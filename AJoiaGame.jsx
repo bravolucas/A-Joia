@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { ANO_INICIO, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPS_PAIS, COSMETICOS, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, NACIONALIDADES, NIVEIS, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POS_GRUPO, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS } from "./data";
-import { agregarPorCompeticao, ajustarMeta, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarConvocacao, avaliarMetaIndividual, avaliarPermanenciaTecnico, avaliarPremios, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, descreverMetaPromessa, distribuirRodadasNaJanela, dividirPorCompeticao, efeitosOstentacao, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, forcaEfetivaClube, formatarDinheiro, gerarElenco, gerarMetaIndividual, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, nacDe, nivelFragilidade, noticia, ovrHexGradiente, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, rand, rankingBolaDeOuro, rankingPorPosicao, registrarMarco, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, sortearAdversario, sortearConcorrente, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, valorDeMercado, valorMundo, veredito } from "./lib";
-import { AttrBarDelta, AttrRadar, BallIcon, Button, CalendarioTemporadaPopup, Card, ClubDot, Confetti, CountUp, CurvaEvolucao, Diamond, FichaPartida, FreeKickMini, GoalMini, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PopupOverlay, SilhuetaJogador, Sparkle, TimingBar, TrophyIcon } from "./components";
+import { montarSave, salvarLocal, carregarLocal, apagarLocal, listarSaves, existeAlgumSave, baixarSave, lerArquivoSave, formatarData, normalizarSave, SLOTS } from "./save.js";
+import { ANO_INICIO, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPS_PAIS, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
+import { agregarPorCompeticao, ajustarMeta, ajustesDoContexto, analisarJogos, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, creditarTitulo, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, forcaEfetivaClube, formatarDinheiro, gerarContextoLance, gerarElenco, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, sortearAdversario, sortearCartoes, sortearConcorrente, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, todosJogosCarreira, valorDeMercado, valorMundo, veredito } from "./lib.js";
+import { AttrBarDelta, AttrRadar, BallIcon, Button, CalendarioTemporadaPopup, Card, ClubDot, Confetti, CountUp, CurvaEvolucao, Diamond, FichaPartida, FreeKickMini, GoalMini, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PopupOverlay, SilhuetaJogador, Sparkle, TimingBar, TrophyIcon } from "./components.jsx";
 
 export default function AJoiaGame() {
   const [stage, setStage] = useState("intro");
@@ -53,6 +54,9 @@ export default function AJoiaGame() {
   const [pendingSponsor, setPendingSponsor] = useState(null);
   const [pendingLegendFollow, setPendingLegendFollow] = useState(null);
   const [treinoDesafio, setTreinoDesafio] = useState(null);
+  const [treinoResultado, setTreinoResultado] = useState(null);
+  const [itensCompradosAberto, setItensCompradosAberto] = useState(false);
+  const [respostaFa, setRespostaFa] = useState(null);
   const [pendingAbordagem, setPendingAbordagem] = useState(false);
   const [pendingExpectativa, setPendingExpectativa] = useState(null);
   const [pendingTecnico, setPendingTecnico] = useState(null);
@@ -95,6 +99,9 @@ export default function AJoiaGame() {
   const [elencoAberto, setElencoAberto] = useState(false);
   const [inboxFiltro, setInboxFiltro] = useState("todas");
   const [vestiarioAberto, setVestiarioAberto] = useState(false);
+  const [savesAberto, setSavesAberto] = useState(false);
+  const [avisoSave, setAvisoSave] = useState(null);
+  const [temSave, setTemSave] = useState(false);
   const [fichaJogo, setFichaJogo] = useState(null);
   const [noticiaAberta, setNoticiaAberta] = useState(null);
   const [calendarioAberto, setCalendarioAberto] = useState(false);
@@ -308,7 +315,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
       c.elenco = gerarElenco(clubeNovo, mundo, c.posicao);
       c.recordesClube = { ...(c.recordesClube || {}), [clubeNovo.nome]: (c.recordesClube || {})[clubeNovo.nome] || gerarRecordeClube(clubeNovo) };
       registrarMarco(c, "transferencia", `${tipoTransfer === "emprestimo" ? "Emprestado ao" : "Assinou com o"} ${clubeNovo.nome} (${LIGAS[clubeNovo.liga].nome}).`, clubeNovo.nome);
-      c.entrosamento = 15; c.titularidade = 100; c.concorrente = sortearConcorrente(clubeNovo, c.elenco, c.posicao);
+      c.entrosamento = clampR(15 + somaEfeitoInsignia(c, "entrosamentoNovo"), 0, 100); c.titularidade = 100; c.concorrente = sortearConcorrente(clubeNovo, c.elenco, c.posicao);
       c.tecnico = gerarTecnico(clubeNovo);
       c.relacoes = gerarRelacoesVestiario(c.elenco, c.posicao, c.idade);
       c.tecnicoConfianca = clampR(55 + encaixeNoEstilo(c) * 1.2, 25, 85);
@@ -340,6 +347,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
     // O técnico propõe um pacto pra temporada (nem toda temporada tem)
     c.promessaTecnico = Math.random() < 0.6 ? gerarPromessaTecnico(c) : null;
     c.expectativa = gerarMetaIndividual(c);
+    c.metasCompeticao = gerarMetasCompeticao(c);
     setCarreira(c);
     setPendingAbordagem(false);
     const roll = Math.random();
@@ -743,21 +751,54 @@ function simularRodadaAtual(c, ta, bonusGol = 0, bonusAssist = 0) {
       const souCasa = partida.casa.nome === c.clube.nome;
       const meusGolsTime = souCasa ? golsCasa : golsFora;
       const golsAdvTime = souCasa ? golsFora : golsCasa;
-      let golsPessoais = golsRestantes > 0 && Math.random() < 0.42 ? Math.min(meusGolsTime, rand(1, Math.min(2, Math.max(1, golsRestantes)))) : 0;
+      const adversarioObj = souCasa ? partida.fora : partida.casa;
+      const ehClassico = !!(c.clube.estado && adversarioObj.estado === c.clube.estado) || Math.abs(adversarioObj.forca - forcaClube) <= 3;
+      const postura = ta.postura || "normal";
+      const post = POSTURAS_JOGO.find((x) => x.id === postura) || POSTURAS_JOGO[1];
+      // efeito da semana de preparação, se houve
+      const prepSem = PREPARACOES_SEMANA.find((x) => x.id === ta.preparacaoSemana)?.efeito || {};
+
+      // ---- SUSPENSÃO: se está cumprindo, nem entra em campo ----
+      const suspenso = (c.cartoes?.suspensoesRestantes || 0) > 0;
+      if (suspenso) {
+        c.cartoes = { ...c.cartoes, suspensoesRestantes: c.cartoes.suspensoesRestantes - 1 };
+        meuResultadoRodada = {
+          adversario: adversarioObj.nome, adversarioForca: adversarioObj.forca,
+          golsMeu: meusGolsTime, golsAdv: golsAdvTime,
+          resultado: meusGolsTime > golsAdvTime ? "V" : meusGolsTime === golsAdvTime ? "E" : "D",
+          golsMinha: 0, assistMinha: 0, numero: ta.rodadaAtual + 1,
+          casa: souCasa, competicao: "liga", classico: ehClassico,
+          suspenso: true, nota: null,
+        };
+        return; // pula o resto do lance pra esta partida
+      }
+
+      // a postura mexe na chance de participar do gol
+      let golsPessoais = golsRestantes > 0 && Math.random() < 0.42 * post.golMult * (prepSem.golMult || 1) ? Math.min(meusGolsTime, rand(1, Math.min(2, Math.max(1, golsRestantes)))) : 0;
       golsRestantes = Math.max(0, golsRestantes - golsPessoais);
-      let assistPessoal = assistRestantes > 0 && Math.random() < 0.32 ? 1 : 0;
+      let assistPessoal = assistRestantes > 0 && Math.random() < 0.32 * post.assistMult * (prepSem.assistMult || 1) ? 1 : 0;
       assistRestantes = Math.max(0, assistRestantes - assistPessoal);
       golsPessoais += bonusGol; assistPessoal += bonusAssist;
-      const adversarioObj = souCasa ? partida.fora : partida.casa;
       const resultado = meusGolsTime > golsAdvTime ? "V" : meusGolsTime === golsAdvTime ? "E" : "D";
+
+      // ---- CARTÕES ----
+      const cart = (() => {
+        const base = sortearCartoes(c, { postura, classico: ehClassico, adversarioForca: adversarioObj.forca, forcaClube });
+        // semana de descanso/estudo deixa você mais controlado em campo
+        if ((prepSem.cartaoMult || 1) < 1 && (base.amarelo || base.vermelho) && Math.random() > (prepSem.cartaoMult || 1)) return { amarelo: false, vermelho: false, segundoAmarelo: false };
+        return base;
+      })();
+      const susp = (cart.amarelo || cart.vermelho) ? aplicarCartao(c, cart) : { suspendeu: 0 };
+
       meuResultadoRodada = {
         adversario: adversarioObj.nome, adversarioForca: adversarioObj.forca,
         golsMeu: meusGolsTime, golsAdv: golsAdvTime, resultado,
         golsMinha: golsPessoais, assistMinha: assistPessoal, numero: ta.rodadaAtual + 1,
-        casa: souCasa, competicao: "liga",
-        // clássico: adversário do mesmo estado (Brasil) ou da mesma liga e força parecida (Europa)
-        classico: !!(c.clube.estado && adversarioObj.estado === c.clube.estado) || Math.abs(adversarioObj.forca - forcaClube) <= 3,
-        nota: notaDaPartida(c, { gols: golsPessoais, assist: assistPessoal, resultado, golsSofridos: golsAdvTime, adversarioForca: adversarioObj.forca, forcaClube, forcaJogador, casa: souCasa }),
+        casa: souCasa, competicao: "liga", classico: ehClassico, postura,
+        amarelo: cart.amarelo, vermelho: cart.vermelho, segundoAmarelo: cart.segundoAmarelo,
+        suspensaoGerada: susp.suspendeu, motivoSuspensao: susp.motivo,
+        preparacao: ta.preparacaoSemana,
+        nota: clamp(notaDaPartida(c, { gols: golsPessoais, assist: assistPessoal, resultado, golsSofridos: golsAdvTime, adversarioForca: adversarioObj.forca, forcaClube, forcaJogador, casa: souCasa }) + post.notaBonus + (prepSem.notaBonus || 0) - (cart.vermelho ? 1.2 : 0), 4.5, 10),
       };
     }
   });
@@ -1187,7 +1228,15 @@ function resolverTemporada(c, extraStats) {
     c.forma = clamp((card.nota - 6.8) * 2 + (c.staff?.nutricionista ? 0.6 : 0) + (c.staff?.chefParticular ? 0.3 : 0), -4, 4);
 
     const persona = PERSONALIDADES.find((p) => p.id === c.personalidade);
-    c.attrs = evoluirAtributos(c.attrs, c.potencial, c.idade, persona, c.focoTreino, c.staff?.psicologoEsportivo ? 0.85 : 1);
+    { // Imortal deixa o declínio mais lento
+      const freioDeclinio = multEfeitoInsignia(c, "declinio");
+      c.attrs = evoluirAtributos(c.attrs, c.potencial, c.idade, persona, c.focoTreino, (c.staff?.psicologoEsportivo ? 0.85 : 1) * (freioDeclinio || 1));
+    }
+    // Líder Nato puxa o moral do grupo todo ano
+    { const m = somaEfeitoInsignia(c, "moralAnual"); if (m) c.elencoMoral = clampR((c.elencoMoral ?? 60) + m, 0, 100); }
+    // Ídolo Eterno estabelece um piso de torcida no clube atual
+    { const piso = somaEfeitoInsignia(c, "pisoTorcida");
+      if (piso && getTorcida(c, c.clube.nome) < piso) c.torcidaPorClube = { ...(c.torcidaPorClube || {}), [c.clube.nome]: piso }; }
     // Sequelas cobram o preço: depois dos 30, o corpo castigado perde velocidade e físico mais rápido
     if (c.idade >= 30 && (c.sequela || 0) > 0.1 && Math.random() < (c.sequela || 0)) {
       const alvo = Math.random() < 0.6 ? "velocidade" : "fisico";
@@ -1222,7 +1271,12 @@ function resolverTemporada(c, extraStats) {
     // Desgaste acumulado real: mais jogos, abordagem mais intensa e idade avançada cobram mais caro
     const fatorAbordagem = c.abordagem === "limite" ? 1.5 : c.abordagem === "dedicado" ? 1.0 : 0.8;
     const penalidadeIdade = 1 + Math.max(0, c.idade - 16) / 20;
-    c.desgaste += ((card.jogos * fatorAbordagem) / 100) * penalidadeIdade * ((ROTINAS_FISICAS.find((r) => r.id === c.rotinaFisica) || ROTINAS_FISICAS[1]).desgasteMult);
+    { // postura de jogo também cobra do corpo
+      const postSeason = POSTURAS_JOGO.find((x) => x.id === (c.posturaPreferida || "normal")) || POSTURAS_JOGO[1];
+      c.desgaste += ((card.jogos * fatorAbordagem) / 100) * penalidadeIdade * ((ROTINAS_FISICAS.find((r) => r.id === c.rotinaFisica) || ROTINAS_FISICAS[1]).desgasteMult) * postSeason.desgasteMult;
+    }
+    // zera o acúmulo de amarelos entre temporadas, mas guarda o histórico
+    if (c.cartoes) c.cartoes = { ...c.cartoes, amarelosAcumulados: 0, suspensoesRestantes: 0 };
     // A energia reseta a cada temporada, mas o teto de preparação física pra pré-temporada seguinte
     // é penalizado pelo desgaste acumulado — jogar sempre no limite cobra o preço no condicionamento.
     c.energiaMax = clampR(100 - c.desgaste * 12, 55, 100);
@@ -1337,7 +1391,7 @@ function resolverTemporada(c, extraStats) {
     const eventosVestiario = aplicarEfeitosVestiario(c, card, c.elenco);
     eventosVestiario.forEach((ev) => {
       logHist(c, ev.texto);
-      c.inbox = [noticia("clube", TIPOS_RELACAO[ev.tipo]?.nome || "Vestiário", ev.texto, 1), ...(c.inbox || [])].slice(0, 60);
+      c.inbox = [noticiaDoMomento(c, "clube", TIPOS_RELACAO[ev.tipo]?.nome || "Vestiário", ev.texto, 1), ...(c.inbox || [])].slice(0, 60);
     });
     // se ficou sem relações (todos saíram), o grupo novo cria outras
     if (!c.relacoes.parceiro && !c.relacoes.pupilo && Math.random() < 0.5) {
@@ -1347,7 +1401,22 @@ function resolverTemporada(c, extraStats) {
     // ---- AS LIGAS SE MEXEM: força oscila, times sobem e caem ----
     let movimentoLigas = null;
     {
-      const estadoAtual = c.estadoClubes || estadoInicialClubes();
+      let estadoAtual = c.estadoClubes || estadoInicialClubes();
+
+      // ---- PALMARÉS: credita os títulos da temporada ----
+      // 1) o que VOCÊ ganhou vai pro seu clube
+      if (card.campeaoLiga) estadoAtual = creditarTitulo(estadoAtual, c.clube.nome, "liga");
+      if (card.copaNacional?.titulo) estadoAtual = creditarTitulo(estadoAtual, c.clube.nome, "copa");
+      if (card.continental?.titulo) estadoAtual = creditarTitulo(estadoAtual, c.clube.nome, "continental");
+      if (card.mundial?.titulo) estadoAtual = creditarTitulo(estadoAtual, c.clube.nome, "mundial");
+      // 2) o resto do mundo também tem campeões — o Real segue somando Champions
+      const titulosMundo = distribuirTitulosDoMundo(estadoAtual, c.clube.liga, {
+        liga: !!card.campeaoLiga, copa: !!card.copaNacional?.titulo,
+        continental: !!card.continental?.titulo, mundial: !!card.mundial?.titulo,
+      });
+      estadoAtual = titulosMundo.estado;
+      c.campeoesDaTemporada = titulosMundo.campeoes;
+
       const giro = girarLigas(estadoAtual);
       c.estadoClubes = giro.estado;
       movimentoLigas = { promovidos: giro.promovidos, rebaixados: giro.rebaixados };
@@ -1401,6 +1470,56 @@ function resolverTemporada(c, extraStats) {
       }
     }
 
+    // alimenta a insígnia "Jogador de Decisão": quanto você rende a mais em jogo grande
+    {
+      const todos = todosJogosCarreira([...temporadas, { jogosLista: jogosLista.length ? jogosLista : card.jogosLista, temporadaLabel: "", clube: c.clube.nome }]);
+      const an = analisarJogos(todos);
+      if (an && an.classicos.jogos >= 3) c.difClassico = +(an.classicos.notaMedia - an.normais.notaMedia).toFixed(2);
+    }
+
+    // ---- METAS DA DIRETORIA POR COMPETIÇÃO ----
+    const balancoMetas = avaliarMetasCompeticao(c, card);
+    if (balancoMetas.total > 0) {
+      c.relacaoDiretoria = clampR((c.relacaoDiretoria ?? 40) + balancoMetas.deltaDiretoria, 0, 100);
+      if (balancoMetas.premio > 0) {
+        c.cofre += balancoMetas.premio;
+        c.extrato = [...c.extrato, { idade: c.idade, tipo: "Bônus por metas cumpridas", valor: balancoMetas.premio }];
+      }
+      const txt = balancoMetas.resultados.map((r) => `${r.cumprida ? "✅" : "❌"} ${r.texto}`).join(" · ");
+      logHist(c, `Metas da diretoria: ${txt}${balancoMetas.premio ? ` (bônus de $${formatarDinheiro(balancoMetas.premio)})` : ""}`);
+      c.inbox = [noticiaDoMomento(c, "clube",
+        balancoMetas.cumpridas === balancoMetas.total ? "Diretoria satisfeita: todas as metas cumpridas" : balancoMetas.cumpridas === 0 ? "Diretoria cobra: nenhuma meta cumprida" : `Metas: ${balancoMetas.cumpridas} de ${balancoMetas.total} cumpridas`,
+        txt, balancoMetas.cumpridas === 0 ? 3 : 1), ...(c.inbox || [])].slice(0, 60);
+    }
+    c.metasCompeticao = null;
+
+    // ---- MEMÓRIA: confrontos, jogos memoráveis e apelido da torcida ----
+    {
+      const jogosDaTemporada = jogosLista.length ? jogosLista : (card.jogosLista || []);
+      registrarConfrontos(c, jogosDaTemporada);
+      const memoraveis = detectarJogosMemoraveis(c, jogosDaTemporada, {
+        temporadaLabel: temporadaLabel(c.idade, ANO_INICIO), idade: c.idade, clube: c.clube.nome,
+      });
+      memoraveis.slice(0, 2).forEach((m) => {
+        logHist(c, `⭐ Jogo memorável x ${m.adversario} (${m.golsMeu}-${m.golsAdv}): ${m.criterios.map((x) => x.label).join(", ")}.`);
+      });
+      // a torcida pode te batizar
+      const novoApelido = avaliarApelido(c, temporadas);
+      if (novoApelido) {
+        c.apelido = novoApelido;
+        logHist(c, `📣 A torcida do ${c.clube.nome} te batizou: "${novoApelido.nome}".`);
+        registrarMarco(c, "recorde", `A torcida do ${c.clube.nome} passou a te chamar de "${novoApelido.nome}".`, novoApelido.nome);
+        c.inbox = [noticiaDoMomento(c, "clube", `A torcida te batizou: ${novoApelido.nome}`, `O apelido pegou na arquibancada e já virou cântico. Poucos jogadores conquistam isso.`, 2), ...(c.inbox || [])].slice(0, 60);
+      }
+    }
+
+    // gols em clássicos alimentam o marco secreto "Carrasco do rival"
+    { const cls = (jogosLista.length ? jogosLista : (card.jogosLista || [])).filter((j) => j.classico);
+      c.golsEmClassicos = (c.golsEmClassicos || 0) + cls.reduce((a2, j) => a2 + (j.golsMinha || 0), 0); }
+
+    // ---- MARCOS ESPECIAIS (recompensas, cicatrizes e segredos) ----
+    const marcosNovos = checarMarcosEspeciais(c, card, { postoBO: meuPostoBO });
+
     // ---- VALOR DE MERCADO ----
     const valorAtual = valorDeMercado(c, card.ovr, card);
     const valorAnterior = c.valorMercado ?? valorAtual;
@@ -1421,10 +1540,19 @@ function resolverTemporada(c, extraStats) {
       valorMercado: valorAtual, valorAnterior,
     };
     setTemporadas((t) => [...t, registro]);
+    // autosave: a virada de temporada é o ponto mais seguro pra gravar
+    setTimeout(() => {
+      const r = salvarLocal("auto", montarSave({
+        stage: "carreira", nome, posicao, nacionalidade, personalidade, pernaDominante, clubeCoracao,
+        potencial, origemId: c.origem || null, carreira: c,
+        temporadas: [...temporadas, registro], mundo: mundoAtualizado || mundo, fim: null, aba, modoSimulacao,
+      }));
+      if (r.ok) { setTemSave(true); setAvisoSave({ erro: false, txt: "Progresso salvo automaticamente." }); setTimeout(() => setAvisoSave(null), 2500); }
+    }, 0);
 
     // ---- INBOX: as notícias da temporada ----
     {
-      const novas = gerarNoticias(c, registro, mundoAtualizado || mundo, nome).map((x) => ({ ...x, idade: c.idade, temporada: registro.temporadaLabel }));
+      const novas = gerarNoticias(c, registro, mundoAtualizado || mundo, nome).map((x) => ({ ...x, idade: c.idade, temporada: registro.temporadaLabel, clube: registro.clube, clubeObj: registro.clubeObj }));
       c.inbox = [...novas, ...(c.inbox || [])].slice(0, 60);
     }
 
@@ -1447,7 +1575,10 @@ function resolverTemporada(c, extraStats) {
     const destaque = card.nota >= 7.4 || premios.length > 0 || (card.gols >= 20 && card.ligaMult < 0.9);
     const ruim = card.nota <= 6.2;
     let proposta = null;
-    if (c.idade >= 33 && Math.random() < 0.55) proposta = { tipo: "aposentadoria", opcoes: [{ clube: pick(CLUBES.filter((x) => x.liga === "arabia" || x.liga === "mls")), tipo: "transfer" }], motivo: "Fim de carreira: dinheiro e ritmo leve chamam." };
+    // emprestado não recebe proposta de ninguém — o contrato é do clube de origem
+    const podeNegociar = !c.emprestimo;
+    if (!podeNegociar) proposta = null; // emprestado: ninguém pode fazer proposta
+    else if (c.idade >= 33 && Math.random() < 0.55) proposta = { tipo: "aposentadoria", opcoes: [{ clube: pick(CLUBES.filter((x) => x.liga === "arabia" || x.liga === "mls")), tipo: "transfer" }], motivo: "Fim de carreira: dinheiro e ritmo leve chamam." };
     else if (destaque && c.anoNoClube >= 2 && Math.random() < 0.6) {
       const alvos = CLUBES.filter((x) => LIGAS[x.liga].mult > card.ligaMult + 0.02 && x.forca >= c.clube.forca - 2 && x.liga !== "arabia" && x.liga !== "mls");
       if (alvos.length) { const op1 = pick(alvos); const op2 = pick(alvos.filter((x) => x.nome !== op1.nome)); proposta = { tipo: "mercado", opcoes: op2 ? [{ clube: op1, tipo: "transfer" }, { clube: op2, tipo: "transfer" }] : [{ clube: op1, tipo: "transfer" }], motivo: "Sua temporada chamou atenção de ligas mais fortes." }; }
@@ -1475,7 +1606,7 @@ function resolverTemporada(c, extraStats) {
         const escolhido = sortearPorInteresse(cands, 1)[0];
         if (escolhido) {
           clausulaAtivada = { clube: escolhido.clube, valorPago: c.contrato.multa, valorMercado: valorAtual, pechincha: c.contrato.multa < valorAtual };
-          c.inbox = [noticia("mercado", `${escolhido.clube.nome} deposita sua multa rescisória`, `Foram $${formatarDinheiro(c.contrato.multa)} pagos à vista. O ${c.clube.nome} não pode impedir — a decisão é sua.`, 3), ...(c.inbox || [])].slice(0, 60);
+          c.inbox = [noticiaDoMomento(c, "mercado", `${escolhido.clube.nome} deposita sua multa rescisória`, `Foram $${formatarDinheiro(c.contrato.multa)} pagos à vista. O ${c.clube.nome} não pode impedir — a decisão é sua.`, 3), ...(c.inbox || [])].slice(0, 60);
         }
       }
     }
@@ -1589,7 +1720,9 @@ function resolverTemporada(c, extraStats) {
       const adversario = jogoDoJogador ? (jogoDoJogador.casa.nome === c.clube.nome ? jogoDoJogador.fora.nome : jogoDoJogador.casa.nome) : "adversário";
       const rTipo = Math.random();
       const tipoLance = rTipo < 0.22 ? "falta" : rTipo < 0.44 ? "passe" : "texto";
-      setPendingLanceJogo({ adversario, tipoLance });
+      const advObj = CLUBES.find((x) => x.nome === adversario);
+      const contexto = gerarContextoLance(c, adversario, advObj?.forca);
+      setPendingLanceJogo({ adversario, tipoLance, contexto });
       return;
     }
 
@@ -1609,19 +1742,36 @@ function resolverTemporada(c, extraStats) {
     const c = { ...carreira };
     const ta = c.temporadaAndamento;
     const adversario = pendingLanceJogo.adversario;
-    let chance = clamp((c.attrs[opcao.attr] - 40) / 60, 0.15, 0.9);
+    const ctx = pendingLanceJogo.contexto;
+    const aj = ajustesDoContexto(ctx);
+    let chance = clamp((c.attrs[opcao.attr] - 40) / 60, 0.15, 0.9) * aj.chanceMult;
     if (opcao.id === "passe") chance = clamp(chance + ((c.elencoMoral ?? 60) - 60) / 200, 0.1, 0.92);
     const sucesso = Math.random() < chance;
     const ehGol = !["passe", "sair", "contra"].includes(opcao.id);
     let bonusGol = 0, bonusAssist = 0;
-    if (sucesso && ["ATA", "MEI"].includes(POS_GRUPO[c.posicao] || "MEI")) { if (ehGol) bonusGol = 1; else bonusAssist = 1; }
+    // Qualquer posição pode decidir um lance — o minigame já determinou se acertou.
+    if (sucesso) { if (ehGol) bonusGol = 1; else bonusAssist = 1; c.minigamesAcertados = (c.minigamesAcertados || 0) + 1; }
     const { tabela, historico, meuResultadoRodada, golsRestantes, assistRestantes } = simularRodadaAtual(c, { ...ta, lanceResolvido: true }, bonusGol, bonusAssist);
-    if (bonusGol) c.gols += bonusGol;
-    if (bonusAssist) c.assist += bonusAssist;
+    // O gol/assistência entra no CARD DA TEMPORADA — o total da carreira é somado
+    // depois, em finalizarTemporada. Somar nos dois lugares causaria contagem dupla.
+    if (bonusGol || bonusAssist) {
+      ta.cardOriginal = { ...ta.cardOriginal, gols: (ta.cardOriginal.gols || 0) + bonusGol, assist: (ta.cardOriginal.assist || 0) + bonusAssist };
+    }
     const proxRodada = ta.rodadaAtual + 1;
     const logJogos = meuResultadoRodada ? [...ta.logJogos, meuResultadoRodada] : ta.logJogos;
     const resultadosRodadas = [...ta.resultadosRodadas, meuResultadoRodada ? meuResultadoRodada.resultado : "E"];
-    setResultadoAcao({ titulo: sucesso ? "🌟 Lance decisivo!" : "Não foi dessa vez", texto: sucesso ? opcao.sucesso(adversario) : opcao.falha(adversario), icone: sucesso ? "⚡" : "😅" });
+    // quanto mais dramático o momento, maior o efeito na fama e na torcida
+    if (sucesso) {
+      c.fama = clamp(c.fama + Math.round(2 * aj.famaMult), 0, 100);
+      setTorcidaClube(c, c.clube.nome, Math.round(3 * aj.torcidaMult));
+    } else if (ctx?.peso >= 3) {
+      setTorcidaClube(c, c.clube.nome, -2); // falhar num momento decisivo custa
+    }
+    setResultadoAcao({
+      titulo: sucesso ? (ctx?.peso >= 3 ? "🌟 DECIDIU O JOGO!" : "🌟 Lance decisivo!") : (ctx?.peso >= 3 ? "😞 Perdeu a chance" : "Não foi dessa vez"),
+      texto: (ctx ? ctx.texto + " " : "") + (sucesso ? opcao.sucesso(adversario) : opcao.falha(adversario)),
+      icone: sucesso ? "⚡" : "😅",
+    });
     if (proxRodada >= ta.calendario.length) {
       c.temporadaAndamento = null;
       finalizarTemporada(c, ta.cardOriginal, logJogos);
@@ -1634,8 +1784,9 @@ function resolverTemporada(c, extraStats) {
   function finalizarLanceComBonus(bonusGol, bonusAssist, tituloResultado, textoResultado, iconeResultado) {
     const c = { ...carreira };
     const ta = c.temporadaAndamento;
-    if (bonusGol) c.gols += bonusGol;
-    if (bonusAssist) c.assist += bonusAssist;
+    if (bonusGol || bonusAssist) {
+      ta.cardOriginal = { ...ta.cardOriginal, gols: (ta.cardOriginal.gols || 0) + bonusGol, assist: (ta.cardOriginal.assist || 0) + bonusAssist };
+    }
     const { tabela, historico, meuResultadoRodada, golsRestantes, assistRestantes } = simularRodadaAtual(c, { ...ta, lanceResolvido: true }, bonusGol, bonusAssist);
     const proxRodada = ta.rodadaAtual + 1;
     const logJogos = meuResultadoRodada ? [...ta.logJogos, meuResultadoRodada] : ta.logJogos;
@@ -1755,7 +1906,7 @@ function resolverTemporada(c, extraStats) {
     c.elencoMoral = clampR((c.elencoMoral ?? 60) + 6, 0, 100);
     logHist(c, `Recusou a proposta do ${clausula.clube.nome} e decidiu ficar no ${c.clube.nome}. A torcida não esqueceu.`);
     registrarMarco(c, "recorde", `Recusou o ${clausula.clube.nome} pra continuar no ${c.clube.nome}.`);
-    c.inbox = [noticia("clube", `Você fica no ${c.clube.nome}`, `A recusa à proposta do ${clausula.clube.nome} caiu como um manifesto de lealdade. A torcida te carrega nos braços.`, 3), ...(c.inbox || [])].slice(0, 60);
+    c.inbox = [noticiaDoMomento(c, "clube", `Você fica no ${c.clube.nome}`, `A recusa à proposta do ${clausula.clube.nome} caiu como um manifesto de lealdade. A torcida te carrega nos braços.`, 3), ...(c.inbox || [])].slice(0, 60);
     setCarreira(c);
     setJanela(null);
     setPosTemporada({ ok: true, ...gerarBloqueios() });
@@ -1791,7 +1942,9 @@ function resolverTemporada(c, extraStats) {
     const custoDesbloqueio = posTemporada?.bloqueiosTreino?.[attrId];
     if (custoDesbloqueio && carreira.cofre < custoDesbloqueio) return;
     if ((carreira.energia ?? 100) < 15) return;
-    setTreinoDesafio({ attrId, custoDesbloqueio });
+    // cada atributo treina com o minigame que faz sentido pra ele
+    const minigamePorAttr = { finalizacao: "penalti", drible: "falta", passe: "passe" };
+    setTreinoDesafio({ attrId, custoDesbloqueio, minigame: minigamePorAttr[attrId] || "timing" });
   }
   function resolverTreino(acerto) {
     const c = { ...carreira };
@@ -2201,8 +2354,111 @@ function resolverTemporada(c, extraStats) {
     setCarreira(c);
     setEmpresarioMenuAberto(false);
   }
+  // Carimba a notícia com o clube e a idade do momento — assim ela não "muda de time" depois
+  function noticiaDoMomento(c, tipo, titulo, corpo, prioridade = 1) {
+    return { ...noticia(tipo, titulo, corpo, prioridade), idade: c.idade, temporada: temporadaLabel(c.idade, ANO_INICIO), clube: c.clube?.nome, clubeObj: c.clube };
+  }
+  // ao abrir o jogo, descobre se existe carreira salva (pra mostrar "Continuar")
+  useEffect(() => { setTemSave(existeAlgumSave()); }, []);
+
+  /* ===================== SALVAR E CARREGAR ===================== */
+  function estadoAtualParaSave() {
+    return montarSave({
+      stage, nome, posicao, nacionalidade, personalidade, pernaDominante, clubeCoracao,
+      potencial, origemId: origem?.id || carreira?.origem || null,
+      carreira, temporadas, mundo, fim, aba, modoSimulacao,
+    });
+  }
+  function salvarJogo(slot) {
+    if (!carreira && !fim) { setAvisoSave({ erro: true, txt: "Não há carreira pra salvar ainda." }); return; }
+    const r = salvarLocal(slot, estadoAtualParaSave());
+    setTemSave(existeAlgumSave());
+    setAvisoSave(r.ok
+      ? { erro: false, txt: slot === "auto" ? "Progresso salvo automaticamente." : `Carreira salva no espaço ${slot}.` }
+      : { erro: true, txt: r.erro });
+    setTimeout(() => setAvisoSave(null), 3500);
+  }
+  /* Repõe o jogo a partir de um save. Todo estado de interface é zerado de propósito:
+     ninguém quer voltar com um popup pela metade aberto. */
+  function aplicarSave(saveBruto) {
+    if (!saveBruto) return;
+    const save = normalizarSave(saveBruto); // completa campos que faltarem
+    setNome(save.nome || "");
+    setPosicao(save.posicao || null);
+    setNacionalidade(save.nacionalidade || "BRA");
+    setPersonalidade(save.personalidade || null);
+    setPernaDominante(save.pernaDominante || "destro");
+    setClubeCoracao(save.clubeCoracao || null);
+    setPotencial(save.potencial || {});
+    setOrigem(save.origemId ? ORIGENS.find((o) => o.id === save.origemId) || null : null);
+    setCarreira(save.carreira || null);
+    setTemporadas(save.temporadas || []);
+    setMundo(save.mundo || null);
+    setFim(save.fim || null);
+    setAba(save.aba || "carreira");
+    setModoSimulacao(save.modoSimulacao || "completa");
+    // zera tudo que é transitório
+    setDecisao(null); setDecisaoResultado(null); setJanela(null); setPosTemporada(null);
+    setAwardsPopup(null); setPendingTierUpgrade(null); setPendingSponsor(null);
+    setPendingAbordagem(false); setPendingColetiva(false); setPendingTecnico(null);
+    setPendingExpectativa(null); setPendingLegendFollow(null); setPendingCompeticao(null);
+    setPendingLanceJogo(null); setResultadoAcao(null); setPopupTemporada(null);
+    setSavesAberto(false);
+    setStage(save.fim ? "fim" : save.carreira ? "carreira" : "intro");
+    setAvisoSave({ erro: false, txt: "Carreira carregada." });
+    setTimeout(() => setAvisoSave(null), 3000);
+  }
+  function carregarJogo(slot) {
+    const save = carregarLocal(slot);
+    if (!save) { setAvisoSave({ erro: true, txt: "Esse espaço está vazio." }); return; }
+    aplicarSave(save);
+  }
+  async function importarSaveDeArquivo(file) {
+    try {
+      const save = await lerArquivoSave(file);
+      aplicarSave(save);
+    } catch (e) {
+      setAvisoSave({ erro: true, txt: e.message });
+      setTimeout(() => setAvisoSave(null), 4000);
+    }
+  }
+  function responderTorcedor(r) {
+    const c = { ...carreira };
+    const e = r.efeito || {};
+    if (e.fama) c.fama = clamp(c.fama + e.fama, 0, 100);
+    if (e.calorMidia) c.calorMidia = clampR((c.calorMidia ?? 20) + e.calorMidia, 0, 100);
+    if (e.elenco) c.elencoMoral = clampR((c.elencoMoral ?? 60) + e.elenco, 0, 100);
+    if (e.torcida) setTorcidaClube(c, c.clube.nome, e.torcida);
+    if (e.seguidores) c.seguidores = Math.round((c.seguidores || 10000) * (1 + e.seguidores / 100));
+    c.respostasFas = [...(c.respostasFas || []), respostaFa.id];
+    const virouNoticia = Math.abs(e.calorMidia || 0) >= 12;
+    logHist(c, `Respondeu ${respostaFa.autor}: "${r.texto}"`);
+    if (virouNoticia) {
+      c.inbox = [noticiaDoMomento(c, "critica", `Resposta de ${nome} a torcedor repercute`, `"${r.texto}" — a frase viralizou e dividiu opiniões nas redes.`, 2), ...(c.inbox || [])].slice(0, 60);
+    }
+    setCarreira(c);
+    setRespostaFa(null);
+    setResultadoAcao({
+      titulo: virouNoticia ? "📰 Sua resposta virou notícia" : "💬 Você respondeu",
+      texto: `"${r.texto}"${virouNoticia ? " — e a internet não perdoou: o assunto virou manchete." : ""}`,
+      icone: r.icone,
+      deltas: Object.entries(e).filter(([, v]) => v).map(([k, v]) => ({ label: { fama: "Fama", torcida: "Torcida", calorMidia: "Pressão da mídia", elenco: "Moral do elenco", seguidores: "Seguidores (%)" }[k] || k, valor: v })),
+    });
+  }
   function abrirTransferencias(tipo) {
     const c = { ...carreira };
+    // ---- TRAVA DE EMPRÉSTIMO ----
+    // Quem está emprestado não pertence ao clube onde joga: não pode negociar com ninguém.
+    // A situação só se resolve quando o empréstimo acaba ou vira compra definitiva.
+    if (c.emprestimo && tipo !== "empresario") {
+      setResultadoAcao({
+        titulo: "Você está emprestado",
+        texto: `Seu contrato ainda é com o ${c.clubeOrigemEmprestimo?.nome || "clube de origem"}. Enquanto o empréstimo estiver em vigor, nenhuma negociação pode ser feita — nem por você, nem pelo seu empresário. Resta esperar o fim do vínculo ou o ${c.clube.nome} exercer a compra definitiva.`,
+        icone: "🔒",
+      });
+      setPosTemporada(null);
+      return;
+    }
     if (tipo === "empresario") { setJanela({ tipo: "empresario" }); setPosTemporada(null); return; }
     if (tipo === "normal") { c.empresarioUsado = { ...c.empresarioUsado, normal: true }; setCarreira(c); setJanela({ tipo: "ligas", ligasSelecionadas: [] }); setPosTemporada(null); return; }
     if (tipo === "emprestimo") { c.empresarioUsado = { ...c.empresarioUsado, emprestimo: true }; setCarreira(c); setJanela({ tipo: "duracaoEmprestimo" }); setPosTemporada(null); return; }
@@ -2233,6 +2489,7 @@ function resolverTemporada(c, extraStats) {
   }
   function confirmarBuscaLigas() {
     const c = carreira;
+    if (c.emprestimo) { setJanela(null); setResultadoAcao({ titulo: "Você está emprestado", texto: "Nenhum clube pode negociar com você enquanto o empréstimo estiver em vigor.", icone: "🔒" }); return; }
     const emp = c.empresario ? empresarioPorId(c.empresario.id) : EMPRESARIOS[0];
     const ultima = temporadas.length ? temporadas[temporadas.length - 1] : null;
     const ligasAlvo = janela.ligasSelecionadas.length ? janela.ligasSelecionadas : Object.keys(LIGAS);
@@ -2414,6 +2671,15 @@ function resolverTemporada(c, extraStats) {
               <div className="flex justify-center mb-2 glow-anim"><Diamond size={72} /></div>
               <h1 className="display text-2xl font-black mb-1">A JOIA</h1>
               <p className="text-zinc-400 text-xs max-w-sm mx-auto">Escolha de onde seu craque vem, mostre serviço na peneira e comece a jornada rumo a se tornar A JOIA.</p>
+              {temSave && (
+                <div className="mt-4 pt-4 border-t border-zinc-800">
+                  <p className="text-[10px] text-zinc-500 mb-2">Você já tem uma carreira em andamento.</p>
+                  <div className="flex gap-2 justify-center">
+                    <button onClick={() => carregarJogo("auto")} className="text-xs font-bold text-emerald-400 border border-emerald-500/50 rounded-sm px-4 py-2 hover:bg-emerald-500/10">▶ Continuar carreira</button>
+                    <button onClick={() => setSavesAberto(true)} className="text-xs text-zinc-400 border border-zinc-700 rounded-sm px-4 py-2 hover:border-zinc-500">💾 Ver saves</button>
+                  </div>
+                </div>
+              )}
             </div>
             <Card>
               <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome do jogador" className="w-full bg-zinc-800 border border-zinc-700 rounded-sm px-4 py-2.5 text-sm mb-4 outline-none focus:border-emerald-500" />
@@ -2626,6 +2892,7 @@ function resolverTemporada(c, extraStats) {
                     ["Técnico", "🧑‍💼", () => setTecnicoMenuAberto(true)],
                     ["Corpo", "🏋️", () => setTreinoPopupAberto(true)],
                     ["Clube", "🏟️", () => setPopupClube(carreira.clube.nome)],
+                    ["Salvar", "💾", () => setSavesAberto(true)],
                   ].map(([label, icone, onClick]) => (
                     <button key={label} onClick={onClick} className="opt-card shrink-0 px-3 py-1.5 text-[10px] font-sport font-bold uppercase tracking-wide rounded-md border border-amber-500/30 text-amber-400 hover:bg-amber-500/10 whitespace-nowrap">{icone} {label}</button>
                   ))}
@@ -2643,7 +2910,13 @@ function resolverTemporada(c, extraStats) {
                         <div className="flex-1 h-2.5 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full rounded-full bar-fill" style={{ width: `${carreira.energia ?? 100}%`, background: (carreira.energia ?? 100) > 40 ? "linear-gradient(90deg,#22D3EE,#39FF88)" : "linear-gradient(90deg,#f59e0b,#ef4444)" }} /></div>
                         <span className="text-[10px] font-mono text-zinc-400 w-7 text-right">{Math.round(carreira.energia ?? 100)}%</span>
                       </div>
-                      <div className="text-[10px] text-zinc-500 truncate">{nome} · {carreira.clube.nome} · Idade {carreira.idade}</div>
+                      <div className="text-[10px] text-zinc-500 truncate">
+                        {nome} · {carreira.clube.nome} · Idade {carreira.idade}
+                        {carreira.apelido && <span className="text-amber-400"> · "{carreira.apelido.nome}"</span>}
+                      </div>
+                      {carreira.apelido && canticoDoApelido(carreira, nome) && (
+                        <div className="text-[10px] text-amber-400/80 italic truncate">📣 "{canticoDoApelido(carreira, nome)}"</div>
+                      )}
                       <div className="flex items-center gap-2 mt-1 text-[9px] text-zinc-400">
                         <span title={carreira.clube.nome}>{emojiClube(carreira.clube.nome)}</span>
                         <span title={nacDe(carreira.nacionalidade).label}>🌎 {nacDe(carreira.nacionalidade).id}</span>
@@ -2716,6 +2989,79 @@ function resolverTemporada(c, extraStats) {
 
                 {carreira.temporadaAndamento && (
                   <>
+                    <Card className="border-emerald-500/30">
+                      {(() => {
+                        const ta = carreira.temporadaAndamento;
+                        const susp = carreira.cartoes?.suspensoesRestantes || 0;
+                        const amAcum = carreira.cartoes?.amarelosAcumulados || 0;
+                        const postAtual = ta.postura || "normal";
+                        return (
+                          <>
+                            {(carreira.metasCompeticao || []).length > 0 && (
+                              <div className="mb-3 pb-2.5 border-b border-zinc-800">
+                                <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">🎯 O que a diretoria cobra nesta temporada</div>
+                                <div className="grid gap-1">
+                                  {carreira.metasCompeticao.map((m, i) => {
+                                    const rot = { liga: "🏆 Liga", copa: "🥇 Copa", continental: "🌍 Continental" }[m.comp] || m.comp;
+                                    return (
+                                      <div key={i} className="flex items-center gap-2 text-[10px]">
+                                        <span className="text-zinc-500 w-20 shrink-0">{rot}</span>
+                                        <span className="flex-1 text-zinc-300">{m.texto}</span>
+                                        <span className="font-mono text-amber-400 text-[9px]">+${formatarDinheiro(m.bonus)}</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                            <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">📅 A semana antes do jogo</div>
+                            <div className="grid grid-cols-2 gap-1.5 mb-3">
+                              {PREPARACOES_SEMANA.map((pr) => {
+                                const ativa = ta.preparacaoSemana === pr.id;
+                                const semEnergia = (carreira.energia ?? 100) + (pr.energia || 0) < 5;
+                                return (
+                                  <button key={pr.id} disabled={semEnergia}
+                                    onClick={() => { const cc = { ...carreira }; const usado = aplicarPreparacaoSemana(cc, pr.id); cc.temporadaAndamento = { ...cc.temporadaAndamento, preparacaoSemana: pr.id }; setCarreira(cc); if (usado?._ganho) setAvisoSave({ erro: false, txt: `Ação de patrocinador rendeu $${formatarDinheiro(usado._ganho)}` }); if (usado?._subiuFisico) setAvisoSave({ erro: false, txt: "O trabalho pesado rendeu +1 de físico" }); setTimeout(() => setAvisoSave(null), 2600); }}
+                                    className="text-left px-2 py-1.5 rounded-sm border transition-all disabled:opacity-30"
+                                    style={{ borderColor: ativa ? pr.cor : "#27272a", background: ativa ? `${pr.cor}15` : "transparent" }}>
+                                    <div className="text-[10px] font-bold" style={{ color: ativa ? pr.cor : "#e4e4e7" }}>{pr.icone} {pr.nome}</div>
+                                    <div className="text-[9px] text-zinc-500 mt-0.5 leading-snug">{pr.desc}</div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="text-[9px] text-zinc-500 uppercase tracking-widest">⚡ Como você entra em campo</div>
+                              <div className="flex items-center gap-2 text-[9px]">
+                                {amAcum > 0 && <span className="text-yellow-400">🟨 {amAcum}/{REGRAS_CARTAO.amarelosParaSuspender}</span>}
+                                {susp > 0 && <span className="text-red-400 font-bold">🚫 suspenso ({susp} jogo{susp > 1 ? "s" : ""})</span>}
+                              </div>
+                            </div>
+                            {susp > 0 ? (
+                              <p className="text-[11px] text-red-400 border border-red-500/30 bg-red-500/5 rounded-sm px-2.5 py-2">
+                                Você está suspenso e não entra em campo na próxima rodada. Cumpra a suspensão pra voltar.
+                              </p>
+                            ) : (
+                              <div className="grid grid-cols-2 gap-1.5">
+                                {POSTURAS_JOGO.map((po) => {
+                                  const ativa = postAtual === po.id;
+                                  return (
+                                    <button key={po.id}
+                                      onClick={() => setCarreira((cc) => ({ ...cc, posturaPreferida: po.id, temporadaAndamento: { ...cc.temporadaAndamento, postura: po.id } }))}
+                                      className="text-left px-2.5 py-2 rounded-sm border transition-all"
+                                      style={{ borderColor: ativa ? po.cor : "#27272a", background: ativa ? `${po.cor}15` : "transparent" }}>
+                                      <div className="text-[11px] font-bold" style={{ color: ativa ? po.cor : "#e4e4e7" }}>{po.icone} {po.nome}</div>
+                                      <div className="text-[9px] text-zinc-500 mt-0.5 leading-snug">{po.desc}</div>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </Card>
+
                     <Card className="border-amber-500/30">
                       <div className="flex items-center justify-between mb-2">
                         <div className="text-[9px] text-zinc-500 uppercase tracking-widest">🗓️ Calendário da temporada — rodada {carreira.temporadaAndamento.rodadaAtual + 1}/{carreira.temporadaAndamento.calendario.length}</div>
@@ -2750,9 +3096,13 @@ function resolverTemporada(c, extraStats) {
                           <p className="text-[9px] text-zinc-600 mb-1.5">Clique num jogo pra ver a ficha completa da partida.</p>
                           <div className="flex items-center gap-2 mb-2.5 flex-wrap">
                             {an.ultimos.slice(-8).map((j, i) => (
-                              <button key={i} onClick={() => setFichaJogo(j)} className="flex flex-col items-center hover:scale-110 transition-transform" title={`x ${j.adversario} — clique pra ver a ficha`}>
-                                <div className={`w-9 h-9 rounded-sm flex items-center justify-center text-xs font-black ${j.resultado === "V" ? "bg-emerald-500 text-zinc-900" : j.resultado === "D" ? "bg-red-500 text-white" : "bg-zinc-600 text-white"}`}>{j.resultado}</div>
-                                <span className="text-[9px] font-mono mt-0.5" style={{ color: (j.nota || 0) >= 7.5 ? "#12A876" : (j.nota || 0) >= 6.5 ? "#a1a1aa" : "#D6483F" }}>{j.nota}</span>
+                              <button key={i} onClick={() => setFichaJogo(j)} className="flex flex-col items-center hover:scale-110 transition-transform relative" title={`x ${j.adversario} — clique pra ver a ficha`}>
+                                <div className={`w-9 h-9 rounded-sm flex items-center justify-center text-xs font-black relative ${j.suspenso ? "bg-zinc-800 text-zinc-600" : j.resultado === "V" ? "bg-emerald-500 text-zinc-900" : j.resultado === "D" ? "bg-red-500 text-white" : "bg-zinc-600 text-white"}`}>
+                                  {j.suspenso ? "🚫" : j.resultado}
+                                  {j.vermelho && <span className="absolute -top-1 -right-1 w-2.5 h-3.5 rounded-[2px] bg-red-600 border border-zinc-900" title="Cartão vermelho" />}
+                                  {j.amarelo && !j.vermelho && <span className="absolute -top-1 -right-1 w-2.5 h-3.5 rounded-[2px] bg-yellow-400 border border-zinc-900" title="Cartão amarelo" />}
+                                </div>
+                                <span className="text-[9px] font-mono mt-0.5" style={{ color: j.suspenso ? "#52525b" : (j.nota || 0) >= 7.5 ? "#12A876" : (j.nota || 0) >= 6.5 ? "#a1a1aa" : "#D6483F" }}>{j.suspenso ? "—" : j.nota}</span>
                               </button>
                             ))}
                           </div>
@@ -3197,8 +3547,35 @@ function resolverTemporada(c, extraStats) {
                   <PopupOverlay>
                     <Card className="text-center border-emerald-500/40">
                       <div className="text-[10px] text-emerald-400 uppercase tracking-widest mb-2">Treino de {ATTR_SLOTS.find((s) => s.id === treinoDesafio.attrId).label}</div>
-                      <p className="text-xs text-zinc-400 mb-3">Clique em "Parar" quando o marcador estiver na zona verde.</p>
-                      <TimingBar onResult={(acerto) => resolverTreino(acerto)} duracao={1000} label="Parar" />
+                      {treinoDesafio.minigame === "penalti" ? (
+                        <>
+                          <p className="text-xs text-zinc-400 mb-2">Sessão de cobranças — converta pra afinar a finalização.</p>
+                          <GoalMini resultado={treinoResultado} onPick={(zona) => {
+                            const gol = Math.random() < clamp((carreira.attrs.finalizacao - 30) / 75 + somaEfeitoInsignia(carreira, "minigame"), 0.2, 0.95);
+                            setTreinoResultado({ zona, gol });
+                            setTimeout(() => { setTreinoResultado(null); resolverTreino(gol); }, 1400);
+                          }} />
+                        </>
+                      ) : treinoDesafio.minigame === "falta" ? (
+                        <>
+                          <p className="text-xs text-zinc-400 mb-2">Sessão de bola parada — acertar afia a técnica.</p>
+                          <FreeKickMini resultado={treinoResultado} onPick={(zona) => {
+                            const gol = Math.random() < clamp((carreira.attrs.drible - 30) / 85 + somaEfeitoInsignia(carreira, "minigame"), 0.15, 0.9);
+                            setTreinoResultado({ zona, gol, tipo: tipoResultadoFalta(gol, zona) });
+                            setTimeout(() => { setTreinoResultado(null); resolverTreino(gol); }, 1500);
+                          }} />
+                        </>
+                      ) : treinoDesafio.minigame === "passe" ? (
+                        <>
+                          <p className="text-xs text-zinc-400 mb-2">Treino de saída de bola — ache o companheiro livre.</p>
+                          <PasseMini atributoPasse={carreira.attrs.passe} onResultado={(r) => { setTimeout(() => resolverTreino(r.gol), 1400); }} />
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-xs text-zinc-400 mb-3">Clique em "Parar" quando o marcador estiver na zona verde.</p>
+                          <TimingBar onResult={(acerto) => resolverTreino(acerto)} duracao={1000} label="Parar" />
+                        </>
+                      )}
                     </Card>
                   </PopupOverlay>
                 )}
@@ -3427,9 +3804,24 @@ function resolverTemporada(c, extraStats) {
                   <PopupOverlay>
                     <Card className="border-amber-500/40 text-center">
                       <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-1">⚡ Lance-chave x {pendingLanceJogo.adversario}</div>
+                      {pendingLanceJogo.contexto && (() => {
+                        const ctx = pendingLanceJogo.contexto;
+                        const aj = ajustesDoContexto(ctx);
+                        const cor = ctx.peso >= 3 ? "#D6483F" : ctx.peso === 2 ? "#f59e0b" : "#a1a1aa";
+                        return (
+                          <div className="rounded-sm border px-3 py-2.5 mb-3 text-left" style={{ borderColor: `${cor}55`, background: `${cor}12` }}>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <span className="text-[9px] uppercase tracking-widest font-bold" style={{ color: cor }}>{aj.rotulo}</span>
+                              <span className="font-stat font-black text-sm">{ctx.golsMeu} <span className="text-zinc-600">x</span> {ctx.golsAdv}</span>
+                            </div>
+                            <p className="text-[11px] text-zinc-300 leading-snug">{ctx.texto}</p>
+                            {ctx.peso >= 3 && <p className="text-[9px] mt-1.5" style={{ color: cor }}>Acertar aqui vale o dobro em fama e torcida — errar também pesa.</p>}
+                          </div>
+                        );
+                      })()}
                       {pendingLanceJogo.tipoLance === "texto" && (
                         <>
-                          <p className="text-xs text-zinc-400 mb-3">Momento decisivo no jogo — o que você faz?</p>
+                          <p className="text-xs text-zinc-400 mb-3">O que você faz?</p>
                           <div className="grid gap-1.5">
                             {(LANCES_POR_POSICAO[POS_GRUPO[carreira.posicao] || "MEI"]).map((op) => (
                               <Button key={op.id} variant="ghost" onClick={() => resolverLanceJogo(op)}>{op.label}</Button>
@@ -4144,19 +4536,81 @@ function resolverTemporada(c, extraStats) {
 
             {aba === "estatisticas" && (
               <div className="tab-grid">
-                <Card className="border-amber-500/30">
-                  <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-2">🏅 Insígnias (Traits)</div>
-                  {(carreira.traits || []).length === 0 ? (
-                    <p className="text-xs text-zinc-500">Nenhuma insígnia desbloqueada ainda — mantenha um atributo acima de 90 por temporadas seguidas.</p>
-                  ) : (
-                    <div className="grid gap-1.5">
-                      {carreira.traits.map((tid) => {
-                        const t = TRAITS_DISPONIVEIS.find((x) => x.id === tid);
-                        if (!t) return null;
-                        return <div key={tid} className="flex items-center gap-2 text-xs bg-amber-500/10 border border-amber-500/30 rounded-md px-2.5 py-1.5"><span className="text-base">{t.icone}</span><div><span className="font-bold text-amber-300">{t.nome}</span><span className="block text-[10px] text-zinc-400">{t.desc} (+{Math.round(t.bonus * 100)}% em mata-mata)</span></div></div>;
-                      })}
+                {carreira.cartoes && (
+                  <Card>
+                    <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2.5">🟨 Ficha disciplinar</div>
+                    <div className="grid grid-cols-3 gap-2 text-center mb-2">
+                      <div className="bg-zinc-950/40 rounded-sm p-2.5">
+                        <div className="font-stat font-black text-xl text-yellow-400">{carreira.cartoes.amarelos || 0}</div>
+                        <div className="text-[8px] text-zinc-500 uppercase tracking-widest">Amarelos</div>
+                      </div>
+                      <div className="bg-zinc-950/40 rounded-sm p-2.5">
+                        <div className="font-stat font-black text-xl text-red-500">{carreira.cartoes.vermelhos || 0}</div>
+                        <div className="text-[8px] text-zinc-500 uppercase tracking-widest">Vermelhos</div>
+                      </div>
+                      <div className="bg-zinc-950/40 rounded-sm p-2.5">
+                        <div className="font-stat font-black text-xl">{carreira.cartoes.amarelosAcumulados || 0}<span className="text-zinc-600 text-sm">/{REGRAS_CARTAO.amarelosParaSuspender}</span></div>
+                        <div className="text-[8px] text-zinc-500 uppercase tracking-widest">Pendurado</div>
+                      </div>
                     </div>
-                  )}
+                    {(carreira.cartoes.suspensoesRestantes || 0) > 0 && (
+                      <p className="text-[10px] text-red-400 border border-red-500/30 bg-red-500/5 rounded-sm px-2 py-1.5">🚫 Suspenso por mais {carreira.cartoes.suspensoesRestantes} jogo(s)</p>
+                    )}
+                    {(carreira.cartoes.amarelosAcumulados || 0) === REGRAS_CARTAO.amarelosParaSuspender - 1 && (
+                      <p className="text-[10px] text-yellow-400 border border-yellow-500/30 bg-yellow-500/5 rounded-sm px-2 py-1.5">⚠️ Pendurado — o próximo amarelo te tira do jogo seguinte</p>
+                    )}
+                  </Card>
+                )}
+
+                <Card className="border-amber-500/30">
+                  <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-1">🏅 Insígnias</div>
+                  <p className="text-[10px] text-zinc-600 mb-3">Conquistadas por comportamento repetido. Cada uma evolui em três níveis — e o efeito aumenta junto.</p>
+                  {(() => {
+                    const conquistadas = TRAITS_DISPONIVEIS.map((t) => ({ t, nivel: nivelDaInsignia(carreira, t.id) })).filter((x) => x.nivel > 0);
+                    const faltando = TRAITS_DISPONIVEIS.filter((t) => nivelDaInsignia(carreira, t.id) === 0);
+                    return (
+                      <>
+                        {conquistadas.length === 0 && <p className="text-xs text-zinc-500 mb-3">Nenhuma insígnia ainda. Elas vêm de constância: manter atributo alto, ganhar títulos, render em jogo grande.</p>}
+                        <div className="grid gap-1.5 mb-3">
+                          {conquistadas.sort((a, b) => b.nivel - a.nivel).map(({ t, nivel }) => {
+                            const niv = NIVEIS_INSIGNIA[nivel - 1];
+                            return (
+                              <div key={t.id} className="rounded-md px-2.5 py-2 border" style={{ borderColor: `${niv.cor}55`, background: `${niv.cor}12` }}>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">{t.icone}</span>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="font-bold text-xs" style={{ color: niv.cor }}>{t.nome}</span>
+                                      <span className="text-[9px] px-1.5 py-0.5 rounded-sm font-bold" style={{ background: `${niv.cor}25`, color: niv.cor }}>{niv.nome}</span>
+                                    </div>
+                                    <span className="block text-[10px] text-zinc-400 mt-0.5">{t.efeito(nivel)}</span>
+                                  </div>
+                                  <div className="flex gap-0.5 shrink-0">
+                                    {[1, 2, 3].map((n) => <span key={n} className="w-1.5 h-4 rounded-sm" style={{ background: n <= nivel ? niv.cor : "#3f3f46" }} />)}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {faltando.length > 0 && (
+                          <>
+                            <div className="text-[9px] text-zinc-600 uppercase tracking-widest mb-1.5">🔒 Ainda por conquistar</div>
+                            <div className="grid gap-1">
+                              {faltando.map((t) => (
+                                <div key={t.id} className="flex items-center gap-2 text-[10px] text-zinc-600 px-2 py-1 border border-zinc-800 rounded-sm">
+                                  <span className="opacity-50">{t.icone}</span>
+                                  <span className="flex-1">{t.nome}</span>
+                                  <span className="text-[9px] text-zinc-700 truncate max-w-[55%]">{t.desc(1)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                        <p className="text-[9px] text-zinc-600 mt-2">{conquistadas.length}/{TRAITS_DISPONIVEIS.length} insígnias · {conquistadas.filter((x) => x.nivel === 3).length} no ouro</p>
+                      </>
+                    );
+                  })()}
                 </Card>
 
                 <Card>
@@ -4323,7 +4777,7 @@ function resolverTemporada(c, extraStats) {
                                   {!x.lida && <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: t.cor }} />}
                                 </div>
                                 <p className="text-[10px] text-zinc-500 mt-0.5 leading-snug">{x.corpo}</p>
-                                <div className="text-[9px] text-zinc-600 mt-1">{x.temporada} · {x.idade} anos · {t.label}</div>
+                                <div className="text-[9px] text-zinc-600 mt-1">{x.temporada} · {x.idade} anos{x.clube ? ` · ${x.clube}` : ""} · {t.label}</div>
                               </div>
                             </div>
                           </button>
@@ -4542,7 +4996,49 @@ function resolverTemporada(c, extraStats) {
                     <button onClick={() => setAbaLegado("classicos")} className={`px-3 py-1.5 text-[11px] rounded-sm border ${abaLegado === "classicos" ? "border-emerald-500 bg-emerald-500/10 text-emerald-400" : "border-zinc-800 text-zinc-500"}`}>⚔️ Jogos grandes</button>
                     <button onClick={() => setAbaLegado("marcos")} className={`px-3 py-1.5 text-[11px] rounded-sm border ${abaLegado === "marcos" ? "border-emerald-500 bg-emerald-500/10 text-emerald-400" : "border-zinc-800 text-zinc-500"}`}>📜 Linha do tempo</button>
                     <button onClick={() => setAbaLegado("recordes")} className={`px-3 py-1.5 text-[11px] rounded-sm border ${abaLegado === "recordes" ? "border-emerald-500 bg-emerald-500/10 text-emerald-400" : "border-zinc-800 text-zinc-500"}`}>🎯 Recordes</button>
+                    <button onClick={() => setAbaLegado("memoraveis")} className={`px-3 py-1.5 text-[11px] rounded-sm border ${abaLegado === "memoraveis" ? "border-emerald-500 bg-emerald-500/10 text-emerald-400" : "border-zinc-800 text-zinc-500"}`}>⭐ Jogos inesquecíveis</button>
                   </div>
+                  {abaLegado === "memoraveis" && (() => {
+                    const mem = carreira.jogosMemoraveis || [];
+                    const conf = melhoresEPioresConfrontos(carreira);
+                    return (
+                      <>
+                        <p className="text-[10px] text-zinc-600 mb-2.5">As partidas que ficaram — e como você se sai contra cada adversário.</p>
+                        {mem.length === 0 ? <p className="text-xs text-zinc-500 mb-3">Nenhum jogo memorável ainda. Faça um hat-trick, decida um clássico ou tire uma nota 8.8.</p> : (
+                          <div className="grid gap-1.5 mb-4 max-h-[42vh] overflow-y-auto pr-1">
+                            {mem.map((m) => (
+                              <div key={m.id} className="border border-amber-500/25 bg-amber-500/5 rounded-sm p-2.5">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-xs font-bold">{m.casa === false ? "✈️" : "🏠"} x {m.adversario} {m.classico && <span className="text-amber-400">⚔️</span>}</span>
+                                  <span className="font-stat font-black text-sm" style={{ color: m.golsMeu > m.golsAdv ? "#12A876" : m.golsMeu === m.golsAdv ? "#a1a1aa" : "#D6483F" }}>{m.golsMeu}×{m.golsAdv}</span>
+                                </div>
+                                <div className="flex flex-wrap gap-1 mb-1">
+                                  {m.criterios.map((cr) => <span key={cr.id} className="text-[9px] px-1.5 py-0.5 rounded-sm bg-amber-500/15 text-amber-400">{cr.icone} {cr.label}</span>)}
+                                </div>
+                                <div className="text-[9px] text-zinc-500">{m.temporadaLabel} · {m.clube} · {m.idade} anos · {m.golsMinha}G {m.assistMinha}A · nota {m.nota}</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {conf.todos.length > 0 && (
+                          <>
+                            <div className="text-[9px] text-zinc-600 uppercase tracking-widest mb-1.5 border-t border-zinc-800 pt-2.5">⚔️ Contra quem você joga melhor</div>
+                            <div className="grid gap-0.5">
+                              {conf.todos.slice(0, 10).map((x) => (
+                                <div key={x.nome} className="flex items-center gap-2 text-[10px] px-1.5 py-1 rounded-sm hover:bg-white/5">
+                                  <span className="flex-1 truncate text-zinc-300">{x.nome}</span>
+                                  <span className="font-mono text-zinc-600">{x.jogos}J</span>
+                                  <span className="font-mono w-14 text-right"><span className="text-emerald-400">{x.v}</span>-<span className="text-zinc-500">{x.e}</span>-<span className="text-red-400">{x.d}</span></span>
+                                  <span className="font-mono text-zinc-400 w-8 text-right">{x.gols}g</span>
+                                  <span className="font-mono w-9 text-right" style={{ color: x.aproveitamento >= 60 ? "#12A876" : x.aproveitamento <= 35 ? "#D6483F" : "#a1a1aa" }}>{x.aproveitamento}%</span>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </>
+                    );
+                  })()}
                   {abaLegado === "marcos" && (
                     <>
                       <p className="text-[10px] text-zinc-600 mb-2.5">Os momentos que definiram sua carreira, do primeiro dia até aqui.</p>
@@ -4772,13 +5268,57 @@ function resolverTemporada(c, extraStats) {
 
                 {ultima && (
                   <Card className={ultima.nota >= 7.3 ? "border-emerald-500/30" : ultima.nota <= 6.3 ? "border-red-500/30" : ""}>
-                    <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2">Mensagens de torcedores</div>
+                    <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">Mensagens de torcedores</div>
+                    <p className="text-[10px] text-zinc-600 mb-2.5">Você pode responder — mas cuidado: o que você escreve vira notícia.</p>
                     <div className="space-y-1.5">
-                      {(ultima.nota >= 7.3 ? FAN_MSGS_POS : ultima.nota <= 6.3 ? FAN_MSGS_NEG : ["Temporada ok, vamos que vamos pro próximo ano."]).slice(0, 3).map((m, i) => (
-                        <div key={i} className="text-[11px] bg-zinc-950/40 rounded-sm px-2 py-1.5"><span className="font-bold text-zinc-400">@torcedor{i + 1}: </span><span className="text-zinc-300">{m}</span></div>
-                      ))}
+                      {(ultima.nota >= 7.3 ? FAN_MSGS_POS : ultima.nota <= 6.3 ? FAN_MSGS_NEG : ["Temporada ok, vamos que vamos pro próximo ano."]).slice(0, 3).map((m, i) => {
+                        const hater = ultima.nota <= 6.3;
+                        const jaRespondi = (carreira.respostasFas || []).includes(`${ultima.temporadaLabel}_${i}`);
+                        return (
+                          <div key={i} className="bg-zinc-950/40 rounded-sm px-2.5 py-2">
+                            <div className="text-[11px]"><span className="font-bold" style={{ color: hater ? "#D6483F" : "#12A876" }}>@torcedor{i + 1}: </span><span className="text-zinc-300">{m}</span></div>
+                            {jaRespondi ? (
+                              <div className="text-[10px] text-zinc-600 mt-1.5 pl-3 border-l border-zinc-800">✓ você já respondeu</div>
+                            ) : (
+                              <button onClick={() => setRespostaFa({ id: `${ultima.temporadaLabel}_${i}`, msg: m, hater, autor: `@torcedor${i + 1}` })}
+                                className="text-[10px] mt-1.5 text-zinc-400 border border-zinc-700 rounded-sm px-2 py-1 hover:border-pink-500 hover:text-pink-400">
+                                💬 Responder
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </Card>
+                )}
+
+                {respostaFa && (
+                  <PopupOverlay onClose={() => setRespostaFa(null)}>
+                    <Card className="border-pink-500/40">
+                      <div className="text-[10px] text-pink-400 uppercase tracking-widest mb-2">💬 Responder {respostaFa.autor}</div>
+                      <div className="bg-zinc-950/50 rounded-sm px-3 py-2 mb-3">
+                        <span className="text-[11px] font-bold" style={{ color: respostaFa.hater ? "#D6483F" : "#12A876" }}>{respostaFa.autor}: </span>
+                        <span className="text-[11px] text-zinc-300">{respostaFa.msg}</span>
+                      </div>
+                      <div className="text-[9px] text-zinc-600 uppercase tracking-widest mb-1.5">Como você responde?</div>
+                      <div className="grid gap-1.5">
+                        {(respostaFa.hater ? RESPOSTAS_HATER : RESPOSTAS_FA).map((r) => (
+                          <button key={r.id} onClick={() => responderTorcedor(r)} className="text-left px-3 py-2.5 rounded-sm border transition-all" style={{ borderColor: `${r.cor}44` }}>
+                            <div className="text-xs font-bold" style={{ color: r.cor }}>{r.icone} {r.label}</div>
+                            <div className="text-[10px] text-zinc-500 mt-0.5 italic">"{r.texto}"</div>
+                            <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1.5">
+                              {Object.entries(r.efeito).filter(([, v]) => v).map(([k, v]) => {
+                                const rot = { fama: "Fama", torcida: "Torcida", calorMidia: "Pressão", elenco: "Elenco", seguidores: "Seguidores" }[k] || k;
+                                const ruim = k === "calorMidia" ? v > 0 : v < 0;
+                                return <span key={k} className={`text-[9px] font-mono ${ruim ? "text-red-400" : "text-emerald-400"}`}>{rot} {v > 0 ? "+" : ""}{k === "seguidores" ? `${v}%` : v}</span>;
+                              })}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      <div className="mt-3"><Button variant="ghost" onClick={() => setRespostaFa(null)}>Deixar quieto</Button></div>
+                    </Card>
+                  </PopupOverlay>
                 )}
 
                 <Card className="border-pink-500/30">
@@ -4904,18 +5444,79 @@ function resolverTemporada(c, extraStats) {
                   );
                 })()}
 
-                {(carreira.posses || []).length > 0 && (
-                  <Card>
-                    <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2">O que você já tem <span className="text-zinc-600 normal-case">(manutenção sai do cofre todo ano)</span></div>
-                    <div className="grid gap-1.5">
-                      {carreira.posses.map((p) => (
-                        <div key={p.compraId} className="flex justify-between items-center px-3 py-2 text-xs rounded-sm border border-zinc-800">
-                          <span>{p.icone} {p.nome}{p.manutencao > 0 ? <span className="text-zinc-500"> · manutenção ${formatarDinheiro(p.manutencao)}/ano</span> : ""}{p.comercial ? <span className="text-blue-400"> · gera renda</span> : ""}{p.clubeDono ? <span className="text-amber-400"> · {p.clubeDono} (trava)</span> : ""}</span>
-                          {p.categoria !== "Estrutura do Clube" && <button onClick={() => venderItem(p.compraId)} className="text-[10px] text-red-400 border border-red-500/30 rounded-sm px-2 py-1 hover:bg-red-500/10">Vender (${formatarDinheiro(Math.round(p.custo * 0.5))})</button>}
+                {(carreira.posses || []).length > 0 && (() => {
+                  const manutTotal = carreira.posses.reduce((a2, p) => a2 + (p.manutencao || 0), 0);
+                  const valorTotal = carreira.posses.reduce((a2, p) => a2 + (p.custo || 0), 0);
+                  return (
+                    <Card>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-[10px] text-zinc-500 uppercase tracking-widest">🛍️ Seus bens</div>
+                        <span className="text-[10px] text-zinc-500">{carreira.posses.length} itens</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 mb-2.5">
+                        <div className="bg-zinc-950/40 rounded-sm p-2 text-center">
+                          <div className="font-mono text-sm font-bold text-amber-400">${formatarDinheiro(valorTotal)}</div>
+                          <div className="text-[8px] text-zinc-500 uppercase tracking-widest">Patrimônio em bens</div>
                         </div>
-                      ))}
-                    </div>
-                  </Card>
+                        <div className="bg-zinc-950/40 rounded-sm p-2 text-center">
+                          <div className="font-mono text-sm font-bold text-red-400">${formatarDinheiro(manutTotal)}</div>
+                          <div className="text-[8px] text-zinc-500 uppercase tracking-widest">Manutenção/ano</div>
+                        </div>
+                      </div>
+                      <button onClick={() => setItensCompradosAberto(true)} className="w-full text-[11px] text-emerald-400 border border-emerald-500/40 rounded-sm py-2 hover:bg-emerald-500/10">
+                        📦 Ver todos os itens comprados →
+                      </button>
+                    </Card>
+                  );
+                })()}
+
+                {itensCompradosAberto && (
+                  <PopupOverlay largo onClose={() => setItensCompradosAberto(false)}>
+                    <Card className="border-emerald-500/40">
+                      <div className="text-[10px] text-emerald-400 uppercase tracking-widest mb-1">📦 Itens comprados</div>
+                      <p className="text-[10px] text-zinc-600 mb-3">Tudo que você adquiriu, organizado por categoria. A manutenção sai do cofre todo ano.</p>
+                      {["Estrutura do Clube", "Imóveis", "Garagem", "Joias", "Luxo"].map((cat) => {
+                        const itens = (carreira.posses || []).filter((p) => p.categoria === cat);
+                        if (!itens.length) return null;
+                        const totalCat = itens.reduce((a2, p) => a2 + (p.custo || 0), 0);
+                        return (
+                          <div key={cat} className="mb-3">
+                            <div className="flex items-center justify-between mb-1.5">
+                              <span className="text-[9px] text-zinc-600 uppercase tracking-widest">{cat}</span>
+                              <span className="text-[9px] text-zinc-600">{itens.length} itens · ${formatarDinheiro(totalCat)}</span>
+                            </div>
+                            <div className="lista-cards">
+                              {itens.map((p) => (
+                                <div key={p.compraId} className="border border-zinc-800 rounded-sm px-3 py-2">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1 min-w-0">
+                                      <div className="text-xs font-bold">{p.icone} {p.nome}</div>
+                                      <div className="text-[9px] text-zinc-500 mt-0.5">
+                                        ${formatarDinheiro(p.custo)}
+                                        {p.manutencao > 0 && <span> · manutenção ${formatarDinheiro(p.manutencao)}/ano</span>}
+                                      </div>
+                                      <div className="flex flex-wrap gap-1 mt-1">
+                                        {p.comercial && <span className="text-[8px] px-1.5 py-0.5 rounded-sm bg-blue-500/15 text-blue-400">gera renda</span>}
+                                        {p.clubeDono && <span className="text-[8px] px-1.5 py-0.5 rounded-sm bg-amber-500/15 text-amber-400">🔒 {p.clubeDono}</span>}
+                                        {p.efeitoFisico != null && <span className={`text-[8px] px-1.5 py-0.5 rounded-sm ${p.efeitoFisico < 0 ? "bg-emerald-500/15 text-emerald-400" : "bg-red-500/15 text-red-400"}`}>🩺 {p.efeitoFisico < 0 ? "−" : "+"}{Math.abs(p.efeitoFisico)} desgaste</span>}
+                                        {PESO_OSTENTACAO[p.categoria] > 0 && <span className="text-[8px] px-1.5 py-0.5 rounded-sm bg-pink-500/15 text-pink-400">💸 ostentação</span>}
+                                      </div>
+                                    </div>
+                                    {p.categoria !== "Estrutura do Clube" && (
+                                      <button onClick={() => venderItem(p.compraId)} className="text-[9px] text-red-400 border border-red-500/30 rounded-sm px-2 py-1 hover:bg-red-500/10 shrink-0">
+                                        Vender<br />${formatarDinheiro(Math.round(p.custo * 0.5))}
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div className="mt-2"><Button variant="ghost" onClick={() => setItensCompradosAberto(false)}>Fechar</Button></div>
+                    </Card>
+                  </PopupOverlay>
                 )}
 
                 {Object.keys(carreira.staffContratos || {}).length > 0 && (
@@ -4979,6 +5580,62 @@ function resolverTemporada(c, extraStats) {
           </div>
         )}
 
+        {savesAberto && (
+          <PopupOverlay onClose={() => setSavesAberto(false)}>
+            <Card className="border-emerald-500/40">
+              <div className="text-[10px] text-emerald-400 uppercase tracking-widest mb-1">💾 Carreiras salvas</div>
+              <p className="text-[10px] text-zinc-600 mb-3">O jogo salva sozinho no fim de cada temporada. Use os espaços 1, 2 e 3 pra guardar momentos específicos.</p>
+              <div className="grid gap-1.5 mb-3">
+                {listarSaves().map(({ slot, existe, resumo }) => (
+                  <div key={slot} className={`border rounded-sm p-2.5 ${existe ? "border-zinc-700" : "border-zinc-800 border-dashed"}`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[11px] font-bold" style={{ color: slot === "auto" ? "#D8B44A" : "#e4e4e7" }}>
+                        {slot === "auto" ? "⚡ Automático" : `💾 Espaço ${slot}`}
+                      </span>
+                      {existe && <span className="text-[9px] text-zinc-600">{formatarData(resumo.salvoEm)}</span>}
+                    </div>
+                    {existe ? (
+                      <>
+                        <div className="text-[11px] text-zinc-300">{resumo.nome} · {resumo.posicao} · {resumo.idade} anos</div>
+                        <div className="text-[10px] text-zinc-500">{resumo.encerrada ? "Carreira encerrada" : resumo.clube} · {resumo.temporadas} temporada(s)</div>
+                        <div className="flex gap-1.5 mt-2">
+                          <button onClick={() => carregarJogo(slot)} className="flex-1 text-[10px] text-emerald-400 border border-emerald-500/40 rounded-sm py-1.5 hover:bg-emerald-500/10">Carregar</button>
+                          {slot !== "auto" && <button onClick={() => salvarJogo(slot)} className="flex-1 text-[10px] text-blue-400 border border-blue-500/40 rounded-sm py-1.5 hover:bg-blue-500/10">Sobrescrever</button>}
+                          <button onClick={() => { if (confirm("Apagar essa carreira salva?")) { apagarLocal(slot); setTemSave(existeAlgumSave()); setAvisoSave({ erro: false, txt: "Save apagado." }); setTimeout(() => setAvisoSave(null), 2000); } }} className="text-[10px] text-red-400 border border-red-500/30 rounded-sm px-2 py-1.5 hover:bg-red-500/10">Apagar</button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-zinc-600">vazio</span>
+                        {slot !== "auto" && (carreira || fim) && <button onClick={() => salvarJogo(slot)} className="text-[10px] text-emerald-400 border border-emerald-500/40 rounded-sm px-3 py-1 hover:bg-emerald-500/10">Salvar aqui</button>}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="border-t border-zinc-800 pt-2.5">
+                <div className="text-[9px] text-zinc-600 uppercase tracking-widest mb-1.5">Backup em arquivo</div>
+                <p className="text-[9px] text-zinc-600 mb-2">O save fica guardado no navegador. Se limpar os dados dele, some. Baixe um arquivo pra não perder.</p>
+                <div className="flex gap-1.5">
+                  <button onClick={() => { if (carreira || fim) baixarSave(estadoAtualParaSave()); }} disabled={!carreira && !fim} className="flex-1 text-[10px] text-zinc-300 border border-zinc-700 rounded-sm py-1.5 hover:border-emerald-500 disabled:opacity-40">⬇️ Baixar carreira</button>
+                  <label className="flex-1 text-[10px] text-zinc-300 border border-zinc-700 rounded-sm py-1.5 hover:border-emerald-500 cursor-pointer text-center">
+                    ⬆️ Carregar arquivo
+                    <input type="file" accept="application/json,.json" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importarSaveDeArquivo(f); e.target.value = ""; }} />
+                  </label>
+                </div>
+              </div>
+              <div className="mt-3"><Button variant="ghost" onClick={() => setSavesAberto(false)}>Fechar</Button></div>
+            </Card>
+          </PopupOverlay>
+        )}
+
+        {avisoSave && (
+          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] px-4 py-2.5 rounded-md text-xs font-bold animate-[popIn_0.2s_ease-out]"
+            style={{ background: avisoSave.erro ? "#3b1213" : "#0d2a19", border: `1px solid ${avisoSave.erro ? "#D6483F" : "#12A876"}`, color: avisoSave.erro ? "#ff9d97" : "#39FF88" }}>
+            {avisoSave.erro ? "⚠️ " : "💾 "}{avisoSave.txt}
+          </div>
+        )}
+
         {fichaJogo && carreira && (
           <PopupOverlay onClose={() => setFichaJogo(null)}>
             <FichaPartida jogo={fichaJogo} clubeNome={carreira.clube.nome} posicao={carreira.posicao} onClose={() => setFichaJogo(null)} />
@@ -4987,7 +5644,7 @@ function resolverTemporada(c, extraStats) {
 
         {noticiaAberta && carreira && (
           <PopupOverlay onClose={() => setNoticiaAberta(null)}>
-            <LeitorNoticia noticia={noticiaAberta} nome={nome} clube={carreira.clube.nome} onClose={() => setNoticiaAberta(null)} />
+            <LeitorNoticia noticia={noticiaAberta} nome={nome} clube={noticiaAberta.clube || carreira.clube.nome} onClose={() => setNoticiaAberta(null)} />
           </PopupOverlay>
         )}
 
@@ -5097,6 +5754,63 @@ function resolverTemporada(c, extraStats) {
                   <div className="bg-zinc-950/40 rounded-sm p-2"><div className="font-mono text-lg font-bold">{assistTotais}</div><div className="text-[8px] text-zinc-500 uppercase">Assist.</div></div>
                 </div>
 
+                {(() => {
+                  const cl = CLUBES.find((x) => x.nome === popupClube);
+                  if (!cl) return null;
+                  const pal = palmaresDoClube(carreira?.estadoClubes, popupClube);
+                  const nomes = nomeDosTitulos(cl.liga);
+                  const inicial = palmaresInicialDe(cl);
+                  const linhas = [
+                    { k: "liga", icone: "🏆", cor: "#12A876" },
+                    { k: "copa", icone: "🥇", cor: "#D8B44A" },
+                    { k: "continental", icone: "🌍", cor: "#f59e0b" },
+                    { k: "mundial", icone: "🌐", cor: "#EC4899" },
+                  ].filter((l) => (pal[l.k] || 0) > 0);
+                  const total = (pal.liga || 0) + (pal.copa || 0) + (pal.continental || 0) + (pal.mundial || 0);
+                  return (
+                    <div className="mb-4">
+                      <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1.5">🏛️ Sala de troféus do clube</div>
+                      {total === 0 ? (
+                        <p className="text-[11px] text-zinc-600 mb-3">O clube ainda não tem títulos de expressão. Uma página em branco pra você escrever.</p>
+                      ) : (
+                        <div className="grid gap-1 mb-2">
+                          {linhas.map((l) => {
+                            const ganhosNaSuaEra = (pal[l.k] || 0) - (inicial[l.k] || 0);
+                            return (
+                              <div key={l.k} className="flex items-center gap-2 text-[11px] px-2 py-1.5 rounded-sm bg-zinc-950/40">
+                                <span>{l.icone}</span>
+                                <span className="flex-1 text-zinc-300">{nomes[l.k]}</span>
+                                <span className="font-mono font-bold" style={{ color: l.cor }}>{pal[l.k]}×</span>
+                                {ganhosNaSuaEra > 0 && <span className="text-[9px] text-emerald-400">+{ganhosNaSuaEra} na sua era</span>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                      <p className="text-[9px] text-zinc-600">{total} taça(s) na história do clube</p>
+                    </div>
+                  );
+                })()}
+                {(() => {
+                  const conf = resumoConfronto(carreira, popupClube);
+                  if (!conf) return null;
+                  return (
+                    <div className="mb-4">
+                      <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1.5">⚔️ Seu histórico contra o {popupClube}</div>
+                      <div className="grid grid-cols-4 gap-2 text-center">
+                        <div className="bg-zinc-950/40 rounded-sm p-2"><div className="font-stat font-black text-base">{conf.jogos}</div><div className="text-[8px] text-zinc-500 uppercase">Jogos</div></div>
+                        <div className="bg-zinc-950/40 rounded-sm p-2"><div className="font-stat font-black text-base"><span className="text-emerald-400">{conf.v}</span>-<span className="text-zinc-400">{conf.e}</span>-<span className="text-red-400">{conf.d}</span></div><div className="text-[8px] text-zinc-500 uppercase">V-E-D</div></div>
+                        <div className="bg-zinc-950/40 rounded-sm p-2"><div className="font-stat font-black text-base">{conf.gols}</div><div className="text-[8px] text-zinc-500 uppercase">Gols</div></div>
+                        <div className="bg-zinc-950/40 rounded-sm p-2"><div className="font-stat font-black text-base" style={{ color: conf.notaMedia >= 7.2 ? "#12A876" : conf.notaMedia >= 6.5 ? "#e4e4e7" : "#D6483F" }}>{conf.notaMedia}</div><div className="text-[8px] text-zinc-500 uppercase">Nota</div></div>
+                      </div>
+                      <p className="text-[10px] mt-1.5" style={{ color: conf.aproveitamento >= 60 ? "#12A876" : conf.aproveitamento <= 35 ? "#D6483F" : "#a1a1aa" }}>
+                        {conf.aproveitamento >= 60 ? `🍗 Freguesia: ${conf.aproveitamento}% de aproveitamento contra eles.`
+                          : conf.aproveitamento <= 35 ? `😖 Pedra no sapato: só ${conf.aproveitamento}% de aproveitamento.`
+                          : `Equilibrado: ${conf.aproveitamento}% de aproveitamento.`}
+                      </p>
+                    </div>
+                  );
+                })()}
                 <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1.5">🏆 Feitos com essa camisa</div>
                 {titulos.length === 0 ? <p className="text-[11px] text-zinc-500 mb-3">Nenhum título por aqui ainda.</p> : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">

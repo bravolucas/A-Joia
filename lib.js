@@ -1,4 +1,4 @@
-import { AFINIDADE_MERCADO, CATEGORIAS_INFLACAO_SALARIAL, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, EMOJI_CLUBES, EMPRESARIOS, ESTADUAIS, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, JANELAS_BRASIL, LIGAS, LIGAS_ESPECIALISTA, NACIONALIDADES, NACS_MUNDO, NIVEIS, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, PROMESSAS_TECNICO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRAITS_DISPONIVEIS } from "./data";
+import { AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESTADUAIS, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, JANELAS_BRASIL, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
 
 export function potencialDaOrigem(origem, posicao) {
   const base = { velocidade: 64, finalizacao: 64, passe: 64, drible: 64, defesa: 64, fisico: 64, fintas: 3, pernaRuim: 3 };
@@ -125,7 +125,9 @@ export function poisson(lambda) {
 }
 
 export function calcOVR(attrs, posId, papelId) {
-  const pos = POSICOES.find((p) => p.id === posId);
+  // tolerante a posição inválida (save antigo, dado corrompido): cai no primeiro perfil
+  const pos = POSICOES.find((p) => p.id === posId) || POSICOES[0];
+  if (!attrs) attrs = {};
   const pesos = papelId && papelId !== "padrao" ? pesoComPapel(pos, papelId) : pos.pesos;
   let soma = 0, pesoTotal = 0;
   NUM_ATTRS.forEach((id) => { const w = pesos[id] || 0.5; soma += (attrs[id] || 50) * w; pesoTotal += w; });
@@ -145,27 +147,283 @@ export function attrsIniciais(potencial) {
   return obj;
 }
 
+/* Avalia todas as insígnias e sobe de nível quem merecer.
+   Guarda como { id, nivel } — mas continua entendendo saves antigos, onde era só a string do id. */
 export function atualizarTraits(c) {
   c.streaksTraits = c.streaksTraits || {};
-  c.traits = c.traits || [];
+  c.traits = (c.traits || []).map((t) => (typeof t === "string" ? { id: t, nivel: 1 } : t));
+  const novas = [];
+
   TRAITS_DISPONIVEIS.forEach((t) => {
-    if (c.traits.includes(t.id)) return;
-    const atual = c.attrs[t.attrId] || 0;
-    if (atual >= t.limiar) {
-      c.streaksTraits[t.id] = (c.streaksTraits[t.id] || 0) + 1;
-      if (c.streaksTraits[t.id] >= t.temporadas) {
-        c.traits.push(t.id);
-        logHist(c, `🏅 Trait desbloqueada: ${t.icone} ${t.nome} — ${t.desc}`);
-      }
-    } else {
-      c.streaksTraits[t.id] = 0;
+    const atual = c.traits.find((x) => x.id === t.id);
+    const nivelAtual = atual?.nivel || 0;
+    let nivelMerecido = 0;
+
+    if (t.tipo === "atributo") {
+      // conta temporadas seguidas acima de cada limiar
+      const valor = c.attrs?.[t.attrId] || 0;
+      const st = (c.streaksTraits[t.id] = { ...(c.streaksTraits[t.id] || {}) });
+      t.limiares.forEach((lim, idx) => {
+        const chave = "n" + (idx + 1);
+        if (valor >= lim) st[chave] = (st[chave] || 0) + 1;
+        else st[chave] = 0;
+        if (st[chave] >= t.temporadas[idx]) nivelMerecido = Math.max(nivelMerecido, idx + 1);
+      });
+    } else if (typeof t.condicao === "function") {
+      nivelMerecido = t.condicao(c) || 0;
+    }
+
+    if (nivelMerecido > nivelAtual) {
+      if (atual) atual.nivel = nivelMerecido;
+      else c.traits.push({ id: t.id, nivel: nivelMerecido });
+      const nomeNivel = NIVEIS_INSIGNIA[nivelMerecido - 1]?.nome || "";
+      novas.push({ ...t, nivel: nivelMerecido, nomeNivel });
+      logHist(c, `🏅 Insígnia ${nivelAtual ? "evoluiu para" : "conquistada:"} ${t.icone} ${t.nome} ${nomeNivel}${nivelAtual ? "" : " — " + t.efeito(nivelMerecido)}`);
     }
   });
+  return novas;
+}
+
+/* Nível atual de uma insígnia (0 = não conquistada) */
+/* Verifica os marcos especiais e aplica as recompensas de quem foi conquistado agora */
+/* Sorteia cartões de uma partida, considerando posição, postura, personalidade e clássico */
+/* ===================== CONTEXTO DO LANCE =====================
+   O lance decisivo deixa de acontecer no vácuo: agora ele tem minuto, placar parcial
+   e uma leitura do jogo. Isso muda o que está em disputa e o texto que você lê. */
+export function gerarContextoLance(c, adversario, adversarioForca) {
+  const minuto = rand(28, 88);
+  const forcaClube = forcaEfetivaClube(c, c.clube);
+  const diferenca = (forcaClube - (adversarioForca ?? 70)) / 12;
+  // placar parcial coerente com a força dos times e o minuto do jogo
+  const proporcao = minuto / 90;
+  const golsMeu = poisson(Math.max(0.15, (1.25 + diferenca * 0.4) * proporcao));
+  const golsAdv = poisson(Math.max(0.15, (1.25 - diferenca * 0.4) * proporcao));
+  const perdendo = golsAdv > golsMeu, empatando = golsAdv === golsMeu;
+  const finalDeJogo = minuto >= 75;
+
+  let situacao, peso;
+  if (perdendo && finalDeJogo) { situacao = "desesperoFinal"; peso = 3; }
+  else if (empatando && finalDeJogo) { situacao = "decisaoFinal"; peso = 3; }
+  else if (perdendo) { situacao = "atras"; peso = 2; }
+  else if (empatando) { situacao = "equilibrado"; peso = 1; }
+  else { situacao = "vencendo"; peso = 1; }
+
+  const textos = {
+    desesperoFinal: `${minuto}' — vocês perdem por ${golsMeu} a ${golsAdv} e o tempo está acabando. O estádio empurra. A bola sobra pra você.`,
+    decisaoFinal: `${minuto}' — ${golsMeu} a ${golsAdv} no placar, últimos minutos. Um lance decide tudo, e ele é seu.`,
+    atras: `${minuto}' — o ${adversario} está na frente por ${golsAdv} a ${golsMeu}. Precisa de alguém pra puxar o time.`,
+    equilibrado: `${minuto}' — jogo travado em ${golsMeu} a ${golsAdv}. Abre um espaço e a bola chega em você.`,
+    vencendo: `${minuto}' — vocês vencem por ${golsMeu} a ${golsAdv}. Chance de matar o jogo de vez.`,
+  };
+  return { minuto, golsMeu, golsAdv, situacao, peso, texto: textos[situacao], finalDeJogo, perdendo, empatando };
+}
+
+/* A situação do jogo altera o risco e a recompensa das opções */
+export function ajustesDoContexto(ctx) {
+  switch (ctx?.situacao) {
+    case "desesperoFinal": return { chanceMult: 0.85, famaMult: 2.2, torcidaMult: 2.2, rotulo: "Momento decisivo" };
+    case "decisaoFinal":   return { chanceMult: 0.9,  famaMult: 2,   torcidaMult: 2,   rotulo: "Momento decisivo" };
+    case "atras":          return { chanceMult: 0.95, famaMult: 1.4, torcidaMult: 1.5, rotulo: "Time precisa de você" };
+    case "equilibrado":    return { chanceMult: 1,    famaMult: 1,   torcidaMult: 1,   rotulo: "Jogo aberto" };
+    default:               return { chanceMult: 1.1,  famaMult: 0.7, torcidaMult: 0.8, rotulo: "Sem pressão" };
+  }
+}
+
+export function sortearCartoes(c, { postura, classico, adversarioForca, forcaClube }) {
+  const post = POSTURAS_JOGO.find((p) => p.id === postura) || POSTURAS_JOGO[1];
+  const base = CARTAO_POR_POSICAO[c.posicao] ?? 0.1;
+  const persona = PERSONALIDADES.find((p) => p.id === c.personalidade);
+  let chance = base * post.cartaoMult;
+  if (classico) chance *= 1.45;                                   // clássico esquenta
+  if ((adversarioForca ?? 70) > (forcaClube ?? 70) + 6) chance *= 1.2; // sufoco gera falta
+  if (persona?.risco) chance *= 0.9 + persona.risco * 0.15;       // temperamento
+  const amarelo = Math.random() < clamp(chance, 0.01, 0.65);
+  // vermelho direto é raro; segundo amarelo também vira vermelho
+  const vermelhoDireto = Math.random() < clamp(chance * 0.07, 0, 0.05);
+  const segundoAmarelo = amarelo && Math.random() < clamp(chance * 0.12, 0, 0.08);
+  return { amarelo: amarelo && !segundoAmarelo, vermelho: vermelhoDireto || segundoAmarelo, segundoAmarelo };
+}
+
+/* Aplica o cartão na ficha disciplinar e devolve a suspensão gerada, se houver */
+export function aplicarCartao(c, { amarelo, vermelho }) {
+  c.cartoes = c.cartoes || { amarelos: 0, vermelhos: 0, amarelosAcumulados: 0, suspensoesRestantes: 0, historico: [] };
+  let suspendeu = 0, motivo = null;
+  if (amarelo) {
+    c.cartoes.amarelos += 1;
+    c.cartoes.amarelosAcumulados += 1;
+    if (c.cartoes.amarelosAcumulados >= REGRAS_CARTAO.amarelosParaSuspender) {
+      c.cartoes.amarelosAcumulados = 0;
+      suspendeu = 1; motivo = "3º amarelo";
+    }
+  }
+  if (vermelho) {
+    c.cartoes.vermelhos += 1;
+    c.cartoes.amarelosAcumulados = 0;
+    suspendeu = rand(REGRAS_CARTAO.jogosPorVermelho[0], REGRAS_CARTAO.jogosPorVermelho[1]);
+    motivo = "cartão vermelho";
+  }
+  if (suspendeu) c.cartoes.suspensoesRestantes = (c.cartoes.suspensoesRestantes || 0) + suspendeu;
+  return { suspendeu, motivo };
+}
+
+/* ===================== MEMÓRIA DE CONFRONTOS =====================
+   O jogo passa a lembrar de cada adversário: quantas vezes você enfrentou,
+   como se saiu e quantos gols fez. É o que dá peso ao clássico. */
+/* Sorteia as metas da diretoria pra temporada, dosadas pelo porte do clube */
+export function gerarMetasCompeticao(c) {
+  const forca = c.clube?.forca ?? 70;
+  // clube grande é cobrado por título; clube pequeno, por sobreviver
+  const nivel = forca >= 86 ? 3 : forca >= 78 ? 2 : 1;
+  // as listas vão da meta mais dura pra mais branda — pega a mais dura que o clube
+  // pode ser cobrado de alcançar
+  const escolher = (lista) => {
+    const possiveis = lista.filter((m) => m.dificuldade <= nivel);
+    return possiveis.length ? possiveis[0] : lista[lista.length - 1];
+  };
+  const metas = [{ comp: "liga", ...escolher(METAS_COMPETICAO.liga) }];
+  if (Math.random() < 0.7) metas.push({ comp: "copa", ...escolher(METAS_COMPETICAO.copa) });
+  if (LIGAS[c.clube?.liga]?.continental && Math.random() < 0.6) metas.push({ comp: "continental", ...escolher(METAS_COMPETICAO.continental) });
+  return metas;
+}
+
+/* Avalia as metas ao fim da temporada e devolve o saldo com a diretoria */
+export function avaliarMetasCompeticao(c, card) {
+  const metas = c.metasCompeticao || [];
+  if (!metas.length) return { resultados: [], cumpridas: 0, total: 0, deltaDiretoria: 0, premio: 0 };
+  const resultados = metas.map((m) => {
+    let ok = false;
+    try { ok = !!m.checa(card); } catch { ok = false; }
+    return { ...m, cumprida: ok };
+  });
+  const cumpridas = resultados.filter((r) => r.cumprida).length;
+  const premio = resultados.filter((r) => r.cumprida).reduce((a, r) => a + (r.bonus || 0), 0);
+  // cumprir agrada, falhar irrita — e falhar tudo irrita muito
+  const deltaDiretoria = resultados.reduce((a, r) => a + (r.cumprida ? 5 + r.dificuldade * 2 : -(4 + r.dificuldade * 2)), 0);
+  return { resultados, cumpridas, total: resultados.length, deltaDiretoria, premio };
+}
+
+/* Aplica a preparação da semana ao próximo jogo */
+export function aplicarPreparacaoSemana(c, prepId) {
+  const prep = PREPARACOES_SEMANA.find((p) => p.id === prepId);
+  if (!prep) return null;
+  c.energia = clampR((c.energia ?? 100) + (prep.energia || 0), 0, c.energiaMax ?? 100);
+  c.desgaste = Math.max(0, (c.desgaste || 0) + (prep.desgaste || 0));
+  if (prep.fama) c.fama = clamp(c.fama + prep.fama, 0, 100);
+  if (prep.dinheiro) {
+    const ganho = Math.round((c.fama ?? 20) * rand(1, 3));
+    c.cofre += ganho;
+    c.extrato = [...(c.extrato || []), { idade: c.idade, tipo: "Ação de patrocinador", valor: ganho }];
+    prep._ganho = ganho;
+  }
+  if (prep.ganhoFisico && Math.random() < 0.35) {
+    c.attrs = { ...c.attrs, fisico: clamp(c.attrs.fisico + 1, 1, 99) };
+    prep._subiuFisico = true;
+  }
+  return prep;
+}
+
+export function registrarConfrontos(c, jogos) {
+  c.confrontos = c.confrontos || {};
+  (jogos || []).forEach((j) => {
+    if (!j || !j.adversario || j.suspenso) return;
+    const at = c.confrontos[j.adversario] || { jogos: 0, v: 0, e: 0, d: 0, gols: 0, assist: 0, somaNota: 0, classicos: 0 };
+    at.jogos += 1;
+    if (j.resultado === "V") at.v += 1; else if (j.resultado === "E") at.e += 1; else at.d += 1;
+    at.gols += j.golsMinha || 0;
+    at.assist += j.assistMinha || 0;
+    at.somaNota += j.nota || 0;
+    if (j.classico) at.classicos += 1;
+    c.confrontos[j.adversario] = at;
+  });
+}
+export function resumoConfronto(c, adversario) {
+  const x = c?.confrontos?.[adversario];
+  if (!x || !x.jogos) return null;
+  return { ...x, notaMedia: +(x.somaNota / x.jogos).toFixed(2), aproveitamento: Math.round(((x.v * 3 + x.e) / (x.jogos * 3)) * 100) };
+}
+/* Quem é sua "freguesia" e quem é seu carrasco */
+export function melhoresEPioresConfrontos(c, min = 3) {
+  const lista = Object.entries(c?.confrontos || {})
+    .filter(([, x]) => x.jogos >= min)
+    .map(([nome, x]) => ({ nome, ...x, notaMedia: +(x.somaNota / x.jogos).toFixed(2), aproveitamento: Math.round(((x.v * 3 + x.e) / (x.jogos * 3)) * 100) }));
+  const porAprov = [...lista].sort((a, b) => b.aproveitamento - a.aproveitamento || b.gols - a.gols);
+  return { freguesia: porAprov.slice(0, 3), carrascos: porAprov.slice(-3).reverse(), todos: lista.sort((a, b) => b.jogos - a.jogos) };
+}
+
+/* ===================== JOGOS MEMORÁVEIS ===================== */
+export function detectarJogosMemoraveis(c, jogos, contexto) {
+  c.jogosMemoraveis = c.jogosMemoraveis || [];
+  const novos = [];
+  (jogos || []).forEach((j) => {
+    if (!j || j.suspenso) return;
+    const criterios = CRITERIOS_MEMORAVEL.filter((cr) => { try { return cr.teste(j); } catch { return false; } });
+    if (!criterios.length) return;
+    const peso = criterios.reduce((a, cr) => a + cr.peso, 0);
+    if (peso < 2) return; // precisa de algo realmente notável
+    const registro = {
+      id: `${contexto.temporadaLabel}_${j.numero}`,
+      temporadaLabel: contexto.temporadaLabel, idade: contexto.idade, clube: contexto.clube,
+      adversario: j.adversario, golsMeu: j.golsMeu, golsAdv: j.golsAdv, casa: j.casa,
+      golsMinha: j.golsMinha || 0, assistMinha: j.assistMinha || 0, nota: j.nota,
+      classico: !!j.classico, criterios: criterios.map((cr) => ({ id: cr.id, label: cr.label, icone: cr.icone })), peso,
+    };
+    c.jogosMemoraveis.push(registro);
+    novos.push(registro);
+  });
+  // guarda só os melhores, pra lista não virar um catálogo
+  c.jogosMemoraveis = c.jogosMemoraveis.sort((a, b) => b.peso - a.peso || (b.nota || 0) - (a.nota || 0)).slice(0, 25);
+  return novos;
+}
+
+/* ===================== APELIDO DA TORCIDA ===================== */
+export function avaliarApelido(c, temporadas) {
+  // só depois de firmar no clube — apelido não se ganha em três meses
+  const st = (c.statsPorClube || {})[c.clube?.nome];
+  if (!st || (st.temporadas || 0) < 2) return null;
+  const jogosTot = Math.max(1, st.jogos || 1);
+  const stats = { golsPorJogo: (st.gols || 0) / jogosTot, assistPorJogo: (st.assist || 0) / jogosTot };
+  const candidatos = APELIDOS_TORCIDA.filter((a) => { try { return a.cond(c, stats); } catch { return false; } });
+  if (!candidatos.length) return null;
+  // mantém o apelido atual se ele ainda faz sentido
+  if (c.apelido && candidatos.some((a) => a.id === c.apelido.id)) return null;
+  const escolhido = pick(candidatos);
+  return { id: escolhido.id, nome: escolhido.nome, icone: escolhido.icone, clube: c.clube.nome, desde: c.idade };
+}
+export function canticoDoApelido(c, nome) {
+  if (!c?.apelido) return null;
+  const def = APELIDOS_TORCIDA.find((a) => a.id === c.apelido.id);
+  if (!def) return null;
+  const primeiro = (nome || "").split(" ")[0] || nome;
+  return def.cantico(primeiro);
+}
+
+export function checarMarcosEspeciais(c, card, ctx) {
+  c.marcosEspeciais = c.marcosEspeciais || [];
+  const novos = [];
+  MARCOS_ESPECIAIS.forEach((m) => {
+    if (c.marcosEspeciais.includes(m.id)) return;
+    let bateu = false;
+    try { bateu = !!m.condicao(c, card, ctx); } catch { bateu = false; }
+    if (!bateu) return;
+    c.marcosEspeciais.push(m.id);
+    if (m.recompensa) { try { m.recompensa(c); } catch {} }
+    registrarMarco(c, m.tipo, `${m.nome}: ${m.texto(c)}`, m.recompensaTxt);
+    logHist(c, `${m.icone} ${m.nome} — ${m.texto(c)}${m.recompensaTxt ? ` (${m.recompensaTxt})` : ""}`);
+    novos.push(m);
+  });
+  return novos;
+}
+
+export function nivelDaInsignia(c, id) {
+  const t = (c?.traits || []).find((x) => (typeof x === "string" ? x : x.id) === id);
+  if (!t) return 0;
+  return typeof t === "string" ? 1 : (t.nivel || 1);
 }
 
 export function bonusTraitsMataMata(c) {
-  return (c.traits || []).reduce((soma, id) => soma + (TRAITS_DISPONIVEIS.find((t) => t.id === id)?.bonus || 0), 0);
+  return somaEfeitoInsignia(c, "mataMata");
 }
+
 
 export function evoluirAtributos(atual, potencial, idade, persona, bonusFoco, reducaoDeclinio = 1) {
   const novo = { ...atual };
@@ -296,6 +554,7 @@ export function valorDeMercado(c, ovr, ultimaTemporada) {
   v *= restantes >= 4 ? 1.12 : restantes === 3 ? 1.05 : restantes === 2 ? 1 : restantes === 1 ? 0.72 : 0.45;
   // 7) apelo comercial
   v *= 1 + ((c.fama ?? 20) / 100) * 0.28;
+  v *= multEfeitoInsignia(c, "valorMult"); // Artilheiro Nato valoriza o passe
   // 8) corpo castigado assusta comprador
   v *= 1 - clamp((c.sequela || 0) * 0.45, 0, 0.4);
   return Math.max(1, Math.round(v));
@@ -460,22 +719,39 @@ export function gerarJogadorElenco(clube, posId, idBase) {
   };
 }
 
+/* Monta o elenco do clube: puxa quem já existe no mundo naquele time e completa
+   até virar um plantel de verdade — titular e reserva em cada posição, mais opções no banco. */
 export function gerarElenco(clube, mundo, posicaoJogador) {
   const doMundo = (mundo?.jogadores || [])
     .filter((j) => !j.aposentado && j.clubeNome === clube.nome)
     .map((j) => ({ id: `m${j.id}`, nome: j.nome, nac: j.nac, posicao: j.posicao, idade: j.idade, ovr: j.ovr, forma: 0, doMundo: true }));
   const elenco = [...doMundo];
-  // garante cobertura mínima de cada posição da formação (sem contar a sua, que é você)
-  const necessarias = [...FORMACAO_433];
   let idBase = 1;
-  necessarias.forEach((posId) => {
+
+  // 1) toda posição da formação precisa de titular + reserva (menos a sua, onde VOCÊ é uma das opções)
+  const posicoesUnicas = [...new Set(FORMACAO_433)];
+  posicoesUnicas.forEach((posId) => {
     const jaTem = elenco.filter((e) => e.posicao === posId).length;
-    const precisa = posId === posicaoJogador ? 1 : 1; // pelo menos 1 por vaga (você disputa a sua)
-    for (let i = jaTem; i < precisa; i++) elenco.push(gerarJogadorElenco(clube, posId, idBase++));
+    const naFormacao = FORMACAO_433.filter((x) => x === posId).length; // zagueiro e lateral aparecem 2x
+    const desejado = naFormacao + 1 - (posId === posicaoJogador ? 1 : 0);
+    for (let i = jaTem; i < desejado; i++) elenco.push(gerarJogadorElenco(clube, posId, idBase++));
   });
-  // reservas extras pra dar corpo ao grupo
-  const extras = rand(8, 12);
-  for (let i = 0; i < extras; i++) elenco.push(gerarJogadorElenco(clube, pick(FORMACAO_433), idBase++));
+
+  // 2) goleiro sempre com três, como todo clube de verdade
+  const goleiros = elenco.filter((e) => e.posicao === "GOL").length;
+  for (let i = goleiros; i < (posicaoJogador === "GOL" ? 2 : 3); i++) elenco.push(gerarJogadorElenco(clube, "GOL", idBase++));
+
+  // 3) jovens da base pra dar profundidade e renovação
+  const jovens = rand(2, 4);
+  for (let i = 0; i < jovens; i++) {
+    const j = gerarJogadorElenco(clube, pick(FORMACAO_433), idBase++);
+    elenco.push({ ...j, idade: rand(17, 20), ovr: clampR(j.ovr - rand(6, 14), 40, 80), daBase: true });
+  }
+
+  // 4) completa até um plantel realista (24 a 26 jogadores)
+  const alvo = rand(24, 26);
+  while (elenco.length < alvo) elenco.push(gerarJogadorElenco(clube, pick(FORMACAO_433), idBase++));
+
   return elenco;
 }
 
@@ -552,8 +828,70 @@ export function avaliarPermanenciaTecnico(c, card, bateuMeta) {
 
 export function estadoInicialClubes() {
   const st = {};
-  CLUBES.forEach((c) => { st[c.nome] = { liga: c.liga, forca: c.forca }; });
+  CLUBES.forEach((c) => { st[c.nome] = { liga: c.liga, forca: c.forca, palmares: palmaresInicialDe(c) }; });
   return st;
+}
+
+/* Soma um título ao palmarés de um clube no estado do mundo */
+export function creditarTitulo(estado, clubeNome, tipo, qtd = 1) {
+  if (!estado || !clubeNome) return estado;
+  const atual = estado[clubeNome];
+  if (!atual) return estado;
+  const base = atual.palmares || palmaresInicialDe(CLUBES.find((c) => c.nome === clubeNome) || { forca: 60 });
+  return { ...estado, [clubeNome]: { ...atual, palmares: { ...base, [tipo]: (base[tipo] || 0) + qtd } } };
+}
+
+/* Ao fim de cada temporada, decide os campeões das ligas onde VOCÊ NÃO joga.
+   É o que faz o mundo ter história própria: o Real vai somando Champions mesmo
+   que você jogue no Brasil a carreira inteira. */
+export function distribuirTitulosDoMundo(estado, ligaDoJogador, jaCreditado = {}) {
+  // jaCreditado = { liga, copa, continental, mundial } -> true quando o SEU clube já levou aquela taça
+  // (evita creditar duas vezes, mas garante que alguém sempre é campeão)
+  let novo = { ...estado };
+  const campeoes = [];
+  const ligasPrincipais = ["brasileirao", "inglaterra", "espanha", "italia", "alemanha", "franca", "portugal"];
+  ligasPrincipais.forEach((ligaId) => {
+    const doGrupo = Object.entries(novo).filter(([, v]) => v.liga === ligaId);
+    if (doGrupo.length < 4) return;
+    const naSuaLiga = ligaId === ligaDoJogador;
+    // campeão = força + sorte; times fortes ganham mais, mas há zebra
+    const ordenado = doGrupo.map(([n, v]) => ({ n, pts: v.forca + rand(-8, 8) })).sort((a, b) => b.pts - a.pts);
+    // se você já foi campeão da sua liga, ninguém mais leva; senão, alguém leva
+    if (!(naSuaLiga && jaCreditado.liga)) {
+      const campeaoLiga = ordenado[0].n;
+      novo = creditarTitulo(novo, campeaoLiga, "liga");
+      campeoes.push({ liga: ligaId, tipo: "liga", clube: campeaoLiga });
+    }
+    // copa nacional: costuma dar zebra, sorteia entre os 8 melhores
+    if (!(naSuaLiga && jaCreditado.copa)) {
+      const campeaoCopa = pick(ordenado.slice(0, Math.min(8, ordenado.length))).n;
+      novo = creditarTitulo(novo, campeaoCopa, "copa");
+      campeoes.push({ liga: ligaId, tipo: "copa", clube: campeaoCopa });
+    }
+  });
+  // continentais: Champions entre os europeus, Libertadores entre os brasileiros
+  const europeus = Object.entries(novo).filter(([, v]) => ["inglaterra", "espanha", "italia", "alemanha", "franca", "portugal"].includes(v.liga));
+  const jogadorNaEuropa = ["inglaterra", "espanha", "italia", "alemanha", "franca", "portugal"].includes(ligaDoJogador);
+  if (europeus.length > 8 && !(jogadorNaEuropa && jaCreditado.continental)) {
+    const top = europeus.map(([n, v]) => ({ n, pts: v.forca + rand(-6, 10) })).sort((a, b) => b.pts - a.pts);
+    novo = creditarTitulo(novo, top[0].n, "continental");
+    campeoes.push({ tipo: "continental", clube: top[0].n, nome: "Champions League" });
+  }
+  const brasileiros = Object.entries(novo).filter(([, v]) => v.liga === "brasileirao");
+  if (brasileiros.length > 6 && !(ligaDoJogador === "brasileirao" && jaCreditado.continental)) {
+    const top = brasileiros.map(([n, v]) => ({ n, pts: v.forca + rand(-8, 10) })).sort((a, b) => b.pts - a.pts);
+    novo = creditarTitulo(novo, top[0].n, "continental");
+    campeoes.push({ tipo: "continental", clube: top[0].n, nome: "Libertadores" });
+  }
+  return { estado: novo, campeoes };
+}
+
+/* Palmarés atual de um clube, já com o que foi conquistado durante a carreira */
+export function palmaresDoClube(estado, clubeNome) {
+  const st = estado?.[clubeNome];
+  if (st?.palmares) return st.palmares;
+  const cl = CLUBES.find((c) => c.nome === clubeNome);
+  return cl ? palmaresInicialDe(cl) : { liga: 0, copa: 0, continental: 0, mundial: 0 };
 }
 
 export function clubeAtual(estado, nome) {
@@ -563,30 +901,50 @@ export function clubeAtual(estado, nome) {
   return mod ? { ...base, liga: mod.liga, forca: mod.forca } : base;
 }
 
+/* Sistema de divisões: cada liga principal tem uma segunda divisão associada,
+   com o número real de rebaixados de cada país. */
+export const PIRAMIDE_LIGAS = [
+  { elite: "brasileirao", acesso: "serieB", vagas: 4, nome: "Brasil" },
+  { elite: "inglaterra", acesso: "inglaterra2", vagas: 3, nome: "Inglaterra" },
+  { elite: "espanha", acesso: "espanha2", vagas: 3, nome: "Espanha" },
+  { elite: "italia", acesso: "italia2", vagas: 3, nome: "Itália" },
+  { elite: "alemanha", acesso: "alemanha2", vagas: 2, nome: "Alemanha" },
+  { elite: "franca", acesso: "franca2", vagas: 2, nome: "França" },
+  { elite: "portugal", acesso: "portugal2", vagas: 2, nome: "Portugal" },
+];
+
 export function girarLigas(estado) {
   const novo = { ...estado };
   // 1) oscilação de força: clubes sobem e caem de patamar com o tempo
   Object.keys(novo).forEach((nome) => {
     const base = CLUBES.find((c) => c.nome === nome);
+    if (!base) return;
     const cur = novo[nome];
     const drift = rand(-2, 2) + (Math.random() < 0.08 ? rand(-5, 5) : 0); // choques ocasionais
     // puxa levemente de volta pro patamar histórico, pra não desandar em 20 anos
     const retorno = (base.forca - cur.forca) * 0.12;
     novo[nome] = { ...cur, forca: clampR(Math.round(cur.forca + drift + retorno), 40, 96) };
   });
-  // 2) acesso e rebaixamento entre Brasileirão e Série B
-  const naA = Object.entries(novo).filter(([, v]) => v.liga === "brasileirao");
-  const naB = Object.entries(novo).filter(([, v]) => v.liga === "serieB");
-  if (naA.length >= 8 && naB.length >= 8) {
-    // classificação estimada = força + sorte da temporada
-    const ordenar = (arr) => arr.map(([n, v]) => ({ n, v, pts: v.forca + rand(-9, 9) })).sort((a, b) => b.pts - a.pts);
-    const A = ordenar(naA), B = ordenar(naB);
-    const rebaixados = A.slice(-4), promovidos = B.slice(0, 4);
-    rebaixados.forEach((x) => { novo[x.n] = { ...novo[x.n], liga: "serieB", forca: clampR(novo[x.n].forca - rand(1, 4), 40, 96) }; });
-    promovidos.forEach((x) => { novo[x.n] = { ...novo[x.n], liga: "brasileirao", forca: clampR(novo[x.n].forca + rand(1, 4), 40, 96) }; });
-    return { estado: novo, rebaixados: rebaixados.map((x) => x.n), promovidos: promovidos.map((x) => x.n) };
-  }
-  return { estado: novo, rebaixados: [], promovidos: [] };
+
+  // 2) acesso e rebaixamento — agora em TODAS as ligas que têm segunda divisão
+  const ordenar = (arr) => arr.map(([n, v]) => ({ n, v, pts: v.forca + rand(-9, 9) })).sort((a, b) => b.pts - a.pts);
+  const rebaixadosTodos = [], promovidosTodos = [], porPais = [];
+
+  PIRAMIDE_LIGAS.forEach((div) => {
+    const naElite = Object.entries(novo).filter(([, v]) => v.liga === div.elite);
+    const naAcesso = Object.entries(novo).filter(([, v]) => v.liga === div.acesso);
+    // só roda se as duas divisões tiverem tamanho razoável
+    if (naElite.length < 6 || naAcesso.length < div.vagas) return;
+    const E = ordenar(naElite), A = ordenar(naAcesso);
+    const caem = E.slice(-div.vagas), sobem = A.slice(0, div.vagas);
+    caem.forEach((x) => { novo[x.n] = { ...novo[x.n], liga: div.acesso, forca: clampR(novo[x.n].forca - rand(1, 4), 40, 96) }; });
+    sobem.forEach((x) => { novo[x.n] = { ...novo[x.n], liga: div.elite, forca: clampR(novo[x.n].forca + rand(1, 4), 40, 96) }; });
+    rebaixadosTodos.push(...caem.map((x) => x.n));
+    promovidosTodos.push(...sobem.map((x) => x.n));
+    porPais.push({ pais: div.nome, sobem: sobem.map((x) => x.n), caem: caem.map((x) => x.n) });
+  });
+
+  return { estado: novo, rebaixados: rebaixadosTodos, promovidos: promovidosTodos, porPais };
 }
 
 export function continentalDaSelecao(nac) {
@@ -983,7 +1341,7 @@ export function simularTemporada(c) {
   const rotina = ROTINAS_FISICAS.find((r) => r.id === c.rotinaFisica) || ROTINAS_FISICAS[1];
   let lesaoBase = (c.idade >= 31 ? 0.2 : 0.11) * (persona?.risco || 1) * (1 + (c.desgaste || 0) * 0.15) * (c.staff?.personalTrainer ? 0.75 : 1);
   lesaoBase *= (1 + (c.sequela || 0)); // corpo já castigado se machuca mais
-  lesaoBase *= rotina.riscoMult;
+  lesaoBase *= rotina.riscoMult * multEfeitoInsignia(c, "riscoLesao"); // Fenômeno Físico protege
   if (c.abordagem === "limite") lesaoBase *= 1.45;
   if (c.abordagem === "dedicado") lesaoBase *= 0.7;
   lesaoBase *= (2 - energiaFator);
@@ -1000,9 +1358,11 @@ export function simularTemporada(c) {
   // goleiros raramente marcam, mas os com bom "Reflexos" (finalização) batendo pênalti/falta têm uma chance mínima
   const chanceGolGoleiro = c.posicao === "GOL" ? clamp((c.attrs.finalizacao - 60) / 900, 0, 0.05) : 0;
   const parc = bonusParceria(c);
-  const gols = (c.posicao === "GOL" ? poisson(chanceGolGoleiro * jogos) : poisson(pos.golBase * nivelFator * jogos * bonusFin)) + (c.posicao === "GOL" ? 0 : parc.gols);
+  const multGols = multEfeitoInsignia(c, "golsMult");     // insígnias ofensivas
+  const multAssist = multEfeitoInsignia(c, "assistMult");
+  const gols = (c.posicao === "GOL" ? poisson(chanceGolGoleiro * jogos) : poisson(pos.golBase * nivelFator * jogos * bonusFin * multGols)) + (c.posicao === "GOL" ? 0 : parc.gols);
   const xG = c.posicao === "GOL" ? +(chanceGolGoleiro * jogos).toFixed(1) : +(pos.golBase * nivelFator * jogos * bonusFin).toFixed(1);
-  const assist = poisson(pos.assistBase * nivelFator * jogos * (c.posicao === "GOL" ? 0.1 : c.focoTreino === "passe" ? 1.12 : 1)) + (c.posicao === "GOL" ? 0 : parc.assist);
+  const assist = poisson(pos.assistBase * nivelFator * jogos * multAssist * (c.posicao === "GOL" ? 0.1 : c.focoTreino === "passe" ? 1.12 : 1)) + (c.posicao === "GOL" ? 0 : parc.assist);
   const cleanSheets = c.posicao === "GOL" ? poisson(jogos * clamp((ovr - 55) / 60, 0.1, 0.55)) : 0;
 
   const taxaConversao = clamp(0.14 + (c.attrs.finalizacao - 50) * 0.003, 0.08, 0.32);
@@ -1450,6 +1810,27 @@ export function janelasEuropaPais(ligaId) {
 }
 
 export function janelasPorLiga(ligaId) { return (ligaId === "brasileirao" || ligaId === "serieB") ? JANELAS_BRASIL : janelasEuropaPais(ligaId); }
+
+/* Datas da seleção — as janelas mudam conforme o ano do ciclo (Copa, continental, eliminatórias).
+   Aparecem no calendário junto com os compromissos de clube. */
+export function janelasSelecao(c) {
+  if (!c) return [];
+  const comp = competicaoSelecaoDoAno(c.anosDesdeCopa ?? 0, c.nacionalidade);
+  const convocado = (c.selecaoMinhaPos ?? 99) <= 6;
+  const base = { comp: comp.nome, icone: comp.icone, cor: comp.cor, selecao: true, seConvocado: true };
+  if (comp.id === "copa") return [{ ...base, inicioMes: 5, inicioDia: 11, fimMes: 6, fimDia: 13 }];
+  if (comp.id === "continental") return [{ ...base, inicioMes: 5, inicioDia: 14, fimMes: 6, fimDia: 14 }];
+  if (comp.id === "eliminatorias") return [
+    { ...base, inicioMes: 2, inicioDia: 20, fimMes: 2, fimDia: 28 },
+    { ...base, inicioMes: 5, inicioDia: 5, fimMes: 5, fimDia: 15 },
+    { ...base, inicioMes: 8, inicioDia: 4, fimMes: 8, fimDia: 12 },
+    { ...base, inicioMes: 10, inicioDia: 10, fimMes: 10, fimDia: 20 },
+  ];
+  return [
+    { ...base, inicioMes: 2, inicioDia: 22, fimMes: 2, fimDia: 27 },
+    { ...base, inicioMes: 8, inicioDia: 5, fimMes: 8, fimDia: 10 },
+  ];
+}
 
 export function diaNaJanela(mes, dia, j) {
   const inicio = j.inicioMes * 100 + j.inicioDia, fim = j.fimMes * 100 + j.fimDia, alvo = mes * 100 + dia;

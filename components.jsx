@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { ANO_INICIO, ATTR_SLOTS, CLUBES, DIAS_SEMANA_ABREV, DIAS_SEMANA_LABEL, FALTA_BONECO_POS, FALTA_BOX, FALTA_GOAL, FALTA_SPOT, LANCES_POR_POSICAO, MESES_LABEL, NUM_ATTRS, PASSE_H, PASSE_ORIGEM, PASSE_W, PEN_GOAL, PEN_H, PEN_SPOT, PEN_W, PEN_ZONE_X, POS_GRUPO, TIPOS_NOTICIA } from "./data";
-import { calcularSucessoPasse, clamp, diaNaJanela, diasNoMes, distribuirRodadasNaJanela, estimarRodadasLiga, faltaAlvoBola, formatarDinheiro, gerarCenaPasse, janelasPorLiga, labelAtributoGoleiro, nacDe, penAlvoBola, pick, primeiroDiaSemanaMes, rand, tierInfo } from "./lib";
+import { ANO_INICIO, ATTR_SLOTS, CLUBES, DIAS_SEMANA_ABREV, DIAS_SEMANA_LABEL, FALTA_BONECO_POS, FALTA_BOX, FALTA_GOAL, FALTA_SPOT, LANCES_POR_POSICAO, MESES_LABEL, NUM_ATTRS, PASSE_H, PASSE_ORIGEM, PASSE_W, PEN_GOAL, PEN_H, PEN_SPOT, PEN_W, PEN_ZONE_X, POS_GRUPO, TIPOS_NOTICIA } from "./data.js";
+import { calcularSucessoPasse, clamp, diaNaJanela, diasNoMes, distribuirRodadasNaJanela, estimarRodadasLiga, faltaAlvoBola, formatarDinheiro, gerarCenaPasse, janelasPorLiga, janelasSelecao, labelAtributoGoleiro, nacDe, penAlvoBola, pick, primeiroDiaSemanaMes, rand, tierInfo } from "./lib.js";
 
 export function Card({ children, className = "", accent, padded = true, id }) {
   return (
@@ -124,6 +124,17 @@ export function FichaPartida({ jogo, clubeNome, posicao, onClose }) {
           <span className="text-[10px] text-zinc-400 text-center truncate w-full">{jogo.casa === false ? clubeNome : jogo.adversario}</span>
         </div>
       </div>
+      {jogo.suspenso && <div className="text-center text-[11px] text-red-400 border border-red-500/30 bg-red-500/5 rounded-sm py-1.5 mb-3">🚫 Você cumpriu suspensão e não entrou em campo</div>}
+      {(jogo.amarelo || jogo.vermelho) && (
+        <div className="flex items-center justify-center gap-2 mb-3">
+          {jogo.amarelo && <span className="flex items-center gap-1 text-[10px] text-yellow-400"><span className="inline-block w-2.5 h-3.5 rounded-[2px] bg-yellow-400" /> Cartão amarelo</span>}
+          {jogo.vermelho && <span className="flex items-center gap-1 text-[10px] text-red-400"><span className="inline-block w-2.5 h-3.5 rounded-[2px] bg-red-600" /> {jogo.segundoAmarelo ? "Expulso (2º amarelo)" : "Cartão vermelho"}</span>}
+          {jogo.suspensaoGerada > 0 && <span className="text-[10px] text-red-400">· {jogo.suspensaoGerada} jogo(s) de suspensão</span>}
+        </div>
+      )}
+      {jogo.postura && jogo.postura !== "normal" && (
+        <div className="text-center text-[10px] text-zinc-500 mb-2">Postura: {({ cauteloso: "🛡️ Jogo seguro", ofensivo: "⚔️ Foi pra cima", raca: "🔥 Jogou na raça" })[jogo.postura]}</div>
+      )}
       {melhorEmCampo && <div className="text-center text-[10px] text-amber-400 mb-3">⭐ Você foi o melhor em campo</div>}
       <div className="grid grid-cols-3 gap-2 mb-3">
         <div className="bg-zinc-950/50 rounded-sm p-2.5 text-center">
@@ -246,7 +257,7 @@ export function CalendarioTemporadaPopup({ carreira, mesAtual, setMesAtual, onCl
   const [diaSelecionado, setDiaSelecionado] = useState(null);
   const ano = ANO_INICIO + (carreira.idade - 16);
   const ligaId = carreira.clube.liga;
-  const janelas = janelasPorLiga(ligaId);
+  const janelas = [...janelasPorLiga(ligaId), ...janelasSelecao(carreira)];
   const janelaLiga = janelas.find((j) => j.ligaPrincipal);
   const ta = carreira.temporadaAndamento;
   const nRodadas = ta ? ta.calendario.length : estimarRodadasLiga(ligaId);
@@ -321,7 +332,21 @@ export function CalendarioTemporadaPopup({ carreira, mesAtual, setMesAtual, onCl
           <div className="mx-4 mb-3 p-3 bg-zinc-950/50 rounded-sm border border-zinc-800">
             <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-1.5">{diaSelecionado.toString().padStart(2, "0")} de {MESES_LABEL[mesAtual]} · {DIAS_SEMANA_LABEL[new Date(ano, mesAtual, diaSelecionado).getDay()]}</div>
             {diaInfo.janelasAtivas.length === 0 && diaInfo.rodadaIdx == null && <p className="text-[11px] text-zinc-500">Sem compromisso confirmado nessa data.</p>}
-            {diaInfo.janelasAtivas.map((j, i) => <div key={i} className="text-[11px] mb-0.5" style={{ color: j.cor }}>{j.icone} {j.comp}</div>)}
+            {diaInfo.janelasAtivas.map((j, i) => (
+              <div key={i} className="text-[11px] mb-0.5" style={{ color: j.cor }}>
+                {j.icone} {j.comp}
+                {j.selecao && <span className="text-zinc-500"> · seleção</span>}
+              </div>
+            ))}
+            {diaInfo.janelasAtivas.some((j) => j.selecao) && carreira.selecao?.historico?.length > 0 && (() => {
+              const ult = carreira.selecao.historico[carreira.selecao.historico.length - 1];
+              return (
+                <div className="mt-2 pt-2 border-t border-zinc-800">
+                  <div className="text-[10px]" style={{ color: ult.titulo ? "#D8B44A" : "#22D3EE" }}>{ult.icone} {ult.campanha}</div>
+                  <div className="text-[9px] text-zinc-500 mt-0.5">{ult.jogos} jogos · {ult.gols} gols · {ult.assist} assistências · nota {ult.nota}</div>
+                </div>
+              );
+            })()}
             {jogoSel && (
               <div className="mt-2 pt-2 border-t border-zinc-800 text-xs">
                 <div className="font-bold">{jogoSel.casa.nome} <span className="text-zinc-500">x</span> {jogoSel.fora.nome} <span className="text-zinc-600">— rodada {rodadaSel + 1}</span></div>

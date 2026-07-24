@@ -1,4 +1,4 @@
-import { clamp, clampR, formatarDinheiro } from "./lib";
+import { clamp, clampR, formatarDinheiro } from "./lib.js";
 
 export const ATTR_SLOTS = [
   { id: "velocidade", label: "Velocidade", tipo: "num", abrev: "VEL" },
@@ -241,6 +241,12 @@ export const EIXOS_APROVACAO = [
 
 export const LIGAS = {
   serieB: { nome: "Brasileirão Série B", mult: 0.62, continental: "Acesso à Série A" },
+  inglaterra2: { nome: "Championship", mult: 0.72, continental: "Acesso à Premier League" },
+  espanha2: { nome: "LaLiga 2", mult: 0.66, continental: "Acesso à LaLiga" },
+  italia2: { nome: "Serie B (Itália)", mult: 0.64, continental: "Acesso à Serie A" },
+  alemanha2: { nome: "2. Bundesliga", mult: 0.68, continental: "Acesso à Bundesliga" },
+  franca2: { nome: "Ligue 2", mult: 0.63, continental: "Acesso à Ligue 1" },
+  portugal2: { nome: "Liga Portugal 2", mult: 0.55, continental: "Acesso à Liga Portugal" },
   brasileirao: { nome: "Brasileirão", mult: 0.8, continental: "Libertadores" },
   portugal: { nome: "Liga Portugal", mult: 0.82, continental: "Champions League" },
   franca: { nome: "Ligue 1", mult: 0.88, continental: "Champions League" },
@@ -251,6 +257,93 @@ export const LIGAS = {
   arabia: { nome: "Liga Saudita", mult: 0.6, continental: "Champions Asiática" },
   mls: { nome: "MLS", mult: 0.58, continental: "Concacaf" },
 };
+
+/* ===================== PALMARÉS HISTÓRICO DOS CLUBES =====================
+   O que cada clube já ganhou ANTES da sua carreira começar. Esses números crescem
+   ao longo do jogo conforme os títulos vão sendo conquistados no mundo.
+   Clubes não listados recebem um palmarés estimado pela força (ver palmaresInicialDe). */
+export const PALMARES_HISTORICO = {
+  // ---- Brasil ----
+  "Flamengo":        { liga: 8,  copa: 5, continental: 3, mundial: 1 },
+  "Palmeiras":       { liga: 12, copa: 4, continental: 3, mundial: 0 },
+  "Corinthians":     { liga: 7,  copa: 3, continental: 1, mundial: 2 },
+  "São Paulo":       { liga: 6,  copa: 1, continental: 3, mundial: 3 },
+  "Santos":          { liga: 8,  copa: 1, continental: 3, mundial: 2 },
+  "Grêmio":          { liga: 2,  copa: 5, continental: 3, mundial: 1 },
+  "Internacional":   { liga: 3,  copa: 1, continental: 2, mundial: 1 },
+  "Cruzeiro":        { liga: 4,  copa: 6, continental: 2, mundial: 0 },
+  "Vasco da Gama":   { liga: 4,  copa: 1, continental: 1, mundial: 0 },
+  "Fluminense":      { liga: 4,  copa: 1, continental: 1, mundial: 0 },
+  "Botafogo":        { liga: 3,  copa: 0, continental: 1, mundial: 0 },
+  "Atlético-MG":     { liga: 2,  copa: 2, continental: 1, mundial: 0 },
+  "Athletico-PR":    { liga: 1,  copa: 1, continental: 2, mundial: 0 },
+  "Bahia":           { liga: 2,  copa: 1, continental: 0, mundial: 0 },
+  "Sport Recife":    { liga: 1,  copa: 1, continental: 0, mundial: 0 },
+  "Coritiba":        { liga: 1,  copa: 0, continental: 0, mundial: 0 },
+  "Guarani":         { liga: 1,  copa: 0, continental: 0, mundial: 0 },
+  "Fortaleza":       { liga: 0,  copa: 0, continental: 0, mundial: 0 },
+  // ---- Espanha ----
+  "Real Madrid":     { liga: 36, copa: 20, continental: 15, mundial: 8 },
+  "Barcelona":       { liga: 27, copa: 31, continental: 5,  mundial: 3 },
+  "Atlético Madrid": { liga: 11, copa: 10, continental: 0,  mundial: 0 },
+  "Valencia":        { liga: 6,  copa: 8,  continental: 0,  mundial: 0 },
+  "Athletic Bilbao": { liga: 8,  copa: 24, continental: 0,  mundial: 0 },
+  "Sevilla":         { liga: 1,  copa: 5,  continental: 0,  mundial: 0 },
+  // ---- Inglaterra ----
+  "Manchester United": { liga: 20, copa: 12, continental: 3, mundial: 1 },
+  "Liverpool":       { liga: 19, copa: 8,  continental: 6, mundial: 1 },
+  "Arsenal":         { liga: 13, copa: 14, continental: 0, mundial: 0 },
+  "Chelsea":         { liga: 6,  copa: 8,  continental: 2, mundial: 2 },
+  "Manchester City": { liga: 10, copa: 7,  continental: 1, mundial: 1 },
+  "Tottenham":       { liga: 2,  copa: 8,  continental: 0, mundial: 0 },
+  "Everton":         { liga: 9,  copa: 5,  continental: 0, mundial: 0 },
+  "Newcastle":       { liga: 4,  copa: 6,  continental: 0, mundial: 0 },
+  "Aston Villa":     { liga: 7,  copa: 7,  continental: 1, mundial: 0 },
+  // ---- Itália ----
+  "Juventus":        { liga: 36, copa: 15, continental: 2, mundial: 2 },
+  "Milan":           { liga: 19, copa: 5,  continental: 7, mundial: 4 },
+  "Inter de Milão":  { liga: 20, copa: 9,  continental: 3, mundial: 3 },
+  "Napoli":          { liga: 4,  copa: 6,  continental: 0, mundial: 0 },
+  "Roma":            { liga: 3,  copa: 9,  continental: 0, mundial: 0 },
+  "Lazio":           { liga: 2,  copa: 7,  continental: 0, mundial: 0 },
+  "Fiorentina":      { liga: 2,  copa: 6,  continental: 0, mundial: 0 },
+  // ---- Alemanha ----
+  "Bayern de Munique": { liga: 33, copa: 20, continental: 6, mundial: 2 },
+  "Borussia Dortmund": { liga: 8,  copa: 5,  continental: 1, mundial: 1 },
+  "Bayer Leverkusen":  { liga: 1,  copa: 1,  continental: 0, mundial: 0 },
+  "RB Leipzig":        { liga: 0,  copa: 2,  continental: 0, mundial: 0 },
+  // ---- França ----
+  "PSG":             { liga: 12, copa: 15, continental: 1, mundial: 0 },
+  "Marseille":       { liga: 9,  copa: 10, continental: 1, mundial: 0 },
+  "Lyon":            { liga: 7,  copa: 5,  continental: 0, mundial: 0 },
+  "Monaco":          { liga: 8,  copa: 5,  continental: 0, mundial: 0 },
+  // ---- Portugal ----
+  "Benfica":         { liga: 38, copa: 26, continental: 2, mundial: 0 },
+  "Porto":           { liga: 30, copa: 20, continental: 2, mundial: 2 },
+  "Sporting":        { liga: 20, copa: 17, continental: 0, mundial: 0 },
+};
+
+/* Clubes sem palmarés escrito à mão recebem um histórico plausível pela força */
+export function palmaresInicialDe(clube) {
+  const p = PALMARES_HISTORICO[clube.nome];
+  if (p) return { ...p };
+  const f = clube.forca || 60;
+  if (f >= 84) return { liga: 3, copa: 3, continental: 1, mundial: 0 };
+  if (f >= 78) return { liga: 1, copa: 2, continental: 0, mundial: 0 };
+  if (f >= 70) return { liga: 0, copa: 1, continental: 0, mundial: 0 };
+  return { liga: 0, copa: 0, continental: 0, mundial: 0 };
+}
+
+/* Nome bonito de cada tipo de taça, por liga */
+export function nomeDosTitulos(ligaId) {
+  const br = ligaId === "brasileirao" || ligaId === "serieB";
+  return {
+    liga: br ? "Brasileirão" : (LIGAS[ligaId]?.nome || "Liga"),
+    copa: br ? "Copa do Brasil" : (COMPS_PAIS[ligaId]?.copa || "Copa Nacional"),
+    continental: br ? "Libertadores" : "Champions League",
+    mundial: "Mundial de Clubes",
+  };
+}
 
 export const CLUBES = [
   // SÉRIE B
@@ -283,6 +376,55 @@ export const CLUBES = [
   { nome: "Bragantino", forca: 67, liga: "brasileirao", estado: "SP", modesto: true, cor: "#E4181C" },
   { nome: "Juventude", forca: 62, liga: "serieB", estado: "RS", modesto: true, cor: "#1A7A3C" },
   { nome: "Criciúma", forca: 60, liga: "serieB", estado: "SC", modesto: true, cor: "#E4181C" },
+
+  /* ===== SEGUNDAS DIVISÕES EUROPEIAS (sistema de acesso e rebaixamento) ===== */
+  { nome: "Leeds United", forca: 71, liga: "inglaterra2", modesto: true, cor: "#FFFFFF", escuro: true },
+  { nome: "Southampton", forca: 70, liga: "inglaterra2", modesto: true, cor: "#D71920" },
+  { nome: "Norwich City", forca: 67, liga: "inglaterra2", modesto: true, cor: "#00A650" },
+  { nome: "Sheffield United", forca: 69, liga: "inglaterra2", modesto: true, cor: "#EE2737" },
+  { nome: "Middlesbrough", forca: 66, liga: "inglaterra2", modesto: true, cor: "#E21C38" },
+  { nome: "West Bromwich", forca: 66, liga: "inglaterra2", modesto: true, cor: "#122F67" },
+  { nome: "Coventry City", forca: 64, liga: "inglaterra2", modesto: true, cor: "#7BB9E8" },
+  { nome: "Millwall", forca: 62, liga: "inglaterra2", modesto: true, cor: "#001D5E" },
+
+  { nome: "Real Zaragoza", forca: 63, liga: "espanha2", modesto: true, cor: "#0B4EA2" },
+  { nome: "Sporting Gijón", forca: 64, liga: "espanha2", modesto: true, cor: "#E53027" },
+  { nome: "Racing Santander", forca: 63, liga: "espanha2", modesto: true, cor: "#0F9D58" },
+  { nome: "Levante", forca: 65, liga: "espanha2", modesto: true, cor: "#004B9B" },
+  { nome: "Eibar", forca: 62, liga: "espanha2", modesto: true, cor: "#0B4EA2" },
+  { nome: "Deportivo La Coruña", forca: 64, liga: "espanha2", modesto: true, cor: "#0072CE" },
+  { nome: "Cádiz", forca: 62, liga: "espanha2", modesto: true, cor: "#FFE500", escuro: true },
+  { nome: "Huesca", forca: 60, liga: "espanha2", modesto: true, cor: "#0B4EA2" },
+
+  { nome: "Sampdoria", forca: 64, liga: "italia2", modesto: true, cor: "#1B449C" },
+  { nome: "Palermo", forca: 63, liga: "italia2", modesto: true, cor: "#EFA9C4", escuro: true },
+  { nome: "Bari", forca: 61, liga: "italia2", modesto: true, cor: "#E4181C" },
+  { nome: "Cremonese", forca: 63, liga: "italia2", modesto: true, cor: "#C8102E" },
+  { nome: "Spezia", forca: 62, liga: "italia2", modesto: true, cor: "#000000", escuro: false },
+  { nome: "Catanzaro", forca: 60, liga: "italia2", modesto: true, cor: "#FFD500", escuro: true },
+  { nome: "Brescia", forca: 60, liga: "italia2", modesto: true, cor: "#0057B8" },
+  { nome: "Modena", forca: 59, liga: "italia2", modesto: true, cor: "#F5B335", escuro: true },
+
+  { nome: "Hamburgo", forca: 68, liga: "alemanha2", modesto: true, cor: "#0A3A82" },
+  { nome: "Hertha Berlim", forca: 66, liga: "alemanha2", modesto: true, cor: "#004C9F" },
+  { nome: "Schalke 04", forca: 65, liga: "alemanha2", modesto: true, cor: "#004D9D" },
+  { nome: "Fortuna Düsseldorf", forca: 63, liga: "alemanha2", modesto: true, cor: "#E2001A" },
+  { nome: "Kaiserslautern", forca: 62, liga: "alemanha2", modesto: true, cor: "#E30613" },
+  { nome: "Nürnberg", forca: 62, liga: "alemanha2", modesto: true, cor: "#A61C23" },
+
+  { nome: "Saint-Étienne", forca: 65, liga: "franca2", modesto: true, cor: "#00A94F" },
+  { nome: "Bordeaux", forca: 64, liga: "franca2", modesto: true, cor: "#00285E" },
+  { nome: "Metz", forca: 62, liga: "franca2", modesto: true, cor: "#7B1E3C" },
+  { nome: "Caen", forca: 60, liga: "franca2", modesto: true, cor: "#E4181C" },
+  { nome: "Guingamp", forca: 60, liga: "franca2", modesto: true, cor: "#E4181C" },
+  { nome: "Ajaccio", forca: 59, liga: "franca2", modesto: true, cor: "#E4181C" },
+
+  { nome: "Académico Viseu", forca: 54, liga: "portugal2", modesto: true, cor: "#0B4EA2" },
+  { nome: "Chaves", forca: 55, liga: "portugal2", modesto: true, cor: "#E4181C" },
+  { nome: "Feirense", forca: 54, liga: "portugal2", modesto: true, cor: "#0F9D58" },
+  { nome: "Leixões", forca: 53, liga: "portugal2", modesto: true, cor: "#E4181C" },
+  { nome: "Penafiel", forca: 52, liga: "portugal2", modesto: true, cor: "#E4181C" },
+  { nome: "Torreense", forca: 52, liga: "portugal2", modesto: true, cor: "#0B4EA2" },
   { nome: "Mirassol", forca: 61, liga: "brasileirao", estado: "SP", modesto: true, cor: "#FDE100", escuro: true },
   { nome: "Sport Recife", forca: 63, liga: "brasileirao", estado: "PE", modesto: true, cor: "#E4181C" },
   { nome: "Fluminense", forca: 74, liga: "brasileirao", estado: "RJ", cor: "#7C1F3D" },
@@ -518,13 +660,301 @@ export const TIERS_TORCIDA = [
   { min: 8, label: "Contestado", cor: "#f59e0b" }, { min: 0, label: "Jogador esquecível", cor: "#6b7280" },
 ];
 
-export const TRAITS_DISPONIVEIS = [
-  { id: "finalizadorClinico", attrId: "finalizacao", limiar: 90, temporadas: 2, nome: "Finalizador Clínico", icone: "🎯", desc: "Finalização acima de 90 por 2 temporadas seguidas.", bonus: 0.05 },
-  { id: "muralha", attrId: "defesa", limiar: 90, temporadas: 2, nome: "Muralha", icone: "🛡️", desc: "Defesa acima de 90 por 2 temporadas seguidas.", bonus: 0.05 },
-  { id: "maestro", attrId: "passe", limiar: 90, temporadas: 2, nome: "Maestro", icone: "🎼", desc: "Passe acima de 90 por 2 temporadas seguidas.", bonus: 0.05 },
-  { id: "dribladorNato", attrId: "drible", limiar: 90, temporadas: 2, nome: "Driblador Nato", icone: "🌀", desc: "Drible acima de 90 por 2 temporadas seguidas.", bonus: 0.05 },
-  { id: "fenomenoFisico", attrId: "fisico", limiar: 90, temporadas: 2, nome: "Fenômeno Físico", icone: "💪", desc: "Físico acima de 90 por 2 temporadas seguidas.", bonus: 0.04 },
+/* ===================== INSÍGNIAS =====================
+   Conquistadas por comportamento repetido, não por sorte. Evoluem em três níveis
+   (bronze → prata → ouro) e cada nível aperta o efeito. Diferente da versão antiga,
+   elas não servem só pra mata-mata: mexem em treino, lesão, moral, mercado e minigames. */
+export const NIVEIS_INSIGNIA = [
+  { nivel: 1, nome: "Bronze", cor: "#CD7F32" },
+  { nivel: 2, nome: "Prata", cor: "#C0C0C0" },
+  { nivel: 3, nome: "Ouro", cor: "#D8B44A" },
 ];
+
+export const TRAITS_DISPONIVEIS = [
+  /* --- por atributo mantido no alto --- */
+  { id: "finalizadorClinico", nome: "Finalizador Clínico", icone: "🎯", tipo: "atributo", attrId: "finalizacao",
+    limiares: [82, 88, 93], temporadas: [1, 2, 3],
+    desc: (n) => `Finalização acima de ${[82, 88, 93][n - 1]} por ${[1, 2, 3][n - 1]} temporada(s).`,
+    efeito: (n) => `+${(n * 4)}% de gols na temporada`, golsMult: (n) => 1 + n * 0.04, mataMata: (n) => n * 0.02 },
+  { id: "muralha", nome: "Muralha", icone: "🛡️", tipo: "atributo", attrId: "defesa",
+    limiares: [82, 88, 93], temporadas: [1, 2, 3],
+    desc: (n) => `Defesa acima de ${[82, 88, 93][n - 1]} por ${[1, 2, 3][n - 1]} temporada(s).`,
+    efeito: (n) => `Time sofre ${n * 4}% menos gols com você em campo`, defesaTime: (n) => n * 0.04, mataMata: (n) => n * 0.02 },
+  { id: "maestro", nome: "Maestro", icone: "🎼", tipo: "atributo", attrId: "passe",
+    limiares: [82, 88, 93], temporadas: [1, 2, 3],
+    desc: (n) => `Passe acima de ${[82, 88, 93][n - 1]} por ${[1, 2, 3][n - 1]} temporada(s).`,
+    efeito: (n) => `+${n * 6}% de assistências`, assistMult: (n) => 1 + n * 0.06, mataMata: (n) => n * 0.015 },
+  { id: "dribladorNato", nome: "Driblador Nato", icone: "🌀", tipo: "atributo", attrId: "drible",
+    limiares: [82, 88, 93], temporadas: [1, 2, 3],
+    desc: (n) => `Drible acima de ${[82, 88, 93][n - 1]} por ${[1, 2, 3][n - 1]} temporada(s).`,
+    efeito: (n) => `+${n * 5}% de chance nos minigames de habilidade`, minigame: (n) => n * 0.05 },
+  { id: "fenomenoFisico", nome: "Fenômeno Físico", icone: "💪", tipo: "atributo", attrId: "fisico",
+    limiares: [80, 87, 92], temporadas: [1, 2, 3],
+    desc: (n) => `Físico acima de ${[80, 87, 92][n - 1]} por ${[1, 2, 3][n - 1]} temporada(s).`,
+    efeito: (n) => `${n * 12}% menos risco de lesão e desgaste`, riscoLesao: (n) => 1 - n * 0.12, desgaste: (n) => 1 - n * 0.1 },
+  { id: "velocista", nome: "Velocista", icone: "⚡", tipo: "atributo", attrId: "velocidade",
+    limiares: [85, 90, 94], temporadas: [1, 2, 3],
+    desc: (n) => `Velocidade acima de ${[85, 90, 94][n - 1]} por ${[1, 2, 3][n - 1]} temporada(s).`,
+    efeito: (n) => `+${n * 3}% de gols e assistências em contra-ataque`, golsMult: (n) => 1 + n * 0.02, assistMult: (n) => 1 + n * 0.02 },
+
+  /* --- por comportamento ao longo da carreira --- */
+  { id: "cobrador", nome: "Cobrador", icone: "🥅", tipo: "feito",
+    condicao: (c) => c.especialistaBP ? 3 : (c.minigamesAcertados || 0) >= 12 ? 2 : (c.minigamesAcertados || 0) >= 5 ? 1 : 0,
+    desc: () => "Acumule acertos em cobranças de pênalti e falta.",
+    efeito: (n) => `+${n * 7}% de chance em pênaltis e faltas`, minigame: (n) => n * 0.07 },
+  { id: "decisivo", nome: "Jogador de Decisão", icone: "🦁", tipo: "feito",
+    condicao: (c) => { const d = c.difClassico || 0; return d >= 0.5 ? 3 : d >= 0.3 ? 2 : d >= 0.15 ? 1 : 0; },
+    desc: () => "Renda mais em clássicos e mata-matas do que em jogos comuns.",
+    efeito: (n) => `+${n * 4}% de chance em fases decisivas`, mataMata: (n) => n * 0.04 },
+  { id: "sangueFrio", nome: "Sangue Frio", icone: "🧊", tipo: "feito",
+    condicao: (c) => { const t = c.titulos || 0; return t >= 8 ? 3 : t >= 4 ? 2 : t >= 2 ? 1 : 0; },
+    desc: () => "Conquiste títulos — quem já levantou taça não treme.",
+    efeito: (n) => `Perde ${n * 25}% menos moral após derrotas`, protecaoMoral: (n) => n * 0.25, mataMata: (n) => n * 0.015 },
+  { id: "lider", nome: "Líder Nato", icone: "👑", tipo: "feito",
+    condicao: (c) => { const m = c.elencoMoral ?? 60; const cap = c.selecao?.capitao; return cap && m >= 75 ? 3 : m >= 75 ? 2 : m >= 68 ? 1 : 0; },
+    desc: () => "Mantenha o vestiário do seu lado.",
+    efeito: (n) => `+${n * 3} de moral do elenco por temporada`, moralAnual: (n) => n * 3 },
+  { id: "idoloEterno", nome: "Ídolo Eterno", icone: "💎", tipo: "feito",
+    condicao: (c) => { const t = Math.max(0, ...Object.values(c.torcidaPorClube || { x: 0 })); return t >= 90 ? 3 : t >= 80 ? 2 : t >= 70 ? 1 : 0; },
+    desc: () => "Seja idolatrado pela torcida de algum clube.",
+    efeito: (n) => `Torcida nunca cai abaixo de ${[40, 50, 60][n - 1]}`, pisoTorcida: (n) => [40, 50, 60][n - 1] },
+  { id: "cidadaoMundo", nome: "Cidadão do Mundo", icone: "✈️", tipo: "feito",
+    condicao: (c) => { const n = Object.keys(c.camisaPorClube || {}).length; return n >= 6 ? 3 : n >= 4 ? 2 : n >= 3 ? 1 : 0; },
+    desc: () => "Defenda clubes diferentes ao longo da carreira.",
+    efeito: (n) => `Entrosamento inicial +${n * 8} em clube novo`, entrosamentoNovo: (n) => n * 8 },
+  { id: "artilheiroNato", nome: "Artilheiro Nato", icone: "👟", tipo: "feito",
+    condicao: (c) => { const g = c.gols || 0; return g >= 250 ? 3 : g >= 120 ? 2 : g >= 50 ? 1 : 0; },
+    desc: () => "Some gols na carreira: 50, 120 e 250.",
+    efeito: (n) => `+${n * 3}% de gols e valor de mercado`, golsMult: (n) => 1 + n * 0.03, valorMult: (n) => 1 + n * 0.03 },
+  { id: "imortal", nome: "Imortal", icone: "🕰️", tipo: "feito",
+    condicao: (c) => { const i = c.idade || 16; return i >= 36 ? 3 : i >= 34 ? 2 : i >= 32 ? 1 : 0; },
+    desc: () => "Siga jogando em alto nível depois dos 32.",
+    efeito: (n) => `Declínio por idade ${n * 20}% mais lento`, declinio: (n) => 1 - n * 0.2 },
+];
+
+/* Soma o efeito de um tipo entre todas as insígnias conquistadas */
+export function somaEfeitoInsignia(c, chave) {
+  let total = 0;
+  (c?.traits || []).forEach((t) => {
+    const id = typeof t === "string" ? t : t.id;
+    const nivel = typeof t === "string" ? 1 : (t.nivel || 1);
+    const def = TRAITS_DISPONIVEIS.find((x) => x.id === id);
+    if (def && typeof def[chave] === "function") total += def[chave](nivel);
+  });
+  return total;
+}
+/* Multiplicadores começam em 1 e se acumulam multiplicando */
+export function multEfeitoInsignia(c, chave) {
+  let m = 1;
+  (c?.traits || []).forEach((t) => {
+    const id = typeof t === "string" ? t : t.id;
+    const nivel = typeof t === "string" ? 1 : (t.nivel || 1);
+    const def = TRAITS_DISPONIVEIS.find((x) => x.id === id);
+    if (def && typeof def[chave] === "function") m *= def[chave](nivel);
+  });
+  return m;
+}
+
+/* ===================== MARCOS DE CARREIRA =====================
+   Não são só registro: os raros dão bônus permanente, os ruins deixam cicatriz,
+   e alguns são secretos — você só descobre que existiam quando conquista. */
+export const MARCOS_ESPECIAIS = [
+  /* --- marcos de conquista, com recompensa permanente --- */
+  { id: "gol100Clube", nome: "100 gols pelo mesmo clube", icone: "💯", cor: "#D8B44A", tipo: "recorde",
+    condicao: (c) => Object.values(c.statsPorClube || {}).some((s) => (s.gols || 0) >= 100),
+    texto: (c) => `Chegou a 100 gols com a mesma camisa — número que poucos alcançam.`,
+    recompensa: (c) => { c.attrs.finalizacao = Math.min(99, c.attrs.finalizacao + 2); },
+    recompensaTxt: "+2 de finalização permanente" },
+  { id: "decada", nome: "Uma década no mesmo clube", icone: "🏛️", cor: "#12A876", tipo: "recorde",
+    condicao: (c) => Object.values(c.statsPorClube || {}).some((s) => (s.temporadas || 0) >= 10),
+    texto: () => `Dez temporadas defendendo o mesmo escudo. Isso já não se vê mais no futebol.`,
+    recompensa: (c) => { c.torcidaPorClube = { ...(c.torcidaPorClube || {}), [c.clube.nome]: 100 }; },
+    recompensaTxt: "Torcida no máximo, pra sempre" },
+  { id: "trinca", nome: "Tríplice coroa", icone: "👑", cor: "#EC4899", tipo: "titulo",
+    condicao: (c, card) => card && card.campeaoLiga && card.copaNacional?.titulo && card.continental?.titulo,
+    texto: () => `Liga, copa e continental na mesma temporada. Uma temporada perfeita.`,
+    recompensa: (c) => { c.fama = Math.min(100, c.fama + 15); },
+    recompensaTxt: "+15 de fama" },
+  { id: "artilheiroMundo", nome: "Artilheiro do mundo", icone: "🌍", cor: "#f59e0b", tipo: "premio",
+    condicao: (c, card, ctx) => ctx?.postoBO === 1,
+    texto: () => `Eleito o melhor jogador do planeta. O topo absoluto.`,
+    recompensa: (c) => { NUM_ATTRS.forEach((a) => { c.attrs[a] = Math.min(99, c.attrs[a] + 1); }); },
+    recompensaTxt: "+1 em todos os atributos" },
+  { id: "camisa10", nome: "O camisa 10 da seleção", icone: "🎖️", cor: "#22D3EE", tipo: "selecao",
+    condicao: (c) => c.selecao?.capitao && (c.selecao?.jogos || 0) >= 50,
+    texto: (c) => `Capitão com mais de 50 jogos pela seleção. Você virou a referência do país.`,
+    recompensa: (c) => { c.fama = Math.min(100, c.fama + 10); },
+    recompensaTxt: "+10 de fama" },
+
+  /* --- cicatrizes: o futebol também machuca --- */
+  { id: "jejum", nome: "O jejum", icone: "🥀", cor: "#D6483F", tipo: "lesao", negativo: true,
+    condicao: (c, card) => card && card.jogos >= 20 && card.gols === 0 && !["GOL", "ZAG"].includes(c.posicao),
+    texto: () => `Uma temporada inteira sem marcar. A imprensa não deixou você esquecer.`,
+    recompensa: (c) => { c.calorMidia = Math.min(100, (c.calorMidia ?? 20) + 15); },
+    recompensaTxt: "A pressão aumentou" },
+  { id: "rebaixado", nome: "A queda", icone: "⬇️", cor: "#D6483F", tipo: "lesao", negativo: true,
+    condicao: (c, card) => card && (card.posLiga ?? 1) >= 18,
+    texto: (c) => `Terminou entre os últimos com o ${c.clube.nome}. Uma temporada pra esquecer — mas que ninguém esquece.`,
+    recompensaTxt: "Marca na carreira" },
+  { id: "operado", nome: "A cirurgia", icone: "🏥", cor: "#D6483F", tipo: "lesao", negativo: true,
+    condicao: (c) => (c.lesoesHistorico || []).some((l) => l.gravidade >= 4),
+    texto: () => `Uma lesão que exigiu cirurgia e meses parado. O corpo nunca mais foi o mesmo.`,
+    recompensaTxt: "Cicatriz permanente" },
+
+  /* --- marcos secretos: aparecem só quando acontecem --- */
+  { id: "profeta", nome: "Profeta da casa", icone: "🔮", cor: "#a855f7", tipo: "recorde", secreto: true,
+    condicao: (c) => c.clubeCoracao && c.clube?.nome === c.clubeCoracao && (c.titulos || 0) >= 3,
+    texto: (c) => `Três títulos pelo clube do seu coração. O menino que sonhava virou ídolo em casa.`,
+    recompensa: (c) => { c.fama = Math.min(100, c.fama + 8); },
+    recompensaTxt: "+8 de fama · sonho realizado" },
+  { id: "andarilho", nome: "O andarilho", icone: "🧭", cor: "#a855f7", tipo: "transferencia", secreto: true,
+    condicao: (c) => Object.keys(c.camisaPorClube || {}).length >= 7,
+    texto: () => `Sete clubes diferentes. Sua carreira foi uma viagem sem endereço fixo.`,
+    recompensa: (c) => { c.entrosamento = Math.min(100, (c.entrosamento ?? 20) + 20); },
+    recompensaTxt: "Adapta-se instantaneamente" },
+  { id: "fenix", nome: "Fênix", icone: "🔥", cor: "#a855f7", tipo: "recorde", secreto: true,
+    condicao: (c, card) => card && (c.sequela || 0) >= 0.3 && card.nota >= 7.6,
+    texto: () => `Depois de tantas lesões, uma temporada de altíssimo nível. Você renasceu.`,
+    recompensa: (c) => { c.sequela = Math.max(0, (c.sequela || 0) - 0.15); },
+    recompensaTxt: "Parte das sequelas superada" },
+  { id: "carrasco", nome: "Carrasco do rival", icone: "😈", cor: "#a855f7", tipo: "recorde", secreto: true,
+    condicao: (c) => (c.golsEmClassicos || 0) >= 15,
+    texto: () => `15 gols em clássicos. A torcida adversária aprendeu a temer seu nome.`,
+    recompensa: (c) => { c.fama = Math.min(100, c.fama + 6); },
+    recompensaTxt: "+6 de fama · pesadelo dos rivais" },
+];
+
+/* ===================== POSTURA DE JOGO =====================
+   Antes de cada partida você decide como vai entrar em campo.
+   Não existe escolha certa: cada uma troca uma coisa por outra. */
+export const POSTURAS_JOGO = [
+  { id: "cauteloso", nome: "Jogar seguro", icone: "🛡️", cor: "#3b82f6",
+    desc: "Menos risco, menos brilho. Evita cartão e poupa o corpo.",
+    golMult: 0.82, assistMult: 0.9, cartaoMult: 0.5, desgasteMult: 0.75, notaBonus: -0.05 },
+  { id: "normal", nome: "Jogo natural", icone: "⚖️", cor: "#a1a1aa",
+    desc: "Do jeito que você sempre joga.",
+    golMult: 1, assistMult: 1, cartaoMult: 1, desgasteMult: 1, notaBonus: 0 },
+  { id: "ofensivo", nome: "Ir pra cima", icone: "⚔️", cor: "#D8B44A",
+    desc: "Buscar o jogo o tempo todo. Mais chance de decidir, mais chance de se expor.",
+    golMult: 1.3, assistMult: 1.15, cartaoMult: 1.5, desgasteMult: 1.35, notaBonus: 0.08 },
+  { id: "raca", nome: "Jogar na raça", icone: "🔥", cor: "#D6483F",
+    desc: "Entrar forte em toda dividida. A torcida ama — o árbitro nem tanto.",
+    golMult: 1.1, assistMult: 1, cartaoMult: 2.4, desgasteMult: 1.5, notaBonus: 0.04, torcidaBonus: 1 },
+];
+
+/* Regras de cartão: 3 amarelos suspendem 1 jogo, vermelho suspende de 1 a 2 */
+export const REGRAS_CARTAO = { amarelosParaSuspender: 3, jogosPorVermelho: [1, 2] };
+
+/* Chance base de cartão por posição — zagueiro e volante levam muito mais que ponta */
+export const CARTAO_POR_POSICAO = {
+  GOL: 0.03, ZAG: 0.16, LD: 0.12, LE: 0.12, VOL: 0.18, MC: 0.13, MEI: 0.09, PD: 0.07, PE: 0.07, SA: 0.07, ATA: 0.08,
+};
+
+/* ===================== RESPOSTAS A TORCEDORES =====================
+   Responder um fã é fácil. Responder um hater é onde a carreira se complica. */
+export const RESPOSTAS_FA = [
+  { id: "agradecer", label: "Agradecer com simplicidade", icone: "🙏", cor: "#12A876",
+    texto: "Obrigado, torcedor! Vocês que fazem a diferença todo jogo.",
+    efeito: { torcida: 4, elenco: 2, seguidores: 2 } },
+  { id: "prometer", label: "Prometer mais", icone: "🔥", cor: "#D8B44A",
+    texto: "Ainda tem muito por vir. Guarda esse print pro ano que vem.",
+    efeito: { torcida: 6, fama: 3, calorMidia: 6, seguidores: 4 } },
+  { id: "dividir", label: "Dividir com o grupo", icone: "🤝", cor: "#3b82f6",
+    texto: "Mérito é do grupo todo. Sozinho eu não faço nada.",
+    efeito: { elenco: 7, torcida: 3, seguidores: 1 } },
+];
+export const RESPOSTAS_HATER = [
+  { id: "ignorarNao", label: "Responder com humildade", icone: "🙇", cor: "#12A876",
+    texto: "Você tem razão, posso mais. Vou trabalhar pra melhorar.",
+    efeito: { torcida: 5, elenco: 3, calorMidia: -4 } },
+  { id: "ironia", label: "Responder com ironia", icone: "😏", cor: "#D8B44A",
+    texto: "Se você jogasse metade do que fala, já era titular.",
+    efeito: { fama: 6, torcida: -3, calorMidia: 14, seguidores: 6 } },
+  { id: "peitar", label: "Peitar de frente", icone: "😤", cor: "#D6483F",
+    texto: "Fala isso na minha cara. Fácil digitar atrás de um perfil falso.",
+    efeito: { fama: 8, torcida: -8, elenco: -4, calorMidia: 20, seguidores: 8 } },
+  { id: "bloquear", label: "Bloquear e seguir a vida", icone: "🚫", cor: "#71717a",
+    texto: "(sem resposta pública)",
+    efeito: { calorMidia: -6 } },
+];
+
+/* ===================== APELIDOS DA TORCIDA =====================
+   Depois de algumas temporadas, a arquibancada te batiza. O apelido nasce do
+   que você é em campo — e vem com um cântico que aparece nos jogos em casa. */
+export const APELIDOS_TORCIDA = [
+  { id: "anjo", nome: "O Anjo", icone: "😇", cond: (c, s) => s.golsPorJogo >= 0.7 && c.fama >= 60,
+    cantico: (n) => `Ôoo, ${n}! O anjo da nossa torcida!`, req: "Média de gols altíssima" },
+  { id: "maestro", nome: "O Maestro", icone: "🎼", cond: (c, s) => c.attrs.passe >= 85 && s.assistPorJogo >= 0.35,
+    cantico: (n) => `${n} rege o time, a torcida canta em coro!`, req: "Passe e assistências de sobra" },
+  { id: "muralha", nome: "A Muralha", icone: "🧱", cond: (c) => ["ZAG", "GOL"].includes(c.posicao) && c.attrs.defesa >= 85,
+    cantico: (n) => `Não passa! ${n} é muralha, não passa ninguém!`, req: "Defensor dominante" },
+  { id: "furacao", nome: "O Furacão", icone: "🌪️", cond: (c) => c.attrs.velocidade >= 88 && c.attrs.drible >= 82,
+    cantico: (n) => `Corre, ${n}! Ninguém segura o furacão!`, req: "Velocidade e drible" },
+  { id: "capitao", nome: "O Capitão", icone: "🎖️", cond: (c) => c.selecao?.capitao || (c.elencoMoral ?? 0) >= 80,
+    cantico: (n) => `${n} na frente, que a gente vai atrás!`, req: "Liderança reconhecida" },
+  { id: "carrasco", nome: "O Carrasco", icone: "😈", cond: (c) => (c.golsEmClassicos || 0) >= 8,
+    cantico: (n) => `${n}, ${n}! Pesadelo do rival!`, req: "Muitos gols em clássicos" },
+  { id: "eterno", nome: "O Eterno", icone: "♾️", cond: (c) => Object.values(c.statsPorClube || {}).some((x) => (x.temporadas || 0) >= 7),
+    cantico: (n) => `${n} é dessa casa, é sangue do nosso sangue!`, req: "Sete temporadas no mesmo clube" },
+  { id: "artilheiro", nome: "O Artilheiro", icone: "🎯", cond: (c) => (c.gols || 0) >= 150,
+    cantico: (n) => `Bola no pé do ${n} é gol, pode confiar!`, req: "150 gols na carreira" },
+  { id: "joia", nome: "A Joia", icone: "💎", cond: (c) => c.idade <= 21 && c.picoOvr >= 80,
+    cantico: (n) => `Olha a joia! ${n} é o futuro chegando!`, req: "Jovem que já brilha" },
+  { id: "guerreiro", nome: "O Guerreiro", icone: "⚔️", cond: (c) => (c.lesoesHistorico || []).length >= 3 && (c.titulos || 0) >= 2,
+    cantico: (n) => `${n} joga machucado, ${n} é raça!`, req: "Superou lesões e ganhou títulos" },
+];
+
+/* Critérios pra uma partida virar "jogo memorável" */
+export const CRITERIOS_MEMORAVEL = [
+  { id: "hattrick", label: "Hat-trick", icone: "⚽⚽⚽", teste: (j) => (j.golsMinha || 0) >= 3, peso: 3 },
+  { id: "showTotal", label: "Atuação de gala", icone: "⭐", teste: (j) => (j.nota || 0) >= 8.8, peso: 3 },
+  { id: "decisivoClassico", label: "Decidiu o clássico", icone: "⚔️", teste: (j) => j.classico && (j.golsMinha || 0) >= 1 && j.resultado === "V", peso: 3 },
+  { id: "duploGol", label: "Dois gols", icone: "⚽⚽", teste: (j) => (j.golsMinha || 0) === 2, peso: 2 },
+  { id: "golEAssist", label: "Gol e assistência", icone: "🎯", teste: (j) => (j.golsMinha || 0) >= 1 && (j.assistMinha || 0) >= 1, peso: 2 },
+  { id: "viradaFora", label: "Vitória fora contra time forte", icone: "✈️", teste: (j) => j.casa === false && j.resultado === "V" && (j.adversarioForca || 0) >= 84, peso: 2 },
+  { id: "paredao", label: "Jogo sem sofrer gol", icone: "🧤", teste: (j) => j.golsAdv === 0 && (j.nota || 0) >= 7.8, peso: 1 },
+];
+
+/* ===================== PREPARAÇÃO DE SEMANA =====================
+   Entre uma rodada e outra existe uma semana. O que você faz com ela muda
+   o próximo jogo — e o custo aparece no corpo ou na conta. */
+export const PREPARACOES_SEMANA = [
+  { id: "descanso", nome: "Poupar e descansar", icone: "😴", cor: "#3b82f6",
+    desc: "Semana leve, foco em recuperar. Volta inteiro, mas sem afiar nada.",
+    energia: 12, desgaste: -0.25, efeito: { golMult: 0.95, cartaoMult: 0.85 } },
+  { id: "finalizacao", nome: "Treinar finalização", icone: "🎯", cor: "#12A876",
+    desc: "Tarde inteira batendo pro gol. Cansa, mas o pé fica calibrado.",
+    energia: -8, desgaste: 0.15, efeito: { golMult: 1.28 } },
+  { id: "estudar", nome: "Estudar o adversário", icone: "🔍", cor: "#a855f7",
+    desc: "Vídeo, reunião, mapa de calor. Você entra sabendo onde o espaço vai abrir.",
+    energia: -3, desgaste: 0, efeito: { notaBonus: 0.25, assistMult: 1.2, cartaoMult: 0.8 } },
+  { id: "fisico", nome: "Trabalho físico pesado", icone: "💪", cor: "#D6483F",
+    desc: "Academia e campo no limite. Cobra caro agora, rende no longo prazo.",
+    energia: -15, desgaste: 0.35, efeito: { golMult: 1.1 }, ganhoFisico: true },
+  { id: "imagem", nome: "Compromissos de imagem", icone: "📸", cor: "#EC4899",
+    desc: "Gravação, entrevista, ação de patrocinador. Rende dinheiro e fama, atrapalha o foco.",
+    energia: -6, desgaste: 0.1, efeito: { notaBonus: -0.15 }, fama: 2, dinheiro: true },
+];
+
+/* ===================== METAS DA DIRETORIA POR COMPETIÇÃO =====================
+   A diretoria não cobra "uma temporada boa": cobra coisas diferentes em cada torneio. */
+export const METAS_COMPETICAO = {
+  liga: [
+    { id: "titulo", texto: "ser campeão da liga", checa: (card) => !!card.campeaoLiga, dificuldade: 3, bonus: 380 },
+    { id: "g4", texto: "terminar entre os 4 primeiros", checa: (card) => (card.posLiga ?? 20) <= 4, dificuldade: 2, bonus: 200 },
+    { id: "fugirZ4", texto: "escapar do rebaixamento com folga", checa: (card) => (card.posLiga ?? 20) <= 14, dificuldade: 1, bonus: 90 },
+  ],
+  copa: [
+    { id: "titulo", texto: "levantar a copa nacional", checa: (card) => !!card.copaNacional?.titulo, dificuldade: 3, bonus: 300 },
+    { id: "semi", texto: "chegar às semifinais da copa", checa: (card) => !!card.copaNacional, dificuldade: 2, bonus: 150 },
+    { id: "fasesIniciais", texto: "não cair logo de cara na copa", checa: (card) => !!card.copaNacional || !!card.copaNacionalPendente, dificuldade: 1, bonus: 70 },
+  ],
+  continental: [
+    { id: "titulo", texto: "conquistar o torneio continental", checa: (card) => !!card.continental?.titulo, dificuldade: 3, bonus: 450 },
+    { id: "fase", texto: "avançar longe no continental", checa: (card) => !!card.continental, dificuldade: 2, bonus: 220 },
+    { id: "participar", texto: "fazer boa figura no continental", checa: (card) => !!card.continental || !!card.continentalPendente, dificuldade: 1, bonus: 100 },
+  ],
+};
 
 export const CATEGORIAS_INFLACAO_SALARIAL = ["Joias", "Luxo", "Ações Sociais"];
 

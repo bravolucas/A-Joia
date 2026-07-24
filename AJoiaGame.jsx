@@ -251,7 +251,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
 
   function iniciarCarreira(clubeEscolhido, numero) {
     const attrsIni = attrsIniciais(potencialFinal);
-    const persona = PERSONALIDADES.find((p) => p.id === personalidade);
+    const persona = PERSONALIDADES.find((p) => p.id === personalidade) || PERSONALIDADES[3];
     const c = {
       attrs: attrsIni, attrsAnteriores: { ...attrsIni }, potencial: potencialFinal, posicao, personalidade, nacionalidade, clubeCoracao, pernaDominante, origem: origem?.id,
       idade: 16, clube: clubeEscolhido, forma: 0, anoNoClube: 0,
@@ -470,7 +470,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
   function resolverOfertaPatrocinio(aceitar) {
     const c = { ...carreira };
     if (aceitar) {
-      const persona = PERSONALIDADES.find((p) => p.id === c.personalidade);
+      const persona = PERSONALIDADES.find((p) => p.id === c.personalidade) || PERSONALIDADES[3];
       const valor = Math.round(c.fama * (persona?.famaMult || 1) * rand(6, 12) * pendingSponsor.valorMult);
       c.cofre += valor; c.extrato = [...c.extrato, { idade: c.idade, tipo: `Patrocínio (${pendingSponsor.marca})`, valor }];
       c.relacaoPatrocinadores = clampR((c.relacaoPatrocinadores ?? 50) + rand(4, 8), 0, 100);
@@ -1227,7 +1227,7 @@ function resolverTemporada(c, extraStats) {
     const subiuTier = tierNum(c.picoOvr) > tierAntes;
     c.forma = clamp((card.nota - 6.8) * 2 + (c.staff?.nutricionista ? 0.6 : 0) + (c.staff?.chefParticular ? 0.3 : 0), -4, 4);
 
-    const persona = PERSONALIDADES.find((p) => p.id === c.personalidade);
+    const persona = PERSONALIDADES.find((p) => p.id === c.personalidade) || PERSONALIDADES[3];
     { // Imortal deixa o declínio mais lento
       const freioDeclinio = multEfeitoInsignia(c, "declinio");
       c.attrs = evoluirAtributos(c.attrs, c.potencial, c.idade, persona, c.focoTreino, (c.staff?.psicologoEsportivo ? 0.85 : 1) * (freioDeclinio || 1));
@@ -2029,7 +2029,7 @@ function resolverTemporada(c, extraStats) {
       return;
     }
     if (tipo === "patrocinio") {
-      const persona = PERSONALIDADES.find((x) => x.id === c.personalidade);
+      const persona = PERSONALIDADES.find((x) => x.id === c.personalidade) || PERSONALIDADES[3];
       const disponiveis = patrocinadoresDisponiveis(c);
       const marca = pick(disponiveis.length ? disponiveis : OFERTAS_PATROCINIO.filter((p) => p.perfil === "neutro"));
       const valor = Math.round(c.fama * (persona?.famaMult || 1) * rand(8, 14) * (marca.valorMult || 1) * (c.staff?.consultorImagem ? 1.25 : 1));
@@ -2941,7 +2941,7 @@ function resolverTemporada(c, extraStats) {
                   }}
                 >
                   {carreira.temporadaAndamento
-                    ? `▶ Avançar — rodada ${carreira.temporadaAndamento.rodadaAtual + 1}/${carreira.temporadaAndamento.calendario.length}`
+                    ? `▶ Avançar — rodada ${carreira.temporadaAndamento.rodadaAtual + 1}/${(carreira.temporadaAndamento.calendario || []).length}`
                     : posTemporada?.ok
                     ? "▶ Seguir para a temporada"
                     : "▶ Jogar temporada (idade " + carreira.idade + ")"}
@@ -3001,7 +3001,7 @@ function resolverTemporada(c, extraStats) {
                               <div className="mb-3 pb-2.5 border-b border-zinc-800">
                                 <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">🎯 O que a diretoria cobra nesta temporada</div>
                                 <div className="grid gap-1">
-                                  {carreira.metasCompeticao.map((m, i) => {
+                                  {(carreira.metasCompeticao || []).map((m, i) => {
                                     const rot = { liga: "🏆 Liga", copa: "🥇 Copa", continental: "🌍 Continental" }[m.comp] || m.comp;
                                     return (
                                       <div key={i} className="flex items-center gap-2 text-[10px]">
@@ -3064,7 +3064,7 @@ function resolverTemporada(c, extraStats) {
 
                     <Card className="border-amber-500/30">
                       <div className="flex items-center justify-between mb-2">
-                        <div className="text-[9px] text-zinc-500 uppercase tracking-widest">🗓️ Calendário da temporada — rodada {carreira.temporadaAndamento.rodadaAtual + 1}/{carreira.temporadaAndamento.calendario.length}</div>
+                        <div className="text-[9px] text-zinc-500 uppercase tracking-widest">🗓️ Calendário da temporada — rodada {carreira.temporadaAndamento.rodadaAtual + 1}/{(carreira.temporadaAndamento.calendario || []).length}</div>
                         <button
                           onClick={() => {
                             const ano = ANO_INICIO + (carreira.idade - 16);
@@ -3077,10 +3077,10 @@ function resolverTemporada(c, extraStats) {
                         >📅 Ver calendário completo</button>
                       </div>
                       <div className="flex flex-wrap gap-1">
-                        {carreira.temporadaAndamento.calendario.map((_, i) => {
+                        {(carreira.temporadaAndamento.calendario || []).map((_, i) => {
                           const jogada = i < carreira.temporadaAndamento.rodadaAtual;
                           const atual = i === carreira.temporadaAndamento.rodadaAtual;
-                          const resultado = carreira.temporadaAndamento.resultadosRodadas[i];
+                          const resultado = (carreira.temporadaAndamento.resultadosRodadas || [])[i];
                           const cor = !jogada ? "bg-zinc-800" : resultado === "V" ? "bg-emerald-500" : resultado === "D" ? "bg-red-500" : "bg-zinc-500";
                           return <div key={i} className={`w-3.5 h-3.5 rounded-sm ${cor} ${atual ? "border-2 border-amber-400" : ""}`} title={`Rodada ${i + 1}${resultado ? ` — ${resultado === "V" ? "Vitória" : resultado === "D" ? "Derrota" : "Empate"}` : ""}`} />;
                         })}

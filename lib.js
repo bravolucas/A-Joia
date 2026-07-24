@@ -426,7 +426,11 @@ export function bonusTraitsMataMata(c) {
 
 
 export function evoluirAtributos(atual, potencial, idade, persona, bonusFoco, reducaoDeclinio = 1) {
+  // Personalidade inválida (save antigo, dado corrompido) derrubava o jogo inteiro aqui.
+  // Agora cai num perfil padrão em vez de quebrar a tela.
+  if (!persona || persona.picoFim == null) persona = PERSONALIDADES.find((p) => p.id === "ascensao") || PERSONALIDADES[0];
   const novo = { ...atual };
+  if (!potencial) potencial = { ...atual };
   TODOS_ATTRS.forEach((id) => {
     const isStar = id === "fintas" || id === "pernaRuim";
     const min = isStar ? 1 : 40, max = isStar ? 5 : 99;

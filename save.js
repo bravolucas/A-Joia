@@ -117,7 +117,7 @@ export function formatarData(iso) {
    Um save pode vir de uma versão anterior do jogo (ou ter sido editado à mão).
    Aqui a carreira é completada com valores padrão pra que nada quebre ao carregar. */
 const PADRAO_CARREIRA = {
-  posicao: "ATA", nacionalidade: "BRA", personalidade: "equilibrado", papelTatico: "padrao",
+  posicao: "ATA", nacionalidade: "BRA", personalidade: "ascensao", papelTatico: "padrao",
   idade: 16, gols: 0, assist: 0, melhorEmCampo: 0, titulos: 0, bolasDeOuro: 0,
   premiosIndividuais: 0, copasDoMundo: 0, fama: 12, cofre: 0, desgaste: 0, energia: 100,
   picoOvr: 50, anosDesdeCopa: 0, anoNoClube: 0, sequela: 0,

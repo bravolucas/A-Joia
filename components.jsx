@@ -96,6 +96,63 @@ export function Confetti() {
   );
 }
 
+// Cerimônia da Bola de Ouro: 3 cards lado a lado (3º, 2º, 1º), revelados em
+// sequência com efeito de flip (achata no eixo X, troca o conteúdo, expande).
+// `finalistas` já vem ordenado por posição real do ranking (rankingBolaDeOuro).
+export function PodiumBolaDeOuro({ finalistas, aoConcluir }) {
+  const [fase, setFase] = useState(finalistas.map(() => "oculto")); // oculto | saindo | entrando | revelado
+  const [iniciado, setIniciado] = useState(false);
+
+  function revelarUm(indice) {
+    setFase((prev) => { const n = [...prev]; n[indice] = "saindo"; return n; });
+    setTimeout(() => {
+      setFase((prev) => { const n = [...prev]; n[indice] = "entrando"; return n; });
+      setTimeout(() => {
+        setFase((prev) => { const n = [...prev]; n[indice] = "revelado"; return n; });
+      }, 280);
+    }, 280);
+  }
+
+  function iniciarCerimonia() {
+    if (iniciado) return;
+    setIniciado(true);
+    // suspense: revela do lugar mais baixo pro mais alto
+    const ordem = finalistas.map((_, i) => i).sort((a, b) => finalistas[b].pos - finalistas[a].pos);
+    ordem.forEach((indice, k) => setTimeout(() => revelarUm(indice), k * 950));
+    setTimeout(() => aoConcluir && aoConcluir(), ordem.length * 950 + 560);
+  }
+
+  return (
+    <div>
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        {finalistas.map((f, i) => {
+          const estado = fase[i];
+          const virado = estado === "entrando" || estado === "revelado";
+          const animClasse = estado === "saindo" ? "animate-[flipOut_0.28s_ease-in_forwards]"
+            : estado === "entrando" ? "animate-[flipIn_0.28s_ease-out_forwards]" : "";
+          const vencedor = f.pos === 1;
+          return (
+            <div key={i} className={`relative bg-zinc-950/50 border rounded-sm p-2 flex flex-col items-center justify-center gap-1 min-h-[92px] ${estado === "revelado" && f.voce ? "border-amber-400 animate-[ceremonyGlow_1.6s_ease-in-out_infinite]" : "border-zinc-800"} ${animClasse}`}>
+              {estado === "revelado" && f.voce && <Confetti />}
+              <TrophyIcon tipo={vencedor ? "ouro" : "prata"} size={virado ? 26 : 20} />
+              <span className="text-[9px] text-zinc-500 uppercase tracking-widest">{f.pos}º lugar</span>
+              {virado ? (
+                <>
+                  <span className={`text-xs font-bold text-center leading-tight ${f.voce ? "text-amber-400" : "text-zinc-200"}`}>{f.nome}{f.voce ? " — é você!" : ""}</span>
+                  <span className="text-[9px] text-zinc-500 text-center">{f.clube}</span>
+                </>
+              ) : (
+                <span className="text-xl text-zinc-700">❔</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {!iniciado && <Button variant="gold" onClick={iniciarCerimonia}>🏆 Revelar a Bola de Ouro</Button>}
+    </div>
+  );
+}
+
 export function FichaPartida({ jogo, clubeNome, posicao, onClose }) {
   if (!jogo) return null;
   const venceu = jogo.resultado === "V", empatou = jogo.resultado === "E";

@@ -1,0 +1,46 @@
+--- /tmp/orig/A-Joia-main/AJoiaGame.jsx	2026-07-24 18:50:16.000000000 +0000
++++ /tmp/repo/A-Joia-main/AJoiaGame.jsx	2026-07-24 21:01:00.865712925 +0000
+@@ -2,7 +2,7 @@
+ import { montarSave, salvarLocal, carregarLocal, apagarLocal, listarSaves, existeAlgumSave, baixarSave, lerArquivoSave, formatarData, normalizarSave, SLOTS } from "./save.js";
+ import { ANO_INICIO, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPS_PAIS, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
+ import { agregarPorCompeticao, ajustarMeta, ajustesDoContexto, analisarJogos, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, creditarTitulo, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, forcaEfetivaClube, formatarDinheiro, gerarContextoLance, gerarElenco, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, sortearAdversario, sortearCartoes, sortearConcorrente, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, todosJogosCarreira, valorDeMercado, valorMundo, veredito } from "./lib.js";
+-import { AttrBarDelta, AttrRadar, BallIcon, Button, CalendarioTemporadaPopup, Card, ClubDot, Confetti, CountUp, CurvaEvolucao, Diamond, FichaPartida, FreeKickMini, GoalMini, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PopupOverlay, SilhuetaJogador, Sparkle, TimingBar, TrophyIcon } from "./components.jsx";
++import { AttrBarDelta, AttrRadar, BallIcon, Button, CalendarioTemporadaPopup, Card, ClubDot, Confetti, CountUp, CurvaEvolucao, Diamond, FichaPartida, FreeKickMini, GoalMini, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PodiumBolaDeOuro, PopupOverlay, SilhuetaJogador, Sparkle, TimingBar, TrophyIcon } from "./components.jsx";
+ 
+ export default function AJoiaGame() {
+   const [stage, setStage] = useState("intro");
+@@ -2607,6 +2607,9 @@
+         @keyframes miraPulsa{0%,100%{opacity:0.65;transform:translate(-50%,-50%) scale(0.9)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}}
+         @keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(160px) rotate(360deg);opacity:0}}
+         @keyframes spin3dY{from{transform:rotateY(0deg)}to{transform:rotateY(360deg)}}
++        @keyframes flipOut{from{transform:scaleX(1)}to{transform:scaleX(0)}}
++        @keyframes flipIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
++        @keyframes ceremonyGlow{0%,100%{box-shadow:0 0 10px rgba(216,180,74,0.35)}50%{box-shadow:0 0 22px rgba(216,180,74,0.75)}}
+         @keyframes sparkleTwinkle{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1.15)}}
+         @keyframes stageEnter{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:translateY(0)}}
+         @keyframes scrambleFade{0%{opacity:0.3}100%{opacity:1}}
+@@ -3894,13 +3897,17 @@
+                           <>
+                             <div className="text-center mb-3 flex flex-col items-center gap-1"><TrophyIcon tipo="ouro" size={30} /><div className="text-[10px] text-amber-400 uppercase tracking-widest">Premiações & finanças</div></div>
+                             {awardsPopup.registro.premios.some((p) => p.nome === "BOLA DE OURO") && (
+-                              <div className="bg-zinc-950/40 rounded-sm p-2 mb-3">
+-                                <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1 text-center">Shortlist da Bola de Ouro</div>
+-                                <div className="flex justify-center gap-3 text-[10px] text-zinc-400">
+-                                  <span>1️⃣ {awardsPopup.registro.premios.find((p) => p.nome === "BOLA DE OURO").vencedor}</span>
+-                                  <span>2️⃣ {carreira.rivalPosicao}</span>
+-                                  <span>3️⃣ {pick(RIVAIS_PREMIO)}</span>
+-                                </div>
++                              <div className="bg-zinc-950/40 rounded-sm p-3 mb-3">
++                                <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-2 text-center">Cerimônia da Bola de Ouro</div>
++                                {(awardsPopup.registro.rankingBO || []).length >= 3 ? (
++                                  <PodiumBolaDeOuro finalistas={awardsPopup.registro.rankingBO.slice(0, 3)} />
++                                ) : (
++                                  <div className="flex justify-center gap-3 text-[10px] text-zinc-400">
++                                    <span>1️⃣ {awardsPopup.registro.premios.find((p) => p.nome === "BOLA DE OURO").vencedor}</span>
++                                    <span>2️⃣ {carreira.rivalPosicao}</span>
++                                    <span>3️⃣ {pick(RIVAIS_PREMIO)}</span>
++                                  </div>
++                                )}
+                               </div>
+                             )}
+                             <div className="text-xs text-zinc-300 space-y-2 mb-3">

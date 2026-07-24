@@ -3069,7 +3069,7 @@ function resolverTemporada(c, extraStats) {
                           onClick={() => {
                             const ano = ANO_INICIO + (carreira.idade - 16);
                             const janelaLiga = janelasPorLiga(carreira.clube.liga).find((j) => j.ligaPrincipal);
-                            const datas = distribuirRodadasNaJanela(carreira.temporadaAndamento.calendario.length, janelaLiga, ano);
+                            const datas = distribuirRodadasNaJanela((carreira.temporadaAndamento.calendario || []).length, janelaLiga, ano);
                             setCalendarioMesAberto(datas[carreira.temporadaAndamento.rodadaAtual]?.mes ?? janelaLiga.inicioMes);
                             setCalendarioAberto(true);
                           }}

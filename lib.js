@@ -331,16 +331,29 @@ export function resolverLance(estado, slot, ctx, decisaoId) {
   if (!decisaoId) return { estado, precisaDecisao: true, opcoes: ACOES_DEFESA, minuto, situacao, finalDeJogo, texto: `${minuto}' — o adversário ataca pelo seu lado.` };
   const acao = ACOES_DEFESA.find((a) => a.id === decisaoId) || ACOES_DEFESA[1];
   const chanceGolAdv = clamp(0.2 - diferenca * 0.4, 0.05, 0.5) * (2 - post.golMult) / acao.desarmeMult;
-  const levouCartao = Math.random() < 0.05 * acao.cartaoMult * (ctx.classico ? 1.4 : 1) * post.cartaoMult;
+  const jaTinhaAmarelo = !!estado.cartoes?.amarelo;
+  const chanceCartao = 0.05 * acao.cartaoMult * (ctx.classico ? 1.4 : 1) * post.cartaoMult;
+  // vermelho direto é raro; com amarelo no bolso, a disputa forte pode custar o segundo
+  const vermelhoDireto = Math.random() < clamp(chanceCartao * 0.1, 0, 0.045);
+  const segundoAmarelo = !vermelhoDireto && jaTinhaAmarelo && Math.random() < clamp(chanceCartao * 1.8, 0, 0.4);
+  const amareloNovo = !vermelhoDireto && !segundoAmarelo && !jaTinhaAmarelo && Math.random() < chanceCartao;
+  const vermelho = vermelhoDireto || segundoAmarelo;
+  const levouCartao = amareloNovo || vermelho;
   const novoEstado = levouCartao
-    ? { ...estado, cartoes: { ...estado.cartoes, amarelo: true } }
+    ? { ...estado, cartoes: { amarelo: (estado.cartoes?.amarelo || amareloNovo) && !vermelho, vermelho } }
     : estado;
+  const textoCartao = vermelhoDireto
+    ? `🟥 Cartão vermelho direto aos ${minuto}' (${acao.label.toLowerCase()}).`
+    : segundoAmarelo
+    ? `🟥 Segundo amarelo aos ${minuto}' — expulso (${acao.label.toLowerCase()}).`
+    : `🟨 Cartão amarelo aos ${minuto}' (${acao.label.toLowerCase()}).`;
   if (Math.random() < chanceGolAdv) {
     return { estado: { ...novoEstado, golsAdv: novoEstado.golsAdv + 1 },
-      evento: { minuto, tipo: "gol", meuTime: false, texto: `⚽ Gol do ${ctx.adversario} aos ${minuto}' — passou pelo seu setor.`, cartao: levouCartao } };
+      evento: { minuto, tipo: "gol", meuTime: false, cartao: levouCartao, vermelho, segundoAmarelo,
+        texto: `⚽ Gol do ${ctx.adversario} aos ${minuto}' — passou pelo seu setor.${levouCartao ? " " + textoCartao : ""}` } };
   }
-  return { estado: novoEstado, evento: { minuto, tipo: levouCartao ? "cartao" : "defesa", meu: true,
-    texto: levouCartao ? `🟨 Cartão amarelo aos ${minuto}' (${acao.label.toLowerCase()}).` : `${minuto}' — você segurou bem na defesa (${acao.label.toLowerCase()}).` } };
+  return { estado: novoEstado, evento: { minuto, tipo: levouCartao ? "cartao" : "defesa", meu: true, cartao: levouCartao, vermelho, segundoAmarelo,
+    texto: levouCartao ? textoCartao : `${minuto}' — você segurou bem na defesa (${acao.label.toLowerCase()}).` } };
 }
 
 /* Compara a nota média REAL da temporada com a nota esperada pro OVR do

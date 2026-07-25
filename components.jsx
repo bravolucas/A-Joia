@@ -155,46 +155,130 @@ export function PodiumBolaDeOuro({ finalistas, aoConcluir }) {
 
 // Popup da partida ao vivo: placar em tempo real, log de eventos subindo, e
 // botões de decisão quando o lance atual pede escolha do jogador.
-export function PartidaAoVivoPopup({ pv, onDecisao, onContinuar }) {
+// Tela cheia da partida ao vivo — o relógio corre sozinho (1T, intervalo,
+// 2T, acréscimos) e só para quando um lance pede decisão sua. Campo
+// simplificado + estatísticas + feed de eventos, no estilo "match engine".
+export function TelaPartidaAoVivo({ pv, onDecisao, onContinuarSegundoTempo }) {
   if (!pv) return null;
-  const { estado, eventos, ctx, pendente, concluida } = pv;
-  const ultimoMinuto = eventos.length ? eventos[eventos.length - 1].minuto : 0;
+  const { estado, eventos, ctx, pendente, concluida, fase, minutoVisivel, acrescimos, stats } = pv;
   const meusGols = estado.golsMeu, advGols = estado.golsAdv;
-  return (
-    <PopupOverlay>
-      <Card className="border-amber-500/40">
-        <div className="text-center mb-2">
-          <div className="text-[9px] text-zinc-500 uppercase tracking-widest">{ctx.souCasa ? "🏠 Em casa" : "✈️ Fora"} {ctx.classico ? "· ⚔️ Clássico" : ""}</div>
-          <div className="flex items-center justify-center gap-3 mt-1">
-            <span className="font-stat font-black text-3xl">{ctx.souCasa ? meusGols : advGols}</span>
-            <span className="text-zinc-600 text-sm">x</span>
-            <span className="font-stat font-black text-3xl">{ctx.souCasa ? advGols : meusGols}</span>
-          </div>
-          <div className="text-xs text-zinc-400 mt-1">vs {ctx.adversario} {concluida ? "— fim de jogo" : `— ${ultimoMinuto}'`}</div>
-        </div>
-        <div className="bg-zinc-950/40 rounded-sm p-2 mb-3 max-h-32 overflow-y-auto flex flex-col-reverse gap-1">
-          {eventos.length === 0 && <div className="text-[11px] text-zinc-500 text-center">Bola rolando...</div>}
-          {[...eventos].reverse().map((e, i) => (
-            <div key={i} className={`text-[11px] ${e.tipo === "gol" && e.meu ? "text-amber-400 font-bold" : e.tipo === "cartao" ? "text-yellow-400" : "text-zinc-400"}`}>{e.texto}</div>
+  const relogioTxt = concluida ? "Fim de jogo" : fase === "intervalo" ? "Intervalo" : minutoVisivel > 90 ? `90+${minutoVisivel - 90}'` : `${minutoVisivel}'`;
+  const totalChutesMeu = stats.chutesMeu, totalChutesAdv = stats.chutesAdv;
+  const posseMeu = clamp(Math.round(50 + (ctx.forcaClube - ctx.adversarioForca) * 0.6 + (ctx.postura === "ofensivo" ? 4 : ctx.postura === "cauteloso" ? -4 : 0)), 28, 72);
+  const ultimoFoco = eventos.length ? eventos[eventos.length - 1] : null;
+  // posição aproximada da bola no campo, conforme o último lance (visual, não literal)
+  const bolaY = !ultimoFoco ? 50 : ultimoFoco.tipo === "gol" ? (ultimoFoco.meuTime ? 12 : 88) : ultimoFoco.meu === true ? 30 : ultimoFoco.tipo === "defesa" ? 75 : 50;
+
+  const Formacao = ({ ladoEsquerdo, destaque }) => (
+    <div className="relative bg-emerald-950/40 rounded-sm h-full min-h-[220px] border border-zinc-800 overflow-hidden">
+      <div className="absolute inset-0" style={{ background: "repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0 24px, transparent 24px 48px)" }} />
+      <div className="absolute left-1/2 top-0 bottom-0 w-px bg-zinc-700/40" />
+      {[85, 65, 40, 15].map((y, row) => (
+        <div key={row} className="absolute w-full flex justify-around px-3" style={{ top: `${ladoEsquerdo ? y : 100 - y}%` }}>
+          {Array.from({ length: row === 0 ? 1 : row === 3 ? 3 : row === 2 ? 3 : 4 }).map((_, i) => (
+            <div key={i} className={`w-2.5 h-2.5 rounded-full ${destaque ? "bg-amber-400" : "bg-zinc-500"}`} />
           ))}
         </div>
-        {pendente ? (
-          <>
-            <div className="text-xs text-zinc-300 mb-2 text-center">{pendente.texto}</div>
-            <div className="grid gap-1.5">
-              {pendente.opcoes.map((op) => (
-                <button key={op.id} onClick={() => onDecisao(op.id)} className="text-left px-3 py-2 rounded-sm border border-zinc-800 hover:border-amber-500 transition-colors">
-                  <div className="text-xs font-bold">{op.icone} {op.label}</div>
-                  <div className="text-[10px] text-zinc-500">{op.desc}</div>
-                </button>
+      ))}
+    </div>
+  );
+
+  return (
+    <PopupOverlay largo>
+      <Card className="border-amber-500/40" padded={false}>
+        <div className="p-4 border-b border-zinc-800 text-center">
+          <div className="text-[9px] text-zinc-500 uppercase tracking-widest">{ctx.souCasa ? "🏠 Em casa" : "✈️ Fora"} {ctx.classico ? "· ⚔️ Clássico" : ""} · {ctx.copa ? ctx.copa.nomeCompeticao : "Liga"}</div>
+          <div className="flex items-center justify-center gap-4 mt-1">
+            <span className="font-stat font-black text-4xl">{ctx.souCasa ? meusGols : advGols}</span>
+            <div className="text-center">
+              <div className="text-xs text-zinc-400">vs {ctx.adversario}</div>
+              <div className={`text-sm font-bold ${fase === "intervalo" ? "text-amber-400" : "text-zinc-300"}`}>{relogioTxt}</div>
+            </div>
+            <span className="font-stat font-black text-4xl">{ctx.souCasa ? advGols : meusGols}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3">
+          <Formacao ladoEsquerdo destaque />
+
+          <div className="flex flex-col gap-3">
+            <div className="bg-zinc-950/40 rounded-sm p-3">
+              <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-2 text-center">Estatísticas</div>
+              {[
+                { label: "Chutes", meu: totalChutesMeu, adv: totalChutesAdv },
+                { label: "No alvo", meu: stats.chutesAlvoMeu, adv: stats.chutesAlvoAdv },
+                { label: "Posse", meu: posseMeu, adv: 100 - posseMeu, sufixo: "%" },
+              ].map((linha) => {
+                const total = Math.max(1, linha.meu + linha.adv);
+                return (
+                  <div key={linha.label} className="mb-2">
+                    <div className="flex justify-between text-[10px] text-zinc-400 mb-0.5">
+                      <span>{linha.meu}{linha.sufixo || ""}</span><span>{linha.label}</span><span>{linha.adv}{linha.sufixo || ""}</span>
+                    </div>
+                    <div className="flex h-1.5 rounded-full overflow-hidden bg-zinc-800">
+                      <div className="bg-amber-400" style={{ width: `${(linha.meu / total) * 100}%` }} />
+                      <div className="bg-zinc-600" style={{ width: `${(linha.adv / total) * 100}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="bg-zinc-950/40 rounded-sm p-2 flex-1 overflow-y-auto flex flex-col-reverse gap-1 max-h-40">
+              {eventos.length === 0 && <div className="text-[11px] text-zinc-500 text-center">Bola rolando...</div>}
+              {[...eventos].reverse().map((e, i) => (
+                <div key={i} className={`text-[11px] ${e.tipo === "gol" && e.meu ? "text-amber-400 font-bold" : e.tipo === "cartao" ? "text-yellow-400" : "text-zinc-400"}`}>{e.minuto}' — {e.texto.replace(/^\d+'\s*—?\s*/, "")}</div>
               ))}
             </div>
-          </>
-        ) : !concluida ? (
-          <Button onClick={onContinuar}>Continuar</Button>
-        ) : (
-          <div className="text-center text-[10px] text-zinc-500 uppercase tracking-widest">Apurando o resultado...</div>
-        )}
+          </div>
+
+          <Formacao />
+        </div>
+
+        <div className="p-3 border-t border-zinc-800">
+          {pendente ? (
+            <>
+              <div className="text-xs text-zinc-300 mb-2 text-center">{pendente.texto}</div>
+              <div className="grid gap-1.5 max-w-md mx-auto">
+                {pendente.opcoes.map((op) => (
+                  <button key={op.id} onClick={() => onDecisao(op.id)} className="text-left px-3 py-2 rounded-sm border border-zinc-800 hover:border-amber-500 transition-colors">
+                    <div className="text-xs font-bold">{op.icone} {op.label}</div>
+                    <div className="text-[10px] text-zinc-500">{op.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : fase === "intervalo" ? (
+            <div className="max-w-xs mx-auto"><Button onClick={onContinuarSegundoTempo}>Continuar pro 2º tempo</Button></div>
+          ) : concluida ? (
+            <div className="text-center text-[10px] text-zinc-500 uppercase tracking-widest">Apurando o resultado...</div>
+          ) : (
+            <div className="text-center text-[10px] text-zinc-600 uppercase tracking-widest">Jogo em andamento...</div>
+          )}
+        </div>
+      </Card>
+    </PopupOverlay>
+  );
+}
+
+// Celebra qualquer convocação pra seleção — amistoso, eliminatórias,
+// continental (Copa América/Eurocopa/etc.) ou Copa do Mundo, que é o
+// evento maior e ganha um tratamento visual mais grandioso.
+export function PopupConvocacao({ info, onClose }) {
+  if (!info) return null;
+  const { competicao, querCopa } = info;
+  return (
+    <PopupOverlay>
+      <Card padded={false} className={`overflow-hidden ${querCopa ? "border-amber-400" : "border-emerald-500/40"}`}>
+        <div className="relative h-24 flex items-center justify-center overflow-hidden" style={{ background: querCopa ? "radial-gradient(circle at 30% 30%, rgba(216,180,74,0.45) 0%, transparent 60%), linear-gradient(180deg, #241d08 0%, #171308 100%)" : "linear-gradient(180deg, #0d2318 0%, #0a1610 100%)" }}>
+          {querCopa && <Confetti />}
+          <div className="text-4xl">{querCopa ? "🌎" : competicao.icone}</div>
+        </div>
+        <div className="p-5 text-center">
+          <div className={`text-[10px] uppercase tracking-widest font-bold mb-1 ${querCopa ? "text-amber-400" : "text-emerald-400"}`}>Convocação</div>
+          <p className="text-lg font-black mb-1">{querCopa ? "VOCÊ FOI CONVOCADO PRA COPA DO MUNDO!" : `Convocado para ${competicao.nome}!`}</p>
+          <p className="text-xs text-zinc-400 mb-4">{querCopa ? "O sonho de qualquer jogador. A seleção conta com você no maior palco do futebol." : "A comissão técnica confirmou seu nome na lista."}</p>
+          <Button onClick={onClose}>{querCopa ? "Vamos pro Mundial!" : "Bora representar!"}</Button>
+        </div>
       </Card>
     </PopupOverlay>
   );

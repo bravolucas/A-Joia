@@ -229,6 +229,131 @@ export function ajustesDoContexto(ctx) {
   }
 }
 
+/* ===================== MOTOR DE PARTIDA JOGO A JOGO =====================
+   A partida deixa de ter o placar pronto: ela é resolvida em "lances"
+   sucessivos, cujo resultado acumulado É o placar final. Decisões do
+   jogador só existem quando o lance é dele (ataque ou defesa no seu
+   setor) — o resto da disputa (meio-campo, jogadas de outros jogadores)
+   resolve sozinho, do jeito que sempre resolveu. */
+
+// Classifica a situação a partir do placar REAL da partida em andamento
+// (antes isso vinha de um placar fake gerado só pro texto do lance especial).
+export function situacaoAtual(golsMeu, golsAdv, minuto) {
+  const perdendo = golsAdv > golsMeu, empatando = golsAdv === golsMeu, finalDeJogo = minuto >= 75;
+  let situacao;
+  if (perdendo && finalDeJogo) situacao = "desesperoFinal";
+  else if (empatando && finalDeJogo) situacao = "decisaoFinal";
+  else if (perdendo) situacao = "atras";
+  else if (empatando) situacao = "equilibrado";
+  else situacao = "vencendo";
+  return { situacao, perdendo, empatando, finalDeJogo };
+}
+
+function amostraSemRepeticao(n, min, max) {
+  const alvo = Math.min(n, Math.max(0, max - min + 1));
+  const set = new Set();
+  while (set.size < alvo) set.add(rand(min, max));
+  return [...set];
+}
+
+// Jogo de rotina tem menos lances decisivos; clássico/mata-mata/decisão têm mais.
+export function definirImportanciaPartida({ classico, ligaDecisiva, faseMataMata, final } = {}) {
+  if (final || ligaDecisiva) return { tier: "decisiva", numLances: rand(7, 9) };
+  if (classico || faseMataMata) return { tier: "grande-jogo", numLances: rand(5, 6) };
+  return { tier: "rotina", numLances: rand(3, 4) };
+}
+
+// Monta os "slots" de lance ao longo dos 90 minutos, já classificados por
+// foco (se passam pelo seu ataque, sua defesa, ou são disputa neutra),
+// pesado pela sua posição — atacante vê mais bola no ataque, zagueiro na defesa.
+export function gerarRoteiroPartida(numLances, posicao) {
+  const minutos = amostraSemRepeticao(numLances, 3, 88).sort((a, b) => a - b);
+  const pesoAtaque = { ATA: 0.55, PON: 0.5, MEI: 0.35, VOL: 0.22, LAT: 0.22, ZAG: 0.1, GOL: 0.02 }[posicao] ?? 0.3;
+  const pesoDefesa = { ATA: 0.06, PON: 0.08, MEI: 0.18, VOL: 0.32, LAT: 0.38, ZAG: 0.55, GOL: 0.65 }[posicao] ?? 0.25;
+  return minutos.map((minuto) => {
+    const r = Math.random();
+    const foco = r < pesoAtaque ? "ataque" : r < pesoAtaque + pesoDefesa ? "defesa" : "neutro";
+    return { minuto, foco };
+  });
+}
+
+export const ACOES_ATAQUE = [
+  { id: "arriscar", label: "Arriscar a jogada", icone: "🎯", chanceMult: 1.35, cartaoMult: 1, desc: "Mais chance do gol ser seu — mas se não der certo, o time perde a posse." },
+  { id: "seguro", label: "Jogar simples", icone: "🔒", chanceMult: 0.85, cartaoMult: 0.9, desc: "Menos risco pro time, mas menos chance de ser você a decidir." },
+  { id: "cruzar", label: "Tocar pro companheiro", icone: "🤝", chanceMult: 1.05, cartaoMult: 0.9, cruza: true, desc: "Boa chance de assistência, mas o gol não conta pra você." },
+];
+
+export const ACOES_DEFESA = [
+  { id: "entrar_forte", label: "Entrar forte na disputa", icone: "💥", desarmeMult: 1.35, cartaoMult: 1.9, desc: "Mais chance de tirar a bola — mais risco de cartão." },
+  { id: "posicionar", label: "Se posicionar e esperar", icone: "🧱", desarmeMult: 0.95, cartaoMult: 0.55, desc: "Mais seguro, mas dá mais liberdade pro atacante adversário." },
+];
+
+/* Resolve um lance do roteiro contra o estado atual da partida.
+   estado: { golsMeu, golsAdv, cartoes: {amarelo,vermelho}, fadiga (0-1) }
+   ctx: { posicao, postura, forcaClube, adversarioForca, adversario, classico }
+   decisaoId: id da ação escolhida (só relevante quando foco !== "neutro").
+   Se o lance exige decisão e nenhuma foi passada, devolve precisaDecisao:true
+   com as opções — quem chama decide como perguntar (ou escolhe automático). */
+export function resolverLance(estado, slot, ctx, decisaoId) {
+  const { minuto, foco } = slot;
+  const { situacao, finalDeJogo } = situacaoAtual(estado.golsMeu, estado.golsAdv, minuto);
+  const ajuste = ajustesDoContexto({ situacao });
+  const post = POSTURAS_JOGO.find((p) => p.id === ctx.postura) || POSTURAS_JOGO[1];
+  const diferenca = clamp((ctx.forcaClube - (ctx.adversarioForca ?? 70)) / 100, -0.35, 0.35);
+  const fadigaPenal = 1 - (estado.fadiga || 0) * 0.22;
+
+  if (foco === "neutro") {
+    const chanceGolMeu = clamp(0.085 + diferenca * 0.45, 0.02, 0.32) * post.golMult * ajuste.chanceMult * fadigaPenal;
+    const chanceGolAdv = clamp(0.085 - diferenca * 0.45, 0.02, 0.32) * (2 - post.golMult);
+    const r = Math.random();
+    if (r < chanceGolMeu) return { estado: { ...estado, golsMeu: estado.golsMeu + 1 }, evento: { minuto, tipo: "gol", meuTime: true, texto: `⚽ Gol do seu time aos ${minuto}'!` } };
+    if (r < chanceGolMeu + chanceGolAdv) return { estado: { ...estado, golsAdv: estado.golsAdv + 1 }, evento: { minuto, tipo: "gol", meuTime: false, texto: `⚽ Gol do ${ctx.adversario} aos ${minuto}'.` } };
+    return { estado, evento: { minuto, tipo: "chance", texto: `${minuto}' — lance de perigo no jogo, sem gol.` } };
+  }
+
+  if (foco === "ataque") {
+    if (!decisaoId) return { estado, precisaDecisao: true, opcoes: ACOES_ATAQUE, minuto, situacao, finalDeJogo, texto: `${minuto}' — a bola sobra em boa posição de ataque.` };
+    const acao = ACOES_ATAQUE.find((a) => a.id === decisaoId) || ACOES_ATAQUE[1];
+    const chanceGol = clamp(0.22 + diferenca * 0.4, 0.06, 0.55) * post.golMult * ajuste.chanceMult * acao.chanceMult * fadigaPenal;
+    if (Math.random() < chanceGol) {
+      const souEu = !acao.cruza;
+      const souAssist = !!acao.cruza && Math.random() < 0.7;
+      return {
+        estado: { ...estado, golsMeu: estado.golsMeu + 1 },
+        evento: { minuto, tipo: "gol", meuTime: true, meu: souEu, assist: souAssist,
+          texto: souEu ? `⚽ GOL SEU aos ${minuto}'!` : souAssist ? `⚽ Gol do time aos ${minuto}' — assistência sua!` : `⚽ Gol do seu time aos ${minuto}'.` },
+      };
+    }
+    return { estado, evento: { minuto, tipo: "chance", meu: true, texto: `${minuto}' — você teve a chance (${acao.label.toLowerCase()}), mas não saiu gol.` } };
+  }
+
+  // foco === "defesa"
+  if (!decisaoId) return { estado, precisaDecisao: true, opcoes: ACOES_DEFESA, minuto, situacao, finalDeJogo, texto: `${minuto}' — o adversário ataca pelo seu lado.` };
+  const acao = ACOES_DEFESA.find((a) => a.id === decisaoId) || ACOES_DEFESA[1];
+  const chanceGolAdv = clamp(0.2 - diferenca * 0.4, 0.05, 0.5) * (2 - post.golMult) / acao.desarmeMult;
+  const levouCartao = Math.random() < 0.05 * acao.cartaoMult * (ctx.classico ? 1.4 : 1) * post.cartaoMult;
+  const novoEstado = levouCartao
+    ? { ...estado, cartoes: { ...estado.cartoes, amarelo: true } }
+    : estado;
+  if (Math.random() < chanceGolAdv) {
+    return { estado: { ...novoEstado, golsAdv: novoEstado.golsAdv + 1 },
+      evento: { minuto, tipo: "gol", meuTime: false, texto: `⚽ Gol do ${ctx.adversario} aos ${minuto}' — passou pelo seu setor.`, cartao: levouCartao } };
+  }
+  return { estado: novoEstado, evento: { minuto, tipo: levouCartao ? "cartao" : "defesa", meu: true,
+    texto: levouCartao ? `🟨 Cartão amarelo aos ${minuto}' (${acao.label.toLowerCase()}).` : `${minuto}' — você segurou bem na defesa (${acao.label.toLowerCase()}).` } };
+}
+
+/* Compara a nota média REAL da temporada com a nota esperada pro OVR do
+   jogador (mesma base da fórmula de nota, só que sem gols/assist/sorte) —
+   a diferença vira um fator moderado (±25% no crescimento, ±40% no freio
+   de declínio) que entra em evoluirAtributos. Deliberadamente contido:
+   é a média da temporada toda puxando o ponteiro, não um jogo isolado. */
+export function fatorDesempenhoTemporada(notaMediaReal, ovr) {
+  const notaEsperada = 6.3 + (ovr - 78) * 0.035;
+  const idx = clamp((notaMediaReal - notaEsperada) / 1.2, -1, 1);
+  return { idx, fatorCrescimento: 1 + idx * 0.25, fatorDeclinioReducao: clampR(1 - idx * 0.3, 0.6, 1.4) };
+}
+
 export function sortearCartoes(c, { postura, classico, adversarioForca, forcaClube }) {
   const post = POSTURAS_JOGO.find((p) => p.id === postura) || POSTURAS_JOGO[1];
   const base = CARTAO_POR_POSICAO[c.posicao] ?? 0.1;
@@ -425,7 +550,7 @@ export function bonusTraitsMataMata(c) {
 }
 
 
-export function evoluirAtributos(atual, potencial, idade, persona, bonusFoco, reducaoDeclinio = 1) {
+export function evoluirAtributos(atual, potencial, idade, persona, bonusFoco, reducaoDeclinio = 1, fatorDesempenho = 1) {
   // Personalidade inválida (save antigo, dado corrompido) derrubava o jogo inteiro aqui.
   // Agora cai num perfil padrão em vez de quebrar a tela.
   if (!persona || persona.picoFim == null) persona = PERSONALIDADES.find((p) => p.id === "ascensao") || PERSONALIDADES[0];
@@ -437,7 +562,7 @@ export function evoluirAtributos(atual, potencial, idade, persona, bonusFoco, re
     const focoMult = bonusFoco === id ? 1.5 : 1;
     if (idade < persona.picoFim) {
       const gap = potencial[id] - novo[id];
-      const passo = gap * 0.18 * persona.taxaCresc * focoMult;
+      const passo = gap * 0.18 * persona.taxaCresc * focoMult * fatorDesempenho;
       novo[id] = clampR(Math.round(novo[id] + passo), min, max);
     } else if (idade >= persona.declinioApartir) {
       // Velocidade e físico caem 40% mais rápido que passe/finalização — curva de envelhecimento real

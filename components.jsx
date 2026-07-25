@@ -153,6 +153,53 @@ export function PodiumBolaDeOuro({ finalistas, aoConcluir }) {
   );
 }
 
+// Popup da partida ao vivo: placar em tempo real, log de eventos subindo, e
+// botões de decisão quando o lance atual pede escolha do jogador.
+export function PartidaAoVivoPopup({ pv, onDecisao, onContinuar }) {
+  if (!pv) return null;
+  const { estado, eventos, ctx, pendente, concluida } = pv;
+  const ultimoMinuto = eventos.length ? eventos[eventos.length - 1].minuto : 0;
+  const meusGols = estado.golsMeu, advGols = estado.golsAdv;
+  return (
+    <PopupOverlay>
+      <Card className="border-amber-500/40">
+        <div className="text-center mb-2">
+          <div className="text-[9px] text-zinc-500 uppercase tracking-widest">{ctx.souCasa ? "🏠 Em casa" : "✈️ Fora"} {ctx.classico ? "· ⚔️ Clássico" : ""}</div>
+          <div className="flex items-center justify-center gap-3 mt-1">
+            <span className="font-stat font-black text-3xl">{ctx.souCasa ? meusGols : advGols}</span>
+            <span className="text-zinc-600 text-sm">x</span>
+            <span className="font-stat font-black text-3xl">{ctx.souCasa ? advGols : meusGols}</span>
+          </div>
+          <div className="text-xs text-zinc-400 mt-1">vs {ctx.adversario} {concluida ? "— fim de jogo" : `— ${ultimoMinuto}'`}</div>
+        </div>
+        <div className="bg-zinc-950/40 rounded-sm p-2 mb-3 max-h-32 overflow-y-auto flex flex-col-reverse gap-1">
+          {eventos.length === 0 && <div className="text-[11px] text-zinc-500 text-center">Bola rolando...</div>}
+          {[...eventos].reverse().map((e, i) => (
+            <div key={i} className={`text-[11px] ${e.tipo === "gol" && e.meu ? "text-amber-400 font-bold" : e.tipo === "cartao" ? "text-yellow-400" : "text-zinc-400"}`}>{e.texto}</div>
+          ))}
+        </div>
+        {pendente ? (
+          <>
+            <div className="text-xs text-zinc-300 mb-2 text-center">{pendente.texto}</div>
+            <div className="grid gap-1.5">
+              {pendente.opcoes.map((op) => (
+                <button key={op.id} onClick={() => onDecisao(op.id)} className="text-left px-3 py-2 rounded-sm border border-zinc-800 hover:border-amber-500 transition-colors">
+                  <div className="text-xs font-bold">{op.icone} {op.label}</div>
+                  <div className="text-[10px] text-zinc-500">{op.desc}</div>
+                </button>
+              ))}
+            </div>
+          </>
+        ) : !concluida ? (
+          <Button onClick={onContinuar}>Continuar</Button>
+        ) : (
+          <div className="text-center text-[10px] text-zinc-500 uppercase tracking-widest">Apurando o resultado...</div>
+        )}
+      </Card>
+    </PopupOverlay>
+  );
+}
+
 export function FichaPartida({ jogo, clubeNome, posicao, onClose }) {
   if (!jogo) return null;
   const venceu = jogo.resultado === "V", empatou = jogo.resultado === "E";
@@ -213,8 +260,17 @@ export function FichaPartida({ jogo, clubeNome, posicao, onClose }) {
         {jogo.competicao && <div className="flex justify-between"><span className="text-zinc-500">Competição</span><span>{jogo.competicao === "liga" ? "Liga nacional" : jogo.competicao}</span></div>}
         <div className="flex justify-between"><span className="text-zinc-500">Sua participação</span><span>{(jogo.golsMinha || 0) + (jogo.assistMinha || 0) > 0 ? `${jogo.golsMinha || 0}G ${jogo.assistMinha || 0}A` : "sem participação direta"}</span></div>
       </div>
+      {jogo.eventos?.length > 0 && (
+        <div className="grid gap-1 text-[11px] border-t border-zinc-800 pt-2.5 mt-2.5 max-h-40 overflow-y-auto">
+          <div className="text-[9px] text-zinc-600 uppercase tracking-widest mb-0.5">Como o jogo aconteceu</div>
+          {jogo.eventos.map((e, i) => (
+            <div key={i} className={e.tipo === "gol" && e.meu ? "text-amber-400 font-bold" : e.tipo === "cartao" ? "text-yellow-400" : "text-zinc-500"}>{e.texto}</div>
+          ))}
+        </div>
+      )}
       {onClose && <div className="mt-3"><Button variant="ghost" onClick={onClose}>Fechar</Button></div>}
     </Card>
+
   );
 }
 

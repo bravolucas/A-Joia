@@ -1843,8 +1843,11 @@ function resolverTemporada(c, extraStats) {
     const golsMinha = eventos.filter((e) => e.tipo === "gol" && e.meu).length;
     const assistMinha = eventos.filter((e) => e.tipo === "gol" && e.assist).length;
     const resultado = estado.golsMeu > estado.golsAdv ? "V" : estado.golsMeu === estado.golsAdv ? "E" : "D";
-    const amarelo = eventos.some((e) => e.tipo === "cartao");
-    const susp = amarelo ? aplicarCartao(c, { amarelo: true, vermelho: false }) : { suspendeu: 0 };
+    const cartaoEvento = eventos.find((e) => e.cartao);
+    const vermelho = !!cartaoEvento?.vermelho;
+    const segundoAmarelo = !!cartaoEvento?.segundoAmarelo;
+    const amarelo = !!cartaoEvento && !vermelho;
+    const susp = cartaoEvento ? aplicarCartao(c, { amarelo, vermelho }) : { suspendeu: 0 };
     const post = ctx.postura || "normal";
 
     const nota = notaDaPartida(c, {
@@ -1857,9 +1860,9 @@ function resolverTemporada(c, extraStats) {
       golsMeu: estado.golsMeu, golsAdv: estado.golsAdv, resultado,
       golsMinha, assistMinha, numero: ta.rodadaAtual + 1,
       casa: ctx.souCasa, competicao: "liga", classico: ctx.classico, postura: post,
-      amarelo, vermelho: false, segundoAmarelo: false,
+      amarelo, vermelho, segundoAmarelo,
       suspensaoGerada: susp.suspendeu, motivoSuspensao: susp.motivo,
-      nota: clamp(nota, 4.5, 10), eventos,
+      nota: clamp(nota - (vermelho ? 1.2 : 0), 4.5, 10), eventos,
     };
 
     logHist(c, `${resultado === "V" ? "✅" : resultado === "E" ? "➖" : "❌"} ${resultado === "V" ? "Venceu" : resultado === "E" ? "Empatou com" : "Perdeu para"} o ${ctx.adversario} por ${Math.max(estado.golsMeu, estado.golsAdv)}x${Math.min(estado.golsMeu, estado.golsAdv)}${golsMinha ? ` — ${golsMinha} gol(s) seu(s)` : ""}${assistMinha ? `, ${assistMinha} assistência(s)` : ""}.`);

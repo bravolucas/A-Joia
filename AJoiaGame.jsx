@@ -3209,7 +3209,7 @@ function resolverTemporada(c, extraStats) {
                           const linhas = Object.values(carreira.temporadaAndamento.tabela).sort((a, b) => b.pts - a.pts || b.sg - a.sg).map((row, i) => ({ ...row, posicao: i + 1 }));
                           const minhaLinha = linhas.find((r) => r.clube.nome === carreira.clube.nome);
                           const topN = linhas.slice(0, 6);
-                          const mostrar = topN.some((r) => r.clube.nome === carreira.clube.nome) ? topN : [...topN, minhaLinha];
+                          const mostrar = (topN.some((r) => r.clube.nome === carreira.clube.nome) ? topN : [...topN, minhaLinha]).filter((r) => r && r.clube);
                           return mostrar.map((row) => (
                             <div key={row.clube.nome} className={`flex items-center justify-between text-[11px] py-1 px-1.5 rounded-sm ${row.clube.nome === carreira.clube.nome ? "bg-emerald-500/10 border border-emerald-500/30" : ""}`}>
                               <span className="flex items-center gap-1.5 truncate"><span className="font-mono text-zinc-500 w-4">{row.posicao}º</span><ClubDot club={row.clube} size={14} /><span className={row.clube.nome === carreira.clube.nome ? "font-bold text-emerald-400" : "text-zinc-400"}>{row.clube.nome}{row.clube.nome === carreira.clube.nome ? " (você)" : ""}</span></span>

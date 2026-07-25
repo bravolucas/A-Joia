@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { montarSave, salvarLocal, carregarLocal, apagarLocal, listarSaves, existeAlgumSave, baixarSave, lerArquivoSave, formatarData, normalizarSave, SLOTS } from "./save.js";
 import { ANO_INICIO, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPS_PAIS, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
-import { agregarPorCompeticao, ajustarMeta, ajustesDoContexto, analisarJogos, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, creditarTitulo, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, forcaEfetivaClube, formatarDinheiro, gerarContextoLance, gerarElenco, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearConcorrente, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, todosJogosCarreira, valorDeMercado, valorMundo, veredito } from "./lib.js";
+import { agregarPorCompeticao, ajustarMeta, ajustesDoContexto, analisarJogos, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, creditarTitulo, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, forcaEfetivaClube, formatarDinheiro, gerarColetivaPosJogo, gerarContextoLance, gerarElenco, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearConcorrente, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, todosJogosCarreira, valorDeMercado, valorMundo, veredito } from "./lib.js";
 import { AttrBarDelta, AttrRadar, BallIcon, Button, CalendarioTemporadaPopup, Card, ClubDot, Confetti, CountUp, CurvaEvolucao, Diamond, FichaPartida, FreeKickMini, GoalMini, JogadorCard, LeitorNoticia, PartidaAoVivoPopup, PasseMini, PlayerFutCard, PodiumBolaDeOuro, PopupOverlay, SilhuetaJogador, Sparkle, TimingBar, TrophyIcon } from "./components.jsx";
 
 export default function AJoiaGame() {
@@ -77,6 +77,7 @@ export default function AJoiaGame() {
   const [pendingLanceJogo, setPendingLanceJogo] = useState(null);
   const [lanceMiniResultado, setLanceMiniResultado] = useState(null);
   const [partidaAoVivo, setPartidaAoVivo] = useState(null);
+  const [pendingColetivaPosJogo, setPendingColetivaPosJogo] = useState(null);
   const [detalhesAbertos, setDetalhesAbertos] = useState(false);
   const [jogadorCardAberto, setJogadorCardAberto] = useState(false);
   const [filtroHistorico, setFiltroHistorico] = useState("todos");
@@ -1868,6 +1869,27 @@ function resolverTemporada(c, extraStats) {
     logHist(c, `${resultado === "V" ? "✅" : resultado === "E" ? "➖" : "❌"} ${resultado === "V" ? "Venceu" : resultado === "E" ? "Empatou com" : "Perdeu para"} o ${ctx.adversario} por ${Math.max(estado.golsMeu, estado.golsAdv)}x${Math.min(estado.golsMeu, estado.golsAdv)}${golsMinha ? ` — ${golsMinha} gol(s) seu(s)` : ""}${assistMinha ? `, ${assistMinha} assistência(s)` : ""}.`);
 
     setPartidaAoVivo(null);
+    const coletiva = gerarColetivaPosJogo(meuResultadoRodada);
+    if (coletiva) {
+      setPendingColetivaPosJogo({ info: coletiva, resumeData: { c, ta, tabela, historico, meuResultadoRodada } });
+      return;
+    }
+    concluirRodada(c, ta, { tabela, historico, meuResultadoRodada, golsRestantes: ta.golsRestantes, assistRestantes: ta.assistRestantes });
+  }
+
+  /* Resolve a coletiva que nasceu de um jogo marcante — mesmo efeito por tom
+     da coletiva de pré-temporada, só que reagindo ao que aconteceu na partida.
+     Só depois de responder é que a rodada termina de fato. */
+  function resolverColetivaPosJogo(tom) {
+    const { c, ta, tabela, historico, meuResultadoRodada } = pendingColetivaPosJogo.resumeData;
+    c.fama = clamp(c.fama + (tom.efeito.fama || 0), 0, 100);
+    c.calorMidia = clampR((c.calorMidia ?? 20) + (tom.efeito.calorMidia || 0), 0, 100);
+    c.tecnicoConfianca = clampR((c.tecnicoConfianca ?? 60) + (tom.efeito.tecnicoConfianca || 0), 0, 100);
+    c.elencoMoral = clampR((c.elencoMoral ?? 60) + (tom.efeito.elenco || 0), 0, 100);
+    c.relacaoDiretoria = clampR((c.relacaoDiretoria ?? 40) + (tom.efeito.diretoria || 0), 0, 100);
+    if (tom.efeito.torcida) setTorcidaClube(c, c.clube.nome, tom.efeito.torcida);
+    logHist(c, `Coletiva pós-jogo: ${tom.label.toLowerCase()}.`);
+    setPendingColetivaPosJogo(null);
     concluirRodada(c, ta, { tabela, historico, meuResultadoRodada, golsRestantes: ta.golsRestantes, assistRestantes: ta.assistRestantes });
   }
 
@@ -3755,6 +3777,38 @@ function resolverTemporada(c, extraStats) {
                           const itens = Object.entries(t.efeito).filter(([, v]) => v);
                           return (
                             <button key={t.id} onClick={() => resolverColetiva(t)} className="text-left px-3 py-2.5 rounded-sm border border-zinc-800 hover:border-amber-500 transition-all">
+                              <div className="text-xs font-bold">{t.icone} {t.label}</div>
+                              <div className="text-[10px] text-zinc-500 mt-0.5">{t.desc}</div>
+                              <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1.5">
+                                {itens.map(([k, v]) => {
+                                  const ruim = k === "calorMidia" ? v > 0 : v < 0;
+                                  return <span key={k} className={`text-[9px] font-mono ${ruim ? "text-red-400" : "text-emerald-400"}`}>{rotulos[k] || k} {v > 0 ? "+" : ""}{v}</span>;
+                                })}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      </div>
+                    </Card>
+                  </PopupOverlay>
+                )}
+
+                {pendingColetivaPosJogo && (
+                  <PopupOverlay>
+                    <Card padded={false} className="border-amber-500/40 overflow-hidden">
+                      <div className="relative h-20" style={{ background: `radial-gradient(circle at 20% 30%, rgba(255,255,255,0.35) 0%, transparent 8%), radial-gradient(circle at 55% 60%, rgba(255,255,255,0.28) 0%, transparent 6%), radial-gradient(circle at 80% 25%, rgba(255,255,255,0.3) 0%, transparent 7%), radial-gradient(circle at 35% 80%, rgba(255,255,255,0.2) 0%, transparent 6%), linear-gradient(180deg, #26210f 0%, #171308 100%)` }}>
+                        <div className="absolute bottom-2 left-5 text-[10px] text-amber-400 uppercase tracking-widest font-sport font-bold">{pendingColetivaPosJogo.info.icone} Coletiva pós-jogo</div>
+                      </div>
+                      <div className="p-5">
+                      <p className="text-sm mb-1">{pendingColetivaPosJogo.info.pergunta}</p>
+                      <p className="text-[10px] text-zinc-500 mb-3">Toda declaração tem preço — o que agrada um lado costuma irritar outro.</p>
+                      <div className="grid gap-1.5">
+                        {TONS_COLETIVA.map((t) => {
+                          const rotulos = { torcida: "Torcida", elenco: "Elenco", tecnicoConfianca: "Técnico", diretoria: "Diretoria", calorMidia: "Pressão", fama: "Fama" };
+                          const itens = Object.entries(t.efeito).filter(([, v]) => v);
+                          return (
+                            <button key={t.id} onClick={() => resolverColetivaPosJogo(t)} className="text-left px-3 py-2.5 rounded-sm border border-zinc-800 hover:border-amber-500 transition-all">
                               <div className="text-xs font-bold">{t.icone} {t.label}</div>
                               <div className="text-[10px] text-zinc-500 mt-0.5">{t.desc}</div>
                               <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-1.5">

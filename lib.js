@@ -356,6 +356,24 @@ export function resolverLance(estado, slot, ctx, decisaoId) {
     texto: levouCartao ? textoCartao : `${minuto}' — você segurou bem na defesa (${acao.label.toLowerCase()}).` } };
 }
 
+/* Nem todo jogo vira coletiva — só os marcantes. A pergunta nasce do que
+   realmente aconteceu (placar, cartão, clássico), não é genérica. Se mais
+   de um critério bate, o primeiro da lista (o mais dramático) vence. */
+export function gerarColetivaPosJogo(r) {
+  if (!r) return null;
+  if (r.vermelho) return { tipo: "expulsao", icone: "🟥",
+    pergunta: `Expulso contra o ${r.adversario} — o que rolou naquele lance, e o time sente sua falta em campo?` };
+  if ((r.golsMinha || 0) >= 3) return { tipo: "hattrick", icone: "🎩",
+    pergunta: `Três gols seus contra o ${r.adversario}. Dá pra descrever essa atuação?` };
+  if (r.classico && r.resultado === "V" && (r.golsMinha || 0) > 0) return { tipo: "heroiClassico", icone: "⚔️",
+    pergunta: `Você decidiu o clássico contra o ${r.adversario}. Como foi sentir esse peso?` };
+  if (r.classico && r.resultado === "D") return { tipo: "derrotaClassico", icone: "😞",
+    pergunta: `Derrota no clássico pro ${r.adversario}. Como o grupo lida com essa cobrança agora?` };
+  if (r.resultado === "D" && (r.golsAdv - r.golsMeu) >= 3) return { tipo: "goleada", icone: "📉",
+    pergunta: `Goleada sofrida pro ${r.adversario} (${r.golsMeu} a ${r.golsAdv}). O que faltou hoje?` };
+  return null;
+}
+
 /* Compara a nota média REAL da temporada com a nota esperada pro OVR do
    jogador (mesma base da fórmula de nota, só que sem gols/assist/sorte) —
    a diferença vira um fator moderado (±25% no crescimento, ±40% no freio

@@ -1,4 +1,4 @@
-import { AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, JANELAS_BRASIL, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
+import { AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
 
 export function potencialDaOrigem(origem, posicao) {
   const base = { velocidade: 64, finalizacao: 64, passe: 64, drible: 64, defesa: 64, fisico: 64, fintas: 3, pernaRuim: 3 };
@@ -1611,14 +1611,37 @@ const COMPOSICAO_ELENCO = [["GOL", 2], ["ZAG", 3], ["LD", 1], ["LE", 1], ["VOL",
 export function gerarMundoJogadores() {
   const jogadores = [];
   let id = 1;
+  const nomeParaNac = (clube) => clube.liga === "brasileirao" || clube.liga === "serieB"
+    ? (Math.random() < 0.85 ? "BRA" : pick(NACS_MUNDO))
+    : (Math.random() < 0.55 ? { inglaterra: "ENG", espanha: "ESP", italia: "ITA", alemanha: "ALE", franca: "FRA", portugal: "POR" }[clube.liga] || pick(NACS_MUNDO) : pick(NACS_MUNDO));
+  const clubesComElencoReal = new Set(JOGADORES_REAIS_BASE.map((j) => j.time));
+
   CLUBES.forEach((clube) => {
+    // clube coberto pela base real (planilha) — usa nome/posição/OVR de verdade em vez de sortear
+    if (clubesComElencoReal.has(clube.nome)) {
+      JOGADORES_REAIS_BASE.filter((j) => j.time === clube.nome).forEach((jr) => {
+        const idade = rand(18, 33);
+        const teto = clampR(jr.ovr + rand(0, idade < 23 ? 12 : 4), 58, 99);
+        const nac = nomeParaNac(clube);
+        jogadores.push({
+          id: id++, nome: jr.nome, nac, posicao: jr.posicao,
+          idade, ovr: jr.ovr, potencial: teto, picoIdade: rand(26, 30), clubeNome: clube.nome, clubeOrigem: clube.nome, liga: clube.liga,
+          traco: pick(TRACOS_MUNDO).id, estilo: pick(ESTILOS_JOGO_MUNDO).id,
+          gols: 0, assist: 0, jogos: 0, nota: 0,
+          carreira: { gols: 0, assist: 0, jogos: 0, titulos: 0, bolasDeOuro: 0, premios: 0, temporadas: 0 },
+          aposentado: false,
+        });
+      });
+      return;
+    }
+    // clube sem base real — elenco gerado proceduralmente, como já era
     const extra = clube.forca >= 85 ? 2 : clube.forca >= 78 ? 1 : 0;
     COMPOSICAO_ELENCO.forEach(([posId, qtd]) => {
       for (let i = 0; i < qtd + (extra > 0 && Math.random() < 0.4 ? 1 : 0); i++) {
         const idade = rand(18, 33);
         const teto = clampR(Math.round(clube.forca + rand(-6, 9)), 58, 96);
         const ovr = idade < 24 ? clampR(teto - rand(4, 14), 52, 92) : clampR(teto - rand(0, 4), 55, 95);
-        const nac = clube.liga === "brasileirao" || clube.liga === "serieB" ? (Math.random() < 0.85 ? "BRA" : pick(NACS_MUNDO)) : (Math.random() < 0.55 ? { inglaterra: "ENG", espanha: "ESP", italia: "ITA", alemanha: "ALE", franca: "FRA", portugal: "POR" }[clube.liga] || pick(NACS_MUNDO) : pick(NACS_MUNDO));
+        const nac = nomeParaNac(clube);
         jogadores.push({
           id: id++, nome: nomeMundo(nac), nac, posicao: posId,
           idade, ovr, potencial: Math.max(ovr, teto), picoIdade: rand(26, 30), clubeNome: clube.nome, clubeOrigem: clube.nome, liga: clube.liga,

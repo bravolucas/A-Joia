@@ -115,6 +115,29 @@ export const LENDAS = [
   { nome: "Modrić", stats: { velocidade: 78, finalizacao: 78, passe: 96, drible: 92, defesa: 56, fisico: 68, fintas: 4, pernaRuim: 4 } },
 ];
 
+/* Traços de personalidade sorteados aleatoriamente pros jogadores do mundo —
+   influenciam decisão de transferência (não é só flavor text, mexe na
+   simulação: quem é leal resiste a sair, quem é ambicioso busca clube maior,
+   quem é nostálgico pode voltar pro clube que revelou). */
+export const TRACOS_MUNDO = [
+  { id: "leal", label: "Leal ao clube", desc: "Resiste a sair mesmo com propostas melhores.", chanceTransferenciaMult: 0.4 },
+  { id: "ambicioso", label: "Ambicioso", desc: "Busca sempre um clube maior que o atual.", chanceTransferenciaMult: 1.4, prefereClubeMaior: true },
+  { id: "mercenario", label: "Mercenário", desc: "Vai atrás de quem paga mais, sem apego à camisa.", chanceTransferenciaMult: 1.6 },
+  { id: "nostalgico", label: "Nostálgico", desc: "Sonha em voltar pro clube que o revelou.", voltaParaClubeOrigem: true },
+  { id: "patriota", label: "Apegado ao país natal", desc: "Evita se transferir pra fora da liga do país de origem.", prefereMesmoPais: true },
+  { id: "aventureiro", label: "Aventureiro", desc: "Gosta de conhecer ligas e países novos.", chanceTransferenciaMult: 1.3 },
+  { id: "estavel", label: "Estável", desc: "Não gosta de mudanças, raramente pede pra sair.", chanceTransferenciaMult: 0.6 },
+];
+
+export const ESTILOS_JOGO_MUNDO = [
+  { id: "artilheiro", label: "Artilheiro nato" },
+  { id: "criativo", label: "Criador de jogadas" },
+  { id: "lutador", label: "Guerreiro / raça" },
+  { id: "tecnico", label: "Categoria técnica" },
+  { id: "fisico", label: "Físico / aéreo" },
+  { id: "velocista", label: "Explosivo" },
+];
+
 export const POSICOES = [
   { id: "GOL", label: "Goleiro", pesos: { defesa: 3.2, finalizacao: 2.2, fisico: 1.8, drible: 1.4, passe: 1.0, velocidade: 0.6 }, golBase: 0, assistBase: 0.01 },
   { id: "ZAG", label: "Zagueiro", pesos: { defesa: 3.0, fisico: 2.4, velocidade: 1.0, passe: 0.9, finalizacao: 0.3, drible: 0.3 }, golBase: 0.06, assistBase: 0.03 },
@@ -1284,6 +1307,20 @@ export const NOMES_MUNDO = {
 };
 
 export const NACS_MUNDO = ["BRA", "ARG", "ESP", "FRA", "ENG", "ALE", "ITA", "POR", "HOL", "BEL", "URU", "COL", "CRO", "MAR", "JAP", "EUA", "MEX", "SNE", "SUI", "DIN", "EQU", "COR", "NIG", "CMR", "ALG", "CSC", "CRC", "PAR", "CHI", "PER", "BOL", "POL", "SUE", "AUT", "HUN", "TCH", "SER", "RUS", "ESC", "GAL", "IRN", "IRL", "ROM", "BUL", "GRE", "TUR", "SVK", "SLO", "BOS", "ISL", "NOR", "ISR", "ARS", "IRA", "AUS", "QAT", "CHN", "IRQ", "CDN", "KUW", "EAU", "EGI", "TUN", "GAN", "AFS", "ANG", "TOG", "RDC", "CAN", "JAM", "HON", "PAN", "TRI", "HAI", "ELS", "NZL"];
+
+/* Confederação de cada seleção — usada pra sortear adversário de eliminatórias
+   sempre dentro do mesmo continente (na vida real ninguém disputa eliminatória
+   contra seleção de outra confederação). */
+export const CONFEDERACAO_POR_NACAO = {
+  BRA: "CONMEBOL", ARG: "CONMEBOL", URU: "CONMEBOL", COL: "CONMEBOL", PAR: "CONMEBOL", CHI: "CONMEBOL", PER: "CONMEBOL", EQU: "CONMEBOL", BOL: "CONMEBOL",
+  FRA: "UEFA", ESP: "UEFA", POR: "UEFA", ENG: "UEFA", ITA: "UEFA", ALE: "UEFA", HOL: "UEFA", BEL: "UEFA", CRO: "UEFA", SUI: "UEFA", DIN: "UEFA",
+  POL: "UEFA", SUE: "UEFA", AUT: "UEFA", HUN: "UEFA", TCH: "UEFA", SER: "UEFA", RUS: "UEFA", ESC: "UEFA", GAL: "UEFA", IRN: "UEFA", IRL: "UEFA",
+  ROM: "UEFA", BUL: "UEFA", GRE: "UEFA", TUR: "UEFA", SVK: "UEFA", SLO: "UEFA", BOS: "UEFA", ISL: "UEFA", NOR: "UEFA", ISR: "UEFA",
+  JAP: "AFC", COR: "AFC", ARS: "AFC", IRA: "AFC", AUS: "AFC", QAT: "AFC", CHN: "AFC", IRQ: "AFC", CDN: "AFC", KUW: "AFC", EAU: "AFC",
+  MAR: "CAF", SNE: "CAF", NIG: "CAF", CMR: "CAF", ALG: "CAF", CSC: "CAF", EGI: "CAF", TUN: "CAF", GAN: "CAF", AFS: "CAF", ANG: "CAF", TOG: "CAF", RDC: "CAF",
+  EUA: "CONCACAF", MEX: "CONCACAF", CRC: "CONCACAF", CAN: "CONCACAF", JAM: "CONCACAF", HON: "CONCACAF", PAN: "CONCACAF", TRI: "CONCACAF", HAI: "CONCACAF", ELS: "CONCACAF",
+  NZL: "OFC",
+};
 
 export const EVENTOS_CLUBE = [
   { txt: "Patrocinador master investiu pesado na base do clube", delta: 3, positivo: true },

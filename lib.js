@@ -1,4 +1,4 @@
-import { AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESTADUAIS, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, JANELAS_BRASIL, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
+import { AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, JANELAS_BRASIL, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
 
 export function potencialDaOrigem(origem, posicao) {
   const base = { velocidade: 64, finalizacao: 64, passe: 64, drible: 64, defesa: 64, fisico: 64, fintas: 3, pernaRuim: 3 };
@@ -1377,6 +1377,11 @@ export function sortearAdversario(c, competicao) {
     const outras = NACIONALIDADES.filter((n) => n.id !== c.nacionalidade);
     return outras.length ? pick(outras).label : "seleção rival";
   }
+  if (competicao === "eliminatorias") {
+    const minhaConfederacao = CONFEDERACAO_POR_NACAO[c.nacionalidade];
+    const pool = NACIONALIDADES.filter((n) => n.id !== c.nacionalidade && CONFEDERACAO_POR_NACAO[n.id] === minhaConfederacao);
+    return pool.length ? pick(pool).label : "seleção rival continental";
+  }
   if (competicao === "classico") {
     const pool = CLUBES.filter((x) => x.liga === c.clube.liga && x.nome !== c.clube.nome);
     return pool.length ? pick(pool).nome : "rival";
@@ -1599,32 +1604,38 @@ export function nomeMundo(nac) {
   return `${pick(n.pri)} ${pick(n.sob)}`;
 }
 
+/* Composição realista de um elenco (~24 jogadores): posição -> quantidade.
+   Clubes maiores têm elenco um pouco mais fundo (bancos de reserva maiores). */
+const COMPOSICAO_ELENCO = [["GOL", 2], ["ZAG", 3], ["LD", 1], ["LE", 1], ["VOL", 2], ["MC", 2], ["MEI", 2], ["PD", 1], ["PE", 1], ["SA", 1], ["ATA", 2]];
+
 export function gerarMundoJogadores() {
   const jogadores = [];
   let id = 1;
-  const clubesRelevantes = CLUBES.filter((c) => c.liga !== "serieB");
-  clubesRelevantes.forEach((clube) => {
-    const n = clube.forca >= 85 ? 4 : clube.forca >= 78 ? 3 : 2;
-    for (let i = 0; i < n; i++) {
-      const idade = rand(18, 32);
-      const teto = clampR(Math.round(clube.forca + rand(-6, 9)), 58, 96);
-      const ovr = idade < 24 ? clampR(teto - rand(4, 14), 52, 92) : clampR(teto - rand(0, 4), 55, 95);
-      const nac = clube.liga === "brasileirao" ? (Math.random() < 0.8 ? "BRA" : pick(NACS_MUNDO)) : (Math.random() < 0.55 ? { inglaterra: "ENG", espanha: "ESP", italia: "ITA", alemanha: "ALE", franca: "FRA", portugal: "POR" }[clube.liga] || pick(NACS_MUNDO) : pick(NACS_MUNDO));
-      jogadores.push({
-        id: id++, nome: nomeMundo(nac), nac, posicao: pick(POSICOES).id,
-        idade, ovr, potencial: Math.max(ovr, teto), picoIdade: rand(26, 30), clubeNome: clube.nome, liga: clube.liga,
-        gols: 0, assist: 0, jogos: 0, nota: 0,
-        carreira: { gols: 0, assist: 0, jogos: 0, titulos: 0, bolasDeOuro: 0, premios: 0, temporadas: 0 },
-        aposentado: false,
-      });
-    }
+  CLUBES.forEach((clube) => {
+    const extra = clube.forca >= 85 ? 2 : clube.forca >= 78 ? 1 : 0;
+    COMPOSICAO_ELENCO.forEach(([posId, qtd]) => {
+      for (let i = 0; i < qtd + (extra > 0 && Math.random() < 0.4 ? 1 : 0); i++) {
+        const idade = rand(18, 33);
+        const teto = clampR(Math.round(clube.forca + rand(-6, 9)), 58, 96);
+        const ovr = idade < 24 ? clampR(teto - rand(4, 14), 52, 92) : clampR(teto - rand(0, 4), 55, 95);
+        const nac = clube.liga === "brasileirao" || clube.liga === "serieB" ? (Math.random() < 0.85 ? "BRA" : pick(NACS_MUNDO)) : (Math.random() < 0.55 ? { inglaterra: "ENG", espanha: "ESP", italia: "ITA", alemanha: "ALE", franca: "FRA", portugal: "POR" }[clube.liga] || pick(NACS_MUNDO) : pick(NACS_MUNDO));
+        jogadores.push({
+          id: id++, nome: nomeMundo(nac), nac, posicao: posId,
+          idade, ovr, potencial: Math.max(ovr, teto), picoIdade: rand(26, 30), clubeNome: clube.nome, clubeOrigem: clube.nome, liga: clube.liga,
+          traco: pick(TRACOS_MUNDO).id, estilo: pick(ESTILOS_JOGO_MUNDO).id,
+          gols: 0, assist: 0, jogos: 0, nota: 0,
+          carreira: { gols: 0, assist: 0, jogos: 0, titulos: 0, bolasDeOuro: 0, premios: 0, temporadas: 0 },
+          aposentado: false,
+        });
+      }
+    });
   });
   return { jogadores, temporada: 0, historicoBolaDeOuro: [] };
 }
 
 export function simularTemporadaMundo(mundo) {
   const jogadores = mundo.jogadores.map((j) => {
-    if (j.aposentado) return j;
+    if (j.aposentado) return { ...j, idade: j.idade + 1 };
     const p = { ...j };
     const clube = CLUBES.find((x) => x.nome === p.clubeNome) || { forca: 70, liga: p.liga };
     const liga = LIGAS[clube.liga] || { mult: 0.8 };
@@ -1643,12 +1654,23 @@ export function simularTemporadaMundo(mundo) {
     else p.ovr = clampR(p.ovr - rand(0, 2) - Math.max(0, Math.round((p.idade - p.picoIdade - 2) * 0.6)), 40, 99);
     // aposentadoria
     if (p.idade >= 34 && (p.idade >= 39 || Math.random() < (p.idade - 33) * 0.2)) { p.aposentado = true; return p; }
-    // transferência: quem cresceu muito acima do clube tende a sair
+    // transferência: quem cresceu muito acima do clube tende a sair — traço de personalidade ajusta a chance e o destino
+    const traco = TRACOS_MUNDO.find((t) => t.id === p.traco);
+    const multTransf = traco?.chanceTransferenciaMult ?? 1;
     const gap = p.ovr - clube.forca;
-    if (gap > 5 && Math.random() < 0.35) {
-      const destinos = CLUBES.filter((x) => x.liga !== "serieB" && x.nome !== p.clubeNome && Math.abs(x.forca - p.ovr) <= 6);
-      if (destinos.length) { const d = pick(destinos); p.clubeNome = d.nome; p.liga = d.liga; }
-    } else if (gap < -10 && Math.random() < 0.3) {
+    // nostálgico: depois dos 27, pode voltar pro clube que o revelou, mesmo sem gap de força
+    if (traco?.voltaParaClubeOrigem && p.idade >= 27 && p.clubeNome !== p.clubeOrigem && Math.random() < 0.08) {
+      const origem = CLUBES.find((x) => x.nome === p.clubeOrigem);
+      if (origem) { p.clubeNome = origem.nome; p.liga = origem.liga; return p; }
+    }
+    if (gap > 5 && Math.random() < 0.35 * multTransf) {
+      let destinos = CLUBES.filter((x) => x.liga !== "serieB" && x.nome !== p.clubeNome && Math.abs(x.forca - p.ovr) <= 6);
+      if (traco?.prefereMesmoPais) { const mesmaLiga = destinos.filter((x) => x.liga === p.liga); if (mesmaLiga.length) destinos = mesmaLiga; }
+      if (destinos.length) {
+        const d = traco?.prefereClubeMaior ? destinos.reduce((a, b) => (b.forca > a.forca ? b : a)) : pick(destinos);
+        p.clubeNome = d.nome; p.liga = d.liga;
+      }
+    } else if (gap < -10 && Math.random() < 0.3 * multTransf) {
       const destinos = CLUBES.filter((x) => x.nome !== p.clubeNome && Math.abs(x.forca - p.ovr) <= 7);
       if (destinos.length) { const d = pick(destinos); p.clubeNome = d.nome; p.liga = d.liga; }
     }
@@ -1664,11 +1686,14 @@ export function simularTemporadaMundo(mundo) {
     jogadores.push({
       id: proxId++, nome: nomeMundo(nac), nac, posicao: pick(POSICOES).id,
       idade: rand(16, 19), ovr: clampR(teto - rand(10, 20), 48, 74), potencial: teto, picoIdade: rand(26, 30),
-      clubeNome: clube.nome, liga: clube.liga, gols: 0, assist: 0, jogos: 0, nota: 0,
+      clubeNome: clube.nome, clubeOrigem: clube.nome, liga: clube.liga,
+      traco: pick(TRACOS_MUNDO).id, estilo: pick(ESTILOS_JOGO_MUNDO).id,
+      gols: 0, assist: 0, jogos: 0, nota: 0,
       carreira: { gols: 0, assist: 0, jogos: 0, titulos: 0, bolasDeOuro: 0, premios: 0, temporadas: 0 }, aposentado: false,
     });
   }
-  return { ...mundo, jogadores, temporada: (mundo.temporada || 0) + 1 };
+  const jogadoresLimpos = jogadores.filter((j) => !j.aposentado || j.idade <= 45);
+  return { ...mundo, jogadores: jogadoresLimpos, temporada: (mundo.temporada || 0) + 1 };
 }
 
 export function scoreBolaDeOuro({ ovr, gols, assist, nota, ligaMult, titulos = 0 }) {

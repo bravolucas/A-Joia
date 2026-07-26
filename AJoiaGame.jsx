@@ -995,7 +995,7 @@ function concluirPartidaCopaDoMundo(c, ctx, resultado, golsMinha, assistMinha) {
    do mesmo jeito que a resolução estatística antiga fazia. */
 function iniciarSequenciaSelecao(c, card, competicaoId, jogoAtual, acumulado) {
   const compInfo = competicaoId === "continental" ? { ...COMPETICOES_SELECAO.continental, nome: continentalDaSelecao(c.nacionalidade) } : COMPETICOES_SELECAO[competicaoId];
-  const adversarioNome = sortearAdversario(c, "copaDoMundo");
+  const adversarioNome = sortearAdversario(c, competicaoId === "eliminatorias" ? "eliminatorias" : "copaDoMundo");
   const adversarioObj = NACIONALIDADES.find((n) => n.label === adversarioNome);
   const forcaSelecao = (nacDe(c.nacionalidade)?.forcaSelecao ?? 80) + (calcOVR(c.attrs, c.posicao) - 78) * 0.08;
   const { numLances } = definirImportanciaPartida({ faseMataMata: competicaoId === "eliminatorias" });
@@ -3894,15 +3894,19 @@ function resolverTemporada(c, extraStats) {
                   </div>
                 </Card>
 
-                <button onClick={() => setDetalhesAbertos((v) => !v)} className="w-full flex items-center justify-between glass rounded-md px-4 py-2.5 text-[10px] text-zinc-400 uppercase tracking-widest font-sport font-bold border border-white/10 hover:border-amber-500/30">
-                  <span>📂 Mais detalhes</span>
-                  <span className="text-zinc-600 normal-case">{detalhesAbertos ? "recolher ▲" : "expandir ▼"}</span>
-                </button>
+                <div className="flex gap-1.5">
+                  {[["clube", "👥 Elenco, Clube & Mercado"], ["selecao", "🌎 Seleção & Contrato"]].map(([id, label]) => (
+                    <button key={id} onClick={() => setSubAbaCarreira((v) => (v === id ? null : id))}
+                      className={`flex-1 rounded-md px-3 py-2.5 text-[10px] uppercase tracking-widest font-sport font-bold border ${subAbaCarreira === id ? "border-amber-500/50 text-amber-400 bg-amber-500/10" : "glass border-white/10 text-zinc-400 hover:border-amber-500/30"}`}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
                 </div>
 
                 </div>
 
-                {detalhesAbertos && (
+                {subAbaCarreira === "clube" && (
                   <>
                 <div className="row-2">
                 <Card>
@@ -4146,7 +4150,11 @@ function resolverTemporada(c, extraStats) {
                   <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{ width: `${clamp(((carreira.desgaste ?? 0) / 3) * 100, 4, 100)}%`, background: riscoLesao(carreira.desgaste).cor }} /></div>
                 </Card>
                 </div>
+                  </>
+                )}
 
+                {subAbaCarreira === "selecao" && (
+                  <>
                 <Card>
                   <button onClick={() => { setCalendarioMesAberto(janelasPorLiga(carreira.clube.liga)[0].inicioMes); setCalendarioAberto(true); }} className="w-full text-left">
                     <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2 flex items-center justify-between"><span>🗓️ Calendário da temporada</span><span className="text-amber-400 text-[9px] normal-case">ver calendário completo →</span></div>

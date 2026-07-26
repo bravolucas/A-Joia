@@ -169,19 +169,26 @@ export function TelaPartidaAoVivo({ pv, onDecisao, onContinuarSegundoTempo, onMu
   // posição aproximada da bola no campo, conforme o último lance (visual, não literal)
   const bolaY = !ultimoFoco ? 50 : ultimoFoco.tipo === "gol" ? (ultimoFoco.meuTime ? 12 : 88) : ultimoFoco.meu === true ? 30 : ultimoFoco.tipo === "defesa" ? 75 : 50;
 
-  const Formacao = ({ ladoEsquerdo, destaque }) => (
-    <div className="relative bg-emerald-950/40 rounded-sm h-full min-h-[220px] border border-zinc-800 overflow-hidden">
-      <div className="absolute inset-0" style={{ background: "repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0 24px, transparent 24px 48px)" }} />
-      <div className="absolute left-1/2 top-0 bottom-0 w-px bg-zinc-700/40" />
-      {[85, 65, 40, 15].map((y, row) => (
-        <div key={row} className="absolute w-full flex justify-around px-3" style={{ top: `${ladoEsquerdo ? y : 100 - y}%` }}>
-          {Array.from({ length: row === 0 ? 1 : row === 3 ? 3 : row === 2 ? 3 : 4 }).map((_, i) => (
-            <div key={i} className={`w-2.5 h-2.5 rounded-full ${destaque ? "bg-amber-400" : "bg-zinc-500"}`} />
-          ))}
+  const Formacao = ({ ladoEsquerdo, destaque, club, nomeExibicao }) => {
+    const cor = club?.cor || (destaque ? "#D8B44A" : "#71717a");
+    return (
+      <div className="relative bg-emerald-950/40 rounded-sm h-full min-h-[220px] border border-zinc-800 overflow-hidden">
+        <div className="absolute top-1.5 left-0 right-0 flex items-center justify-center gap-1.5 z-10">
+          {club ? <ClubDot club={club} size={16} /> : <span className="text-sm">{destaque ? "🔵" : "⚪"}</span>}
+          <span className="text-[10px] font-bold text-zinc-200 truncate max-w-[85%]">{nomeExibicao}</span>
         </div>
-      ))}
-    </div>
-  );
+        <div className="absolute inset-0" style={{ background: "repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0 24px, transparent 24px 48px)" }} />
+        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-zinc-700/40" />
+        {[85, 65, 40, 15].map((y, row) => (
+          <div key={row} className="absolute w-full flex justify-around px-3" style={{ top: `${ladoEsquerdo ? y : 100 - y}%` }}>
+            {Array.from({ length: row === 0 ? 1 : row === 3 ? 3 : row === 2 ? 3 : 4 }).map((_, i) => (
+              <div key={i} className="w-3 h-3 rounded-full border border-black/30" style={{ background: cor }} />
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <PopupOverlay largo>
@@ -207,7 +214,7 @@ export function TelaPartidaAoVivo({ pv, onDecisao, onContinuarSegundoTempo, onMu
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3">
-          <Formacao ladoEsquerdo destaque />
+          <Formacao ladoEsquerdo destaque club={ctx.meuClube} nomeExibicao={ctx.meuClube?.nome || "Você"} />
 
           <div className="flex flex-col gap-3">
             <div className="bg-zinc-950/40 rounded-sm p-3">
@@ -215,6 +222,7 @@ export function TelaPartidaAoVivo({ pv, onDecisao, onContinuarSegundoTempo, onMu
               {[
                 { label: "Chutes", meu: totalChutesMeu, adv: totalChutesAdv },
                 { label: "No alvo", meu: stats.chutesAlvoMeu, adv: stats.chutesAlvoAdv },
+                { label: "Faltas", meu: stats.faltasMeu || 0, adv: stats.faltasAdv || 0 },
                 { label: "Posse", meu: posseMeu, adv: 100 - posseMeu, sufixo: "%" },
               ].map((linha) => {
                 const total = Math.max(1, linha.meu + linha.adv);
@@ -239,7 +247,7 @@ export function TelaPartidaAoVivo({ pv, onDecisao, onContinuarSegundoTempo, onMu
             </div>
           </div>
 
-          <Formacao />
+          <Formacao club={ctx.adversarioObj} nomeExibicao={ctx.adversario} />
         </div>
 
         <div className="p-3 border-t border-zinc-800">
@@ -286,6 +294,144 @@ export function PopupConvocacao({ info, onClose }) {
           <p className="text-lg font-black mb-1">{querCopa ? "VOCÊ FOI CONVOCADO PRA COPA DO MUNDO!" : `Convocado para ${competicao.nome}!`}</p>
           <p className="text-xs text-zinc-400 mb-4">{querCopa ? "O sonho de qualquer jogador. A seleção conta com você no maior palco do futebol." : "A comissão técnica confirmou seu nome na lista."}</p>
           <Button onClick={onClose}>{querCopa ? "Vamos pro Mundial!" : "Bora representar!"}</Button>
+        </div>
+      </Card>
+    </PopupOverlay>
+  );
+}
+
+// Cartão de Carreira — o "resumo pra printar e guardar" no fim da carreira.
+// Navegável em páginas (Resumo / Conquistas / Trajetória / Seleção), reunindo
+// os dados que já existem espalhados pela carreira numa vitrine só, pensada
+// pra ser uma lembrança de verdade, não só mais uma tela de números.
+export function CartaoCarreira({ fim, temporadas, nome, posicao, onClose }) {
+  const [pagina, setPagina] = useState(0);
+  const c = fim.c;
+  const paginas = [
+    { id: "resumo", label: "Resumo", icone: "🃏" },
+    { id: "conquistas", label: "Conquistas", icone: "🏆" },
+    { id: "trajetoria", label: "Trajetória", icone: "🗺️" },
+    { id: "selecao", label: "Seleção", icone: "🌎" },
+  ];
+
+  const maiorValor = Math.max(0, ...(c.valorHistorico || []).map((v) => v.valor));
+  const melhorTemporada = [...temporadas].sort((a, b) => (b.nota || 0) - (a.nota || 0))[0];
+  const titulosFlat = Object.entries(c.titulosPorClube || {}).flatMap(([clube, lista]) => (lista || []).map((t) => ({ clube, titulo: t })));
+  const clubesDefendidos = Object.keys(c.camisaPorClube || {});
+  const nac = nacDe(c.nacionalidade);
+  const maisQuerido = Object.entries(c.torcidaPorClube || {}).sort((a, b) => b[1] - a[1])[0];
+
+  return (
+    <PopupOverlay largo>
+      <Card padded={false} className="border-amber-500/40 overflow-hidden">
+        <div className="relative p-5 text-center overflow-hidden" style={{ background: "radial-gradient(circle at 25% 15%, rgba(216,180,74,0.3) 0%, transparent 55%), linear-gradient(180deg,#1c1608 0%,#0d0a04 100%)" }}>
+          <div className="text-[9px] text-amber-400 uppercase tracking-widest mb-1 font-bold">🃏 Cartão de Carreira</div>
+          <div className="text-xl font-black text-zinc-100">{nome}</div>
+          <div className="text-xs text-zinc-400">{posicao} · pico {c.picoOvr} OVR · <span className="text-amber-400 font-bold">{fim.nivel.label}</span></div>
+        </div>
+
+        <div className="flex border-b border-zinc-800 overflow-x-auto">
+          {paginas.map((p, i) => (
+            <button key={p.id} onClick={() => setPagina(i)} className={`flex-1 whitespace-nowrap py-2.5 text-[10px] uppercase tracking-widest font-sport font-bold ${pagina === i ? "text-amber-400 border-b-2 border-amber-400" : "text-zinc-500"}`}>
+              {p.icone} {p.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="p-5 min-h-[300px] max-h-[60vh] overflow-y-auto">
+          {pagina === 0 && (
+            <div className="grid gap-3">
+              <PlayerFutCard nome={nome} posicao={posicao} ovr={c.picoOvr} clube="Aposentado" gols={c.gols} assist={c.assist} dinheiro={c.cofre} attrs={c.attrs} nacionalidade={c.nacionalidade} />
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-lg font-black text-zinc-100">{temporadas.length}</div><div className="text-[9px] text-zinc-500 uppercase">temporadas</div></div>
+                <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-lg font-black text-zinc-100">{c.titulos || 0}</div><div className="text-[9px] text-zinc-500 uppercase">títulos</div></div>
+                <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-lg font-black text-amber-400">{c.bolasDeOuro || 0}</div><div className="text-[9px] text-zinc-500 uppercase">Bola de Ouro</div></div>
+              </div>
+              {melhorTemporada && (
+                <div className="bg-zinc-950/40 rounded-sm p-2.5 text-[11px]">
+                  <span className="text-zinc-500 uppercase text-[9px] tracking-widest block mb-1">⭐ Melhor temporada</span>
+                  <span className="text-zinc-200">{melhorTemporada.temporadaLabel || "—"} pelo {melhorTemporada.clube} — nota {melhorTemporada.nota}, {melhorTemporada.gols}G {melhorTemporada.assist}A</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {pagina === 1 && (
+            <div className="grid gap-3">
+              <div className="grid grid-cols-2 gap-2 text-center">
+                <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-lg font-black text-zinc-100">{c.premiosIndividuais || 0}</div><div className="text-[9px] text-zinc-500 uppercase">prêmios individuais</div></div>
+                <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-lg font-black text-zinc-100">{c.copasDoMundo || 0}</div><div className="text-[9px] text-zinc-500 uppercase">Copa(s) do Mundo</div></div>
+              </div>
+              <div>
+                <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">🏆 Títulos coletivos</div>
+                {titulosFlat.length ? (
+                  <div className="grid gap-1">
+                    {titulosFlat.map((t, i) => <div key={i} className="text-[11px] text-zinc-300 flex justify-between border-b border-zinc-900 pb-1"><span>{t.titulo}</span><span className="text-zinc-600">{t.clube}</span></div>)}
+                  </div>
+                ) : <div className="text-xs text-zinc-500">Nenhum título coletivo na carreira.</div>}
+              </div>
+            </div>
+          )}
+
+          {pagina === 2 && (
+            <div className="grid gap-3">
+              <div>
+                <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">🎽 Clubes defendidos ({clubesDefendidos.length})</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {clubesDefendidos.map((cn) => {
+                    const cl = CLUBES.find((x) => x.nome === cn);
+                    return <div key={cn} className="flex items-center gap-1 bg-zinc-950/40 rounded-sm px-2 py-1"><ClubDot club={cl} size={14} /><span className="text-[10px] text-zinc-300">{cn}</span></div>;
+                  })}
+                </div>
+                {maisQuerido && <div className="text-[10px] text-zinc-500 mt-1.5">💛 Onde foi mais querido: <span className="text-zinc-200 font-bold">{maisQuerido[0]}</span></div>}
+              </div>
+              <div>
+                <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">📈 Curva de evolução</div>
+                <CurvaEvolucao temporadas={temporadas} />
+              </div>
+              <div className="bg-zinc-950/40 rounded-sm p-2.5 text-[11px] flex justify-between">
+                <span className="text-zinc-500">💰 Maior valor de mercado</span>
+                <span className="text-amber-400 font-bold">${formatarDinheiro(maiorValor)}</span>
+              </div>
+            </div>
+          )}
+
+          {pagina === 3 && (
+            <div className="grid gap-3">
+              {(c.selecao?.jogos || 0) > 0 ? (
+                <>
+                  <div className="text-center mb-1">
+                    <div className="text-sm font-bold text-zinc-100">🌎 Seleção {nac?.label}</div>
+                    {c.selecao.capitao && <div className="text-[10px] text-amber-400">🎖️ Capitão</div>}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-lg font-black text-zinc-100">{c.selecao.jogos}</div><div className="text-[9px] text-zinc-500 uppercase">jogos</div></div>
+                    <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-lg font-black text-zinc-100">{c.selecao.gols}</div><div className="text-[9px] text-zinc-500 uppercase">gols</div></div>
+                    <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-lg font-black text-zinc-100">{c.selecao.assist}</div><div className="text-[9px] text-zinc-500 uppercase">assist.</div></div>
+                  </div>
+                  {(c.titulosSelecao || []).length > 0 && (
+                    <div>
+                      <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">🏆 Pela seleção</div>
+                      {c.titulosSelecao.map((t, i) => <div key={i} className="text-[11px] text-zinc-300">{t}</div>)}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-xs text-zinc-500 text-center py-6">Nunca foi convocado pra seleção nacional.</div>
+              )}
+              {c.rivalPosicao && (
+                <div className="bg-zinc-950/40 rounded-sm p-2.5 text-[11px] flex justify-between items-center">
+                  <span className="text-zinc-500">⚔️ Maior rival</span>
+                  <span className="text-zinc-200 font-bold">{c.rivalPosicao}</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="p-3 border-t border-zinc-800 flex items-center justify-between">
+          <span className="text-[9px] text-zinc-600">📸 Tire um print pra guardar essa lembrança</span>
+          <Button variant="ghost" onClick={onClose}>Fechar</Button>
         </div>
       </Card>
     </PopupOverlay>
@@ -454,8 +600,38 @@ export function PopupOverlay({ children, onClose, largo = false }) {
 
 export function ClubDot({ club, size = 20 }) {
   if (!club) return null;
+  const [imgFalhou, setImgFalhou] = useState(false);
   const ini = club.nome.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
-  return <span className="inline-flex items-center justify-center font-black shrink-0" style={{ width: size, height: size * 1.14, background: club.cor, color: club.escuro ? "#0a0a0a" : "#fff", clipPath: "polygon(50% 0%,100% 18%,100% 65%,50% 100%,0% 65%,0% 18%)", fontSize: size * 0.34 }}>{ini}</span>;
+  const shieldClip = "polygon(50% 0%,100% 18%,100% 65%,50% 100%,0% 65%,0% 18%)";
+
+  // se o clube tiver uma imagem própria configurada (fornecida pelo usuário) e ela carregar, usa ela
+  if (club.imagemUrl && !imgFalhou) {
+    return (
+      <img
+        src={club.imagemUrl} alt={club.nome} width={size} height={size}
+        onError={() => setImgFalhou(true)}
+        className="shrink-0 object-contain"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
+
+  // escudo genérico: gradiente sutil (cor -> uma variação mais escura) em vez de cor chapada, com um aro fino de contorno
+  return (
+    <span
+      className="inline-flex items-center justify-center font-black shrink-0"
+      style={{
+        width: size, height: size * 1.14,
+        background: `linear-gradient(150deg, ${club.cor} 0%, ${club.cor}cc 55%, ${club.cor}88 100%)`,
+        boxShadow: `inset 0 0 0 1px ${club.escuro ? "#00000030" : "#ffffff30"}`,
+        color: club.escuro ? "#0a0a0a" : "#fff",
+        clipPath: shieldClip,
+        fontSize: size * 0.34,
+      }}
+    >
+      {ini}
+    </span>
+  );
 }
 
 export function CalendarioTemporadaPopup({ carreira, mesAtual, setMesAtual, onClose, onAbrirFicha }) {

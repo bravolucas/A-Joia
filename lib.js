@@ -270,11 +270,42 @@ export function gerarRoteiroPartida(numLances, posicao) {
   const minutos = amostraSemRepeticao(numLances, 3, 88).sort((a, b) => a - b);
   const pesoAtaque = { ATA: 0.55, PON: 0.5, MEI: 0.35, VOL: 0.22, LAT: 0.22, ZAG: 0.1, GOL: 0.02 }[posicao] ?? 0.3;
   const pesoDefesa = { ATA: 0.06, PON: 0.08, MEI: 0.18, VOL: 0.32, LAT: 0.38, ZAG: 0.55, GOL: 0.65 }[posicao] ?? 0.25;
-  return minutos.map((minuto) => {
+  const lancesDecisao = minutos.map((minuto) => {
     const r = Math.random();
     const foco = r < pesoAtaque ? "ataque" : r < pesoAtaque + pesoDefesa ? "defesa" : "neutro";
     return { minuto, foco };
   });
+  // eventos de ambiente: chutes, faltas e lances de meio-campo que dão vida
+  // ao jogo (estatística, feed de eventos) sem nunca pedir decisão sua —
+  // é o que faz uma partida de 90' parecer de verdade, não só 3-9 lances secos.
+  const numAmbiente = rand(16, 26);
+  const minutosOcupados = new Set(minutos);
+  const minutosAmbiente = amostraSemRepeticao(numAmbiente * 2, 1, 90).filter((m) => !minutosOcupados.has(m)).slice(0, numAmbiente);
+  const lancesAmbiente = minutosAmbiente.map((minuto) => ({ minuto, foco: "ambiente" }));
+  return [...lancesDecisao, ...lancesAmbiente].sort((a, b) => a.minuto - b.minuto);
+}
+
+/* Evento de ambiente: chute, falta ou lance de meio-campo que só alimenta
+   estatística e o feed — nunca pede decisão, e a chance de virar gol é bem
+   menor que um lance de verdade (pra não inflar o placar). */
+export function gerarEventoAmbiente(minuto, ctx) {
+  const post = POSTURAS_JOGO.find((p) => p.id === ctx.postura) || POSTURAS_JOGO[1];
+  const diferenca = clamp((ctx.forcaClube - (ctx.adversarioForca ?? 70)) / 100, -0.35, 0.35);
+  const chanceMeuLado = clamp(0.5 + diferenca * 0.5, 0.25, 0.75);
+  const meuLado = Math.random() < chanceMeuLado;
+  const r = Math.random();
+
+  if (r < 0.5) {
+    const golChance = 0.025 * (meuLado ? post.golMult : 2 - post.golMult);
+    if (Math.random() < golChance) {
+      return { minuto, tipo: "gol", meuTime: meuLado, texto: meuLado ? `⚽ Gol do seu time aos ${minuto}'!` : `⚽ Gol do adversário aos ${minuto}'.` };
+    }
+    return { minuto, tipo: "chute", meuTime: meuLado, texto: meuLado ? `${minuto}' — seu time finalizou, sem perigo.` : `${minuto}' — o adversário arriscou, para fora.` };
+  }
+  if (r < 0.78) {
+    return { minuto, tipo: "falta", meuTime: meuLado, texto: meuLado ? `${minuto}' — falta sofrida pelo seu time.` : `${minuto}' — falta cometida pelo seu time.` };
+  }
+  return { minuto, tipo: "lance", meuTime: meuLado, texto: `${minuto}' — troca de passes no meio-campo.` };
 }
 
 export const ACOES_ATAQUE = [
@@ -1073,7 +1104,7 @@ export const PIRAMIDE_LIGAS = [
   { elite: "portugal", acesso: "portugal2", vagas: 2, nome: "Portugal" },
 ];
 
-export function girarLigas(estado) {
+export function girarLigas(estado, forcarClube = null) {
   const novo = { ...estado };
   // 1) oscilação de força: clubes sobem e caem de patamar com o tempo
   Object.keys(novo).forEach((nome) => {
@@ -1086,22 +1117,36 @@ export function girarLigas(estado) {
     novo[nome] = { ...cur, forca: clampR(Math.round(cur.forca + drift + retorno), 40, 96) };
   });
 
-  // 2) acesso e rebaixamento — agora em TODAS as ligas que têm segunda divisão
+  // 2) acesso e rebaixamento — agora em TODAS as ligas que têm segunda divisão.
+  // O clube do jogador (se informado em forcarClube) NÃO entra no sorteio por
+  // força — o destino dele já foi decidido pela posição real na tabela da
+  // temporada, então ele é excluído do embaralhamento e encaixado à parte.
   const ordenar = (arr) => arr.map(([n, v]) => ({ n, v, pts: v.forca + rand(-9, 9) })).sort((a, b) => b.pts - a.pts);
   const rebaixadosTodos = [], promovidosTodos = [], porPais = [];
 
   PIRAMIDE_LIGAS.forEach((div) => {
     const naElite = Object.entries(novo).filter(([, v]) => v.liga === div.elite);
     const naAcesso = Object.entries(novo).filter(([, v]) => v.liga === div.acesso);
-    // só roda se as duas divisões tiverem tamanho razoável
     if (naElite.length < 6 || naAcesso.length < div.vagas) return;
-    const E = ordenar(naElite), A = ordenar(naAcesso);
-    const caem = E.slice(-div.vagas), sobem = A.slice(0, div.vagas);
-    caem.forEach((x) => { novo[x.n] = { ...novo[x.n], liga: div.acesso, forca: clampR(novo[x.n].forca - rand(1, 4), 40, 96) }; });
-    sobem.forEach((x) => { novo[x.n] = { ...novo[x.n], liga: div.elite, forca: clampR(novo[x.n].forca + rand(1, 4), 40, 96) }; });
-    rebaixadosTodos.push(...caem.map((x) => x.n));
-    promovidosTodos.push(...sobem.map((x) => x.n));
-    porPais.push({ pais: div.nome, sobem: sobem.map((x) => x.n), caem: caem.map((x) => x.n) });
+
+    const ehForcadoNaElite = forcarClube && forcarClube.liga === div.elite;
+    const ehForcadoNoAcesso = forcarClube && forcarClube.liga === div.acesso;
+    const eliteSemForcado = ehForcadoNaElite ? naElite.filter(([n]) => n !== forcarClube.nome) : naElite;
+    const acessoSemForcado = ehForcadoNoAcesso ? naAcesso.filter(([n]) => n !== forcarClube.nome) : naAcesso;
+
+    const E = ordenar(eliteSemForcado), A = ordenar(acessoSemForcado);
+    const vagasCaem = div.vagas - (ehForcadoNaElite && forcarClube.desceu ? 1 : 0);
+    const vagasSobem = div.vagas - (ehForcadoNoAcesso && forcarClube.subiu ? 1 : 0);
+    const caem = E.slice(-vagasCaem).map((x) => x.n);
+    const sobem = A.slice(0, vagasSobem).map((x) => x.n);
+    if (ehForcadoNaElite && forcarClube.desceu) caem.push(forcarClube.nome);
+    if (ehForcadoNoAcesso && forcarClube.subiu) sobem.push(forcarClube.nome);
+
+    caem.forEach((n) => { novo[n] = { ...novo[n], liga: div.acesso, forca: clampR(novo[n].forca - rand(1, 4), 40, 96) }; });
+    sobem.forEach((n) => { novo[n] = { ...novo[n], liga: div.elite, forca: clampR(novo[n].forca + rand(1, 4), 40, 96) }; });
+    rebaixadosTodos.push(...caem);
+    promovidosTodos.push(...sobem);
+    porPais.push({ pais: div.nome, sobem, caem });
   });
 
   return { estado: novo, rebaixados: rebaixadosTodos, promovidos: promovidosTodos, porPais };

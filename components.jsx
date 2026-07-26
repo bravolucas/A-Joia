@@ -158,9 +158,9 @@ export function PodiumBolaDeOuro({ finalistas, aoConcluir }) {
 // Tela cheia da partida ao vivo — o relógio corre sozinho (1T, intervalo,
 // 2T, acréscimos) e só para quando um lance pede decisão sua. Campo
 // simplificado + estatísticas + feed de eventos, no estilo "match engine".
-export function TelaPartidaAoVivo({ pv, onDecisao, onContinuarSegundoTempo }) {
+export function TelaPartidaAoVivo({ pv, onDecisao, onContinuarSegundoTempo, onMudarVelocidade, onPularParaFinal }) {
   if (!pv) return null;
-  const { estado, eventos, ctx, pendente, concluida, fase, minutoVisivel, acrescimos, stats } = pv;
+  const { estado, eventos, ctx, pendente, concluida, fase, minutoVisivel, acrescimos, stats, velocidade } = pv;
   const meusGols = estado.golsMeu, advGols = estado.golsAdv;
   const relogioTxt = concluida ? "Fim de jogo" : fase === "intervalo" ? "Intervalo" : minutoVisivel > 90 ? `90+${minutoVisivel - 90}'` : `${minutoVisivel}'`;
   const totalChutesMeu = stats.chutesMeu, totalChutesAdv = stats.chutesAdv;
@@ -196,6 +196,14 @@ export function TelaPartidaAoVivo({ pv, onDecisao, onContinuarSegundoTempo }) {
             </div>
             <span className="font-stat font-black text-4xl">{ctx.souCasa ? advGols : meusGols}</span>
           </div>
+          {!concluida && (
+            <div className="flex items-center justify-center gap-1.5 mt-2">
+              {[1, 2, 5].map((v) => (
+                <button key={v} onClick={() => onMudarVelocidade(v)} className={`text-[10px] font-bold px-2 py-0.5 rounded-sm border ${velocidade === v ? "border-amber-400 text-amber-400 bg-amber-500/10" : "border-zinc-700 text-zinc-500"}`}>{v}x</button>
+              ))}
+              <button onClick={onPularParaFinal} className="text-[10px] font-bold px-2 py-0.5 rounded-sm border border-zinc-700 text-zinc-500 hover:border-amber-400 hover:text-amber-400">⏭ Pular pro final</button>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3">

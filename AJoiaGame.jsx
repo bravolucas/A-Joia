@@ -859,7 +859,7 @@ function iniciarPartidaMataMata(c, tipo, adversarioNome, faseIdx, card) {
   setCarreira(c);
   setPartidaAoVivo({
     roteiro, indice: 0, eventos: [], concluida: false, pendente: null,
-    minutoVisivel: 0, fase: "1T", acrescimos: rand(1, 6),
+    minutoVisivel: 0, fase: "1T", acrescimos: rand(1, 6), velocidade: 1,
     estado: { golsMeu: 0, golsAdv: 0, cartoes: {}, fadiga: 0 },
     stats: { chutesMeu: 0, chutesAlvoMeu: 0, chutesAdv: 0, chutesAlvoAdv: 0 },
     ctx: {
@@ -869,7 +869,11 @@ function iniciarPartidaMataMata(c, tipo, adversarioNome, faseIdx, card) {
     },
   });
 }
-function concluirPartidaMataMata(c, ctx, resultado) {
+function acumularStatsCompeticao(card, campo, golsMinha, assistMinha) {
+  const atual = card.statsCompeticoes?.[campo] || { gols: 0, assist: 0, jogos: 0 };
+  card.statsCompeticoes = { ...card.statsCompeticoes, [campo]: { gols: atual.gols + (golsMinha || 0), assist: atual.assist + (assistMinha || 0), jogos: atual.jogos + 1 } };
+}
+function concluirPartidaMataMata(c, ctx, resultado, golsMinha, assistMinha) {
   const { tipo, faseIdx, card } = ctx.copa;
   const fases = FASES_POR_COMPETICAO[tipo];
   const campo = campoMataMata(tipo);
@@ -881,6 +885,7 @@ function concluirPartidaMataMata(c, ctx, resultado) {
     placarTxt += ` (pênaltis: ${passou ? "você" : adversario} levou a melhor)`;
   }
   const nomeCompeticao = nomeMataMata(c, tipo);
+  acumularStatsCompeticao(card, campo, golsMinha, assistMinha);
   logHist(c, `${nomeCompeticao} — ${faseIdx >= fases.length ? "Final" : fases[faseIdx].label} x ${adversario}: ${passou ? "vitória" : "derrota"} por ${placarTxt}.`);
 
   if (faseIdx >= fases.length) {
@@ -911,7 +916,7 @@ function iniciarPartidaCopaDoMundo(c, card, faseIdx, jogoGrupo, pontosGrupo, ram
   setCarreira(c);
   setPartidaAoVivo({
     roteiro, indice: 0, eventos: [], concluida: false, pendente: null,
-    minutoVisivel: 0, fase: "1T", acrescimos: rand(1, 6),
+    minutoVisivel: 0, fase: "1T", acrescimos: rand(1, 6), velocidade: 1,
     estado: { golsMeu: 0, golsAdv: 0, cartoes: {}, fadiga: 0 },
     stats: { chutesMeu: 0, chutesAlvoMeu: 0, chutesAdv: 0, chutesAlvoAdv: 0 },
     ctx: {
@@ -921,8 +926,9 @@ function iniciarPartidaCopaDoMundo(c, card, faseIdx, jogoGrupo, pontosGrupo, ram
     },
   });
 }
-function concluirPartidaCopaDoMundo(c, ctx, resultado) {
+function concluirPartidaCopaDoMundo(c, ctx, resultado, golsMinha, assistMinha) {
   const { faseIdx, jogoGrupo, pontosGrupo, ramo, card } = ctx.copa;
+  acumularStatsCompeticao(card, "copaDoMundo", golsMinha, assistMinha);
   const nac = nacDe(c.nacionalidade);
   const adversario = ctx.adversario;
   const placarTxt = `${resultado.golsMeu}-${resultado.golsAdv}`;
@@ -997,7 +1003,7 @@ function iniciarSequenciaSelecao(c, card, competicaoId, jogoAtual, acumulado) {
   setCarreira(c);
   setPartidaAoVivo({
     roteiro, indice: 0, eventos: [], concluida: false, pendente: null,
-    minutoVisivel: 0, fase: "1T", acrescimos: rand(1, 6),
+    minutoVisivel: 0, fase: "1T", acrescimos: rand(1, 6), velocidade: 1,
     estado: { golsMeu: 0, golsAdv: 0, cartoes: {}, fadiga: 0 },
     stats: { chutesMeu: 0, chutesAlvoMeu: 0, chutesAdv: 0, chutesAlvoAdv: 0 },
     ctx: {
@@ -1009,6 +1015,7 @@ function iniciarSequenciaSelecao(c, card, competicaoId, jogoAtual, acumulado) {
 }
 function concluirSequenciaSelecao(c, ctx, resultado, golsMinha, assistMinha) {
   const { competicaoId, jogoAtual, totalJogos, acumulado, card, nomeCompeticao, icone } = ctx.copa;
+  acumularStatsCompeticao(card, "selecao", golsMinha, assistMinha);
   const novo = {
     jogos: acumulado.jogos + 1,
     gols: acumulado.gols + golsMinha, assist: acumulado.assist + assistMinha,
@@ -1050,7 +1057,7 @@ function iniciarPartidaContinentalSelecao(c, card, faseIdx, jogoGrupo, pontosGru
   setCarreira(c);
   setPartidaAoVivo({
     roteiro, indice: 0, eventos: [], concluida: false, pendente: null,
-    minutoVisivel: 0, fase: "1T", acrescimos: rand(1, 6),
+    minutoVisivel: 0, fase: "1T", acrescimos: rand(1, 6), velocidade: 1,
     estado: { golsMeu: 0, golsAdv: 0, cartoes: {}, fadiga: 0 },
     stats: { chutesMeu: 0, chutesAlvoMeu: 0, chutesAdv: 0, chutesAlvoAdv: 0 },
     ctx: {
@@ -1060,8 +1067,9 @@ function iniciarPartidaContinentalSelecao(c, card, faseIdx, jogoGrupo, pontosGru
     },
   });
 }
-function concluirPartidaContinentalSelecao(c, ctx, resultado) {
+function concluirPartidaContinentalSelecao(c, ctx, resultado, golsMinha, assistMinha) {
   const { faseIdx, jogoGrupo, pontosGrupo, ramo, card, nomeCompeticao } = ctx.copa;
+  acumularStatsCompeticao(card, "continentalSelecao", golsMinha, assistMinha);
   const nac = nacDe(c.nacionalidade);
   const adversario = ctx.adversario;
   const placarTxt = `${resultado.golsMeu}-${resultado.golsAdv}`;
@@ -2106,7 +2114,7 @@ function resolverTemporada(c, extraStats) {
       const roteiro = gerarRoteiroPartida(numLances, c.posicao);
       setPartidaAoVivo({
         roteiro, indice: 0, eventos: [], concluida: false, pendente: null,
-        minutoVisivel: 0, fase: "1T", acrescimos: rand(1, 6),
+        minutoVisivel: 0, fase: "1T", acrescimos: rand(1, 6), velocidade: 1,
         estado: { golsMeu: 0, golsAdv: 0, cartoes: {}, fadiga: 0 },
         stats: { chutesMeu: 0, chutesAlvoMeu: 0, chutesAdv: 0, chutesAlvoAdv: 0 },
         ctx: { posicao: c.posicao, postura: ta.postura || "normal", forcaClube, forcaJogador, adversarioForca: adversarioObj.forca, adversario: adversarioObj.nome, classico: ehClassico, souCasa },
@@ -2148,7 +2156,8 @@ function resolverTemporada(c, extraStats) {
   /* O relógio corre sozinho: avança um minuto por vez, para no intervalo
      (45') esperando o jogador continuar, e dispara o próximo lance quando
      chega no minuto dele. A partida só é dada como concluída quando o
-     roteiro acabou E o relógio já passou dos acréscimos. */
+     roteiro acabou E o relógio já passou dos acréscimos. A velocidade
+     escolhida (1x/2x/5x) só encurta o intervalo entre os ticks. */
   useEffect(() => {
     const pv = partidaAoVivo;
     if (!pv || pv.pendente || pv.concluida || pv.fase === "intervalo") return;
@@ -2163,7 +2172,7 @@ function resolverTemporada(c, extraStats) {
         }
         return { ...atual, minutoVisivel: prox };
       });
-    }, 420);
+    }, 420 / (pv.velocidade || 1));
     return () => clearTimeout(t);
   }, [partidaAoVivo]);
 
@@ -2175,6 +2184,33 @@ function resolverTemporada(c, extraStats) {
     if (pv.minutoVisivel >= pv.roteiro[pv.indice].minuto) processarProximoLance();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [partidaAoVivo?.minutoVisivel]);
+
+  function mudarVelocidadePartida(v) {
+    setPartidaAoVivo((pv) => (pv ? { ...pv, velocidade: v } : pv));
+  }
+
+  /* "Pular pro final": resolve todos os lances que restam de uma vez (decisões
+     pendentes usam sempre a primeira opção, a mais equilibrada) e joga o
+     relógio direto pros acréscimos — sem esperar a animação minuto a minuto. */
+  function pularParaFinalPartida() {
+    setPartidaAoVivo((pv) => {
+      if (!pv || pv.concluida) return pv;
+      let estado = pv.estado;
+      const eventos = [...pv.eventos];
+      const stats = { ...pv.stats };
+      for (let i = pv.indice; i < pv.roteiro.length; i++) {
+        const slot = pv.roteiro[i];
+        let res = resolverLance(estado, slot, pv.ctx);
+        if (res.precisaDecisao) res = resolverLance(estado, slot, pv.ctx, res.opcoes[0].id);
+        estado = res.estado;
+        eventos.push(res.evento);
+        if (res.evento.tipo === "gol") { if (res.evento.meuTime) { stats.chutesMeu++; stats.chutesAlvoMeu++; } else { stats.chutesAdv++; stats.chutesAlvoAdv++; } }
+        else if (res.evento.tipo === "chance") { if (slot.foco === "ataque") stats.chutesMeu++; else stats.chutesAdv++; }
+        else if (res.evento.tipo === "defesa" || res.evento.tipo === "cartao") { stats.chutesAdv++; if (res.evento.tipo === "defesa") stats.chutesAlvoAdv++; }
+      }
+      return { ...pv, estado, eventos, stats, indice: pv.roteiro.length, pendente: null, minutoVisivel: 90 + pv.acrescimos, fase: "2T", concluida: true };
+    });
+  }
 
   function continuarSegundoTempo() {
     setPartidaAoVivo((pv) => pv ? { ...pv, fase: "2T" } : pv);
@@ -2210,10 +2246,10 @@ function resolverTemporada(c, extraStats) {
     // pausada — só decide se avança de fase, e a próxima fase já começa direto.
     if (ctx.copa) {
       setPartidaAoVivo(null);
-      if (ctx.copa.tipo === "copaDoMundo") concluirPartidaCopaDoMundo(c, ctx, { resultado, golsMeu: estado.golsMeu, golsAdv: estado.golsAdv });
-      else if (ctx.copa.tipo === "continentalSelecao") concluirPartidaContinentalSelecao(c, ctx, { resultado, golsMeu: estado.golsMeu, golsAdv: estado.golsAdv });
+      if (ctx.copa.tipo === "copaDoMundo") concluirPartidaCopaDoMundo(c, ctx, { resultado, golsMeu: estado.golsMeu, golsAdv: estado.golsAdv }, golsMinha, assistMinha);
+      else if (ctx.copa.tipo === "continentalSelecao") concluirPartidaContinentalSelecao(c, ctx, { resultado, golsMeu: estado.golsMeu, golsAdv: estado.golsAdv }, golsMinha, assistMinha);
       else if (ctx.copa.tipo === "selecaoSequencia") concluirSequenciaSelecao(c, ctx, resultado, golsMinha, assistMinha);
-      else concluirPartidaMataMata(c, ctx, { resultado, golsMeu: estado.golsMeu, golsAdv: estado.golsAdv });
+      else concluirPartidaMataMata(c, ctx, { resultado, golsMeu: estado.golsMeu, golsAdv: estado.golsAdv }, golsMinha, assistMinha);
       return;
     }
 
@@ -3463,6 +3499,134 @@ function resolverTemporada(c, extraStats) {
                   </div>
                 </Card>
 
+                {(() => {
+                  const ta = carreira.temporadaAndamento;
+                  const meuClube = carreira.clube.nome;
+                  // próximo jogo de liga (se a temporada estiver rolando)
+                  let proximoJogo = null;
+                  const proximasPartidas = [];
+                  if (ta?.calendario) {
+                    for (let r = ta.rodadaAtual; r < ta.calendario.length && proximasPartidas.length < 3; r++) {
+                      const partida = ta.calendario[r].find((p) => p.casa.nome === meuClube || p.fora.nome === meuClube);
+                      if (!partida) continue;
+                      const souCasa = partida.casa.nome === meuClube;
+                      const adversario = souCasa ? partida.fora : partida.casa;
+                      const ehClassico = !!(carreira.clube.estado && adversario.estado === carreira.clube.estado) || Math.abs(adversario.forca - forcaEfetivaClube(carreira, carreira.clube)) <= 3;
+                      const item = { rodada: r + 1, adversario, souCasa, ehClassico };
+                      if (!proximoJogo) proximoJogo = item;
+                      proximasPartidas.push(item);
+                    }
+                  }
+                  const eventoEspecial = ta?.eventosAgendados?.[0] || null;
+                  const naoLidas = (carreira.inbox || []).filter((x) => !x.lida);
+                  const noticiasParaMostrar = (naoLidas.length ? naoLidas : (carreira.inbox || [])).slice(0, 2);
+
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 span-full">
+                      <Card className="border-emerald-500/30">
+                        <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-2">⚽ Próximo jogo</div>
+                        {proximoJogo ? (
+                          <div className="flex items-center gap-2.5">
+                            <ClubDot club={proximoJogo.adversario} size={28} />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-bold truncate">{proximoJogo.adversario.nome}{proximoJogo.ehClassico && <span className="text-amber-400"> ⚔️</span>}</div>
+                              <div className="text-[10px] text-zinc-500">{proximoJogo.souCasa ? "🏠 Em casa" : "✈️ Fora"} · Rodada {proximoJogo.rodada}</div>
+                            </div>
+                          </div>
+                        ) : eventoEspecial ? (
+                          <div className="text-xs text-zinc-400">Próximo compromisso: <span className="text-amber-400 font-bold">{eventoEspecial.tipo === "copaDoMundo" ? "Copa do Mundo" : eventoEspecial.tipo === "copaNacional" ? "Copa Nacional" : eventoEspecial.tipo === "estadual" ? "Estadual" : eventoEspecial.tipo === "copinha" ? "Copinha" : eventoEspecial.tipo === "selecaoAno" ? "Seleção" : "evento especial"}</span></div>
+                        ) : (
+                          <div className="text-xs text-zinc-500">Nenhuma partida agendada no momento.</div>
+                        )}
+                      </Card>
+
+                      <Card>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[9px] text-zinc-500 uppercase tracking-widest">📬 Notícias recentes</span>
+                          <button onClick={() => setAba("inbox")} className="text-[9px] text-zinc-600 hover:text-amber-400">ver todas →</button>
+                        </div>
+                        {noticiasParaMostrar.length ? (
+                          <div className="grid gap-1.5">
+                            {noticiasParaMostrar.map((n, i) => {
+                              const t = TIPOS_NOTICIA[n.tipo] || TIPOS_NOTICIA.mundo;
+                              return (
+                                <button key={i} onClick={() => setAba("inbox")} className="text-left flex items-start gap-1.5">
+                                  <span className="text-xs shrink-0">{t.icone}</span>
+                                  <span className="text-[11px] text-zinc-300 line-clamp-1">{n.titulo}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="text-xs text-zinc-500">Sem novidades por enquanto.</div>
+                        )}
+                      </Card>
+
+                      {ta && (
+                        <Card>
+                          <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-2">📊 Classificação atual</div>
+                          <div className="grid gap-0.5">
+                            {(() => {
+                              const linhas = Object.values(ta.tabela).sort((a, b) => b.pts - a.pts || b.sg - a.sg).map((row, i) => ({ ...row, posicao: i + 1 }));
+                              const minhaLinha = linhas.find((r) => r.clube.nome === meuClube);
+                              const topN = linhas.slice(0, 6);
+                              const mostrar = (topN.some((r) => r.clube.nome === meuClube) ? topN : [...topN, minhaLinha]).filter((r) => r && r.clube);
+                              return mostrar.map((row) => (
+                                <div key={row.clube.nome} className={`flex items-center justify-between text-[11px] py-1 px-1.5 rounded-sm ${row.clube.nome === meuClube ? "bg-emerald-500/10 border border-emerald-500/30" : ""}`}>
+                                  <span className="flex items-center gap-1.5 truncate"><span className="font-mono text-zinc-500 w-4">{row.posicao}º</span><ClubDot club={row.clube} size={14} /><span className={row.clube.nome === meuClube ? "font-bold text-emerald-400" : "text-zinc-400"}>{row.clube.nome}{row.clube.nome === meuClube ? " (você)" : ""}</span></span>
+                                  <span className="font-mono text-zinc-300">{row.pts}pts <span className="text-zinc-600">({row.j}j)</span></span>
+                                </div>
+                              ));
+                            })()}
+                          </div>
+                        </Card>
+                      )}
+
+                      <Card>
+                        <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-2">🗓️ Próximas partidas</div>
+                        {proximasPartidas.length ? (
+                          <div className="grid gap-1">
+                            {proximasPartidas.map((p, i) => (
+                              <div key={i} className="flex items-center justify-between text-[11px]">
+                                <span className="flex items-center gap-1.5 truncate"><ClubDot club={p.adversario} size={12} /><span className="text-zinc-300 truncate">{p.adversario.nome}{p.ehClassico ? " ⚔️" : ""}</span></span>
+                                <span className="text-zinc-500 shrink-0">{p.souCasa ? "casa" : "fora"} · R{p.rodada}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-xs text-zinc-500">Sem jogos de liga agendados à vista.</div>
+                        )}
+                      </Card>
+
+                      {ta && (() => {
+                        const golsLiga = (ta.logJogos || []).reduce((a, j) => a + (j.golsMinha || 0), 0);
+                        const assistLiga = (ta.logJogos || []).reduce((a, j) => a + (j.assistMinha || 0), 0);
+                        const jogosLiga = (ta.logJogos || []).length;
+                        const stats = ta.cardOriginal?.statsCompeticoes || {};
+                        const nomesCampo = { copaNacional: "Copa Nacional", estadual: ESTADUAIS[carreira.clube.estado] || "Estadual", copinhaCarreira: "Copa São Paulo", copaDoMundo: "Copa do Mundo", continentalSelecao: continentalDaSelecao(carreira.nacionalidade), selecao: "Seleção (data FIFA)" };
+                        const linhas = [{ nome: "Liga", gols: golsLiga, assist: assistLiga, jogos: jogosLiga }, ...Object.entries(stats).map(([k, v]) => ({ nome: nomesCampo[k] || k, ...v }))].filter((l) => l.jogos > 0);
+                        return (
+                          <Card className="span-full">
+                            <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-2">⚽ Seus números por competição (temporada atual)</div>
+                            {linhas.length ? (
+                              <div className="grid gap-1">
+                                {linhas.map((l) => (
+                                  <div key={l.nome} className="flex items-center justify-between text-[11px] py-0.5">
+                                    <span className="text-zinc-300">{l.nome} <span className="text-zinc-600">({l.jogos}j)</span></span>
+                                    <span className="font-mono text-zinc-400">{l.gols}G {l.assist}A</span>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-xs text-zinc-500">Ainda sem jogos disputados nessa temporada.</div>
+                            )}
+                          </Card>
+                        );
+                      })()}
+                    </div>
+                  );
+                })()}
+
                 <div>
                 <Button
                   disabled={!carreira.temporadaAndamento && !posTemporada?.ok && (janela || decisao || awardsPopup || pendingSponsor || pendingAbordagem || pendingExpectativa || pendingTecnico || pendingColetiva || pendingCompeticao || competicaoResultado || pendingLegendFollow || pendingTierUpgrade)}
@@ -3729,26 +3893,6 @@ function resolverTemporada(c, extraStats) {
                     </button>
                   </div>
                 </Card>
-
-                {carreira.temporadaAndamento && (
-                    <Card>
-                      <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-2">📊 Classificação atual</div>
-                      <div className="grid gap-0.5">
-                        {(() => {
-                          const linhas = Object.values(carreira.temporadaAndamento.tabela).sort((a, b) => b.pts - a.pts || b.sg - a.sg).map((row, i) => ({ ...row, posicao: i + 1 }));
-                          const minhaLinha = linhas.find((r) => r.clube.nome === carreira.clube.nome);
-                          const topN = linhas.slice(0, 6);
-                          const mostrar = (topN.some((r) => r.clube.nome === carreira.clube.nome) ? topN : [...topN, minhaLinha]).filter((r) => r && r.clube);
-                          return mostrar.map((row) => (
-                            <div key={row.clube.nome} className={`flex items-center justify-between text-[11px] py-1 px-1.5 rounded-sm ${row.clube.nome === carreira.clube.nome ? "bg-emerald-500/10 border border-emerald-500/30" : ""}`}>
-                              <span className="flex items-center gap-1.5 truncate"><span className="font-mono text-zinc-500 w-4">{row.posicao}º</span><ClubDot club={row.clube} size={14} /><span className={row.clube.nome === carreira.clube.nome ? "font-bold text-emerald-400" : "text-zinc-400"}>{row.clube.nome}{row.clube.nome === carreira.clube.nome ? " (você)" : ""}</span></span>
-                              <span className="font-mono text-zinc-300">{row.pts}pts <span className="text-zinc-600">({row.j}j)</span></span>
-                            </div>
-                          ));
-                        })()}
-                      </div>
-                    </Card>
-                )}
 
                 <button onClick={() => setDetalhesAbertos((v) => !v)} className="w-full flex items-center justify-between glass rounded-md px-4 py-2.5 text-[10px] text-zinc-400 uppercase tracking-widest font-sport font-bold border border-white/10 hover:border-amber-500/30">
                   <span>📂 Mais detalhes</span>
@@ -4373,6 +4517,8 @@ function resolverTemporada(c, extraStats) {
                     pv={partidaAoVivo}
                     onDecisao={(id) => processarProximoLance(id)}
                     onContinuarSegundoTempo={continuarSegundoTempo}
+                    onMudarVelocidade={mudarVelocidadePartida}
+                    onPularParaFinal={pularParaFinalPartida}
                   />
                 )}
 

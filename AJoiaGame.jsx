@@ -85,6 +85,8 @@ export default function AJoiaGame() {
   const [pendingContratoVencido, setPendingContratoVencido] = useState(false);
   const [concorrenciaClubes, setConcorrenciaClubes] = useState(null);
   const [pendingChegadaClube, setPendingChegadaClube] = useState(null);
+  const [pendingVidaPessoal, setPendingVidaPessoal] = useState(null);
+  const [pendingNascimentoFilho, setPendingNascimentoFilho] = useState(null);
   const [negociacaoContrato, setNegociacaoContrato] = useState(null);
   const [detalhesAbertos, setDetalhesAbertos] = useState(false);
   const [subAbaCarreira, setSubAbaCarreira] = useState(null);
@@ -291,7 +293,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
       camisaPorClube: { [clubeEscolhido.nome]: [numero] }, titulosPorClube: {}, titulosSelecao: [], clubesInteresse: [], contrato: null,
       seguidores: Math.round(seguidoresBase(calcOVR(attrsIni, posicao))),
       desgaste: 0, energia: 100, abordagem: null, focoTreino: null, treinouPesado: false, emprestimo: false, clubeOrigemEmprestimo: null,
-      historico: [], titulosLista: [], rivalPosicao: pick(poolRivalPorOvr(calcOVR(attrsIni, posicao))), rivalBolasDeOuro: 0, tecnicoConfianca: 60, relacaoDiretoria: 40, calorMidia: 20, expectativa: null, posicoesAprendidas: [posicao], empresarioUsado: {}, papelTatico: "padrao", cosmeticosDesbloqueados: [], cosmeticosEquipados: {}, postSocialFeito: false,
+      historico: [], titulosLista: [], rivalPosicao: pick(poolRivalPorOvr(calcOVR(attrsIni, posicao))), rivalBolasDeOuro: 0, tecnicoConfianca: 60, relacaoDiretoria: 40, calorMidia: 20, expectativa: null, posicoesAprendidas: [posicao], empresarioUsado: {}, papelTatico: "padrao", cosmeticosDesbloqueados: [], cosmeticosEquipados: {}, postSocialFeito: false, vidaPessoal: { status: "solteiro", parceiro: null, temporadasNoStatus: 0, filhos: [] },
       entrosamento: 20, elencoMoral: 60, titularidade: 100, concorrente: sortearConcorrente(clubeEscolhido), relacaoPatrocinadores: 50, traits: [], streaksTraits: {},
       empresario: { id: "iniciante", restantes: 3 },
     };
@@ -1448,6 +1450,8 @@ function resolverTemporada(c, extraStats) {
       } else if (!c.emprestimo && ((c.titularidade ?? 100) < 40 || c.idade <= 20) && Math.random() < 0.18) {
         const poolFraco = CLUBES.filter((x) => x.nome !== c.clube.nome && x.forca < forcaEfetivaClube(c, c.clube) - 8);
         if (poolFraco.length) setPendingOfertaInesperada({ tipo: "emprestimo", clube: pick(poolFraco) });
+      } else {
+        avancarVidaPessoal(c);
       }
       setCarreira(c);
       return;
@@ -3165,6 +3169,53 @@ function resolverTemporada(c, extraStats) {
     c.xpDesenvolvimento -= CUSTO_PONTO_DESENVOLVIMENTO;
     c.attrs = { ...c.attrs, [attr]: clampR((c.attrs[attr] ?? 40) + 1, 40, teto) };
     setCarreira(c);
+  }
+  /* Vida pessoal: vida fora do futebol que a aba "Vida Privada" nunca teve de
+     verdade. Progride sozinha, temporada a temporada — namoro, noivado,
+     casamento, filhos — e o nascimento de um filho é uma escolha real, não
+     só uma linha de texto. */
+  function avancarVidaPessoal(c) {
+    const vp = { ...(c.vidaPessoal || { status: "solteiro", parceiro: null, temporadasNoStatus: 0, filhos: [] }) };
+    vp.temporadasNoStatus = (vp.temporadasNoStatus || 0) + 1;
+    let evento = null;
+    if (vp.status === "solteiro" && Math.random() < 0.22) {
+      vp.parceiro = nomeMundo(c.nacionalidade); vp.status = "namorando"; vp.temporadasNoStatus = 0;
+      evento = { tipo: "namorando", texto: `Você começou a namorar ${vp.parceiro} — a vida fora de campo ganhou um novo capítulo.` };
+    } else if (vp.status === "namorando") {
+      if (vp.temporadasNoStatus >= 1 && Math.random() < 0.12) {
+        vp.status = "solteiro"; const exNome = vp.parceiro; vp.parceiro = null; vp.temporadasNoStatus = 0;
+        evento = { tipo: "termino", texto: `O relacionamento com ${exNome} chegou ao fim — a rotina de jogador pesou demais dessa vez.` };
+      } else if (vp.temporadasNoStatus >= 1 && Math.random() < 0.28) {
+        vp.status = "noivo"; vp.temporadasNoStatus = 0;
+        evento = { tipo: "noivado", texto: `Você pediu ${vp.parceiro} em noivado — e o "sim" veio na hora.` };
+      }
+    } else if (vp.status === "noivo" && vp.temporadasNoStatus >= 1 && Math.random() < 0.55) {
+      vp.status = "casado"; vp.temporadasNoStatus = 0;
+      evento = { tipo: "casamento", texto: `Você se casou com ${vp.parceiro} — festa marcante, com direito a gente do futebol e da vida real toda junta.` };
+    } else if (vp.status === "casado" && (vp.filhos || []).length < 3 && Math.random() < 0.22) {
+      const nomeFilho = nomeMundo(c.nacionalidade).split(" ")[0];
+      vp.filhos = [...(vp.filhos || []), { nome: nomeFilho, idadeNascimento: c.idade }];
+      evento = { tipo: "nascimento", nomeFilho, texto: `${vp.parceiro} e você tiveram ${(vp.filhos.length > 1) ? "mais um filho" : "seu primeiro filho"}: ${nomeFilho}!` };
+    }
+    c.vidaPessoal = vp;
+    if (evento?.tipo === "nascimento") { setPendingNascimentoFilho(evento); }
+    else if (evento) { logHist(c, evento.texto); setPendingVidaPessoal(evento); }
+  }
+  function resolverNascimentoFilho(tipo) {
+    const c = { ...carreira };
+    const nomeFilho = pendingNascimentoFilho.nomeFilho;
+    let texto;
+    if (tipo === "licenca") {
+      c.energia = clampR((c.energia ?? 100) + 20, 0, c.energiaMax ?? 100);
+      c.titularidade = clampR((c.titularidade ?? 100) - 8, 0, 100);
+      texto = `Tirou uma licença pra ficar perto de ${nomeFilho} nos primeiros dias — voltou renovado, mas perdeu um pouco de ritmo com o time.`;
+    } else {
+      c.tecnicoConfianca = clampR((c.tecnicoConfianca ?? 60) + 4, 0, 100);
+      texto = `Seguiu treinando normalmente mesmo com o nascimento de ${nomeFilho} — dedicação que a comissão técnica notou, mas os primeiros dias em casa passaram voando.`;
+    }
+    logHist(c, `👶 ${pendingNascimentoFilho.texto} ${texto}`);
+    setCarreira(c);
+    setPendingNascimentoFilho(null);
   }
   function equiparCosmetico(categoria, id) {
     const c = { ...carreira };
@@ -5133,6 +5184,38 @@ function resolverTemporada(c, extraStats) {
                   </PopupOverlay>
                 )}
 
+                {pendingVidaPessoal && (
+                  <PopupOverlay>
+                    <Card className="border-pink-500/40 text-center">
+                      <div className="text-[10px] text-pink-400 uppercase tracking-widest mb-2">
+                        {pendingVidaPessoal.tipo === "namorando" ? "💕 Vida pessoal" : pendingVidaPessoal.tipo === "noivado" ? "💍 Vida pessoal" : pendingVidaPessoal.tipo === "casamento" ? "👰 Vida pessoal" : "💔 Vida pessoal"}
+                      </div>
+                      <p className="text-sm mb-4">{pendingVidaPessoal.texto}</p>
+                      <Button onClick={() => setPendingVidaPessoal(null)}>Seguir a temporada</Button>
+                    </Card>
+                  </PopupOverlay>
+                )}
+
+                {pendingNascimentoFilho && (
+                  <PopupOverlay>
+                    <Card className="border-pink-500/40 text-center">
+                      <div className="text-[10px] text-pink-400 uppercase tracking-widest mb-2">👶 Vida pessoal</div>
+                      <p className="text-sm mb-4">{pendingNascimentoFilho.texto}</p>
+                      <p className="text-xs text-zinc-400 mb-3">Como você vai lidar com o começo dessa nova fase?</p>
+                      <div className="grid gap-2">
+                        <button onClick={() => resolverNascimentoFilho("licenca")} className="text-left p-3 border border-zinc-800 rounded-sm hover:border-pink-500">
+                          <div className="font-bold text-sm">🏠 Tirar uma licença</div>
+                          <div className="text-[10px] text-zinc-500 mt-0.5">+energia, mas perde um pouco de ritmo com o time (titularidade).</div>
+                        </button>
+                        <button onClick={() => resolverNascimentoFilho("treinar")} className="text-left p-3 border border-zinc-800 rounded-sm hover:border-emerald-500">
+                          <div className="font-bold text-sm">💪 Seguir treinando normalmente</div>
+                          <div className="text-[10px] text-zinc-500 mt-0.5">Comissão técnica nota a dedicação, mas os primeiros dias em casa passam voando.</div>
+                        </button>
+                      </div>
+                    </Card>
+                  </PopupOverlay>
+                )}
+
                 {pendingChegadaClube && (
                   <PopupOverlay>
                     <Card className="border-emerald-500/40">
@@ -6950,6 +7033,33 @@ function resolverTemporada(c, extraStats) {
 
             {aba === "vidaprivada" && (
               <div className="tab-grid">
+                <Card accent="linear-gradient(90deg,#ec4899,#8b5cf6)">
+                  <div className="text-[10px] text-pink-400 uppercase tracking-widest mb-2">💞 Vida Pessoal</div>
+                  {(() => {
+                    const vp = carreira.vidaPessoal || { status: "solteiro", parceiro: null, filhos: [] };
+                    const statusLabel = { solteiro: "Solteiro(a)", namorando: `Namorando com ${vp.parceiro}`, noivo: `Noivo(a) de ${vp.parceiro}`, casado: `Casado(a) com ${vp.parceiro}` }[vp.status];
+                    const statusIcone = { solteiro: "🙋", namorando: "💕", noivo: "💍", casado: "👰" }[vp.status];
+                    return (
+                      <>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xl">{statusIcone}</span>
+                          <span className="text-sm font-bold text-zinc-200">{statusLabel}</span>
+                        </div>
+                        {(vp.filhos || []).length > 0 && (
+                          <div>
+                            <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">👶 Filhos</div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {vp.filhos.map((f, i) => <span key={i} className="text-[10px] px-2 py-1 rounded-sm border border-zinc-800 text-zinc-300">{f.nome} <span className="text-zinc-600">· nasceu quando você tinha {f.idadeNascimento}</span></span>)}
+                            </div>
+                          </div>
+                        )}
+                        {vp.status === "solteiro" && !(vp.filhos || []).length && <p className="text-[10px] text-zinc-500">A vida fora de campo ainda não deslanchou — quem sabe essa temporada.</p>}
+                      </>
+                    );
+                  })()}
+                </Card>
+
+                <div className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1 mb-1">💰 Patrimônio & Extrato</div>
                 <Card accent="linear-gradient(90deg,#12A876,#D8B44A)">
                   <div className="text-center mb-4"><div className="text-[10px] text-zinc-500 uppercase tracking-widest">Total acumulado</div><div className="display text-3xl font-black text-emerald-400">${formatarDinheiro(carreira.cofre)}</div></div>
                   <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2">Extrato</div>
@@ -6979,6 +7089,7 @@ function resolverTemporada(c, extraStats) {
                   );
                 })()}
 
+                <div className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1 mb-1">💸 Padrão de Vida</div>
                 {(() => {
                   const ost = efeitosOstentacao(carreira);
                   const fisicoBens = (carreira.posses || []).reduce((s, p) => s + (p.efeitoFisico || 0), 0);
@@ -7017,6 +7128,7 @@ function resolverTemporada(c, extraStats) {
                   );
                 })()}
 
+                <div className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1 mb-1">🛍️ Bens & Loja</div>
                 {(carreira.posses || []).length > 0 && (() => {
                   const manutTotal = carreira.posses.reduce((a2, p) => a2 + (p.manutencao || 0), 0);
                   const valorTotal = carreira.posses.reduce((a2, p) => a2 + (p.custo || 0), 0);
@@ -7110,6 +7222,7 @@ function resolverTemporada(c, extraStats) {
                   </Card>
                 )}
 
+                <div className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1 mb-1">📈 Investimentos</div>
                 <Card accent="linear-gradient(90deg,#3b82f6,#8b5cf6)">
                   <div className="text-[10px] text-blue-400 uppercase tracking-widest mb-2">📈 Investimentos</div>
                   <p className="text-[11px] text-zinc-500 mb-2">Resultado é aleatório e depende do perfil de risco escolhido.</p>

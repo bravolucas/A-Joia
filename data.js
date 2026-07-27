@@ -2835,6 +2835,15 @@ export const CRITERIOS_MEMORAVEL = [
 /* ===================== PREPARAÇÃO DE SEMANA =====================
    Entre uma rodada e outra existe uma semana. O que você faz com ela muda
    o próximo jogo — e o custo aparece no corpo ou na conta. */
+/* Função prometida no elenco, negociável no contrato — afeta expectativa
+   salarial e o quanto a diretoria cobra desempenho em troca. */
+export const FUNCOES_ELENCO = [
+  { id: "reserva", nome: "Reserva", desc: "Sem pressão, mas também sem prioridade — minutos não são garantidos.", expectativaMult: 0.72 },
+  { id: "titular", nome: "Titular", desc: "Espera-se presença regular no time principal.", expectativaMult: 1.0 },
+  { id: "fundamental", nome: "Peça fundamental", desc: "O time é montado contando com você — cobrança maior de desempenho.", expectativaMult: 1.25 },
+  { id: "estrela", nome: "Estrela do time", desc: "O rosto do elenco. Salário alto, cobrança máxima.", expectativaMult: 1.55 },
+];
+
 export const PREPARACOES_SEMANA = [
   { id: "descanso", nome: "Poupar e descansar", icone: "😴", cor: "#3b82f6",
     desc: "Semana leve, foco em recuperar. Volta inteiro, mas sem afiar nada.",

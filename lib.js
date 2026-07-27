@@ -612,7 +612,7 @@ export function bonusTraitsMataMata(c) {
 }
 
 
-export function evoluirAtributos(atual, potencial, idade, persona, bonusFoco, reducaoDeclinio = 1, fatorDesempenho = 1) {
+export function evoluirAtributos(atual, potencial, idade, persona, bonusFoco, reducaoDeclinio = 1, fatorDesempenho = 1, fatorTitulos = 1) {
   // Personalidade inválida (save antigo, dado corrompido) derrubava o jogo inteiro aqui.
   // Agora cai num perfil padrão em vez de quebrar a tela.
   if (!persona || persona.picoFim == null) persona = PERSONALIDADES.find((p) => p.id === "ascensao") || PERSONALIDADES[0];
@@ -624,8 +624,14 @@ export function evoluirAtributos(atual, potencial, idade, persona, bonusFoco, re
     const focoMult = bonusFoco === id ? 1.5 : 1;
     if (idade < persona.picoFim) {
       const gap = potencial[id] - novo[id];
-      const passo = gap * 0.18 * persona.taxaCresc * focoMult * fatorDesempenho;
-      novo[id] = clampR(Math.round(novo[id] + passo), min, max);
+      if (gap > 0) {
+        // Taxa proporcional mais forte, e um piso mínimo — sem isso, a evolução
+        // desacelera tanto perto do potencial que na prática nunca chega lá
+        // (é a causa do "travado nos 70 e poucos" que os jogadores sentiam).
+        const passoProporcional = gap * 0.28 * persona.taxaCresc * focoMult * fatorDesempenho * fatorTitulos;
+        const passo = Math.max(passoProporcional, Math.min(gap, isStar ? 0.3 : 1));
+        novo[id] = clampR(Math.round(novo[id] + passo), min, max);
+      }
     } else if (idade >= persona.declinioApartir) {
       // Velocidade e físico caem 40% mais rápido que passe/finalização — curva de envelhecimento real
       const pesoFisico = ["velocidade", "fisico"].includes(id) ? 1.4 : 0.9;
@@ -634,6 +640,14 @@ export function evoluirAtributos(atual, potencial, idade, persona, bonusFoco, re
     }
   });
   return novo;
+}
+
+/* Quantos títulos essa temporada rendeu — usado como bônus extra de evolução
+   (títulos funcionam como recompensa: quem ganha campeonato evolui um pouco
+   mais rápido naquele ano, além do fator de desempenho por nota). */
+export function fatorTitulosTemporada(card) {
+  const titulos = [card.campeaoLiga, card.copaNacional?.titulo, card.estadual?.titulo, card.copinhaCarreira?.titulo, card.continental?.titulo, card.mundial?.titulo, card.copaResultado?.titulo, card.continentalSelecaoResultado?.titulo].filter(Boolean).length;
+  return clampR(1 + titulos * 0.07, 1, 1.35);
 }
 
 export function forcaEfetivaClube(c, clube) {
@@ -1615,10 +1629,7 @@ export function simularTemporada(c) {
   }
 
   let copaNacional = null, copaNacionalPendente = null;
-  if (Math.random() < 0.6) {
-    const r = forcaTotal + (Math.random() - 0.5) * 14;
-    if (r >= 80) copaNacionalPendente = { forcaBase: r, adversario: sortearAdversario(c, "copaNacional") };
-  }
+  { const r = forcaTotal + (Math.random() - 0.5) * 14; copaNacionalPendente = { forcaBase: r, adversario: sortearAdversario(c, "copaNacional") }; }
 
   // Mundial de Clubes — só disputa quem se classificou (campeão de liga ou continental na temporada anterior)
   let mundial = null;

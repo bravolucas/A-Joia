@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { montarSave, salvarLocal, carregarLocal, apagarLocal, listarSaves, existeAlgumSave, baixarSave, lerArquivoSave, formatarData, normalizarSave, SLOTS } from "./save.js";
-import { ANO_INICIO, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
-import { agregarPorCompeticao, ajustarMeta, ajustesDoContexto, analisarJogos, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, continentalDaSelecao, creditarTitulo, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, forcaEfetivaClube, formatarDinheiro, gerarColetivaPosJogo, gerarContextoLance, gerarElenco, gerarEventoAmbiente, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, PIRAMIDE_LIGAS, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearConcorrente, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, todosJogosCarreira, valorDeMercado, valorMundo, veredito } from "./lib.js";
+import { ANO_INICIO, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, FUNCOES_ELENCO, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
+import { agregarPorCompeticao, ajustarMeta, ajustesDoContexto, analisarJogos, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, continentalDaSelecao, creditarTitulo, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, fatorTitulosTemporada, forcaEfetivaClube, formatarDinheiro, gerarColetivaPosJogo, gerarContextoLance, gerarElenco, gerarEventoAmbiente, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, PIRAMIDE_LIGAS, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearConcorrente, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, todosJogosCarreira, valorDeMercado, valorMundo, veredito } from "./lib.js";
 import { AttrBarDelta, AttrRadar, BallIcon, Button, CalendarioTemporadaPopup, Card, CartaoCarreira, ClubDot, Confetti, CountUp, CurvaEvolucao, Diamond, FichaPartida, FreeKickMini, GoalMini, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PodiumBolaDeOuro, PopupConvocacao, PopupOverlay, SilhuetaJogador, Sparkle, TelaPartidaAoVivo, TimingBar, TrophyIcon } from "./components.jsx";
 
 export default function AJoiaGame() {
@@ -46,6 +46,8 @@ export default function AJoiaGame() {
   const [clubeSelecionadoInicial, setClubeSelecionadoInicial] = useState(null);
   const [numerosBloqueados, setNumerosBloqueados] = useState(() => new Set());
   const [numeroEscolhidoInicial, setNumeroEscolhidoInicial] = useState(null);
+  const [draftSlots, setDraftSlots] = useState(() => NUM_ATTRS.map((attr) => ({ attr, valor: null, girando: false })));
+  const [draftGirandoAgora, setDraftGirandoAgora] = useState(null);
 
   const [carreira, setCarreira] = useState(null);
   const [temporadas, setTemporadas] = useState([]);
@@ -79,8 +81,9 @@ export default function AJoiaGame() {
   const [partidaAoVivo, setPartidaAoVivo] = useState(null);
   const [pendingColetivaPosJogo, setPendingColetivaPosJogo] = useState(null);
   const [pendingConvocacao, setPendingConvocacao] = useState(null);
+  const [pendingOfertaInesperada, setPendingOfertaInesperada] = useState(null);
+  const [negociacaoContrato, setNegociacaoContrato] = useState(null);
   const [detalhesAbertos, setDetalhesAbertos] = useState(false);
-  const [subAbaCarreira, setSubAbaCarreira] = useState(null);
   const [jogadorCardAberto, setJogadorCardAberto] = useState(false);
   const [filtroHistorico, setFiltroHistorico] = useState("todos");
   const [resultadoAcao, setResultadoAcao] = useState(null);
@@ -254,8 +257,24 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
   function escolherClubeInicial(c) { setClubeSelecionadoInicial(c); setNumerosBloqueados(gerarBloqueadosNumero()); }
   function confirmarNumeroInicial(n) { setNumeroEscolhidoInicial(n); iniciarCopinha(); }
 
+  /* Draft de upgrades da peneira: 6 slots, um por atributo, cada um com um
+     "dado" de 0 a 10 que soma direto no atributo inicial. Leve tendência
+     pros atributos mais relevantes da posição escolhida (não é 100% sorte
+     pura, mas também não garante nada — ainda pode sair baixo). */
+  function girarSlotDraft(attr) {
+    if (draftGirandoAgora || draftSlots.find((s) => s.attr === attr)?.valor !== null) return;
+    setDraftGirandoAgora(attr);
+    setTimeout(() => {
+      const pos = POSICOES.find((p) => p.id === posicao) || POSICOES[0];
+      const relevante = (pos.pesos[attr] || 0) >= 2.0;
+      const valor = clampR(Math.round(rand(0, 10) + (relevante ? rand(0, 2) : 0)), 0, 10);
+      setDraftSlots((slots) => slots.map((s) => (s.attr === attr ? { ...s, valor } : s)));
+      setDraftGirandoAgora(null);
+    }, 900);
+  }
   function iniciarCarreira(clubeEscolhido, numero) {
     const attrsIni = attrsIniciais(potencialFinal);
+    draftSlots.forEach((s) => { if (s.valor) attrsIni[s.attr] = clampR(attrsIni[s.attr] + s.valor, 40, 99); });
     const persona = PERSONALIDADES.find((p) => p.id === personalidade) || PERSONALIDADES[3];
     const c = {
       attrs: attrsIni, attrsAnteriores: { ...attrsIni }, potencial: potencialFinal, posicao, personalidade, nacionalidade, clubeCoracao, pernaDominante, origem: origem?.id,
@@ -269,6 +288,15 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
       historico: [], titulosLista: [], rivalPosicao: pick(poolRivalPorOvr(calcOVR(attrsIni, posicao))), rivalBolasDeOuro: 0, tecnicoConfianca: 60, relacaoDiretoria: 40, calorMidia: 20, expectativa: null, posicoesAprendidas: [posicao], empresarioUsado: {}, papelTatico: "padrao", cosmeticosDesbloqueados: [], postSocialFeito: false,
       entrosamento: 20, elencoMoral: 60, titularidade: 100, concorrente: sortearConcorrente(clubeEscolhido), relacaoPatrocinadores: 50, traits: [], streaksTraits: {},
       empresario: { id: "iniciante", restantes: 3 },
+    };
+    // Primeiro contrato: um "contrato de formação" — valor simbólico, quase
+    // um teste, bem diferente de um contrato profissional de verdade.
+    const ovrEstreia = calcOVR(attrsIni, posicao);
+    c.contrato = {
+      anos: 2, restantes: 2,
+      salario: Math.max(120, Math.round(salarioClube(clubeEscolhido, ovrEstreia) * 0.15)),
+      multa: Math.max(600, Math.round(salarioClube(clubeEscolhido, ovrEstreia) * 3)),
+      bonusGol: 0, formacao: true,
     };
     if (origem?.aplicar) origem.aplicar(c);
     if (origem) logHist(c, `Origem: ${origem.nome}. ${origem.perk}`);
@@ -453,20 +481,95 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
     resolverTemporada(c, {});
   }
   function escolherOfertaTransferencia(op) {
-    const ovr = calcOVR(carreira.attrs, carreira.posicao);
-    const emp = carreira.empresario ? empresarioPorId(carreira.empresario.id) : EMPRESARIOS[0];
-    const salarioBase = salarioClube(op.clube, ovr) * (op.salarioMult || 1) * (emp.salarioMult ?? 1);
-    const anos = (base) => clampR(base + (emp.anosBonus || 0), 1, 6);
-    const mm = emp.multaMult ?? 1;
-    const pacotes = [
-      { anos: anos(2), salario: Math.round(salarioBase * 0.82), multa: Math.round(salarioBase * 2.5 * mm), bonusGol: 2, label: "Contrato curto" },
-      { anos: anos(3), salario: Math.round(salarioBase), multa: Math.round(salarioBase * 5 * mm), bonusGol: 3, label: "Contrato padrão" },
-      { anos: anos(5), salario: Math.round(salarioBase * 1.3), multa: Math.round(salarioBase * 10 * mm), bonusGol: 5, label: "Contrato longo" },
-    ];
-    setJanela({ tipo: "contrato", opEscolhida: op, pacotes, empNome: emp.nome });
+    iniciarNegociacaoContrato(op.clube, op);
   }
-  function confirmarContrato(pacote) {
-    setJanela((j) => ({ tipo: "numeroTransfer", opEscolhida: { ...j.opEscolhida, contrato: pacote }, bloqueados: gerarBloqueadosNumero() }));
+  /* Negociação de contrato de verdade — folha de contrato com termos que
+     dão pra pedir mais ou menos, e a diretoria pode perder a paciência e
+     sair da mesa se você empurrar demais. Serve tanto pra renovar com o
+     clube atual (opTransfer null) quanto pra fechar com um clube novo. */
+  function iniciarNegociacaoContrato(clube, opTransfer = null) {
+    const ovr = calcOVR(carreira.attrs, carreira.posicao, carreira.papelTatico);
+    const emp = carreira.empresario ? empresarioPorId(carreira.empresario.id) : EMPRESARIOS[0];
+    const salarioBase = salarioClube(clube, ovr) * (opTransfer?.salarioMult || 1) * (emp.salarioMult ?? 1);
+    // relevância: o quanto o clube te quer/precisa — molda a paciência inicial da diretoria
+    const relevancia = clamp((ovr - clube.forca + ((carreira.fama ?? 20) - 40) / 4) / 40, -0.5, 0.6);
+    const termos = {
+      salario: Math.round(salarioBase),
+      anos: clampR(3 + (emp.anosBonus || 0), 1, 6),
+      multa: Math.round(salarioBase * 5 * (emp.multaMult ?? 1)),
+      bonusGol: 3,
+      bonusTitulo: Math.round(salarioBase * 0.5),
+      funcao: "titular",
+    };
+    setNegociacaoContrato({
+      clube, opTransfer, termos, paciencia: clampR(60 + relevancia * 60, 25, 95),
+      pedidosRestantes: 4, colapsou: false, empNome: emp.nome,
+    });
+  }
+  function ajustarTermoNegociacao(campo, direcao) {
+    setNegociacaoContrato((n) => {
+      if (!n || n.pedidosRestantes <= 0 || n.colapsou) return n;
+      const passos = { salario: 0.1, anos: 1, multa: 0.18, bonusGol: 1, bonusTitulo: 0.25 };
+      const atual = n.termos[campo];
+      const novoValor = campo === "anos" || campo === "bonusGol"
+        ? clampR(atual + direcao * passos[campo], campo === "anos" ? 1 : 0, campo === "anos" ? 6 : 15)
+        : Math.max(0, Math.round(atual * (1 + direcao * passos[campo])));
+      // pedir mais salário/bônus/anos, ou pedir menos cláusula de saída, desgasta a diretoria
+      const desgastante = (["salario", "bonusGol", "bonusTitulo", "anos"].includes(campo) && direcao > 0) || (campo === "multa" && direcao < 0);
+      const chanceAceitar = clamp(n.paciencia / 100, 0.15, 0.95);
+      const aceitou = Math.random() < (desgastante ? chanceAceitar : 0.95);
+      const paciencia = clampR(n.paciencia - (desgastante ? rand(6, 14) : rand(0, 3)), 0, 100);
+      const colapsou = paciencia <= 0;
+      if (!aceitou) return { ...n, paciencia, colapsou, pedidosRestantes: n.pedidosRestantes - 1 };
+      return { ...n, termos: { ...n.termos, [campo]: novoValor }, paciencia, colapsou, pedidosRestantes: n.pedidosRestantes - 1 };
+    });
+  }
+  function mudarFuncaoNegociacao(funcaoId) {
+    setNegociacaoContrato((n) => (n && !n.colapsou ? { ...n, termos: { ...n.termos, funcao: funcaoId } } : n));
+  }
+  function fecharNegociacaoContrato() {
+    const n = negociacaoContrato;
+    if (!n || n.colapsou) return;
+    const pacote = { anos: n.termos.anos, salario: n.termos.salario, multa: n.termos.multa, bonusGol: n.termos.bonusGol, bonusTitulo: n.termos.bonusTitulo, funcao: n.termos.funcao, label: "Negociado" };
+    setNegociacaoContrato(null);
+    if (n.opTransfer) {
+      setJanela({ tipo: "numeroTransfer", opEscolhida: { ...n.opTransfer, contrato: pacote }, bloqueados: gerarBloqueadosNumero() });
+    } else {
+      const c = { ...carreira };
+      c.contrato = { ...pacote, restantes: pacote.anos };
+      const funcaoNome = FUNCOES_ELENCO.find((f) => f.id === pacote.funcao)?.nome.toLowerCase();
+      logHist(c, `Renovou contrato com o ${c.clube.nome}: ${pacote.anos} ano(s), salário $${formatarDinheiro(pacote.salario)}, cláusula de saída $${formatarDinheiro(pacote.multa)}, como ${funcaoNome}.`);
+      setCarreira(c);
+      setResultadoAcao({ titulo: "Novo contrato assinado", texto: `Você renovou com o ${c.clube.nome} nesses termos.`, icone: "✍️" });
+    }
+  }
+  function sairDaNegociacao() {
+    setNegociacaoContrato(null);
+  }
+  /* Oferta inesperada: seu clube aceitou uma proposta por você (venda), ou
+     surgiu um empréstimo espontâneo pra quem está no banco ou é muito jovem.
+     Aceitar venda abre a negociação de contrato de verdade; aceitar
+     empréstimo já manda direto (o vínculo com o clube atual continua). */
+  function aceitarOfertaInesperada() {
+    const oferta = pendingOfertaInesperada;
+    setPendingOfertaInesperada(null);
+    if (!oferta) return;
+    if (oferta.tipo === "venda") {
+      iniciarNegociacaoContrato(oferta.clube, { clube: oferta.clube, tipo: "transfer", salarioMult: 1 });
+    } else {
+      jogarTemporada(oferta.clube, "emprestimo", 1, null, null);
+    }
+  }
+  function recusarOfertaInesperada() {
+    const c = { ...carreira };
+    if (pendingOfertaInesperada?.tipo === "venda") {
+      c.relacaoDiretoria = clampR((c.relacaoDiretoria ?? 40) - 3, 0, 100);
+      logHist(c, `Recusou proposta do ${pendingOfertaInesperada.clube.nome} e permaneceu no ${c.clube.nome}.`);
+    } else if (pendingOfertaInesperada?.tipo === "emprestimo") {
+      logHist(c, `Recusou empréstimo ao ${pendingOfertaInesperada.clube.nome} e permaneceu no ${c.clube.nome}.`);
+    }
+    setCarreira(c);
+    setPendingOfertaInesperada(null);
   }
   function confirmarNumeroTransfer(n) {
     const op = janela.opEscolhida;
@@ -777,6 +880,18 @@ function simularRodadaAtual(c, ta, bonusGol = 0, bonusAssist = 0) {
         };
         return; // pula o resto do lance pra esta partida
       }
+      // ---- DESCANSO: escolheu poupar na semana, fica fora ou no banco ----
+      if (ta.preparacaoSemana === "descanso") {
+        meuResultadoRodada = {
+          adversario: adversarioObj.nome, adversarioForca: adversarioObj.forca,
+          golsMeu: meusGolsTime, golsAdv: golsAdvTime,
+          resultado: meusGolsTime > golsAdvTime ? "V" : meusGolsTime === golsAdvTime ? "E" : "D",
+          golsMinha: 0, assistMinha: 0, numero: ta.rodadaAtual + 1,
+          casa: souCasa, competicao: "liga", classico: ehClassico,
+          descansou: true, nota: null,
+        };
+        return;
+      }
 
       // a postura mexe na chance de participar do gol
       let golsPessoais = golsRestantes > 0 && Math.random() < 0.42 * post.golMult * (prepSem.golMult || 1) ? Math.min(meusGolsTime, rand(1, Math.min(2, Math.max(1, golsRestantes)))) : 0;
@@ -834,7 +949,7 @@ function concluirRodada(c, ta, { tabela, historico, meuResultadoRodada, golsRest
     c.temporadaAndamento = null;
     finalizarTemporada(c, ta.cardOriginal, logJogos, tabela);
   } else {
-    c.temporadaAndamento = { ...ta, rodadaAtual: proxRodada, tabela, historicoRodada: historico, ultimoResultado: meuResultadoRodada, golsRestantes, assistRestantes, logJogos, resultadosRodadas };
+    c.temporadaAndamento = { ...ta, rodadaAtual: proxRodada, tabela, historicoRodada: historico, ultimoResultado: meuResultadoRodada, golsRestantes, assistRestantes, logJogos, resultadosRodadas, preparacaoSemana: null, posturaEscolhidaRodada: false, imagemDisponivel: !!c.patrocinio && Math.random() < 0.25 };
     setCarreira(c);
   }
 }
@@ -1226,12 +1341,20 @@ function resolverTemporada(c, extraStats) {
       }
       c.temporadaAndamento = {
         calendario, rodadaAtual: 0, tabela, historicoRodada: [], ultimoResultado: null, resultadosRodadas: [],
-        eventosAgendados, cardOriginal: card,
+        eventosAgendados, cardOriginal: card, posturaEscolhidaRodada: false, imagemDisponivel: !!c.patrocinio && Math.random() < 0.25,
         lanceRodada: rand(0, calendario.length - 1), lanceResolvido: false,
         golsRestantes: card.gols, assistRestantes: card.assist, logJogos: [],
       };
+      c.pedidosContrato = { aumentoUsado: false, aumentoNegado: false, bonusUsado: false, bonusNegado: false };
       if (conv.convocado) {
         setPendingConvocacao({ competicao: compSelecao, querCopa, nacionalidade: c.nacionalidade });
+      } else if (!c.emprestimo && calcOVR(c.attrs, c.posicao) >= 68 && !(c.clubeCoracao && c.clube.nome === c.clubeCoracao.nome) && Math.random() < 0.12) {
+        // Oferta inesperada: o clube aceitou proposta por você — negocia ou fica
+        const pool = CLUBES.filter((x) => x.nome !== c.clube.nome && Math.abs(x.forca - forcaEfetivaClube(c, c.clube)) <= 10);
+        if (pool.length) setPendingOfertaInesperada({ tipo: "venda", clube: pick(pool) });
+      } else if (!c.emprestimo && ((c.titularidade ?? 100) < 40 || c.idade <= 20) && Math.random() < 0.18) {
+        const poolFraco = CLUBES.filter((x) => x.nome !== c.clube.nome && x.forca < forcaEfetivaClube(c, c.clube) - 8);
+        if (poolFraco.length) setPendingOfertaInesperada({ tipo: "emprestimo", clube: pick(poolFraco) });
       }
       setCarreira(c);
       return;
@@ -1516,6 +1639,17 @@ function resolverTemporada(c, extraStats) {
       const clubeKey = c.clube.nome;
       c.titulosPorClube = { ...c.titulosPorClube, [clubeKey]: [...(c.titulosPorClube?.[clubeKey] || []), ...titulosLista] };
     }
+    // Bônus por título do contrato: paga por cada título de clube ou de seleção conquistado nessa temporada
+    if (c.contrato?.bonusTitulo > 0) {
+      const titulosSelecaoTemporada = (card.copaResultado?.titulo ? 1 : 0) + (card.continentalSelecaoResultado?.titulo ? 1 : 0);
+      const totalTitulosTemporada = titulosLista.length + titulosSelecaoTemporada;
+      if (totalTitulosTemporada > 0) {
+        const ganhoBonus = c.contrato.bonusTitulo * totalTitulosTemporada;
+        c.cofre += ganhoBonus;
+        c.extrato = [...(c.extrato || []), { idade: c.idade, tipo: `Bônus por título (${totalTitulosTemporada}x)`, valor: ganhoBonus }];
+        logHist(c, `Recebeu $${formatarDinheiro(ganhoBonus)} em bônus contratual por ${totalTitulosTemporada} título(s) na temporada.`);
+      }
+    }
     if (copa?.titulo) { const nac = nacDe(c.nacionalidade); c.titulosSelecao = [...(c.titulosSelecao || []), `Copa do Mundo (${nac.label})`]; }
 
     // O mundo avança junto: rivais rendem, evoluem, trocam de clube e se aposentam
@@ -1595,7 +1729,8 @@ function resolverTemporada(c, extraStats) {
     { // Imortal deixa o declínio mais lento; desempenho da temporada (nota real vs esperada pro OVR) ajusta ambos os lados
       const freioDeclinio = multEfeitoInsignia(c, "declinio");
       const desemp = fatorDesempenhoTemporada(card.nota, card.ovr);
-      c.attrs = evoluirAtributos(c.attrs, c.potencial, c.idade, persona, c.focoTreino, (c.staff?.psicologoEsportivo ? 0.85 : 1) * (freioDeclinio || 1) * desemp.fatorDeclinioReducao, desemp.fatorCrescimento);
+      const fatorTitulos = fatorTitulosTemporada(card);
+      c.attrs = evoluirAtributos(c.attrs, c.potencial, c.idade, persona, c.focoTreino, (c.staff?.psicologoEsportivo ? 0.85 : 1) * (freioDeclinio || 1) * desemp.fatorDeclinioReducao, desemp.fatorCrescimento, fatorTitulos);
     }
     // Líder Nato puxa o moral do grupo todo ano
     { const m = somaEfeitoInsignia(c, "moralAnual"); if (m) c.elencoMoral = clampR((c.elencoMoral ?? 60) + m, 0, 100); }
@@ -2123,8 +2258,9 @@ function resolverTemporada(c, extraStats) {
 
     const meuJogoRodada = ta.calendario[ta.rodadaAtual].find((p) => p.casa.nome === c.clube.nome || p.fora.nome === c.clube.nome);
     const suspenso = (c.cartoes?.suspensoesRestantes || 0) > 0;
+    const descansou = ta.preparacaoSemana === "descanso";
 
-    if (meuJogoRodada && !suspenso) {
+    if (meuJogoRodada && !suspenso && !descansou) {
       // A partida do jogador não é mais resolvida na hora — vira uma sequência
       // de lances com decisões reais, e o placar nasce do que acontece nela.
       const { tabela: tabelaParcial, historico: historicoParcial } = simularOutrasPartidasDaRodada(c, ta);
@@ -2278,6 +2414,13 @@ function resolverTemporada(c, extraStats) {
     const segundoAmarelo = !!cartaoEvento?.segundoAmarelo;
     const amarelo = !!cartaoEvento && !vermelho;
     const susp = cartaoEvento ? aplicarCartao(c, { amarelo, vermelho }) : { suspendeu: 0 };
+
+    // Energia consumida de verdade pela partida — mais lances/fadiga acumulada
+    // e postura mais intensa (raça/ofensivo) custam mais caro.
+    const postDesgaste = POSTURAS_JOGO.find((p) => p.id === ctx.postura) || POSTURAS_JOGO[1];
+    const custoEnergia = Math.round((13 + (estado.fadiga || 0) * 12) * (postDesgaste.desgasteMult || 1));
+    c.energia = clampR((c.energia ?? 100) - custoEnergia, 0, c.energiaMax ?? 100);
+    c.desgaste = Math.max(0, (c.desgaste || 0) + 0.15 * (postDesgaste.desgasteMult || 1));
 
     const nota = notaDaPartida(c, {
       gols: golsMinha, assist: assistMinha, resultado, golsSofridos: estado.golsAdv,
@@ -2764,10 +2907,20 @@ function resolverTemporada(c, extraStats) {
     setPosTemporada((p) => ({ ...p, contratoNegociado: true }));
     setResultadoAcao({ titulo: "Negociação de contrato", texto, icone: aceitou ? "✍️" : "📄" });
   }
+  function dentroJanelaPedidoContrato() {
+    const ta = carreira.temporadaAndamento;
+    if (!ta?.calendario?.length) return true; // fora do modo jogo a jogo, não trava por janela
+    const meio = Math.floor(ta.calendario.length / 2);
+    return ta.rodadaAtual <= 2 || Math.abs(ta.rodadaAtual - meio) <= 2;
+  }
   function pedirAumentoSalarial() {
     const c = { ...carreira };
     setContratoMenuAberto(false);
     if (!c.contrato) { setResultadoAcao({ titulo: "Pedido de aumento", texto: "Você ainda não tem um contrato formal pra pedir aumento — negocie uma renovação primeiro.", icone: "📄" }); return; }
+    const pedidos = c.pedidosContrato || { aumentoUsado: false, aumentoNegado: false, bonusUsado: false, bonusNegado: false };
+    if (pedidos.aumentoNegado) { setResultadoAcao({ titulo: "Pedido de aumento", texto: "A diretoria já disse não recentemente — melhor esperar a próxima janela antes de insistir.", icone: "📄" }); return; }
+    if (pedidos.aumentoUsado) { setResultadoAcao({ titulo: "Pedido de aumento", texto: "Você já usou seu pedido de aumento nessa janela.", icone: "📄" }); return; }
+    if (!dentroJanelaPedidoContrato()) { setResultadoAcao({ titulo: "Pedido de aumento", texto: "A diretoria só ouve pedido de aumento no início ou no meio da temporada — tente mais perto dessas janelas.", icone: "📄" }); return; }
     const chance = clamp(((c.relacaoDiretoria ?? 40) + (c.tecnicoConfianca ?? 60)) / 220, 0.12, 0.85);
     const aceitou = Math.random() < chance;
     let texto;
@@ -2777,8 +2930,9 @@ function resolverTemporada(c, extraStats) {
       texto = `A diretoria topa o pedido — salário reajustado em ${aumento}%, agora $${formatarDinheiro(c.contrato.salario)}/ano.`;
     } else {
       c.relacaoDiretoria = clampR((c.relacaoDiretoria ?? 40) - 4, 0, 100);
-      texto = "A diretoria recusou o pedido de aumento por enquanto — melhor tentar de novo depois de uma boa temporada.";
+      texto = "A diretoria recusou o pedido de aumento — vai precisar esperar a próxima janela pra tentar de novo.";
     }
+    c.pedidosContrato = { ...pedidos, aumentoUsado: true, aumentoNegado: !aceitou };
     logHist(c, `Pedido de aumento salarial: ${texto}`);
     setCarreira(c);
     setResultadoAcao({ titulo: "Pedido de aumento salarial", texto, icone: aceitou ? "💰" : "📄" });
@@ -2787,6 +2941,10 @@ function resolverTemporada(c, extraStats) {
     const c = { ...carreira };
     setContratoMenuAberto(false);
     if (!c.contrato) { setResultadoAcao({ titulo: "Bônus por desempenho", texto: "Você precisa de um contrato ativo pra negociar bônus.", icone: "📄" }); return; }
+    const pedidos = c.pedidosContrato || { aumentoUsado: false, aumentoNegado: false, bonusUsado: false, bonusNegado: false };
+    if (pedidos.bonusNegado) { setResultadoAcao({ titulo: "Bônus por desempenho", texto: "A diretoria já negou esse pedido recentemente — espere a próxima janela.", icone: "📄" }); return; }
+    if (pedidos.bonusUsado) { setResultadoAcao({ titulo: "Bônus por desempenho", texto: "Você já usou seu pedido de bônus nessa janela.", icone: "📄" }); return; }
+    if (!dentroJanelaPedidoContrato()) { setResultadoAcao({ titulo: "Bônus por desempenho", texto: "A diretoria só ouve esse tipo de pedido no início ou no meio da temporada.", icone: "📄" }); return; }
     const chance = clamp(((c.relacaoDiretoria ?? 40) + (c.tecnicoConfianca ?? 60)) / 200, 0.15, 0.85);
     const aceitou = Math.random() < chance;
     let texto;
@@ -2798,6 +2956,7 @@ function resolverTemporada(c, extraStats) {
       c.relacaoDiretoria = clampR((c.relacaoDiretoria ?? 40) - 3, 0, 100);
       texto = "A diretoria não topou aumentar o bônus por gol dessa vez.";
     }
+    c.pedidosContrato = { ...pedidos, bonusUsado: true, bonusNegado: !aceitou };
     logHist(c, `Negociação de bônus: ${texto}`);
     setCarreira(c);
     setResultadoAcao({ titulo: "Bônus por desempenho", texto, icone: aceitou ? "🎁" : "📄" });
@@ -3093,6 +3252,32 @@ function resolverTemporada(c, extraStats) {
   }
   function toggleLigaSelecionada(key) {
     setJanela((j) => ({ ...j, ligasSelecionadas: j.ligasSelecionadas.includes(key) ? j.ligasSelecionadas.filter((x) => x !== key) : [...j.ligasSelecionadas, key] }));
+  }
+  /* Pedir um clube específico: diferente da busca por liga (que já sorteia
+     quem se interessa), aqui o jogador escolhe o alvo — mas o clube só topa
+     de verdade se o interesse calculado (nível, forma, fama, empresário)
+     for suficiente. Nem todo clube que você quiser vai te querer de volta. */
+  function pedirClubeEspecifico(clube) {
+    const c = carreira;
+    const emp = c.empresario ? empresarioPorId(c.empresario.id) : EMPRESARIOS[0];
+    const ultima = temporadas.length ? temporadas[temporadas.length - 1] : null;
+    const score = scoreInteresseClube(c, clube, ultima, emp);
+    const chance = clamp(score * 0.35, 0.03, 0.9);
+    const topou = Math.random() < chance;
+    const cc = { ...c };
+    cc.empresarioUsado = { ...cc.empresarioUsado, especifico: true };
+    setCarreira(cc);
+    if (topou) {
+      setJanela(null);
+      iniciarNegociacaoContrato(clube, { clube, tipo: "transfer", salarioMult: 1 });
+    } else {
+      setJanela(null);
+      setResultadoAcao({
+        titulo: `${clube.nome} não demonstrou interesse`,
+        texto: `${emp.nome} bateu na porta do ${clube.nome}, mas não rolou — o clube não está atrás de alguém com seu perfil agora (nível, forma recente ou necessidade não bateram). Vale tentar de novo mais pra frente, quando sua situação mudar.`,
+        icone: "🚪",
+      });
+    }
   }
   function confirmarBuscaLigas() {
     const c = carreira;
@@ -3446,38 +3631,40 @@ function resolverTemporada(c, extraStats) {
             {clubeSelecionadoInicial && !numeroEscolhidoInicial && (
               <div className="animate-[popIn_0.3s_ease-out]">
                 <div className="flex items-center justify-center gap-2 mb-3"><ClubDot club={clubeSelecionadoInicial} size={28} /><span className="font-bold text-sm">{clubeSelecionadoInicial.nome}</span></div>
-                <p className="text-xs text-zinc-400 mb-3">Escolha sua camisa (10 números livres):</p>
+                <p className="text-xs text-zinc-400 mb-3">Escolha sua camisa (números de estreante — 17 a 28):</p>
                 <div className="flex flex-wrap justify-center gap-2 mb-4">
-                  {Array.from({ length: 28 }, (_, i) => i + 1).filter((n) => !numerosBloqueados.has(n)).map((n) => (
+                  {Array.from({ length: 12 }, (_, i) => i + 17).filter((n) => !numerosBloqueados.has(n)).map((n) => (
                     <button key={n} onClick={() => confirmarNumeroInicial(n)} className="w-11 h-11 text-sm font-mono rounded-sm border border-zinc-700 hover:border-amber-400 hover:bg-amber-400/10">{n}</button>
                   ))}
                 </div>
               </div>
             )}
-            {clubeSelecionadoInicial && numeroEscolhidoInicial && !copinhaResultado && (
-              <div className="text-center animate-[popIn_0.3s_ease-out]">
-                <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-1">Copa São Paulo de Futebol Júnior</div>
-                <div className="display text-sm font-bold mb-3">{FASES_COPINHA[copinhaFaseIdx]}</div>
-                {!copinhaTentativa ? (
-                  <>
-                    <p className="text-xs text-zinc-400 mb-3">Pênalti decisivo pela base do {clubeSelecionadoInicial.nome}. Perdeu, tá fora. Ganhou, passa de fase.</p>
-                    <GoalMini onPick={baterPenaltiCopinha} resultado={null} />
-                  </>
-                ) : (
-                  <>
-                    <GoalMini onPick={() => {}} resultado={copinhaTentativa} />
-                    <p className="text-sm mb-4">{copinhaTentativa.gol ? "Converteu! Classificado pra próxima fase." : copinhaTentativa.tipo === "Defesa" ? "O goleiro pegou! Eliminado da Copinha." : "Chutou pra fora! Eliminado da Copinha."}</p>
-                    <Button variant="gold" onClick={continuarCopinha}>Continuar</Button>
-                  </>
-                )}
+            {clubeSelecionadoInicial && numeroEscolhidoInicial && draftSlots.some((s) => s.valor === null) && (
+              <div className="text-center mt-2 animate-[popIn_0.3s_ease-out]">
+                <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-1">🎲 Draft de upgrades da base</div>
+                <p className="text-xs text-zinc-400 mb-3">Gire cada dado — cada um soma de 0 a 10 pontos direto no atributo correspondente. Seus melhores atributos pra {POSICOES.find((p) => p.id === posicao)?.label} têm uma leve vantagem no sorteio.</p>
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  {draftSlots.map((s) => {
+                    const info = ATTR_SLOTS.find((a) => a.id === s.attr);
+                    const girando = draftGirandoAgora === s.attr;
+                    return (
+                      <button key={s.attr} onClick={() => girarSlotDraft(s.attr)} disabled={s.valor !== null || !!draftGirandoAgora}
+                        className={`p-3 rounded-sm border text-center transition-all ${s.valor !== null ? "border-emerald-500/40 bg-emerald-500/5" : "border-zinc-800 hover:border-amber-400"} disabled:cursor-default`}>
+                        <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">{info?.label}</div>
+                        <div className={`text-2xl font-black font-stat ${girando ? "animate-pulse text-amber-400" : s.valor !== null ? "text-emerald-400" : "text-zinc-600"}`}>
+                          {girando ? "🎲" : s.valor !== null ? `+${s.valor}` : "?"}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
-            {copinhaResultado && (
+            {clubeSelecionadoInicial && numeroEscolhidoInicial && draftSlots.every((s) => s.valor !== null) && (
               <div className="text-center mt-2 animate-[popIn_0.3s_ease-out]">
-                <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-2">Primeira competição — Copa São Paulo de Futebol Júnior</div>
-                <div className="text-3xl mb-2">🏆</div>
-                <p className="font-bold text-base text-amber-400 mb-1">{copinhaResultado.label}</p>
-                <p className="text-xs text-zinc-400 mb-4">{copinhaResultado.texto}</p>
+                <div className="text-3xl mb-2">🎽</div>
+                <p className="font-bold text-base text-amber-400 mb-1">Pronto pra estrear!</p>
+                <p className="text-xs text-zinc-400 mb-4">A Copa São Paulo de Futebol Júnior vai ser sua primeira competição de verdade, logo no início da temporada — com a camisa {numeroEscolhidoInicial} do {clubeSelecionadoInicial.nome}.</p>
                 <Button variant="gold" onClick={() => { iniciarCarreira(clubeSelecionadoInicial, numeroEscolhidoInicial); setClubeSelecionadoInicial(null); }}>Estrear no profissional</Button>
               </div>
             )}
@@ -3671,7 +3858,7 @@ function resolverTemporada(c, extraStats) {
 
                 <div>
                 <Button
-                  disabled={!carreira.temporadaAndamento && !posTemporada?.ok && (janela || decisao || awardsPopup || pendingSponsor || pendingAbordagem || pendingExpectativa || pendingTecnico || pendingColetiva || pendingCompeticao || competicaoResultado || pendingLegendFollow || pendingTierUpgrade)}
+                  disabled={(!carreira.temporadaAndamento && !posTemporada?.ok && (janela || decisao || awardsPopup || pendingSponsor || pendingAbordagem || pendingExpectativa || pendingTecnico || pendingColetiva || pendingCompeticao || competicaoResultado || pendingLegendFollow || pendingTierUpgrade)) || (carreira.temporadaAndamento && !carreira.temporadaAndamento.posturaEscolhidaRodada && (carreira.cartoes?.suspensoesRestantes || 0) === 0)}
                   onClick={() => {
                     if (carreira.temporadaAndamento) avancarUmJogo();
                     else if (posTemporada?.ok) { setModoSimulacao("jogoAJogo"); iniciarTemporada(); }
@@ -3684,6 +3871,9 @@ function resolverTemporada(c, extraStats) {
                     ? "▶ Seguir para a temporada"
                     : "▶ Jogar temporada (idade " + carreira.idade + ")"}
                 </Button>
+                {carreira.temporadaAndamento && !carreira.temporadaAndamento.posturaEscolhidaRodada && (carreira.cartoes?.suspensoesRestantes || 0) === 0 && (
+                  <p className="text-[10px] text-amber-400 mt-1.5">⚠️ Escolha como você entra em campo antes de avançar.</p>
+                )}
                 </div>
 
                 {posTemporada?.ok && !janela && !awardsPopup && !carreira.temporadaAndamento && (
@@ -3752,15 +3942,16 @@ function resolverTemporada(c, extraStats) {
                                 </div>
                               </div>
                             )}
-                            <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">📅 A semana antes do jogo</div>
+                            <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">📅 A semana antes do jogo{ta.preparacaoSemana ? " — já escolhida" : ""}</div>
                             <div className="grid grid-cols-2 gap-1.5 mb-3">
-                              {PREPARACOES_SEMANA.map((pr) => {
+                              {PREPARACOES_SEMANA.filter((pr) => pr.id !== "imagem" || ta.imagemDisponivel).map((pr) => {
                                 const ativa = ta.preparacaoSemana === pr.id;
                                 const semEnergia = (carreira.energia ?? 100) + (pr.energia || 0) < 5;
+                                const travada = !!ta.preparacaoSemana && !ativa;
                                 return (
-                                  <button key={pr.id} disabled={semEnergia}
+                                  <button key={pr.id} disabled={semEnergia || !!ta.preparacaoSemana}
                                     onClick={() => { const cc = { ...carreira }; const usado = aplicarPreparacaoSemana(cc, pr.id); cc.temporadaAndamento = { ...cc.temporadaAndamento, preparacaoSemana: pr.id }; setCarreira(cc); if (usado?._ganho) setAvisoSave({ erro: false, txt: `Ação de patrocinador rendeu $${formatarDinheiro(usado._ganho)}` }); if (usado?._subiuFisico) setAvisoSave({ erro: false, txt: "O trabalho pesado rendeu +1 de físico" }); setTimeout(() => setAvisoSave(null), 2600); }}
-                                    className="text-left px-2 py-1.5 rounded-sm border transition-all disabled:opacity-30"
+                                    className={`text-left px-2 py-1.5 rounded-sm border transition-all ${travada ? "opacity-30" : ""} ${semEnergia && !ta.preparacaoSemana ? "opacity-30" : ""}`}
                                     style={{ borderColor: ativa ? pr.cor : "#27272a", background: ativa ? `${pr.cor}15` : "transparent" }}>
                                     <div className="text-[10px] font-bold" style={{ color: ativa ? pr.cor : "#e4e4e7" }}>{pr.icone} {pr.nome}</div>
                                     <div className="text-[9px] text-zinc-500 mt-0.5 leading-snug">{pr.desc}</div>
@@ -3785,7 +3976,7 @@ function resolverTemporada(c, extraStats) {
                                   const ativa = postAtual === po.id;
                                   return (
                                     <button key={po.id}
-                                      onClick={() => setCarreira((cc) => ({ ...cc, posturaPreferida: po.id, temporadaAndamento: { ...cc.temporadaAndamento, postura: po.id } }))}
+                                      onClick={() => setCarreira((cc) => ({ ...cc, posturaPreferida: po.id, temporadaAndamento: { ...cc.temporadaAndamento, postura: po.id, posturaEscolhidaRodada: true } }))}
                                       className="text-left px-2.5 py-2 rounded-sm border transition-all"
                                       style={{ borderColor: ativa ? po.cor : "#27272a", background: ativa ? `${po.cor}15` : "transparent" }}>
                                       <div className="text-[11px] font-bold" style={{ color: ativa ? po.cor : "#e4e4e7" }}>{po.icone} {po.nome}</div>
@@ -4231,12 +4422,15 @@ function resolverTemporada(c, extraStats) {
                 {carreira.contrato && (
                   <Card id="painel-contrato">
                     <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2">✍️ Contrato com o {carreira.clube.nome}</div>
-                    <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div className="grid grid-cols-2 gap-2 text-[11px] mb-2.5">
                       <div className="flex justify-between"><span className="text-zinc-400">Restam</span><span className="font-bold text-zinc-200">{carreira.contrato.restantes} ano(s)</span></div>
                       <div className="flex justify-between"><span className="text-zinc-400">Salário</span><span className="font-mono text-zinc-200">${formatarDinheiro(carreira.contrato.salario)}</span></div>
-                      <div className="flex justify-between"><span className="text-zinc-400">Multa</span><span className="font-mono text-zinc-200">${formatarDinheiro(carreira.contrato.multa)}</span></div>
+                      <div className="flex justify-between"><span className="text-zinc-400">Cláusula de saída</span><span className="font-mono text-zinc-200">${formatarDinheiro(carreira.contrato.multa)}</span></div>
                       <div className="flex justify-between"><span className="text-zinc-400">Bônus/gol</span><span className="font-mono text-zinc-200">${formatarDinheiro(carreira.contrato.bonusGol)}</span></div>
+                      {carreira.contrato.bonusTitulo > 0 && <div className="flex justify-between"><span className="text-zinc-400">Bônus/título</span><span className="font-mono text-zinc-200">${formatarDinheiro(carreira.contrato.bonusTitulo)}</span></div>}
+                      {carreira.contrato.funcao && <div className="flex justify-between"><span className="text-zinc-400">Função</span><span className="font-bold text-amber-400">{FUNCOES_ELENCO.find((f) => f.id === carreira.contrato.funcao)?.nome}</span></div>}
                     </div>
+                    <Button variant="ghost" onClick={() => iniciarNegociacaoContrato(carreira.clube)}>📄 Renegociar contrato</Button>
                   </Card>
                 )}
                   </>
@@ -4558,6 +4752,78 @@ function resolverTemporada(c, extraStats) {
                   </PopupOverlay>
                 )}
 
+                {pendingOfertaInesperada && (
+                  <PopupOverlay>
+                    <Card className="border-amber-500/40 text-center">
+                      <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-2">{pendingOfertaInesperada.tipo === "venda" ? "📰 Oferta inesperada" : "📋 Proposta de empréstimo"}</div>
+                      <div className="flex items-center justify-center gap-2 mb-2"><ClubDot club={pendingOfertaInesperada.clube} size={28} /><span className="font-bold text-sm">{pendingOfertaInesperada.clube.nome}</span></div>
+                      <p className="text-xs text-zinc-400 mb-4">
+                        {pendingOfertaInesperada.tipo === "venda"
+                          ? `O ${carreira.clube.nome} aceitou uma proposta do ${pendingOfertaInesperada.clube.nome} por você. Pode negociar a transferência ou recusar e continuar no elenco atual.`
+                          : `O ${pendingOfertaInesperada.clube.nome} pediu você por empréstimo de uma temporada, pra ganhar minutos que hoje não estão vindo no ${carreira.clube.nome}. Seu vínculo com o ${carreira.clube.nome} continua.`}
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button variant="ghost" onClick={recusarOfertaInesperada}>Recusar e ficar</Button>
+                        <Button variant="gold" onClick={aceitarOfertaInesperada}>{pendingOfertaInesperada.tipo === "venda" ? "Negociar saída" : "Aceitar empréstimo"}</Button>
+                      </div>
+                    </Card>
+                  </PopupOverlay>
+                )}
+
+                {negociacaoContrato && (
+                  <PopupOverlay>
+                    <Card padded={false} className="border-amber-500/40 overflow-hidden">
+                      <div className="p-4 border-b border-zinc-800 text-center" style={{ background: "radial-gradient(circle at 25% 15%, rgba(216,180,74,0.25) 0%, transparent 55%), linear-gradient(180deg,#1c1608 0%,#0d0a04 100%)" }}>
+                        <div className="text-[9px] text-amber-400 uppercase tracking-widest mb-1 font-bold">📄 Folha de contrato</div>
+                        <div className="flex items-center justify-center gap-1.5"><ClubDot club={negociacaoContrato.clube} size={20} /><span className="text-sm font-bold">{negociacaoContrato.clube.nome}</span></div>
+                        <div className="text-[10px] text-zinc-500 mt-0.5">Negociado por {negociacaoContrato.empNome}</div>
+                      </div>
+                      <div className="p-4">
+                        <div className="mb-3">
+                          <div className="flex justify-between text-[10px] text-zinc-500 mb-1"><span>Disposição da diretoria</span><span>{Math.round(negociacaoContrato.paciencia)}%</span></div>
+                          <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full transition-all" style={{ width: `${negociacaoContrato.paciencia}%`, background: negociacaoContrato.paciencia > 50 ? "#12A876" : negociacaoContrato.paciencia > 20 ? "#D8B44A" : "#D6483F" }} />
+                          </div>
+                        </div>
+                        <div className="grid gap-1.5 mb-3">
+                          {[
+                            ["salario", "💰 Salário anual", `$${formatarDinheiro(negociacaoContrato.termos.salario)}`],
+                            ["anos", "📅 Duração", `${negociacaoContrato.termos.anos} ano(s)`],
+                            ["multa", "🔒 Cláusula de saída", `$${formatarDinheiro(negociacaoContrato.termos.multa)}`],
+                            ["bonusGol", "⚽ Bônus por gol", `$${formatarDinheiro(negociacaoContrato.termos.bonusGol)}`],
+                            ["bonusTitulo", "🏆 Bônus por título", `$${formatarDinheiro(negociacaoContrato.termos.bonusTitulo)}`],
+                          ].map(([campo, label, valorTxt]) => (
+                            <div key={campo} className="flex items-center justify-between bg-zinc-950/40 rounded-sm px-3 py-2">
+                              <span className="text-[11px] text-zinc-400">{label}</span>
+                              <div className="flex items-center gap-2">
+                                <button disabled={negociacaoContrato.pedidosRestantes <= 0 || negociacaoContrato.colapsou} onClick={() => ajustarTermoNegociacao(campo, -1)} className="w-6 h-6 rounded-sm border border-zinc-700 text-xs disabled:opacity-30 hover:border-amber-400">−</button>
+                                <span className="text-[11px] font-bold text-zinc-100 w-24 text-center">{valorTxt}</span>
+                                <button disabled={negociacaoContrato.pedidosRestantes <= 0 || negociacaoContrato.colapsou} onClick={() => ajustarTermoNegociacao(campo, 1)} className="w-6 h-6 rounded-sm border border-zinc-700 text-xs disabled:opacity-30 hover:border-amber-400">+</button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mb-3">
+                          <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">Função no elenco</div>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            {FUNCOES_ELENCO.map((f) => (
+                              <button key={f.id} disabled={negociacaoContrato.colapsou} onClick={() => mudarFuncaoNegociacao(f.id)} className={`text-left px-2 py-1.5 rounded-sm border transition-all ${negociacaoContrato.termos.funcao === f.id ? "border-amber-500 bg-amber-500/10" : "border-zinc-800"}`}>
+                                <div className="text-[10px] font-bold text-zinc-200">{f.nome}</div>
+                                <div className="text-[9px] text-zinc-500 leading-snug">{f.desc}</div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-zinc-500 mb-3">{negociacaoContrato.colapsou ? "😤 A diretoria encerrou a conversa — sem acordo dessa vez." : `Pedidos restantes: ${negociacaoContrato.pedidosRestantes}`}</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button variant="ghost" onClick={sairDaNegociacao}>{negociacaoContrato.colapsou ? "Fechar" : "Recusar e sair"}</Button>
+                          {!negociacaoContrato.colapsou && <Button variant="gold" onClick={fecharNegociacaoContrato}>Fechar negócio</Button>}
+                        </div>
+                      </div>
+                    </Card>
+                  </PopupOverlay>
+                )}
+
                 {pendingConvocacao && (
                   <PopupConvocacao info={pendingConvocacao} onClose={() => setPendingConvocacao(null)} />
                 )}
@@ -4707,6 +4973,7 @@ function resolverTemporada(c, extraStats) {
                             <button onClick={() => abrirTransferencias("normal")} disabled={carreira.empresarioUsado?.normal} className="text-left p-3 border border-zinc-800 rounded-sm hover:border-emerald-500 disabled:opacity-40"><div className="font-bold text-sm">Pedir transferência{carreira.empresarioUsado?.normal ? " (já pedido nessa temporada)" : ""}</div><div className="text-[11px] text-zinc-500">Escolher ligas e ver quem topa te contratar.</div></button>
                             <button onClick={() => abrirTransferencias("emprestimo")} disabled={carreira.empresarioUsado?.emprestimo} className="text-left p-3 border border-zinc-800 rounded-sm hover:border-emerald-500 disabled:opacity-40"><div className="font-bold text-sm">Pedir empréstimo{carreira.empresarioUsado?.emprestimo ? " (já pedido nessa temporada)" : ""}</div><div className="text-[11px] text-zinc-500">1 ou 2 temporadas fora, com opção de compra definitiva depois.</div></button>
                             <button onClick={() => abrirTransferencias("sair")} disabled={carreira.empresarioUsado?.sair} className="text-left p-3 border border-zinc-800 rounded-sm hover:border-red-500 disabled:opacity-40"><div className="font-bold text-sm">Pedir para sair{carreira.empresarioUsado?.sair ? " (já pedido nessa temporada)" : ""}</div><div className="text-[11px] text-zinc-500 text-red-400/80">Perde moral com a torcida do {carreira.clube.nome}, mas força a saída — clubes de nível igual ou pior aparecem.</div></button>
+                            <button onClick={() => setJanela({ tipo: "clubeEspecificoLiga" })} disabled={carreira.empresarioUsado?.especifico || carreira.emprestimo} className="text-left p-3 border border-zinc-800 rounded-sm hover:border-emerald-500 disabled:opacity-40"><div className="font-bold text-sm">🎯 Pedir um clube específico{carreira.empresarioUsado?.especifico ? " (já pedido nessa temporada)" : ""}</div><div className="text-[11px] text-zinc-500">Escolhe o time que você quer — mas não são todos que vão te querer de volta.</div></button>
                             {carreira.clubeCoracao && carreira.clube.nome !== carreira.clubeCoracao.nome && (
                               carreira.idade >= 29
                                 ? <button onClick={() => abrirTransferencias("coracao")} className="text-left p-3 border border-zinc-800 rounded-sm hover:border-emerald-500"><div className="font-bold text-sm">Pedir clube do coração</div><div className="text-[11px] text-zinc-500">{carreira.clubeCoracao.nome}</div></button>
@@ -4730,24 +4997,6 @@ function resolverTemporada(c, extraStats) {
                           <div className="grid gap-2">{PEDIDOS_DIRETORIA.map((opt, i) => <button key={i} onClick={() => pedirDiretoria(opt)} className="text-left p-3 border border-zinc-800 rounded-sm hover:border-amber-500 text-sm capitalize">{opt.label}</button>)}</div>
                         </>
                       )}
-                      {janela.tipo === "contrato" && (
-                        <>
-                          <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-2 flex items-center gap-1.5"><ClubDot club={janela.opEscolhida.clube} size={20} />Negociação com o {janela.opEscolhida.clube.nome}</div>
-                          <div className="grid gap-2 mb-2">
-                            {janela.pacotes.map((p, i) => (
-                              <button key={i} onClick={() => confirmarContrato(p)} className="text-left p-3 border border-zinc-800 rounded-sm hover:border-emerald-500">
-                                <div className="font-bold text-sm mb-1">{p.label} · {p.anos} anos</div>
-                                <div className="text-[11px] text-zinc-400 grid grid-cols-3 gap-1">
-                                  <span>💰 ${formatarDinheiro(p.salario)}/ano</span>
-                                  <span>⚖️ multa ${formatarDinheiro(p.multa)}</span>
-                                  <span>⚽ +${formatarDinheiro(p.bonusGol)}/gol</span>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                          <Button variant="ghost" onClick={() => setJanela({ tipo: "empresario" })}>← Voltar</Button>
-                        </>
-                      )}
                       {janela.tipo === "ligas" && (
                         <>
                           <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-2">Empresário — quais ligas buscar?</div>
@@ -4760,6 +5009,28 @@ function resolverTemporada(c, extraStats) {
                             <Button variant="ghost" onClick={() => setJanela({ tipo: "empresario" })}>← Voltar</Button>
                             <Button onClick={confirmarBuscaLigas}>Buscar propostas</Button>
                           </div>
+                        </>
+                      )}
+                      {janela.tipo === "clubeEspecificoLiga" && (
+                        <>
+                          <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-2">🎯 Qual liga tem o clube que você quer?</div>
+                          <div className="grid gap-1.5 mb-4">
+                            {ligasOrdenadas().map(([k, l]) => (
+                              <button key={k} onClick={() => setJanela({ tipo: "clubeEspecifico", liga: k })} className="text-left px-3 py-2 text-xs rounded-sm border border-zinc-800 hover:border-emerald-500">{l.nome}</button>
+                            ))}
+                          </div>
+                          <Button variant="ghost" onClick={() => setJanela({ tipo: "empresario" })}>← Voltar</Button>
+                        </>
+                      )}
+                      {janela.tipo === "clubeEspecifico" && (
+                        <>
+                          <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-2">🎯 Qual clube você quer que seu empresário procure?</div>
+                          <div className="grid gap-1.5 mb-4 max-h-[50vh] overflow-y-auto">
+                            {CLUBES.filter((x) => x.liga === janela.liga && x.nome !== carreira.clube.nome).map((cl) => (
+                              <button key={cl.nome} onClick={() => pedirClubeEspecifico(cl)} className="text-left px-3 py-2 text-xs rounded-sm border border-zinc-800 hover:border-emerald-500 flex items-center gap-2"><ClubDot club={cl} size={16} />{cl.nome}<span className="text-zinc-600 ml-auto">força {cl.forca}</span></button>
+                            ))}
+                          </div>
+                          <Button variant="ghost" onClick={() => setJanela({ tipo: "clubeEspecificoLiga" })}>← Voltar</Button>
                         </>
                       )}
                       {janela.tipo === "duracaoEmprestimo" && (
@@ -6897,7 +7168,7 @@ function resolverTemporada(c, extraStats) {
                 download={`a-joia-${nome.replace(/\s+/g, "_")}.txt`}
                 className="px-4 py-2.5 text-sm font-semibold uppercase tracking-wide rounded-sm text-center bg-zinc-800 border border-zinc-700 hover:border-emerald-500"
               >⬇ Baixar resumo</a>
-              <Button onClick={() => { setStage("intro"); setIntroFase("splash"); setZoomingIntro(false); setPotencial({}); setRoubos({}); setOrigem(null); setTemporadas([]); setCarreira(null); setFim(null); setPosTemporada(null); setDecisao(null); setJanela(null); setAwardsPopup(null); setCopinhaResultado(null); setCopinhaFaseIdx(0); setCopinhaTentativa(null); setClubeSelecionadoInicial(null); setNumeroEscolhidoInicial(null); setTesteFase("penalti"); setTesteTentativas([]); setTesteTentativaAtual(null); setTesteFaltas([]); setTesteFaltaAtual(null); setTestePasses([]); setTestePasseAtual(null); setTesteReflexo([]); setTesteResultado(null); setCopaMundoTentativa(null); setModoSimulacao("completa"); setPendingLanceJogo(null); setConversaBanco(null); setEmpresarioMenuAberto(false); setMundo(null); setMundoAba("bola"); setCaminhoPos(null); setElencoAberto(false); setInboxFiltro("todas"); setVestiarioAberto(false); setAbaLegado("coletivos"); }}>Nova carreira</Button>
+              <Button onClick={() => { setStage("intro"); setIntroFase("splash"); setZoomingIntro(false); setPotencial({}); setRoubos({}); setOrigem(null); setTemporadas([]); setCarreira(null); setFim(null); setPosTemporada(null); setDecisao(null); setJanela(null); setAwardsPopup(null); setCopinhaResultado(null); setCopinhaFaseIdx(0); setCopinhaTentativa(null); setClubeSelecionadoInicial(null); setNumeroEscolhidoInicial(null); setDraftSlots(NUM_ATTRS.map((attr) => ({ attr, valor: null, girando: false }))); setDraftGirandoAgora(null); setTesteFase("penalti"); setTesteTentativas([]); setTesteTentativaAtual(null); setTesteFaltas([]); setTesteFaltaAtual(null); setTestePasses([]); setTestePasseAtual(null); setTesteReflexo([]); setTesteResultado(null); setCopaMundoTentativa(null); setModoSimulacao("completa"); setPendingLanceJogo(null); setConversaBanco(null); setEmpresarioMenuAberto(false); setMundo(null); setMundoAba("bola"); setCaminhoPos(null); setElencoAberto(false); setInboxFiltro("todas"); setVestiarioAberto(false); setAbaLegado("coletivos"); }}>Nova carreira</Button>
             </div>
           </div>
         )}

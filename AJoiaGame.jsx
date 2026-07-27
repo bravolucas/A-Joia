@@ -80,6 +80,7 @@ export default function AJoiaGame() {
   const [pendingColetivaPosJogo, setPendingColetivaPosJogo] = useState(null);
   const [pendingConvocacao, setPendingConvocacao] = useState(null);
   const [detalhesAbertos, setDetalhesAbertos] = useState(false);
+  const [subAbaCarreira, setSubAbaCarreira] = useState(null);
   const [jogadorCardAberto, setJogadorCardAberto] = useState(false);
   const [filtroHistorico, setFiltroHistorico] = useState("todos");
   const [resultadoAcao, setResultadoAcao] = useState(null);

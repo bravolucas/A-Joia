@@ -160,7 +160,7 @@ export function PodiumBolaDeOuro({ finalistas, aoConcluir }) {
 // simplificado + estatísticas + feed de eventos, no estilo "match engine".
 export function TelaPartidaAoVivo({ pv, onDecisao, onContinuarSegundoTempo, onMudarVelocidade, onPularParaFinal }) {
   if (!pv) return null;
-  const { estado, eventos, ctx, pendente, concluida, fase, minutoVisivel, acrescimos, stats, velocidade } = pv;
+  const { estado, eventos, ctx, pendente, concluida, fase, minutoVisivel, acrescimos, stats, velocidade, substituido } = pv;
   const meusGols = estado.golsMeu, advGols = estado.golsAdv;
   const relogioTxt = concluida ? "Fim de jogo" : fase === "intervalo" ? "Intervalo" : minutoVisivel > 90 ? `90+${minutoVisivel - 90}'` : `${minutoVisivel}'`;
   const totalChutesMeu = stats.chutesMeu, totalChutesAdv = stats.chutesAdv;
@@ -200,6 +200,7 @@ export function TelaPartidaAoVivo({ pv, onDecisao, onContinuarSegundoTempo, onMu
             <div className="text-center">
               <div className="text-xs text-zinc-400">vs {ctx.adversario}</div>
               <div className={`text-sm font-bold ${fase === "intervalo" ? "text-amber-400" : "text-zinc-300"}`}>{relogioTxt}</div>
+              {substituido && <div className="text-[9px] text-zinc-500 mt-0.5">🔄 Você foi substituído</div>}
             </div>
             <span className="font-stat font-black text-4xl">{ctx.souCasa ? advGols : meusGols}</span>
           </div>

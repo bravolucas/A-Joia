@@ -2321,10 +2321,10 @@ function resolverTemporada(c, extraStats) {
     setPartidaAoVivo((pv) => {
       if (!pv || pv.concluida) return pv;
       const slot = pv.roteiro[pv.indice];
-      const fadiga = Math.min(1, (pv.estado.fadiga || 0) + 1 / pv.roteiro.length);
+      const fadiga = pv.substituido ? (pv.estado.fadiga || 0) : Math.min(1, (pv.estado.fadiga || 0) + 1 / pv.roteiro.length);
       const stats = { ...pv.stats };
 
-      if (slot.foco === "ambiente") {
+      if (slot.foco === "ambiente" || pv.substituido) {
         const evento = gerarEventoAmbiente(slot.minuto, pv.ctx);
         const estado = evento.tipo === "gol" ? { ...pv.estado, fadiga, golsMeu: pv.estado.golsMeu + (evento.meuTime ? 1 : 0), golsAdv: pv.estado.golsAdv + (evento.meuTime ? 0 : 1) } : { ...pv.estado, fadiga };
         if (evento.tipo === "gol") { if (evento.meuTime) { stats.chutesMeu++; stats.chutesAlvoMeu++; } else { stats.chutesAdv++; stats.chutesAlvoAdv++; } }
@@ -2367,6 +2367,20 @@ function resolverTemporada(c, extraStats) {
           if (prox >= 90 + atual.acrescimos) return { ...atual, minutoVisivel: prox, concluida: true };
           return { ...atual, minutoVisivel: prox };
         }
+        // Substituição tática: depois dos 60', muito cansaço ou o time
+        // perdendo feio pode fazer o técnico te tirar de campo — só uma vez
+        // por partida. Dali em diante, o resto do jogo roda sem te envolver.
+        if (!atual.substituido && prox >= 60 && prox % 5 === 0) {
+          const cansaco = (atual.estado.fadiga || 0) >= 0.75;
+          const perdendoFeio = atual.estado.golsAdv - atual.estado.golsMeu >= 2;
+          const chanceSub = (cansaco ? 0.05 : 0) + (perdendoFeio ? 0.04 : 0);
+          if (chanceSub > 0 && Math.random() < chanceSub) {
+            return {
+              ...atual, minutoVisivel: prox, substituido: true,
+              eventos: [...atual.eventos, { minuto: prox, tipo: "substituicao", meu: true, texto: `🔄 Você foi substituído aos ${prox}' — o técnico decidiu mudar a equipe.` }],
+            };
+          }
+        }
         return { ...atual, minutoVisivel: prox };
       });
     }, 420 / (pv.velocidade || 1));
@@ -2397,7 +2411,7 @@ function resolverTemporada(c, extraStats) {
       const stats = { ...pv.stats };
       for (let i = pv.indice; i < pv.roteiro.length; i++) {
         const slot = pv.roteiro[i];
-        if (slot.foco === "ambiente") {
+        if (slot.foco === "ambiente" || pv.substituido) {
           const evento = gerarEventoAmbiente(slot.minuto, pv.ctx);
           if (evento.tipo === "gol") { estado = { ...estado, golsMeu: estado.golsMeu + (evento.meuTime ? 1 : 0), golsAdv: estado.golsAdv + (evento.meuTime ? 0 : 1) }; if (evento.meuTime) { stats.chutesMeu++; stats.chutesAlvoMeu++; } else { stats.chutesAdv++; stats.chutesAlvoAdv++; } }
           else if (evento.tipo === "chute") { if (evento.meuTime) stats.chutesMeu++; else stats.chutesAdv++; }

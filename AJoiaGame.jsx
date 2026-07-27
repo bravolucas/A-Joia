@@ -876,7 +876,10 @@ function agregarJogos(lista) {
   return { ...acc, notaMedia: acc.jogos ? +(acc.somaNota / acc.jogos).toFixed(2) : 0, aproveitamento: acc.jogos ? Math.round(((acc.v * 3 + acc.e) / (acc.jogos * 3)) * 100) : 0 };
 }
 function analisarJogos(lista) {
-  const jogos = (lista || []).filter(Boolean);
+  // Rodadas em que você não jogou de verdade (suspenso, descansando ou não
+  // escalado) não podem contar como jogo disputado nem entrar na nota média —
+  // senão a nota fica puxada pra baixo por partidas que você nem entrou em campo.
+  const jogos = (lista || []).filter((j) => j && !j.suspenso && !j.descansou && !j.naoEscalado);
   if (!jogos.length) return null;
   const comNota = jogos.filter((j) => j.nota != null);
   const ordenados = [...comNota].sort((a, b) => b.nota - a.nota);
@@ -1027,6 +1030,10 @@ function concluirRodada(c, ta, { tabela, historico, meuResultadoRodada, golsRest
   const proxRodada = ta.rodadaAtual + 1;
   const logJogos = meuResultadoRodada ? [...ta.logJogos, meuResultadoRodada] : ta.logJogos;
   const resultadosRodadas = [...ta.resultadosRodadas, meuResultadoRodada ? meuResultadoRodada.resultado : "E"];
+  // Recuperação passiva: o corpo descansa um pouco entre uma rodada e outra
+  // mesmo sem escolher "poupar" de propósito — sem isso, a energia zerava em
+  // poucas rodadas de uma temporada de 35+ jogos.
+  c.energia = clampR((c.energia ?? 100) + 6, 0, c.energiaMax ?? 100);
   if (proxRodada >= ta.calendario.length) {
     c.temporadaAndamento = null;
     finalizarTemporada(c, ta.cardOriginal, logJogos, tabela);
@@ -1656,10 +1663,11 @@ function resolverTemporada(c, extraStats) {
     // Copa/estadual/continental ainda vêm da projeção — são resolvidos por
     // um sistema à parte, ainda não convertido pro motor de lances.
     if (jogosLista.length) {
+      const jogosDeVerdade = jogosLista.filter((j) => !j.suspenso && !j.descansou && !j.naoEscalado);
       const comNota = jogosLista.filter((j) => j.nota != null);
       card = {
         ...card,
-        jogos: jogosLista.length,
+        jogos: jogosDeVerdade.length,
         gols: jogosLista.reduce((a, j) => a + (j.golsMinha || 0), 0),
         assist: jogosLista.reduce((a, j) => a + (j.assistMinha || 0), 0),
         nota: comNota.length ? +(comNota.reduce((a, j) => a + j.nota, 0) / comNota.length).toFixed(2) : card.nota,
@@ -2534,7 +2542,7 @@ function resolverTemporada(c, extraStats) {
     // Energia consumida de verdade pela partida — mais lances/fadiga acumulada
     // e postura mais intensa (raça/ofensivo) custam mais caro.
     const postDesgaste = POSTURAS_JOGO.find((p) => p.id === ctx.postura) || POSTURAS_JOGO[1];
-    const custoEnergia = Math.round((13 + (estado.fadiga || 0) * 12) * (postDesgaste.desgasteMult || 1));
+    const custoEnergia = Math.round((8 + (estado.fadiga || 0) * 8) * (postDesgaste.desgasteMult || 1));
     c.energia = clampR((c.energia ?? 100) - custoEnergia, 0, c.energiaMax ?? 100);
     c.desgaste = Math.max(0, (c.desgaste || 0) + 0.15 * (postDesgaste.desgasteMult || 1));
 
@@ -5900,7 +5908,7 @@ function resolverTemporada(c, extraStats) {
                       </div>
                     )}
                     {!jogosExpandido ? (
-                      <div className="text-[11px] text-zinc-400">{ultima.jogosLista.length} jogos disputados nessa temporada.</div>
+                      <div className="text-[11px] text-zinc-400">{ultima.jogosLista.filter((j) => !j.suspenso && !j.descansou && !j.naoEscalado).length} jogos disputados nessa temporada.</div>
                     ) : (
                       <div className="grid gap-0.5 max-h-72 overflow-y-auto pr-1">
                         {ultima.jogosLista.map((j) => (

@@ -842,7 +842,7 @@ function todosJogosCarreira(temporadas) {
 }
 
 /* Simula a rodada inteira da liga (todos os jogos ao mesmo tempo), extraindo o jogo do jogador à parte */
-function simularRodadaAtual(c, ta, bonusGol = 0, bonusAssist = 0) {
+function simularRodadaAtual(c, ta, bonusGol = 0, bonusAssist = 0, forcarNaoEscalado = false) {
   const rodada = ta.calendario[ta.rodadaAtual];
   let tabela = ta.tabela;
   const historico = [];
@@ -890,6 +890,25 @@ function simularRodadaAtual(c, ta, bonusGol = 0, bonusAssist = 0) {
           golsMinha: 0, assistMinha: 0, numero: ta.rodadaAtual + 1,
           casa: souCasa, competicao: "liga", classico: ehClassico,
           descansou: true, nota: null,
+        };
+        return;
+      }
+      // ---- ESCALAÇÃO: a função no contrato (reserva/titular/fundamental/
+      // estrela) só dá uma CHANCE de jogar, não garantia. Se veio de fora já
+      // decidido (avancarUmJogo já rolou o dado), respeita; senão, decide aqui
+      // mesmo (bulk-simular temporada também passa por essa checagem). ----
+      const funcaoAtual = FUNCOES_ELENCO.find((f) => f.id === c.contrato?.funcao) || FUNCOES_ELENCO[1];
+      const chanceBaseEscalado = { reserva: 0.55, titular: 0.87, fundamental: 0.95, estrela: 0.98 }[funcaoAtual.id] ?? 0.87;
+      const ajusteConfianca = ((c.tecnicoConfianca ?? 60) - 60) / 300;
+      const naoEscalado = forcarNaoEscalado || Math.random() >= clamp(chanceBaseEscalado + ajusteConfianca, 0.15, 0.99);
+      if (naoEscalado) {
+        meuResultadoRodada = {
+          adversario: adversarioObj.nome, adversarioForca: adversarioObj.forca,
+          golsMeu: meusGolsTime, golsAdv: golsAdvTime,
+          resultado: meusGolsTime > golsAdvTime ? "V" : meusGolsTime === golsAdvTime ? "E" : "D",
+          golsMinha: 0, assistMinha: 0, numero: ta.rodadaAtual + 1,
+          casa: souCasa, competicao: "liga", classico: ehClassico,
+          naoEscalado: true, nota: null,
         };
         return;
       }
@@ -2260,8 +2279,15 @@ function resolverTemporada(c, extraStats) {
     const meuJogoRodada = ta.calendario[ta.rodadaAtual].find((p) => p.casa.nome === c.clube.nome || p.fora.nome === c.clube.nome);
     const suspenso = (c.cartoes?.suspensoesRestantes || 0) > 0;
     const descansou = ta.preparacaoSemana === "descanso";
+    // Escalação de verdade: a função prometida no contrato (reserva/titular/
+    // fundamental/estrela) decide a CHANCE de você começar jogando — não é
+    // garantia. Confiança do técnico empurra um pouco pra cima ou pra baixo.
+    const funcaoAtual = FUNCOES_ELENCO.find((f) => f.id === c.contrato?.funcao) || FUNCOES_ELENCO[1];
+    const chanceBaseEscalado = { reserva: 0.55, titular: 0.87, fundamental: 0.95, estrela: 0.98 }[funcaoAtual.id] ?? 0.87;
+    const ajusteConfianca = ((c.tecnicoConfianca ?? 60) - 60) / 300;
+    const naoEscalado = !suspenso && !descansou && Math.random() >= clamp(chanceBaseEscalado + ajusteConfianca, 0.15, 0.99);
 
-    if (meuJogoRodada && !suspenso && !descansou) {
+    if (meuJogoRodada && !suspenso && !descansou && !naoEscalado) {
       // A partida do jogador não é mais resolvida na hora — vira uma sequência
       // de lances com decisões reais, e o placar nasce do que acontece nela.
       const { tabela: tabelaParcial, historico: historicoParcial } = simularOutrasPartidasDaRodada(c, ta);
@@ -2283,8 +2309,8 @@ function resolverTemporada(c, extraStats) {
       return;
     }
 
-    // sem jogo do jogador nessa rodada (bye) ou suspenso — resolve do jeito de sempre
-    const { tabela, historico, meuResultadoRodada, golsRestantes, assistRestantes } = simularRodadaAtual(c, ta);
+    // sem jogo do jogador nessa rodada (bye), suspenso, descansando ou não escalado — resolve do jeito de sempre
+    const { tabela, historico, meuResultadoRodada, golsRestantes, assistRestantes } = simularRodadaAtual(c, ta, 0, 0, naoEscalado);
     concluirRodada(c, ta, { tabela, historico, meuResultadoRodada, golsRestantes, assistRestantes });
   }
 

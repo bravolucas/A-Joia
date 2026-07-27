@@ -93,6 +93,7 @@ export default function AJoiaGame() {
   const [resultadoAcao, setResultadoAcao] = useState(null);
   const [acoesPopupAberto, setAcoesPopupAberto] = useState(false);
   const [treinoPopupAberto, setTreinoPopupAberto] = useState(false);
+  const [treinoExtraDesafio, setTreinoExtraDesafio] = useState(null);
   const [centralMedicaAberta, setCentralMedicaAberta] = useState(false);
   const [negociacaoContratoAtual, setNegociacaoContratoAtual] = useState(null);
   const [pendingPatrocinioEscolha, setPendingPatrocinioEscolha] = useState(false);
@@ -2851,7 +2852,7 @@ function resolverTemporada(c, extraStats) {
     if (custoDesbloqueio && carreira.cofre < custoDesbloqueio) return;
     if ((carreira.energia ?? 100) < 15) return;
     // cada atributo treina com o minigame que faz sentido pra ele
-    const minigamePorAttr = { finalizacao: "penalti", drible: "falta", passe: "passe" };
+    const minigamePorAttr = { finalizacao: "penalti", drible: "falta", passe: "passe", velocidade: "arrancada", fisico: "disputa", defesa: "leitura" };
     setTreinoDesafio({ attrId, custoDesbloqueio, minigame: minigamePorAttr[attrId] || "timing" });
   }
   function resolverTreino(acerto) {
@@ -2872,6 +2873,9 @@ function resolverTemporada(c, extraStats) {
     if (tipo === "ferias") { c.energia = clampR((c.energia ?? 100) + 40, 0, c.energiaMax ?? 100); logHist(c, "Tirou férias de fim de semana com a família — recarregou as energias."); }
     if (tipo === "casa") { c.energia = clampR((c.energia ?? 100) + 25, 0, c.energiaMax ?? 100); logHist(c, "Descansou em casa na pré-temporada."); }
     if (tipo === "regenerativo") { c.energia = clampR((c.energia ?? 100) + 15, 0, c.energiaMax ?? 100); c.desgaste = Math.max(0, c.desgaste - 2); logHist(c, "Fez trabalho regenerativo com a fisioterapia."); }
+    if (tipo === "viagem") { c.energia = clampR((c.energia ?? 100) + 45, 0, c.energiaMax ?? 100); c.fama = clamp(c.fama + 2, 0, 100); logHist(c, "Viagem curta pra fora do país pra desligar de vez — voltou renovado e ainda rendeu boas fotos."); }
+    if (tipo === "spa") { c.energia = clampR((c.energia ?? 100) + 20, 0, c.energiaMax ?? 100); c.desgaste = Math.max(0, c.desgaste - 3); logHist(c, "Dia inteiro de spa e recovery de ponta — o corpo agradeceu mais que a mente."); }
+    if (tipo === "amigos") { c.energia = clampR((c.energia ?? 100) + 20, 0, c.energiaMax ?? 100); c.calorMidia = clampR((c.calorMidia ?? 20) - 5, 0, 100); logHist(c, "Tempo com amigos de fora do futebol — ninguém falando de bola, cabeça bem mais leve."); }
     setCarreira(c);
     setPosTemporada((p) => ({ ...p, descansou: true }));
   }
@@ -2893,13 +2897,28 @@ function resolverTemporada(c, extraStats) {
     logHist(c, `Escalado como ${POSICOES.find((p) => p.id === pos).label} nessa temporada.`);
     setCarreira(c);
   }
-  function treinoExtra(tipo) {
+  function abrirDesafioTreinoExtra(tipo) {
+    setTreinoExtraDesafio({ tipo });
+  }
+  function treinoExtra(tipo, acerto = true) {
     const c = { ...carreira };
-    if (tipo === "tatico") { setTorcidaClube(c, c.clube.nome, 3); c.fama = clamp(c.fama + 1, 0, 100); c.treinoTaticoFeito = true; logHist(c, "Treino tático — mais entrosado com o time."); }
-    if (tipo === "mental") { c.forma = clamp(c.forma + 1, -4, 4); c.desgaste = Math.max(0, c.desgaste - 1); logHist(c, "Preparação mental — chegou mais leve pra temporada."); }
-    if (tipo === "bolaParada") { c.especialistaBP = true; logHist(c, "Treino de bolas paradas — vai se sair melhor em cobranças decisivas."); }
+    if (tipo === "tatico") {
+      const ganhoTorcida = acerto ? rand(4, 7) : rand(1, 2), ganhoFama = acerto ? 2 : 1;
+      setTorcidaClube(c, c.clube.nome, ganhoTorcida); c.fama = clamp(c.fama + ganhoFama, 0, 100); c.treinoTaticoFeito = true;
+      logHist(c, acerto ? "Treino tático sincronizado — entrosamento com o time deu um salto." : "Treino tático — sincronia mediana, mas ajudou um pouco.");
+    }
+    if (tipo === "mental") {
+      const ganhoForma = acerto ? 2 : 1, reducaoDesgaste = acerto ? 2 : 1;
+      c.forma = clamp(c.forma + ganhoForma, -4, 4); c.desgaste = Math.max(0, c.desgaste - reducaoDesgaste);
+      logHist(c, acerto ? "Preparação mental impecável — chegou muito mais leve pra temporada." : "Preparação mental — ajudou, mas a cabeça ainda divaga de vez em quando.");
+    }
+    if (tipo === "bolaParada") {
+      c.especialistaBP = true; c.especialistaBPNivel = acerto ? "elite" : "regular";
+      logHist(c, acerto ? "Treino de bolas paradas impecável — virou referência em cobranças decisivas." : "Treino de bolas paradas — vai ajudar, mas ainda sem ser uma especialidade de verdade.");
+    }
     setCarreira(c);
     setPosTemporada((p) => ({ ...p, extraTreinoFeito: true }));
+    setTreinoExtraDesafio(null);
   }
   function treinoPesado() {
     const c = { ...carreira };
@@ -4755,6 +4774,40 @@ function resolverTemporada(c, extraStats) {
                   </PopupOverlay>
                 )}
 
+                {treinoExtraDesafio && (
+                  <PopupOverlay>
+                    <Card className="text-center border-emerald-500/40">
+                      <div className="text-[10px] text-emerald-400 uppercase tracking-widest mb-2">
+                        {treinoExtraDesafio.tipo === "tatico" ? "📋 Treino Tático" : treinoExtraDesafio.tipo === "mental" ? "🧘 Preparação Mental" : "🎯 Bola Parada"}
+                      </div>
+                      {treinoExtraDesafio.tipo === "tatico" && (
+                        <>
+                          <p className="text-xs text-zinc-400 mb-1">Ensaio de jogada — sincronize o movimento com o time no vídeo tático.</p>
+                          <p className="text-[10px] text-zinc-600 mb-3">Clique em "Sincronizar" no momento certo do movimento.</p>
+                          <TimingBar onResult={(acerto) => treinoExtra("tatico", acerto)} duracao={900} label="Sincronizar" />
+                        </>
+                      )}
+                      {treinoExtraDesafio.tipo === "mental" && (
+                        <>
+                          <p className="text-xs text-zinc-400 mb-1">Sessão de respiração e foco antes da temporada — controle o ritmo.</p>
+                          <p className="text-[10px] text-zinc-600 mb-3">Clique em "Focar" no pico de concentração.</p>
+                          <TimingBar onResult={(acerto) => treinoExtra("mental", acerto)} duracao={1300} label="Focar" />
+                        </>
+                      )}
+                      {treinoExtraDesafio.tipo === "bolaParada" && (
+                        <>
+                          <p className="text-xs text-zinc-400 mb-2">Sessão de cobranças de falta — quanto melhor a mira, mais forte a especialidade.</p>
+                          <FreeKickMini resultado={treinoResultado} onPick={(zona) => {
+                            const gol = Math.random() < clamp((carreira.attrs.drible - 25) / 80 + somaEfeitoInsignia(carreira, "minigame"), 0.15, 0.92);
+                            setTreinoResultado({ zona, gol, tipo: tipoResultadoFalta(gol, zona) });
+                            setTimeout(() => { setTreinoResultado(null); treinoExtra("bolaParada", gol); }, 1500);
+                          }} />
+                        </>
+                      )}
+                    </Card>
+                  </PopupOverlay>
+                )}
+
                 {treinoDesafio && (
                   <PopupOverlay>
                     <Card className="text-center border-emerald-500/40">
@@ -4781,6 +4834,24 @@ function resolverTemporada(c, extraStats) {
                         <>
                           <p className="text-xs text-zinc-400 mb-2">Treino de saída de bola — ache o companheiro livre.</p>
                           <PasseMini atributoPasse={carreira.attrs.passe} onResultado={(r) => { setTimeout(() => resolverTreino(r.gol), 1400); }} />
+                        </>
+                      ) : treinoDesafio.minigame === "arrancada" ? (
+                        <>
+                          <p className="text-xs text-zinc-400 mb-1">Sprint de 30 metros — exploda no momento certo pra bater seu tempo.</p>
+                          <p className="text-[10px] text-zinc-600 mb-3">🏃 Clique em "Explodir!" bem no pico da barra.</p>
+                          <TimingBar onResult={(acerto) => resolverTreino(acerto)} duracao={650} label="Explodir!" />
+                        </>
+                      ) : treinoDesafio.minigame === "disputa" ? (
+                        <>
+                          <p className="text-xs text-zinc-400 mb-1">Disputa de bola corpo a corpo — sincronize o choque pra levar a melhor.</p>
+                          <p className="text-[10px] text-zinc-600 mb-3">💪 Clique em "Empurrar" na hora certa do encontrão.</p>
+                          <TimingBar onResult={(acerto) => resolverTreino(acerto)} duracao={950} label="Empurrar" />
+                        </>
+                      ) : treinoDesafio.minigame === "leitura" ? (
+                        <>
+                          <p className="text-xs text-zinc-400 mb-1">Leitura de jogada — antecipe o passe adversário e corte antes que chegue.</p>
+                          <p className="text-[10px] text-zinc-600 mb-3">🛡️ Clique em "Interceptar" assim que enxergar a linha de passe certa.</p>
+                          <TimingBar onResult={(acerto) => resolverTreino(acerto)} duracao={1250} label="Interceptar" />
                         </>
                       ) : (
                         <>
@@ -5570,7 +5641,8 @@ function resolverTemporada(c, extraStats) {
                         <div className="absolute bottom-2 left-5 text-[10px] text-emerald-400 uppercase tracking-widest font-sport font-bold">🏋️ Centro de Treinamento</div>
                       </div>
                       <div className="p-5">
-                      <div className="text-xs text-zinc-400 mb-1.5">Treinar atributo (minigame — custa 15 de energia)</div>
+                      <div className="text-[9px] text-emerald-500 uppercase tracking-widest font-bold mb-1.5">💪 Treino de Atributos</div>
+                      <div className="text-xs text-zinc-400 mb-1.5">Minigame — custa 15 de energia</div>
                       <div className="grid grid-cols-3 gap-1 mb-2">
                         {NUM_ATTRS.map((id) => {
                           const custo = posTemporada?.bloqueiosTreino?.[id];
@@ -5578,35 +5650,49 @@ function resolverTemporada(c, extraStats) {
                         })}
                       </div>
                       <button onClick={treinoPesado} disabled={posTemporada?.treinou} className="w-full text-[10px] text-amber-400 border border-amber-500/30 rounded-sm py-1.5 disabled:opacity-40 mb-3">Treino PESADO (+evolução, +desgaste)</button>
-                      {carreira.desgaste > 1.5 && <div className="text-[9px] text-red-400 mb-2">Desgaste alto — risco de lesão subindo.</div>}
-                      <div className="text-xs text-zinc-400 mb-1">Treino especializado (1 por temporada)</div>
-                      <div className="grid gap-1 mb-3">
-                        <button onClick={() => treinoExtra("tatico")} disabled={posTemporada?.extraTreinoFeito} className="px-2 py-1.5 text-[10px] rounded-sm border border-zinc-800 hover:border-emerald-500 disabled:opacity-40 text-left">📋 Treino tático — entrosamento com o time</button>
-                        <button onClick={() => treinoExtra("mental")} disabled={posTemporada?.extraTreinoFeito} className="px-2 py-1.5 text-[10px] rounded-sm border border-zinc-800 hover:border-emerald-500 disabled:opacity-40 text-left">🧘 Preparação mental — forma e recuperação</button>
-                        <button onClick={() => treinoExtra("bolaParada")} disabled={posTemporada?.extraTreinoFeito} className="px-2 py-1.5 text-[10px] rounded-sm border border-zinc-800 hover:border-emerald-500 disabled:opacity-40 text-left">🎯 Cobranças de bola parada</button>
+                      {carreira.desgaste > 1.5 && <div className="text-[9px] text-red-400 mb-3 -mt-2">Desgaste alto — risco de lesão subindo.</div>}
+
+                      <div className="border-t border-zinc-800 pt-3 mb-3">
+                        <div className="text-[9px] text-emerald-500 uppercase tracking-widest font-bold mb-1.5">🎯 Treino Especializado</div>
+                        <div className="text-xs text-zinc-400 mb-1">1 por temporada, com minijogo próprio</div>
+                        <div className="grid gap-1">
+                          <button onClick={() => abrirDesafioTreinoExtra("tatico")} disabled={posTemporada?.extraTreinoFeito} className="px-2 py-1.5 text-[10px] rounded-sm border border-zinc-800 hover:border-emerald-500 disabled:opacity-40 text-left">📋 Treino tático — entrosamento com o time</button>
+                          <button onClick={() => abrirDesafioTreinoExtra("mental")} disabled={posTemporada?.extraTreinoFeito} className="px-2 py-1.5 text-[10px] rounded-sm border border-zinc-800 hover:border-emerald-500 disabled:opacity-40 text-left">🧘 Preparação mental — forma e recuperação</button>
+                          <button onClick={() => abrirDesafioTreinoExtra("bolaParada")} disabled={posTemporada?.extraTreinoFeito} className="px-2 py-1.5 text-[10px] rounded-sm border border-zinc-800 hover:border-emerald-500 disabled:opacity-40 text-left">🎯 Cobranças de bola parada</button>
+                        </div>
                       </div>
-                      <div className="text-xs text-zinc-400 mb-1">Descanso (recupera energia)</div>
-                      <div className="grid gap-1 mb-3">
-                        <button onClick={() => descansar("ferias")} disabled={posTemporada?.descansou} className="px-2 py-1.5 text-[10px] rounded-sm border border-zinc-800 hover:border-blue-500 disabled:opacity-40 text-left">🏖️ Férias de fim de semana com a família (+40)</button>
-                        <button onClick={() => descansar("casa")} disabled={posTemporada?.descansou} className="px-2 py-1.5 text-[10px] rounded-sm border border-zinc-800 hover:border-blue-500 disabled:opacity-40 text-left">🛋️ Descanso em casa (+25)</button>
-                        <button onClick={() => descansar("regenerativo")} disabled={posTemporada?.descansou} className="px-2 py-1.5 text-[10px] rounded-sm border border-zinc-800 hover:border-blue-500 disabled:opacity-40 text-left">💆 Trabalho regenerativo (+15, -desgaste)</button>
+
+                      <div className="border-t border-zinc-800 pt-3 mb-3">
+                        <div className="text-[9px] text-blue-400 uppercase tracking-widest font-bold mb-1.5">🧊 Recuperação</div>
+                        <div className="grid gap-1">
+                          <button onClick={() => descansar("ferias")} disabled={posTemporada?.descansou} className="px-2 py-1.5 text-[10px] rounded-sm border border-zinc-800 hover:border-blue-500 disabled:opacity-40 text-left">🏖️ Férias de fim de semana com a família (+40)</button>
+                          <button onClick={() => descansar("casa")} disabled={posTemporada?.descansou} className="px-2 py-1.5 text-[10px] rounded-sm border border-zinc-800 hover:border-blue-500 disabled:opacity-40 text-left">🛋️ Descanso em casa (+25)</button>
+                          <button onClick={() => descansar("regenerativo")} disabled={posTemporada?.descansou} className="px-2 py-1.5 text-[10px] rounded-sm border border-zinc-800 hover:border-blue-500 disabled:opacity-40 text-left">💆 Trabalho regenerativo (+15, −desgaste)</button>
+                          <button onClick={() => descansar("viagem")} disabled={posTemporada?.descansou} className="px-2 py-1.5 text-[10px] rounded-sm border border-zinc-800 hover:border-blue-500 disabled:opacity-40 text-left">✈️ Viagem curta pra recarregar a cabeça (+45, +fama)</button>
+                          <button onClick={() => descansar("spa")} disabled={posTemporada?.descansou} className="px-2 py-1.5 text-[10px] rounded-sm border border-zinc-800 hover:border-blue-500 disabled:opacity-40 text-left">💆‍♂️ Dia de spa e recovery de ponta (+20, −−desgaste)</button>
+                          <button onClick={() => descansar("amigos")} disabled={posTemporada?.descansou} className="px-2 py-1.5 text-[10px] rounded-sm border border-zinc-800 hover:border-blue-500 disabled:opacity-40 text-left">🎮 Tempo com amigos fora do futebol (+20, −mídia)</button>
+                        </div>
                       </div>
-                      <div className="text-xs text-zinc-400 mb-1">Versatilidade <span className="text-zinc-600">(atual: {carreira.posicao})</span></div>
-                      {(carreira.posicoesAprendidas || [carreira.posicao]).length > 1 && (
-                        <select onChange={(e) => e.target.value && jogarComoPosicao(e.target.value)} value="" className="w-full bg-zinc-800 border border-zinc-700 rounded-sm px-2 py-1.5 text-[10px] outline-none mb-1.5">
-                          <option value="">🔀 Jogar como... (já aprendidas)</option>
-                          {(carreira.posicoesAprendidas || [carreira.posicao]).map((pid) => <option key={pid} value={pid}>{pid} — {POSICOES.find((p) => p.id === pid)?.label}</option>)}
+
+                      <div className="border-t border-zinc-800 pt-3">
+                        <div className="text-[9px] text-purple-400 uppercase tracking-widest font-bold mb-1.5">🧭 Desenvolvimento de Carreira</div>
+                        <div className="text-xs text-zinc-400 mb-1">Versatilidade <span className="text-zinc-600">(atual: {carreira.posicao})</span></div>
+                        {(carreira.posicoesAprendidas || [carreira.posicao]).length > 1 && (
+                          <select onChange={(e) => e.target.value && jogarComoPosicao(e.target.value)} value="" className="w-full bg-zinc-800 border border-zinc-700 rounded-sm px-2 py-1.5 text-[10px] outline-none mb-1.5">
+                            <option value="">🔀 Jogar como... (já aprendidas)</option>
+                            {(carreira.posicoesAprendidas || [carreira.posicao]).map((pid) => <option key={pid} value={pid}>{pid} — {POSICOES.find((p) => p.id === pid)?.label}</option>)}
+                          </select>
+                        )}
+                        <select onChange={(e) => e.target.value && aprenderNovaPosicao(e.target.value)} disabled={(carreira.energia ?? 100) < 25} value="" className="w-full bg-zinc-800 border border-zinc-700 rounded-sm px-2 py-1.5 text-[10px] outline-none disabled:opacity-40 mb-3">
+                          <option value="">📘 Aprender nova posição (-25 energia, uma vez só)</option>
+                          {POSICOES.filter((p) => !(carreira.posicoesAprendidas || [carreira.posicao]).includes(p.id)).map((p) => <option key={p.id} value={p.id}>{p.id} — {p.label}</option>)}
                         </select>
-                      )}
-                      <select onChange={(e) => e.target.value && aprenderNovaPosicao(e.target.value)} disabled={(carreira.energia ?? 100) < 25} value="" className="w-full bg-zinc-800 border border-zinc-700 rounded-sm px-2 py-1.5 text-[10px] outline-none disabled:opacity-40 mb-3">
-                        <option value="">📘 Aprender nova posição (-25 energia, uma vez só)</option>
-                        {POSICOES.filter((p) => !(carreira.posicoesAprendidas || [carreira.posicao]).includes(p.id)).map((p) => <option key={p.id} value={p.id}>{p.id} — {p.label}</option>)}
-                      </select>
-                      <div className="text-xs text-zinc-400 mb-1">Função tática</div>
-                      <select onChange={(e) => setCarreira((c) => ({ ...c, papelTatico: e.target.value }))} value={carreira.papelTatico || "padrao"} className="w-full bg-zinc-800 border border-zinc-700 rounded-sm px-2 py-1.5 text-[10px] outline-none mb-3">
-                        {PAPEIS_TATICOS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
-                      </select>
-                      <p className="text-[9px] text-zinc-600 mb-3 -mt-2">{PAPEIS_TATICOS.find((p) => p.id === (carreira.papelTatico || "padrao"))?.desc}</p>
+                        <div className="text-xs text-zinc-400 mb-1">Função tática</div>
+                        <select onChange={(e) => setCarreira((c) => ({ ...c, papelTatico: e.target.value }))} value={carreira.papelTatico || "padrao"} className="w-full bg-zinc-800 border border-zinc-700 rounded-sm px-2 py-1.5 text-[10px] outline-none mb-3">
+                          {PAPEIS_TATICOS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
+                        </select>
+                        <p className="text-[9px] text-zinc-600 mb-3 -mt-2">{PAPEIS_TATICOS.find((p) => p.id === (carreira.papelTatico || "padrao"))?.desc}</p>
+                      </div>
                       <Button variant="ghost" onClick={() => setTreinoPopupAberto(false)}>Fechar</Button>
                       </div>
                     </Card>

@@ -82,6 +82,8 @@ export default function AJoiaGame() {
   const [pendingColetivaPosJogo, setPendingColetivaPosJogo] = useState(null);
   const [pendingConvocacao, setPendingConvocacao] = useState(null);
   const [pendingOfertaInesperada, setPendingOfertaInesperada] = useState(null);
+  const [pendingContratoVencido, setPendingContratoVencido] = useState(false);
+  const [concorrenciaClubes, setConcorrenciaClubes] = useState(null);
   const [negociacaoContrato, setNegociacaoContrato] = useState(null);
   const [detalhesAbertos, setDetalhesAbertos] = useState(false);
   const [subAbaCarreira, setSubAbaCarreira] = useState(null);
@@ -546,6 +548,38 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
   }
   function sairDaNegociacao() {
     setNegociacaoContrato(null);
+  }
+  /* Contrato vencido: sem renovação automática silenciosa — o jogador decide
+     se renova com o clube atual ou testa o mercado, e aí sim (se houver
+     clubes de olho) pode pintar concorrência de verdade entre times. */
+  function renovarComContratoVencido() {
+    const c = { ...carreira };
+    c.contratoVencido = false;
+    setCarreira(c);
+    setPendingContratoVencido(false);
+    iniciarNegociacaoContrato(c.clube);
+  }
+  function abrirConcorrenciaClubes() {
+    setPendingContratoVencido(false);
+    const c = carreira;
+    const emp = c.empresario ? empresarioPorId(c.empresario.id) : EMPRESARIOS[0];
+    const ultima = temporadas.length ? temporadas[temporadas.length - 1] : null;
+    const ovr = calcOVR(c.attrs, c.posicao, c.papelTatico);
+    let pool = (c.clubesInteresse || []).map((nome) => CLUBES.find((x) => x.nome === nome)).filter(Boolean);
+    if (pool.length < 3) {
+      const extras = CLUBES.filter((x) => x.nome !== c.clube.nome && !pool.some((p) => p.nome === x.nome) && Math.abs(x.forca - ovr) <= 10);
+      while (pool.length < 3 && extras.length) pool.push(extras.splice(Math.floor(Math.random() * extras.length), 1)[0]);
+    }
+    pool = pool.slice(0, 3);
+    const comScore = pool.map((clube) => ({ clube, score: scoreInteresseClube(c, clube, ultima, emp) })).sort((a, b) => b.score - a.score);
+    setConcorrenciaClubes(comScore);
+  }
+  function escolherClubeConcorrencia(clube) {
+    setConcorrenciaClubes(null);
+    const c = { ...carreira };
+    c.contratoVencido = false;
+    setCarreira(c);
+    iniciarNegociacaoContrato(clube, { clube, tipo: "transfer", salarioMult: 1 });
   }
   /* Oferta inesperada: seu clube aceitou uma proposta por você (venda), ou
      surgiu um empréstimo espontâneo pra quem está no banco ou é muito jovem.
@@ -1366,7 +1400,9 @@ function resolverTemporada(c, extraStats) {
         golsRestantes: card.gols, assistRestantes: card.assist, logJogos: [],
       };
       c.pedidosContrato = { aumentoUsado: false, aumentoNegado: false, bonusUsado: false, bonusNegado: false };
-      if (conv.convocado) {
+      if (c.contratoVencido) {
+        setPendingContratoVencido(true);
+      } else if (conv.convocado) {
         setPendingConvocacao({ competicao: compSelecao, querCopa, nacionalidade: c.nacionalidade });
       } else if (!c.emprestimo && calcOVR(c.attrs, c.posicao) >= 68 && !(c.clubeCoracao && c.clube.nome === c.clubeCoracao.nome) && Math.random() < 0.12) {
         // Oferta inesperada: o clube aceitou proposta por você — negocia ou fica
@@ -1851,12 +1887,18 @@ function resolverTemporada(c, extraStats) {
     c.extrato = [...c.extrato, { idade: c.idade, tipo: bonusGols ? `Salário + bônus de gols` : "Salário", valor: salario, clube: c.clube.nome }];
     if (c.contrato) {
       c.contrato = { ...c.contrato, restantes: c.contrato.restantes - 1 };
-      if (c.contrato.restantes <= 0) { logHist(c, `Contrato com o ${c.clube.nome} chegou ao fim — renovação automática nos mesmos moldes.`); c.contrato = { ...c.contrato, restantes: c.contrato.anos }; }
+      if (c.contrato.restantes <= 0) { c.contratoVencido = true; }
     }
 
-    if (card.nota >= 7.0 && Math.random() < 0.4) {
-      const cands = CLUBES.filter((x) => x.nome !== c.clube.nome && Math.abs(x.forca - card.ovr) <= 12 && !(c.clubesInteresse || []).includes(x.nome));
-      if (cands.length) { const alvo = pick(cands); c.clubesInteresse = [...(c.clubesInteresse || []), alvo.nome].slice(-5); }
+    // Contrato acabando gera pressão real: clubes de olho aparecem com mais
+    // frequência (às vezes mais de um de uma vez), não só 1 sorteio raro.
+    const chanceInteresse = (c.contrato?.restantes ?? 2) <= 1 ? 0.65 : 0.4;
+    const qtdInteresse = (c.contrato?.restantes ?? 2) <= 1 ? 2 : 1;
+    if (card.nota >= 7.0 && Math.random() < chanceInteresse) {
+      for (let i = 0; i < qtdInteresse; i++) {
+        const cands = CLUBES.filter((x) => x.nome !== c.clube.nome && Math.abs(x.forca - card.ovr) <= 12 && !(c.clubesInteresse || []).includes(x.nome));
+        if (cands.length) { const alvo = pick(cands); c.clubesInteresse = [...(c.clubesInteresse || []), alvo.nome].slice(-5); }
+      }
     }
 
     // Avalia a meta individual negociada com a diretoria e mexe na confiança do técnico
@@ -4807,6 +4849,43 @@ function resolverTemporada(c, extraStats) {
                         <Button variant="ghost" onClick={recusarOfertaInesperada}>Recusar e ficar</Button>
                         <Button variant="gold" onClick={aceitarOfertaInesperada}>{pendingOfertaInesperada.tipo === "venda" ? "Negociar saída" : "Aceitar empréstimo"}</Button>
                       </div>
+                    </Card>
+                  </PopupOverlay>
+                )}
+
+                {pendingContratoVencido && (
+                  <PopupOverlay>
+                    <Card className="border-red-500/40 text-center">
+                      <div className="text-[10px] text-red-400 uppercase tracking-widest mb-2">⏰ Contrato vencido</div>
+                      <p className="text-xs text-zinc-400 mb-4">Seu vínculo com o {carreira.clube.nome} chegou ao fim — você agora é agente livre. Pode renovar direto com o clube, ou deixar seu empresário testar o mercado (se houver clubes de olho em você, pode pintar concorrência de verdade).</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button variant="ghost" onClick={abrirConcorrenciaClubes}>Ver propostas</Button>
+                        <Button variant="gold" onClick={renovarComContratoVencido}>Renovar com o {carreira.clube.nome}</Button>
+                      </div>
+                    </Card>
+                  </PopupOverlay>
+                )}
+
+                {concorrenciaClubes && (
+                  <PopupOverlay>
+                    <Card className="border-amber-500/40">
+                      <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-2 text-center">🎯 Propostas na mesa</div>
+                      {concorrenciaClubes.length ? (
+                        <div className="grid gap-2">
+                          {concorrenciaClubes.map(({ clube, score }, i) => (
+                            <button key={clube.nome} onClick={() => escolherClubeConcorrencia(clube)} className="text-left p-3 border border-zinc-800 rounded-sm hover:border-emerald-500 flex items-center gap-3">
+                              <ClubDot club={clube} size={24} />
+                              <div className="flex-1">
+                                <div className="font-bold text-sm">{clube.nome}</div>
+                                <div className="text-[10px] text-zinc-500">força {clube.forca}{i === 0 && score > 1 ? " · parece bem interessado" : ""}</div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-zinc-500 text-center">Nenhum clube apareceu com proposta dessa vez — pode voltar a tentar mais pra frente.</p>
+                      )}
+                      <div className="mt-3"><Button variant="ghost" onClick={() => setConcorrenciaClubes(null)}>Fechar</Button></div>
                     </Card>
                   </PopupOverlay>
                 )}

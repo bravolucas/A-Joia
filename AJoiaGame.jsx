@@ -95,6 +95,7 @@ export default function AJoiaGame() {
   const [treinoPopupAberto, setTreinoPopupAberto] = useState(false);
   const [centralMedicaAberta, setCentralMedicaAberta] = useState(false);
   const [negociacaoContratoAtual, setNegociacaoContratoAtual] = useState(null);
+  const [pendingPatrocinioEscolha, setPendingPatrocinioEscolha] = useState(false);
   const [popupTemporada, setPopupTemporada] = useState(null);
   const [popupClube, setPopupClube] = useState(null);
   const [abaLegado, setAbaLegado] = useState("coletivos");
@@ -2831,7 +2832,7 @@ function resolverTemporada(c, extraStats) {
     const poolT = [...NUM_ATTRS];
     const nT = rand(0, 3);
     for (let i = 0; i < nT && poolT.length; i++) { const id = poolT.splice(rand(0, poolT.length - 1), 1)[0]; bloqueiosTreino[id] = 40 + rand(0, 60); }
-    const acaoIds = ["patrocinio", "eventoTorcida", "social", "recuperacao", "preparador", "imagem", "capitania", "base", "folga", "noitada"];
+    const acaoIds = ["patrocinio", "eventoTorcida", "social", "recuperacao", "preparador", "imagem", "capitania", "base", "folga", "noitada", "hospital", "leilaoBeneficente", "aulaLideranca", "investirImovel", "podcastProprio"];
     const bloqueiosAcao = {};
     const poolA = [...acaoIds];
     const nA = rand(1, 3);
@@ -2936,17 +2937,9 @@ function resolverTemporada(c, extraStats) {
       return;
     }
     if (tipo === "patrocinio") {
-      const persona = PERSONALIDADES.find((x) => x.id === c.personalidade) || PERSONALIDADES[3];
-      const disponiveis = patrocinadoresDisponiveis(c);
-      const marca = pick(disponiveis.length ? disponiveis : OFERTAS_PATROCINIO.filter((p) => p.perfil === "neutro"));
-      const valor = Math.round(c.fama * (persona?.famaMult || 1) * rand(8, 14) * (marca.valorMult || 1) * (c.staff?.consultorImagem ? 1.25 : 1));
-      c.cofre += valor; c.extrato = [...c.extrato, { idade: c.idade, tipo: `Patrocínio (${marca.marca})`, valor }];
-      c.fama = clamp(c.fama + 3, 0, 100);
-      if (marca.bonusTorcida) setTorcidaClube(c, c.clube.nome, marca.bonusTorcida);
-      const texto = `A ${marca.marca} topou um contrato de patrocínio: +$${formatarDinheiro(valor)} na conta.${marca.perfil === "luxo" ? " Marca de luxo — seu padrão de vida abriu essa porta." : marca.perfil === "familia" ? " Marca familiar — sua imagem limpa pesou na escolha." : ""}`;
-      logHist(c, texto); setCarreira(c);
-      setPosTemporada((p) => { const nb = { ...p.bloqueiosAcao }; delete nb.patrocinio; return { ...p, patrocinioFeito: true, bloqueiosAcao: nb }; });
-      setResultadoAcao({ titulo: "Patrocínio fechado", texto, icone: "💼" }); return;
+      setAcoesPopupAberto(false);
+      setPendingPatrocinioEscolha(true);
+      return;
     }
     if (tipo === "eventoTorcida") {
       const ganho = rand(2, 5);
@@ -3028,11 +3021,88 @@ function resolverTemporada(c, extraStats) {
       setPosTemporada((p) => { const nb = { ...p.bloqueiosAcao }; delete nb.folga; return { ...p, folgaFeita: true, bloqueiosAcao: nb }; });
       setResultadoAcao({ titulo: "Folga para a família", texto, icone: "🏖️" }); return;
     }
+    if (tipo === "hospital") {
+      const ganhoTorcida = rand(4, 7), ganhoFama = rand(2, 4);
+      setTorcidaClube(c, c.clube.nome, ganhoTorcida); c.fama = clamp(c.fama + ganhoFama, 0, 100);
+      const texto = `A visita ao hospital infantil, sem imprensa chamada, viralizou mesmo assim — carinho de verdade da torcida.`;
+      logHist(c, texto); setCarreira(c);
+      setPosTemporada((p) => { const nb = { ...p.bloqueiosAcao }; delete nb.hospital; return { ...p, hospitalFeito: true, bloqueiosAcao: nb }; });
+      setResultadoAcao({ titulo: "Visita ao hospital infantil", texto, icone: "🏥", deltas: [{ label: "Torcida", valor: ganhoTorcida }, { label: "Fama", valor: ganhoFama }] }); return;
+    }
+    if (tipo === "leilaoBeneficente") {
+      const custoDoacao = Math.round((c.cofre || 0) * 0.03);
+      c.cofre -= custoDoacao;
+      const ganhoFama = rand(6, 10);
+      c.fama = clamp(c.fama + ganhoFama, 0, 100);
+      c.relacaoDiretoria = clampR((c.relacaoDiretoria ?? 40) + rand(4, 7), 0, 100);
+      const texto = `Sua camisa de jogo foi a mais disputada do leilão beneficente — doou $${formatarDinheiro(custoDoacao)}, e a repercussão foi ótima.`;
+      c.extrato = [...c.extrato, { idade: c.idade, tipo: "Doação — leilão beneficente", valor: -custoDoacao }];
+      logHist(c, texto); setCarreira(c);
+      setPosTemporada((p) => { const nb = { ...p.bloqueiosAcao }; delete nb.leilaoBeneficente; return { ...p, leilaoFeito: true, bloqueiosAcao: nb }; });
+      setResultadoAcao({ titulo: "Leilão beneficente", texto, icone: "🎗️", deltas: [{ label: "Fama", valor: ganhoFama }, { label: "Cofre", valor: -custoDoacao }] }); return;
+    }
+    if (tipo === "aulaLideranca") {
+      const ganhoTec = rand(3, 6), ganhoElenco = rand(3, 6);
+      c.tecnicoConfianca = clampR((c.tecnicoConfianca ?? 60) + ganhoTec, 0, 100);
+      c.elencoMoral = clampR((c.elencoMoral ?? 60) + ganhoElenco, 0, 100);
+      const texto = `Passou a tarde dando aula pra moleques da base — comissão técnica e elenco notaram a atitude de liderança.`;
+      logHist(c, texto); setCarreira(c);
+      setPosTemporada((p) => { const nb = { ...p.bloqueiosAcao }; delete nb.aulaLideranca; return { ...p, aulaFeita: true, bloqueiosAcao: nb }; });
+      setResultadoAcao({ titulo: "Aula de liderança pra base", texto, icone: "🎓", deltas: [{ label: "Confiança do técnico", valor: ganhoTec }, { label: "Moral do elenco", valor: ganhoElenco }] }); return;
+    }
+    if (tipo === "investirImovel") {
+      const custoInvestimento = Math.round(30 + rand(0, 40));
+      c.cofre -= custoInvestimento;
+      c.fama = clamp(c.fama + rand(1, 3), 0, 100);
+      c.calorMidia = clampR((c.calorMidia ?? 20) - rand(2, 5), 0, 100);
+      const texto = `Investiu em um imóvel próprio — vida financeira mais estável passa uma imagem mais madura pra fora.`;
+      c.extrato = [...c.extrato, { idade: c.idade, tipo: "Investimento — imóvel", valor: -custoInvestimento }];
+      logHist(c, texto); setCarreira(c);
+      setPosTemporada((p) => { const nb = { ...p.bloqueiosAcao }; delete nb.investirImovel; return { ...p, imovelFeito: true, bloqueiosAcao: nb }; });
+      setResultadoAcao({ titulo: "Investimento em imóvel", texto, icone: "🏠", deltas: [{ label: "Cofre", valor: -custoInvestimento }] }); return;
+    }
+    if (tipo === "podcastProprio") {
+      const ganhoSeguidores = rand(3, 8);
+      c.seguidores = Math.round((c.seguidores || 10000) * (1 + ganhoSeguidores / 100));
+      c.fama = clamp(c.fama + rand(2, 4), 0, 100);
+      const texto = `Gravou um episódio do seu podcast — bastidores que a torcida nunca tinha visto, seguidores em alta.`;
+      logHist(c, texto); setCarreira(c);
+      setPosTemporada((p) => { const nb = { ...p.bloqueiosAcao }; delete nb.podcastProprio; return { ...p, podcastFeito: true, bloqueiosAcao: nb }; });
+      setResultadoAcao({ titulo: "Podcast próprio", texto, icone: "🎙️" }); return;
+    }
     if (tipo === "contrato") {
       setAcoesPopupAberto(false);
-      setNegociacaoContratoAtual(c.contrato || { anos: 2, salario: salarioClube(c.clube, calcOVR(c.attrs, c.posicao)), multa: salarioClube(c.clube, calcOVR(c.attrs, c.posicao)) * 4, bonusGol: 2 });
+      setPosTemporada((p) => { const nb = { ...p.bloqueiosAcao }; delete nb.contrato; return { ...p, contratoNegociado: true, bloqueiosAcao: nb }; });
+      iniciarNegociacaoContrato(c.clube);
       return;
     }
+  }
+  /* Escolha do tipo de patrocínio: luxo rende mais mas exige ostentação alta,
+     família é mais estável e ainda rende torcida em alguns casos, esportivo é
+     o equilíbrio — nada de sorteio cego, você escolhe o caminho. */
+  function escolherPerfilPatrocinio(perfil) {
+    setPendingPatrocinioEscolha(false);
+    const c = { ...carreira };
+    const persona = PERSONALIDADES.find((x) => x.id === c.personalidade) || PERSONALIDADES[3];
+    const disponiveis = patrocinadoresDisponiveis(c).filter((p) => p.perfil === perfil);
+    if (!disponiveis.length) {
+      const texto = perfil === "luxo"
+        ? "Nenhuma marca de luxo topou — sua ostentação ainda não impressionou esse mercado."
+        : perfil === "familia"
+        ? "Nenhuma marca familiar toppou — sua imagem atual não combina com esse perfil no momento."
+        : "Nenhuma marca esportiva quis fechar dessa vez.";
+      setResultadoAcao({ titulo: "Patrocínio não fechado", texto, icone: "🚪" });
+      return;
+    }
+    const marca = pick(disponiveis);
+    const valor = Math.round(c.fama * (persona?.famaMult || 1) * rand(8, 14) * (marca.valorMult || 1) * (c.staff?.consultorImagem ? 1.25 : 1));
+    c.cofre += valor; c.extrato = [...c.extrato, { idade: c.idade, tipo: `Patrocínio (${marca.marca})`, valor }];
+    c.fama = clamp(c.fama + 3, 0, 100);
+    if (marca.bonusTorcida) setTorcidaClube(c, c.clube.nome, marca.bonusTorcida);
+    const texto = `A ${marca.marca} topou um contrato de patrocínio: +$${formatarDinheiro(valor)} na conta.${marca.perfil === "luxo" ? " Marca de luxo — seu padrão de vida abriu essa porta." : marca.perfil === "familia" ? " Marca familiar — sua imagem limpa pesou na escolha." : ""}`;
+    logHist(c, texto); setCarreira(c);
+    setPosTemporada((p) => { const nb = { ...p.bloqueiosAcao }; delete nb.patrocinio; return { ...p, patrocinioFeito: true, bloqueiosAcao: nb }; });
+    setResultadoAcao({ titulo: "Patrocínio fechado", texto, icone: "💼" });
   }
   function ajustarNegociacaoAtual(campo, delta) {
     setNegociacaoContratoAtual((n) => {
@@ -5547,27 +5617,80 @@ function resolverTemporada(c, extraStats) {
                   <PopupOverlay onClose={() => setAcoesPopupAberto(false)}>
                     <Card className="border-blue-500/40">
                       <div className="text-[10px] text-blue-400 uppercase tracking-widest mb-3">📋 Ações da carreira</div>
-                      <div className="grid gap-1.5">
-                        {[
-                          ["patrocinio", "💼 Buscar patrocínio", posTemporada.patrocinioFeito],
-                          ["eventoTorcida", "🎉 Evento com a torcida", posTemporada.torcidaFeita],
-                          ["social", "❤️ Ação social pelo clube", posTemporada.torcidaFeita],
-                          ["recuperacao", "🧊 Recuperação física", posTemporada.recuperou],
-                          ["preparador", "🩺 Preparador físico particular", posTemporada.preparadorFeito],
-                          ["imagem", "📸 Investir em imagem pessoal", posTemporada.imagemFeita],
-                          ["capitania", "🎗️ Pedir a braçadeira de capitão", posTemporada.capitaniaFeita],
-                          ["numero", "👕 Pedir troca de número", posTemporada.numeroFeito],
-                          ["contrato", "✍️ Negociar contrato atual", posTemporada.contratoNegociado],
-                          ["diretoria", "🏛️ Reunião com a diretoria", posTemporada.diretoriaFeita],
-                          ["base", "🌱 Trabalho com a base do clube", posTemporada.baseFeita],
-                          ["folga", "🏖️ Pedir folga pra família", posTemporada.folgaFeita],
-                          ["noitada", "🎉 Sair pra noitada", posTemporada.noitadaFeita],
-                        ].map(([id, label, feito]) => {
-                          const custo = posTemporada.bloqueiosAcao?.[id];
-                          return <button key={id} onClick={() => acaoComDesbloqueio(id, custo)} disabled={feito || (custo && carreira.cofre < custo)} className="px-2 py-1.5 text-[11px] rounded-sm border border-zinc-800 hover:border-blue-500 disabled:opacity-40 text-left">{custo ? "🔒 " : ""}{label}{custo ? <span className="text-amber-400 ml-1">${formatarDinheiro(custo)}</span> : ""}</button>;
-                        })}
+                      {[
+                        ["💼 Imagem & Patrocínio", [
+                          ["patrocinio", "💼 Buscar patrocínio", posTemporada.patrocinioFeito, "Escolhe o tipo de marca — luxo, família ou esportiva, cada uma com seu risco e retorno."],
+                          ["imagem", "📸 Investir em imagem pessoal", posTemporada.imagemFeita, "Cresce sua fama e passa a atrair mais patrocinadores."],
+                          ["podcastProprio", "🎙️ Gravar episódio do seu podcast", posTemporada.podcastFeito, "Bastidores exclusivos que os seguidores adoram."],
+                        ]],
+                        ["🎉 Torcida & Comunidade", [
+                          ["eventoTorcida", "🎉 Evento com a torcida", posTemporada.torcidaFeita, "Aparece de corpo presente pra galera do clube."],
+                          ["social", "❤️ Ação social pelo clube", posTemporada.torcidaFeita, "Rende repercussão boa até com a diretoria."],
+                          ["hospital", "🏥 Visitar hospital infantil", posTemporada.hospitalFeito, "Gesto sem holofote que a torcida sente de verdade."],
+                          ["leilaoBeneficente", "🎗️ Leiloar sua camisa (beneficente)", posTemporada.leilaoFeito, "Doa uma parte do seu cofre por uma boa causa."],
+                        ]],
+                        ["🩺 Físico & Preparação", [
+                          ["recuperacao", "🧊 Recuperação física", posTemporada.recuperou, "Recarrega bastante energia de uma vez."],
+                          ["preparador", "🩺 Preparador físico particular", posTemporada.preparadorFeito, "Desgaste acumula bem mais devagar a temporada toda."],
+                        ]],
+                        ["🎗️ Vestiário & Liderança", [
+                          ["capitania", "🎗️ Pedir a braçadeira de capitão", posTemporada.capitaniaFeita, "Depende do técnico topar — nem sempre rola."],
+                          ["base", "🌱 Trabalho com a base do clube", posTemporada.baseFeita, "Pode render bem, ou passar despercebido."],
+                          ["aulaLideranca", "🎓 Aula de liderança pra base", posTemporada.aulaFeita, "Comissão técnica e elenco notam a atitude."],
+                        ]],
+                        ["📄 Administrativo", [
+                          ["numero", "👕 Pedir troca de número", posTemporada.numeroFeito, null],
+                          ["contrato", "✍️ Negociar contrato atual", posTemporada.contratoNegociado, "Abre a folha de contrato pra negociar de verdade."],
+                          ["diretoria", "🏛️ Reunião com a diretoria", posTemporada.diretoriaFeita, null],
+                        ]],
+                        ["🏖️ Vida Pessoal", [
+                          ["folga", "🏖️ Pedir folga pra família", posTemporada.folgaFeita, "Recupera energia, mas custa relação com todo mundo."],
+                          ["noitada", "🎉 Sair pra noitada", posTemporada.noitadaFeita, "Fama sobe, mas o técnico fica de olho."],
+                          ["investirImovel", "🏠 Investir em imóvel", posTemporada.imovelFeito, "Vida financeira mais estável, custa uma grana agora."],
+                        ]],
+                      ].map(([categoria, itens]) => (
+                        <div key={categoria} className="mb-3">
+                          <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">{categoria}</div>
+                          <div className="grid gap-1.5">
+                            {itens.map(([id, label, feito, cena]) => {
+                              const custo = posTemporada.bloqueiosAcao?.[id];
+                              return (
+                                <button key={id} onClick={() => acaoComDesbloqueio(id, custo)} disabled={feito || (custo && carreira.cofre < custo)} className="px-2.5 py-1.5 text-[11px] rounded-sm border border-zinc-800 hover:border-blue-500 disabled:opacity-40 text-left">
+                                  <div className="flex items-center justify-between">
+                                    <span>{custo ? "🔒 " : ""}{label}</span>
+                                    {custo ? <span className="text-amber-400 text-[10px] whitespace-nowrap ml-2">${formatarDinheiro(custo)}</span> : null}
+                                  </div>
+                                  {cena && <div className="text-[9px] text-zinc-600 mt-0.5">{cena}</div>}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                      <div className="mt-1"><Button variant="ghost" onClick={() => setAcoesPopupAberto(false)}>Fechar</Button></div>
+
+                {pendingPatrocinioEscolha && (
+                  <PopupOverlay onClose={() => setPendingPatrocinioEscolha(false)}>
+                    <Card className="border-blue-500/40">
+                      <div className="text-[10px] text-blue-400 uppercase tracking-widest mb-2">💼 Que tipo de patrocínio você quer buscar?</div>
+                      <div className="grid gap-2">
+                        <button onClick={() => escolherPerfilPatrocinio("luxo")} className="text-left p-3 border border-zinc-800 rounded-sm hover:border-amber-500">
+                          <div className="font-bold text-sm">✨ Marca de luxo</div>
+                          <div className="text-[10px] text-zinc-500 mt-0.5">Cachê bem maior, mas só topa se sua ostentação já for alta — senão a marca nem aparece.</div>
+                        </button>
+                        <button onClick={() => escolherPerfilPatrocinio("familia")} className="text-left p-3 border border-zinc-800 rounded-sm hover:border-emerald-500">
+                          <div className="font-bold text-sm">👨‍👩‍👧 Marca familiar</div>
+                          <div className="text-[10px] text-zinc-500 mt-0.5">Cachê menor, mas mais estável — precisa de imagem limpa e pouco escândalo na mídia.</div>
+                        </button>
+                        <button onClick={() => escolherPerfilPatrocinio("neutro")} className="text-left p-3 border border-zinc-800 rounded-sm hover:border-blue-500">
+                          <div className="font-bold text-sm">⚽ Marca esportiva</div>
+                          <div className="text-[10px] text-zinc-500 mt-0.5">O equilíbrio — sem exigência especial, cachê mediano.</div>
+                        </button>
                       </div>
-                      <div className="mt-3"><Button variant="ghost" onClick={() => setAcoesPopupAberto(false)}>Fechar</Button></div>
+                      <div className="mt-3"><Button variant="ghost" onClick={() => setPendingPatrocinioEscolha(false)}>Cancelar</Button></div>
+                    </Card>
+                  </PopupOverlay>
+                )}
 
                 {pendingTrocaNumero && (
                   <PopupOverlay onClose={() => setPendingTrocaNumero(null)}>

@@ -404,11 +404,14 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
     setCarreira(c);
     setPendingAbordagem(false);
     const roll = Math.random();
+    // Perfil de mídia (reputação acumulada) empurra a chance de patrocínio: quem
+    // é conhecido como comunicativo atrai mais atenção de marca; quem é discreto, menos.
+    const empurraPatrocinio = clamp((c.reputacaoMidia ?? 0) / 500, -0.06, 0.06);
     if (roll < 0.32) setDecisao(pick(DECISOES_JOGO));
-    else if (roll < 0.44) setPendingSponsor(pick(patrocinadoresDisponiveis(c)));
-    else if (roll < 0.56) setPendingLegendFollow(pick(LENDAS).nome);
-    else if (roll < 0.68) setPendingTecnico(pick(PEDIDOS_TECNICO));
-    else if (roll < 0.8) setPendingColetiva(true);
+    else if (roll < 0.44 + empurraPatrocinio) setPendingSponsor(pick(patrocinadoresDisponiveis(c)));
+    else if (roll < 0.56 + empurraPatrocinio) setPendingLegendFollow(pick(LENDAS).nome);
+    else if (roll < 0.68 + empurraPatrocinio) setPendingTecnico(pick(PEDIDOS_TECNICO));
+    else if (roll < 0.8 + empurraPatrocinio) setPendingColetiva(true);
     else resolverTemporada(c, {});
   }
   function negociarMeta(delta) {
@@ -474,6 +477,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
     const c = { ...carreira };
     c.calorMidia = clampR((c.calorMidia ?? 20) + rand(10, 18), 0, 100);
     c.fama = clamp(c.fama + rand(2, 5), 0, 100);
+    c.reputacaoMidia = clampR((c.reputacaoMidia ?? 0) + 6, -100, 100);
     logHist(c, `🔥 Provocou ${c.rivalPosicao} nas redes — a mídia esportiva entrou em polvorosa.`);
     setCarreira(c);
   }
@@ -481,6 +485,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
     const c = { ...carreira };
     c.calorMidia = clampR((c.calorMidia ?? 20) - rand(10, 16), 0, 100);
     c.tecnicoConfianca = clampR((c.tecnicoConfianca ?? 60) + rand(1, 4), 0, 100);
+    c.reputacaoMidia = clampR((c.reputacaoMidia ?? 0) - 5, -100, 100);
     logHist(c, `🕊️ Elogiou ${c.rivalPosicao} publicamente — esfriou a rivalidade e agradou a comissão técnica.`);
     setCarreira(c);
   }
@@ -513,6 +518,9 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
     const salarioBase = salarioClube(clube, ovr) * (opTransfer?.salarioMult || 1) * (emp.salarioMult ?? 1);
     // relevância: o quanto o clube te quer/precisa — molda a paciência inicial da diretoria
     const relevancia = clamp((ovr - clube.forca + ((carreira.fama ?? 20) - 40) / 4) / 40, -0.5, 0.6);
+    // sua fama de negociador (perfil de reputação) já chega antes de você — quem é
+    // conhecido como ganancioso encontra diretorias mais precavidas de cara
+    const penalReputacao = clamp(-(carreira.reputacaoNegociacao ?? 0) / 8, -12, 12);
     const termos = {
       salario: Math.round(salarioBase),
       anos: clampR(3 + (emp.anosBonus || 0), 1, 6),
@@ -522,7 +530,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
       funcao: "titular",
     };
     setNegociacaoContrato({
-      clube, opTransfer, termos, paciencia: clampR(60 + relevancia * 60, 25, 95),
+      clube, opTransfer, termos, paciencia: clampR(60 + relevancia * 60 + penalReputacao, 20, 95),
       pedidosRestantes: 4, colapsou: false, empNome: emp.nome,
     });
   }
@@ -540,6 +548,9 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
       const aceitou = Math.random() < (desgastante ? chanceAceitar : 0.95);
       const paciencia = clampR(n.paciencia - (desgastante ? rand(6, 14) : rand(0, 3)), 0, 100);
       const colapsou = paciencia <= 0;
+      // perfil de reputação: pedido folgado bem-sucedido reforça fama de ganancioso;
+      // pedido generoso (o oposto) puxa pro lado comedido — devagar, com o tempo
+      setCarreira((cc) => ({ ...cc, reputacaoNegociacao: clampR((cc.reputacaoNegociacao ?? 0) + (desgastante && aceitou ? 3 : !desgastante ? -2 : 0), -100, 100) }));
       if (!aceitou) return { ...n, paciencia, colapsou, pedidosRestantes: n.pedidosRestantes - 1 };
       return { ...n, termos: { ...n.termos, [campo]: novoValor }, paciencia, colapsou, pedidosRestantes: n.pedidosRestantes - 1 };
     });
@@ -4289,6 +4300,17 @@ function resolverTemporada(c, extraStats) {
                       </div>
                     ) : null;
                   })()}
+                  {((carreira.reputacaoMidia ?? 0) !== 0 || (carreira.reputacaoNegociacao ?? 0) !== 0) && (
+                    <div className="border-t border-zinc-800 mt-3 pt-2.5 grid gap-1.5">
+                      <div className="text-[9px] text-zinc-500 uppercase tracking-widest">🗞️ Sua fama por aí</div>
+                      {(carreira.reputacaoMidia ?? 0) !== 0 && (
+                        <div className="flex justify-between text-[10px]"><span className="text-zinc-400">Com a imprensa</span><span className="font-bold text-zinc-200">{carreira.reputacaoMidia > 15 ? "Comunicativo, dá entrevista fácil" : carreira.reputacaoMidia < -15 ? "Discreto, evita os holofotes" : "Equilibrado"}</span></div>
+                      )}
+                      {(carreira.reputacaoNegociacao ?? 0) !== 0 && (
+                        <div className="flex justify-between text-[10px]"><span className="text-zinc-400">Em negociação</span><span className="font-bold text-zinc-200">{carreira.reputacaoNegociacao > 15 ? "Fama de osso duro — pede sempre" : carreira.reputacaoNegociacao < -15 ? "Fama de comedido, fácil de negociar" : "Equilibrado"}</span></div>
+                      )}
+                    </div>
+                  )}
                 </Card>
 
                 {(carreira.elenco || []).length > 0 && (() => {

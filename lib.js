@@ -1006,6 +1006,36 @@ export function gerarTecnico(clube) {
 
 export function estiloTecnico(id) { return ESTILOS_TECNICO.find((e) => e.id === id) || ESTILOS_TECNICO[4]; }
 
+/* "Vida no clube" — os primeiros momentos depois de uma troca de clube.
+   Não é só mais uma linha de histórico: three beats de narrativa (apresentação,
+   primeiro treino, vestiário) calibrados pelo tamanho da sua chegada (contratação
+   badalada vs mais um reforço discreto), com pequenos efeitos sutis de moral/torcida. */
+export function gerarChegadaClube(c, tipoTransfer) {
+  const ovr = calcOVR(c.attrs, c.posicao, c.papelTatico);
+  const gap = ovr - c.clube.forca;
+  const famaAlta = (c.fama ?? 20) >= 50;
+  const grandeChegada = gap >= 8 || (famaAlta && gap >= -3);
+
+  const apresentacao = grandeChegada
+    ? `A diretoria do ${c.clube.nome} fez questão de uma coletiva cheia pra anunciar sua chegada — expectativa alta em cima de você desde o primeiro dia.`
+    : gap <= -10
+    ? `Sua chegada passou quase despercebida pela imprensa — mais um nome no elenco, ninguém esperando muito ainda.`
+    : `Apresentação de praxe: fotos com a camisa nova, algumas perguntas da imprensa local, e o convite pra já começar a treinar.`;
+
+  const encaixe = encaixeNoEstilo(c);
+  const primeiroTreino = encaixe >= 60
+    ? `${c.tecnico.nome} gostou do que viu no primeiro treino — seu perfil conversa bem com o estilo que ele quer implantar.`
+    : `O primeiro treino foi de reconhecimento mútuo — ${c.tecnico.nome} ainda está te estudando pra decidir onde você encaixa melhor.`;
+
+  const vestiario = tipoTransfer === "emprestimo"
+    ? `O grupo recebeu bem, mas sabe que sua passagem é só por empréstimo — ninguém trata como definitivo ainda.`
+    : grandeChegada
+    ? `Alguns veteranos do elenco sentiram o tamanho da expectativa em cima de você — um clima sutil de "vamos ver do que ele é feito" no vestiário.`
+    : `O vestiário recebeu bem, sem drama — mais um rosto novo se apresentando aos poucos.`;
+
+  return { apresentacao, primeiroTreino, vestiario, grandeChegada, clubeNome: c.clube.nome };
+}
+
 export function encaixeNoEstilo(c) {
   const est = estiloTecnico(c.tecnico?.estilo);
   const media = NUM_ATTRS.reduce((s, a) => s + c.attrs[a], 0) / NUM_ATTRS.length;

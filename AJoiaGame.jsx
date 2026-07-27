@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { montarSave, salvarLocal, carregarLocal, apagarLocal, listarSaves, existeAlgumSave, baixarSave, lerArquivoSave, formatarData, normalizarSave, SLOTS } from "./save.js";
 import { ANO_INICIO, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, FUNCOES_ELENCO, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
-import { agregarPorCompeticao, ajustarMeta, ajustesDoContexto, analisarJogos, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, continentalDaSelecao, creditarTitulo, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, fatorTitulosTemporada, forcaEfetivaClube, formatarDinheiro, gerarColetivaPosJogo, gerarContextoLance, gerarElenco, gerarEventoAmbiente, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, PIRAMIDE_LIGAS, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearConcorrente, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, todosJogosCarreira, valorDeMercado, valorMundo, veredito } from "./lib.js";
+import { agregarPorCompeticao, ajustarMeta, ajustesDoContexto, analisarJogos, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, continentalDaSelecao, creditarTitulo, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, fatorTitulosTemporada, forcaEfetivaClube, formatarDinheiro, gerarChegadaClube, gerarColetivaPosJogo, gerarContextoLance, gerarElenco, gerarEventoAmbiente, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, PIRAMIDE_LIGAS, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearConcorrente, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, todosJogosCarreira, valorDeMercado, valorMundo, veredito } from "./lib.js";
 import { AttrBarDelta, AttrRadar, BallIcon, Button, CalendarioTemporadaPopup, Card, CartaoCarreira, ClubDot, Confetti, CountUp, CurvaEvolucao, Diamond, FichaPartida, FreeKickMini, GoalMini, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PodiumBolaDeOuro, PopupConvocacao, PopupOverlay, SilhuetaJogador, Sparkle, TelaPartidaAoVivo, TimingBar, TrophyIcon } from "./components.jsx";
 
 export default function AJoiaGame() {
@@ -84,6 +84,7 @@ export default function AJoiaGame() {
   const [pendingOfertaInesperada, setPendingOfertaInesperada] = useState(null);
   const [pendingContratoVencido, setPendingContratoVencido] = useState(false);
   const [concorrenciaClubes, setConcorrenciaClubes] = useState(null);
+  const [pendingChegadaClube, setPendingChegadaClube] = useState(null);
   const [negociacaoContrato, setNegociacaoContrato] = useState(null);
   const [detalhesAbertos, setDetalhesAbertos] = useState(false);
   const [subAbaCarreira, setSubAbaCarreira] = useState(null);
@@ -368,6 +369,15 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
     }
     setJanela(null); setPosTemporada(null); setCarreira(c); setTreinoPopupAberto(false); setAcoesPopupAberto(false); setResultadoAcao(null);
     setPosTemporada({ ok: true, ...gerarBloqueios() });
+    if (clubeNovo) {
+      const chegada = gerarChegadaClube(c, tipoTransfer);
+      if (chegada.grandeChegada) {
+        c.elencoMoral = clampR((c.elencoMoral ?? 60) - 5, 0, 100);
+        c.torcidaPorClube = { ...c.torcidaPorClube, [clubeNovo.nome]: clampR((c.torcidaPorClube[clubeNovo.nome] ?? 40) + 6, 0, 100) };
+        setCarreira({ ...c });
+      }
+      setPendingChegadaClube(chegada);
+    }
   }
   function iniciarTemporada() {
     setPendingAbordagem(true);
@@ -4849,6 +4859,32 @@ function resolverTemporada(c, extraStats) {
                         <Button variant="ghost" onClick={recusarOfertaInesperada}>Recusar e ficar</Button>
                         <Button variant="gold" onClick={aceitarOfertaInesperada}>{pendingOfertaInesperada.tipo === "venda" ? "Negociar saída" : "Aceitar empréstimo"}</Button>
                       </div>
+                    </Card>
+                  </PopupOverlay>
+                )}
+
+                {pendingChegadaClube && (
+                  <PopupOverlay>
+                    <Card className="border-emerald-500/40">
+                      <div className="text-center mb-3">
+                        <div className="flex items-center justify-center gap-2 mb-1"><ClubDot club={carreira.clube} size={26} /><span className="font-bold text-base">{pendingChegadaClube.clubeNome}</span></div>
+                        <div className="text-[10px] text-emerald-400 uppercase tracking-widest">Seus primeiros dias por lá</div>
+                      </div>
+                      <div className="grid gap-2.5">
+                        <div className="bg-zinc-950/40 rounded-sm p-2.5">
+                          <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">📸 Apresentação</div>
+                          <p className="text-[11px] text-zinc-300 leading-relaxed">{pendingChegadaClube.apresentacao}</p>
+                        </div>
+                        <div className="bg-zinc-950/40 rounded-sm p-2.5">
+                          <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">🏋️ Primeiro treino</div>
+                          <p className="text-[11px] text-zinc-300 leading-relaxed">{pendingChegadaClube.primeiroTreino}</p>
+                        </div>
+                        <div className="bg-zinc-950/40 rounded-sm p-2.5">
+                          <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">🚪 Vestiário</div>
+                          <p className="text-[11px] text-zinc-300 leading-relaxed">{pendingChegadaClube.vestiario}</p>
+                        </div>
+                      </div>
+                      <div className="mt-3"><Button variant="gold" onClick={() => setPendingChegadaClube(null)}>Seguir em frente</Button></div>
                     </Card>
                   </PopupOverlay>
                 )}

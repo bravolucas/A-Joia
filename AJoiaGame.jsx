@@ -289,7 +289,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
       camisaPorClube: { [clubeEscolhido.nome]: [numero] }, titulosPorClube: {}, titulosSelecao: [], clubesInteresse: [], contrato: null,
       seguidores: Math.round(seguidoresBase(calcOVR(attrsIni, posicao))),
       desgaste: 0, energia: 100, abordagem: null, focoTreino: null, treinouPesado: false, emprestimo: false, clubeOrigemEmprestimo: null,
-      historico: [], titulosLista: [], rivalPosicao: pick(poolRivalPorOvr(calcOVR(attrsIni, posicao))), rivalBolasDeOuro: 0, tecnicoConfianca: 60, relacaoDiretoria: 40, calorMidia: 20, expectativa: null, posicoesAprendidas: [posicao], empresarioUsado: {}, papelTatico: "padrao", cosmeticosDesbloqueados: [], postSocialFeito: false,
+      historico: [], titulosLista: [], rivalPosicao: pick(poolRivalPorOvr(calcOVR(attrsIni, posicao))), rivalBolasDeOuro: 0, tecnicoConfianca: 60, relacaoDiretoria: 40, calorMidia: 20, expectativa: null, posicoesAprendidas: [posicao], empresarioUsado: {}, papelTatico: "padrao", cosmeticosDesbloqueados: [], cosmeticosEquipados: {}, postSocialFeito: false,
       entrosamento: 20, elencoMoral: 60, titularidade: 100, concorrente: sortearConcorrente(clubeEscolhido), relacaoPatrocinadores: 50, traits: [], streaksTraits: {},
       empresario: { id: "iniciante", restantes: 3 },
     };
@@ -1730,6 +1730,11 @@ function resolverTemporada(c, extraStats) {
     if (titulosLista.length) {
       const clubeKey = c.clube.nome;
       c.titulosPorClube = { ...c.titulosPorClube, [clubeKey]: [...(c.titulosPorClube?.[clubeKey] || []), ...titulosLista] };
+      // Comemoração equipada rende torcida extra a cada título — bônus de verdade agora
+      const comemEquipada = COSMETICOS.find((it) => it.id === c.cosmeticosEquipados?.["Comemoração"]);
+      if (comemEquipada?.torcidaBonusTitulo) {
+        c.torcidaPorClube = { ...c.torcidaPorClube, [clubeKey]: clampR((c.torcidaPorClube?.[clubeKey] ?? 40) + comemEquipada.torcidaBonusTitulo * titulosLista.length, 0, 100) };
+      }
     }
     // Bônus por título do contrato: paga por cada título de clube ou de seleção conquistado nessa temporada
     if (c.contrato?.bonusTitulo > 0) {
@@ -2236,14 +2241,36 @@ function resolverTemporada(c, extraStats) {
     }
 
     // desbloqueio de cosméticos por marcos da carreira
-    const statsCosmeticos = { titulos: c.titulos, bolasDeOuro: c.bolasDeOuro, premiosIndividuais: c.premiosIndividuais, picoOvr: c.picoOvr, fama: c.fama };
+    const statsCosmeticos = {
+      titulos: c.titulos, bolasDeOuro: c.bolasDeOuro, premiosIndividuais: c.premiosIndividuais,
+      picoOvr: c.picoOvr, fama: c.fama, idade: c.idade, anoNoClube: c.anoNoClube ?? 0,
+      seguidores: c.seguidores || 0, elencoMoral: c.elencoMoral ?? 60,
+      copasDoMundo: c.copasDoMundo || 0, selecaoJogos: c.selecao?.jogos || 0,
+      torcidaAtual: c.torcidaPorClube?.[c.clube.nome] ?? 40,
+    };
+    const novosDesbloqueios = [];
     COSMETICOS.forEach((item) => {
       if (!(c.cosmeticosDesbloqueados || []).includes(item.id) && item.requisito(statsCosmeticos)) {
+        // se o item pertence a um grupo com níveis (ex: comemoração assinatura),
+        // o nível novo substitui o anterior — não fica acumulando os dois
+        if (item.grupo) {
+          c.cosmeticosDesbloqueados = (c.cosmeticosDesbloqueados || []).filter((id) => {
+            const antigo = COSMETICOS.find((x) => x.id === id);
+            return !(antigo && antigo.grupo === item.grupo && antigo.tier < item.tier);
+          });
+        }
         c.cosmeticosDesbloqueados = [...(c.cosmeticosDesbloqueados || []), item.id];
         aplicarEfeitoCosmetico(c, item);
         logHist(c, `Novo item desbloqueado: ${item.nome} — ${item.desc || ""}`);
+        novosDesbloqueios.push(item);
+        // categorias equipáveis: se ainda não tinha nada equipado nessa categoria, equipa automático
+        if (item.equipavel) {
+          c.cosmeticosEquipados = c.cosmeticosEquipados || {};
+          if (!c.cosmeticosEquipados[item.categoria]) c.cosmeticosEquipados[item.categoria] = item.id;
+        }
       }
     });
+    if (novosDesbloqueios.length) c.novosCosmeticosParaCelebrar = novosDesbloqueios;
     // bônus anuais recorrentes de cosméticos já desbloqueados (vestiário, torcida etc.)
     (c.cosmeticosDesbloqueados || []).forEach((id) => {
       const item = COSMETICOS.find((x) => x.id === id);
@@ -3048,6 +3075,11 @@ function resolverTemporada(c, extraStats) {
     if ((c.attrs[attr] ?? 0) >= teto) return;
     c.xpDesenvolvimento -= CUSTO_PONTO_DESENVOLVIMENTO;
     c.attrs = { ...c.attrs, [attr]: clampR((c.attrs[attr] ?? 40) + 1, 40, teto) };
+    setCarreira(c);
+  }
+  function equiparCosmetico(categoria, id) {
+    const c = { ...carreira };
+    c.cosmeticosEquipados = { ...(c.cosmeticosEquipados || {}), [categoria]: id };
     setCarreira(c);
   }
   function dentroJanelaPedidoContrato() {
@@ -5023,6 +5055,25 @@ function resolverTemporada(c, extraStats) {
                   </PopupOverlay>
                 )}
 
+                {(carreira.novosCosmeticosParaCelebrar || []).length > 0 && (
+                  <PopupOverlay>
+                    <Card className="border-amber-500/40 text-center">
+                      <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-2">🎉 Novo marco desbloqueado</div>
+                      <div className="grid gap-2.5 mb-3">
+                        {carreira.novosCosmeticosParaCelebrar.map((it) => (
+                          <div key={it.id} className="bg-zinc-950/40 rounded-sm p-3">
+                            <div className="text-2xl mb-1">{it.icone}</div>
+                            <div className="font-bold text-sm">{it.nome}</div>
+                            <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1">{it.categoria}</div>
+                            <p className="text-[11px] text-zinc-400">{it.desc}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <Button variant="gold" onClick={() => setCarreira((cc) => ({ ...cc, novosCosmeticosParaCelebrar: [] }))}>Show!</Button>
+                    </Card>
+                  </PopupOverlay>
+                )}
+
                 {negociacaoContrato && (
                   <PopupOverlay>
                     <Card padded={false} className="border-amber-500/40 overflow-hidden">
@@ -6524,27 +6575,40 @@ function resolverTemporada(c, extraStats) {
 
                 <Card>
                   <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">🎨 Itens de marco desbloqueados</div>
-                  <p className="text-[10px] text-zinc-600 mb-3">Cada item carrega um efeito real — atributo, fama, torcida ou confiança do técnico.</p>
+                  <p className="text-[10px] text-zinc-600 mb-3">Comemoração e Imagem você escolhe qual usar — o resto aplica sozinho. {(carreira.cosmeticosDesbloqueados || []).length}/{COSMETICOS.length} liberados.</p>
                   {(carreira.cosmeticosDesbloqueados || []).length === 0 && <p className="text-xs text-zinc-500 mb-2">Nenhum item desbloqueado ainda — conquiste títulos, prêmios e fama pra liberar.</p>}
-                  <div className="grid gap-1.5 mb-3">
-                    {COSMETICOS.filter((it) => (carreira.cosmeticosDesbloqueados || []).includes(it.id)).map((it) => (
-                      <div key={it.id} className="text-[11px] px-2.5 py-1.5 border border-amber-500/30 rounded-sm bg-amber-500/5">
-                        <div className="font-bold">{it.icone} {it.nome} <span className="text-zinc-500 font-normal">· {it.categoria}</span></div>
-                        <div className="text-[10px] text-zinc-500 mt-0.5">{it.desc}</div>
+                  {["Comemoração", "Imagem", "Performance", "Vestiário", "Torcida", "Legado"].map((cat) => {
+                    const desbloqueados = COSMETICOS.filter((it) => it.categoria === cat && (carreira.cosmeticosDesbloqueados || []).includes(it.id));
+                    const bloqueados = COSMETICOS.filter((it) => it.categoria === cat && !(carreira.cosmeticosDesbloqueados || []).includes(it.id));
+                    if (!desbloqueados.length && !bloqueados.length) return null;
+                    const equipavel = desbloqueados.some((it) => it.equipavel);
+                    const equipadoId = carreira.cosmeticosEquipados?.[cat];
+                    return (
+                      <div key={cat} className="mb-3">
+                        <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">{cat} · {desbloqueados.length}/{desbloqueados.length + bloqueados.length}</div>
+                        <div className="grid gap-1.5">
+                          {desbloqueados.map((it) => {
+                            const ativo = equipavel ? equipadoId === it.id : true;
+                            return (
+                              <div key={it.id} className={`text-[11px] px-2.5 py-1.5 border rounded-sm ${ativo ? "border-amber-500/30 bg-amber-500/5" : "border-zinc-800"}`}>
+                                <div className="flex items-center justify-between">
+                                  <div className="font-bold">{it.icone} {it.nome}</div>
+                                  {it.equipavel && (
+                                    ativo ? <span className="text-[9px] text-amber-400 font-bold whitespace-nowrap ml-2">✓ em uso</span>
+                                    : <button onClick={() => equiparCosmetico(cat, it.id)} className="text-[9px] text-zinc-400 hover:text-amber-400 whitespace-nowrap ml-2 border border-zinc-700 rounded-sm px-1.5 py-0.5">usar essa</button>
+                                  )}
+                                </div>
+                                <div className="text-[10px] text-zinc-500 mt-0.5">{it.desc}</div>
+                              </div>
+                            );
+                          })}
+                          {bloqueados.map((it) => (
+                            <div key={it.id} className="text-[10px] px-2.5 py-1.5 border border-zinc-800 rounded-sm text-zinc-600">🔒 {it.nome}</div>
+                          ))}
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                  {COSMETICOS.some((it) => !(carreira.cosmeticosDesbloqueados || []).includes(it.id)) && (
-                    <>
-                      <div className="text-[9px] text-zinc-600 uppercase tracking-widest mb-1.5">🔒 Ainda por vir</div>
-                      <div className="grid gap-1">
-                        {COSMETICOS.filter((it) => !(carreira.cosmeticosDesbloqueados || []).includes(it.id)).map((it) => (
-                          <div key={it.id} className="text-[10px] px-2.5 py-1.5 border border-zinc-800 rounded-sm text-zinc-600">🔒 {it.nome}</div>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                  <p className="text-[9px] text-zinc-600 mt-2">{(carreira.cosmeticosDesbloqueados || []).length}/{COSMETICOS.length} itens liberados</p>
+                    );
+                  })}
                 </Card>
               </div>
             )}

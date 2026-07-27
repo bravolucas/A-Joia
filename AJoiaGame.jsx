@@ -2551,6 +2551,12 @@ function resolverTemporada(c, extraStats) {
       adversarioForca: ctx.adversarioForca, forcaClube: ctx.forcaClube, forcaJogador: ctx.forcaJogador, casa: ctx.souCasa,
     });
 
+    // Pontos de desenvolvimento: um complemento pequeno à evolução automática,
+    // não um substituto — dá pro jogador escolher onde investir, mas o ritmo é
+    // modesto de propósito pra não desbalancear a curva que já calibramos.
+    const xpGanho = (nota >= 6.0 ? 1 : 0) + (nota >= 7.5 ? 1 : 0) + Math.min(2, golsMinha + assistMinha);
+    if (xpGanho > 0) c.xpDesenvolvimento = (c.xpDesenvolvimento || 0) + xpGanho;
+
     // Partida da Copa Nacional: não mexe na tabela/rodada da liga, que fica
     // pausada — só decide se avança de fase, e a próxima fase já começa direto.
     if (ctx.copa) {
@@ -3030,6 +3036,19 @@ function resolverTemporada(c, extraStats) {
     setNegociacaoContratoAtual(null);
     setPosTemporada((p) => ({ ...p, contratoNegociado: true }));
     setResultadoAcao({ titulo: "Negociação de contrato", texto, icone: aceitou ? "✍️" : "📄" });
+  }
+  /* Árvore de evolução: gasta os pontos ganhos por bom desempenho pra
+     escolher onde investir. Respeita o teto do potencial — não dá pra
+     forçar além do que o jogador é capaz de alcançar. */
+  const CUSTO_PONTO_DESENVOLVIMENTO = 8;
+  function investirPontoDesenvolvimento(attr) {
+    const c = { ...carreira };
+    if ((c.xpDesenvolvimento || 0) < CUSTO_PONTO_DESENVOLVIMENTO) return;
+    const teto = Math.min(99, c.potencial?.[attr] ?? 99);
+    if ((c.attrs[attr] ?? 0) >= teto) return;
+    c.xpDesenvolvimento -= CUSTO_PONTO_DESENVOLVIMENTO;
+    c.attrs = { ...c.attrs, [attr]: clampR((c.attrs[attr] ?? 40) + 1, 40, teto) };
+    setCarreira(c);
   }
   function dentroJanelaPedidoContrato() {
     const ta = carreira.temporadaAndamento;
@@ -4527,6 +4546,33 @@ function resolverTemporada(c, extraStats) {
                   <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{ width: `${clamp(((carreira.desgaste ?? 0) / 3) * 100, 4, 100)}%`, background: riscoLesao(carreira.desgaste).cor }} /></div>
                 </Card>
                 </div>
+
+                <Card>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-widest">🌳 Árvore de evolução</span>
+                    <span className="text-[11px] font-bold text-amber-400">{carreira.xpDesenvolvimento || 0} pts</span>
+                  </div>
+                  <p className="text-[10px] text-zinc-500 mb-2.5">Ganha pontos jogando bem (nota alta, gols, assistências). Gasta {CUSTO_PONTO_DESENVOLVIMENTO} pontos pra investir +1 direto num atributo — sem passar do seu potencial.</p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {NUM_ATTRS.map((attr) => {
+                      const info = ATTR_SLOTS.find((a) => a.id === attr);
+                      const atual = carreira.attrs[attr] ?? 40;
+                      const teto = Math.min(99, carreira.potencial?.[attr] ?? 99);
+                      const noTeto = atual >= teto;
+                      const semPontos = (carreira.xpDesenvolvimento || 0) < CUSTO_PONTO_DESENVOLVIMENTO;
+                      return (
+                        <button key={attr} onClick={() => investirPontoDesenvolvimento(attr)} disabled={noTeto || semPontos}
+                          className="text-left px-2 py-1.5 rounded-sm border border-zinc-800 hover:border-amber-400 disabled:opacity-40 disabled:hover:border-zinc-800">
+                          <div className="flex justify-between items-center">
+                            <span className="text-[10px] font-bold text-zinc-200">{info?.label}</span>
+                            <span className="text-[10px] font-mono text-zinc-500">{atual}/{teto}</span>
+                          </div>
+                          <div className="h-1 bg-zinc-800 rounded-full overflow-hidden mt-1"><div className="h-full rounded-full bg-amber-500" style={{ width: `${teto ? (atual / teto) * 100 : 0}%` }} /></div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </Card>
                   </>
                 )}
 

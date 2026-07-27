@@ -358,9 +358,16 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
       c.tecnicoConfianca = clampR(55 + encaixeNoEstilo(c) * 1.2, 25, 85);
       logHist(c, `No novo clube quem manda é ${c.tecnico.nome} (${estiloTecnico(c.tecnico.estilo).nome}).`);
       if (clubeNovo.liga !== ligaAntiga) {
-        const novoRival = sortearRival(calcOVR(c.attrs, c.posicao, c.papelTatico), c.rivalPosicao);
-        c.rivalPosicao = novoRival; c.rivalBolasDeOuro = Math.max(0, Math.round((c.rivalBolasDeOuro || 0) * 0.4));
-        logHist(c, `Na nova liga, ${novoRival} desponta como seu novo rival direto na briga por prêmios.`);
+        const meuOvrAtual = calcOVR(c.attrs, c.posicao, c.papelTatico);
+        const rivalAtualMundo = mundo?.jogadores?.find((j) => j.id === c.rivalId && !j.aposentado);
+        const aindaValido = rivalAtualMundo && Math.abs(rivalAtualMundo.ovr - meuOvrAtual) <= 15;
+        if (aindaValido) {
+          logHist(c, `Mesmo na nova liga, ${c.rivalPosicao} continua sendo seu rival de sempre — a rivalidade não esfria com a mudança de clube.`);
+        } else {
+          const novoRival = sortearRival(meuOvrAtual, c.rivalPosicao);
+          c.rivalPosicao = novoRival; c.rivalId = null; c.rivalBolasDeOuro = Math.max(0, Math.round((c.rivalBolasDeOuro || 0) * 0.4));
+          logHist(c, `Na nova liga, ${novoRival} desponta como seu novo rival direto na briga por prêmios.`);
+        }
       }
       if (contrato) { c.contrato = { ...contrato, restantes: contrato.anos }; logHist(c, `Assinou contrato de ${contrato.anos} anos (salário $${formatarDinheiro(contrato.salario)}, multa $${formatarDinheiro(contrato.multa)}, bônus $${formatarDinheiro(contrato.bonusGol)}/gol).`); }
       if (c.torcidaPorClube[clubeNovo.nome] === undefined) c.torcidaPorClube = { ...c.torcidaPorClube, [clubeNovo.nome]: 40 };
@@ -2227,13 +2234,18 @@ function resolverTemporada(c, extraStats) {
     c.idade += 1;
     const aposentar = c.idade >= 35 && (c.idade >= 40 || Math.random() < (c.idade - 34) * 0.22);
 
-    // Rivalidade da geração: reavaliada toda temporada conforme o OVR atual — muda de patamar, muda o nome no debate
+    // Rivalidade da geração: só muda quando o rival de verdade (ligado ao mundo)
+    // já não faz mais sentido — aposentou ou ficou longe demais do seu nível.
+    // Antes trocava sozinho 35% das temporadas sem motivo nenhum; agora a
+    // rivalidade dura de verdade, a não ser que ela realmente não caiba mais.
     const bandaAntiga = poolRivalPorOvr(card.ovr === c.picoOvr ? card.ovr : Math.max(card.ovr, c.picoOvr - 5));
     const trocouBanda = !bandaAntiga.includes(c.rivalPosicao);
-    if (trocouBanda || subiuTier || Math.random() < 0.35) {
+    const rivalAtualMundo = mundo?.jogadores?.find((j) => j.id === c.rivalId && !j.aposentado);
+    const rivalAindaValido = rivalAtualMundo && Math.abs(rivalAtualMundo.ovr - card.ovr) <= 18;
+    if (!rivalAindaValido && (trocouBanda || subiuTier)) {
       const novoRival = sortearRival(c.picoOvr, c.rivalPosicao);
       if (novoRival !== c.rivalPosicao) {
-        c.rivalPosicao = novoRival; c.rivalBolasDeOuro = Math.max(0, Math.round((c.rivalBolasDeOuro || 0) * (subiuTier ? 0.5 : 0.8)));
+        c.rivalPosicao = novoRival; c.rivalId = null; c.rivalBolasDeOuro = Math.max(0, Math.round((c.rivalBolasDeOuro || 0) * (subiuTier ? 0.5 : 0.8)));
         logHist(c, `${trocouBanda || subiuTier ? "Subindo de patamar, " : ""}${novoRival} vira o novo nome no debate do maior da geração.`);
       }
     }
@@ -3842,10 +3854,13 @@ function resolverTemporada(c, extraStats) {
                   const eventoEspecial = ta?.eventosAgendados?.[0] || null;
                   const naoLidas = (carreira.inbox || []).filter((x) => !x.lida);
                   const noticiasParaMostrar = (naoLidas.length ? naoLidas : (carreira.inbox || [])).slice(0, 2);
+                  const rivalNoMundo = mundo?.jogadores?.find((j) => j.id === carreira.rivalId && !j.aposentado);
+                  const proximoEhRival = !!(proximoJogo && rivalNoMundo && proximoJogo.adversario.nome === rivalNoMundo.clubeNome);
+                  const confrontoRival = proximoEhRival ? carreira.confrontos?.[proximoJogo.adversario.nome] : null;
 
                   return (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 span-full">
-                      <Card className="border-emerald-500/30">
+                      <Card className={proximoEhRival ? "border-red-500/40" : "border-emerald-500/30"}>
                         <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-2">⚽ Próximo jogo</div>
                         {proximoJogo ? (
                           <div className="flex items-center gap-2.5">
@@ -3853,6 +3868,12 @@ function resolverTemporada(c, extraStats) {
                             <div className="flex-1 min-w-0">
                               <div className="text-sm font-bold truncate">{proximoJogo.adversario.nome}{proximoJogo.ehClassico && <span className="text-amber-400"> ⚔️</span>}</div>
                               <div className="text-[10px] text-zinc-500">{proximoJogo.souCasa ? "🏠 Em casa" : "✈️ Fora"} · Rodada {proximoJogo.rodada}</div>
+                              {proximoEhRival && (
+                                <div className="text-[10px] text-red-400 font-bold mt-1">
+                                  🔥 {rivalNoMundo.nome} está nesse time — sua rivalidade de gerações
+                                  {confrontoRival && confrontoRival.jogos > 0 ? ` (${confrontoRival.v}V ${confrontoRival.e}E ${confrontoRival.d}D no histórico)` : ""}
+                                </div>
+                              )}
                             </div>
                           </div>
                         ) : eventoEspecial ? (

@@ -351,13 +351,18 @@ export function ApresentacaoNovoClube({ clube, nome, numero, posicao, idade, gra
           {fase >= 2 && (
             <div className="relative z-10 flex flex-col items-center" style={fase === 2 ? { animation: "jerseyRise 0.9s ease-out" } : undefined}>
               <div
-                className="relative w-40 h-48 rounded-lg flex items-center justify-center mb-3"
-                style={{ background: `linear-gradient(160deg, ${corClube}, ${corClube}99)`, boxShadow: `0 0 45px ${corClube}90`, animation: "ceremonyGlow 2s ease-in-out infinite" }}
+                className="relative w-48 h-56 flex flex-col items-center justify-center pt-9 mb-3"
+                style={{
+                  background: `linear-gradient(160deg, ${corClube}, ${corClube}99)`,
+                  boxShadow: `0 0 45px ${corClube}90`,
+                  animation: "ceremonyGlow 2s ease-in-out infinite",
+                  clipPath: "polygon(35% 0%, 50% 9%, 65% 0%, 84% 7%, 100% 24%, 80% 36%, 80% 100%, 20% 100%, 20% 36%, 0% 24%, 16% 7%)",
+                }}
               >
                 {fase >= 3 && (
                   <div className="text-center animate-[popIn_0.35s_ease-out]">
-                    <div className="font-black text-5xl leading-none" style={{ color: corTexto }}>{numero}</div>
-                    <div className="text-xs font-bold uppercase tracking-wide mt-1" style={{ color: corTexto }}>{nome.split(" ")[0]}</div>
+                    <div className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: corTexto }}>{nome.split(" ")[0]}</div>
+                    <div className="font-black text-6xl leading-none" style={{ color: corTexto }}>{numero}</div>
                   </div>
                 )}
               </div>

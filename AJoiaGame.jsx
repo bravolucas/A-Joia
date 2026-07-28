@@ -766,7 +766,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
     const c = { ...carreira };
     let efeito, extraStats = {};
     if (opt.risco) {
-      const bonusBP = c.especialistaBP ? 6 : 0;
+      const bonusBP = c.especialistaBP ? (c.especialistaBPNivel === "elite" ? 9 : 4) : 0;
       const cSimulado = bonusBP ? { ...c, attrs: { ...c.attrs, finalizacao: clampR(c.attrs.finalizacao + bonusBP, 1, 99) } } : c;
       const acertou = calcularSucessoDecisivo(cSimulado, null, true);
       efeito = acertou ? opt.seAcerta : opt.seErra;
@@ -797,7 +797,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
   }
   function resolverFaltaDecisao(zona) {
     const c = { ...carreira };
-    const bonusBP = c.especialistaBP ? 4 : 0;
+    const bonusBP = c.especialistaBP ? (c.especialistaBPNivel === "elite" ? 7 : 4) : 0;
     const gol = calcularSucessoFalta(c.attrs.finalizacao + bonusBP, c.attrs.drible + bonusBP);
     const tipo = tipoResultadoFalta(gol, zona);
     if (gol) { c.fama = clamp(c.fama + 8, 0, 100); setTorcidaClube(c, c.clube.nome, 12); logHist(c, "Falta decisiva na final: NO ÂNGULO! Cobrança perfeita."); }
@@ -2613,10 +2613,8 @@ function resolverTemporada(c, extraStats) {
     c.jogosCarreiraTotal = (c.jogosCarreiraTotal || 0) + 1;
     const ehJogoDeSelecao = ctx.meuClube === null && ctx.adversarioObj === null;
     const eraPrimeiraSelecao = ehJogoDeSelecao && !c.estreiaSelecaoFeita;
-    if (eraPrimeiraSelecao) c.estreiaSelecaoFeita = true;
     const rivalNoMundoAgora = mundo?.jogadores?.find((j) => j.id === c.rivalId && !j.aposentado);
     const eraPrimeiroEncontroRival = !ehJogoDeSelecao && rivalNoMundoAgora && ctx.adversario === rivalNoMundoAgora.clubeNome && !c.encarouRivalFeito;
-    if (eraPrimeiroEncontroRival) c.encarouRivalFeito = true;
 
     const golsMinha = eventos.filter((e) => e.tipo === "gol" && e.meu).length;
     const assistMinha = eventos.filter((e) => e.tipo === "gol" && e.assist).length;
@@ -2679,8 +2677,8 @@ function resolverTemporada(c, extraStats) {
     setPartidaAoVivo(null);
     const resumeData = { c, ta, tabela, historico, meuResultadoRodada };
     if (eraPrimeiroJogoDaCarreira) { setPendingEstreia({ tipo: "profissional", nomeEquipe: c.clube.nome, cor: c.clube.cor, resumeData }); return; }
-    if (eraPrimeiraSelecao) { setPendingEstreia({ tipo: "selecao", nomeEquipe: nacDe(c.nacionalidade)?.label, cor: "#12A876", resumeData }); return; }
-    if (eraPrimeiroEncontroRival) { setPendingRivalidade({ meuNome: nome, rivalNome: c.rivalPosicao, resumeData }); return; }
+    if (eraPrimeiraSelecao) { c.estreiaSelecaoFeita = true; setPendingEstreia({ tipo: "selecao", nomeEquipe: nacDe(c.nacionalidade)?.label, cor: "#12A876", resumeData }); return; }
+    if (eraPrimeiroEncontroRival) { c.encarouRivalFeito = true; setPendingRivalidade({ meuNome: nome, rivalNome: c.rivalPosicao, resumeData }); return; }
     const coletiva = gerarColetivaPosJogo(meuResultadoRodada);
     if (coletiva) {
       setPendingColetivaPosJogo({ info: coletiva, resumeData });
@@ -2785,7 +2783,7 @@ function resolverTemporada(c, extraStats) {
   }
   function escolherZonaLanceFalta(zona) {
     const c = carreira;
-    const bonusBP = c.especialistaBP ? 4 : 0;
+    const bonusBP = c.especialistaBP ? (c.especialistaBPNivel === "elite" ? 7 : 4) : 0;
     const gol = calcularSucessoFalta(c.attrs.finalizacao + bonusBP, c.attrs.drible + bonusBP);
     const tipo = tipoResultadoFalta(gol, zona);
     setLanceMiniResultado({ tipo: "falta", zona, gol, tipoResultado: tipo });

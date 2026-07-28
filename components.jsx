@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { ANO_INICIO, ATTR_SLOTS, CLUBES, DIAS_SEMANA_ABREV, DIAS_SEMANA_LABEL, FALTA_BONECO_POS, FALTA_BOX, FALTA_GOAL, FALTA_SPOT, LANCES_POR_POSICAO, MESES_LABEL, NUM_ATTRS, PASSE_H, PASSE_ORIGEM, PASSE_W, PEN_GOAL, PEN_H, PEN_SPOT, PEN_W, PEN_ZONE_X, POS_GRUPO, TIPOS_NOTICIA } from "./data.js";
+import { ANO_INICIO, ATTR_SLOTS, CLUBES, CONDICOES_CLIMA, DIAS_SEMANA_ABREV, DIAS_SEMANA_LABEL, FALTA_BONECO_POS, FALTA_BOX, FALTA_GOAL, FALTA_SPOT, LANCES_POR_POSICAO, MESES_LABEL, NUM_ATTRS, PASSE_H, PASSE_ORIGEM, PASSE_W, PEN_GOAL, PEN_H, PEN_SPOT, PEN_W, PEN_ZONE_X, POS_GRUPO, TIPOS_NOTICIA } from "./data.js";
 import { calcularSucessoPasse, clamp, diaNaJanela, diasNoMes, distribuirRodadasNaJanela, estimarRodadasLiga, faltaAlvoBola, formatarDinheiro, gerarCenaPasse, janelasPorLiga, janelasSelecao, labelAtributoGoleiro, nacDe, penAlvoBola, pick, primeiroDiaSemanaMes, rand, tierInfo } from "./lib.js";
 
 export function Card({ children, className = "", accent, padded = true, id }) {
@@ -201,6 +201,7 @@ export function TelaPartidaAoVivo({ pv, onDecisao, onContinuarSegundoTempo, onMu
               <div className="text-xs text-zinc-400">vs {ctx.adversario}</div>
               <div className={`text-sm font-bold ${fase === "intervalo" ? "text-amber-400" : "text-zinc-300"}`}>{relogioTxt}</div>
               {substituido && <div className="text-[9px] text-zinc-500 mt-0.5">🔄 Você foi substituído</div>}
+              {ctx.clima && ctx.clima !== "normal" && (() => { const cl = CONDICOES_CLIMA.find((c) => c.id === ctx.clima); return cl ? <div className="text-[9px] text-zinc-500 mt-0.5">{cl.icone} {cl.label}</div> : null; })()}
             </div>
             <span className="font-stat font-black text-4xl">{ctx.souCasa ? advGols : meusGols}</span>
           </div>

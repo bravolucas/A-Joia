@@ -138,6 +138,15 @@ export const ESTILOS_JOGO_MUNDO = [
   { id: "velocista", label: "Explosivo" },
 ];
 
+/* Condição de campo/clima — sorteada uma vez no início de cada partida,
+   afeta levemente a chance de gol (representando dificuldade de passe e
+   finalização), igual em ambos os times. Pequeno, mas dá variedade real. */
+export const CONDICOES_CLIMA = [
+  { id: "normal", label: "Tempo bom", icone: "☀️", mult: 1, chance: 0.68 },
+  { id: "chuva", label: "Chuva", icone: "🌧️", mult: 0.9, chance: 0.2 },
+  { id: "pesado", label: "Campo pesado", icone: "🟤", mult: 0.85, chance: 0.12 },
+];
+
 export const POSICOES = [
   { id: "GOL", label: "Goleiro", pesos: { defesa: 3.2, finalizacao: 2.2, fisico: 1.8, drible: 1.4, passe: 1.0, velocidade: 0.6 }, golBase: 0, assistBase: 0.01 },
   { id: "ZAG", label: "Zagueiro", pesos: { defesa: 3.0, fisico: 2.4, velocidade: 1.0, passe: 0.9, finalizacao: 0.3, drible: 0.3 }, golBase: 0.06, assistBase: 0.03 },

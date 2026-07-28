@@ -97,6 +97,7 @@ export default function AJoiaGame() {
   const [pendingVidaPessoal, setPendingVidaPessoal] = useState(null);
   const [pendingCompraDestaque, setPendingCompraDestaque] = useState(null);
   const [pendingAssinaturaContrato, setPendingAssinaturaContrato] = useState(null);
+  const [pendingMelhorEmCampo, setPendingMelhorEmCampo] = useState(null);
   const [pendingNascimentoFilho, setPendingNascimentoFilho] = useState(null);
   const [negociacaoContrato, setNegociacaoContrato] = useState(null);
   const [detalhesAbertos, setDetalhesAbertos] = useState(false);
@@ -2701,6 +2702,10 @@ function resolverTemporada(c, extraStats) {
     // modesto de propósito pra não desbalancear a curva que já calibramos.
     const xpGanho = (nota >= 6.0 ? 1 : 0) + (nota >= 7.5 ? 1 : 0) + Math.min(2, golsMinha + assistMinha);
     if (xpGanho > 0) c.xpDesenvolvimento = (c.xpDesenvolvimento || 0) + xpGanho;
+
+    // Melhor em Campo da rodada: reconhecimento pontual pra atuação de
+    // destaque, sem precisar esperar prêmio de fim de temporada.
+    if (nota >= 8.3) setPendingMelhorEmCampo({ nota, adversario: ctx.adversario });
 
     // Partida da Copa Nacional: não mexe na tabela/rodada da liga, que fica
     // pausada — só decide se avança de fase, e a próxima fase já começa direto.
@@ -5431,6 +5436,18 @@ function resolverTemporada(c, extraStats) {
 
                 {pendingAssinaturaContrato && (
                   <CenaAssinaturaContrato clube={pendingAssinaturaContrato.clube} funcaoNome={pendingAssinaturaContrato.funcaoNome} onConcluir={() => setPendingAssinaturaContrato(null)} />
+                )}
+
+                {pendingMelhorEmCampo && (
+                  <PopupOverlay>
+                    <Card className="border-amber-500/40 text-center">
+                      <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-2">⭐ Melhor em Campo</div>
+                      <div className="text-3xl mb-2">🌟</div>
+                      <p className="text-sm font-bold text-zinc-200 mb-1">Atuação de destaque contra o {pendingMelhorEmCampo.adversario}!</p>
+                      <p className="text-xs text-zinc-500 mb-4">Nota {pendingMelhorEmCampo.nota.toFixed(1)} — a imprensa já está comentando essa partida.</p>
+                      <Button variant="gold" onClick={() => setPendingMelhorEmCampo(null)}>Seguir em frente</Button>
+                    </Card>
+                  </PopupOverlay>
                 )}
 
                 {pendingCompraDestaque && (

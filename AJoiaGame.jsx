@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { montarSave, salvarLocal, carregarLocal, apagarLocal, listarSaves, existeAlgumSave, baixarSave, lerArquivoSave, formatarData, normalizarSave, SLOTS } from "./save.js";
 import { ANO_INICIO, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, FUNCOES_ELENCO, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
 import { agregarPorCompeticao, ajustarMeta, ajustesDoContexto, analisarJogos, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, continentalDaSelecao, creditarTitulo, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, fatorTitulosTemporada, forcaEfetivaClube, formatarDinheiro, gerarChegadaClube, gerarColetivaPosJogo, gerarContextoLance, gerarElenco, gerarEventoAmbiente, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, PIRAMIDE_LIGAS, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearConcorrente, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, todosJogosCarreira, valorDeMercado, valorMundo, veredito } from "./lib.js";
-import { AttrBarDelta, AttrRadar, BallIcon, Button, CalendarioTemporadaPopup, Card, CartaoCarreira, ClubDot, Confetti, CountUp, CurvaEvolucao, Diamond, FichaPartida, FreeKickMini, GoalMini, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PodiumBolaDeOuro, PopupConvocacao, PopupOverlay, SilhuetaJogador, Sparkle, TelaPartidaAoVivo, TimingBar, TrophyIcon } from "./components.jsx";
+import { AttrBarDelta, AttrRadar, BallIcon, ApresentacaoNovoClube, Button, CalendarioTemporadaPopup, Card, CartaoCarreira, ClubDot, Confetti, CountUp, CurvaEvolucao, Diamond, FichaPartida, FreeKickMini, GoalMini, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PodiumBolaDeOuro, PopupConvocacao, PopupOverlay, SilhuetaJogador, Sparkle, TelaPartidaAoVivo, TimingBar, TrophyIcon } from "./components.jsx";
 
 export default function AJoiaGame() {
   const [stage, setStage] = useState("intro");
@@ -85,6 +85,7 @@ export default function AJoiaGame() {
   const [pendingContratoVencido, setPendingContratoVencido] = useState(false);
   const [concorrenciaClubes, setConcorrenciaClubes] = useState(null);
   const [pendingChegadaClube, setPendingChegadaClube] = useState(null);
+  const [pendingApresentacaoClube, setPendingApresentacaoClube] = useState(null);
   const [pendingVidaPessoal, setPendingVidaPessoal] = useState(null);
   const [pendingNascimentoFilho, setPendingNascimentoFilho] = useState(null);
   const [negociacaoContrato, setNegociacaoContrato] = useState(null);
@@ -387,7 +388,8 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
         c.torcidaPorClube = { ...c.torcidaPorClube, [clubeNovo.nome]: clampR((c.torcidaPorClube[clubeNovo.nome] ?? 40) + 6, 0, 100) };
         setCarreira({ ...c });
       }
-      setPendingChegadaClube(chegada);
+      const numeroUsado = numero || (c.camisaPorClube?.[clubeNovo.nome] || []).slice(-1)[0];
+      setPendingApresentacaoClube({ clube: clubeNovo, numero: numeroUsado, posicao: c.posicao, idade: c.idade, grandeChegada: chegada.grandeChegada, chegadaDepois: chegada });
     }
   }
   function iniciarTemporada() {
@@ -3720,6 +3722,9 @@ function resolverTemporada(c, extraStats) {
         @keyframes sparkleTwinkle{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1.15)}}
         @keyframes stageEnter{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:translateY(0)}}
         @keyframes scrambleFade{0%{opacity:0.3}100%{opacity:1}}
+        @keyframes jerseyRise{0%{opacity:0;transform:translateY(60px) scale(0.7);filter:brightness(0.5)}70%{filter:brightness(1.3)}100%{opacity:1;transform:translateY(0) scale(1);filter:brightness(1)}}
+        @keyframes spotlightPulse{0%,100%{opacity:0.35;transform:scale(0.9)}50%{opacity:0.7;transform:scale(1.15)}}
+        @keyframes cameraFlashRandom{0%,100%{opacity:0}10%{opacity:1}20%{opacity:0}}
         @keyframes barFill{from{width:0%}}
         @keyframes neonPulse{0%,100%{box-shadow:0 0 6px rgba(57,255,136,0.35),0 0 0 1px rgba(57,255,136,0.15)}50%{box-shadow:0 0 18px rgba(57,255,136,0.65),0 0 0 1px rgba(57,255,136,0.3)}}
         @keyframes cyanPulse{0%,100%{box-shadow:0 0 6px rgba(34,211,238,0.35)}50%{box-shadow:0 0 18px rgba(34,211,238,0.65)}}
@@ -5214,6 +5219,15 @@ function resolverTemporada(c, extraStats) {
                       </div>
                     </Card>
                   </PopupOverlay>
+                )}
+
+                {pendingApresentacaoClube && (
+                  <ApresentacaoNovoClube
+                    clube={pendingApresentacaoClube.clube} numero={pendingApresentacaoClube.numero}
+                    nome={nome} posicao={pendingApresentacaoClube.posicao} idade={pendingApresentacaoClube.idade}
+                    grandeChegada={pendingApresentacaoClube.grandeChegada}
+                    onConcluir={() => { const chegada = pendingApresentacaoClube.chegadaDepois; setPendingApresentacaoClube(null); setPendingChegadaClube(chegada); }}
+                  />
                 )}
 
                 {pendingChegadaClube && (

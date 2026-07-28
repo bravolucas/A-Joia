@@ -305,6 +305,82 @@ export function PopupConvocacao({ info, onClose }) {
 // Navegável em páginas (Resumo / Conquistas / Trajetória / Seleção), reunindo
 // os dados que já existem espalhados pela carreira numa vitrine só, pensada
 // pra ser uma lembrança de verdade, não só mais uma tela de números.
+// Apresentação de camisa — o "evento" de ir pra um clube novo, em 4 fases:
+// sala escura com holofote pulsando, flashes de câmera, camisa surgindo em
+// holofote, nome/número carimbando, e boas-vindas. A intensidade (mais
+// flashes, confete) escala com o tamanho da contratação (grandeChegada).
+export function ApresentacaoNovoClube({ clube, nome, numero, posicao, idade, grandeChegada, onConcluir }) {
+  const [fase, setFase] = useState(0); // 0 escuro | 1 flashes | 2 camisa | 3 nome | 4 final
+  const numFlashes = grandeChegada ? 14 : 6;
+  const [flashes] = useState(() => Array.from({ length: numFlashes }, () => ({ delay: Math.random() * 1.4, dur: 0.5 + Math.random() * 0.7 })));
+
+  useEffect(() => {
+    const tempos = [1300, 1300, 1300, 1100];
+    if (fase < 4) {
+      const t = setTimeout(() => setFase((f) => f + 1), tempos[fase]);
+      return () => clearTimeout(t);
+    }
+  }, [fase]);
+
+  const corClube = clube.cor || "#D8B44A";
+  const corTexto = clube.escuro ? "#0a0a0a" : "#fff";
+
+  return (
+    <PopupOverlay>
+      <Card padded={false} className="overflow-hidden border-none" style={{ background: `radial-gradient(circle at 50% 25%, ${corClube}2a 0%, #060606 75%)` }}>
+        <div className="relative h-[420px] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
+          {fase >= 1 && fase < 4 && flashes.map((f, i) => (
+            <div key={i} className="absolute inset-0 bg-white pointer-events-none" style={{ animation: `cameraFlashRandom ${f.dur}s ${f.delay}s infinite` }} />
+          ))}
+          {fase === 4 && grandeChegada && <Confetti />}
+
+          {fase === 0 && (
+            <div className="flex flex-col items-center gap-4 animate-[fadeIn_0.5s_ease-out] relative z-10">
+              <div className="w-28 h-28 rounded-full" style={{ background: corClube, filter: "blur(22px)", animation: "spotlightPulse 1.8s ease-in-out infinite" }} />
+              <p className="text-[11px] text-zinc-500 uppercase tracking-widest">Preparando anúncio...</p>
+            </div>
+          )}
+
+          {fase === 1 && (
+            <div className="flex flex-col items-center gap-2 relative z-10">
+              <ClubDot club={clube} size={72} />
+              <p className="text-xs text-zinc-400 uppercase tracking-widest">A imprensa já está a postos</p>
+            </div>
+          )}
+
+          {fase >= 2 && (
+            <div className="relative z-10 flex flex-col items-center" style={fase === 2 ? { animation: "jerseyRise 0.9s ease-out" } : undefined}>
+              <div
+                className="relative w-40 h-48 rounded-lg flex items-center justify-center mb-3"
+                style={{ background: `linear-gradient(160deg, ${corClube}, ${corClube}99)`, boxShadow: `0 0 45px ${corClube}90`, animation: "ceremonyGlow 2s ease-in-out infinite" }}
+              >
+                {fase >= 3 && (
+                  <div className="text-center animate-[popIn_0.35s_ease-out]">
+                    <div className="font-black text-5xl leading-none" style={{ color: corTexto }}>{numero}</div>
+                    <div className="text-xs font-bold uppercase tracking-wide mt-1" style={{ color: corTexto }}>{nome.split(" ")[0]}</div>
+                  </div>
+                )}
+              </div>
+              {fase === 4 && (
+                <div className="animate-[popIn_0.4s_ease-out]">
+                  <div className="flex items-center justify-center gap-2 mb-1"><ClubDot club={clube} size={22} /><span className="font-bold text-base">{clube.nome}</span></div>
+                  <p className="text-amber-400 font-bold text-sm mb-1">{grandeChegada ? "Reforço de peso confirmado!" : "Bem-vindo!"}</p>
+                  <p className="text-[11px] text-zinc-500">{posicao} · {idade} anos</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        {fase === 4 && (
+          <div className="p-3 border-t border-zinc-800">
+            <Button variant="gold" onClick={onConcluir}>Continuar</Button>
+          </div>
+        )}
+      </Card>
+    </PopupOverlay>
+  );
+}
+
 export function CartaoCarreira({ fim, temporadas, nome, posicao, onClose }) {
   const [pagina, setPagina] = useState(0);
   const c = fim.c;

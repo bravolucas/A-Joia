@@ -559,6 +559,8 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
       multa: Math.round(salarioBase * 5 * (emp.multaMult ?? 1)),
       bonusGol: 3,
       bonusTitulo: Math.round(salarioBase * 0.5),
+      metaGols: 20,
+      bonusMeta: Math.round(salarioBase * 0.35),
       funcao: "titular",
     };
     setNegociacaoContrato({
@@ -569,13 +571,15 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
   function ajustarTermoNegociacao(campo, direcao) {
     setNegociacaoContrato((n) => {
       if (!n || n.pedidosRestantes <= 0 || n.colapsou) return n;
-      const passos = { salario: 0.1, anos: 1, multa: 0.18, bonusGol: 1, bonusTitulo: 0.25 };
+      const passos = { salario: 0.1, anos: 1, multa: 0.18, bonusGol: 1, bonusTitulo: 0.25, metaGols: 2, bonusMeta: 0.25 };
       const atual = n.termos[campo];
       const novoValor = campo === "anos" || campo === "bonusGol"
         ? clampR(atual + direcao * passos[campo], campo === "anos" ? 1 : 0, campo === "anos" ? 6 : 15)
+        : campo === "metaGols"
+        ? clampR(atual + direcao * passos[campo], 5, 40)
         : Math.max(0, Math.round(atual * (1 + direcao * passos[campo])));
-      // pedir mais salário/bônus/anos, ou pedir menos cláusula de saída, desgasta a diretoria
-      const desgastante = (["salario", "bonusGol", "bonusTitulo", "anos"].includes(campo) && direcao > 0) || (campo === "multa" && direcao < 0);
+      // pedir mais salário/bônus/anos, pedir a meta de gols mais baixa (mais fácil de bater), ou pedir menos cláusula de saída, desgasta a diretoria
+      const desgastante = (["salario", "bonusGol", "bonusTitulo", "bonusMeta", "anos"].includes(campo) && direcao > 0) || (["multa", "metaGols"].includes(campo) && direcao < 0);
       const chanceAceitar = clamp(n.paciencia / 100, 0.15, 0.95);
       const aceitou = Math.random() < (desgastante ? chanceAceitar : 0.95);
       const paciencia = clampR(n.paciencia - (desgastante ? rand(6, 14) : rand(0, 3)), 0, 100);
@@ -1793,6 +1797,12 @@ function resolverTemporada(c, extraStats) {
         c.extrato = [...(c.extrato || []), { idade: c.idade, tipo: `Bônus por título (${totalTitulosTemporada}x)`, valor: ganhoBonus }];
         logHist(c, `Recebeu $${formatarDinheiro(ganhoBonus)} em bônus contratual por ${totalTitulosTemporada} título(s) na temporada.`);
       }
+    }
+    // Cláusula de performance: bônus se bateu a meta de gols da temporada
+    if (c.contrato?.bonusMeta > 0 && c.contrato?.metaGols > 0 && card.gols >= c.contrato.metaGols) {
+      c.cofre += c.contrato.bonusMeta;
+      c.extrato = [...(c.extrato || []), { idade: c.idade, tipo: `Bônus por meta de gols (${card.gols}/${c.contrato.metaGols})`, valor: c.contrato.bonusMeta }];
+      logHist(c, `Bateu a meta contratual de ${c.contrato.metaGols} gols na temporada (fez ${card.gols}) — recebeu $${formatarDinheiro(c.contrato.bonusMeta)} de bônus.`);
     }
     if (copa?.titulo) { const nac = nacDe(c.nacionalidade); c.titulosSelecao = [...(c.titulosSelecao || []), `Copa do Mundo (${nac.label})`]; }
 
@@ -4958,6 +4968,7 @@ function resolverTemporada(c, extraStats) {
                       <div className="flex justify-between"><span className="text-zinc-400">Cláusula de saída</span><span className="font-mono text-zinc-200">${formatarDinheiro(carreira.contrato.multa)}</span></div>
                       <div className="flex justify-between"><span className="text-zinc-400">Bônus/gol</span><span className="font-mono text-zinc-200">${formatarDinheiro(carreira.contrato.bonusGol)}</span></div>
                       {carreira.contrato.bonusTitulo > 0 && <div className="flex justify-between"><span className="text-zinc-400">Bônus/título</span><span className="font-mono text-zinc-200">${formatarDinheiro(carreira.contrato.bonusTitulo)}</span></div>}
+                      {carreira.contrato.metaGols > 0 && <div className="flex justify-between"><span className="text-zinc-400">Meta de gols</span><span className="font-mono text-zinc-200">{carreira.contrato.metaGols} gols → ${formatarDinheiro(carreira.contrato.bonusMeta)}</span></div>}
                       {carreira.contrato.funcao && <div className="flex justify-between"><span className="text-zinc-400">Função</span><span className="font-bold text-amber-400">{FUNCOES_ELENCO.find((f) => f.id === carreira.contrato.funcao)?.nome}</span></div>}
                     </div>
                     <Button variant="ghost" onClick={() => iniciarNegociacaoContrato(carreira.clube)}>📄 Renegociar contrato</Button>
@@ -5537,6 +5548,8 @@ function resolverTemporada(c, extraStats) {
                             ["multa", "🔒 Cláusula de saída", `$${formatarDinheiro(negociacaoContrato.termos.multa)}`],
                             ["bonusGol", "⚽ Bônus por gol", `$${formatarDinheiro(negociacaoContrato.termos.bonusGol)}`],
                             ["bonusTitulo", "🏆 Bônus por título", `$${formatarDinheiro(negociacaoContrato.termos.bonusTitulo)}`],
+                            ["metaGols", "🎯 Meta de gols na temporada", `${negociacaoContrato.termos.metaGols} gols`],
+                            ["bonusMeta", "💵 Bônus por bater a meta", `$${formatarDinheiro(negociacaoContrato.termos.bonusMeta)}`],
                           ].map(([campo, label, valorTxt]) => (
                             <div key={campo} className="flex items-center justify-between bg-zinc-950/40 rounded-sm px-3 py-2">
                               <span className="text-[11px] text-zinc-400">{label}</span>

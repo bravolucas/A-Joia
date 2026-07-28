@@ -86,6 +86,25 @@ export function SilhuetaJogador({ size = 56, cor = "#12A876" }) {
   );
 }
 
+export function DadoIcon({ size = 32, girando }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" className="shrink-0" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.35))", animation: girando ? "diceRoll 0.5s linear infinite" : undefined }}>
+      <defs>
+        <linearGradient id="diceFace" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#fdfdfd" /><stop offset="100%" stopColor="#c9c9cf" />
+        </linearGradient>
+      </defs>
+      <rect x="2" y="2" width="36" height="36" rx="9" fill="url(#diceFace)" stroke="#00000022" strokeWidth="1" />
+      <rect x="4" y="4" width="32" height="10" rx="6" fill="#ffffff" opacity="0.5" />
+      <circle cx="13" cy="13" r="3.1" fill="#27272a" />
+      <circle cx="27" cy="13" r="3.1" fill="#27272a" />
+      <circle cx="20" cy="20" r="3.1" fill="#27272a" />
+      <circle cx="13" cy="27" r="3.1" fill="#27272a" />
+      <circle cx="27" cy="27" r="3.1" fill="#27272a" />
+    </svg>
+  );
+}
+
 export function TrophyIcon({ tipo = "ouro", size = 24 }) {
   const cores = { ouro: "#D8B44A", prata: "#C7CDD6", bronze: "#B08D57", mundo: "#3b82f6", liga: "#12A876" };
   const cor = cores[tipo] || cores.ouro;

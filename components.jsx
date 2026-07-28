@@ -540,6 +540,36 @@ export function CenaDespedidaClube({ clube, anos, onConcluir }) {
   );
 }
 
+// Assinatura de contrato na renovação — mais contida que a apresentação de
+// camisa (é o mesmo clube, não precisa de holofote), mas ainda um momento.
+export function CenaAssinaturaContrato({ clube, funcaoNome, onConcluir }) {
+  const [fase, setFase] = useState(0);
+  useEffect(() => { if (fase === 0) { const t = setTimeout(() => setFase(1), 1400); return () => clearTimeout(t); } }, [fase]);
+  const cor = clube?.cor || "#D8B44A";
+  return (
+    <PopupOverlay>
+      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `radial-gradient(circle at 50% 30%, ${cor}22 0%, #050505 80%)` }}>
+        <div className="h-[300px] flex flex-col items-center justify-center px-5">
+          {fase === 0 ? (
+            <div className="flex flex-col items-center gap-3 animate-[fadeIn_0.5s_ease-out]">
+              <div className="text-4xl" style={{ animation: "floatY 1.6s ease-in-out infinite" }}>🖊️</div>
+              <p className="text-[11px] text-zinc-500 uppercase tracking-widest">Assinando os novos termos...</p>
+            </div>
+          ) : (
+            <div className="animate-[popIn_0.5s_ease-out] flex flex-col items-center">
+              <div className="flex items-center gap-2 mb-2"><ClubDot club={clube} size={26} /><span className="font-bold text-base">{clube?.nome}</span></div>
+              <div className="text-3xl mb-2">🤝</div>
+              <p className="font-black text-amber-400 text-sm mb-1">Contrato renovado!</p>
+              <p className="text-[11px] text-zinc-500">Seguindo como {funcaoNome} — a diretoria selou o acordo com um aperto de mão.</p>
+            </div>
+          )}
+        </div>
+        {fase >= 1 && <div className="p-3 border-t border-zinc-800"><Button variant="gold" onClick={onConcluir}>Seguir em frente</Button></div>}
+      </Card>
+    </PopupOverlay>
+  );
+}
+
 export function CartaoCarreira({ fim, temporadas, nome, posicao, onClose }) {
   const [pagina, setPagina] = useState(0);
   const c = fim.c;

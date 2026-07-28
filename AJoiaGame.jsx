@@ -3,7 +3,7 @@ import { montarSave, salvarLocal, carregarLocal, apagarLocal, listarSaves, exist
 import { ANO_INICIO, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONFEDERACAO_POR_NACAO, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, FUNCOES_ELENCO, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
 import { agregarPorCompeticao, ajustarMeta, ajustesDoContexto, analisarJogos, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, continentalDaSelecao, creditarTitulo, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, fatorTitulosTemporada, forcaEfetivaClube, formatarDinheiro, gerarChegadaClube, gerarColetivaPosJogo, gerarContextoLance, gerarElenco, gerarEventoAmbiente, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, PIRAMIDE_LIGAS, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearClima, sortearConcorrente, sortearFormacao, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, todosJogosCarreira, valorDeMercado, valorMundo, veredito } from "./lib.js";
 import { AttrBarDelta, AttrRadar, BallIcon, ApresentacaoNovoClube, Button, CalendarioTemporadaPopup, Card, CartaoCarreira,
-  CenaAposentadoria, CenaDespedidaClube, CenaEstreia, CenaLesaoGrave, CenaLevantarTaca, CenaRivalidade, ClubDot, Confetti, CountUp, CurvaEvolucao, Diamond, FichaPartida, FreeKickMini, GoalMini, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PodiumBolaDeOuro, PopupConvocacao, PopupOverlay, SilhuetaJogador, Sparkle, TelaPartidaAoVivo, TimingBar, TrophyIcon } from "./components.jsx";
+  CenaAposentadoria, CenaAssinaturaContrato, CenaDespedidaClube, CenaEstreia, CenaLesaoGrave, CenaLevantarTaca, CenaRivalidade, ClubDot, Confetti, CountUp, CurvaEvolucao, Diamond, FichaPartida, FreeKickMini, GoalMini, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PodiumBolaDeOuro, PopupConvocacao, PopupOverlay, SilhuetaJogador, Sparkle, TelaPartidaAoVivo, TimingBar, TrophyIcon } from "./components.jsx";
 
 export default function AJoiaGame() {
   const [stage, setStage] = useState("intro");
@@ -96,6 +96,7 @@ export default function AJoiaGame() {
   const [pendingDespedidaClube, setPendingDespedidaClube] = useState(null);
   const [pendingVidaPessoal, setPendingVidaPessoal] = useState(null);
   const [pendingCompraDestaque, setPendingCompraDestaque] = useState(null);
+  const [pendingAssinaturaContrato, setPendingAssinaturaContrato] = useState(null);
   const [pendingNascimentoFilho, setPendingNascimentoFilho] = useState(null);
   const [negociacaoContrato, setNegociacaoContrato] = useState(null);
   const [detalhesAbertos, setDetalhesAbertos] = useState(false);
@@ -597,7 +598,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
   function fecharNegociacaoContrato() {
     const n = negociacaoContrato;
     if (!n || n.colapsou) return;
-    const pacote = { anos: n.termos.anos, salario: n.termos.salario, multa: n.termos.multa, bonusGol: n.termos.bonusGol, bonusTitulo: n.termos.bonusTitulo, funcao: n.termos.funcao, label: "Negociado" };
+    const pacote = { anos: n.termos.anos, salario: n.termos.salario, multa: n.termos.multa, bonusGol: n.termos.bonusGol, bonusTitulo: n.termos.bonusTitulo, metaGols: n.termos.metaGols, bonusMeta: n.termos.bonusMeta, funcao: n.termos.funcao, label: "Negociado" };
     setNegociacaoContrato(null);
     if (n.opTransfer) {
       setJanela({ tipo: "numeroTransfer", opEscolhida: { ...n.opTransfer, contrato: pacote }, bloqueados: gerarBloqueadosNumero() });
@@ -607,7 +608,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
       const funcaoNome = FUNCOES_ELENCO.find((f) => f.id === pacote.funcao)?.nome.toLowerCase();
       logHist(c, `Renovou contrato com o ${c.clube.nome}: ${pacote.anos} ano(s), salário $${formatarDinheiro(pacote.salario)}, cláusula de saída $${formatarDinheiro(pacote.multa)}, como ${funcaoNome}.`);
       setCarreira(c);
-      setResultadoAcao({ titulo: "Novo contrato assinado", texto: `Você renovou com o ${c.clube.nome} nesses termos.`, icone: "✍️" });
+      setPendingAssinaturaContrato({ clube: c.clube, pacote, funcaoNome });
     }
   }
   function sairDaNegociacao() {
@@ -5426,6 +5427,10 @@ function resolverTemporada(c, extraStats) {
                     grandeChegada={pendingApresentacaoClube.grandeChegada}
                     onConcluir={() => { const chegada = pendingApresentacaoClube.chegadaDepois; setPendingApresentacaoClube(null); setPendingChegadaClube(chegada); }}
                   />
+                )}
+
+                {pendingAssinaturaContrato && (
+                  <CenaAssinaturaContrato clube={pendingAssinaturaContrato.clube} funcaoNome={pendingAssinaturaContrato.funcaoNome} onConcluir={() => setPendingAssinaturaContrato(null)} />
                 )}
 
                 {pendingCompraDestaque && (

@@ -2986,6 +2986,7 @@ function resolverTemporada(c, extraStats) {
     const custoDesbloqueio = posTemporada?.bloqueiosTreino?.[attrId];
     if (custoDesbloqueio && carreira.cofre < custoDesbloqueio) return;
     if ((carreira.energia ?? 100) < 15) return;
+    setTreinoPopupAberto(false);
     // cada atributo treina com o minigame que faz sentido pra ele
     const minigamePorAttr = { finalizacao: "penalti", drible: "falta", passe: "passe", velocidade: "arrancada", fisico: "disputa", defesa: "leitura" };
     setTreinoDesafio({ attrId, custoDesbloqueio, minigame: minigamePorAttr[attrId] || "timing" });
@@ -3033,6 +3034,7 @@ function resolverTemporada(c, extraStats) {
     setCarreira(c);
   }
   function abrirDesafioTreinoExtra(tipo) {
+    setTreinoPopupAberto(false);
     setTreinoExtraDesafio({ tipo });
   }
   function treinoExtra(tipo, acerto = true) {
@@ -6100,6 +6102,9 @@ function resolverTemporada(c, extraStats) {
                         </div>
                       ))}
                       <div className="mt-1"><Button variant="ghost" onClick={() => setAcoesPopupAberto(false)}>Fechar</Button></div>
+                    </Card>
+                  </PopupOverlay>
+                )}
 
                 {pendingPatrocinioEscolha && (
                   <PopupOverlay onClose={() => setPendingPatrocinioEscolha(false)}>
@@ -6135,9 +6140,6 @@ function resolverTemporada(c, extraStats) {
                         ))}
                       </div>
                       <div className="mt-3"><Button variant="ghost" onClick={() => setPendingTrocaNumero(null)}>Cancelar</Button></div>
-                    </Card>
-                  </PopupOverlay>
-                )}
                     </Card>
                   </PopupOverlay>
                 )}
@@ -6364,7 +6366,7 @@ function resolverTemporada(c, extraStats) {
                         <p className="text-xs text-zinc-500 mb-4">Você ainda não tem um contrato formal registrado com o {carreira.clube.nome}.</p>
                       )}
                       <div className="grid gap-1.5">
-                        <button onClick={() => { setContratoMenuAberto(false); setNegociacaoContratoAtual(carreira.contrato || { anos: 2, salario: salarioClube(carreira.clube, calcOVR(carreira.attrs, carreira.posicao)), multa: salarioClube(carreira.clube, calcOVR(carreira.attrs, carreira.posicao)) * 4, bonusGol: 2 }); }} className="text-left px-3 py-2 text-xs rounded-sm border border-zinc-800 hover:border-blue-500">✍️ Negociar renovação completa <span className="block text-[9px] text-zinc-500 mt-0.5">Ajusta salário, bônus, multa, anos e status de estrela.</span></button>
+                        <button onClick={() => { setContratoMenuAberto(false); iniciarNegociacaoContrato(carreira.clube); }} className="text-left px-3 py-2 text-xs rounded-sm border border-zinc-800 hover:border-blue-500">✍️ Negociar renovação completa <span className="block text-[9px] text-zinc-500 mt-0.5">Abre a folha de contrato — salário, duração, cláusula de saída, bônus e função no elenco.</span></button>
                         <button onClick={pedirAumentoSalarial} disabled={!carreira.contrato} className="text-left px-3 py-2 text-xs rounded-sm border border-zinc-800 hover:border-emerald-500 disabled:opacity-40">💰 Pedir aumento salarial <span className="block text-[9px] text-zinc-500 mt-0.5">Rápido, sem mexer no resto do contrato.</span></button>
                         <button onClick={negociarBonusRapido} disabled={!carreira.contrato} className="text-left px-3 py-2 text-xs rounded-sm border border-zinc-800 hover:border-amber-500 disabled:opacity-40">🎁 Negociar bônus por gol/assistência <span className="block text-[9px] text-zinc-500 mt-0.5">Aumenta o valor extra por desempenho.</span></button>
                         <button onClick={pedirClausulaEstabilidade} disabled={!carreira.contrato || carreira.contrato?.clausulaEstabilidade} className="text-left px-3 py-2 text-xs rounded-sm border border-zinc-800 hover:border-cyan-500 disabled:opacity-40">🛡️ Pedir cláusula de estabilidade <span className="block text-[9px] text-zinc-500 mt-0.5">Suaviza a queda de confiança do técnico em temporadas ruins.</span></button>

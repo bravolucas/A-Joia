@@ -95,6 +95,7 @@ export default function AJoiaGame() {
   const [pendingAposentadoria, setPendingAposentadoria] = useState(null);
   const [pendingDespedidaClube, setPendingDespedidaClube] = useState(null);
   const [pendingVidaPessoal, setPendingVidaPessoal] = useState(null);
+  const [pendingCompraDestaque, setPendingCompraDestaque] = useState(null);
   const [pendingNascimentoFilho, setPendingNascimentoFilho] = useState(null);
   const [negociacaoContrato, setNegociacaoContrato] = useState(null);
   const [detalhesAbertos, setDetalhesAbertos] = useState(false);
@@ -689,9 +690,14 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
     const { custo, manutencao } = precoAjustado(item, c);
     if (c.cofre < custo) return;
     if (item.categoria === "Estrutura do Clube" && (c.posses || []).some((p) => p.id === item.id && p.clubeDono === c.clube.nome)) return; // já adquirido e travado nesse clube
+    if (item.requisitoVidaPessoal && !item.requisitoVidaPessoal(c.vidaPessoal)) return; // ainda não faz sentido pro seu momento de vida
     c.cofre -= custo;
     c.extrato = [...c.extrato, { idade: c.idade, tipo: `Compra: ${item.nome}`, valor: -custo }];
     item = { ...item, custo, manutencao };
+    // Perfil de mídia (reputação acumulada) amplia ou reduz a repercussão de
+    // compras ostentosas e ações sociais — comunicativo vira mais notícia,
+    // discreto quase não repercute fazendo a mesma coisa.
+    const fatorRepercussao = clamp(1 + (c.reputacaoMidia ?? 0) / 200, 0.5, 1.6);
     if (item.tipo === "staff") {
       c.staff = { ...c.staff, [item.id]: true };
       c.staffContratos = { ...(c.staffContratos || {}), [item.id]: { restantes: item.duracaoTemporadas || 2, manutencao, custo } };
@@ -704,9 +710,9 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
       logHist(c, `Investiu no clube: ${item.nome} (+${item.forcaClube} de força pro ${c.clube.nome}).`);
     }
     else if (item.tipo === "acao") {
-      const boostTorcida = item.id === "fundacaoSocial" ? 15 : item.id === "ajudaHospital" ? 10 : 6;
-      const boostFama = item.id === "fundacaoSocial" ? 10 : 6;
-      const boostSeg = item.id === "ajudaHospital" ? 0.18 : item.id === "abrigoAnimais" ? 0.12 : item.id === "fundacaoSocial" ? 0.15 : 0.06;
+      const boostTorcida = (item.id === "fundacaoSocial" ? 15 : item.id === "ajudaHospital" ? 10 : 6) * fatorRepercussao;
+      const boostFama = (item.id === "fundacaoSocial" ? 10 : 6) * fatorRepercussao;
+      const boostSeg = (item.id === "ajudaHospital" ? 0.18 : item.id === "abrigoAnimais" ? 0.12 : item.id === "fundacaoSocial" ? 0.15 : 0.06) * fatorRepercussao;
       setTorcidaClube(c, c.clube.nome, boostTorcida);
       c.acoesSociaisFeitas = (c.acoesSociaisFeitas || 0) + 1;
       c.fama = clamp(c.fama + boostFama, 0, 100);
@@ -715,10 +721,14 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
     } else {
       c.posses = [...(c.posses || []), { ...item, compraId: Date.now() + Math.random() }];
       if (item.fama) c.fama = clamp(c.fama + item.fama, 0, 100);
+      if (item.efeitoFama) c.fama = clamp(c.fama + item.efeitoFama * (PESO_OSTENTACAO[item.categoria] > 0 ? fatorRepercussao : 1), 0, 100);
+      if (item.efeitoMoral) c.elencoMoral = clampR((c.elencoMoral ?? 60) + item.efeitoMoral, 0, 100);
+      if (PESO_OSTENTACAO[item.categoria] > 0 && fatorRepercussao > 1.05) { c.calorMidia = clampR((c.calorMidia ?? 20) + Math.round((fatorRepercussao - 1) * 12), 0, 100); }
       if (item.bonusAttr) { c.attrs = { ...c.attrs, [item.bonusAttr.id]: clamp(c.attrs[item.bonusAttr.id] + item.bonusAttr.valor, 1, 99) }; logHist(c, `Equipou ${item.nome} — ${item.bonusAttr.valor > 0 ? "+" : ""}${item.bonusAttr.valor} de ${item.bonusAttr.id} permanente.`); }
       logHist(c, `Comprou: ${item.nome}.`);
     }
     setCarreira(c);
+    if (item.destaque) setPendingCompraDestaque(item);
   }
   function venderItem(compraId) {
     const c = { ...carreira };
@@ -5370,6 +5380,22 @@ function resolverTemporada(c, extraStats) {
                   />
                 )}
 
+                {pendingCompraDestaque && (
+                  <PopupOverlay>
+                    <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: "radial-gradient(circle at 50% 25%, #D8B44A2a 0%, #050505 80%)" }}>
+                      <div className="relative h-[260px] flex flex-col items-center justify-center px-5 overflow-hidden">
+                        <Confetti />
+                        <div className="relative z-10 animate-[popIn_0.5s_ease-out]">
+                          <div className="text-5xl mb-2" style={{ animation: "floatY 2.4s ease-in-out infinite" }}>{pendingCompraDestaque.icone}</div>
+                          <div className="font-black text-lg text-amber-400 mb-1">{pendingCompraDestaque.nome}</div>
+                          <p className="text-xs text-zinc-400">Uma conquista que virou notícia — sua vida fora de campo também escreve história.</p>
+                        </div>
+                      </div>
+                      <div className="p-3 border-t border-zinc-800"><Button variant="gold" onClick={() => setPendingCompraDestaque(null)}>Aproveitar</Button></div>
+                    </Card>
+                  </PopupOverlay>
+                )}
+
                 {pendingChegadaClube && (
                   <PopupOverlay>
                     <Card className="border-emerald-500/40">
@@ -7499,24 +7525,28 @@ function resolverTemporada(c, extraStats) {
               <p className="text-[10px] text-zinc-600 mb-3">
                 {lojaCategoriaAberta === "Estrutura do Clube" ? "Compra única por clube — trava depois de adquirido, e some se você sair do clube."
                   : lojaCategoriaAberta === "Staff" ? "Contratos temporários — cobram manutenção anual e vencem, precisando renovar."
+                  : lojaCategoriaAberta === "Ações Sociais" ? "Investimentos maiores, disponíveis a qualquer momento (sem limite de uma vez por ano) — diferente das ações beneficentes mais simples que aparecem nas Ações da Carreira."
                   : "Itens da sua vida pessoal — compre quantas vezes fizer sentido."}
               </p>
               <div className="lista-cards">
                 {LOJA_ITENS.filter((it) => it.categoria === lojaCategoriaAberta).map((item) => {
                   const contratoAtivo = item.tipo === "staff" ? carreira.staffContratos?.[item.id] : null;
                   const travadoEstrutura = item.categoria === "Estrutura do Clube" && (carreira.posses || []).some((p) => p.id === item.id && p.clubeDono === carreira.clube.nome);
+                  const bloqueadoVidaPessoal = item.requisitoVidaPessoal && !item.requisitoVidaPessoal(carreira.vidaPessoal);
                   const { custo, manutencao } = precoAjustado(item, carreira);
-                  const desabilitado = travadoEstrutura || carreira.cofre < custo;
+                  const desabilitado = travadoEstrutura || bloqueadoVidaPessoal || carreira.cofre < custo;
                   return (
                     <button key={item.id} onClick={() => comprarItem(item)} disabled={desabilitado} className="flex justify-between items-center px-3 py-2 text-xs rounded-sm border border-zinc-800 hover:border-emerald-500 disabled:opacity-40 text-left gap-2">
                       <span className="flex-1">
                         <span className="mr-1.5">{item.icone}</span>{item.nome}
                         {item.desc && <span className="block text-[9px] text-zinc-500 mt-0.5">{item.desc}</span>}
                         {item.efeitoFisico != null && <span className={`block text-[9px] mt-0.5 ${item.efeitoFisico < 0 ? "text-emerald-400" : "text-red-400"}`}>{item.efeitoFisico < 0 ? "🩺 reduz" : "🩺 aumenta"} o desgaste em {Math.abs(item.efeitoFisico)}/ano</span>}
+                        {item.efeitoMoral > 0 && <span className="block text-[9px] text-pink-300/80 mt-0.5">💞 +{item.efeitoMoral} de moral do elenco</span>}
                         {PESO_OSTENTACAO[item.categoria] > 0 && <span className="block text-[9px] text-pink-400/70 mt-0.5">💸 aumenta seu padrão de vida</span>}
                         {manutencao > 0 && <span className="block text-[9px] text-zinc-600 mt-0.5">manutenção ${formatarDinheiro(manutencao)}/ano{item.duracaoTemporadas ? ` · contrato de ${item.duracaoTemporadas} temporada(s)` : ""}</span>}
                         {contratoAtivo && <span className="block text-[9px] text-emerald-400 mt-0.5">✓ ativo — {contratoAtivo.restantes} temporada(s) restante(s) · clique pra renovar</span>}
                         {travadoEstrutura && <span className="block text-[9px] text-amber-400 mt-0.5">🔒 já construído no {carreira.clube.nome} — some se você for embora</span>}
+                        {bloqueadoVidaPessoal && <span className="block text-[9px] text-zinc-600 mt-0.5">🔒 disponível conforme sua vida pessoal avança</span>}
                       </span>
                       <span className="font-mono text-amber-400 shrink-0">{travadoEstrutura ? "✓" : `$${formatarDinheiro(custo)}`}</span>
                     </button>

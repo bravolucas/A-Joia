@@ -3312,6 +3312,11 @@ export const OFERTAS_PATROCINIO = [
 ];
 
 export const LOJA_ITENS = [
+  // FAMÍLIA — só aparecem/fazem sentido conforme o momento da vida pessoal
+  { id: "anelNoivado", nome: "Anel de noivado", custo: 15, manutencao: 0, categoria: "Joias", icone: "💍", desc: "Presente à altura do momento — reforça a estabilidade em casa.", requisitoVidaPessoal: (vp) => vp?.status === "noivo" || vp?.status === "casado", efeitoMoral: 3 },
+  { id: "festaCasamento", nome: "Festa de casamento", custo: 40, manutencao: 0, categoria: "Luxo", icone: "💒", desc: "Celebração à altura — vira notícia, reforça sua imagem de vida estável.", destaque: true, requisitoVidaPessoal: (vp) => vp?.status === "casado", efeitoFama: 4, efeitoMoral: 3 },
+  { id: "quartoBebe", nome: "Quarto do bebê", custo: 12, manutencao: 1, categoria: "Imóveis", icone: "🍼", desc: "Preparar a casa pra chegada — tranquilidade em casa ajuda no foco.", requisitoVidaPessoal: (vp) => (vp?.filhos || []).length > 0, efeitoMoral: 2 },
+  { id: "escolaParticular", nome: "Escola particular dos filhos", custo: 8, manutencao: 6, categoria: "Imóveis", icone: "🎒", desc: "Educação de ponta pros pequenos — investimento recorrente na família.", requisitoVidaPessoal: (vp) => (vp?.filhos || []).length > 0, efeitoMoral: 2 },
   // GARAGEM
   { id: "bike", nome: "Bicicleta", custo: 3, manutencao: 0, categoria: "Garagem", icone: "🚲" },
   { id: "moto", nome: "Moto esportiva", custo: 25, manutencao: 1, categoria: "Garagem", icone: "🏍️" },
@@ -3321,7 +3326,7 @@ export const LOJA_ITENS = [
   { id: "jetski", nome: "Jet ski", custo: 40, manutencao: 2, categoria: "Garagem", icone: "🛥️" },
   { id: "barco", nome: "Lancha", custo: 180, manutencao: 9, categoria: "Garagem", icone: "⛵", fama: 3 },
   { id: "iate", nome: "Iate", custo: 900, manutencao: 30, categoria: "Garagem", icone: "🛳️", fama: 8 },
-  { id: "jatinho", nome: "Jato particular", custo: 2500, manutencao: 60, categoria: "Garagem", icone: "🛩️", fama: 15 },
+  { id: "jatinho", nome: "Jato particular", custo: 2500, manutencao: 60, categoria: "Garagem", icone: "🛩️", fama: 15, destaque: true },
   // IMÓVEIS
   { id: "apartamento", nome: "Apartamento na cidade", custo: 80, manutencao: 3, categoria: "Imóveis", icone: "🏢" },
   { id: "casaCT", nome: "Casa ao lado do CT", custo: 140, manutencao: 4, categoria: "Imóveis", icone: "🏠", desc: "Menos trânsito, mais sono: reduz o desgaste físico todo ano.", efeitoFisico: -0.35 },
@@ -3330,7 +3335,7 @@ export const LOJA_ITENS = [
   { id: "coberturaLuxo", nome: "Cobertura com vista pro mar", custo: 380, manutencao: 12, categoria: "Imóveis", icone: "🌇", fama: 5, desc: "Endereço de estrela — muita fama, e uma agenda social que cansa.", efeitoFisico: 0.2 },
   { id: "mansao", nome: "Mansão", custo: 550, manutencao: 15, categoria: "Imóveis", icone: "🏰", fama: 6 },
   { id: "terreno", nome: "Terreno de investimento", custo: 120, manutencao: 1, categoria: "Imóveis", icone: "🌳" },
-  { id: "shopping", nome: "Participação num shopping", custo: 800, manutencao: 10, categoria: "Imóveis", icone: "🏬", comercial: true },
+  { id: "shopping", nome: "Participação num shopping", custo: 800, manutencao: 10, categoria: "Imóveis", icone: "🏬", comercial: true, destaque: true },
   { id: "predioComercial", nome: "Prédio comercial alugado", custo: 400, manutencao: 5, categoria: "Imóveis", icone: "🏙️", comercial: true },
   // JOIAS
   { id: "relogio", nome: "Relógio de grife", custo: 30, manutencao: 0, categoria: "Joias", icone: "⌚", fama: 2 },

@@ -141,6 +141,16 @@ export const ESTILOS_JOGO_MUNDO = [
 /* Condição de campo/clima — sorteada uma vez no início de cada partida,
    afeta levemente a chance de gol (representando dificuldade de passe e
    finalização), igual em ambos os times. Pequeno, mas dá variedade real. */
+/* Formação tática — quem escolhe é o técnico, não você. Aparece em
+   clássicos e finais, com uma leve vantagem se sua posição for favorecida
+   pelo desenho tático daquela partida específica. */
+export const FORMACOES_TATICAS = [
+  { id: "433", label: "4-3-3", desc: "Ataque com dois pontas abertos.", favorece: ["PD", "PE", "ATA"] },
+  { id: "442", label: "4-4-2", desc: "Clássico, dois de referência na frente.", favorece: ["ATA", "MC"] },
+  { id: "352", label: "3-5-2", desc: "Meio de campo lotado, alas subindo.", favorece: ["VOL", "MC", "LD", "LE"] },
+  { id: "4231", label: "4-2-3-1", desc: "Um camisa 9 e trio criativo por trás.", favorece: ["MEI", "SA"] },
+];
+
 export const CONDICOES_CLIMA = [
   { id: "normal", label: "Tempo bom", icone: "☀️", mult: 1, chance: 0.68 },
   { id: "chuva", label: "Chuva", icone: "🌧️", mult: 0.9, chance: 0.2 },

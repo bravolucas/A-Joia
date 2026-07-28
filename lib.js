@@ -1,4 +1,4 @@
-import { AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONDICOES_CLIMA, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
+import { AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONDICOES_CLIMA, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, FORMACOES_TATICAS, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
 
 export function potencialDaOrigem(origem, posicao) {
   const base = { velocidade: 64, finalizacao: 64, passe: 64, drible: 64, defesa: 64, fisico: 64, fintas: 3, pernaRuim: 3 };
@@ -333,6 +333,11 @@ export function sortearClima() {
   return CONDICOES_CLIMA[0];
 }
 
+/* Sorteia a formação tática pra clássicos/finais — decisão do técnico, não sua. */
+export function sortearFormacao() {
+  return pick(FORMACOES_TATICAS);
+}
+
 export function resolverLance(estado, slot, ctx, decisaoId) {
   const { minuto, foco } = slot;
   const { situacao, finalDeJogo } = situacaoAtual(estado.golsMeu, estado.golsAdv, minuto);
@@ -341,9 +346,10 @@ export function resolverLance(estado, slot, ctx, decisaoId) {
   const diferenca = clamp((ctx.forcaClube - (ctx.adversarioForca ?? 70)) / 100, -0.35, 0.35);
   const fadigaPenal = 1 - (estado.fadiga || 0) * 0.22;
   const climaMult = ctx.climaMult ?? 1;
+  const formacaoMult = ctx.formacaoFavorece == null ? 1 : ctx.formacaoFavorece ? 1.08 : 0.94;
 
   if (foco === "neutro") {
-    const chanceGolMeu = clamp(0.085 + diferenca * 0.45, 0.02, 0.32) * post.golMult * ajuste.chanceMult * fadigaPenal * climaMult;
+    const chanceGolMeu = clamp(0.085 + diferenca * 0.45, 0.02, 0.32) * post.golMult * ajuste.chanceMult * fadigaPenal * climaMult * formacaoMult;
     const chanceGolAdv = clamp(0.085 - diferenca * 0.45, 0.02, 0.32) * (2 - post.golMult) * climaMult;
     const r = Math.random();
     if (r < chanceGolMeu) return { estado: { ...estado, golsMeu: estado.golsMeu + 1 }, evento: { minuto, tipo: "gol", meuTime: true, texto: `⚽ Gol do seu time aos ${minuto}'!` } };
@@ -354,7 +360,7 @@ export function resolverLance(estado, slot, ctx, decisaoId) {
   if (foco === "ataque") {
     if (!decisaoId) return { estado, precisaDecisao: true, opcoes: ACOES_ATAQUE, minuto, situacao, finalDeJogo, texto: `${minuto}' — a bola sobra em boa posição de ataque.` };
     const acao = ACOES_ATAQUE.find((a) => a.id === decisaoId) || ACOES_ATAQUE[1];
-    const chanceGol = clamp(0.22 + diferenca * 0.4, 0.06, 0.55) * post.golMult * ajuste.chanceMult * acao.chanceMult * fadigaPenal * climaMult;
+    const chanceGol = clamp(0.22 + diferenca * 0.4, 0.06, 0.55) * post.golMult * ajuste.chanceMult * acao.chanceMult * fadigaPenal * climaMult * formacaoMult;
     if (Math.random() < chanceGol) {
       const souEu = !acao.cruza;
       const souAssist = !!acao.cruza && Math.random() < 0.7;

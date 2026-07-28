@@ -202,6 +202,7 @@ export function TelaPartidaAoVivo({ pv, onDecisao, onContinuarSegundoTempo, onMu
               <div className={`text-sm font-bold ${fase === "intervalo" ? "text-amber-400" : "text-zinc-300"}`}>{relogioTxt}</div>
               {substituido && <div className="text-[9px] text-zinc-500 mt-0.5">🔄 Você foi substituído</div>}
               {ctx.clima && ctx.clima !== "normal" && (() => { const cl = CONDICOES_CLIMA.find((c) => c.id === ctx.clima); return cl ? <div className="text-[9px] text-zinc-500 mt-0.5">{cl.icone} {cl.label}</div> : null; })()}
+              {ctx.formacao && <div className="text-[9px] text-zinc-500 mt-0.5">📋 {ctx.formacao} escolhida pelo técnico{ctx.formacaoFavorece ? " — favorece sua posição" : ""}</div>}
             </div>
             <span className="font-stat font-black text-4xl">{ctx.souCasa ? advGols : meusGols}</span>
           </div>

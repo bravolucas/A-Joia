@@ -1,4 +1,4 @@
-import { AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLASSICOS, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONDICOES_CLIMA, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, FORMACOES_TATICAS, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
+import { AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLASSICOS, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONDICOES_CLIMA, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESPECIALIDADES_LISTA, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, FORMACOES_TATICAS, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
 
 export function potencialDaOrigem(origem, posicao) {
   const base = { velocidade: 64, finalizacao: 64, passe: 64, drible: 64, defesa: 64, fisico: 64, fintas: 3, pernaRuim: 3 };
@@ -341,6 +341,26 @@ export function ehClassicoReal(nomeA, nomeB) {
   return CLASSICOS.some(([a, b]) => (a === nomeA && b === nomeB) || (a === nomeB && b === nomeA));
 }
 
+/* Gera as especialidades iniciais: cada uma parte de uma base típica pra
+   posição (um zagueiro já nasce com mais jeito pra recuperação de bola,
+   por exemplo), com uma variação aleatória por cima — ninguém é clonado. */
+export function especialidadesIniciais(posId) {
+  const obj = {};
+  ESPECIALIDADES_LISTA.forEach((e) => {
+    const base = e.posBase[posId] ?? 30;
+    obj[e.id] = clampR(Math.round(base + rand(-12, 12)), 5, 70);
+  });
+  return obj;
+}
+
+/* Bônus de OVR pelas especialidades — modesto de propósito (até +4), pra
+   não virar um segundo sistema de atributo que infla o OVR sem controle. */
+export function bonusEspecialidades(especialidades) {
+  if (!especialidades) return 0;
+  const soma = Object.values(especialidades).reduce((s, v) => s + Math.max(0, v - 50), 0);
+  return clampR(Math.round(soma * 0.012), 0, 4);
+}
+
 export function sortearFormacao() {
   return pick(FORMACOES_TATICAS);
 }
@@ -354,10 +374,18 @@ export function resolverLance(estado, slot, ctx, decisaoId) {
   const fadigaPenal = 1 - (estado.fadiga || 0) * 0.22;
   const climaMult = ctx.climaMult ?? 1;
   const formacaoMult = ctx.formacaoFavorece == null ? 1 : ctx.formacaoFavorece ? 1.08 : 0.94;
+  // Especialidades: ofensivas (finalização de fora/área, cabeceio, drible,
+  // lançamento, primeiro toque) reforçam suas próprias chances de gol;
+  // defensivas (recuperação de bola, jogo aéreo defensivo) reduzem a do adversário.
+  const esp = ctx.especialidades || {};
+  const mediaOfensiva = ((esp.finalizacaoFora || 30) + (esp.finalizacaoArea || 30) + (esp.cabeceio || 30) + (esp.drible || 30) + (esp.lancamento || 30) + (esp.primeiroToque || 30)) / 6;
+  const especOfensivo = clamp(mediaOfensiva / 50, 0.85, 1.3);
+  const mediaDefensiva = ((esp.recuperacao || 30) + (esp.jogoAereoDefensivo || 30)) / 2;
+  const especDefensivo = clamp(mediaDefensiva / 50, 0.85, 1.2);
 
   if (foco === "neutro") {
-    const chanceGolMeu = clamp(0.085 + diferenca * 0.45, 0.02, 0.32) * post.golMult * ajuste.chanceMult * fadigaPenal * climaMult * formacaoMult;
-    const chanceGolAdv = clamp(0.085 - diferenca * 0.45, 0.02, 0.32) * (2 - post.golMult) * climaMult;
+    const chanceGolMeu = clamp(0.085 + diferenca * 0.45, 0.02, 0.32) * post.golMult * ajuste.chanceMult * fadigaPenal * climaMult * formacaoMult * especOfensivo;
+    const chanceGolAdv = clamp(0.085 - diferenca * 0.45, 0.02, 0.32) * (2 - post.golMult) * climaMult / especDefensivo;
     const r = Math.random();
     if (r < chanceGolMeu) return { estado: { ...estado, golsMeu: estado.golsMeu + 1 }, evento: { minuto, tipo: "gol", meuTime: true, texto: `⚽ Gol do seu time aos ${minuto}'!` } };
     if (r < chanceGolMeu + chanceGolAdv) return { estado: { ...estado, golsAdv: estado.golsAdv + 1 }, evento: { minuto, tipo: "gol", meuTime: false, texto: `⚽ Gol do ${ctx.adversario} aos ${minuto}'.` } };
@@ -367,7 +395,7 @@ export function resolverLance(estado, slot, ctx, decisaoId) {
   if (foco === "ataque") {
     if (!decisaoId) return { estado, precisaDecisao: true, opcoes: ACOES_ATAQUE, minuto, situacao, finalDeJogo, texto: `${minuto}' — a bola sobra em boa posição de ataque.` };
     const acao = ACOES_ATAQUE.find((a) => a.id === decisaoId) || ACOES_ATAQUE[1];
-    const chanceGol = clamp(0.22 + diferenca * 0.4, 0.06, 0.55) * post.golMult * ajuste.chanceMult * acao.chanceMult * fadigaPenal * climaMult * formacaoMult;
+    const chanceGol = clamp(0.22 + diferenca * 0.4, 0.06, 0.55) * post.golMult * ajuste.chanceMult * acao.chanceMult * fadigaPenal * climaMult * formacaoMult * especOfensivo;
     if (Math.random() < chanceGol) {
       const souEu = !acao.cruza;
       const souAssist = !!acao.cruza && Math.random() < 0.7;

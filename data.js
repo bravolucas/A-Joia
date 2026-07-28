@@ -197,6 +197,23 @@ export const CONDICOES_CLIMA = [
   { id: "pesado", label: "Campo pesado", icone: "🟤", mult: 0.85, chance: 0.12 },
 ];
 
+/* Especialidades — habilidades 0-99 além dos 6 atributos principais.
+   Cada uma soma um pouco no OVR efetivo e, mais importante, tem efeito
+   real na simulação (mais chance de gol/assistência no contexto certo,
+   menos fadiga, etc.) — não é só um número decorativo. */
+export const ESPECIALIDADES_LISTA = [
+  { id: "bolaParada", nome: "Bola Parada", icone: "🎯", desc: "Mais gols de falta e pênalti, mais assistências em escanteio/falta.", posBase: { GOL: 5, ZAG: 15, LD: 25, LE: 25, VOL: 30, MC: 35, MEI: 55, PD: 50, PE: 50, SA: 45, ATA: 40 } },
+  { id: "lancamento", nome: "Lançamento", icone: "🎳", desc: "Passes longos de precisão viram mais assistências.", posBase: { GOL: 30, ZAG: 40, LD: 35, LE: 35, VOL: 45, MC: 50, MEI: 45, PD: 25, PE: 25, SA: 30, ATA: 20 } },
+  { id: "recuperacao", nome: "Recuperação de Bola", icone: "🛡️", desc: "Rouba mais bola do adversário, reduz a chance de gol sofrido.", posBase: { GOL: 20, ZAG: 55, LD: 45, LE: 45, VOL: 60, MC: 45, MEI: 30, PD: 25, PE: 25, SA: 30, ATA: 20 } },
+  { id: "finalizacaoFora", nome: "Finalização de Fora da Área", icone: "🚀", desc: "Mais gols de fora da área.", posBase: { GOL: 5, ZAG: 15, LD: 20, LE: 20, VOL: 30, MC: 40, MEI: 45, PD: 40, PE: 40, SA: 40, ATA: 45 } },
+  { id: "finalizacaoArea", nome: "Finalização na Pequena Área", icone: "⚡", desc: "Mais gols de oportunismo, dentro da área.", posBase: { GOL: 5, ZAG: 15, LD: 15, LE: 15, VOL: 20, MC: 30, MEI: 40, PD: 45, PE: 45, SA: 55, ATA: 60 } },
+  { id: "cabeceio", nome: "Cabeceio", icone: "🙆", desc: "Mais gols e finalizações de cabeça em cruzamentos/escanteios.", posBase: { GOL: 10, ZAG: 45, LD: 25, LE: 25, VOL: 30, MC: 25, MEI: 25, PD: 25, PE: 25, SA: 40, ATA: 50 } },
+  { id: "drible", nome: "Drible", icone: "🕺", desc: "Mais sucesso em jogadas de drible individual.", posBase: { GOL: 5, ZAG: 15, LD: 30, LE: 30, VOL: 25, MC: 35, MEI: 50, PD: 55, PE: 55, SA: 45, ATA: 35 } },
+  { id: "folego", nome: "Fôlego", icone: "🫁", desc: "Acumula fadiga bem mais devagar durante a partida.", posBase: { GOL: 20, ZAG: 30, LD: 45, LE: 45, VOL: 50, MC: 45, MEI: 35, PD: 40, PE: 40, SA: 35, ATA: 30 } },
+  { id: "jogoAereoDefensivo", nome: "Jogo Aéreo Defensivo", icone: "🧱", desc: "Menos gols de cabeça sofridos em bola parada adversária.", posBase: { GOL: 30, ZAG: 55, LD: 30, LE: 30, VOL: 35, MC: 20, MEI: 15, PD: 15, PE: 15, SA: 15, ATA: 15 } },
+  { id: "primeiroToque", nome: "Primeiro Toque", icone: "✨", desc: "Domina melhor a bola em jogadas rápidas, gera mais chances limpas.", posBase: { GOL: 15, ZAG: 20, LD: 30, LE: 30, VOL: 35, MC: 45, MEI: 50, PD: 45, PE: 45, SA: 45, ATA: 40 } },
+];
+
 export const POSICOES = [
   { id: "GOL", label: "Goleiro", pesos: { defesa: 3.2, finalizacao: 2.2, fisico: 1.8, drible: 1.4, passe: 1.0, velocidade: 0.6 }, golBase: 0, assistBase: 0.01 },
   { id: "ZAG", label: "Zagueiro", pesos: { defesa: 3.0, fisico: 2.4, velocidade: 1.0, passe: 0.9, finalizacao: 0.3, drible: 0.3 }, golBase: 0.06, assistBase: 0.03 },
@@ -3371,6 +3388,13 @@ export const OFERTAS_PATROCINIO = [
 ];
 
 export const LOJA_ITENS = [
+  // ESPECIALISTAS — contrato temporário, acelera o desenvolvimento de uma especialidade específica
+  ...ESPECIALIDADES_LISTA.map((e) => ({
+    id: `especialista_${e.id}`, nome: `Especialista em ${e.nome}`, categoria: "Especialistas", icone: e.icone,
+    tipo: "staffEspecialista", custo: 45, manutencao: 8, duracaoTemporadas: 2,
+    desc: `Contrato de 2 temporadas — acelera o desenvolvimento de ${e.nome} (+3/ano enquanto durar).`,
+    especialidadeAlvo: e.id, especialidadeBonusAnual: 3,
+  })),
   // FAMÍLIA — só aparecem/fazem sentido conforme o momento da vida pessoal
   { id: "anelNoivado", nome: "Anel de noivado", custo: 15, manutencao: 0, categoria: "Joias", icone: "💍", desc: "Presente à altura do momento — reforça a estabilidade em casa.", requisitoVidaPessoal: (vp) => vp?.status === "noivo" || vp?.status === "casado", efeitoMoral: 3 },
   { id: "festaCasamento", nome: "Festa de casamento", custo: 40, manutencao: 0, categoria: "Luxo", icone: "💒", desc: "Celebração à altura — vira notícia, reforça sua imagem de vida estável.", destaque: true, requisitoVidaPessoal: (vp) => vp?.status === "casado", efeitoFama: 4, efeitoMoral: 3 },

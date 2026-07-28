@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { montarSave, salvarLocal, carregarLocal, apagarLocal, listarSaves, existeAlgumSave, baixarSave, lerArquivoSave, formatarData, normalizarSave, SLOTS } from "./save.js";
-import { ANO_INICIO, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONFEDERACAO_POR_NACAO, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, FUNCOES_ELENCO, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
-import { agregarPorCompeticao, ajustarMeta, ajustesDoContexto, analisarJogos, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, continentalDaSelecao, creditarTitulo, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, ehClassicoReal, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, fatorTitulosTemporada, forcaEfetivaClube, formatarDinheiro, gerarChegadaClube, gerarColetivaPosJogo, gerarContextoLance, gerarElenco, gerarEventoAmbiente, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, PIRAMIDE_LIGAS, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearClima, sortearConcorrente, sortearFormacao, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, todosJogosCarreira, valorDeMercado, valorMundo, veredito } from "./lib.js";
+import { ANO_INICIO, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONFEDERACAO_POR_NACAO, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, ESPECIALIDADES_LISTA, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, FUNCOES_ELENCO, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
+import { agregarPorCompeticao, ajustarMeta, ajustesDoContexto, analisarJogos, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusEspecialidades, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, continentalDaSelecao, creditarTitulo, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, ehClassicoReal, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, especialidadesIniciais, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, fatorTitulosTemporada, forcaEfetivaClube, formatarDinheiro, gerarChegadaClube, gerarColetivaPosJogo, gerarContextoLance, gerarElenco, gerarEventoAmbiente, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, PIRAMIDE_LIGAS, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearClima, sortearConcorrente, sortearFormacao, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, todosJogosCarreira, valorDeMercado, valorMundo, veredito } from "./lib.js";
 import { AttrBarDelta, AttrRadar, BallIcon, ApresentacaoNovoClube, Button, CalendarioTemporadaPopup, Card, CartaoCarreira,
   CenaAposentadoria, CenaAssinaturaContrato, CenaDespedidaClube, CenaEstreia, CenaLesaoGrave, CenaLevantarTaca, CenaRivalidade, ClubDot, Confetti, CountUp, CurvaEvolucao, Diamond, FichaPartida, FreeKickMini, GoalMini, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PodiumBolaDeOuro, PopupConvocacao, PopupOverlay, SilhuetaJogador, Sparkle, TelaPartidaAoVivo, TimingBar, TrophyIcon } from "./components.jsx";
 
@@ -98,6 +98,7 @@ export default function AJoiaGame() {
   const [pendingCompraDestaque, setPendingCompraDestaque] = useState(null);
   const [pendingAssinaturaContrato, setPendingAssinaturaContrato] = useState(null);
   const [pendingMelhorEmCampo, setPendingMelhorEmCampo] = useState(null);
+  const [pendingReuniaoTatica, setPendingReuniaoTatica] = useState(null);
   const [pendingNascimentoFilho, setPendingNascimentoFilho] = useState(null);
   const [negociacaoContrato, setNegociacaoContrato] = useState(null);
   const [detalhesAbertos, setDetalhesAbertos] = useState(false);
@@ -305,7 +306,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
       camisaPorClube: { [clubeEscolhido.nome]: [numero] }, titulosPorClube: {}, titulosSelecao: [], clubesInteresse: [], contrato: null,
       seguidores: Math.round(seguidoresBase(calcOVR(attrsIni, posicao))),
       desgaste: 0, energia: 100, abordagem: null, focoTreino: null, treinouPesado: false, emprestimo: false, clubeOrigemEmprestimo: null,
-      historico: [], titulosLista: [], rivalPosicao: pick(poolRivalPorOvr(calcOVR(attrsIni, posicao))), rivalBolasDeOuro: 0, tecnicoConfianca: 60, relacaoDiretoria: 40, calorMidia: 20, expectativa: null, posicoesAprendidas: [posicao], empresarioUsado: {}, papelTatico: "padrao", cosmeticosDesbloqueados: [], cosmeticosEquipados: {}, postSocialFeito: false, vidaPessoal: { status: "solteiro", parceiro: null, temporadasNoStatus: 0, filhos: [] },
+      historico: [], titulosLista: [], rivalPosicao: pick(poolRivalPorOvr(calcOVR(attrsIni, posicao))), rivalBolasDeOuro: 0, tecnicoConfianca: 60, relacaoDiretoria: 40, calorMidia: 20, expectativa: null, posicoesAprendidas: [posicao], empresarioUsado: {}, papelTatico: "padrao", cosmeticosDesbloqueados: [], cosmeticosEquipados: {}, postSocialFeito: false, vidaPessoal: { status: "solteiro", parceiro: null, temporadasNoStatus: 0, filhos: [] }, especialidades: especialidadesIniciais(posicao),
       entrosamento: 20, elencoMoral: 60, titularidade: 100, concorrente: sortearConcorrente(clubeEscolhido), relacaoPatrocinadores: 50, traits: [], streaksTraits: {},
       empresario: { id: "iniciante", restantes: 3 },
     };
@@ -709,6 +710,10 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
       c.staffContratos = { ...(c.staffContratos || {}), [item.id]: { restantes: item.duracaoTemporadas || 2, manutencao, custo } };
       logHist(c, `Contratou: ${item.nome} (contrato de ${item.duracaoTemporadas || 2} temporada(s)).`);
     }
+    else if (item.tipo === "staffEspecialista") {
+      c.especialistasContratados = { ...(c.especialistasContratados || {}), [item.especialidadeAlvo]: { restantes: item.duracaoTemporadas || 2, manutencao, bonusAnual: item.especialidadeBonusAnual } };
+      logHist(c, `Contratou: ${item.nome} (contrato de ${item.duracaoTemporadas || 2} temporada(s)).`);
+    }
     else if (item.forcaClube) {
       const clubeKey = c.clube.nome;
       c.investimentosClube = { ...(c.investimentosClube || {}), [clubeKey]: clampR(((c.investimentosClube || {})[clubeKey] || 0) + item.forcaClube, 0, 18) };
@@ -1085,7 +1090,7 @@ function concluirRodada(c, ta, { tabela, historico, meuResultadoRodada, golsRest
     c.temporadaAndamento = null;
     finalizarTemporada(c, ta.cardOriginal, logJogos, tabela);
   } else {
-    c.temporadaAndamento = { ...ta, rodadaAtual: proxRodada, tabela, historicoRodada: historico, ultimoResultado: meuResultadoRodada, golsRestantes, assistRestantes, logJogos, resultadosRodadas, preparacaoSemana: null, posturaEscolhidaRodada: false, imagemDisponivel: !!c.patrocinio && Math.random() < 0.25 };
+    c.temporadaAndamento = { ...ta, rodadaAtual: proxRodada, tabela, historicoRodada: historico, ultimoResultado: meuResultadoRodada, golsRestantes, assistRestantes, logJogos, resultadosRodadas, preparacaoSemana: null, posturaEscolhidaRodada: false, reuniaoTaticaFeita: false, imagemDisponivel: !!c.patrocinio && Math.random() < 0.25 };
     setCarreira(c);
   }
 }
@@ -1121,7 +1126,7 @@ function iniciarPartidaMataMata(c, tipo, adversarioNome, faseIdx, card) {
       posicao: c.posicao, postura: "normal", forcaClube, forcaJogador: calcOVR(c.attrs, c.posicao),
       adversarioForca: adversarioObj?.forca ?? 70, adversario: adversarioNome, classico: false, souCasa: Math.random() < 0.5,
       meuClube: c.clube, adversarioObj, ...(() => { const cl = sortearClima(); return { clima: cl.id, climaMult: cl.mult }; })(),
-      formacao: formacaoMataMata?.label ?? null, formacaoFavorece: formacaoMataMata ? formacaoMataMata.favorece.includes(c.posicao) : null,
+      formacao: formacaoMataMata?.label ?? null, formacaoFavorece: formacaoMataMata ? formacaoMataMata.favorece.includes(c.posicao) : null, especialidades: c.especialidades,
       copa: { tipo, faseIdx, card, nomeCompeticao: nomeMataMata(c, tipo) },
     },
   });
@@ -1179,7 +1184,7 @@ function iniciarPartidaCopaDoMundo(c, card, faseIdx, jogoGrupo, pontosGrupo, ram
     ctx: {
       posicao: c.posicao, postura: "normal", forcaClube: forcaSelecao, forcaJogador: calcOVR(c.attrs, c.posicao),
       adversarioForca: adversarioObj?.forcaSelecao ?? 75, adversario: adversarioNome, classico: false, souCasa: Math.random() < 0.5,
-      meuClube: null, adversarioObj: null, ...(() => { const cl = sortearClima(); return { clima: cl.id, climaMult: cl.mult }; })(),
+      meuClube: null, adversarioObj: null, especialidades: c.especialidades, ...(() => { const cl = sortearClima(); return { clima: cl.id, climaMult: cl.mult }; })(),
       copa: { tipo: "copaDoMundo", faseIdx, jogoGrupo, pontosGrupo, ramo, card, nomeCompeticao: "Copa do Mundo" },
     },
   });
@@ -1267,7 +1272,7 @@ function iniciarSequenciaSelecao(c, card, competicaoId, jogoAtual, acumulado) {
     ctx: {
       posicao: c.posicao, postura: "normal", forcaClube: forcaSelecao, forcaJogador: calcOVR(c.attrs, c.posicao),
       adversarioForca: adversarioObj?.forcaSelecao ?? 75, adversario: adversarioNome, classico: false, souCasa: Math.random() < 0.5,
-      meuClube: null, adversarioObj: null, ...(() => { const cl = sortearClima(); return { clima: cl.id, climaMult: cl.mult }; })(),
+      meuClube: null, adversarioObj: null, especialidades: c.especialidades, ...(() => { const cl = sortearClima(); return { clima: cl.id, climaMult: cl.mult }; })(),
       copa: { tipo: "selecaoSequencia", competicaoId, jogoAtual, totalJogos: compInfo.jogosBase, acumulado, card, nomeCompeticao: compInfo.nome, icone: compInfo.icone },
     },
   });
@@ -1322,7 +1327,7 @@ function iniciarPartidaContinentalSelecao(c, card, faseIdx, jogoGrupo, pontosGru
     ctx: {
       posicao: c.posicao, postura: "normal", forcaClube: forcaSelecao, forcaJogador: calcOVR(c.attrs, c.posicao),
       adversarioForca: adversarioObj?.forcaSelecao ?? 75, adversario: adversarioNome, classico: false, souCasa: Math.random() < 0.5,
-      meuClube: null, adversarioObj: null, ...(() => { const cl = sortearClima(); return { clima: cl.id, climaMult: cl.mult }; })(),
+      meuClube: null, adversarioObj: null, especialidades: c.especialidades, ...(() => { const cl = sortearClima(); return { clima: cl.id, climaMult: cl.mult }; })(),
       copa: { tipo: "continentalSelecao", faseIdx, jogoGrupo, pontosGrupo, ramo, card, nomeCompeticao },
     },
   });
@@ -1480,7 +1485,7 @@ function resolverTemporada(c, extraStats) {
       }
       c.temporadaAndamento = {
         calendario, rodadaAtual: 0, tabela, historicoRodada: [], ultimoResultado: null, resultadosRodadas: [],
-        eventosAgendados, cardOriginal: card, posturaEscolhidaRodada: false, imagemDisponivel: !!c.patrocinio && Math.random() < 0.25,
+        eventosAgendados, cardOriginal: card, posturaEscolhidaRodada: false, reuniaoTaticaFeita: false, imagemDisponivel: !!c.patrocinio && Math.random() < 0.25,
         lanceRodada: rand(0, calendario.length - 1), lanceResolvido: false,
         golsRestantes: card.gols, assistRestantes: card.assist, logJogos: [],
       };
@@ -1888,6 +1893,15 @@ function resolverTemporada(c, extraStats) {
       const desemp = fatorDesempenhoTemporada(card.nota, card.ovr);
       const fatorTitulos = fatorTitulosTemporada(card);
       c.attrs = evoluirAtributos(c.attrs, c.potencial, c.idade, persona, c.focoTreino, (c.staff?.psicologoEsportivo ? 0.85 : 1) * (freioDeclinio || 1) * desemp.fatorDeclinioReducao, desemp.fatorCrescimento, fatorTitulos);
+      // Especialidades evoluem devagar com o tempo de jogo — jogar bastante
+      // uma temporada empurra 2-3 delas um pouco pra cima, aleatoriamente.
+      if (card.jogos >= 8 && c.idade < 34) {
+        const chaves = Object.keys(c.especialidades || {});
+        const sorteadas = [...chaves].sort(() => Math.random() - 0.5).slice(0, rand(2, 3));
+        const especNovas = { ...c.especialidades };
+        sorteadas.forEach((k) => { especNovas[k] = clampR(especNovas[k] + rand(1, 3), 5, 99); });
+        c.especialidades = especNovas;
+      }
     }
     // Líder Nato puxa o moral do grupo todo ano
     { const m = somaEfeitoInsignia(c, "moralAnual"); if (m) c.elencoMoral = clampR((c.elencoMoral ?? 60) + m, 0, 100); }
@@ -1966,6 +1980,27 @@ function resolverTemporada(c, extraStats) {
       if (manutencaoStaff > 0) { c.cofre -= manutencaoStaff; c.extrato = [...c.extrato, { idade: c.idade, tipo: "Manutenção da equipe", valor: -manutencaoStaff }]; }
       c.staff = staffAtualizado;
       c.staffContratos = contratosAtualizados;
+    }
+
+    // Especialistas contratados: cada um empurra uma especialidade específica pra cima todo ano, enquanto durar o contrato
+    if (c.especialistasContratados) {
+      const especAtualizadas = { ...(c.especialidades || {}) };
+      const contratosEspecAtualizados = {};
+      let manutencaoEspec = 0;
+      Object.entries(c.especialistasContratados).forEach(([especId, contrato]) => {
+        manutencaoEspec += contrato.manutencao || 0;
+        especAtualizadas[especId] = clampR((especAtualizadas[especId] || 30) + (contrato.bonusAnual || 0), 5, 99);
+        const restantes = (contrato.restantes || 1) - 1;
+        if (restantes <= 0) {
+          const nomeEspec = ESPECIALIDADES_LISTA.find((e) => e.id === especId)?.nome || especId;
+          logHist(c, `Contrato do especialista em ${nomeEspec} venceu — precisa renovar pra manter o ritmo de evolução.`);
+        } else {
+          contratosEspecAtualizados[especId] = { ...contrato, restantes };
+        }
+      });
+      if (manutencaoEspec > 0) { c.cofre -= manutencaoEspec; c.extrato = [...c.extrato, { idade: c.idade, tipo: "Manutenção de especialistas", valor: -manutencaoEspec }]; }
+      c.especialidades = especAtualizadas;
+      c.especialistasContratados = contratosEspecAtualizados;
     }
 
     // crescimento de seguidores: individuais valem mais que coletivos, sempre soma (nunca cai sozinho)
@@ -2493,7 +2528,7 @@ function resolverTemporada(c, extraStats) {
         minutoVisivel: 0, fase: "1T", acrescimos: rand(1, 6), velocidade: 1,
         estado: { golsMeu: 0, golsAdv: 0, cartoes: {}, fadiga: 0 },
         stats: { chutesMeu: 0, chutesAlvoMeu: 0, chutesAdv: 0, chutesAlvoAdv: 0, faltasMeu: 0, faltasAdv: 0 },
-        ctx: { posicao: c.posicao, postura: ta.postura || "normal", forcaClube, forcaJogador, adversarioForca: adversarioObj.forca, adversario: adversarioObj.nome, classico: ehClassico, souCasa, meuClube: c.clube, adversarioObj, clima: climaPartida.id, climaMult: climaPartida.mult, formacao: formacaoPartida?.label ?? null, formacaoFavorece: formacaoPartida ? formacaoPartida.favorece.includes(c.posicao) : null },
+        ctx: { posicao: c.posicao, postura: ta.postura || "normal", forcaClube, forcaJogador, adversarioForca: adversarioObj.forca, adversario: adversarioObj.nome, classico: ehClassico, souCasa, meuClube: c.clube, adversarioObj, clima: climaPartida.id, climaMult: climaPartida.mult, formacao: formacaoPartida?.label ?? null, formacaoFavorece: formacaoPartida ? formacaoPartida.favorece.includes(c.posicao) : null, especialidades: c.especialidades },
         tabelaParcial, historicoParcial,
       });
       return;
@@ -2521,7 +2556,8 @@ function resolverTemporada(c, extraStats) {
     setPartidaAoVivo((pv) => {
       if (!pv || pv.concluida) return pv;
       const slot = pv.roteiro[pv.indice];
-      const fadiga = pv.substituido ? (pv.estado.fadiga || 0) : Math.min(1, (pv.estado.fadiga || 0) + 1 / pv.roteiro.length);
+      const folegoMult = clamp(1 - ((pv.ctx.especialidades?.folego ?? 30) - 30) / 140, 0.75, 1.1);
+      const fadiga = pv.substituido ? (pv.estado.fadiga || 0) : Math.min(1, (pv.estado.fadiga || 0) + (1 / pv.roteiro.length) * folegoMult);
       const stats = { ...pv.stats };
 
       if (slot.foco === "ambiente" || pv.substituido) {
@@ -3361,6 +3397,27 @@ function resolverTemporada(c, extraStats) {
     const c = { ...carreira };
     c.cosmeticosEquipados = { ...(c.cosmeticosEquipados || {}), [categoria]: id };
     setCarreira(c);
+  }
+  /* Reunião tática semanal — o meio da semana do atleta. Dispara junto da
+     escolha de postura, uma vez por rodada, com o técnico explicando o
+     plano (menciona a formação escolhida, se for clássico) e você reage. */
+  function escolherPosturaEReuniao(posturaId) {
+    const ta = carreira.temporadaAndamento;
+    setCarreira((cc) => ({ ...cc, posturaPreferida: posturaId, temporadaAndamento: { ...cc.temporadaAndamento, postura: posturaId, posturaEscolhidaRodada: true } }));
+    if (ta && !ta.reuniaoTaticaFeita) {
+      const proximoJogo = ta.calendario?.[ta.rodadaAtual]?.find((p) => p.casa.nome === carreira.clube.nome || p.fora.nome === carreira.clube.nome);
+      const ehClassicoSemana = proximoJogo && ehClassicoReal(carreira.clube.nome, (proximoJogo.casa.nome === carreira.clube.nome ? proximoJogo.fora : proximoJogo.casa).nome);
+      setPendingReuniaoTatica({ ehClassico: ehClassicoSemana });
+    }
+  }
+  function responderReuniaoTatica(opcao) {
+    const c = { ...carreira };
+    c.temporadaAndamento = { ...c.temporadaAndamento, reuniaoTaticaFeita: true };
+    if (opcao === "confiar") { c.tecnicoConfianca = clampR((c.tecnicoConfianca ?? 60) + 3, 0, 100); logHist(c, "Confiou no plano do técnico pra semana — a comissão técnica notou o apoio."); }
+    else if (opcao === "questionar") { c.tecnicoConfianca = clampR((c.tecnicoConfianca ?? 60) - 2, 0, 100); c.fama = clamp(c.fama + 1, 0, 100); logHist(c, "Questionou a estratégia da semana — a conversa foi franca, mas deixou o técnico um pouco incomodado."); }
+    else { logHist(c, "Ficou de boca fechada na reunião, só absorvendo o plano."); }
+    setCarreira(c);
+    setPendingReuniaoTatica(null);
   }
   function dentroJanelaPedidoContrato() {
     const ta = carreira.temporadaAndamento;
@@ -4489,7 +4546,7 @@ function resolverTemporada(c, extraStats) {
                                   const ativa = postAtual === po.id;
                                   return (
                                     <button key={po.id}
-                                      onClick={() => setCarreira((cc) => ({ ...cc, posturaPreferida: po.id, temporadaAndamento: { ...cc.temporadaAndamento, postura: po.id, posturaEscolhidaRodada: true } }))}
+                                      onClick={() => escolherPosturaEReuniao(po.id)}
                                       className="text-left px-2.5 py-2 rounded-sm border transition-all"
                                       style={{ borderColor: ativa ? po.cor : "#27272a", background: ativa ? `${po.cor}15` : "transparent" }}>
                                       <div className="text-[11px] font-bold" style={{ color: ativa ? po.cor : "#e4e4e7" }}>{po.icone} {po.nome}</div>
@@ -4930,6 +4987,29 @@ function resolverTemporada(c, extraStats) {
                           </div>
                           <div className="h-1 bg-zinc-800 rounded-full overflow-hidden mt-1"><div className="h-full rounded-full bg-amber-500" style={{ width: `${teto ? (atual / teto) * 100 : 0}%` }} /></div>
                         </button>
+                      );
+                    })}
+                  </div>
+                </Card>
+
+                <Card>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-widest">🎯 Especialidades</span>
+                    <span className="text-[11px] font-bold text-emerald-400">+{bonusEspecialidades(carreira.especialidades)} OVR</span>
+                  </div>
+                  <p className="text-[10px] text-zinc-500 mb-2.5">Habilidades específicas, além dos atributos — evoluem sozinhas jogando bastante, ou contrate um especialista na loja.</p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {ESPECIALIDADES_LISTA.map((e) => {
+                      const valor = carreira.especialidades?.[e.id] ?? 30;
+                      const contratado = carreira.especialistasContratados?.[e.id];
+                      return (
+                        <div key={e.id} className="px-2 py-1.5 rounded-sm border border-zinc-800">
+                          <div className="flex justify-between items-center">
+                            <span className="text-[9px] font-bold text-zinc-300">{e.icone} {e.nome}{contratado ? " 👨‍🏫" : ""}</span>
+                            <span className="text-[10px] font-mono text-zinc-500">{valor}</span>
+                          </div>
+                          <div className="h-1 bg-zinc-800 rounded-full overflow-hidden mt-1"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${valor}%` }} /></div>
+                        </div>
                       );
                     })}
                   </div>
@@ -5441,6 +5521,24 @@ function resolverTemporada(c, extraStats) {
 
                 {pendingAssinaturaContrato && (
                   <CenaAssinaturaContrato clube={pendingAssinaturaContrato.clube} funcaoNome={pendingAssinaturaContrato.funcaoNome} onConcluir={() => setPendingAssinaturaContrato(null)} />
+                )}
+
+                {pendingReuniaoTatica && (
+                  <PopupOverlay>
+                    <Card className="border-blue-500/40">
+                      <div className="text-[10px] text-blue-400 uppercase tracking-widest mb-2">📋 Reunião tática da semana</div>
+                      <p className="text-xs text-zinc-300 mb-4">
+                        {pendingReuniaoTatica.ehClassico
+                          ? "\"Essa semana é decisiva. Já defini a formação pro clássico — quero todo mundo entrosado no que treinamos.\""
+                          : "\"Vamos manter o padrão essa semana. Confio no que a gente vem construindo no treino.\""}
+                      </p>
+                      <div className="grid gap-2">
+                        <button onClick={() => responderReuniaoTatica("confiar")} className="text-left p-2.5 border border-zinc-800 rounded-sm hover:border-emerald-500 text-xs">👍 Confiar no plano</button>
+                        <button onClick={() => responderReuniaoTatica("questionar")} className="text-left p-2.5 border border-zinc-800 rounded-sm hover:border-amber-500 text-xs">🤔 Questionar a estratégia</button>
+                        <button onClick={() => responderReuniaoTatica("calado")} className="text-left p-2.5 border border-zinc-800 rounded-sm hover:border-zinc-600 text-xs">🤐 Só ouvir, sem reagir</button>
+                      </div>
+                    </Card>
+                  </PopupOverlay>
                 )}
 
                 {pendingMelhorEmCampo && (
@@ -7616,7 +7714,7 @@ function resolverTemporada(c, extraStats) {
               </p>
               <div className="lista-cards">
                 {LOJA_ITENS.filter((it) => it.categoria === lojaCategoriaAberta).map((item) => {
-                  const contratoAtivo = item.tipo === "staff" ? carreira.staffContratos?.[item.id] : null;
+                  const contratoAtivo = item.tipo === "staff" ? carreira.staffContratos?.[item.id] : item.tipo === "staffEspecialista" ? carreira.especialistasContratados?.[item.especialidadeAlvo] : null;
                   const travadoEstrutura = item.categoria === "Estrutura do Clube" && (carreira.posses || []).some((p) => p.id === item.id && p.clubeDono === carreira.clube.nome);
                   const bloqueadoVidaPessoal = item.requisitoVidaPessoal && !item.requisitoVidaPessoal(carreira.vidaPessoal);
                   const { custo, manutencao } = precoAjustado(item, carreira);

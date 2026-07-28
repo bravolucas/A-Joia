@@ -5487,6 +5487,9 @@ function resolverTemporada(c, extraStats) {
                   <PopupOverlay>
                     <Card className="border-amber-500/40">
                       <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-2 text-center">🎯 Propostas na mesa</div>
+                      <div className="mb-3 px-3 py-2 rounded-sm border border-red-500/40 bg-red-500/10 text-center" style={{ animation: "glowPulse 1.6s ease-in-out infinite" }}>
+                        <span className="text-[10px] font-bold text-red-400">⏰ Decida agora — se sair sem escolher, essas propostas somem</span>
+                      </div>
                       {concorrenciaClubes.length ? (
                         <div className="grid gap-2">
                           {concorrenciaClubes.map(({ clube, score }, i) => (
@@ -5572,6 +5575,11 @@ function resolverTemporada(c, extraStats) {
                             ))}
                           </div>
                         </div>
+                        {!negociacaoContrato.colapsou && negociacaoContrato.pedidosRestantes <= 1 && (
+                          <div className="mb-2 px-3 py-2 rounded-sm border border-red-500/40 bg-red-500/10 text-center" style={{ animation: "glowPulse 1.2s ease-in-out infinite" }}>
+                            <span className="text-[11px] font-bold text-red-400">⏰ ÚLTIMA RODADA — decida agora ou a negociação esfria</span>
+                          </div>
+                        )}
                         <p className="text-[10px] text-zinc-500 mb-3">{negociacaoContrato.colapsou ? "😤 A diretoria encerrou a conversa — sem acordo dessa vez." : `Pedidos restantes: ${negociacaoContrato.pedidosRestantes}`}</p>
                         <div className="grid grid-cols-2 gap-2">
                           <Button variant="ghost" onClick={sairDaNegociacao}>{negociacaoContrato.colapsou ? "Fechar" : "Recusar e sair"}</Button>

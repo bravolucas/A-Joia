@@ -1485,6 +1485,7 @@ function resolverTemporada(c, extraStats) {
         golsRestantes: card.gols, assistRestantes: card.assist, logJogos: [],
       };
       c.pedidosContrato = { aumentoUsado: false, aumentoNegado: false, bonusUsado: false, bonusNegado: false };
+      c.conversaBancoUsada = false;
       if (c.contratoVencido) {
         setPendingContratoVencido(true);
       } else if (conv.convocado) {
@@ -3457,6 +3458,7 @@ function resolverTemporada(c, extraStats) {
     return { id: "tatico", txt: "É escolha tática. O jogo que quero jogar pede outro perfil na sua posição neste momento." };
   }
   function abrirConversaBanco() {
+    if (carreira.conversaBancoUsada) return;
     setTecnicoMenuAberto(false);
     setConversaBanco({ motivo: motivoDoBanco(carreira), resposta: null });
   }
@@ -3493,6 +3495,7 @@ function resolverTemporada(c, extraStats) {
       } else { dConf = 2; texto = "Vocês conversaram sobre função, mas você já domina as posições que o time precisa."; }
     }
     c.tecnicoConfianca = clampR((c.tecnicoConfianca ?? 60) + dConf, 0, 100);
+    c.conversaBancoUsada = true;
     logHist(c, texto);
     setCarreira(c);
     setConversaBanco(null);
@@ -6317,9 +6320,10 @@ function resolverTemporada(c, extraStats) {
                       <div className="flex justify-between text-[11px] mb-1"><span className="text-zinc-400">Confiança atual</span><span className="font-bold" style={{ color: statusNoTime(carreira.tecnicoConfianca ?? 60).cor }}>{statusNoTime(carreira.tecnicoConfianca ?? 60).label} ({Math.round(carreira.tecnicoConfianca ?? 60)})</span></div>
                       <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden mb-4"><div className="h-full rounded-full" style={{ width: `${carreira.tecnicoConfianca ?? 60}%`, background: statusNoTime(carreira.tecnicoConfianca ?? 60).cor }} /></div>
                       <p className="text-[10px] text-zinc-600 mb-2">Até {LIMITE_ACOES_TECNICO} ações por temporada · usadas: {carreira.tecnicoAcoesTemporada || 0}/{LIMITE_ACOES_TECNICO}</p>
-                      <button onClick={abrirConversaBanco} className="w-full text-left px-3 py-2.5 mb-3 text-xs rounded-sm border border-amber-500/40 bg-amber-500/5 hover:bg-amber-500/10">
-                        🪑 "Por que estou no banco?" <span className="block text-[9px] text-zinc-500 mt-0.5">Conversa franca — o técnico explica o motivo real e você decide como reagir. Não gasta ação.</span>
+                      <button onClick={abrirConversaBanco} disabled={carreira.conversaBancoUsada} className="w-full text-left px-3 py-2.5 mb-3 text-xs rounded-sm border border-amber-500/40 bg-amber-500/5 hover:bg-amber-500/10 disabled:opacity-40 disabled:hover:bg-amber-500/5">
+                        🪑 "Por que estou no banco?" <span className="block text-[9px] text-zinc-500 mt-0.5">{carreira.conversaBancoUsada ? "Já teve essa conversa nessa temporada — dá pra insistir de novo só na próxima." : "Conversa franca — o técnico explica o motivo real e você decide como reagir. Uma vez por temporada."}</span>
                       </button>
+                      {carreira.conversaBancoUsada && <p className="text-[9px] text-amber-400/80 -mt-2 mb-3">🔒 Disponível de novo na próxima temporada.</p>}
                       <div className="text-[9px] text-emerald-400 uppercase tracking-widest mb-1.5">Aproximam vocês</div>
                       <div className="grid gap-1.5 mb-3">
                         <button onClick={() => acaoTecnico("conversar")} disabled={(carreira.tecnicoAcoesTemporada || 0) >= LIMITE_ACOES_TECNICO} className="text-left px-3 py-2 text-xs rounded-sm border border-emerald-500/30 hover:bg-emerald-500/10 disabled:opacity-40">🗣️ Conversar em particular <span className="block text-[9px] text-zinc-500 mt-0.5">Alinha expectativas, ganho discreto e confiável.</span></button>

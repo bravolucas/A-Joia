@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { montarSave, salvarLocal, carregarLocal, apagarLocal, listarSaves, existeAlgumSave, baixarSave, lerArquivoSave, formatarData, normalizarSave, SLOTS } from "./save.js";
-import { ANO_INICIO, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, FUNCOES_ELENCO, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
+import { ANO_INICIO, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONFEDERACAO_POR_NACAO, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, FUNCOES_ELENCO, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
 import { agregarPorCompeticao, ajustarMeta, ajustesDoContexto, analisarJogos, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, continentalDaSelecao, creditarTitulo, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, fatorTitulosTemporada, forcaEfetivaClube, formatarDinheiro, gerarChegadaClube, gerarColetivaPosJogo, gerarContextoLance, gerarElenco, gerarEventoAmbiente, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, PIRAMIDE_LIGAS, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearConcorrente, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, todosJogosCarreira, valorDeMercado, valorMundo, veredito } from "./lib.js";
 import { AttrBarDelta, AttrRadar, BallIcon, ApresentacaoNovoClube, Button, CalendarioTemporadaPopup, Card, CartaoCarreira,
   CenaAposentadoria, CenaDespedidaClube, CenaEstreia, CenaLesaoGrave, CenaLevantarTaca, CenaRivalidade, ClubDot, Confetti, CountUp, CurvaEvolucao, Diamond, FichaPartida, FreeKickMini, GoalMini, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PodiumBolaDeOuro, PopupConvocacao, PopupOverlay, SilhuetaJogador, Sparkle, TelaPartidaAoVivo, TimingBar, TrophyIcon } from "./components.jsx";
@@ -16,6 +16,7 @@ export default function AJoiaGame() {
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [stage, introFase]);
   const [nome, setNome] = useState("");
+  const [formEtapa, setFormEtapa] = useState(0);
   const [posicao, setPosicao] = useState(null);
   const [nacionalidade, setNacionalidade] = useState("BRA");
   const [personalidade, setPersonalidade] = useState(null);
@@ -3848,17 +3849,134 @@ function resolverTemporada(c, extraStats) {
           </div>
         )}
 
-        {stage === "intro" && introFase === "form" && (
-          <div className="grid gap-4">
-            <div className="relative overflow-hidden rounded-sm border border-zinc-800 bg-gradient-to-br from-emerald-950/40 via-zinc-900 to-blue-950/40 p-6 text-center">
-              <div className="absolute top-3 left-4 opacity-25 float-anim"><BallIcon size={26} /></div>
-              <div className="absolute bottom-3 right-5 opacity-20 float-anim" style={{ animationDelay: "1s" }}><BallIcon size={20} /></div>
-              <div className="absolute top-4 right-6 text-amber-400/30 text-xl float-anim" style={{ animationDelay: "0.5s" }}>🏆</div>
-              <div className="flex justify-center mb-2 glow-anim"><Diamond size={72} /></div>
-              <h1 className="display text-2xl font-black mb-1">A JOIA</h1>
-              <p className="text-zinc-400 text-xs max-w-sm mx-auto">Escolha de onde seu craque vem, mostre serviço na peneira e comece a jornada rumo a se tornar A JOIA.</p>
-              {temSave && (
-                <div className="mt-4 pt-4 border-t border-zinc-800">
+        {stage === "intro" && introFase === "form" && (() => {
+          const etapas = ["Nome", "Posição", "Nacionalidade", "Perna", "Personalidade", "Clube", "Origem"];
+          const podeAvancar = [!!nome.trim(), !!posicao, !!nacionalidade, !!pernaDominante, !!personalidade, true, !!origem][formEtapa];
+          const nacAtual = NACIONALIDADES.find((n) => n.id === nacionalidade);
+          const confOrdem = ["CONMEBOL", "UEFA", "AFC", "CAF", "CONCACAF", "OFC"];
+          const confNomes = { CONMEBOL: "CONMEBOL — América do Sul", UEFA: "UEFA — Europa", AFC: "AFC — Ásia", CAF: "CAF — África", CONCACAF: "CONCACAF — América do Norte e Central", OFC: "OFC — Oceania" };
+          return (
+            <div className="grid gap-4">
+              <div className="flex items-center gap-3 px-4 py-2.5 rounded-sm border border-zinc-800 bg-zinc-900/40">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-lg shrink-0">{posicao ? "⚽" : "🙋"}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-bold truncate">{nome.trim() || "Seu jogador"}</div>
+                  <div className="text-[10px] text-zinc-500 truncate">{posicao ? POSICOES.find((p) => p.id === posicao)?.label : "posição por escolher"}{nacAtual ? ` · ${nacAtual.id}` : ""}{pernaDominante ? ` · ${pernaDominante}` : ""}</div>
+                </div>
+                <div className="text-[10px] text-zinc-600 shrink-0">{formEtapa + 1}/{etapas.length}</div>
+              </div>
+              <div className="flex gap-1">
+                {etapas.map((_, i) => <div key={i} className={`flex-1 h-1 rounded-full transition-colors ${i <= formEtapa ? "bg-emerald-500" : "bg-zinc-800"}`} />)}
+              </div>
+
+              <Card>
+                {formEtapa === 0 && (
+                  <div className="animate-[fadeIn_0.3s_ease-out]">
+                    <div className="text-sm text-zinc-300 mb-3">Qual o nome do seu jogador?</div>
+                    <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome do jogador" autoFocus className="w-full bg-zinc-800 border border-zinc-700 rounded-sm px-4 py-3 text-sm outline-none focus:border-emerald-500" />
+                  </div>
+                )}
+                {formEtapa === 1 && (
+                  <div className="animate-[fadeIn_0.3s_ease-out]">
+                    <div className="text-sm text-zinc-300 mb-3">Em que posição você joga?</div>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {POSICOES.map((p) => <button key={p.id} onClick={() => setPosicao(p.id)} className={`opt-card px-2 py-2.5 text-xs rounded-sm border text-left ${posicao === p.id ? "border-emerald-500 bg-emerald-500/10" : "border-zinc-800"}`}><span className="font-mono font-bold">{p.id}</span><span className="block text-[9px] text-zinc-500 leading-tight">{p.label}</span></button>)}
+                    </div>
+                  </div>
+                )}
+                {formEtapa === 2 && (
+                  <div className="animate-[fadeIn_0.3s_ease-out]">
+                    <div className="text-sm text-zinc-300 mb-3">Qual sua nacionalidade?</div>
+                    {confOrdem.map((conf) => {
+                      const nacoes = NACIONALIDADES.filter((n) => CONFEDERACAO_POR_NACAO[n.id] === conf);
+                      if (!nacoes.length) return null;
+                      return (
+                        <div key={conf} className="mb-3">
+                          <div className="text-[9px] text-zinc-600 uppercase tracking-widest mb-1.5">{confNomes[conf]}</div>
+                          <div className="grid grid-cols-5 gap-1.5">
+                            {nacoes.map((n) => <button key={n.id} onClick={() => setNacionalidade(n.id)} className={`px-1.5 py-2 text-[11px] rounded-sm border font-bold ${nacionalidade === n.id ? "border-emerald-500 bg-emerald-500/10 text-emerald-400" : "border-zinc-800 text-zinc-400"}`}>{n.id}</button>)}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {formEtapa === 3 && (
+                  <div className="animate-[fadeIn_0.3s_ease-out]">
+                    <div className="text-sm text-zinc-300 mb-3">Perna dominante</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button onClick={() => setPernaDominante("destro")} className={`opt-card px-3 py-3 text-xs rounded-sm border font-bold ${pernaDominante === "destro" ? "border-emerald-500 bg-emerald-500/10 text-emerald-400" : "border-zinc-800 text-zinc-400"}`}>🦵 Destro</button>
+                      <button onClick={() => setPernaDominante("canhoto")} className={`opt-card px-3 py-3 text-xs rounded-sm border font-bold ${pernaDominante === "canhoto" ? "border-emerald-500 bg-emerald-500/10 text-emerald-400" : "border-zinc-800 text-zinc-400"}`}>🦵 Canhoto</button>
+                    </div>
+                  </div>
+                )}
+                {formEtapa === 4 && (
+                  <div className="animate-[fadeIn_0.3s_ease-out]">
+                    <div className="text-sm text-zinc-300 mb-3">Personalidade <span className="text-zinc-600 text-xs">(define sua curva de evolução)</span></div>
+                    <div className="grid gap-1.5">
+                      {PERSONALIDADES.map((p) => {
+                        const alturas = [0.5, 0.75, p.picoFim >= 28 ? 1 : 0.6, p.declinioApartir >= 32 ? 0.85 : 0.4, p.declinioApartir >= 32 ? 0.6 : 0.2];
+                        const ativo = personalidade === p.id;
+                        return (
+                          <button key={p.id} onClick={() => setPersonalidade(p.id)} className={`opt-card text-left px-3 py-2.5 rounded-sm border transition-all ${ativo ? "scale-[1.01]" : ""}`} style={{ borderColor: ativo ? p.cor : "#27272a", background: ativo ? `${p.cor}18` : "transparent" }}>
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">{p.icone}</span>
+                              <div className="flex-1">
+                                <span className="font-bold text-xs" style={{ color: ativo ? p.cor : "#e4e4e7" }}>{p.label}</span>
+                                <span className="block text-[10px] text-zinc-500 mt-0.5">{p.desc}</span>
+                              </div>
+                              <div className="flex items-end gap-0.5 h-8 shrink-0">
+                                {alturas.map((h, i) => <div key={i} className="w-1.5 rounded-full" style={{ height: `${h * 100}%`, background: ativo ? p.cor : "#3f3f46" }} />)}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                {formEtapa === 5 && (
+                  <div className="animate-[fadeIn_0.3s_ease-out]">
+                    <div className="text-sm text-zinc-300 mb-3">Clube do coração <span className="text-zinc-600 text-xs">(opcional)</span></div>
+                    <select value={clubeCoracao?.nome || ""} onChange={(e) => setClubeCoracao(CLUBES.find((c) => c.nome === e.target.value) || null)} className="w-full bg-zinc-800 border border-zinc-700 rounded-sm px-3 py-2.5 text-xs outline-none">
+                      <option value="">Nenhum (neutro)</option>
+                      {CLUBES.filter((c) => c.liga !== "arabia" && c.liga !== "mls").map((c) => <option key={c.nome} value={c.nome}>{emojiClube(c.nome)} {c.nome}</option>)}
+                    </select>
+                  </div>
+                )}
+                {formEtapa === 6 && (
+                  <div className="animate-[fadeIn_0.3s_ease-out]">
+                    <div className="text-sm text-zinc-300 mb-3">De onde você vem <span className="text-zinc-600 text-xs">(molda seu potencial e ganha um bônus)</span></div>
+                    <div className="grid gap-1.5">
+                      {ORIGENS.map((o) => {
+                        const ativo = origem?.id === o.id;
+                        return (
+                          <button key={o.id} onClick={() => setOrigem(o)} className={`opt-card text-left px-3 py-2.5 rounded-sm border transition-all ${ativo ? "scale-[1.01]" : ""}`} style={{ borderColor: ativo ? o.cor : "#27272a", background: ativo ? `${o.cor}18` : "transparent" }}>
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">{o.icone}</span>
+                              <div className="flex-1">
+                                <span className="font-bold text-xs" style={{ color: ativo ? o.cor : "#e4e4e7" }}>{o.nome}</span>
+                                <span className="block text-[10px] text-zinc-500 mt-0.5">{o.desc}</span>
+                                {ativo && <span className="block text-[10px] mt-1" style={{ color: o.cor }}>🎁 {o.perk}</span>}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-2 mt-5">
+                  {formEtapa > 0 && <Button variant="ghost" onClick={() => setFormEtapa((f) => f - 1)}>← Voltar</Button>}
+                  {formEtapa < etapas.length - 1
+                    ? <Button onClick={() => setFormEtapa((f) => f + 1)} disabled={!podeAvancar}>Continuar →</Button>
+                    : <Button onClick={confirmarOrigem} disabled={!podeAvancar}>Ir pra peneira</Button>}
+                </div>
+              </Card>
+
+              {formEtapa === 0 && temSave && (
+                <div className="text-center pt-2 border-t border-zinc-800">
                   <p className="text-[10px] text-zinc-500 mb-2">Você já tem uma carreira em andamento.</p>
                   <div className="flex gap-2 justify-center">
                     <button onClick={() => carregarJogo("auto")} className="text-xs font-bold text-emerald-400 border border-emerald-500/50 rounded-sm px-4 py-2 hover:bg-emerald-500/10">▶ Continuar carreira</button>
@@ -3867,81 +3985,8 @@ function resolverTemporada(c, extraStats) {
                 </div>
               )}
             </div>
-            <Card>
-              <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome do jogador" className="w-full bg-zinc-800 border border-zinc-700 rounded-sm px-4 py-2.5 text-sm mb-4 outline-none focus:border-emerald-500" />
-              <div className="mb-4">
-                <div className="text-xs text-zinc-400 mb-2">Posição</div>
-                <div className="grid grid-cols-3 gap-1.5">
-                  {POSICOES.map((p) => <button key={p.id} onClick={() => setPosicao(p.id)} className={`opt-card px-2 py-2 text-xs rounded-sm border text-left ${posicao === p.id ? "border-emerald-500 bg-emerald-500/10" : "border-zinc-800"}`}><span className="font-mono font-bold">{p.id}</span><span className="block text-[9px] text-zinc-500 leading-tight">{p.label}</span></button>)}
-                </div>
-              </div>
-              <div className="mb-4">
-                <div className="text-xs text-zinc-400 mb-2">Nacionalidade</div>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {NACIONALIDADES.map((n) => <button key={n.id} onClick={() => setNacionalidade(n.id)} className={`px-2 py-2 text-[11px] rounded-sm border font-bold ${nacionalidade === n.id ? "border-emerald-500 bg-emerald-500/10 text-emerald-400" : "border-zinc-800 text-zinc-400"}`}>{n.id}</button>)}
-                </div>
-              </div>
-              <div className="mb-4">
-                <div className="text-xs text-zinc-400 mb-2">Perna dominante</div>
-                <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => setPernaDominante("destro")} className={`opt-card px-3 py-2 text-xs rounded-sm border font-bold ${pernaDominante === "destro" ? "border-emerald-500 bg-emerald-500/10 text-emerald-400" : "border-zinc-800 text-zinc-400"}`}>🦵 Destro</button>
-                  <button onClick={() => setPernaDominante("canhoto")} className={`opt-card px-3 py-2 text-xs rounded-sm border font-bold ${pernaDominante === "canhoto" ? "border-emerald-500 bg-emerald-500/10 text-emerald-400" : "border-zinc-800 text-zinc-400"}`}>🦵 Canhoto</button>
-                </div>
-              </div>
-              <div className="mb-4">
-                <div className="text-xs text-zinc-400 mb-2">Personalidade (define sua curva de evolução)</div>
-                <div className="grid gap-1.5">
-                  {PERSONALIDADES.map((p) => {
-                    const alturas = [0.5, 0.75, p.picoFim >= 28 ? 1 : 0.6, p.declinioApartir >= 32 ? 0.85 : 0.4, p.declinioApartir >= 32 ? 0.6 : 0.2];
-                    const ativo = personalidade === p.id;
-                    return (
-                      <button key={p.id} onClick={() => setPersonalidade(p.id)} className={`opt-card text-left px-3 py-2.5 rounded-sm border transition-all ${ativo ? "scale-[1.01]" : ""}`} style={{ borderColor: ativo ? p.cor : "#27272a", background: ativo ? `${p.cor}18` : "transparent" }}>
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">{p.icone}</span>
-                          <div className="flex-1">
-                            <span className="font-bold text-xs" style={{ color: ativo ? p.cor : "#e4e4e7" }}>{p.label}</span>
-                            <span className="block text-[10px] text-zinc-500 mt-0.5">{p.desc}</span>
-                          </div>
-                          <div className="flex items-end gap-0.5 h-8 shrink-0">
-                            {alturas.map((h, i) => <div key={i} className="w-1.5 rounded-full" style={{ height: `${h * 100}%`, background: ativo ? p.cor : "#3f3f46" }} />)}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="mb-4">
-                <div className="text-xs text-zinc-400 mb-2">Clube do coração</div>
-                <select value={clubeCoracao?.nome || ""} onChange={(e) => setClubeCoracao(CLUBES.find((c) => c.nome === e.target.value) || null)} className="w-full bg-zinc-800 border border-zinc-700 rounded-sm px-3 py-2 text-xs outline-none">
-                  <option value="">Nenhum (neutro)</option>
-                  {CLUBES.filter((c) => c.liga !== "arabia" && c.liga !== "mls").map((c) => <option key={c.nome} value={c.nome}>{emojiClube(c.nome)} {c.nome}</option>)}
-                </select>
-              </div>
-              <div className="mb-5">
-                <div className="text-xs text-zinc-400 mb-2">De onde você vem <span className="text-zinc-600">(molda seu potencial e ganha um bônus)</span></div>
-                <div className="grid gap-1.5">
-                  {ORIGENS.map((o) => {
-                    const ativo = origem?.id === o.id;
-                    return (
-                      <button key={o.id} onClick={() => setOrigem(o)} className={`opt-card text-left px-3 py-2.5 rounded-sm border transition-all ${ativo ? "scale-[1.01]" : ""}`} style={{ borderColor: ativo ? o.cor : "#27272a", background: ativo ? `${o.cor}18` : "transparent" }}>
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">{o.icone}</span>
-                          <div className="flex-1">
-                            <span className="font-bold text-xs" style={{ color: ativo ? o.cor : "#e4e4e7" }}>{o.nome}</span>
-                            <span className="block text-[10px] text-zinc-500 mt-0.5">{o.desc}</span>
-                            {ativo && <span className="block text-[10px] mt-1" style={{ color: o.cor }}>🎁 {o.perk}</span>}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-              <Button onClick={confirmarOrigem} disabled={!nome.trim() || !posicao || !personalidade || !origem}>Ir pra peneira</Button>
-            </Card>
-          </div>
-        )}
+          );
+        })()}
 
         {stage === "teste" && (
           <Card className="text-center" accent="linear-gradient(90deg,#12A876,#3b82f6)">
@@ -7916,7 +7961,7 @@ function resolverTemporada(c, extraStats) {
                 download={`a-joia-${nome.replace(/\s+/g, "_")}.txt`}
                 className="px-4 py-2.5 text-sm font-semibold uppercase tracking-wide rounded-sm text-center bg-zinc-800 border border-zinc-700 hover:border-emerald-500"
               >⬇ Baixar resumo</a>
-              <Button onClick={() => { setStage("intro"); setIntroFase("splash"); setZoomingIntro(false); setPotencial({}); setRoubos({}); setOrigem(null); setTemporadas([]); setCarreira(null); setFim(null); setPosTemporada(null); setDecisao(null); setJanela(null); setAwardsPopup(null); setCopinhaResultado(null); setCopinhaFaseIdx(0); setCopinhaTentativa(null); setClubeSelecionadoInicial(null); setNumeroEscolhidoInicial(null); setDraftSlots(NUM_ATTRS.map((attr) => ({ attr, valor: null, girando: false }))); setDraftGirandoAgora(null); setTesteFase("penalti"); setTesteTentativas([]); setTesteTentativaAtual(null); setTesteFaltas([]); setTesteFaltaAtual(null); setTestePasses([]); setTestePasseAtual(null); setTesteReflexo([]); setTesteResultado(null); setCopaMundoTentativa(null); setModoSimulacao("completa"); setPendingLanceJogo(null); setConversaBanco(null); setEmpresarioMenuAberto(false); setMundo(null); setMundoAba("bola"); setCaminhoPos(null); setElencoAberto(false); setInboxFiltro("todas"); setVestiarioAberto(false); setAbaLegado("coletivos"); }}>Nova carreira</Button>
+              <Button onClick={() => { setStage("intro"); setIntroFase("splash"); setZoomingIntro(false); setPotencial({}); setRoubos({}); setOrigem(null); setFormEtapa(0); setTemporadas([]); setCarreira(null); setFim(null); setPosTemporada(null); setDecisao(null); setJanela(null); setAwardsPopup(null); setCopinhaResultado(null); setCopinhaFaseIdx(0); setCopinhaTentativa(null); setClubeSelecionadoInicial(null); setNumeroEscolhidoInicial(null); setDraftSlots(NUM_ATTRS.map((attr) => ({ attr, valor: null, girando: false }))); setDraftGirandoAgora(null); setTesteFase("penalti"); setTesteTentativas([]); setTesteTentativaAtual(null); setTesteFaltas([]); setTesteFaltaAtual(null); setTestePasses([]); setTestePasseAtual(null); setTesteReflexo([]); setTesteResultado(null); setCopaMundoTentativa(null); setModoSimulacao("completa"); setPendingLanceJogo(null); setConversaBanco(null); setEmpresarioMenuAberto(false); setMundo(null); setMundoAba("bola"); setCaminhoPos(null); setElencoAberto(false); setInboxFiltro("todas"); setVestiarioAberto(false); setAbaLegado("coletivos"); }}>Nova carreira</Button>
             </div>
           </div>
         )}

@@ -2494,6 +2494,16 @@ function resolverTemporada(c, extraStats) {
   /* Processa o próximo lance da partida ao vivo. Sem decisaoId: tenta
      resolver o lance atual (pode vir a pedir decisão). Com decisaoId: aplica
      a escolha do jogador ao lance que estava pendente. */
+  /* VAR: só em clássicos, e só depois de gol — pequena chance do lance ser
+     revisado, podendo confirmar ou anular o gol. Cria tensão sem mexer no
+     resto do motor. */
+  function aplicarVarSeAplicavel(estado, evento, ctx) {
+    if (!ctx.classico || evento.tipo !== "gol" || Math.random() >= 0.1) return { estado, evento };
+    const anulado = Math.random() < 0.5;
+    if (!anulado) return { estado, evento: { ...evento, texto: `${evento.texto} 📺 O VAR revisou e confirmou o lance.` } };
+    const estadoCorrigido = { ...estado, golsMeu: estado.golsMeu - (evento.meuTime ? 1 : 0), golsAdv: estado.golsAdv - (evento.meuTime ? 0 : 1) };
+    return { estado: estadoCorrigido, evento: { ...evento, tipo: "var", texto: `📺 VAR chamado — o gol aos ${evento.minuto}' foi ANULADO após revisão!` } };
+  }
   function processarProximoLance(decisaoId) {
     setPartidaAoVivo((pv) => {
       if (!pv || pv.concluida) return pv;
@@ -2503,20 +2513,30 @@ function resolverTemporada(c, extraStats) {
 
       if (slot.foco === "ambiente" || pv.substituido) {
         const evento = gerarEventoAmbiente(slot.minuto, pv.ctx);
-        const estado = evento.tipo === "gol" ? { ...pv.estado, fadiga, golsMeu: pv.estado.golsMeu + (evento.meuTime ? 1 : 0), golsAdv: pv.estado.golsAdv + (evento.meuTime ? 0 : 1) } : { ...pv.estado, fadiga };
-        if (evento.tipo === "gol") { if (evento.meuTime) { stats.chutesMeu++; stats.chutesAlvoMeu++; } else { stats.chutesAdv++; stats.chutesAlvoAdv++; } }
+        let estado = evento.tipo === "gol" ? { ...pv.estado, fadiga, golsMeu: pv.estado.golsMeu + (evento.meuTime ? 1 : 0), golsAdv: pv.estado.golsAdv + (evento.meuTime ? 0 : 1) } : { ...pv.estado, fadiga };
+        let eventoFinal = evento;
+        if (evento.tipo === "gol") {
+          const var1 = aplicarVarSeAplicavel(estado, evento, pv.ctx);
+          estado = var1.estado; eventoFinal = var1.evento;
+          if (eventoFinal.tipo !== "var") { if (evento.meuTime) { stats.chutesMeu++; stats.chutesAlvoMeu++; } else { stats.chutesAdv++; stats.chutesAlvoAdv++; } }
+        }
         else if (evento.tipo === "chute") { if (evento.meuTime) stats.chutesMeu++; else stats.chutesAdv++; }
         else if (evento.tipo === "falta") { if (evento.meuTime) stats.faltasAdv = (stats.faltasAdv || 0) + 1; else stats.faltasMeu = (stats.faltasMeu || 0) + 1; }
-        const eventos = [...pv.eventos, evento];
+        const eventos = [...pv.eventos, eventoFinal];
         return { ...pv, estado, eventos, indice: pv.indice + 1, pendente: null, stats, minutoVisivel: Math.max(pv.minutoVisivel, slot.minuto) };
       }
 
       const res = resolverLance(pv.estado, slot, pv.ctx, decisaoId);
       if (res.precisaDecisao) return { ...pv, pendente: { opcoes: res.opcoes, texto: res.texto, minuto: res.minuto } };
-      const estado = { ...res.estado, fadiga };
-      const eventos = [...pv.eventos, res.evento];
-      const proxIndice = pv.indice + 1;
+      let estado = { ...res.estado, fadiga };
+      let eventoFinal = res.evento;
       if (res.evento.tipo === "gol") {
+        const var2 = aplicarVarSeAplicavel(estado, res.evento, pv.ctx);
+        estado = { ...var2.estado, fadiga }; eventoFinal = var2.evento;
+      }
+      const eventos = [...pv.eventos, eventoFinal];
+      const proxIndice = pv.indice + 1;
+      if (eventoFinal.tipo === "gol") {
         if (res.evento.meuTime) { stats.chutesMeu++; stats.chutesAlvoMeu++; } else { stats.chutesAdv++; stats.chutesAlvoAdv++; }
       } else if (res.evento.tipo === "chance") {
         if (slot.foco === "ataque") stats.chutesMeu++; else stats.chutesAdv++;
@@ -2590,7 +2610,14 @@ function resolverTemporada(c, extraStats) {
         const slot = pv.roteiro[i];
         if (slot.foco === "ambiente" || pv.substituido) {
           const evento = gerarEventoAmbiente(slot.minuto, pv.ctx);
-          if (evento.tipo === "gol") { estado = { ...estado, golsMeu: estado.golsMeu + (evento.meuTime ? 1 : 0), golsAdv: estado.golsAdv + (evento.meuTime ? 0 : 1) }; if (evento.meuTime) { stats.chutesMeu++; stats.chutesAlvoMeu++; } else { stats.chutesAdv++; stats.chutesAlvoAdv++; } }
+          if (evento.tipo === "gol") {
+            estado = { ...estado, golsMeu: estado.golsMeu + (evento.meuTime ? 1 : 0), golsAdv: estado.golsAdv + (evento.meuTime ? 0 : 1) };
+            const varA = aplicarVarSeAplicavel(estado, evento, pv.ctx);
+            estado = varA.estado;
+            if (varA.evento.tipo !== "var") { if (evento.meuTime) { stats.chutesMeu++; stats.chutesAlvoMeu++; } else { stats.chutesAdv++; stats.chutesAlvoAdv++; } }
+            eventos.push(varA.evento);
+            continue;
+          }
           else if (evento.tipo === "chute") { if (evento.meuTime) stats.chutesMeu++; else stats.chutesAdv++; }
           else if (evento.tipo === "falta") { if (evento.meuTime) stats.faltasAdv = (stats.faltasAdv || 0) + 1; else stats.faltasMeu = (stats.faltasMeu || 0) + 1; }
           eventos.push(evento);
@@ -2599,8 +2626,13 @@ function resolverTemporada(c, extraStats) {
         let res = resolverLance(estado, slot, pv.ctx);
         if (res.precisaDecisao) res = resolverLance(estado, slot, pv.ctx, res.opcoes[0].id);
         estado = res.estado;
-        eventos.push(res.evento);
-        if (res.evento.tipo === "gol") { if (res.evento.meuTime) { stats.chutesMeu++; stats.chutesAlvoMeu++; } else { stats.chutesAdv++; stats.chutesAlvoAdv++; } }
+        let eventoParaEmpilhar = res.evento;
+        if (res.evento.tipo === "gol") {
+          const varB = aplicarVarSeAplicavel(estado, res.evento, pv.ctx);
+          estado = varB.estado; eventoParaEmpilhar = varB.evento;
+        }
+        eventos.push(eventoParaEmpilhar);
+        if (eventoParaEmpilhar.tipo === "gol") { if (res.evento.meuTime) { stats.chutesMeu++; stats.chutesAlvoMeu++; } else { stats.chutesAdv++; stats.chutesAlvoAdv++; } }
         else if (res.evento.tipo === "chance") { if (slot.foco === "ataque") stats.chutesMeu++; else stats.chutesAdv++; }
         else if (res.evento.tipo === "defesa" || res.evento.tipo === "cartao") { stats.chutesAdv++; if (res.evento.tipo === "defesa") stats.chutesAlvoAdv++; }
       }

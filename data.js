@@ -151,6 +151,46 @@ export const FORMACOES_TATICAS = [
   { id: "4231", label: "4-2-3-1", desc: "Um camisa 9 e trio criativo por trás.", favorece: ["MEI", "SA"] },
 ];
 
+/* Clássicos de verdade — rivalidades locais reais, pesquisadas uma a uma.
+   Substitui a aproximação antiga (mesmo estado OU força parecida), que
+   classificava qualquer confronto de times fortes como "clássico" mesmo
+   sem rivalidade nenhuma (ex: Corinthians x Flamengo não é clássico —
+   é um grande jogo, mas não carrega a rivalidade local de verdade). */
+export const CLASSICOS = [
+  // Brasil — São Paulo
+  ["Corinthians", "Palmeiras"], ["Corinthians", "São Paulo"], ["Palmeiras", "São Paulo"],
+  ["Santos", "São Paulo"], ["Santos", "Corinthians"], ["Santos", "Palmeiras"],
+  // Brasil — Rio de Janeiro
+  ["Flamengo", "Fluminense"], ["Flamengo", "Vasco da Gama"], ["Flamengo", "Botafogo"],
+  ["Vasco da Gama", "Fluminense"], ["Vasco da Gama", "Botafogo"], ["Botafogo", "Fluminense"],
+  // Brasil — Rio Grande do Sul
+  ["Grêmio", "Internacional"],
+  // Brasil — Minas Gerais
+  ["Atlético-MG", "Cruzeiro"],
+  // Brasil — Bahia
+  ["Bahia", "Vitória"],
+  // Brasil — Pernambuco
+  ["Sport Recife", "Náutico"],
+  // Brasil — Paraná
+  ["Athletico-PR", "Coritiba"],
+  // Brasil — Ceará
+  ["Ceará", "Fortaleza"],
+  // Inglaterra
+  ["Manchester United", "Manchester City"], ["Manchester United", "Liverpool"], ["Liverpool", "Everton"],
+  ["Arsenal", "Tottenham"], ["Chelsea", "Arsenal"], ["Chelsea", "Tottenham"],
+  // Espanha
+  ["Real Madrid", "Barcelona"], ["Real Madrid", "Atlético de Madrid"], ["Sevilla", "Real Betis"],
+  ["Athletic Bilbao", "Real Sociedad"],
+  // Itália
+  ["Inter de Milão", "Milan"], ["Roma", "Lazio"], ["Juventus", "Torino"],
+  // Alemanha
+  ["Bayern de Munique", "Borussia Dortmund"],
+  // França
+  ["PSG", "Marseille"], ["Lyon", "Saint-Étienne"],
+  // Portugal
+  ["Benfica", "Porto"], ["Benfica", "Sporting"], ["Porto", "Sporting"],
+];
+
 export const CONDICOES_CLIMA = [
   { id: "normal", label: "Tempo bom", icone: "☀️", mult: 1, chance: 0.68 },
   { id: "chuva", label: "Chuva", icone: "🌧️", mult: 0.9, chance: 0.2 },

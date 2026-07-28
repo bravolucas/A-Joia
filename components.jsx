@@ -352,19 +352,39 @@ export function ApresentacaoNovoClube({ clube, nome, numero, posicao, idade, gra
 
           {fase >= 2 && (
             <div className="relative z-10 flex flex-col items-center" style={fase === 2 ? { animation: "jerseyRise 0.9s ease-out" } : undefined}>
-              <div
-                className="relative w-48 h-56 flex flex-col items-center justify-center pt-9 mb-3"
-                style={{
-                  background: `linear-gradient(160deg, ${corClube}, ${corClube}99)`,
-                  boxShadow: `0 0 45px ${corClube}90`,
-                  animation: "ceremonyGlow 2s ease-in-out infinite",
-                  clipPath: "polygon(35% 0%, 50% 9%, 65% 0%, 84% 7%, 100% 24%, 80% 36%, 80% 100%, 20% 100%, 20% 36%, 0% 24%, 16% 7%)",
-                }}
-              >
+              <div className="relative w-52 h-60 mb-3" style={{ animation: "ceremonyGlow 2s ease-in-out infinite", filter: `drop-shadow(0 8px 28px ${corClube}70)` }}>
+                <svg viewBox="0 0 200 220" width="100%" height="100%">
+                  <defs>
+                    <linearGradient id="jerseyBody" x1="0" y1="0" x2="0.15" y2="1">
+                      <stop offset="0%" stopColor={corClube} />
+                      <stop offset="55%" stopColor={corClube} />
+                      <stop offset="100%" stopColor={clube.escuro ? "#000000" : "#00000022"} stopOpacity={clube.escuro ? 0.35 : 0.25} />
+                    </linearGradient>
+                    <linearGradient id="jerseySleeve" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#000000" stopOpacity="0.22" />
+                      <stop offset="100%" stopColor="#000000" stopOpacity="0.05" />
+                    </linearGradient>
+                    <linearGradient id="jerseySheen" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="30%" stopColor="#ffffff" stopOpacity="0" />
+                      <stop offset="48%" stopColor="#ffffff" stopOpacity="0.16" />
+                      <stop offset="60%" stopColor="#ffffff" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  {/* corpo + mangas */}
+                  <path d="M75,8 Q100,22 125,8 L152,20 Q185,35 198,68 L170,92 Q166,95 163,90 L163,205 Q163,213 155,213 L45,213 Q37,213 37,205 L37,90 Q34,95 30,92 L2,68 Q15,35 48,20 Z" fill="url(#jerseyBody)" stroke="rgba(0,0,0,0.25)" strokeWidth="1.5" />
+                  {/* mangas com sombra pra dar profundidade (raglan) */}
+                  <path d="M152,20 Q185,35 198,68 L170,92 Q166,95 163,90 L145,55 Z" fill="url(#jerseySleeve)" />
+                  <path d="M48,20 Q15,35 2,68 L30,92 Q34,95 37,90 L55,55 Z" fill="url(#jerseySleeve)" />
+                  {/* gola */}
+                  <path d="M75,8 Q100,22 125,8 Q123,17 100,20 Q77,17 75,8 Z" fill="none" stroke={clube.escuro ? "#ffffff" : "#000000"} strokeOpacity="0.35" strokeWidth="3" />
+                  {/* brilho diagonal de tecido */}
+                  <path d="M75,8 Q100,22 125,8 L152,20 Q185,35 198,68 L170,92 Q166,95 163,90 L163,205 Q163,213 155,213 L45,213 Q37,213 37,205 L37,90 Q34,95 30,92 L2,68 Q15,35 48,20 Z" fill="url(#jerseySheen)" />
+                </svg>
+                <div className="absolute" style={{ top: "26%", left: "27%" }}><ClubDot club={clube} size={22} /></div>
                 {fase >= 3 && (
-                  <div className="text-center animate-[popIn_0.35s_ease-out]">
-                    <div className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: corTexto }}>{nome.split(" ")[0]}</div>
-                    <div className="font-black text-6xl leading-none" style={{ color: corTexto }}>{numero}</div>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pt-6 text-center animate-[popIn_0.35s_ease-out]">
+                    <div className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: corTexto, textShadow: `0 1px 3px ${clube.escuro ? "#fff2" : "#0006"}` }}>{nome.split(" ")[0]}</div>
+                    <div className="font-black text-6xl leading-none" style={{ color: corTexto, textShadow: `0 2px 6px ${clube.escuro ? "#fff2" : "#0006"}` }}>{numero}</div>
                   </div>
                 )}
               </div>

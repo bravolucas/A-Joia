@@ -2,7 +2,8 @@ import React, { useState, useMemo, useEffect } from "react";
 import { montarSave, salvarLocal, carregarLocal, apagarLocal, listarSaves, existeAlgumSave, baixarSave, lerArquivoSave, formatarData, normalizarSave, SLOTS } from "./save.js";
 import { ANO_INICIO, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, FUNCOES_ELENCO, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
 import { agregarPorCompeticao, ajustarMeta, ajustesDoContexto, analisarJogos, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, continentalDaSelecao, creditarTitulo, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, fatorTitulosTemporada, forcaEfetivaClube, formatarDinheiro, gerarChegadaClube, gerarColetivaPosJogo, gerarContextoLance, gerarElenco, gerarEventoAmbiente, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, PIRAMIDE_LIGAS, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearConcorrente, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, todosJogosCarreira, valorDeMercado, valorMundo, veredito } from "./lib.js";
-import { AttrBarDelta, AttrRadar, BallIcon, ApresentacaoNovoClube, Button, CalendarioTemporadaPopup, Card, CartaoCarreira, ClubDot, Confetti, CountUp, CurvaEvolucao, Diamond, FichaPartida, FreeKickMini, GoalMini, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PodiumBolaDeOuro, PopupConvocacao, PopupOverlay, SilhuetaJogador, Sparkle, TelaPartidaAoVivo, TimingBar, TrophyIcon } from "./components.jsx";
+import { AttrBarDelta, AttrRadar, BallIcon, ApresentacaoNovoClube, Button, CalendarioTemporadaPopup, Card, CartaoCarreira,
+  CenaAposentadoria, CenaDespedidaClube, CenaEstreia, CenaLesaoGrave, CenaLevantarTaca, CenaRivalidade, ClubDot, Confetti, CountUp, CurvaEvolucao, Diamond, FichaPartida, FreeKickMini, GoalMini, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PodiumBolaDeOuro, PopupConvocacao, PopupOverlay, SilhuetaJogador, Sparkle, TelaPartidaAoVivo, TimingBar, TrophyIcon } from "./components.jsx";
 
 export default function AJoiaGame() {
   const [stage, setStage] = useState("intro");
@@ -86,6 +87,12 @@ export default function AJoiaGame() {
   const [concorrenciaClubes, setConcorrenciaClubes] = useState(null);
   const [pendingChegadaClube, setPendingChegadaClube] = useState(null);
   const [pendingApresentacaoClube, setPendingApresentacaoClube] = useState(null);
+  const [pendingCelebracaoTitulo, setPendingCelebracaoTitulo] = useState(null);
+  const [pendingEstreia, setPendingEstreia] = useState(null);
+  const [pendingLesaoGrave, setPendingLesaoGrave] = useState(null);
+  const [pendingRivalidade, setPendingRivalidade] = useState(null);
+  const [pendingAposentadoria, setPendingAposentadoria] = useState(null);
+  const [pendingDespedidaClube, setPendingDespedidaClube] = useState(null);
   const [pendingVidaPessoal, setPendingVidaPessoal] = useState(null);
   const [pendingNascimentoFilho, setPendingNascimentoFilho] = useState(null);
   const [negociacaoContrato, setNegociacaoContrato] = useState(null);
@@ -339,9 +346,16 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
 
   function jogarTemporada(clubeNovo, tipoTransfer, duracao, numero, contrato) {
     let c = { ...carreira };
+    let despedidaMarcante = null;
     if (clubeNovo) {
       const ligaAntiga = c.clube.liga;
       const clubeAntigoNome = c.clube.nome;
+      const clubeAntigoObj = c.clube;
+      const anoNoClubeAntigo = c.anoNoClube ?? 0;
+      const titulosNoClubeAntigo = (c.titulosPorClube?.[clubeAntigoNome] || []).length;
+      if (anoNoClubeAntigo >= 3 || titulosNoClubeAntigo >= 2) {
+        despedidaMarcante = { clube: clubeAntigoObj, anos: anoNoClubeAntigo };
+      }
       if (tipoTransfer === "emprestimo") { c.clubeOrigemEmprestimo = c.clube; c.emprestimo = true; c.emprestimoAnosRestantes = duracao || 1; logHist(c, `Emprestado ao ${clubeNovo.nome} (${LIGAS[clubeNovo.liga].nome}) por ${duracao || 1} temporada(s).`); }
       else { c.emprestimo = false; c.clubeOrigemEmprestimo = null; logHist(c, `Transferido para o ${clubeNovo.nome} (${LIGAS[clubeNovo.liga].nome}).`); }
       // Estrutura do Clube é investimento local — ao sair, o que foi construído lá fica lá (reseta pro jogador)
@@ -389,8 +403,18 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
         setCarreira({ ...c });
       }
       const numeroUsado = numero || (c.camisaPorClube?.[clubeNovo.nome] || []).slice(-1)[0];
-      setPendingApresentacaoClube({ clube: clubeNovo, numero: numeroUsado, posicao: c.posicao, idade: c.idade, grandeChegada: chegada.grandeChegada, chegadaDepois: chegada });
+      const dadosApresentacao = { clube: clubeNovo, numero: numeroUsado, posicao: c.posicao, idade: c.idade, grandeChegada: chegada.grandeChegada, chegadaDepois: chegada };
+      if (despedidaMarcante) {
+        setPendingDespedidaClube({ ...despedidaMarcante, proximo: dadosApresentacao });
+      } else {
+        setPendingApresentacaoClube(dadosApresentacao);
+      }
     }
+  }
+  function concluirDespedidaClube() {
+    const p = pendingDespedidaClube;
+    setPendingDespedidaClube(null);
+    if (p?.proximo) setPendingApresentacaoClube(p.proximo);
   }
   function iniciarTemporada() {
     setPendingAbordagem(true);
@@ -1724,12 +1748,13 @@ function resolverTemporada(c, extraStats) {
     }
 
     const titulosLista = [];
-    if (card.campeaoLiga) titulosLista.push(`Campeão ${card.ligaNome}`);
-    if (card.continental?.titulo) titulosLista.push(`Campeão da ${card.continental.nome}`);
-    if (card.copaNacional?.titulo) titulosLista.push(`Campeão da Copa Nacional`);
-    if (card.estadual?.titulo) titulosLista.push(`Campeão do ${card.estadual.nome}`);
+    const titulosComTier = [];
+    if (card.campeaoLiga) { titulosLista.push(`Campeão ${card.ligaNome}`); titulosComTier.push({ texto: `Campeão ${card.ligaNome}`, tier: "ouro" }); }
+    if (card.continental?.titulo) { titulosLista.push(`Campeão da ${card.continental.nome}`); titulosComTier.push({ texto: `Campeão da ${card.continental.nome}`, tier: "prata" }); }
+    if (card.copaNacional?.titulo) { titulosLista.push(`Campeão da Copa Nacional`); titulosComTier.push({ texto: "Campeão da Copa Nacional", tier: "ouro" }); }
+    if (card.estadual?.titulo) { titulosLista.push(`Campeão do ${card.estadual.nome}`); titulosComTier.push({ texto: `Campeão do ${card.estadual.nome}`, tier: "bronze" }); }
     if (card.mundial) {
-      if (card.mundial.titulo) { titulosLista.push("Campeão do Mundial de Clubes"); c.fama = clamp(c.fama + 15, 0, 100); c.seguidores = Math.round((c.seguidores || 10000) * 1.12); }
+      if (card.mundial.titulo) { titulosLista.push("Campeão do Mundial de Clubes"); titulosComTier.push({ texto: "Campeão do Mundial de Clubes", tier: "ouro" }); c.fama = clamp(c.fama + 15, 0, 100); c.seguidores = Math.round((c.seguidores || 10000) * 1.12); }
       logHist(c, `${card.mundial.resultado} pelo ${c.clube.nome}.`);
     }
     // Classificação pro Mundial de Clubes na próxima temporada: título de liga ou continental credenciam o clube
@@ -2305,10 +2330,28 @@ function resolverTemporada(c, extraStats) {
     }
     setCarreira(c);
 
-    if (subiuTier) {
-      setPendingTierUpgrade({ tier: tierInfo(c.picoOvr), registro, aposentar, proposta, ofertaCompra, clausulaAtivada, temporadasSnapshot: [...temporadas, registro] });
+    const proximaTela = subiuTier
+      ? { tipo: "tier", dados: { tier: tierInfo(c.picoOvr), registro, aposentar, proposta, ofertaCompra, clausulaAtivada, temporadasSnapshot: [...temporadas, registro] } }
+      : { tipo: "awards", dados: { registro, aposentar, proposta, ofertaCompra, clausulaAtivada, temporadasSnapshot: [...temporadas, registro], slide: 0 } };
+    const seguirAposLesao = () => {
+      if (titulosComTier.length) {
+        setPendingCelebracaoTitulo({ titulos: titulosComTier, clube: c.clube, proximaTela });
+      } else if (proximaTela.tipo === "tier") {
+        setPendingTierUpgrade(proximaTela.dados);
+      } else {
+        setAwardsPopup(proximaTela.dados);
+      }
+    };
+    if (lesaoOcorrida && card.lesaoTipo?.gravidade >= 3) {
+      setPendingLesaoGrave({ nomeLesao: card.lesaoTipo.nome, jogosFora: lesaoOcorrida.jogosFora, proximo: seguirAposLesao });
+    } else {
+      seguirAposLesao();
     }
-    else setAwardsPopup({ registro, aposentar, proposta, ofertaCompra, clausulaAtivada, temporadasSnapshot: [...temporadas, registro], slide: 0 });
+  }
+  function concluirLesaoGrave() {
+    const p = pendingLesaoGrave;
+    setPendingLesaoGrave(null);
+    p?.proximo?.();
   }
   function simularMetadeDaTemporada() {
     const c = { ...carreira };
@@ -2565,6 +2608,16 @@ function resolverTemporada(c, extraStats) {
     if (!ta) { setPartidaAoVivo(null); return; }
     const { estado, eventos, ctx } = pv;
 
+    // Primeiro jogo de verdade da carreira toda — vira cena de estreia
+    const eraPrimeiroJogoDaCarreira = !c.jogosCarreiraTotal;
+    c.jogosCarreiraTotal = (c.jogosCarreiraTotal || 0) + 1;
+    const ehJogoDeSelecao = ctx.meuClube === null && ctx.adversarioObj === null;
+    const eraPrimeiraSelecao = ehJogoDeSelecao && !c.estreiaSelecaoFeita;
+    if (eraPrimeiraSelecao) c.estreiaSelecaoFeita = true;
+    const rivalNoMundoAgora = mundo?.jogadores?.find((j) => j.id === c.rivalId && !j.aposentado);
+    const eraPrimeiroEncontroRival = !ehJogoDeSelecao && rivalNoMundoAgora && ctx.adversario === rivalNoMundoAgora.clubeNome && !c.encarouRivalFeito;
+    if (eraPrimeiroEncontroRival) c.encarouRivalFeito = true;
+
     const golsMinha = eventos.filter((e) => e.tipo === "gol" && e.meu).length;
     const assistMinha = eventos.filter((e) => e.tipo === "gol" && e.assist).length;
     const resultado = estado.golsMeu > estado.golsAdv ? "V" : estado.golsMeu === estado.golsAdv ? "E" : "D";
@@ -2624,11 +2677,24 @@ function resolverTemporada(c, extraStats) {
     logHist(c, `${resultado === "V" ? "✅" : resultado === "E" ? "➖" : "❌"} ${resultado === "V" ? "Venceu" : resultado === "E" ? "Empatou com" : "Perdeu para"} o ${ctx.adversario} por ${Math.max(estado.golsMeu, estado.golsAdv)}x${Math.min(estado.golsMeu, estado.golsAdv)}${golsMinha ? ` — ${golsMinha} gol(s) seu(s)` : ""}${assistMinha ? `, ${assistMinha} assistência(s)` : ""}.`);
 
     setPartidaAoVivo(null);
+    const resumeData = { c, ta, tabela, historico, meuResultadoRodada };
+    if (eraPrimeiroJogoDaCarreira) { setPendingEstreia({ tipo: "profissional", nomeEquipe: c.clube.nome, cor: c.clube.cor, resumeData }); return; }
+    if (eraPrimeiraSelecao) { setPendingEstreia({ tipo: "selecao", nomeEquipe: nacDe(c.nacionalidade)?.label, cor: "#12A876", resumeData }); return; }
+    if (eraPrimeiroEncontroRival) { setPendingRivalidade({ meuNome: nome, rivalNome: c.rivalPosicao, resumeData }); return; }
     const coletiva = gerarColetivaPosJogo(meuResultadoRodada);
     if (coletiva) {
-      setPendingColetivaPosJogo({ info: coletiva, resumeData: { c, ta, tabela, historico, meuResultadoRodada } });
+      setPendingColetivaPosJogo({ info: coletiva, resumeData });
       return;
     }
+    concluirRodada(c, ta, { tabela, historico, meuResultadoRodada, golsRestantes: ta.golsRestantes, assistRestantes: ta.assistRestantes });
+  }
+  function concluirAposCenaEspecial() {
+    const dados = pendingEstreia?.resumeData || pendingRivalidade?.resumeData;
+    setPendingEstreia(null); setPendingRivalidade(null);
+    if (!dados) return;
+    const { c, ta, tabela, historico, meuResultadoRodada } = dados;
+    const coletiva = gerarColetivaPosJogo(meuResultadoRodada);
+    if (coletiva) { setPendingColetivaPosJogo({ info: coletiva, resumeData: dados }); return; }
     concluirRodada(c, ta, { tabela, historico, meuResultadoRodada, golsRestantes: ta.golsRestantes, assistRestantes: ta.assistRestantes });
   }
 
@@ -3218,6 +3284,13 @@ function resolverTemporada(c, extraStats) {
     logHist(c, `👶 ${pendingNascimentoFilho.texto} ${texto}`);
     setCarreira(c);
     setPendingNascimentoFilho(null);
+  }
+  function concluirCelebracaoTitulo() {
+    const p = pendingCelebracaoTitulo;
+    setPendingCelebracaoTitulo(null);
+    if (!p) return;
+    if (p.proximaTela.tipo === "tier") setPendingTierUpgrade(p.proximaTela.dados);
+    else setAwardsPopup(p.proximaTela.dados);
   }
   function equiparCosmetico(categoria, id) {
     const c = { ...carreira };
@@ -5221,6 +5294,30 @@ function resolverTemporada(c, extraStats) {
                   </PopupOverlay>
                 )}
 
+                {pendingDespedidaClube && (
+                  <CenaDespedidaClube clube={pendingDespedidaClube.clube} anos={pendingDespedidaClube.anos} onConcluir={concluirDespedidaClube} />
+                )}
+
+                {pendingAposentadoria && (
+                  <CenaAposentadoria nome={nome} clube={carreira.clube} onConcluir={() => { setFim(pendingAposentadoria); setPendingAposentadoria(null); setStage("fim"); }} />
+                )}
+
+                {pendingLesaoGrave && (
+                  <CenaLesaoGrave nomeLesao={pendingLesaoGrave.nomeLesao} jogosFora={pendingLesaoGrave.jogosFora} onConcluir={concluirLesaoGrave} />
+                )}
+
+                {pendingEstreia && (
+                  <CenaEstreia tipo={pendingEstreia.tipo} nomeEquipe={pendingEstreia.nomeEquipe} corDestaque={pendingEstreia.cor} onConcluir={concluirAposCenaEspecial} />
+                )}
+
+                {pendingRivalidade && (
+                  <CenaRivalidade meuNome={pendingRivalidade.meuNome} rivalNome={pendingRivalidade.rivalNome} onConcluir={concluirAposCenaEspecial} />
+                )}
+
+                {pendingCelebracaoTitulo && (
+                  <CenaLevantarTaca titulos={pendingCelebracaoTitulo.titulos} clube={pendingCelebracaoTitulo.clube} onConcluir={concluirCelebracaoTitulo} />
+                )}
+
                 {pendingApresentacaoClube && (
                   <ApresentacaoNovoClube
                     clube={pendingApresentacaoClube.clube} numero={pendingApresentacaoClube.numero}
@@ -5660,7 +5757,7 @@ function resolverTemporada(c, extraStats) {
                           </div>
                           {janela.tipo !== "aposentadoria" && <Button variant="ghost" onClick={() => setJanela({ tipo: "empresario" })}>← Voltar</Button>}
                           <div className="mt-2"><Button variant="ghost" onClick={() => jogarTemporada(null)}>Recusar e ficar no {carreira.clube.nome}</Button></div>
-                          {janela.tipo === "aposentadoria" && <div className="mt-2"><Button variant="ghost" onClick={() => { setFim({ nivel: veredito(carreira, janela.temporadasSnapshot), c: carreira }); setStage("fim"); }}>🚪 Pendurar as chuteiras (encerrar carreira)</Button></div>}
+                          {janela.tipo === "aposentadoria" && <div className="mt-2"><Button variant="ghost" onClick={() => setPendingAposentadoria({ nivel: veredito(carreira, janela.temporadasSnapshot), c: carreira })}>🚪 Pendurar as chuteiras (encerrar carreira)</Button></div>}
                         </>
                       )}
                     </Card>

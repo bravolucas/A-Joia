@@ -381,6 +381,158 @@ export function ApresentacaoNovoClube({ clube, nome, numero, posicao, idade, gra
   );
 }
 
+// Taça genérica — silhueta própria (taça, duas alças, haste, base), sem
+// reproduzir nenhum troféu real. A cor muda pelo nível da competição.
+export function TrofeuIcone({ tier = "ouro", size = 80 }) {
+  const cores = { ouro: ["#F4D03F", "#B8860B"], prata: ["#E8E8E8", "#9CA3AF"], bronze: ["#D2915B", "#8B5A2B"] };
+  const [c1, c2] = cores[tier] || cores.ouro;
+  const gid = `trofeu-grad-${tier}`;
+  return (
+    <svg width={size} height={size * 1.15} viewBox="0 0 100 115" style={{ filter: `drop-shadow(0 0 14px ${c1}aa)` }}>
+      <defs><linearGradient id={gid} x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor={c1} /><stop offset="100%" stopColor={c2} /></linearGradient></defs>
+      <path d="M30 10 H70 V35 C70 55 58 63 50 63 C42 63 30 55 30 35 Z" fill={`url(#${gid})`} />
+      <path d="M30 16 C14 16 9 32 20 40 C25 44 30 41 30 41" fill="none" stroke={`url(#${gid})`} strokeWidth="5" strokeLinecap="round" />
+      <path d="M70 16 C86 16 91 32 80 40 C75 44 70 41 70 41" fill="none" stroke={`url(#${gid})`} strokeWidth="5" strokeLinecap="round" />
+      <rect x="45" y="63" width="10" height="18" fill={`url(#${gid})`} />
+      <rect x="33" y="81" width="34" height="7" rx="2" fill={`url(#${gid})`} />
+      <rect x="26" y="88" width="48" height="9" rx="2" fill={`url(#${gid})`} />
+    </svg>
+  );
+}
+
+// Levantar a taça — a conquista de um título vira cena, não só uma linha de log.
+export function CenaLevantarTaca({ titulos, clube, onConcluir }) {
+  const [fase, setFase] = useState(0);
+  useEffect(() => { if (fase === 0) { const t = setTimeout(() => setFase(1), 1000); return () => clearTimeout(t); } }, [fase]);
+  const corClube = clube?.cor || "#D8B44A";
+  return (
+    <PopupOverlay>
+      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `radial-gradient(circle at 50% 20%, ${corClube}33 0%, #050505 75%)` }}>
+        <div className="relative h-[400px] flex flex-col items-center justify-center px-4 overflow-hidden">
+          {fase >= 1 && <Confetti />}
+          <div className="relative z-10" style={{ animation: fase === 0 ? "jerseyRise 0.8s ease-out" : "floatY 2.4s ease-in-out infinite" }}>
+            <TrofeuIcone tier={titulos[0]?.tier || "ouro"} size={100} />
+          </div>
+          {fase >= 1 && (
+            <div className="relative z-10 mt-3 animate-[popIn_0.4s_ease-out]">
+              <div className="text-amber-400 font-black text-xl mb-1">CAMPEÃO!</div>
+              <div className="grid gap-1">
+                {titulos.map((t, i) => <div key={i} className="text-sm text-zinc-200 font-bold">{t.texto}</div>)}
+              </div>
+            </div>
+          )}
+        </div>
+        {fase >= 1 && <div className="p-3 border-t border-zinc-800"><Button variant="gold" onClick={onConcluir}>Comemorar!</Button></div>}
+      </Card>
+    </PopupOverlay>
+  );
+}
+
+// Estreia (profissional ou seleção) — o túnel, o hino, o primeiro passo em campo.
+export function CenaEstreia({ tipo, nomeEquipe, corDestaque, onConcluir }) {
+  const [fase, setFase] = useState(0);
+  useEffect(() => { if (fase === 0) { const t = setTimeout(() => setFase(1), 1600); return () => clearTimeout(t); } }, [fase]);
+  const cor = corDestaque || "#12A876";
+  return (
+    <PopupOverlay>
+      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `radial-gradient(circle at 50% 60%, ${cor}22 0%, #030303 80%)` }}>
+        <div className="relative h-[360px] flex flex-col items-center justify-center px-5 overflow-hidden">
+          {fase === 0 ? (
+            <div className="flex flex-col items-center gap-3 animate-[fadeIn_0.6s_ease-out]">
+              <div className="w-20 h-20 rounded-full" style={{ background: cor, filter: "blur(20px)", animation: "spotlightPulse 1.6s ease-in-out infinite" }} />
+              <p className="text-[11px] text-zinc-500 uppercase tracking-widest">{tipo === "selecao" ? "O hino nacional ainda ecoa..." : "O barulho da torcida na sua primeira vez em campo..."}</p>
+            </div>
+          ) : (
+            <div className="animate-[popIn_0.5s_ease-out]">
+              <div className="text-4xl mb-2">{tipo === "selecao" ? "🌎" : "⚽"}</div>
+              <div className="font-black text-lg mb-1" style={{ color: cor }}>{tipo === "selecao" ? "Você estreou pela seleção!" : "Você estreou como profissional!"}</div>
+              <p className="text-xs text-zinc-400">{nomeEquipe}</p>
+            </div>
+          )}
+        </div>
+        {fase >= 1 && <div className="p-3 border-t border-zinc-800"><Button variant="gold" onClick={onConcluir}>Seguir a temporada</Button></div>}
+      </Card>
+    </PopupOverlay>
+  );
+}
+
+// Lesão grave — câmera lenta, tom mais sério, sem confete nenhum.
+export function CenaLesaoGrave({ nomeLesao, jogosFora, onConcluir }) {
+  return (
+    <PopupOverlay>
+      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: "radial-gradient(circle at 50% 30%, #7f1d1d33 0%, #050505 80%)" }}>
+        <div className="h-[320px] flex flex-col items-center justify-center px-5">
+          <div className="text-4xl mb-3 animate-[fadeIn_0.8s_ease-out]">🩹</div>
+          <div className="animate-[popIn_0.5s_ease-out]">
+            <div className="font-black text-lg text-red-400 mb-1">{nomeLesao}</div>
+            <p className="text-xs text-zinc-400 mb-1">A comissão médica já está em campo — o jogo segue sem você.</p>
+            <p className="text-[11px] text-zinc-600">{jogosFora} jogo(s) de recuperação estimados.</p>
+          </div>
+        </div>
+        <div className="p-3 border-t border-zinc-800"><Button variant="ghost" onClick={onConcluir}>Entender a situação</Button></div>
+      </Card>
+    </PopupOverlay>
+  );
+}
+
+// Primeiro encontro com o rival — frente a frente antes da bola rolar.
+export function CenaRivalidade({ meuNome, rivalNome, onConcluir }) {
+  return (
+    <PopupOverlay>
+      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: "radial-gradient(circle at 50% 40%, #7f1d1d22 0%, #050505 80%)" }}>
+        <div className="h-[300px] flex flex-col items-center justify-center px-5">
+          <div className="text-[10px] text-red-400 uppercase tracking-widest mb-3 animate-[fadeIn_0.5s_ease-out]">⚔️ Frente a frente, pela primeira vez</div>
+          <div className="flex items-center gap-4 animate-[popIn_0.5s_ease-out]">
+            <span className="font-black text-base text-zinc-200">{meuNome}</span>
+            <span className="text-red-400 font-black text-xl">VS</span>
+            <span className="font-black text-base text-zinc-200">{rivalNome}</span>
+          </div>
+          <p className="text-xs text-zinc-500 mt-3">Anos de rivalidade na geração finalmente se encontraram dentro de campo.</p>
+        </div>
+        <div className="p-3 border-t border-zinc-800"><Button variant="gold" onClick={onConcluir}>Seguir a temporada</Button></div>
+      </Card>
+    </PopupOverlay>
+  );
+}
+
+// Aposentadoria — a última volta, sem confete de festa, mais nostalgia que celebração.
+export function CenaAposentadoria({ nome, clube, onConcluir }) {
+  return (
+    <PopupOverlay>
+      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: "radial-gradient(circle at 50% 30%, #D8B44A22 0%, #050505 80%)" }}>
+        <div className="h-[360px] flex flex-col items-center justify-center px-5">
+          <div className="text-4xl mb-3 animate-[floatY_3s_ease-in-out_infinite]">🏟️</div>
+          <div className="animate-[popIn_0.6s_ease-out]">
+            <div className="font-black text-lg text-amber-400 mb-1">A última volta</div>
+            <p className="text-sm text-zinc-300 mb-1">{nome}</p>
+            <p className="text-xs text-zinc-500">Uma carreira inteira dedicada ao futebol chega ao fim.</p>
+          </div>
+        </div>
+        <div className="p-3 border-t border-zinc-800"><Button variant="gold" onClick={onConcluir}>Ver o legado</Button></div>
+      </Card>
+    </PopupOverlay>
+  );
+}
+
+// Despedida de um clube marcante — o inverso da chegada: guarda de honra na saída.
+export function CenaDespedidaClube({ clube, anos, onConcluir }) {
+  const cor = clube?.cor || "#D8B44A";
+  return (
+    <PopupOverlay>
+      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `radial-gradient(circle at 50% 25%, ${cor}2a 0%, #050505 80%)` }}>
+        <div className="h-[340px] flex flex-col items-center justify-center px-5">
+          <div className="animate-[popIn_0.5s_ease-out] flex flex-col items-center">
+            <ClubDot club={clube} size={56} />
+            <div className="font-black text-lg mt-3" style={{ color: cor }}>Obrigado, {clube?.nome}!</div>
+            <p className="text-xs text-zinc-500 mt-1">{anos} temporada(s) de casa — a torcida forma uma guarda de honra na sua saída.</p>
+          </div>
+        </div>
+        <div className="p-3 border-t border-zinc-800"><Button variant="gold" onClick={onConcluir}>Seguir em frente</Button></div>
+      </Card>
+    </PopupOverlay>
+  );
+}
+
 export function CartaoCarreira({ fim, temporadas, nome, posicao, onClose }) {
   const [pagina, setPagina] = useState(0);
   const c = fim.c;

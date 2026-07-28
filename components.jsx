@@ -21,12 +21,31 @@ export function Estrelas({ n }) { return <span className="text-amber-400 text-[1
 
 export function Diamond({ size = 64 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100">
-      <polygon points="20,42 32,15 50,42" fill="#5B9BDE" stroke="#111" strokeWidth="3.2" strokeLinejoin="round" />
-      <polygon points="80,42 68,15 50,42" fill="#5B9BDE" stroke="#111" strokeWidth="3.2" strokeLinejoin="round" />
-      <polygon points="32,15 68,15 50,42" fill="#AEE0FB" stroke="#111" strokeWidth="3.2" strokeLinejoin="round" />
-      <polygon points="20,42 50,42 50,95" fill="#4A86D0" stroke="#111" strokeWidth="3.2" strokeLinejoin="round" />
-      <polygon points="80,42 50,42 50,95" fill="#2F6FC4" stroke="#111" strokeWidth="3.2" strokeLinejoin="round" />
+    <svg width={size} height={size} viewBox="0 0 100 100" style={{ filter: "drop-shadow(0 6px 20px rgba(216,180,74,0.5))" }}>
+      <defs>
+        <linearGradient id="diamondTopLeft" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#F7E9B0" /><stop offset="100%" stopColor="#D8B44A" />
+        </linearGradient>
+        <linearGradient id="diamondTopRight" x1="1" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#E9C868" /><stop offset="100%" stopColor="#B8933A" />
+        </linearGradient>
+        <linearGradient id="diamondCrown" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#FFFAE6" /><stop offset="100%" stopColor="#F4E4A6" />
+        </linearGradient>
+        <linearGradient id="diamondLeft" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#C1A055" /><stop offset="100%" stopColor="#8A6B22" />
+        </linearGradient>
+        <linearGradient id="diamondRight" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#8A6B22" /><stop offset="100%" stopColor="#5E4712" />
+        </linearGradient>
+      </defs>
+      <polygon points="20,42 32,15 50,42" fill="url(#diamondTopLeft)" stroke="#FFFAE6" strokeOpacity="0.4" strokeWidth="1" strokeLinejoin="round" />
+      <polygon points="80,42 68,15 50,42" fill="url(#diamondTopRight)" stroke="#FFFAE6" strokeOpacity="0.3" strokeWidth="1" strokeLinejoin="round" />
+      <polygon points="32,15 68,15 50,42" fill="url(#diamondCrown)" stroke="#FFFAE6" strokeOpacity="0.6" strokeWidth="1" strokeLinejoin="round" />
+      <polygon points="20,42 50,42 50,95" fill="url(#diamondLeft)" stroke="#00000030" strokeWidth="1" strokeLinejoin="round" />
+      <polygon points="80,42 50,42 50,95" fill="url(#diamondRight)" stroke="#00000030" strokeWidth="1" strokeLinejoin="round" />
+      <polygon points="37,19 50,19 44,32" fill="#ffffff" opacity="0.6" />
+      <polygon points="24,40 33,26 38,40" fill="#ffffff" opacity="0.18" />
     </svg>
   );
 }
@@ -35,7 +54,19 @@ export function Sparkle({ size = 14, cor = "#7EC8F2" }) {
   return <svg width={size} height={size} viewBox="0 0 24 24"><path d="M12 0 L14.5 9.5 L24 12 L14.5 14.5 L12 24 L9.5 14.5 L0 12 L9.5 9.5 Z" fill={cor} /></svg>;
 }
 
-export function BallIcon({ size = 22, spin }) { return <svg width={size} height={size} viewBox="0 0 24 24" className={spin ? "animate-spin" : ""} style={spin ? { animationDuration: "1.6s" } : {}}><circle cx="12" cy="12" r="10" fill="#fff" stroke="#111" strokeWidth="1" /><polygon points="12,7 15,9.2 13.8,13 10.2,13 9,9.2" fill="#111" /></svg>; }
+export function BallIcon({ size = 22, spin }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={spin ? "animate-spin" : ""} style={spin ? { animationDuration: "1.6s" } : {}}>
+      <defs>
+        <radialGradient id="ballShade" cx="35%" cy="30%" r="75%">
+          <stop offset="0%" stopColor="#ffffff" /><stop offset="100%" stopColor="#d8d8dc" />
+        </radialGradient>
+      </defs>
+      <circle cx="12" cy="12" r="10" fill="url(#ballShade)" stroke="#00000025" strokeWidth="0.6" />
+      <polygon points="12,7 15,9.2 13.8,13 10.2,13 9,9.2" fill="#18181b" />
+    </svg>
+  );
+}
 
 export function BolaGirandoBox({ revelado }) {
   return (

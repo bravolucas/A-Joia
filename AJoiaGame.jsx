@@ -694,10 +694,23 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
   }
   function comprarItem(item) {
     const c = { ...carreira };
-    const { custo, manutencao } = precoAjustado(item, c);
+    const ehEstrutura = item.categoria === "Estrutura do Clube";
+    const { custo, manutencao } = ehEstrutura
+      ? { custo: Math.round(item.custo * clamp(c.clube.forca / 65, 0.55, 2.3)), manutencao: item.manutencao || 0 }
+      : precoAjustado(item, c);
     if (c.cofre < custo) return;
     if (item.categoria === "Estrutura do Clube" && (c.posses || []).some((p) => p.id === item.id && p.clubeDono === c.clube.nome)) return; // já adquirido e travado nesse clube
     if (item.requisitoVidaPessoal && !item.requisitoVidaPessoal(c.vidaPessoal)) return; // ainda não faz sentido pro seu momento de vida
+    // itens grandes de estrutura (força 3+) exigem aprovação da diretoria, não só dinheiro
+    if (ehEstrutura && item.forcaClube >= 3) {
+      const chanceAprovar = clamp((c.relacaoDiretoria ?? 40) / 100 + 0.15, 0.15, 0.95);
+      if (Math.random() >= chanceAprovar) {
+        logHist(c, `A diretoria do ${c.clube.nome} recusou o investimento em ${item.nome} — sua relação com eles ainda não é forte o bastante pra esse tipo de decisão.`);
+        setCarreira(c);
+        return;
+      }
+      c.relacaoDiretoria = clampR((c.relacaoDiretoria ?? 40) + 4, 0, 100);
+    }
     c.cofre -= custo;
     c.extrato = [...c.extrato, { idade: c.idade, tipo: `Compra: ${item.nome}`, valor: -custo }];
     item = { ...item, custo, manutencao };
@@ -716,9 +729,13 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
     }
     else if (item.forcaClube) {
       const clubeKey = c.clube.nome;
-      c.investimentosClube = { ...(c.investimentosClube || {}), [clubeKey]: clampR(((c.investimentosClube || {})[clubeKey] || 0) + item.forcaClube, 0, 18) };
+      // benefício também escala pelo tamanho do clube: clubes pequenos não têm estrutura
+      // organizacional pra aproveitar o investimento tão bem quanto um clube grande
+      const beneficioEfetivo = item.forcaClube * clamp(c.clube.forca / 72, 0.5, 1.15);
+      c.investimentosClube = { ...(c.investimentosClube || {}), [clubeKey]: clampR(((c.investimentosClube || {})[clubeKey] || 0) + beneficioEfetivo, 0, 18) };
+      c.investimentosClubeAno = { ...(c.investimentosClubeAno || {}), [clubeKey]: c.idade };
       c.posses = [...(c.posses || []), { ...item, clubeDono: clubeKey, compraId: Date.now() + Math.random() }];
-      logHist(c, `Investiu no clube: ${item.nome} (+${item.forcaClube} de força pro ${c.clube.nome}).`);
+      logHist(c, `Investiu no clube: ${item.nome} (+${beneficioEfetivo.toFixed(1)} de força pro ${c.clube.nome}).`);
     }
     else if (item.tipo === "acao") {
       const boostTorcida = (item.id === "fundacaoSocial" ? 15 : item.id === "ajudaHospital" ? 10 : 6) * fatorRepercussao;
@@ -1980,6 +1997,18 @@ function resolverTemporada(c, extraStats) {
       if (manutencaoStaff > 0) { c.cofre -= manutencaoStaff; c.extrato = [...c.extrato, { idade: c.idade, tipo: "Manutenção da equipe", valor: -manutencaoStaff }]; }
       c.staff = staffAtualizado;
       c.staffContratos = contratosAtualizados;
+    }
+
+    // Estrutura do clube decai devagar se você passar tempo sem reinvestir —
+    // não é mais "compra uma vez e esquece pra sempre".
+    if ((c.investimentosClube?.[c.clube.nome] || 0) > 0) {
+      const ultimoAno = c.investimentosClubeAno?.[c.clube.nome] ?? 0;
+      if (c.idade - ultimoAno >= 2) {
+        const atual = c.investimentosClube[c.clube.nome];
+        const decaido = Math.max(0, +(atual * 0.94).toFixed(2));
+        c.investimentosClube = { ...c.investimentosClube, [c.clube.nome]: decaido };
+        if (atual - decaido > 0.3) logHist(c, `A estrutura que você ajudou a construir no ${c.clube.nome} está ficando datada — sem reinvestimento recente, o efeito vem caindo aos poucos.`);
+      }
     }
 
     // Especialistas contratados: cada um empurra uma especialidade específica pra cima todo ano, enquanto durar o contrato
@@ -7717,19 +7746,25 @@ function resolverTemporada(c, extraStats) {
                   const contratoAtivo = item.tipo === "staff" ? carreira.staffContratos?.[item.id] : item.tipo === "staffEspecialista" ? carreira.especialistasContratados?.[item.especialidadeAlvo] : null;
                   const travadoEstrutura = item.categoria === "Estrutura do Clube" && (carreira.posses || []).some((p) => p.id === item.id && p.clubeDono === carreira.clube.nome);
                   const bloqueadoVidaPessoal = item.requisitoVidaPessoal && !item.requisitoVidaPessoal(carreira.vidaPessoal);
-                  const { custo, manutencao } = precoAjustado(item, carreira);
+                  const ehEstrutura = item.categoria === "Estrutura do Clube";
+                  const { custo, manutencao } = ehEstrutura
+                    ? { custo: Math.round(item.custo * clamp(carreira.clube.forca / 65, 0.55, 2.3)), manutencao: item.manutencao || 0 }
+                    : precoAjustado(item, carreira);
+                  const beneficioEfetivo = ehEstrutura ? item.forcaClube * clamp(carreira.clube.forca / 72, 0.5, 1.15) : 0;
                   const desabilitado = travadoEstrutura || bloqueadoVidaPessoal || carreira.cofre < custo;
                   return (
                     <button key={item.id} onClick={() => comprarItem(item)} disabled={desabilitado} className="flex justify-between items-center px-3 py-2 text-xs rounded-sm border border-zinc-800 hover:border-emerald-500 disabled:opacity-40 text-left gap-2">
                       <span className="flex-1">
                         <span className="mr-1.5">{item.icone}</span>{item.nome}
                         {item.desc && <span className="block text-[9px] text-zinc-500 mt-0.5">{item.desc}</span>}
+                        {ehEstrutura && <span className="block text-[9px] text-emerald-400/80 mt-0.5">+{beneficioEfetivo.toFixed(1)} de força pro {carreira.clube.nome} (escala com o tamanho do clube)</span>}
+                        {ehEstrutura && item.forcaClube >= 3 && <span className="block text-[9px] text-amber-400/80 mt-0.5">🏛️ precisa de aprovação da diretoria — sua relação atual pesa na decisão</span>}
                         {item.efeitoFisico != null && <span className={`block text-[9px] mt-0.5 ${item.efeitoFisico < 0 ? "text-emerald-400" : "text-red-400"}`}>{item.efeitoFisico < 0 ? "🩺 reduz" : "🩺 aumenta"} o desgaste em {Math.abs(item.efeitoFisico)}/ano</span>}
                         {item.efeitoMoral > 0 && <span className="block text-[9px] text-pink-300/80 mt-0.5">💞 +{item.efeitoMoral} de moral do elenco</span>}
                         {PESO_OSTENTACAO[item.categoria] > 0 && <span className="block text-[9px] text-pink-400/70 mt-0.5">💸 aumenta seu padrão de vida</span>}
                         {manutencao > 0 && <span className="block text-[9px] text-zinc-600 mt-0.5">manutenção ${formatarDinheiro(manutencao)}/ano{item.duracaoTemporadas ? ` · contrato de ${item.duracaoTemporadas} temporada(s)` : ""}</span>}
                         {contratoAtivo && <span className="block text-[9px] text-emerald-400 mt-0.5">✓ ativo — {contratoAtivo.restantes} temporada(s) restante(s) · clique pra renovar</span>}
-                        {travadoEstrutura && <span className="block text-[9px] text-amber-400 mt-0.5">🔒 já construído no {carreira.clube.nome} — some se você for embora</span>}
+                        {travadoEstrutura && <span className="block text-[9px] text-amber-400 mt-0.5">🔒 já construído no {carreira.clube.nome} — some se você for embora, e decai se você passar anos sem reinvestir</span>}
                         {bloqueadoVidaPessoal && <span className="block text-[9px] text-zinc-600 mt-0.5">🔒 disponível conforme sua vida pessoal avança</span>}
                       </span>
                       <span className="font-mono text-amber-400 shrink-0">{travadoEstrutura ? "✓" : `$${formatarDinheiro(custo)}`}</span>

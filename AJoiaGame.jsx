@@ -373,6 +373,14 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
         }
       }
       c.clube = clubeNovo; c.anoNoClube = 0;
+      // Se a temporada já estava montada pro clube antigo (ex: aceitou uma
+      // oferta de empréstimo bem no início da temporada, antes de jogar
+      // qualquer rodada), o calendário precisa ser refeito pro clube novo —
+      // senão nenhum jogo seu aparece nele, e toda rodada vira "empate" padrão.
+      if (c.temporadaAndamento && (c.temporadaAndamento.rodadaAtual || 0) === 0) {
+        const novoCalendario = gerarCalendarioLiga(clubeNovo, CLUBES, clubeNovo.liga);
+        c.temporadaAndamento = { ...c.temporadaAndamento, calendario: novoCalendario, tabela: criarTabelaZerada(clubeNovo.liga) };
+      }
       c.elenco = gerarElenco(clubeNovo, mundo, c.posicao);
       c.recordesClube = { ...(c.recordesClube || {}), [clubeNovo.nome]: (c.recordesClube || {})[clubeNovo.nome] || gerarRecordeClube(clubeNovo) };
       registrarMarco(c, "transferencia", `${tipoTransfer === "emprestimo" ? "Emprestado ao" : "Assinou com o"} ${clubeNovo.nome} (${LIGAS[clubeNovo.liga].nome}).`, clubeNovo.nome);

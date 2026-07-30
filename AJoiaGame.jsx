@@ -467,11 +467,10 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
     // Perfil de mídia (reputação acumulada) empurra a chance de patrocínio: quem
     // é conhecido como comunicativo atrai mais atenção de marca; quem é discreto, menos.
     const empurraPatrocinio = clamp((c.reputacaoMidia ?? 0) / 500, -0.06, 0.06);
-    if (roll < 0.32) setDecisao(pick(DECISOES_JOGO));
-    else if (roll < 0.44 + empurraPatrocinio) setPendingSponsor(pick(patrocinadoresDisponiveis(c)));
-    else if (roll < 0.56 + empurraPatrocinio) setPendingLegendFollow(pick(LENDAS).nome);
-    else if (roll < 0.68 + empurraPatrocinio) setPendingTecnico(pick(PEDIDOS_TECNICO));
-    else if (roll < 0.8 + empurraPatrocinio) setPendingColetiva(true);
+    if (roll < 0.12 + empurraPatrocinio) setPendingSponsor(pick(patrocinadoresDisponiveis(c)));
+    else if (roll < 0.24 + empurraPatrocinio) setPendingLegendFollow(pick(LENDAS).nome);
+    else if (roll < 0.36 + empurraPatrocinio) setPendingTecnico(pick(PEDIDOS_TECNICO));
+    else if (roll < 0.48 + empurraPatrocinio) setPendingColetiva(true);
     else resolverTemporada(c, {});
   }
   function negociarMeta(delta) {
@@ -1861,7 +1860,6 @@ function resolverTemporada(c, extraStats) {
 
     // O mundo avança junto: rivais rendem, evoluem, trocam de clube e se aposentam
     const mundoAtualizado = mundo ? simularTemporadaMundo(mundo) : null;
-    if (mundoAtualizado) setMundo(mundoAtualizado);
 
     // Artilharia real da liga e disputa real da Bola de Ouro
     let rankingBO = [], artilhariaReal = [], meuPostoBO = null;
@@ -1882,8 +1880,25 @@ function resolverTemporada(c, extraStats) {
     }
 
     const premios = avaliarPremios(card, c.posicao, copa?.titulo, nome, c.rivalPosicao, meuPostoBO);
-    premios.forEach((p) => { if (p.nome === "BOLA DE OURO" && !p.doJogador) c.rivalBolasDeOuro = (c.rivalBolasDeOuro || 0) + 1; });
     premios.forEach((p) => { if (p.doJogador) { c.premiosIndividuais += 1; if (p.bolaDeOuro) { c.bolasDeOuro += 1; logHist(c, "Conquistou a BOLA DE OURO!"); } } });
+    // Bolas de Ouro do rival: antes só contava quando o sistema de prêmios
+    // "sorteava" o rival especificamente como vencedor (raro, já que o mundo
+    // tem milhares de jogadores) — agora conta de verdade sempre que o
+    // vencedor real da temporada (no Hall da Fama do mundo) é o seu rival.
+    if (mundoAtualizado && meuPostoBO !== 1 && (mundoAtualizado.historicoBolaDeOuro || []).length) {
+      const vencedorReal = mundoAtualizado.historicoBolaDeOuro[mundoAtualizado.historicoBolaDeOuro.length - 1];
+      if (vencedorReal?.nome === c.rivalPosicao) c.rivalBolasDeOuro = (c.rivalBolasDeOuro || 0) + 1;
+    }
+    // O Hall da Fama do mundo (aba Mundo) calculava o vencedor da temporada
+    // só entre os jogadores simulados, sem saber que você mesmo pode ter
+    // vencido de verdade — corrige o registro dessa temporada com seu nome
+    // quando você é realmente o nº1 do ranking.
+    if (mundoAtualizado && meuPostoBO === 1 && (mundoAtualizado.historicoBolaDeOuro || []).length) {
+      const hist = [...mundoAtualizado.historicoBolaDeOuro];
+      hist[hist.length - 1] = { ...hist[hist.length - 1], nome, clube: c.clube.nome, ovr: card.ovr, gols: card.gols, assist: card.assist, voce: true };
+      mundoAtualizado.historicoBolaDeOuro = hist;
+    }
+    if (mundoAtualizado) setMundo(mundoAtualizado);
 
     c.gols += card.gols; c.assist += card.assist; c.melhorEmCampo += card.melhorEmCampo;
 
@@ -2220,7 +2235,6 @@ function resolverTemporada(c, extraStats) {
         const motivoTxt = dest.motivo === "demitido" ? "foi demitido depois de uma temporada ruim" : dest.motivo === "assediado" ? "foi levado por um clube maior" : "encerrou o ciclo";
         trocaTecnico = { antigo: antigo.nome, novo: novo.nome, motivo: dest.motivo, estiloNovo: novo.estilo };
         logHist(c, `🔄 ${antigo.nome} ${motivoTxt}. ${novo.nome} assume o comando (${estiloTecnico(novo.estilo).nome}).`);
-        registrarMarco(c, "transferencia", `${novo.nome} assumiu o comando do ${c.clube.nome} no lugar de ${antigo.nome}.`);
       } else if (dest) {
         c.tecnico = { ...c.tecnico, temporadas: dest.temporadas };
         // com o tempo, quem combina com o estilo do técnico ganha confiança
@@ -3390,7 +3404,10 @@ function resolverTemporada(c, extraStats) {
   function investirPontoDesenvolvimento(attr) {
     const c = { ...carreira };
     if ((c.xpDesenvolvimento || 0) < CUSTO_PONTO_DESENVOLVIMENTO) return;
-    const teto = Math.min(99, c.potencial?.[attr] ?? 99);
+    // O teto vai um pouco além do potencial natural — a árvore existe pra
+    // representar esforço extra e dedicado, não só repetir o que o treino
+    // comum já alcançaria sozinho (senão nunca sobraria nada pra investir).
+    const teto = Math.min(99, (c.potencial?.[attr] ?? 99) + 6);
     if ((c.attrs[attr] ?? 0) >= teto) return;
     c.xpDesenvolvimento -= CUSTO_PONTO_DESENVOLVIMENTO;
     c.attrs = { ...c.attrs, [attr]: clampR((c.attrs[attr] ?? 40) + 1, 40, teto) };
@@ -5055,7 +5072,7 @@ function resolverTemporada(c, extraStats) {
                     {NUM_ATTRS.map((attr) => {
                       const info = ATTR_SLOTS.find((a) => a.id === attr);
                       const atual = carreira.attrs[attr] ?? 40;
-                      const teto = Math.min(99, carreira.potencial?.[attr] ?? 99);
+                      const teto = Math.min(99, (carreira.potencial?.[attr] ?? 99) + 6);
                       const noTeto = atual >= teto;
                       const semPontos = (carreira.xpDesenvolvimento || 0) < CUSTO_PONTO_DESENVOLVIMENTO;
                       return (
@@ -7767,12 +7784,14 @@ function resolverTemporada(c, extraStats) {
                 <div className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1 mb-1">Categorias da loja</div>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    ["Estrutura do Clube", "🏟️"], ["Garagem", "🚗"], ["Imóveis", "🏠"], ["Joias", "💎"],
+                    ["Estrutura do Clube", "🏟️"], ["Especialistas", "🎯"], ["Garagem", "🚗"], ["Imóveis", "🏠"], ["Joias", "💎"],
                     ["Luxo", "🥂"], ["Ações Sociais", "🤝"], ["Staff", "🧑‍💼"],
                   ].map(([cat, icone]) => {
                     const itens = LOJA_ITENS.filter((it) => it.categoria === cat);
                     const possuidos = cat === "Staff"
                       ? itens.filter((it) => !!carreira.staff?.[it.id]).length
+                      : cat === "Especialistas"
+                      ? Object.keys(carreira.especialistasContratados || {}).length
                       : cat === "Estrutura do Clube"
                       ? (carreira.posses || []).filter((p) => p.categoria === "Estrutura do Clube" && p.clubeDono === carreira.clube.nome).length
                       : 0;

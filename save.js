@@ -139,6 +139,8 @@ const PADRAO_CARREIRA = {
   premiosIndividuais: 0, copasDoMundo: 0, fama: 12, cofre: 0, desgaste: 0, energia: 100,
   picoOvr: 50, anosDesdeCopa: 0, anoNoClube: 0, sequela: 0,
   tecnicoConfianca: 60, relacaoDiretoria: 40, calorMidia: 20, elencoMoral: 60,
+  especialidades: { bolaParada: 35, lancamento: 35, recuperacao: 35, finalizacaoFora: 35, finalizacaoArea: 35, cabeceio: 35, drible: 35, folego: 35, jogoAereoDefensivo: 35, primeiroToque: 35 },
+  especialistasContratados: {},
   entrosamento: 20, titularidade: 100, relacaoPatrocinadores: 50, ostentacao: 0,
   historico: [], marcos: [], inbox: [], posses: [], traits: [], extrato: [],
   titulosLista: [], titulosSelecao: [], clubesInteresse: [], lesoesHistorico: [],
@@ -160,6 +162,8 @@ export function normalizarCarreira(c) {
   if (!out.attrs || typeof out.attrs !== "object") out.attrs = { velocidade: 50, finalizacao: 50, passe: 50, drible: 50, defesa: 50, fisico: 50, fintas: 3, pernaRuim: 3 };
   if (!out.potencial || typeof out.potencial !== "object") out.potencial = { ...out.attrs };
   if (!out.attrsAnteriores) out.attrsAnteriores = { ...out.attrs };
+  if (!out.especialidades || typeof out.especialidades !== "object") out.especialidades = { ...PADRAO_CARREIRA.especialidades };
+  else out.especialidades = { ...out.especialidades };
   if (!out.clube || !out.clube.nome) out.clube = { nome: "Clube", liga: "brasileirao", forca: 60, cor: "#12A876" };
   return out;
 }

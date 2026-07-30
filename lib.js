@@ -1764,7 +1764,7 @@ export function gerarMundoJogadores() {
       JOGADORES_REAIS_BASE.filter((j) => j.time === clube.nome).forEach((jr) => {
         const idade = rand(18, 33);
         const teto = clampR(jr.ovr + rand(0, idade < 23 ? 12 : 4), 58, 99);
-        const nac = nomeParaNac(clube);
+        const nac = jr.nac || nomeParaNac(clube);
         jogadores.push({
           id: id++, nome: jr.nome, nac, posicao: jr.posicao,
           idade, ovr: jr.ovr, potencial: teto, picoIdade: rand(26, 30), clubeNome: clube.nome, clubeOrigem: clube.nome, liga: clube.liga,

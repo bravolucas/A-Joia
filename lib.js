@@ -1704,14 +1704,9 @@ export function simularTemporada(c) {
   const campeaoLiga = posLiga === 1;
 
   let continental = null, continentalPendente = null;
-  if (posLiga <= 6 || Math.random() < 0.45) {
-    const r = forcaTotal + (Math.random() - 0.5) * 12;
-    const corte = liga.continental === "Champions League" ? 92 : 84;
-    if (r >= corte - 12) {
-      const estagio = r >= corte ? "final" : r >= corte - 6 ? "semi" : "quartas";
-      continentalPendente = { nome: liga.continental, estagio, forcaBase: r, corte, adversario: sortearAdversario(c, "continental") };
-    }
-    else continental = { nome: liga.continental, resultado: "Eliminado cedo", titulo: false };
+  if (liga.continental && (posLiga <= 6 || Math.random() < 0.45)) {
+    const formato = liga.continental === "Champions League" ? "liga" : "grupo";
+    continentalPendente = { nome: liga.continental, formato };
   }
 
   let copaNacional = null, copaNacionalPendente = null;

@@ -2734,9 +2734,19 @@ export const ESTADUAIS = {
 
 export const FASES_POR_COMPETICAO = {
   estadual: [{ id: "grupos", label: "Fase de Grupos", prep: "na" }, { id: "semifinal", label: "Semifinal", prep: "na" }],
-  copaNacional: [{ id: "oitavas", label: "Oitavas de Final", prep: "nas" }, { id: "quartas", label: "Quartas de Final", prep: "nas" }, { id: "semifinal", label: "Semifinal", prep: "na" }],
+  copaNacional: [{ id: "oitavas", label: "Oitavas de Final", prep: "nas", idaVolta: true }, { id: "quartas", label: "Quartas de Final", prep: "nas", idaVolta: true }, { id: "semifinal", label: "Semifinal", prep: "na", idaVolta: true }],
   copinha: [{ id: "grupos", label: "Fase de Grupos", prep: "na" }, { id: "oitavas", label: "Oitavas de Final", prep: "nas" }, { id: "quartas", label: "Quartas de Final", prep: "nas" }, { id: "semifinal", label: "Semifinal", prep: "na" }],
+  // Continental: oitavas/quartas/semi em ida e volta (placar agregado), final em jogo único —
+  // igual às competições de verdade (Champions League e Libertadores).
+  continental: [{ id: "oitavas", label: "Oitavas de Final", prep: "nas", idaVolta: true }, { id: "quartas", label: "Quartas de Final", prep: "nas", idaVolta: true }, { id: "semifinal", label: "Semifinal", prep: "na", idaVolta: true }],
 };
+
+/* Fase inicial da Continental antes do mata-mata — dois formatos reais:
+   "grupo" (Libertadores: grupo de 4, todos contra todos em ida e volta, 6
+   jogos, os 2 primeiros avançam) e "liga" (Champions League desde 2024/25:
+   modelo suíço, jogos contra adversários diferentes, sem repetir, decidido
+   por pontos corridos — aqui adaptado pra 6 jogos por escala de temporada). */
+export const JOGOS_FASE_CONTINENTAL = 6;
 
 export const FASES_COPA_MUNDO = [
   { id: "grupos", label: "Fase de Grupos", prep: "na" },

@@ -1176,6 +1176,17 @@ function acumularStatsCompeticao(card, campo, golsMinha, assistMinha) {
   const atual = card.statsCompeticoes?.[campo] || { gols: 0, assist: 0, jogos: 0 };
   card.statsCompeticoes = { ...card.statsCompeticoes, [campo]: { gols: atual.gols + (golsMinha || 0), assist: atual.assist + (assistMinha || 0), jogos: atual.jogos + 1 } };
 }
+/* Agenda a próxima partida de mata-mata pra uma rodada futura de verdade,
+   em vez de encadear na hora — rodadas de copa ficam semanas separadas na
+   vida real, intercaladas com o campeonato, não uma atrás da outra. */
+function agendarEventoMataMata(c, evento, atrasoRodadas) {
+  const ta = c.temporadaAndamento;
+  const totalRodadas = ta?.calendario?.length || 38;
+  const minimo = (ta?.rodadaAtual || 0) + 1;
+  const rodadaAlvo = minimo >= totalRodadas - 1 ? totalRodadas - 1 : clampR(minimo + atrasoRodadas - 1, minimo, totalRodadas - 1);
+  const eventosNovos = [...(ta?.eventosAgendados || []), { ...evento, rodadaAlvo }].sort((a, b) => a.rodadaAlvo - b.rodadaAlvo);
+  c.temporadaAndamento = { ...ta, eventosAgendados: eventosNovos };
+}
 /* Continental de clube: fase de grupos de verdade (Libertadores — grupo de
    4, ida e volta, 6 jogos) ou fase de liga (Champions League modelo suíço —
    6 adversários diferentes, sem repetir), decidida por pontos corridos.
@@ -1228,8 +1239,9 @@ function concluirPartidaContinentalClube(c, ctx, resultado, golsMinha, assistMin
     if (formato === "grupo") {
       // Libertadores: precisa terminar entre os 2 primeiros do grupo de 4 (equivalente a 8+ pontos em 6 jogos)
       if (total >= 8) {
-        setCompeticaoResultado({ titulo: `${nomeCompeticao} — ${nomeFase1} concluída`, texto: `Terminou com ${total} pontos — classificado entre os 2 primeiros do grupo! Começa o mata-mata.`, icone: "🎉", nomeCompeticao });
-        iniciarPartidaContinentalClube(c, card, null, sortearAdversario(c, "continental"), Math.random() < 0.5, { faseIdx: 0, perna: "ida", agregadoMeu: 0, agregadoAdv: 0 });
+        setCompeticaoResultado({ titulo: `${nomeCompeticao} — ${nomeFase1} concluída`, texto: `Terminou com ${total} pontos — classificado entre os 2 primeiros do grupo! Começa o mata-mata daqui a algumas rodadas.`, icone: "🎉", nomeCompeticao });
+        agendarEventoMataMata(c, { tipo: "continental", jogoGrupo: null, adversario: sortearAdversario(c, "continental"), souCasa: Math.random() < 0.5, opcoesMataMata: { faseIdx: 0, perna: "ida", agregadoMeu: 0, agregadoAdv: 0 } }, rand(3, 5));
+        setCarreira(c);
         return;
       }
       card.continental = { nome: nomeCompeticao, resultado: "Eliminado na fase de grupos", titulo: false, placar: placarTxt };
@@ -1239,13 +1251,15 @@ function concluirPartidaContinentalClube(c, ctx, resultado, golsMinha, assistMin
     }
     // Champions League (modelo suíço): 13+ direto às oitavas, 8-12 playoff, menos que isso eliminado
     if (total >= 13) {
-      setCompeticaoResultado({ titulo: `${nomeCompeticao} — ${nomeFase1} concluída`, texto: `Terminou com ${total} pontos — entre os melhores da fase de liga! Classificação direta às oitavas.`, icone: "🎉", nomeCompeticao });
-      iniciarPartidaContinentalClube(c, card, null, sortearAdversario(c, "continental"), Math.random() < 0.5, { faseIdx: 0, perna: "ida", agregadoMeu: 0, agregadoAdv: 0 });
+      setCompeticaoResultado({ titulo: `${nomeCompeticao} — ${nomeFase1} concluída`, texto: `Terminou com ${total} pontos — entre os melhores da fase de liga! Classificação direta às oitavas, daqui a algumas rodadas.`, icone: "🎉", nomeCompeticao });
+      agendarEventoMataMata(c, { tipo: "continental", jogoGrupo: null, adversario: sortearAdversario(c, "continental"), souCasa: Math.random() < 0.5, opcoesMataMata: { faseIdx: 0, perna: "ida", agregadoMeu: 0, agregadoAdv: 0 } }, rand(3, 5));
+      setCarreira(c);
       return;
     }
     if (total >= 8) {
-      setCompeticaoResultado({ titulo: `${nomeCompeticao} — ${nomeFase1} concluída`, texto: `Terminou com ${total} pontos — vai ter que passar pelo playoff (ida e volta) pra seguir na competição.`, icone: "⚡", nomeCompeticao });
-      iniciarPartidaContinentalClube(c, card, null, sortearAdversario(c, "continental"), Math.random() < 0.5, { faseIdx: -1, perna: "ida", agregadoMeu: 0, agregadoAdv: 0 });
+      setCompeticaoResultado({ titulo: `${nomeCompeticao} — ${nomeFase1} concluída`, texto: `Terminou com ${total} pontos — vai ter que passar pelo playoff (ida e volta) pra seguir na competição, daqui a algumas rodadas.`, icone: "⚡", nomeCompeticao });
+      agendarEventoMataMata(c, { tipo: "continental", jogoGrupo: null, adversario: sortearAdversario(c, "continental"), souCasa: Math.random() < 0.5, opcoesMataMata: { faseIdx: -1, perna: "ida", agregadoMeu: 0, agregadoAdv: 0 } }, rand(3, 5));
+      setCarreira(c);
       return;
     }
     card.continental = { nome: nomeCompeticao, resultado: "Eliminado na fase de liga", titulo: false, placar: placarTxt };
@@ -1262,8 +1276,9 @@ function concluirPartidaContinentalClube(c, ctx, resultado, golsMinha, assistMin
 
   if (idaVolta && perna === "ida") {
     logHist(c, `${nomeCompeticao} — ${nomeFaseAtual} (ida) x ${adversario}: ${placarTxt}.`);
-    setCompeticaoResultado({ titulo: `${nomeCompeticao} — ${nomeFaseAtual} (ida)`, texto: `Primeiro jogo terminou ${placarTxt} contra o ${adversario}. Decide no placar agregado na volta.`, icone: "🔁", nomeCompeticao });
-    iniciarPartidaContinentalClube(c, card, null, adversario, !ctx.souCasa, { faseIdx, perna: "volta", agregadoMeu: resultado.golsMeu, agregadoAdv: resultado.golsAdv });
+    setCompeticaoResultado({ titulo: `${nomeCompeticao} — ${nomeFaseAtual} (ida)`, texto: `Primeiro jogo terminou ${placarTxt} contra o ${adversario}. Decide no placar agregado na volta, daqui a algumas rodadas.`, icone: "🔁", nomeCompeticao });
+    agendarEventoMataMata(c, { tipo: "continental", jogoGrupo: null, adversario, souCasa: !ctx.souCasa, opcoesMataMata: { faseIdx, perna: "volta", agregadoMeu: resultado.golsMeu, agregadoAdv: resultado.golsAdv } }, rand(1, 2));
+    setCarreira(c);
     return;
   }
 
@@ -1287,7 +1302,8 @@ function concluirPartidaContinentalClube(c, ctx, resultado, golsMinha, assistMin
     return;
   }
   const proximaFase = faseIdx === -1 ? 0 : faseIdx + 1;
-  iniciarPartidaContinentalClube(c, card, null, sortearAdversario(c, "continental"), Math.random() < 0.5, { faseIdx: proximaFase, perna: "ida", agregadoMeu: 0, agregadoAdv: 0 });
+  agendarEventoMataMata(c, { tipo: "continental", jogoGrupo: null, adversario: sortearAdversario(c, "continental"), souCasa: Math.random() < 0.5, opcoesMataMata: { faseIdx: proximaFase, perna: "ida", agregadoMeu: 0, agregadoAdv: 0 } }, rand(3, 5));
+  setCarreira(c);
 }
 function concluirPartidaMataMata(c, ctx, resultado, golsMinha, assistMinha) {
   const { tipo, faseIdx, card, perna, agregadoMeu, agregadoAdv } = ctx.copa;
@@ -1302,8 +1318,9 @@ function concluirPartidaMataMata(c, ctx, resultado, golsMinha, assistMinha) {
 
   if (idaVolta && perna === "ida") {
     logHist(c, `${nomeCompeticao} — ${fases[faseIdx].label} (ida) x ${adversario}: ${placarTxt}.`);
-    setCompeticaoResultado({ titulo: `${nomeCompeticao} — ${fases[faseIdx].label} (ida)`, texto: `Primeiro jogo terminou ${placarTxt} contra o ${adversario}. Decide no placar agregado na volta.`, icone: "🔁", nomeCompeticao });
-    iniciarPartidaMataMata(c, tipo, adversario, faseIdx, card, { perna: "volta", agregadoMeu: resultado.golsMeu, agregadoAdv: resultado.golsAdv, souCasa: !ctx.souCasa });
+    setCompeticaoResultado({ titulo: `${nomeCompeticao} — ${fases[faseIdx].label} (ida)`, texto: `Primeiro jogo terminou ${placarTxt} contra o ${adversario}. Decide no placar agregado na volta, daqui a algumas rodadas.`, icone: "🔁", nomeCompeticao });
+    agendarEventoMataMata(c, { tipo, faseIdx, adversario, opcoesIdaVolta: { perna: "volta", agregadoMeu: resultado.golsMeu, agregadoAdv: resultado.golsAdv, souCasa: !ctx.souCasa } }, rand(1, 2));
+    setCarreira(c);
     return;
   }
 
@@ -1327,7 +1344,8 @@ function concluirPartidaMataMata(c, ctx, resultado, golsMinha, assistMinha) {
     setCompeticaoResultado({ titulo: `${nomeCompeticao} encerrada`, texto: `Derrota por ${placarFinal} contra o ${adversario}. A campanha parou ${f.prep} ${f.label}.`, icone: "😔", epico: true, venceu: false, nomeCompeticao });
     return;
   }
-  iniciarPartidaMataMata(c, tipo, sortearAdversario(c, tipo), faseIdx + 1, card);
+  agendarEventoMataMata(c, { tipo, faseIdx: faseIdx + 1, adversario: sortearAdversario(c, tipo) }, rand(3, 5));
+  setCarreira(c);
 }
 /* Copa do Mundo: fase de grupos de verdade (3 jogos, classifica com 4+ pontos)
    e depois mata-mata (dezesseis-avos → oitavas → quartas → semifinal → final),
@@ -2685,11 +2703,11 @@ function resolverTemporada(c, extraStats) {
       const [proximoEvento, ...resto] = ta.eventosAgendados;
       c.temporadaAndamento = { ...ta, eventosAgendados: resto };
       if (proximoEvento.tipo === "copaNacional" || proximoEvento.tipo === "estadual" || proximoEvento.tipo === "copinha") {
-        iniciarPartidaMataMata(c, proximoEvento.tipo, proximoEvento.adversario, 0, ta.cardOriginal);
+        iniciarPartidaMataMata(c, proximoEvento.tipo, proximoEvento.adversario, proximoEvento.faseIdx ?? 0, ta.cardOriginal, proximoEvento.opcoesIdaVolta);
         return;
       }
       if (proximoEvento.tipo === "continental") {
-        iniciarPartidaContinentalClube(c, ta.cardOriginal, proximoEvento.jogoGrupo, proximoEvento.adversario, proximoEvento.souCasa);
+        iniciarPartidaContinentalClube(c, ta.cardOriginal, proximoEvento.jogoGrupo ?? null, proximoEvento.adversario, proximoEvento.souCasa, proximoEvento.opcoesMataMata);
         return;
       }
       if (proximoEvento.tipo === "copaDoMundo") {

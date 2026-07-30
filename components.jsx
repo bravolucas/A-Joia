@@ -1690,6 +1690,95 @@ export function AttrBar({ label, value, max = 99, posicao }) {
   );
 }
 
+export function GraficoEvolucaoCarreira({ temporadas }) {
+  const [hoverIdx, setHoverIdx] = useState(null);
+  const [linhasAtivas, setLinhasAtivas] = useState({ ovr: true, nota: true, gols: false, assist: false });
+  if (!temporadas.length) return null;
+  const w = 300, h = 130, pad = 16;
+  const idades = temporadas.map((t) => t.idade);
+  const minIdade = Math.min(...idades), maxIdade = Math.max(...idades);
+  const metricas = {
+    ovr: { cor: "#12A876", label: "OVR", valores: temporadas.map((t) => t.ovr || 0) },
+    nota: { cor: "#D8B44A", label: "Nota ×10", valores: temporadas.map((t) => (t.nota || 0) * 10) },
+    gols: { cor: "#3b82f6", label: "Gols", valores: temporadas.map((t) => t.gols || 0) },
+    assist: { cor: "#a855f7", label: "Assistências", valores: temporadas.map((t) => t.assist || 0) },
+  };
+  const ativos = Object.entries(metricas).filter(([k]) => linhasAtivas[k]);
+  const todosValores = ativos.flatMap(([, m]) => m.valores);
+  const minV = Math.min(...todosValores, 0) - 2;
+  const maxV = Math.max(...todosValores, 1) + 2;
+  const xFor = (idade) => pad + ((idade - minIdade) / Math.max(1, maxIdade - minIdade)) * (w - 2 * pad);
+  const yFor = (v) => h - pad - ((v - minV) / Math.max(1, maxV - minV)) * (h - 2 * pad);
+  const t = hoverIdx != null ? temporadas[hoverIdx] : null;
+
+  return (
+    <div>
+      <div className="flex gap-1.5 mb-2 flex-wrap">
+        {Object.entries(metricas).map(([k, m]) => (
+          <button key={k} onClick={() => setLinhasAtivas((la) => ({ ...la, [k]: !la[k] }))}
+            className="text-[9px] px-2 py-1 rounded-full border transition-colors"
+            style={{ borderColor: linhasAtivas[k] ? m.cor : "#3f3f46", color: linhasAtivas[k] ? m.cor : "#71717a", background: linhasAtivas[k] ? `${m.cor}18` : "transparent" }}>
+            {m.label}
+          </button>
+        ))}
+      </div>
+      <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" onMouseLeave={() => setHoverIdx(null)}>
+        {ativos.map(([k, m]) => {
+          const pts = temporadas.map((tp, i) => `${xFor(tp.idade)},${yFor(m.valores[i])}`).join(" ");
+          return <polyline key={k} points={pts} fill="none" stroke={m.cor} strokeWidth="2" />;
+        })}
+        {hoverIdx != null && <line x1={xFor(temporadas[hoverIdx].idade)} x2={xFor(temporadas[hoverIdx].idade)} y1="0" y2={h} stroke="#ffffff2a" strokeWidth="1" />}
+        {temporadas.map((tp, i) => (
+          <rect key={i} x={xFor(tp.idade) - 9} y="0" width="18" height={h} fill="transparent" style={{ cursor: "pointer" }}
+            onMouseEnter={() => setHoverIdx(i)} onClick={() => setHoverIdx(i === hoverIdx ? null : i)} />
+        ))}
+      </svg>
+      {t ? (
+        <div className="mt-1.5 text-[10px] bg-zinc-950/50 rounded-sm p-2 border border-zinc-800">
+          <span className="font-bold text-zinc-300">{t.idade} anos — {t.temporadaLabel || t.clube}:</span>
+          <span className="text-zinc-500"> OVR {t.ovr} · Nota {(t.nota || 0).toFixed(1)} · {t.gols || 0}G {t.assist || 0}A</span>
+        </div>
+      ) : (
+        <p className="text-[9px] text-zinc-600 mt-1.5">Toque numa temporada pra ver os números exatos.</p>
+      )}
+    </div>
+  );
+}
+
+export function ComparadorTemporadas({ temporadas }) {
+  const [aIdx, setAIdx] = useState(0);
+  const [bIdx, setBIdx] = useState(temporadas.length - 1);
+  if (temporadas.length < 2) return <p className="text-[10px] text-zinc-600">Precisa de pelo menos 2 temporadas pra comparar.</p>;
+  const a = temporadas[aIdx], b = temporadas[bIdx];
+  const linhas = [["OVR", "ovr", 0], ["Nota média", "nota", 1], ["Gols", "gols", 0], ["Assistências", "assist", 0], ["Jogos", "jogos", 0]];
+  const opt = (t, i) => <option key={i} value={i}>{t.idade} anos — {t.temporadaLabel || t.clube}</option>;
+  return (
+    <div>
+      <div className="flex gap-2 mb-3 items-center">
+        <select value={aIdx} onChange={(e) => setAIdx(+e.target.value)} className="flex-1 bg-zinc-800 border border-zinc-700 rounded-sm px-2 py-1.5 text-[10px] outline-none">
+          {temporadas.map(opt)}
+        </select>
+        <span className="text-zinc-600 text-[10px] shrink-0">vs</span>
+        <select value={bIdx} onChange={(e) => setBIdx(+e.target.value)} className="flex-1 bg-zinc-800 border border-zinc-700 rounded-sm px-2 py-1.5 text-[10px] outline-none">
+          {temporadas.map(opt)}
+        </select>
+      </div>
+      <div className="grid gap-0.5">
+        {linhas.map(([label, key, casas]) => {
+          const va = a[key] || 0, vb = b[key] || 0;
+          return (
+            <div key={key} className="grid grid-cols-3 text-[11px] items-center py-1 border-b border-zinc-900">
+              <span className={`text-right font-mono ${va > vb ? "text-emerald-400 font-bold" : "text-zinc-400"}`}>{va.toFixed(casas)}</span>
+              <span className="text-center text-zinc-600 text-[9px] uppercase">{label}</span>
+              <span className={`text-left font-mono ${vb > va ? "text-emerald-400 font-bold" : "text-zinc-400"}`}>{vb.toFixed(casas)}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function CurvaEvolucao({ temporadas }) {
   if (!temporadas.length) return null;
   const w = 280, h = 90, pad = 10;

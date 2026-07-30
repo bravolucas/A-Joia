@@ -1852,7 +1852,16 @@ export function simularTemporadaMundo(mundo) {
     });
   }
   const jogadoresLimpos = jogadores.filter((j) => !j.aposentado || j.idade <= 45);
-  return { ...mundo, jogadores: jogadoresLimpos, temporada: (mundo.temporada || 0) + 1 };
+  // Hall da fama: registra quem ficou no topo do ranking mundial nessa
+  // temporada — histórico existia declarado, mas nunca era preenchido.
+  const candidatos = jogadoresLimpos.filter((j) => !j.aposentado && j.jogos > 0);
+  let historicoBolaDeOuro = mundo.historicoBolaDeOuro || [];
+  if (candidatos.length) {
+    const vencedor = candidatos.reduce((a, b) => (scoreJogadorMundo(b) > scoreJogadorMundo(a) ? b : a));
+    historicoBolaDeOuro = [...historicoBolaDeOuro, { temporada: (mundo.temporada || 0) + 1, nome: vencedor.nome, clube: vencedor.clubeNome, ovr: vencedor.ovr, gols: vencedor.gols, assist: vencedor.assist }].slice(-30);
+    vencedor.carreira.bolasDeOuro = (vencedor.carreira.bolasDeOuro || 0) + 1;
+  }
+  return { ...mundo, jogadores: jogadoresLimpos, temporada: (mundo.temporada || 0) + 1, historicoBolaDeOuro };
 }
 
 export function scoreBolaDeOuro({ ovr, gols, assist, nota, ligaMult, titulos = 0 }) {

@@ -6903,6 +6903,24 @@ function resolverTemporada(c, extraStats) {
                       </Card>
 
                       <Card>
+                        <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-2">🏛️ Hall da Fama — Bola de Ouro do mundo</div>
+                        {(mundo.historicoBolaDeOuro || []).length === 0 ? (
+                          <p className="text-[10px] text-zinc-600">Ainda sem histórico registrado — os primeiros vencedores aparecem ao longo das temporadas.</p>
+                        ) : (
+                          <div className="grid gap-1">
+                            {[...mundo.historicoBolaDeOuro].reverse().slice(0, 8).map((v, i) => (
+                              <div key={i} className="flex items-center gap-2 text-[11px] py-1 px-1.5 rounded-sm odd:bg-zinc-950/30">
+                                <span className="font-mono text-zinc-600 w-8">{v.temporada}</span>
+                                <span className="flex-1 truncate text-zinc-200 font-bold">{v.nome}</span>
+                                <span className="text-[9px] text-zinc-600 truncate max-w-[90px]">{v.clube}</span>
+                                <span className="font-mono text-amber-400 text-[10px]">{v.gols}G {v.assist}A</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </Card>
+
+                      <Card>
                         <div className="text-[10px] text-cyan-400 uppercase tracking-widest mb-2">🌎 Seleção {nacDe(carreira.nacionalidade)?.label}</div>
                         {(() => {
                           const sel = carreira.selecao || { jogos: 0, gols: 0, assist: 0, historico: [] };

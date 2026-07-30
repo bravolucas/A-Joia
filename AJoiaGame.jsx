@@ -128,6 +128,8 @@ export default function AJoiaGame() {
   const [inboxFiltro, setInboxFiltro] = useState("todas");
   const [vestiarioAberto, setVestiarioAberto] = useState(false);
   const [savesAberto, setSavesAberto] = useState(false);
+  const [buscaComparador, setBuscaComparador] = useState("");
+  const [jogadorComparado, setJogadorComparado] = useState(null);
   const [editandoLabelSlot, setEditandoLabelSlot] = useState(null);
   const [avisoSave, setAvisoSave] = useState(null);
   const [temSave, setTemSave] = useState(false);
@@ -6918,6 +6920,53 @@ function resolverTemporada(c, extraStats) {
                             ))}
                           </div>
                         )}
+                      </Card>
+
+                      <Card>
+                        <div className="text-[10px] text-blue-400 uppercase tracking-widest mb-2">🔍 Comparar com jogador do mundo</div>
+                        <input value={buscaComparador} onChange={(e) => { setBuscaComparador(e.target.value); setJogadorComparado(null); }} placeholder="Buscar por nome..." className="w-full bg-zinc-800 border border-zinc-700 rounded-sm px-2.5 py-1.5 text-[11px] outline-none focus:border-blue-500 mb-2" />
+                        {buscaComparador.trim().length >= 2 && !jogadorComparado && (
+                          <div className="grid gap-1 mb-2 max-h-32 overflow-y-auto">
+                            {mundo.jogadores.filter((j) => !j.aposentado && j.nome.toLowerCase().includes(buscaComparador.toLowerCase())).slice(0, 6).map((j) => (
+                              <button key={j.id} onClick={() => setJogadorComparado(j)} className="text-left px-2 py-1.5 text-[10px] rounded-sm border border-zinc-800 hover:border-blue-500">
+                                <span className="font-bold text-zinc-200">{j.nome}</span> <span className="text-zinc-600">· {j.clubeNome} · OVR {j.ovr}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        {jogadorComparado && (() => {
+                          const vEle = valorMundo(jogadorComparado);
+                          const vMeu = valorDeMercado(carreira, ovrAtual, ultima);
+                          const linhas = [
+                            ["OVR", ovrAtual, jogadorComparado.ovr, 0],
+                            ["Idade", carreira.idade, jogadorComparado.idade, 0],
+                            ["Gols (temporada)", ultima?.gols || 0, jogadorComparado.gols, 0],
+                            ["Assistências (temporada)", ultima?.assist || 0, jogadorComparado.assist, 0],
+                            ["Nota média", ultima?.nota || 0, jogadorComparado.nota, 1],
+                          ];
+                          return (
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-[10px] font-bold text-zinc-300">{jogadorComparado.nome} <span className="text-zinc-600 font-normal">({jogadorComparado.clubeNome})</span></span>
+                                <button onClick={() => { setJogadorComparado(null); setBuscaComparador(""); }} className="text-[9px] text-zinc-600 hover:text-red-400">trocar ✕</button>
+                              </div>
+                              <div className="grid gap-0.5">
+                                {linhas.map(([label, meu, dele, casas]) => (
+                                  <div key={label} className="grid grid-cols-3 text-[11px] items-center py-1 border-b border-zinc-900">
+                                    <span className={`text-right font-mono ${meu > dele ? "text-emerald-400 font-bold" : "text-zinc-400"}`}>{meu.toFixed(casas)}</span>
+                                    <span className="text-center text-zinc-600 text-[9px] uppercase">{label}</span>
+                                    <span className={`text-left font-mono ${dele > meu ? "text-emerald-400 font-bold" : "text-zinc-400"}`}>{dele.toFixed(casas)}</span>
+                                  </div>
+                                ))}
+                                <div className="grid grid-cols-3 text-[11px] items-center py-1">
+                                  <span className={`text-right font-mono ${vMeu > vEle ? "text-emerald-400 font-bold" : "text-zinc-400"}`}>${formatarDinheiro(vMeu)}</span>
+                                  <span className="text-center text-zinc-600 text-[9px] uppercase">Valor de mercado</span>
+                                  <span className={`text-left font-mono ${vEle > vMeu ? "text-emerald-400 font-bold" : "text-zinc-400"}`}>${formatarDinheiro(vEle)}</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </Card>
 
                       <Card>

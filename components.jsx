@@ -640,6 +640,37 @@ export function CenaAssinaturaContrato({ clube, funcaoNome, onConcluir }) {
   );
 }
 
+export function TimelineCarreira({ marcos, tiposMarco }) {
+  const [selecionado, setSelecionado] = useState(null);
+  if (!marcos?.length) return <p className="text-[10px] text-zinc-600">Nenhum marco registrado ainda — eles vão aparecendo conforme sua carreira acontece.</p>;
+  return (
+    <div>
+      <div className="flex gap-3 overflow-x-auto pb-2 pt-1" style={{ scrollbarWidth: "thin" }}>
+        {marcos.map((m, i) => {
+          const info = tiposMarco[m.tipo] || { icone: "•", cor: "#71717a" };
+          const ativo = selecionado === i;
+          return (
+            <button key={i} onClick={() => setSelecionado(ativo ? null : i)} className="flex flex-col items-center shrink-0 relative" style={{ width: 52 }}>
+              {i > 0 && <div className="absolute top-4 right-full w-3 h-px" style={{ background: "#3f3f46" }} />}
+              <div className="w-9 h-9 rounded-full flex items-center justify-center text-base border-2 transition-transform" style={{ borderColor: ativo ? info.cor : `${info.cor}55`, background: ativo ? `${info.cor}22` : "#18181b", transform: ativo ? "scale(1.12)" : "scale(1)" }}>
+                {info.icone}
+              </div>
+              <span className="text-[8px] text-zinc-500 mt-1">{m.idade}a</span>
+            </button>
+          );
+        })}
+      </div>
+      {selecionado != null && marcos[selecionado] && (
+        <div className="mt-2 text-[11px] bg-zinc-950/50 rounded-sm p-2.5 border border-zinc-800 animate-[fadeIn_0.2s_ease-out]">
+          <span className="font-bold" style={{ color: (tiposMarco[marcos[selecionado].tipo] || {}).cor }}>{(tiposMarco[marcos[selecionado].tipo] || {}).label || marcos[selecionado].tipo}</span>
+          <span className="text-zinc-500"> · {marcos[selecionado].idade} anos{marcos[selecionado].clube ? ` · ${marcos[selecionado].clube}` : ""}</span>
+          <p className="text-zinc-300 mt-1">{marcos[selecionado].texto}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function CartaoCarreira({ fim, temporadas, nome, posicao, onClose }) {
   const [pagina, setPagina] = useState(0);
   const c = fim.c;

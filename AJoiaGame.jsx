@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { montarSave, salvarLocal, carregarLocal, apagarLocal, listarSaves, existeAlgumSave, baixarSave, lerArquivoSave, formatarData, normalizarSave, SLOTS } from "./save.js";
+import { montarSave, salvarLocal, carregarLocal, apagarLocal, listarSaves, existeAlgumSave, baixarSave, lerArquivoSave, formatarData, normalizarSave, definirLabelSlot, SLOTS } from "./save.js";
 import { ANO_INICIO, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONFEDERACAO_POR_NACAO, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, ESPECIALIDADES_LISTA, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, FUNCOES_ELENCO, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
 import { agregarPorCompeticao, ajustarMeta, ajustesDoContexto, analisarJogos, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusEspecialidades, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, continentalDaSelecao, creditarTitulo, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, ehClassicoReal, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, especialidadesIniciais, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, fatorTitulosTemporada, forcaEfetivaClube, formatarDinheiro, gerarChegadaClube, gerarColetivaPosJogo, gerarContextoLance, gerarElenco, gerarEventoAmbiente, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, PIRAMIDE_LIGAS, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearClima, sortearConcorrente, sortearFormacao, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, todosJogosCarreira, valorDeMercado, valorMundo, veredito } from "./lib.js";
 import { AttrBarDelta, AttrRadar, BallIcon, ApresentacaoNovoClube, Button, CalendarioTemporadaPopup, Card, CartaoCarreira,
@@ -128,6 +128,7 @@ export default function AJoiaGame() {
   const [inboxFiltro, setInboxFiltro] = useState("todas");
   const [vestiarioAberto, setVestiarioAberto] = useState(false);
   const [savesAberto, setSavesAberto] = useState(false);
+  const [editandoLabelSlot, setEditandoLabelSlot] = useState(null);
   const [avisoSave, setAvisoSave] = useState(null);
   const [temSave, setTemSave] = useState(false);
   const [fichaJogo, setFichaJogo] = useState(null);
@@ -7678,14 +7679,26 @@ function resolverTemporada(c, extraStats) {
               <div className="text-[10px] text-emerald-400 uppercase tracking-widest mb-1">💾 Carreiras salvas</div>
               <p className="text-[10px] text-zinc-600 mb-3">O jogo salva sozinho no fim de cada temporada. Use os espaços 1, 2 e 3 pra guardar momentos específicos.</p>
               <div className="grid gap-1.5 mb-3">
-                {listarSaves().map(({ slot, existe, resumo }) => (
+                {listarSaves().map(({ slot, existe, resumo, label }) => (
                   <div key={slot} className={`border rounded-sm p-2.5 ${existe ? "border-zinc-700" : "border-zinc-800 border-dashed"}`}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[11px] font-bold" style={{ color: slot === "auto" ? "#D8B44A" : "#e4e4e7" }}>
-                        {slot === "auto" ? "⚡ Automático" : `💾 Espaço ${slot}`}
+                        {slot === "auto" ? "⚡ Automático" : label ? `💾 ${label}` : `💾 Espaço ${slot}`}
                       </span>
                       {existe && <span className="text-[9px] text-zinc-600">{formatarData(resumo.salvoEm)}</span>}
                     </div>
+                    {existe && slot !== "auto" && (
+                      editandoLabelSlot === slot ? (
+                        <div className="flex gap-1 mb-1.5">
+                          <input autoFocus defaultValue={label || ""} placeholder="Dar um nome pra esse save..." maxLength={40}
+                            onKeyDown={(e) => { if (e.key === "Enter") { definirLabelSlot(slot, e.target.value); setEditandoLabelSlot(null); } if (e.key === "Escape") setEditandoLabelSlot(null); }}
+                            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-sm px-2 py-1 text-[10px] outline-none focus:border-emerald-500" />
+                          <button onClick={(e) => { definirLabelSlot(slot, e.target.previousSibling.value); setEditandoLabelSlot(null); }} className="text-[9px] text-emerald-400 px-2">✓</button>
+                        </div>
+                      ) : (
+                        <button onClick={() => setEditandoLabelSlot(slot)} className="text-[9px] text-zinc-600 hover:text-emerald-400 mb-1 block">✏️ {label ? "renomear" : "dar um nome"}</button>
+                      )
+                    )}
                     {existe ? (
                       <>
                         <div className="text-[11px] text-zinc-300">{resumo.nome} · {resumo.posicao} · {resumo.idade} anos</div>

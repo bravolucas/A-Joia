@@ -4,7 +4,23 @@
 
 export const VERSAO_SAVE = 1;
 const PREFIXO = "ajoia_save_";
-export const SLOTS = ["auto", "1", "2", "3"];
+const CHAVE_LABELS = "ajoia_save_labels";
+export const SLOTS = ["auto", "1", "2", "3", "4", "5"];
+
+/* Rótulos personalizados por slot (ex: "Carreira do zagueiro chileno") —
+   guardados à parte do save em si, pra facilitar identificar qual é qual. */
+export function obterLabelsSlots() {
+  try { return JSON.parse(localStorage.getItem(CHAVE_LABELS) || "{}"); } catch { return {}; }
+}
+export function definirLabelSlot(slot, label) {
+  try {
+    const labels = obterLabelsSlots();
+    if (label && label.trim()) labels[slot] = label.trim().slice(0, 40);
+    else delete labels[slot];
+    localStorage.setItem(CHAVE_LABELS, JSON.stringify(labels));
+    return true;
+  } catch { return false; }
+}
 
 /* Monta o objeto salvável a partir do estado do jogo.
    Só entra o que é essencial pra retomar: estado de interface (popups, filtros)
@@ -58,13 +74,14 @@ export function carregarLocal(slot) {
 }
 
 export function apagarLocal(slot) {
-  try { localStorage.removeItem(chave(slot)); return true; } catch { return false; }
+  try { localStorage.removeItem(chave(slot)); definirLabelSlot(slot, null); return true; } catch { return false; }
 }
 
 export function listarSaves() {
+  const labels = obterLabelsSlots();
   return SLOTS.map((slot) => {
     const save = carregarLocal(slot);
-    return { slot, existe: !!save, resumo: resumoDoSave(save) };
+    return { slot, existe: !!save, resumo: resumoDoSave(save), label: labels[slot] || null };
   });
 }
 

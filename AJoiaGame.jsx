@@ -4377,9 +4377,27 @@ function resolverTemporada(c, extraStats) {
                               )}
                             </div>
                           </div>
-                        ) : eventoEspecial ? (
-                          <div className="text-xs text-zinc-400">Próximo compromisso: <span className="text-amber-400 font-bold">{eventoEspecial.tipo === "copaDoMundo" ? "Copa do Mundo" : eventoEspecial.tipo === "copaNacional" ? "Copa Nacional" : eventoEspecial.tipo === "estadual" ? "Estadual" : eventoEspecial.tipo === "copinha" ? "Copinha" : eventoEspecial.tipo === "selecaoAno" ? "Seleção" : "evento especial"}</span></div>
-                        ) : (
+                        ) : eventoEspecial ? (() => {
+                          const configEvento = {
+                            copaDoMundo: { nome: "Copa do Mundo", icone: "🌎", cor: "#3b82f6" },
+                            copaNacional: { nome: "Copa Nacional", icone: "🏆", cor: "#D8B44A" },
+                            estadual: { nome: nomeMataMata(carreira, "estadual"), icone: "🚩", cor: "#f59e0b" },
+                            copinha: { nome: "Copa São Paulo de Futebol Júnior", icone: "🌱", cor: "#12A876" },
+                            selecaoAno: { nome: "Seleção", icone: "🌎", cor: "#22D3EE" },
+                          }[eventoEspecial.tipo] || { nome: "Evento especial", icone: "⭐", cor: "#71717a" };
+                          const faseLabel = eventoEspecial.faseIdx != null ? FASES_POR_COMPETICAO[eventoEspecial.tipo]?.[eventoEspecial.faseIdx]?.label : null;
+                          const nomeAdv = typeof eventoEspecial.adversario === "string" ? eventoEspecial.adversario : eventoEspecial.adversario?.nome;
+                          const advObj = nomeAdv ? CLUBES.find((cl) => cl.nome === nomeAdv) : null;
+                          return (
+                            <div className="flex items-center gap-2.5">
+                              {advObj ? <ClubDot club={advObj} size={28} /> : <div className="text-xl">{configEvento.icone}</div>}
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-bold truncate" style={{ color: configEvento.cor }}>{configEvento.nome}</div>
+                                <div className="text-[10px] text-zinc-500">{faseLabel || "Fase decisiva"}{nomeAdv ? ` · vs ${nomeAdv}` : ""}</div>
+                              </div>
+                            </div>
+                          );
+                        })() : (
                           <div className="text-xs text-zinc-500">Nenhuma partida agendada no momento.</div>
                         )}
                       </Card>

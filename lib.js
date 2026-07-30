@@ -1509,7 +1509,13 @@ export function sortearAdversario(c, competicao) {
     return pool.length ? pick(pool).nome : "adversário nacional";
   }
   if (competicao === "continental") {
-    const pool = CLUBES.filter((x) => x.liga === c.clube.liga && x.nome !== c.clube.nome);
+    // Continental de verdade cruza países dentro do mesmo grupo continental
+    // (Champions League = Espanha/Inglaterra/Itália/Alemanha/França/Portugal
+    // todos entre si) — antes só sorteava dentro da própria liga, o que nem
+    // de longe é como a Champions/Libertadores funcionam.
+    const meuGrupo = LIGAS[c.clube.liga]?.continental;
+    const ligasDoGrupo = Object.keys(LIGAS).filter((l) => LIGAS[l].continental === meuGrupo);
+    const pool = CLUBES.filter((x) => ligasDoGrupo.includes(x.liga) && x.nome !== c.clube.nome);
     return pool.length ? pick(pool).nome : "adversário continental";
   }
   if (competicao === "copaDoMundo") {

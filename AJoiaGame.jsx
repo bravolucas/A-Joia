@@ -378,11 +378,25 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
       c.clube = clubeNovo; c.anoNoClube = 0;
       // Se a temporada já estava montada pro clube antigo (ex: aceitou uma
       // oferta de empréstimo bem no início da temporada, antes de jogar
-      // qualquer rodada), o calendário precisa ser refeito pro clube novo —
-      // senão nenhum jogo seu aparece nele, e toda rodada vira "empate" padrão.
+      // qualquer rodada), o calendário e os adversários de copa/estadual/
+      // continental já sorteados pro time antigo precisam ser refeitos —
+      // senão ficam "presos", podendo até misturar países num confronto
+      // que deveria ser só nacional (ex: Copa Nacional contra time de fora).
       if (c.temporadaAndamento && (c.temporadaAndamento.rodadaAtual || 0) === 0) {
         const novoCalendario = gerarCalendarioLiga(clubeNovo, CLUBES, clubeNovo.liga);
-        c.temporadaAndamento = { ...c.temporadaAndamento, calendario: novoCalendario, tabela: criarTabelaZerada(clubeNovo.liga) };
+        const ta = c.temporadaAndamento;
+        const cardAjustado = ta.cardOriginal ? { ...ta.cardOriginal } : null;
+        if (cardAjustado?.copaNacionalPendente) cardAjustado.copaNacionalPendente = { ...cardAjustado.copaNacionalPendente, adversario: sortearAdversario(c, "copaNacional") };
+        if (cardAjustado?.continentalPendente) cardAjustado.continentalPendente = { ...cardAjustado.continentalPendente, adversario: sortearAdversario(c, "continental") };
+        const eventosAjustados = (ta.eventosAgendados || []).map((ev) => {
+          if (ev.tipo === "copinha" || ev.tipo === "estadual") {
+            if (!clubeNovo.estado) return null; // clube novo não é brasileiro/sem estadual — o evento não existe mais
+            return { ...ev, adversario: sortearAdversario(c, ev.tipo) };
+          }
+          if (ev.tipo === "classico" || ev.tipo === "falta") return { ...ev, adversario: sortearAdversario(c, "classico") };
+          return ev;
+        }).filter(Boolean);
+        c.temporadaAndamento = { ...ta, calendario: novoCalendario, tabela: criarTabelaZerada(clubeNovo.liga), cardOriginal: cardAjustado, eventosAgendados: eventosAjustados };
       }
       c.elenco = gerarElenco(clubeNovo, mundo, c.posicao);
       c.recordesClube = { ...(c.recordesClube || {}), [clubeNovo.nome]: (c.recordesClube || {})[clubeNovo.nome] || gerarRecordeClube(clubeNovo) };
@@ -1482,7 +1496,10 @@ function resolverTemporada(c, extraStats) {
     // Copinha é sempre a primeira competição do ano — acontece em janeiro,
     // antes do estadual e de qualquer outra coisa. Vai primeiro na fila e,
     // mais abaixo, o agendamento força ela pra rodada 1 mesmo assim.
-    if (c.idade <= 18 && c.clube.estado && !c.copinhaJogadaTemporada) { fila.push({ tipo: "copinha", faseIdx: 0, adversario: sortearAdversario(c, "copinha") }); c.copinhaJogadaTemporada = true; }
+    // Só existe na primeira temporada da carreira, e só com clube brasileiro —
+    // antes podia repetir em qualquer temporada enquanto tivesse <= 18 anos.
+    if (!c.copinhaOportunidadeExpirada && c.clube.estado) { fila.push({ tipo: "copinha", faseIdx: 0, adversario: sortearAdversario(c, "copinha") }); }
+    c.copinhaOportunidadeExpirada = true;
     if (card.lesao) fila.push({ tipo: "lesao" });
     if (querCopa && !card.copaResultado) fila.push({ tipo: "copaDoMundo", faseIdx: 0, ramo: null, adversario: sortearAdversario(c, "copaDoMundo") });
     if (!querCopa && conv.convocado && modoSimulacao === "jogoAJogo") fila.push({ tipo: "selecaoAno", competicaoId: compSelecao.id, nomeCompeticao: compSelecao.nome || continentalDaSelecao(c.nacionalidade) });

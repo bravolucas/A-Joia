@@ -1176,6 +1176,13 @@ function acumularStatsCompeticao(card, campo, golsMinha, assistMinha) {
   const atual = card.statsCompeticoes?.[campo] || { gols: 0, assist: 0, jogos: 0 };
   card.statsCompeticoes = { ...card.statsCompeticoes, [campo]: { gols: atual.gols + (golsMinha || 0), assist: atual.assist + (assistMinha || 0), jogos: atual.jogos + 1 } };
 }
+/* Registro permanente de cada partida de copa/continental jogada na
+   carreira — igual à liga já guarda rodada a rodada, isso guarda fase a
+   fase, com placar, adversário e resultado, pra sempre poder acompanhar
+   depois (aba Estatísticas). Nunca é apagado entre temporadas. */
+function registrarPartidaCopa(c, info) {
+  c.historicoPartidasCopa = [...(c.historicoPartidasCopa || []), { idade: c.idade, clube: c.clube.nome, ...info }].slice(-120);
+}
 /* Agenda a próxima partida de mata-mata pra uma rodada futura de verdade,
    em vez de encadear na hora — rodadas de copa ficam semanas separadas na
    vida real, intercaladas com o campeonato, não uma atrás da outra. */
@@ -1226,6 +1233,11 @@ function concluirPartidaContinentalClube(c, ctx, resultado, golsMinha, assistMin
   const adversario = ctx.adversario;
   const placarTxt = `${resultado.golsMeu}-${resultado.golsAdv}`;
   acumularStatsCompeticao(card, "continental", golsMinha, assistMinha);
+  {
+    const fases = FASES_POR_COMPETICAO.continental;
+    const faseLabelRegistro = jogoGrupo != null ? (formato === "grupo" ? "Fase de Grupos" : "Fase de Liga") : faseIdx === -1 ? "Playoff" : faseIdx >= fases.length ? "Final" : fases[faseIdx].label;
+    registrarPartidaCopa(c, { competicao: nomeCompeticao, fase: faseLabelRegistro, adversario, resultado: resultado.resultado, placar: placarTxt, casa: ctx.souCasa });
+  }
 
   // ---- fase de grupos (Libertadores) ou fase de liga (Champions) ----
   if (jogoGrupo != null) {
@@ -1315,6 +1327,7 @@ function concluirPartidaMataMata(c, ctx, resultado, golsMinha, assistMinha) {
   const idaVolta = !ehFinal && fases[faseIdx].idaVolta;
   const placarTxt = `${resultado.golsMeu}-${resultado.golsAdv}`;
   acumularStatsCompeticao(card, campo, golsMinha, assistMinha);
+  registrarPartidaCopa(c, { competicao: nomeCompeticao, fase: ehFinal ? "Final" : fases[faseIdx].label, adversario, resultado: resultado.resultado, placar: placarTxt, casa: ctx.souCasa });
 
   if (idaVolta && perna === "ida") {
     logHist(c, `${nomeCompeticao} — ${fases[faseIdx].label} (ida) x ${adversario}: ${placarTxt}.`);
@@ -6818,6 +6831,43 @@ function resolverTemporada(c, extraStats) {
                     <ComparadorTemporadas temporadas={temporadas} />
                   </Card>
                 )}
+                {(() => {
+                  const contPendente = carreira.temporadaAndamento?.cardOriginal?.continentalPendente;
+                  const hist = carreira.historicoPartidasCopa || [];
+                  if (!contPendente && !hist.length) return null;
+                  return (
+                    <Card className="span-full" accent="linear-gradient(90deg,#3b82f6,#D8B44A)">
+                      <div className="text-[10px] text-blue-400 uppercase tracking-widest mb-2">🏆 Acompanhamento de Copas</div>
+                      {contPendente && (
+                        <div className="mb-3 p-2.5 rounded-sm border border-blue-500/30 bg-blue-500/5">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[11px] font-bold text-zinc-200">{contPendente.nome} — {contPendente.formato === "grupo" ? "Fase de Grupos" : "Fase de Liga"}</span>
+                            <span className="text-[11px] font-mono text-amber-400">{contPendente.pontosGrupo || 0} pts</span>
+                          </div>
+                          {(() => {
+                            const jogosDaFase = hist.filter((h) => h.idade === carreira.idade && h.competicao === contPendente.nome && (h.fase === "Fase de Grupos" || h.fase === "Fase de Liga"));
+                            const v = jogosDaFase.filter((j) => j.resultado === "V").length;
+                            const e = jogosDaFase.filter((j) => j.resultado === "E").length;
+                            const d = jogosDaFase.filter((j) => j.resultado === "D").length;
+                            return <div className="text-[10px] text-zinc-500">{jogosDaFase.length}/{JOGOS_FASE_CONTINENTAL} jogos disputados · {v}V {e}E {d}D</div>;
+                          })()}
+                        </div>
+                      )}
+                      {hist.length > 0 && (
+                        <div className="grid gap-1 max-h-64 overflow-y-auto">
+                          {[...hist].reverse().slice(0, 25).map((h, i) => (
+                            <div key={i} className="flex items-center gap-2 text-[11px] py-1 px-1.5 rounded-sm odd:bg-zinc-950/30">
+                              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black shrink-0 ${h.resultado === "V" ? "bg-emerald-500/20 text-emerald-400" : h.resultado === "D" ? "bg-red-500/20 text-red-400" : "bg-zinc-700 text-zinc-300"}`}>{h.resultado}</span>
+                              <span className="flex-1 min-w-0 truncate text-zinc-300">{h.competicao} <span className="text-zinc-600">· {h.fase}</span></span>
+                              <span className="text-zinc-500 text-[10px] shrink-0">{h.casa ? "🏠" : "✈️"} {h.adversario}</span>
+                              <span className="font-mono text-zinc-400 shrink-0">{h.placar}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </Card>
+                  );
+                })()}
                 {carreira.cartoes && (
                   <Card>
                     <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2.5">🟨 Ficha disciplinar</div>

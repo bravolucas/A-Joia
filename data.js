@@ -491,14 +491,18 @@ export const EIXOS_APROVACAO = [
 ];
 
 export const LIGAS = {
-  serieB: { nome: "Brasileirão Série B", mult: 0.62, continental: "Acesso à Série A" },
-  inglaterra2: { nome: "Championship", mult: 0.72, continental: "Acesso à Premier League" },
-  espanha2: { nome: "LaLiga 2", mult: 0.66, continental: "Acesso à LaLiga" },
-  italia2: { nome: "Serie B (Itália)", mult: 0.64, continental: "Acesso à Serie A" },
-  alemanha2: { nome: "2. Bundesliga", mult: 0.68, continental: "Acesso à Bundesliga" },
-  franca2: { nome: "Ligue 2", mult: 0.63, continental: "Acesso à Ligue 1" },
-  portugal2: { nome: "Liga Portugal 2", mult: 0.55, continental: "Acesso à Liga Portugal" },
+  // Segundas divisões — não disputam competição continental (vaga é só pra
+  // primeira divisão e, em alguns países, o campeão de copa). "promocao" é
+  // só um rótulo de referência pro acesso à elite, não uma competição real.
+  serieB: { nome: "Brasileirão Série B", mult: 0.62, promocao: "Acesso à Série A" },
+  inglaterra2: { nome: "Championship", mult: 0.72, promocao: "Acesso à Premier League" },
+  espanha2: { nome: "LaLiga 2", mult: 0.66, promocao: "Acesso à LaLiga" },
+  italia2: { nome: "Serie B (Itália)", mult: 0.64, promocao: "Acesso à Serie A" },
+  alemanha2: { nome: "2. Bundesliga", mult: 0.68, promocao: "Acesso à Bundesliga" },
+  franca2: { nome: "Ligue 2", mult: 0.63, promocao: "Acesso à Ligue 1" },
+  portugal2: { nome: "Liga Portugal 2", mult: 0.55, promocao: "Acesso à Liga Portugal" },
   brasileirao: { nome: "Brasileirão", mult: 0.8, continental: "Libertadores" },
+  sulamericano: { nome: "Outras Ligas Sul-Americanas", mult: 0.65, continental: "Libertadores", naoJogavel: true },
   portugal: { nome: "Liga Portugal", mult: 0.82, continental: "Champions League" },
   franca: { nome: "Ligue 1", mult: 0.88, continental: "Champions League" },
   italia: { nome: "Serie A", mult: 0.95, continental: "Champions League" },
@@ -597,12 +601,34 @@ export function nomeDosTitulos(ligaId) {
   return {
     liga: br ? "Brasileirão" : (LIGAS[ligaId]?.nome || "Liga"),
     copa: br ? "Copa do Brasil" : (COMPS_PAIS[ligaId]?.copa || "Copa Nacional"),
-    continental: br ? "Libertadores" : "Champions League",
+    continental: LIGAS[ligaId]?.continental || (ligaId === "brasileirao" ? "Libertadores" : ""),
     mundial: "Mundial de Clubes",
   };
 }
 
 export const CLUBES = [
+  // ---- Outras ligas sul-americanas (só pra completar a Libertadores) ----
+  { nome: "Boca Juniors", forca: 82, liga: "sulamericano", cor: "#1E3A8A" },
+  { nome: "River Plate", forca: 83, liga: "sulamericano", cor: "#DC2626" },
+  { nome: "Racing Club", forca: 72, liga: "sulamericano", cor: "#87CEEB" },
+  { nome: "Independiente", forca: 68, liga: "sulamericano", cor: "#DC143C" },
+  { nome: "San Lorenzo", forca: 66, liga: "sulamericano", cor: "#00008B" },
+  { nome: "Estudiantes de La Plata", forca: 65, liga: "sulamericano", cor: "#DC2626" },
+  { nome: "Talleres", forca: 64, liga: "sulamericano", cor: "#0047AB" },
+  { nome: "Argentinos Juniors", forca: 62, liga: "sulamericano", cor: "#DC2626" },
+  { nome: "Peñarol", forca: 68, liga: "sulamericano", cor: "#FFD700" },
+  { nome: "Nacional de Montevidéu", forca: 67, liga: "sulamericano", cor: "#87CEEB" },
+  { nome: "Atlético Nacional", forca: 70, liga: "sulamericano", cor: "#004225" },
+  { nome: "Millonarios", forca: 66, liga: "sulamericano", cor: "#003DA5" },
+  { nome: "Junior de Barranquilla", forca: 64, liga: "sulamericano", cor: "#DC2626" },
+  { nome: "Colo-Colo", forca: 68, liga: "sulamericano", cor: "#000000" },
+  { nome: "Universidad de Chile", forca: 65, liga: "sulamericano", cor: "#0033A0" },
+  { nome: "Universidad Católica", forca: 64, liga: "sulamericano", cor: "#87CEEB" },
+  { nome: "Olimpia", forca: 62, liga: "sulamericano", cor: "#000000" },
+  { nome: "Cerro Porteño", forca: 61, liga: "sulamericano", cor: "#DC2626" },
+  { nome: "LDU de Quito", forca: 63, liga: "sulamericano", cor: "#FFD700" },
+  { nome: "Independiente del Valle", forca: 64, liga: "sulamericano", cor: "#DC2626" },
+  { nome: "Barcelona de Guayaquil", forca: 62, liga: "sulamericano", cor: "#FFD700" },
   // SÉRIE B
   { nome: "Ceará", forca: 58, liga: "serieB", estado: "CE", modesto: true, cor: "#1A1A1A" },
   { nome: "Guarani", forca: 55, liga: "serieB", estado: "SP", modesto: true, cor: "#005C2E" },

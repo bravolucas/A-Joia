@@ -658,7 +658,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
     const ovr = calcOVR(c.attrs, c.posicao, c.papelTatico);
     let pool = (c.clubesInteresse || []).map((nome) => CLUBES.find((x) => x.nome === nome)).filter(Boolean);
     if (pool.length < 3) {
-      const extras = CLUBES.filter((x) => x.nome !== c.clube.nome && !pool.some((p) => p.nome === x.nome) && Math.abs(x.forca - ovr) <= 10);
+      const extras = CLUBES.filter((x) => x.nome !== c.clube.nome && x.liga !== "sulamericano" && !pool.some((p) => p.nome === x.nome) && Math.abs(x.forca - ovr) <= 10);
       while (pool.length < 3 && extras.length) pool.push(extras.splice(Math.floor(Math.random() * extras.length), 1)[0]);
     }
     pool = pool.slice(0, 3);
@@ -1702,10 +1702,10 @@ function resolverTemporada(c, extraStats) {
         setPendingConvocacao({ competicao: compSelecao, querCopa, nacionalidade: c.nacionalidade });
       } else if (!c.emprestimo && calcOVR(c.attrs, c.posicao) >= 68 && !(c.clubeCoracao && c.clube.nome === c.clubeCoracao.nome) && Math.random() < 0.12) {
         // Oferta inesperada: o clube aceitou proposta por você — negocia ou fica
-        const pool = CLUBES.filter((x) => x.nome !== c.clube.nome && Math.abs(x.forca - forcaEfetivaClube(c, c.clube)) <= 10);
+        const pool = CLUBES.filter((x) => x.nome !== c.clube.nome && x.liga !== "sulamericano" && Math.abs(x.forca - forcaEfetivaClube(c, c.clube)) <= 10);
         if (pool.length) setPendingOfertaInesperada({ tipo: "venda", clube: pick(pool) });
       } else if (!c.emprestimo && ((c.titularidade ?? 100) < 40 || c.idade <= 20) && Math.random() < 0.18) {
-        const poolFraco = CLUBES.filter((x) => x.nome !== c.clube.nome && x.forca < forcaEfetivaClube(c, c.clube) - 8);
+        const poolFraco = CLUBES.filter((x) => x.nome !== c.clube.nome && x.liga !== "sulamericano" && x.forca < forcaEfetivaClube(c, c.clube) - 8);
         if (poolFraco.length) setPendingOfertaInesperada({ tipo: "emprestimo", clube: pick(poolFraco) });
       } else {
         avancarVidaPessoal(c);
@@ -2265,7 +2265,7 @@ function resolverTemporada(c, extraStats) {
     const qtdInteresse = (c.contrato?.restantes ?? 2) <= 1 ? 2 : 1;
     if (card.nota >= 7.0 && Math.random() < chanceInteresse) {
       for (let i = 0; i < qtdInteresse; i++) {
-        const cands = CLUBES.filter((x) => x.nome !== c.clube.nome && Math.abs(x.forca - card.ovr) <= 12 && !(c.clubesInteresse || []).includes(x.nome));
+        const cands = CLUBES.filter((x) => x.nome !== c.clube.nome && x.liga !== "sulamericano" && Math.abs(x.forca - card.ovr) <= 12 && !(c.clubesInteresse || []).includes(x.nome));
         if (cands.length) { const alvo = pick(cands); c.clubesInteresse = [...(c.clubesInteresse || []), alvo.nome].slice(-5); }
       }
     }
@@ -2527,10 +2527,10 @@ function resolverTemporada(c, extraStats) {
     if (!podeNegociar) proposta = null; // emprestado: ninguém pode fazer proposta
     else if (c.idade >= 33 && Math.random() < 0.55) proposta = { tipo: "aposentadoria", opcoes: [{ clube: pick(CLUBES.filter((x) => x.liga === "arabia" || x.liga === "mls")), tipo: "transfer" }], motivo: "Fim de carreira: dinheiro e ritmo leve chamam." };
     else if (destaque && c.anoNoClube >= 2 && Math.random() < 0.6) {
-      const alvos = CLUBES.filter((x) => LIGAS[x.liga].mult > card.ligaMult + 0.02 && x.forca >= c.clube.forca - 2 && x.liga !== "arabia" && x.liga !== "mls");
+      const alvos = CLUBES.filter((x) => LIGAS[x.liga].mult > card.ligaMult + 0.02 && x.forca >= c.clube.forca - 2 && x.liga !== "arabia" && x.liga !== "mls" && x.liga !== "sulamericano");
       if (alvos.length) { const op1 = pick(alvos); const op2 = pick(alvos.filter((x) => x.nome !== op1.nome)); proposta = { tipo: "mercado", opcoes: op2 ? [{ clube: op1, tipo: "transfer" }, { clube: op2, tipo: "transfer" }] : [{ clube: op1, tipo: "transfer" }], motivo: "Sua temporada chamou atenção de ligas mais fortes." }; }
     } else if (ruim && c.anoNoClube >= 2 && Math.random() < 0.35) {
-      const alvos = CLUBES.filter((x) => x.forca < c.clube.forca && x.liga !== "arabia" && x.liga !== "mls");
+      const alvos = CLUBES.filter((x) => x.forca < c.clube.forca && x.liga !== "arabia" && x.liga !== "mls" && x.liga !== "sulamericano");
       if (alvos.length) proposta = { tipo: "mercado", opcoes: [{ clube: pick(alvos), tipo: "transfer" }], motivo: "Depois de uma temporada difícil, surge uma porta de saída." };
     }
 
@@ -3738,7 +3738,7 @@ function resolverTemporada(c, extraStats) {
     c.contrato = null;
     setTorcidaClube(c, c.clube.nome, -20);
     logHist(c, `Rescindiu o contrato com o ${c.clube.nome} pagando $${formatarDinheiro(multa)} de multa — virou agente livre.`);
-    const alvos = CLUBES.filter((x) => x.nome !== c.clube.nome && x.forca <= c.clube.forca + 4 && x.liga !== "arabia" && x.liga !== "mls");
+    const alvos = CLUBES.filter((x) => x.nome !== c.clube.nome && x.forca <= c.clube.forca + 4 && x.liga !== "arabia" && x.liga !== "mls" && x.liga !== "sulamericano");
     const escolhidos = []; const pool = [...alvos];
     while (escolhidos.length < 3 && pool.length) escolhidos.push(pool.splice(rand(0, pool.length - 1), 1)[0]);
     setCarreira(c);
@@ -3988,7 +3988,7 @@ function resolverTemporada(c, extraStats) {
       c.empresarioUsado = { ...c.empresarioUsado, sair: true };
       setTorcidaClube(c, c.clube.nome, -18);
       logHist(c, `Pediu para sair do ${c.clube.nome} — a torcida não gostou.`);
-      const alvos = CLUBES.filter((x) => x.nome !== c.clube.nome && x.forca <= c.clube.forca + 2 && x.liga !== "arabia" && x.liga !== "mls");
+      const alvos = CLUBES.filter((x) => x.nome !== c.clube.nome && x.forca <= c.clube.forca + 2 && x.liga !== "arabia" && x.liga !== "mls" && x.liga !== "sulamericano");
       const escolhidos = []; const pool = [...alvos];
       while (escolhidos.length < 3 && pool.length) escolhidos.push(pool.splice(rand(0, pool.length - 1), 1)[0]);
       opcoes = escolhidos.map((cl) => ({ clube: cl, tipo: "transfer" }));
@@ -4038,7 +4038,7 @@ function resolverTemporada(c, extraStats) {
     if (c.emprestimo) { setJanela(null); setResultadoAcao({ titulo: "Você está emprestado", texto: "Nenhum clube pode negociar com você enquanto o empréstimo estiver em vigor.", icone: "🔒" }); return; }
     const emp = c.empresario ? empresarioPorId(c.empresario.id) : EMPRESARIOS[0];
     const ultima = temporadas.length ? temporadas[temporadas.length - 1] : null;
-    const ligasAlvo = janela.ligasSelecionadas.length ? janela.ligasSelecionadas : Object.keys(LIGAS);
+    const ligasAlvo = janela.ligasSelecionadas.length ? janela.ligasSelecionadas : Object.keys(LIGAS).filter((l) => !LIGAS[l].naoJogavel);
     const cands = CLUBES
       .filter((x) => x.nome !== c.clube.nome && ligasAlvo.includes(x.liga))
       .map((clube) => ({ clube, score: scoreInteresseClube(c, clube, ultima, emp) }));
@@ -4057,7 +4057,7 @@ function resolverTemporada(c, extraStats) {
   }
   function escolherDuracaoEmprestimo(anos) {
     const c = carreira, ovr = calcOVR(c.attrs, c.posicao);
-    const cands = CLUBES.filter((x) => x.nome !== c.clube.nome && Math.abs(x.forca - (ovr - 3)) <= 8 && x.liga !== "arabia" && x.liga !== "mls");
+    const cands = CLUBES.filter((x) => x.nome !== c.clube.nome && Math.abs(x.forca - (ovr - 3)) <= 8 && x.liga !== "arabia" && x.liga !== "mls" && x.liga !== "sulamericano");
     const escolhidos = []; const pool = [...cands];
     while (escolhidos.length < 3 && pool.length) escolhidos.push(pool.splice(rand(0, pool.length - 1), 1)[0]);
     setJanela({ tipo: "emprestimo", opcoes: escolhidos.map((cl) => ({ clube: cl, tipo: "emprestimo", duracao: anos })) });
@@ -4306,7 +4306,7 @@ function resolverTemporada(c, extraStats) {
                     <div className="text-sm text-zinc-300 mb-3">Clube do coração <span className="text-zinc-600 text-xs">(opcional)</span></div>
                     <select value={clubeCoracao?.nome || ""} onChange={(e) => setClubeCoracao(CLUBES.find((c) => c.nome === e.target.value) || null)} className="w-full bg-zinc-800 border border-zinc-700 rounded-sm px-3 py-2.5 text-xs outline-none">
                       <option value="">Nenhum (neutro)</option>
-                      {CLUBES.filter((c) => c.liga !== "arabia" && c.liga !== "mls").map((c) => <option key={c.nome} value={c.nome}>{emojiClube(c.nome)} {c.nome}</option>)}
+                      {CLUBES.filter((c) => c.liga !== "arabia" && c.liga !== "mls" && c.liga !== "sulamericano").map((c) => <option key={c.nome} value={c.nome}>{emojiClube(c.nome)} {c.nome}</option>)}
                     </select>
                   </div>
                 )}

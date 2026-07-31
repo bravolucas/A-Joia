@@ -214,6 +214,19 @@ export const ESPECIALIDADES_LISTA = [
   { id: "primeiroToque", nome: "Primeiro Toque", icone: "✨", desc: "Domina melhor a bola em jogadas rápidas, gera mais chances limpas.", posBase: { GOL: 15, ZAG: 20, LD: 30, LE: 30, VOL: 35, MC: 45, MEI: 50, PD: 45, PE: 45, SA: 45, ATA: 40 } },
 ];
 
+export const EMOJI_NACIONALIDADE = {
+  BRA: "🇧🇷", ARG: "🇦🇷", FRA: "🇫🇷", ESP: "🇪🇸", POR: "🇵🇹", ENG: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", ITA: "🇮🇹", ALE: "🇩🇪",
+  HOL: "🇳🇱", BEL: "🇧🇪", URU: "🇺🇾", COL: "🇨🇴", CRO: "🇭🇷", MAR: "🇲🇦", JAP: "🇯🇵", EUA: "🇺🇸",
+  MEX: "🇲🇽", SNE: "🇸🇳", SUI: "🇨🇭", DIN: "🇩🇰", EQU: "🇪🇨", COR: "🇰🇷", NIG: "🇳🇬", CMR: "🇨🇲",
+  ALG: "🇩🇿", CSC: "🇨🇮", CRC: "🇨🇷", PAR: "🇵🇾", CHI: "🇨🇱", PER: "🇵🇪", BOL: "🇧🇴", POL: "🇵🇱",
+  SUE: "🇸🇪", AUT: "🇦🇹", HUN: "🇭🇺", TCH: "🇨🇿", SER: "🇷🇸", RUS: "🇷🇺", ESC: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", GAL: "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
+  IRN: "🇬🇧", IRL: "🇮🇪", ROM: "🇷🇴", BUL: "🇧🇬", GRE: "🇬🇷", TUR: "🇹🇷", SVK: "🇸🇰", SLO: "🇸🇮",
+  BOS: "🇧🇦", ISL: "🇮🇸", NOR: "🇳🇴", ISR: "🇮🇱", ARS: "🇸🇦", IRA: "🇮🇷", AUS: "🇦🇺", QAT: "🇶🇦",
+  CHN: "🇨🇳", IRQ: "🇮🇶", CDN: "🇰🇵", KUW: "🇰🇼", EAU: "🇦🇪", EGI: "🇪🇬", TUN: "🇹🇳", GAN: "🇬🇭",
+  AFS: "🇿🇦", ANG: "🇦🇴", TOG: "🇹🇬", RDC: "🇨🇩", CAN: "🇨🇦", JAM: "🇯🇲", HON: "🇭🇳", PAN: "🇵🇦",
+  TRI: "🇹🇹", HAI: "🇭🇹", ELS: "🇸🇻", NZL: "🇳🇿",
+};
+
 export const POSICOES = [
   { id: "GOL", label: "Goleiro", pesos: { defesa: 3.2, finalizacao: 2.2, fisico: 1.8, drible: 1.4, passe: 1.0, velocidade: 0.6 }, golBase: 0, assistBase: 0.01 },
   { id: "ZAG", label: "Zagueiro", pesos: { defesa: 3.0, fisico: 2.4, velocidade: 1.0, passe: 0.9, finalizacao: 0.3, drible: 0.3 }, golBase: 0.06, assistBase: 0.03 },

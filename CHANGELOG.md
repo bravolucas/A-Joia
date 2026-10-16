@@ -118,6 +118,23 @@ A diretoria cobra objetivos específicos por torneio, dosados pelo porte do club
 
 ---
 
+## 💎 Bloco 10 — Identidade visual e tela inicial
+
+### Nova gema da marca
+- A gema foi redesenhada em vetor com a paleta oficial (esmeralda, dourado, safira) e virou o componente `Gema`.
+- Aparece na animação de abertura, no cabeçalho (no lugar do pontinho) e como ícone da aba do navegador.
+
+### Tela inicial de verdade
+- A animação de abertura agora termina numa tela-título, em vez de cair direto no formulário.
+- **Continuar carreira** virou o botão principal, com resumo do save (jogador · clube · temporada). Antes ficava escondido no rodapé do passo "Nome".
+- **Nova carreira** abre o formulário; o passo "Nome" ganhou o botão "← Voltar" para a tela inicial.
+- Layout adaptável: no computador, marca à esquerda e ações à direita; no celular, marca em cima e botões embaixo, ao alcance do polegar.
+
+### Correção encontrada no caminho
+- `nomeMundo` era usado na vida pessoal (namoro e nome de filho) sem ser importado de `lib.js`. Quando o evento sorteava, a virada de temporada quebrava. Agora está importado.
+
+---
+
 ## 🔧 Mudanças técnicas
 
 - Imports com extensão explícita (`./data.js`), permitindo testar módulos direto no Node

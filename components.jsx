@@ -19,6 +19,26 @@ export function Button({ children, onClick, variant = "primary", disabled }) {
 
 export function Estrelas({ n }) { return <span className="text-amber-400 text-[11px]">{"★".repeat(n)}<span className="text-zinc-700">{"★".repeat(5 - n)}</span></span>; }
 
+/* Gema da marca A JOIA (vetorial, cores da paleta) */
+export function Gema({ size = 64, className = "", titulo = "A JOIA" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" className={className} role="img" aria-label={titulo}>
+      <g stroke="#0E1512" strokeWidth="3" strokeLinejoin="round">
+        <polygon points="30,12 70,12 62,30 38,30" fill="#1BC28A" />
+        <polygon points="30,12 38,30 28,42 8,40" fill="#12A876" />
+        <polygon points="70,12 92,40 72,42 62,30" fill="#15B37E" />
+        <polygon points="8,40 28,42 50,70 50,92" fill="#0E8C62" />
+        <polygon points="61,56 50,70 50,92 71,66" fill="#12A876" />
+        <polygon points="92,40 72,42 61,56 71,66" fill="#2E6FE0" />
+        <polygon points="38,30 62,30 72,42 50,70 28,42" fill="#D8B44A" />
+      </g>
+      <polygon points="50,30 62,30 72,42 50,70" fill="#C29C34" />
+      <polygon points="38,30 50,30 50,42 28,42" fill="#EACB6E" />
+      <polygon points="38,30 62,30 72,42 50,70 28,42" fill="none" stroke="#0E1512" strokeWidth="3" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function Diamond({ size = 64 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" style={{ filter: "drop-shadow(0 6px 20px rgba(216,180,74,0.5))" }}>

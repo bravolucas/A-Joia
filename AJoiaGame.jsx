@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { montarSave, salvarLocal, carregarLocal, apagarLocal, listarSaves, existeAlgumSave, baixarSave, lerArquivoSave, formatarData, normalizarSave, definirLabelSlot, SLOTS } from "./save.js";
+import { montarSave, resumoDoSave, salvarLocal, carregarLocal, apagarLocal, listarSaves, existeAlgumSave, baixarSave, lerArquivoSave, formatarData, normalizarSave, definirLabelSlot, SLOTS } from "./save.js";
 import { ANO_INICIO, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONFEDERACAO_POR_NACAO, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, EMOJI_NACIONALIDADE, ESPECIALIDADES_LISTA, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, FUNCOES_ELENCO, JOGOS_FASE_CONTINENTAL, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "./data.js";
-import { agregarPorCompeticao, ajustarMeta, ajustesDoContexto, analisarJogos, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusEspecialidades, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, continentalDaSelecao, creditarTitulo, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, ehClassicoReal, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, especialidadesIniciais, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, fatorTitulosTemporada, forcaEfetivaClube, formatarDinheiro, gerarChegadaClube, gerarColetivaPosJogo, gerarContextoLance, gerarElenco, gerarEventoAmbiente, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, PIRAMIDE_LIGAS, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearClima, sortearConcorrente, sortearFormacao, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, todosJogosCarreira, valorDeMercado, valorMundo, veredito } from "./lib.js";
+import { nomeMundo, agregarPorCompeticao, ajustarMeta, ajustesDoContexto, analisarJogos, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusEspecialidades, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, continentalDaSelecao, creditarTitulo, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, ehClassicoReal, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, especialidadesIniciais, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, fatorTitulosTemporada, forcaEfetivaClube, formatarDinheiro, gerarChegadaClube, gerarColetivaPosJogo, gerarContextoLance, gerarElenco, gerarEventoAmbiente, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, PIRAMIDE_LIGAS, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearClima, sortearConcorrente, sortearFormacao, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, todosJogosCarreira, valorDeMercado, valorMundo, veredito } from "./lib.js";
 import { AttrBarDelta, AttrRadar, BallIcon, ApresentacaoNovoClube, Button, CalendarioTemporadaPopup, Card, CartaoCarreira,
-  CenaAposentadoria, CenaAssinaturaContrato, CenaDespedidaClube, CenaEstreia, CenaLesaoGrave, CenaLevantarTaca, CenaRivalidade, ClubDot, ComparadorTemporadas, Confetti, CountUp, CurvaEvolucao, DadoIcon, Diamond, FichaPartida, FreeKickMini, GoalMini, GraficoEvolucaoCarreira, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PodiumBolaDeOuro, PopupConvocacao, PopupOverlay, SilhuetaJogador, Sparkle, TelaPartidaAoVivo, TimelineCarreira, TimingBar, TrophyIcon } from "./components.jsx";
+  CenaAposentadoria, CenaAssinaturaContrato, CenaDespedidaClube, CenaEstreia, CenaLesaoGrave, CenaLevantarTaca, CenaRivalidade, ClubDot, ComparadorTemporadas, Confetti, CountUp, CurvaEvolucao, DadoIcon, Diamond, Gema, FichaPartida, FreeKickMini, GoalMini, GraficoEvolucaoCarreira, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PodiumBolaDeOuro, PopupConvocacao, PopupOverlay, SilhuetaJogador, Sparkle, TelaPartidaAoVivo, TimelineCarreira, TimingBar, TrophyIcon } from "./components.jsx";
 
 export default function AJoiaGame() {
   const [stage, setStage] = useState("intro");
@@ -12,7 +12,7 @@ export default function AJoiaGame() {
   useEffect(() => {
     if (stage !== "intro" || introFase !== "splash") return;
     const t1 = setTimeout(() => setZoomingIntro(true), 1800);
-    const t2 = setTimeout(() => setIntroFase("form"), 2350);
+    const t2 = setTimeout(() => setIntroFase("titulo"), 2350);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [stage, introFase]);
   const [nome, setNome] = useState("");
@@ -4193,6 +4193,13 @@ function resolverTemporada(c, extraStats) {
         .btn-ghost{background:rgba(24,26,29,0.62);border:1px solid rgba(255,255,255,0.2);color:#f4f4f5;}
         .btn-ghost:hover{border-color:rgba(34,211,238,0.7);box-shadow:0 0 14px rgba(34,211,238,0.35);}
         .btn-gold{background:linear-gradient(90deg,#D8B44A,#F5D77A);color:#09090b;}
+        .tela-titulo{background:#0E1512;color:#F2F5F3;animation:fadeIn 0.5s ease-out;}
+        .tela-titulo-brilho{position:absolute;left:50%;top:22%;width:min(900px,130vw);height:min(620px,90vw);transform:translate(-50%,-50%);border-radius:50%;background:#12A876;opacity:0.10;filter:blur(90px);pointer-events:none;}
+        @media(min-width:768px){ .tela-titulo-brilho{top:50%;left:38%;} }
+        .titulo-btn-principal{background:#12A876;color:#06110C;}
+        .titulo-btn-principal:hover{background:#18BB85;box-shadow:0 0 22px rgba(18,168,118,0.45);}
+        .titulo-btn-secundario{background:#131D19;border:1px solid #2A3A33;color:#F2F5F3;}
+        .titulo-btn-secundario:hover{border-color:#12A876;}
         .btn-gold:hover{filter:brightness(1.1);box-shadow:0 0 18px rgba(216,180,74,0.55);}
         .logo-dot{background:linear-gradient(135deg,#34d399,#22d3ee);}
         .tab-active{border-color:#34d399 !important;color:#34d399 !important;text-shadow:0 0 12px rgba(52,211,153,0.5);}
@@ -4205,7 +4212,7 @@ function resolverTemporada(c, extraStats) {
       `}</style>
       <div className="relative z-10">
       <header className="sticky top-0 z-40 border-b border-white/10 px-6 py-4 flex items-center gap-2 glass-strong">
-        <span className="w-3 h-3 logo-dot" style={{ clipPath: "polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%)" }} />
+        <Gema size={20} />
         <span className="display font-bold text-sm tracking-wide">A JOIA</span>
         <span className="ml-auto text-[10px] text-zinc-500 uppercase tracking-widest font-sport">Simulador de carreira</span>
       </header>
@@ -4222,11 +4229,51 @@ function resolverTemporada(c, extraStats) {
               <div className="absolute" style={{ bottom: "10px", left: "-70px", animation: "sparkleTwinkle 1.4s ease-in-out infinite 0.9s" }}><Sparkle size={14} /></div>
               <div className="absolute" style={{ bottom: "0px", right: "-60px", animation: "sparkleTwinkle 1.4s ease-in-out infinite 1.1s" }}><Sparkle size={20} /></div>
               <div style={{ animation: "spin3dY 1.1s linear infinite" }}>
-                <Diamond size={160} />
+                <Gema size={160} />
               </div>
             </div>
           </div>
         )}
+
+        {stage === "intro" && introFase === "titulo" && (() => {
+          const resumoAuto = temSave ? resumoDoSave(carregarLocal("auto")) : null;
+          const irParaFormulario = () => { setFormEtapa(0); setIntroFase("form"); };
+          return (
+            <div className="tela-titulo fixed inset-0 z-50 overflow-y-auto">
+              <div aria-hidden="true" className="tela-titulo-brilho" />
+              <div className="relative min-h-full flex flex-col md:flex-row md:items-center md:justify-center md:gap-24 px-6 pt-16 pb-8 md:px-12 md:py-12">
+                <div className="flex-1 md:flex-none flex flex-col items-center md:items-start justify-center gap-5 md:gap-7 text-center md:text-left">
+                  <Gema size={176} className="w-28 h-28 md:w-44 md:h-44" />
+                  <div className="flex flex-col gap-2">
+                    <h1 className="display font-black text-4xl md:text-6xl tracking-wider leading-none text-[#F2F5F3]">A JOIA</h1>
+                    <p className="font-sport font-semibold text-sm md:text-base uppercase tracking-[0.3em] text-[#8FA39A]">Simulador de carreira</p>
+                  </div>
+                  <p className="hidden md:block font-sport text-lg text-[#8FA39A] max-w-sm leading-snug">Da peneira à Bola de Ouro. Cada escolha dentro e fora de campo escreve a sua história.</p>
+                </div>
+                <div className="w-full max-w-sm mx-auto md:mx-0 flex flex-col gap-3 mt-10 md:mt-0">
+                  {temSave && (
+                    <button onClick={() => (resumoAuto ? carregarJogo("auto") : setSavesAberto(true))} className="titulo-btn-principal hud-btn flex items-center gap-4 text-left rounded-2xl px-5 py-4 min-h-[76px]">
+                      <span className="flex-1 min-w-0 flex flex-col gap-0.5">
+                        <span className="display font-bold text-[15px] tracking-wide">{resumoAuto ? "Continuar carreira" : "Carregar carreira"}</span>
+                        {resumoAuto && (
+                          <span className="font-sport font-semibold text-[15px] text-[#0B3A27] truncate">
+                            {resumoAuto.nome} · {resumoAuto.encerrada ? "carreira encerrada" : resumoAuto.clube} · <span className="font-mono text-[13px]">T{resumoAuto.temporadas + 1}</span>
+                          </span>
+                        )}
+                      </span>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+                    </button>
+                  )}
+                  <button onClick={irParaFormulario} className={`hud-btn display font-bold text-sm tracking-wide rounded-2xl min-h-[56px] px-5 ${temSave ? "titulo-btn-secundario" : "titulo-btn-principal"}`}>Nova carreira</button>
+                  {temSave && (
+                    <button onClick={() => setSavesAberto(true)} className="self-center font-sport font-semibold text-base text-[#7FE3BC] hover:text-[#F2F5F3] min-h-[44px] px-3">Gerenciar saves</button>
+                  )}
+                  <p className="font-sport text-[13px] tracking-wider text-[#5E7068] text-center md:text-left mt-3">A carreira é sua. A história também.</p>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {stage === "intro" && introFase === "form" && (() => {
           const etapas = ["Nome", "Posição", "Nacionalidade", "Perna", "Personalidade", "Clube", "Origem"];
@@ -4347,22 +4394,13 @@ function resolverTemporada(c, extraStats) {
                 )}
 
                 <div className="flex gap-2 mt-5">
-                  {formEtapa > 0 && <Button variant="ghost" onClick={() => setFormEtapa((f) => f - 1)}>← Voltar</Button>}
+                  <Button variant="ghost" onClick={() => (formEtapa > 0 ? setFormEtapa((f) => f - 1) : setIntroFase("titulo"))}>← Voltar</Button>
                   {formEtapa < etapas.length - 1
                     ? <Button onClick={() => setFormEtapa((f) => f + 1)} disabled={!podeAvancar}>Continuar →</Button>
                     : <Button onClick={confirmarOrigem} disabled={!podeAvancar}>Ir pra peneira</Button>}
                 </div>
               </Card>
 
-              {formEtapa === 0 && temSave && (
-                <div className="text-center pt-2 border-t border-zinc-800">
-                  <p className="text-[10px] text-zinc-500 mb-2">Você já tem uma carreira em andamento.</p>
-                  <div className="flex gap-2 justify-center">
-                    <button onClick={() => carregarJogo("auto")} className="text-xs font-bold text-emerald-400 border border-emerald-500/50 rounded-sm px-4 py-2 hover:bg-emerald-500/10">▶ Continuar carreira</button>
-                    <button onClick={() => setSavesAberto(true)} className="text-xs text-zinc-400 border border-zinc-700 rounded-sm px-4 py-2 hover:border-zinc-500">💾 Ver saves</button>
-                  </div>
-                </div>
-              )}
             </div>
           );
         })()}

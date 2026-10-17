@@ -172,7 +172,44 @@ export function criarJogador(dados) {
   c.diario = ehCodigoDiario(codigo);
   return c;
 }
-function criarJogadorBase({ nome, nac, posicao, personalidade, origem }) {
+
+/* ---------- pé preferido, número e ritmo ---------- */
+export const PES = [
+  { id: "destro", nome: "Destro", icone: "🦶", desc: "+1 de finalização e +1 de passe no teto." },
+  { id: "canhoto", nome: "Canhoto", icone: "🫲", desc: "Raro e imprevisível: +2 de drible no teto." },
+  { id: "ambidestro", nome: "Ambidestro", icone: "🔁", desc: "Chuta com as duas: +6% de gols e assistências, mas −1 em todo o teto." },
+];
+export const peDe = (id) => PES.find((p) => p.id === id) || PES[0];
+export const NUMERO_PADRAO = { GOL: 1, ZAG: 4, LD: 2, LE: 6, VOL: 5, MC: 8, MEI: 10, PD: 7, PE: 11, SA: 10, ATA: 9 };
+export const numeroDe = (c) => c.numero || NUMERO_PADRAO[c.posicao] || 8;
+export const RITMOS = [
+  { id: "intenso", nome: "Intenso", icone: "🔥", desc: "Mais eventos e coletiva todo ano · ~15 min" },
+  { id: "normal", nome: "Normal", icone: "⚽", desc: "Coletivas só nos grandes momentos · ~8 min" },
+  { id: "expresso", nome: "Expresso", icone: "⚡", desc: "Só as decisões importantes · ~4 min" },
+];
+export const ritmoDe = (id) => RITMOS.find((r) => r.id === id) || RITMOS[1];
+
+/* Três clubes de base possíveis para a pessoa escolher onde começar */
+export function opcoesClubeInicial(nac, origem) {
+  const vistos = new Set(), out = [];
+  for (let i = 0; i < 30 && out.length < 3; i++) {
+    const x = clubeInicial(nac, origem === "base");
+    if (!vistos.has(x.nome)) { vistos.add(x.nome); out.push(x); }
+  }
+  return out;
+}
+
+/* ---------- estado mental ---------- */
+export function mexerMoral(c, d) { c.moral = clampR(Math.round((c.moral ?? 65) + d), 0, 100); return c.moral; }
+export function estadoMental(m = 65) {
+  if (m >= 78) return { nome: "Confiante", icone: "😎", cor: "#1BC28A" };
+  if (m >= 58) return { nome: "Tranquilo", icone: "🙂", cor: "#7FE3BC" };
+  if (m >= 38) return { nome: "Oscilando", icone: "😐", cor: "#EBC557" };
+  if (m >= 20) return { nome: "Abalado", icone: "😟", cor: "#F0A99E" };
+  return { nome: "No limite", icone: "😣", cor: "#E36B5B" };
+}
+
+function criarJogadorBase({ nome, nac, posicao, personalidade, origem, pe, numero, clube: clubeEscolhido, ritmo }) {
   const pos = posicaoDe(posicao);
   const persona = personaDe(personalidade);
   const org = origemDe(origem);
@@ -183,9 +220,15 @@ function criarJogadorBase({ nome, nac, posicao, personalidade, origem }) {
   pesos.forEach(([a], i) => { potencial[a] = clampR(teto - i * rand(2, 5) + rand(-2, 2) + Math.round((org?.bias?.[a] || 0) * 0.25) + (org?.id === "prodigio" ? 1 : 0), 50, 97); });
   const attrs = {};
   ATTRS.forEach((a) => { attrs[a] = clampR(potencial[a] - rand(24, 32) + Math.round((org?.bias?.[a] || 0) * 0.3), 38, 68); });
-  const clube = clubeInicial(nac, org?.id === "base");
+  // pé preferido mexe no teto
+  const peId = peDe(pe).id;
+  if (peId === "destro") { potencial.finalizacao = clampR(potencial.finalizacao + 1, 40, 99); potencial.passe = clampR(potencial.passe + 1, 40, 99); }
+  if (peId === "canhoto") potencial.drible = clampR(potencial.drible + 2, 40, 99);
+  if (peId === "ambidestro") ATTRS.forEach((a) => { potencial[a] = clampR(potencial[a] - 1, 40, 99); });
+  const clube = (clubeEscolhido && CLUBES.find((x) => x.nome === clubeEscolhido)) || clubeInicial(nac, org?.id === "base");
   const c = {
     v: VERSAO_RAPIDO, nome: nome.trim(), nac, posicao, personalidade: persona.id, origem: org?.id || null,
+    pe: peId, numero: clampR(Math.round(+numero || NUMERO_PADRAO[posicao] || 8), 1, 99), ritmo: ritmoDe(ritmo).id, moral: 70,
     idade: IDADE_INICIAL, ano: ANO_INICIAL, attrs, potencial, foco: "equilibrio",
     clubeNome: clube.nome, primeiroClube: clube.nome, empresario: org?.id === "herdeiro" ? "cauteloso" : "iniciante",
     torcida: { [clube.nome]: 30 }, apelidos: [], tracos: [], tracosEscolhidos: {},
@@ -417,6 +460,7 @@ export const fama_negociador = (c) => ((c.repNeg || 0) >= 15 ? "Osso duro" : (c.
 
 /* ---------- investimentos e luxos ---------- */
 export const INVESTIMENTOS = [
+  { id: "psicologo", nome: "Psicólogo do esporte", icone: "🧠", custo: 600, desc: "Cabeça mais estável: +3 de estado mental por ano e metade das quedas.", moralAno: 3, moralQueda: 0.5 },
   { id: "personal", nome: "Personal trainer", icone: "🏋️", custo: 400, desc: "20% menos risco de lesão.", lesaoMult: 0.8 },
   { id: "nutri", nome: "Nutricionista particular", icone: "🥗", custo: 900, desc: "Envelhece 12% mais devagar.", declinio: 0.88 },
   { id: "fisio", nome: "Fisioterapeuta particular", icone: "🩺", custo: 1500, desc: "Cura lesão crônica e reduz o risco de lesão.", lesaoMult: 0.9, curaCronica: true },
@@ -532,7 +576,7 @@ function simularTorneioSelecao(c, ovr, { nome, tipo }) {
   const fs = forcaSelecao(c);
   const vitrine = c.foco === "vitrine" ? 2 : 0;
   const corte = fs - 6 + (c.flags.selecaoFria || 0) * 2 - vitrine;
-  if (c.idade < 18) return null;
+  if (c.idade < 18 || c.flags.semSelecao) return null;
   const convocado = ovr >= corte ? chance(0.92) : ovr >= corte - 4 ? chance(0.35) : false;
   if (!convocado) return { ano: c.ano, nome, tipo, convocado: false, resultado: "Fora da convocação" };
   const titular = ovr >= fs - 2;
@@ -577,11 +621,12 @@ function jogarTemporadaBase(c0) {
   const pos = posicaoDe(c.posicao);
   const ovr = ovrDe(c);
   const st = statusPorDiff(ovr - clube.forca, c.idade);
-  let share = clampR((st.share + (mod.shareAdd || 0)) * (mod.shareMult ?? 1) * (fx.shareMult ?? 1), 0.04, 1);
+  const moral = c.moral ?? 65;
+  let share = clampR((st.share + (mod.shareAdd || 0)) * (mod.shareMult ?? 1) * (fx.shareMult ?? 1) * (moral < 25 ? 0.9 : 1), 0.04, 1);
 
   // lesão durante a temporada
   const corpoPronto = c.origem === "tardio" && c.idade <= 21 ? 0.5 : 1;
-  const riscoLesao = clampR((0.07 + (mod.lesaoAdd || 0) + (fx.lesaoAdd || 0) + (c.flags.cronica ? 0.05 : 0) + Math.max(0, c.idade - 30) * 0.01) * persona.risco * multTraco(c, "lesaoMult") * multInv(c, "lesaoMult") * corpoPronto, 0.01, 0.4);
+  const riscoLesao = clampR((0.07 + (moral < 30 ? 0.03 : 0) + (mod.lesaoAdd || 0) + (fx.lesaoAdd || 0) + (c.flags.cronica ? 0.05 : 0) + Math.max(0, c.idade - 30) * 0.01) * persona.risco * multTraco(c, "lesaoMult") * multInv(c, "lesaoMult") * corpoPronto, 0.01, 0.4);
   const lesao = chance(riscoLesao) ? pick([
     { nome: "estiramento na coxa", fator: 0.8 }, { nome: "entorse no tornozelo", fator: 0.75 },
     { nome: "lesão muscular", fator: 0.7 }, { nome: "ruptura de ligamento", fator: 0.35 },
@@ -590,16 +635,16 @@ function jogarTemporadaBase(c0) {
 
   const jogos = clampR(Math.round(48 * share * (0.9 + rnd() * 0.15)), 0, 52);
   const nivel = Math.pow(Math.max(0.25, (ovr - 55) / 35), 1.55) * (1.25 - liga.mult * 0.45);
-  const gm = multTraco(c, "golsMult") * (fx.golsMult ?? 1);
+  const gm = multTraco(c, "golsMult") * (fx.golsMult ?? 1) * (mod.golsMult ?? 1) * (c.pe === "ambidestro" ? 1.06 : 1);
   const gols = c.posicao === "GOL" ? 0 : Math.round(poisson(pos.golBase * nivel * jogos) * gm);
-  const assist = Math.round(poisson(pos.assistBase * nivel * jogos * (c.posicao === "GOL" ? 0.1 : 1)) * multTraco(c, "assistMult") * (fx.golsMult ?? 1));
+  const assist = Math.round(poisson(pos.assistBase * nivel * jogos * (c.posicao === "GOL" ? 0.1 : 1)) * multTraco(c, "assistMult") * (fx.golsMult ?? 1) * (mod.assistMult ?? 1) * (c.pe === "ambidestro" ? 1.06 : 1));
   const defBonus = DEFENSIVAS.includes(c.posicao) ? 0.15 : 0;
   const nota = jogos === 0 ? 0 : +clamp(6.2 + (ovr - 70) * 0.035 + (ovr - clube.forca) * 0.02 + ((gols + assist) / Math.max(1, jogos)) * 1.2
-    + defBonus + somaTraco(c, "notaBonus") + somaInv(c, "notaBonus") + (mod.notaBonus || 0) + (rnd() - 0.5) * 0.5 * (fx.notaRuido || 1), 5.2, 9.7).toFixed(2);
+    + defBonus + somaTraco(c, "notaBonus") + somaInv(c, "notaBonus") + (mod.notaBonus || 0) + (moral - 60) * 0.008 + (rnd() - 0.5) * 0.5 * (fx.notaRuido || 1), 5.2, 9.7).toFixed(2);
 
   const card = {
     idx: c.temporadas.length, ano: c.ano, idade: c.idade, clube: clube.nome, cor: clube.cor, ligaId: clube.liga, ligaNome: liga.nome,
-    emprestado: !!c.emprestimo, ovr, status: st.label, foco: c.foco, jogos, gols, assist, nota, lesao: lesao?.nome || null,
+    emprestado: !!c.emprestimo, ovr, status: st.label, foco: c.foco, jogos, gols, assist, nota, lesao: lesao?.nome || null, share,
     titulos: [], destaques: [],
   };
   const forcaTimeExtra = (fx.forcaTime || 0) * share;
@@ -815,7 +860,8 @@ function fecharTemporadaBase(c0, card0) {
   // evolução e idade
   const focoEvo = c.foco === "evolucao" ? 1.15 : 1;
   const focoDecl = c.foco === "preservar" ? 0.8 : 1;
-  const fatorDes = clampR(1 + ((card.nota || 6) - 6.8) * 0.12, 0.8, 1.25) * (c.mod?.evolucao ?? 1) * focoEvo * multInv(c, "evolucao");
+  const moralAntes = c.moral ?? 65;
+  const fatorDes = clampR(1 + ((card.nota || 6) - 6.8) * 0.12, 0.8, 1.25) * (c.mod?.evolucao ?? 1) * focoEvo * multInv(c, "evolucao") * (moralAntes >= 70 ? 1.05 : moralAntes < 35 ? 0.92 : 1);
   const reduc = multTraco(c, "declinio") * (c.mod?.declinio ?? 1) * focoDecl * multInv(c, "declinio");
   const novos = evoluirAtributos({ ...c.attrs, fintas: 3, pernaRuim: 3 }, { ...c.potencial, fintas: 3, pernaRuim: 3 }, c.idade, persona, null, reduc, fatorDes, 1 + nTit * 0.05);
   ATTRS.forEach((a) => { c.attrs[a] = novos[a]; });
@@ -836,6 +882,12 @@ function fecharTemporadaBase(c0, card0) {
     }
   }
   card.valor = valorMercado(card.ovrDepois, c.idade + 1, c.fama);
+
+  // cabeça: a temporada mexe com o estado mental, que tende a voltar ao normal
+  const dMoral = (card.nota ? (card.nota - 7.0) * 6 : -6) + nTit * 3 + ((card.share ?? 0.5) < 0.4 ? -5 : 0)
+    + (card.lesao ? -6 : 0) + (card.bola.pos <= 3 ? 4 : 0) + (65 - moralAntes) * 0.3 + somaInv(c, "moralAno") + (c.mod?.moralAno || 0);
+  mexerMoral(c, dMoral * (dMoral < 0 ? multInv(c, "moralQueda") : 1));
+  card.moral = c.moral; card.moralDelta = c.moral - moralAntes;
 
   card.ganhos = fecharFinancas(c, card);
   card.contratoRestante = c.contrato.restantes;
@@ -1357,9 +1409,9 @@ export const EVENTOS_EXTRAS = [
     texto: () => "O ídolo que vestia o número pendurou as chuteiras. O roupeiro deixou a camisa no seu armário — mas a escolha é sua.",
     opcoes: (c) => [
       { id: "aceitar", label: "Herdar o número do ídolo", dica: "Torcida empolgada · comparação inevitável",
-        efeito: (c) => { c.flags.camisas = [...(c.flags.camisas || []), c.clubeNome]; sobe(c, c.clubeNome, 6); c.mod.notaBonus = (c.mod.notaBonus || 0) + (chance(0.6) ? 0.15 : -0.15); return "O número pesa. Você decidiu que vai carregar."; } },
+        efeito: (c) => { c.flags.camisas = [...(c.flags.camisas || []), c.clubeNome]; c.numero = c.posicao === "GOL" ? 1 : 10; sobe(c, c.clubeNome, 6); c.mod.notaBonus = (c.mod.notaBonus || 0) + (chance(0.6) ? 0.15 : -0.15); return "O número pesa. Você decidiu que vai carregar."; } },
       { id: "infancia", label: "Manter o número da base", dica: "Fiel à própria história",
-        efeito: (c) => { c.flags.camisas = [...(c.flags.camisas || []), c.clubeNome]; sobe(c, c.clubeNome, 2); return `Você segue com a ${NUMEROS_POR_POS[c.posicao] || 8}. A torcida respeitou.`; } },
+        efeito: (c) => { c.flags.camisas = [...(c.flags.camisas || []), c.clubeNome]; sobe(c, c.clubeNome, 2); return `Você segue com a ${numeroDe(c)}. A torcida respeitou.`; } },
       { id: "homenagem", label: "Pedir para aposentar a camisa", dica: "Gesto de respeito ao ídolo · fama sobe",
         efeito: (c) => { c.flags.camisas = [...(c.flags.camisas || []), c.clubeNome]; c.fama = clampR(c.fama + 4, 0, 100); sobe(c, c.clubeNome, 4); return "Ninguém mais vai usar aquele número. A ideia foi sua."; } },
     ],
@@ -1481,8 +1533,380 @@ export const EVENTOS_EXTRAS = [
   },
 ];
 
+/* ---------- vida fora de campo: mexe com a cabeça (estado mental) ---------- */
+const gastar = (c, v) => { c.patrimonio = Math.max(0, (c.patrimonio || 0) - v); };
+const ganhar = (c, v) => { c.patrimonio = (c.patrimonio || 0) + v; c.ganhosTotais = (c.ganhosTotais || 0) + v; };
+const unico = (c, id) => !(c.flags.vistos || []).includes(id);
+const marcar = (c, id) => { c.flags.vistos = [...(c.flags.vistos || []), id]; };
+const ultimaTemporada = (c) => c.temporadas[c.temporadas.length - 1];
+const longeDeCasa = (c) => c.clubeNome !== c.primeiroClube && !(LIGA_BASE_POR_NAC[c.nac] || []).map((l) => l.replace(/2$/, "")).concat(LIGA_BASE_POR_NAC[c.nac] || []).map((l) => (l === "serieB" ? "brasileirao" : l)).includes(clubeDe(c.clubeNome).liga);
+
+export const EVENTOS_VIDA = [
+  {
+    id: "saudade", icone: "🧳", vida: true,
+    peso: (c) => (c.idade <= 23 && longeDeCasa(c) ? 2 : 0),
+    titulo: () => "Saudade de casa",
+    texto: () => "Outro idioma, outra comida, inverno de verdade. As noites no apartamento novo estão longas demais.",
+    opcoes: (c) => [
+      { id: "familia", label: "Trazer a família para morar com você", dica: `Cabeça bem melhor · custa ${formatarValor(Math.max(60, Math.round((c.contrato?.salario || 100) * 0.3)))}`,
+        efeito: (c) => { gastar(c, Math.max(60, Math.round((c.contrato?.salario || 100) * 0.3))); mexerMoral(c, 14); return "A casa ficou cheia e barulhenta de novo. Você voltou a sorrir no treino."; } },
+      { id: "aguentar", label: "Aguentar firme e focar no futebol", dica: "Evolui mais · a cabeça sofre", risco: "equilibrado",
+        efeito: (c) => { c.mod.evolucao = (c.mod.evolucao ?? 1) * 1.05; mexerMoral(c, -8); return "Treino, casa, treino. Funcionou em campo, mas pesou por dentro."; } },
+      { id: "idioma", label: "Fazer aulas de idioma e se enturmar", dica: "Adaptação mais rápida, torcida gosta",
+        efeito: (c) => { mexerMoral(c, 6); sobe(c, c.clubeNome, 4); return "Em três meses você já dava entrevista na língua local. A torcida adorou."; } },
+    ],
+  },
+  {
+    id: "romance", icone: "💘", vida: true,
+    peso: (c) => (c.idade >= 20 && c.idade <= 30 && c.fama >= 30 && unico(c, "romance") ? 1.2 : 0),
+    titulo: () => "Romance com uma celebridade",
+    texto: () => "Vocês se conheceram num evento de patrocinador. Os paparazzi já descobriram.",
+    opcoes: () => [
+      { id: "assumir", label: "Assumir publicamente", dica: "Fama sobe · a vida vira notícia", risco: "equilibrado",
+        efeito: (c) => { marcar(c, "romance"); c.fama = clampR(c.fama + 8, 0, 100); if (chance(0.35)) { mexerMoral(c, -6); return "O namoro rendeu capa de revista — e também fofoca toda semana."; } mexerMoral(c, 8); return "Foto oficial, casal do ano. Você anda leve."; } },
+      { id: "discreto", label: "Manter longe dos holofotes", dica: "Paz e cabeça no lugar",
+        efeito: (c) => { marcar(c, "romance"); mexerMoral(c, 6); return "Ninguém sabe direito. Do jeito que vocês queriam."; } },
+    ],
+  },
+  {
+    id: "filho", icone: "🍼", vida: true,
+    peso: (c) => (c.idade >= 24 && c.idade <= 33 && unico(c, "filho") ? 1.4 : 0),
+    titulo: () => "Seu primeiro filho vai nascer",
+    texto: () => "A data prevista cai bem na semana da decisão do clube.",
+    opcoes: () => [
+      { id: "licenca", label: "Pedir licença e estar no parto", dica: "Perde alguns jogos · cabeça nas nuvens",
+        efeito: (c) => { marcar(c, "filho"); c.mod.shareMult = (c.mod.shareMult ?? 1) * 0.94; mexerMoral(c, 16); sobe(c, c.clubeNome, 2); return "Você estava lá. Voltou aos treinos mais leve do que nunca."; } },
+      { id: "jogar", label: "Jogar a decisão e correr para a maternidade", dica: "Comemoração de ninar se fizer o gol", risco: "equilibrado",
+        efeito: (c) => { marcar(c, "filho"); c.fama = clampR(c.fama + 3, 0, 100); if (chance(0.5)) { mexerMoral(c, 12); sobe(c, c.clubeNome, 6); return "Gol, comemoração de ninar e voo direto para o hospital. Chegou a tempo."; } mexerMoral(c, 2); return "Perdeu o parto por meia hora. A foto do primeiro colo foi no corredor."; } },
+    ],
+  },
+  {
+    id: "luto", icone: "🕯️", vida: true,
+    peso: (c) => (c.idade >= 19 && unico(c, "luto") ? 0.8 : 0),
+    titulo: () => "Uma perda na família",
+    texto: () => "Seu avô, que te levava aos treinos da escolinha, faleceu. O jogo mais importante do ano é em dois dias.",
+    opcoes: () => [
+      { id: "viajar", label: "Viajar para a despedida", dica: "Perde o jogo · fica em paz consigo",
+        efeito: (c) => { marcar(c, "luto"); mexerMoral(c, -4); c.mod.shareMult = (c.mod.shareMult ?? 1) * 0.97; return "Você estava com a família. O clube entendeu e mandou flores."; } },
+      { id: "dedicar", label: "Jogar e dedicar a ele", dica: "Pode ser o jogo da vida — ou pesar demais", risco: "arriscado",
+        efeito: (c) => { marcar(c, "luto"); if (chance(0.55)) { mexerMoral(c, 4); sobe(c, c.clubeNome, 8); c.fama = clampR(c.fama + 4, 0, 100); return "Gol, dedo para o céu e o estádio inteiro aplaudindo de pé."; } mexerMoral(c, -12); return "Você não conseguiu jogar. Saiu no intervalo, em lágrimas."; } },
+    ],
+  },
+  {
+    id: "odioRedes", icone: "💬", vida: true,
+    peso: (c) => { const u = ultimaTemporada(c); return c.fama >= 30 && u && u.nota && u.nota < 6.7 ? 2 : 0; },
+    titulo: () => "Ataques nas redes sociais",
+    texto: () => "Depois de uma temporada abaixo, as mensagens passaram do limite. Algumas falam da sua família.",
+    opcoes: () => [
+      { id: "psicologo", label: "Conversar com o psicólogo do clube", dica: "Cabeça no lugar · ninguém fica sabendo",
+        efeito: (c) => { mexerMoral(c, 10); c.mod.notaBonus = (c.mod.notaBonus || 0) + 0.05; return "Algumas sessões e você aprendeu a desligar o barulho."; } },
+      { id: "sair", label: "Sair das redes por um tempo", dica: "Paz · a fama esfria um pouco",
+        efeito: (c) => { mexerMoral(c, 7); c.fama = clampR(c.fama - 4, 0, 100); return "Conta desativada. O celular ficou bem mais silencioso."; } },
+      { id: "responder", label: "Responder um por um", dica: "Vira assunto · desgaste enorme", risco: "arriscado",
+        efeito: (c) => { c.fama = clampR(c.fama + 4, 0, 100); mexerMoral(c, -10); return "Você ganhou algumas brigas e perdeu várias noites de sono."; } },
+    ],
+  },
+  {
+    id: "esgotamento", icone: "🔋", vida: true,
+    peso: (c) => ((c.moral ?? 65) < 40 ? 3 : 0),
+    titulo: () => "Esgotamento mental",
+    texto: () => "Você acorda cansado, treina no automático e não sente mais prazer nos jogos. O departamento médico percebeu.",
+    opcoes: () => [
+      { id: "pausa", label: "Pedir duas semanas de pausa", dica: "Perde alguns jogos · recupera a cabeça",
+        efeito: (c) => { c.mod.shareMult = (c.mod.shareMult ?? 1) * 0.92; mexerMoral(c, 20); return "Você desligou o celular, viajou com a família e voltou com vontade de jogar."; } },
+      { id: "terapia", label: "Começar terapia com psicólogo do esporte", dica: "Melhora aos poucos, sem parar de jogar",
+        efeito: (c) => { if (!(c.investimentos || []).includes("psicologo")) c.investimentos = [...(c.investimentos || []), "psicologo"]; mexerMoral(c, 10); return "Toda terça, uma hora de conversa. O psicólogo virou parte da sua rotina."; } },
+      { id: "automatico", label: "Seguir em frente sem falar nada", dica: "Ninguém percebe — por enquanto", risco: "arriscado",
+        efeito: (c) => { mexerMoral(c, -6); c.mod.lesaoAdd = (c.mod.lesaoAdd || 0) + 0.03; return "Você engoliu tudo. O corpo começou a dar sinais."; } },
+    ],
+  },
+  {
+    id: "amigo", icone: "🤲", vida: true,
+    peso: (c) => ((c.patrimonio || 0) >= 400 && unico(c, "amigo") ? 1.1 : 0),
+    titulo: () => "Um amigo de infância pede ajuda",
+    texto: (c) => `Ele quer abrir uma escolinha de futebol no bairro onde vocês cresceram e precisa de ${formatarValor(Math.round((c.patrimonio || 0) * 0.08))}.`,
+    opcoes: (c) => [
+      { id: "investir", label: "Entrar como sócio", dica: "Pode dar retorno · pode virar prejuízo", risco: "equilibrado",
+        efeito: (c) => { marcar(c, "amigo"); const v = Math.round((c.patrimonio || 0) * 0.08); gastar(c, v); mexerMoral(c, 5); if (chance(0.5)) { ganhar(c, v * 2); sobe(c, c.primeiroClube, 5); return "A escolinha lotou. Você recuperou o dinheiro e ainda revelou um garoto."; } return "A escolinha fechou em um ano. Pelo menos a amizade continua."; } },
+      { id: "doar", label: "Dar o dinheiro de presente", dica: "Gesto bonito · legado no bairro",
+        efeito: (c) => { marcar(c, "amigo"); gastar(c, Math.round((c.patrimonio || 0) * 0.08)); mexerMoral(c, 8); c.flags.social = true; return "A escolinha tem seu nome na fachada. Seu amigo chorou na inauguração."; } },
+      { id: "recusar", label: "Recusar com educação", dica: "Sem risco · a amizade esfria",
+        efeito: (c) => { marcar(c, "amigo"); mexerMoral(c, -3); return "Ele entendeu. Mas as mensagens ficaram mais raras."; } },
+    ],
+  },
+  {
+    id: "golpe", icone: "📈", vida: true,
+    peso: (c) => ((c.patrimonio || 0) >= 1500 && unico(c, "golpe") ? 1 : 0),
+    titulo: () => "Investimento \"garantido\"",
+    texto: () => "Um conhecido do vestiário promete retorno de 40% ao mês num negócio de criptomoedas. Vários jogadores já entraram.",
+    opcoes: () => [
+      { id: "entrar", label: "Colocar uma parte do patrimônio", dica: "Pode dobrar · pode sumir", risco: "arriscado",
+        efeito: (c) => { marcar(c, "golpe"); const v = Math.round((c.patrimonio || 0) * 0.3); if (chance(0.25)) { ganhar(c, Math.round(v * 0.6)); return "Você saiu na hora certa, com lucro. Semanas depois, o esquema desabou."; } gastar(c, v); mexerMoral(c, -10); return "Era pirâmide. O dinheiro sumiu junto com o \"gestor\"."; } },
+      { id: "assessor", label: "Perguntar ao seu assessor financeiro", dica: "Ele vai dizer não",
+        efeito: (c) => { marcar(c, "golpe"); return "O assessor riu, depois ficou sério: \"isso é golpe\". Você ficou de fora."; } },
+    ],
+  },
+  {
+    id: "estudos", icone: "🎓", vida: true,
+    peso: (c) => (c.idade >= 18 && c.idade <= 26 && unico(c, "estudos") ? 0.9 : 0),
+    titulo: () => "Voltar a estudar?",
+    texto: () => "Você parou os estudos cedo por causa do futebol. Uma faculdade a distância oferece bolsa para atletas.",
+    opcoes: () => [
+      { id: "estudar", label: "Fazer a faculdade a distância", dica: "Prepara o pós-carreira · menos descanso",
+        efeito: (c) => { marcar(c, "estudos"); c.flags.estudou = true; mexerMoral(c, 4); c.mod.evolucao = (c.mod.evolucao ?? 1) * 0.98; return "Aulas no ônibus e no hotel de concentração. O diploma vem aí."; } },
+      { id: "depois", label: "Deixar para depois da carreira", dica: "Foco total no campo",
+        efeito: (c) => { marcar(c, "estudos"); return "O livro ficou na estante. Um dia, quem sabe."; } },
+    ],
+  },
+  {
+    id: "casaPais", icone: "🏠", vida: true,
+    peso: (c) => ((c.patrimonio || 0) >= 300 && unico(c, "casaPais") ? 1.4 : 0),
+    titulo: () => "A casa dos seus pais",
+    texto: () => "Seus pais ainda moram de aluguel no bairro onde você nasceu. Dá para resolver isso agora.",
+    opcoes: () => [
+      { id: "comprar", label: "Comprar uma casa para eles", dica: "Custa € 250 mil · realização pessoal enorme",
+        efeito: (c) => { marcar(c, "casaPais"); gastar(c, 250); mexerMoral(c, 15); return "Você entregou a chave no aniversário da sua mãe. Ninguém segurou o choro."; } },
+      { id: "depois", label: "Esperar o próximo contrato", dica: "Guarda o dinheiro",
+        efeito: (c) => { marcar(c, "casaPais"); return "Fica para o ano que vem. Eles disseram que não tem pressa."; } },
+    ],
+  },
+  {
+    id: "cachorro", icone: "🐶", vida: true,
+    peso: (c) => (c.idade >= 19 && unico(c, "cachorro") ? 0.8 : 0),
+    titulo: () => "Um cachorro na porta do CT",
+    texto: () => "Um vira-lata começou a te esperar todo dia na saída do treino. Os funcionários já o chamam pelo seu sobrenome.",
+    opcoes: () => [
+      { id: "adotar", label: "Adotar", dica: "Companhia garantida · a torcida se derrete",
+        efeito: (c) => { marcar(c, "cachorro"); mexerMoral(c, 8); sobe(c, c.clubeNome, 3); c.fama = clampR(c.fama + 2, 0, 100); return "Ele virou mascote do clube e tem mais seguidores que alguns jogadores."; } },
+      { id: "ong", label: "Pagar uma ONG para cuidar dele", dica: "Ajuda sem mudar a rotina",
+        efeito: (c) => { marcar(c, "cachorro"); mexerMoral(c, 3); return "Ele foi adotado por uma família do bairro. Você recebe fotos de vez em quando."; } },
+    ],
+  },
+  {
+    id: "homenagem", icone: "🎖️", vida: true,
+    peso: (c) => (c.fama >= 40 && unico(c, "homenagem") ? 1.1 : 0),
+    titulo: () => "Sua cidade natal quer te homenagear",
+    texto: () => "A prefeitura vai dar seu nome ao campo onde você começou. A cerimônia cai numa semana de jogos.",
+    opcoes: () => [
+      { id: "ir", label: "Ir pessoalmente", dica: "Cabeça renovada · perde um treino importante",
+        efeito: (c) => { marcar(c, "homenagem"); mexerMoral(c, 10); sobe(c, c.primeiroClube, 6); return "O campo de terra agora tem placa com seu nome. Seu primeiro técnico discursou."; } },
+      { id: "video", label: "Mandar um vídeo emocionado", dica: "Sem desgaste",
+        efeito: (c) => { marcar(c, "homenagem"); mexerMoral(c, 3); return "O vídeo passou no telão da praça. A cidade entendeu."; } },
+    ],
+  },
+  {
+    id: "pressaoCopa", icone: "🌎", vida: true,
+    peso: (c) => (anoDeCopa(c.ano) && c.selecao.convocacoes > 0 && c.idade >= 20 ? 2.5 : 0),
+    titulo: () => "O peso de uma Copa do Mundo",
+    texto: (c) => `Faltam meses para a Copa e ${nacDe(c.nac).label} inteiro fala de você. A ansiedade aparece até no sono.`,
+    opcoes: () => [
+      { id: "mental", label: "Trabalhar a cabeça com um psicólogo", dica: "Mais frio na hora decisiva",
+        efeito: (c) => { mexerMoral(c, 10); c.mod.notaBonus = (c.mod.notaBonus || 0) + 0.05; return "Respiração, visualização, rotina. Você chega à Copa em paz."; } },
+      { id: "isolar", label: "Fugir da imprensa até a estreia", dica: "Menos barulho · fama esfria",
+        efeito: (c) => { mexerMoral(c, 5); c.fama = clampR(c.fama - 3, 0, 100); return "Sem entrevistas, sem redes. Só treino e família."; } },
+      { id: "assumir", label: "Assumir o favoritismo em público", dica: "Fama sobe · pressão também", risco: "equilibrado",
+        efeito: (c) => { c.fama = clampR(c.fama + 6, 0, 100); mexerMoral(c, chance(0.5) ? 6 : -8); return "\"Vamos ser campeões.\" A frase abriu todos os jornais."; } },
+    ],
+  },
+];
+
+/* ---------- mais acontecimentos de campo ---------- */
+export const EVENTOS_CAMPO = [
+  {
+    id: "batedor", icone: "🎯",
+    peso: (c) => (c.posicao !== "GOL" && c.idade >= 20 && ["Titular", "Estrela do time"].includes(statusNoClube(c).label) && unico(c, `batedor:${c.clubeNome}`) ? 1.4 : 0),
+    titulo: () => "Quem bate os pênaltis?",
+    texto: () => "O cobrador oficial foi embora. O técnico olhou para você no treino.",
+    opcoes: () => [
+      { id: "assumir", label: "Assumir as cobranças", dica: "Mais gols · se errar, a cobrança vem", risco: "equilibrado",
+        efeito: (c) => { marcar(c, `batedor:${c.clubeNome}`); c.mod.golsMult = (c.mod.golsMult ?? 1) * 1.12; mexerMoral(c, chance(0.75) ? 3 : -5); return "A bola é sua. Você já tem um canto preferido."; } },
+      { id: "passar", label: "Deixar para o companheiro", dica: "Sem pressão extra",
+        efeito: (c) => { marcar(c, `batedor:${c.clubeNome}`); return "Você apontou para o colega. Ele agradeceu a confiança."; } },
+    ],
+  },
+  {
+    id: "excursao", icone: "✈️",
+    peso: (c) => (clubeDe(c.clubeNome).forca >= 80 && c.idade >= 18 ? 1.1 : 0),
+    titulo: () => "Excursão de pré-temporada na Ásia",
+    texto: () => "Três amistosos, dois fusos horários e muitos eventos de patrocinador. O clube quer você na foto.",
+    opcoes: () => [
+      { id: "ir", label: "Ir e fazer tudo", dica: "Fama e bônus · cansaço", risco: "equilibrado",
+        efeito: (c) => { c.fama = clampR(c.fama + 5, 0, 100); ganhar(c, 80); c.mod.lesaoAdd = (c.mod.lesaoAdd || 0) + 0.02; return "Estádios lotados, camisas esgotadas e um bônus no contrato."; } },
+      { id: "ficar", label: "Pedir para treinar em casa", dica: "Chega mais inteiro à temporada",
+        efeito: (c) => { c.mod.evolucao = (c.mod.evolucao ?? 1) * 1.04; return "Você ficou no CT com o preparador físico. O clube não gostou muito."; } },
+    ],
+  },
+  {
+    id: "expulsao", icone: "🟥",
+    peso: (c) => (c.idade >= 19 ? 1 : 0),
+    titulo: () => "Expulsão polêmica",
+    texto: () => "Cartão vermelho direto num lance duvidoso. O tribunal pode te dar até cinco jogos de gancho.",
+    opcoes: () => [
+      { id: "recorrer", label: "Recorrer com o departamento jurídico", dica: "Pode reduzir a pena — ou não", risco: "equilibrado",
+        efeito: (c) => { if (chance(0.55)) return "Pena reduzida para um jogo. O advogado do clube virou herói."; c.mod.shareMult = (c.mod.shareMult ?? 1) * 0.9; return "Recurso negado. Cinco jogos na arquibancada."; } },
+      { id: "desculpas", label: "Pedir desculpas e cumprir", dica: "Três jogos fora · imagem limpa",
+        efeito: (c) => { c.mod.shareMult = (c.mod.shareMult ?? 1) * 0.94; sobe(c, c.clubeNome, 2); return "Três jogos de fora. A imprensa elogiou a postura."; } },
+      { id: "arbitragem", label: "Detonar a arbitragem", dica: "Torcida ama · pena maior", risco: "arriscado",
+        efeito: (c) => { c.mod.shareMult = (c.mod.shareMult ?? 1) * 0.86; sobe(c, c.clubeNome, 5); c.fama = clampR(c.fama + 3, 0, 100); return "A entrevista viralizou. O tribunal dobrou o gancho."; } },
+    ],
+  },
+  {
+    id: "vestiario", icone: "🗣️",
+    peso: (c) => (c.idade >= 21 ? 1.2 : 0),
+    titulo: () => "Racha no vestiário",
+    texto: () => "Os veteranos e os mais jovens não se falam mais. Os dois lados querem você.",
+    opcoes: () => [
+      { id: "veteranos", label: "Ficar com os veteranos", dica: "O técnico confia mais em você",
+        efeito: (c) => { c.mod.shareAdd = (c.mod.shareAdd || 0) + 0.05; mexerMoral(c, -2); return "Você sentou na mesa dos mais velhos. A escalação agradeceu."; } },
+      { id: "jovens", label: "Ficar com os jovens", dica: "Clima leve · técnico desconfia",
+        efeito: (c) => { mexerMoral(c, 5); c.mod.shareAdd = (c.mod.shareAdd || 0) - 0.04; return "Resenha no ônibus, playlist nova. O técnico olhou torto."; } },
+      { id: "ponte", label: "Juntar os dois lados num churrasco", dica: "Se der certo, o time voa", risco: "equilibrado",
+        efeito: (c) => { if (chance(0.6)) { c.mod.notaBonus = (c.mod.notaBonus || 0) + 0.1; mexerMoral(c, 6); sobe(c, c.clubeNome, 3); return "Churrasco na sua casa e o grupo voltou a ser um time."; } mexerMoral(c, -4); return "Teve discussão na beira da piscina. Ninguém mais tocou no assunto."; } },
+    ],
+  },
+  {
+    id: "salarioAtrasado", icone: "⏳",
+    peso: (c) => (clubeDe(c.clubeNome).forca < 74 && c.idade >= 19 ? 1.3 : 0),
+    titulo: () => "Salários atrasados",
+    texto: () => "Três meses sem pagamento. O grupo quer uma posição sua.",
+    opcoes: () => [
+      { id: "cobrar", label: "Cobrar a diretoria em público", dica: "Vira notícia · o mercado ouve",
+        efeito: (c) => { c.mod.ofertasExtra = 1; c.repNeg = clampR((c.repNeg || 0) + 6, -60, 60); sobe(c, c.clubeNome, -4); return "Sua fala abriu o noticiário esportivo. O telefone do empresário tocou."; } },
+      { id: "esperar", label: "Esperar e confiar no clube", dica: "A torcida reconhece · a cabeça sofre",
+        efeito: (c) => { sobe(c, c.clubeNome, 5); mexerMoral(c, -6); return "O dinheiro veio, aos poucos. A torcida não esqueceu sua paciência."; } },
+      { id: "ajudar", label: "Ajudar os funcionários do clube do próprio bolso", dica: "Gesto enorme · custa caro",
+        efeito: (c) => { gastar(c, 120); sobe(c, c.clubeNome, 10); mexerMoral(c, 5); c.flags.social = true; return "Roupeiros, seguranças e cozinheiras receberam em dia. Graças a você."; } },
+    ],
+  },
+  {
+    id: "olheiros", icone: "🔭",
+    peso: (c) => (c.idade >= 18 && c.idade <= 23 && ovrDe(c) - clubeDe(c.clubeNome).forca >= 0 ? 1.5 : 0),
+    titulo: () => "Olheiros de um gigante na arquibancada",
+    texto: () => "Seu empresário avisou: domingo tem gente de um clube enorme vendo o jogo.",
+    opcoes: () => [
+      { id: "vitrine", label: "Jogar para aparecer", dica: "Mais propostas · nota oscila", risco: "equilibrado",
+        efeito: (c) => { c.mod.ofertasExtra = 1; c.mod.notaBonus = (c.mod.notaBonus || 0) + (chance(0.5) ? 0.1 : -0.1); return "Caneta, chapéu e chute de longe. Os olheiros anotaram tudo."; } },
+      { id: "time", label: "Jogar para o time", dica: "Torcida e técnico gostam",
+        efeito: (c) => { sobe(c, c.clubeNome, 3); c.mod.shareAdd = (c.mod.shareAdd || 0) + 0.03; return "Jogo simples, eficiente. Os olheiros também gostam disso."; } },
+    ],
+  },
+  {
+    id: "beneficente", icone: "🎗️",
+    peso: (c) => (c.fama >= 40 ? 0.9 : 0),
+    titulo: () => "Jogo beneficente das estrelas",
+    texto: () => "Ex-jogadores, artistas e craques de vários clubes, tudo para um hospital infantil.",
+    opcoes: () => [
+      { id: "jogar", label: "Jogar e doar o cachê", dica: "Fama, torcida e cabeça boa",
+        efeito: (c) => { c.fama = clampR(c.fama + 3, 0, 100); mexerMoral(c, 5); sobe(c, c.clubeNome, 2); return "Gol de letra e o hospital ganhou uma ala nova."; } },
+      { id: "doar", label: "Só fazer uma doação", dica: "Ajuda sem risco de lesão",
+        efeito: (c) => { gastar(c, 50); mexerMoral(c, 3); return "Doação feita, sem foto. Do jeito que você queria."; } },
+    ],
+  },
+  {
+    id: "recordeClube", icone: "📜",
+    peso: (c) => { if (c.posicao === "GOL") return 0; const g = c.temporadas.filter((s) => s.clube === c.clubeNome).reduce((a, s) => a + s.gols, 0); return g >= 50 && unico(c, `recorde:${c.clubeNome}`) ? 2 : 0; },
+    titulo: (c) => `Perto de virar o maior artilheiro do ${c.clubeNome}`,
+    texto: () => "Faltam poucos gols para a marca histórica. A imprensa faz contagem regressiva.",
+    opcoes: () => [
+      { id: "buscar", label: "Buscar o recorde a todo custo", dica: "Mais gols · menos jogo coletivo", risco: "equilibrado",
+        efeito: (c) => { marcar(c, `recorde:${c.clubeNome}`); c.mod.golsMult = (c.mod.golsMult ?? 1) * 1.12; c.mod.assistMult = (c.mod.assistMult ?? 1) * 0.85; sobe(c, c.clubeNome, 4); return "Cada gol vira contagem no telão. A marca está ao alcance."; } },
+      { id: "natural", label: "Deixar acontecer naturalmente", dica: "Sem pressão",
+        efeito: (c) => { marcar(c, `recorde:${c.clubeNome}`); mexerMoral(c, 3); return "Você parou de ler a contagem. Os gols vêm quando têm que vir."; } },
+    ],
+  },
+  {
+    id: "foraDaLista", icone: "📋",
+    peso: (c) => (c.selecao.convocacoes > 0 && c.idade >= 22 && c.idade <= 32 && !c.flags.semSelecao && ovrDe(c) < forcaSelecao(c) - 2 ? 1.6 : 0),
+    titulo: () => "Fora da lista da seleção",
+    texto: (c) => `O técnico de ${nacDe(c.nac).label} divulgou a convocação. Seu nome não está lá.`,
+    opcoes: () => [
+      { id: "criticar", label: "Criticar o técnico da seleção", dica: "Fama sobe · a porta pode fechar", risco: "arriscado",
+        efeito: (c) => { c.fama = clampR(c.fama + 4, 0, 100); c.flags.selecaoFria = (c.flags.selecaoFria || 0) + 2; return "Sua entrevista rendeu, mas o técnico guardou o recorte."; } },
+      { id: "trabalhar", label: "Trabalhar calado", dica: "Motivação extra no clube",
+        efeito: (c) => { c.mod.notaBonus = (c.mod.notaBonus || 0) + 0.1; mexerMoral(c, -3); c.flags.selecaoFria = Math.max(0, (c.flags.selecaoFria || 0) - 1); return "Nenhuma palavra. Só treino a mais."; } },
+    ],
+  },
+  {
+    id: "videogame", icone: "🎮",
+    peso: (c) => (ovrDe(c) >= 78 && c.fama >= 35 && unico(c, `game:${c.ano}`) ? 0.9 : 0),
+    titulo: () => "Sua carta no videogame de futebol",
+    texto: (c) => `Saiu o novo jogo e o seu overall é ${ovrDe(c) - 2}. Os fãs acham pouco.`,
+    opcoes: () => [
+      { id: "reclamar", label: "Reclamar com bom humor nas redes", dica: "Fama sobe · vira meme",
+        efeito: (c) => { marcar(c, `game:${c.ano}`); c.fama = clampR(c.fama + 4, 0, 100); mexerMoral(c, 3); return "\"Me deram 2 de velocidade a menos, quero falar com o gerente.\" Viralizou."; } },
+      { id: "jogar", label: "Jogar uma partida ao vivo com você mesmo", dica: "Fãs adoram",
+        efeito: (c) => { marcar(c, `game:${c.ano}`); c.fama = clampR(c.fama + 2, 0, 100); mexerMoral(c, 4); return "Você perdeu para você mesmo nos pênaltis. Três milhões de visualizações."; } },
+    ],
+  },
+  {
+    id: "adeusSelecao", icone: "🧣",
+    peso: (c) => (c.idade >= 31 && c.selecao.convocacoes >= 3 && !c.flags.semSelecao ? 1.4 : 0),
+    titulo: () => "Hora de se despedir da seleção?",
+    texto: () => "O corpo reclama das viagens longas e os jovens pedem passagem.",
+    opcoes: (c) => [
+      { id: "despedir", label: "Anunciar a aposentadoria da seleção", dica: "Menos desgaste · sem mais torneios por seleção",
+        efeito: (c) => { c.flags.semSelecao = true; mexerMoral(c, 6); c.mod.declinio = (c.mod.declinio ?? 1) * 0.9; return `Uma carta emocionada para ${nacDe(c.nac).label}. O ciclo fechou.`; } },
+      { id: "continuar", label: "Seguir à disposição", dica: "Ainda sonha com mais uma Copa",
+        efeito: (c) => { c.flags.selecaoFria = Math.max(0, (c.flags.selecaoFria || 0) - 1); return "\"Enquanto me chamarem, eu vou.\""; } },
+    ],
+  },
+  {
+    id: "treinoExtra", icone: "⏱️",
+    peso: (c) => (c.idade <= 26 ? 1.3 : 0),
+    titulo: () => "Treino extra depois do expediente",
+    texto: () => "O auxiliar técnico se ofereceu para ficar uma hora a mais com você todo dia.",
+    opcoes: (c) => {
+      const foco = c.posicao === "GOL" ? "defesa" : DEFENSIVAS.includes(c.posicao) ? "defesa" : c.posicao === "MEI" || c.posicao === "MC" ? "passe" : "finalizacao";
+      return [
+        { id: "aceitar", label: "Aceitar a hora extra", dica: `+1 de ${foco} agora e no teto · cansa`,
+          efeito: (c) => { c.attrs[foco] = clampR(c.attrs[foco] + 1, 40, 99); c.potencial[foco] = clampR(c.potencial[foco] + 1, 40, 99); mexerMoral(c, -2); return "Cem chutes por dia, chuva ou sol. Dá para ver a diferença."; } },
+        { id: "descansar", label: "Descansar", dica: "Cabeça e corpo inteiros",
+          efeito: (c) => { mexerMoral(c, 3); return "Você agradeceu e foi para casa. Recuperação também é treino."; } },
+      ];
+    },
+  },
+  {
+    id: "voltaLesao", icone: "🦵",
+    peso: (c) => (ultimaTemporada(c)?.lesao ? 2 : 0),
+    titulo: () => "A volta depois da lesão",
+    texto: () => "O departamento médico liberou, mas você ainda não confia 100% no corpo.",
+    opcoes: () => [
+      { id: "devagar", label: "Voltar aos poucos", dica: "Menos jogos no começo · sem recaída",
+        efeito: (c) => { c.mod.shareMult = (c.mod.shareMult ?? 1) * 0.95; c.mod.lesaoAdd = (c.mod.lesaoAdd || 0) - 0.03; mexerMoral(c, 4); return "Primeiro 20 minutos, depois 45. Na metade da temporada, 100%."; } },
+      { id: "acelerar", label: "Acelerar a volta", dica: "Joga mais · risco de recaída", risco: "arriscado",
+        efeito: (c) => { c.mod.lesaoAdd = (c.mod.lesaoAdd || 0) + 0.05; mexerMoral(c, 2); return "Você pulou etapas. O joelho ainda avisa de vez em quando."; } },
+    ],
+  },
+  {
+    id: "paiEmpresario", icone: "👨‍👦",
+    peso: (c) => (c.idade <= 21 && unico(c, "paiEmpresario") ? 1.2 : 0),
+    titulo: () => "Seu pai quer ser seu empresário",
+    texto: () => "Ele largou o emprego para te acompanhar desde a base e agora quer cuidar da sua carreira.",
+    opcoes: () => [
+      { id: "aceitar", label: "Deixar seu pai cuidar de tudo", dica: "Confiança total · menos contatos no mercado",
+        efeito: (c) => { marcar(c, "paiEmpresario"); c.empresario = "iniciante"; mexerMoral(c, 8); return "Contrato assinado na mesa da cozinha. Ele chorou."; } },
+      { id: "conselheiro", label: "Ele vira conselheiro, o empresário segue", dica: "Meio-termo",
+        efeito: (c) => { marcar(c, "paiEmpresario"); mexerMoral(c, 3); return "Ele participa das reuniões, mas quem negocia é o profissional."; } },
+      { id: "nao", label: "Manter a família fora dos negócios", dica: "Clima pesado em casa por um tempo",
+        efeito: (c) => { marcar(c, "paiEmpresario"); mexerMoral(c, -5); return "A conversa foi difícil. O almoço de domingo ficou em silêncio."; } },
+    ],
+  },
+  {
+    id: "idiomaImprensa", icone: "🎙️",
+    peso: (c) => (longeDeCasa(c) && c.idade >= 22 && unico(c, `imprensa:${c.clubeNome}`) ? 1 : 0),
+    titulo: () => "A imprensa local quer ouvir você",
+    texto: () => "Até agora você falou só pelo tradutor. Um programa de TV popular quer uma entrevista exclusiva.",
+    opcoes: () => [
+      { id: "lingua", label: "Dar a entrevista na língua deles", dica: "Torcida se encanta · pode escorregar", risco: "equilibrado",
+        efeito: (c) => { marcar(c, `imprensa:${c.clubeNome}`); sobe(c, c.clubeNome, chance(0.75) ? 8 : -3); c.fama = clampR(c.fama + 3, 0, 100); return "Sotaque carregado, gramática criativa e muito carisma."; } },
+      { id: "tradutor", label: "Ir com tradutor", dica: "Seguro",
+        efeito: (c) => { marcar(c, `imprensa:${c.clubeNome}`); sobe(c, c.clubeNome, 2); return "Entrevista correta. Nada demais."; } },
+    ],
+  },
+];
+
 const riscoDaOferta = (o) => (["Reserva", "Fora dos planos", "Base"].includes(o.status) ? "arriscado" : o.status === "Rotação" ? "equilibrado" : "seguro");
-const TODOS_EVENTOS = () => [...EVENTOS, ...EVENTOS_EXTRAS];
+const TODOS_EVENTOS = () => [...EVENTOS, ...EVENTOS_EXTRAS, ...EVENTOS_VIDA, ...EVENTOS_CAMPO];
 const opcoesCompletas = (e, c, ctx) => [...e.opcoes(c, ctx), ...(EXTRAS_OPCOES[e.id] ? EXTRAS_OPCOES[e.id](c, ctx) : [])];
 
 /* Sorteia o evento da janela entre temporadas */
@@ -1507,7 +1931,7 @@ function sortearEventoBase(c, { somente = null, excluir = [] } = {}) {
   const escolhido = cands.find((x) => (roll -= x.p) <= 0) || cands[cands.length - 1];
   const { e, ctx } = escolhido;
   return {
-    id: e.id, icone: e.icone, titulo: e.titulo(c, ctx), texto: e.texto(c, ctx),
+    id: e.id, icone: e.icone, vida: !!e.vida, titulo: e.titulo(c, ctx), texto: e.texto(c, ctx),
     opcoes: opcoesCompletas(e, c, ctx).map(({ efeito, ...o }) => ({ ...o, risco: o.risco || RISCOS[`${e.id}:${o.id}`] || (o.oferta ? riscoDaOferta(o.oferta) : "seguro") })), ctx,
   };
 }
@@ -1534,6 +1958,143 @@ function resolverEventoBase(c0, evento, opcaoId, extra = null) {
   const ultima = c.temporadas[c.temporadas.length - 1];
   if (ultima) ultima.decisao = { evento: evento.titulo, escolha: op?.label || "", resultado };
   return { c, resultado };
+}
+
+/* ---------- ritmo: quantos acontecimentos por janela ---------- */
+const EVENTOS_IMPORTANTES = ["propostas", "fimContrato", "clausula", "livre", "fortuna", "traicao", "voltarCasa", "naturalizacao", "emprestimo", "forcarSaida"];
+/* Evento principal da janela, respeitando o ritmo escolhido */
+export function eventoDaJanela(c) {
+  const ev = sortearEvento(c);
+  if (!ev || c.ritmo !== "expresso") return ev;
+  if (EVENTOS_IMPORTANTES.includes(ev.id)) return ev;
+  return comSemente(c.codigo, `expresso:${c.ano}`, () => (chance(0.35) ? ev : null));
+}
+/* Segundo acontecimento da janela: transferência (se o atleta já é grande demais) ou, no ritmo intenso, mais um evento */
+export function segundoEvento(c, idJaVisto) {
+  const janela = janelaExtra(c, idJaVisto);
+  if (janela || c.ritmo !== "intenso") return janela;
+  return sortearEvento(c, { excluir: [idJaVisto, "propostas"] });
+}
+
+/* ---------- coletiva de imprensa ---------- */
+const COLETIVAS = {
+  titulo: {
+    pergunta: (c, k) => `Campeão${k.titulos.length > 1 ? ` de ${k.titulos.length} taças` : ""}. O que esse momento representa para você?`,
+    tons: {
+      calmo: ["“Foi um ano de muito trabalho. Agora é descansar e recomeçar.”", { torcida: 2, moral: 3 }],
+      agressivo: ["“Isso é só o começo. Quem duvidou, que se prepare.”", { fama: 6, torcida: 5, moral: 4, tecnico: -2 }],
+      humilde: ["“O título é do grupo. Eu só fiz a minha parte.”", { torcida: 4, moral: 5, tecnico: 4 }],
+      defenderTecnico: ["“Quero dedicar ao professor. Ninguém acreditava nele.”", { tecnico: 8, moral: 3 }],
+    },
+  },
+  crise: {
+    pergunta: (c, k) => `Nota ${(k.nota || 0).toFixed(1)} e muita crítica. A torcida tem razão em cobrar?`,
+    tons: {
+      calmo: ["“Faz parte. Vou trabalhar em silêncio.”", { moral: 2, torcida: 1 }],
+      agressivo: ["“Quem me critica não vê os treinos. Vou calar muita gente.”", { fama: 4, moral: 4, aposta: true }],
+      cobrarReforcos: ["“Sozinho não dá. O elenco precisa de reforços.”", { torcida: 6, diretoria: -10, moral: -2, ofertas: true }],
+      defenderTecnico: ["“A culpa não é do treinador. Estamos com ele.”", { tecnico: 10, torcida: -3 }],
+      assumirCulpa: ["“A responsabilidade é minha. Eu devo mais.”", { torcida: 6, moral: -4, tecnico: 4, fama: -2 }],
+    },
+  },
+  rival: {
+    pergunta: (c) => `${c.rival?.nome} está sendo comparado a você o tempo todo. Quem é melhor?`,
+    tons: {
+      calmo: ["“Respeito muito. Cada um faz a sua história.”", { moral: 2 }],
+      agressivo: ["“Os números falam por mim. Pode comparar.”", { fama: 6, moral: 3, aposta: true }],
+      humilde: ["“Ele é um craque. Me obriga a melhorar todo dia.”", { torcida: 2, moral: 4, fama: 1 }],
+    },
+  },
+  mercado: {
+    pergunta: (c) => `Dizem que grandes clubes da Europa estão de olho. Você fica no ${c.clubeNome}?`,
+    tons: {
+      calmo: ["“Tenho contrato e foco total aqui.”", { torcida: 5, moral: 2 }],
+      agressivo: ["“Quero disputar tudo. Sonho em jogar no maior palco.”", { fama: 4, torcida: -8, ofertas: true }],
+      humilde: ["“Estou feliz. Se um dia vier algo, a gente conversa com o clube.”", { torcida: 1, diretoria: 4 }],
+    },
+  },
+  copa: {
+    pergunta: (c) => `Ano de ${anoDeCopa(c.ano) ? "Copa do Mundo" : nomeCopaContinental(c.nac)}. ${nacDe(c.nac).label} pode contar com você?`,
+    tons: {
+      calmo: ["“Se o treinador me chamar, estarei pronto.”", { moral: 2 }],
+      agressivo: ["“Vou ser campeão. Podem escrever.”", { fama: 6, moral: 5, aposta: true }],
+      humilde: ["“Vestir essa camisa já é um sonho. O resto é consequência.”", { torcida: 3, moral: 4, selecao: 1 }],
+    },
+  },
+  geral: {
+    pergunta: (c) => `Temporada encerrada no ${c.clubeNome}. Qual é a meta para o ano que vem?`,
+    tons: {
+      calmo: ["“Evoluir um pouco a cada jogo.”", { moral: 3 }],
+      agressivo: ["“Quero ser o melhor do mundo. Não tenho medo de falar.”", { fama: 5, moral: 2, aposta: true }],
+      humilde: ["“Ajudar o grupo a brigar por título.”", { torcida: 3, tecnico: 4 }],
+      cobrarReforcos: ["“Para sonhar alto, o clube precisa investir.”", { torcida: 5, diretoria: -8, ofertas: true }],
+    },
+  },
+};
+const JORNALISTAS = ["Rádio Arquibancada", "Jornal do Gramado", "TV Bola Rolando", "Portal Lance Livre", "Canal Resenha", "Diário da Grande Área"];
+
+export function deveTerColetiva(c, card) {
+  if (c.ritmo === "expresso" || c.idade < 18 || !card) return false;
+  if (c.ritmo === "intenso") return true;
+  const marcante = card.titulos.some((t) => ["liga", "continental", "copaMundo", "continentalSelecao", "mundial"].includes(t.tipo)) || card.bola.pos <= 3
+    || (card.nota && card.nota < 6.3 && card.jogos >= 15) || card.rival?.bola === 1;
+  // sem repetir coletiva dois anos seguidos no ritmo normal
+  if (c.ultimaColetiva === c.ano - 1) return false;
+  return marcante || comSemente(c.codigo, `coletivaSorteio:${c.ano}`, () => chance(0.15));
+}
+
+export function gerarColetiva(c, card) {
+  return comSemente(c.codigo, `coletiva:${c.ano}`, () => {
+    const ovr = ovrDe(c);
+    const contexto = card.titulos.some((t) => t.tipo !== "bolaOuro") ? "titulo"
+      : card.nota && card.nota < 6.5 && card.jogos >= 12 ? "crise"
+      : c.rival && !c.rival.aposentado && (card.rival?.bola || card.rival?.titulos?.length) && chance(0.7) ? "rival"
+      : (anoDeCopa(c.ano) || anoDeContinentalSelecao(c.ano)) && c.selecao.convocacoes > 0 ? "copa"
+      : ovr - clubeDe(c.clubeNome).forca >= 4 ? "mercado" : "geral";
+    const def = COLETIVAS[contexto];
+    return {
+      contexto, veiculo: pick(JORNALISTAS), pergunta: def.pergunta(c, card),
+      opcoes: Object.entries(def.tons).map(([id, [fala]]) => {
+        const tom = TONS_COLETIVA_RAPIDO[id];
+        return { id, label: tom.label, icone: tom.icone, fala };
+      }),
+    };
+  });
+}
+const TONS_COLETIVA_RAPIDO = {
+  calmo: { label: "Calmo e ponderado", icone: "🙂" }, agressivo: { label: "Confiante e provocador", icone: "🔥" },
+  humilde: { label: "Humilde, mérito do grupo", icone: "🤝" }, cobrarReforcos: { label: "Cobrar a diretoria", icone: "📣" },
+  defenderTecnico: { label: "Defender o técnico", icone: "🛡️" }, assumirCulpa: { label: "Assumir a culpa", icone: "🙇" },
+};
+
+export function responderColetiva(c0, coletiva, tomId) {
+  return comSemente(c0.codigo, `coletivaResp:${c0.ano}:${tomId}`, () => {
+    const c = clone(c0);
+    c.mod = c.mod || {};
+    const [fala, ef] = COLETIVAS[coletiva.contexto].tons[tomId] || COLETIVAS.geral.tons.calmo;
+    const notas = [];
+    const t = c.clubeNome;
+    let { torcida = 0, fama = 0, moral = 0, tecnico = 0, diretoria = 0 } = ef;
+    // promessa ousada: a imprensa cobra se não cumprir; ganha confiança se cumprir
+    if (ef.aposta) {
+      if (chance(0.5)) { c.mod.notaBonus = (c.mod.notaBonus || 0) + 0.15; notas.push("A frase virou combustível: você entra na temporada com sangue nos olhos."); }
+      else { moral -= 6; notas.push("A frase virou manchete e os rivais colaram no vestiário deles."); }
+    }
+    if (torcida) c.torcida[t] = clampR((c.torcida[t] ?? 30) + torcida, 0, 100);
+    if (fama) c.fama = clampR(c.fama + fama, 0, 100);
+    if (moral) mexerMoral(c, moral);
+    if (tecnico) c.mod.shareAdd = (c.mod.shareAdd || 0) + tecnico * 0.006;
+    if (diretoria) c.repNeg = clampR((c.repNeg || 0) - Math.round(diretoria / 2), -60, 60);
+    if (ef.ofertas) c.mod.ofertasExtra = 1;
+    if (ef.selecao) c.flags.selecaoFria = Math.max(0, (c.flags.selecaoFria || 0) - ef.selecao);
+    const efeitos = [
+      torcida && `torcida ${torcida > 0 ? "+" : ""}${torcida}`, fama && `fama ${fama > 0 ? "+" : ""}${fama}`, moral && `cabeça ${moral > 0 ? "+" : ""}${moral}`,
+      tecnico && (tecnico > 0 ? "técnico gostou" : "técnico não gostou"), diretoria && (diretoria > 0 ? "diretoria aprovou" : "diretoria irritada"),
+      ef.ofertas && "o mercado ouviu",
+    ].filter(Boolean);
+    c.coletivas = (c.coletivas || 0) + 1; c.ultimaColetiva = c.ano;
+    return { c, resultado: { fala, notas, efeitos } };
+  });
 }
 
 /* ---------- texto para compartilhar ---------- */
@@ -1607,6 +2168,7 @@ export function carregarRapido() {
     if (!s.c.contrato) s.c.contrato = contratoPadrao(s.c, s.c.clubeNome);
     s.c.foco = s.c.foco || "equilibrio";
     s.c.picoAttrs = s.c.picoAttrs || { ...s.c.attrs };
+    s.c.moral = s.c.moral ?? 65; s.c.ritmo = s.c.ritmo || "normal"; s.c.pe = s.c.pe || "destro";
     s.c.titulos = { liga: 0, copa: 0, continental: 0, mundial: 0, copaMundo: 0, continentalSelecao: 0, bolaOuro: 0, segunda: 0, ...(s.c.titulos || {}) };
     if (!s.c.mundo?.jogadores) s.c.mundo = mundoCompacto();
     return s;
@@ -1641,9 +2203,11 @@ function simularCarreiraAutomaticaBase(dados, escolher, escolherFoco) {
     ({ c } = fecharTemporada(c2, card));
     if (aposentadoriaForcada(c) || (podeAposentar(c) && c.idade >= 36 && chance(0.4))) { c = aposentar(c); break; }
     if (precisaEscolherTraco(c)) c = escolherTraco(c, pick(opcoesDeTraco(c)).id);
-    const ev = sortearEvento(c);
+    const ultimo = c.temporadas[c.temporadas.length - 1];
+    if (deveTerColetiva(c, ultimo)) { const col = gerarColetiva(c, ultimo); c = responderColetiva(c, col, pick(col.opcoes).id).c; }
+    const ev = eventoDaJanela(c);
     if (ev) c = resolverAuto(c, ev, escolher);
-    const ex = janelaExtra(c, ev?.id);
+    const ex = segundoEvento(c, ev?.id);
     if (ex) c = resolverAuto(c, ex, escolher);
     const compra = INVESTIMENTOS.filter((i) => !(c.investimentos || []).includes(i.id) && i.custo <= c.patrimonio * 0.5);
     if (compra.length && chance(0.4)) c = comprarInvestimento(c, pick(compra).id).c;

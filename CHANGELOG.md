@@ -4,6 +4,19 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🧠 Modo Rápido: cabeça, coletivas e 60 acontecimentos
+
+- **Ritmo da carreira**: Intenso (dois acontecimentos por janela e coletiva todo ano), Normal ou Expresso (só as decisões importantes, sem coletivas)
+- **Pé preferido**: destro (+1 de finalização e passe no teto), canhoto (+2 de drible) ou ambidestro (+6% de gols e assistências, −1 em todo o teto)
+- **Número da camisa** escolhido na criação, mostrado na ficha, na carta final e na apresentação no clube novo. Herdar a camisa 10 do ídolo agora troca o número
+- **Onde começar**: três clubes de base possíveis para escolher (ou deixar sortear)
+- **Estado mental ("Cabeça")**: barra de 0 a 100 que sobe e desce com notas, títulos, lesões e decisões. Cabeça boa melhora a nota e a evolução; cabeça ruim aumenta o risco de lesão e pode tirar espaço no time. Novo investimento: psicólogo do esporte
+- **Vida pessoal**: 13 acontecimentos fora de campo (saudade de casa, romance, nascimento do primeiro filho, luto, ataques nas redes, esgotamento, amigo pedindo ajuda, investimento furado, estudos, casa dos pais, cachorro adotado, homenagem na cidade natal, pressão antes da Copa)
+- **Coletivas de imprensa**: depois das temporadas marcantes, um jornalista pergunta (título, crise, rival, mercado, seleção) e o tom da resposta mexe com torcida, fama, técnico, diretoria e cabeça. Frases ousadas podem virar combustível ou manchete contra você
+- **15 acontecimentos novos de campo**: batedor de pênaltis, excursão na Ásia, expulsão polêmica, racha no vestiário, salários atrasados, olheiros, jogo beneficente, recorde de gols do clube, corte da seleção, carta no videogame, despedida da seleção, treino extra, volta de lesão, pai empresário e entrevista na língua local. Agora são 60 no total
+
+---
+
 ## 🔁 Modo Rápido: rejogar e compartilhar
 
 - **Carreira do Dia**: todo mundo recebe o mesmo atleta (país, posição, origem e perfil) e o mesmo mundo no mesmo dia. Só as escolhas mudam a história

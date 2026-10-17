@@ -12,7 +12,8 @@ import {
   nomeCopaContinental, chancePenalti, ORIGENS_RAPIDO, origemDe, FOCOS, focoDe, definirFoco,
   iniciarNegociacao, ajustarNegociacao, fecharNegociacao, CAMPOS_NEGOCIACAO, fama_negociador,
   INVESTIMENTOS, comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
-  chanceMomento, miniDaPosicao, codigoDoDia, dadosDoDia, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
+  chanceMomento, miniDaPosicao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
+  eventoDaJanela, segundoEvento, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
 } from "./rapido.js";
 
 /* Estilo do seletor de modos e do Modo Rápido. Inclui as animações que as
@@ -66,7 +67,6 @@ const RISCO = {
   equilibrado: { label: "Equilibrado", cor: "#8DB4F5", bg: "rgba(46,111,224,.16)" },
   arriscado: { label: "Arriscado", cor: "#F0A99E", bg: "rgba(227,107,91,.16)" },
 };
-const numeroCamisa = (pos) => ({ GOL: 1, ZAG: 4, LD: 2, LE: 6, VOL: 5, MC: 8, MEI: 10, PD: 7, PE: 11, SA: 10, ATA: 9 }[pos] || 8);
 
 function Barra({ valor, cor = "#12A876" }) {
   return (
@@ -182,6 +182,19 @@ function Estante({ c, onFechar }) {
 }
 
 /* Ficha compacta do atleta */
+function BarraMental({ moral = 65, delta = null }) {
+  const e = estadoMental(moral);
+  return (
+    <div className="mt-2 rounded-xl bg-[#0E1512]/70 px-3 py-2.5" title="Estado mental: afeta nota, evolução e risco de lesão">
+      <div className="flex items-center justify-between text-[14px] mb-1.5">
+        <span className="text-[#C9D3CE]">🧠 Cabeça</span>
+        <span className="font-bold" style={{ color: e.cor }}>{e.icone} {e.nome} <span className="font-stat text-[#8FA39A]">{moral}</span>{delta ? <span className={delta > 0 ? "text-[#1BC28A]" : "text-[#E36B5B]"}> {delta > 0 ? `+${delta}` : delta}</span> : null}</span>
+      </div>
+      <Barra valor={moral} cor={e.cor} />
+    </div>
+  );
+}
+
 function Ficha({ c }) {
   const ovr = ovrDe(c);
   const clube = clubeDe(c.emprestimo?.destino || c.clubeNome);
@@ -201,6 +214,7 @@ function Ficha({ c }) {
             <span className="truncate">{clube.nome}{c.emprestimo ? " (empréstimo)" : ""}</span>
           </div>
           <div className="text-[13px] text-[#8FA39A]">{ligaDe(clube.liga).nome} · {st.label}</div>
+          <div className="text-[13px] text-[#8FA39A]">Camisa <span className="font-stat text-[#E1E6E3]">{numeroDe(c)}</span> · {peDe(c.pe).nome}</div>
         </div>
       </div>
       <div className="px-4 pb-4">
@@ -219,6 +233,7 @@ function Ficha({ c }) {
             <span className={`font-bold ${c.contrato.restantes <= 1 ? "text-[#EBC557]" : "text-[#8FA39A]"}`}>{c.contrato.restantes <= 0 ? "acabou" : `${c.contrato.restantes} ano${c.contrato.restantes > 1 ? "s" : ""}`}</span>
           </div>
         )}
+        <BarraMental moral={c.moral} />
         <div className="grid grid-cols-3 gap-2 mt-2 text-center">
           {[["VALOR", formatarValor(valorMercado(ovr, c.idade, c.fama))], ["TORCIDA", `${torcida}/100`], ["FAMA", `${c.fama}/100`]].map(([k, v]) => (
             <div key={k} className="rounded-xl bg-[#0E1512]/70 py-2"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">{k}</div><div className="font-stat text-sm">{v}</div></div>
@@ -273,7 +288,14 @@ function TelaCriacao({ onCriar }) {
   const [personalidade, setPersonalidade] = useState("");
   const [origem, setOrigem] = useState("");
   const [codigo, setCodigo] = useState("");
+  const [pe, setPe] = useState("destro");
+  const [numero, setNumero] = useState("");
+  const [clube, setClube] = useState("");
+  const [ritmo, setRitmo] = useState("normal");
   const [gerando, setGerando] = useState(false);
+  // três bases possíveis, sorteadas de novo quando muda o país ou a origem
+  const clubes = React.useMemo(() => (origem ? opcoesClubeInicial(nac, origem) : []), [nac, origem]);
+  useEffect(() => { setClube(""); }, [nac, origem]);
   const destaque = NACS_DESTAQUE.map((id) => NACIONALIDADES.find((n) => n.id === id)).filter(Boolean);
   const outras = NACIONALIDADES.filter((n) => !NACS_DESTAQUE.includes(n.id)).sort((a, b) => a.label.localeCompare(b.label));
   const doDia = modo === "dia" ? dadosDoDia(codigoDoDia()) : null;
@@ -282,7 +304,8 @@ function TelaCriacao({ onCriar }) {
 
   const comecar = () => {
     setGerando(true);
-    const dados = doDia ? { nome, ...doDia } : { nome, nac, posicao, personalidade, origem, codigo: normalizarCodigo(codigo) };
+    const dados = doDia ? { nome, ...doDia, ritmo }
+      : { nome, nac, posicao, personalidade, origem, codigo: normalizarCodigo(codigo), pe, numero: numero || NUMERO_PADRAO[posicao], clube: clube || undefined, ritmo };
     // dá tempo de a tela mostrar o carregamento antes de gerar o mundo
     setTimeout(() => onCriar(dados), 30);
   };
@@ -364,6 +387,45 @@ function TelaCriacao({ onCriar }) {
             </div>
           </Secao>
 
+          <Secao titulo="Pé preferido">
+            <div className="grid sm:grid-cols-3 gap-2">
+              {PES.map((p) => (
+                <button key={p.id} onClick={() => setPe(p.id)} className={`rp-opcao px-4 py-3 ${pe === p.id ? "sel" : ""}`}>
+                  <div className="font-bold text-[16px] text-[#F2F5F3]">{p.icone} {p.nome}</div>
+                  <div className="text-[13px] leading-snug text-[#8FA39A] mt-0.5">{p.desc}</div>
+                </button>
+              ))}
+            </div>
+          </Secao>
+
+          <Secao titulo="Número da camisa">
+            <div className="flex items-center gap-2 flex-wrap">
+              <input inputMode="numeric" value={numero} onChange={(e) => setNumero(e.target.value.replace(/\D/g, "").slice(0, 2).replace(/^0+/, ""))}
+                placeholder={posicao ? String(NUMERO_PADRAO[posicao]) : "10"} aria-label="Número da camisa"
+                className="rp-painel w-24 px-4 min-h-[52px] text-2xl font-stat text-center text-[#F2F5F3] placeholder:text-[#5E7068] outline-none focus:border-[#12A876]" />
+              {[7, 9, 10, 11].map((n) => (
+                <button key={n} onClick={() => setNumero(String(n))} className={`rp-opcao w-12 min-h-[44px] font-stat text-lg ${+numero === n ? "sel" : ""}`}>{n}</button>
+              ))}
+            </div>
+          </Secao>
+
+          {clubes.length > 0 && (
+            <Secao titulo="Onde começar">
+              <div className="grid gap-2">
+                {clubes.map((x) => (
+                  <button key={x.nome} onClick={() => setClube(x.nome)} className={`rp-opcao px-4 py-3 flex items-center gap-3 ${clube === x.nome ? "sel" : ""}`}>
+                    <ClubDot club={x} size={30} />
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold text-[16px] text-[#F2F5F3] truncate">{x.nome}</div>
+                      <div className="text-[13px] text-[#8FA39A]">{ligaDe(x.liga).nome} · força <span className="font-stat">{x.forca}</span></div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              <p className="text-[14px] text-[#8FA39A]">{clube ? "Clube menor: mais minutos cedo. Clube maior: vitrine e títulos, mas espaço difícil." : "Se não escolher, o clube é sorteado."}</p>
+            </Secao>
+          )}
+
           <Secao titulo="Código da carreira (opcional)">
             <input value={codigo} onChange={(e) => setCodigo(normalizarCodigo(e.target.value))} placeholder="Ex.: K7QX2M — deixe vazio para sortear"
               aria-label="Código da carreira" className="rp-painel px-4 min-h-[52px] text-lg font-stat tracking-widest text-[#F2F5F3] placeholder:text-[#5E7068] placeholder:font-sans placeholder:tracking-normal placeholder:text-[15px] outline-none focus:border-[#12A876]" />
@@ -371,6 +433,17 @@ function TelaCriacao({ onCriar }) {
           </Secao>
         </>
       )}
+
+      <Secao titulo="Ritmo">
+        <div className="grid grid-cols-3 gap-2">
+          {RITMOS.map((r) => (
+            <button key={r.id} onClick={() => setRitmo(r.id)} className={`rp-opcao px-3 py-3 ${ritmo === r.id ? "sel" : ""}`}>
+              <div className="font-bold text-[16px] text-[#F2F5F3]">{r.icone} {r.nome}</div>
+              <div className="text-[12px] leading-snug text-[#8FA39A] mt-0.5">{r.desc}</div>
+            </button>
+          ))}
+        </div>
+      </Secao>
 
       <button disabled={!pronto || gerando} onClick={comecar} className="rp-btn rp-prim display text-sm tracking-wide">
         {gerando ? "Montando o mundo do futebol…" : doDia ? "Jogar a Carreira do Dia" : "Começar carreira"}
@@ -804,6 +877,8 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever }) {
         </div>
       </div>
 
+      {card.moral != null && <div className="-mt-2"><BarraMental moral={card.moral} delta={card.moralDelta} /></div>}
+
       {card.ganhos && (
         <div className="rp-painel px-4 py-3">
           <div className="flex items-center justify-between">
@@ -839,6 +914,45 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever }) {
 }
 
 /* ---------- traço de carreira ---------- */
+/* ---------- coletiva de imprensa ---------- */
+function TelaColetiva({ c, coletiva, resposta, onResponder, onSeguir }) {
+  return (
+    <div className="max-w-xl mx-auto px-4 py-5 flex flex-col gap-4 rp-entra">
+      <div className="rp-painel overflow-hidden">
+        <div aria-hidden="true" className="h-36 -mb-16" style={{ background: `linear-gradient(180deg, rgba(19,26,23,0) 0%, rgba(19,26,23,.75) 60%, rgba(19,26,23,1) 100%), url(${ARTE.refletores}) center 40%/cover` }} />
+        <div className="relative px-5 pb-4">
+          <span className="rp-chip" style={{ color: "#9CC3FF", background: "rgba(46,111,224,.2)" }}>🎙️ Coletiva de imprensa</span>
+          <div className="text-[13px] text-[#8FA39A] mt-3">{coletiva.veiculo} pergunta:</div>
+          <p className="display text-[15px] leading-snug text-[#F2F5F3] mt-1">“{coletiva.pergunta}”</p>
+        </div>
+        {!resposta && (
+          <div className="flex flex-col gap-2 p-4 pt-1">
+            {coletiva.opcoes.map((o) => (
+              <button key={o.id} onClick={() => onResponder(o.id)} className="rp-opcao px-4 py-3">
+                <div className="font-bold text-[16px] text-[#F2F5F3]">{o.icone} {o.label}</div>
+                <div className="text-[15px] text-[#8FA39A] mt-1 italic">{o.fala}</div>
+              </button>
+            ))}
+          </div>
+        )}
+        {resposta && (
+          <div className="px-5 pb-5 rp-entra">
+            <p className="text-[17px] italic text-[#E1E6E3]">{resposta.fala}</p>
+            {resposta.notas.map((n, i) => <p key={i} className="text-[16px] text-[#C9D3CE] mt-2">{n}</p>)}
+            {resposta.efeitos.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                {resposta.efeitos.map((e) => <span key={e} className="rp-chip" style={{ color: "#C9D3CE", background: "rgba(255,255,255,.07)" }}>{e}</span>)}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      {resposta && <button onClick={onSeguir} className="rp-btn rp-prim display text-sm">Continuar</button>}
+      {!resposta && <button onClick={onSeguir} className="text-[15px] text-[#8FA39A] min-h-[44px]">Não dar entrevista</button>}
+    </div>
+  );
+}
+
 function TelaTraco({ c, opcoes, onEscolher }) {
   const marco = IDADES_TRACO.indexOf(c.idade) + 1;
   return (
@@ -867,9 +981,10 @@ function CartaoEvento({ evento, resultado, onEscolher }) {
   return (
     <div className="rp-painel overflow-hidden">
       {foto && <div aria-hidden="true" className="h-32 -mb-14" style={{ background: `linear-gradient(180deg, rgba(19,26,23,0) 0%, rgba(19,26,23,.7) 60%, rgba(19,26,23,1) 100%), url(${foto}) center 45%/cover` }} />}
-      <div className="relative px-5 pt-5 pb-4 flex items-start gap-4" style={{ background: foto ? "transparent" : "linear-gradient(135deg, rgba(18,168,118,.16), transparent 70%)" }}>
+      <div className="relative px-5 pt-5 pb-4 flex items-start gap-4" style={{ background: foto ? "transparent" : evento.vida ? "linear-gradient(135deg, rgba(140,110,230,.18), transparent 70%)" : "linear-gradient(135deg, rgba(18,168,118,.16), transparent 70%)" }}>
         <span className="text-4xl w-16 h-16 rounded-2xl bg-[#0E1512]/70 border border-white/10 flex items-center justify-center shrink-0">{evento.icone}</span>
         <div className="min-w-0">
+          {evento.vida && <span className="rp-chip mb-1.5 inline-block" style={{ color: "#C7B8F5", background: "rgba(140,110,230,.18)" }}>Vida pessoal · mexe com a cabeça</span>}
           <h2 className="display text-[15px] leading-snug text-[#F2F5F3]">{evento.titulo}</h2>
           <p className="text-[17px] text-[#C9D3CE] mt-1.5 leading-snug">{evento.texto}</p>
         </div>
@@ -1051,8 +1166,8 @@ function CartaFinal({ c }) {
         <div className="flex items-start justify-between relative">
           <div>
             <div className="font-stat text-5xl font-bold leading-none" style={{ color: L.nivel.cor }}>{c.picoOvr}</div>
-            <div className="text-sm font-bold tracking-widest text-[#C9D3CE] mt-1">{c.posicao}</div>
-            <div className="text-[13px] text-[#8FA39A]">{nacDe(c.nac).label}</div>
+            <div className="text-sm font-bold tracking-widest text-[#C9D3CE] mt-1">{c.posicao} · #{numeroDe(c)}</div>
+            <div className="text-[13px] text-[#8FA39A]">{nacDe(c.nac).label} · {peDe(c.pe).nome}</div>
           </div>
           <Gema size={64} />
         </div>
@@ -1297,10 +1412,16 @@ export default function ModoRapido({ onSair }) {
 
   const continuar = () => {
     if (precisaEscolherTraco(c)) return setEstado({ etapa: "traco", c, card, opcoesTraco: opcoesDeTraco(c).map((t) => t.id) });
-    irParaEvento(c);
+    irAdiante(c, card);
   };
-  const irParaEvento = (cc) => setEstado({ etapa: "evento", c: cc, evento: sortearEvento(cc), resultado: null, fila: true });
-  const escolherT = (id) => irParaEvento(escolherTraco(c, id));
+  // depois do resumo: coletiva (conforme o ritmo) e então a janela de eventos
+  const irAdiante = (cc, k) => {
+    if (deveTerColetiva(cc, k)) return setEstado({ etapa: "coletiva", c: cc, card: k, coletiva: gerarColetiva(cc, k), resposta: null });
+    irParaEvento(cc);
+  };
+  const irParaEvento = (cc) => setEstado({ etapa: "evento", c: cc, evento: eventoDaJanela(cc), resultado: null, fila: true });
+  const escolherT = (id) => irAdiante(escolherTraco(c, id), card);
+  const responder = (tom) => { const r = responderColetiva(c, estado.coletiva, tom); setEstado((st) => ({ ...st, c: r.c, resposta: r.resultado })); };
   // escolha com negociação: abre a mesa antes de aplicar a opção
   const escolherEvento = (opId) => {
     const op = evento.opcoes.find((o) => o.id === opId);
@@ -1310,7 +1431,7 @@ export default function ModoRapido({ onSair }) {
   const aplicarEscolha = (cBase, opId, extra) => {
     const r = resolverEvento(cBase, evento, opId, extra);
     // fila: depois do evento principal, a janela de transferências pode abrir também
-    const extraEv = fila ? janelaExtra(r.c, evento.id) : null;
+    const extraEv = fila ? segundoEvento(r.c, evento.id) : null;
     setEstado({ etapa: "evento", c: r.c, evento, resultado: r.resultado || "Decisão tomada.", proximo: extraEv, fila: false });
     if (r.c.clubeNome !== c.clubeNome) {
       const clube = clubeDe(r.c.clubeNome);
@@ -1363,13 +1484,14 @@ export default function ModoRapido({ onSair }) {
         {etapa === "momento" && <TelaMomento c={c} momento={card.pendente} onFim={fimMomento} />}
         {etapa === "festa" && <TelaFesta c={c} card={card} onFim={() => setEstado({ etapa: "resumo", c, card })} />}
         {etapa === "resumo" && <TelaResumo c={c} card={card} onContinuar={continuar} onAposentar={encerrar} onRever={() => setEstado({ etapa: "festa", c, card })} />}
+        {etapa === "coletiva" && estado.coletiva && <TelaColetiva c={c} coletiva={estado.coletiva} resposta={estado.resposta} onResponder={responder} onSeguir={() => irParaEvento(c)} />}
         {etapa === "traco" && <TelaTraco c={c} opcoes={(opcoesTraco || []).map(tracoDe).filter(Boolean)} onEscolher={escolherT} />}
         {etapa === "fim" && <TelaFim c={c} onNova={nova} onSair={onSair} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
       </main>
       {estanteAberta && c && <Estante c={c} onFechar={() => setEstanteAberta(false)} />}
       {patrimonioAberto && c && <Patrimonio c={c} onComprar={comprar} onFechar={() => setPatrimonioAberto(false)} />}
       {apresentacao && (
-        <ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroCamisa(c.posicao)} posicao={posicaoDe(c.posicao).label}
+        <ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label}
           idade={c.idade} grandeChegada={apresentacao.grande} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} onConcluir={() => setApresentacao(null)} />
       )}
     </div>

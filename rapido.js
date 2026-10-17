@@ -6,11 +6,11 @@
    lê ou grava o save do Modo Carreira. */
 
 import {
-  CLUBES, LIGAS, POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS, AFINIDADE_MERCADO, CLASSICOS, ORIGENS, CAMINHOS_POS_CARREIRA,
+  CLUBES, LIGAS, POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS, AFINIDADE_MERCADO, CLASSICOS, ORIGENS, CAMINHOS_POS_CARREIRA, LENDAS,
 } from "./data.js";
 import {
   rand, pick, clampR, clamp, poisson, calcOVR, evoluirAtributos,
-  gerarMundoJogadores, simularTemporadaMundo, rankingBolaDeOuro,
+  gerarMundoJogadores, simularTemporadaMundo, rankingBolaDeOuro, nomeMundo,
 } from "./lib.js";
 
 export const VERSAO_RAPIDO = 1;
@@ -24,6 +24,46 @@ const DEFENSIVAS = ["GOL", "ZAG", "LD", "LE", "VOL"];
 const rnd = () => Math.random();
 const chance = (p) => rnd() < p;
 const clone = (x) => JSON.parse(JSON.stringify(x));
+
+/* ---------- semente: o mesmo código + as mesmas escolhas = a mesma carreira ----------
+   Cada etapa sorteia com um gerador próprio, derivado do código da carreira e de
+   uma etiqueta (ano, evento, opção…). Assim duas pessoas com o mesmo código veem o
+   mesmo mundo e só divergem quando escolhem caminhos diferentes. */
+function hashTexto(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return h >>> 0;
+}
+function mulberry32(a) {
+  return () => {
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+export function comSemente(codigo, etiqueta, fn) {
+  if (!codigo) return fn();
+  const original = Math.random;
+  Math.random = mulberry32(hashTexto(`${codigo}|${etiqueta}`));
+  try { return fn(); } finally { Math.random = original; }
+}
+const ALFABETO_CODIGO = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+export const gerarCodigo = () => Array.from({ length: 6 }, () => ALFABETO_CODIGO[Math.floor(Math.random() * ALFABETO_CODIGO.length)]).join("");
+export const normalizarCodigo = (s) => (s || "").toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 14);
+
+/* Carreira do Dia: todo mundo recebe o mesmo atleta e o mesmo mundo no mesmo dia */
+export function codigoDoDia(d = new Date()) {
+  const p = (n) => String(n).padStart(2, "0");
+  return `DIA-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}`;
+}
+export const dataDoCodigo = (codigo) => `${codigo.slice(10, 12)}/${codigo.slice(8, 10)}/${codigo.slice(4, 8)}`;
+export const ehCodigoDiario = (codigo) => /^DIA-\d{8}$/.test(codigo || "");
+export function dadosDoDia(codigo = codigoDoDia()) {
+  return comSemente(codigo, "perfil", () => ({
+    nac: pick(NACS_DESTAQUE), posicao: pick(POSICOES).id, personalidade: pick(PERSONALIDADES).id, origem: pick(ORIGENS_RAPIDO).id, codigo,
+  }));
+}
 
 /* ---------- consultas básicas ---------- */
 export const posicaoDe = (id) => POSICOES.find((p) => p.id === id) || POSICOES[0];
@@ -103,7 +143,8 @@ const efeitosTracos = (c) => (c.tracos || []).map(tracoDe).filter(Boolean);
 const multTraco = (c, k) => efeitosTracos(c).reduce((m, t) => m * (t[k] ?? 1), 1);
 const somaTraco = (c, k) => efeitosTracos(c).reduce((s, t) => s + (t[k] ?? 0), 0);
 
-export function opcoesDeTraco(c) {
+export function opcoesDeTraco(c) { return comSemente(c.codigo, `traco:${c.ano}`, () => opcoesDeTracoBase(c)); }
+function opcoesDeTracoBase(c) {
   const disp = TRACOS_RAPIDO.filter((t) => !(c.tracos || []).includes(t.id) && (!t.posicoes || t.posicoes.includes(c.posicao)));
   const out = [];
   const pool = [...disp];
@@ -124,7 +165,14 @@ export function escolherTraco(c0, id) {
 export const precisaEscolherTraco = (c) => IDADES_TRACO.includes(c.idade) && !(c.tracosEscolhidos || {})[c.idade] && !c.aposentado;
 
 /* ---------- criação ---------- */
-export function criarJogador({ nome, nac, posicao, personalidade, origem }) {
+export function criarJogador(dados) {
+  const codigo = normalizarCodigo(dados.codigo) || gerarCodigo();
+  const c = comSemente(codigo, "criar", () => criarJogadorBase(dados));
+  c.codigo = codigo;
+  c.diario = ehCodigoDiario(codigo);
+  return c;
+}
+function criarJogadorBase({ nome, nac, posicao, personalidade, origem }) {
   const pos = posicaoDe(posicao);
   const persona = personaDe(personalidade);
   const org = origemDe(origem);
@@ -151,7 +199,85 @@ export function criarJogador({ nome, nac, posicao, personalidade, origem }) {
   c.picoOvr = ovrDe(c);
   c.patrimonio = 0; c.ganhosTotais = 0; c.investimentos = []; c.repNeg = 0;
   c.contrato = contratoPadrao(c, clube.nome, { base: true });
+  c.picoAttrs = { ...attrs };
+  c.rival = criarRival(c);
   return c;
+}
+
+/* ---------- rival de geração ----------
+   Um garoto da mesma idade, de outro país, que a imprensa vai comparar com você
+   a carreira inteira. Ele evolui sozinho, troca de clube, ganha (ou não) títulos. */
+const GRUPO_POS = { GOL: ["GOL"], ZAG: ["ZAG"], LD: ["LD", "LE"], LE: ["LE", "LD"], VOL: ["VOL", "MC"], MC: ["MC", "MEI"], MEI: ["MEI", "MC"], PD: ["PD", "PE"], PE: ["PE", "PD"], SA: ["SA", "ATA"], ATA: ["ATA", "SA"] };
+export function criarRival(c) {
+  // só países com banco de nomes próprio, para o rival ter nome coerente
+  const nac = pick(["BRA", "ARG", "ESP", "FRA", "ENG", "ALE", "ITA", "POR"].filter((n) => n !== c.nac));
+  const posicao = pick(GRUPO_POS[c.posicao] || [c.posicao]);
+  const clube = clubeInicial(nac, chance(0.4));
+  return {
+    nome: nomeMundo(nac), nac, posicao, clube: clube.nome, ovr: clampR(ovrDe(c) + rand(-1, 3), 50, 72), teto: rand(86, 93),
+    totais: { jogos: 0, gols: 0, assist: 0 }, titulos: { liga: 0, copa: 0, continental: 0, copaMundo: 0, bolaOuro: 0 }, top3: 0, pico: 0, aposentado: false,
+  };
+}
+
+function temporadaDoRival(r0, idade, meu) {
+  const r = clone(r0);
+  if (r.aposentado) return { r, linha: null };
+  const pos = posicaoDe(r.posicao);
+  // evolução: cresce até ~27, estabiliza, cai depois dos 30
+  if (idade < 27) r.ovr = clampR(r.ovr + Math.max(0, Math.round((r.teto - r.ovr) * rand(14, 30) / 100)), 40, 97);
+  else if (idade >= 30) r.ovr = clampR(r.ovr - rand(0, 2) - (idade >= 33 ? 1 : 0), 40, 97);
+  r.pico = Math.max(r.pico, r.ovr);
+  // mercado: quando fica grande demais para o clube, se transfere
+  let mudou = null;
+  const cl = clubeDe(r.clube);
+  if (idade >= 18 && r.ovr - cl.forca >= 4 && chance(0.55)) {
+    const alvo = clubesJogaveis().filter((x) => x.forca > cl.forca && x.forca >= r.ovr - 7 && x.forca <= r.ovr + 3 && !ehSegundaDivisao(x.liga));
+    if (alvo.length) { mudou = r.clube; r.clube = pick(alvo).nome; }
+  }
+  const clube = clubeDe(r.clube);
+  const st = statusPorDiff(r.ovr - clube.forca, idade);
+  const jogos = clampR(Math.round(46 * st.share * (0.85 + rnd() * 0.2)), 0, 52);
+  const nivel = Math.pow(Math.max(0.25, (r.ovr - 55) / 35), 1.55) * (1.25 - ligaDe(clube.liga).mult * 0.45);
+  const gols = r.posicao === "GOL" ? 0 : poisson(pos.golBase * nivel * jogos);
+  const assist = poisson(pos.assistBase * nivel * jogos * (r.posicao === "GOL" ? 0.1 : 1));
+  const titulos = [];
+  if (chance(clampR(0.03 + (clube.forca - 76) * 0.035, 0.01, 0.45) * (st.share > 0.5 ? 1 : 0.6))) { titulos.push("liga"); r.titulos.liga += 1; }
+  if (chance(clampR(0.05 + (clube.forca - 76) * 0.01, 0.02, 0.2))) { titulos.push("copa"); r.titulos.copa += 1; }
+  if (clube.forca >= 82 && chance(clampR((clube.forca - 82) * 0.025, 0.02, 0.2))) { titulos.push("continental"); r.titulos.continental += 1; }
+  if (anoDeCopa(meu.ano) && r.ovr >= 82 && !meu.ganhouCopa && chance(clampR((r.ovr - 82) * 0.012, 0, 0.12))) { titulos.push("copaMundo"); r.titulos.copaMundo += 1; }
+  // Bola de Ouro: só se você não levou
+  let bola = null;
+  if (jogos >= 20 && r.ovr >= 85) {
+    const score = r.ovr + gols * 0.12 + titulos.length * 2 + rnd() * 4;
+    if (meu.bolaPos !== 1 && score >= 96 && chance(0.45)) { bola = 1; r.titulos.bolaOuro += 1; r.top3 += 1; } else if (score >= 92) { bola = rand(2, 3); r.top3 += 1; } else if (score >= 88) bola = rand(4, 10);
+  }
+  r.totais.jogos += jogos; r.totais.gols += gols; r.totais.assist += assist;
+  if ((idade >= 35 && r.ovr < 80) || idade >= 38) r.aposentado = true;
+  return { r, linha: { clube: r.clube, mudou, ovr: r.ovr, jogos, gols, assist, titulos, bola, aposentou: r.aposentado } };
+}
+
+export function pontosRival(r) {
+  const t = r.titulos;
+  return Math.round(r.totais.gols * 0.35 + r.totais.assist * 0.25 + t.liga * 9 + t.copa * 4 + t.continental * 18 + t.copaMundo * 45 + t.bolaOuro * 55 + r.top3 * 10 + Math.max(0, r.pico - 74) * 6);
+}
+
+/* ---------- "Você foi como…": lenda com perfil mais parecido no auge ----------
+   Compara só com lendas da mesma família de posição e pondera cada atributo
+   pelo peso que ele tem na sua posição (um centroavante não é julgado pela defesa). */
+const grupoLenda = (st) => (st.finalizacao <= 30 ? "gk" : st.defesa >= 75 ? "def" : st.passe >= st.finalizacao + 3 ? "mid" : "att");
+const GRUPOS_DA_POSICAO = { GOL: ["gk"], ZAG: ["def"], LD: ["def"], LE: ["def"], VOL: ["def", "mid"], MC: ["mid", "def"], MEI: ["mid"], PD: ["att"], PE: ["att"], SA: ["att", "mid"], ATA: ["att"] };
+export function lendaParecida(attrs, posicao = "ATA") {
+  const grupos = GRUPOS_DA_POSICAO[posicao] || ["att"];
+  const pesos = { ...posicaoDe(posicao).pesos };
+  if (posicao === "GOL") pesos.finalizacao = 0; // no Modo Rápido ela mede reflexo; nas lendas é chute
+  const somaPesos = ATTRS.reduce((s, a) => s + (pesos[a] || 0), 0) || 1;
+  const cands = LENDAS.filter((l) => grupos.includes(grupoLenda(l.stats)));
+  const notas = (cands.length ? cands : LENDAS).map((l) => {
+    const dist = ATTRS.reduce((s, a) => s + Math.abs((attrs[a] || 0) - (l.stats[a] || 0)) * (pesos[a] || 0), 0) / somaPesos;
+    return { nome: l.nome, dist };
+  }).sort((a, b) => a.dist - b.dist);
+  const m = notas[0];
+  return { nome: m.nome, similaridade: clampR(Math.round(100 - m.dist * 2.4), 35, 99) };
 }
 
 /* ---------- foco da temporada: uma escolha rápida antes de cada temporada ---------- */
@@ -255,10 +381,13 @@ export function iniciarNegociacao(c, { clube, tipo = "transferencia", luvas = 0,
   const relevancia = clamp((ovr - cl.forca + ((c.fama ?? 20) - 40) / 4) / 40, -0.5, 0.6);
   const afeto = tipo === "renovacao" ? ((c.torcida[clube] ?? 30) - 50) / 5 : 0;
   const paciencia = clampR(Math.round(60 + relevancia * 60 - (c.repNeg || 0) / 8 + afeto), 20, 95);
-  return { clube, tipo, termos, original: { ...termos }, paciencia, pacienciaInicial: paciencia, pedidos: 4, colapsou: false, luvas, contexto, historico: [], duro: 0, cedeu: 0 };
+  return { clube, tipo, termos, original: { ...termos }, paciencia, pacienciaInicial: paciencia, pedidos: 4, colapsou: false, luvas, contexto, historico: [], duro: 0, cedeu: 0, codigo: c.codigo || null, ano: c.ano };
 }
 
 export function ajustarNegociacao(n0, campo, dir) {
+  return comSemente(n0.codigo, `neg:${n0.ano}:${n0.clube}:${n0.pedidos}:${campo}:${dir}`, () => ajustarNegociacaoBase(n0, campo, dir));
+}
+function ajustarNegociacaoBase(n0, campo, dir) {
   const n = clone(n0);
   if (n.pedidos <= 0 || n.colapsou) return n;
   const t = n.termos;
@@ -436,7 +565,8 @@ function efeitoFoco(c) {
 
 /* Joga a temporada inteira. Se houver uma final com você em campo,
    devolve um "momento decisivo" (pênalti) para o jogador resolver na tela. */
-export function jogarTemporada(c0) {
+export function jogarTemporada(c0) { return comSemente(c0.codigo, `jogar:${c0.ano}`, () => jogarTemporadaBase(c0)); }
+function jogarTemporadaBase(c0) {
   const c = clone(c0);
   const mod = c.mod || {};
   const fx = efeitoFoco(c);
@@ -527,29 +657,62 @@ export function jogarTemporada(c0) {
     }
   }
 
+  if (momento) {
+    momento.mini = miniDaPosicao(c.posicao);
+    momento.texto = TEXTO_MINI[momento.mini](c, momento.tipo);
+  }
   card.pendente = momento;
   return { c, card, momento };
 }
 
+/* ---------- momento decisivo: cada posição decide do seu jeito ---------- */
+export function miniDaPosicao(pos) {
+  if (pos === "GOL") return "defesa";
+  if (["MEI", "PD", "PE"].includes(pos)) return "falta";
+  if (["MC", "VOL", "LD", "LE"].includes(pos)) return "passe";
+  return "penalti";
+}
+const TEXTO_MINI = {
+  penalti: (c, tipo) => (tipo === "selecao" ? `${nacDe(c.nac).label} inteiro te olhando. Pênalti decisivo.` : "Prorrogação empatada. Pênaltis. A última cobrança é sua."),
+  falta: () => "Último minuto, empate no placar. Falta na entrada da área, e a bola é sua.",
+  passe: () => "Acréscimos. O time puxa o contra-ataque e a bola chega em você: ache o passe do gol.",
+  defesa: (c, tipo) => (tipo === "selecao" ? `Disputa de pênaltis. ${nacDe(c.nac).label} depende de você: defenda a última cobrança.` : "Disputa de pênaltis. Se você pegar a última cobrança, o título é seu."),
+};
+export const ACAO_MINI = {
+  penalti: { ok: "Pênalti decisivo convertido", erro: "Perdeu o pênalti decisivo" },
+  falta: { ok: "Gol de falta no último minuto", erro: "A falta decisiva não entrou" },
+  passe: { ok: "Assistência decisiva no último lance", erro: "O passe decisivo foi interceptado" },
+  defesa: { ok: "Defendeu o pênalti do título", erro: "Não alcançou o pênalti decisivo" },
+};
+
 /* Chance base de converter o pênalti decisivo — usada pela simulação automática */
 export function chancePenalti(c) {
   return clampR(0.62 + (c.attrs.finalizacao - 65) * 0.006 + somaTraco(c, "penalti"), 0.45, 0.92);
+}
+/* Chance estimada de cada minigame (simulação automática e dica na tela) */
+export function chanceMomento(c, mini = miniDaPosicao(c.posicao)) {
+  const dec = somaTraco(c, "penalti");
+  if (mini === "falta") return clampR(((c.attrs.finalizacao * 0.65 + c.attrs.drible * 0.35) / 145 + 0.18) * 1.15 + dec, 0.3, 0.8);
+  if (mini === "passe") return clampR(c.attrs.passe / 130 + 0.3 + dec, 0.4, 0.88);
+  if (mini === "defesa") return clampR(0.38 + (c.attrs.defesa - 65) * 0.006 + dec, 0.25, 0.65);
+  return chancePenalti(c);
 }
 
 export function aplicarMomento(card0, acertou) {
   const card = clone(card0);
   const m = card.pendente;
   if (!m) return card;
+  const acao = ACAO_MINI[m.mini || "penalti"];
   if (m.tipo === "continental") {
-    if (acertou) { card.titulos.push({ tipo: "continental", nome: card.continental.nome }); card.continental.faseNome = "Campeão"; card.destaques.push(`Pênalti decisivo convertido na final da ${card.continental.nome}`); }
-    else { card.continental.faseNome = "Vice-campeão"; card.destaques.push(`Perdeu o pênalti decisivo na final da ${card.continental.nome}`); }
+    if (acertou) { card.titulos.push({ tipo: "continental", nome: card.continental.nome }); card.continental.faseNome = "Campeão"; card.destaques.push(`${acao.ok} na final da ${card.continental.nome}`); }
+    else { card.continental.faseNome = "Vice-campeão"; card.destaques.push(`${acao.erro} na final da ${card.continental.nome}`); }
   } else {
     const t = card.selecao;
-    if (acertou) { t.campeao = true; t.resultado = "Campeão"; card.titulos.push({ tipo: t.tipo, nome: t.nome }); card.destaques.push(`Seu pênalti deu a ${t.nome} ao seu país`); }
-    else { t.resultado = "Vice-campeão"; card.destaques.push(`O pênalti decisivo da ${t.nome} parou no goleiro`); }
+    if (acertou) { t.campeao = true; t.resultado = "Campeão"; card.titulos.push({ tipo: t.tipo, nome: t.nome }); card.destaques.push(`${acao.ok}: a ${t.nome} é do seu país`); }
+    else { t.resultado = "Vice-campeão"; card.destaques.push(`${acao.erro} na final da ${t.nome}`); }
   }
   card.pendente = null;
-  card.momento = { tipo: m.tipo, acertou };
+  card.momento = { tipo: m.tipo, mini: m.mini || "penalti", acertou };
   return card;
 }
 
@@ -586,7 +749,8 @@ function detectarMarcos(antes, c, card) {
 }
 
 /* Fecha a temporada: títulos, Bola de Ouro, torcida, evolução, idade e mundo. */
-export function fecharTemporada(c0, card0) {
+export function fecharTemporada(c0, card0) { return comSemente(c0.codigo, `fechar:${c0.ano}`, () => fecharTemporadaBase(c0, card0)); }
+function fecharTemporadaBase(c0, card0) {
   const antes = c0;
   const c = clone(c0);
   const card = clone(card0);
@@ -657,7 +821,20 @@ export function fecharTemporada(c0, card0) {
   ATTRS.forEach((a) => { c.attrs[a] = novos[a]; });
   if (c.flags.cronica) { c.attrs.velocidade = clampR(c.attrs.velocidade - 1, 40, 99); c.attrs.fisico = clampR(c.attrs.fisico - 1, 40, 99); }
   card.ovrDepois = ovrDe(c);
+  if (card.ovrDepois >= c.picoOvr || !c.picoAttrs) c.picoAttrs = { ...c.attrs };
   c.picoOvr = Math.max(c.picoOvr, card.ovr, card.ovrDepois);
+
+  // o rival também jogou a temporada dele
+  if (c.rival) {
+    const ganhouCopa = card.titulos.some((t) => t.tipo === "copaMundo");
+    const { r, linha } = temporadaDoRival(c.rival, card.idade, { ano: card.ano, bolaPos: card.bola.pos, ganhouCopa });
+    c.rival = r;
+    if (linha) {
+      card.rival = linha;
+      if (linha.bola === 1) card.destaques.push(`${r.nome}, seu rival de geração, ganhou a Bola de Ouro`);
+      else if (linha.bola && card.bola.pos < linha.bola) card.destaques.push(`Você terminou à frente de ${r.nome} na Bola de Ouro`);
+    }
+  }
   card.valor = valorMercado(card.ovrDepois, c.idade + 1, c.fama);
 
   card.ganhos = fecharFinancas(c, card);
@@ -685,6 +862,7 @@ export function aposentadoriaForcada(c) {
 export function aposentar(c0) {
   const c = clone(c0);
   c.aposentado = true;
+  c.lenda = lendaParecida(c.picoAttrs || c.attrs, c.posicao);
   c.legado = calcularLegado(c);
   return c;
 }
@@ -711,6 +889,8 @@ export function calcularLegado(c) {
     auge: Math.max(0, c.picoOvr - 74) * 6,
     torcida: idolos * 12 + (c.flags.social ? 8 : 0) + (c.flags.mentorJovem ? 6 : 0) + (c.flags.benfeitor ? 10 : 0),
   };
+  // duelo de geração: vencer o rival no fim vale um bônus pequeno
+  if (c.rival) partes.rival = pontosRival(c.rival) < Object.values(partes).reduce((a, b) => a + b, 0) ? 25 : 0;
   const pontos = Object.values(partes).reduce((a, b) => a + b, 0);
   const nivel = [...NIVEIS_LEGADO].reverse().find((n) => pontos >= n.min) || NIVEIS_LEGADO[0];
   return { pontos, partes, nivel, idolos };
@@ -1306,7 +1486,10 @@ const TODOS_EVENTOS = () => [...EVENTOS, ...EVENTOS_EXTRAS];
 const opcoesCompletas = (e, c, ctx) => [...e.opcoes(c, ctx), ...(EXTRAS_OPCOES[e.id] ? EXTRAS_OPCOES[e.id](c, ctx) : [])];
 
 /* Sorteia o evento da janela entre temporadas */
-export function sortearEvento(c, { somente = null, excluir = [] } = {}) {
+export function sortearEvento(c, opts = {}) {
+  return comSemente(c.codigo, `evento:${c.ano}:${opts.somente || ""}:${(opts.excluir || []).join(",")}`, () => sortearEventoBase(c, opts));
+}
+function sortearEventoBase(c, { somente = null, excluir = [] } = {}) {
   const recentes = (c.flags.historicoEventos || []).slice(-3);
   const cands = TODOS_EVENTOS().map((e) => {
     if (somente && e.id !== somente) return null;
@@ -1339,6 +1522,9 @@ export function janelaExtra(c, idJaVisto) {
 
 /* Aplica a escolha. Como funções não vão pro save, o evento é reconstruído pelo id + contexto. */
 export function resolverEvento(c0, evento, opcaoId, extra = null) {
+  return comSemente(c0.codigo, `resolver:${c0.ano}:${evento.id}:${opcaoId}`, () => resolverEventoBase(c0, evento, opcaoId, extra));
+}
+function resolverEventoBase(c0, evento, opcaoId, extra = null) {
   const c = clone(c0);
   c.mod = c.mod || {};
   const def = TODOS_EVENTOS().find((e) => e.id === evento.id);
@@ -1363,7 +1549,47 @@ export function textoCompartilhar(c) {
     `💼 Ganhou ${formatarValor(c.ganhosTotais || 0)} na carreira · patrimônio final ${formatarValor(c.patrimonio || 0)}`,
     `Clubes: ${[...new Set(c.temporadas.map((s) => s.clube))].join(" → ")}`,
   ];
+  if (c.lenda) linhas.splice(3, 0, `🪞 Você foi como ${c.lenda.nome} (${c.lenda.similaridade}% de semelhança)`);
+  if (c.rival) linhas.push(`⚔️ Rival: ${c.rival.nome} — ${duelo(c).venceu ? "você venceu o duelo de geração" : "ele levou a melhor"}`);
+  linhas.push(c.diario ? `📅 Carreira do Dia ${dataDoCodigo(c.codigo)} · jogue a mesma em A JOIA` : `🔑 Código da carreira: ${c.codigo}`);
   return linhas.join("\n");
+}
+
+/* Placar do duelo de geração */
+export function duelo(c) {
+  const r = c.rival;
+  if (!r) return null;
+  const meus = c.legado?.pontos ?? calcularLegado(c).pontos;
+  const dele = pontosRival(r);
+  const tit = (t) => (t.liga || 0) + (t.copa || 0) + (t.continental || 0) + (t.copaMundo || 0) + (t.mundial || 0) + (t.continentalSelecao || 0);
+  return {
+    venceu: meus > dele, meus, dele,
+    linhas: [
+      ["Gols", c.totais.gols, r.totais.gols], ["Assistências", c.totais.assist, r.totais.assist], ["Títulos", tit(c.titulos), tit(r.titulos)],
+      ["Bolas de Ouro", c.titulos.bolaOuro || 0, r.titulos.bolaOuro], ["Copas do Mundo", c.titulos.copaMundo || 0, r.titulos.copaMundo], ["OVR máximo", c.picoOvr, r.pico || r.ovr],
+    ],
+  };
+}
+
+/* ---------- ranking pessoal (só neste navegador) ---------- */
+export const CHAVE_HALL = "ajoia_rapido_hall";
+export function lerHall() {
+  try { const h = JSON.parse(localStorage.getItem(CHAVE_HALL) || "[]"); return Array.isArray(h) ? h : []; } catch { return []; }
+}
+/* Registra a carreira encerrada e devolve a posição dela entre as suas */
+export function registrarNoHall(c) {
+  const L = c.legado || calcularLegado(c);
+  const id = `${c.codigo}|${c.nome}|${L.pontos}|${c.totais.gols}`;
+  const hall = lerHall().filter((x) => x.id !== id);
+  const item = {
+    id, nome: c.nome, pontos: L.pontos, nivel: L.nivel.nome, icone: L.nivel.icone, cor: L.nivel.cor, codigo: c.codigo, diario: !!c.diario,
+    posicao: c.posicao, nac: c.nac, gols: c.totais.gols, titulos: c.lista.filter((x) => x.tipo !== "bolaOuro").length, data: new Date().toISOString().slice(0, 10),
+  };
+  const novo = [...hall, item].sort((a, b) => b.pontos - a.pontos);
+  const posicao = novo.findIndex((x) => x.id === id) + 1;
+  const melhorDoDia = c.diario ? novo.filter((x) => x.codigo === c.codigo).findIndex((x) => x.id === id) + 1 : null;
+  try { localStorage.setItem(CHAVE_HALL, JSON.stringify(novo.slice(0, 30))); } catch { /* sem armazenamento */ }
+  return { posicao, total: novo.length, melhorDoDia, tentativasDoDia: c.diario ? novo.filter((x) => x.codigo === c.codigo).length : 0 };
 }
 
 /* ---------- save próprio ---------- */
@@ -1380,6 +1606,7 @@ export function carregarRapido() {
     s.c.patrimonio = s.c.patrimonio || 0; s.c.investimentos = s.c.investimentos || []; s.c.repNeg = s.c.repNeg || 0;
     if (!s.c.contrato) s.c.contrato = contratoPadrao(s.c, s.c.clubeNome);
     s.c.foco = s.c.foco || "equilibrio";
+    s.c.picoAttrs = s.c.picoAttrs || { ...s.c.attrs };
     s.c.titulos = { liga: 0, copa: 0, continental: 0, mundial: 0, copaMundo: 0, continentalSelecao: 0, bolaOuro: 0, segunda: 0, ...(s.c.titulos || {}) };
     if (!s.c.mundo?.jogadores) s.c.mundo = mundoCompacto();
     return s;
@@ -1402,11 +1629,15 @@ function resolverAuto(c, ev, escolher) {
 }
 
 export function simularCarreiraAutomatica(dados, escolher = (op) => pick(op), escolherFoco = () => pick(FOCOS).id) {
+  const codigo = normalizarCodigo(dados.codigo);
+  return comSemente(codigo, "auto", () => simularCarreiraAutomaticaBase({ ...dados, codigo }, escolher, escolherFoco));
+}
+function simularCarreiraAutomaticaBase(dados, escolher, escolherFoco) {
   let c = criarJogador(dados);
   let guard = 0;
   while (!c.aposentado && guard++ < 30) {
     let { c: c2, card, momento } = jogarTemporada(c);
-    if (momento) card = aplicarMomento(card, chance(chancePenalti(c2)));
+    if (momento) card = aplicarMomento(card, chance(chanceMomento(c2, momento.mini)));
     ({ c } = fecharTemporada(c2, card));
     if (aposentadoriaForcada(c) || (podeAposentar(c) && c.idade >= 36 && chance(0.4))) { c = aposentar(c); break; }
     if (precisaEscolherTraco(c)) c = escolherTraco(c, pick(opcoesDeTraco(c)).id);

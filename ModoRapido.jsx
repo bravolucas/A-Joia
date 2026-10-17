@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ARTE, ARTE_EVENTO } from "./arte.js";
 import { POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS } from "./data.js";
-import { Gema, ClubDot, Confetti, ApresentacaoNovoClube } from "./components.jsx";
+import { Gema, ClubDot, Confetti, ApresentacaoNovoClube, FreeKickMini, PasseMini } from "./components.jsx";
+import { calcularSucessoFalta, tipoResultadoFalta } from "./lib.js";
 import { TacaCompeticao } from "./trofeus.jsx";
 import {
   criarJogador, jogarTemporada, aplicarMomento, fecharTemporada, sortearEvento, resolverEvento, janelaExtra,
@@ -11,6 +12,7 @@ import {
   nomeCopaContinental, chancePenalti, ORIGENS_RAPIDO, origemDe, FOCOS, focoDe, definirFoco,
   iniciarNegociacao, ajustarNegociacao, fecharNegociacao, CAMPOS_NEGOCIACAO, fama_negociador,
   INVESTIMENTOS, comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
+  chanceMomento, miniDaPosicao, codigoDoDia, dadosDoDia, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
 } from "./rapido.js";
 
 /* Estilo do seletor de modos e do Modo Rápido. Inclui as animações que as
@@ -242,21 +244,47 @@ function Secao({ titulo, children }) {
   );
 }
 
+function MelhoresCarreiras() {
+  const hall = lerHall().slice(0, 5);
+  if (!hall.length) return null;
+  return (
+    <Secao titulo="Suas melhores carreiras">
+      <ol className="rp-painel p-3 flex flex-col gap-2">
+        {hall.map((h, i) => (
+          <li key={h.id} className="flex items-center gap-3">
+            <span className="font-stat text-lg w-6 text-center" style={{ color: i === 0 ? "#EBC557" : "#8FA39A" }}>{i + 1}</span>
+            <div className="min-w-0 flex-1">
+              <div className="text-[16px] font-semibold text-[#F2F5F3] truncate">{h.nome} <span className="text-[13px] font-normal text-[#8FA39A]">· {h.posicao}{h.diario ? " · do dia" : ""}</span></div>
+              <div className="text-[13px] text-[#8FA39A]">{h.icone} {h.nivel} · {h.gols} gols · {h.titulos} títulos</div>
+            </div>
+            <span className="font-stat text-lg" style={{ color: h.cor }}>{h.pontos}</span>
+          </li>
+        ))}
+      </ol>
+    </Secao>
+  );
+}
+
 function TelaCriacao({ onCriar }) {
+  const [modo, setModo] = useState("livre");
   const [nome, setNome] = useState("");
   const [nac, setNac] = useState("BRA");
   const [posicao, setPosicao] = useState("");
   const [personalidade, setPersonalidade] = useState("");
   const [origem, setOrigem] = useState("");
+  const [codigo, setCodigo] = useState("");
   const [gerando, setGerando] = useState(false);
   const destaque = NACS_DESTAQUE.map((id) => NACIONALIDADES.find((n) => n.id === id)).filter(Boolean);
   const outras = NACIONALIDADES.filter((n) => !NACS_DESTAQUE.includes(n.id)).sort((a, b) => a.label.localeCompare(b.label));
-  const pronto = nome.trim().length >= 2 && posicao && personalidade && origem;
+  const doDia = modo === "dia" ? dadosDoDia(codigoDoDia()) : null;
+  const tentativasHoje = doDia ? lerHall().filter((h) => h.codigo === doDia.codigo) : [];
+  const pronto = nome.trim().length >= 2 && (doDia || (posicao && personalidade && origem));
 
   const comecar = () => {
     setGerando(true);
+    const dados = doDia ? { nome, ...doDia } : { nome, nac, posicao, personalidade, origem, codigo: normalizarCodigo(codigo) };
     // dá tempo de a tela mostrar o carregamento antes de gerar o mundo
-    setTimeout(() => onCriar({ nome, nac, posicao, personalidade, origem }), 30);
+    setTimeout(() => onCriar(dados), 30);
   };
 
   return (
@@ -266,83 +294,147 @@ function TelaCriacao({ onCriar }) {
         <p className="text-[17px] text-[#8FA39A] mt-1">Você começa aos 16 anos. Cada temporada é uma tela, e cada escolha fica na sua história.</p>
       </div>
 
+      <div className="grid grid-cols-2 gap-2" role="tablist">
+        {[["livre", "Carreira livre", "Você monta o atleta"], ["dia", "Carreira do Dia", "Mesmo atleta e mesmo mundo para todos hoje"]].map(([id, t, d]) => (
+          <button key={id} role="tab" aria-selected={modo === id} onClick={() => setModo(id)} className={`rp-opcao px-3 py-3 ${modo === id ? "sel" : ""}`}>
+            <div className="font-bold text-[16px] text-[#F2F5F3]">{id === "dia" ? "📅 " : "✍️ "}{t}</div>
+            <div className="text-[13px] leading-snug text-[#8FA39A] mt-0.5">{d}</div>
+          </button>
+        ))}
+      </div>
+
       <Secao titulo="Nome">
         <input value={nome} onChange={(e) => setNome(e.target.value.slice(0, 24))} placeholder="Como a torcida vai te chamar"
           className="rp-painel px-4 min-h-[52px] text-lg text-[#F2F5F3] placeholder:text-[#5E7068] outline-none focus:border-[#12A876]" />
       </Secao>
 
-      <Secao titulo="Nacionalidade">
-        <select value={nac} onChange={(e) => setNac(e.target.value)} className="rp-painel px-4 min-h-[52px] text-lg text-[#F2F5F3] outline-none">
-          <optgroup label="Principais">{destaque.map((n) => <option key={n.id} value={n.id}>{n.label}</option>)}</optgroup>
-          <optgroup label="Todas">{outras.map((n) => <option key={n.id} value={n.id}>{n.label}</option>)}</optgroup>
-        </select>
-      </Secao>
-
-      <Secao titulo="Posição">
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-          {POSICOES.map((p) => (
-            <button key={p.id} onClick={() => setPosicao(p.id)} className={`rp-opcao px-3 py-2 min-h-[56px] ${posicao === p.id ? "sel" : ""}`}>
-              <div className="font-stat text-base text-[#F2F5F3]">{p.id}</div>
-              <div className="text-[12px] leading-tight text-[#8FA39A]">{p.label}</div>
-            </button>
-          ))}
+      {doDia ? (
+        <div className="rp-painel p-4 flex flex-col gap-3" style={{ borderColor: "rgba(216,180,74,.45)", background: "linear-gradient(135deg, rgba(216,180,74,.14), rgba(19,26,23,.9) 60%)" }}>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#EBC557]">Desafio de {dataDoCodigo(doDia.codigo)}</div>
+          <div className="grid grid-cols-2 gap-2 text-[15px]">
+            <div><span className="text-[#8FA39A]">País</span><div className="font-bold text-[#F2F5F3]">{nacDe(doDia.nac).label}</div></div>
+            <div><span className="text-[#8FA39A]">Posição</span><div className="font-bold text-[#F2F5F3]">{posicaoDe(doDia.posicao).label}</div></div>
+            <div><span className="text-[#8FA39A]">Origem</span><div className="font-bold text-[#F2F5F3]">{origemDe(doDia.origem)?.icone} {origemDe(doDia.origem)?.nome}</div></div>
+            <div><span className="text-[#8FA39A]">Perfil</span><div className="font-bold text-[#F2F5F3]">{personaDe(doDia.personalidade).icone} {personaDe(doDia.personalidade).label}</div></div>
+          </div>
+          <p className="text-[14px] text-[#C9D3CE] leading-snug">Todo mundo que jogar hoje recebe este atleta, os mesmos clubes e os mesmos sorteios. Só as suas escolhas mudam a história. Compare o resultado com os amigos.</p>
+          {tentativasHoje.length > 0 && <p className="text-[14px] text-[#EBC557]">Seu melhor hoje: <span className="font-stat">{Math.max(...tentativasHoje.map((h) => h.pontos))}</span> pts em {tentativasHoje.length} tentativa(s).</p>}
         </div>
-      </Secao>
+      ) : (
+        <>
+          <Secao titulo="Nacionalidade">
+            <select value={nac} onChange={(e) => setNac(e.target.value)} className="rp-painel px-4 min-h-[52px] text-lg text-[#F2F5F3] outline-none">
+              <optgroup label="Principais">{destaque.map((n) => <option key={n.id} value={n.id}>{n.label}</option>)}</optgroup>
+              <optgroup label="Todas">{outras.map((n) => <option key={n.id} value={n.id}>{n.label}</option>)}</optgroup>
+            </select>
+          </Secao>
 
-      <Secao titulo="De onde você veio">
-        <div className="grid grid-cols-2 gap-2">
-          {ORIGENS_RAPIDO.map((o) => (
-            <button key={o.id} onClick={() => setOrigem(o.id)} className={`rp-opcao px-3 py-3 ${origem === o.id ? "sel" : ""}`}>
-              <div className="font-bold text-[16px] text-[#F2F5F3]">{o.icone} {o.nome}</div>
-              <div className="text-[13px] leading-snug text-[#8FA39A] mt-0.5">{o.perk}</div>
-            </button>
-          ))}
-        </div>
-        {origem && <p className="text-[14px] text-[#8FA39A]">{origemDe(origem)?.desc}</p>}
-      </Secao>
+          <Secao titulo="Posição">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              {POSICOES.map((p) => (
+                <button key={p.id} onClick={() => setPosicao(p.id)} className={`rp-opcao px-3 py-2 min-h-[56px] ${posicao === p.id ? "sel" : ""}`}>
+                  <div className="font-stat text-base text-[#F2F5F3]">{p.id}</div>
+                  <div className="text-[12px] leading-tight text-[#8FA39A]">{p.label}</div>
+                </button>
+              ))}
+            </div>
+            {posicao && <p className="text-[14px] text-[#8FA39A]">Nas finais, você decide {({ penalti: "no pênalti", falta: "na cobrança de falta", passe: "no passe do último lance", defesa: "defendendo o pênalti" })[miniDaPosicao(posicao)]}.</p>}
+          </Secao>
 
-      <Secao titulo="Personalidade">
-        <div className="grid sm:grid-cols-2 gap-2">
-          {PERSONALIDADES.map((p) => (
-            <button key={p.id} onClick={() => setPersonalidade(p.id)} className={`rp-opcao px-4 py-3 ${personalidade === p.id ? "sel" : ""}`}>
-              <div className="font-bold text-[16px] text-[#F2F5F3]">{p.icone} {p.label}</div>
-              <div className="text-[14px] leading-snug text-[#8FA39A] mt-0.5">{p.desc}</div>
-            </button>
-          ))}
-        </div>
-      </Secao>
+          <Secao titulo="De onde você veio">
+            <div className="grid grid-cols-2 gap-2">
+              {ORIGENS_RAPIDO.map((o) => (
+                <button key={o.id} onClick={() => setOrigem(o.id)} className={`rp-opcao px-3 py-3 ${origem === o.id ? "sel" : ""}`}>
+                  <div className="font-bold text-[16px] text-[#F2F5F3]">{o.icone} {o.nome}</div>
+                  <div className="text-[13px] leading-snug text-[#8FA39A] mt-0.5">{o.perk}</div>
+                </button>
+              ))}
+            </div>
+            {origem && <p className="text-[14px] text-[#8FA39A]">{origemDe(origem)?.desc}</p>}
+          </Secao>
+
+          <Secao titulo="Personalidade">
+            <div className="grid sm:grid-cols-2 gap-2">
+              {PERSONALIDADES.map((p) => (
+                <button key={p.id} onClick={() => setPersonalidade(p.id)} className={`rp-opcao px-4 py-3 ${personalidade === p.id ? "sel" : ""}`}>
+                  <div className="font-bold text-[16px] text-[#F2F5F3]">{p.icone} {p.label}</div>
+                  <div className="text-[14px] leading-snug text-[#8FA39A] mt-0.5">{p.desc}</div>
+                </button>
+              ))}
+            </div>
+          </Secao>
+
+          <Secao titulo="Código da carreira (opcional)">
+            <input value={codigo} onChange={(e) => setCodigo(normalizarCodigo(e.target.value))} placeholder="Ex.: K7QX2M — deixe vazio para sortear"
+              aria-label="Código da carreira" className="rp-painel px-4 min-h-[52px] text-lg font-stat tracking-widest text-[#F2F5F3] placeholder:text-[#5E7068] placeholder:font-sans placeholder:tracking-normal placeholder:text-[15px] outline-none focus:border-[#12A876]" />
+            <p className="text-[14px] text-[#8FA39A]">Recebeu o código de um amigo? Use o mesmo para jogar no mesmo mundo, com os mesmos sorteios.</p>
+          </Secao>
+        </>
+      )}
 
       <button disabled={!pronto || gerando} onClick={comecar} className="rp-btn rp-prim display text-sm tracking-wide">
-        {gerando ? "Montando o mundo do futebol…" : "Começar carreira"}
+        {gerando ? "Montando o mundo do futebol…" : doDia ? "Jogar a Carreira do Dia" : "Começar carreira"}
       </button>
+
+      <MelhoresCarreiras />
     </div>
   );
 }
 
-/* ---------- pênalti decisivo ---------- */
+/* ---------- momento decisivo: pênalti, falta, passe ou defesa ---------- */
 const ZONAS = [[0, 0], [1, 0], [2, 0], [0, 1], [1, 1], [2, 1]]; // [coluna, linha]
-function TelaPenalti({ c, momento, onFim }) {
+const NOME_MINI = { penalti: "Pênalti decisivo", falta: "Falta decisiva", passe: "Último lance", defesa: "Pênalti contra" };
+
+function CabecalhoMomento({ c, momento }) {
+  const mini = momento.mini || "penalti";
+  return (
+    <div className="text-center">
+      <span className="rp-chip" style={{ color: "#EBC557", background: "rgba(216,180,74,.14)" }}>Momento decisivo · {NOME_MINI[mini]}</span>
+      <h2 className="display text-lg text-[#F2F5F3] mt-3">{momento.titulo}</h2>
+      <p className="text-[17px] text-[#8FA39A] mt-1">{momento.texto}</p>
+    </div>
+  );
+}
+
+function PlacarMomento({ ok, texto }) {
+  return <div className={`display text-3xl rp-sobe ${ok ? "text-[#1BC28A]" : "text-[#E36B5B]"}`}>{texto}</div>;
+}
+
+/* Pênalti (você bate) e defesa (você é o goleiro) usam o mesmo gol */
+function TelaPenalti({ c, momento, onFim, goleiro = false }) {
   const [escolha, setEscolha] = useState(null);
   const [res, setRes] = useState(null);
 
   const chutar = (i) => {
     if (escolha != null) return;
     const [col, lin] = ZONAS[i];
+    const bonus = (c.tracos || []).includes("decisao") ? 0.12 : 0;
+    if (goleiro) {
+      // você escolhe para onde pular; o batedor escolhe o canto dele
+      const k = Math.random() < 0.15 ? 4 : [0, 2, 3, 5, 1][Math.floor(Math.random() * 5)];
+      const [bCol, bLin] = ZONAS[k];
+      const def = c.attrs.defesa;
+      let resultado = "gol";
+      if (bLin === 0 && Math.random() < 0.08) resultado = "fora";
+      else if (bCol === col && Math.random() < (bLin === lin ? 0.86 : 0.55) + bonus + (def - 70) * 0.005) resultado = "defesa";
+      setEscolha(k);
+      setRes({ resultado, goleiro: [col, lin], ok: resultado !== "gol" });
+      return;
+    }
     const r = Math.random();
     const gCol = r < 0.4 ? 0 : r < 0.6 ? 1 : 2;
     const gLin = Math.random() < 0.55 ? 1 : 0;
-    const bonus = (c.tracos || []).includes("decisao") ? 0.12 : 0;
     const fin = c.attrs.finalizacao;
     let resultado = "gol";
     if (lin === 0 && Math.random() < Math.max(0.04, 0.2 - (fin - 60) * 0.005)) resultado = "fora";
     else if (gCol === col && Math.random() < (gLin === lin ? 0.8 : 0.45) - bonus - (fin - 70) * 0.004) resultado = "defesa";
     setEscolha(i);
-    setRes({ resultado, goleiro: [gCol, gLin] });
+    setRes({ resultado, goleiro: [gCol, gLin], ok: resultado === "gol" });
   };
 
   useEffect(() => {
     if (!res) return undefined;
-    const t = setTimeout(() => onFim(res.resultado === "gol"), 2200);
+    const t = setTimeout(() => onFim(res.ok), 2200);
     return () => clearTimeout(t);
   }, [res, onFim]);
 
@@ -351,31 +443,31 @@ function TelaPenalti({ c, momento, onFim }) {
   const gRot = res ? (res.goleiro[0] - 1) * 55 : 0;
   const bola = escolha != null ? ZONAS[escolha] : null;
   const fora = res?.resultado === "fora";
+  const corGoleiro = goleiro ? "#D8B44A" : "#2E6FE0";
+  const textoRes = !res ? "" : goleiro
+    ? (res.resultado === "defesa" ? "QUE DEFESA!" : res.resultado === "fora" ? "PRA FORA! É CAMPEÃO!" : "GOL DELES…")
+    : (res.resultado === "gol" ? "GOOOL!" : res.resultado === "defesa" ? "DEFENDEU!" : "PRA FORA!");
 
   return (
     <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
-      <div className="text-center">
-        <span className="rp-chip" style={{ color: "#EBC557", background: "rgba(216,180,74,.14)" }}>Momento decisivo</span>
-        <h2 className="display text-lg text-[#F2F5F3] mt-3">{momento.titulo}</h2>
-        <p className="text-[17px] text-[#8FA39A] mt-1">{momento.texto}</p>
-      </div>
+      <CabecalhoMomento c={c} momento={momento} />
       <div className="rp-painel p-3 overflow-hidden" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
-        <svg viewBox="0 0 300 200" className="w-full" role="img" aria-label="Gol: escolha onde bater">
+        <svg viewBox="0 0 300 200" className="w-full" role="img" aria-label={goleiro ? "Gol: escolha para onde pular" : "Gol: escolha onde bater"}>
           <rect x="0" y="150" width="300" height="50" fill="#14432F" />
           <rect x="15" y="20" width="270" height="132" fill="rgba(255,255,255,.04)" stroke="#F2F5F3" strokeWidth="5" />
           {Array.from({ length: 12 }).map((_, i) => <line key={`v${i}`} x1={15 + i * 22.5} y1="20" x2={15 + i * 22.5} y2="152" stroke="rgba(255,255,255,.08)" />)}
           {Array.from({ length: 6 }).map((_, i) => <line key={`h${i}`} x1="15" y1={20 + i * 22} x2="285" y2={20 + i * 22} stroke="rgba(255,255,255,.08)" />)}
           <g className="rp-goleiro" style={{ transform: `translate(${gx}px, ${gy}px) rotate(${gRot}deg)`, transformOrigin: "150px 150px" }}>
-            <rect x="138" y="96" width="24" height="40" rx="8" fill="#2E6FE0" />
+            <rect x="138" y="96" width="24" height="40" rx="8" fill={corGoleiro} />
             <circle cx="150" cy="86" r="10" fill="#E8C7A6" />
-            <rect x="112" y="98" width="28" height="9" rx="4" fill="#2E6FE0" />
-            <rect x="160" y="98" width="28" height="9" rx="4" fill="#2E6FE0" />
+            <rect x="112" y="98" width="28" height="9" rx="4" fill={corGoleiro} />
+            <rect x="160" y="98" width="28" height="9" rx="4" fill={corGoleiro} />
             <rect x="140" y="134" width="8" height="18" fill="#0E1512" /><rect x="152" y="134" width="8" height="18" fill="#0E1512" />
           </g>
           {escolha == null && ZONAS.map(([col, lin], i) => (
-            <g key={i} onClick={() => chutar(i)} style={{ cursor: "pointer" }}>
-              <rect x={zx(col) - 42} y={zy(lin) - 27} width="84" height="54" rx="8" fill="rgba(18,168,118,.10)" stroke="rgba(18,168,118,.55)" strokeDasharray="4 4" />
-              <circle cx={zx(col)} cy={zy(lin)} r="6" fill="#1BC28A" opacity=".8" />
+            <g key={i} onClick={() => chutar(i)} style={{ cursor: "pointer" }} role="button" aria-label={`${lin === 0 ? "Alto" : "Baixo"} ${["esquerda", "meio", "direita"][col]}`}>
+              <rect x={zx(col) - 42} y={zy(lin) - 27} width="84" height="54" rx="8" fill={goleiro ? "rgba(216,180,74,.10)" : "rgba(18,168,118,.10)"} stroke={goleiro ? "rgba(216,180,74,.6)" : "rgba(18,168,118,.55)"} strokeDasharray="4 4" />
+              <circle cx={zx(col)} cy={zy(lin)} r="6" fill={goleiro ? "#EBC557" : "#1BC28A"} opacity=".8" />
             </g>
           ))}
           <circle className="rp-bola" cx="150" cy="185" r="8" fill="#F2F5F3" stroke="#0E1512" strokeWidth="1.5"
@@ -383,15 +475,70 @@ function TelaPenalti({ c, momento, onFim }) {
         </svg>
       </div>
       <div className="text-center min-h-[64px]">
-        {!res && <p className="text-[17px] text-[#C9D3CE]">Toque no canto onde vai bater. Finalização <span className="font-stat">{c.attrs.finalizacao}</span> · chance estimada <span className="font-stat">{Math.round(chancePenalti(c) * 100)}%</span></p>}
-        {res && (
-          <div className={`display text-3xl rp-sobe ${res.resultado === "gol" ? "text-[#1BC28A]" : "text-[#E36B5B]"}`}>
-            {res.resultado === "gol" ? "GOOOL!" : res.resultado === "defesa" ? "DEFENDEU!" : "PRA FORA!"}
-          </div>
-        )}
+        {!res && (goleiro
+          ? <p className="text-[17px] text-[#C9D3CE]">Toque no canto para onde vai pular. Defesa <span className="font-stat">{c.attrs.defesa}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "defesa") * 100)}%</span></p>
+          : <p className="text-[17px] text-[#C9D3CE]">Toque no canto onde vai bater. Finalização <span className="font-stat">{c.attrs.finalizacao}</span> · chance estimada <span className="font-stat">{Math.round(chancePenalti(c) * 100)}%</span></p>)}
+        {res && <PlacarMomento ok={res.ok} texto={textoRes} />}
       </div>
     </div>
   );
+}
+
+function TelaFalta({ c, momento, onFim }) {
+  const [res, setRes] = useState(null);
+  const bater = (zona) => {
+    if (res) return;
+    const bonus = (c.tracos || []).includes("decisao") ? 8 : 0;
+    // no Modo Rápido a falta decisiva é um pouco mais generosa que a do jogo completo
+    const gol = calcularSucessoFalta(c.attrs.finalizacao + bonus + 6, c.attrs.drible + bonus);
+    setRes({ gol, zona, tipo: tipoResultadoFalta(gol, zona) });
+  };
+  useEffect(() => {
+    if (!res) return undefined;
+    const t = setTimeout(() => onFim(res.gol), 2600);
+    return () => clearTimeout(t);
+  }, [res, onFim]);
+  return (
+    <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
+      <CabecalhoMomento c={c} momento={momento} />
+      <div className="rp-painel p-3 overflow-hidden flex justify-center" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
+        <FreeKickMini onPick={bater} resultado={res} />
+      </div>
+      <div className="text-center min-h-[64px]">
+        {!res && <p className="text-[17px] text-[#C9D3CE]">Escolha onde colocar a bola. Finalização <span className="font-stat">{c.attrs.finalizacao}</span> · drible <span className="font-stat">{c.attrs.drible}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "falta") * 100)}%</span></p>}
+        {res && <PlacarMomento ok={res.gol} texto={res.gol ? "GOLAÇO DE FALTA!" : res.tipo === "Barreira" ? "NA BARREIRA!" : res.tipo === "Trave" ? "NA TRAVE!" : res.tipo === "Defesa" ? "DEFENDEU!" : "PRA FORA!"} />}
+      </div>
+    </div>
+  );
+}
+
+function TelaPasse({ c, momento, onFim }) {
+  const [res, setRes] = useState(null);
+  const bonus = (c.tracos || []).includes("decisao") ? 8 : 0;
+  useEffect(() => {
+    if (!res) return undefined;
+    const t = setTimeout(() => onFim(res.gol), 2200);
+    return () => clearTimeout(t);
+  }, [res, onFim]);
+  return (
+    <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
+      <CabecalhoMomento c={c} momento={momento} />
+      <div className="rp-painel p-3 overflow-hidden flex justify-center" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
+        <PasseMini atributoPasse={c.attrs.passe + bonus + 6} onResultado={(r) => setRes(r)} />
+      </div>
+      <div className="text-center min-h-[64px]">
+        {!res && <p className="text-[17px] text-[#C9D3CE]">Você é o jogador dourado. Toque num companheiro livre, longe dos adversários de vermelho. Passe <span className="font-stat">{c.attrs.passe}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "passe") * 100)}%</span></p>}
+        {res && <PlacarMomento ok={res.gol} texto={res.gol ? "ASSISTÊNCIA! GOL!" : "INTERCEPTADO!"} />}
+      </div>
+    </div>
+  );
+}
+
+function TelaMomento({ c, momento, onFim }) {
+  const mini = momento.mini || "penalti";
+  if (mini === "falta") return <TelaFalta c={c} momento={momento} onFim={onFim} />;
+  if (mini === "passe") return <TelaPasse c={c} momento={momento} onFim={onFim} />;
+  return <TelaPenalti c={c} momento={momento} onFim={onFim} goleiro={mini === "defesa"} />;
 }
 
 /* ---------- celebração: uma tela por conquista ---------- */
@@ -511,6 +658,41 @@ function Stat({ label, valor }) {
   );
 }
 
+const NOME_TIT_RIVAL = { liga: "a liga", copa: "a copa nacional", continental: "a continental", copaMundo: "a Copa do Mundo" };
+function PainelRival({ c, card }) {
+  const r = c.rival, l = card.rival;
+  const cor = clubeDe(l.clube).cor || "#E36B5B";
+  const comp = [["Temporada", `${card.gols}G ${card.assist}A`, `${l.gols}G ${l.assist}A`], ["Carreira", `${c.totais.gols} gols`, `${r.totais.gols} gols`], ["OVR", card.ovrDepois, l.ovr]];
+  const noticia = l.aposentou ? `${r.nome} anunciou a aposentadoria.`
+    : l.bola === 1 ? `${r.nome} levou a Bola de Ouro.`
+    : l.titulos.length ? `${r.nome} ganhou ${l.titulos.map((t) => NOME_TIT_RIVAL[t]).join(" e ")} pelo ${l.clube}.`
+    : l.mudou ? `${r.nome} trocou o ${l.mudou} pelo ${l.clube}.`
+    : l.bola && l.bola <= 3 ? `${r.nome} ficou em ${l.bola}º na Bola de Ouro.` : null;
+  return (
+    <div className="rp-painel p-4" style={{ borderColor: "rgba(227,107,91,.35)", background: "linear-gradient(135deg, rgba(227,107,91,.12), rgba(19,26,23,.9) 55%)" }}>
+      <div className="flex items-center gap-3">
+        <span className="text-xl" aria-hidden="true">⚔️</span>
+        <div className="min-w-0 flex-1">
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#F0A99E]">Seu rival de geração</div>
+          <div className="text-[16px] font-bold text-[#F2F5F3] truncate">{r.nome} <span className="font-normal text-[14px] text-[#8FA39A]">· {nacDe(r.nac).label} · {r.posicao}</span></div>
+        </div>
+        <ClubDot club={clubeDe(l.clube)} size={30} />
+      </div>
+      {noticia && <p className="text-[15px] text-[#C9D3CE] mt-2">{noticia}</p>}
+      <div className="grid grid-cols-[1fr_auto_1fr] gap-x-3 gap-y-1 mt-3 text-[15px] items-center">
+        <div className="text-[12px] font-bold tracking-wider text-[#7FE3BC] text-right">VOCÊ</div><div /><div className="text-[12px] font-bold tracking-wider" style={{ color: "#F0A99E" }}>ELE</div>
+        {comp.map(([k, a, b]) => (
+          <React.Fragment key={k}>
+            <div className="font-stat text-right text-[#F2F5F3]">{a}</div>
+            <div className="text-[12px] text-[#8FA39A] text-center">{k}</div>
+            <div className="font-stat text-[#F2F5F3]" style={{ borderLeft: `3px solid ${cor}`, paddingLeft: 6 }}>{b}</div>
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function TelaResumo({ c, card, onContinuar, onAposentar, onRever }) {
   const forcada = aposentadoriaForcada(c);
   const delta = card.ovrDepois - card.ovr;
@@ -568,6 +750,8 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever }) {
       )}
 
       {card.lesao && <div className="rp-painel px-4 py-3 text-[16px] text-[#F0A99E]">🩹 Desfalcou parte da temporada: {card.lesao}.</div>}
+
+      {card.rival && c.rival && <PainelRival c={c} card={card} />}
 
       {(card.continental || sel) && (
         <div className="grid gap-2">
@@ -885,7 +1069,17 @@ function CartaFinal({ c }) {
             </div>
           ))}
         </div>
+        {c.lenda && (
+          <div className="mt-4 rounded-xl px-3 py-2 relative" style={{ background: "rgba(0,0,0,.28)", border: "1px solid rgba(255,255,255,.06)" }}>
+            <div className="text-[10px] font-bold tracking-[0.2em] text-[#8FA39A]">VOCÊ FOI COMO</div>
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="text-[17px] font-bold text-[#F2F5F3] truncate">{c.lenda.nome}</span>
+              <span className="font-stat text-base" style={{ color: L.nivel.cor }}>{c.lenda.similaridade}%</span>
+            </div>
+          </div>
+        )}
         <div className="text-[11px] tracking-[0.2em] uppercase text-[#5E7068] mt-4 text-center">A JOIA · Modo Rápido · {c.temporadas[0]?.ano}–{c.ano - 1}</div>
+        {c.codigo && <div className="text-[11px] tracking-[0.2em] uppercase text-[#5E7068] text-center mt-0.5">{c.diario ? `Carreira do Dia ${dataDoCodigo(c.codigo)}` : `Código ${c.codigo}`}</div>}
       </div>
     </div>
   );
@@ -926,10 +1120,37 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
     else clubes.push({ nome: s.clube, de: s.ano, ate: s.ano, jogos: s.jogos, gols: s.gols, emp: s.emprestado, titulos: s.titulos.filter((x) => x.tipo !== "bolaOuro" && x.tipo !== "copaMundo" && x.tipo !== "continentalSelecao").length });
   });
   const proximo = NIVEIS_LEGADO.find((n) => n.min > L.pontos);
-  const rotulos = { numeros: "Números em campo", titulos: "Títulos por clubes", selecao: "Seleção", premios: "Prêmios individuais", auge: "Auge técnico", torcida: "Idolatria e legado" };
+  const rotulos = { numeros: "Números em campo", titulos: "Títulos por clubes", selecao: "Seleção", premios: "Prêmios individuais", auge: "Auge técnico", torcida: "Idolatria e legado", rival: "Duelo com o rival" };
   const porTipo = ORDEM_TIPOS.map((t) => ({ tipo: t, n: c.lista.filter((x) => x.tipo === t).length })).filter((g) => g.n);
   const copiar = async () => {
     try { await navigator.clipboard.writeText(textoCompartilhar(c)); setCopiado(true); setTimeout(() => setCopiado(false), 2000); } catch { setCopiado(false); }
+  };
+  const cartaRef = useRef(null);
+  const [imagem, setImagem] = useState("pronto");
+  const du = duelo(c);
+  const baixarCarta = async () => {
+    if (!cartaRef.current) return;
+    setImagem("gerando");
+    try {
+      const { toPng } = await import("html-to-image");
+      const opts = { pixelRatio: 3, cacheBust: true, backgroundColor: "#0E1512" };
+      let url;
+      try { url = await toPng(cartaRef.current, opts); } catch { url = await toPng(cartaRef.current, { ...opts, skipFonts: true }); }
+      const arquivo = `a-joia-${c.nome.normalize("NFD").replace(/[^\w]+/g, "-").toLowerCase()}.png`;
+      const blob = await (await fetch(url)).blob();
+      const file = typeof File === "function" ? new File([blob], arquivo, { type: "image/png" }) : null;
+      // no celular abre o menu de compartilhar; no computador baixa o arquivo
+      if (file && /Android|iPhone|iPad/i.test(navigator.userAgent) && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: "Minha carreira em A JOIA", text: textoCompartilhar(c) });
+      } else {
+        const a = document.createElement("a");
+        a.href = url; a.download = arquivo; document.body.appendChild(a); a.click(); a.remove();
+      }
+      setImagem("ok");
+    } catch (e) {
+      setImagem(e?.name === "AbortError" ? "pronto" : "erro");
+    }
+    setTimeout(() => setImagem("pronto"), 2500);
   };
   return (
     <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
@@ -938,8 +1159,37 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
         <h2 className="display text-xl mt-2" style={{ color: L.nivel.cor, textShadow: "0 2px 14px rgba(0,0,0,.9), 0 0 2px rgba(0,0,0,.8)" }}>{L.nivel.icone} {L.nivel.nome}</h2>
         <p className="text-[17px] text-[#C9D3CE] mt-1">{L.nivel.desc}</p>
       </div>
-      <CartaFinal c={c} />
-      <button onClick={copiar} className="rp-btn rp-ouro display text-sm">{copiado ? "Copiado!" : "Copiar resumo para compartilhar"}</button>
+      {c.hall && (
+        <div className="rp-painel px-4 py-3 text-center text-[16px] text-[#C9D3CE]" style={{ borderColor: c.hall.posicao === 1 ? "rgba(216,180,74,.5)" : undefined }}>
+          {c.hall.total === 1 ? <>📒 Primeira carreira no seu ranking pessoal. Jogue de novo para tentar superá-la.</> : c.hall.posicao === 1 ? <>🥇 <b className="text-[#EBC557]">Sua melhor carreira até hoje!</b></> : <>Esta é a sua <span className="font-stat text-[#EBC557]">{c.hall.posicao}ª</span> melhor carreira de {c.hall.total}.</>}
+          {c.diario && <div className="text-[14px] text-[#8FA39A] mt-1">Carreira do Dia: {c.hall.melhorDoDia === 1 ? "seu melhor resultado hoje" : `${c.hall.melhorDoDia}º das suas ${c.hall.tentativasDoDia} tentativas de hoje`}.</div>}
+        </div>
+      )}
+      <div ref={cartaRef} className="mx-auto w-full max-w-[364px] p-3 rounded-[32px]" style={{ background: "#0E1512" }}><CartaFinal c={c} /></div>
+      <div className="grid grid-cols-2 gap-2">
+        <button onClick={baixarCarta} disabled={imagem === "gerando"} className="rp-btn rp-ouro display text-xs">
+          {imagem === "gerando" ? "Gerando…" : imagem === "ok" ? "Imagem pronta!" : imagem === "erro" ? "Não deu, tente de novo" : "Baixar carta (PNG)"}
+        </button>
+        <button onClick={copiar} className="rp-btn rp-sec text-[16px]">{copiado ? "Copiado!" : "Copiar resumo"}</button>
+      </div>
+
+      {du && (
+        <div className="rp-painel p-4" style={{ borderColor: du.venceu ? "rgba(18,168,118,.45)" : "rgba(227,107,91,.4)" }}>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Duelo de geração</div>
+          <div className="display text-base mt-2" style={{ color: du.venceu ? "#7FE3BC" : "#F0A99E" }}>{du.venceu ? `Você venceu ${c.rival.nome}` : `${c.rival.nome} levou a melhor`}</div>
+          <p className="text-[14px] text-[#8FA39A] mt-1">{nacDe(c.rival.nac).label} · {c.rival.posicao} · último clube: {c.rival.clube}{du.venceu ? " · +25 pontos de legado" : ""}</p>
+          <div className="grid grid-cols-[1fr_auto_1fr] gap-x-3 gap-y-1.5 mt-3 items-center">
+            <div className="text-[12px] font-bold tracking-wider text-[#7FE3BC] text-right">VOCÊ</div><div /><div className="text-[12px] font-bold tracking-wider text-[#F0A99E]">ELE</div>
+            {[...du.linhas, ["Legado", du.meus, du.dele]].map(([k, a, b]) => (
+              <React.Fragment key={k}>
+                <div className={`font-stat text-right ${a > b ? "text-[#1BC28A]" : "text-[#F2F5F3]"}`}>{a}</div>
+                <div className="text-[13px] text-[#8FA39A] text-center">{k}</div>
+                <div className={`font-stat ${b > a ? "text-[#E36B5B]" : "text-[#F2F5F3]"}`}>{b}</div>
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      )}
 
       <PosCarreira c={c} onEscolher={onPosCarreira} />
 
@@ -1084,7 +1334,11 @@ export default function ModoRapido({ onSair }) {
   const comprar = (id) => { const r = comprarInvestimento(c, id); if (r.ok) setEstado((st) => ({ ...st, c: r.c })); };
   const proximoEvento = () => setEstado((s) => ({ ...s, evento: s.proximo, resultado: null, proximo: null }));
   const mudarFoco = (id) => setEstado((s) => ({ ...s, c: definirFoco(s.c, id) }));
-  const encerrar = () => setEstado({ etapa: "fim", c: aposentar(c) });
+  const encerrar = () => {
+    const cc = aposentar(c);
+    cc.hall = registrarNoHall(cc);
+    setEstado({ etapa: "fim", c: cc });
+  };
   const nova = () => setEstado({ etapa: "criacao" });
 
   const mostrarCabecalho = etapa !== "criacao" && etapa !== "fim";
@@ -1106,7 +1360,7 @@ export default function ModoRapido({ onSair }) {
           </>
         )}
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}
-        {etapa === "momento" && <TelaPenalti c={c} momento={card.pendente} onFim={fimMomento} />}
+        {etapa === "momento" && <TelaMomento c={c} momento={card.pendente} onFim={fimMomento} />}
         {etapa === "festa" && <TelaFesta c={c} card={card} onFim={() => setEstado({ etapa: "resumo", c, card })} />}
         {etapa === "resumo" && <TelaResumo c={c} card={card} onContinuar={continuar} onAposentar={encerrar} onRever={() => setEstado({ etapa: "festa", c, card })} />}
         {etapa === "traco" && <TelaTraco c={c} opcoes={(opcoesTraco || []).map(tracoDe).filter(Boolean)} onEscolher={escolherT} />}

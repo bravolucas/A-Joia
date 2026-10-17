@@ -4,6 +4,18 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🔁 Modo Rápido: rejogar e compartilhar
+
+- **Carreira do Dia**: todo mundo recebe o mesmo atleta (país, posição, origem e perfil) e o mesmo mundo no mesmo dia. Só as escolhas mudam a história
+- **Código da carreira**: toda carreira ganha um código de 6 letras. Quem digitar o mesmo código joga no mesmo mundo, com os mesmos sorteios. Aparece na carta final e no resumo
+- **Ranking pessoal**: as 30 melhores carreiras ficam salvas no navegador. A tela de criação mostra o top 5 e o fim de carreira diz em que posição a nova ficou (e o seu melhor resultado do dia)
+- **Rival de geração**: um jogador da mesma idade, de outro país, evolui, troca de clube e ganha títulos ao longo da sua carreira. Aparece no resumo de cada temporada e no fim, com o placar do duelo. Vencer vale +25 pontos de legado
+- **"Você foi como…"**: no fim, a lenda com o perfil mais parecido com o seu no auge, comparando só lendas da mesma família de posição
+- **Baixar carta (PNG)**: a carta final vira imagem. No celular abre o menu de compartilhar
+- **Momento decisivo por posição**: atacantes e zagueiros batem o pênalti, meias e pontas cobram a falta, volantes, meio-campistas e laterais acham o passe do último lance, e goleiros escolhem para onde pular no pênalti do título
+
+---
+
 ## 🏆 Taças com fotos de verdade (Adobe Stock + Photoshop)
 
 - As taças desenhadas em vetor viraram fotos 3D/realistas, com fundo removido no Adobe Photoshop: taça dourada (liga), prateada (copa nacional), taça com tampa e fitas (continental), estrela de cristal (Mundial de Clubes), estrela dourada (Copa do Mundo), taça com estrela (copa continental de seleções) e taça de bronze (segunda divisão)

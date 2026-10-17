@@ -269,7 +269,7 @@ export function TelaPartidaAoVivo({ pv, onDecisao, onContinuarSegundoTempo, onMu
             <span className="font-stat font-black text-4xl">{ctx.souCasa ? meusGols : advGols}</span>
             <div className="text-center">
               <div className="text-xs text-zinc-400">vs {ctx.adversario}</div>
-              <div className={`text-sm font-bold ${fase === "intervalo" ? "text-amber-400" : "text-zinc-300"}`}>{relogioTxt}</div>
+              <div className={`text-sm font-bold ${fase === "intervalo" ? "text-blue-300" : "text-zinc-300"}`}>{relogioTxt}</div>
               {substituido && <div className="text-[9px] text-zinc-500 mt-0.5">🔄 Você foi substituído</div>}
               {ctx.clima && ctx.clima !== "normal" && (() => { const cl = CONDICOES_CLIMA.find((c) => c.id === ctx.clima); return cl ? <div className="text-[9px] text-zinc-500 mt-0.5">{cl.icone} {cl.label}</div> : null; })()}
               {ctx.formacao && <div className="text-[9px] text-zinc-500 mt-0.5">📋 {ctx.formacao} escolhida pelo técnico{ctx.formacaoFavorece ? " — favorece sua posição" : ""}</div>}
@@ -279,7 +279,7 @@ export function TelaPartidaAoVivo({ pv, onDecisao, onContinuarSegundoTempo, onMu
           {!concluida && (
             <div className="flex items-center justify-center gap-1.5 mt-2">
               {[1, 2, 5].map((v) => (
-                <button key={v} onClick={() => onMudarVelocidade(v)} className={`text-[10px] font-bold px-2 py-0.5 rounded-sm border ${velocidade === v ? "border-amber-400 text-amber-400 bg-amber-500/10" : "border-zinc-700 text-zinc-500"}`}>{v}x</button>
+                <button key={v} onClick={() => onMudarVelocidade(v)} className={`text-[10px] font-bold px-2 py-0.5 rounded-sm border ${velocidade === v ? "border-emerald-400 text-emerald-300 bg-emerald-500/10" : "border-zinc-700 text-zinc-500"}`}>{v}x</button>
               ))}
               <button onClick={onPularParaFinal} className="text-[10px] font-bold px-2 py-0.5 rounded-sm border border-zinc-700 text-zinc-500 hover:border-amber-400 hover:text-amber-400">⏭ Pular pro final</button>
             </div>
@@ -719,7 +719,7 @@ export function CartaoCarreira({ fim, temporadas, nome, posicao, onClose }) {
 
         <div className="flex border-b border-zinc-800 overflow-x-auto">
           {paginas.map((p, i) => (
-            <button key={p.id} onClick={() => setPagina(i)} className={`flex-1 whitespace-nowrap py-2.5 text-[10px] uppercase tracking-widest font-sport font-bold ${pagina === i ? "text-amber-400 border-b-2 border-amber-400" : "text-zinc-500"}`}>
+            <button key={p.id} onClick={() => setPagina(i)} className={`flex-1 whitespace-nowrap py-2.5 text-[10px] uppercase tracking-widest font-sport font-bold ${pagina === i ? "text-emerald-300 border-b-2 border-emerald-400" : "text-zinc-500"}`}>
               {p.icone} {p.label}
             </button>
           ))}

@@ -4895,7 +4895,7 @@ function resolverTemporada(c, extraStats) {
                           const atual = i === carreira.temporadaAndamento.rodadaAtual;
                           const resultado = (carreira.temporadaAndamento.resultadosRodadas || [])[i];
                           const cor = !jogada ? "bg-zinc-800" : resultado === "V" ? "bg-emerald-500" : resultado === "D" ? "bg-red-500" : "bg-zinc-500";
-                          return <div key={i} className={`w-3.5 h-3.5 rounded-sm ${cor} ${atual ? "border-2 border-amber-400" : ""}`} title={`Rodada ${i + 1}${resultado ? ` — ${resultado === "V" ? "Vitória" : resultado === "D" ? "Derrota" : "Empate"}` : ""}`} />;
+                          return <div key={i} className={`w-3.5 h-3.5 rounded-sm ${cor} ${atual ? "border-2 border-emerald-300" : ""}`} title={`Rodada ${i + 1}${resultado ? ` — ${resultado === "V" ? "Vitória" : resultado === "D" ? "Derrota" : "Empate"}` : ""}`} />;
                         })}
                       </div>
                     </Card>
@@ -5014,7 +5014,7 @@ function resolverTemporada(c, extraStats) {
                 <div className="flex gap-1.5">
                   {[["clube", "👥 Elenco, Clube & Mercado"], ["selecao", "🌎 Seleção & Contrato"]].map(([id, label]) => (
                     <button key={id} onClick={() => setSubAbaCarreira((v) => (v === id ? null : id))}
-                      className={`flex-1 rounded-md px-3 py-2.5 text-[10px] uppercase tracking-widest font-sport font-bold border ${subAbaCarreira === id ? "border-amber-500/50 text-amber-400 bg-amber-500/10" : "glass border-white/10 text-zinc-400 hover:border-amber-500/30"}`}>
+                      className={`flex-1 rounded-md px-3 py-2.5 text-[10px] uppercase tracking-widest font-sport font-bold border ${subAbaCarreira === id ? "border-emerald-500/50 text-emerald-300 bg-emerald-500/10" : "glass border-white/10 text-zinc-400 hover:border-emerald-500/30"}`}>
                       {label}
                     </button>
                   ))}
@@ -6007,7 +6007,7 @@ function resolverTemporada(c, extraStats) {
                           <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">Função no elenco</div>
                           <div className="grid grid-cols-2 gap-1.5">
                             {FUNCOES_ELENCO.map((f) => (
-                              <button key={f.id} disabled={negociacaoContrato.colapsou} onClick={() => mudarFuncaoNegociacao(f.id)} className={`text-left px-2 py-1.5 rounded-sm border transition-all ${negociacaoContrato.termos.funcao === f.id ? "border-amber-500 bg-amber-500/10" : "border-zinc-800"}`}>
+                              <button key={f.id} disabled={negociacaoContrato.colapsou} onClick={() => mudarFuncaoNegociacao(f.id)} className={`text-left px-2 py-1.5 rounded-sm border transition-all ${negociacaoContrato.termos.funcao === f.id ? "border-emerald-500 bg-emerald-500/10" : "border-zinc-800"}`}>
                                 <div className="text-[10px] font-bold text-zinc-200">{f.nome}</div>
                                 <div className="text-[9px] text-zinc-500 leading-snug">{f.desc}</div>
                               </button>
@@ -6801,7 +6801,7 @@ function resolverTemporada(c, extraStats) {
                         <div className="flex items-center justify-between"><span className="text-xs text-zinc-400">Salário/ano</span><div className="flex items-center gap-2"><button onClick={() => ajustarNegociacaoAtual("salario", -1)} className="w-7 h-7 border border-zinc-700 rounded-sm">−</button><span className="font-mono text-sm w-16 text-center">${formatarDinheiro(negociacaoContratoAtual.salario)}</span><button onClick={() => ajustarNegociacaoAtual("salario", 1)} className="w-7 h-7 border border-zinc-700 rounded-sm">+</button></div></div>
                         <div className="flex items-center justify-between"><span className="text-xs text-zinc-400">Bônus por gol</span><div className="flex items-center gap-2"><button onClick={() => ajustarNegociacaoAtual("bonusGol", -1)} className="w-7 h-7 border border-zinc-700 rounded-sm">−</button><span className="font-mono text-sm w-16 text-center">${formatarDinheiro(negociacaoContratoAtual.bonusGol)}</span><button onClick={() => ajustarNegociacaoAtual("bonusGol", 1)} className="w-7 h-7 border border-zinc-700 rounded-sm">+</button></div></div>
                         <div className="flex items-center justify-between"><span className="text-xs text-zinc-400">Multa rescisória</span><div className="flex items-center gap-2"><button onClick={() => ajustarNegociacaoAtual("multa", -1)} className="w-7 h-7 border border-zinc-700 rounded-sm">−</button><span className="font-mono text-sm w-20 text-center">${formatarDinheiro(negociacaoContratoAtual.multa)}</span><button onClick={() => ajustarNegociacaoAtual("multa", 1)} className="w-7 h-7 border border-zinc-700 rounded-sm">+</button></div></div>
-                        <button onClick={() => ajustarNegociacaoAtual("estrela", 0)} className={`w-full text-left px-3 py-2 rounded-sm border text-xs ${negociacaoContratoAtual.estrela ? "border-amber-500 bg-amber-500/10 text-amber-400" : "border-zinc-700 text-zinc-400"}`}>⭐ Status de estrela do time {negociacaoContratoAtual.estrela ? "(pedido)" : "(pedir)"} — maior tolerância a faltas em treino, mas a diretoria topa menos fácil</button>
+                        <button onClick={() => ajustarNegociacaoAtual("estrela", 0)} className={`w-full text-left px-3 py-2 rounded-sm border text-xs ${negociacaoContratoAtual.estrela ? "border-emerald-500 bg-emerald-500/10 text-emerald-300" : "border-zinc-700 text-zinc-400"}`}>⭐ Status de estrela do time {negociacaoContratoAtual.estrela ? "(pedido)" : "(pedir)"} — maior tolerância a faltas em treino, mas a diretoria topa menos fácil</button>
                         <div className="flex items-center justify-between"><span className="text-xs text-zinc-400">Duração (anos)</span><div className="flex items-center gap-2"><button onClick={() => ajustarNegociacaoAtual("anos", -1)} className="w-7 h-7 border border-zinc-700 rounded-sm">−</button><span className="font-mono text-sm w-16 text-center">{negociacaoContratoAtual.anos}</span><button onClick={() => ajustarNegociacaoAtual("anos", 1)} className="w-7 h-7 border border-zinc-700 rounded-sm">+</button></div></div>
                       </div>
                       <p className="text-[10px] text-zinc-500 mb-3">Quanto mais você pede acima do seu valor de mercado, menor a chance da diretoria topar de primeira.</p>
@@ -7337,9 +7337,9 @@ function resolverTemporada(c, extraStats) {
 
                       <Card>
                         <div className="flex gap-1 mb-3">
-                          <button onClick={() => setMundoAba("bola")} className={`px-3 py-1.5 text-[11px] rounded-sm border ${mundoAba === "bola" ? "border-amber-500 bg-amber-500/10 text-amber-400" : "border-zinc-800 text-zinc-500"}`}>🥇 Bola de Ouro</button>
-                          <button onClick={() => setMundoAba("art")} className={`px-3 py-1.5 text-[11px] rounded-sm border ${mundoAba === "art" ? "border-amber-500 bg-amber-500/10 text-amber-400" : "border-zinc-800 text-zinc-500"}`}>⚽ Artilharia</button>
-                          <button onClick={() => setMundoAba("pos")} className={`px-3 py-1.5 text-[11px] rounded-sm border ${mundoAba === "pos" ? "border-amber-500 bg-amber-500/10 text-amber-400" : "border-zinc-800 text-zinc-500"}`}>📋 Por posição</button>
+                          <button onClick={() => setMundoAba("bola")} className={`px-3 py-1.5 text-[11px] rounded-sm border ${mundoAba === "bola" ? "border-emerald-500 bg-emerald-500/10 text-emerald-300" : "border-zinc-800 text-zinc-500"}`}>🥇 Bola de Ouro</button>
+                          <button onClick={() => setMundoAba("art")} className={`px-3 py-1.5 text-[11px] rounded-sm border ${mundoAba === "art" ? "border-emerald-500 bg-emerald-500/10 text-emerald-300" : "border-zinc-800 text-zinc-500"}`}>⚽ Artilharia</button>
+                          <button onClick={() => setMundoAba("pos")} className={`px-3 py-1.5 text-[11px] rounded-sm border ${mundoAba === "pos" ? "border-emerald-500 bg-emerald-500/10 text-emerald-300" : "border-zinc-800 text-zinc-500"}`}>📋 Por posição</button>
                         </div>
                         {mundoAba === "bola" && (
                           <>

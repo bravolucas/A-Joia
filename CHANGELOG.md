@@ -135,6 +135,11 @@ A diretoria cobra objetivos específicos por torneio, dosados pelo porte do club
 - O "amber" laranja virou o dourado da gema (#D8B44A).
 - Ciano e verde-neon saíram da interface: botões e destaques de foco agora usam o esmeralda; barras de atributo e radar usam safira → esmeralda. O verde-neon ficou só no lance de gol e nas animações dos minigames.
 
+### Dourado só para conquistas
+- Abas, filtros, seletor de velocidade da partida e opções de contrato deixaram de usar dourado quando selecionados: agora usam esmeralda.
+- O indicador de intervalo da partida passou para azul-safira.
+- O dourado continua em títulos, prêmios, pódio, cerimônias e itens desbloqueados — onde ele significa conquista.
+
 ### Correção encontrada no caminho
 - `nomeMundo` era usado na vida pessoal (namoro e nome de filho) sem ser importado de `lib.js`. Quando o evento sorteava, a virada de temporada quebrava. Agora está importado.
 

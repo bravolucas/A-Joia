@@ -4,6 +4,15 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 📞 Mercado em toda janela e liga escolhida pelo empresário
+
+- **Propostas frequentes, como no Copero**: depois do acontecimento de cada temporada, o empresário traz de 2 a 4 propostas. Não há mercado quando você acabou de trocar de clube, renovou há pouco, está emprestado ou tem menos de 17 anos
+- O acontecimento principal da janela deixou de sortear "propostas", para não repetir o mercado
+- **Escolher a liga**: no cartão de propostas, "Pedir propostas de outra liga" abre as ligas (Premier League, La Liga, Serie A, Bundesliga, Ligue 1, Liga Portugal, Brasileirão, Liga Saudita, MLS ou qualquer uma). O empresário refaz as propostas na hora, com a maioria vindo da liga pedida, e continua sondando essa liga nas próximas janelas. Vale uma vez por janela
+- Ficar recusando só clubes menores agora quase não mexe com a torcida (antes dava +5 em toda janela)
+
+---
+
 ## 📰 Transferências com valor, manchete de jornal e carreira em emojis
 
 - **Valor de transferência**: cada venda tem preço, calculado pelo valor de mercado e pelos anos de contrato restantes, limitado pela cláusula. Fim de contrato e pré-contrato saem de graça; cláusula paga custa exatamente a multa

@@ -1047,18 +1047,30 @@ export const EVENTOS = [
     },
     preparar: (c) => {
       const emp = EMPRESARIOS.find((e) => e.id === c.empresario) || EMPRESARIOS[0];
-      return { ofertas: gerarOfertas(c, Math.min(3, Math.max(1, Math.round(emp.nOfertas * 0.6)) + somaTraco(c, "ofertasExtra") + (c.mod.ofertasExtra || 0))) };
+      const n = Math.min(4, Math.max(2, Math.round(emp.nOfertas * 0.6)) + somaTraco(c, "ofertasExtra") + (c.mod.ofertasExtra || 0));
+      if (!c.ligaAlvo) return { ofertas: gerarOfertas(c, n) };
+      // liga pedida ao empresário: a maior parte das propostas vem de lá, com faixa de nível mais larga
+      const ovr = ovrDe(c);
+      const daLiga = gerarOfertas(c, Math.max(2, n - 1), { ligas: [c.ligaAlvo], lo: ovr - 12, hi: ovr + Math.round(emp.alcance * 0.5) + 3 });
+      const outras = gerarOfertas(c, Math.max(1, n - daLiga.length)).filter((o) => !daLiga.some((d) => d.clube === o.clube));
+      return { ofertas: [...daLiga, ...outras].slice(0, n), ligaAlvo: c.ligaAlvo, achouNaLiga: daLiga.length };
     },
     titulo: () => "Janela de transferências",
-    texto: (c, ctx) => `Seu empresário chegou com ${ctx.ofertas.length === 1 ? "uma proposta" : `${ctx.ofertas.length} propostas`}. Valor de mercado atual: ${formatarValor(valorMercado(ovrDe(c), c.idade, c.fama))}.`,
+    texto: (c, ctx) => {
+      const base = `Seu empresário chegou com ${ctx.ofertas.length === 1 ? "uma proposta" : `${ctx.ofertas.length} propostas`}. Valor de mercado atual: ${formatarValor(valorMercado(ovrDe(c), c.idade, c.fama))}.`;
+      if (!ctx.ligaAlvo) return base;
+      const liga = ligaDe(ctx.ligaAlvo).nome;
+      return ctx.achouNaLiga ? `📞 Ele sondou a ${liga} a seu pedido. ${base}` : `📞 Ele ligou para a ${liga}, mas nenhum clube de lá quis apostar em você agora. ${base}`;
+    },
     opcoes: (c, ctx) => [
       ...ctx.ofertas.map((o) => ({
         id: `ir:${o.clube}`, label: `Negociar com o ${o.clube}`, dica: `${o.ligaNome} · chegaria como ${o.status.toLowerCase()} · ~${formatarValor(salarioAnual(o.clube, ovrDe(c)))}/ano · transferência de ${valorTransferencia(c, o.clube) ? formatarValor(valorTransferencia(c, o.clube)) : "graça"}`, oferta: o,
         negociar: { clube: o.clube, tipo: "transferencia" },
         efeito: (c, extra) => { const de = transferir(c, o.clube, { contrato: extra?.contrato }); c.fama = clampR(c.fama + (o.forca > clubeDe(de).forca ? 4 : 0), 0, 100); return r(`Contrato assinado. Nova casa: ${o.clube}.`); },
       })),
-      { id: "ficar", label: `Ficar no ${c.clubeNome}`, dica: "A torcida valoriza a lealdade",
-        efeito: (c) => { c.torcida[c.clubeNome] = clampR((c.torcida[c.clubeNome] ?? 30) + 5, 0, 100); return r("Você recusou tudo e ficou. A arquibancada notou."); } },
+      ...(c.flags.ligaPedida !== c.ano ? [{ id: "pedirLiga", label: "📞 Pedir propostas de outra liga", dica: c.ligaAlvo ? `Hoje ele está sondando a ${ligaDe(c.ligaAlvo).nome}` : "Diga ao empresário onde você quer jogar", escolherLiga: true, efeito: () => "" }] : []),
+      { id: "ficar", label: `Ficar no ${c.clubeNome}`, dica: ctx.ofertas.some((o) => o.forca > clubeDe(c.clubeNome).forca) ? "Recusar clubes maiores: a torcida valoriza a lealdade" : "Nenhuma proposta melhor que o seu clube",
+        efeito: (c) => { const melhor = ctx.ofertas.some((o) => o.forca > clubeDe(c.clubeNome).forca); c.torcida[c.clubeNome] = clampR((c.torcida[c.clubeNome] ?? 30) + (melhor ? 5 : 1), 0, 100); return r(melhor ? "Você recusou clubes maiores e ficou. A arquibancada notou." : "Nada que valesse a mudança. Você segue onde está."); } },
     ],
   },
   {
@@ -1976,9 +1988,12 @@ function sortearEventoBase(c, { somente = null, excluir = [] } = {}) {
 
 /* Depois do evento principal: se o atleta já é grande demais para o clube,
    a janela de transferências abre também (sem perder a oportunidade). */
+/* Mercado em toda janela (como no Copero): depois do acontecimento da temporada,
+   o empresário traz propostas — salvo se você acabou de trocar de clube, renovou
+   há pouco, está emprestado ou ainda é da base. */
 export function janelaExtra(c, idJaVisto) {
-  if (["propostas", "fimContrato", "clausula"].includes(idJaVisto) || c.contrato?.restantes <= 0 || c.flags.blindado > 0 || c.idade < 18 || c.emprestimo) return null;
-  if (ovrDe(c) - clubeDe(c.clubeNome).forca < 4 && !c.mod?.ofertasExtra) return null;
+  if (["propostas", "fimContrato", "clausula"].includes(idJaVisto) || c.contrato?.restantes <= 0 || c.flags.blindado > 0 || c.idade < 17 || c.emprestimo) return null;
+  if (c.ultimaTransferencia?.ano === c.ano) return null;
   return sortearEvento(c, { somente: "propostas" });
 }
 
@@ -1998,11 +2013,28 @@ function resolverEventoBase(c0, evento, opcaoId, extra = null) {
   return { c, resultado };
 }
 
+/* ---------- ligas que o empresário pode sondar ---------- */
+export const LIGAS_EMPRESARIO = [
+  { id: null, nome: "Qualquer liga", icone: "🌍" },
+  { id: "inglaterra", nome: "Premier League", icone: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" }, { id: "espanha", nome: "La Liga", icone: "🇪🇸" },
+  { id: "italia", nome: "Serie A", icone: "🇮🇹" }, { id: "alemanha", nome: "Bundesliga", icone: "🇩🇪" },
+  { id: "franca", nome: "Ligue 1", icone: "🇫🇷" }, { id: "portugal", nome: "Liga Portugal", icone: "🇵🇹" },
+  { id: "brasileirao", nome: "Brasileirão", icone: "🇧🇷" }, { id: "arabia", nome: "Liga Saudita", icone: "🇸🇦" },
+  { id: "mls", nome: "MLS", icone: "🇺🇸" },
+];
+/* Pede ao empresário outra liga durante a janela: refaz as propostas uma vez por janela */
+export function pedirLiga(c0, ligaId) {
+  const c = clone(c0);
+  c.ligaAlvo = ligaId || null;
+  c.flags.ligaPedida = c.ano;
+  return { c, evento: sortearEvento(c, { somente: "propostas" }) };
+}
+
 /* ---------- ritmo: quantos acontecimentos por janela ---------- */
 const EVENTOS_IMPORTANTES = ["propostas", "fimContrato", "clausula", "livre", "fortuna", "traicao", "voltarCasa", "naturalizacao", "emprestimo", "forcarSaida"];
 /* Evento principal da janela, respeitando o ritmo escolhido */
 export function eventoDaJanela(c) {
-  const ev = sortearEvento(c);
+  const ev = sortearEvento(c, { excluir: ["propostas"] });
   if (!ev || c.ritmo !== "expresso") return ev;
   if (EVENTOS_IMPORTANTES.includes(ev.id)) return ev;
   return comSemente(c.codigo, `expresso:${c.ano}`, () => (chance(0.35) ? ev : null));
@@ -2231,7 +2263,7 @@ export function carregarRapido() {
     if (!s.c.contrato) s.c.contrato = contratoPadrao(s.c, s.c.clubeNome);
     s.c.foco = s.c.foco || "equilibrio";
     s.c.picoAttrs = s.c.picoAttrs || { ...s.c.attrs };
-    s.c.moral = s.c.moral ?? 65; s.c.transferencias = s.c.transferencias || []; s.c.ritmo = s.c.ritmo || "normal"; s.c.pe = s.c.pe || "destro";
+    s.c.moral = s.c.moral ?? 65; s.c.transferencias = s.c.transferencias || []; s.c.ligaAlvo = s.c.ligaAlvo || null; s.c.ritmo = s.c.ritmo || "normal"; s.c.pe = s.c.pe || "destro";
     s.c.titulos = { liga: 0, copa: 0, continental: 0, mundial: 0, copaMundo: 0, continentalSelecao: 0, bolaOuro: 0, segunda: 0, ...(s.c.titulos || {}) };
     if (!s.c.mundo?.jogadores) s.c.mundo = mundoCompacto();
     return s;
@@ -2241,7 +2273,7 @@ export function apagarRapido() { try { localStorage.removeItem(CHAVE_SAVE_RAPIDO
 
 /* ---------- simulação automática (testes e balanceamento) ---------- */
 function resolverAuto(c, ev, escolher) {
-  let op = escolher(ev.opcoes, ev);
+  let op = escolher(ev.opcoes.filter((o) => !o.escolherLiga), ev);
   if (!op.negociar) return resolverEvento(c, ev, op.id).c;
   let n = iniciarNegociacao(c, op.negociar);
   for (let k = 0; k < 2 && chance(0.6); k++) n = ajustarNegociacao(n, pick(["salario", "anos", "multa", "bonusGol"]), pick([1, -1]));

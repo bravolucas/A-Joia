@@ -13,7 +13,7 @@ import {
   iniciarNegociacao, ajustarNegociacao, fecharNegociacao, CAMPOS_NEGOCIACAO, fama_negociador,
   INVESTIMENTOS, comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
   chanceMomento, miniDaPosicao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
-  eventoDaJanela, segundoEvento, textoEmoji, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
+  eventoDaJanela, segundoEvento, textoEmoji, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
 } from "./rapido.js";
 
 /* Estilo do seletor de modos e do Modo Rápido. Inclui as animações que as
@@ -976,8 +976,9 @@ function TelaTraco({ c, opcoes, onEscolher }) {
 }
 
 /* ---------- evento + preparação da próxima temporada ---------- */
-function CartaoEvento({ evento, resultado, onEscolher }) {
+function CartaoEvento({ evento, resultado, onEscolher, onPedirLiga }) {
   const foto = ARTE_EVENTO[evento.id];
+  const [ligas, setLigas] = useState(false);
   return (
     <div className="rp-painel overflow-hidden">
       {foto && <div aria-hidden="true" className="h-32 -mb-14" style={{ background: `linear-gradient(180deg, rgba(19,26,23,0) 0%, rgba(19,26,23,.7) 60%, rgba(19,26,23,1) 100%), url(${foto}) center 45%/cover` }} />}
@@ -993,6 +994,25 @@ function CartaoEvento({ evento, resultado, onEscolher }) {
         <div className="flex flex-col gap-2 p-4 pt-1">
           {evento.opcoes.map((o) => {
             const r = RISCO[o.risco] || RISCO.seguro;
+            if (o.escolherLiga) {
+              return (
+                <div key={o.id} className="rounded-2xl border border-dashed border-[#2E6FE0]/50 bg-[#2E6FE0]/8">
+                  <button onClick={() => setLigas((v) => !v)} aria-expanded={ligas} className="w-full text-left px-4 py-3 min-h-[52px]">
+                    <div className="font-bold text-[17px] text-[#9CC3FF]">{o.label}</div>
+                    <div className="text-[14px] text-[#8FA39A] mt-1">{o.dica} · uma vez por janela</div>
+                  </button>
+                  {ligas && (
+                    <div className="grid grid-cols-2 gap-2 px-3 pb-3 rp-entra">
+                      {LIGAS_EMPRESARIO.map((l) => (
+                        <button key={l.id || "qualquer"} onClick={() => onPedirLiga(l.id)} className="rp-opcao px-3 py-2.5 text-left min-h-[48px]">
+                          <span className="font-bold text-[15px] text-[#F2F5F3]">{l.icone} {l.nome}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            }
             return (
               <button key={o.id} onClick={() => onEscolher(o.id)} className="rp-opcao px-4 py-3">
                 <div className="flex items-center gap-2">
@@ -1085,13 +1105,13 @@ function RecorteJornal({ manchete, transf }) {
   );
 }
 
-function TelaEvento({ c, evento, resultado, temMais, aviso, manchete, onEscolher, onProximo, onFoco, onJogar, onPatrimonio }) {
+function TelaEvento({ c, evento, resultado, temMais, aviso, manchete, onEscolher, onPedirLiga, onProximo, onFoco, onJogar, onPatrimonio }) {
   const torneio = c.idade >= 18 ? (anoDeCopa(c.ano) ? "Copa do Mundo" : anoDeContinentalSelecao(c.ano) ? nomeCopaContinental(c.nac) : null) : null;
   const pronto = !evento || resultado;
   return (
     <div className="max-w-xl mx-auto px-4 py-5 flex flex-col gap-4 rp-entra">
       {aviso && <div className="rp-painel px-4 py-3 text-[16px] text-[#F0A99E]" style={{ borderColor: "rgba(227,107,91,.35)" }}>{aviso}</div>}
-      {evento && <CartaoEvento evento={evento} resultado={resultado} onEscolher={onEscolher} />}
+      {evento && <CartaoEvento key={`${evento.id}:${evento.texto}`} evento={evento} resultado={resultado} onEscolher={onEscolher} onPedirLiga={onPedirLiga} />}
       {resultado && manchete && c.ultimaTransferencia && <RecorteJornal manchete={manchete} transf={c.ultimaTransferencia} />}
       {pronto && temMais && <button onClick={onProximo} className="rp-btn rp-prim display text-sm">Ver próxima notícia</button>}
       {pronto && !temMais && (
@@ -1533,6 +1553,12 @@ export default function ModoRapido({ onSair }) {
     const cNovo = n.colapsou ? { ...c, repNeg: Math.min(60, (c.repNeg || 0) + 6) } : c;
     setEstado((st) => ({ ...st, etapa: "evento", c: cNovo, evento: { ...evento, opcoes: restantes }, neg: null, negOp: null, aviso }));
   };
+  const pedirLigaUI = (ligaId) => {
+    const r = pedirLiga(c, ligaId);
+    const nome = LIGAS_EMPRESARIO.find((l) => l.id === ligaId)?.nome || "qualquer liga";
+    if (r.evento) setEstado((st) => ({ ...st, c: r.c, evento: r.evento, aviso: null }));
+    else setEstado((st) => ({ ...st, c: r.c, evento: { ...st.evento, opcoes: st.evento.opcoes.filter((o) => !o.escolherLiga) }, aviso: `O empresário ligou para clubes da ${nome}, mas ninguém fez proposta agora.` }));
+  };
   const comprar = (id) => { const r = comprarInvestimento(c, id); if (r.ok) setEstado((st) => ({ ...st, c: r.c })); };
   const proximoEvento = () => setEstado((s) => ({ ...s, evento: s.proximo, resultado: null, proximo: null, manchete: null }));
   const mudarFoco = (id) => setEstado((s) => ({ ...s, c: definirFoco(s.c, id) }));
@@ -1559,7 +1585,7 @@ export default function ModoRapido({ onSair }) {
                 <p className="text-[17px] text-[#8FA39A] mt-1">{c.nome}, {c.idade} anos, {posicaoDe(c.posicao).label.toLowerCase()} da base do {c.clubeNome}. {origemDe(c.origem) ? `${origemDe(c.origem).nome}. ` : ""}Perfil: {personaDe(c.personalidade).label.toLowerCase()}. Empresário: {(EMPRESARIOS.find((e) => e.id === c.empresario) || EMPRESARIOS[0]).nome.toLowerCase()}.</p>
               </div>
             )}
-            <TelaEvento c={c} evento={evento} resultado={resultado} temMais={!!estado.proximo} aviso={estado.aviso} manchete={estado.manchete} onEscolher={escolherEvento} onProximo={proximoEvento} onFoco={mudarFoco} onJogar={jogar} onPatrimonio={() => setPatrimonioAberto(true)} />
+            <TelaEvento c={c} evento={evento} resultado={resultado} temMais={!!estado.proximo} aviso={estado.aviso} manchete={estado.manchete} onEscolher={escolherEvento} onPedirLiga={pedirLigaUI} onProximo={proximoEvento} onFoco={mudarFoco} onJogar={jogar} onPatrimonio={() => setPatrimonioAberto(true)} />
           </>
         )}
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}

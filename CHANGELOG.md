@@ -6,6 +6,7 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ## 🧠 Modo Rápido: cabeça, coletivas e 60 acontecimentos
 
+- Coletiva com foto própria de sala de imprensa (Adobe Stock 1534097092, licença gratuita) e o evento "Sua família quer cuidar da sua carreira" com texto neutro
 - **Ritmo da carreira**: Intenso (dois acontecimentos por janela e coletiva todo ano), Normal ou Expresso (só as decisões importantes, sem coletivas)
 - **Pé preferido**: destro (+1 de finalização e passe no teto), canhoto (+2 de drible) ou ambidestro (+6% de gols e assistências, −1 em todo o teto)
 - **Número da camisa** escolhido na criação, mostrado na ficha, na carta final e na apresentação no clube novo. Herdar a camisa 10 do ídolo agora troca o número

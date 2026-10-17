@@ -919,7 +919,7 @@ function TelaColetiva({ c, coletiva, resposta, onResponder, onSeguir }) {
   return (
     <div className="max-w-xl mx-auto px-4 py-5 flex flex-col gap-4 rp-entra">
       <div className="rp-painel overflow-hidden">
-        <div aria-hidden="true" className="h-36 -mb-16" style={{ background: `linear-gradient(180deg, rgba(19,26,23,0) 0%, rgba(19,26,23,.75) 60%, rgba(19,26,23,1) 100%), url(${ARTE.refletores}) center 40%/cover` }} />
+        <div aria-hidden="true" className="h-36 -mb-16" style={{ background: `linear-gradient(180deg, rgba(19,26,23,0) 0%, rgba(19,26,23,.75) 60%, rgba(19,26,23,1) 100%), url(${ARTE.coletiva}) center 45%/cover` }} />
         <div className="relative px-5 pb-4">
           <span className="rp-chip" style={{ color: "#9CC3FF", background: "rgba(46,111,224,.2)" }}>🎙️ Coletiva de imprensa</span>
           <div className="text-[13px] text-[#8FA39A] mt-3">{coletiva.veiculo} pergunta:</div>

@@ -26,6 +26,7 @@ A licença do Adobe Stock permite uso em projetos, mas não a redistribuição d
 
 | Arquivo | Adobe Stock ID | Título original | Competição no jogo |
 |---|---|---|---|
+| coletiva.webp | 1534097092 | Press conference concept with podium and multiple microphones | Coletiva de imprensa (Modo Rápido) |
 | tacas/liga.webp | 1734220943 | Isolated Gold award for success, prize for winning competition | Liga nacional |
 | tacas/copa.webp | 1849730582 | Isolated shiny silver trophy cup with handles | Copa nacional |
 | tacas/continental.webp | 551381312 | Isolated golden soccer trophy of football sport | Continental de clubes |

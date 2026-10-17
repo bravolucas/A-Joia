@@ -130,6 +130,11 @@ A diretoria cobra objetivos específicos por torneio, dosados pelo porte do club
 - **Nova carreira** abre o formulário; o passo "Nome" ganhou o botão "← Voltar" para a tela inicial.
 - Layout adaptável: no computador, marca à esquerda e ações à direita; no celular, marca em cima e botões embaixo, ao alcance do polegar.
 
+### Paleta da marca no jogo inteiro
+- Neutros (fundos, bordas, textos secundários) passaram do cinza puro para o grafite-esverdeado da marca, com base em #0E1512. Feito no `tailwind.config.js`, então vale para todas as telas sem mexer componente por componente.
+- O "amber" laranja virou o dourado da gema (#D8B44A).
+- Ciano e verde-neon saíram da interface: botões e destaques de foco agora usam o esmeralda; barras de atributo e radar usam safira → esmeralda. O verde-neon ficou só no lance de gol e nas animações dos minigames.
+
 ### Correção encontrada no caminho
 - `nomeMundo` era usado na vida pessoal (namoro e nome de filho) sem ser importado de `lib.js`. Quando o evento sorteava, a virada de temporada quebrava. Agora está importado.
 

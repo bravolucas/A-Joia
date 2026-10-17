@@ -1110,7 +1110,7 @@ export function CalendarioTemporadaPopup({ carreira, mesAtual, setMesAtual, onCl
               const ult = carreira.selecao.historico[carreira.selecao.historico.length - 1];
               return (
                 <div className="mt-2 pt-2 border-t border-zinc-800">
-                  <div className="text-[10px]" style={{ color: ult.titulo ? "#D8B44A" : "#22D3EE" }}>{ult.icone} {ult.campanha}</div>
+                  <div className="text-[10px]" style={{ color: ult.titulo ? "#D8B44A" : "#5B8FEA" }}>{ult.icone} {ult.campanha}</div>
                   <div className="text-[9px] text-zinc-500 mt-0.5">{ult.jogos} jogos · {ult.gols} gols · {ult.assist} assistências · nota {ult.nota}</div>
                 </div>
               );
@@ -1569,7 +1569,7 @@ export function PasseCampo() {
 }
 
 export function PassePersonagem({ x, y, tipo, selecionavel, destacado, onClick }) {
-  const cor = tipo === "adversario" ? "#D6483F" : tipo === "voce" ? "#D8B44A" : "#22D3EE";
+  const cor = tipo === "adversario" ? "#D6483F" : tipo === "voce" ? "#D8B44A" : "#5B8FEA";
   const escala = 0.55 + (y / PASSE_H) * 0.55;
   return (
     <button onClick={selecionavel ? onClick : undefined} disabled={!selecionavel}
@@ -1699,8 +1699,8 @@ export function AttrRadar({ attrs, baseline }) {
   return (
     <svg viewBox="0 0 100 100" className="w-full h-40">
       {[0.33, 0.66, 1].map((f, i) => <polygon key={i} points={toPath(keys.map((_, j) => pointFor(99 * f, j)))} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />)}
-      <polygon points={toPath(basePts)} fill="rgba(34,211,238,0.08)" stroke="#22D3EE" strokeWidth="1" strokeDasharray="2,2" />
-      <polygon points={toPath(playerPts)} fill="rgba(57,255,136,0.2)" stroke="#39FF88" strokeWidth="1.5" />
+      <polygon points={toPath(basePts)} fill="rgba(46,111,224,0.10)" stroke="#5B8FEA" strokeWidth="1" strokeDasharray="2,2" />
+      <polygon points={toPath(playerPts)} fill="rgba(18,168,118,0.25)" stroke="#1BC28A" strokeWidth="1.5" />
       {labelPts.map((p, i) => <text key={i} x={p.x} y={p.y} fontSize="6" fill="#a1a1aa" textAnchor="middle" dominantBaseline="middle">{p.label}</text>)}
     </svg>
   );
@@ -1713,7 +1713,7 @@ export function AttrBarDelta({ label, value, anterior, max = 99, posicao }) {
     <div className="flex items-center gap-2 mb-2">
       <div className="w-8 text-[10px] font-sport font-bold text-zinc-400">{labelExibido}</div>
       <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
-        <div className="h-full rounded-full bar-fill" style={{ width: `${(value / max) * 100}%`, background: "linear-gradient(90deg, #22D3EE, #39FF88)" }} />
+        <div className="h-full rounded-full bar-fill" style={{ width: `${(value / max) * 100}%`, background: "linear-gradient(90deg, #2E6FE0, #1BC28A)" }} />
       </div>
       <div className="w-7 text-right text-[11px] font-stat font-bold text-zinc-200">{value}</div>
       {delta !== 0 && (
@@ -1734,7 +1734,7 @@ export function AttrBar({ label, value, max = 99, posicao }) {
     <div className="flex items-center gap-2 mb-1">
       <div className="w-8 text-[9px] font-sport font-bold text-zinc-400">{labelExibido}</div>
       <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
-        <div className="h-full rounded-full bar-fill" style={{ width: `${w}%`, background: "linear-gradient(90deg, #22D3EE, #39FF88)" }} />
+        <div className="h-full rounded-full bar-fill" style={{ width: `${w}%`, background: "linear-gradient(90deg, #2E6FE0, #1BC28A)" }} />
       </div>
       <div className="w-6 text-right text-[10px] font-stat text-zinc-300">{value}</div>
     </div>

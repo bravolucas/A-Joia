@@ -4093,7 +4093,7 @@ function resolverTemporada(c, extraStats) {
           linear-gradient(180deg, #0d0f11 0%, #0a0b0d 55%, #08090a 100%)
         `,
       }} />
-      <div className="fixed inset-0 z-0 pointer-events-none opacity-70" style={{ background: "radial-gradient(ellipse at top, rgba(20,255,150,0.08) 0%, transparent 45%), radial-gradient(ellipse at bottom right, rgba(34,211,238,0.08) 0%, transparent 55%)" }} />
+      <div className="fixed inset-0 z-0 pointer-events-none opacity-70" style={{ background: "radial-gradient(ellipse at top, rgba(18,168,118,0.10) 0%, transparent 45%), radial-gradient(ellipse at bottom right, rgba(46,111,224,0.07) 0%, transparent 55%)" }} />
       <style>{`
         /* ===== LAYOUT RESPONSIVO (CSS próprio, sem depender do build do Tailwind) ===== */
         .app-shell{width:100%;max-width:42rem;margin-left:auto;margin-right:auto;padding:2rem 1rem;}
@@ -4143,8 +4143,8 @@ function resolverTemporada(c, extraStats) {
         }
         @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;900&family=Oswald:wght@400;500;600;700&family=Unbounded:wght@700;900&display=swap');
         :root{
-          --bg-graphite:#111214; --bg-panel:rgba(24,26,29,0.62); --border-glass:rgba(255,255,255,0.08);
-          --neon-green:#39FF88; --neon-cyan:#22D3EE; --gold:#D8B44A;
+          --bg-graphite:#0E1512; --bg-panel:rgba(19,26,23,0.62); --border-glass:rgba(255,255,255,0.08);
+          --neon-green:#1BC28A; --neon-cyan:#2E6FE0; --gold:#D8B44A;
         }
         .display{font-family:'Unbounded',sans-serif;}
         .font-sport{font-family:'Rajdhani',sans-serif;}
@@ -4177,22 +4177,22 @@ function resolverTemporada(c, extraStats) {
         @keyframes cameraFlashRandom{0%,100%{opacity:0}10%{opacity:1}20%{opacity:0}}
         @keyframes diceRoll{0%{transform:rotate(0deg) scale(1)}50%{transform:rotate(180deg) scale(0.85)}100%{transform:rotate(360deg) scale(1)}}
         @keyframes barFill{from{width:0%}}
-        @keyframes neonPulse{0%,100%{box-shadow:0 0 6px rgba(57,255,136,0.35),0 0 0 1px rgba(57,255,136,0.15)}50%{box-shadow:0 0 18px rgba(57,255,136,0.65),0 0 0 1px rgba(57,255,136,0.3)}}
-        @keyframes cyanPulse{0%,100%{box-shadow:0 0 6px rgba(34,211,238,0.35)}50%{box-shadow:0 0 18px rgba(34,211,238,0.65)}}
+        @keyframes neonPulse{0%,100%{box-shadow:0 0 6px rgba(18,168,118,0.35),0 0 0 1px rgba(18,168,118,0.15)}50%{box-shadow:0 0 18px rgba(18,168,118,0.65),0 0 0 1px rgba(18,168,118,0.3)}}
+        @keyframes cyanPulse{0%,100%{box-shadow:0 0 6px rgba(46,111,224,0.35)}50%{box-shadow:0 0 18px rgba(46,111,224,0.65)}}
         .float-anim{animation:floatY 3.2s ease-in-out infinite}
         .glow-anim{animation:glowPulse 2.6s ease-in-out infinite}
         .glow-border{box-shadow:0 0 0 1px rgba(216,180,74,0.5),0 0 22px rgba(216,180,74,0.35)}
         .shimmer-bg{background:linear-gradient(110deg,transparent 40%,rgba(255,255,255,0.15) 50%,transparent 60%);background-size:200% 100%;animation:shimmer 2.5s infinite}
         .glass{background:var(--bg-panel);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--border-glass);box-shadow:0 8px 30px rgba(0,0,0,0.35);}
-        .glass-strong{background:rgba(16,17,20,0.78);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+        .glass-strong{background:rgba(14,21,18,0.82);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
         .bar-fill{transition:width 0.9s cubic-bezier(0.22,1,0.36,1);}
         .hud-btn{transition:all 0.3s ease;}
         .hud-btn:hover{transform:translateY(-2px);}
-        .btn-primary{background:linear-gradient(90deg,#10b981,#34d399);color:#09090b;}
-        .btn-primary:hover{filter:brightness(1.1);box-shadow:0 0 18px rgba(52,211,153,0.55);}
-        .btn-ghost{background:rgba(24,26,29,0.62);border:1px solid rgba(255,255,255,0.2);color:#f4f4f5;}
-        .btn-ghost:hover{border-color:rgba(34,211,238,0.7);box-shadow:0 0 14px rgba(34,211,238,0.35);}
-        .btn-gold{background:linear-gradient(90deg,#D8B44A,#F5D77A);color:#09090b;}
+        .btn-primary{background:#12A876;color:#06110C;}
+        .btn-primary:hover{background:#18BB85;box-shadow:0 0 18px rgba(18,168,118,0.5);}
+        .btn-ghost{background:rgba(19,29,25,0.7);border:1px solid #2A3A33;color:#F2F5F3;}
+        .btn-ghost:hover{border-color:#12A876;box-shadow:0 0 14px rgba(18,168,118,0.3);}
+        .btn-gold{background:linear-gradient(90deg,#D8B44A,#F5D77A);color:#1A1405;}
         .tela-titulo{background:#0E1512;color:#F2F5F3;animation:fadeIn 0.5s ease-out;}
         .tela-titulo-brilho{position:absolute;left:50%;top:22%;width:min(900px,130vw);height:min(620px,90vw);transform:translate(-50%,-50%);border-radius:50%;background:#12A876;opacity:0.10;filter:blur(90px);pointer-events:none;}
         @media(min-width:768px){ .tela-titulo-brilho{top:50%;left:38%;} }
@@ -4204,7 +4204,7 @@ function resolverTemporada(c, extraStats) {
         .logo-dot{background:linear-gradient(135deg,#34d399,#22d3ee);}
         .tab-active{border-color:#34d399 !important;color:#34d399 !important;text-shadow:0 0 12px rgba(52,211,153,0.5);}
         .opt-card{transition:all 0.3s ease;}
-        .opt-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.35),0 0 14px rgba(34,211,238,0.25);}
+        .opt-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.35),0 0 14px rgba(18,168,118,0.25);}
         .opt-card:active{transform:translateY(0);}
         .shimmer-sweep{position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,0.10) 50%,transparent 65%);background-size:250% 250%;animation:shimmer 4s ease-in-out infinite;pointer-events:none;}
         ::-webkit-scrollbar{width:6px;height:6px;}
@@ -4634,7 +4634,7 @@ function resolverTemporada(c, extraStats) {
                             copaNacional: { nome: "Copa Nacional", icone: "🏆", cor: "#D8B44A" },
                             estadual: { nome: nomeMataMata(carreira, "estadual"), icone: "🚩", cor: "#f59e0b" },
                             copinha: { nome: "Copa São Paulo de Futebol Júnior", icone: "🌱", cor: "#12A876" },
-                            selecaoAno: { nome: "Seleção", icone: "🌎", cor: "#22D3EE" },
+                            selecaoAno: { nome: "Seleção", icone: "🌎", cor: "#5B8FEA" },
                           }[eventoEspecial.tipo] || { nome: "Evento especial", icone: "⭐", cor: "#71717a" };
                           const faseLabel = eventoEspecial.faseIdx != null ? FASES_POR_COMPETICAO[eventoEspecial.tipo]?.[eventoEspecial.faseIdx]?.label : null;
                           const nomeAdv = typeof eventoEspecial.adversario === "string" ? eventoEspecial.adversario : eventoEspecial.adversario?.nome;
@@ -8127,7 +8127,7 @@ function resolverTemporada(c, extraStats) {
 
         {avisoSave && (
           <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] px-4 py-2.5 rounded-md text-xs font-bold animate-[popIn_0.2s_ease-out]"
-            style={{ background: avisoSave.erro ? "#3b1213" : "#0d2a19", border: `1px solid ${avisoSave.erro ? "#D6483F" : "#12A876"}`, color: avisoSave.erro ? "#ff9d97" : "#39FF88" }}>
+            style={{ background: avisoSave.erro ? "#3b1213" : "#0d2a19", border: `1px solid ${avisoSave.erro ? "#D6483F" : "#12A876"}`, color: avisoSave.erro ? "#ff9d97" : "#7FE3BC" }}>
             {avisoSave.erro ? "⚠️ " : "💾 "}{avisoSave.txt}
           </div>
         )}

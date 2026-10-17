@@ -4,6 +4,13 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 📣 Nova cena de contratação
+
+- A antiga apresentação com a camisa foi trocada por um anúncio no estilo das redes dos clubes: varredura na cor do clube, carimbo "OFICIAL", brasão com anel pulsante, nome gigante com o número vazado, de onde veio → para onde foi, e salário, duração e cláusula do contrato
+- Botão "Pular" para quem quer ir direto. Vale para o Modo Carreira e o Modo Rápido
+
+---
+
 ## 🛡️ Brasões e taças próprios do jogo
 
 - Cada clube ganhou um brasão original e fixo, gerado a partir do nome (6 formas de escudo, 6 padrões: listras, faixa, diagonal, metade, chevron ou liso) e da cor do clube, com iniciais e estrelas para os gigantes. Vale para os dois modos

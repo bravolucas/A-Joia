@@ -382,101 +382,106 @@ export function PopupConvocacao({ info, onClose }) {
 // sala escura com holofote pulsando, flashes de câmera, camisa surgindo em
 // holofote, nome/número carimbando, e boas-vindas. A intensidade (mais
 // flashes, confete) escala com o tamanho da contratação (grandeChegada).
-export function ApresentacaoNovoClube({ clube, nome, numero, posicao, idade, grandeChegada, onConcluir }) {
-  const [fase, setFase] = useState(0); // 0 escuro | 1 flashes | 2 camisa | 3 nome | 4 final
-  const numFlashes = grandeChegada ? 14 : 6;
-  const [flashes] = useState(() => Array.from({ length: numFlashes }, () => ({ delay: Math.random() * 1.4, dur: 0.5 + Math.random() * 0.7 })));
-
+// Anúncio de contratação no estilo das redes dos clubes: varredura na cor do
+// clube, "OFICIAL", brasão, nome gigante com o número vazado e os termos.
+// Usado pelo Modo Carreira e pelo Modo Rápido (mesmas props de antes + extras opcionais).
+const ESTILO_ANUNCIO = `
+@keyframes ancVarre{0%{transform:translateX(-130%) skewX(-18deg)}100%{transform:translateX(0) skewX(-18deg)}}
+@keyframes ancSai{0%{transform:translateX(0) skewX(-18deg)}100%{transform:translateX(140%) skewX(-18deg)}}
+@keyframes ancCarimbo{0%{opacity:0;transform:scale(2.4) rotate(-8deg);letter-spacing:.6em}60%{opacity:1;transform:scale(.94) rotate(-3deg)}100%{opacity:1;transform:scale(1) rotate(-3deg);letter-spacing:.18em}}
+@keyframes ancBrasao{0%{opacity:0;transform:scale(.3) translateY(30px)}70%{transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+@keyframes ancAnel{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.9);opacity:0}}
+@keyframes ancSobe{0%{opacity:0;transform:translateY(26px)}100%{opacity:1;transform:none}}
+@keyframes ancNumero{0%{opacity:0;transform:scale(1.4)}100%{opacity:.32;transform:scale(1)}}
+@keyframes ancLuz{0%,100%{opacity:.35}50%{opacity:.75}}
+@keyframes ancFlash{0%,100%{opacity:0}6%{opacity:.9}14%{opacity:0}}
+@keyframes ancFaixas{from{background-position:0 0}to{background-position:220px 0}}
+`;
+function AnuncioClube({ clube, nome, numero, posicao, idade, grandeChegada, deOnde, contrato, onConcluir }) {
+  const [fase, setFase] = useState(0); // 0 varredura | 1 oficial | 2 brasão | 3 jogador | 4 termos
+  const [flashes] = useState(() => Array.from({ length: grandeChegada ? 10 : 4 }, () => ({ x: Math.random() * 100, y: Math.random() * 45, d: Math.random() * 2.5, t: 1.6 + Math.random() * 1.6 })));
   useEffect(() => {
-    const tempos = [1300, 1300, 1300, 1100];
-    if (fase < 4) {
-      const t = setTimeout(() => setFase((f) => f + 1), tempos[fase]);
-      return () => clearTimeout(t);
-    }
+    if (fase >= 4) return undefined;
+    const t = setTimeout(() => setFase((f) => f + 1), [650, 950, 1000, 1100][fase]);
+    return () => clearTimeout(t);
   }, [fase]);
-
-  const corClube = clube.cor || "#D8B44A";
-  const corTexto = clube.escuro ? "#0a0a0a" : "#fff";
-
+  const cor = clube.cor || "#12A876";
+  const primeiro = (nome || "").split(" ")[0];
+  const resto = (nome || "").split(" ").slice(1).join(" ");
+  const fmt = (k) => (k >= 1000 ? `€ ${(k / 1000).toFixed(k >= 100000 ? 0 : 1).replace(".0", "")} mi` : `€ ${Math.round(k)} mil`);
   return (
-    <PopupOverlay>
-      <Card padded={false} className="overflow-hidden border-none" style={{ background: `radial-gradient(circle at 50% 25%, ${corClube}2a 0%, #060606 75%)` }}>
-        <div className="relative h-[420px] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
-          {fase >= 1 && fase < 4 && flashes.map((f, i) => (
-            <div key={i} className="absolute inset-0 bg-white pointer-events-none" style={{ animation: `cameraFlashRandom ${f.dur}s ${f.delay}s infinite` }} />
-          ))}
-          {fase === 4 && grandeChegada && <Confetti />}
+    <div className="fixed inset-0 z-50 overflow-hidden" style={{ background: "#07100C", fontFamily: "'Rajdhani',sans-serif" }} role="dialog" aria-label={`Anúncio: ${nome} no ${clube.nome}`}>
+      <style>{ESTILO_ANUNCIO}</style>
+      {/* fundo: luz de estádio, faixas na cor do clube e flashes */}
+      <div className="absolute inset-0" style={{ background: `radial-gradient(120% 70% at 50% 0%, ${cor}66 0%, transparent 60%), radial-gradient(90% 60% at 50% 110%, ${cor}40 0%, transparent 70%)` }} />
+      <div className="absolute inset-0 opacity-[.07]" style={{ backgroundImage: `repeating-linear-gradient(115deg, ${cor} 0 40px, transparent 40px 110px)`, animation: "ancFaixas 6s linear infinite" }} />
+      <div className="absolute -top-24 left-[8%] w-56 h-56 rounded-full blur-3xl" style={{ background: "#fff", animation: "ancLuz 3s ease-in-out infinite" }} />
+      <div className="absolute -top-24 right-[8%] w-56 h-56 rounded-full blur-3xl" style={{ background: "#fff", animation: "ancLuz 3s ease-in-out infinite .8s" }} />
+      {fase >= 2 && flashes.map((f, i) => <div key={i} className="absolute w-24 h-24 rounded-full blur-2xl bg-white" style={{ left: `${f.x}%`, top: `${f.y}%`, opacity: 0, animation: `ancFlash ${f.t}s ${f.d}s infinite` }} />)}
 
-          {fase === 0 && (
-            <div className="flex flex-col items-center gap-4 animate-[fadeIn_0.5s_ease-out] relative z-10">
-              <div className="w-28 h-28 rounded-full" style={{ background: corClube, filter: "blur(22px)", animation: "spotlightPulse 1.8s ease-in-out infinite" }} />
-              <p className="text-[11px] text-zinc-500 uppercase tracking-widest">Preparando anúncio...</p>
-            </div>
-          )}
+      {/* varredura de abertura */}
+      <div className="absolute inset-y-0 -left-[20%] w-[140%]" style={{ background: `linear-gradient(90deg, ${cor}, ${cor}dd)`, animation: fase === 0 ? "ancVarre .6s cubic-bezier(.7,0,.3,1) both" : "ancSai .5s cubic-bezier(.7,0,.3,1) both" }} />
 
-          {fase === 1 && (
-            <div className="flex flex-col items-center gap-2 relative z-10">
-              <ClubDot club={clube} size={72} />
-              <p className="text-xs text-zinc-400 uppercase tracking-widest">A imprensa já está a postos</p>
-            </div>
-          )}
+      <button onClick={onConcluir} className="absolute top-4 right-4 z-10 min-h-[44px] px-4 rounded-full text-[14px] font-bold text-white/80 bg-black/30 backdrop-blur">Pular</button>
 
-          {fase >= 2 && (
-            <div className="relative z-10 flex flex-col items-center" style={fase === 2 ? { animation: "jerseyRise 0.9s ease-out" } : undefined}>
-              <div className="relative w-52 h-60 mb-3" style={{ animation: "ceremonyGlow 2s ease-in-out infinite", filter: `drop-shadow(0 8px 28px ${corClube}70)` }}>
-                <svg viewBox="0 0 200 220" width="100%" height="100%">
-                  <defs>
-                    <linearGradient id="jerseyBody" x1="0" y1="0" x2="0.15" y2="1">
-                      <stop offset="0%" stopColor={corClube} />
-                      <stop offset="55%" stopColor={corClube} />
-                      <stop offset="100%" stopColor={clube.escuro ? "#000000" : "#00000022"} stopOpacity={clube.escuro ? 0.35 : 0.25} />
-                    </linearGradient>
-                    <linearGradient id="jerseySleeve" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#000000" stopOpacity="0.22" />
-                      <stop offset="100%" stopColor="#000000" stopOpacity="0.05" />
-                    </linearGradient>
-                    <linearGradient id="jerseySheen" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="30%" stopColor="#ffffff" stopOpacity="0" />
-                      <stop offset="48%" stopColor="#ffffff" stopOpacity="0.16" />
-                      <stop offset="60%" stopColor="#ffffff" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                  {/* corpo + mangas */}
-                  <path d="M75,8 Q100,22 125,8 L152,20 Q185,35 198,68 L170,92 Q166,95 163,90 L163,205 Q163,213 155,213 L45,213 Q37,213 37,205 L37,90 Q34,95 30,92 L2,68 Q15,35 48,20 Z" fill="url(#jerseyBody)" stroke="rgba(0,0,0,0.25)" strokeWidth="1.5" />
-                  {/* mangas com sombra pra dar profundidade (raglan) */}
-                  <path d="M152,20 Q185,35 198,68 L170,92 Q166,95 163,90 L145,55 Z" fill="url(#jerseySleeve)" />
-                  <path d="M48,20 Q15,35 2,68 L30,92 Q34,95 37,90 L55,55 Z" fill="url(#jerseySleeve)" />
-                  {/* gola */}
-                  <path d="M75,8 Q100,22 125,8 Q123,17 100,20 Q77,17 75,8 Z" fill="none" stroke={clube.escuro ? "#ffffff" : "#000000"} strokeOpacity="0.35" strokeWidth="3" />
-                  {/* brilho diagonal de tecido */}
-                  <path d="M75,8 Q100,22 125,8 L152,20 Q185,35 198,68 L170,92 Q166,95 163,90 L163,205 Q163,213 155,213 L45,213 Q37,213 37,205 L37,90 Q34,95 30,92 L2,68 Q15,35 48,20 Z" fill="url(#jerseySheen)" />
-                </svg>
-                <div className="absolute" style={{ top: "26%", left: "27%" }}><ClubDot club={clube} size={22} /></div>
-                {fase >= 3 && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center pt-6 text-center animate-[popIn_0.35s_ease-out]">
-                    <div className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: corTexto, textShadow: `0 1px 3px ${clube.escuro ? "#fff2" : "#0006"}` }}>{nome.split(" ")[0]}</div>
-                    <div className="font-black text-6xl leading-none" style={{ color: corTexto, textShadow: `0 2px 6px ${clube.escuro ? "#fff2" : "#0006"}` }}>{numero}</div>
-                  </div>
-                )}
-              </div>
-              {fase === 4 && (
-                <div className="animate-[popIn_0.4s_ease-out]">
-                  <div className="flex items-center justify-center gap-2 mb-1"><ClubDot club={clube} size={22} /><span className="font-bold text-base">{clube.nome}</span></div>
-                  <p className="text-amber-400 font-bold text-sm mb-1">{grandeChegada ? "Reforço de peso confirmado!" : "Bem-vindo!"}</p>
-                  <p className="text-[11px] text-zinc-500">{posicao} · {idade} anos</p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-        {fase === 4 && (
-          <div className="p-3 border-t border-zinc-800">
-            <Button variant="gold" onClick={onConcluir}>Continuar</Button>
+      <div className="relative h-full max-w-md mx-auto flex flex-col items-center justify-center px-6 text-center">
+        {fase >= 1 && (
+          <div className="font-black text-white" style={{ fontFamily: "'Unbounded',sans-serif", fontSize: 30, animation: "ancCarimbo .55s cubic-bezier(.2,.8,.2,1) both", textShadow: `0 0 30px ${cor}` }}>
+            OFICIAL
           </div>
         )}
-      </Card>
-    </PopupOverlay>
+        {fase >= 1 && <div className="mt-1 text-[13px] font-bold uppercase tracking-[0.35em] text-white/70" style={{ animation: "ancSobe .5s .15s both" }}>{grandeChegada ? "Reforço de peso" : "Novo contratado"}</div>}
+
+        {fase >= 2 && (
+          <div className="relative mt-6" style={{ animation: "ancBrasao .7s cubic-bezier(.2,.8,.2,1) both" }}>
+            <div className="absolute inset-0 rounded-full" style={{ boxShadow: `0 0 0 3px ${cor}`, animation: "ancAnel 1.4s ease-out infinite" }} />
+            <div style={{ filter: `drop-shadow(0 10px 40px ${cor}aa)` }}><Brasao club={clube} size={112} /></div>
+          </div>
+        )}
+
+        {fase >= 3 && (
+          <div className="relative mt-6 w-full">
+            <div className="absolute inset-x-0 -top-8 font-black leading-none select-none" aria-hidden="true"
+              style={{ fontFamily: "'Unbounded',sans-serif", fontSize: 150, color: "transparent", WebkitTextStroke: `2px ${cor}`, animation: "ancNumero .6s both" }}>{numero}</div>
+            <div className="relative" style={{ animation: "ancSobe .5s both" }}>
+              <div className="text-[18px] font-semibold uppercase tracking-[0.3em] text-white/70">{primeiro}</div>
+              <div className="font-black text-white leading-tight" style={{ fontFamily: "'Unbounded',sans-serif", fontSize: resto.length > 12 ? 26 : 34 }}>{(resto || primeiro).toUpperCase()}</div>
+              <div className="mt-2 text-[16px] text-white/75">{posicao} · {idade} anos · camisa {numero}</div>
+            </div>
+            {deOnde && (
+              <div className="mt-4 flex items-center justify-center gap-3 text-[15px] font-semibold text-white/85" style={{ animation: "ancSobe .5s .2s both" }}>
+                <span className="flex items-center gap-1.5"><Brasao club={deOnde} size={20} />{deOnde.nome}</span>
+                <span className="text-white/50">→</span>
+                <span className="flex items-center gap-1.5"><Brasao club={clube} size={20} />{clube.nome}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {fase >= 4 && (
+          <div className="w-full mt-6" style={{ animation: "ancSobe .5s both" }}>
+            {contrato && (
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                {[["SALÁRIO", `${fmt(contrato.salario)}/ano`], ["CONTRATO", `${contrato.anos} anos`], ["CLÁUSULA", fmt(contrato.multa)]].map(([k, v]) => (
+                  <div key={k} className="rounded-xl bg-white/8 border border-white/10 py-2 px-1">
+                    <div className="text-[10px] font-bold tracking-widest text-white/55">{k}</div>
+                    <div className="text-[14px] font-bold text-white">{v}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button onClick={onConcluir} className="w-full min-h-[54px] rounded-2xl font-bold text-[16px]" style={{ background: "linear-gradient(90deg,#D8B44A,#F5D77A)", color: "#1A1405", fontFamily: "'Unbounded',sans-serif" }}>
+              Vestir a camisa
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
+}
+
+export function ApresentacaoNovoClube(props) {
+  return <AnuncioClube {...props} />;
 }
 
 // Taça genérica — silhueta própria (taça, duas alças, haste, base), sem

@@ -1061,7 +1061,7 @@ export default function ModoRapido({ onSair }) {
     setEstado({ etapa: "evento", c: r.c, evento, resultado: r.resultado || "Decisão tomada.", proximo: extraEv, fila: false });
     if (r.c.clubeNome !== c.clubeNome) {
       const clube = clubeDe(r.c.clubeNome);
-      setApresentacao({ clube, grande: clube.forca > clubeDe(c.clubeNome).forca + 3 });
+      setApresentacao({ clube, grande: clube.forca > clubeDe(c.clubeNome).forca + 3, deOnde: clubeDe(c.clubeNome), contrato: r.c.contrato });
     }
   };
   const ajustarNeg = (campo, dir) => setEstado((st) => ({ ...st, neg: ajustarNegociacao(st.neg, campo, dir) }));
@@ -1113,7 +1113,7 @@ export default function ModoRapido({ onSair }) {
       {patrimonioAberto && c && <Patrimonio c={c} onComprar={comprar} onFechar={() => setPatrimonioAberto(false)} />}
       {apresentacao && (
         <ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroCamisa(c.posicao)} posicao={posicaoDe(c.posicao).label}
-          idade={c.idade} grandeChegada={apresentacao.grande} onConcluir={() => setApresentacao(null)} />
+          idade={c.idade} grandeChegada={apresentacao.grande} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} onConcluir={() => setApresentacao(null)} />
       )}
     </div>
   );

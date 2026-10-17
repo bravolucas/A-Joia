@@ -12,3 +12,12 @@ redimensionadas pelo Adobe Photoshop (API) e convertidas para WebP.
 
 A licença do Adobe Stock permite uso em projetos, mas não a redistribuição das imagens isoladas
 (por exemplo, como banco de imagens). Não reutilize estes arquivos fora do A JOIA.
+
+## Segunda leva
+
+| Arquivo | Adobe Stock ID | Título original | Uso no jogo |
+|---|---|---|---|
+| tunel.webp | 839152440 | textured soccer game field with entrance to stadium | Estreia, eventos de base/empréstimo |
+| torcida.webp | 197600090 | silhouettes of Soccer fans in a match and Spectators at football stadium | Seleção, convocação, clássico |
+| lesao.webp | 427520032 | The injured footballer lies on the pitch (recortada) | Lesão grave, eventos de lesão |
+| contrato.webp | 1193565407 | Close-Up of Hand Writing with Pen on Document in Low Light Setting | Negociação e assinatura de contrato |

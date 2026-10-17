@@ -4,9 +4,9 @@ import { TacaCompeticao } from "./trofeus.jsx";
 import { ANO_INICIO, ATTR_SLOTS, CLUBES, CONDICOES_CLIMA, DIAS_SEMANA_ABREV, DIAS_SEMANA_LABEL, FALTA_BONECO_POS, FALTA_BOX, FALTA_GOAL, FALTA_SPOT, LANCES_POR_POSICAO, MESES_LABEL, NUM_ATTRS, PASSE_H, PASSE_ORIGEM, PASSE_W, PEN_GOAL, PEN_H, PEN_SPOT, PEN_W, PEN_ZONE_X, POS_GRUPO, TIPOS_NOTICIA } from "./data.js";
 import { calcularSucessoPasse, clamp, diaNaJanela, diasNoMes, distribuirRodadasNaJanela, estimarRodadasLiga, faltaAlvoBola, formatarDinheiro, gerarCenaPasse, janelasPorLiga, janelasSelecao, labelAtributoGoleiro, nacDe, penAlvoBola, pick, primeiroDiaSemanaMes, rand, tierInfo } from "./lib.js";
 
-export function Card({ children, className = "", accent, padded = true, id }) {
+export function Card({ children, className = "", accent, padded = true, id, style }) {
   return (
-    <div id={id} className={`relative glass rounded-md ${padded ? "p-5" : ""} overflow-hidden ${className}`}>
+    <div id={id} className={`relative glass rounded-md ${padded ? "p-5" : ""} overflow-hidden ${className}`} style={style}>
       {accent && <div className="absolute top-0 left-0 right-0 h-1" style={{ background: accent }} />}
       {children}
     </div>
@@ -360,7 +360,7 @@ export function PopupConvocacao({ info, onClose }) {
   return (
     <PopupOverlay>
       <Card padded={false} className={`overflow-hidden ${querCopa ? "border-amber-400" : "border-emerald-500/40"}`}>
-        <div className="relative h-24 flex items-center justify-center overflow-hidden" style={{ background: querCopa ? "radial-gradient(circle at 30% 30%, rgba(216,180,74,0.45) 0%, transparent 60%), linear-gradient(180deg, #241d08 0%, #171308 100%)" : "linear-gradient(180deg, #0d2318 0%, #0a1610 100%)" }}>
+        <div className="relative h-36 flex items-center justify-center overflow-hidden" style={{ background: `${querCopa ? "radial-gradient(circle at 30% 30%, rgba(216,180,74,0.45) 0%, transparent 60%), " : ""}linear-gradient(180deg, rgba(10,22,16,.2) 0%, rgba(10,22,16,.75) 100%), url(${ARTE.torcida}) center 60%/cover` }}>
           {querCopa && <Confetti />}
           <div className="text-4xl">{querCopa ? "🌎" : competicao.icone}</div>
         </div>
@@ -529,7 +529,7 @@ export function CenaEstreia({ tipo, nomeEquipe, corDestaque, onConcluir }) {
   const cor = corDestaque || "#12A876";
   return (
     <PopupOverlay>
-      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `radial-gradient(circle at 50% 60%, ${cor}22 0%, #030303 80%)` }}>
+      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `linear-gradient(180deg, rgba(3,3,3,.35) 0%, rgba(3,3,3,.55) 50%, #030303 100%), radial-gradient(circle at 50% 60%, ${cor}33 0%, transparent 70%), url(${tipo === "selecao" ? ARTE.torcida : ARTE.tunel}) center 60%/cover` }}>
         <div className="relative h-[360px] flex flex-col items-center justify-center px-5 overflow-hidden">
           {fase === 0 ? (
             <div className="flex flex-col items-center gap-3 animate-[fadeIn_0.6s_ease-out]">
@@ -539,7 +539,7 @@ export function CenaEstreia({ tipo, nomeEquipe, corDestaque, onConcluir }) {
           ) : (
             <div className="animate-[popIn_0.5s_ease-out]">
               <div className="text-4xl mb-2">{tipo === "selecao" ? "🌎" : "⚽"}</div>
-              <div className="font-black text-lg mb-1" style={{ color: cor }}>{tipo === "selecao" ? "Você estreou pela seleção!" : "Você estreou como profissional!"}</div>
+              <div className="font-black text-lg mb-1" style={{ color: cor, textShadow: "0 2px 12px #000, 0 0 3px #000" }}>{tipo === "selecao" ? "Você estreou pela seleção!" : "Você estreou como profissional!"}</div>
               <p className="text-xs text-zinc-400">{nomeEquipe}</p>
             </div>
           )}
@@ -554,8 +554,8 @@ export function CenaEstreia({ tipo, nomeEquipe, corDestaque, onConcluir }) {
 export function CenaLesaoGrave({ nomeLesao, jogosFora, onConcluir }) {
   return (
     <PopupOverlay>
-      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: "radial-gradient(circle at 50% 30%, #7f1d1d33 0%, #050505 80%)" }}>
-        <div className="h-[320px] flex flex-col items-center justify-center px-5">
+      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `linear-gradient(180deg, rgba(5,5,5,.2) 0%, rgba(40,6,6,.65) 50%, #050505 100%), url(${ARTE.lesao}) center 40%/cover` }}>
+        <div className="h-[320px] flex flex-col items-center justify-end pb-8 px-5">
           <div className="text-4xl mb-3 animate-[fadeIn_0.8s_ease-out]">🩹</div>
           <div className="animate-[popIn_0.5s_ease-out]">
             <div className="font-black text-lg text-red-400 mb-1">{nomeLesao}</div>
@@ -573,7 +573,7 @@ export function CenaLesaoGrave({ nomeLesao, jogosFora, onConcluir }) {
 export function CenaRivalidade({ meuNome, rivalNome, onConcluir }) {
   return (
     <PopupOverlay>
-      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: "radial-gradient(circle at 50% 40%, #7f1d1d22 0%, #050505 80%)" }}>
+      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `linear-gradient(180deg, rgba(5,5,5,.35) 0%, rgba(30,5,5,.7) 55%, #050505 100%), url(${ARTE.refletores}) 20% 30%/cover` }}>
         <div className="h-[300px] flex flex-col items-center justify-center px-5">
           <div className="text-[10px] text-red-400 uppercase tracking-widest mb-3 animate-[fadeIn_0.5s_ease-out]">⚔️ Frente a frente, pela primeira vez</div>
           <div className="flex items-center gap-4 animate-[popIn_0.5s_ease-out]">
@@ -612,7 +612,7 @@ export function CenaDespedidaClube({ clube, anos, onConcluir }) {
   const cor = clube?.cor || "#D8B44A";
   return (
     <PopupOverlay>
-      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `radial-gradient(circle at 50% 25%, ${cor}2a 0%, #050505 80%)` }}>
+      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `linear-gradient(180deg, rgba(5,5,5,.3) 0%, rgba(5,5,5,.7) 55%, #050505 100%), radial-gradient(circle at 50% 25%, ${cor}33 0%, transparent 70%), url(${ARTE.estadioNoite}) center 40%/cover` }}>
         <div className="h-[340px] flex flex-col items-center justify-center px-5">
           <div className="animate-[popIn_0.5s_ease-out] flex flex-col items-center">
             <ClubDot club={clube} size={56} />
@@ -634,7 +634,7 @@ export function CenaAssinaturaContrato({ clube, funcaoNome, onConcluir }) {
   const cor = clube?.cor || "#D8B44A";
   return (
     <PopupOverlay>
-      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `radial-gradient(circle at 50% 30%, ${cor}22 0%, #050505 80%)` }}>
+      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `linear-gradient(180deg, rgba(5,5,5,.3) 0%, rgba(5,5,5,.7) 55%, #050505 100%), radial-gradient(circle at 50% 30%, ${cor}33 0%, transparent 70%), url(${ARTE.contrato}) center 45%/cover` }}>
         <div className="h-[300px] flex flex-col items-center justify-center px-5">
           {fase === 0 ? (
             <div className="flex flex-col items-center gap-3 animate-[fadeIn_0.5s_ease-out]">

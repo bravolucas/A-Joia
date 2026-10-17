@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ARTE } from "./arte.js";
+import { ARTE, ARTE_EVENTO } from "./arte.js";
 import { POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS } from "./data.js";
 import { Gema, ClubDot, Confetti, ApresentacaoNovoClube } from "./components.jsx";
 import { TacaCompeticao } from "./trofeus.jsx";
@@ -578,7 +578,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever }) {
             </div>
           )}
           {sel && (
-            <div className="rp-painel px-4 py-3" style={{ background: "linear-gradient(135deg, rgba(46,111,224,.2), rgba(19,26,23,.72))" }}>
+            <div className="rp-painel px-4 py-3 pt-10" style={{ background: `linear-gradient(180deg, rgba(19,26,23,.15) 0%, rgba(19,26,23,.88) 65%), linear-gradient(135deg, rgba(46,111,224,.3), transparent), url(${ARTE.torcida}) center 55%/cover` }}>
               <div className="flex items-center justify-between gap-3">
                 <span className="text-[16px] text-[#C9D3CE]">🌎 {sel.nome} {sel.ano}</span>
                 <span className="font-stat text-[15px] text-[#F2F5F3]">{sel.convocado ? sel.resultado : "Fora da lista"}</span>
@@ -679,9 +679,11 @@ function TelaTraco({ c, opcoes, onEscolher }) {
 
 /* ---------- evento + preparação da próxima temporada ---------- */
 function CartaoEvento({ evento, resultado, onEscolher }) {
+  const foto = ARTE_EVENTO[evento.id];
   return (
     <div className="rp-painel overflow-hidden">
-      <div className="px-5 pt-5 pb-4 flex items-start gap-4" style={{ background: "linear-gradient(135deg, rgba(18,168,118,.16), transparent 70%)" }}>
+      {foto && <div aria-hidden="true" className="h-32 -mb-14" style={{ background: `linear-gradient(180deg, rgba(19,26,23,0) 0%, rgba(19,26,23,.7) 60%, rgba(19,26,23,1) 100%), url(${foto}) center 45%/cover` }} />}
+      <div className="relative px-5 pt-5 pb-4 flex items-start gap-4" style={{ background: foto ? "transparent" : "linear-gradient(135deg, rgba(18,168,118,.16), transparent 70%)" }}>
         <span className="text-4xl w-16 h-16 rounded-2xl bg-[#0E1512]/70 border border-white/10 flex items-center justify-center shrink-0">{evento.icone}</span>
         <div className="min-w-0">
           <h2 className="display text-[15px] leading-snug text-[#F2F5F3]">{evento.titulo}</h2>
@@ -763,7 +765,7 @@ function TelaNegociacao({ c, n, onAjustar, onAssinar, onSair }) {
   return (
     <div className="max-w-xl mx-auto px-4 py-5 flex flex-col gap-4 rp-entra">
       <div className="rp-painel overflow-hidden">
-        <div className="p-4 flex items-center gap-3" style={{ background: `linear-gradient(120deg, ${cl.cor}44, transparent 75%)` }}>
+        <div className="p-4 pt-16 flex items-center gap-3" style={{ background: `linear-gradient(180deg, rgba(19,26,23,.1) 0%, rgba(19,26,23,.85) 70%), linear-gradient(120deg, ${cl.cor}44, transparent 75%), url(${ARTE.contrato}) center 40%/cover` }}>
           <ClubDot club={cl} size={44} />
           <div className="min-w-0 flex-1">
             <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9D3CE]">{n.tipo === "renovacao" ? "Renovação de contrato" : "Proposta de contrato"}</div>

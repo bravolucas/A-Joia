@@ -4,6 +4,14 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🖼️ Mais fotos nas cenas (Adobe Stock, 2ª leva)
+
+- Túnel do estádio na estreia profissional; torcida em silhueta na estreia pela seleção, na convocação e no painel de seleção do Modo Rápido; jogador lesionado na lesão grave; mão assinando contrato na renovação e na mesa de negociação; refletores no primeiro duelo com o rival; estádio à noite na despedida de um clube
+- Eventos do Modo Rápido ganharam foto de cabeçalho conforme o tema (contrato, lesão, seleção, base, imprensa)
+- Correção: o componente de cartão ignorava o fundo personalizado, então as cenas do Modo Carreira nunca mostravam o fundo próprio; agora mostram
+
+---
+
 ## 🖼️ Fotos de fundo (Adobe Stock + Photoshop)
 
 - Quatro fotos do Adobe Stock (licença gratuita), tratadas no Adobe Photoshop e convertidas para WebP (menos de 250 KB no total)

@@ -4530,16 +4530,18 @@ function resolverTemporada(c, extraStats) {
 
         {stage === "carreira" && carreira && (
           <div className="grid gap-4">
-            <div className="flex gap-1 border-b border-white/10 overflow-x-auto glass rounded-t-md px-1">
+            <div className="grid grid-cols-4 sm:flex gap-1 border-b border-white/10 sm:overflow-x-auto glass rounded-t-md px-1">
               {[["carreira", "🏟️ Carreira"], ["inbox", `📬 Notícias${(carreira.inbox || []).filter((x) => !x.lida).length ? ` (${(carreira.inbox || []).filter((x) => !x.lida).length})` : ""}`], ["estatisticas", "📊 Estatísticas"], ["mundo", "🌍 Mundo"], ["legado", "🏆 Legado"], ["vidaprivada", "🛍️ Vida Privada"], ["midia", "📱 Mídia & Redes"]].map(([id, label]) => (
-                <button key={id} onClick={() => setAba(id)} className={`hud-btn px-3 py-2.5 text-xs font-sport font-semibold uppercase tracking-widest border-b-2 whitespace-nowrap ${aba === id ? "tab-active" : "border-transparent text-zinc-500 hover:text-zinc-200"}`}>{label}</button>
+                <button key={id} onClick={() => setAba(id)} className={`hud-btn flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 px-1 sm:px-3 py-2 sm:py-2.5 text-[10px] sm:text-xs leading-tight text-center font-sport font-semibold uppercase tracking-wide sm:tracking-widest border-b-2 sm:whitespace-nowrap ${aba === id ? "tab-active" : "border-transparent text-zinc-500 hover:text-zinc-200"}`}>
+                  <span aria-hidden="true" className="text-sm sm:text-xs">{label.split(" ")[0]}</span><span>{label.split(" ").slice(1).join(" ")}</span>
+                </button>
               ))}
             </div>
 
             <div key={aba} className="animate-[stageEnter_0.3s_ease-out] grid gap-4">
             {aba === "carreira" && (
               <div className="stack">
-                <div className="flex gap-1.5 overflow-x-auto pb-0.5 span-full">
+                <div className="flex flex-wrap gap-1.5 pb-0.5 span-full">
                   {[
                     ["Contrato", "✍️", () => setContratoMenuAberto(true)],
                     ["Empresário", "💼", () => setEmpresarioMenuAberto(true)],
@@ -4613,7 +4615,7 @@ function resolverTemporada(c, extraStats) {
                   return (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 span-full">
                       <Card className={proximoEhRival ? "border-red-500/40" : "border-emerald-500/30"}>
-                        <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-2">⚽ Próximo jogo</div>
+                        <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-2">📅 Calendário</div>
                         {proximoJogo ? (
                           <div className="flex items-center gap-2.5">
                             <ClubDot club={proximoJogo.adversario} size={28} />
@@ -4649,8 +4651,54 @@ function resolverTemporada(c, extraStats) {
                             </div>
                           );
                         })() : (
-                          <div className="text-xs text-zinc-500">Nenhuma partida agendada no momento.</div>
+                          <div className="text-xs text-zinc-500">{ta ? "Folga nesta rodada." : posTemporada?.ok ? "Pré-temporada — defina o rumo e siga para a temporada." : "A temporada começa quando você der o play."}</div>
                         )}
+                        {proximasPartidas.length > 1 && (
+                          <div className="grid gap-1 mt-3 pt-2.5 border-t border-white/10">
+                            <div className="text-[9px] text-zinc-600 uppercase tracking-widest">Depois</div>
+                            {proximasPartidas.slice(1).map((p, i) => (
+                              <div key={i} className="flex items-center justify-between text-[11px]">
+                                <span className="flex items-center gap-1.5 truncate"><ClubDot club={p.adversario} size={12} /><span className="text-zinc-300 truncate">{p.adversario.nome}{p.ehClassico ? " ⚔️" : ""}</span></span>
+                                <span className="text-zinc-500 shrink-0">{p.souCasa ? "casa" : "fora"} · R{p.rodada}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div className="mt-3 pt-2.5 border-t border-white/10">
+                          {ta ? (<>
+                            <div className="text-xs text-zinc-400">Último jogo: {carreira.temporadaAndamento.ultimoResultado ? `${carreira.temporadaAndamento.ultimoResultado.golsMeu}x${carreira.temporadaAndamento.ultimoResultado.golsAdv} x ${carreira.temporadaAndamento.ultimoResultado.adversario}` : "—"}</div>
+                            {carreira.temporadaAndamento.ultimoResultado && (carreira.temporadaAndamento.ultimoResultado.golsMinha > 0 || carreira.temporadaAndamento.ultimoResultado.assistMinha > 0) && (
+                              <div className="text-[10px] text-emerald-400 mt-0.5">{carreira.temporadaAndamento.ultimoResultado.golsMinha > 0 ? `⚽${carreira.temporadaAndamento.ultimoResultado.golsMinha} ` : ""}{carreira.temporadaAndamento.ultimoResultado.assistMinha > 0 ? `🎯${carreira.temporadaAndamento.ultimoResultado.assistMinha}` : ""}</div>
+                            )}
+                          </>) : (
+                            <div className="text-xs text-zinc-400">Última temporada: {ultima ? `${ultima.jogos} jogos · nota ${ultima.nota}` : "—"}</div>
+                          )}
+                        </div>
+                        <div className="mt-3 grid gap-1.5">
+                <Button
+                  disabled={(!carreira.temporadaAndamento && !posTemporada?.ok && (janela || decisao || awardsPopup || pendingSponsor || pendingAbordagem || pendingExpectativa || pendingTecnico || pendingColetiva || pendingCompeticao || competicaoResultado || pendingLegendFollow || pendingTierUpgrade)) || (carreira.temporadaAndamento && !carreira.temporadaAndamento.posturaEscolhidaRodada && (carreira.cartoes?.suspensoesRestantes || 0) === 0)}
+                  onClick={() => {
+                    if (carreira.temporadaAndamento) avancarUmJogo();
+                    else if (posTemporada?.ok) { setModoSimulacao("jogoAJogo"); iniciarTemporada(); }
+                    else jogarTemporada(null);
+                  }}
+                >
+                  {carreira.temporadaAndamento
+                    ? `▶ Avançar — rodada ${carreira.temporadaAndamento.rodadaAtual + 1}/${(carreira.temporadaAndamento.calendario || []).length}`
+                    : posTemporada?.ok
+                    ? "▶ Seguir para a temporada"
+                    : "▶ Jogar temporada (idade " + carreira.idade + ")"}
+                </Button>
+                {carreira.temporadaAndamento && !carreira.temporadaAndamento.posturaEscolhidaRodada && (carreira.cartoes?.suspensoesRestantes || 0) === 0 && (
+                  <p className="text-[10px] text-amber-400 mt-1.5">⚠️ Escolha como você entra em campo antes de avançar.</p>
+                )}
+                {carreira.temporadaAndamento && (
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <Button variant="ghost" onClick={simularMetadeDaTemporada}>⏭️ Simular metade da temporada</Button>
+                    <Button variant="ghost" onClick={simularRestoDaTemporada}>⏩ Simular temporada inteira</Button>
+                  </div>
+                )}
+                        </div>
                       </Card>
 
                       <Card>
@@ -4695,22 +4743,6 @@ function resolverTemporada(c, extraStats) {
                         </Card>
                       )}
 
-                      <Card>
-                        <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-2">🗓️ Próximas partidas</div>
-                        {proximasPartidas.length ? (
-                          <div className="grid gap-1">
-                            {proximasPartidas.map((p, i) => (
-                              <div key={i} className="flex items-center justify-between text-[11px]">
-                                <span className="flex items-center gap-1.5 truncate"><ClubDot club={p.adversario} size={12} /><span className="text-zinc-300 truncate">{p.adversario.nome}{p.ehClassico ? " ⚔️" : ""}</span></span>
-                                <span className="text-zinc-500 shrink-0">{p.souCasa ? "casa" : "fora"} · R{p.rodada}</span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-xs text-zinc-500">Sem jogos de liga agendados à vista.</div>
-                        )}
-                      </Card>
-
                       {ta && (() => {
                         const golsLiga = (ta.logJogos || []).reduce((a, j) => a + (j.golsMinha || 0), 0);
                         const assistLiga = (ta.logJogos || []).reduce((a, j) => a + (j.assistMinha || 0), 0);
@@ -4740,25 +4772,6 @@ function resolverTemporada(c, extraStats) {
                   );
                 })()}
 
-                <div>
-                <Button
-                  disabled={(!carreira.temporadaAndamento && !posTemporada?.ok && (janela || decisao || awardsPopup || pendingSponsor || pendingAbordagem || pendingExpectativa || pendingTecnico || pendingColetiva || pendingCompeticao || competicaoResultado || pendingLegendFollow || pendingTierUpgrade)) || (carreira.temporadaAndamento && !carreira.temporadaAndamento.posturaEscolhidaRodada && (carreira.cartoes?.suspensoesRestantes || 0) === 0)}
-                  onClick={() => {
-                    if (carreira.temporadaAndamento) avancarUmJogo();
-                    else if (posTemporada?.ok) { setModoSimulacao("jogoAJogo"); iniciarTemporada(); }
-                    else jogarTemporada(null);
-                  }}
-                >
-                  {carreira.temporadaAndamento
-                    ? `▶ Avançar — rodada ${carreira.temporadaAndamento.rodadaAtual + 1}/${(carreira.temporadaAndamento.calendario || []).length}`
-                    : posTemporada?.ok
-                    ? "▶ Seguir para a temporada"
-                    : "▶ Jogar temporada (idade " + carreira.idade + ")"}
-                </Button>
-                {carreira.temporadaAndamento && !carreira.temporadaAndamento.posturaEscolhidaRodada && (carreira.cartoes?.suspensoesRestantes || 0) === 0 && (
-                  <p className="text-[10px] text-amber-400 mt-1.5">⚠️ Escolha como você entra em campo antes de avançar.</p>
-                )}
-                </div>
 
                 {posTemporada?.ok && !janela && !awardsPopup && !carreira.temporadaAndamento && (
                   <Card className="border-2 border-emerald-400 glow-anim span-full" accent="linear-gradient(90deg,#12A876,#3b82f6,#12A876)">
@@ -4792,12 +4805,6 @@ function resolverTemporada(c, extraStats) {
                   <div className="text-[10px] text-zinc-500 text-center -mt-1 mb-1">📋 Planejamento definido — treino em <span className="text-amber-400 font-bold">CORPO</span>, ações em <span className="text-amber-400 font-bold">CONTRATO</span>, logo ali em cima.</div>
                 )}
 
-                {carreira.temporadaAndamento && (
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <Button variant="ghost" onClick={simularMetadeDaTemporada}>⏭️ Simular metade da temporada</Button>
-                    <Button variant="ghost" onClick={simularRestoDaTemporada}>⏩ Simular temporada inteira</Button>
-                  </div>
-                )}
 
                 {carreira.temporadaAndamento && (
                   <>
@@ -4934,24 +4941,10 @@ function resolverTemporada(c, extraStats) {
                       );
                     })()}
 
-                    <Card>
-                      <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">📅 Próximo Compromisso</div>
-                      <div className="text-sm text-zinc-100 font-bold mb-2">{(() => {
-                        const jogo = carreira.temporadaAndamento.calendario[carreira.temporadaAndamento.rodadaAtual]?.find((p) => p.casa.nome === carreira.clube.nome || p.fora.nome === carreira.clube.nome);
-                        if (!jogo) return "Folga nessa rodada";
-                        const souCasa = jogo.casa.nome === carreira.clube.nome;
-                        return `${souCasa ? "vs" : "x"} ${souCasa ? jogo.fora.nome : jogo.casa.nome}${souCasa ? " (casa)" : " (fora)"}`;
-                      })()}</div>
-                      <hr className="border-white/10 mb-2" />
-                      <div className="text-xs text-zinc-400">Último jogo: {carreira.temporadaAndamento.ultimoResultado ? `${carreira.temporadaAndamento.ultimoResultado.golsMeu}x${carreira.temporadaAndamento.ultimoResultado.golsAdv} x ${carreira.temporadaAndamento.ultimoResultado.adversario}` : "—"}</div>
-                      {carreira.temporadaAndamento.ultimoResultado && (carreira.temporadaAndamento.ultimoResultado.golsMinha > 0 || carreira.temporadaAndamento.ultimoResultado.assistMinha > 0) && (
-                        <div className="text-[10px] text-emerald-400 mt-0.5">{carreira.temporadaAndamento.ultimoResultado.golsMinha > 0 ? `⚽${carreira.temporadaAndamento.ultimoResultado.golsMinha} ` : ""}{carreira.temporadaAndamento.ultimoResultado.assistMinha > 0 ? `🎯${carreira.temporadaAndamento.ultimoResultado.assistMinha}` : ""}</div>
-                      )}
-                    </Card>
                   </>
                 )}
 
-                <div className="row-3">
+                <div className={carreira.temporadaAndamento?.historicoRodada?.length ? "row-3" : "row-2"}>
 
                 <Card>
                   <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-3">📊 Atributos do Atleta</div>
@@ -4966,10 +4959,8 @@ function resolverTemporada(c, extraStats) {
                   </div>
                 </Card>
 
+                {carreira.temporadaAndamento?.historicoRodada?.length > 0 && (
                 <div className="grid gap-3">
-                {carreira.temporadaAndamento ? (
-                  <>
-                    {carreira.temporadaAndamento.historicoRodada.length > 0 && (
                       <Card>
                         <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-2">📰 Resultados da última rodada</div>
                         <div className="grid gap-1 max-h-40 overflow-y-auto pr-1">
@@ -4978,19 +4969,8 @@ function resolverTemporada(c, extraStats) {
                           ))}
                         </div>
                       </Card>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <Card>
-                      <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">📅 Próximo Compromisso</div>
-                      <div className="text-sm text-zinc-100 font-bold mb-2">{posTemporada?.ok ? "Pré-temporada" : pendingCompeticao ? "Competição em andamento" : "Rodada da liga"}</div>
-                      <hr className="border-white/10 mb-2" />
-                      <div className="text-xs text-zinc-400">Último jogo: {ultima ? `${ultima.jogos} jogos · nota ${ultima.nota}` : "—"}</div>
-                    </Card>
-                  </>
-                )}
                 </div>
+                )}
 
                 <div className="grid gap-3">
                 <Card>

@@ -146,6 +146,12 @@ A diretoria cobra objetivos específicos por torneio, dosados pelo porte do club
 - "Próximo compromisso" em branco, não mais dourado.
 - Radar de atributos: as legendas de cima e de baixo (VEL e DRI) não são mais cortadas.
 
+### Hub da carreira reorganizado
+- "Próximo jogo", "Próximas partidas" e "Próximo compromisso" viraram um único card de **Calendário**: próximo jogo, os seguintes, último resultado e o botão de jogar/avançar dentro dele, logo abaixo do cartão do jogador.
+- Os botões de simular metade/temporada inteira foram para o mesmo card.
+- Antes da temporada, a coluna vazia do meio sumiu: atributos e desempenho ocupam a linha toda.
+- Celular: as 7 abas aparecem todas em duas linhas (ícone em cima, nome embaixo) e os atalhos quebram linha, em vez de ficarem escondidos numa rolagem lateral.
+
 ### Correção encontrada no caminho
 - `nomeMundo` era usado na vida pessoal (namoro e nome de filho) sem ser importado de `lib.js`. Quando o evento sorteava, a virada de temporada quebrava. Agora está importado.
 

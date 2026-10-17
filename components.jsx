@@ -398,7 +398,7 @@ const ESTILO_ANUNCIO = `
 @keyframes ancFlash{0%,100%{opacity:0}6%{opacity:.9}14%{opacity:0}}
 @keyframes ancFaixas{from{background-position:0 0}to{background-position:220px 0}}
 `;
-function AnuncioClube({ clube, nome, numero, posicao, idade, grandeChegada, deOnde, contrato, onConcluir }) {
+function AnuncioClube({ clube, nome, numero, posicao, idade, grandeChegada, deOnde, contrato, valor = null, onConcluir }) {
   const [fase, setFase] = useState(0); // 0 varredura | 1 oficial | 2 brasão | 3 jogador | 4 termos
   const [flashes] = useState(() => Array.from({ length: grandeChegada ? 10 : 4 }, () => ({ x: Math.random() * 100, y: Math.random() * 45, d: Math.random() * 2.5, t: 1.6 + Math.random() * 1.6 })));
   useEffect(() => {
@@ -464,8 +464,8 @@ function AnuncioClube({ clube, nome, numero, posicao, idade, grandeChegada, deOn
         {fase >= 4 && (
           <div className="w-full mt-6" style={{ animation: "ancSobe .5s both" }}>
             {contrato && (
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                {[["SALÁRIO", `${fmt(contrato.salario)}/ano`], ["CONTRATO", `${contrato.anos} anos`], ["CLÁUSULA", fmt(contrato.multa)]].map(([k, v]) => (
+              <div className={`grid ${valor != null ? "grid-cols-2" : "grid-cols-3"} gap-2 mb-4`}>
+                {[...(valor != null ? [["TRANSFERÊNCIA", valor ? fmt(valor) : "Sem custo"]] : []), ["SALÁRIO", `${fmt(contrato.salario)}/ano`], ["CONTRATO", `${contrato.anos} anos`], ["CLÁUSULA", fmt(contrato.multa)]].map(([k, v]) => (
                   <div key={k} className="rounded-xl bg-white/8 border border-white/10 py-2 px-1">
                     <div className="text-[10px] font-bold tracking-widest text-white/55">{k}</div>
                     <div className="text-[14px] font-bold text-white">{v}</div>

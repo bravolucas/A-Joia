@@ -4,6 +4,17 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 📰 Transferências com valor, manchete de jornal e carreira em emojis
+
+- **Valor de transferência**: cada venda tem preço, calculado pelo valor de mercado e pelos anos de contrato restantes, limitado pela cláusula. Fim de contrato e pré-contrato saem de graça; cláusula paga custa exatamente a multa
+- O valor aparece nas propostas, no anúncio "OFICIAL" do clube novo, na trajetória do fim de carreira ("chegou por € X") e em dois totais: quanto pagaram por você e a maior transferência. A primeira grande venda e cada novo recorde viram momento da carreira
+- **Manchete de jornal**: depois de cada transferência, um recorte de jornal com manchete, linha fina, valor e duração do contrato. O texto muda para venda, recorde, saída de graça, cláusula paga, volta para casa e traição ao rival
+- **Carreira em emojis**: no fim, uma figura por temporada (🥇 Bola de Ouro, 🏆 título, ✈️ clube novo, 🩹 lesão, ⚽ grande temporada) com nível e pontos, pronta para colar no WhatsApp. No celular abre o menu de compartilhar
+- **Primeira vez guiada**: três dicas curtas antes da primeira temporada (foco, cabeça e decisões). Aparecem só uma vez
+- **Abertura mais rápida**: o Modo Carreira só é baixado quando a pessoa entra nele. A página inicial ficou cerca de 38% menor
+
+---
+
 ## 🧠 Modo Rápido: cabeça, coletivas e 60 acontecimentos
 
 - Coletiva com foto própria de sala de imprensa (Adobe Stock 1534097092, licença gratuita) e o evento "Sua família quer cuidar da sua carreira" com texto neutro

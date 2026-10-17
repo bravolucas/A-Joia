@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ARTE, ARTE_EVENTO } from "./arte.js";
 import { POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS } from "./data.js";
-import { Gema, ClubDot, Confetti, ApresentacaoNovoClube, FreeKickMini, PasseMini } from "./components.jsx";
+import { Gema, ClubDot, Brasao, Confetti, ApresentacaoNovoClube, FreeKickMini, PasseMini } from "./components.jsx";
 import { calcularSucessoFalta, tipoResultadoFalta } from "./lib.js";
 import { TacaCompeticao } from "./trofeus.jsx";
 import {
@@ -13,13 +13,13 @@ import {
   iniciarNegociacao, ajustarNegociacao, fecharNegociacao, CAMPOS_NEGOCIACAO, fama_negociador,
   INVESTIMENTOS, comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
   chanceMomento, miniDaPosicao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
-  eventoDaJanela, segundoEvento, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
+  eventoDaJanela, segundoEvento, textoEmoji, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
 } from "./rapido.js";
 
 /* Estilo do seletor de modos e do Modo Rápido. Inclui as animações que as
    cenas reaproveitadas do Modo Carreira (apresentação no clube, confete) usam. */
 export const ESTILO_BASE = `
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Oswald:wght@500;600;700&family=Unbounded:wght@700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Oswald:wght@500;600;700&family=Unbounded:wght@700;900&family=Playfair+Display:wght@800;900&display=swap');
 .rp{min-height:100vh;background:#0E1512;color:#E1E6E3;font-family:'Rajdhani',ui-sans-serif,system-ui,sans-serif;}
 .rp .display{font-family:'Unbounded',sans-serif;}
 .rp .font-stat{font-family:'bebas-neue','Oswald',sans-serif;letter-spacing:.02em;font-synthesis:none;}
@@ -1028,13 +1028,71 @@ function SeletorFoco({ c, onFoco }) {
   );
 }
 
-function TelaEvento({ c, evento, resultado, temMais, aviso, onEscolher, onProximo, onFoco, onJogar, onPatrimonio }) {
+/* Primeira vez: três dicas curtas antes da primeira temporada */
+const CHAVE_DICAS = "ajoia_rapido_dicas_v1";
+const DICAS = [
+  { icone: "🎯", titulo: "Escolha o foco e jogue", texto: "Cada temporada é jogada de uma vez. Antes, escolha o foco: gols, evolução, títulos, vitrine ou preservar o corpo." },
+  { icone: "🧠", titulo: "Cuide da cabeça", texto: "A barra de Cabeça sobe com boas temporadas e decisões leves, e cai com lesões, polêmicas e pressão. Cabeça boa joga melhor." },
+  { icone: "⚔️", titulo: "Cada escolha fica na história", texto: "Entre as temporadas chegam propostas, coletivas e acontecimentos. Um rival da sua geração vai ser comparado a você até o fim." },
+];
+function DicasIniciais() {
+  const [passo, setPasso] = useState(() => { try { return localStorage.getItem(CHAVE_DICAS) ? -1 : 0; } catch { return 0; } });
+  if (passo < 0) return null;
+  const fechar = () => { try { localStorage.setItem(CHAVE_DICAS, "1"); } catch { /* sem armazenamento */ } setPasso(-1); };
+  const d = DICAS[passo];
+  return (
+    <div className="max-w-xl mx-auto px-4 pt-4">
+      <div className="rp-painel p-4 rp-entra" key={passo} style={{ borderColor: "rgba(216,180,74,.45)" }} role="region" aria-label="Dicas para começar">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#EBC557]">Como funciona · {passo + 1}/{DICAS.length}</span>
+          <button onClick={fechar} className="text-[14px] text-[#8FA39A] min-h-[40px] px-2">Pular</button>
+        </div>
+        <div className="flex gap-3 mt-1">
+          <span className="text-3xl" aria-hidden="true">{d.icone}</span>
+          <div><div className="font-bold text-[17px] text-[#F2F5F3]">{d.titulo}</div><p className="text-[16px] text-[#C9D3CE] leading-snug mt-0.5">{d.texto}</p></div>
+        </div>
+        <button onClick={() => (passo + 1 < DICAS.length ? setPasso(passo + 1) : fechar())} className="rp-btn rp-sec text-[16px] w-full mt-3">{passo + 1 < DICAS.length ? "Próxima dica" : "Entendi, bora jogar"}</button>
+      </div>
+    </div>
+  );
+}
+
+/* Recorte de jornal que aparece depois de uma transferência */
+function RecorteJornal({ manchete, transf }) {
+  const clube = clubeDe(transf.para);
+  return (
+    <figure className="rp-entra mx-1 my-1" aria-label={`Manchete: ${manchete.titulo}`}
+      style={{ transform: "rotate(-1.2deg)", background: "linear-gradient(175deg,#F6F1E4,#EAE2CE)", color: "#1B1A17", borderRadius: 4, boxShadow: "0 12px 30px rgba(0,0,0,.45), 0 1px 0 rgba(255,255,255,.6) inset", padding: "14px 16px 16px" }}>
+      <div className="flex items-end justify-between border-b-2 border-[#1B1A17] pb-1">
+        <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900, fontSize: 20, letterSpacing: ".01em" }}>{manchete.jornal}</span>
+        <span className="text-[11px] uppercase tracking-widest text-[#5B574E]">Edição de {manchete.ano}</span>
+      </div>
+      <div className="border-b border-[#1B1A17]/40 py-1 text-[10px] uppercase tracking-[0.25em] text-[#5B574E] flex justify-between"><span>Esportes</span><span>Mercado da bola</span></div>
+      <div className="flex gap-3 mt-3 items-start">
+        <div className="shrink-0 w-[68px] h-[78px] flex items-center justify-center" style={{ background: `repeating-radial-gradient(circle at 30% 30%, ${clube.cor || "#333"}33 0 1px, transparent 1px 4px), #D9D0BA`, filter: "grayscale(.35) contrast(1.1)" }}>
+          <Brasao club={clube} size={48} />
+        </div>
+        <figcaption className="min-w-0">
+          <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900, fontSize: 21, lineHeight: 1.08 }}>{manchete.titulo}</div>
+        </figcaption>
+      </div>
+      <p className="mt-2 text-[14px] leading-snug text-[#2E2B25]" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>{manchete.linhaFina}</p>
+      <div className="mt-3 flex gap-2 text-[12px] font-bold uppercase tracking-wider" style={{ fontFamily: "Georgia, serif" }}>
+        <span className="px-2 py-0.5 border border-[#1B1A17]">{transf.valor ? formatarValor(transf.valor) : "Sem custo"}</span>
+        <span className="px-2 py-0.5 border border-[#1B1A17]/50 text-[#5B574E]">{transf.anos} anos de contrato</span>
+      </div>
+    </figure>
+  );
+}
+
+function TelaEvento({ c, evento, resultado, temMais, aviso, manchete, onEscolher, onProximo, onFoco, onJogar, onPatrimonio }) {
   const torneio = c.idade >= 18 ? (anoDeCopa(c.ano) ? "Copa do Mundo" : anoDeContinentalSelecao(c.ano) ? nomeCopaContinental(c.nac) : null) : null;
   const pronto = !evento || resultado;
   return (
     <div className="max-w-xl mx-auto px-4 py-5 flex flex-col gap-4 rp-entra">
       {aviso && <div className="rp-painel px-4 py-3 text-[16px] text-[#F0A99E]" style={{ borderColor: "rgba(227,107,91,.35)" }}>{aviso}</div>}
       {evento && <CartaoEvento evento={evento} resultado={resultado} onEscolher={onEscolher} />}
+      {resultado && manchete && c.ultimaTransferencia && <RecorteJornal manchete={manchete} transf={c.ultimaTransferencia} />}
       {pronto && temMais && <button onClick={onProximo} className="rp-btn rp-prim display text-sm">Ver próxima notícia</button>}
       {pronto && !temMais && (
         <>
@@ -1240,6 +1298,15 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
   const copiar = async () => {
     try { await navigator.clipboard.writeText(textoCompartilhar(c)); setCopiado(true); setTimeout(() => setCopiado(false), 2000); } catch { setCopiado(false); }
   };
+  const [emojiOk, setEmojiOk] = useState(false);
+  const emoji = textoEmoji(c);
+  const compartilharEmoji = async () => {
+    try {
+      if (/Android|iPhone|iPad/i.test(navigator.userAgent) && navigator.share) await navigator.share({ text: emoji });
+      else await navigator.clipboard.writeText(emoji);
+      setEmojiOk(true); setTimeout(() => setEmojiOk(false), 2200);
+    } catch { /* cancelado */ }
+  };
   const cartaRef = useRef(null);
   const [imagem, setImagem] = useState("pronto");
   const du = duelo(c);
@@ -1285,7 +1352,13 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
         <button onClick={baixarCarta} disabled={imagem === "gerando"} className="rp-btn rp-ouro display text-xs">
           {imagem === "gerando" ? "Gerando…" : imagem === "ok" ? "Imagem pronta!" : imagem === "erro" ? "Não deu, tente de novo" : "Baixar carta (PNG)"}
         </button>
-        <button onClick={copiar} className="rp-btn rp-sec text-[16px]">{copiado ? "Copiado!" : "Copiar resumo"}</button>
+        <button onClick={compartilharEmoji} className="rp-btn rp-sec text-[16px]">{emojiOk ? "Copiado!" : "Compartilhar"}</button>
+      </div>
+      <div className="rp-painel p-4">
+        <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-2">Sua carreira em emojis</div>
+        <pre className="whitespace-pre-wrap text-[15px] leading-relaxed text-[#E1E6E3] font-sans">{emoji}</pre>
+        <div className="text-[12px] text-[#5E7068] mt-2">🥇 Bola de Ouro · 🏆 título · ✈️ clube novo · 🩹 lesão · ⚽ grande temporada · 🟩 boa · ⬜ discreta</div>
+        <button onClick={copiar} className="text-[14px] font-bold text-[#8FA39A] min-h-[40px] mt-1">{copiado ? "Resumo completo copiado!" : "Copiar resumo completo em texto"}</button>
       </div>
 
       {du && (
@@ -1311,6 +1384,12 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
       <div className="grid grid-cols-2 gap-2">
         <div className="rp-painel px-4 py-3"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">GANHOU NA CARREIRA</div><div className="font-stat text-lg text-[#F2F5F3]">{formatarValor(c.ganhosTotais || 0)}</div></div>
         <div className="rp-painel px-4 py-3"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">PATRIMÔNIO FINAL</div><div className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</div></div>
+        {(c.transferencias || []).length > 0 && (
+          <>
+            <div className="rp-painel px-4 py-3"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">PAGARAM POR VOCÊ</div><div className="font-stat text-lg text-[#F2F5F3]">{formatarValor(c.transferencias.reduce((a, t) => a + t.valor, 0))}</div></div>
+            <div className="rp-painel px-4 py-3"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">MAIOR TRANSFERÊNCIA</div><div className="font-stat text-lg text-[#F2F5F3]">{(() => { const m = [...c.transferencias].sort((a, b) => b.valor - a.valor)[0]; return m.valor ? formatarValor(m.valor) : "Sem custo"; })()}</div></div>
+          </>
+        )}
       </div>
 
       {porTipo.length > 0 && (
@@ -1352,6 +1431,7 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
               <div className="min-w-0 flex-1">
                 <div className="text-[16px] font-semibold text-[#F2F5F3] truncate">{k.nome}{k.emp ? " (empréstimo)" : ""}</div>
                 <div className="text-[13px] text-[#8FA39A]">{k.de === k.ate ? k.de : `${k.de}–${k.ate}`} · {k.jogos} jogos · {k.gols} gols{k.titulos ? ` · ${k.titulos} título(s)` : ""}</div>
+                {(() => { const t = (c.transferencias || []).find((x) => x.para === k.nome && Math.abs(x.ano - k.de) <= 1); return t ? <div className="text-[13px] text-[#EBC557]">💸 Chegou {t.valor ? `por ${formatarValor(t.valor)}` : "sem custo"}</div> : null; })()}
               </div>
               {(c.torcida[k.nome] ?? 0) >= 75 && <span className="rp-chip" style={{ color: "#7FE3BC", background: "rgba(18,168,118,.16)" }}>Ídolo</span>}
             </li>
@@ -1432,10 +1512,11 @@ export default function ModoRapido({ onSair }) {
     const r = resolverEvento(cBase, evento, opId, extra);
     // fila: depois do evento principal, a janela de transferências pode abrir também
     const extraEv = fila ? segundoEvento(r.c, evento.id) : null;
-    setEstado({ etapa: "evento", c: r.c, evento, resultado: r.resultado || "Decisão tomada.", proximo: extraEv, fila: false });
-    if (r.c.clubeNome !== c.clubeNome) {
+    const mudou = r.c.clubeNome !== c.clubeNome;
+    setEstado({ etapa: "evento", c: r.c, evento, resultado: r.resultado || "Decisão tomada.", proximo: extraEv, fila: false, manchete: mudou ? r.c.ultimaTransferencia?.manchete : null });
+    if (mudou) {
       const clube = clubeDe(r.c.clubeNome);
-      setApresentacao({ clube, grande: clube.forca > clubeDe(c.clubeNome).forca + 3, deOnde: clubeDe(c.clubeNome), contrato: r.c.contrato });
+      setApresentacao({ clube, grande: clube.forca > clubeDe(c.clubeNome).forca + 3, deOnde: clubeDe(c.clubeNome), contrato: r.c.contrato, valor: r.c.ultimaTransferencia?.valor ?? null });
     }
   };
   const ajustarNeg = (campo, dir) => setEstado((st) => ({ ...st, neg: ajustarNegociacao(st.neg, campo, dir) }));
@@ -1453,7 +1534,7 @@ export default function ModoRapido({ onSair }) {
     setEstado((st) => ({ ...st, etapa: "evento", c: cNovo, evento: { ...evento, opcoes: restantes }, neg: null, negOp: null, aviso }));
   };
   const comprar = (id) => { const r = comprarInvestimento(c, id); if (r.ok) setEstado((st) => ({ ...st, c: r.c })); };
-  const proximoEvento = () => setEstado((s) => ({ ...s, evento: s.proximo, resultado: null, proximo: null }));
+  const proximoEvento = () => setEstado((s) => ({ ...s, evento: s.proximo, resultado: null, proximo: null, manchete: null }));
   const mudarFoco = (id) => setEstado((s) => ({ ...s, c: definirFoco(s.c, id) }));
   const encerrar = () => {
     const cc = aposentar(c);
@@ -1471,13 +1552,14 @@ export default function ModoRapido({ onSair }) {
         {etapa === "criacao" && <TelaCriacao onCriar={criar} />}
         {etapa === "evento" && (
           <>
+            {!evento && c.temporadas.length === 0 && <DicasIniciais />}
             {!evento && c.temporadas.length === 0 && (
               <div className="max-w-xl mx-auto px-4 pt-6 rp-entra">
                 <h2 className="display text-lg text-[#F2F5F3]">A história começa aqui</h2>
                 <p className="text-[17px] text-[#8FA39A] mt-1">{c.nome}, {c.idade} anos, {posicaoDe(c.posicao).label.toLowerCase()} da base do {c.clubeNome}. {origemDe(c.origem) ? `${origemDe(c.origem).nome}. ` : ""}Perfil: {personaDe(c.personalidade).label.toLowerCase()}. Empresário: {(EMPRESARIOS.find((e) => e.id === c.empresario) || EMPRESARIOS[0]).nome.toLowerCase()}.</p>
               </div>
             )}
-            <TelaEvento c={c} evento={evento} resultado={resultado} temMais={!!estado.proximo} aviso={estado.aviso} onEscolher={escolherEvento} onProximo={proximoEvento} onFoco={mudarFoco} onJogar={jogar} onPatrimonio={() => setPatrimonioAberto(true)} />
+            <TelaEvento c={c} evento={evento} resultado={resultado} temMais={!!estado.proximo} aviso={estado.aviso} manchete={estado.manchete} onEscolher={escolherEvento} onProximo={proximoEvento} onFoco={mudarFoco} onJogar={jogar} onPatrimonio={() => setPatrimonioAberto(true)} />
           </>
         )}
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}
@@ -1492,7 +1574,7 @@ export default function ModoRapido({ onSair }) {
       {patrimonioAberto && c && <Patrimonio c={c} onComprar={comprar} onFechar={() => setPatrimonioAberto(false)} />}
       {apresentacao && (
         <ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label}
-          idade={c.idade} grandeChegada={apresentacao.grande} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} onConcluir={() => setApresentacao(null)} />
+          idade={c.idade} grandeChegada={apresentacao.grande} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={() => setApresentacao(null)} />
       )}
     </div>
   );

@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { Suspense, lazy, useState } from "react";
 import { ARTE } from "./arte.js";
-import AJoiaGame from "./AJoiaGame.jsx";
+// o Modo Carreira é grande: só baixa quando a pessoa entra nele
+const AJoiaGame = lazy(() => import("./AJoiaGame.jsx"));
 import ModoRapido, { ESTILO_BASE } from "./ModoRapido.jsx";
 import { Gema } from "./components.jsx";
 import { carregarRapido } from "./rapido.js";
@@ -10,7 +11,13 @@ import { carregarRapido } from "./rapido.js";
 export default function App() {
   const [modo, setModo] = useState(null);
 
-  if (modo === "carreira") return <AJoiaGame />;
+  if (modo === "carreira") {
+    return (
+      <Suspense fallback={<div className="rp flex items-center justify-center min-h-screen"><style>{ESTILO_BASE}</style><div className="flex flex-col items-center gap-4 text-[#8FA39A]"><Gema size={72} /><span>Carregando o Modo Carreira…</span></div></div>}>
+        <AJoiaGame />
+      </Suspense>
+    );
+  }
   if (modo === "rapido") return <ModoRapido onSair={() => setModo(null)} />;
 
   const rapidoSalvo = carregarRapido();

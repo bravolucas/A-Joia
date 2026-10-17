@@ -6,7 +6,7 @@
    lê ou grava o save do Modo Carreira. */
 
 import {
-  CLUBES, LIGAS, POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS, AFINIDADE_MERCADO, CLASSICOS,
+  CLUBES, LIGAS, POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS, AFINIDADE_MERCADO, CLASSICOS, ORIGENS,
 } from "./data.js";
 import {
   rand, pick, clampR, clamp, poisson, calcOVR, evoluirAtributos,
@@ -54,8 +54,28 @@ const LIGA_BASE_POR_NAC = {
   JAP: ["alemanha2"], COR: ["alemanha2"], ARS: ["arabia"], QAT: ["arabia"], EAU: ["arabia"],
 };
 
-export function clubeInicial(nacId) {
+/* Origem do atleta (mesmas do Modo Carreira): puxa o perfil de atributos
+   e dá um empurrão diferente no começo da história. */
+export const ORIGENS_RAPIDO = ORIGENS.map((o) => ({
+  id: o.id, nome: o.nome, icone: o.icone, cor: o.cor, desc: o.desc, bias: o.bias,
+  perk: {
+    varzea: "+8 de fama: a torcida ama uma história de superação.",
+    base: "Começa na base de um clube grande do seu país.",
+    futsal: "Drible e passe acima da média desde cedo.",
+    herdeiro: "+12 de fama e um empresário experiente desde o início.",
+    tardio: "Corpo pronto: metade do risco de lesão até os 21.",
+    prodigio: "Teto mais alto: +1 de potencial em tudo, além do perfil equilibrado.",
+  }[o.id] || o.perk,
+}));
+export const origemDe = (id) => ORIGENS_RAPIDO.find((o) => o.id === id);
+
+export function clubeInicial(nacId, grande = false) {
   const ligas = LIGA_BASE_POR_NAC[nacId] || ["portugal2", "inglaterra2", "franca2"];
+  if (grande) {
+    const primeira = ligas.map((l) => l.replace(/2$/, "")).map((l) => (l === "serieB" ? "brasileirao" : l));
+    const grandes = clubesJogaveis().filter((x) => primeira.includes(x.liga) && x.forca >= 74).sort((a, b) => b.forca - a.forca).slice(0, 6);
+    if (grandes.length) return pick(grandes);
+  }
   let pool = clubesJogaveis().filter((x) => ligas.includes(x.liga) && x.forca <= 70);
   if (!pool.length) pool = clubesJogaveis().filter((x) => ligas.includes(x.liga));
   if (!pool.length) pool = clubesJogaveis().filter((x) => x.liga === "portugal2");
@@ -104,31 +124,60 @@ export function escolherTraco(c0, id) {
 export const precisaEscolherTraco = (c) => IDADES_TRACO.includes(c.idade) && !(c.tracosEscolhidos || {})[c.idade] && !c.aposentado;
 
 /* ---------- criação ---------- */
-export function criarJogador({ nome, nac, posicao, personalidade }) {
+export function criarJogador({ nome, nac, posicao, personalidade, origem }) {
   const pos = posicaoDe(posicao);
   const persona = personaDe(personalidade);
+  const org = origemDe(origem);
   // potencial: ponto alto nos atributos que a posição mais usa, com uma faixa de sorte
   const teto = rand(82, 93) + (persona.id === "festeiro" ? 2 : 0);
   const pesos = Object.entries(pos.pesos).sort((a, b) => b[1] - a[1]);
   const potencial = {};
-  pesos.forEach(([a], i) => { potencial[a] = clampR(teto - i * rand(2, 5) + rand(-2, 2), 50, 97); });
+  pesos.forEach(([a], i) => { potencial[a] = clampR(teto - i * rand(2, 5) + rand(-2, 2) + Math.round((org?.bias?.[a] || 0) * 0.25) + (org?.id === "prodigio" ? 1 : 0), 50, 97); });
   const attrs = {};
-  ATTRS.forEach((a) => { attrs[a] = clampR(potencial[a] - rand(24, 32), 38, 66); });
-  const clube = clubeInicial(nac);
+  ATTRS.forEach((a) => { attrs[a] = clampR(potencial[a] - rand(24, 32) + Math.round((org?.bias?.[a] || 0) * 0.3), 38, 68); });
+  const clube = clubeInicial(nac, org?.id === "base");
   const c = {
-    v: VERSAO_RAPIDO, nome: nome.trim(), nac, posicao, personalidade: persona.id,
-    idade: IDADE_INICIAL, ano: ANO_INICIAL, attrs, potencial,
-    clubeNome: clube.nome, primeiroClube: clube.nome, empresario: "iniciante",
+    v: VERSAO_RAPIDO, nome: nome.trim(), nac, posicao, personalidade: persona.id, origem: org?.id || null,
+    idade: IDADE_INICIAL, ano: ANO_INICIAL, attrs, potencial, foco: "equilibrio",
+    clubeNome: clube.nome, primeiroClube: clube.nome, empresario: org?.id === "herdeiro" ? "cauteloso" : "iniciante",
     torcida: { [clube.nome]: 30 }, apelidos: [], tracos: [], tracosEscolhidos: {},
     temporadas: [], totais: { jogos: 0, gols: 0, assist: 0 },
-    titulos: { liga: 0, copa: 0, continental: 0, copaMundo: 0, bolaOuro: 0, segunda: 0 },
-    lista: [], top3Bola: 0, fama: 5, mod: {}, flags: { historicoEventos: [], cronica: false, blindado: 0, selecaoFria: 0, social: false, traidor: [] },
+    titulos: { liga: 0, copa: 0, continental: 0, mundial: 0, copaMundo: 0, continentalSelecao: 0, bolaOuro: 0, segunda: 0 },
+    lista: [], marcos: [], top3Bola: 0, fama: { varzea: 8, herdeiro: 12, prodigio: 5 }[org?.id] ?? 5, mod: {},
+    flags: { historicoEventos: [], cronica: false, blindado: 0, selecaoFria: 0, social: false, traidor: [], mentorJovem: false },
     selecao: { convocacoes: 0, copas: [] }, vagaContinental: false, picoOvr: 0, aposentado: false, emprestimo: null,
     mundo: mundoCompacto(),
   };
   c.picoOvr = ovrDe(c);
   return c;
 }
+
+/* ---------- foco da temporada: uma escolha rápida antes de cada temporada ---------- */
+export const FOCOS = [
+  { id: "equilibrio", icone: "⚖️", nome: "Equilíbrio", desc: "Sem bônus nem custo." },
+  { id: "protagonismo", icone: "🎯", nome: "Protagonismo", desc: "+12% de gols e assistências · nota oscila mais" },
+  { id: "evolucao", icone: "📈", nome: "Evolução", desc: "Evolui 15% mais rápido · números um pouco menores" },
+  { id: "coletivo", icone: "🤝", nome: "Jogo coletivo", desc: "Mais chance de título · menos gols" },
+  { id: "vitrine", icone: "📸", nome: "Vitrine", desc: "Mais fama, seleção e Bola de Ouro · torcida desconfia" },
+  { id: "preservar", icone: "🧊", nome: "Preservar o corpo", desc: "Menos lesão e declínio mais lento · menos jogos" },
+];
+export const focoDe = (id) => FOCOS.find((f) => f.id === id) || FOCOS[0];
+export function definirFoco(c0, id) { const c = clone(c0); c.foco = focoDe(id).id; return c; }
+
+/* ---------- copa continental de seleções ---------- */
+const CONMEBOL = ["BRA", "ARG", "URU", "COL", "CHI", "PAR", "EQU", "PER", "BOL"];
+const CONCACAF = ["EUA", "MEX", "CAN", "JAM", "HON", "PAN", "TRI", "HAI", "ELS", "CRC"];
+const CAF = ["MAR", "SNE", "NIG", "CMR", "ALG", "CSC", "EGI", "TUN", "GAN", "AFS", "ANG", "TOG", "RDC"];
+const AFC = ["JAP", "COR", "ARS", "IRA", "AUS", "QAT", "CHN", "IRQ", "CDN", "KUW", "EAU"];
+export function nomeCopaContinental(nac) {
+  if (CONMEBOL.includes(nac)) return "Copa América";
+  if (CONCACAF.includes(nac)) return "Copa Ouro";
+  if (CAF.includes(nac)) return "Copa Africana de Nações";
+  if (AFC.includes(nac)) return "Copa da Ásia";
+  if (nac === "NZL") return "Copa das Nações da OFC";
+  return "Eurocopa";
+}
+export const anoDeContinentalSelecao = (ano) => ano % 4 === 0;
 
 /* O mundo completo tem ~6 mil jogadores. Para a Bola de Ouro só interessa
    quem pode brigar por ela, então o Modo Rápido guarda só a elite (cabe no save). */
@@ -165,9 +214,9 @@ export function formatarValor(k) {
 export const anoDeCopa = (ano) => ano % 4 === 2;
 const forcaSelecao = (c) => nacDe(c.nac).forcaSelecao;
 
-function simularLiga(c, clube, ovr, share) {
+function simularLiga(c, clube, ovr, share, extra = 0) {
   const rivais = clubesJogaveis().filter((x) => x.liga === clube.liga);
-  const impacto = (ovr - clube.forca) * share * 0.35 + somaTraco(c, "forcaTime") * share;
+  const impacto = (ovr - clube.forca) * share * 0.35 + somaTraco(c, "forcaTime") * share + extra;
   const tabela = rivais.map((x) => ({ nome: x.nome, s: x.forca + (x.nome === clube.nome ? impacto : 0) + (rnd() + rnd() + rnd() - 1.5) * 6 }))
     .sort((a, b) => b.s - a.s);
   const pos = tabela.findIndex((x) => x.nome === clube.nome) + 1;
@@ -178,9 +227,9 @@ function mataMata(forcaEf, base, bonus = 0) {
   return clampR(0.5 + (forcaEf - base) * 0.03 + bonus, 0.12, 0.85);
 }
 
-function simularContinental(c, clube, ovr, share) {
+function simularContinental(c, clube, ovr, share, extra = 0) {
   const nome = ligaDe(clube.liga).continental;
-  const forcaEf = clube.forca + (ovr - clube.forca) * share * 0.3 + somaTraco(c, "forcaTime") * share;
+  const forcaEf = clube.forca + (ovr - clube.forca) * share * 0.3 + somaTraco(c, "forcaTime") * share + extra;
   const fases = ["Fase de grupos", "Oitavas", "Quartas", "Semifinal", "Final"];
   const base = nome === "Champions League" ? 84 : 76;
   const bonus = somaTraco(c, "mataMata") * share;
@@ -191,25 +240,41 @@ function simularContinental(c, clube, ovr, share) {
   return { nome, fase: 4, faseNome: "Final", final: true, chanceFinal: mataMata(forcaEf, base, bonus) };
 }
 
-function simularCopaMundo(c, ovr) {
+/* Torneio de seleções (Copa do Mundo ou copa continental). Mesma lógica,
+   nomes e pesos diferentes. */
+function simularTorneioSelecao(c, ovr, { nome, tipo }) {
   const fs = forcaSelecao(c);
-  const corte = fs - 6 + (c.flags.selecaoFria || 0) * 2;
+  const vitrine = c.foco === "vitrine" ? 2 : 0;
+  const corte = fs - 6 + (c.flags.selecaoFria || 0) * 2 - vitrine;
   if (c.idade < 18) return null;
-  let convocado = ovr >= corte ? chance(0.92) : ovr >= corte - 4 ? chance(0.35) : false;
-  if (!convocado) return { ano: c.ano, convocado: false, resultado: "Fora da convocação" };
+  const convocado = ovr >= corte ? chance(0.92) : ovr >= corte - 4 ? chance(0.35) : false;
+  if (!convocado) return { ano: c.ano, nome, tipo, convocado: false, resultado: "Fora da convocação" };
   const titular = ovr >= fs - 2;
   const bonus = titular ? (ovr - fs) * 0.01 + 0.03 + somaTraco(c, "mataMata") : 0;
   const fases = ["Fase de grupos", "Oitavas", "Quartas", "Semifinal", "Final"];
-  const out = { ano: c.ano, convocado: true, titular, fase: 0, resultado: "Eliminado na fase de grupos", gols: 0 };
+  const out = { ano: c.ano, nome, tipo, convocado: true, titular, fase: 0, resultado: "Eliminado na fase de grupos", gols: 0 };
   const lance = titular ? posicaoDe(c.posicao).golBase * 0.9 : posicaoDe(c.posicao).golBase * 0.3;
+  const baseGrupo = tipo === "copaMundo" ? 75 : 70;
+  const baseMata = tipo === "copaMundo" ? 82 : 78;
   out.gols += poisson(lance * 3);
-  if (!chance(clampR(0.55 + (fs - 75) * 0.025 + bonus, 0.2, 0.95))) return out;
+  if (!chance(clampR(0.55 + (fs - baseGrupo) * 0.025 + bonus, 0.2, 0.95))) return out;
   for (let f = 1; f <= 3; f++) {
     out.gols += poisson(lance);
-    if (!chance(mataMata(fs, 82, bonus))) { out.fase = f; out.resultado = `Eliminado nas ${fases[f].toLowerCase()}`; if (f === 3) out.resultado = "Eliminado na semifinal"; return out; }
+    if (!chance(mataMata(fs, baseMata, bonus))) { out.fase = f; out.resultado = f === 3 ? "Eliminado na semifinal" : `Eliminado nas ${fases[f].toLowerCase()}`; return out; }
   }
-  out.fase = 4; out.final = true; out.chanceFinal = mataMata(fs, 82, bonus); out.resultado = "Final";
+  out.fase = 4; out.final = true; out.chanceFinal = mataMata(fs, baseMata, bonus); out.resultado = "Final";
   return out;
+}
+
+/* Efeitos do foco escolhido para a temporada */
+function efeitoFoco(c) {
+  return {
+    protagonismo: { golsMult: 1.12, notaRuido: 2 },
+    evolucao: { golsMult: 0.95 },
+    coletivo: { golsMult: 0.9, forcaTime: 1.5 },
+    vitrine: { bola: 5 },
+    preservar: { lesaoAdd: -0.04, shareMult: 0.92 },
+  }[c.foco] || {};
 }
 
 /* Joga a temporada inteira. Se houver uma final com você em campo,
@@ -217,6 +282,7 @@ function simularCopaMundo(c, ovr) {
 export function jogarTemporada(c0) {
   const c = clone(c0);
   const mod = c.mod || {};
+  const fx = efeitoFoco(c);
   const persona = personaDe(c.personalidade);
   const clubeNome = c.emprestimo?.destino || c.clubeNome;
   const clube = clubeDe(clubeNome);
@@ -224,10 +290,11 @@ export function jogarTemporada(c0) {
   const pos = posicaoDe(c.posicao);
   const ovr = ovrDe(c);
   const st = statusPorDiff(ovr - clube.forca, c.idade);
-  let share = clampR((st.share + (mod.shareAdd || 0)) * (mod.shareMult ?? 1), 0.04, 1);
+  let share = clampR((st.share + (mod.shareAdd || 0)) * (mod.shareMult ?? 1) * (fx.shareMult ?? 1), 0.04, 1);
 
   // lesão durante a temporada
-  const riscoLesao = clampR((0.07 + (mod.lesaoAdd || 0) + (c.flags.cronica ? 0.05 : 0) + Math.max(0, c.idade - 30) * 0.01) * persona.risco * multTraco(c, "lesaoMult"), 0.01, 0.4);
+  const corpoPronto = c.origem === "tardio" && c.idade <= 21 ? 0.5 : 1;
+  const riscoLesao = clampR((0.07 + (mod.lesaoAdd || 0) + (fx.lesaoAdd || 0) + (c.flags.cronica ? 0.05 : 0) + Math.max(0, c.idade - 30) * 0.01) * persona.risco * multTraco(c, "lesaoMult") * corpoPronto, 0.01, 0.4);
   const lesao = chance(riscoLesao) ? pick([
     { nome: "estiramento na coxa", fator: 0.8 }, { nome: "entorse no tornozelo", fator: 0.75 },
     { nome: "lesão muscular", fator: 0.7 }, { nome: "ruptura de ligamento", fator: 0.35 },
@@ -236,55 +303,69 @@ export function jogarTemporada(c0) {
 
   const jogos = clampR(Math.round(48 * share * (0.9 + rnd() * 0.15)), 0, 52);
   const nivel = Math.pow(Math.max(0.25, (ovr - 55) / 35), 1.55) * (1.25 - liga.mult * 0.45);
-  const gols = c.posicao === "GOL" ? 0 : Math.round(poisson(pos.golBase * nivel * jogos) * multTraco(c, "golsMult"));
-  const assist = Math.round(poisson(pos.assistBase * nivel * jogos * (c.posicao === "GOL" ? 0.1 : 1)) * multTraco(c, "assistMult"));
+  const gm = multTraco(c, "golsMult") * (fx.golsMult ?? 1);
+  const gols = c.posicao === "GOL" ? 0 : Math.round(poisson(pos.golBase * nivel * jogos) * gm);
+  const assist = Math.round(poisson(pos.assistBase * nivel * jogos * (c.posicao === "GOL" ? 0.1 : 1)) * multTraco(c, "assistMult") * (fx.golsMult ?? 1));
   const defBonus = DEFENSIVAS.includes(c.posicao) ? 0.15 : 0;
   const nota = jogos === 0 ? 0 : +clamp(6.2 + (ovr - 70) * 0.035 + (ovr - clube.forca) * 0.02 + ((gols + assist) / Math.max(1, jogos)) * 1.2
-    + defBonus + somaTraco(c, "notaBonus") + (mod.notaBonus || 0) + (rnd() - 0.5) * 0.5, 5.2, 9.7).toFixed(2);
+    + defBonus + somaTraco(c, "notaBonus") + (mod.notaBonus || 0) + (rnd() - 0.5) * 0.5 * (fx.notaRuido || 1), 5.2, 9.7).toFixed(2);
 
   const card = {
     idx: c.temporadas.length, ano: c.ano, idade: c.idade, clube: clube.nome, cor: clube.cor, ligaId: clube.liga, ligaNome: liga.nome,
-    emprestado: !!c.emprestimo, ovr, status: st.label, jogos, gols, assist, nota, lesao: lesao?.nome || null,
+    emprestado: !!c.emprestimo, ovr, status: st.label, foco: c.foco, jogos, gols, assist, nota, lesao: lesao?.nome || null,
     titulos: [], destaques: [],
   };
+  const forcaTimeExtra = (fx.forcaTime || 0) * share;
 
   // campeonato nacional
-  const tab = simularLiga(c, clube, ovr, share);
-  card.posLiga = tab.pos; card.totalLiga = tab.total;
+  const tab = simularLiga(c, clube, ovr, share, forcaTimeExtra);
+  card.posLiga = tab.pos; card.totalLiga = tab.total; card.campeaoLiga = tab.campeao;
   if (tab.pos === 1) card.titulos.push({ tipo: ehSegundaDivisao(clube.liga) ? "segunda" : "liga", nome: liga.nome });
   else if (ehSegundaDivisao(clube.liga) && tab.pos <= 2) card.destaques.push(`${liga.promocao} conquistado com o clube`);
 
   // copa nacional
   const copaNome = COPA_POR_LIGA[clube.liga];
   if (copaNome) {
-    const p = clampR(0.06 + (clube.forca - 75) * 0.01 + (ovr - clube.forca) * share * 0.004 + somaTraco(c, "mataMata") * share, 0.02, 0.3);
+    const p = clampR(0.06 + (clube.forca - 75) * 0.01 + (ovr - clube.forca) * share * 0.004 + (somaTraco(c, "mataMata") + forcaTimeExtra * 0.02) * share, 0.02, 0.32);
     if (chance(p)) card.titulos.push({ tipo: "copa", nome: copaNome });
+  }
+
+  // Mundial de Clubes: quem foi campeão continental no ano anterior e ficou no clube
+  if (c.campeaoContinental === clube.nome && !c.emprestimo) {
+    if (chance(clampR(0.4 + (clube.forca - 82) * 0.03 + forcaTimeExtra * 0.02, 0.25, 0.75))) card.titulos.push({ tipo: "mundial", nome: "Mundial de Clubes" });
+    else card.destaques.push("Perdeu a final do Mundial de Clubes");
   }
 
   // continental
   let momento = null;
   if (liga.continental && !ehSegundaDivisao(clube.liga) && (c.vagaContinental || (c.temporadas.length === 0 && clube.forca >= 80))) {
-    const cont = simularContinental(c, clube, ovr, share);
+    const cont = simularContinental(c, clube, ovr, share, forcaTimeExtra);
     card.continental = { nome: cont.nome, faseNome: cont.faseNome, final: !!cont.final, chanceFinal: cont.chanceFinal };
     if (cont.final) {
-      if (share >= 0.5 && !lesao) momento = { tipo: "continental", titulo: `Final da ${cont.nome}`, texto: `Prorrogação empatada. Pênaltis. A última cobrança é sua.` };
+      if (share >= 0.5 && !lesao) momento = { tipo: "continental", titulo: `Final da ${cont.nome}`, texto: "Prorrogação empatada. Pênaltis. A última cobrança é sua." };
       else if (chance(cont.chanceFinal)) card.titulos.push({ tipo: "continental", nome: cont.nome });
+      else card.continental.faseNome = "Vice-campeão";
     }
   }
 
-  // Copa do Mundo
-  if (anoDeCopa(c.ano)) {
-    const copa = simularCopaMundo(c, ovr);
-    if (copa) {
-      card.copaMundo = copa;
-      if (copa.convocado) c.selecao.convocacoes += 1;
-      if (copa.final) {
-        if (copa.titular) {
-          // a Copa tem prioridade: se as duas finais caírem no mesmo ano, a continental é sorteada
-          if (momento) { if (chance(card.continental.chanceFinal)) card.titulos.push({ tipo: "continental", nome: card.continental.nome }); card.continental.resolvida = true; }
-          momento = { tipo: "copa", titulo: `Final da Copa do Mundo ${c.ano}`, texto: `${nacDe(c.nac).label} e o mundo inteiro te olhando. Pênalti decisivo.` };
-        } else if (chance(copa.chanceFinal)) { copa.campeao = true; copa.resultado = "Campeão do mundo"; card.titulos.push({ tipo: "copaMundo", nome: "Copa do Mundo" }); }
-        else copa.resultado = "Vice-campeão do mundo";
+  // Seleção: Copa do Mundo (2026, 2030…) e copa continental (2028, 2032…)
+  const torneio = anoDeCopa(c.ano) ? { nome: "Copa do Mundo", tipo: "copaMundo" }
+    : anoDeContinentalSelecao(c.ano) ? { nome: nomeCopaContinental(c.nac), tipo: "continentalSelecao" } : null;
+  if (torneio) {
+    const t = simularTorneioSelecao(c, ovr, torneio);
+    if (t) {
+      card.selecao = t;
+      if (t.convocado) c.selecao.convocacoes += 1;
+      if (t.final) {
+        if (t.titular) {
+          // a final da seleção tem prioridade: se as duas finais caírem no mesmo ano, a do clube é sorteada
+          if (momento) {
+            if (chance(card.continental.chanceFinal)) card.titulos.push({ tipo: "continental", nome: card.continental.nome });
+            else card.continental.faseNome = "Vice-campeão";
+          }
+          momento = { tipo: "selecao", titulo: `Final da ${t.nome} ${c.ano}`, texto: `${nacDe(c.nac).label} inteiro te olhando. Pênalti decisivo.` };
+        } else if (chance(t.chanceFinal)) { t.campeao = true; t.resultado = "Campeão"; card.titulos.push({ tipo: t.tipo, nome: t.nome }); }
+        else t.resultado = "Vice-campeão";
       }
     }
   }
@@ -305,9 +386,10 @@ export function aplicarMomento(card0, acertou) {
   if (m.tipo === "continental") {
     if (acertou) { card.titulos.push({ tipo: "continental", nome: card.continental.nome }); card.continental.faseNome = "Campeão"; card.destaques.push(`Pênalti decisivo convertido na final da ${card.continental.nome}`); }
     else { card.continental.faseNome = "Vice-campeão"; card.destaques.push(`Perdeu o pênalti decisivo na final da ${card.continental.nome}`); }
-  } else if (m.tipo === "copa") {
-    if (acertou) { card.copaMundo.campeao = true; card.copaMundo.resultado = "Campeão do mundo"; card.titulos.push({ tipo: "copaMundo", nome: "Copa do Mundo" }); card.destaques.push("Seu pênalti deu a Copa do Mundo ao seu país"); }
-    else { card.copaMundo.resultado = "Vice-campeão do mundo"; card.destaques.push("O pênalti decisivo da Copa parou no goleiro"); }
+  } else {
+    const t = card.selecao;
+    if (acertou) { t.campeao = true; t.resultado = "Campeão"; card.titulos.push({ tipo: t.tipo, nome: t.nome }); card.destaques.push(`Seu pênalti deu a ${t.nome} ao seu país`); }
+    else { t.resultado = "Vice-campeão"; card.destaques.push(`O pênalti decisivo da ${t.nome} parou no goleiro`); }
   }
   card.pendente = null;
   card.momento = { tipo: m.tipo, acertou };
@@ -326,59 +408,100 @@ function apelidoPara(c, card) {
   return "O Guerreiro";
 }
 
+/* ---------- marcos de carreira (conquistas pessoais que viram destaque) ---------- */
+const MARCAS_GOL = [50, 100, 200, 300, 400, 500];
+const MARCAS_JOGO = [100, 300, 500, 700];
+function detectarMarcos(antes, c, card) {
+  const m = [];
+  const add = (id, icone, titulo, texto) => { if (!(c.marcos || []).some((x) => x.id === id)) m.push({ id, icone, titulo, texto, ano: card.ano }); };
+  if (card.jogos >= 20 && !antes.temporadas.some((s) => s.jogos >= 20)) add("profissional", "👟", "Virou profissional de verdade", `Primeira temporada com ${card.jogos} jogos.`);
+  if (card.gols > 0 && antes.totais.gols === 0) add("primeiroGol", "⚽", "Primeiro gol como profissional", `Aos ${card.idade} anos, pelo ${card.clube}.`);
+  MARCAS_GOL.forEach((g) => { if (antes.totais.gols < g && c.totais.gols >= g) add(`gols${g}`, "🎯", `${g} gols na carreira`, `A marca veio vestindo a camisa do ${card.clube}.`); });
+  MARCAS_JOGO.forEach((j) => { if (antes.totais.jogos < j && c.totais.jogos >= j) add(`jogos${j}`, "🏟️", `${j} jogos como profissional`, "Longevidade é talento também."); });
+  if (card.selecao?.convocado && antes.selecao.convocacoes === 0) add("selecao", "🌎", "Primeira convocação", `${card.selecao.nome} ${card.ano} com ${nacDe(c.nac).label}.`);
+  if (card.titulos.length && !antes.lista.length) add("primeiroTitulo", "🏆", "Primeiro título da carreira", card.titulos[0].nome);
+  if (card.bola.pos <= 10 && !antes.temporadas.some((s) => s.bola?.pos <= 10)) add("top10", "🔟", "Top 10 do mundo", `${card.bola.pos}º na Bola de Ouro.`);
+  if (card.bola.pos <= 3 && card.bola.pos > 1 && !antes.temporadas.some((s) => s.bola?.pos <= 3)) add("podio", "🥉", "No pódio da Bola de Ouro", `${card.bola.pos}º lugar do mundo.`);
+  if (card.gols >= 30) add("temporada30", "🔥", "Temporada de 30 gols", `${card.gols} gols em ${card.jogos} jogos.`);
+  if (card.valor >= 100000) add("valor100", "💰", "Valor de 100 milhões", formatarValor(card.valor));
+  if (card.ovrDepois >= 90) add("ovr90", "💎", "Chegou a 90 de overall", "Patamar de craque mundial.");
+  return m;
+}
+
 /* Fecha a temporada: títulos, Bola de Ouro, torcida, evolução, idade e mundo. */
 export function fecharTemporada(c0, card0) {
+  const antes = c0;
   const c = clone(c0);
   const card = clone(card0);
   const persona = personaDe(c.personalidade);
-  const nTit = card.titulos.length;
+  const fx = efeitoFoco(c);
 
   // mundo real anda junto e a Bola de Ouro sai do ranking contra ele
   c.mundo = simularTemporadaMundo(c.mundo);
-  const pesoTit = card.titulos.reduce((s, t) => s + (t.tipo === "copaMundo" ? 3 : t.tipo === "continental" ? 2 : t.tipo === "segunda" ? 0 : 1), 0);
+  const PESO_BOLA = { copaMundo: 3, continental: 2, continentalSelecao: 2, mundial: 1, segunda: 0 };
+  const pesoTit = card.titulos.reduce((s, t) => s + (PESO_BOLA[t.tipo] ?? 1), 0);
   const meuCard = { clube: card.clube, posicao: c.posicao, ovr: card.ovr, gols: card.gols, assist: card.assist, nota: card.nota || 6, ligaMult: ligaDe(card.ligaId).mult };
   let ranking = rankingBolaDeOuro(c.mundo, meuCard, c.nome, pesoTit);
-  const bonusFama = somaTraco(c, "bolaBonus") + c.fama * 0.04;
-  if (bonusFama) {
-    ranking = ranking.map((r) => (r.voce ? { ...r, score: r.score + bonusFama } : r)).sort((a, b) => b.score - a.score).map((x, i) => ({ ...x, pos: i + 1 }));
-  }
+  const bonusFama = somaTraco(c, "bolaBonus") + c.fama * 0.04 + (fx.bola || 0);
+  ranking = ranking.map((r) => (r.voce ? { ...r, score: r.score + bonusFama } : r)).sort((a, b) => b.score - a.score).map((x, i) => ({ ...x, pos: i + 1 }));
   const eu = ranking.find((r) => r.voce);
-  card.bola = { pos: card.jogos >= 10 ? eu?.pos ?? 999 : 999, top: ranking.slice(0, 3).map((r) => ({ nome: r.nome, clube: r.clube, voce: r.voce })) };
-  if (card.bola.pos === 1) { card.titulos.push({ tipo: "bolaOuro", nome: "Bola de Ouro" }); }
+  card.bola = { pos: card.jogos >= 10 ? eu?.pos ?? 999 : 999, top: ranking.filter((r) => card.jogos >= 10 || !r.voce).slice(0, 3).map((r) => ({ nome: r.voce ? c.nome : r.nome, clube: r.clube, voce: r.voce })) };
+  if (card.bola.pos === 1) card.titulos.push({ tipo: "bolaOuro", nome: "Bola de Ouro" });
   if (card.bola.pos <= 3) c.top3Bola += 1;
 
-  card.titulos.forEach((t) => { c.titulos[t.tipo] = (c.titulos[t.tipo] || 0) + 1; c.lista.push({ ano: card.ano, nome: t.nome, tipo: t.tipo, clube: t.tipo === "copaMundo" ? nacDe(c.nac).label : card.clube }); });
+  // contagem de cada taça (para "seu 3º Brasileirão")
+  card.titulos = card.titulos.map((t) => {
+    const n = c.lista.filter((x) => x.nome === t.nome).length + 1;
+    return { ...t, n, primeiro: c.lista.length === 0 };
+  });
+  const nTit = card.titulos.filter((t) => t.tipo !== "bolaOuro").length;
+  card.titulos.forEach((t) => {
+    c.titulos[t.tipo] = (c.titulos[t.tipo] || 0) + 1;
+    const pelaSelecao = t.tipo === "copaMundo" || t.tipo === "continentalSelecao";
+    c.lista.push({ ano: card.ano, nome: t.nome, tipo: t.tipo, clube: pelaSelecao ? nacDe(c.nac).label : t.tipo === "bolaOuro" ? "Individual" : card.clube });
+  });
+  c.campeaoContinental = card.titulos.some((t) => t.tipo === "continental") && !card.emprestado ? card.clube : null;
 
   // totais e fama
   c.totais.jogos += card.jogos; c.totais.gols += card.gols; c.totais.assist += card.assist;
-  if (card.copaMundo?.convocado) { c.totais.gols += card.copaMundo.gols || 0; }
-  const famaGanho = (Math.max(0, (card.nota - 6.5)) * 6 + nTit * 4 + (card.bola.pos <= 10 ? 8 : 0)) * (persona.famaMult || 1) * multTraco(c, "famaMult");
+  if (card.selecao?.convocado) c.totais.gols += card.selecao.gols || 0;
+  const famaGanho = (Math.max(0, (card.nota - 6.5)) * 6 + nTit * 4 + (card.bola.pos <= 10 ? 8 : 0)) * (persona.famaMult || 1) * multTraco(c, "famaMult") * (c.foco === "vitrine" ? 1.4 : 1);
   c.fama = clampR(Math.round(c.fama * 0.92 + famaGanho), 0, 100);
 
   // torcida do clube em que jogou
   const tc = card.clube;
-  const antes = c.torcida[tc] ?? 30;
-  const delta = ((card.nota ? (card.nota - 6.6) * 9 : -4) + nTit * 7 + (card.jogos >= 30 ? 3 : 0) + somaTraco(c, "torcidaAno")) * (card.nota >= 6.6 ? multTraco(c, "torcidaMult") : 1);
-  c.torcida[tc] = clampR(Math.round(antes + delta), 0, 100);
+  const tAntes = c.torcida[tc] ?? 30;
+  const delta = ((card.nota ? (card.nota - 6.6) * 9 : -4) + nTit * 7 + (card.jogos >= 30 ? 3 : 0) + somaTraco(c, "torcidaAno") - (c.foco === "vitrine" ? 3 : 0)) * (card.nota >= 6.6 ? multTraco(c, "torcidaMult") : 1);
+  c.torcida[tc] = clampR(Math.round(tAntes + delta), 0, 100);
   card.torcida = c.torcida[tc];
-  if (c.torcida[tc] >= 75 && antes < 75 && !c.apelidos.some((a) => a.clube === tc) && !card.emprestado) {
-    const ap = apelidoPara(c, card);
-    c.apelidos.push({ clube: tc, nome: ap });
-    card.destaques.push(`A torcida do ${tc} passou a te chamar de "${ap}"`);
+  card.torcidaDelta = c.torcida[tc] - tAntes;
+  const novosMarcos = [];
+  if (c.torcida[tc] >= 75 && tAntes < 75 && !card.emprestado) {
+    novosMarcos.push({ id: `idolo:${tc}`, icone: "💚", titulo: `Ídolo do ${tc}`, texto: "A arquibancada canta o seu nome.", ano: card.ano });
+    if (!c.apelidos.some((a) => a.clube === tc)) {
+      const ap = apelidoPara(c, card);
+      c.apelidos.push({ clube: tc, nome: ap });
+      novosMarcos.push({ id: `apelido:${tc}`, icone: "📣", titulo: `Apelido: "${ap}"`, texto: `Assim a torcida do ${tc} passou a te chamar.`, ano: card.ano });
+    }
   }
 
   // vaga continental para o ano seguinte (só conta se você continuar no clube)
   c.vagaContinental = !card.emprestado && !ehSegundaDivisao(card.ligaId) && !!ligaDe(card.ligaId).continental && (card.posLiga <= 4 || card.titulos.some((t) => t.tipo === "continental"));
 
   // evolução e idade
-  const fatorDes = clampR(1 + ((card.nota || 6) - 6.8) * 0.12, 0.8, 1.25) * (c.mod?.evolucao ?? 1);
-  const reduc = multTraco(c, "declinio") * (c.mod?.declinio ?? 1);
+  const focoEvo = c.foco === "evolucao" ? 1.15 : 1;
+  const focoDecl = c.foco === "preservar" ? 0.8 : 1;
+  const fatorDes = clampR(1 + ((card.nota || 6) - 6.8) * 0.12, 0.8, 1.25) * (c.mod?.evolucao ?? 1) * focoEvo;
+  const reduc = multTraco(c, "declinio") * (c.mod?.declinio ?? 1) * focoDecl;
   const novos = evoluirAtributos({ ...c.attrs, fintas: 3, pernaRuim: 3 }, { ...c.potencial, fintas: 3, pernaRuim: 3 }, c.idade, persona, null, reduc, fatorDes, 1 + nTit * 0.05);
   ATTRS.forEach((a) => { c.attrs[a] = novos[a]; });
   if (c.flags.cronica) { c.attrs.velocidade = clampR(c.attrs.velocidade - 1, 40, 99); c.attrs.fisico = clampR(c.attrs.fisico - 1, 40, 99); }
   card.ovrDepois = ovrDe(c);
   c.picoOvr = Math.max(c.picoOvr, card.ovr, card.ovrDepois);
   card.valor = valorMercado(card.ovrDepois, c.idade + 1, c.fama);
+
+  card.marcos = [...detectarMarcos(antes, c, card), ...novosMarcos];
+  c.marcos = [...(c.marcos || []), ...card.marcos];
 
   if (c.flags.blindado > 0) c.flags.blindado -= 1;
   if (c.emprestimo) { card.destaques.push(`Fim do empréstimo: volta ao ${c.clubeNome}`); c.emprestimo = null; }
@@ -407,10 +530,10 @@ export function aposentar(c0) {
 export const NIVEIS_LEGADO = [
   { min: 0, nome: "Promessa esquecida", icone: "🍂", cor: "#6C7470", desc: "O talento estava lá. A história não aconteceu." },
   { min: 90, nome: "Jogador de carreira", icone: "⚽", cor: "#9CA4A1", desc: "Uma carreira honesta, respeitada por quem viu de perto." },
-  { min: 210, nome: "Ídolo de clube", icone: "💚", cor: "#12A876", desc: "Tem uma torcida que nunca vai te esquecer." },
-  { min: 350, nome: "Estrela internacional", icone: "⭐", cor: "#2E6FE0", desc: "Seu nome atravessou fronteiras." },
-  { min: 540, nome: "Lenda do futebol", icone: "🏆", cor: "#EBC557", desc: "Entrou para a história do esporte." },
-  { min: 820, nome: "A Joia", icone: "💎", cor: "#D8B44A", desc: "Raro, lapidado, eterno. Um dos maiores de todos os tempos." },
+  { min: 230, nome: "Ídolo de clube", icone: "💚", cor: "#12A876", desc: "Tem uma torcida que nunca vai te esquecer." },
+  { min: 400, nome: "Estrela internacional", icone: "⭐", cor: "#2E6FE0", desc: "Seu nome atravessou fronteiras." },
+  { min: 640, nome: "Lenda do futebol", icone: "🏆", cor: "#EBC557", desc: "Entrou para a história do esporte." },
+  { min: 950, nome: "A Joia", icone: "💎", cor: "#D8B44A", desc: "Raro, lapidado, eterno. Um dos maiores de todos os tempos." },
 ];
 
 export function calcularLegado(c) {
@@ -419,11 +542,11 @@ export function calcularLegado(c) {
   const idolos = Object.entries(c.torcida).filter(([, v]) => v >= 75).length;
   const partes = {
     numeros: Math.round(c.totais.gols * 0.35 + c.totais.assist * 0.25 + (defensivo ? c.totais.jogos * 0.12 : c.totais.jogos * 0.03)),
-    titulos: (t.liga || 0) * 9 + (t.copa || 0) * 4 + (t.continental || 0) * 18 + (t.segunda || 0) * 2,
-    selecao: (t.copaMundo || 0) * 45 + c.selecao.convocacoes * 6,
+    titulos: (t.liga || 0) * 9 + (t.copa || 0) * 4 + (t.continental || 0) * 18 + (t.mundial || 0) * 8 + (t.segunda || 0) * 2,
+    selecao: (t.copaMundo || 0) * 45 + (t.continentalSelecao || 0) * 18 + c.selecao.convocacoes * 4,
     premios: (t.bolaOuro || 0) * 55 + c.top3Bola * 10,
     auge: Math.max(0, c.picoOvr - 74) * 6,
-    torcida: idolos * 12 + (c.flags.social ? 8 : 0),
+    torcida: idolos * 12 + (c.flags.social ? 8 : 0) + (c.flags.mentorJovem ? 6 : 0),
   };
   const pontos = Object.values(partes).reduce((a, b) => a + b, 0);
   const nivel = [...NIVEIS_LEGADO].reverse().find((n) => pontos >= n.min) || NIVEIS_LEGADO[0];
@@ -772,11 +895,203 @@ export const EVENTOS = [
   },
 ];
 
+/* ---------- terceira opção nos eventos que pediam um meio-termo ---------- */
+const sobe = (c, clube, v) => { c.torcida[clube] = clampR((c.torcida[clube] ?? 30) + v, 0, 100); };
+const EXTRAS_OPCOES = {
+  renovacao: () => [{ id: "clausula", label: "Renovar com cláusula de saída", dica: "Meio-termo: 1 temporada sem propostas · a diretoria aceita, a torcida nem tanto",
+    efeito: (c) => { c.flags.blindado = 1; sobe(c, c.clubeNome, 3); return "Renovado, mas com uma porta entreaberta para o mercado."; } }],
+  classico: (c, ctx) => [{ id: "dedicar", label: "Dedicar o clássico à torcida", dica: "Sem provocar ninguém, mas com o coração",
+    efeito: (c) => { if (chance(0.5)) { sobe(c, c.clubeNome, 7); return `Gol no clássico e o beijo no escudo. A torcida do ${c.clubeNome} não esquece.`; } sobe(c, c.clubeNome, 2); return `Empate duro contra o ${ctx.rival}. Pelo menos ninguém pode dizer que faltou entrega.`; } }],
+  lesaoPre: () => [{ id: "conservador", label: "Tratamento conservador", dica: "Perde algumas semanas · pequeno risco de sequela",
+    efeito: (c) => { c.mod.shareMult = (c.mod.shareMult ?? 1) * 0.8; if (chance(0.15)) { c.flags.cronica = true; c.attrs.velocidade = clampR(c.attrs.velocidade - 2, 40, 99); return "Fisioterapia e paciência. O joelho voltou, mas nunca mais foi o mesmo."; } return "Fisioterapia e paciência. Voltou bem depois de um mês."; } }],
+  polemica: () => [{ id: "silencio", label: "Silêncio total", dica: "Deixa a poeira baixar sozinha",
+    efeito: (c) => { c.fama = clampR(c.fama - 1, 0, 100); return "Você não disse nada. Em uma semana ninguém lembrava mais."; } }],
+  novoTecnico: () => [{ id: "conversar", label: "Pedir uma conversa franca", dica: "Pode chegar a um acordo — ou não",
+    efeito: (c) => { if (chance(0.6)) { c.mod.shareAdd = (c.mod.shareAdd || 0) + 0.06; return "Café, prancheta e acordo: você joga na sua, ele ganha sua entrega sem bola."; } c.mod.shareAdd = (c.mod.shareAdd || 0) - 0.05; return "A conversa não andou. Começou a temporada fora de alguns jogos."; } }],
+  pretemporada: () => [{ id: "equilibrio", label: "Programa equilibrado", dica: "Um pouco de evolução, sem risco extra",
+    efeito: (c) => { c.mod.evolucao = 1.1; return "Nem tanto ao céu, nem tanto à terra."; } }],
+  fortuna: (c, ctx) => [{ id: "leilao", label: "Usar a proposta para renovar", dica: "Aumento no clube atual · a torcida percebe a jogada",
+    efeito: (c) => { c.flags.blindado = 1; sobe(c, c.clubeNome, -3); c.fama = clampR(c.fama + 2, 0, 100); return `A oferta do ${ctx.clube.nome} virou aumento no ${c.clubeNome}.`; } }],
+  noitada: () => [{ id: "rapido", label: "Passar rápido e ir embora cedo", dica: "Aparece na foto sem exagero",
+    efeito: (c) => { c.fama = clampR(c.fama + 3, 0, 100); if (chance(0.1)) { c.mod.shareAdd = (c.mod.shareAdd || 0) - 0.05; return "Saiu cedo, mas a foto com o copo na mão viralizou."; } return "Uma foto, um abraço no cantor e cama às 23h."; } }],
+  mentor: () => [{ id: "folgas", label: "Treinar com ele só nas folgas", dica: "Um pouco de cada",
+    efeito: (c) => { ["finalizacao", "passe", "drible"].forEach((a) => { c.potencial[a] = clampR(c.potencial[a] + 1, 40, 99); }); return "Sábados de manhã no CT. Pequenos ajustes que fazem diferença."; } }],
+  traicao: (c, ctx) => [{ id: "renovar", label: "Usar a proposta para renovar", dica: "Aumento e permanência · a torcida desconfia",
+    efeito: (c) => { c.flags.blindado = 1; sobe(c, c.clubeNome, -4); return `O ${ctx.rival} serviu de moeda de troca. Ficou, mais rico.`; } }],
+  patrocinio: () => [{ id: "local", label: "Marca nacional, agenda leve", dica: "Fama sobe um pouco, sem atrapalhar o treino",
+    efeito: (c) => { c.fama = clampR(c.fama + 4, 0, 100); return "Comercial no intervalo da novela, e só."; } }],
+  voltarCasa: (c) => [{ id: "promessa", label: "Prometer voltar para encerrar a carreira", dica: "A torcida do clube que te revelou já começa a te esperar",
+    efeito: (c) => { sobe(c, c.primeiroClube, 10); return `A promessa virou faixa no estádio do ${c.primeiroClube}.`; } }],
+  social: () => [{ id: "doacao", label: "Fazer uma doação discreta", dica: "Ajuda sem holofote",
+    efeito: (c) => { sobe(c, c.clubeNome, 3); return "Ninguém soube. Mas fez diferença para muita gente."; } }],
+  rivalMundo: () => [{ id: "elogiar", label: "Elogiar o rival em público", dica: "Classe pura · a imprensa adora",
+    efeito: (c) => { c.fama = clampR(c.fama + 3, 0, 100); return "Você desarmou a provocação com um elogio. Virou exemplo."; } }],
+};
+
+/* Selo de risco mostrado em cada opção */
+const RISCOS = {
+  "propostas:ficar": "seguro", "renovacao:renovar": "seguro", "renovacao:esperar": "arriscado",
+  "classico:provocar": "arriscado", "classico:respeitar": "seguro", "classico:dedicar": "equilibrado",
+  "sub20:ir": "equilibrado", "sub20:dispensa": "equilibrado",
+  "lesaoPre:operar": "seguro", "lesaoPre:sacrificio": "arriscado", "lesaoPre:conservador": "equilibrado",
+  "polemica:desculpas": "seguro", "polemica:frente": "arriscado", "polemica:silencio": "seguro",
+  "novoTecnico:aceitar": "seguro", "novoTecnico:recusar": "arriscado", "novoTecnico:conversar": "equilibrado",
+  "pretemporada:elite": "arriscado", "pretemporada:preservar": "seguro", "pretemporada:equilibrio": "equilibrado",
+  "fortuna:aceitar": "arriscado", "fortuna:recusar": "seguro", "fortuna:leilao": "equilibrado",
+  "capitao:aceitar": "arriscado", "capitao:recusar": "seguro",
+  "noitada:ir": "arriscado", "noitada:casa": "seguro", "noitada:rapido": "equilibrado",
+  "mentor:aceitar": "equilibrado", "mentor:sozinho": "seguro", "mentor:folgas": "seguro",
+  "emprestimo:ficar": "arriscado", "forcarSaida:forcar": "arriscado", "forcarSaida:aguentar": "seguro",
+  "traicao:trair": "arriscado", "traicao:recusar": "seguro", "traicao:renovar": "equilibrado",
+  "rivalMundo:responder": "arriscado", "rivalMundo:ignorar": "seguro", "rivalMundo:elogiar": "seguro",
+  "naturalizacao:aceitar": "arriscado", "camisa10:aceitar": "arriscado", "documentario:aceitar": "equilibrado",
+  "golDePlaca:provocar": "arriscado", "presidente:apoiar": "arriscado", "presidente:oposicao": "arriscado",
+  "livre:grande": "arriscado", "selecaoAmistoso:jogar": "arriscado",
+};
+
+/* ---------- eventos novos ---------- */
+const NUMEROS_POR_POS = { GOL: 1, ZAG: 4, LD: 2, LE: 6, VOL: 5, MC: 8, MEI: 10, PD: 7, PE: 11, SA: 9, ATA: 9 };
+export const EVENTOS_EXTRAS = [
+  {
+    id: "camisa10", icone: "🔟",
+    peso: (c) => (c.idade >= 20 && ["Titular", "Estrela do time"].includes(statusNoClube(c).label) && !(c.flags.camisas || []).includes(c.clubeNome) ? 1.6 : 0),
+    titulo: (c) => `A camisa ${["GOL"].includes(c.posicao) ? "1" : "10"} do ${c.clubeNome} está vaga`,
+    texto: () => "O ídolo que vestia o número pendurou as chuteiras. O roupeiro deixou a camisa no seu armário — mas a escolha é sua.",
+    opcoes: (c) => [
+      { id: "aceitar", label: "Herdar o número do ídolo", dica: "Torcida empolgada · comparação inevitável",
+        efeito: (c) => { c.flags.camisas = [...(c.flags.camisas || []), c.clubeNome]; sobe(c, c.clubeNome, 6); c.mod.notaBonus = (c.mod.notaBonus || 0) + (chance(0.6) ? 0.15 : -0.15); return "O número pesa. Você decidiu que vai carregar."; } },
+      { id: "infancia", label: "Manter o número da base", dica: "Fiel à própria história",
+        efeito: (c) => { c.flags.camisas = [...(c.flags.camisas || []), c.clubeNome]; sobe(c, c.clubeNome, 2); return `Você segue com a ${NUMEROS_POR_POS[c.posicao] || 8}. A torcida respeitou.`; } },
+      { id: "homenagem", label: "Pedir para aposentar a camisa", dica: "Gesto de respeito ao ídolo · fama sobe",
+        efeito: (c) => { c.flags.camisas = [...(c.flags.camisas || []), c.clubeNome]; c.fama = clampR(c.fama + 4, 0, 100); sobe(c, c.clubeNome, 4); return "Ninguém mais vai usar aquele número. A ideia foi sua."; } },
+    ],
+  },
+  {
+    id: "documentario", icone: "🎬",
+    peso: (c) => (c.fama >= 45 && !c.flags.documentario ? 1.2 : 0),
+    titulo: () => "Uma série documental sobre você",
+    texto: () => "Uma plataforma de streaming quer acompanhar sua temporada inteira, do vestiário ao sofá de casa.",
+    opcoes: () => [
+      { id: "aceitar", label: "Abrir as portas", dica: "Fama dispara · câmeras no vestiário incomodam o elenco",
+        efeito: (c) => { c.flags.documentario = true; c.fama = clampR(c.fama + 12, 0, 100); c.mod.shareAdd = (c.mod.shareAdd || 0) - 0.04; return "Três episódios, top 1 em vinte países."; } },
+      { id: "limitado", label: "Só fora de campo", dica: "Menos fama, sem desgaste",
+        efeito: (c) => { c.flags.documentario = true; c.fama = clampR(c.fama + 5, 0, 100); return "Família, infância e bastidores. Vestiário, nunca."; } },
+      { id: "recusar", label: "Recusar", dica: "Privacidade acima de tudo",
+        efeito: () => "Sua vida continua sendo só sua." },
+    ],
+  },
+  {
+    id: "parceria", icone: "🤜",
+    peso: (c) => (c.idade >= 19 && c.posicao !== "GOL" ? 1.3 : 0),
+    titulo: () => "Entrosamento com um companheiro",
+    texto: () => "Você e um companheiro de ataque se encontraram em campo. O técnico quer montar o time em volta da dupla.",
+    opcoes: (c) => [
+      { id: "garcom", label: "Virar o garçom da dupla", dica: "Mais assistências, o time ganha mais",
+        efeito: (c) => { c.attrs.passe = clampR(c.attrs.passe + 2, 40, 99); c.mod.shareAdd = (c.mod.shareAdd || 0) + 0.05; return "Você enxerga o passe antes de ele pedir."; } },
+      { id: "finalizador", label: "Ser quem finaliza", dica: "Mais gols, mais holofote",
+        efeito: (c) => { c.attrs.finalizacao = clampR(c.attrs.finalizacao + 2, 40, 99); c.fama = clampR(c.fama + 3, 0, 100); return "Ele cria, você empurra para as redes."; } },
+      { id: "solo", label: "Preferir jogar sozinho", dica: "Ninguém divide os seus gols",
+        efeito: (c) => { c.mod.notaBonus = (c.mod.notaBonus || 0) - 0.05; c.attrs.drible = clampR(c.attrs.drible + 1, 40, 99); return "A dupla nunca engrenou. Você seguiu resolvendo do seu jeito."; } },
+    ],
+  },
+  {
+    id: "naturalizacao", icone: "🛂",
+    peso: (c) => (c.idade >= 19 && c.idade <= 25 && forcaSelecao(c) <= 80 && c.selecao.convocacoes === 0 && ovrDe(c) >= 74 && !c.flags.naturalizacaoVista ? 2 : 0),
+    preparar: (c) => {
+      const op = NACIONALIDADES.filter((n) => n.id !== c.nac && n.forcaSelecao >= 85);
+      return { nova: pick(op) };
+    },
+    titulo: (c, ctx) => `${ctx.nova.label} quer te naturalizar`,
+    texto: (c, ctx) => `Você nunca foi chamado por ${nacDe(c.nac).label}. A federação de ${ctx.nova.label} oferece uma vaga na próxima convocação — e a chance real de disputar títulos.`,
+    opcoes: (c, ctx) => [
+      { id: "aceitar", label: `Defender ${ctx.nova.label}`, dica: "Seleção muito mais forte · seu país de origem não vai gostar",
+        efeito: (c) => { c.flags.naturalizacaoVista = true; c.nacOrigem = c.nac; c.nac = ctx.nova.id; c.flags.selecaoFria = 0; c.fama = clampR(c.fama + 5, 0, 100); return `Passaporte novo. Você agora joga por ${ctx.nova.label}.`; } },
+      { id: "esperar", label: `Esperar por ${nacDe(c.nac).label}`, dica: "Fiel às raízes · a convocação pode não vir",
+        efeito: (c) => { c.flags.naturalizacaoVista = true; c.flags.selecaoFria = Math.max(0, (c.flags.selecaoFria || 0) - 1); return "Sua camisa é uma só. Os jornais do seu país fizeram festa."; } },
+    ],
+  },
+  {
+    id: "golDePlaca", icone: "🎥",
+    peso: (c) => (c.posicao !== "GOL" && c.idade >= 18 ? 1.4 : 0),
+    titulo: () => "Seu golaço rodou o mundo",
+    texto: () => "Um gol de bicicleta no último minuto. Milhões de visualizações. Na próxima coletiva, todos querem saber da comemoração.",
+    opcoes: () => [
+      { id: "familia", label: "Dedicar à família", dica: "A torcida se emociona",
+        efeito: (c) => { sobe(c, c.clubeNome, 5); c.fama = clampR(c.fama + 3, 0, 100); return "Você apontou para a arquibancada onde sua mãe estava. Ninguém segurou o choro."; } },
+      { id: "marca", label: "Criar uma comemoração sua", dica: "Vira marca registrada · fama sobe",
+        efeito: (c) => { c.fama = clampR(c.fama + 7, 0, 100); return "Crianças do mundo inteiro já imitam o seu gesto."; } },
+      { id: "provocar", label: "Comemorar provocando a torcida rival", dica: "Viraliza mais · pode dar punição",
+        efeito: (c) => { c.fama = clampR(c.fama + 6, 0, 100); if (chance(0.4)) { c.mod.shareAdd = (c.mod.shareAdd || 0) - 0.08; return "Cartão, multa e dois jogos de suspensão."; } return "Polêmica de uma semana e um meme eterno."; } },
+    ],
+  },
+  {
+    id: "presidente", icone: "🗳️",
+    peso: (c) => (c.idade >= 23 && (c.torcida[c.clubeNome] ?? 0) >= 45 ? 1.1 : 0),
+    titulo: (c) => `Eleição para presidente do ${c.clubeNome}`,
+    texto: () => "Os dois candidatos querem uma foto com você. Apoiar um lado pode mudar o clima no clube por anos.",
+    opcoes: () => [
+      { id: "apoiar", label: "Apoiar a situação", dica: "Se ganhar, ganha força com a diretoria",
+        efeito: (c) => { if (chance(0.55)) { c.mod.shareAdd = (c.mod.shareAdd || 0) + 0.08; sobe(c, c.clubeNome, 2); return "Seu candidato venceu. A diretoria lembra de quem ficou do lado."; } c.mod.shareAdd = (c.mod.shareAdd || 0) - 0.08; return "Seu candidato perdeu. A nova diretoria te olha torto."; } },
+      { id: "oposicao", label: "Apoiar a oposição", dica: "Se ganhar, você vira peça central do novo projeto",
+        efeito: (c) => { if (chance(0.45)) { c.flags.blindado = 2; sobe(c, c.clubeNome, 6); return "A oposição venceu e te colocou no centro do projeto."; } sobe(c, c.clubeNome, -5); return "A oposição perdeu e você ficou isolado."; } },
+      { id: "neutro", label: "Ficar neutro", dica: "Sem risco",
+        efeito: () => "Você votou em silêncio. Ninguém soube em quem." },
+    ],
+  },
+  {
+    id: "livre", icone: "📝",
+    peso: (c) => (c.idade >= 24 && c.idade <= 32 && c.flags.blindado === 0 && ovrDe(c) >= 76 ? 1.3 : 0),
+    preparar: (c) => ({ grande: gerarOfertas(c, 1, { lo: ovrDe(c) - 1, hi: ovrDe(c) + 10 })[0] || null }),
+    titulo: () => "Seu contrato está acabando",
+    texto: (c, ctx) => `Faltam seis meses. Você pode sair de graça no fim da temporada${ctx.grande ? ` — e o ${ctx.grande.clube} já sinalizou interesse` : ""}.`,
+    opcoes: (c, ctx) => [
+      ...(ctx.grande ? [{ id: "grande", label: `Assinar pré-contrato com o ${ctx.grande.clube}`, dica: `${ctx.grande.ligaNome} · chegaria como ${ctx.grande.status.toLowerCase()} · torcida atual se sente traída`, oferta: ctx.grande,
+        efeito: (c) => { const de = transferir(c, ctx.grande.clube); sobe(c, de, -12); c.fama = clampR(c.fama + 4, 0, 100); return `Saída de graça para o ${ctx.grande.clube}. No ${de}, o assunto foi amargo.`; } }] : []),
+      { id: "renovar", label: "Renovar antes de chegar ao fim", dica: "Estabilidade e carinho da torcida",
+        efeito: (c) => { c.flags.blindado = 2; sobe(c, c.clubeNome, 6); return "Mais quatro anos. Assinou no gramado, com a família."; } },
+      { id: "testar", label: "Deixar correr e ouvir o mercado", dica: "Mais propostas na próxima janela",
+        efeito: (c) => { c.mod.ofertasExtra = 2; return "Você deixou o relógio correr. O telefone do empresário não parou."; } },
+    ],
+  },
+  {
+    id: "jovemMentor", icone: "🧒",
+    peso: (c) => (c.idade >= 30 && !c.flags.mentorJovem ? 1.8 : 0),
+    titulo: () => "Um garoto da base pede conselhos",
+    texto: () => "Um menino de 16 anos, que te tinha como pôster na parede, quer treinar ao seu lado.",
+    opcoes: () => [
+      { id: "adotar", label: "Assumir o garoto como pupilo", dica: "Legado fora de campo · a torcida se encanta",
+        efeito: (c) => { c.flags.mentorJovem = true; sobe(c, c.clubeNome, 6); return "Você virou o veterano que um dia te adotou. O ciclo se fechou."; } },
+      { id: "dicas", label: "Dar umas dicas e seguir focado", dica: "Foco total no seu fim de carreira",
+        efeito: (c) => { c.mod.declinio = Math.min(c.mod.declinio ?? 1, 0.85); return "Algumas dicas, um autógrafo e de volta ao seu treino."; } },
+    ],
+  },
+  {
+    id: "selecaoAmistoso", icone: "✈️",
+    peso: (c) => (c.selecao.convocacoes > 0 && c.idade >= 20 ? 1.2 : 0),
+    titulo: (c) => `${nacDe(c.nac).label} te chamou para uma turnê de amistosos`,
+    texto: () => "Dez dias, três continentes, logo antes de um jogo decisivo do clube.",
+    opcoes: () => [
+      { id: "jogar", label: "Ir e jogar todos os minutos", dica: "A comissão técnica adora · desgaste físico",
+        efeito: (c) => { c.flags.selecaoFria = Math.max(0, (c.flags.selecaoFria || 0) - 1); c.mod.lesaoAdd = (c.mod.lesaoAdd || 0) + 0.04; return "Dois gols na turnê e a vaga na seleção mais firme do que nunca."; } },
+      { id: "poupar", label: "Ir, mas pedir para ser poupado", dica: "Meio-termo",
+        efeito: () => "Viajou, treinou e jogou só o segundo tempo do último jogo." },
+      { id: "cortar", label: "Pedir corte para cuidar do clube", dica: "O clube agradece · a seleção esfria",
+        efeito: (c) => { c.flags.selecaoFria = (c.flags.selecaoFria || 0) + 1; sobe(c, c.clubeNome, 4); return "O clube agradeceu. O técnico da seleção anotou o nome."; } },
+    ],
+  },
+];
+
+const riscoDaOferta = (o) => (["Reserva", "Fora dos planos", "Base"].includes(o.status) ? "arriscado" : o.status === "Rotação" ? "equilibrado" : "seguro");
+const TODOS_EVENTOS = () => [...EVENTOS, ...EVENTOS_EXTRAS];
+const opcoesCompletas = (e, c, ctx) => [...e.opcoes(c, ctx), ...(EXTRAS_OPCOES[e.id] ? EXTRAS_OPCOES[e.id](c, ctx) : [])];
+
 /* Sorteia o evento da janela entre temporadas */
-export function sortearEvento(c) {
+export function sortearEvento(c, { somente = null, excluir = [] } = {}) {
   const recentes = (c.flags.historicoEventos || []).slice(-3);
-  const cands = EVENTOS.map((e) => {
-    if (e.id !== "propostas" && recentes.includes(e.id)) return null;
+  const cands = TODOS_EVENTOS().map((e) => {
+    if (somente && e.id !== somente) return null;
+    if (excluir.includes(e.id)) return null;
+    if (!somente && e.id !== "propostas" && recentes.includes(e.id)) return null;
     const ctx = e.preparar ? e.preparar(c) : {};
     const p = e.peso(c, ctx);
     return p > 0 ? { e, ctx, p } : null;
@@ -788,16 +1103,24 @@ export function sortearEvento(c) {
   const { e, ctx } = escolhido;
   return {
     id: e.id, icone: e.icone, titulo: e.titulo(c, ctx), texto: e.texto(c, ctx),
-    opcoes: e.opcoes(c, ctx).map(({ efeito, ...o }) => o), ctx,
+    opcoes: opcoesCompletas(e, c, ctx).map(({ efeito, ...o }) => ({ ...o, risco: o.risco || RISCOS[`${e.id}:${o.id}`] || (o.oferta ? riscoDaOferta(o.oferta) : "seguro") })), ctx,
   };
+}
+
+/* Depois do evento principal: se o atleta já é grande demais para o clube,
+   a janela de transferências abre também (sem perder a oportunidade). */
+export function janelaExtra(c, idJaVisto) {
+  if (idJaVisto === "propostas" || c.flags.blindado > 0 || c.idade < 18 || c.emprestimo) return null;
+  if (ovrDe(c) - clubeDe(c.clubeNome).forca < 4 && !c.mod?.ofertasExtra) return null;
+  return sortearEvento(c, { somente: "propostas" });
 }
 
 /* Aplica a escolha. Como funções não vão pro save, o evento é reconstruído pelo id + contexto. */
 export function resolverEvento(c0, evento, opcaoId) {
   const c = clone(c0);
   c.mod = c.mod || {};
-  const def = EVENTOS.find((e) => e.id === evento.id);
-  const op = def?.opcoes(c, evento.ctx).find((o) => o.id === opcaoId);
+  const def = TODOS_EVENTOS().find((e) => e.id === evento.id);
+  const op = def ? opcoesCompletas(def, c, evento.ctx).find((o) => o.id === opcaoId) : null;
   const resultado = op ? op.efeito(c) : "";
   c.flags.historicoEventos = [...(c.flags.historicoEventos || []), evento.id].slice(-8);
   const ultima = c.temporadas[c.temporadas.length - 1];
@@ -814,7 +1137,7 @@ export function textoCompartilhar(c) {
     `${c.nome} · ${posicaoDe(c.posicao).label} · ${nacDe(c.nac).label}`,
     `${L.nivel.icone} ${L.nivel.nome} (${L.pontos} pts)`,
     `⚽ ${c.totais.gols} gols · 🅰️ ${c.totais.assist} assist. · ${c.totais.jogos} jogos · OVR máx. ${c.picoOvr}`,
-    `🏆 ${t.liga} ligas · ${t.copa} copas · ${t.continental} continentais · ${t.copaMundo} Copas do Mundo · ${t.bolaOuro} Bolas de Ouro`,
+    `🏆 ${t.liga} ligas · ${t.copa} copas · ${t.continental} continentais · ${t.mundial || 0} mundiais · ${t.copaMundo} Copas do Mundo · ${t.continentalSelecao || 0} copas continentais pela seleção · ${t.bolaOuro} Bolas de Ouro`,
     `Clubes: ${[...new Set(c.temporadas.map((s) => s.clube))].join(" → ")}`,
   ];
   return linhas.join("\n");
@@ -830,6 +1153,9 @@ export function carregarRapido() {
     if (!s || s.v !== VERSAO_RAPIDO || !s.c?.attrs || !Array.isArray(s.c.temporadas)) return null;
     s.c.flags = { historicoEventos: [], traidor: [], ...(s.c.flags || {}) };
     s.c.mod = s.c.mod || {};
+    s.c.marcos = s.c.marcos || [];
+    s.c.foco = s.c.foco || "equilibrio";
+    s.c.titulos = { liga: 0, copa: 0, continental: 0, mundial: 0, copaMundo: 0, continentalSelecao: 0, bolaOuro: 0, segunda: 0, ...(s.c.titulos || {}) };
     if (!s.c.mundo?.jogadores) s.c.mundo = mundoCompacto();
     return s;
   } catch { return null; }
@@ -837,7 +1163,7 @@ export function carregarRapido() {
 export function apagarRapido() { try { localStorage.removeItem(CHAVE_SAVE_RAPIDO); } catch { /* sem armazenamento */ } }
 
 /* ---------- simulação automática (testes e balanceamento) ---------- */
-export function simularCarreiraAutomatica(dados, escolher = (op) => pick(op)) {
+export function simularCarreiraAutomatica(dados, escolher = (op) => pick(op), escolherFoco = () => pick(FOCOS).id) {
   let c = criarJogador(dados);
   let guard = 0;
   while (!c.aposentado && guard++ < 30) {
@@ -848,6 +1174,9 @@ export function simularCarreiraAutomatica(dados, escolher = (op) => pick(op)) {
     if (precisaEscolherTraco(c)) c = escolherTraco(c, pick(opcoesDeTraco(c)).id);
     const ev = sortearEvento(c);
     if (ev) ({ c } = resolverEvento(c, ev, escolher(ev.opcoes, ev).id));
+    const ex = janelaExtra(c, ev?.id);
+    if (ex) ({ c } = resolverEvento(c, ex, escolher(ex.opcoes, ex).id));
+    c = definirFoco(c, escolherFoco(c));
   }
   if (!c.aposentado) c = aposentar(c);
   return c;

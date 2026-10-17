@@ -4,6 +4,29 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🏆 Modo Rápido — conquistas, mais escolhas e novo visual
+
+**Conquistas não passam mais batido**
+- Tela de celebração para cada título (taça, raios na cor do clube, confete e contagem: "seu 3º Brasileirão")
+- Cerimônia da Bola de Ouro com pódio revelado do 3º ao 1º quando você fica no top 3
+- Apresentação no novo clube (camisa com seu nome e número) a cada transferência
+- Marcos de carreira: primeiro gol, 50/100/200… gols, 100/300/500 jogos, primeira convocação, top 10 do mundo, ídolo e apelido da torcida
+- Estante de troféus sempre visível no topo, com os momentos da carreira
+
+**Mais escolhas**
+- Foco da temporada antes de cada ano: Equilíbrio, Protagonismo, Evolução, Jogo coletivo, Vitrine ou Preservar o corpo
+- Origem do atleta na criação (várzea, base de clube grande, futsal, filho de ex-jogador, descoberto tarde, prodígio)
+- 9 eventos novos (camisa 10, série documental, naturalização, eleição no clube, fim de contrato, pupilo da base…) e terceira opção em 14 eventos
+- Selo de risco em cada escolha: Seguro, Equilibrado ou Arriscado
+- Janela de transferências extra quando você fica grande demais para o clube
+- Copa América / Eurocopa / Copa Africana / Copa da Ásia / Copa Ouro entre as Copas do Mundo, e Mundial de Clubes para o campeão continental
+
+**Visual**
+- Resumo com a cor do clube, anel de nota, variação de torcida e conquistas em destaque dourado
+- Eventos com cabeçalho ilustrado; escudos dos clubes em todas as telas
+
+---
+
 ## ⚡ Modo Rápido (novo modo de jogo)
 
 Tela inicial agora tem dois modos: **Modo Carreira** (o jogo completo, sem nenhuma alteração) e **Modo Rápido** (carreira inteira em 5 a 10 minutos, inspirado em Copero e El Ídolo).

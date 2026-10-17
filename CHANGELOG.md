@@ -4,6 +4,22 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## ⚡ Modo Rápido (novo modo de jogo)
+
+Tela inicial agora tem dois modos: **Modo Carreira** (o jogo completo, sem nenhuma alteração) e **Modo Rápido** (carreira inteira em 5 a 10 minutos, inspirado em Copero e El Ídolo).
+
+- Cada temporada é uma tela: resumo → evento → decisão
+- Começa aos 16 anos na base de um clube modesto do seu país
+- 21 eventos com consequências (propostas, renovação, clássico, lesão, traição ao rival, volta ao clube que te revelou, Arábia, empréstimo…)
+- Traços de carreira (as antigas insígnias) escolhidos aos 19, 24 e 29 anos
+- Copa do Mundo a cada 4 anos e pênalti decisivo jogável nas finais
+- Bola de Ouro disputada contra o mundo de jogadores reais do Modo Carreira
+- Fim de carreira com pontos de legado em 6 níveis (de "Promessa esquecida" a "A Joia") e carta final com resumo para compartilhar
+- Save próprio (`ajoia_rapido_v1`), separado dos saves do Modo Carreira
+- Arquivos novos: `App.jsx` (seletor de modos), `ModoRapido.jsx` (telas), `rapido.js` (regras)
+
+---
+
 ## 🐛 Bloco 1 — Correção de bugs
 
 ### Gol de minigame não contava

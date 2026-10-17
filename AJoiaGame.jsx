@@ -4148,7 +4148,7 @@ function resolverTemporada(c, extraStats) {
         }
         .display{font-family:'Unbounded',sans-serif;}
         .font-sport{font-family:'Rajdhani',sans-serif;}
-        .font-stat{font-family:'Oswald',sans-serif;}
+        .font-stat{font-family:'bebas-neue','Oswald',sans-serif;letter-spacing:.02em;font-synthesis:none;}
         body,.font-sans{font-family:'Rajdhani',ui-sans-serif,system-ui,sans-serif;}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         @keyframes popIn{0%{opacity:0;transform:scale(0.95) translateY(8px)}100%{opacity:1;transform:scale(1) translateY(0)}}

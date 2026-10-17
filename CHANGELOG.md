@@ -4,6 +4,13 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🔢 Fonte dos números: Bebas Neue (Adobe Fonts)
+
+- Placar, overall, gols, valores e estatísticas passam a usar a Bebas Neue (Ryoichi Tsunekawa, Dharma Type), servida pelo Adobe Fonts (kit `lvt7jhx`, liberado para bravolucas.github.io e localhost)
+- Títulos continuam em Unbounded e textos em Rajdhani; se o Adobe Fonts não carregar, os números voltam para a Oswald automaticamente
+
+---
+
 ## 🖼️ Mais fotos nas cenas (Adobe Stock, 2ª leva)
 
 - Túnel do estádio na estreia profissional; torcida em silhueta na estreia pela seleção, na convocação e no painel de seleção do Modo Rápido; jogador lesionado na lesão grave; mão assinando contrato na renovação e na mesa de negociação; refletores no primeiro duelo com o rival; estádio à noite na despedida de um clube

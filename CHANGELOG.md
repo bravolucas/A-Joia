@@ -4,6 +4,20 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 💼 Modo Rápido — contratos, negociação e economia
+
+Trazido do Modo Carreira e enxugado para o formato curto:
+- **Contrato de verdade:** salário, duração, cláusula de rescisão e bônus por gol, sempre visíveis na ficha
+- **Mesa de negociação** ao aceitar proposta ou renovar: peça mais salário, anos, bônus ou cláusula menor; a diretoria tem paciência limitada e pode sair da mesa (a proposta cai). Quem negocia duro ganha fama de "osso duro" e encontra diretorias menos pacientes
+- **Fim de contrato:** renovar, sair de graça levando luvas, ou aceitar o primeiro clube que ligar
+- **Cláusula paga:** se a sua cláusula estiver barata, um clube maior pode depositá-la; ir ou ficar (e o clube dobra a cláusula)
+- **Economia:** salário + bônus por gol e por título − comissão do empresário − manutenção de luxos; patrimônio acumulado
+- **Investimentos e luxos:** personal, nutricionista, fisioterapeuta (cura lesão crônica), analista, CT próprio, assessoria de imagem, instituto social, reforma da base do clube que te revelou; carros, mansão e iate dão fama, mas a ostentação incomoda torcida de clube pequeno
+- **Pós-carreira:** escolha o que fazer depois da bola (treinador, comentarista, embaixador, dirigente, empresário…), com epílogo
+- Fim de carreira mostra quanto você ganhou e o patrimônio final
+
+---
+
 ## 🏆 Modo Rápido — conquistas, mais escolhas e novo visual
 
 **Conquistas não passam mais batido**

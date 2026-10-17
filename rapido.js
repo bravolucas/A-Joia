@@ -6,7 +6,7 @@
    lê ou grava o save do Modo Carreira. */
 
 import {
-  CLUBES, LIGAS, POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS, AFINIDADE_MERCADO, CLASSICOS, ORIGENS,
+  CLUBES, LIGAS, POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS, AFINIDADE_MERCADO, CLASSICOS, ORIGENS, CAMINHOS_POS_CARREIRA,
 } from "./data.js";
 import {
   rand, pick, clampR, clamp, poisson, calcOVR, evoluirAtributos,
@@ -149,6 +149,8 @@ export function criarJogador({ nome, nac, posicao, personalidade, origem }) {
     mundo: mundoCompacto(),
   };
   c.picoOvr = ovrDe(c);
+  c.patrimonio = 0; c.ganhosTotais = 0; c.investimentos = []; c.repNeg = 0;
+  c.contrato = contratoPadrao(c, clube.nome, { base: true });
   return c;
 }
 
@@ -208,6 +210,161 @@ export function valorMercado(ovr, idade, fama = 0) {
 export function formatarValor(k) {
   if (k >= 1000) { const m = k / 1000; return `€ ${m >= 100 ? Math.round(m) : m.toFixed(1).replace(".0", "")} mi`; }
   return `€ ${Math.round(k)} mil`;
+}
+
+/* ===================== ECONOMIA E CONTRATOS =====================
+   Mesma ideia do Modo Carreira (salário, cláusula, bônus, comissão do
+   empresário, gastos), com valores em milhares de euro e escala realista. */
+const LIGA_PAGA = {
+  inglaterra: 1.35, espanha: 1.1, italia: 1.0, alemanha: 1.0, franca: 0.9, portugal: 0.55, brasileirao: 0.5, arabia: 2.4, mls: 0.8,
+  inglaterra2: 0.45, espanha2: 0.3, italia2: 0.28, alemanha2: 0.32, franca2: 0.28, portugal2: 0.18, serieB: 0.2,
+};
+export function salarioAnual(clubeNome, ovr) {
+  const cl = clubeDe(clubeNome);
+  return Math.max(15, Math.round(60 * Math.pow(1.155, ovr - 55) * (LIGA_PAGA[cl.liga] ?? 0.4) * (0.75 + (cl.forca - 60) / 80)));
+}
+const empresarioDe = (c) => EMPRESARIOS.find((e) => e.id === c.empresario) || EMPRESARIOS[0];
+
+export function contratoPadrao(c, clubeNome, { base = false } = {}) {
+  const emp = empresarioDe(c);
+  const ovr = ovrDe(c);
+  const salario = Math.round(salarioAnual(clubeNome, ovr) * (emp.salarioMult ?? 1) * (base ? 0.6 : 1));
+  const anos = clampR(3 + (emp.anosBonus || 0), 1, 5);
+  return {
+    clube: clubeNome, anos, restantes: anos, salario,
+    multa: Math.round(Math.max(valorMercado(ovr, c.idade, c.fama) * 1.6, salario * 4) * (emp.multaMult ?? 1)),
+    bonusGol: Math.max(1, Math.round(salario * 0.012)),
+  };
+}
+
+/* ---------- mesa de negociação ---------- */
+export const CAMPOS_NEGOCIACAO = [
+  { id: "salario", label: "Salário por ano", icone: "💰", pedirMais: "Pedir mais", ceder: "Aceitar menos" },
+  { id: "anos", label: "Duração", icone: "📅", pedirMais: "Mais anos", ceder: "Menos anos" },
+  { id: "multa", label: "Cláusula de rescisão", icone: "🔓", pedirMais: "Cláusula maior", ceder: "Cláusula menor" },
+  { id: "bonusGol", label: "Bônus por gol", icone: "⚽", pedirMais: "Pedir mais", ceder: "Aceitar menos" },
+];
+/* Desgasta a diretoria: pedir mais salário, bônus ou anos, ou pedir cláusula menor (sair fica fácil). */
+const ehDesgastante = (campo, dir) => (["salario", "bonusGol", "anos"].includes(campo) && dir > 0) || (campo === "multa" && dir < 0);
+
+export function iniciarNegociacao(c, { clube, tipo = "transferencia", luvas = 0, contexto = null }) {
+  const ovr = ovrDe(c);
+  const cl = clubeDe(clube);
+  const termos = contratoPadrao(c, clube);
+  if (tipo === "renovacao") termos.salario = Math.max(termos.salario, Math.round((c.contrato?.salario || 0) * 1.05));
+  const relevancia = clamp((ovr - cl.forca + ((c.fama ?? 20) - 40) / 4) / 40, -0.5, 0.6);
+  const afeto = tipo === "renovacao" ? ((c.torcida[clube] ?? 30) - 50) / 5 : 0;
+  const paciencia = clampR(Math.round(60 + relevancia * 60 - (c.repNeg || 0) / 8 + afeto), 20, 95);
+  return { clube, tipo, termos, original: { ...termos }, paciencia, pacienciaInicial: paciencia, pedidos: 4, colapsou: false, luvas, contexto, historico: [], duro: 0, cedeu: 0 };
+}
+
+export function ajustarNegociacao(n0, campo, dir) {
+  const n = clone(n0);
+  if (n.pedidos <= 0 || n.colapsou) return n;
+  const t = n.termos;
+  const novo = campo === "anos" ? clampR(t.anos + dir, 1, 5)
+    : campo === "salario" ? Math.max(10, Math.round(t.salario * (1 + dir * 0.1)))
+    : campo === "multa" ? Math.max(Math.round(t.salario * 1.5), Math.round(t.multa * (1 + dir * 0.18)))
+    : Math.max(0, Math.round(t.bonusGol * (1 + dir * 0.25)) + (dir > 0 && t.bonusGol < 4 ? 1 : 0));
+  const desg = ehDesgastante(campo, dir);
+  const aceitou = desg ? chance(clamp(n.paciencia / 100, 0.15, 0.95)) : true;
+  n.paciencia = clampR(n.paciencia - (desg ? rand(6, 14) : -rand(2, 5)), 0, 100);
+  n.pedidos -= 1;
+  if (desg) n.duro += aceitou ? 1 : 0; else n.cedeu += 1;
+  const rotulo = CAMPOS_NEGOCIACAO.find((x) => x.id === campo)?.label.toLowerCase();
+  if (aceitou) { t[campo] = novo; if (campo === "anos") t.restantes = novo; }
+  n.historico.push(aceitou ? (desg ? `Aceitaram mudar ${rotulo}.` : `Você cedeu em ${rotulo}. A diretoria gostou.`) : `Recusaram mexer em ${rotulo}.`);
+  if (n.paciencia <= 0) { n.colapsou = true; n.historico.push("A diretoria levantou da mesa."); }
+  return n;
+}
+
+/* Fecha o acordo: devolve o contrato e atualiza a fama de negociador */
+export function fecharNegociacao(c0, n) {
+  const c = clone(c0);
+  c.repNeg = clampR((c.repNeg || 0) + n.duro * 4 - n.cedeu * 2, -60, 60);
+  return { c, contrato: { ...n.termos, clube: n.clube, restantes: n.termos.anos } };
+}
+export const fama_negociador = (c) => ((c.repNeg || 0) >= 15 ? "Osso duro" : (c.repNeg || 0) <= -15 ? "Fácil de negociar" : "Equilibrado");
+
+/* ---------- investimentos e luxos ---------- */
+export const INVESTIMENTOS = [
+  { id: "personal", nome: "Personal trainer", icone: "🏋️", custo: 400, desc: "20% menos risco de lesão.", lesaoMult: 0.8 },
+  { id: "nutri", nome: "Nutricionista particular", icone: "🥗", custo: 900, desc: "Envelhece 12% mais devagar.", declinio: 0.88 },
+  { id: "fisio", nome: "Fisioterapeuta particular", icone: "🩺", custo: 1500, desc: "Cura lesão crônica e reduz o risco de lesão.", lesaoMult: 0.9, curaCronica: true },
+  { id: "imagem", nome: "Assessoria de imagem", icone: "🗞️", custo: 1200, desc: "+3 de fama todo ano.", famaAno: 3 },
+  { id: "analista", nome: "Analista de desempenho", icone: "📊", custo: 2000, desc: "Notas um pouco mais altas.", notaBonus: 0.08 },
+  { id: "ct", nome: "Centro de treinamento próprio", icone: "🏟️", custo: 8000, desc: "Evolui 8% mais rápido.", evolucao: 1.08 },
+  { id: "instituto", nome: "Instituto com seu nome", icone: "🤝", custo: 5000, desc: "Legado fora de campo e +2 de torcida por ano.", torcidaAno: 2, social: true },
+  { id: "origem", nome: "Reformar a base do clube que te revelou", icone: "🏠", custo: 12000, desc: "Vira benfeitor: +20 de torcida no seu primeiro clube e pontos de legado.", benfeitor: true },
+  { id: "carro", nome: "Coleção de carros esportivos", icone: "🏎️", custo: 2500, desc: "+4 de fama. Luxo: custa manutenção e incomoda torcida de clube pequeno.", luxo: true, fama: 4 },
+  { id: "mansao", nome: "Mansão com piscina", icone: "🏡", custo: 9000, desc: "+6 de fama. Luxo: custa manutenção e incomoda torcida de clube pequeno.", luxo: true, fama: 6 },
+  { id: "iate", nome: "Iate", icone: "🛥️", custo: 25000, desc: "+8 de fama. Luxo de verdade — e polêmica.", luxo: true, fama: 8 },
+];
+export const investimentoDe = (id) => INVESTIMENTOS.find((i) => i.id === id);
+const efeitosInv = (c) => (c.investimentos || []).map(investimentoDe).filter(Boolean);
+const multInv = (c, k) => efeitosInv(c).reduce((m, i) => m * (i[k] ?? 1), 1);
+const somaInv = (c, k) => efeitosInv(c).reduce((s, i) => s + (i[k] ?? 0), 0);
+
+export function comprarInvestimento(c0, id) {
+  const c = clone(c0);
+  const inv = investimentoDe(id);
+  if (!inv || (c.investimentos || []).includes(id) || c.patrimonio < inv.custo) return { c, ok: false };
+  c.patrimonio -= inv.custo;
+  c.investimentos = [...(c.investimentos || []), id];
+  if (inv.curaCronica) c.flags.cronica = false;
+  if (inv.fama) c.fama = clampR(c.fama + inv.fama, 0, 100);
+  if (inv.social) c.flags.social = true;
+  if (inv.benfeitor) { c.flags.benfeitor = true; c.torcida[c.primeiroClube] = clampR((c.torcida[c.primeiroClube] ?? 30) + 20, 0, 100); }
+  return { c, ok: true };
+}
+
+/* Dinheiro da temporada: salário + bônus − comissão − manutenção dos luxos */
+function fecharFinancas(c, card) {
+  const k = c.contrato || contratoPadrao(c, c.clubeNome);
+  const emp = empresarioDe(c);
+  const nTit = card.titulos.filter((t) => t.tipo !== "bolaOuro").length;
+  const salario = k.salario;
+  const bonus = k.bonusGol * card.gols + Math.round(salario * 0.1) * nTit + (card.bola?.pos === 1 ? Math.round(salario * 0.3) : 0);
+  const comissao = Math.round((salario + bonus) * (emp.comissao || 0));
+  const manutencao = efeitosInv(c).filter((i) => i.luxo).reduce((s, i) => s + Math.round(i.custo * 0.06), 0);
+  const total = salario + bonus - comissao - manutencao;
+  c.patrimonio = Math.max(0, (c.patrimonio || 0) + total);
+  c.ganhosTotais = (c.ganhosTotais || 0) + salario + bonus;
+  k.restantes = Math.max(0, (k.restantes ?? 1) - 1);
+  c.contrato = k;
+  return { salario, bonus, comissao, manutencao, total };
+}
+
+/* ---------- pós-carreira (os mesmos caminhos do Modo Carreira) ---------- */
+export function caminhosPosCarreira(c) {
+  const titulos = (c.lista || []).filter((x) => x.tipo !== "bolaOuro").length;
+  const idolo = Object.values(c.torcida).some((v) => v >= 75);
+  const req = {
+    tecnico: c.temporadas.length >= 15 || titulos >= 5,
+    auxiliar: true,
+    embaixador: idolo,
+    comentarista: c.fama >= 55,
+    dirigente: (c.patrimonio || 0) >= 10000 || (c.repNeg || 0) >= 20,
+    empresario: (c.patrimonio || 0) >= 3000,
+    afastar: true,
+  };
+  const textoReq = { tecnico: "Carreira longa (15+ temporadas) ou 5 títulos", dirigente: "Patrimônio de € 10 mi ou fama de negociador duro", empresario: "Patrimônio de € 3 mi" };
+  return CAMINHOS_POS_CARREIRA.map((p) => ({ id: p.id, nome: p.nome, icone: p.icone, cor: p.cor, desc: p.desc, disponivel: !!req[p.id], requisito: textoReq[p.id] || p.textoRequisito }));
+}
+export function escolherPosCarreira(c0, id) {
+  const c = clone(c0);
+  const p = CAMINHOS_POS_CARREIRA.find((x) => x.id === id);
+  if (!p) return c;
+  const ultimo = c.temporadas[c.temporadas.length - 1];
+  const adaptado = {
+    titulos: c.lista.filter((x) => x.tipo !== "bolaOuro").length, bolasDeOuro: c.titulos.bolaOuro || 0,
+    clube: { nome: ultimo?.clube || c.clubeNome }, torcidaPorClube: c.torcida, fama: c.fama, cofre: c.patrimonio || 0,
+    tecnicoConfianca: 60, relacaoDiretoria: 50,
+  };
+  let epilogo = "";
+  try { epilogo = p.epilogo(adaptado, c.temporadas); } catch { epilogo = ""; }
+  c.posCarreira = { id: p.id, nome: p.nome, icone: p.icone, cor: p.cor, epilogo: epilogo.replace(/\$([\d.]+M?k?)/g, (_, v) => `€ ${v}`) };
+  return c;
 }
 
 /* ---------- temporada ---------- */
@@ -294,7 +451,7 @@ export function jogarTemporada(c0) {
 
   // lesão durante a temporada
   const corpoPronto = c.origem === "tardio" && c.idade <= 21 ? 0.5 : 1;
-  const riscoLesao = clampR((0.07 + (mod.lesaoAdd || 0) + (fx.lesaoAdd || 0) + (c.flags.cronica ? 0.05 : 0) + Math.max(0, c.idade - 30) * 0.01) * persona.risco * multTraco(c, "lesaoMult") * corpoPronto, 0.01, 0.4);
+  const riscoLesao = clampR((0.07 + (mod.lesaoAdd || 0) + (fx.lesaoAdd || 0) + (c.flags.cronica ? 0.05 : 0) + Math.max(0, c.idade - 30) * 0.01) * persona.risco * multTraco(c, "lesaoMult") * multInv(c, "lesaoMult") * corpoPronto, 0.01, 0.4);
   const lesao = chance(riscoLesao) ? pick([
     { nome: "estiramento na coxa", fator: 0.8 }, { nome: "entorse no tornozelo", fator: 0.75 },
     { nome: "lesão muscular", fator: 0.7 }, { nome: "ruptura de ligamento", fator: 0.35 },
@@ -308,7 +465,7 @@ export function jogarTemporada(c0) {
   const assist = Math.round(poisson(pos.assistBase * nivel * jogos * (c.posicao === "GOL" ? 0.1 : 1)) * multTraco(c, "assistMult") * (fx.golsMult ?? 1));
   const defBonus = DEFENSIVAS.includes(c.posicao) ? 0.15 : 0;
   const nota = jogos === 0 ? 0 : +clamp(6.2 + (ovr - 70) * 0.035 + (ovr - clube.forca) * 0.02 + ((gols + assist) / Math.max(1, jogos)) * 1.2
-    + defBonus + somaTraco(c, "notaBonus") + (mod.notaBonus || 0) + (rnd() - 0.5) * 0.5 * (fx.notaRuido || 1), 5.2, 9.7).toFixed(2);
+    + defBonus + somaTraco(c, "notaBonus") + somaInv(c, "notaBonus") + (mod.notaBonus || 0) + (rnd() - 0.5) * 0.5 * (fx.notaRuido || 1), 5.2, 9.7).toFixed(2);
 
   const card = {
     idx: c.temporadas.length, ano: c.ano, idade: c.idade, clube: clube.nome, cor: clube.cor, ligaId: clube.liga, ligaNome: liga.nome,
@@ -466,12 +623,15 @@ export function fecharTemporada(c0, card0) {
   c.totais.jogos += card.jogos; c.totais.gols += card.gols; c.totais.assist += card.assist;
   if (card.selecao?.convocado) c.totais.gols += card.selecao.gols || 0;
   const famaGanho = (Math.max(0, (card.nota - 6.5)) * 6 + nTit * 4 + (card.bola.pos <= 10 ? 8 : 0)) * (persona.famaMult || 1) * multTraco(c, "famaMult") * (c.foco === "vitrine" ? 1.4 : 1);
-  c.fama = clampR(Math.round(c.fama * 0.92 + famaGanho), 0, 100);
+  c.fama = clampR(Math.round(c.fama * 0.92 + famaGanho + somaInv(c, "famaAno")), 0, 100);
 
   // torcida do clube em que jogou
   const tc = card.clube;
   const tAntes = c.torcida[tc] ?? 30;
-  const delta = ((card.nota ? (card.nota - 6.6) * 9 : -4) + nTit * 7 + (card.jogos >= 30 ? 3 : 0) + somaTraco(c, "torcidaAno") - (c.foco === "vitrine" ? 3 : 0)) * (card.nota >= 6.6 ? multTraco(c, "torcidaMult") : 1);
+  const luxos = efeitosInv(c).filter((i) => i.luxo).length;
+  const ostentacao = luxos && clubeDe(tc).forca < 80 ? luxos * 3 : 0;
+  if (ostentacao) card.destaques.push("Seu padrão de vida destoa do clube: a torcida estranha a ostentação");
+  const delta = ((card.nota ? (card.nota - 6.6) * 9 : -4) + nTit * 7 + (card.jogos >= 30 ? 3 : 0) + somaTraco(c, "torcidaAno") + somaInv(c, "torcidaAno") - ostentacao - (c.foco === "vitrine" ? 3 : 0)) * (card.nota >= 6.6 ? multTraco(c, "torcidaMult") : 1);
   c.torcida[tc] = clampR(Math.round(tAntes + delta), 0, 100);
   card.torcida = c.torcida[tc];
   card.torcidaDelta = c.torcida[tc] - tAntes;
@@ -491,8 +651,8 @@ export function fecharTemporada(c0, card0) {
   // evolução e idade
   const focoEvo = c.foco === "evolucao" ? 1.15 : 1;
   const focoDecl = c.foco === "preservar" ? 0.8 : 1;
-  const fatorDes = clampR(1 + ((card.nota || 6) - 6.8) * 0.12, 0.8, 1.25) * (c.mod?.evolucao ?? 1) * focoEvo;
-  const reduc = multTraco(c, "declinio") * (c.mod?.declinio ?? 1) * focoDecl;
+  const fatorDes = clampR(1 + ((card.nota || 6) - 6.8) * 0.12, 0.8, 1.25) * (c.mod?.evolucao ?? 1) * focoEvo * multInv(c, "evolucao");
+  const reduc = multTraco(c, "declinio") * (c.mod?.declinio ?? 1) * focoDecl * multInv(c, "declinio");
   const novos = evoluirAtributos({ ...c.attrs, fintas: 3, pernaRuim: 3 }, { ...c.potencial, fintas: 3, pernaRuim: 3 }, c.idade, persona, null, reduc, fatorDes, 1 + nTit * 0.05);
   ATTRS.forEach((a) => { c.attrs[a] = novos[a]; });
   if (c.flags.cronica) { c.attrs.velocidade = clampR(c.attrs.velocidade - 1, 40, 99); c.attrs.fisico = clampR(c.attrs.fisico - 1, 40, 99); }
@@ -500,6 +660,9 @@ export function fecharTemporada(c0, card0) {
   c.picoOvr = Math.max(c.picoOvr, card.ovr, card.ovrDepois);
   card.valor = valorMercado(card.ovrDepois, c.idade + 1, c.fama);
 
+  card.ganhos = fecharFinancas(c, card);
+  card.contratoRestante = c.contrato.restantes;
+  card.patrimonio = c.patrimonio;
   card.marcos = [...detectarMarcos(antes, c, card), ...novosMarcos];
   c.marcos = [...(c.marcos || []), ...card.marcos];
 
@@ -546,7 +709,7 @@ export function calcularLegado(c) {
     selecao: (t.copaMundo || 0) * 45 + (t.continentalSelecao || 0) * 18 + c.selecao.convocacoes * 4,
     premios: (t.bolaOuro || 0) * 55 + c.top3Bola * 10,
     auge: Math.max(0, c.picoOvr - 74) * 6,
-    torcida: idolos * 12 + (c.flags.social ? 8 : 0) + (c.flags.mentorJovem ? 6 : 0),
+    torcida: idolos * 12 + (c.flags.social ? 8 : 0) + (c.flags.mentorJovem ? 6 : 0) + (c.flags.benfeitor ? 10 : 0),
   };
   const pontos = Object.values(partes).reduce((a, b) => a + b, 0);
   const nivel = [...NIVEIS_LEGADO].reverse().find((n) => pontos >= n.min) || NIVEIS_LEGADO[0];
@@ -582,9 +745,11 @@ export function gerarOfertas(c, n, opts = {}) {
   }));
 }
 
-export function transferir(c, clubeNome, { torcidaInicial = 30 } = {}) {
+export function transferir(c, clubeNome, { torcidaInicial = 30, contrato = null, luvas = 0 } = {}) {
   const deOnde = c.clubeNome;
   c.clubeNome = clubeNome;
+  c.contrato = contrato ? { ...contrato, clube: clubeNome } : contratoPadrao(c, clubeNome);
+  if (luvas) { c.patrimonio = (c.patrimonio || 0) + luvas; c.ganhosTotais = (c.ganhosTotais || 0) + luvas; }
   c.torcida[clubeNome] = c.torcida[clubeNome] ?? torcidaInicial;
   c.vagaContinental = false;
   c.emprestimo = null;
@@ -618,8 +783,9 @@ export const EVENTOS = [
     texto: (c, ctx) => `Seu empresário chegou com ${ctx.ofertas.length === 1 ? "uma proposta" : `${ctx.ofertas.length} propostas`}. Valor de mercado atual: ${formatarValor(valorMercado(ovrDe(c), c.idade, c.fama))}.`,
     opcoes: (c, ctx) => [
       ...ctx.ofertas.map((o) => ({
-        id: `ir:${o.clube}`, label: `Assinar com o ${o.clube}`, dica: `${o.ligaNome} · você chegaria como ${o.status.toLowerCase()}`, oferta: o,
-        efeito: (c) => { const de = transferir(c, o.clube); c.fama = clampR(c.fama + (o.forca > clubeDe(de).forca ? 4 : 0), 0, 100); return r(`Contrato assinado. Nova casa: ${o.clube}.`); },
+        id: `ir:${o.clube}`, label: `Negociar com o ${o.clube}`, dica: `${o.ligaNome} · você chegaria como ${o.status.toLowerCase()} · ~${formatarValor(salarioAnual(o.clube, ovrDe(c)))}/ano`, oferta: o,
+        negociar: { clube: o.clube, tipo: "transferencia" },
+        efeito: (c, extra) => { const de = transferir(c, o.clube, { contrato: extra?.contrato }); c.fama = clampR(c.fama + (o.forca > clubeDe(de).forca ? 4 : 0), 0, 100); return r(`Contrato assinado. Nova casa: ${o.clube}.`); },
       })),
       { id: "ficar", label: `Ficar no ${c.clubeNome}`, dica: "A torcida valoriza a lealdade",
         efeito: (c) => { c.torcida[c.clubeNome] = clampR((c.torcida[c.clubeNome] ?? 30) + 5, 0, 100); return r("Você recusou tudo e ficou. A arquibancada notou."); } },
@@ -630,9 +796,10 @@ export const EVENTOS = [
     peso: (c) => (c.idade >= 19 && ["Titular", "Estrela do time"].includes(statusNoClube(c).label) && c.flags.blindado === 0 ? 2.5 : 0),
     titulo: (c) => `O ${c.clubeNome} quer renovar`,
     texto: () => "A diretoria oferece um contrato longo, com aumento. Assinar agora fecha a porta para o mercado por um tempo.",
-    opcoes: () => [
-      { id: "renovar", label: "Renovar por 4 anos", dica: "Torcida e técnico te abraçam · sem propostas por 2 temporadas",
-        efeito: (c) => { c.flags.blindado = 2; c.torcida[c.clubeNome] = clampR((c.torcida[c.clubeNome] ?? 30) + 8, 0, 100); c.mod.shareAdd = (c.mod.shareAdd || 0) + 0.05; return r("Renovado. Você é um dos pilares do projeto."); } },
+    opcoes: (c) => [
+      { id: "renovar", label: "Sentar para negociar a renovação", dica: "Torcida e técnico te abraçam · sem propostas por 2 temporadas",
+        negociar: { clube: c.clubeNome, tipo: "renovacao" },
+        efeito: (c, extra) => { if (extra?.contrato) c.contrato = extra.contrato; c.flags.blindado = 2; c.torcida[c.clubeNome] = clampR((c.torcida[c.clubeNome] ?? 30) + 8, 0, 100); c.mod.shareAdd = (c.mod.shareAdd || 0) + 0.05; return r("Renovado. Você é um dos pilares do projeto."); } },
       { id: "esperar", label: "Esperar o mercado", dica: "Mais propostas na próxima janela · a torcida estranha",
         efeito: (c) => { c.mod.ofertasExtra = 1; c.torcida[c.clubeNome] = clampR((c.torcida[c.clubeNome] ?? 30) - 6, 0, 100); return r("Você deixou a caneta na mesa. O mercado ficou sabendo."); } },
     ],
@@ -946,12 +1113,63 @@ const RISCOS = {
   "rivalMundo:responder": "arriscado", "rivalMundo:ignorar": "seguro", "rivalMundo:elogiar": "seguro",
   "naturalizacao:aceitar": "arriscado", "camisa10:aceitar": "arriscado", "documentario:aceitar": "equilibrado",
   "golDePlaca:provocar": "arriscado", "presidente:apoiar": "arriscado", "presidente:oposicao": "arriscado",
-  "livre:grande": "arriscado", "selecaoAmistoso:jogar": "arriscado",
+  "livre:grande": "arriscado", "selecaoAmistoso:jogar": "arriscado", "fimContrato:renovar": "seguro", "fimContrato:qualquer": "seguro", "clausula:ir": "equilibrado", "clausula:ficar": "seguro",
 };
 
 /* ---------- eventos novos ---------- */
 const NUMEROS_POR_POS = { GOL: 1, ZAG: 4, LD: 2, LE: 6, VOL: 5, MC: 8, MEI: 10, PD: 7, PE: 11, SA: 9, ATA: 9 };
 export const EVENTOS_EXTRAS = [
+  {
+    id: "fimContrato", icone: "📄",
+    peso: (c) => (c.contrato && c.contrato.restantes <= 0 && !c.emprestimo ? 1000 : 0),
+    preparar: (c) => {
+      const ovr = ovrDe(c);
+      const ofertas = gerarOfertas(c, 2, { lo: ovr - 8, hi: ovr + 6, permitirSegunda: true });
+      const querRenovar = !["Fora dos planos"].includes(statusNoClube(c).label) && !(c.idade >= 33 && ovr < 72);
+      return { ofertas, querRenovar };
+    },
+    titulo: (c) => `Seu contrato com o ${c.clubeNome} acabou`,
+    texto: (c, ctx) => (ctx.querRenovar ? "Você está livre. O clube quer renovar, mas outros também ligaram — e quem sai de graça ainda leva luvas." : "Você está livre. O clube não demonstrou interesse em renovar."),
+    opcoes: (c, ctx) => [
+      ...(ctx.querRenovar ? [{ id: "renovar", label: `Negociar a renovação com o ${c.clubeNome}`, dica: "Continuidade e carinho da torcida", negociar: { clube: c.clubeNome, tipo: "renovacao" },
+        efeito: (c, extra) => { c.contrato = extra?.contrato || contratoPadrao(c, c.clubeNome); sobe(c, c.clubeNome, 4); return "Renovado. Mais um capítulo na mesma casa."; } }] : []),
+      ...ctx.ofertas.map((o) => ({
+        id: `livre:${o.clube}`, label: `Negociar com o ${o.clube} (sem custo de transferência)`, dica: `${o.ligaNome} · chegaria como ${o.status.toLowerCase()} · leva luvas na assinatura`, oferta: o,
+        negociar: { clube: o.clube, tipo: "transferencia", luvas: true },
+        efeito: (c, extra) => { transferir(c, o.clube, { contrato: extra?.contrato, luvas: extra?.luvas }); return `Assinou com o ${o.clube} de graça${extra?.luvas ? ` e embolsou ${formatarValor(extra.luvas)} de luvas` : ""}.`; },
+      })),
+      { id: "qualquer", label: "Aceitar o primeiro clube que ligar", dica: "Sem negociação: garante um contrato padrão",
+        efeito: (c) => {
+          const ovr = ovrDe(c);
+          const op = clubesJogaveis().filter((x) => x.nome !== c.clubeNome && x.forca <= ovr && x.forca >= ovr - 10);
+          const d = op.length ? pick(op) : clubeDe(c.clubeNome);
+          if (d.nome === c.clubeNome) { c.contrato = contratoPadrao(c, c.clubeNome); return "Ninguém ligou. Você renovou nos termos que o clube ofereceu."; }
+          transferir(c, d.nome); return `O ${d.nome} ligou primeiro. Contrato padrão assinado.`;
+        } },
+    ],
+  },
+  {
+    id: "clausula", icone: "🔓",
+    peso: (c, ctx) => (ctx.clube && c.flags.blindado === 0 && !c.emprestimo && c.idade >= 19 ? (ctx.multa < valorMercado(ovrDe(c), c.idade, c.fama) * 0.5 ? 5 : 3) : 0),
+    preparar: (c) => {
+      const ovr = ovrDe(c);
+      const atual = clubeDe(c.clubeNome);
+      const multa = c.contrato?.multa ?? Infinity;
+      const barata = multa <= valorMercado(ovr, c.idade, c.fama) * 1.15;
+      if (!barata) return {};
+      const op = clubesJogaveis().filter((x) => x.forca >= atual.forca + 4 && x.forca <= ovr + 8 && !ehSegundaDivisao(x.liga) && !(c.flags.traidor || []).includes(x.nome));
+      return { clube: op.length ? pick(op).nome : null, multa };
+    },
+    titulo: (c, ctx) => `O ${ctx.clube} pagou sua cláusula de rescisão`,
+    texto: (c, ctx) => `${formatarValor(ctx.multa)} depositados. O ${c.clubeNome} não pode impedir: a decisão é só sua. (Cláusula baixa é porta aberta.)`,
+    opcoes: (c, ctx) => [
+      { id: "ir", label: `Negociar salário com o ${ctx.clube}`, dica: `${ligaDe(clubeDe(ctx.clube).liga).nome} · salto de clube`, oferta: { clube: ctx.clube, status: statusPorDiff(ovrDe(c) - clubeDe(ctx.clube).forca, c.idade).label },
+        negociar: { clube: ctx.clube, tipo: "transferencia" },
+        efeito: (c, extra) => { const de = transferir(c, ctx.clube, { contrato: extra?.contrato }); sobe(c, de, -6); c.fama = clampR(c.fama + 5, 0, 100); return `A cláusula foi paga e você foi. Nova casa: ${ctx.clube}.`; } },
+      { id: "ficar", label: "Recusar e ficar", dica: "A torcida te carrega nos braços · o clube sobe sua cláusula",
+        efeito: (c) => { sobe(c, c.clubeNome, 12); c.contrato = { ...c.contrato, multa: Math.round(c.contrato.multa * 2), salario: Math.round(c.contrato.salario * 1.15) }; return "Você recusou. O clube dobrou sua cláusula e deu aumento como agradecimento."; } },
+    ],
+  },
   {
     id: "camisa10", icone: "🔟",
     peso: (c) => (c.idade >= 20 && ["Titular", "Estrela do time"].includes(statusNoClube(c).label) && !(c.flags.camisas || []).includes(c.clubeNome) ? 1.6 : 0),
@@ -1040,15 +1258,17 @@ export const EVENTOS_EXTRAS = [
   },
   {
     id: "livre", icone: "📝",
-    peso: (c) => (c.idade >= 24 && c.idade <= 32 && c.flags.blindado === 0 && ovrDe(c) >= 76 ? 1.3 : 0),
+    peso: (c) => (c.contrato?.restantes === 1 && c.idade >= 22 && ovrDe(c) >= 72 ? 2.5 : 0),
     preparar: (c) => ({ grande: gerarOfertas(c, 1, { lo: ovrDe(c) - 1, hi: ovrDe(c) + 10 })[0] || null }),
     titulo: () => "Seu contrato está acabando",
-    texto: (c, ctx) => `Faltam seis meses. Você pode sair de graça no fim da temporada${ctx.grande ? ` — e o ${ctx.grande.clube} já sinalizou interesse` : ""}.`,
+    texto: (c, ctx) => `Último ano de contrato com o ${c.clubeNome}. Você pode sair de graça no fim da temporada${ctx.grande ? ` — e o ${ctx.grande.clube} já sinalizou interesse` : ""}.`,
     opcoes: (c, ctx) => [
       ...(ctx.grande ? [{ id: "grande", label: `Assinar pré-contrato com o ${ctx.grande.clube}`, dica: `${ctx.grande.ligaNome} · chegaria como ${ctx.grande.status.toLowerCase()} · torcida atual se sente traída`, oferta: ctx.grande,
-        efeito: (c) => { const de = transferir(c, ctx.grande.clube); sobe(c, de, -12); c.fama = clampR(c.fama + 4, 0, 100); return `Saída de graça para o ${ctx.grande.clube}. No ${de}, o assunto foi amargo.`; } }] : []),
-      { id: "renovar", label: "Renovar antes de chegar ao fim", dica: "Estabilidade e carinho da torcida",
-        efeito: (c) => { c.flags.blindado = 2; sobe(c, c.clubeNome, 6); return "Mais quatro anos. Assinou no gramado, com a família."; } },
+        negociar: { clube: ctx.grande.clube, tipo: "transferencia", luvas: true },
+        efeito: (c, extra) => { const de = transferir(c, ctx.grande.clube, { contrato: extra?.contrato, luvas: extra?.luvas }); sobe(c, de, -12); c.fama = clampR(c.fama + 4, 0, 100); return `Saída de graça para o ${ctx.grande.clube}. No ${de}, o assunto foi amargo.`; } }] : []),
+      { id: "renovar", label: "Negociar a renovação antes do fim", dica: "Estabilidade e carinho da torcida",
+        negociar: { clube: c.clubeNome, tipo: "renovacao" },
+        efeito: (c, extra) => { if (extra?.contrato) c.contrato = extra.contrato; c.flags.blindado = 2; sobe(c, c.clubeNome, 6); return "Renovado. Assinou no gramado, com a família."; } },
       { id: "testar", label: "Deixar correr e ouvir o mercado", dica: "Mais propostas na próxima janela",
         efeito: (c) => { c.mod.ofertasExtra = 2; return "Você deixou o relógio correr. O telefone do empresário não parou."; } },
     ],
@@ -1091,12 +1311,14 @@ export function sortearEvento(c, { somente = null, excluir = [] } = {}) {
   const cands = TODOS_EVENTOS().map((e) => {
     if (somente && e.id !== somente) return null;
     if (excluir.includes(e.id)) return null;
-    if (!somente && e.id !== "propostas" && recentes.includes(e.id)) return null;
+    if (!somente && !["propostas", "fimContrato", "clausula"].includes(e.id) && recentes.includes(e.id)) return null;
     const ctx = e.preparar ? e.preparar(c) : {};
     const p = e.peso(c, ctx);
     return p > 0 ? { e, ctx, p } : null;
   }).filter(Boolean);
   if (!cands.length) return null;
+  const forcado = cands.find((x) => x.p >= 1000);
+  if (forcado) cands.splice(0, cands.length, forcado);
   const tot = cands.reduce((s, x) => s + x.p, 0);
   let roll = rnd() * tot;
   const escolhido = cands.find((x) => (roll -= x.p) <= 0) || cands[cands.length - 1];
@@ -1110,18 +1332,18 @@ export function sortearEvento(c, { somente = null, excluir = [] } = {}) {
 /* Depois do evento principal: se o atleta já é grande demais para o clube,
    a janela de transferências abre também (sem perder a oportunidade). */
 export function janelaExtra(c, idJaVisto) {
-  if (idJaVisto === "propostas" || c.flags.blindado > 0 || c.idade < 18 || c.emprestimo) return null;
+  if (["propostas", "fimContrato", "clausula"].includes(idJaVisto) || c.contrato?.restantes <= 0 || c.flags.blindado > 0 || c.idade < 18 || c.emprestimo) return null;
   if (ovrDe(c) - clubeDe(c.clubeNome).forca < 4 && !c.mod?.ofertasExtra) return null;
   return sortearEvento(c, { somente: "propostas" });
 }
 
 /* Aplica a escolha. Como funções não vão pro save, o evento é reconstruído pelo id + contexto. */
-export function resolverEvento(c0, evento, opcaoId) {
+export function resolverEvento(c0, evento, opcaoId, extra = null) {
   const c = clone(c0);
   c.mod = c.mod || {};
   const def = TODOS_EVENTOS().find((e) => e.id === evento.id);
   const op = def ? opcoesCompletas(def, c, evento.ctx).find((o) => o.id === opcaoId) : null;
-  const resultado = op ? op.efeito(c) : "";
+  const resultado = op ? op.efeito(c, extra) : "";
   c.flags.historicoEventos = [...(c.flags.historicoEventos || []), evento.id].slice(-8);
   const ultima = c.temporadas[c.temporadas.length - 1];
   if (ultima) ultima.decisao = { evento: evento.titulo, escolha: op?.label || "", resultado };
@@ -1138,6 +1360,7 @@ export function textoCompartilhar(c) {
     `${L.nivel.icone} ${L.nivel.nome} (${L.pontos} pts)`,
     `⚽ ${c.totais.gols} gols · 🅰️ ${c.totais.assist} assist. · ${c.totais.jogos} jogos · OVR máx. ${c.picoOvr}`,
     `🏆 ${t.liga} ligas · ${t.copa} copas · ${t.continental} continentais · ${t.mundial || 0} mundiais · ${t.copaMundo} Copas do Mundo · ${t.continentalSelecao || 0} copas continentais pela seleção · ${t.bolaOuro} Bolas de Ouro`,
+    `💼 Ganhou ${formatarValor(c.ganhosTotais || 0)} na carreira · patrimônio final ${formatarValor(c.patrimonio || 0)}`,
     `Clubes: ${[...new Set(c.temporadas.map((s) => s.clube))].join(" → ")}`,
   ];
   return linhas.join("\n");
@@ -1154,6 +1377,8 @@ export function carregarRapido() {
     s.c.flags = { historicoEventos: [], traidor: [], ...(s.c.flags || {}) };
     s.c.mod = s.c.mod || {};
     s.c.marcos = s.c.marcos || [];
+    s.c.patrimonio = s.c.patrimonio || 0; s.c.investimentos = s.c.investimentos || []; s.c.repNeg = s.c.repNeg || 0;
+    if (!s.c.contrato) s.c.contrato = contratoPadrao(s.c, s.c.clubeNome);
     s.c.foco = s.c.foco || "equilibrio";
     s.c.titulos = { liga: 0, copa: 0, continental: 0, mundial: 0, copaMundo: 0, continentalSelecao: 0, bolaOuro: 0, segunda: 0, ...(s.c.titulos || {}) };
     if (!s.c.mundo?.jogadores) s.c.mundo = mundoCompacto();
@@ -1163,6 +1388,19 @@ export function carregarRapido() {
 export function apagarRapido() { try { localStorage.removeItem(CHAVE_SAVE_RAPIDO); } catch { /* sem armazenamento */ } }
 
 /* ---------- simulação automática (testes e balanceamento) ---------- */
+function resolverAuto(c, ev, escolher) {
+  let op = escolher(ev.opcoes, ev);
+  if (!op.negociar) return resolverEvento(c, ev, op.id).c;
+  let n = iniciarNegociacao(c, op.negociar);
+  for (let k = 0; k < 2 && chance(0.6); k++) n = ajustarNegociacao(n, pick(["salario", "anos", "multa", "bonusGol"]), pick([1, -1]));
+  if (n.colapsou) {
+    const resto = ev.opcoes.filter((o) => o.id !== op.id && !o.negociar);
+    return resto.length ? resolverEvento(c, ev, resto[0].id).c : c;
+  }
+  const f = fecharNegociacao(c, n);
+  return resolverEvento(f.c, ev, op.id, { contrato: f.contrato, luvas: op.negociar.luvas ? Math.round(f.contrato.salario * 0.5) : 0 }).c;
+}
+
 export function simularCarreiraAutomatica(dados, escolher = (op) => pick(op), escolherFoco = () => pick(FOCOS).id) {
   let c = criarJogador(dados);
   let guard = 0;
@@ -1173,9 +1411,11 @@ export function simularCarreiraAutomatica(dados, escolher = (op) => pick(op), es
     if (aposentadoriaForcada(c) || (podeAposentar(c) && c.idade >= 36 && chance(0.4))) { c = aposentar(c); break; }
     if (precisaEscolherTraco(c)) c = escolherTraco(c, pick(opcoesDeTraco(c)).id);
     const ev = sortearEvento(c);
-    if (ev) ({ c } = resolverEvento(c, ev, escolher(ev.opcoes, ev).id));
+    if (ev) c = resolverAuto(c, ev, escolher);
     const ex = janelaExtra(c, ev?.id);
-    if (ex) ({ c } = resolverEvento(c, ex, escolher(ex.opcoes, ex).id));
+    if (ex) c = resolverAuto(c, ex, escolher);
+    const compra = INVESTIMENTOS.filter((i) => !(c.investimentos || []).includes(i.id) && i.custo <= c.patrimonio * 0.5);
+    if (compra.length && chance(0.4)) c = comprarInvestimento(c, pick(compra).id).c;
     c = definirFoco(c, escolherFoco(c));
   }
   if (!c.aposentado) c = aposentar(c);

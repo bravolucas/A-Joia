@@ -7,6 +7,8 @@ import {
   calcularLegado, NIVEIS_LEGADO, statusNoClube, valorMercado, formatarValor, ovrDe, clubeDe, ligaDe, posicaoDe, nacDe, personaDe,
   textoCompartilhar, salvarRapido, carregarRapido, apagarRapido, NACS_DESTAQUE, IDADES_TRACO, anoDeCopa, anoDeContinentalSelecao,
   nomeCopaContinental, chancePenalti, ORIGENS_RAPIDO, origemDe, FOCOS, focoDe, definirFoco,
+  iniciarNegociacao, ajustarNegociacao, fecharNegociacao, CAMPOS_NEGOCIACAO, fama_negociador,
+  INVESTIMENTOS, comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
 } from "./rapido.js";
 
 /* Estilo do seletor de modos e do Modo Rápido. Inclui as animações que as
@@ -208,7 +210,13 @@ function Ficha({ c }) {
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-3 gap-2 mt-4 text-center">
+        {c.contrato && (
+          <div className="mt-4 rounded-xl bg-[#0E1512]/70 px-3 py-2.5 flex items-center justify-between gap-2 text-[14px]">
+            <span className="text-[#C9D3CE]">📄 {formatarValor(c.contrato.salario)}/ano · cláusula {formatarValor(c.contrato.multa)}</span>
+            <span className={`font-bold ${c.contrato.restantes <= 1 ? "text-[#EBC557]" : "text-[#8FA39A]"}`}>{c.contrato.restantes <= 0 ? "acabou" : `${c.contrato.restantes} ano${c.contrato.restantes > 1 ? "s" : ""}`}</span>
+          </div>
+        )}
+        <div className="grid grid-cols-3 gap-2 mt-2 text-center">
           {[["VALOR", formatarValor(valorMercado(ovr, c.idade, c.fama))], ["TORCIDA", `${torcida}/100`], ["FAMA", `${c.fama}/100`]].map(([k, v]) => (
             <div key={k} className="rounded-xl bg-[#0E1512]/70 py-2"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">{k}</div><div className="font-stat text-sm">{v}</div></div>
           ))}
@@ -611,6 +619,19 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever }) {
         </div>
       </div>
 
+      {card.ganhos && (
+        <div className="rp-painel px-4 py-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Dinheiro da temporada</span>
+            <span className="font-stat text-lg text-[#1BC28A]">+{formatarValor(card.ganhos.total)}</span>
+          </div>
+          <div className="text-[14px] text-[#8FA39A] mt-1">
+            Salário {formatarValor(card.ganhos.salario)} · bônus {formatarValor(card.ganhos.bonus)} · empresário −{formatarValor(card.ganhos.comissao)}{card.ganhos.manutencao ? ` · luxos −${formatarValor(card.ganhos.manutencao)}` : ""}
+          </div>
+          <div className="text-[14px] mt-1"><span className="text-[#C9D3CE]">Patrimônio: {formatarValor(card.patrimonio)}</span>{card.contratoRestante <= 1 && <span className="text-[#EBC557] font-bold"> · {card.contratoRestante <= 0 ? "contrato encerrado" : "último ano de contrato"}</span>}</div>
+        </div>
+      )}
+
       {card.destaques.length > 0 && (
         <ul className="flex flex-col gap-1.5">
           {card.destaques.map((d, i) => <li key={i} className="text-[16px] text-[#C9D3CE]">✨ {d}</li>)}
@@ -705,21 +726,128 @@ function SeletorFoco({ c, onFoco }) {
   );
 }
 
-function TelaEvento({ c, evento, resultado, temMais, onEscolher, onProximo, onFoco, onJogar }) {
+function TelaEvento({ c, evento, resultado, temMais, aviso, onEscolher, onProximo, onFoco, onJogar, onPatrimonio }) {
   const torneio = c.idade >= 18 ? (anoDeCopa(c.ano) ? "Copa do Mundo" : anoDeContinentalSelecao(c.ano) ? nomeCopaContinental(c.nac) : null) : null;
   const pronto = !evento || resultado;
   return (
     <div className="max-w-xl mx-auto px-4 py-5 flex flex-col gap-4 rp-entra">
+      {aviso && <div className="rp-painel px-4 py-3 text-[16px] text-[#F0A99E]" style={{ borderColor: "rgba(227,107,91,.35)" }}>{aviso}</div>}
       {evento && <CartaoEvento evento={evento} resultado={resultado} onEscolher={onEscolher} />}
       {pronto && temMais && <button onClick={onProximo} className="rp-btn rp-prim display text-sm">Ver próxima notícia</button>}
       {pronto && !temMais && (
         <>
           <Ficha c={c} />
+          <button onClick={onPatrimonio} className="rp-painel px-4 py-3 flex items-center gap-3 text-left hover:border-[#D8B44A]/50">
+            <span className="text-2xl">💼</span>
+            <span className="flex-1"><span className="block text-[13px] font-bold uppercase tracking-[0.15em] text-[#8FA39A]">Patrimônio</span><span className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</span></span>
+            <span className="text-[15px] font-bold text-[#EBC557]">Investir →</span>
+          </button>
           <SeletorFoco c={c} onFoco={onFoco} />
           {torneio && <div className="rp-painel px-4 py-3 text-[16px] text-[#8DB4F5]" style={{ borderColor: "rgba(46,111,224,.35)" }}>🌎 Ano de {torneio}. Jogue bem para ser convocado.</div>}
           <button onClick={onJogar} className="rp-btn rp-prim display text-sm">Jogar temporada {c.ano}</button>
         </>
       )}
+    </div>
+  );
+}
+
+/* ---------- mesa de negociação ---------- */
+function TelaNegociacao({ c, n, onAjustar, onAssinar, onSair }) {
+  const cl = clubeDe(n.clube);
+  const t = n.termos, o = n.original;
+  const corPac = n.paciencia >= 60 ? "#1BC28A" : n.paciencia >= 30 ? "#EBC557" : "#E36B5B";
+  const humor = n.colapsou ? "Saiu da mesa" : n.paciencia >= 60 ? "Tranquila" : n.paciencia >= 30 ? "Impaciente" : "No limite";
+  const fmt = { salario: (v) => `${formatarValor(v)}/ano`, anos: (v) => `${v} ano${v > 1 ? "s" : ""}`, multa: (v) => formatarValor(v), bonusGol: (v) => `${formatarValor(v)}/gol` };
+  const luvas = n.luvas ? Math.round(t.salario * 0.5) : 0;
+  return (
+    <div className="max-w-xl mx-auto px-4 py-5 flex flex-col gap-4 rp-entra">
+      <div className="rp-painel overflow-hidden">
+        <div className="p-4 flex items-center gap-3" style={{ background: `linear-gradient(120deg, ${cl.cor}44, transparent 75%)` }}>
+          <ClubDot club={cl} size={44} />
+          <div className="min-w-0 flex-1">
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9D3CE]">{n.tipo === "renovacao" ? "Renovação de contrato" : "Proposta de contrato"}</div>
+            <h2 className="display text-base text-[#F2F5F3] truncate">{cl.nome}</h2>
+            <div className="text-[14px] text-[#C9D3CE]">{ligaDe(cl.liga).nome} · sua fama: {fama_negociador(c).toLowerCase()}</div>
+          </div>
+        </div>
+        <div className="px-4 py-3 border-t border-white/5">
+          <div className="flex items-center justify-between text-[14px]">
+            <span className="font-bold text-[#C9D3CE]">Paciência da diretoria</span>
+            <span className="font-bold" style={{ color: corPac }}>{humor}</span>
+          </div>
+          <div className="mt-1.5"><Barra valor={n.paciencia} cor={corPac} /></div>
+          <div className="text-[13px] text-[#8FA39A] mt-1.5">{n.pedidos > 0 && !n.colapsou ? `${n.pedidos} pedido(s) restante(s). Pedir mais desgasta; ceder acalma.` : n.colapsou ? "Você forçou demais." : "Sem mais pedidos: assine ou saia."}</div>
+        </div>
+      </div>
+
+      <div className="rp-painel p-2">
+        {CAMPOS_NEGOCIACAO.map((campo) => {
+          const mudou = t[campo.id] !== o[campo.id];
+          const bloqueado = n.pedidos <= 0 || n.colapsou;
+          return (
+            <div key={campo.id} className="flex items-center gap-2 px-2 py-2.5 border-b border-white/5 last:border-0">
+              <span className="text-xl w-7 text-center">{campo.icone}</span>
+              <div className="flex-1 min-w-0">
+                <div className="text-[13px] text-[#8FA39A]">{campo.label}</div>
+                <div className={`font-stat text-[17px] ${mudou ? "text-[#EBC557]" : "text-[#F2F5F3]"}`}>{fmt[campo.id](t[campo.id])}</div>
+              </div>
+              <button disabled={bloqueado} onClick={() => onAjustar(campo.id, -1)} className="rp-btn rp-sec !min-h-[44px] px-3 text-[13px]" aria-label={`${campo.ceder}: ${campo.label}`}>−</button>
+              <button disabled={bloqueado} onClick={() => onAjustar(campo.id, 1)} className="rp-btn rp-sec !min-h-[44px] px-3 text-[13px]" aria-label={`${campo.pedirMais}: ${campo.label}`}>+</button>
+            </div>
+          );
+        })}
+        <p className="text-[13px] text-[#8FA39A] px-2 pt-2 pb-1">Cláusula baixa facilita sair no futuro, mas um clube grande pode pagá-la sem te consultar.</p>
+      </div>
+
+      {n.historico.length > 0 && (
+        <ul className="flex flex-col gap-1">
+          {n.historico.slice(-4).map((h, i) => <li key={i} className="text-[15px] text-[#C9D3CE]">• {h}</li>)}
+        </ul>
+      )}
+      {luvas > 0 && !n.colapsou && <div className="rp-painel px-4 py-3 text-[16px] text-[#EBC557]">💰 Luvas na assinatura: {formatarValor(luvas)}</div>}
+
+      {n.colapsou ? (
+        <button onClick={onSair} className="rp-btn rp-sec text-[16px]">Voltar</button>
+      ) : (
+        <div className="grid grid-cols-[1fr_auto] gap-2">
+          <button onClick={onAssinar} className="rp-btn rp-ouro display text-sm">Assinar contrato</button>
+          <button onClick={onSair} className="rp-btn rp-sec text-[16px] px-4">Sair da mesa</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------- patrimônio e investimentos ---------- */
+function Patrimonio({ c, onComprar, onFechar }) {
+  return (
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center" onClick={onFechar}>
+      <div className="w-full max-w-xl max-h-[85vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-[#121916] border border-white/10 p-5 rp-entra" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between">
+          <h2 className="display text-base text-[#F2F5F3]">Patrimônio</h2>
+          <button onClick={onFechar} className="min-h-[44px] px-3 text-[15px] font-bold text-[#8FA39A]">Fechar</button>
+        </div>
+        <div className="font-stat text-3xl text-[#EBC557] mt-1">{formatarValor(c.patrimonio || 0)}</div>
+        <p className="text-[14px] text-[#8FA39A]">Ganhou {formatarValor(c.ganhosTotais || 0)} na carreira. Investimentos são permanentes; luxos custam 6% ao ano de manutenção.</p>
+        <div className="flex flex-col gap-2 mt-4">
+          {INVESTIMENTOS.map((inv) => {
+            const tem = (c.investimentos || []).includes(inv.id);
+            const pode = !tem && (c.patrimonio || 0) >= inv.custo;
+            return (
+              <div key={inv.id} className={`rounded-2xl border p-3 flex items-center gap-3 ${tem ? "border-[#12A876]/50 bg-[#12A876]/8" : "border-white/8 bg-[#0E1512]"}`}>
+                <span className="text-2xl w-10 text-center">{inv.icone}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[16px] font-bold text-[#F2F5F3]">{inv.nome} {inv.luxo && <span className="rp-chip ml-1" style={{ color: "#F0A99E", background: "rgba(227,107,91,.14)" }}>Luxo</span>}</div>
+                  <div className="text-[13px] text-[#8FA39A] leading-snug">{inv.desc}</div>
+                </div>
+                {tem ? <span className="text-[13px] font-bold text-[#7FE3BC]">Seu</span> : (
+                  <button disabled={!pode} onClick={() => onComprar(inv.id)} className="rp-btn rp-prim !min-h-[44px] px-3 text-[13px] whitespace-nowrap">{formatarValor(inv.custo)}</button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
@@ -760,7 +888,32 @@ function CartaFinal({ c }) {
   );
 }
 
-function TelaFim({ c, onNova, onSair }) {
+function PosCarreira({ c, onEscolher }) {
+  if (c.posCarreira) {
+    return (
+      <div className="rp-painel p-5" style={{ borderColor: `${c.posCarreira.cor}66` }}>
+        <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Depois da bola</div>
+        <div className="display text-base mt-2" style={{ color: c.posCarreira.cor }}>{c.posCarreira.icone} {c.posCarreira.nome}</div>
+        <p className="text-[17px] text-[#C9D3CE] mt-2 leading-snug">{c.posCarreira.epilogo}</p>
+      </div>
+    );
+  }
+  return (
+    <div className="rp-painel p-4">
+      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">E agora? O que vem depois da bola</div>
+      <div className="grid gap-2 mt-3">
+        {caminhosPosCarreira(c).map((p) => (
+          <button key={p.id} disabled={!p.disponivel} onClick={() => onEscolher(p.id)} className="rp-opcao px-4 py-3 disabled:opacity-40 disabled:hover:translate-y-0">
+            <div className="font-bold text-[16px] text-[#F2F5F3]">{p.icone} {p.nome}</div>
+            <div className="text-[14px] text-[#8FA39A]">{p.disponivel ? p.desc : `Requer: ${p.requisito}`}</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TelaFim({ c, onNova, onSair, onPosCarreira }) {
   const L = c.legado || calcularLegado(c);
   const [copiado, setCopiado] = useState(false);
   const clubes = [];
@@ -784,6 +937,13 @@ function TelaFim({ c, onNova, onSair }) {
       </div>
       <CartaFinal c={c} />
       <button onClick={copiar} className="rp-btn rp-ouro display text-sm">{copiado ? "Copiado!" : "Copiar resumo para compartilhar"}</button>
+
+      <PosCarreira c={c} onEscolher={onPosCarreira} />
+
+      <div className="grid grid-cols-2 gap-2">
+        <div className="rp-painel px-4 py-3"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">GANHOU NA CARREIRA</div><div className="font-stat text-lg text-[#F2F5F3]">{formatarValor(c.ganhosTotais || 0)}</div></div>
+        <div className="rp-painel px-4 py-3"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">PATRIMÔNIO FINAL</div><div className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</div></div>
+      </div>
 
       {porTipo.length > 0 && (
         <div className="rp-painel p-4">
@@ -860,6 +1020,7 @@ export default function ModoRapido({ onSair }) {
   const [estado, setEstado] = useState(() => carregarRapido() || { etapa: "criacao" });
   const [estanteAberta, setEstanteAberta] = useState(false);
   const [apresentacao, setApresentacao] = useState(null);
+  const [patrimonioAberto, setPatrimonioAberto] = useState(false);
   const { etapa, c, card, evento, resultado, opcoesTraco, fila } = estado;
 
   useEffect(() => {
@@ -887,16 +1048,37 @@ export default function ModoRapido({ onSair }) {
   };
   const irParaEvento = (cc) => setEstado({ etapa: "evento", c: cc, evento: sortearEvento(cc), resultado: null, fila: true });
   const escolherT = (id) => irParaEvento(escolherTraco(c, id));
+  // escolha com negociação: abre a mesa antes de aplicar a opção
   const escolherEvento = (opId) => {
-    const r = resolverEvento(c, evento, opId);
+    const op = evento.opcoes.find((o) => o.id === opId);
+    if (op?.negociar) { setEstado((st) => ({ ...st, etapa: "negociacao", neg: iniciarNegociacao(c, op.negociar), negOp: opId, aviso: null })); return; }
+    aplicarEscolha(c, opId, null);
+  };
+  const aplicarEscolha = (cBase, opId, extra) => {
+    const r = resolverEvento(cBase, evento, opId, extra);
     // fila: depois do evento principal, a janela de transferências pode abrir também
-    const extra = fila ? janelaExtra(r.c, evento.id) : null;
-    setEstado({ etapa: "evento", c: r.c, evento, resultado: r.resultado || "Decisão tomada.", proximo: extra, fila: false });
+    const extraEv = fila ? janelaExtra(r.c, evento.id) : null;
+    setEstado({ etapa: "evento", c: r.c, evento, resultado: r.resultado || "Decisão tomada.", proximo: extraEv, fila: false });
     if (r.c.clubeNome !== c.clubeNome) {
       const clube = clubeDe(r.c.clubeNome);
       setApresentacao({ clube, grande: clube.forca > clubeDe(c.clubeNome).forca + 3 });
     }
   };
+  const ajustarNeg = (campo, dir) => setEstado((st) => ({ ...st, neg: ajustarNegociacao(st.neg, campo, dir) }));
+  const assinar = () => {
+    const op = evento.opcoes.find((o) => o.id === estado.negOp);
+    const f = fecharNegociacao(c, estado.neg);
+    aplicarEscolha(f.c, estado.negOp, { contrato: f.contrato, luvas: op?.negociar?.luvas ? Math.round(f.contrato.salario * 0.5) : 0 });
+  };
+  const sairNeg = () => {
+    const n = estado.neg;
+    // diretoria saiu da mesa (ou você saiu): essa porta fecha, as outras opções continuam
+    const restantes = evento.opcoes.filter((o) => o.id !== estado.negOp);
+    const aviso = n.colapsou ? `O ${n.clube} encerrou a negociação. Essa porta fechou.` : `Você saiu da mesa com o ${n.clube}.`;
+    const cNovo = n.colapsou ? { ...c, repNeg: Math.min(60, (c.repNeg || 0) + 6) } : c;
+    setEstado((st) => ({ ...st, etapa: "evento", c: cNovo, evento: { ...evento, opcoes: restantes }, neg: null, negOp: null, aviso }));
+  };
+  const comprar = (id) => { const r = comprarInvestimento(c, id); if (r.ok) setEstado((st) => ({ ...st, c: r.c })); };
   const proximoEvento = () => setEstado((s) => ({ ...s, evento: s.proximo, resultado: null, proximo: null }));
   const mudarFoco = (id) => setEstado((s) => ({ ...s, c: definirFoco(s.c, id) }));
   const encerrar = () => setEstado({ etapa: "fim", c: aposentar(c) });
@@ -917,16 +1099,18 @@ export default function ModoRapido({ onSair }) {
                 <p className="text-[17px] text-[#8FA39A] mt-1">{c.nome}, {c.idade} anos, {posicaoDe(c.posicao).label.toLowerCase()} da base do {c.clubeNome}. {origemDe(c.origem) ? `${origemDe(c.origem).nome}. ` : ""}Perfil: {personaDe(c.personalidade).label.toLowerCase()}. Empresário: {(EMPRESARIOS.find((e) => e.id === c.empresario) || EMPRESARIOS[0]).nome.toLowerCase()}.</p>
               </div>
             )}
-            <TelaEvento c={c} evento={evento} resultado={resultado} temMais={!!estado.proximo} onEscolher={escolherEvento} onProximo={proximoEvento} onFoco={mudarFoco} onJogar={jogar} />
+            <TelaEvento c={c} evento={evento} resultado={resultado} temMais={!!estado.proximo} aviso={estado.aviso} onEscolher={escolherEvento} onProximo={proximoEvento} onFoco={mudarFoco} onJogar={jogar} onPatrimonio={() => setPatrimonioAberto(true)} />
           </>
         )}
+        {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}
         {etapa === "momento" && <TelaPenalti c={c} momento={card.pendente} onFim={fimMomento} />}
         {etapa === "festa" && <TelaFesta c={c} card={card} onFim={() => setEstado({ etapa: "resumo", c, card })} />}
         {etapa === "resumo" && <TelaResumo c={c} card={card} onContinuar={continuar} onAposentar={encerrar} onRever={() => setEstado({ etapa: "festa", c, card })} />}
         {etapa === "traco" && <TelaTraco c={c} opcoes={(opcoesTraco || []).map(tracoDe).filter(Boolean)} onEscolher={escolherT} />}
-        {etapa === "fim" && <TelaFim c={c} onNova={nova} onSair={onSair} />}
+        {etapa === "fim" && <TelaFim c={c} onNova={nova} onSair={onSair} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
       </main>
       {estanteAberta && c && <Estante c={c} onFechar={() => setEstanteAberta(false)} />}
+      {patrimonioAberto && c && <Patrimonio c={c} onComprar={comprar} onFechar={() => setPatrimonioAberto(false)} />}
       {apresentacao && (
         <ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroCamisa(c.posicao)} posicao={posicaoDe(c.posicao).label}
           idade={c.idade} grandeChegada={apresentacao.grande} onConcluir={() => setApresentacao(null)} />

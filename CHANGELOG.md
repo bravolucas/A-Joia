@@ -140,6 +140,12 @@ A diretoria cobra objetivos específicos por torneio, dosados pelo porte do club
 - O indicador de intervalo da partida passou para azul-safira.
 - O dourado continua em títulos, prêmios, pódio, cerimônias e itens desbloqueados — onde ele significa conquista.
 
+### Ajustes no hub da carreira
+- Atalhos (Contrato, Empresário, Técnico, Corpo, Clube, Salvar) e o cartão do jogador deixaram o dourado: agora são neutros, com destaque esmeralda ao passar o mouse.
+- Barra de energia em esmeralda (o aviso de energia baixa continua quente).
+- "Próximo compromisso" em branco, não mais dourado.
+- Radar de atributos: as legendas de cima e de baixo (VEL e DRI) não são mais cortadas.
+
 ### Correção encontrada no caminho
 - `nomeMundo` era usado na vida pessoal (namoro e nome de filho) sem ser importado de `lib.js`. Quando o evento sorteava, a virada de temporada quebrava. Agora está importado.
 

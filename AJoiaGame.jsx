@@ -4548,11 +4548,11 @@ function resolverTemporada(c, extraStats) {
                     ["Clube", "🏟️", () => setPopupClube(carreira.clube.nome)],
                     ["Salvar", "💾", () => setSavesAberto(true)],
                   ].map(([label, icone, onClick]) => (
-                    <button key={label} onClick={onClick} className="opt-card shrink-0 px-3 py-1.5 text-[10px] font-sport font-bold uppercase tracking-wide rounded-md border border-amber-500/30 text-amber-400 hover:bg-amber-500/10 whitespace-nowrap">{icone} {label}</button>
+                    <button key={label} onClick={onClick} className="opt-card shrink-0 px-3 py-1.5 text-[10px] font-sport font-bold uppercase tracking-wide rounded-md border border-zinc-700 text-zinc-300 hover:border-emerald-500/50 hover:text-emerald-300 whitespace-nowrap">{icone} {label}</button>
                   ))}
                 </div>
 
-                <Card className="border-amber-500/30 span-full">
+                <Card className="span-full">
                   <div className="flex items-center gap-3">
                     <button onClick={() => setJogadorCardAberto(true)} className={`shrink-0 w-16 h-16 flex flex-col items-center justify-center hover:brightness-110 transition-all ${ovrAtual >= 93 ? "glow-anim" : ""}`} style={{ background: ovrHexGradiente(ovrAtual), clipPath: "polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)" }}>
                       <div className="font-stat font-black text-2xl text-zinc-950 leading-none">{ovrAtual}</div>
@@ -4560,8 +4560,8 @@ function resolverTemporada(c, extraStats) {
                     </button>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-cyan-400 text-xs">⚡</span>
-                        <div className="flex-1 h-2.5 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full rounded-full bar-fill" style={{ width: `${carreira.energia ?? 100}%`, background: (carreira.energia ?? 100) > 40 ? "linear-gradient(90deg,#22D3EE,#39FF88)" : "linear-gradient(90deg,#f59e0b,#ef4444)" }} /></div>
+                        <span className="text-emerald-400 text-xs">⚡</span>
+                        <div className="flex-1 h-2.5 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full rounded-full bar-fill" style={{ width: `${carreira.energia ?? 100}%`, background: (carreira.energia ?? 100) > 40 ? "linear-gradient(90deg,#12A876,#1BC28A)" : "linear-gradient(90deg,#f59e0b,#ef4444)" }} /></div>
                         <span className="text-[10px] font-mono text-zinc-400 w-7 text-right">{Math.round(carreira.energia ?? 100)}%</span>
                       </div>
                       <div className="text-[10px] text-zinc-500 truncate">
@@ -4936,7 +4936,7 @@ function resolverTemporada(c, extraStats) {
 
                     <Card>
                       <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">📅 Próximo Compromisso</div>
-                      <div className="text-sm text-amber-300 font-bold mb-2">{(() => {
+                      <div className="text-sm text-zinc-100 font-bold mb-2">{(() => {
                         const jogo = carreira.temporadaAndamento.calendario[carreira.temporadaAndamento.rodadaAtual]?.find((p) => p.casa.nome === carreira.clube.nome || p.fora.nome === carreira.clube.nome);
                         if (!jogo) return "Folga nessa rodada";
                         const souCasa = jogo.casa.nome === carreira.clube.nome;
@@ -4984,7 +4984,7 @@ function resolverTemporada(c, extraStats) {
                   <>
                     <Card>
                       <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">📅 Próximo Compromisso</div>
-                      <div className="text-sm text-amber-300 font-bold mb-2">{posTemporada?.ok ? "Pré-temporada" : pendingCompeticao ? "Competição em andamento" : "Rodada da liga"}</div>
+                      <div className="text-sm text-zinc-100 font-bold mb-2">{posTemporada?.ok ? "Pré-temporada" : pendingCompeticao ? "Competição em andamento" : "Rodada da liga"}</div>
                       <hr className="border-white/10 mb-2" />
                       <div className="text-xs text-zinc-400">Último jogo: {ultima ? `${ultima.jogos} jogos · nota ${ultima.nota}` : "—"}</div>
                     </Card>

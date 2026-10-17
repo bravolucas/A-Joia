@@ -1697,7 +1697,7 @@ export function AttrRadar({ attrs, baseline }) {
   const basePts = keys.map((_, i) => pointFor(baseline, i));
   const labelPts = keys.map((k, i) => { const a = angleFor(i); return { x: cx + (maxR + 11) * Math.cos(a), y: cy + (maxR + 11) * Math.sin(a), label: ATTR_SLOTS.find((s) => s.id === k)?.abrev || k }; });
   return (
-    <svg viewBox="0 0 100 100" className="w-full h-40">
+    <svg viewBox="-9 -9 118 118" className="w-full h-44">
       {[0.33, 0.66, 1].map((f, i) => <polygon key={i} points={toPath(keys.map((_, j) => pointFor(99 * f, j)))} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />)}
       <polygon points={toPath(basePts)} fill="rgba(46,111,224,0.10)" stroke="#5B8FEA" strokeWidth="1" strokeDasharray="2,2" />
       <polygon points={toPath(playerPts)} fill="rgba(18,168,118,0.25)" stroke="#1BC28A" strokeWidth="1.5" />

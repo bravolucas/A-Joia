@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { ARTE } from "./arte.js";
 import { TacaCompeticao } from "./trofeus.jsx";
 import { ANO_INICIO, ATTR_SLOTS, CLUBES, CONDICOES_CLIMA, DIAS_SEMANA_ABREV, DIAS_SEMANA_LABEL, FALTA_BONECO_POS, FALTA_BOX, FALTA_GOAL, FALTA_SPOT, LANCES_POR_POSICAO, MESES_LABEL, NUM_ATTRS, PASSE_H, PASSE_ORIGEM, PASSE_W, PEN_GOAL, PEN_H, PEN_SPOT, PEN_W, PEN_ZONE_X, POS_GRUPO, TIPOS_NOTICIA } from "./data.js";
 import { calcularSucessoPasse, clamp, diaNaJanela, diasNoMes, distribuirRodadasNaJanela, estimarRodadasLiga, faltaAlvoBola, formatarDinheiro, gerarCenaPasse, janelasPorLiga, janelasSelecao, labelAtributoGoleiro, nacDe, penAlvoBola, pick, primeiroDiaSemanaMes, rand, tierInfo } from "./lib.js";
@@ -413,7 +414,9 @@ function AnuncioClube({ clube, nome, numero, posicao, idade, grandeChegada, deOn
     <div className="fixed inset-0 z-50 overflow-hidden" style={{ background: "#07100C", fontFamily: "'Rajdhani',sans-serif" }} role="dialog" aria-label={`Anúncio: ${nome} no ${clube.nome}`}>
       <style>{ESTILO_ANUNCIO}</style>
       {/* fundo: luz de estádio, faixas na cor do clube e flashes */}
-      <div className="absolute inset-0" style={{ background: `radial-gradient(120% 70% at 50% 0%, ${cor}66 0%, transparent 60%), radial-gradient(90% 60% at 50% 110%, ${cor}40 0%, transparent 70%)` }} />
+      <div className="absolute inset-0" style={{ backgroundImage: `url(${ARTE.refletores})`, backgroundSize: "cover", backgroundPosition: "18% 30%", opacity: 0.55, filter: "saturate(.6)" }} />
+      <div className="absolute inset-0" style={{ background: cor, mixBlendMode: "color", opacity: 0.55 }} />
+      <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, rgba(7,16,12,.25) 0%, rgba(7,16,12,.65) 45%, #07100C 92%), radial-gradient(120% 70% at 50% 0%, ${cor}55 0%, transparent 60%)` }} />
       <div className="absolute inset-0 opacity-[.07]" style={{ backgroundImage: `repeating-linear-gradient(115deg, ${cor} 0 40px, transparent 40px 110px)`, animation: "ancFaixas 6s linear infinite" }} />
       <div className="absolute -top-24 left-[8%] w-56 h-56 rounded-full blur-3xl" style={{ background: "#fff", animation: "ancLuz 3s ease-in-out infinite" }} />
       <div className="absolute -top-24 right-[8%] w-56 h-56 rounded-full blur-3xl" style={{ background: "#fff", animation: "ancLuz 3s ease-in-out infinite .8s" }} />
@@ -498,7 +501,7 @@ export function CenaLevantarTaca({ titulos, clube, onConcluir }) {
   const corClube = clube?.cor || "#D8B44A";
   return (
     <PopupOverlay>
-      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `radial-gradient(circle at 50% 20%, ${corClube}33 0%, #050505 75%)` }}>
+      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `radial-gradient(circle at 50% 20%, ${corClube}33 0%, #050505 75%), url(${ARTE.confete}) center/cover` }}>
         <div className="relative h-[400px] flex flex-col items-center justify-center px-4 overflow-hidden">
           {fase >= 1 && <Confetti />}
           <div className="relative z-10" style={{ animation: fase === 0 ? "jerseyRise 0.8s ease-out" : "floatY 2.4s ease-in-out infinite" }}>
@@ -590,9 +593,8 @@ export function CenaRivalidade({ meuNome, rivalNome, onConcluir }) {
 export function CenaAposentadoria({ nome, clube, onConcluir }) {
   return (
     <PopupOverlay>
-      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: "radial-gradient(circle at 50% 30%, #D8B44A22 0%, #050505 80%)" }}>
-        <div className="h-[360px] flex flex-col items-center justify-center px-5">
-          <div className="text-4xl mb-3 animate-[floatY_3s_ease-in-out_infinite]">🏟️</div>
+      <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `linear-gradient(180deg, rgba(5,5,5,.15) 0%, rgba(5,5,5,.55) 55%, #050505 100%), url(${ARTE.porDoSol}) center 70%/cover` }}>
+        <div className="h-[360px] flex flex-col items-center justify-end pb-8 px-5">
           <div className="animate-[popIn_0.6s_ease-out]">
             <div className="font-black text-lg text-amber-400 mb-1">A última volta</div>
             <p className="text-sm text-zinc-300 mb-1">{nome}</p>

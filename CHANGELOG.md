@@ -4,6 +4,14 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🖼️ Fotos de fundo (Adobe Stock + Photoshop)
+
+- Quatro fotos do Adobe Stock (licença gratuita), tratadas no Adobe Photoshop e convertidas para WebP (menos de 250 KB no total)
+- Menu inicial: estádio à noite. Anúncio de contratação: refletores tingidos com a cor do novo clube. Festa de título, Bola de Ouro e taça do Modo Carreira: confete dourado. Aposentadoria e fim de carreira: estádio ao pôr do sol
+- Créditos em `arte/CREDITOS.md`
+
+---
+
 ## 📣 Nova cena de contratação
 
 - A antiga apresentação com a camisa foi trocada por um anúncio no estilo das redes dos clubes: varredura na cor do clube, carimbo "OFICIAL", brasão com anel pulsante, nome gigante com o número vazado, de onde veio → para onde foi, e salário, duração e cláusula do contrato

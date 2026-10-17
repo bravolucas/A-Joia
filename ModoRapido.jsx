@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { ARTE } from "./arte.js";
 import { POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS } from "./data.js";
 import { Gema, ClubDot, Confetti, ApresentacaoNovoClube } from "./components.jsx";
 import { TacaCompeticao } from "./trofeus.jsx";
@@ -400,7 +401,7 @@ function SlideTitulo({ c, card, titulo }) {
   const contagem = titulo.n > 1 ? `Seu ${titulo.n}º título de ${titulo.nome}` : titulo.primeiro ? "O primeiro título da sua carreira" : `Seu primeiro título de ${titulo.nome}`;
   return (
     <div className="relative overflow-hidden rounded-[28px] min-h-[440px] flex flex-col items-center justify-center text-center px-6 py-10 border border-white/10"
-      style={{ background: `radial-gradient(circle at 50% 32%, ${cor}55 0%, #0E1512 68%)` }}>
+      style={{ background: `radial-gradient(circle at 50% 32%, ${cor}55 0%, rgba(14,21,18,.55) 68%), url(${ARTE.confete}) center/cover, #0E1512` }}>
       <div aria-hidden="true" className="absolute left-1/2 top-[38%] w-[620px] h-[620px] opacity-20"
         style={{ background: `repeating-conic-gradient(${cor} 0deg 8deg, transparent 8deg 24deg)`, animation: "rpRaios 26s linear infinite", borderRadius: "50%" }} />
       <Confetti />
@@ -433,7 +434,7 @@ function SlideBolaDeOuro({ c, card }) {
   const fim = revelados >= top.length;
   return (
     <div className="relative overflow-hidden rounded-[28px] min-h-[440px] flex flex-col items-center justify-center text-center px-5 py-8 border border-[#D8B44A]/30"
-      style={{ background: "radial-gradient(circle at 50% 25%, rgba(216,180,74,.35) 0%, #0E1512 70%)" }}>
+      style={{ background: `radial-gradient(circle at 50% 25%, rgba(216,180,74,.35) 0%, rgba(14,21,18,.6) 70%), url(${ARTE.confete}) center/cover, #0E1512` }}>
       {fim && ganhou && <Confetti />}
       <BolaDourada size={84} />
       <div className="display text-lg text-[#F5D77A] mt-3">Bola de Ouro {card.ano}</div>
@@ -930,9 +931,9 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
   };
   return (
     <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
-      <div className="text-center">
-        <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#8FA39A]">Fim de carreira · {c.idade - 1} anos</div>
-        <h2 className="display text-xl mt-2" style={{ color: L.nivel.cor }}>{L.nivel.icone} {L.nivel.nome}</h2>
+      <div className="text-center -mx-4 -mt-6 px-4 pt-24 pb-6" style={{ background: `linear-gradient(180deg, rgba(14,21,18,.1) 0%, rgba(14,21,18,.55) 55%, #0E1512 100%), url(${ARTE.porDoSol}) center 65%/cover` }}>
+        <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#E1E6E3]">Fim de carreira · {c.idade - 1} anos</div>
+        <h2 className="display text-xl mt-2" style={{ color: L.nivel.cor, textShadow: "0 2px 14px rgba(0,0,0,.9), 0 0 2px rgba(0,0,0,.8)" }}>{L.nivel.icone} {L.nivel.nome}</h2>
         <p className="text-[17px] text-[#C9D3CE] mt-1">{L.nivel.desc}</p>
       </div>
       <CartaFinal c={c} />

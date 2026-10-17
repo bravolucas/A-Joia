@@ -4,6 +4,15 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🏆 Taças com fotos de verdade (Adobe Stock + Photoshop)
+
+- As taças desenhadas em vetor viraram fotos 3D/realistas, com fundo removido no Adobe Photoshop: taça dourada (liga), prateada (copa nacional), taça com tampa e fitas (continental), estrela de cristal (Mundial de Clubes), estrela dourada (Copa do Mundo), taça com estrela (copa continental de seleções) e taça de bronze (segunda divisão)
+- Valem nos dois modos: festa de título, resumo, estante, sala de troféus, cena de taça do Modo Carreira e contador no topo
+- Se uma imagem não carregar, o desenho vetorial anterior aparece no lugar
+- Todas são taças genéricas de banco de imagens, sem reproduzir troféus oficiais. Créditos em `arte/CREDITOS.md`
+
+---
+
 ## 🔢 Fonte dos números: Bebas Neue (Adobe Fonts)
 
 - Placar, overall, gols, valores e estatísticas passam a usar a Bebas Neue (Ryoichi Tsunekawa, Dharma Type), servida pelo Adobe Fonts (kit `lvt7jhx`, liberado para bravolucas.github.io e localhost)

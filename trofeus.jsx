@@ -130,15 +130,38 @@ const DESENHOS = {
 
 const METAL_POR_TIPO = { liga: "ouro", continental: "ouro", mundial: "ouro", copaMundo: "ouro", continentalSelecao: "ouro", copa: "prata", segunda: "bronze" };
 
-export function TacaCompeticao({ tipo = "liga", size = 40 }) {
+/* Fotos das taças (Adobe Stock, recortadas no Photoshop). O desenho
+   vetorial acima continua como reserva caso a imagem não carregue. */
+import liga from "./arte/tacas/liga.webp";
+import copa from "./arte/tacas/copa.webp";
+import continental from "./arte/tacas/continental.webp";
+import mundial from "./arte/tacas/mundial.webp";
+import copaMundo from "./arte/tacas/copaMundo.webp";
+import continentalSelecao from "./arte/tacas/continentalSelecao.webp";
+import segunda from "./arte/tacas/segunda.webp";
+const FOTOS = { liga, copa, continental, mundial, copaMundo, continentalSelecao, segunda };
+
+function TacaVetor({ tipo, size }) {
   const desenho = DESENHOS[tipo] || DESENHOS.liga;
   const metal = METAL_POR_TIPO[tipo] || "ouro";
   const id = `taca-${tipo}`;
-  const brilho = METAIS[metal][1];
   return (
-    <svg width={size} height={size * 1.2} viewBox="0 0 100 120" className="shrink-0" style={{ filter: `drop-shadow(0 0 ${Math.max(4, size / 8)}px ${brilho}88)` }} aria-hidden="true">
+    <svg width={size} height={size * 1.2} viewBox="0 0 100 120" className="shrink-0" aria-hidden="true">
       <Defs id={id} metal={metal} />
       {desenho(id)}
     </svg>
+  );
+}
+
+export function TacaCompeticao({ tipo = "liga", size = 40 }) {
+  const [falhou, setFalhou] = React.useState(false);
+  const metal = METAL_POR_TIPO[tipo] || "ouro";
+  const brilho = METAIS[metal][1];
+  const sombra = { filter: `drop-shadow(0 ${Math.max(2, size / 20)}px ${Math.max(4, size / 7)}px rgba(0,0,0,.55)) drop-shadow(0 0 ${Math.max(4, size / 6)}px ${brilho}55)` };
+  if (falhou || !FOTOS[tipo]) return <span className="shrink-0 inline-block" style={sombra}><TacaVetor tipo={tipo} size={size} /></span>;
+  return (
+    <img src={FOTOS[tipo]} alt="" aria-hidden="true" width={size} height={Math.round(size * 1.2)} loading="lazy" decoding="async"
+      onError={() => setFalhou(true)} className="shrink-0 object-contain select-none" draggable="false"
+      style={{ width: size, height: size * 1.2, ...sombra }} />
   );
 }

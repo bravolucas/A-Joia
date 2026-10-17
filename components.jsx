@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { TacaCompeticao } from "./trofeus.jsx";
 import { ANO_INICIO, ATTR_SLOTS, CLUBES, CONDICOES_CLIMA, DIAS_SEMANA_ABREV, DIAS_SEMANA_LABEL, FALTA_BONECO_POS, FALTA_BOX, FALTA_GOAL, FALTA_SPOT, LANCES_POR_POSICAO, MESES_LABEL, NUM_ATTRS, PASSE_H, PASSE_ORIGEM, PASSE_W, PEN_GOAL, PEN_H, PEN_SPOT, PEN_W, PEN_ZONE_X, POS_GRUPO, TIPOS_NOTICIA } from "./data.js";
 import { calcularSucessoPasse, clamp, diaNaJanela, diasNoMes, distribuirRodadasNaJanela, estimarRodadasLiga, faltaAlvoBola, formatarDinheiro, gerarCenaPasse, janelasPorLiga, janelasSelecao, labelAtributoGoleiro, nacDe, penAlvoBola, pick, primeiroDiaSemanaMes, rand, tierInfo } from "./lib.js";
 
@@ -481,20 +482,8 @@ export function ApresentacaoNovoClube({ clube, nome, numero, posicao, idade, gra
 // Taça genérica — silhueta própria (taça, duas alças, haste, base), sem
 // reproduzir nenhum troféu real. A cor muda pelo nível da competição.
 export function TrofeuIcone({ tier = "ouro", size = 80 }) {
-  const cores = { ouro: ["#F4D03F", "#B8860B"], prata: ["#E8E8E8", "#9CA3AF"], bronze: ["#D2915B", "#8B5A2B"] };
-  const [c1, c2] = cores[tier] || cores.ouro;
-  const gid = `trofeu-grad-${tier}`;
-  return (
-    <svg width={size} height={size * 1.15} viewBox="0 0 100 115" style={{ filter: `drop-shadow(0 0 14px ${c1}aa)` }}>
-      <defs><linearGradient id={gid} x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor={c1} /><stop offset="100%" stopColor={c2} /></linearGradient></defs>
-      <path d="M30 10 H70 V35 C70 55 58 63 50 63 C42 63 30 55 30 35 Z" fill={`url(#${gid})`} />
-      <path d="M30 16 C14 16 9 32 20 40 C25 44 30 41 30 41" fill="none" stroke={`url(#${gid})`} strokeWidth="5" strokeLinecap="round" />
-      <path d="M70 16 C86 16 91 32 80 40 C75 44 70 41 70 41" fill="none" stroke={`url(#${gid})`} strokeWidth="5" strokeLinecap="round" />
-      <rect x="45" y="63" width="10" height="18" fill={`url(#${gid})`} />
-      <rect x="33" y="81" width="34" height="7" rx="2" fill={`url(#${gid})`} />
-      <rect x="26" y="88" width="48" height="9" rx="2" fill={`url(#${gid})`} />
-    </svg>
-  );
+  // usa as taças próprias do jogo: ouro = liga, prata = copa, bronze = medalha
+  return <TacaCompeticao tipo={{ ouro: "liga", prata: "copa", bronze: "segunda" }[tier] || "liga"} size={size} />;
 }
 
 // Levantar a taça — a conquista de um título vira cena, não só uma linha de log.
@@ -985,11 +974,66 @@ export function PopupOverlay({ children, onClose, largo = false }) {
   );
 }
 
+// Brasão próprio do jogo: cada clube ganha um escudo original, sempre o mesmo,
+// montado a partir do nome (forma + padrão) e da cor do clube. Não reproduz
+// nenhum escudo real — é uma identidade visual do A JOIA.
+const FORMAS_BRASAO = [
+  "M50 4 L94 15 V58 C94 84 74 102 50 110 C26 102 6 84 6 58 V15 Z",
+  "M8 6 H92 V60 C92 88 72 105 50 110 C28 105 8 88 8 60 Z",
+  "M50 4 A52 52 0 0 1 50 110 A52 52 0 0 1 50 4 Z",
+  "M6 6 H94 V68 L50 110 L6 68 Z",
+  "M6 16 Q28 2 50 14 Q72 2 94 16 V64 C94 88 72 104 50 110 C28 104 6 88 6 64 Z",
+  "M18 4 H82 L94 26 V62 C94 86 74 103 50 110 C26 103 6 86 6 62 V26 Z",
+];
+function hashNome(s) { let h = 7; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
+
+export function Brasao({ club, size = 20 }) {
+  const h = hashNome(club.nome);
+  const forma = FORMAS_BRASAO[h % FORMAS_BRASAO.length];
+  const padrao = (h >> 3) % 6;
+  const cor = club.cor || "#12A876";
+  const claro = !!club.escuro; // cor principal clara pede detalhe escuro
+  const sec = claro ? "#121916" : (h >> 7) % 3 === 0 ? "#D8B44A" : "#F2F5F3";
+  const id = `br${h.toString(36)}`;
+  const palavras = club.nome.replace(/[^\p{L}\s-]/gu, "").split(/[\s-]+/).filter((w) => w.length > 2 || /^[A-Z]{2,}$/.test(w));
+  const ini = (palavras.length ? palavras : club.nome.split(" ")).map((w) => w[0]).slice(0, size >= 30 ? 3 : 2).join("").toUpperCase();
+  const pequeno = size < 24;
+  const estrelas = (club.forca ?? 0) >= 88 ? 3 : (club.forca ?? 0) >= 82 ? 1 : 0;
+  return (
+    <svg width={size} height={size * 1.14} viewBox="0 0 100 114" className="shrink-0" role="img" aria-label={`Brasão do ${club.nome}`}>
+      <defs>
+        <clipPath id={`${id}c`}><path d={forma} /></clipPath>
+        <linearGradient id={`${id}g`} x1="0" y1="0" x2="0.4" y2="1"><stop offset="0%" stopColor="#ffffff" stopOpacity=".22" /><stop offset="60%" stopColor="#ffffff" stopOpacity="0" /><stop offset="100%" stopColor="#000000" stopOpacity=".25" /></linearGradient>
+      </defs>
+      <g clipPath={`url(#${id}c)`}>
+        <rect width="100" height="114" fill={cor} />
+        {padrao === 1 && [14, 42, 70].map((x) => <rect key={x} x={x} y="0" width="14" height="114" fill={sec} opacity=".9" />)}
+        {padrao === 2 && <path d="M-10 30 L30 -10 L110 70 L70 110 Z" fill={sec} opacity=".9" />}
+        {padrao === 3 && <rect x="50" y="0" width="50" height="114" fill={sec} opacity=".9" />}
+        {padrao === 4 && <rect x="0" y="44" width="100" height="24" fill={sec} opacity=".9" />}
+        {padrao === 5 && <path d="M0 40 L50 72 L100 40 L100 60 L50 92 L0 60 Z" fill={sec} opacity=".9" />}
+        <rect width="100" height="114" fill={`url(#${id}g)`} />
+      </g>
+      <path d={forma} fill="none" stroke={sec} strokeWidth={pequeno ? 6 : 4} opacity=".95" />
+      <path d={forma} fill="none" stroke="#0E1512" strokeWidth="2" opacity=".55" transform="translate(50 57) scale(1.04) translate(-50 -57)" />
+      {!pequeno && estrelas > 0 && (
+        <g fill="#D8B44A">{Array.from({ length: estrelas }).map((_, i) => {
+          const cx = 50 + (i - (estrelas - 1) / 2) * 13, cy = 22;
+          return <polygon key={i} points={`${cx},${cy - 6} ${cx + 1.8},${cy - 1.9} ${cx + 6},${cy - 1.9} ${cx + 2.6},${cy + 1} ${cx + 3.8},${cy + 5.6} ${cx},${cy + 2.8} ${cx - 3.8},${cy + 5.6} ${cx - 2.6},${cy + 1} ${cx - 6},${cy - 1.9} ${cx - 1.8},${cy - 1.9}`} />;
+        })}</g>
+      )}
+      <circle cx="50" cy="60" r={pequeno ? 26 : 23} fill="#0E1512" opacity=".55" />
+      <text x="50" y="60" textAnchor="middle" dominantBaseline="central" fill="#F2F5F3"
+        style={{ fontFamily: "'Unbounded','Oswald',sans-serif", fontWeight: 900, fontSize: pequeno ? 30 : ini.length >= 3 ? 19 : 24, letterSpacing: "-0.02em" }}>
+        {pequeno ? ini[0] : ini}
+      </text>
+    </svg>
+  );
+}
+
 export function ClubDot({ club, size = 20 }) {
   if (!club) return null;
   const [imgFalhou, setImgFalhou] = useState(false);
-  const ini = club.nome.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
-  const shieldClip = "polygon(50% 0%,100% 18%,100% 65%,50% 100%,0% 65%,0% 18%)";
 
   // se o clube tiver uma imagem própria configurada (fornecida pelo usuário) e ela carregar, usa ela
   if (club.imagemUrl && !imgFalhou) {
@@ -1003,22 +1047,7 @@ export function ClubDot({ club, size = 20 }) {
     );
   }
 
-  // escudo genérico: gradiente sutil (cor -> uma variação mais escura) em vez de cor chapada, com um aro fino de contorno
-  return (
-    <span
-      className="inline-flex items-center justify-center font-black shrink-0"
-      style={{
-        width: size, height: size * 1.14,
-        background: `linear-gradient(150deg, ${club.cor} 0%, ${club.cor}cc 55%, ${club.cor}88 100%)`,
-        boxShadow: `inset 0 0 0 1px ${club.escuro ? "#00000030" : "#ffffff30"}`,
-        color: club.escuro ? "#0a0a0a" : "#fff",
-        clipPath: shieldClip,
-        fontSize: size * 0.34,
-      }}
-    >
-      {ini}
-    </span>
-  );
+  return <Brasao club={club} size={size} />;
 }
 
 export function CalendarioTemporadaPopup({ carreira, mesAtual, setMesAtual, onClose, onAbrirFicha }) {

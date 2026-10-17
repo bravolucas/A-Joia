@@ -4,6 +4,14 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🛡️ Brasões e taças próprios do jogo
+
+- Cada clube ganhou um brasão original e fixo, gerado a partir do nome (6 formas de escudo, 6 padrões: listras, faixa, diagonal, metade, chevron ou liso) e da cor do clube, com iniciais e estrelas para os gigantes. Vale para os dois modos
+- Taças desenhadas para o A JOIA, uma silhueta por competição: liga, copa nacional, continental, Mundial de Clubes, Copa do Mundo, copa continental de seleções e medalha de segunda divisão (ouro, prata e bronze)
+- Nenhum escudo ou troféu real é reproduzido; a identidade visual é do jogo
+
+---
+
 ## 💼 Modo Rápido — contratos, negociação e economia
 
 Trazido do Modo Carreira e enxugado para o formato curto:

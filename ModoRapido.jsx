@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS } from "./data.js";
-import { Gema, ClubDot, TrofeuIcone, Confetti, ApresentacaoNovoClube } from "./components.jsx";
+import { Gema, ClubDot, Confetti, ApresentacaoNovoClube } from "./components.jsx";
+import { TacaCompeticao } from "./trofeus.jsx";
 import {
   criarJogador, jogarTemporada, aplicarMomento, fecharTemporada, sortearEvento, resolverEvento, janelaExtra,
   precisaEscolherTraco, opcoesDeTraco, escolherTraco, tracoDe, podeAposentar, aposentadoriaForcada, aposentar,
@@ -55,7 +56,6 @@ export const ESTILO_BASE = `
 `;
 
 const ATTR_LABEL = { velocidade: "VEL", finalizacao: "FIN", passe: "PAS", drible: "DRI", defesa: "DEF", fisico: "FIS" };
-const TIER_TITULO = { liga: "ouro", continental: "ouro", copaMundo: "ouro", continentalSelecao: "ouro", mundial: "ouro", copa: "prata", segunda: "bronze" };
 const ROTULO_TIPO = { liga: "Ligas nacionais", copa: "Copas nacionais", continental: "Continentais", mundial: "Mundiais de Clubes", copaMundo: "Copas do Mundo", continentalSelecao: "Copas continentais (seleção)", bolaOuro: "Bolas de Ouro", segunda: "Segundas divisões" };
 const ORDEM_TIPOS = ["bolaOuro", "copaMundo", "continentalSelecao", "mundial", "continental", "liga", "copa", "segunda"];
 const RISCO = {
@@ -89,7 +89,7 @@ function BolaDourada({ size = 80 }) {
 
 function IconeTitulo({ tipo, size = 40 }) {
   if (tipo === "bolaOuro") return <BolaDourada size={size} />;
-  return <TrofeuIcone tier={TIER_TITULO[tipo] || "ouro"} size={size} />;
+  return <TacaCompeticao tipo={tipo} size={size} />;
 }
 
 /* Linha do tempo: um segmento por temporada, na cor do clube; ponto dourado = título */
@@ -122,7 +122,7 @@ function Cabecalho({ c, onSair, onEstante }) {
         {c && <span className="font-stat text-[15px] text-[#C9D3CE]">{c.ano} · {c.idade} anos</span>}
         {c && (
           <button onClick={onEstante} className="ml-auto flex items-center gap-1.5 min-h-[44px] px-3 rounded-xl border border-[#D8B44A]/35 bg-[#D8B44A]/10 text-[#EBC557]" aria-label="Abrir estante de troféus">
-            <TrofeuIcone tier="ouro" size={16} />
+            <TacaCompeticao tipo="liga" size={15} />
             <span className="font-stat text-[15px]">{nTrofeus}</span>
           </button>
         )}

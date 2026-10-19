@@ -283,7 +283,7 @@ export function TelaPartidaAoVivo({ pv, onDecisao, onContinuarSegundoTempo, onMu
               {[1, 2, 5].map((v) => (
                 <button key={v} onClick={() => onMudarVelocidade(v)} className={`text-[10px] font-bold px-2 py-0.5 rounded-sm border ${velocidade === v ? "border-emerald-400 text-emerald-300 bg-emerald-500/10" : "border-zinc-700 text-zinc-500"}`}>{v}x</button>
               ))}
-              <button onClick={onPularParaFinal} className="text-[10px] font-bold px-2 py-0.5 rounded-sm border border-zinc-700 text-zinc-500 hover:border-amber-400 hover:text-amber-400">⏭ Pular pro final</button>
+              <button onClick={onPularParaFinal} className="text-[10px] font-bold px-2 py-0.5 rounded-sm border border-zinc-700 text-zinc-500 hover:border-emerald-400 hover:text-emerald-300">⏭ Pular pro final</button>
             </div>
           )}
         </div>
@@ -331,7 +331,7 @@ export function TelaPartidaAoVivo({ pv, onDecisao, onContinuarSegundoTempo, onMu
               <div className="text-xs text-zinc-300 mb-2 text-center">{pendente.texto}</div>
               <div className="grid gap-1.5 max-w-md mx-auto">
                 {pendente.opcoes.map((op) => (
-                  <button key={op.id} onClick={() => onDecisao(op.id)} className="text-left px-3 py-2 rounded-sm border border-zinc-800 hover:border-amber-500 transition-colors">
+                  <button key={op.id} onClick={() => onDecisao(op.id)} className="text-left px-3 py-2 rounded-sm border border-zinc-800 hover:border-emerald-500 transition-colors">
                     <div className="text-xs font-bold">{op.icone} {op.label}</div>
                     <div className="text-[10px] text-zinc-500">{op.desc}</div>
                   </button>
@@ -933,7 +933,7 @@ export function LeitorNoticia({ noticia: nt, nome, clube, onClose }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
             <span className="font-bold text-sm">Central do Futebol</span>
-            <span className="text-cyan-400 text-xs">✔</span>
+            <span className="text-emerald-400 text-xs">✔</span>
             <span className="text-zinc-500 text-xs">@centralfut</span>
           </div>
           <p className="text-[15px] leading-snug mt-2 text-zinc-100">{nt.titulo}</p>
@@ -1100,12 +1100,12 @@ export function CalendarioTemporadaPopup({ carreira, mesAtual, setMesAtual, onCl
       <Card className="border-amber-500/40" padded={false}>
         <div className="p-4 pb-2">
           <div className="flex items-center justify-between mb-3">
-            <button onClick={() => setMesAtual((m) => (m + 11) % 12)} className="w-7 h-7 border border-zinc-700 rounded-sm hover:border-amber-500">‹</button>
+            <button onClick={() => setMesAtual((m) => (m + 11) % 12)} className="w-7 h-7 border border-zinc-700 rounded-sm hover:border-emerald-500">‹</button>
             <div className="text-center">
               <div className="text-sm font-sport font-black uppercase tracking-widest text-amber-400">{MESES_LABEL[mesAtual]}</div>
               <div className="text-[10px] text-zinc-500">{ano} · {carreira.clube.nome}</div>
             </div>
-            <button onClick={() => setMesAtual((m) => (m + 1) % 12)} className="w-7 h-7 border border-zinc-700 rounded-sm hover:border-amber-500">›</button>
+            <button onClick={() => setMesAtual((m) => (m + 1) % 12)} className="w-7 h-7 border border-zinc-700 rounded-sm hover:border-emerald-500">›</button>
           </div>
           <div className="grid grid-cols-7 gap-1 mb-1">
             {DIAS_SEMANA_ABREV.map((d) => <div key={d} className="text-center text-[9px] text-zinc-600 uppercase">{d}</div>)}
@@ -1617,7 +1617,7 @@ export function PassePersonagem({ x, y, tipo, selecionavel, destacado, onClick }
         <rect x="6" y="9" width="14" height="13" rx="4" fill={cor} opacity="0.92" />
         <circle cx="13" cy="4.5" r="4.6" fill="#181b22" />
       </svg>
-      {selecionavel && <div className="absolute left-1/2 -translate-x-1/2 -top-3 text-[8px] text-cyan-300">▼</div>}
+      {selecionavel && <div className="absolute left-1/2 -translate-x-1/2 -top-3 text-[8px] text-emerald-300">▼</div>}
     </button>
   );
 }

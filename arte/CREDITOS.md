@@ -36,3 +36,8 @@ A licença do Adobe Stock permite uso em projetos, mas não a redistribuição d
 | tacas/segunda.webp | 1649183514 | A classic bronze trophy cup | Segunda divisão |
 
 Todas são taças genéricas de banco de imagens; nenhuma reproduz troféu oficial de competição real.
+
+## Tratamento de cor
+
+- coletiva.webp: o original tinha parede azul saturada, fora da paleta. Recebeu um duotone grafite-esverdeado (sombras #0B1310, meios #2C4A3F, luzes #E6EFEA) para conversar com as outras cenas.
+

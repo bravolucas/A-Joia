@@ -4,6 +4,17 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🎨 Revisão de design e imagens
+
+- **Contraste:** os cinzas de texto mais apagados (legendas, abas inativas, clubes no ranking da Bola de Ouro) ficavam abaixo do mínimo de leitura (4.5:1) no fundo escuro. Foram clareados nos dois modos.
+- **Texto pequeno no celular:** os tamanhos mínimos do Modo Carreira subiram (9px → 11px, 10px → 12px). No computador nada muda.
+- **Dourado só para conquistas:** as opções de coletiva, reunião, patrocínio, contrato, número da camisa e navegação do calendário deixaram de acender em dourado ao passar o mouse; agora acendem em esmeralda.
+- **Seleção em safira:** o ciano que restava na tela da seleção virou azul-safira, da paleta.
+- **Foto da coletiva:** a parede azul saturada destoava das outras cenas; a imagem ganhou um tratamento grafite-esverdeado.
+- **Posts da aba Mídia & Redes:** em vez de um quadro colorido com emoji, cada post mostra uma foto do jogo ligada ao assunto (contrato, lesão, título, transferência, gols, coletiva), com o emoji como selo.
+
+---
+
 ## 💹 Mercado mais vivo: valor pela forma, salário comparado e clube que não quer vender
 
 - **Valor de mercado reage à temporada**: além de nível, idade e fama, o preço agora sobe ou cai com a forma recente (nota, gols e assistências esperados para a posição, títulos e Bola de Ouro). Quem jogou pouco perde valor. O resumo mostra a variação (▲ +€ 6 mi / ▼ −€ 2 mi), e o novo valor também mexe na cláusula, no preço de venda e nas propostas

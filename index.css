@@ -4,3 +4,7 @@
 
 html, body, #root { min-height: 100%; }
 body { background: #0E1512; color: #E1E6E3; margin: 0; }
+
+/* Contraste AA: os cinzas de texto mais apagados ficavam abaixo de 4.5:1 no fundo escuro */
+.text-zinc-500 { color: #85908A; }
+.text-zinc-600 { color: #7A847F; }

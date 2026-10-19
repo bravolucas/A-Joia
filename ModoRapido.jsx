@@ -160,7 +160,7 @@ function Estante({ c, onFechar }) {
         </div>
         {c.lista.length > 0 && (
           <ul className="flex flex-col gap-1 mt-4">
-            {[...c.lista].reverse().map((t, i) => <li key={i} className="text-[15px] text-[#C9D3CE]"><span className="font-stat text-[#8FA39A] mr-2">{t.ano}</span>{t.nome} <span className="text-[#5E7068]">· {t.clube}</span></li>)}
+            {[...c.lista].reverse().map((t, i) => <li key={i} className="text-[15px] text-[#C9D3CE]"><span className="font-stat text-[#8FA39A] mr-2">{t.ano}</span>{t.nome} <span className="text-[#7F918A]">· {t.clube}</span></li>)}
           </ul>
         )}
         {(c.marcos || []).length > 0 && (
@@ -328,7 +328,7 @@ function TelaCriacao({ onCriar }) {
 
       <Secao titulo="Nome">
         <input value={nome} onChange={(e) => setNome(e.target.value.slice(0, 24))} placeholder="Como a torcida vai te chamar"
-          className="rp-painel px-4 min-h-[52px] text-lg text-[#F2F5F3] placeholder:text-[#5E7068] outline-none focus:border-[#12A876]" />
+          className="rp-painel px-4 min-h-[52px] text-lg text-[#F2F5F3] placeholder:text-[#7F918A] outline-none focus:border-[#12A876]" />
       </Secao>
 
       {doDia ? (
@@ -402,7 +402,7 @@ function TelaCriacao({ onCriar }) {
             <div className="flex items-center gap-2 flex-wrap">
               <input inputMode="numeric" value={numero} onChange={(e) => setNumero(e.target.value.replace(/\D/g, "").slice(0, 2).replace(/^0+/, ""))}
                 placeholder={posicao ? String(NUMERO_PADRAO[posicao]) : "10"} aria-label="Número da camisa"
-                className="rp-painel w-24 px-4 min-h-[52px] text-2xl font-stat text-center text-[#F2F5F3] placeholder:text-[#5E7068] outline-none focus:border-[#12A876]" />
+                className="rp-painel w-24 px-4 min-h-[52px] text-2xl font-stat text-center text-[#F2F5F3] placeholder:text-[#7F918A] outline-none focus:border-[#12A876]" />
               {[7, 9, 10, 11].map((n) => (
                 <button key={n} onClick={() => setNumero(String(n))} className={`rp-opcao w-12 min-h-[44px] font-stat text-lg ${+numero === n ? "sel" : ""}`}>{n}</button>
               ))}
@@ -428,7 +428,7 @@ function TelaCriacao({ onCriar }) {
 
           <Secao titulo="Código da carreira (opcional)">
             <input value={codigo} onChange={(e) => setCodigo(normalizarCodigo(e.target.value))} placeholder="Ex.: K7QX2M — deixe vazio para sortear"
-              aria-label="Código da carreira" className="rp-painel px-4 min-h-[52px] text-lg font-stat tracking-widest text-[#F2F5F3] placeholder:text-[#5E7068] placeholder:font-sans placeholder:tracking-normal placeholder:text-[15px] outline-none focus:border-[#12A876]" />
+              aria-label="Código da carreira" className="rp-painel px-4 min-h-[52px] text-lg font-stat tracking-widest text-[#F2F5F3] placeholder:text-[#7F918A] placeholder:font-sans placeholder:tracking-normal placeholder:text-[15px] outline-none focus:border-[#12A876]" />
             <p className="text-[14px] text-[#8FA39A]">Recebeu o código de um amigo? Use o mesmo para jogar no mesmo mundo, com os mesmos sorteios.</p>
           </Secao>
         </>
@@ -856,7 +856,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever }) {
             <li key={i} className={`flex items-center gap-2 text-[16px] ${r.voce ? "text-[#EBC557] font-bold" : "text-[#C9D3CE]"}`}>
               <span className="font-stat w-5 text-[#8FA39A]">{i + 1}</span>
               <span className="truncate">{r.nome}</span>
-              <span className="ml-auto text-[13px] text-[#5E7068] truncate">{r.clube}</span>
+              <span className="ml-auto text-[13px] text-[#7F918A] truncate">{r.clube}</span>
             </li>
           ))}
         </ol>
@@ -1275,8 +1275,8 @@ function CartaFinal({ c }) {
             </div>
           </div>
         )}
-        <div className="text-[11px] tracking-[0.2em] uppercase text-[#5E7068] mt-4 text-center">A JOIA · Modo Rápido · {c.temporadas[0]?.ano}–{c.ano - 1}</div>
-        {c.codigo && <div className="text-[11px] tracking-[0.2em] uppercase text-[#5E7068] text-center mt-0.5">{c.diario ? `Carreira do Dia ${dataDoCodigo(c.codigo)}` : `Código ${c.codigo}`}</div>}
+        <div className="text-[11px] tracking-[0.2em] uppercase text-[#7F918A] mt-4 text-center">A JOIA · Modo Rápido · {c.temporadas[0]?.ano}–{c.ano - 1}</div>
+        {c.codigo && <div className="text-[11px] tracking-[0.2em] uppercase text-[#7F918A] text-center mt-0.5">{c.diario ? `Carreira do Dia ${dataDoCodigo(c.codigo)}` : `Código ${c.codigo}`}</div>}
       </div>
     </div>
   );
@@ -1381,7 +1381,7 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
       <div className="rp-painel p-4">
         <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-2">Sua carreira em emojis</div>
         <pre className="whitespace-pre-wrap text-[15px] leading-relaxed text-[#E1E6E3] font-sans">{emoji}</pre>
-        <div className="text-[12px] text-[#5E7068] mt-2">🥇 Bola de Ouro · 🏆 título · ✈️ clube novo · 🩹 lesão · ⚽ grande temporada · 🟩 boa · ⬜ discreta</div>
+        <div className="text-[12px] text-[#7F918A] mt-2">🥇 Bola de Ouro · 🏆 título · ✈️ clube novo · 🩹 lesão · ⚽ grande temporada · 🟩 boa · ⬜ discreta</div>
         <button onClick={copiar} className="text-[14px] font-bold text-[#8FA39A] min-h-[40px] mt-1">{copiado ? "Resumo completo copiado!" : "Copiar resumo completo em texto"}</button>
       </div>
 
@@ -1470,7 +1470,7 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
             {c.marcos.map((m, i) => (
               <li key={i} className="relative">
                 <span className="absolute -left-[25px] top-0.5 text-base">{m.icone}</span>
-                <div className="text-[15px] font-bold text-[#F2F5F3]">{m.titulo} <span className="font-stat font-normal text-[#5E7068]">{m.ano}</span></div>
+                <div className="text-[15px] font-bold text-[#F2F5F3]">{m.titulo} <span className="font-stat font-normal text-[#7F918A]">{m.ano}</span></div>
                 <div className="text-[14px] text-[#8FA39A]">{m.texto}</div>
               </li>
             ))}

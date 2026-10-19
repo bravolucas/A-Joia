@@ -2807,7 +2807,7 @@ export const NIVEIS = [
 export const TIERS_TORCIDA = [
   { min: 90, label: "Lenda Máxima", cor: "#D8B44A" }, { min: 75, label: "Ídolo", cor: "#12A876" },
   { min: 60, label: "Xodó da torcida", cor: "#34d399" }, { min: 45, label: "Querido", cor: "#3b82f6" },
-  { min: 30, label: "Respeitado", cor: "#8b5cf6" }, { min: 18, label: "Coadjuvante", cor: "#a1a1aa" },
+  { min: 30, label: "Respeitado", cor: "#a78bfa" }, { min: 18, label: "Coadjuvante", cor: "#a1a1aa" },
   { min: 8, label: "Contestado", cor: "#f59e0b" }, { min: 0, label: "Jogador esquecível", cor: "#6b7280" },
 ];
 

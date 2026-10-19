@@ -4,6 +4,18 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 💹 Mercado mais vivo: valor pela forma, salário comparado e clube que não quer vender
+
+- **Valor de mercado reage à temporada**: além de nível, idade e fama, o preço agora sobe ou cai com a forma recente (nota, gols e assistências esperados para a posição, títulos e Bola de Ouro). Quem jogou pouco perde valor. O resumo mostra a variação (▲ +€ 6 mi / ▼ −€ 2 mi), e o novo valor também mexe na cláusula, no preço de venda e nas propostas
+- **Salário comparado**: cada proposta mostra o salário que o clube vai oferecer de fato (já com o efeito do seu empresário) e quanto isso é em relação ao atual ("+40% do atual"). Na mesa de negociação, o salário vem com "Hoje: € X/ano"
+- **Clube que não quer vender**: quando você é titular ou estrela, com dois anos ou mais de contrato, a diretoria pode recusar a melhor proposta e pedir mais. A proposta mostra o aviso "resiste a vender". Se você insistir, abre o impasse:
+  - **Aceitar e ficar**: diretoria e torcida agradecem, a cabeça sente um pouco
+  - **Pedir ao empresário para pressionar**: pode render um acordo no meio do caminho, ou o comprador desiste. Empresário agressivo tem mais chance
+  - **Forçar a saída**: se der certo, você sai pelo valor pedido e a torcida não perdoa; se der errado, o clube te afasta e você começa a temporada no banco
+- No máximo um impasse por janela; resiste mais quando o comprador é da mesma liga e menos quando é muito maior
+
+---
+
 ## 📞 Mercado em toda janela e liga escolhida pelo empresário
 
 - **Propostas frequentes, como no Copero**: depois do acontecimento de cada temporada, o empresário traz de 2 a 4 propostas. Não há mercado quando você acabou de trocar de clube, renovou há pouco, está emprestado ou tem menos de 17 anos

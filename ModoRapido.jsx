@@ -13,7 +13,7 @@ import {
   iniciarNegociacao, ajustarNegociacao, fecharNegociacao, CAMPOS_NEGOCIACAO, fama_negociador,
   INVESTIMENTOS, comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
   chanceMomento, miniDaPosicao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
-  eventoDaJanela, segundoEvento, textoEmoji, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
+  eventoDaJanela, segundoEvento, eventoImpasse, valorAtual, comparaSalario, textoEmoji, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
 } from "./rapido.js";
 
 /* Estilo do seletor de modos e do Modo Rápido. Inclui as animações que as
@@ -235,7 +235,7 @@ function Ficha({ c }) {
         )}
         <BarraMental moral={c.moral} />
         <div className="grid grid-cols-3 gap-2 mt-2 text-center">
-          {[["VALOR", formatarValor(valorMercado(ovr, c.idade, c.fama))], ["TORCIDA", `${torcida}/100`], ["FAMA", `${c.fama}/100`]].map(([k, v]) => (
+          {[["VALOR", formatarValor(valorAtual(c))], ["TORCIDA", `${torcida}/100`], ["FAMA", `${c.fama}/100`]].map(([k, v]) => (
             <div key={k} className="rounded-xl bg-[#0E1512]/70 py-2"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">{k}</div><div className="font-stat text-sm">{v}</div></div>
           ))}
         </div>
@@ -874,6 +874,9 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever }) {
         <div className="rp-painel px-3 py-3">
           <div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">VALOR</div>
           <div className="font-stat text-lg text-[#F2F5F3] truncate">{formatarValor(card.valor)}</div>
+          {card.valorAntes != null && card.valor !== card.valorAntes && (
+            <div className={`font-stat text-[13px] truncate ${card.valor > card.valorAntes ? "text-[#1BC28A]" : "text-[#E36B5B]"}`}>{card.valor > card.valorAntes ? "▲ +" : "▼ −"}{formatarValor(Math.abs(card.valor - card.valorAntes)).replace("€ ", "")}</div>
+          )}
         </div>
       </div>
 
@@ -1170,6 +1173,7 @@ function TelaNegociacao({ c, n, onAjustar, onAssinar, onSair }) {
               <div className="flex-1 min-w-0">
                 <div className="text-[13px] text-[#8FA39A]">{campo.label}</div>
                 <div className={`font-stat text-[17px] ${mudou ? "text-[#EBC557]" : "text-[#F2F5F3]"}`}>{fmt[campo.id](t[campo.id])}</div>
+                {campo.id === "salario" && c.contrato?.salario > 0 && <div className="text-[12px] text-[#8FA39A]">Hoje: {formatarValor(c.contrato.salario)}/ano{comparaSalario(c, t.salario)}</div>}
               </div>
               <button disabled={bloqueado} onClick={() => onAjustar(campo.id, -1)} className="rp-btn rp-sec !min-h-[44px] px-3 text-[13px]" aria-label={`${campo.ceder}: ${campo.label}`}>−</button>
               <button disabled={bloqueado} onClick={() => onAjustar(campo.id, 1)} className="rp-btn rp-sec !min-h-[44px] px-3 text-[13px]" aria-label={`${campo.pedirMais}: ${campo.label}`}>+</button>
@@ -1531,7 +1535,7 @@ export default function ModoRapido({ onSair }) {
   const aplicarEscolha = (cBase, opId, extra) => {
     const r = resolverEvento(cBase, evento, opId, extra);
     // fila: depois do evento principal, a janela de transferências pode abrir também
-    const extraEv = fila ? segundoEvento(r.c, evento.id) : null;
+    const extraEv = eventoImpasse(r.c) || (fila ? segundoEvento(r.c, evento.id) : null);
     const mudou = r.c.clubeNome !== c.clubeNome;
     setEstado({ etapa: "evento", c: r.c, evento, resultado: r.resultado || "Decisão tomada.", proximo: extraEv, fila: false, manchete: mudou ? r.c.ultimaTransferencia?.manchete : null });
     if (mudou) {

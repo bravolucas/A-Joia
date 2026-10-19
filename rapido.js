@@ -376,6 +376,26 @@ export function valorMercado(ovr, idade, fama = 0) {
   const idadeF = idade <= 21 ? 1.5 : idade <= 24 ? 1.25 : idade <= 28 ? 1 : idade <= 31 ? 0.65 : 0.35;
   return Math.max(50, Math.round(base * idadeF * (1 + fama / 400)));
 }
+/* Forma recente: a última temporada mexe no preço (nota, participação em gols
+   para a posição, títulos e Bola de Ouro). 1 = neutro; vai de 0,75 a 1,4. */
+const GA_ESPERADO = { GOL: 0, ZAG: 0.08, LD: 0.12, LE: 0.12, VOL: 0.12, MC: 0.3, MEI: 0.45, PD: 0.55, PE: 0.55, SA: 0.6, ATA: 0.65 };
+export function formaDaTemporada(card, posicao, anterior = 1) {
+  const jogos = card.jogos || 0;
+  let bruto;
+  if (jogos < 8) bruto = 0.9;
+  else {
+    const esp = GA_ESPERADO[posicao] ?? 0.4;
+    const ga = ((card.gols || 0) + (card.assist || 0)) / jogos;
+    const pGa = esp > 0 ? clamp((ga - esp) / esp, -0.6, 1) * 0.12 : 0;
+    const nTit = (card.titulos || []).filter((t) => t.tipo !== "bolaOuro").length;
+    const pBola = card.bola?.pos <= 3 ? 0.1 : card.bola?.pos <= 10 ? 0.05 : 0;
+    bruto = 1 + Math.min(1, jogos / 25) * (((card.nota || 6.5) - 6.8) * 0.25 + pGa + Math.min(nTit, 3) * 0.03 + pBola);
+  }
+  return Math.round(clamp(0.3 * anterior + 0.7 * bruto, 0.75, 1.4) * 100) / 100;
+}
+/* Valor de mercado do atleta hoje: nível, idade, fama e forma recente */
+export const valorAtual = (c) => Math.max(50, Math.round(valorMercado(ovrDe(c), c.idade, c.fama) * (c.formaMercado ?? 1)));
+
 export function formatarValor(k) {
   if (k >= 1000) { const m = k / 1000; return `€ ${m >= 100 ? Math.round(m) : m.toFixed(1).replace(".0", "")} mi`; }
   return `€ ${Math.round(k)} mil`;
@@ -392,6 +412,13 @@ export function salarioAnual(clubeNome, ovr) {
   const cl = clubeDe(clubeNome);
   return Math.max(15, Math.round(60 * Math.pow(1.155, ovr - 55) * (LIGA_PAGA[cl.liga] ?? 0.4) * (0.75 + (cl.forca - 60) / 80)));
 }
+/* "+40% do atual": compara um salário oferecido com o contrato vigente */
+export function comparaSalario(c, novo) {
+  const atual = c.contrato?.salario;
+  if (!atual || !novo) return "";
+  const pct = Math.round((novo / atual - 1) * 100);
+  return pct === 0 ? " (igual ao atual)" : ` (${pct > 0 ? "+" : ""}${pct}% do atual)`;
+}
 const empresarioDe = (c) => EMPRESARIOS.find((e) => e.id === c.empresario) || EMPRESARIOS[0];
 
 export function contratoPadrao(c, clubeNome, { base = false } = {}) {
@@ -401,7 +428,7 @@ export function contratoPadrao(c, clubeNome, { base = false } = {}) {
   const anos = clampR(3 + (emp.anosBonus || 0), 1, 5);
   return {
     clube: clubeNome, anos, restantes: anos, salario,
-    multa: Math.round(Math.max(valorMercado(ovr, c.idade, c.fama) * 1.6, salario * 4) * (emp.multaMult ?? 1)),
+    multa: Math.round(Math.max(valorAtual(c) * 1.6, salario * 4) * (emp.multaMult ?? 1)),
     bonusGol: Math.max(1, Math.round(salario * 0.012)),
   };
 }
@@ -881,7 +908,10 @@ function fecharTemporadaBase(c0, card0) {
       else if (linha.bola && card.bola.pos < linha.bola) card.destaques.push(`Você terminou à frente de ${r.nome} na Bola de Ouro`);
     }
   }
-  card.valor = valorMercado(card.ovrDepois, c.idade + 1, c.fama);
+  card.valorAntes = valorAtual(c0);
+  c.formaMercado = formaDaTemporada(card, c.posicao, c0.formaMercado ?? 1);
+  card.forma = c.formaMercado;
+  card.valor = Math.max(50, Math.round(valorMercado(card.ovrDepois, c.idade + 1, c.fama) * c.formaMercado));
 
   // cabeça: a temporada mexe com o estado mental, que tende a voltar ao normal
   const dMoral = (card.nota ? (card.nota - 7.0) * 6 : -6) + nTit * 3 + ((card.share ?? 0.5) < 0.4 ? -5 : 0)
@@ -896,6 +926,7 @@ function fecharTemporadaBase(c0, card0) {
   c.marcos = [...(c.marcos || []), ...card.marcos];
 
   if (c.flags.blindado > 0) c.flags.blindado -= 1;
+  c.flags.impasse = null;
   if (c.emprestimo) { card.destaques.push(`Fim do empréstimo: volta ao ${c.clubeNome}`); c.emprestimo = null; }
   c.mod = {};
   c.idade += 1; c.ano += 1;
@@ -982,9 +1013,33 @@ export function gerarOfertas(c, n, opts = {}) {
 export function valorTransferencia(c, comprador) {
   const restantes = c.contrato?.restantes ?? 0;
   if (restantes <= 0) return 0;
-  const base = valorMercado(ovrDe(c), c.idade, c.fama) * (0.75 + 0.1 * Math.min(restantes, 4)) * (clubeDe(comprador).forca >= 85 ? 1.15 : 1);
+  const base = valorAtual(c) * (0.75 + 0.1 * Math.min(restantes, 4)) * (clubeDe(comprador).forca >= 85 ? 1.15 : 1);
   const teto = c.contrato?.multa || base;
   return Math.max(50, Math.round(Math.min(base, teto) / 50) * 50);
+}
+
+/* Clube que não quer vender: titular ou estrela com contrato longo vira peça
+   que a diretoria segura. No máximo uma proposta por janela fica travada; o
+   desfecho de cada caminho do impasse já sai sorteado aqui (determinístico). */
+function marcarResistencia(c, ofertas) {
+  if (c.emprestimo || (c.contrato?.restantes ?? 0) < 2 || c.flags.impasseAno === c.ano || !ofertas.length) return ofertas;
+  const st = statusNoClube(c).id;
+  if (!["titular", "estrela"].includes(st)) return ofertas;
+  const atual = clubeDe(c.clubeNome);
+  const o = ofertas[0]; // a mais forte (as ofertas vêm ordenadas por força)
+  const valor = valorTransferencia(c, o.clube);
+  const multa = c.contrato?.multa ?? Infinity;
+  const pedida = Math.round(Math.min(multa, valor * 1.35) / 50) * 50;
+  if (c.idade < 19 || !valor || pedida < valor * 1.15) return ofertas; // base, ou cláusula baixa: pagariam a multa
+  const p = (st === "estrela" ? 0.5 : 0.28) + (o.ligaId === atual.liga ? 0.15 : 0) - (o.forca - atual.forca >= 8 ? 0.15 : 0) + (c.idade <= 23 ? 0.05 : 0);
+  if (!chance(p)) return ofertas;
+  const emp = empresarioDe(c);
+  const resiste = {
+    valor, pedida, ligaNome: o.ligaNome, status: o.status,
+    empOk: chance(emp.id === "agressivo" ? 0.75 : (emp.alcance ?? 8) >= 15 ? 0.55 : 0.4),
+    forcarOk: chance(st === "estrela" ? 0.55 : 0.68),
+  };
+  return [{ ...o, resiste }, ...ofertas.slice(1)];
 }
 
 const JORNAIS = ["Diário da Bola", "Gazeta do Gramado", "O Placar", "Jornal da Arquibancada", "Folha Esportiva", "Correio do Futebol"];
@@ -1048,25 +1103,32 @@ export const EVENTOS = [
     preparar: (c) => {
       const emp = EMPRESARIOS.find((e) => e.id === c.empresario) || EMPRESARIOS[0];
       const n = Math.min(4, Math.max(2, Math.round(emp.nOfertas * 0.6)) + somaTraco(c, "ofertasExtra") + (c.mod.ofertasExtra || 0));
-      if (!c.ligaAlvo) return { ofertas: gerarOfertas(c, n) };
+      if (!c.ligaAlvo) return { ofertas: marcarResistencia(c, gerarOfertas(c, n)) };
       // liga pedida ao empresário: a maior parte das propostas vem de lá, com faixa de nível mais larga
       const ovr = ovrDe(c);
       const daLiga = gerarOfertas(c, Math.max(2, n - 1), { ligas: [c.ligaAlvo], lo: ovr - 12, hi: ovr + Math.round(emp.alcance * 0.5) + 3 });
       const outras = gerarOfertas(c, Math.max(1, n - daLiga.length)).filter((o) => !daLiga.some((d) => d.clube === o.clube));
-      return { ofertas: [...daLiga, ...outras].slice(0, n), ligaAlvo: c.ligaAlvo, achouNaLiga: daLiga.length };
+      return { ofertas: marcarResistencia(c, [...daLiga, ...outras].slice(0, n)), ligaAlvo: c.ligaAlvo, achouNaLiga: daLiga.length };
     },
     titulo: () => "Janela de transferências",
     texto: (c, ctx) => {
-      const base = `Seu empresário chegou com ${ctx.ofertas.length === 1 ? "uma proposta" : `${ctx.ofertas.length} propostas`}. Valor de mercado atual: ${formatarValor(valorMercado(ovrDe(c), c.idade, c.fama))}.`;
+      const base = `Seu empresário chegou com ${ctx.ofertas.length === 1 ? "uma proposta" : `${ctx.ofertas.length} propostas`}. Valor de mercado atual: ${formatarValor(valorAtual(c))}.`;
       if (!ctx.ligaAlvo) return base;
       const liga = ligaDe(ctx.ligaAlvo).nome;
       return ctx.achouNaLiga ? `📞 Ele sondou a ${liga} a seu pedido. ${base}` : `📞 Ele ligou para a ${liga}, mas nenhum clube de lá quis apostar em você agora. ${base}`;
     },
     opcoes: (c, ctx) => [
       ...ctx.ofertas.map((o) => ({
-        id: `ir:${o.clube}`, label: `Negociar com o ${o.clube}`, dica: `${o.ligaNome} · chegaria como ${o.status.toLowerCase()} · ~${formatarValor(salarioAnual(o.clube, ovrDe(c)))}/ano · transferência de ${valorTransferencia(c, o.clube) ? formatarValor(valorTransferencia(c, o.clube)) : "graça"}`, oferta: o,
-        negociar: { clube: o.clube, tipo: "transferencia" },
-        efeito: (c, extra) => { const de = transferir(c, o.clube, { contrato: extra?.contrato }); c.fama = clampR(c.fama + (o.forca > clubeDe(de).forca ? 4 : 0), 0, 100); return r(`Contrato assinado. Nova casa: ${o.clube}.`); },
+        id: `ir:${o.clube}`, label: `Negociar com o ${o.clube}`, dica: `${o.ligaNome} · chegaria como ${o.status.toLowerCase()} · ~${formatarValor(contratoPadrao(c, o.clube).salario)}/ano${comparaSalario(c, contratoPadrao(c, o.clube).salario)} · transferência de ${valorTransferencia(c, o.clube) ? formatarValor(valorTransferencia(c, o.clube)) : "graça"}${o.resiste ? ` · ⚠️ o ${c.clubeNome} resiste a vender` : ""}`, oferta: o,
+        ...(o.resiste ? { risco: "equilibrado" } : { negociar: { clube: o.clube, tipo: "transferencia" } }),
+        efeito: (c, extra) => {
+          if (o.resiste) {
+            c.flags.impasse = { clube: o.clube, forca: o.forca, ...o.resiste };
+            c.flags.impasseAno = c.ano;
+            return r(`O ${o.clube} formalizou a proposta de ${formatarValor(o.resiste.valor)}, mas o ${c.clubeNome} recusou na hora: diz que você não está à venda e só conversa a partir de ${formatarValor(o.resiste.pedida)}.`);
+          }
+          const de = transferir(c, o.clube, { contrato: extra?.contrato }); c.fama = clampR(c.fama + (o.forca > clubeDe(de).forca ? 4 : 0), 0, 100); return r(`Contrato assinado. Nova casa: ${o.clube}.`);
+        },
       })),
       ...(c.flags.ligaPedida !== c.ano ? [{ id: "pedirLiga", label: "📞 Pedir propostas de outra liga", dica: c.ligaAlvo ? `Hoje ele está sondando a ${ligaDe(c.ligaAlvo).nome}` : "Diga ao empresário onde você quer jogar", escolherLiga: true, efeito: () => "" }] : []),
       { id: "ficar", label: `Ficar no ${c.clubeNome}`, dica: ctx.ofertas.some((o) => o.forca > clubeDe(c.clubeNome).forca) ? "Recusar clubes maiores: a torcida valoriza a lealdade" : "Nenhuma proposta melhor que o seu clube",
@@ -1432,12 +1494,12 @@ export const EVENTOS_EXTRAS = [
   },
   {
     id: "clausula", icone: "🔓",
-    peso: (c, ctx) => (ctx.clube && c.flags.blindado === 0 && !c.emprestimo && c.idade >= 19 ? (ctx.multa < valorMercado(ovrDe(c), c.idade, c.fama) * 0.5 ? 5 : 3) : 0),
+    peso: (c, ctx) => (ctx.clube && c.flags.blindado === 0 && !c.emprestimo && c.idade >= 19 ? (ctx.multa < valorAtual(c) * 0.5 ? 5 : 3) : 0),
     preparar: (c) => {
       const ovr = ovrDe(c);
       const atual = clubeDe(c.clubeNome);
       const multa = c.contrato?.multa ?? Infinity;
-      const barata = multa <= valorMercado(ovr, c.idade, c.fama) * 1.15;
+      const barata = multa <= valorAtual(c) * 1.15;
       if (!barata) return {};
       const op = clubesJogaveis().filter((x) => x.forca >= atual.forca + 4 && x.forca <= ovr + 8 && !ehSegundaDivisao(x.liga) && !(c.flags.traidor || []).includes(x.nome));
       return { clube: op.length ? pick(op).nome : null, multa };
@@ -1956,7 +2018,40 @@ export const EVENTOS_CAMPO = [
 ];
 
 const riscoDaOferta = (o) => (["Reserva", "Fora dos planos", "Base"].includes(o.status) ? "arriscado" : o.status === "Rotação" ? "equilibrado" : "seguro");
-const TODOS_EVENTOS = () => [...EVENTOS, ...EVENTOS_EXTRAS, ...EVENTOS_VIDA, ...EVENTOS_CAMPO];
+/* Impasse: o clube atual recusou vender. Só aparece encadeado logo depois da proposta. */
+const EVENTO_IMPASSE = {
+  id: "impasse", icone: "🧱",
+  peso: (c) => (c.flags.impasse ? 1000 : 0),
+  preparar: (c) => ({ ...(c.flags.impasse || {}) }),
+  titulo: (c) => `O ${c.clubeNome} não quer te vender`,
+  texto: (c, ctx) => `O ${ctx.clube} ofereceu ${formatarValor(ctx.valor)}. A diretoria do ${c.clubeNome} recusou e só aceita conversar a partir de ${formatarValor(ctx.pedida)}. A decisão agora é sua.`,
+  opcoes: (c, ctx) => [
+    { id: "aceitar", label: "Aceitar e ficar", dica: "Diretoria e torcida agradecem · a cabeça sente um pouco", risco: "seguro",
+      efeito: (c) => { c.flags.impasse = null; sobe(c, c.clubeNome, 6); mexerMoral(c, -4); c.mod.shareAdd = (c.mod.shareAdd || 0) + 0.03; return "Você ficou. No vestiário, todo mundo sabe que você podia ter ido."; } },
+    { id: "empresario", label: "Pedir ao empresário para pressionar", dica: `${empresarioDe(c).nome} vai à diretoria · pode sair um acordo no meio do caminho, ou nada`, risco: "equilibrado",
+      ...(ctx.empOk ? { negociar: { clube: ctx.clube, tipo: "transferencia" } } : {}),
+      efeito: (c, extra) => {
+        c.flags.impasse = null;
+        if (!ctx.empOk) { mexerMoral(c, -3); sobe(c, c.clubeNome, -3); return `O ${c.clubeNome} não cedeu e o ${ctx.clube} desistiu. Fica para a próxima janela.`; }
+        const valor = Math.round((ctx.valor + ctx.pedida) / 2 / 50) * 50;
+        const de = transferir(c, ctx.clube, { contrato: extra?.contrato, valor });
+        sobe(c, de, -4); c.fama = clampR(c.fama + (ctx.forca > clubeDe(de).forca ? 4 : 0), 0, 100);
+        return `Seu empresário achou o meio-termo: ${formatarValor(valor)}. Nova casa: ${ctx.clube}.`;
+      } },
+    { id: "forcar", label: "Forçar a saída", dica: "Não se apresentar até te liberarem · a torcida não vai perdoar", risco: "arriscado",
+      ...(ctx.forcarOk ? { negociar: { clube: ctx.clube, tipo: "transferencia" } } : {}),
+      efeito: (c, extra) => {
+        c.flags.impasse = null; mexerMoral(c, -6);
+        if (!ctx.forcarOk) { sobe(c, c.clubeNome, -15); c.mod.shareAdd = (c.mod.shareAdd || 0) - 0.2; return `O ${c.clubeNome} bancou a queda de braço e te afastou do elenco principal. A temporada começa no banco.`; }
+        const de = transferir(c, ctx.clube, { contrato: extra?.contrato, valor: ctx.pedida });
+        sobe(c, de, -18); c.fama = clampR(c.fama + (ctx.forca > clubeDe(de).forca ? 3 : 0), 0, 100);
+        return `Depois de dias de impasse, o ${de} cedeu por ${formatarValor(ctx.pedida)}. Você saiu pela porta dos fundos rumo ao ${ctx.clube}.`;
+      } },
+  ],
+};
+const TODOS_EVENTOS = () => [...EVENTOS, ...EVENTOS_EXTRAS, ...EVENTOS_VIDA, ...EVENTOS_CAMPO, EVENTO_IMPASSE];
+/* Depois de uma escolha: se ela abriu um impasse, ele vem logo em seguida */
+export const eventoImpasse = (c) => (c.flags?.impasse ? sortearEvento(c, { somente: "impasse" }) : null);
 const opcoesCompletas = (e, c, ctx) => [...e.opcoes(c, ctx), ...(EXTRAS_OPCOES[e.id] ? EXTRAS_OPCOES[e.id](c, ctx) : [])];
 
 /* Sorteia o evento da janela entre temporadas */
@@ -1969,6 +2064,7 @@ function sortearEventoBase(c, { somente = null, excluir = [] } = {}) {
     if (somente && e.id !== somente) return null;
     if (excluir.includes(e.id)) return null;
     if (!somente && !["propostas", "fimContrato", "clausula"].includes(e.id) && recentes.includes(e.id)) return null;
+    if (!somente && e.id === "impasse") return null;
     const ctx = e.preparar ? e.preparar(c) : {};
     const p = e.peso(c, ctx);
     return p > 0 ? { e, ctx, p } : null;
@@ -2302,8 +2398,12 @@ function simularCarreiraAutomaticaBase(dados, escolher, escolherFoco) {
     if (deveTerColetiva(c, ultimo)) { const col = gerarColetiva(c, ultimo); c = responderColetiva(c, col, pick(col.opcoes).id).c; }
     const ev = eventoDaJanela(c);
     if (ev) c = resolverAuto(c, ev, escolher);
-    const ex = segundoEvento(c, ev?.id);
+    let imp = eventoImpasse(c);
+    if (imp) c = resolverAuto(c, imp, escolher);
+    const ex = imp ? null : segundoEvento(c, ev?.id);
     if (ex) c = resolverAuto(c, ex, escolher);
+    imp = eventoImpasse(c);
+    if (imp) c = resolverAuto(c, imp, escolher);
     const compra = INVESTIMENTOS.filter((i) => !(c.investimentos || []).includes(i.id) && i.custo <= c.patrimonio * 0.5);
     if (compra.length && chance(0.4)) c = comprarInvestimento(c, pick(compra).id).c;
     c = definirFoco(c, escolherFoco(c));

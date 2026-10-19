@@ -1100,6 +1100,11 @@ function RecorteJornal({ manchete, transf }) {
         </figcaption>
       </div>
       <p className="mt-2 text-[14px] leading-snug text-[#2E2B25]" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>{manchete.linhaFina}</p>
+      {manchete.despedida && (
+        <p className="mt-2 pt-2 border-t border-dashed border-[#1B1A17]/40 text-[14px] leading-snug italic text-[#2E2B25]" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+          <span className="not-italic text-[11px] font-bold uppercase tracking-widest text-[#5B574E] mr-1">Despedida ·</span>{manchete.despedida}
+        </p>
+      )}
       <div className="mt-3 flex gap-2 text-[12px] font-bold uppercase tracking-wider" style={{ fontFamily: "Georgia, serif" }}>
         <span className="px-2 py-0.5 border border-[#1B1A17]">{transf.valor ? formatarValor(transf.valor) : "Sem custo"}</span>
         <span className="px-2 py-0.5 border border-[#1B1A17]/50 text-[#5B574E]">{transf.anos} anos de contrato</span>
@@ -1254,7 +1259,8 @@ function CartaFinal({ c }) {
           <Gema size={64} />
         </div>
         <div className="display text-lg text-[#F2F5F3] mt-5 leading-tight relative">{c.nome}</div>
-        {c.apelidos.length > 0 && <div className="text-[14px] text-[#8FA39A] italic">"{c.apelidos[0].nome}"</div>}
+        {c.apelidos.length > 0 && <div className="text-[14px] text-[#8FA39A] italic">{c.apelidos.map((a) => `"${a.nome}"`).join(" · ")}</div>}
+        {c.apelidos.some((a) => a.cantico) && <div className="text-[12px] text-[#8FA39A] mt-0.5">📣 {c.apelidos.filter((a) => a.cantico).slice(-1)[0].cantico}</div>}
         <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[14px] font-bold" style={{ background: `${L.nivel.cor}22`, color: L.nivel.cor, border: `1px solid ${L.nivel.cor}55` }}>
           {L.nivel.icone} {L.nivel.nome}
         </div>

@@ -4,6 +4,17 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 📣 Modo Rápido: narrativa e torcida
+
+- **A torcida pesa em campo**: ídolo (75+) joga embalado e ganha nota; torcida hostil (20 ou menos) pesa contra, tira nota e mexe com a cabeça. O resumo avisa quando a arquibancada fez diferença
+- **Promessa na coletiva vale de verdade**: frases ousadas ("Isso é só o começo", "Vou ser campeão", "Os números falam por mim"…) não são mais sorteadas na hora. A imprensa guarda e confere no fim da temporada seguinte: cumpriu, ganha fama, torcida e cabeça; não cumpriu, a cobrança vem no resumo
+- **Apelidos variados com cântico**: 14 apelidos possíveis (O Matador, O Garçom, O Mágico, O Xerife, O Trator, O Filho da Casa…), escolhidos pelo seu jeito de jogar e sem repetir entre clubes. Cada um vem com o cântico da arquibancada
+- **Todos os apelidos na carta final**, não só o primeiro, com o cântico mais recente
+- **Reencontro com o ex-clube**: enfrentar um clube antigo da mesma liga vira acontecimento. Se você é ídolo lá, escolha entre não comemorar, homenagear a antiga torcida ou comemorar como sempre. Se saiu como traidor ou brigado, encare a vaia: jogar para calar o estádio, jogar sério ou pedir para não ser escalado
+- **Despedida no jornal**: ao sair de um clube, o recorte mostra como a torcida se despediu (faixa de agradecimento para o ídolo, muro pichado para quem forçou a saída, indiferença para quem nunca foi abraçado)
+
+---
+
 ## 🎨 Revisão de design e imagens
 
 - **Contraste:** os cinzas de texto mais apagados (legendas, abas inativas, clubes no ranking da Bola de Ouro) ficavam abaixo do mínimo de leitura (4.5:1) no fundo escuro. Foram clareados nos dois modos.

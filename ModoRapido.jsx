@@ -14,7 +14,7 @@ import {
   iniciarNegociacao, ajustarNegociacao, fecharNegociacao, CAMPOS_NEGOCIACAO, fama_negociador,
   INVESTIMENTOS, comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
   chanceMomento, miniDaPosicao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
-  eventoDaJanela, segundoEvento, eventoImpasse, valorAtual, comparaSalario, textoEmoji, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
+  eventoDaJanela, segundoEvento, eventoImpasse, valorAtual, comparaSalario, textoEmoji, efeitosDaDecisao, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
 } from "./rapido.js";
 
 /* Estilo do seletor de modos e do Modo Rápido. Inclui as animações que as
@@ -45,6 +45,11 @@ export const ESTILO_BASE = `
 @keyframes rpPulso{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 .rp-carta{animation:rpBrilho 3s ease-in-out infinite;}
 .rp-goleiro{transition:transform .45s cubic-bezier(.2,.8,.2,1);}
+.rp-bracos{transition:opacity .2s ease;}
+@keyframes rpRede{0%{transform:scale(.3);opacity:0}35%{transform:scale(1.15);opacity:1}100%{transform:scale(1);opacity:.85}}
+.rp-rede{animation:rpRede .6s .45s both;transform-box:fill-box;transform-origin:center;}
+@keyframes rpFaisca{0%{transform:scale(.2);opacity:1}100%{transform:scale(1.6);opacity:0}}
+.rp-faisca{animation:rpFaisca .5s .4s both;transform-box:fill-box;transform-origin:center;}
 .rp-bola{transition:transform .5s cubic-bezier(.2,.8,.2,1);}
 .glass{background:rgba(19,26,23,0.92);border:1px solid rgba(255,255,255,0.08);box-shadow:0 8px 30px rgba(0,0,0,0.35);}
 .hud-btn{transition:all .3s ease;width:100%;} .btn-gold{background:linear-gradient(90deg,#D8B44A,#F5D77A);color:#1A1405;}
@@ -91,9 +96,9 @@ function BolaDourada({ size = 80 }) {
   );
 }
 
-function IconeTitulo({ tipo, size = 40 }) {
+function IconeTitulo({ tipo, size = 40, nome = null }) {
   if (tipo === "bolaOuro") return <BolaDourada size={size} />;
-  return <TacaCompeticao tipo={tipo} size={size} />;
+  return <TacaCompeticao tipo={tipo} size={size} nome={nome} />;
 }
 
 /* Linha do tempo: um segmento por temporada, na cor do clube; ponto dourado = título */
@@ -151,7 +156,7 @@ function Estante({ c, onFechar }) {
         <div className="grid grid-cols-2 gap-2 mt-4">
           {porTipo.map((g) => (
             <div key={g.tipo} className="rounded-2xl bg-[#0E1512] border border-white/5 p-3 flex items-center gap-3">
-              <IconeTitulo tipo={g.tipo} size={34} />
+              <IconeTitulo tipo={g.tipo} nome={(c.lista.filter((x) => x.tipo === g.tipo).slice(-1)[0] || {}).nome} size={34} />
               <div className="min-w-0">
                 <div className="font-stat text-xl text-[#F2F5F3] leading-none">{g.itens.length}</div>
                 <div className="text-[13px] text-[#8FA39A] leading-tight">{ROTULO_TIPO[g.tipo]}</div>
@@ -476,6 +481,119 @@ function PlacarMomento({ ok, texto }) {
   return <div className={`display text-3xl rp-sobe ${ok ? "text-[#1BC28A]" : "text-[#E36B5B]"}`}>{texto}</div>;
 }
 
+/* Cena do gol: estádio ao fundo, trave com rede em profundidade e um goleiro de verdade */
+const GZX = (col) => 70 + col * 80, GZY = (lin) => 66 + lin * 50;
+function Goleiro({ cor, mergulho }) {
+  // mergulho: null (pronto) | [col, lin]
+  const est = !!mergulho && !(mergulho[0] === 1 && mergulho[1] === 1);
+  return (
+    <g>
+      {/* sombra */}
+      <ellipse cx="150" cy="151" rx="15" ry="2.5" fill="rgba(0,0,0,.35)" />
+      {/* pernas */}
+      <path d="M142 122 L138 146 L145 146 L148 124 Z" fill="#1B1E24" />
+      <path d="M158 122 L162 146 L155 146 L152 124 Z" fill="#1B1E24" />
+      <rect x="137" y="131" width="8" height="12" rx="2" fill={cor} opacity=".85" />
+      <rect x="155" y="131" width="8" height="12" rx="2" fill={cor} opacity=".85" />
+      <path d="M135 145 h11 v4 h-13 z" fill="#0E1512" /><path d="M154 145 h11 l2 4 h-13 z" fill="#0E1512" />
+      {/* calção */}
+      <path d="M139 113 h22 l2 12 h-11 l-2 -4 l-2 4 h-11 z" fill="#1B1E24" />
+      {/* camisa */}
+      <path d="M138 92 q12 -5 24 0 l3 22 h-30 z" fill={cor} />
+      <path d="M138 92 q12 -5 24 0 l1 6 q-13 -4 -26 0 z" fill="#fff" opacity=".18" />
+      <text x="150" y="110" textAnchor="middle" fontSize="9" fontWeight="800" fill="#0E1512" opacity=".55">1</text>
+      {/* braços prontos (abertos, na altura da cintura) */}
+      <g className="rp-bracos" style={{ opacity: est ? 0 : 1 }}>
+        <path d="M139 94 q-10 6 -15 16" stroke={cor} strokeWidth="6" strokeLinecap="round" fill="none" />
+        <path d="M161 94 q10 6 15 16" stroke={cor} strokeWidth="6" strokeLinecap="round" fill="none" />
+        <circle cx="123" cy="112" r="4.6" fill="#F2F5F3" stroke="#0E1512" strokeWidth="1" /><circle cx="177" cy="112" r="4.6" fill="#F2F5F3" stroke="#0E1512" strokeWidth="1" />
+      </g>
+      {/* braços esticados (no mergulho, acima da cabeça) */}
+      <g className="rp-bracos" style={{ opacity: est ? 1 : 0 }}>
+        <path d="M141 92 L136 62" stroke={cor} strokeWidth="6" strokeLinecap="round" />
+        <path d="M159 92 L164 62" stroke={cor} strokeWidth="6" strokeLinecap="round" />
+        <circle cx="135.5" cy="58" r="5" fill="#F2F5F3" stroke="#0E1512" strokeWidth="1" /><circle cx="164.5" cy="58" r="5" fill="#F2F5F3" stroke="#0E1512" strokeWidth="1" />
+      </g>
+      {/* cabeça */}
+      <rect x="146.5" y="86" width="7" height="6" fill="#C99A78" />
+      <circle cx="150" cy="80" r="8" fill="#D8A988" />
+      <path d="M142 79 q1 -10 8 -10 q8 0 8 9 q-3 -4 -8 -4 q-5 0 -8 5 z" fill="#2A1C14" />
+    </g>
+  );
+}
+function CenaGol({ goleiro, res, bola, fora, podeEscolher, onZona }) {
+  const cor = goleiro ? "#EBC557" : "#B8F23A";
+  const m = res?.goleiro || null;
+  // mergulho: desloca e gira o corpo inteiro em torno dos pés
+  const dx = m ? (m[0] - 1) * 50 : 0;
+  const alto = m && m[1] === 0;
+  const dy = !m ? 0 : m[0] === 1 ? (alto ? -22 : 0) : alto ? -40 : -8;
+  const rot = !m ? 0 : m[0] === 1 ? 0 : (m[0] === 0 ? -1 : 1) * (alto ? 58 : 74);
+  const bx = bola ? GZX(bola[0]) + (fora ? (bola[0] - 1) * 46 : 0) : 150;
+  const by = bola ? GZY(bola[1]) - (fora ? 48 : 0) : 192;
+  const gol = res && ((!goleiro && res.resultado === "gol") || (goleiro && res.resultado === "gol"));
+  const salvou = res?.resultado === "defesa";
+  return (
+    <svg viewBox="0 0 300 210" className="w-full rounded-xl" role="img" aria-label={goleiro ? "Gol: escolha para onde pular" : "Gol: escolha onde bater"}>
+      <defs>
+        <pattern id="rpMalha" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <path d="M0 0 V7 M0 0 H7" stroke="rgba(255,255,255,.38)" strokeWidth=".7" />
+        </pattern>
+        <pattern id="rpMalhaLado" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <path d="M0 0 V6 M0 0 H6" stroke="rgba(255,255,255,.22)" strokeWidth=".6" />
+        </pattern>
+        <linearGradient id="rpGrama" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#1C5A38" /><stop offset="1" stopColor="#0F3A23" /></linearGradient>
+        <linearGradient id="rpTrave" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#FFFFFF" /><stop offset=".6" stopColor="#E3E7E5" /><stop offset="1" stopColor="#9AA3A0" /></linearGradient>
+        <radialGradient id="rpBola" cx=".35" cy=".3" r=".75"><stop offset="0" stopColor="#FFFFFF" /><stop offset=".7" stopColor="#E6E8E7" /><stop offset="1" stopColor="#9DA3A1" /></radialGradient>
+        <filter id="rpDesfoque"><feGaussianBlur stdDeviation="1.6" /></filter>
+      </defs>
+      {/* estádio ao fundo */}
+      <image href={ARTE.estadioNoite} x="-20" y="-30" width="340" height="150" preserveAspectRatio="xMidYMid slice" opacity=".55" filter="url(#rpDesfoque)" />
+      <rect x="0" y="0" width="300" height="120" fill="url(#rpGrama)" opacity=".0" />
+      <rect x="0" y="100" width="300" height="110" fill="url(#rpGrama)" />
+      {[0, 1, 2, 3, 4].map((k) => <rect key={k} x="0" y={112 + k * 22} width="300" height="11" fill="#fff" opacity=".035" />)}
+      {/* linhas do campo */}
+      <path d="M0 150 H300" stroke="rgba(255,255,255,.75)" strokeWidth="1.4" />
+      <path d="M62 150 L50 170 H250 L238 150" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="1.2" />
+      <ellipse cx="150" cy="196" rx="3.2" ry="1.4" fill="rgba(255,255,255,.8)" />
+      {/* rede: fundo, laterais e teto, com profundidade */}
+      <rect x="46" y="44" width="208" height="102" fill="rgba(7,16,12,.55)" />
+      <rect x="46" y="44" width="208" height="102" fill="url(#rpMalha)" />
+      <path d="M30 34 L46 44 L46 146 L30 150 Z" fill="url(#rpMalhaLado)" stroke="rgba(255,255,255,.3)" strokeWidth=".6" />
+      <path d="M270 34 L254 44 L254 146 L270 150 Z" fill="url(#rpMalhaLado)" stroke="rgba(255,255,255,.3)" strokeWidth=".6" />
+      <path d="M30 34 L270 34 L254 44 L46 44 Z" fill="url(#rpMalhaLado)" stroke="rgba(255,255,255,.3)" strokeWidth=".6" />
+      <path d="M46 146 L30 150 M254 146 L270 150" stroke="rgba(255,255,255,.35)" />
+      {/* balanço da rede no gol */}
+      {gol && bola && !fora && <ellipse className="rp-rede" cx={bx} cy={by} rx="24" ry="18" fill="url(#rpMalha)" stroke="rgba(255,255,255,.55)" strokeWidth=".8" />}
+      {/* trave */}
+      <rect x="26" y="30" width="248" height="5" rx="1.5" fill="url(#rpTrave)" />
+      <rect x="26" y="30" width="5" height="121" rx="1.5" fill="url(#rpTrave)" />
+      <rect x="269" y="30" width="5" height="121" rx="1.5" fill="url(#rpTrave)" />
+      <rect x="31" y="35" width="238" height="3" fill="rgba(0,0,0,.25)" />
+      {/* goleiro */}
+      <g className="rp-goleiro" style={{ transform: `translate(${dx}px, ${dy}px) rotate(${rot}deg)`, transformOrigin: "150px 150px" }}>
+        <Goleiro cor={cor} mergulho={m} />
+      </g>
+      {/* zonas de escolha */}
+      {podeEscolher && ZONAS.map(([col, lin], i) => (
+        <g key={i} onClick={() => onZona(i)} style={{ cursor: "pointer" }} role="button" aria-label={`${lin === 0 ? "Alto" : "Baixo"} ${["esquerda", "meio", "direita"][col]}`}>
+          <rect x={GZX(col) - 37} y={GZY(lin) - 23} width="74" height="46" rx="8" fill={goleiro ? "rgba(216,180,74,.12)" : "rgba(18,168,118,.12)"} stroke={goleiro ? "rgba(235,197,87,.75)" : "rgba(27,194,138,.7)"} strokeDasharray="4 4" />
+          <circle cx={GZX(col)} cy={GZY(lin)} r="5" fill={goleiro ? "#EBC557" : "#1BC28A"} />
+        </g>
+      ))}
+      {/* faísca da defesa */}
+      {salvou && bola && <circle className="rp-faisca" cx={bx} cy={by} r="10" fill="none" stroke="#F5D77A" strokeWidth="2.5" />}
+      {/* bola */}
+      <g className="rp-bola" style={{ transform: bola ? `translate(${bx - 150}px, ${by - 192}px) scale(.62)` : "none", transformOrigin: "150px 192px", opacity: fora && res ? 0.85 : 1 }}>
+        <ellipse cx="150" cy="200" rx="7" ry="2" fill="rgba(0,0,0,.35)" style={{ opacity: bola ? 0 : 1 }} />
+        <circle cx="150" cy="192" r="7.5" fill="url(#rpBola)" stroke="#2A2F2D" strokeWidth=".8" />
+        <path d="M150 188.5 l3 2.2 -1.1 3.5 h-3.8 l-1.1 -3.5 z" fill="#1B1E24" />
+        <path d="M143.6 190 l2 1.2 M156.4 190 l-2 1.2 M147 197.8 l1.4 -2 M153 197.8 l-1.4 -2" stroke="#1B1E24" strokeWidth="1" />
+      </g>
+    </svg>
+  );
+}
+
 /* Pênalti (você bate) e defesa (você é o goleiro) usam o mesmo gol */
 function TelaPenalti({ c, momento, onFim, goleiro = false }) {
   const [escolha, setEscolha] = useState(null);
@@ -514,12 +632,8 @@ function TelaPenalti({ c, momento, onFim, goleiro = false }) {
     return () => clearTimeout(t);
   }, [res, onFim]);
 
-  const zx = (col) => 60 + col * 90, zy = (lin) => 52 + lin * 58;
-  const gx = res ? (res.goleiro[0] - 1) * 82 : 0, gy = res ? (res.goleiro[1] === 0 ? -22 : 6) : 0;
-  const gRot = res ? (res.goleiro[0] - 1) * 55 : 0;
   const bola = escolha != null ? ZONAS[escolha] : null;
   const fora = res?.resultado === "fora";
-  const corGoleiro = goleiro ? "#D8B44A" : "#2E6FE0";
   const textoRes = !res ? "" : goleiro
     ? (res.resultado === "defesa" ? "QUE DEFESA!" : res.resultado === "fora" ? "PRA FORA! É CAMPEÃO!" : "GOL DELES…")
     : (res.resultado === "gol" ? "GOOOL!" : res.resultado === "defesa" ? "DEFENDEU!" : "PRA FORA!");
@@ -528,27 +642,7 @@ function TelaPenalti({ c, momento, onFim, goleiro = false }) {
     <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
       <CabecalhoMomento c={c} momento={momento} />
       <div className="rp-painel p-3 overflow-hidden" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
-        <svg viewBox="0 0 300 200" className="w-full" role="img" aria-label={goleiro ? "Gol: escolha para onde pular" : "Gol: escolha onde bater"}>
-          <rect x="0" y="150" width="300" height="50" fill="#14432F" />
-          <rect x="15" y="20" width="270" height="132" fill="rgba(255,255,255,.04)" stroke="#F2F5F3" strokeWidth="5" />
-          {Array.from({ length: 12 }).map((_, i) => <line key={`v${i}`} x1={15 + i * 22.5} y1="20" x2={15 + i * 22.5} y2="152" stroke="rgba(255,255,255,.08)" />)}
-          {Array.from({ length: 6 }).map((_, i) => <line key={`h${i}`} x1="15" y1={20 + i * 22} x2="285" y2={20 + i * 22} stroke="rgba(255,255,255,.08)" />)}
-          <g className="rp-goleiro" style={{ transform: `translate(${gx}px, ${gy}px) rotate(${gRot}deg)`, transformOrigin: "150px 150px" }}>
-            <rect x="138" y="96" width="24" height="40" rx="8" fill={corGoleiro} />
-            <circle cx="150" cy="86" r="10" fill="#E8C7A6" />
-            <rect x="112" y="98" width="28" height="9" rx="4" fill={corGoleiro} />
-            <rect x="160" y="98" width="28" height="9" rx="4" fill={corGoleiro} />
-            <rect x="140" y="134" width="8" height="18" fill="#0E1512" /><rect x="152" y="134" width="8" height="18" fill="#0E1512" />
-          </g>
-          {escolha == null && ZONAS.map(([col, lin], i) => (
-            <g key={i} onClick={() => chutar(i)} style={{ cursor: "pointer" }} role="button" aria-label={`${lin === 0 ? "Alto" : "Baixo"} ${["esquerda", "meio", "direita"][col]}`}>
-              <rect x={zx(col) - 42} y={zy(lin) - 27} width="84" height="54" rx="8" fill={goleiro ? "rgba(216,180,74,.10)" : "rgba(18,168,118,.10)"} stroke={goleiro ? "rgba(216,180,74,.6)" : "rgba(18,168,118,.55)"} strokeDasharray="4 4" />
-              <circle cx={zx(col)} cy={zy(lin)} r="6" fill={goleiro ? "#EBC557" : "#1BC28A"} opacity=".8" />
-            </g>
-          ))}
-          <circle className="rp-bola" cx="150" cy="185" r="8" fill="#F2F5F3" stroke="#0E1512" strokeWidth="1.5"
-            style={{ transform: bola ? `translate(${zx(bola[0]) - 150 + (fora ? (bola[0] - 1) * 40 : 0)}px, ${zy(bola[1]) - 185 - (fora ? 50 : 0)}px) scale(.8)` : "none", transformOrigin: "150px 185px" }} />
-        </svg>
+        <CenaGol goleiro={goleiro} res={res} bola={bola} fora={fora} podeEscolher={escolha == null} onZona={chutar} />
       </div>
       <div className="text-center min-h-[64px]">
         {!res && (goleiro
@@ -629,7 +723,7 @@ function SlideTitulo({ c, card, titulo }) {
         style={{ background: `repeating-conic-gradient(${cor} 0deg 8deg, transparent 8deg 24deg)`, animation: "rpRaios 26s linear infinite", borderRadius: "50%" }} />
       <Confetti />
       <div className="relative rp-sobe" style={{ animationDelay: ".1s" }}>
-        <div style={{ animation: "floatY 2.6s ease-in-out infinite" }}><IconeTitulo tipo={titulo.tipo} size={120} /></div>
+        <div style={{ animation: "floatY 2.6s ease-in-out infinite" }}><IconeTitulo tipo={titulo.tipo} nome={titulo.nome} size={120} /></div>
       </div>
       <div className="relative mt-5 rp-sobe" style={{ animationDelay: ".35s" }}>
         <div className="display text-3xl text-[#F5D77A] tracking-wide">CAMPEÃO!</div>
@@ -769,6 +863,102 @@ function PainelRival({ c, card }) {
   );
 }
 
+/* Curva compacta para a carta final (vai junto no PNG) */
+function MiniCurva({ c, cor }) {
+  const ovr = (c.temporadas || []).map((s) => s.ovrDepois ?? s.ovr);
+  if (ovr.length < 2) return null;
+  const W = 300, H = 46, mn = Math.min(...ovr) - 2, mx = Math.max(...ovr) + 2;
+  const x = (i) => 4 + (i * (W - 8)) / (ovr.length - 1), y = (v) => 4 + (1 - (v - mn) / (mx - mn)) * (H - 8);
+  const p = ovr.indexOf(Math.max(...ovr));
+  const d = ovr.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const ini = c.temporadas[0].idade, pico = c.temporadas[p].idade + 1, fim = c.temporadas[ovr.length - 1].idade + 1;
+  return (
+    <div className="mt-4 relative">
+      <div className="flex justify-between text-[10px] font-bold tracking-[0.2em] text-[#8FA39A]"><span>CURVA DA CARREIRA</span><span>{ini} → {pico} → {fim} anos</span></div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full mt-1" aria-hidden="true">
+        <path d={`${d} L${x(ovr.length - 1)},${H} L${x(0)},${H} Z`} fill={`${cor}22`} />
+        <path d={d} fill="none" stroke={cor} strokeWidth="2.2" strokeLinejoin="round" />
+        <circle cx={x(p)} cy={y(ovr[p])} r="3.5" fill="#EBC557" />
+      </svg>
+    </div>
+  );
+}
+
+/* ---------- gráfico da carreira: OVR e valor ano a ano ---------- */
+function GraficoCarreira({ c, altura = 132, titulo = "Sua curva" }) {
+  const ts = c.temporadas || [];
+  if (ts.length < 2) return null;
+  const W = 340, H = altura, pl = 30, pr = 44, pt = 14, pb = 22;
+  const ovr = ts.map((s) => s.ovrDepois ?? s.ovr);
+  const val = ts.map((s) => s.valor || 0);
+  const oMin = Math.max(40, Math.min(...ovr) - 3), oMax = Math.min(99, Math.max(...ovr) + 2);
+  const vMax = Math.max(1, ...val);
+  const x = (i) => pl + (i * (W - pl - pr)) / Math.max(1, ts.length - 1);
+  const yo = (v) => pt + (1 - (v - oMin) / Math.max(1, oMax - oMin)) * (H - pt - pb);
+  const yv = (v) => pt + (1 - v / vMax) * (H - pt - pb);
+  const pico = ovr.indexOf(Math.max(...ovr));
+  const linha = (arr, f) => arr.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${f(v).toFixed(1)}`).join(" ");
+  const area = `${linha(val, yv)} L${x(val.length - 1)},${H - pb} L${x(0)},${H - pb} Z`;
+  const idades = ts.map((s) => s.idade);
+  return (
+    <div className="rp-painel p-4">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">{titulo}</span>
+        <span className="flex items-center gap-3 text-[12px] text-[#C9D3CE]">
+          <span className="flex items-center gap-1"><span className="w-3 h-[3px] rounded bg-[#1BC28A] inline-block" />OVR</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-2 rounded-sm bg-[#D8B44A]/40 inline-block" />Valor</span>
+        </span>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full mt-2" role="img" aria-label={`OVR de ${ovr[0]} a ${ovr[ovr.length - 1]}, pico de ${ovr[pico]} aos ${idades[pico] + 1} anos; valor máximo ${formatarValor(vMax)}`}>
+        {[0, 0.5, 1].map((f) => <line key={f} x1={pl} x2={W - pr} y1={pt + f * (H - pt - pb)} y2={pt + f * (H - pt - pb)} stroke="rgba(255,255,255,.06)" />)}
+        <path d={area} fill="rgba(216,180,74,.16)" />
+        <path d={linha(val, yv)} fill="none" stroke="#D8B44A" strokeOpacity=".55" strokeWidth="1.5" />
+        <path d={linha(ovr, yo)} fill="none" stroke="#1BC28A" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+        <circle cx={x(pico)} cy={yo(ovr[pico])} r="4.5" fill="#EBC557" stroke="#0E1512" strokeWidth="1.5" />
+        <text x={x(pico)} y={yo(ovr[pico]) - 8} textAnchor="middle" fontSize="11" fontWeight="700" fill="#EBC557">{ovr[pico]}</text>
+        <text x={pl - 6} y={yo(oMax) + 4} textAnchor="end" fontSize="10" fill="#8FA39A">{oMax}</text>
+        <text x={pl - 6} y={yo(oMin) + 4} textAnchor="end" fontSize="10" fill="#8FA39A">{oMin}</text>
+        <text x={W - 2} y={pt + 4} textAnchor="end" fontSize="9.5" fill="#B89A4A">{formatarValor(vMax).replace(/\s/g, "")}</text>
+        {idades.map((a, i) => (i === 0 || i === idades.length - 1 || i === pico || a % 4 === 0) && <text key={i} x={x(i)} y={H - 6} textAnchor="middle" fontSize="10" fill={i === pico ? "#EBC557" : "#8FA39A"}>{a + 1}</text>)}
+      </svg>
+      <p className="text-[13px] text-[#8FA39A] mt-1">Auge: <span className="font-stat text-[#EBC557]">{ovr[pico]}</span> de OVR aos {idades[pico] + 1} anos.</p>
+    </div>
+  );
+}
+
+/* Tabela ano a ano (idade, clube, títulos, OVR e números), como no Copero */
+function TabelaAnoAno({ c }) {
+  const [aberta, setAberta] = useState(false);
+  const ts = c.temporadas || [];
+  const linhas = aberta ? ts : ts.slice(-6);
+  const corOvr = (o) => (o >= 85 ? "#D8B44A" : o >= 78 ? "#1BC28A" : o >= 70 ? "#2E6FE0" : "#5F6E68");
+  return (
+    <div className="rp-painel p-4">
+      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-2">Ano a ano</div>
+      <div className="grid grid-cols-[30px_1fr_auto_38px_30px_30px_30px] gap-x-2 items-center text-[11px] font-bold tracking-wider text-[#8FA39A] pb-1 border-b border-white/5">
+        <span>IDADE</span><span>CLUBE</span><span /><span className="text-center">OVR</span><span className="text-right">J</span><span className="text-right">G</span><span className="text-right">A</span>
+      </div>
+      {linhas.map((s, i) => {
+        const idx = ts.indexOf(s);
+        const troca = idx > 0 && ts[idx - 1].clube !== s.clube;
+        const o = s.ovrDepois ?? s.ovr;
+        return (
+          <div key={idx} className="grid grid-cols-[30px_1fr_auto_38px_30px_30px_30px] gap-x-2 items-center py-1.5 border-b border-white/5 text-[14px]">
+            <span className="font-stat text-[#C9D3CE]">{s.idade}</span>
+            <span className="flex items-center gap-1.5 min-w-0">{troca && <span className="text-[#8FA39A]" aria-label="clube novo">↳</span>}<ClubDot club={clubeDe(s.clube)} size={18} /><span className="truncate text-[#F2F5F3]">{s.clube}</span></span>
+            <span className="flex -space-x-1.5">{s.titulos.filter((t) => t.tipo !== "bolaOuro").slice(0, 3).map((t, k) => <IconeTitulo key={k} tipo={t.tipo} nome={t.nome} size={16} />)}{s.titulos.some((t) => t.tipo === "bolaOuro") && <IconeTitulo tipo="bolaOuro" size={15} />}</span>
+            <span className="font-stat text-center rounded-md text-[#0E1512] font-bold" style={{ background: corOvr(o) }}>{o}</span>
+            <span className="font-stat text-right text-[#C9D3CE]">{s.jogos}</span>
+            <span className="font-stat text-right text-[#F2F5F3]">{s.gols}</span>
+            <span className="font-stat text-right text-[#C9D3CE]">{s.assist}</span>
+          </div>
+        );
+      })}
+      {ts.length > 6 && <button onClick={() => setAberta((v) => !v)} className="text-[14px] font-bold text-[#7FE3BC] min-h-[40px] mt-1">{aberta ? "Mostrar só as últimas" : `Ver as ${ts.length} temporadas`}</button>}
+    </div>
+  );
+}
+
 function TelaResumo({ c, card, onContinuar, onAposentar, onRever }) {
   const forcada = aposentadoriaForcada(c);
   // variação desde antes da pré-temporada (inclui o treino escolhido)
@@ -804,7 +994,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever }) {
           <div className="flex flex-col gap-3 mt-3">
             {card.titulos.map((t, i) => (
               <div key={i} className="flex items-center gap-3">
-                <IconeTitulo tipo={t.tipo} size={40} />
+                <IconeTitulo tipo={t.tipo} nome={t.nome} size={40} />
                 <div>
                   <div className="text-[18px] font-bold text-[#F5D77A] leading-tight">{t.nome}</div>
                   <div className="text-[13px] text-[#C9D3CE]">{t.n > 1 ? `${t.n}º da carreira` : "Primeiro da carreira"}</div>
@@ -885,6 +1075,8 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever }) {
       </div>
 
       {card.moral != null && <div className="-mt-2"><BarraMental moral={card.moral} delta={card.moralDelta} /></div>}
+
+      <GraficoCarreira c={c} altura={112} />
 
       {card.ganhos && (
         <div className="rp-painel px-4 py-3">
@@ -1007,7 +1199,7 @@ function TelaTraco({ c, opcoes, onEscolher }) {
 }
 
 /* ---------- evento + preparação da próxima temporada ---------- */
-function CartaoEvento({ evento, resultado, onEscolher, onPedirLiga }) {
+function CartaoEvento({ evento, resultado, efeitos, onEscolher, onPedirLiga }) {
   const foto = ARTE_EVENTO[evento.id];
   const [ligas, setLigas] = useState(false);
   return (
@@ -1052,12 +1244,26 @@ function CartaoEvento({ evento, resultado, onEscolher, onPedirLiga }) {
                   <span className="rp-chip shrink-0" style={{ color: r.cor, background: r.bg }}>{r.label}</span>
                 </div>
                 {o.dica && <div className="text-[14px] text-[#8FA39A] mt-1">{o.dica}</div>}
+                {o.chances && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {o.chances.map((x, i) => (
+                      <span key={i} className="rp-chip" style={{ color: x.d > 0 ? "#7FE3BC" : x.d < 0 ? "#F0A99E" : "#C9D3CE", background: x.d > 0 ? "rgba(18,168,118,.16)" : x.d < 0 ? "rgba(227,107,91,.16)" : "rgba(255,255,255,.07)" }}>
+                        {x.d > 0 ? `+${x.d} OVR` : x.d < 0 ? `−${-x.d} OVR` : "nada muda"} · {Math.round(x.p * 100)}%
+                      </span>
+                    ))}
+                  </div>
+                )}
               </button>
             );
           })}
         </div>
       )}
-      {resultado && <p className="px-5 pb-5 pt-1 text-[17px] font-semibold text-[#7FE3BC] rp-entra">→ {resultado}</p>}
+      {resultado && <p className={`px-5 ${efeitos?.length ? "pb-2" : "pb-5"} pt-1 text-[17px] font-semibold text-[#7FE3BC] rp-entra`}>→ {resultado}</p>}
+      {resultado && efeitos?.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 px-5 pb-5 rp-entra" aria-label="Efeitos da decisão">
+          {efeitos.map((e) => <span key={e.txt} className="rp-chip" style={{ color: e.bom ? "#7FE3BC" : "#F0A99E", background: e.bom ? "rgba(18,168,118,.16)" : "rgba(227,107,91,.16)" }}>{e.txt}</span>)}
+        </div>
+      )}
     </div>
   );
 }
@@ -1178,13 +1384,13 @@ function RecorteJornal({ manchete, transf }) {
   );
 }
 
-function TelaEvento({ c, evento, resultado, temMais, aviso, manchete, onEscolher, onPedirLiga, onProximo, onFoco, onPretemporada, onJogar, onPatrimonio }) {
+function TelaEvento({ c, evento, resultado, efeitos, temMais, aviso, manchete, onEscolher, onPedirLiga, onProximo, onFoco, onPretemporada, onJogar, onPatrimonio }) {
   const torneio = c.idade >= 18 ? (anoDeCopa(c.ano) ? "Copa do Mundo" : anoDeContinentalSelecao(c.ano) ? nomeCopaContinental(c.nac) : null) : null;
   const pronto = !evento || resultado;
   return (
     <div className="max-w-xl mx-auto px-4 py-5 flex flex-col gap-4 rp-entra">
       {aviso && <div className="rp-painel px-4 py-3 text-[16px] text-[#F0A99E]" style={{ borderColor: "rgba(227,107,91,.35)" }}>{aviso}</div>}
-      {evento && <CartaoEvento key={`${evento.id}:${evento.texto}`} evento={evento} resultado={resultado} onEscolher={onEscolher} onPedirLiga={onPedirLiga} />}
+      {evento && <CartaoEvento key={`${evento.id}:${evento.texto}`} evento={evento} resultado={resultado} efeitos={efeitos} onEscolher={onEscolher} onPedirLiga={onPedirLiga} />}
       {resultado && manchete && c.ultimaTransferencia && <RecorteJornal manchete={manchete} transf={c.ultimaTransferencia} />}
       {pronto && temMais && <button onClick={onProximo} className="rp-btn rp-prim display text-sm">Ver próxima notícia</button>}
       {pronto && !temMais && (
@@ -1338,6 +1544,7 @@ function CartaFinal({ c }) {
             </div>
           ))}
         </div>
+        <MiniCurva c={c} cor={L.nivel.cor} />
         {c.lenda && (
           <div className="mt-4 rounded-xl px-3 py-2 relative" style={{ background: "rgba(0,0,0,.28)", border: "1px solid rgba(255,255,255,.06)" }}>
             <div className="text-[10px] font-bold tracking-[0.2em] text-[#8FA39A]">VOCÊ FOI COMO</div>
@@ -1494,13 +1701,16 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
           <div className="grid grid-cols-2 gap-2">
             {porTipo.map((g) => (
               <div key={g.tipo} className="rounded-2xl bg-[#0E1512] border border-white/5 p-3 flex items-center gap-3">
-                <IconeTitulo tipo={g.tipo} size={34} />
+                <IconeTitulo tipo={g.tipo} nome={(c.lista.filter((x) => x.tipo === g.tipo).slice(-1)[0] || {}).nome} size={34} />
                 <div><div className="font-stat text-xl text-[#F2F5F3] leading-none">{g.n}</div><div className="text-[13px] text-[#8FA39A] leading-tight">{ROTULO_TIPO[g.tipo]}</div></div>
               </div>
             ))}
           </div>
         </div>
       )}
+
+      <GraficoCarreira c={c} altura={150} titulo="A curva da sua carreira" />
+      <TabelaAnoAno c={c} />
 
       <div className="rp-painel p-4">
         <div className="flex items-center justify-between">
@@ -1614,7 +1824,7 @@ export default function ModoRapido({ onSair }) {
     // fila: depois do evento principal, a janela de transferências pode abrir também
     const extraEv = eventoImpasse(r.c) || (fila ? segundoEvento(r.c, evento.id) : null);
     const mudou = r.c.clubeNome !== c.clubeNome;
-    setEstado({ etapa: "evento", c: r.c, evento, resultado: r.resultado || "Decisão tomada.", proximo: extraEv, fila: false, manchete: mudou ? r.c.ultimaTransferencia?.manchete : null });
+    setEstado({ etapa: "evento", c: r.c, evento, resultado: r.resultado || "Decisão tomada.", efeitos: efeitosDaDecisao(c, r.c), proximo: extraEv, fila: false, manchete: mudou ? r.c.ultimaTransferencia?.manchete : null });
     if (mudou) {
       const clube = clubeDe(r.c.clubeNome);
       setApresentacao({ clube, grande: clube.forca > clubeDe(c.clubeNome).forca + 3, deOnde: clubeDe(c.clubeNome), contrato: r.c.contrato, valor: r.c.ultimaTransferencia?.valor ?? null });
@@ -1641,7 +1851,7 @@ export default function ModoRapido({ onSair }) {
     else setEstado((st) => ({ ...st, c: r.c, evento: { ...st.evento, opcoes: st.evento.opcoes.filter((o) => !o.escolherLiga) }, aviso: `O empresário ligou para clubes da ${nome}, mas ninguém fez proposta agora.` }));
   };
   const comprar = (id) => { const r = comprarInvestimento(c, id); if (r.ok) setEstado((st) => ({ ...st, c: r.c })); };
-  const proximoEvento = () => setEstado((s) => ({ ...s, evento: s.proximo, resultado: null, proximo: null, manchete: null }));
+  const proximoEvento = () => setEstado((s) => ({ ...s, evento: s.proximo, resultado: null, efeitos: null, proximo: null, manchete: null }));
   const mudarFoco = (id) => setEstado((s) => ({ ...s, c: definirFoco(s.c, id) }));
   const mudarPretemporada = (id) => setEstado((s) => ({ ...s, c: escolherPretemporada(s.c, id) }));
   const encerrar = () => {
@@ -1667,7 +1877,7 @@ export default function ModoRapido({ onSair }) {
                 <p className="text-[17px] text-[#8FA39A] mt-1">{c.nome}, {c.idade} anos, {posicaoDe(c.posicao).label.toLowerCase()} da base do {c.clubeNome}. {origemDe(c.origem) ? `${origemDe(c.origem).nome}. ` : ""}Perfil: {personaDe(c.personalidade).label.toLowerCase()}. Empresário: {(EMPRESARIOS.find((e) => e.id === c.empresario) || EMPRESARIOS[0]).nome.toLowerCase()}.</p>
               </div>
             )}
-            <TelaEvento c={c} evento={evento} resultado={resultado} temMais={!!estado.proximo} aviso={estado.aviso} manchete={estado.manchete} onEscolher={escolherEvento} onPedirLiga={pedirLigaUI} onProximo={proximoEvento} onFoco={mudarFoco} onPretemporada={mudarPretemporada} onJogar={jogar} onPatrimonio={() => setPatrimonioAberto(true)} />
+            <TelaEvento c={c} evento={evento} resultado={resultado} efeitos={estado.efeitos} temMais={!!estado.proximo} aviso={estado.aviso} manchete={estado.manchete} onEscolher={escolherEvento} onPedirLiga={pedirLigaUI} onProximo={proximoEvento} onFoco={mudarFoco} onPretemporada={mudarPretemporada} onJogar={jogar} onPatrimonio={() => setPatrimonioAberto(true)} />
           </>
         )}
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}

@@ -48,6 +48,7 @@ export default function App() {
             <span className="mt-auto text-[15px] font-bold text-[#7FE3BC]">Entrar →</span>
           </button>
         </div>
+        <p className="text-[12px] leading-snug text-center text-[#8FA39A] max-w-md">Nomes de clubes, competições e jogadores reais aparecem só para identificação dentro da simulação. A JOIA não é afiliado, patrocinado nem endossado por eles.</p>
       </div>
     </div>
   );

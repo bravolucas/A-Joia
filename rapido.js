@@ -1192,7 +1192,12 @@ function fecharTemporadaBase(c0, card0) {
   const formaAntes = c.formaAttrs || {};
   ATTRS.forEach((a) => { if (formaAntes[a]) c.attrs[a] = clampR(c.attrs[a] - formaAntes[a], 40, 99); });
   const ovrNivelAntes = ovrDe(c);
-  const novos = evoluirAtributos({ ...c.attrs, fintas: 3, pernaRuim: 3 }, { ...c.potencial, fintas: 3, pernaRuim: 3 }, c.idade, persona, null, reduc, fatorDes, 1 + nTit * 0.05);
+  // Curva do Modo Rápido: cresce e começa a cair 2 anos depois do Modo Carreira,
+  // pra o auge cair entre 27 e 30, como no Copero (o modo completo não muda).
+  // e o garoto chega ao teto mais devagar (antes batia o potencial aos 23-24)
+  const ritmoJovem = c.idade < 23 ? 0.8 : c.idade < 26 ? 0.9 : 1;
+  const personaCurva = { ...persona, picoFim: (persona.picoFim ?? 28) + 2, declinioApartir: (persona.declinioApartir ?? 31) + 2 };
+  const novos = evoluirAtributos({ ...c.attrs, fintas: 3, pernaRuim: 3 }, { ...c.potencial, fintas: 3, pernaRuim: 3 }, c.idade, personaCurva, null, reduc, fatorDes * ritmoJovem, 1 + nTit * 0.05);
   ATTRS.forEach((a) => { c.attrs[a] = novos[a]; });
   if (c.flags.cronica) { c.attrs.velocidade = clampR(c.attrs.velocidade - 1, 40, 99); c.attrs.fisico = clampR(c.attrs.fisico - 1, 40, 99); }
 
@@ -2454,18 +2459,130 @@ const EVENTO_IMPASSE = {
       } },
   ],
 };
-const TODOS_EVENTOS = () => [...EVENTOS, ...EVENTOS_EXTRAS, ...EVENTOS_VIDA, ...EVENTOS_CAMPO, EVENTO_IMPASSE];
+/* ---------- decisões de risco (estilo Copero): a chance aparece na tela ----------
+   Cada opção arriscada mostra o que pode acontecer e com que probabilidade
+   ("+3 OVR · 60% / −2 OVR · 40%"). O efeito mexe no NÍVEL do atleta (não na fase),
+   então fica para o resto da carreira. */
+export function mexerNivel(c, d) {
+  if (!d) return 0;
+  const pesos = posicaoDe(c.posicao).pesos || {};
+  const ordem = ATTRS.slice().sort((a, b) => (pesos[b] || 0) - (pesos[a] || 0)).slice(0, 4);
+  const alvo = ovrDe(c) + d;
+  for (let k = 0; k < 40 && (d > 0 ? ovrDe(c) < alvo : ovrDe(c) > alvo); k++) {
+    const a = ordem[k % ordem.length];
+    c.attrs[a] = clampR(c.attrs[a] + Math.sign(d), 40, 99);
+    // vale para o resto da carreira: o teto acompanha (senão a perda se recuperava sozinha e o ganho ficava)
+    c.potencial[a] = clampR(c.potencial[a] + Math.sign(d), 40, 99);
+  }
+  return d;
+}
+const aposta = (id, label, chances, extra = {}) => ({
+  id, label, chances, risco: chances.some((x) => x.d < 0) ? (chances.find((x) => x.d < 0).p >= 0.4 ? "arriscado" : "equilibrado") : "seguro", ...extra,
+  efeito: (c) => {
+    let r = rnd(), sorteado = chances[chances.length - 1];
+    for (const x of chances) { if ((r -= x.p) <= 0) { sorteado = x; break; } }
+    mexerNivel(c, sorteado.d);
+    if (sorteado.moral) mexerMoral(c, sorteado.moral);
+    if (extra.custo) gastar(c, extra.custo);
+    c.ultimaAposta = { d: sorteado.d, p: sorteado.p };
+    c.apostas = [...(c.apostas || []), { ano: c.ano, id, d: sorteado.d }];
+    return sorteado.txt;
+  },
+});
+/* O que a decisão mudou, para mostrar em chips verdes e vermelhos (como o Copero mostra o efeito de cada escolha) */
+export function efeitosDaDecisao(a, d) {
+  const out = [];
+  const add = (v, txt, inverso = false) => { if (v) out.push({ txt, bom: inverso ? v < 0 : v > 0 }); };
+  const sinal = (v) => (v > 0 ? `+${v}` : `${v}`);
+  const dOvr = ovrDe(d) - ovrDe(a); add(dOvr, `${sinal(dOvr)} OVR`);
+  const dVal = valorAtual(d) - valorAtual(a); if (Math.abs(dVal) >= 100) add(dVal, `valor ${dVal > 0 ? "▲" : "▼"} ${formatarValor(Math.abs(dVal))}`);
+  const dMoral = (d.moral ?? 65) - (a.moral ?? 65); add(dMoral, `cabeça ${sinal(dMoral)}`);
+  if (a.clubeNome === d.clubeNome) { const dT = (d.torcida[d.clubeNome] ?? 30) - (a.torcida[a.clubeNome] ?? 30); add(dT, `torcida ${sinal(dT)}`); }
+  const dF = (d.fama ?? 0) - (a.fama ?? 0); add(dF, `fama ${sinal(dF)}`);
+  const dP = (d.patrimonio || 0) - (a.patrimonio || 0); if (Math.abs(dP) >= 10 && a.clubeNome === d.clubeNome) add(dP, `${dP > 0 ? "+" : "−"}${formatarValor(Math.abs(dP))}`);
+  const minA = (a.mod?.shareAdd || 0) + ((a.mod?.shareMult ?? 1) - 1), minD = (d.mod?.shareAdd || 0) + ((d.mod?.shareMult ?? 1) - 1);
+  if (Math.abs(minD - minA) >= 0.03) add(minD - minA, minD > minA ? "mais minutos" : "menos minutos");
+  const lA = a.mod?.lesaoAdd || 0, lD = d.mod?.lesaoAdd || 0; if (Math.abs(lD - lA) >= 0.01) add(lD - lA, lD > lA ? "risco de lesão ▲" : "risco de lesão ▼", true);
+  return out;
+}
+const seguro = (id, label, dica, efeito = () => "Sem mudanças.") => ({ id, label, dica, risco: "seguro", efeito });
+const nomeAtrib = (c) => (c.posicao === "GOL" ? "reflexo" : DEFENSIVAS.includes(c.posicao) ? "marcação" : ["MC", "MEI"].includes(c.posicao) ? "passe" : "finalização");
+
+export const EVENTOS_APOSTA = [
+  { id: "dieta", icone: "🥗", peso: () => 1.4,
+    titulo: () => "Plano alimentar", texto: () => "Um nutricionista propõe mudar sua dieta de vez. Pode melhorar seu rendimento ou dar errado.",
+    opcoes: () => [
+      aposta("seguir", "Seguir o plano", [{ p: 0.55, d: 2, txt: "O corpo respondeu: mais fôlego e menos cansaço. +2 OVR." }, { p: 0.45, d: -2, txt: "Você perdeu massa demais e sentiu nos treinos. −2 OVR." }]),
+      seguro("manter", "Manter sua dieta", "Sem mudanças"),
+    ] },
+  { id: "concentracao", icone: "🎯", peso: () => 1.3,
+    titulo: () => "Concentração extra", texto: () => "Uma semana de concentração especial antes da temporada pode melhorar seu jogo, mas o esforço extra pode cobrar o preço.",
+    opcoes: () => [
+      aposta("fazer", "Fazer a concentração", [{ p: 0.55, d: 3, txt: "Você voltou outro jogador. +3 OVR." }, { p: 0.45, d: -3, txt: "Exagerou na carga e chegou desgastado. −3 OVR." }]),
+      seguro("habitual", "Preparação habitual", "Sem mudanças"),
+    ] },
+  { id: "especialista", icone: "🧑‍🏫", peso: (c) => (c.idade <= 30 ? 1.2 : 0),
+    titulo: (c) => `Especialista em ${nomeAtrib(c)}`, texto: (c) => `Um treinador famoso por lapidar ${nomeAtrib(c)} topa trabalhar com você nas férias. Ele cobra caro.`,
+    opcoes: (c) => [
+      aposta("contratar", `Contratar (${formatarValor(Math.max(40, Math.round((c.contrato?.salario || 100) * 0.15)))})`, [{ p: 0.5, d: 2, txt: "Detalhes que fazem diferença. +2 OVR." }, { p: 0.5, d: 0, txt: "Bom trabalho, mas nada mudou em campo." }], { custo: Math.max(40, Math.round((c.contrato?.salario || 100) * 0.15)) }),
+      seguro("ferias", "Tirar férias de verdade", "Cabeça descansada", (c) => { mexerMoral(c, 4); return "Praia, família e celular desligado."; }),
+    ] },
+  { id: "academia", icone: "🏋️", peso: (c) => (c.idade >= 18 && c.idade <= 31 ? 1.1 : 0),
+    titulo: () => "Ganho de massa muscular", texto: () => "O preparador quer você mais forte. Músculo novo pode dar potência — ou tirar a leveza.",
+    opcoes: () => [
+      aposta("ganhar", "Topar o programa de força", [{ p: 0.5, d: 3, txt: "Mais forte nas divididas e sem perder velocidade. +3 OVR." }, { p: 0.5, d: -3, txt: "Ficou pesado e lento. −3 OVR." }]),
+      seguro("leve", "Manter o corpo como está", "Sem mudanças"),
+    ] },
+  { id: "novaPosicao", icone: "🔄", peso: (c) => (c.idade >= 20 && c.idade <= 29 && c.posicao !== "GOL" ? 0.9 : 0),
+    titulo: () => "Teste em outra função", texto: () => "O técnico quer te testar numa função nova, mais perto da área adversária. Pode virar arma secreta ou te deixar perdido.",
+    opcoes: () => [
+      aposta("aceitar", "Aceitar o teste", [{ p: 0.35, d: 4, txt: "Encaixou como luva. O técnico achou um jogador novo. +4 OVR." }, { p: 0.65, d: -2, txt: "Você ficou perdido em campo por meses. −2 OVR." }]),
+      seguro("recusar", "Ficar na sua posição", "Sem mudanças"),
+    ] },
+  { id: "intertemporada", icone: "🏔️", peso: () => 1,
+    titulo: () => "Intertemporada na altitude", texto: () => "Três semanas treinando a 2.500 metros. Os pulmões agradecem — se o corpo aguentar.",
+    opcoes: () => [
+      aposta("ir", "Ir para a altitude", [{ p: 0.6, d: 2, txt: "Fôlego de sobra no começo da temporada. +2 OVR." }, { p: 0.4, d: -2, txt: "Uma gripe forte atrapalhou tudo. −2 OVR." }]),
+      seguro("ficar", "Treinar no CT", "Sem mudanças"),
+    ] },
+  { id: "garotoBase", icone: "🧒", peso: (c) => (c.idade >= 24 && ["Titular", "Estrela do time"].includes(statusNoClube(c).label) ? 1.2 : 0),
+    titulo: () => "Um garoto da base quer sua vaga", texto: () => "O técnico não para de elogiar o menino de 18 anos que joga na sua posição.",
+    opcoes: () => [
+      aposta("dobrado", "Treinar dobrado para segurar a vaga", [{ p: 0.5, d: 2, moral: 3, txt: "Você respondeu em campo. A vaga continua sua. +2 OVR." }, { p: 0.5, d: -2, moral: -6, txt: "O garoto é bom mesmo. Você perdeu a vaga e a confiança. −2 OVR." }]),
+      seguro("mentor", "Ajudar o garoto a crescer", "A torcida gosta · você joga um pouco menos", (c) => { c.mod.shareMult = (c.mod.shareMult ?? 1) * 0.9; sobe(c, c.clubeNome, 5); return "Vocês viraram dupla nos treinos. O vestiário inteiro notou."; }),
+    ] },
+  { id: "recuperacao", icone: "❄️", peso: (c) => (c.idade >= 27 ? 1.2 : 0),
+    titulo: () => "Novo método de recuperação", texto: () => "Câmara de crioterapia, sono monitorado e um protocolo novo que os grandes clubes estão testando.",
+    opcoes: () => [
+      aposta("testar", "Testar o protocolo", [{ p: 0.6, d: 2, txt: "Recuperação de garoto de 20 anos. +2 OVR." }, { p: 0.4, d: -2, txt: "O corpo estranhou e as dores voltaram. −2 OVR." }]),
+      seguro("velho", "Seguir com o que funciona", "Sem mudanças"),
+    ] },
+  { id: "video", icone: "📺", peso: () => 1,
+    titulo: () => "Intensivo de análise tática", texto: () => "O analista de desempenho montou horas de vídeo sobre os seus erros. Assistir tudo é cansativo.",
+    opcoes: () => [
+      aposta("assistir", "Encarar o intensivo", [{ p: 0.6, d: 2, txt: "Você passou a enxergar o jogo antes dos outros. +2 OVR." }, { p: 0.4, d: -1, txt: "Informação demais: você começou a pensar em vez de jogar. −1 OVR." }]),
+      seguro("intuicao", "Confiar no instinto", "Sem mudanças"),
+    ] },
+  { id: "treinoFerias", icone: "🏖️", peso: (c) => (c.idade <= 27 ? 1 : 0),
+    titulo: () => "Treinar nas férias?", texto: () => "Seus companheiros vão viajar. Você pode aproveitar o mês livre para treinar sozinho.",
+    opcoes: () => [
+      aposta("treinar", "Treinar o mês inteiro", [{ p: 0.5, d: 2, moral: -3, txt: "Voltou voando, mas cansado da cabeça. +2 OVR." }, { p: 0.5, d: -1, moral: -5, txt: "Sem descanso, o corpo cobrou logo na estreia. −1 OVR." }]),
+      seguro("descansar", "Descansar com a família", "Cabeça renovada", (c) => { mexerMoral(c, 6); return "Você voltou leve e com saudade da bola."; }),
+    ] },
+];
+
+const TODOS_EVENTOS = () => [...EVENTOS, ...EVENTOS_EXTRAS, ...EVENTOS_VIDA, ...EVENTOS_CAMPO, ...EVENTOS_APOSTA, EVENTO_IMPASSE];
 /* Depois de uma escolha: se ela abriu um impasse, ele vem logo em seguida */
 export const eventoImpasse = (c) => (c.flags?.impasse ? sortearEvento(c, { somente: "impasse" }) : null);
 const opcoesCompletas = (e, c, ctx) => [...e.opcoes(c, ctx), ...(EXTRAS_OPCOES[e.id] ? EXTRAS_OPCOES[e.id](c, ctx) : [])];
 
 /* Sorteia o evento da janela entre temporadas */
 export function sortearEvento(c, opts = {}) {
-  return comSemente(c.codigo, `evento:${c.ano}:${opts.somente || ""}:${(opts.excluir || []).join(",")}`, () => sortearEventoBase(c, opts));
+  return comSemente(c.codigo, `evento:${c.ano}:${opts.somente || ""}:${(opts.excluir || []).join(",")}${opts.soApostas ? ":ap" : ""}`, () => sortearEventoBase(c, opts));
 }
-function sortearEventoBase(c, { somente = null, excluir = [] } = {}) {
+function sortearEventoBase(c, { somente = null, excluir = [], soApostas = false } = {}) {
   const recentes = (c.flags.historicoEventos || []).slice(-3);
-  const cands = TODOS_EVENTOS().map((e) => {
+  const cands = (soApostas ? EVENTOS_APOSTA : TODOS_EVENTOS()).map((e) => {
     if (somente && e.id !== somente) return null;
     if (excluir.includes(e.id)) return null;
     if (!somente && !["propostas", "fimContrato", "clausula"].includes(e.id) && recentes.includes(e.id)) return null;
@@ -2536,9 +2653,16 @@ const EVENTOS_IMPORTANTES = ["propostas", "fimContrato", "clausula", "livre", "f
 /* Evento principal da janela, respeitando o ritmo escolhido */
 export function eventoDaJanela(c) {
   const ev = sortearEvento(c, { excluir: ["propostas"] });
-  if (!ev || c.ritmo !== "expresso") return ev;
-  if (EVENTOS_IMPORTANTES.includes(ev.id)) return ev;
-  return comSemente(c.codigo, `expresso:${c.ano}`, () => (chance(0.35) ? ev : null));
+  const forcado = ev && (EVENTOS_IMPORTANTES.includes(ev.id) || ev.id === "fimContrato");
+  // decisão de risco (estilo Copero) em boa parte das janelas: ~45% no Normal e no Intenso,
+  // e ela é o acontecimento do Expresso quando nada importante acontece
+  const querAposta = comSemente(c.codigo, `aposta:${c.ano}`, () => chance(c.ritmo === "expresso" ? 0.4 : 0.45));
+  if (!forcado && querAposta) {
+    const ap = sortearEvento(c, { excluir: ["propostas"], soApostas: true });
+    if (ap) return ap;
+  }
+  if (!ev || c.ritmo !== "expresso" || forcado) return ev;
+  return null;
 }
 /* Segundo acontecimento da janela: transferência (se o atleta já é grande demais) ou, no ritmo intenso, mais um evento */
 export function segundoEvento(c, idJaVisto) {

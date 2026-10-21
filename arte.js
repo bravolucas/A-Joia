@@ -12,6 +12,18 @@ import contrato from "./arte/contrato.webp";
 
 export const ARTE = { refletores, coletiva, confete, estadioNoite, porDoSol, tunel, torcida, lesao, contrato };
 
+/* Escudos e logos de competição opcionais. O jogo não traz nenhum: quem quiser
+   usar imagens próprias coloca os arquivos em arte/escudos/ e arte/competicoes/
+   com o nome em formato de slug (ex.: "atletico-de-madrid.svg", "premier-league.png").
+   Ver os LEIA-ME de cada pasta. Sem arquivo, o jogo usa o brasão e a taça desenhados. */
+export const slug = (s) => (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+const porNome = (g) => Object.fromEntries(Object.entries(g).map(([k, v]) => [k.split("/").pop().replace(/\.\w+$/, ""), v]));
+const ESCUDOS = porNome(import.meta.glob("./arte/escudos/*.{svg,png,webp}", { eager: true, query: "?url", import: "default" }));
+const LOGOS = porNome(import.meta.glob("./arte/competicoes/*.{svg,png,webp}", { eager: true, query: "?url", import: "default" }));
+export const escudoDe = (nome) => ESCUDOS[slug(nome)] || null;
+export const logoCompeticao = (nome) => LOGOS[slug(nome)] || null;
+export const temImagensOficiais = Object.keys(ESCUDOS).length + Object.keys(LOGOS).length > 0;
+
 /* Foto de cabeçalho por evento do Modo Rápido (eventos sem foto ficam só com o ícone) */
 export const ARTE_EVENTO = {
   propostas: contrato, renovacao: contrato, fimContrato: contrato, livre: contrato, clausula: contrato, fortuna: contrato,

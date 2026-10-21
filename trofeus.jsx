@@ -1,4 +1,5 @@
 import React from "react";
+import { logoCompeticao } from "./arte.js";
 
 /* Taças do A JOIA: uma silhueta própria para cada tipo de competição, todas
    desenhadas para o jogo (nenhuma reproduz troféu real). O facetado de gema
@@ -153,8 +154,11 @@ function TacaVetor({ tipo, size }) {
   );
 }
 
-export function TacaCompeticao({ tipo = "liga", size = 40 }) {
+export function TacaCompeticao({ tipo = "liga", size = 40, nome = null }) {
   const [falhou, setFalhou] = React.useState(false);
+  // logo da competição, se a pessoa colocou o arquivo em arte/competicoes/
+  const logo = nome ? logoCompeticao(nome) : null;
+  if (logo) return <img src={logo} alt="" aria-hidden="true" className="shrink-0 object-contain select-none" draggable="false" style={{ width: size, height: size * 1.2, filter: "drop-shadow(0 2px 6px rgba(0,0,0,.5))" }} />;
   const metal = METAL_POR_TIPO[tipo] || "ouro";
   const brilho = METAIS[metal][1];
   const sombra = { filter: `drop-shadow(0 ${Math.max(2, size / 20)}px ${Math.max(4, size / 7)}px rgba(0,0,0,.55)) drop-shadow(0 0 ${Math.max(4, size / 6)}px ${brilho}55)` };

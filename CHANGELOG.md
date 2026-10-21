@@ -4,6 +4,26 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🎲 Decisões com chance na tela, curva da carreira e goleiro de verdade
+
+- **Decisões de risco, como no Copero**: plano alimentar, concentração extra, especialista de fundamento, ganho de massa, teste em outra função, altitude, garoto da base querendo sua vaga, novo método de recuperação, intensivo de vídeo e treino nas férias. Cada opção arriscada mostra o que pode acontecer e a chance ("+3 OVR · 55%", "−3 OVR · 45%"); a segura mostra que nada muda. O efeito vale para o resto da carreira (sobe ou desce o teto também). Aparecem em cerca de 45% das janelas e são o acontecimento do ritmo Expresso
+- **Efeito de cada escolha**: depois de qualquer decisão, chips verdes e vermelhos mostram o que mudou (OVR, valor, cabeça, torcida, fama, dinheiro, minutos, risco de lesão)
+- **Curva da carreira**: gráfico de OVR e valor ano a ano no resumo e no fim de carreira, com o auge marcado; mini-curva na carta final (vai junto no PNG) e tabela "Ano a ano" com idade, clube, títulos, OVR, jogos, gols e assistências
+- **Auge mais tarde**: no Modo Rápido o crescimento e o declínio começam 2 anos depois e o garoto chega ao teto mais devagar. Auge típico passou de 27 para 28–29 anos (o Modo Carreira não muda)
+- **Pênalti com goleiro de verdade**: estádio ao fundo, trave com sombra, rede em profundidade (fundo, laterais e teto), rede balançando no gol, faísca na defesa e goleiro com uniforme, luvas e mergulho. Vale para bater e para defender
+- **Escudos e logos opcionais**: o jogo continua com brasões e taças próprios, mas agora aceita imagens colocadas em `arte/escudos/` e `arte/competicoes/` (lista de nomes nos LEIA-ME de cada pasta). Aviso de uso só para identificação no menu inicial
+
+---
+
+## 🏁 Modo Rápido: acesso real, desafios de título, OVR dinâmico e pré-temporada
+
+- **Acesso e rebaixamento de verdade** nas 7 ligas com 2ª divisão: os clubes mudam de divisão ao longo da carreira (antes o acesso só aparecia no texto)
+- **Títulos decididos em desafio** (estilo El Ídolo): última rodada da liga, final de copa, Mundial e finais continentais e de seleção viram minigames em sequência
+- **OVR dinâmico**: nível de longo prazo mais uma fase temporária de −3 a +3 puxada pelo rendimento; o resumo explica cada variação
+- **Pré-temporada**: 3 cartas de treino para escolher onde melhorar
+
+---
+
 ## 📣 Modo Rápido: narrativa e torcida
 
 - **A torcida pesa em campo**: ídolo (75+) joga embalado e ganha nota; torcida hostil (20 ou menos) pesa contra, tira nota e mexe com a cabeça. O resumo avisa quando a arquibancada fez diferença

@@ -69,10 +69,36 @@ export function dadosDoDia(codigo = codigoDoDia()) {
 export const posicaoDe = (id) => POSICOES.find((p) => p.id === id) || POSICOES[0];
 export const nacDe = (id) => NACIONALIDADES.find((n) => n.id === id) || NACIONALIDADES[0];
 export const personaDe = (id) => PERSONALIDADES.find((p) => p.id === id) || PERSONALIDADES[3];
-export const clubeDe = (nome) => CLUBES.find((x) => x.nome === nome) || { nome, forca: 60, liga: "serieB", cor: "#12A876" };
+/* Liga ATUAL de cada clube nesta carreira. O cadastro (CLUBES) guarda só a liga de
+   origem; acesso e rebaixamento mudam clubes de divisão ao longo dos anos e ficam
+   registrados em c.ligas. Como só existe uma carreira rodando por vez, o mapa vive
+   aqui no módulo e é sincronizado ao criar, carregar, jogar e fechar a temporada. */
+let LIGAS_CARREIRA = {};
+export function sincronizarLigas(c) { LIGAS_CARREIRA = { ...(c?.ligas || {}) }; }
+const comLigaAtual = (x) => (LIGAS_CARREIRA[x.nome] ? { ...x, liga: LIGAS_CARREIRA[x.nome] } : x);
+export const clubeDe = (nome) => {
+  const x = CLUBES.find((y) => y.nome === nome);
+  return x ? comLigaAtual(x) : { nome, forca: 60, liga: "serieB", cor: "#12A876" };
+};
 export const ligaDe = (id) => LIGAS[id] || { nome: "Liga", mult: 0.7 };
 export const ehSegundaDivisao = (ligaId) => !!ligaDe(ligaId).promocao;
-export const clubesJogaveis = () => CLUBES.filter((x) => !ligaDe(x.liga).naoJogavel);
+export const clubesJogaveis = () => CLUBES.map(comLigaAtual).filter((x) => !ligaDe(x.liga).naoJogavel);
+
+/* Pirâmide de divisões: quantos sobem e quantos caem em cada país */
+const PIRAMIDE = [
+  { baixo: "serieB", cima: "brasileirao", vagas: 4 },
+  { baixo: "inglaterra2", cima: "inglaterra", vagas: 3 },
+  { baixo: "espanha2", cima: "espanha", vagas: 3 },
+  { baixo: "italia2", cima: "italia", vagas: 3 },
+  { baixo: "alemanha2", cima: "alemanha", vagas: 2 },
+  { baixo: "franca2", cima: "franca", vagas: 2 },
+  { baixo: "portugal2", cima: "portugal", vagas: 2 },
+];
+/* Vagas de acesso (2ª divisão) ou de rebaixamento (1ª divisão) da liga; 0 se não tiver */
+export function vagasDaLiga(ligaId) {
+  const p = PIRAMIDE.find((x) => x.baixo === ligaId || x.cima === ligaId);
+  return p ? p.vagas : 0;
+}
 export const ovrDe = (c) => calcOVR({ ...c.attrs, fintas: 3, pernaRuim: 3 }, c.posicao);
 
 /* Seleções mais citadas primeiro na tela de criação */
@@ -167,6 +193,7 @@ export const precisaEscolherTraco = (c) => IDADES_TRACO.includes(c.idade) && !(c
 /* ---------- criação ---------- */
 export function criarJogador(dados) {
   const codigo = normalizarCodigo(dados.codigo) || gerarCodigo();
+  sincronizarLigas(null); // carreira nova: todo mundo na liga de origem
   const c = comSemente(codigo, "criar", () => criarJogadorBase(dados));
   c.codigo = codigo;
   c.diario = ehCodigoDiario(codigo);
@@ -324,6 +351,58 @@ export function lendaParecida(attrs, posicao = "ATA") {
 }
 
 /* ---------- foco da temporada: uma escolha rápida antes de cada temporada ---------- */
+/* ---------- pré-temporada (estilo El Ídolo): em que você vai melhorar este ano ----------
+   Antes de cada temporada chegam 3 cartas de treino, sorteadas pela semente; você
+   escolhe uma. O ganho entra antes de a bola rolar, então já pesa na temporada. */
+export const CARTAS_PRETEMPORADA = [
+  { id: "finalizacao", icone: "🎯", nome: "Finalização na área", desc: "Horas batendo pro gol depois do treino.", ganhos: { finalizacao: 2, drible: 1 },
+    gol: { nome: "Treino de reflexos", desc: "Bolas à queima-roupa até o reflexo virar instinto." } },
+  { id: "explosao", icone: "⚡", nome: "Explosão e arranque", desc: "Tiros curtos e pliometria.", ganhos: { velocidade: 2, fisico: 1 },
+    gol: { nome: "Explosão nas saídas", desc: "Saídas do gol mais rápidas e mais fortes." } },
+  { id: "visao", icone: "🧭", nome: "Visão de jogo", desc: "Vídeo, rondos e tomada de decisão.", ganhos: { passe: 2, drible: 1 },
+    gol: { nome: "Jogo com os pés", desc: "Reposição e saída de bola de líbero." } },
+  { id: "tecnica", icone: "🪄", nome: "Técnica refinada", desc: "Domínio, condução e um contra um.", ganhos: { drible: 2, passe: 1 },
+    gol: { nome: "Elasticidade", desc: "Alongamento e voo pros cantos." } },
+  { id: "marcacao", icone: "🛡️", nome: "Marcação e leitura", desc: "Posicionamento e desarme.", ganhos: { defesa: 2, fisico: 1 },
+    gol: { nome: "Posicionamento", desc: "Ângulos, cobertura e comando da área." } },
+  { id: "musculacao", icone: "💪", nome: "Musculação pesada", desc: "Mais forte no choque, um pouco mais lento.", ganhos: { fisico: 3, velocidade: -1 } },
+  { id: "bolaParada", icone: "🥅", nome: "Bola parada", desc: "Cobranças até a perfeição. +6% de chance nos desafios do ano.", ganhos: { finalizacao: 1 }, desafio: 0.06,
+    gol: { nome: "Treino de pênaltis", desc: "Estudo dos cobradores. +6% de chance nos desafios do ano." } },
+  { id: "cabeca", icone: "🧘", nome: "Cabeça no lugar", desc: "Psicólogo e descanso. Moral em alta e menos lesão.", ganhos: {}, moral: 10, lesao: -0.03 },
+];
+export const cartaDe = (id) => CARTAS_PRETEMPORADA.find((x) => x.id === id) || null;
+export const textoCarta = (carta, posicao) => (posicao === "GOL" && carta.gol ? { ...carta, ...carta.gol } : carta);
+function opcoesPretemporadaBase(c) {
+  const pesos = posicaoDe(c.posicao).pesos || {};
+  const encaixe = (k) => Object.entries(k.ganhos).reduce((s, [a, g]) => s + Math.max(0, g) * (pesos[a] || 0.5), 0);
+  // a carta que mais combina com a sua posição sempre vem; as outras duas são sorteadas
+  const melhor = [...CARTAS_PRETEMPORADA].sort((a, b) => encaixe(b) - encaixe(a))[0];
+  const resto = CARTAS_PRETEMPORADA.filter((k) => k.id !== melhor.id);
+  const sorteadas = [];
+  while (sorteadas.length < 2 && resto.length) sorteadas.push(resto.splice(rand(0, resto.length - 1), 1)[0]);
+  return [melhor, ...sorteadas].sort(() => rnd() - 0.5);
+}
+export function opcoesPretemporada(c) { return comSemente(c.codigo, `pretemp:${c.ano}`, () => opcoesPretemporadaBase(c)); }
+export function escolherPretemporada(c0, id) { const c = clone(c0); c.pretemporada = { ano: c.ano, id }; return c; }
+
+/* Fase: bônus (ou ônus) temporário nos atributos que mais pesam na posição, até o
+   OVR andar "nivel" pontos. Pode passar do teto de potencial, porque é passageira:
+   devolve os deltas aplicados pra serem retirados no fim da próxima temporada. */
+function aplicarFase(c, nivel) {
+  const deltas = {};
+  if (!nivel) return deltas;
+  const pesos = posicaoDe(c.posicao).pesos || {};
+  const ordem = ATTRS.slice().sort((a, b) => (pesos[b] || 0.5) - (pesos[a] || 0.5)).slice(0, 3);
+  const inicio = ovrDe(c), sinal = Math.sign(nivel);
+  for (let i = 0; i < 18 && (sinal > 0 ? ovrDe(c) < inicio + nivel : ovrDe(c) > inicio + nivel); i++) {
+    const a = ordem[i % ordem.length];
+    const antes = c.attrs[a];
+    c.attrs[a] = clampR(antes + sinal, 40, 99);
+    if (c.attrs[a] !== antes) deltas[a] = (deltas[a] || 0) + (c.attrs[a] - antes);
+  }
+  return deltas;
+}
+
 export const FOCOS = [
   { id: "equilibrio", icone: "⚖️", nome: "Equilíbrio", desc: "Sem bônus nem custo." },
   { id: "protagonismo", icone: "🎯", nome: "Protagonismo", desc: "+12% de gols e assistências · nota oscila mais" },
@@ -577,7 +656,34 @@ function simularLiga(c, clube, ovr, share, extra = 0) {
   const tabela = rivais.map((x) => ({ nome: x.nome, s: x.forca + (x.nome === clube.nome ? impacto : 0) + (rnd() + rnd() + rnd() - 1.5) * 6 }))
     .sort((a, b) => b.s - a.s);
   const pos = tabela.findIndex((x) => x.nome === clube.nome) + 1;
-  return { pos: pos || rand(5, 15), total: tabela.length, campeao: tabela[0]?.nome };
+  return { pos: pos || rand(5, 15), total: tabela.length, campeao: tabela[0]?.nome, ordem: tabela.map((x) => x.nome), pontos: tabela.map((x) => x.s) };
+}
+
+/* Classificação final de uma liga: a sua vem da temporada jogada; as outras são
+   simuladas pela força dos clubes com um pouco de sorte. */
+function ordemDaLiga(ligaId, card) {
+  if (card.ligaId === ligaId && Array.isArray(card.tabelaLiga) && card.tabelaLiga.length) return card.tabelaLiga;
+  return clubesJogaveis().filter((x) => x.liga === ligaId)
+    .map((x) => ({ n: x.nome, s: x.forca + (rnd() + rnd() + rnd() - 1.5) * 6 }))
+    .sort((a, b) => b.s - a.s).map((x) => x.n);
+}
+
+/* Fim de temporada: os primeiros da 2ª divisão sobem, os últimos da 1ª caem.
+   Grava em c.ligas e devolve quem subiu e quem caiu. */
+function girarDivisoes(c, card) {
+  const ligas = { ...(c.ligas || {}) };
+  const subiram = [], cairam = [];
+  PIRAMIDE.forEach(({ baixo, cima, vagas }) => {
+    const b = ordemDaLiga(baixo, card), a = ordemDaLiga(cima, card);
+    if (b.length < vagas || a.length < vagas * 2) return;
+    b.slice(0, vagas).forEach((n) => { ligas[n] = cima; subiram.push(n); });
+    a.slice(-vagas).forEach((n) => { ligas[n] = baixo; cairam.push(n); });
+  });
+  // quem voltou pra liga de origem do cadastro não precisa ficar registrado
+  Object.keys(ligas).forEach((n) => { if (CLUBES.find((x) => x.nome === n)?.liga === ligas[n]) delete ligas[n]; });
+  c.ligas = ligas;
+  sincronizarLigas(c);
+  return { subiram, cairam };
 }
 
 function mataMata(forcaEf, base, bonus = 0) {
@@ -636,7 +742,7 @@ function efeitoFoco(c) {
 
 /* Joga a temporada inteira. Se houver uma final com você em campo,
    devolve um "momento decisivo" (pênalti) para o jogador resolver na tela. */
-export function jogarTemporada(c0) { return comSemente(c0.codigo, `jogar:${c0.ano}`, () => jogarTemporadaBase(c0)); }
+export function jogarTemporada(c0) { sincronizarLigas(c0); return comSemente(c0.codigo, `jogar:${c0.ano}`, () => jogarTemporadaBase(c0)); }
 function jogarTemporadaBase(c0) {
   const c = clone(c0);
   const mod = c.mod || {};
@@ -646,6 +752,26 @@ function jogarTemporadaBase(c0) {
   const clube = clubeDe(clubeNome);
   const liga = ligaDe(clube.liga);
   const pos = posicaoDe(c.posicao);
+  // pré-temporada: a carta escolhida mexe nos atributos antes de a bola rolar
+  const ovrAntes = ovrDe(c);
+  const carta = c.pretemporada?.ano === c.ano ? cartaDe(c.pretemporada.id) : null;
+  let preInfo = null;
+  if (carta) {
+    const fator = c.idade >= 31 ? 0.5 : 1; // veterano já não ganha tanto no treino
+    const aplicados = {};
+    Object.entries(carta.ganhos).forEach(([a, g]) => {
+      const ganho = g > 0 ? Math.max(1, Math.round(g * fator)) : g;
+      // o treino acelera rumo ao teto, não passa dele (a fase atual já está somada no atributo)
+      const teto = Math.max(c.attrs[a], (c.potencial?.[a] ?? 99) + ((c.formaAttrs || {})[a] || 0));
+      const novo = clampR(g > 0 ? Math.min(c.attrs[a] + ganho, teto) : c.attrs[a] + ganho, 40, 99);
+      if (novo !== c.attrs[a]) aplicados[a] = novo - c.attrs[a];
+      c.attrs[a] = novo;
+    });
+    if (carta.moral) mexerMoral(c, carta.moral);
+    const tc0 = textoCarta(carta, c.posicao);
+    preInfo = { id: carta.id, icone: carta.icone, nome: tc0.nome, ganhos: aplicados };
+  }
+  c.bonusDesafio = carta?.desafio || 0;
   const ovr = ovrDe(c);
   const st = statusPorDiff(ovr - clube.forca, c.idade);
   const moral = c.moral ?? 65;
@@ -656,7 +782,7 @@ function jogarTemporadaBase(c0) {
 
   // lesão durante a temporada
   const corpoPronto = c.origem === "tardio" && c.idade <= 21 ? 0.5 : 1;
-  const riscoLesao = clampR((0.07 + (moral < 30 ? 0.03 : 0) + (mod.lesaoAdd || 0) + (fx.lesaoAdd || 0) + (c.flags.cronica ? 0.05 : 0) + Math.max(0, c.idade - 30) * 0.01) * persona.risco * multTraco(c, "lesaoMult") * multInv(c, "lesaoMult") * corpoPronto, 0.01, 0.4);
+  const riscoLesao = clampR((0.07 + (moral < 30 ? 0.03 : 0) + (mod.lesaoAdd || 0) + (fx.lesaoAdd || 0) + (carta?.lesao || 0) + (c.flags.cronica ? 0.05 : 0) + Math.max(0, c.idade - 30) * 0.01) * persona.risco * multTraco(c, "lesaoMult") * multInv(c, "lesaoMult") * corpoPronto, 0.01, 0.4);
   const lesao = chance(riscoLesao) ? pick([
     { nome: "estiramento na coxa", fator: 0.8 }, { nome: "entorse no tornozelo", fator: 0.75 },
     { nome: "lesão muscular", fator: 0.7 }, { nome: "ruptura de ligamento", fator: 0.35 },
@@ -674,39 +800,56 @@ function jogarTemporadaBase(c0) {
 
   const card = {
     idx: c.temporadas.length, ano: c.ano, idade: c.idade, clube: clube.nome, cor: clube.cor, ligaId: clube.liga, ligaNome: liga.nome,
-    emprestado: !!c.emprestimo, ovr, status: st.label, foco: c.foco, jogos, gols, assist, nota, lesao: lesao?.nome || null, share,
+    emprestado: !!c.emprestimo, ovr, ovrAntes, pretemporada: preInfo ? { ...preInfo, deltaOvr: ovr - ovrAntes } : null,
+    status: st.label, foco: c.foco, jogos, gols, assist, nota, lesao: lesao?.nome || null, share,
     titulos: [], destaques: [],
   };
   if (jogos > 0 && efTorcida >= 0.12) card.destaques.push("A arquibancada te empurrou o ano inteiro: jogar em casa virou vantagem");
   else if (jogos > 0 && efTorcida <= -0.15) card.destaques.push("Vaia a cada toque errado: a própria torcida pesou contra você");
   const forcaTimeExtra = (fx.forcaTime || 0) * share;
 
+  // Desafios da temporada: cada título disputado na bola vira um minigame seu,
+  // em ordem cronológica (liga e copa em maio, finais continentais, seleção no meio do ano).
+  const momentos = [];
+  const emCampo = share >= 0.45 && jogos >= 10; // reserva não decide título
+
   // campeonato nacional
   const tab = simularLiga(c, clube, ovr, share, forcaTimeExtra);
   card.posLiga = tab.pos; card.totalLiga = tab.total; card.campeaoLiga = tab.campeao;
-  if (tab.pos === 1) card.titulos.push({ tipo: ehSegundaDivisao(clube.liga) ? "segunda" : "liga", nome: liga.nome });
-  else if (ehSegundaDivisao(clube.liga) && tab.pos <= 2) card.destaques.push(`${liga.promocao} conquistado com o clube`);
+  card.tabelaLiga = tab.ordem; // a virada de divisões no fim da temporada usa a classificação inteira
+  const decisaoLiga = emCampo ? decisaoNaTabela(clube, tab) : null;
+  if (decisaoLiga) momentos.push(decisaoLiga);
+  if (tab.pos === 1 && decisaoLiga?.tipo !== "liga") {
+    card.titulos.push({ tipo: ehSegundaDivisao(clube.liga) ? "segunda" : "liga", nome: liga.nome });
+    card.destaques.push(`Título do ${liga.nome} com folga na tabela`);
+    // a taça já é sua; o desafio é ser o nome do jogo que confirma o título
+    if (emCampo) momentos.push({ tipo: "ligaConfirmacao", ligaNome: liga.nome, titulo: `Jogo do título · ${liga.nome}` });
+  }
 
-  // copa nacional
+  // copa nacional: chegar à final é o difícil; a final em si é decidida em campo
   const copaNome = COPA_POR_LIGA[clube.liga];
   if (copaNome) {
     const p = clampR(0.06 + (clube.forca - 75) * 0.01 + (ovr - clube.forca) * share * 0.004 + (somaTraco(c, "mataMata") + forcaTimeExtra * 0.02) * share, 0.02, 0.32);
-    if (chance(p)) card.titulos.push({ tipo: "copa", nome: copaNome });
+    if (chance(clampR(p * 1.45, 0.03, 0.5))) {
+      if (emCampo) momentos.push({ tipo: "copa", nome: copaNome, titulo: `Final da ${copaNome}` });
+      else if (chance(0.5)) card.titulos.push({ tipo: "copa", nome: copaNome });
+      else card.destaques.push(`Vice-campeão da ${copaNome}`);
+    }
   }
 
   // Mundial de Clubes: quem foi campeão continental no ano anterior e ficou no clube
   if (c.campeaoContinental === clube.nome && !c.emprestimo) {
-    if (chance(clampR(0.4 + (clube.forca - 82) * 0.03 + forcaTimeExtra * 0.02, 0.25, 0.75))) card.titulos.push({ tipo: "mundial", nome: "Mundial de Clubes" });
+    if (emCampo && chance(clampR(0.7 + (clube.forca - 82) * 0.02, 0.45, 0.9))) momentos.push({ tipo: "mundial", titulo: "Final do Mundial de Clubes" });
+    else if (chance(clampR(0.4 + (clube.forca - 82) * 0.03 + forcaTimeExtra * 0.02, 0.25, 0.75))) card.titulos.push({ tipo: "mundial", nome: "Mundial de Clubes" });
     else card.destaques.push("Perdeu a final do Mundial de Clubes");
   }
 
   // continental
-  let momento = null;
   if (liga.continental && !ehSegundaDivisao(clube.liga) && (c.vagaContinental || (c.temporadas.length === 0 && clube.forca >= 80))) {
     const cont = simularContinental(c, clube, ovr, share, forcaTimeExtra);
     card.continental = { nome: cont.nome, faseNome: cont.faseNome, final: !!cont.final, chanceFinal: cont.chanceFinal };
     if (cont.final) {
-      if (share >= 0.5 && !lesao) momento = { tipo: "continental", titulo: `Final da ${cont.nome}`, texto: "Prorrogação empatada. Pênaltis. A última cobrança é sua." };
+      if (share >= 0.5 && !lesao) momentos.push({ tipo: "continental", titulo: `Final da ${cont.nome}` });
       else if (chance(cont.chanceFinal)) card.titulos.push({ tipo: "continental", nome: cont.nome });
       else card.continental.faseNome = "Vice-campeão";
     }
@@ -721,26 +864,45 @@ function jogarTemporadaBase(c0) {
       card.selecao = t;
       if (t.convocado) c.selecao.convocacoes += 1;
       if (t.final) {
-        if (t.titular) {
-          // a final da seleção tem prioridade: se as duas finais caírem no mesmo ano, a do clube é sorteada
-          if (momento) {
-            if (chance(card.continental.chanceFinal)) card.titulos.push({ tipo: "continental", nome: card.continental.nome });
-            else card.continental.faseNome = "Vice-campeão";
-          }
-          momento = { tipo: "selecao", titulo: `Final da ${t.nome} ${c.ano}`, texto: `${nacDe(c.nac).label} inteiro te olhando. Pênalti decisivo.` };
-        } else if (chance(t.chanceFinal)) { t.campeao = true; t.resultado = "Campeão"; card.titulos.push({ tipo: t.tipo, nome: t.nome }); }
+        if (t.titular) momentos.push({ tipo: "selecao", titulo: `Final da ${t.nome} ${c.ano}` });
+        else if (chance(t.chanceFinal)) { t.campeao = true; t.resultado = "Campeão"; card.titulos.push({ tipo: t.tipo, nome: t.nome }); }
         else t.resultado = "Vice-campeão";
       }
     }
   }
 
-  if (momento) {
-    momento.mini = miniDaPosicao(c.posicao);
-    momento.texto = TEXTO_MINI[momento.mini](c, momento.tipo);
-  }
-  card.pendente = momento;
-  return { c, card, momento };
+  const mini = miniDaPosicao(c.posicao);
+  momentos.forEach((m, i) => { m.mini = mini; m.texto = textoDoMomento(mini, m, c); m.ordem = i + 1; m.total = momentos.length; });
+  card.momentos = [];
+  card.pendente = momentos[0] || null;
+  card.filaMomentos = momentos.slice(1);
+  return { c, card, momento: card.pendente };
 }
+
+/* Briga apertada na tabela vira desafio na última rodada: pelo título (1º x 2º),
+   pelo acesso (2ª divisão) ou pra não cair (1ª divisão). "fronteira" é a posição
+   do lado de cima da disputa: acertar te deixa nela, errar te joga uma abaixo. */
+function decisaoNaTabela(clube, tab) {
+  const p = tab.pos, total = tab.total, pts = tab.pontos || [];
+  const nomeLiga = ligaDe(clube.liga).nome;
+  const vagas = vagasDaLiga(clube.liga);
+  const segunda = ehSegundaDivisao(clube.liga);
+  const apertado = (f) => pts[f - 1] != null && pts[f] != null && Math.abs(pts[f - 1] - pts[f]) < 3.2;
+  // quem está do lado de cima garante vencendo (ou se o rival também tropeçar);
+  // quem está atrás precisa vencer E torcer. O tropeço do rival já sai sorteado aqui.
+  const base = (f) => ({ ligaNome: nomeLiga, segunda, fronteira: f, ladoCerto: p === f, rivalTropeca: chance(0.45) });
+  if ((p === 1 || p === 2) && apertado(1)) return { ...base(1), tipo: "liga", titulo: `Última rodada do ${nomeLiga}` };
+  if (segunda && vagas && (p === vagas || p === vagas + 1) && apertado(vagas)) return { ...base(vagas), tipo: "acesso", titulo: `Jogo do acesso · ${nomeLiga}` };
+  if (!segunda && vagas && (p === total - vagas || p === total - vagas + 1) && apertado(total - vagas)) return { ...base(total - vagas), tipo: "permanencia", titulo: `Jogo da permanência · ${nomeLiga}` };
+  return null;
+}
+
+/* A situação na tabela antes do desafio, pra o jogador saber o que precisa */
+const SITUACAO_TABELA = {
+  liga: ["Um ponto à frente do vice: vença e a taça é de vocês.", "Um ponto atrás do líder: precisam vencer e torcer por um tropeço."],
+  acesso: ["Na zona de acesso, um ponto à frente do perseguidor: vença e o clube sobe.", "Um ponto fora da zona de acesso: precisam vencer e torcer por um tropeço."],
+  permanencia: ["Um ponto acima da zona de rebaixamento: vença e o clube se salva.", "Na zona de rebaixamento por um ponto: precisam vencer e torcer por um tropeço."],
+};
 
 /* ---------- momento decisivo: cada posição decide do seu jeito ---------- */
 export function miniDaPosicao(pos) {
@@ -755,6 +917,54 @@ const TEXTO_MINI = {
   passe: () => "Acréscimos. O time puxa o contra-ataque e a bola chega em você: ache o passe do gol.",
   defesa: (c, tipo) => (tipo === "selecao" ? `Disputa de pênaltis. ${nacDe(c.nac).label} depende de você: defenda a última cobrança.` : "Disputa de pênaltis. Se você pegar a última cobrança, o título é seu."),
 };
+/* Cena de cada desafio da temporada, por minigame */
+const CENA_MOMENTO = {
+  // liga, acesso e permanência: só a ação; o que está em jogo vem da SITUACAO_TABELA
+  liga: {
+    penalti: "Empate no placar e pênalti a favor nos acréscimos. A bola é sua.",
+    falta: "O placar não sai do zero. Falta na entrada da área, e a bola é sua.",
+    passe: "Acréscimos, contra-ataque de três contra dois: ache o passe do gol.",
+    defesa: "Vocês vencem por 1 a 0. Pênalti contra no último minuto: pegue.",
+  },
+  acesso: {
+    penalti: "Empate no placar e pênalti a favor nos acréscimos. A bola é sua.",
+    falta: "Falta perigosa no fim do jogo, na entrada da área.",
+    passe: "A bola chega em você nos acréscimos: ache o passe do gol.",
+    defesa: "Pênalti contra no último lance: defenda.",
+  },
+  permanencia: {
+    penalti: "Pênalti a favor nos acréscimos. A bola é sua.",
+    falta: "Falta no último minuto, na entrada da área.",
+    passe: "Último ataque da temporada: ache o passe do gol.",
+    defesa: "Pênalti contra no último minuto: tudo nas suas mãos.",
+  },
+  ligaConfirmacao: {
+    penalti: "O título está praticamente garantido. Pênalti no jogo da festa: o gol da taça pode ser seu.",
+    falta: "Estádio lotado pra festa do título. Falta na entrada da área: marque o gol da taça.",
+    passe: "Jogo da festa do título. A bola chega em você: dê o passe do gol que confirma a taça.",
+    defesa: "Jogo da festa do título. Pênalti contra: pegue e feche o campeonato sem sofrer gol.",
+  },
+  mundial: {
+    penalti: "Final do Mundial empatada. Pênaltis. A última cobrança é sua.",
+    falta: "Final do Mundial, último minuto. Falta na entrada da área: o mundo inteiro assistindo.",
+    passe: "Final do Mundial, prorrogação. Último ataque: ache o passe que vale o planeta.",
+    defesa: "Final do Mundial nos pênaltis. Pegue a última cobrança e vocês são campeões do mundo.",
+  },
+  copa: {
+    penalti: "Final empatada. Pênaltis. A última cobrança é sua.",
+    falta: "Final empatada nos acréscimos. Falta na entrada da área: a taça está nesse chute.",
+    passe: "Final, prorrogação, último ataque. A bola chega em você: ache o passe do título.",
+    defesa: "Final decidida nos pênaltis. Pegue a última cobrança e a taça é de vocês.",
+  },
+};
+function textoDoMomento(mini, m, c) {
+  const cena = CENA_MOMENTO[m.tipo]?.[mini] || TEXTO_MINI[mini](c, m.tipo);
+  const sit = SITUACAO_TABELA[m.tipo]?.[m.ladoCerto ? 0 : 1];
+  return sit ? `${sit} ${cena}` : cena;
+}
+/* Peso emocional de cada desafio: final de seleção ou continental mexe mais que copa */
+const PESO_MOMENTO = { selecao: 3, continental: 3, mundial: 3, liga: 2, copa: 2, acesso: 2, permanencia: 2, ligaConfirmacao: 1 };
+
 export const ACAO_MINI = {
   penalti: { ok: "Pênalti decisivo convertido", erro: "Perdeu o pênalti decisivo" },
   falta: { ok: "Gol de falta no último minuto", erro: "A falta decisiva não entrou" },
@@ -764,11 +974,11 @@ export const ACAO_MINI = {
 
 /* Chance base de converter o pênalti decisivo — usada pela simulação automática */
 export function chancePenalti(c) {
-  return clampR(0.62 + (c.attrs.finalizacao - 65) * 0.006 + somaTraco(c, "penalti"), 0.45, 0.92);
+  return clampR(0.62 + (c.attrs.finalizacao - 65) * 0.006 + somaTraco(c, "penalti") + (c.bonusDesafio || 0), 0.45, 0.92);
 }
 /* Chance estimada de cada minigame (simulação automática e dica na tela) */
 export function chanceMomento(c, mini = miniDaPosicao(c.posicao)) {
-  const dec = somaTraco(c, "penalti");
+  const dec = somaTraco(c, "penalti") + (c.bonusDesafio || 0);
   if (mini === "falta") return clampR(((c.attrs.finalizacao * 0.65 + c.attrs.drible * 0.35) / 145 + 0.18) * 1.15 + dec, 0.3, 0.8);
   if (mini === "passe") return clampR(c.attrs.passe / 130 + 0.3 + dec, 0.4, 0.88);
   if (mini === "defesa") return clampR(0.38 + (c.attrs.defesa - 65) * 0.006 + dec, 0.25, 0.65);
@@ -783,13 +993,49 @@ export function aplicarMomento(card0, acertou) {
   if (m.tipo === "continental") {
     if (acertou) { card.titulos.push({ tipo: "continental", nome: card.continental.nome }); card.continental.faseNome = "Campeão"; card.destaques.push(`${acao.ok} na final da ${card.continental.nome}`); }
     else { card.continental.faseNome = "Vice-campeão"; card.destaques.push(`${acao.erro} na final da ${card.continental.nome}`); }
+  } else if (m.tipo === "ligaConfirmacao") {
+    card.destaques.push(acertou ? `${acao.ok} no jogo da festa do ${m.ligaNome}` : `A festa do ${m.ligaNome} veio sem o seu gol, mas a taça já era de vocês`);
+  } else if (m.tipo === "mundial") {
+    if (acertou) { card.titulos.push({ tipo: "mundial", nome: "Mundial de Clubes" }); card.destaques.push(`${acao.ok} na final do Mundial de Clubes`); }
+    else card.destaques.push(`${acao.erro}: vice-campeão do Mundial de Clubes`);
+  } else if (m.tipo === "copa") {
+    if (acertou) { card.titulos.push({ tipo: "copa", nome: m.nome }); card.destaques.push(`${acao.ok} na final da ${m.nome}`); }
+    else card.destaques.push(`${acao.erro}: vice-campeão da ${m.nome}`);
+  } else if (m.tipo === "liga" || m.tipo === "acesso" || m.tipo === "permanencia") {
+    // o resultado do desafio decide de que lado da fronteira o clube termina
+    const ordem = [...(card.tabelaLiga || [])];
+    const i = ordem.indexOf(card.clube), f = m.fronteira;
+    // de cima: garante vencendo ou se o rival também tropeçar. De baixo: precisa vencer E o rival tropeçar.
+    const ladoCerto = m.ladoCerto ?? (i === f - 1);
+    const terminaEmCima = ladoCerto ? (acertou || !!m.rivalTropeca) : (acertou && !!m.rivalTropeca);
+    const alvo = terminaEmCima ? f - 1 : f; // índice 0-based: em cima = posição f; embaixo = posição f+1
+    if (i !== -1 && i !== alvo && (i === f - 1 || i === f)) [ordem[f - 1], ordem[f]] = [ordem[f], ordem[f - 1]];
+    card.tabelaLiga = ordem;
+    if (i !== -1) card.posLiga = ordem.indexOf(card.clube) + 1;
+    card.campeaoLiga = ordem[0] || card.campeaoLiga;
+    // o que aconteceu no outro jogo, quando ele decidiu a história
+    const outro = acertou && !terminaEmCima ? "Você fez sua parte, mas o rival também venceu"
+      : !acertou && terminaEmCima ? "O rival também tropeçou" : null;
+    const lance = acertou ? acao.ok : acao.erro;
+    if (m.tipo === "liga") {
+      if (terminaEmCima) { card.titulos.push({ tipo: m.segunda ? "segunda" : "liga", nome: m.ligaNome }); card.destaques.push(`${outro ? `${lance}. ${outro}` : lance}: o título do ${m.ligaNome} veio na última rodada`); }
+      else card.destaques.push(`${outro ? `${lance}. ${outro}` : lance}: vice-campeão do ${m.ligaNome} por um ponto`);
+    } else if (m.tipo === "acesso") {
+      card.destaques.push(`${outro ? `${lance}. ${outro}` : lance}: ${terminaEmCima ? "o acesso veio na última rodada" : "o acesso escapou por um ponto"}`);
+    } else {
+      card.destaques.push(`${outro ? `${lance}. ${outro}` : lance}: ${terminaEmCima ? "o clube se salvou na última rodada" : "o rebaixamento foi confirmado"}`);
+    }
   } else {
     const t = card.selecao;
     if (acertou) { t.campeao = true; t.resultado = "Campeão"; card.titulos.push({ tipo: t.tipo, nome: t.nome }); card.destaques.push(`${acao.ok}: a ${t.nome} é do seu país`); }
     else { t.resultado = "Vice-campeão"; card.destaques.push(`${acao.erro} na final da ${t.nome}`); }
   }
-  card.pendente = null;
+  card.momentos = [...(card.momentos || []), { tipo: m.tipo, mini: m.mini || "penalti", acertou, titulo: m.titulo }];
   card.momento = { tipo: m.tipo, mini: m.mini || "penalti", acertou };
+  // próximo desafio da fila, se houver
+  const fila = card.filaMomentos || [];
+  card.pendente = fila[0] || null;
+  card.filaMomentos = fila.slice(1);
   return card;
 }
 
@@ -840,7 +1086,7 @@ function detectarMarcos(antes, c, card) {
 }
 
 /* Fecha a temporada: títulos, Bola de Ouro, torcida, evolução, idade e mundo. */
-export function fecharTemporada(c0, card0) { return comSemente(c0.codigo, `fechar:${c0.ano}`, () => fecharTemporadaBase(c0, card0)); }
+export function fecharTemporada(c0, card0) { sincronizarLigas(c0); return comSemente(c0.codigo, `fechar:${c0.ano}`, () => fecharTemporadaBase(c0, card0)); }
 function fecharTemporadaBase(c0, card0) {
   const antes = c0;
   const c = clone(c0);
@@ -900,6 +1146,36 @@ function fecharTemporadaBase(c0, card0) {
     }
   }
 
+  // desafios decisivos: acertar vira confiança, fama e carinho da torcida; errar pesa
+  let dMomentos = 0;
+  (card.momentos || []).forEach((m) => {
+    const peso = PESO_MOMENTO[m.tipo] || 2;
+    const doClube = m.tipo !== "selecao";
+    if (m.acertou) {
+      dMomentos += 2 * peso;
+      c.fama = clampR(c.fama + peso, 0, 100);
+      if (doClube) c.torcida[tc] = clampR((c.torcida[tc] ?? 30) + peso, 0, 100);
+    } else if (m.tipo !== "ligaConfirmacao") {
+      dMomentos -= 2 * peso;
+      if (doClube) c.torcida[tc] = clampR((c.torcida[tc] ?? 30) - peso, 0, 100);
+    }
+  });
+
+  // acesso e rebaixamento: clubes mudam de divisão de verdade (inclusive o seu)
+  const giro = girarDivisoes(c, card);
+  const ligaFoi = ligaDe(card.ligaId);
+  if (giro.subiram.includes(tc)) {
+    card.acesso = { de: ligaFoi.nome, para: ligaDe(c.ligas[tc] || clubeDe(tc).liga).nome };
+    card.destaques.push(`🎉 ACESSO! O ${tc} vai disputar a ${card.acesso.para} em ${card.ano + 1}`);
+    c.torcida[tc] = clampR((c.torcida[tc] ?? 30) + 8, 0, 100);
+  } else if (giro.cairam.includes(tc)) {
+    card.rebaixado = { de: ligaFoi.nome, para: ligaDe(c.ligas[tc] || clubeDe(tc).liga).nome };
+    card.destaques.push(`⬇️ Rebaixado: o ${tc} vai jogar a ${card.rebaixado.para} em ${card.ano + 1}`);
+    c.torcida[tc] = clampR((c.torcida[tc] ?? 30) - 6, 0, 100);
+  }
+  card.torcida = c.torcida[tc];
+  card.torcidaDelta = c.torcida[tc] - tAntes;
+
   // vaga continental para o ano seguinte (só conta se você continuar no clube)
   c.vagaContinental = !card.emprestado && !ehSegundaDivisao(card.ligaId) && !!ligaDe(card.ligaId).continental && (card.posLiga <= 4 || card.titulos.some((t) => t.tipo === "continental"));
 
@@ -909,9 +1185,62 @@ function fecharTemporadaBase(c0, card0) {
   const moralAntes = c.moral ?? 65;
   const fatorDes = clampR(1 + ((card.nota || 6) - 6.8) * 0.12, 0.8, 1.25) * (c.mod?.evolucao ?? 1) * focoEvo * multInv(c, "evolucao") * (moralAntes >= 70 ? 1.05 : moralAntes < 35 ? 0.92 : 1);
   const reduc = multTraco(c, "declinio") * (c.mod?.declinio ?? 1) * focoDecl * multInv(c, "declinio");
+  // OVR = NÍVEL (evolução de longo prazo, respeita o teto de potencial)
+  //     + FASE (bônus temporário de -3 a +3, puxado pelo rendimento da temporada).
+  // Tira a fase da temporada passada pra evolução rodar só sobre o nível.
+  const ovrInicioFechar = ovrDe(c);
+  const formaAntes = c.formaAttrs || {};
+  ATTRS.forEach((a) => { if (formaAntes[a]) c.attrs[a] = clampR(c.attrs[a] - formaAntes[a], 40, 99); });
+  const ovrNivelAntes = ovrDe(c);
   const novos = evoluirAtributos({ ...c.attrs, fintas: 3, pernaRuim: 3 }, { ...c.potencial, fintas: 3, pernaRuim: 3 }, c.idade, persona, null, reduc, fatorDes, 1 + nTit * 0.05);
   ATTRS.forEach((a) => { c.attrs[a] = novos[a]; });
   if (c.flags.cronica) { c.attrs.velocidade = clampR(c.attrs.velocidade - 1, 40, 99); c.attrs.fisico = clampR(c.attrs.fisico - 1, 40, 99); }
+
+  // Cada variação vem com o motivo, pra o resumo explicar por que o número andou.
+  const motivos = [];
+  if (card.pretemporada?.deltaOvr) motivos.push({ txt: `Pré-temporada: ${card.pretemporada.nome}`, d: card.pretemporada.deltaOvr });
+  const dCurva = ovrDe(c) - ovrNivelAntes;
+  if (dCurva) motivos.push({ txt: dCurva > 0 ? "Evolução natural (idade e potencial)" : "Desgaste da idade", d: dCurva });
+  if (card.lesao === "ruptura de ligamento") {
+    const antesL = ovrDe(c);
+    c.attrs.velocidade = clampR(c.attrs.velocidade - 2, 40, 99); c.attrs.fisico = clampR(c.attrs.fisico - 1, 40, 99);
+    const dL = ovrDe(c) - antesL;
+    if (dL) motivos.push({ txt: "Sequela da lesão grave", d: dL });
+  }
+
+  // rendimento da temporada -> empurrão na fase
+  let swing = 0, swingTxt = "";
+  // limites calibrados na distribuição real das notas: ~20% das temporadas empurram
+  // a fase pra cima e ~20% pra baixo (gala e "muito abaixo" são os ~6% das pontas)
+  if (card.jogos >= 15 && card.nota >= 8.2) { swing = 2; swingTxt = "temporada de gala"; }
+  else if (card.jogos >= 15 && card.nota >= 7.65) { swing = 1; swingTxt = "temporada de afirmação"; }
+  else if (card.jogos >= 10 && card.nota < 6.05) { swing = -2; swingTxt = "temporada muito abaixo"; }
+  else if (card.jogos >= 10 && card.nota < 6.5) { swing = -1; swingTxt = "temporada abaixo do esperado"; }
+  else if (card.jogos < 8 && !card.lesao && c.idade >= 20) { swing = -1; swingTxt = "sem ritmo de jogo"; }
+  // só uma temporada de gala eleva o teto (permanente), e no máximo 3 vezes na carreira
+  if (swing === 2 && (c.tetoExtra || 0) < 3) {
+    const pesosP = posicaoDe(c.posicao).pesos || {};
+    const melhor = ATTRS.slice().sort((a, b) => (pesosP[b] || 0.5) - (pesosP[a] || 0.5))[0];
+    c.potencial = { ...c.potencial, [melhor]: clampR((c.potencial?.[melhor] ?? c.attrs[melhor]) + 1, 40, 99) };
+    c.tetoExtra = (c.tetoExtra || 0) + 1;
+    card.destaques.push("Temporada de gala: os olheiros reviram seu teto pra cima");
+  }
+  // a fase anterior se esvai pela metade e soma com o empurrão desta temporada
+  const nivelFaseAntes = c.formaNivel || 0;
+  const nivelFase = clampR(Math.trunc(nivelFaseAntes / 2) + swing, -3, 3);
+  const ovrNivel = ovrDe(c);
+  c.formaAttrs = aplicarFase(c, nivelFase);
+  c.formaNivel = nivelFase;
+  card.fase = nivelFase;
+  // a fase antiga já foi retirada dos atributos (a pré-temporada ficou no nível, não na fase)
+  const dFase = (ovrDe(c) - ovrNivel) - (ovrInicioFechar - ovrNivelAntes);
+  if (dFase) {
+    const txt = swing > 0 ? `Grande fase: ${swingTxt}` : swing < 0 ? `Má fase: ${swingTxt}` : dFase < 0 ? "A boa fase passou" : "Saiu da má fase";
+    motivos.push({ txt, d: dFase });
+  }
+  card.ovrMotivos = motivos;
+  c.bonusDesafio = 0;
+  c.pretemporada = null;
   card.ovrDepois = ovrDe(c);
   if (card.ovrDepois >= c.picoOvr || !c.picoAttrs) c.picoAttrs = { ...c.attrs };
   c.picoOvr = Math.max(c.picoOvr, card.ovr, card.ovrDepois);
@@ -937,7 +1266,7 @@ function fecharTemporadaBase(c0, card0) {
 
   // cabeça: a temporada mexe com o estado mental, que tende a voltar ao normal
   const dMoral = (card.nota ? (card.nota - 7.0) * 6 : -6) + nTit * 3 + ((card.share ?? 0.5) < 0.4 ? -5 : 0)
-    + (card.lesao ? -6 : 0) + (card.bola.pos <= 3 ? 4 : 0) + ((c.torcida[tc] ?? 30) <= 20 ? -4 : (c.torcida[tc] ?? 30) >= 75 ? 2 : 0) + (65 - moralAntes) * 0.3 + somaInv(c, "moralAno") + (c.mod?.moralAno || 0);
+    + (card.lesao ? -6 : 0) + (card.bola.pos <= 3 ? 4 : 0) + (card.acesso ? 6 : 0) + (card.rebaixado ? -8 : 0) + dMomentos + ((c.torcida[tc] ?? 30) <= 20 ? -4 : (c.torcida[tc] ?? 30) >= 75 ? 2 : 0) + (65 - moralAntes) * 0.3 + somaInv(c, "moralAno") + (c.mod?.moralAno || 0);
   mexerMoral(c, dMoral * (dMoral < 0 ? multInv(c, "moralQueda") : 1));
   card.moral = c.moral; card.moralDelta = c.moral - moralAntes;
 
@@ -2465,6 +2794,8 @@ export function carregarRapido() {
     s.c.moral = s.c.moral ?? 65; s.c.transferencias = s.c.transferencias || []; s.c.ligaAlvo = s.c.ligaAlvo || null; s.c.ritmo = s.c.ritmo || "normal"; s.c.pe = s.c.pe || "destro";
     s.c.titulos = { liga: 0, copa: 0, continental: 0, mundial: 0, copaMundo: 0, continentalSelecao: 0, bolaOuro: 0, segunda: 0, ...(s.c.titulos || {}) };
     if (!s.c.mundo?.jogadores) s.c.mundo = mundoCompacto();
+    s.c.ligas = s.c.ligas || {};
+    sincronizarLigas(s.c);
     return s;
   } catch { return null; }
 }
@@ -2486,14 +2817,17 @@ function resolverAuto(c, ev, escolher) {
 
 export function simularCarreiraAutomatica(dados, escolher = (op) => pick(op), escolherFoco = () => pick(FOCOS).id) {
   const codigo = normalizarCodigo(dados.codigo);
-  return comSemente(codigo, "auto", () => simularCarreiraAutomaticaBase({ ...dados, codigo }, escolher, escolherFoco));
+  // a simulação mexe no mapa de ligas; devolve o da carreira que estava aberta
+  const ligasAntes = { ...LIGAS_CARREIRA };
+  try { return comSemente(codigo, "auto", () => simularCarreiraAutomaticaBase({ ...dados, codigo }, escolher, escolherFoco)); }
+  finally { LIGAS_CARREIRA = ligasAntes; }
 }
 function simularCarreiraAutomaticaBase(dados, escolher, escolherFoco) {
   let c = criarJogador(dados);
   let guard = 0;
   while (!c.aposentado && guard++ < 30) {
-    let { c: c2, card, momento } = jogarTemporada(c);
-    if (momento) card = aplicarMomento(card, chance(chanceMomento(c2, momento.mini)));
+    let { c: c2, card } = jogarTemporada(c);
+    while (card.pendente) card = aplicarMomento(card, chance(chanceMomento(c2, card.pendente.mini)));
     ({ c } = fecharTemporada(c2, card));
     if (aposentadoriaForcada(c) || (podeAposentar(c) && c.idade >= 36 && chance(0.4))) { c = aposentar(c); break; }
     if (precisaEscolherTraco(c)) c = escolherTraco(c, pick(opcoesDeTraco(c)).id);
@@ -2510,6 +2844,7 @@ function simularCarreiraAutomaticaBase(dados, escolher, escolherFoco) {
     const compra = INVESTIMENTOS.filter((i) => !(c.investimentos || []).includes(i.id) && i.custo <= c.patrimonio * 0.5);
     if (compra.length && chance(0.4)) c = comprarInvestimento(c, pick(compra).id).c;
     c = definirFoco(c, escolherFoco(c));
+    c = escolherPretemporada(c, pick(opcoesPretemporada(c)).id);
   }
   if (!c.aposentado) c = aposentar(c);
   return c;

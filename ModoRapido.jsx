@@ -10,6 +10,7 @@ import {
   calcularLegado, NIVEIS_LEGADO, statusNoClube, valorMercado, formatarValor, ovrDe, clubeDe, ligaDe, posicaoDe, nacDe, personaDe,
   textoCompartilhar, salvarRapido, carregarRapido, apagarRapido, NACS_DESTAQUE, IDADES_TRACO, anoDeCopa, anoDeContinentalSelecao,
   nomeCopaContinental, chancePenalti, ORIGENS_RAPIDO, origemDe, FOCOS, focoDe, definirFoco,
+  opcoesPretemporada, escolherPretemporada, textoCarta,
   iniciarNegociacao, ajustarNegociacao, fecharNegociacao, CAMPOS_NEGOCIACAO, fama_negociador,
   INVESTIMENTOS, comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
   chanceMomento, miniDaPosicao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
@@ -462,7 +463,9 @@ function CabecalhoMomento({ c, momento }) {
   const mini = momento.mini || "penalti";
   return (
     <div className="text-center">
-      <span className="rp-chip" style={{ color: "#EBC557", background: "rgba(216,180,74,.14)" }}>Momento decisivo · {NOME_MINI[mini]}</span>
+      <span className="rp-chip" style={{ color: "#EBC557", background: "rgba(216,180,74,.14)" }}>
+        {momento.total > 1 ? `Desafio ${momento.ordem} de ${momento.total}` : "Momento decisivo"} · {NOME_MINI[mini]}
+      </span>
       <h2 className="display text-lg text-[#F2F5F3] mt-3">{momento.titulo}</h2>
       <p className="text-[17px] text-[#8FA39A] mt-1">{momento.texto}</p>
     </div>
@@ -768,7 +771,8 @@ function PainelRival({ c, card }) {
 
 function TelaResumo({ c, card, onContinuar, onAposentar, onRever }) {
   const forcada = aposentadoriaForcada(c);
-  const delta = card.ovrDepois - card.ovr;
+  // variação desde antes da pré-temporada (inclui o treino escolhido)
+  const delta = card.ovrDepois - (card.ovrAntes ?? card.ovr);
   const bola = card.bola;
   const sel = card.selecao;
   const temFesta = card.titulos.length > 0 || bola.pos <= 3;
@@ -892,6 +896,30 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever }) {
             Salário {formatarValor(card.ganhos.salario)} · bônus {formatarValor(card.ganhos.bonus)} · empresário −{formatarValor(card.ganhos.comissao)}{card.ganhos.manutencao ? ` · luxos −${formatarValor(card.ganhos.manutencao)}` : ""}
           </div>
           <div className="text-[14px] mt-1"><span className="text-[#C9D3CE]">Patrimônio: {formatarValor(card.patrimonio)}</span>{card.contratoRestante <= 1 && <span className="text-[#EBC557] font-bold"> · {card.contratoRestante <= 0 ? "contrato encerrado" : "último ano de contrato"}</span>}</div>
+        </div>
+      )}
+
+      {(card.acesso || card.rebaixado) && (
+        <div className="rp-painel px-4 py-3 flex items-center gap-3" style={{ borderColor: card.acesso ? "rgba(27,194,138,.45)" : "rgba(227,107,91,.45)", background: card.acesso ? "rgba(27,194,138,.08)" : "rgba(227,107,91,.08)" }}>
+          <span className="text-3xl">{card.acesso ? "🎉" : "⬇️"}</span>
+          <div>
+            <div className="display text-sm" style={{ color: card.acesso ? "#1BC28A" : "#E36B5B" }}>{card.acesso ? "ACESSO!" : "REBAIXADO"}</div>
+            <div className="text-[15px] text-[#C9D3CE]">O {card.clube} {card.acesso ? "sobe" : "cai"} pra {(card.acesso || card.rebaixado).para} em {card.ano + 1}.</div>
+          </div>
+        </div>
+      )}
+
+      {(card.ovrMotivos || []).length > 0 && (
+        <div className="rp-painel px-4 py-3">
+          <div className="text-[10px] font-bold tracking-wider text-[#8FA39A] mb-1.5">POR QUE SEU OVERALL MUDOU</div>
+          <ul className="flex flex-col gap-1">
+            {card.ovrMotivos.map((m, i) => (
+              <li key={i} className="flex items-center justify-between text-[15px]">
+                <span className="text-[#C9D3CE]">{m.txt}</span>
+                <span className="font-stat" style={{ color: m.d > 0 ? "#1BC28A" : "#E36B5B" }}>{m.d > 0 ? `+${m.d}` : m.d}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
@@ -1051,6 +1079,43 @@ function SeletorFoco({ c, onFoco }) {
   );
 }
 
+/* Pré-temporada (estilo El Ídolo): 3 cartas de treino, você escolhe em que melhora */
+const NOME_ATTR = { velocidade: "VEL", finalizacao: "FIN", passe: "PAS", drible: "DRI", defesa: "DEF", fisico: "FIS" };
+const NOME_ATTR_GOL = { finalizacao: "REF", drible: "ELA", defesa: "POS" };
+function SeletorPretemporada({ c, onEscolher }) {
+  const cartas = opcoesPretemporada(c);
+  const escolhida = c.pretemporada?.ano === c.ano ? c.pretemporada.id : null;
+  const rot = (a) => (c.posicao === "GOL" && NOME_ATTR_GOL[a]) || NOME_ATTR[a] || a;
+  return (
+    <div className="rp-painel p-4" style={escolhida ? undefined : { borderColor: "rgba(216,180,74,.45)" }}>
+      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Pré-temporada · escolha seu treino</div>
+      <div className="grid grid-cols-3 gap-2 mt-3">
+        {cartas.map((k0) => {
+          const k = textoCarta(k0, c.posicao);
+          const sel = escolhida === k.id;
+          return (
+            <button key={k.id} onClick={() => onEscolher(k.id)} aria-pressed={sel}
+              className={`rp-opcao px-2 py-2.5 text-center min-h-[92px] flex flex-col items-center ${sel ? "sel" : ""}`}>
+              <div className="text-xl leading-none">{k.icone}</div>
+              <div className="text-[13px] font-bold text-[#F2F5F3] mt-1 leading-tight">{k.nome}</div>
+              <div className="flex flex-wrap justify-center gap-x-1.5 mt-1">
+                {Object.entries(k.ganhos).map(([a, g]) => (
+                  <span key={a} className="font-stat text-[12px]" style={{ color: g > 0 ? "#1BC28A" : "#E36B5B" }}>{g > 0 ? "+" : ""}{g} {rot(a)}</span>
+                ))}
+                {k.desafio && <span className="font-stat text-[12px] text-[#EBC557]">+{Math.round(k.desafio * 100)}% desafios</span>}
+                {k.moral && <span className="font-stat text-[12px] text-[#8DB4F5]">+moral</span>}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+      <p className="text-[14px] text-[#8FA39A] mt-2 min-h-[20px]">
+        {escolhida ? textoCarta(cartas.find((k) => k.id === escolhida) || cartas[0], c.posicao).desc : "Sem treino escolhido, a temporada começa sem bônus."}
+      </p>
+    </div>
+  );
+}
+
 /* Primeira vez: três dicas curtas antes da primeira temporada */
 const CHAVE_DICAS = "ajoia_rapido_dicas_v1";
 const DICAS = [
@@ -1113,7 +1178,7 @@ function RecorteJornal({ manchete, transf }) {
   );
 }
 
-function TelaEvento({ c, evento, resultado, temMais, aviso, manchete, onEscolher, onPedirLiga, onProximo, onFoco, onJogar, onPatrimonio }) {
+function TelaEvento({ c, evento, resultado, temMais, aviso, manchete, onEscolher, onPedirLiga, onProximo, onFoco, onPretemporada, onJogar, onPatrimonio }) {
   const torneio = c.idade >= 18 ? (anoDeCopa(c.ano) ? "Copa do Mundo" : anoDeContinentalSelecao(c.ano) ? nomeCopaContinental(c.nac) : null) : null;
   const pronto = !evento || resultado;
   return (
@@ -1130,6 +1195,7 @@ function TelaEvento({ c, evento, resultado, temMais, aviso, manchete, onEscolher
             <span className="flex-1"><span className="block text-[13px] font-bold uppercase tracking-[0.15em] text-[#8FA39A]">Patrimônio</span><span className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</span></span>
             <span className="text-[15px] font-bold text-[#EBC557]">Investir →</span>
           </button>
+          <SeletorPretemporada c={c} onEscolher={onPretemporada} />
           <SeletorFoco c={c} onFoco={onFoco} />
           {torneio && <div className="rp-painel px-4 py-3 text-[16px] text-[#8DB4F5]" style={{ borderColor: "rgba(46,111,224,.35)" }}>🌎 Ano de {torneio}. Jogue bem para ser convocado.</div>}
           <button onClick={onJogar} className="rp-btn rp-prim display text-sm">Jogar temporada {c.ano}</button>
@@ -1518,7 +1584,12 @@ export default function ModoRapido({ onSair }) {
     if (momento) setEstado({ etapa: "momento", c: c2, card: k });
     else aposFechar(fecharTemporada(c2, k));
   };
-  const fimMomento = (acertou) => aposFechar(fecharTemporada(c, aplicarMomento(card, acertou)));
+  const fimMomento = (acertou) => {
+    const k = aplicarMomento(card, acertou);
+    // mais de um título em jogo na temporada: um desafio por vez
+    if (k.pendente) setEstado({ etapa: "momento", c, card: k });
+    else aposFechar(fecharTemporada(c, k));
+  };
 
   const continuar = () => {
     if (precisaEscolherTraco(c)) return setEstado({ etapa: "traco", c, card, opcoesTraco: opcoesDeTraco(c).map((t) => t.id) });
@@ -1572,6 +1643,7 @@ export default function ModoRapido({ onSair }) {
   const comprar = (id) => { const r = comprarInvestimento(c, id); if (r.ok) setEstado((st) => ({ ...st, c: r.c })); };
   const proximoEvento = () => setEstado((s) => ({ ...s, evento: s.proximo, resultado: null, proximo: null, manchete: null }));
   const mudarFoco = (id) => setEstado((s) => ({ ...s, c: definirFoco(s.c, id) }));
+  const mudarPretemporada = (id) => setEstado((s) => ({ ...s, c: escolherPretemporada(s.c, id) }));
   const encerrar = () => {
     const cc = aposentar(c);
     cc.hall = registrarNoHall(cc);
@@ -1595,11 +1667,11 @@ export default function ModoRapido({ onSair }) {
                 <p className="text-[17px] text-[#8FA39A] mt-1">{c.nome}, {c.idade} anos, {posicaoDe(c.posicao).label.toLowerCase()} da base do {c.clubeNome}. {origemDe(c.origem) ? `${origemDe(c.origem).nome}. ` : ""}Perfil: {personaDe(c.personalidade).label.toLowerCase()}. Empresário: {(EMPRESARIOS.find((e) => e.id === c.empresario) || EMPRESARIOS[0]).nome.toLowerCase()}.</p>
               </div>
             )}
-            <TelaEvento c={c} evento={evento} resultado={resultado} temMais={!!estado.proximo} aviso={estado.aviso} manchete={estado.manchete} onEscolher={escolherEvento} onPedirLiga={pedirLigaUI} onProximo={proximoEvento} onFoco={mudarFoco} onJogar={jogar} onPatrimonio={() => setPatrimonioAberto(true)} />
+            <TelaEvento c={c} evento={evento} resultado={resultado} temMais={!!estado.proximo} aviso={estado.aviso} manchete={estado.manchete} onEscolher={escolherEvento} onPedirLiga={pedirLigaUI} onProximo={proximoEvento} onFoco={mudarFoco} onPretemporada={mudarPretemporada} onJogar={jogar} onPatrimonio={() => setPatrimonioAberto(true)} />
           </>
         )}
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}
-        {etapa === "momento" && <TelaMomento c={c} momento={card.pendente} onFim={fimMomento} />}
+        {etapa === "momento" && <TelaMomento key={`${card.ano}:${(card.momentos || []).length}`} c={c} momento={card.pendente} onFim={fimMomento} />}
         {etapa === "festa" && <TelaFesta c={c} card={card} onFim={() => setEstado({ etapa: "resumo", c, card })} />}
         {etapa === "resumo" && <TelaResumo c={c} card={card} onContinuar={continuar} onAposentar={encerrar} onRever={() => setEstado({ etapa: "festa", c, card })} />}
         {etapa === "coletiva" && estado.coletiva && <TelaColetiva c={c} coletiva={estado.coletiva} resposta={estado.resposta} onResponder={responder} onSeguir={() => irParaEvento(c)} />}

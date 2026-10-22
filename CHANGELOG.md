@@ -35,6 +35,17 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🖼️ Fim de carreira com imagens no lugar de emojis (Modo Rápido)
+
+- **Medalhão do legado:** o nível final ganhou um medalhão na cor do nível — escudo do clube da sua vida (em cinza para "Promessa esquecida", do clube onde virou ídolo para "Ídolo de clube"), taça ou Bola de Ouro para "Lenda do futebol" e a gema para "A Joia".
+- **Foto por nível:** o topo da tela e a carta mudam de foto conforme o nível (estádio ao pôr do sol, estádio à noite, torcida, refletores, confete dourado).
+- **Temporada a temporada:** o bloco de emojis virou uma faixa de peças — Bola de Ouro, taça da competição, escudo do clube novo, listras para lesão e tons de esmeralda para a intensidade da temporada. O botão Compartilhar continua mandando o resumo em texto.
+- **Momentos da carreira:** cada marco tem escudo, taça, Bola de Ouro, gema ou foto, em vez de emoji.
+- **Depois da bola:** cada caminho de pós-carreira tem uma foto; o escolhido ganha uma faixa de foto no topo.
+- **Carta (PNG):** sem emojis, com a foto do nível no topo; também corrigido o corte na borda direita da imagem baixada.
+
+---
+
 ## 🎨 Revisão de design e imagens
 
 - **Contraste:** os cinzas de texto mais apagados (legendas, abas inativas, clubes no ranking da Bola de Ouro) ficavam abaixo do mínimo de leitura (4.5:1) no fundo escuro. Foram clareados nos dois modos.

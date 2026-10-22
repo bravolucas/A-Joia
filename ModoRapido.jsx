@@ -1514,13 +1514,103 @@ function Patrimonio({ c, onComprar, onFechar }) {
 }
 
 /* ---------- fim de carreira ---------- */
+/* ===== Artes do fim de carreira: imagens no lugar de emojis ===== */
+const FOTO_NIVEL = { 0: ARTE.porDoSol, 90: ARTE.estadioNoite, 230: ARTE.torcida, 400: ARTE.refletores, 640: ARTE.confete, 950: ARTE.confete };
+const fotoDoNivel = (nivel) => FOTO_NIVEL[nivel.min] || ARTE.porDoSol;
+const FOTO_POS_CARREIRA = { tecnico: ARTE.estadioNoite, auxiliar: ARTE.tunel, embaixador: ARTE.torcida, comentarista: ARTE.coletiva, dirigente: ARTE.refletores, empresario: ARTE.contrato, afastar: ARTE.porDoSol };
+
+function FotoMini({ src, size = 28, className = "" }) {
+  return <span aria-hidden="true" className={`shrink-0 inline-block rounded-full border border-white/15 ${className}`} style={{ width: size, height: size, background: `url(${src}) center/cover` }} />;
+}
+
+/* clube onde jogou mais partidas */
+function clubeDaVida(c) {
+  const jogos = {};
+  c.temporadas.forEach((s) => { jogos[s.clube] = (jogos[s.clube] || 0) + s.jogos; });
+  return Object.entries(jogos).sort((a, b) => b[1] - a[1])[0]?.[0] || c.temporadas[c.temporadas.length - 1]?.clube;
+}
+
+/* Medalhão do nível de legado: taça ou gema para os maiores, escudo do clube da vida para os demais */
+function EmblemaLegado({ c, L, size = 96 }) {
+  const cor = L.nivel.cor;
+  const interno = size * 0.62;
+  let conteudo;
+  if (L.nivel.min >= 950) conteudo = <Gema size={interno} />;
+  else if (L.nivel.min >= 640) conteudo = (c.titulos.bolaOuro ? <BolaDourada size={interno} /> : <TacaCompeticao tipo={ORDEM_TIPOS.find((t) => t !== "bolaOuro" && c.titulos[t]) || "liga"} size={interno * 0.95} />);
+  else {
+    const idolo = Object.entries(c.torcida || {}).sort((a, b) => b[1] - a[1])[0];
+    const clube = L.nivel.min >= 230 && idolo ? idolo[0] : clubeDaVida(c);
+    conteudo = <span style={{ filter: L.nivel.min === 0 ? "grayscale(1) brightness(.85)" : undefined }}><Escudo nome={clube} size={interno} /></span>;
+  }
+  return (
+    <div className="relative shrink-0 rounded-full p-[3px]" style={{ width: size, height: size, background: `conic-gradient(from 210deg, ${cor}, #0E1512 40%, ${cor} 70%, #0E1512 90%, ${cor})`, boxShadow: `0 0 ${size / 4}px ${cor}55` }} aria-hidden="true">
+      <div className="w-full h-full rounded-full flex items-center justify-center" style={{ background: "radial-gradient(circle at 50% 35%, #1E2A25, #0B1210 75%)" }}>{conteudo}</div>
+    </div>
+  );
+}
+
+/* Uma peça por temporada, com imagem: Bola de Ouro, taça, escudo do clube novo, lesão ou intensidade da temporada */
+function PecaTemporada({ s, anterior, size = 36 }) {
+  const titulo = s.titulos.find((t) => t.tipo !== "bolaOuro");
+  const bola = s.titulos.some((t) => t.tipo === "bolaOuro");
+  const lesao = s.lesao && s.jogos < 25;
+  const novo = anterior && anterior.clube !== s.clube;
+  const cor = s.cor || "#2A3A33";
+  let fundo = "#1A211E", borda = "rgba(255,255,255,.06)", conteudo = null, rotulo = "temporada discreta";
+  if (bola) { fundo = "radial-gradient(circle, #3A3015, #15120A)"; borda = "#D8B44A"; conteudo = <BolaDourada size={size * 0.72} />; rotulo = "Bola de Ouro"; }
+  else if (titulo) { fundo = "radial-gradient(circle, #2A2617, #121510)"; borda = "rgba(216,180,74,.7)"; conteudo = <TacaCompeticao tipo={titulo.tipo} nome={titulo.nome} size={size * 0.6} />; rotulo = titulo.nome; }
+  else if (lesao) { fundo = "repeating-linear-gradient(135deg, #3A1714 0 5px, #24100E 5px 10px)"; borda = "rgba(227,107,91,.55)"; rotulo = "lesão"; }
+  else if (novo) { fundo = "#16201C"; borda = `${cor}AA`; conteudo = <Escudo nome={s.clube} size={size * 0.62} />; rotulo = `chegada ao ${s.clube}`; }
+  else if (s.nota >= 7.2) { fundo = "#12A876"; rotulo = "grande temporada"; }
+  else if (s.nota >= 6.6) { fundo = "rgba(18,168,118,.4)"; rotulo = "boa temporada"; }
+  return (
+    <div className="flex flex-col items-center gap-1" title={`${s.ano} · ${s.clube} · ${rotulo}`}>
+      <div className="rounded-lg flex items-center justify-center overflow-hidden" style={{ width: size, height: size, background: fundo, border: `1px solid ${borda}` }}>{conteudo}</div>
+      <span className="font-stat text-[11px] leading-none text-[#7F918A]">{String(s.ano).slice(2)}</span>
+    </div>
+  );
+}
+
+function FaixaTemporadas({ c }) {
+  const leg = [
+    [<BolaDourada size={14} />, "Bola de Ouro"], [<TacaCompeticao tipo="liga" size={12} />, "título"], [<Escudo nome={clubeDaVida(c)} size={14} />, "clube novo"],
+    [<span className="w-3.5 h-3.5 rounded-sm" style={{ background: "repeating-linear-gradient(135deg, #3A1714 0 3px, #24100E 3px 6px)", border: "1px solid rgba(227,107,91,.55)" }} />, "lesão"],
+    [<span className="w-3.5 h-3.5 rounded-sm bg-[#12A876]" />, "grande"], [<span className="w-3.5 h-3.5 rounded-sm bg-[#12A876]/40" />, "boa"], [<span className="w-3.5 h-3.5 rounded-sm bg-[#1A211E] border border-white/10" />, "discreta"],
+  ];
+  return (
+    <>
+      <div className="grid grid-cols-8 gap-x-1.5 gap-y-2.5 justify-items-center">
+        {c.temporadas.map((s, i) => <PecaTemporada key={i} s={s} anterior={c.temporadas[i - 1]} />)}
+      </div>
+      <div className="flex flex-wrap gap-x-3 gap-y-1.5 mt-3">
+        {leg.map(([icone, nome]) => <span key={nome} className="inline-flex items-center gap-1.5 text-[12px] text-[#8FA39A]">{icone}{nome}</span>)}
+      </div>
+    </>
+  );
+}
+
+/* Marcador com imagem para cada momento da carreira */
+function MarcadorMomento({ c, m }) {
+  const id = m.id || "";
+  const clubeDoAno = c.temporadas.find((s) => s.ano === m.ano)?.clube;
+  if (id.startsWith("idolo:") || id.startsWith("apelido:")) return <Escudo nome={id.split(":")[1]} size={26} />;
+  if (id.startsWith("transf:") || id === "valor100") return <FotoMini src={ARTE.contrato} size={26} />;
+  if (id === "primeiroTitulo") return <TacaCompeticao tipo={(c.lista.find((x) => x.tipo !== "bolaOuro") || {}).tipo || "liga"} size={20} />;
+  if (id === "top10" || id === "podio") return <BolaDourada size={24} />;
+  if (id === "ovr90") return <Gema size={24} />;
+  if (id === "selecao") return <FotoMini src={ARTE.torcida} size={26} />;
+  if (clubeDoAno) return <Escudo nome={clubeDoAno} size={26} />;
+  return <span className="w-2.5 h-2.5 rounded-full bg-[#12A876]" />;
+}
+
 function CartaFinal({ c }) {
   const L = c.legado || calcularLegado(c);
   const t = c.titulos;
   const totalTitulos = c.lista.filter((x) => x.tipo !== "bolaOuro").length;
   return (
-    <div className="rp-carta mx-auto w-full max-w-[340px] rounded-[28px] p-[2px]" style={{ background: `linear-gradient(160deg, ${L.nivel.cor}, #0E1512 55%, ${L.nivel.cor})` }}>
+    <div className="rp-carta w-full rounded-[28px] p-[2px]" style={{ background: `linear-gradient(160deg, ${L.nivel.cor}, #0E1512 55%, ${L.nivel.cor})` }}>
       <div className="rounded-[26px] p-5 relative overflow-hidden" style={{ background: "linear-gradient(170deg, #17201C, #0E1512)" }}>
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-40" style={{ background: `linear-gradient(180deg, rgba(14,21,18,.35) 0%, rgba(23,32,28,.85) 70%, #17201C 100%), url(${fotoDoNivel(L.nivel)}) center/cover` }} />
         <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full opacity-20 blur-2xl" style={{ background: L.nivel.cor }} />
         <div className="flex items-start justify-between relative">
           <div>
@@ -1532,9 +1622,9 @@ function CartaFinal({ c }) {
         </div>
         <div className="display text-lg text-[#F2F5F3] mt-5 leading-tight relative">{c.nome}</div>
         {c.apelidos.length > 0 && <div className="text-[14px] text-[#8FA39A] italic">{c.apelidos.map((a) => `"${a.nome}"`).join(" · ")}</div>}
-        {c.apelidos.some((a) => a.cantico) && <div className="text-[12px] text-[#8FA39A] mt-0.5">📣 {c.apelidos.filter((a) => a.cantico).slice(-1)[0].cantico}</div>}
-        <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[14px] font-bold" style={{ background: `${L.nivel.cor}22`, color: L.nivel.cor, border: `1px solid ${L.nivel.cor}55` }}>
-          {L.nivel.icone} {L.nivel.nome}
+        {c.apelidos.some((a) => a.cantico) && <div className="text-[12px] text-[#8FA39A] mt-0.5">"{c.apelidos.filter((a) => a.cantico).slice(-1)[0].cantico}"</div>}
+        <div className="mt-2 inline-flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full text-[14px] font-bold relative" style={{ background: `${L.nivel.cor}22`, color: L.nivel.cor, border: `1px solid ${L.nivel.cor}55` }}>
+          <EmblemaLegado c={c} L={L} size={26} /> {L.nivel.nome}
         </div>
         <div className="grid grid-cols-3 gap-2 mt-5 relative">
           {[["JOGOS", c.totais.jogos], ["GOLS", c.totais.gols], ["ASSIST.", c.totais.assist], ["TÍTULOS", totalTitulos], ["BOLAS", t.bolaOuro || 0], ["COPAS", t.copaMundo || 0]].map(([k, v]) => (
@@ -1566,7 +1656,8 @@ function PosCarreira({ c, onEscolher }) {
     return (
       <div className="rp-painel p-5" style={{ borderColor: `${c.posCarreira.cor}66` }}>
         <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Depois da bola</div>
-        <div className="display text-base mt-2" style={{ color: c.posCarreira.cor }}>{c.posCarreira.icone} {c.posCarreira.nome}</div>
+        <div className="-mx-5 mt-3 h-28" style={{ background: `linear-gradient(180deg, rgba(18,25,22,.1), #121916), url(${FOTO_POS_CARREIRA[c.posCarreira.id] || ARTE.porDoSol}) center/cover` }} aria-hidden="true" />
+        <div className="display text-base -mt-4 relative" style={{ color: c.posCarreira.cor }}>{c.posCarreira.nome}</div>
         <p className="text-[17px] text-[#C9D3CE] mt-2 leading-snug">{c.posCarreira.epilogo}</p>
       </div>
     );
@@ -1576,9 +1667,12 @@ function PosCarreira({ c, onEscolher }) {
       <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">E agora? O que vem depois da bola</div>
       <div className="grid gap-2 mt-3">
         {caminhosPosCarreira(c).map((p) => (
-          <button key={p.id} disabled={!p.disponivel} onClick={() => onEscolher(p.id)} className="rp-opcao px-4 py-3 disabled:opacity-40 disabled:hover:translate-y-0">
-            <div className="font-bold text-[16px] text-[#F2F5F3]">{p.icone} {p.nome}</div>
-            <div className="text-[14px] text-[#8FA39A]">{p.disponivel ? p.desc : `Requer: ${p.requisito}`}</div>
+          <button key={p.id} disabled={!p.disponivel} onClick={() => onEscolher(p.id)} className="rp-opcao px-3 py-3 flex items-center gap-3 disabled:opacity-40 disabled:hover:translate-y-0">
+            <span aria-hidden="true" className="shrink-0 w-14 h-14 rounded-xl border border-white/10" style={{ background: `url(${FOTO_POS_CARREIRA[p.id] || ARTE.porDoSol}) center/cover`, filter: p.disponivel ? undefined : "grayscale(1)" }} />
+            <span className="min-w-0">
+              <span className="block font-bold text-[16px] text-[#F2F5F3]">{p.nome}</span>
+              <span className="block text-[14px] text-[#8FA39A]">{p.disponivel ? p.desc : `Requer: ${p.requisito}`}</span>
+            </span>
           </button>
         ))}
       </div>
@@ -1618,7 +1712,8 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
     setImagem("gerando");
     try {
       const { toPng } = await import("html-to-image");
-      const opts = { pixelRatio: 3, cacheBust: true, backgroundColor: "#0E1512" };
+      const caixa = cartaRef.current.getBoundingClientRect();
+      const opts = { pixelRatio: 3, cacheBust: true, backgroundColor: "#0E1512", width: Math.round(caixa.width), height: Math.round(caixa.height), style: { margin: "0" } };
       let url;
       try { url = await toPng(cartaRef.current, opts); } catch { url = await toPng(cartaRef.current, { ...opts, skipFonts: true }); }
       const arquivo = `a-joia-${c.nome.normalize("NFD").replace(/[^\w]+/g, "-").toLowerCase()}.png`;
@@ -1639,14 +1734,15 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
   };
   return (
     <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
-      <div className="text-center -mx-4 -mt-6 px-4 pt-24 pb-6" style={{ background: `linear-gradient(180deg, rgba(14,21,18,.1) 0%, rgba(14,21,18,.55) 55%, #0E1512 100%), url(${ARTE.porDoSol}) center 65%/cover` }}>
-        <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#E1E6E3]">Fim de carreira · {c.idade - 1} anos</div>
-        <h2 className="display text-xl mt-2" style={{ color: L.nivel.cor, textShadow: "0 2px 14px rgba(0,0,0,.9), 0 0 2px rgba(0,0,0,.8)" }}>{L.nivel.icone} {L.nivel.nome}</h2>
+      <div className="text-center -mx-4 -mt-6 px-4 pt-16 pb-6 flex flex-col items-center" style={{ background: `linear-gradient(180deg, rgba(14,21,18,.15) 0%, rgba(14,21,18,.6) 55%, #0E1512 100%), url(${fotoDoNivel(L.nivel)}) center 60%/cover` }}>
+        <EmblemaLegado c={c} L={L} size={104} />
+        <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#E1E6E3] mt-4">Fim de carreira · {c.idade - 1} anos</div>
+        <h2 className="display text-xl mt-2" style={{ color: L.nivel.cor, textShadow: "0 2px 14px rgba(0,0,0,.9), 0 0 2px rgba(0,0,0,.8)" }}>{L.nivel.nome}</h2>
         <p className="text-[17px] text-[#C9D3CE] mt-1">{L.nivel.desc}</p>
       </div>
       {c.hall && (
         <div className="rp-painel px-4 py-3 text-center text-[16px] text-[#C9D3CE]" style={{ borderColor: c.hall.posicao === 1 ? "rgba(216,180,74,.5)" : undefined }}>
-          {c.hall.total === 1 ? <>📒 Primeira carreira no seu ranking pessoal. Jogue de novo para tentar superá-la.</> : c.hall.posicao === 1 ? <>🥇 <b className="text-[#EBC557]">Sua melhor carreira até hoje!</b></> : <>Esta é a sua <span className="font-stat text-[#EBC557]">{c.hall.posicao}ª</span> melhor carreira de {c.hall.total}.</>}
+          {c.hall.total === 1 ? <>Primeira carreira no seu ranking pessoal. Jogue de novo para tentar superá-la.</> : c.hall.posicao === 1 ? <b className="text-[#EBC557]">Sua melhor carreira até hoje!</b> : <>Esta é a sua <span className="font-stat text-[#EBC557]">{c.hall.posicao}ª</span> melhor carreira de {c.hall.total}.</>}
           {c.diario && <div className="text-[14px] text-[#8FA39A] mt-1">Carreira do Dia: {c.hall.melhorDoDia === 1 ? "seu melhor resultado hoje" : `${c.hall.melhorDoDia}º das suas ${c.hall.tentativasDoDia} tentativas de hoje`}.</div>}
         </div>
       )}
@@ -1658,9 +1754,8 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
         <button onClick={compartilharEmoji} className="rp-btn rp-sec text-[16px]">{emojiOk ? "Copiado!" : "Compartilhar"}</button>
       </div>
       <div className="rp-painel p-4">
-        <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-2">Sua carreira em emojis</div>
-        <pre className="whitespace-pre-wrap text-[15px] leading-relaxed text-[#E1E6E3] font-sans">{emoji}</pre>
-        <div className="text-[12px] text-[#7F918A] mt-2">🥇 Bola de Ouro · 🏆 título · ✈️ clube novo · 🩹 lesão · ⚽ grande temporada · 🟩 boa · ⬜ discreta</div>
+        <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-3">Temporada a temporada</div>
+        <FaixaTemporadas c={c} />
         <button onClick={copiar} className="text-[14px] font-bold text-[#8FA39A] min-h-[40px] mt-1">{copiado ? "Resumo completo copiado!" : "Copiar resumo completo em texto"}</button>
       </div>
 
@@ -1737,7 +1832,7 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
               <div className="min-w-0 flex-1">
                 <div className="text-[16px] font-semibold text-[#F2F5F3] truncate">{k.nome}{k.emp ? " (empréstimo)" : ""}</div>
                 <div className="text-[13px] text-[#8FA39A]">{k.de === k.ate ? k.de : `${k.de}–${k.ate}`} · {k.jogos} jogos · {k.gols} gols{k.titulos ? ` · ${k.titulos} título(s)` : ""}</div>
-                {(() => { const t = (c.transferencias || []).find((x) => x.para === k.nome && Math.abs(x.ano - k.de) <= 1); return t ? <div className="text-[13px] text-[#EBC557]">💸 Chegou {t.valor ? `por ${formatarValor(t.valor)}` : "sem custo"}</div> : null; })()}
+                {(() => { const t = (c.transferencias || []).find((x) => x.para === k.nome && Math.abs(x.ano - k.de) <= 1); return t ? <div className="text-[13px] text-[#EBC557]">Chegou {t.valor ? `por ${formatarValor(t.valor)}` : "sem custo"}</div> : null; })()}
               </div>
               {(c.torcida[k.nome] ?? 0) >= 75 && <span className="rp-chip" style={{ color: "#7FE3BC", background: "rgba(18,168,118,.16)" }}>Ídolo</span>}
             </li>
@@ -1748,10 +1843,10 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
       {(c.marcos || []).length > 0 && (
         <div className="rp-painel p-4">
           <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-3">Momentos da carreira</div>
-          <ol className="flex flex-col gap-2.5 border-l border-[#2A3A33] ml-2 pl-4">
+          <ol className="flex flex-col gap-3 border-l border-[#2A3A33] ml-3.5 pl-6">
             {c.marcos.map((m, i) => (
               <li key={i} className="relative">
-                <span className="absolute -left-[25px] top-0.5 text-base">{m.icone}</span>
+                <span className="absolute -left-[39px] top-0 w-7 h-7 rounded-full bg-[#121916] flex items-center justify-center"><MarcadorMomento c={c} m={m} /></span>
                 <div className="text-[15px] font-bold text-[#F2F5F3]">{m.titulo} <span className="font-stat font-normal text-[#7F918A]">{m.ano}</span></div>
                 <div className="text-[14px] text-[#8FA39A]">{m.texto}</div>
               </li>

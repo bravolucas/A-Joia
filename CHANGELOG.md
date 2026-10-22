@@ -35,6 +35,12 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🏆 Taça da copa continental de seleções em foto real
+
+- A taça da copa continental de seleções era a única em estilo cartoon. Foi trocada por uma foto real de taça dourada com base de mármore (Adobe Stock, licença gratuita, fundo removido no Photoshop), no mesmo formato das outras.
+
+---
+
 ## 🖼️ Fim de carreira com imagens no lugar de emojis (Modo Rápido)
 
 - **Medalhão do legado:** o nível final ganhou um medalhão na cor do nível — escudo do clube da sua vida (em cinza para "Promessa esquecida", do clube onde virou ídolo para "Ídolo de clube"), taça ou Bola de Ouro para "Lenda do futebol" e a gema para "A Joia".

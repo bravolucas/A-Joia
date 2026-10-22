@@ -32,7 +32,7 @@ A licença do Adobe Stock permite uso em projetos, mas não a redistribuição d
 | tacas/continental.webp | 551381312 | Isolated golden soccer trophy of football sport | Continental de clubes |
 | tacas/mundial.webp | 1847683082 | Isolated Star trophy with gold base | Mundial de Clubes |
 | tacas/copaMundo.webp | 387718989 | Gold star trophy isolated on black | Copa do Mundo |
-| tacas/continentalSelecao.webp | 605130756 | Golden champion trophy cup award with gold star | Copa continental de seleções |
+| tacas/continentalSelecao.webp | 298742334 | Golden cup isolated on white background (fundo removido no Photoshop) | Copa continental de seleções — substituiu a 605130756, em estilo cartoon |
 | tacas/segunda.webp | 1649183514 | A classic bronze trophy cup | Segunda divisão |
 
 Todas são taças genéricas de banco de imagens; nenhuma reproduz troféu oficial de competição real.

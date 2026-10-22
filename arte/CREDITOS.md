@@ -22,20 +22,18 @@ A licença do Adobe Stock permite uso em projetos, mas não a redistribuição d
 | lesao.webp | 427520032 | The injured footballer lies on the pitch (recortada) | Lesão grave, eventos de lesão |
 | contrato.webp | 1193565407 | Close-Up of Hand Writing with Pen on Document in Low Light Setting | Negociação e assinatura de contrato |
 
-## Taças (recortadas com o Adobe Photoshop, fundo removido)
+## Taças
 
-| Arquivo | Adobe Stock ID | Título original | Competição no jogo |
+As sete taças (liga, copa, segunda divisão, continental, copa continental de seleções, Copa do Mundo e Mundial)
+são desenhos originais do A JOIA, feitos em SVG — fontes em `arte/tacas/fonte/` e gerador em
+`ferramentas/gerar-tacas.py`. Não reproduzem nenhum troféu real; a gema da marca é a assinatura das maiores.
+As fotos de taças do Adobe Stock usadas antes foram aposentadas.
+
+## Outras fotos
+
+| Arquivo | Adobe Stock ID | Título original | Uso no jogo |
 |---|---|---|---|
 | coletiva.webp | 1534097092 | Press conference concept with podium and multiple microphones | Coletiva de imprensa (Modo Rápido) |
-| tacas/liga.webp | 1734220943 | Isolated Gold award for success, prize for winning competition | Liga nacional |
-| tacas/copa.webp | 1849730582 | Isolated shiny silver trophy cup with handles | Copa nacional |
-| tacas/continental.webp | 551381312 | Isolated golden soccer trophy of football sport | Continental de clubes |
-| tacas/mundial.webp | 1847683082 | Isolated Star trophy with gold base | Mundial de Clubes |
-| tacas/copaMundo.webp | 387718989 | Gold star trophy isolated on black | Copa do Mundo |
-| tacas/continentalSelecao.webp | 298742334 | Golden cup isolated on white background (fundo removido no Photoshop) | Copa continental de seleções — substituiu a 605130756, em estilo cartoon |
-| tacas/segunda.webp | 1649183514 | A classic bronze trophy cup | Segunda divisão |
-
-Todas são taças genéricas de banco de imagens; nenhuma reproduz troféu oficial de competição real.
 
 ## Tratamento de cor
 

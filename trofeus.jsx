@@ -131,8 +131,9 @@ const DESENHOS = {
 
 const METAL_POR_TIPO = { liga: "ouro", continental: "ouro", mundial: "ouro", copaMundo: "ouro", continentalSelecao: "ouro", copa: "prata", segunda: "bronze" };
 
-/* Fotos das taças (Adobe Stock, recortadas no Photoshop). O desenho
-   vetorial acima continua como reserva caso a imagem não carregue. */
+/* Taças originais do A JOIA: desenhadas em SVG (arte/tacas/fonte, gerador em
+   ferramentas/gerar-tacas.py) e exportadas em WebP. Nenhuma reproduz troféu real.
+   O desenho vetorial acima continua como reserva caso a imagem não carregue. */
 import liga from "./arte/tacas/liga.webp";
 import copa from "./arte/tacas/copa.webp";
 import continental from "./arte/tacas/continental.webp";

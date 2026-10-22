@@ -35,9 +35,13 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
-## 🏆 Taça da copa continental de seleções em foto real
+## 🏆 Taças próprias do A JOIA
 
-- A taça da copa continental de seleções era a única em estilo cartoon. Foi trocada por uma foto real de taça dourada com base de mármore (Adobe Stock, licença gratuita, fundo removido no Photoshop), no mesmo formato das outras.
+- As sete taças do jogo agora são desenhos originais, no lugar das fotos de banco de imagens. Nenhuma imita troféu de competição real.
+- **Liga:** taça dourada clássica com uma gema esmeralda na frente. **Copa:** cálice de prata largo. **Segunda divisão:** taça de bronze lapidada.
+- **Continental de clubes:** vaso alto e facetado, coroado por uma gema esmeralda. **Copa continental de seleções:** taça de bojo cônico lapidado com gema safira.
+- **Copa do Mundo:** coluna dourada que se abre em pétalas de metal segurando uma grande gema esmeralda. **Mundial de clubes:** a mesma família em prata, com gema safira.
+- Os desenhos-fonte ficam em `arte/tacas/fonte/` e o gerador em `ferramentas/gerar-tacas.py`, para ajustes futuros.
 
 ---
 

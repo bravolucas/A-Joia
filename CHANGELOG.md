@@ -35,6 +35,13 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🏷️ Títulos pelo nome da competição (Modo Rápido)
+
+- A estante de troféus e a sala de troféus do fim de carreira agora separam cada competição pelo nome: Libertadores, Champions League, Copa América, Eurocopa, Brasileirão, Premier League, Copa do Brasil... em vez de "Continentais", "Ligas nacionais" ou "Copas continentais (seleção)".
+- O resumo para compartilhar também lista os títulos pelo nome ("2× Libertadores · 1× Champions League · 3× Brasileirão").
+
+---
+
 ## 🏆 Taças próprias do A JOIA
 
 - As sete taças do jogo agora são desenhos originais, no lugar das fotos de banco de imagens. Nenhuma imita troféu de competição real.

@@ -2819,6 +2819,13 @@ export function responderColetiva(c0, coletiva, tomId) {
 }
 
 /* ---------- texto para compartilhar ---------- */
+/* "2× Libertadores · 1× Champions League · 3× Brasileirão" — do mais importante para o menos */
+const ORDEM_TITULOS = ["bolaOuro", "copaMundo", "continentalSelecao", "mundial", "continental", "liga", "copa", "segunda"];
+function tituloPorNome(lista) {
+  const cont = new Map();
+  ORDEM_TITULOS.forEach((tipo) => (lista || []).filter((x) => x.tipo === tipo).forEach((x) => cont.set(x.nome, (cont.get(x.nome) || 0) + 1)));
+  return [...cont].map(([nome, n]) => `${n}× ${nome}`).join(" · ");
+}
 export function textoCompartilhar(c) {
   const L = c.legado || calcularLegado(c);
   const t = c.titulos;
@@ -2827,7 +2834,7 @@ export function textoCompartilhar(c) {
     `${c.nome} · ${posicaoDe(c.posicao).label} · ${nacDe(c.nac).label}`,
     `${L.nivel.icone} ${L.nivel.nome} (${L.pontos} pts)`,
     `⚽ ${c.totais.gols} gols · 🅰️ ${c.totais.assist} assist. · ${c.totais.jogos} jogos · OVR máx. ${c.picoOvr}`,
-    `🏆 ${t.liga} ligas · ${t.copa} copas · ${t.continental} continentais · ${t.mundial || 0} mundiais · ${t.copaMundo} Copas do Mundo · ${t.continentalSelecao || 0} copas continentais pela seleção · ${t.bolaOuro} Bolas de Ouro`,
+    `🏆 ${tituloPorNome(c.lista) || "sem títulos"}`,
     `💼 Ganhou ${formatarValor(c.ganhosTotais || 0)} na carreira · patrimônio final ${formatarValor(c.patrimonio || 0)}`,
     `Clubes: ${[...new Set(c.temporadas.map((s) => s.clube))].join(" → ")}`,
   ];

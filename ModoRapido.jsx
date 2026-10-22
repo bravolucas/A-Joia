@@ -68,6 +68,18 @@ export const ESTILO_BASE = `
 const ATTR_LABEL = { velocidade: "VEL", finalizacao: "FIN", passe: "PAS", drible: "DRI", defesa: "DEF", fisico: "FIS" };
 const ROTULO_TIPO = { liga: "Ligas nacionais", copa: "Copas nacionais", continental: "Continentais", mundial: "Mundiais de Clubes", copaMundo: "Copas do Mundo", continentalSelecao: "Copas continentais (seleção)", bolaOuro: "Bolas de Ouro", segunda: "Segundas divisões" };
 const ORDEM_TIPOS = ["bolaOuro", "copaMundo", "continentalSelecao", "mundial", "continental", "liga", "copa", "segunda"];
+/* Títulos agrupados pelo nome da competição (Libertadores, Champions League, Brasileirão...), na ordem de importância */
+function agruparTitulos(lista) {
+  const grupos = [];
+  ORDEM_TIPOS.forEach((tipo) => {
+    lista.filter((x) => x.tipo === tipo).forEach((x) => {
+      const nome = x.nome || ROTULO_TIPO[tipo];
+      const g = grupos.find((y) => y.tipo === tipo && y.nome === nome);
+      if (g) g.n += 1; else grupos.push({ tipo, nome, n: 1 });
+    });
+  });
+  return grupos;
+}
 const RISCO = {
   seguro: { label: "Seguro", cor: "#7FE3BC", bg: "rgba(18,168,118,.14)" },
   equilibrado: { label: "Equilibrado", cor: "#8DB4F5", bg: "rgba(46,111,224,.16)" },
@@ -144,7 +156,7 @@ function Cabecalho({ c, onSair, onEstante }) {
 
 /* Estante de troféus + momentos marcantes: abre por cima de qualquer tela */
 function Estante({ c, onFechar }) {
-  const porTipo = ORDEM_TIPOS.map((t) => ({ tipo: t, itens: c.lista.filter((x) => x.tipo === t) })).filter((g) => g.itens.length);
+  const porTipo = agruparTitulos(c.lista);
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center" onClick={onFechar}>
       <div className="w-full max-w-xl max-h-[85vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-[#121916] border border-white/10 p-5 rp-entra" onClick={(e) => e.stopPropagation()}>
@@ -155,11 +167,11 @@ function Estante({ c, onFechar }) {
         {!porTipo.length && <p className="text-[16px] text-[#8FA39A] mt-3">Ainda vazia. O primeiro troféu vai ter um lugar de honra aqui.</p>}
         <div className="grid grid-cols-2 gap-2 mt-4">
           {porTipo.map((g) => (
-            <div key={g.tipo} className="rounded-2xl bg-[#0E1512] border border-white/5 p-3 flex items-center gap-3">
-              <IconeTitulo tipo={g.tipo} nome={(c.lista.filter((x) => x.tipo === g.tipo).slice(-1)[0] || {}).nome} size={34} />
+            <div key={g.tipo + g.nome} className="rounded-2xl bg-[#0E1512] border border-white/5 p-3 flex items-center gap-3">
+              <IconeTitulo tipo={g.tipo} nome={g.nome} size={34} />
               <div className="min-w-0">
-                <div className="font-stat text-xl text-[#F2F5F3] leading-none">{g.itens.length}</div>
-                <div className="text-[13px] text-[#8FA39A] leading-tight">{ROTULO_TIPO[g.tipo]}</div>
+                <div className="font-stat text-xl text-[#F2F5F3] leading-none">{g.n}</div>
+                <div className="text-[13px] text-[#C9D3CE] leading-tight">{g.nome}</div>
               </div>
             </div>
           ))}
@@ -1691,7 +1703,7 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
   });
   const proximo = NIVEIS_LEGADO.find((n) => n.min > L.pontos);
   const rotulos = { numeros: "Números em campo", titulos: "Títulos por clubes", selecao: "Seleção", premios: "Prêmios individuais", auge: "Auge técnico", torcida: "Idolatria e legado", rival: "Duelo com o rival" };
-  const porTipo = ORDEM_TIPOS.map((t) => ({ tipo: t, n: c.lista.filter((x) => x.tipo === t).length })).filter((g) => g.n);
+  const porTipo = agruparTitulos(c.lista);
   const copiar = async () => {
     try { await navigator.clipboard.writeText(textoCompartilhar(c)); setCopiado(true); setTimeout(() => setCopiado(false), 2000); } catch { setCopiado(false); }
   };
@@ -1795,9 +1807,9 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
           <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-3">Sala de troféus</div>
           <div className="grid grid-cols-2 gap-2">
             {porTipo.map((g) => (
-              <div key={g.tipo} className="rounded-2xl bg-[#0E1512] border border-white/5 p-3 flex items-center gap-3">
-                <IconeTitulo tipo={g.tipo} nome={(c.lista.filter((x) => x.tipo === g.tipo).slice(-1)[0] || {}).nome} size={34} />
-                <div><div className="font-stat text-xl text-[#F2F5F3] leading-none">{g.n}</div><div className="text-[13px] text-[#8FA39A] leading-tight">{ROTULO_TIPO[g.tipo]}</div></div>
+              <div key={g.tipo + g.nome} className="rounded-2xl bg-[#0E1512] border border-white/5 p-3 flex items-center gap-3">
+                <IconeTitulo tipo={g.tipo} nome={g.nome} size={34} />
+                <div><div className="font-stat text-xl text-[#F2F5F3] leading-none">{g.n}</div><div className="text-[13px] text-[#C9D3CE] leading-tight">{g.nome}</div></div>
               </div>
             ))}
           </div>

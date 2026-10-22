@@ -35,6 +35,16 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🏆 Uma taça diferente para cada competição
+
+- Cada competição agora tem a sua taça: Libertadores, Champions League, Champions Asiática, Concacaf, Sul-Americana, Copa América, Eurocopa, Copa Ouro, Copa Africana, Copa da Ásia, cada liga, cada copa nacional e cada segunda divisão.
+- As taças são geradas pelo jogo (`tacas.js`) combinando forma do bojo, alças, tampa, nó da haste, metal, gema e base. Ligas e copas nacionais levam as cores da bandeira do país na base. A mesma competição sempre tem a mesma taça.
+- Ouro para ligas e continentais, prata para copas nacionais e Mundial, bronze para segundas divisões. A Copa do Mundo e o Mundial seguem com as pétalas segurando a gema.
+- Vale nos dois modos: estante e fim de carreira do Modo Rápido, e estante de troféus do Modo Carreira (que antes mostrava um ícone genérico).
+- As imagens de taças em WebP e o gerador em Python saíram do projeto; tudo é desenhado na hora, nítido em qualquer tamanho.
+
+---
+
 ## 🏷️ Títulos pelo nome da competição (Modo Rápido)
 
 - A estante de troféus e a sala de troféus do fim de carreira agora separam cada competição pelo nome: Libertadores, Champions League, Copa América, Eurocopa, Brasileirão, Premier League, Copa do Brasil... em vez de "Continentais", "Ligas nacionais" ou "Copas continentais (seleção)".
@@ -48,7 +58,6 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 - **Liga:** taça dourada clássica com uma gema esmeralda na frente. **Copa:** cálice de prata largo. **Segunda divisão:** taça de bronze lapidada.
 - **Continental de clubes:** vaso alto e facetado, coroado por uma gema esmeralda. **Copa continental de seleções:** taça de bojo cônico lapidado com gema safira.
 - **Copa do Mundo:** coluna dourada que se abre em pétalas de metal segurando uma grande gema esmeralda. **Mundial de clubes:** a mesma família em prata, com gema safira.
-- Os desenhos-fonte ficam em `arte/tacas/fonte/` e o gerador em `ferramentas/gerar-tacas.py`, para ajustes futuros.
 
 ---
 

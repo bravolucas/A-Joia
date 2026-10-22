@@ -24,10 +24,9 @@ A licença do Adobe Stock permite uso em projetos, mas não a redistribuição d
 
 ## Taças
 
-As sete taças (liga, copa, segunda divisão, continental, copa continental de seleções, Copa do Mundo e Mundial)
-são desenhos originais do A JOIA, feitos em SVG — fontes em `arte/tacas/fonte/` e gerador em
-`ferramentas/gerar-tacas.py`. Não reproduzem nenhum troféu real; a gema da marca é a assinatura das maiores.
-As fotos de taças do Adobe Stock usadas antes foram aposentadas.
+Cada competição tem a sua taça, desenhada pelo próprio jogo em SVG (`tacas.js`): forma, alças, metal, gema e as cores
+da bandeira do país na base mudam conforme a competição. São desenhos originais do A JOIA e não reproduzem nenhum troféu
+real. As fotos de taças do Adobe Stock usadas antes foram aposentadas.
 
 ## Outras fotos
 

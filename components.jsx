@@ -398,14 +398,19 @@ const ESTILO_ANUNCIO = `
 @keyframes ancFlash{0%,100%{opacity:0}6%{opacity:.9}14%{opacity:0}}
 @keyframes ancFaixas{from{background-position:0 0}to{background-position:220px 0}}
 `;
-function AnuncioClube({ clube, nome, numero, posicao, idade, grandeChegada, deOnde, contrato, valor = null, onConcluir }) {
+function AnuncioClube({ clube, nome, numero, posicao, idade, grandeChegada, deOnde, contrato, valor = null, curto = false, onConcluir }) {
   const [fase, setFase] = useState(0); // 0 varredura | 1 oficial | 2 brasão | 3 jogador | 4 termos
   const [flashes] = useState(() => Array.from({ length: grandeChegada ? 10 : 4 }, () => ({ x: Math.random() * 100, y: Math.random() * 45, d: Math.random() * 2.5, t: 1.6 + Math.random() * 1.6 })));
   useEffect(() => {
-    if (fase >= 4) return undefined;
-    const t = setTimeout(() => setFase((f) => f + 1), [650, 950, 1000, 1100][fase]);
+    // versão curta (transferências comuns): tudo em ~1s e fecha sozinha
+    if (fase >= 4) {
+      if (!curto) return undefined;
+      const t = setTimeout(onConcluir, 1500);
+      return () => clearTimeout(t);
+    }
+    const t = setTimeout(() => setFase((f) => f + 1), (curto ? [200, 280, 280, 300] : [650, 950, 1000, 1100])[fase]);
     return () => clearTimeout(t);
-  }, [fase]);
+  }, [fase, curto, onConcluir]);
   const cor = clube.cor || "#12A876";
   const primeiro = (nome || "").split(" ")[0];
   const resto = (nome || "").split(" ").slice(1).join(" ");

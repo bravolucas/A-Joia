@@ -558,6 +558,7 @@ export function comparaSalario(c, novo) {
   const atual = c.contrato?.salario;
   if (!atual || !novo) return "";
   const pct = Math.round((novo / atual - 1) * 100);
+  if (pct >= 200) return ` (${Math.round(pct / 100 + 1)}x o atual)`;
   return pct === 0 ? " (igual ao atual)" : ` (${pct > 0 ? "+" : ""}${pct}% do atual)`;
 }
 const empresarioDe = (c) => EMPRESARIOS.find((e) => e.id === c.empresario) || EMPRESARIOS[0];

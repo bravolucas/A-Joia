@@ -4,6 +4,26 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## ⚡ Modo Rápido mais rápido e limpo: uma coisa por vez
+
+- **Escolher a carta é jogar**: tocar numa carta de treino já joga a temporada (o botão "Jogar temporada" saiu)
+- **Os anos rolam sozinhos**: nas temporadas sem decisão (pelo ritmo), a temporada seguinte começa sozinha depois de ~2 segundos, com barra de progresso, "pausar" e "jogar já"
+- **Resumo em três linhas** acima da próxima ação (nota, jogos/gols/assistências, variação de OVR, campanha do time e taças). Toque para abrir o resumo completo numa gaveta. A tela de resumo separada saiu do caminho
+- **Fila automática**: depois de cada decisão, o resultado fica na tela ~3 segundos (barra "toque para seguir") e a próxima notícia ou as cartas aparecem sozinhas
+- **Proposta sem mesa obrigatória**: tocar no clube assina direto o contrato oferecido; "negociar" abre a mesa
+- **Anúncio "OFICIAL" curto**: ~1,5 segundo e fecha sozinho; a versão longa ficou só para saltos grandes
+- **Tela principal com três blocos**: cartão, tabela e a ação do momento, cabendo numa tela do celular
+- **Gaveta da ficha** (botão ☰ no cartão): atributos, contrato, cabeça, foco da temporada, patrimônio e voltar ao menu
+- **Tabela compacta**: últimas 4 temporadas e a seleção; "ver as N temporadas" abre tudo. Acesso e rebaixamento aparecem como selo na linha
+- **Cartão do topo mais limpo**: sem a linha de ano e nome; contador de taças e ficha ao lado do cartão
+- **Decisões mais curtas**: sem foto grande, texto de até três linhas, botões com as chances e dicas só nas propostas
+- **Sem os cartões de dicas**: uma linha só na primeira temporada
+- **Estouros**: fogos no cartão ao bater recorde de OVR; selo "Ídolo do clube!", "ACESSO!" ou "Rebaixado" no meio da tela
+- **Vibração** no celular quando o OVR sobe, quando uma taça pousa no contador e quando você acerta um desafio
+- Proposta com salário muito maior agora mostra "5x o atual" em vez de "+400% do atual"
+
+---
+
 ## 📋 Modo Rápido no estilo Copero: painel de carreira, resumo curto e pré-temporada de cartas
 
 - **Painel de carreira**: o cartão fica fixo no topo (OVR, bandeira, número, posição, clube, idade e valor) e logo abaixo a tabela ano a ano cresce a cada temporada (idade, clube, OVR, jogos, gols, assistências), com a linha da seleção no fim (torneios, jogos, gols e assistências pelo país)

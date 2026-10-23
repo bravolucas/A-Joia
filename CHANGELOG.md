@@ -4,6 +4,25 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 📋 Modo Rápido no estilo Copero: painel de carreira, resumo curto e pré-temporada de cartas
+
+- **Painel de carreira**: o cartão fica fixo no topo (OVR, bandeira, número, posição, clube, idade e valor) e logo abaixo a tabela ano a ano cresce a cada temporada (idade, clube, OVR, jogos, gols, assistências), com a linha da seleção no fim (torneios, jogos, gols e assistências pelo país)
+- **OVR animado**: quando uma decisão ou a temporada mexe no overall, o número rola até o valor novo, com um "+3" verde ou "−2" vermelho subindo e o cartão brilhando
+- **Resumo curto**: jogos, gols e assistências no topo; logo abaixo overall, torcida e valor com a variação; depois "O time na temporada" (posição na liga, até onde foi na copa, na competição internacional, no Mundial e na seleção) e as conquistas. Bola de Ouro, rival, cabeça, dinheiro e gráfico ficam em "Ver detalhes da temporada"
+- **Taças voando**: títulos de liga, copa nacional, segunda divisão e Bota de Ouro aparecem no meio da tela e voam até o contador. A festa em tela cheia ficou só para as grandes (continental, Mundial, Copa do Mundo, copa continental de seleções e pódio da Bola de Ouro)
+- **Desafios só nas finais grandes**: finais continentais e de seleção continuam como minigame, e a última rodada da liga vira desafio em metade das brigas pelo título. Copa nacional, Mundial, acesso e permanência agora aparecem como resultado
+- **Bota de Ouro**: prêmio de artilheiro (gols × peso da liga, como o europeu). Conta como prêmio individual, não como título
+- **Notas que variam mais**: a nota oscila com a fase, os minutos e um pouco de sorte (agora de ~5,9 a ~8,4 na maioria das temporadas). Goleiros e defensores ganharam um ajuste para não ficarem sempre abaixo dos atacantes
+- **Pré-temporada de cartas**: 24 cartas com raridade (comum, rara, épica), reveladas uma a uma com giro. Cada uma tem efeito de verdade: atributos que entram mesmo para quem já chegou ao teto (até +2 acima dele), mais gols ou assistências no ano, nota, minutos, cabeça, torcida, fama, menos lesão, envelhecer mais devagar. As épicas sobem o teto. O trio não repete o do ano anterior
+- **Ritmos como no Copero**: Intenso tem decisão toda temporada, Normal a cada 2 e Expresso a cada 3. Fim de contrato sempre aparece
+- **Mercado aleatório**: nem toda janela tem proposta, e quando tem vem 1, 2 ou 3 (mais chance jogando bem ou sendo grande demais para o clube)
+- **Menos coletivas**: só depois de título importante, pódio da Bola de Ouro ou crise, e no máximo uma a cada 3 temporadas
+- **Primeira decisão no jogo**: a escolha do clube de base saiu da criação e virou a "Oferta de base", com três escudos lado a lado. O empréstimo também vem com três clubes à escolha
+- **Lesão e torcida com chance na tela**: jogar com dor, conversar com a organizada e tomar infiltração mostram o que pode acontecer e a probabilidade
+- **Fim de carreira enxuto**: nível, jogos, gols, assistências, títulos e o ano a ano, com "Ver resumo" (a tela completa de antes) e "Jogar novamente"
+
+---
+
 ## 🎲 Decisões com chance na tela, curva da carreira e goleiro de verdade
 
 - **Decisões de risco, como no Copero**: plano alimentar, concentração extra, especialista de fundamento, ganho de massa, teste em outra função, altitude, garoto da base querendo sua vaga, novo método de recuperação, intensivo de vídeo e treino nas férias. Cada opção arriscada mostra o que pode acontecer e a chance ("+3 OVR · 55%", "−3 OVR · 45%"); a segura mostra que nada muda. O efeito vale para o resto da carreira (sobe ou desce o teto também). Aparecem em cerca de 45% das janelas e são o acontecimento do ritmo Expresso

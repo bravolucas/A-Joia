@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ARTE, ARTE_EVENTO } from "./arte.js";
-import { POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS } from "./data.js";
+import { POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS, EMOJI_NACIONALIDADE } from "./data.js";
 import { Gema, ClubDot, Brasao, Confetti, ApresentacaoNovoClube, FreeKickMini, PasseMini } from "./components.jsx";
 import { calcularSucessoFalta, tipoResultadoFalta } from "./lib.js";
 import { TacaCompeticao } from "./trofeus.jsx";
@@ -13,7 +13,7 @@ import {
   opcoesPretemporada, escolherPretemporada, textoCarta,
   iniciarNegociacao, ajustarNegociacao, fecharNegociacao, CAMPOS_NEGOCIACAO, fama_negociador,
   INVESTIMENTOS, comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
-  chanceMomento, miniDaPosicao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
+  chanceMomento, miniDaPosicao, ehPremioIndividual, RARIDADES, ganhosDaCarta, efeitosDaCarta, vagasDaLiga, ehSegundaDivisao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
   eventoDaJanela, segundoEvento, eventoImpasse, valorAtual, comparaSalario, textoEmoji, efeitosDaDecisao, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
 } from "./rapido.js";
 
@@ -63,11 +63,29 @@ export const ESTILO_BASE = `
 @keyframes ceremonyGlow{0%,100%{box-shadow:0 0 10px rgba(216,180,74,0.35)}50%{box-shadow:0 0 22px rgba(216,180,74,0.75)}}
 @keyframes flipOut{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 @keyframes flipIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+/* painel de carreira (estilo Copero) */
+@keyframes rpDelta{0%{opacity:0;transform:translate(-50%,6px) scale(.7)}20%{opacity:1;transform:translate(-50%,-6px) scale(1.15)}80%{opacity:1;transform:translate(-50%,-22px) scale(1)}100%{opacity:0;transform:translate(-50%,-34px) scale(.9)}}
+.rp-delta{position:absolute;left:50%;top:-6px;animation:rpDelta 1.6s ease-out both;pointer-events:none;}
+@keyframes rpOvrBrilho{0%{box-shadow:0 0 0 0 var(--brilho)}30%{box-shadow:0 0 0 6px var(--brilho),0 0 30px var(--brilho)}100%{box-shadow:0 0 0 0 transparent}}
+.rp-ovr-brilho{animation:rpOvrBrilho 1.4s ease-out;}
+@keyframes rpLinhaNova{from{background:rgba(216,180,74,.22)}to{background:transparent}}
+.rp-linha-nova{animation:rpLinhaNova 2.2s ease-out;}
+/* taça voando até o contador */
+@keyframes rpTacaVoa{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}30%{transform:translate(-50%,-50%) scale(1)}62%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:.4;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.14)}}
+.rp-taca-voa{position:fixed;left:50%;top:46%;animation:rpTacaVoa 1.9s cubic-bezier(.5,0,.3,1) both;z-index:60;pointer-events:none;}
+@keyframes rpContador{0%,100%{transform:scale(1)}40%{transform:scale(1.35)}}
+.rp-contador{animation:rpContador .5s ease-out;}
+/* cartas da pré-temporada viradas e reveladas */
+.rp-flip{perspective:900px;}
+.rp-flip-in{transform-style:preserve-3d;transition:transform .7s cubic-bezier(.2,.8,.2,1);position:relative;}
+.rp-flip-in.virada{transform:rotateY(180deg);}
+.rp-face{backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.rp-verso{position:absolute;inset:0;transform:rotateY(180deg);backface-visibility:hidden;-webkit-backface-visibility:hidden;}
 `;
 
 const ATTR_LABEL = { velocidade: "VEL", finalizacao: "FIN", passe: "PAS", drible: "DRI", defesa: "DEF", fisico: "FIS" };
-const ROTULO_TIPO = { liga: "Ligas nacionais", copa: "Copas nacionais", continental: "Continentais", mundial: "Mundiais de Clubes", copaMundo: "Copas do Mundo", continentalSelecao: "Copas continentais (seleção)", bolaOuro: "Bolas de Ouro", segunda: "Segundas divisões" };
-const ORDEM_TIPOS = ["bolaOuro", "copaMundo", "continentalSelecao", "mundial", "continental", "liga", "copa", "segunda"];
+const ROTULO_TIPO = { liga: "Ligas nacionais", copa: "Copas nacionais", continental: "Continentais", mundial: "Mundiais de Clubes", copaMundo: "Copas do Mundo", continentalSelecao: "Copas continentais (seleção)", bolaOuro: "Bolas de Ouro", botaOuro: "Botas de Ouro", segunda: "Segundas divisões" };
+const ORDEM_TIPOS = ["bolaOuro", "botaOuro", "copaMundo", "continentalSelecao", "mundial", "continental", "liga", "copa", "segunda"];
 /* Títulos agrupados pelo nome da competição (Libertadores, Champions League, Brasileirão...), na ordem de importância */
 function agruparTitulos(lista) {
   const grupos = [];
@@ -108,9 +126,172 @@ function BolaDourada({ size = 80 }) {
   );
 }
 
+/* Bota de Ouro: chuteira dourada desenhada para o jogo */
+function BotaDourada({ size = 80 }) {
+  const id = `bota${size}`;
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" className="shrink-0" aria-hidden="true" style={{ filter: `drop-shadow(0 ${Math.max(2, size / 25)}px ${Math.max(3, size / 8)}px rgba(235,197,87,.45))` }}>
+      <defs><linearGradient id={id} x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#FFF1B8" /><stop offset=".45" stopColor="#E3B93B" /><stop offset="1" stopColor="#8E6F00" /></linearGradient></defs>
+      <path d="M22 18 h26 l4 30 q26 4 34 16 q4 8 -4 12 H24 q-8 0 -8 -8 Z" fill={`url(#${id})`} stroke="#6B5200" strokeWidth="2" />
+      <path d="M48 26 l8 4 M47 33 l9 4 M46 40 l10 4" stroke="#6B5200" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M20 76 H82" stroke="#6B5200" strokeWidth="3" />
+      {[30, 44, 58, 72].map((x) => <rect key={x} x={x - 3} y="77" width="6" height="8" rx="1.5" fill="#8E6F00" />)}
+      <rect x="26" y="88" width="50" height="7" rx="2" fill="#2A3A33" />
+    </svg>
+  );
+}
+
 function IconeTitulo({ tipo, size = 40, nome = null }) {
   if (tipo === "bolaOuro") return <BolaDourada size={size} />;
+  if (tipo === "botaOuro") return <BotaDourada size={size} />;
   return <TacaCompeticao tipo={tipo} size={size} nome={nome} />;
+}
+
+
+/* ---------- painel de carreira (como no Copero): cartão no topo + ano a ano ---------- */
+const corOvr = (o) => (o >= 85 ? "#D8B44A" : o >= 78 ? "#1BC28A" : o >= 70 ? "#2E6FE0" : "#5F6E68");
+function useOvrAnimado(ovr) {
+  const [mostrado, setMostrado] = useState(ovr);
+  const [delta, setDelta] = useState(null);
+  const anterior = useRef(ovr);
+  useEffect(() => {
+    const de = anterior.current;
+    anterior.current = ovr;
+    if (de === ovr) return undefined;
+    setDelta({ d: ovr - de, k: Date.now() });
+    const t0 = performance.now(), dur = 700;
+    let raf;
+    const passo = (t) => {
+      const f = Math.min(1, (t - t0) / dur);
+      setMostrado(Math.round(de + (ovr - de) * (1 - Math.pow(1 - f, 3))));
+      if (f < 1) raf = requestAnimationFrame(passo);
+    };
+    raf = requestAnimationFrame(passo);
+    return () => cancelAnimationFrame(raf);
+  }, [ovr]);
+  return [mostrado, delta];
+}
+
+function CartaoCarreira({ c, onSair, onEstante, contadorPulsa }) {
+  const ovr = ovrDe(c);
+  const [mostrado, delta] = useOvrAnimado(ovr);
+  const clube = clubeDe(c.emprestimo?.destino || c.clubeNome);
+  const cor = corOvr(ovr);
+  const bandeira = EMOJI_NACIONALIDADE[c.nac] || "";
+  const semClube = c.temporadas.length === 0 && !c.flags?.baseEscolhida;
+  return (
+    <header className="sticky top-0 z-30 bg-[#0E1512]/95 backdrop-blur border-b border-white/5">
+      <div className="max-w-xl mx-auto px-3 pt-2 pb-2.5">
+        <div className="flex items-center gap-2 mb-2">
+          <button onClick={onSair} className="flex items-center gap-2 min-h-[36px] pr-1" aria-label="Voltar ao menu"><Gema size={22} /></button>
+          <span className="text-[13px] font-bold uppercase tracking-[0.2em] text-[#8FA39A]">{c.ano} · {c.nome}</span>
+          <button onClick={onEstante} className={`ml-auto flex items-center gap-1.5 min-h-[36px] px-3 rounded-xl border border-[#D8B44A]/35 bg-[#D8B44A]/10 text-[#EBC557] ${contadorPulsa ? "rp-contador" : ""}`} key={contadorPulsa || 0} aria-label="Abrir estante de troféus" data-contador-tacas>
+            <TacaCompeticao tipo="liga" size={14} />
+            <span className="font-stat text-[15px]">{c.lista.length}</span>
+          </button>
+        </div>
+        <div className="flex items-stretch gap-2.5">
+          <div key={delta?.k || 0} className={`relative w-[74px] shrink-0 rounded-2xl flex flex-col items-center justify-center ${delta ? "rp-ovr-brilho" : ""}`}
+            style={{ background: `linear-gradient(160deg, ${cor}, ${cor}99)`, "--brilho": delta ? (delta.d > 0 ? "rgba(27,194,138,.55)" : "rgba(227,107,91,.55)") : "transparent" }}
+            aria-label={`Overall ${ovr}`}>
+            <span className="text-[10px] font-bold tracking-[0.2em] text-[#0E1512]/70">OVR</span>
+            <span className="font-stat text-[38px] leading-none text-[#0E1512]">{mostrado}</span>
+            {delta && (
+              <span key={delta.k} className="rp-delta font-stat text-[22px] px-2 rounded-lg" style={{ color: "#fff", background: delta.d > 0 ? "#12A876" : "#C9493A", boxShadow: "0 4px 14px rgba(0,0,0,.4)" }}>
+                {delta.d > 0 ? `+${delta.d}` : delta.d}
+              </span>
+            )}
+          </div>
+          <div className="flex-1 min-w-0 rounded-2xl px-3 py-2 flex flex-col justify-between" style={{ background: `linear-gradient(120deg, ${clube.cor || "#12A876"}40, rgba(19,26,23,.9) 70%)`, border: "1px solid rgba(255,255,255,.07)" }}>
+            <div className="flex items-center gap-1.5 text-[12px] font-bold">
+              <span className="text-[#C9D3CE]">{bandeira} {c.nac}</span>
+              <span className="px-1.5 rounded-md bg-[#0E1512]/60 text-[#F2F5F3]">#{numeroDe(c)} {c.posicao}</span>
+              <span className="ml-auto text-[#8FA39A]">IDADE <span className="font-stat text-[17px] text-[#F2F5F3]">{c.idade}</span></span>
+            </div>
+            <div className="flex items-center gap-2 min-w-0">
+              {semClube ? <span className="w-[22px] h-[22px] rounded-full border border-white/25 flex items-center justify-center text-[12px] text-[#8FA39A] shrink-0">?</span> : <ClubDot club={clube} size={22} />}
+              <span className={`display text-[14px] truncate ${semClube ? "text-[#8FA39A]" : "text-[#F2F5F3]"}`}>{semClube ? "Sem clube" : clube.nome}{c.emprestimo ? " (emp.)" : ""}</span>
+              <span className="ml-auto text-[11px] font-bold text-[#8FA39A] shrink-0">VALOR <span className="font-stat text-[17px] text-[#EBC557]">{formatarValor(valorAtual(c)).replace(/\s/g, "")}</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+/* Tabela ano a ano que cresce a cada temporada, com a linha da seleção no fim */
+function TabelaCarreira({ c, proxima = true }) {
+  const ts = c.temporadas || [];
+  const caixa = useRef(null);
+  useEffect(() => { if (caixa.current) caixa.current.scrollTop = caixa.current.scrollHeight; }, [ts.length]);
+  const sel = c.selecao || {};
+  const grid = "grid grid-cols-[38px_1fr_34px_30px_30px_30px] gap-x-1.5 items-center";
+  return (
+    <div className="max-w-xl mx-auto px-3 pt-3">
+      <div className="rp-painel px-3 py-2">
+        <div className={`${grid} text-[11px] font-bold tracking-wider text-[#8FA39A] pb-1 border-b border-white/5`}>
+          <span>IDADE</span><span>CLUBE</span><span className="text-center">OVR</span><span className="text-right">J</span><span className="text-right">G</span><span className="text-right">A</span>
+        </div>
+        <div ref={caixa} className="max-h-[188px] overflow-y-auto">
+          {ts.map((s, i) => {
+            const o = s.ovrDepois ?? s.ovr;
+            const tit = s.titulos.filter((t) => !ehPremioIndividual(t.tipo)).length;
+            return (
+              <div key={i} className={`${grid} py-1 border-b border-white/5 text-[14px] ${i === ts.length - 1 ? "rp-linha-nova" : ""}`}>
+                <span className="font-stat text-[#C9D3CE]">{s.idade}</span>
+                <span className="flex items-center gap-1.5 min-w-0"><ClubDot club={clubeDe(s.clube)} size={16} /><span className="truncate text-[#F2F5F3]">{s.clube}</span>{tit > 0 && <span className="shrink-0 flex items-center gap-0.5 text-[11px] font-bold text-[#EBC557]"><TacaCompeticao tipo="liga" size={11} />{tit > 1 ? tit : ""}</span>}</span>
+                <span className="font-stat text-center rounded-md text-[#0E1512] text-[13px]" style={{ background: corOvr(o) }}>{o}</span>
+                <span className="font-stat text-right text-[#C9D3CE]">{s.jogos}</span>
+                <span className="font-stat text-right text-[#F2F5F3]">{s.gols}</span>
+                <span className="font-stat text-right text-[#C9D3CE]">{s.assist}</span>
+              </div>
+            );
+          })}
+          {proxima && !c.aposentado && (
+            <div className={`${grid} py-1 text-[14px] opacity-70`}>
+              <span className="font-stat text-[#C9D3CE]">{c.idade}</span>
+              <span className="flex items-center gap-1.5 min-w-0">{ts.length || c.flags?.baseEscolhida ? <ClubDot club={clubeDe(c.emprestimo?.destino || c.clubeNome)} size={16} /> : <span className="text-[#8FA39A]">?</span>}<span className="truncate text-[#8FA39A] italic">{ts.length ? "temporada em jogo…" : c.flags?.baseEscolhida ? "começando…" : "escolhendo clube…"}</span></span>
+              <span className="font-stat text-center rounded-md text-[13px] border border-white/15 text-[#C9D3CE]">{ovrDe(c)}</span>
+              <span /><span /><span />
+            </div>
+          )}
+        </div>
+        <div className={`${grid} pt-1.5 mt-1 border-t border-white/10 text-[14px]`} aria-label="Pela seleção">
+          <span className="text-base leading-none">{EMOJI_NACIONALIDADE[c.nac] || "🌎"}</span>
+          <span className="truncate text-[#C9D3CE]">{nacDe(c.nac).label}{sel.convocacoes ? ` · ${sel.convocacoes} torneio${sel.convocacoes > 1 ? "s" : ""}` : ""}</span>
+          <span />
+          <span className="font-stat text-right text-[#C9D3CE]">{sel.jogos || 0}</span>
+          <span className="font-stat text-right text-[#F2F5F3]">{sel.gols || 0}</span>
+          <span className="font-stat text-right text-[#C9D3CE]">{sel.assist || 0}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* Taças pequenas da temporada: aparecem no meio da tela e voam até o contador */
+function TacasVoando({ titulos, onPousou }) {
+  const [i, setI] = useState(0);
+  const [alvo] = useState(() => {
+    const el = typeof document !== "undefined" && document.querySelector("[data-contador-tacas]");
+    if (!el) return { dx: "40vw", dy: "-42vh" };
+    const r = el.getBoundingClientRect();
+    return { dx: `${r.left + r.width / 2 - window.innerWidth / 2}px`, dy: `${r.top + r.height / 2 - window.innerHeight * 0.46}px` };
+  });
+  useEffect(() => {
+    if (i >= titulos.length) return undefined;
+    const t = setTimeout(() => { onPousou?.(i); setI((x) => x + 1); }, 1900);
+    return () => clearTimeout(t);
+  }, [i, titulos.length, onPousou]);
+  if (i >= titulos.length) return null;
+  const t = titulos[i];
+  return (
+    <div key={i} className="rp-taca-voa flex flex-col items-center" style={{ "--dx": alvo.dx, "--dy": alvo.dy }} aria-live="polite">
+      <IconeTitulo tipo={t.tipo} nome={t.nome} size={150} />
+      <div className="display text-[15px] text-[#F5D77A] mt-2 text-center px-3 py-1 rounded-xl bg-[#0E1512]/85" style={{ textShadow: "0 2px 10px rgba(0,0,0,.8)" }}>{t.nome}</div>
+    </div>
+  );
 }
 
 /* Linha do tempo: um segmento por temporada, na cor do clube; ponto dourado = título */
@@ -213,14 +394,14 @@ function BarraMental({ moral = 65, delta = null }) {
   );
 }
 
-function Ficha({ c }) {
+function Ficha({ c, semTopo = false }) {
   const ovr = ovrDe(c);
   const clube = clubeDe(c.emprestimo?.destino || c.clubeNome);
   const st = statusNoClube(c, clube.nome);
   const torcida = c.torcida[clube.nome] ?? 30;
   return (
     <div className="rp-painel overflow-hidden">
-      <div className="p-4 flex items-center gap-3" style={{ background: `linear-gradient(120deg, ${clube.cor}33, transparent 70%)` }}>
+      {!semTopo && <div className="p-4 flex items-center gap-3" style={{ background: `linear-gradient(120deg, ${clube.cor}33, transparent 70%)` }}>
         <div className="w-16 h-16 rounded-2xl flex flex-col items-center justify-center bg-[#0E1512]/80 border border-[#D8B44A]/40 shrink-0">
           <span className="font-stat text-2xl font-bold text-[#EBC557] leading-none">{ovr}</span>
           <span className="text-[10px] font-bold tracking-widest text-[#8FA39A]">{c.posicao}</span>
@@ -234,8 +415,9 @@ function Ficha({ c }) {
           <div className="text-[13px] text-[#8FA39A]">{ligaDe(clube.liga).nome} · {st.label}</div>
           <div className="text-[13px] text-[#8FA39A]">Camisa <span className="font-stat text-[#E1E6E3]">{numeroDe(c)}</span> · {peDe(c.pe).nome}</div>
         </div>
-      </div>
-      <div className="px-4 pb-4">
+      </div>}
+      <div className={`px-4 pb-4 ${semTopo ? "pt-3" : ""}`}>
+        {semTopo && <div className="text-[13px] text-[#8FA39A] mb-2">{ligaDe(clube.liga).nome} · {st.label} · {peDe(c.pe).nome}</div>}
         <div className="grid grid-cols-6 gap-2 mt-1">
           {Object.keys(ATTR_LABEL).map((a) => (
             <div key={a} className="flex flex-col gap-1">
@@ -308,12 +490,8 @@ function TelaCriacao({ onCriar }) {
   const [codigo, setCodigo] = useState("");
   const [pe, setPe] = useState("destro");
   const [numero, setNumero] = useState("");
-  const [clube, setClube] = useState("");
   const [ritmo, setRitmo] = useState("normal");
   const [gerando, setGerando] = useState(false);
-  // três bases possíveis, sorteadas de novo quando muda o país ou a origem
-  const clubes = React.useMemo(() => (origem ? opcoesClubeInicial(nac, origem) : []), [nac, origem]);
-  useEffect(() => { setClube(""); }, [nac, origem]);
   const destaque = NACS_DESTAQUE.map((id) => NACIONALIDADES.find((n) => n.id === id)).filter(Boolean);
   const outras = NACIONALIDADES.filter((n) => !NACS_DESTAQUE.includes(n.id)).sort((a, b) => a.label.localeCompare(b.label));
   const doDia = modo === "dia" ? dadosDoDia(codigoDoDia()) : null;
@@ -323,7 +501,7 @@ function TelaCriacao({ onCriar }) {
   const comecar = () => {
     setGerando(true);
     const dados = doDia ? { nome, ...doDia, ritmo }
-      : { nome, nac, posicao, personalidade, origem, codigo: normalizarCodigo(codigo), pe, numero: numero || NUMERO_PADRAO[posicao], clube: clube || undefined, ritmo };
+      : { nome, nac, posicao, personalidade, origem, codigo: normalizarCodigo(codigo), pe, numero: numero || NUMERO_PADRAO[posicao], ritmo };
     // dá tempo de a tela mostrar o carregamento antes de gerar o mundo
     setTimeout(() => onCriar(dados), 30);
   };
@@ -426,23 +604,6 @@ function TelaCriacao({ onCriar }) {
               ))}
             </div>
           </Secao>
-
-          {clubes.length > 0 && (
-            <Secao titulo="Onde começar">
-              <div className="grid gap-2">
-                {clubes.map((x) => (
-                  <button key={x.nome} onClick={() => setClube(x.nome)} className={`rp-opcao px-4 py-3 flex items-center gap-3 ${clube === x.nome ? "sel" : ""}`}>
-                    <ClubDot club={x} size={30} />
-                    <div className="min-w-0 flex-1">
-                      <div className="font-bold text-[16px] text-[#F2F5F3] truncate">{x.nome}</div>
-                      <div className="text-[13px] text-[#8FA39A]">{ligaDe(x.liga).nome} · força <span className="font-stat">{x.forca}</span></div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-              <p className="text-[14px] text-[#8FA39A]">{clube ? "Clube menor: mais minutos cedo. Clube maior: vitrine e títulos, mas espaço difícil." : "Se não escolher, o clube é sorteado."}</p>
-            </Secao>
-          )}
 
           <Secao titulo="Código da carreira (opcional)">
             <input value={codigo} onChange={(e) => setCodigo(normalizarCodigo(e.target.value))} placeholder="Ex.: K7QX2M — deixe vazio para sortear"
@@ -791,8 +952,11 @@ function SlideBolaDeOuro({ c, card }) {
   );
 }
 
+/* Taças grandes ganham festa em tela cheia; as outras voam até o contador no resumo */
+const TIPOS_GRANDES = ["continental", "mundial", "copaMundo", "continentalSelecao"];
+export const temFestaGrande = (card) => card.titulos.some((t) => TIPOS_GRANDES.includes(t.tipo)) || card.bola.pos <= 3;
 function TelaFesta({ c, card, onFim }) {
-  const titulos = card.titulos.filter((t) => t.tipo !== "bolaOuro");
+  const titulos = card.titulos.filter((t) => TIPOS_GRANDES.includes(t.tipo));
   const slides = [...titulos.map((t) => ({ tipo: "titulo", t })), ...(card.bola.pos <= 3 ? [{ tipo: "bola" }] : [])];
   const [i, setI] = useState(0);
   const s = slides[i];
@@ -958,7 +1122,7 @@ function TabelaAnoAno({ c }) {
           <div key={idx} className="grid grid-cols-[30px_1fr_auto_38px_30px_30px_30px] gap-x-2 items-center py-1.5 border-b border-white/5 text-[14px]">
             <span className="font-stat text-[#C9D3CE]">{s.idade}</span>
             <span className="flex items-center gap-1.5 min-w-0">{troca && <span className="text-[#8FA39A]" aria-label="clube novo">↳</span>}<ClubDot club={clubeDe(s.clube)} size={18} /><span className="truncate text-[#F2F5F3]">{s.clube}</span></span>
-            <span className="flex -space-x-1.5">{s.titulos.filter((t) => t.tipo !== "bolaOuro").slice(0, 3).map((t, k) => <IconeTitulo key={k} tipo={t.tipo} nome={t.nome} size={16} />)}{s.titulos.some((t) => t.tipo === "bolaOuro") && <IconeTitulo tipo="bolaOuro" size={15} />}</span>
+            <span className="flex -space-x-1.5">{s.titulos.filter((t) => !ehPremioIndividual(t.tipo)).slice(0, 3).map((t, k) => <IconeTitulo key={k} tipo={t.tipo} nome={t.nome} size={16} />)}{s.titulos.some((t) => t.tipo === "bolaOuro") && <IconeTitulo tipo="bolaOuro" size={15} />}</span>
             <span className="font-stat text-center rounded-md text-[#0E1512] font-bold" style={{ background: corOvr(o) }}>{o}</span>
             <span className="font-stat text-right text-[#C9D3CE]">{s.jogos}</span>
             <span className="font-stat text-right text-[#F2F5F3]">{s.gols}</span>
@@ -971,86 +1135,115 @@ function TabelaAnoAno({ c }) {
   );
 }
 
-function TelaResumo({ c, card, onContinuar, onAposentar, onRever }) {
+function LinhaTime({ icone, nome, resultado, destaque }) {
+  return (
+    <div className="flex items-center gap-2.5 py-1.5 border-b border-white/5 last:border-0">
+      <span className="w-6 flex justify-center shrink-0">{icone}</span>
+      <span className="text-[15px] text-[#C9D3CE] truncate flex-1">{nome}</span>
+      <span className={`font-stat text-[16px] shrink-0 ${destaque === "ouro" ? "text-[#EBC557]" : destaque === "ruim" ? "text-[#F0A99E]" : "text-[#F2F5F3]"}`}>{resultado}</span>
+    </div>
+  );
+}
+function Delta({ v, fmt = (x) => x }) {
+  if (!v) return <span className="text-[#8FA39A]"> =</span>;
+  return <span className={v > 0 ? "text-[#1BC28A]" : "text-[#E36B5B]"}> {v > 0 ? "▲" : "▼"}{fmt(Math.abs(v))}</span>;
+}
+
+function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou }) {
   const forcada = aposentadoriaForcada(c);
+  const [detalhes, setDetalhes] = useState(false);
   // variação desde antes da pré-temporada (inclui o treino escolhido)
   const delta = card.ovrDepois - (card.ovrAntes ?? card.ovr);
   const bola = card.bola;
   const sel = card.selecao;
-  const temFesta = card.titulos.length > 0 || bola.pos <= 3;
+  const temFesta = temFestaGrande(card);
+  const pequenas = card.titulos.filter((t) => !TIPOS_GRANDES.includes(t.tipo));
+  const vagas = vagasDaLiga(card.ligaId);
+  const ligaRes = `${card.posLiga}º de ${card.totalLiga}`;
+  const corLiga = card.posLiga === 1 ? "ouro" : card.rebaixado ? "ruim" : null;
+  const contRes = card.continental ? (card.titulos.some((t) => t.tipo === "continental") ? "Campeão" : card.continental.faseNome) : null;
   return (
-    <div className="max-w-xl mx-auto px-4 py-5 flex flex-col gap-4 rp-entra">
+    <div className="max-w-xl mx-auto px-3 py-3 flex flex-col gap-3 rp-entra">
+      {voar && pequenas.length > 0 && <TacasVoando titulos={pequenas} onPousou={onPousou} />}
       <div className="rp-painel overflow-hidden">
-        <div className="p-4 flex items-center gap-3" style={{ background: `linear-gradient(120deg, ${card.cor}44, transparent 75%)` }}>
-          <ClubDot club={clubeDe(card.clube)} size={44} />
+        <div className="px-4 pt-3 pb-2 flex items-center gap-3" style={{ background: `linear-gradient(120deg, ${card.cor}44, transparent 75%)` }}>
+          <ClubDot club={clubeDe(card.clube)} size={36} />
           <div className="min-w-0 flex-1">
             <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9D3CE]">Temporada {card.ano} · {card.idade} anos</div>
-            <h2 className="display text-base text-[#F2F5F3] truncate">{card.clube}{card.emprestado ? " (empréstimo)" : ""}</h2>
-            <div className="text-[14px] text-[#C9D3CE]">{card.ligaNome} · <span className="font-stat">{card.posLiga}º</span> lugar · {card.status}</div>
+            <h2 className="display text-[15px] text-[#F2F5F3] truncate">{card.clube}{card.emprestado ? " (empréstimo)" : ""}</h2>
+            <div className="text-[13px] text-[#8FA39A]">{card.status}{card.lesao ? ` · 🩹 ${card.lesao}` : ""}</div>
           </div>
           <AnelNota nota={card.nota} />
         </div>
-        <div className="grid grid-cols-3 gap-2 p-3">
+        {/* números do jogador */}
+        <div className="grid grid-cols-3 gap-2 px-3 pt-2">
           <Stat label="JOGOS" valor={card.jogos} />
           <Stat label="GOLS" valor={card.gols} />
           <Stat label="ASSIST." valor={card.assist} />
         </div>
+        {/* overall, torcida e valor logo abaixo */}
+        <div className="grid grid-cols-3 gap-2 px-3 pt-2">
+          <div className="rounded-xl bg-[#0E1512]/70 px-2.5 py-2"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">OVERALL</div><div className="font-stat text-[19px] text-[#F2F5F3] leading-tight">{card.ovrDepois}<Delta v={delta} /></div></div>
+          <div className="rounded-xl bg-[#0E1512]/70 px-2.5 py-2"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">TORCIDA</div><div className="font-stat text-[19px] text-[#F2F5F3] leading-tight">{card.torcida}<Delta v={card.torcidaDelta} /></div></div>
+          <div className="rounded-xl bg-[#0E1512]/70 px-2.5 py-2 min-w-0"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">VALOR</div><div className="font-stat text-[19px] text-[#F2F5F3] leading-tight truncate">{formatarValor(card.valor).replace(/\s/g, "")}</div>{card.valorAntes != null && card.valor !== card.valorAntes && <div className="font-stat text-[13px] leading-tight truncate"><Delta v={card.valor - card.valorAntes} fmt={(x) => formatarValor(x).replace(/€\s?/, "").replace(/\s/g, "")} /></div>}</div>
+        </div>
+        {/* o time na temporada */}
+        <div className="px-4 pt-3 pb-2">
+          <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-0.5">O time na temporada</div>
+          <LinhaTime icone={<TacaCompeticao tipo={ehSegundaDivisao(card.ligaId) ? "segunda" : "liga"} nome={card.ligaNome} size={18} />} nome={card.ligaNome}
+            resultado={card.acesso ? `${ligaRes} · acesso!` : card.rebaixado ? `${ligaRes} · rebaixado` : vagas && ehSegundaDivisao(card.ligaId) && card.posLiga <= vagas ? `${ligaRes} · acesso` : ligaRes} destaque={card.acesso ? "ouro" : corLiga} />
+          {card.copaNac && <LinhaTime icone={<TacaCompeticao tipo="copa" nome={card.copaNac.nome} size={18} />} nome={card.copaNac.nome} resultado={card.copaNac.fase} destaque={card.copaNac.fase === "Campeão" ? "ouro" : null} />}
+          {card.continental && <LinhaTime icone={<TacaCompeticao tipo="continental" nome={card.continental.nome} size={18} />} nome={card.continental.nome} resultado={contRes} destaque={contRes === "Campeão" ? "ouro" : null} />}
+          {card.mundialRes && <LinhaTime icone={<TacaCompeticao tipo="mundial" nome="Mundial de Clubes" size={18} />} nome="Mundial de Clubes" resultado={card.mundialRes} destaque={card.mundialRes === "Campeão" ? "ouro" : null} />}
+          {sel && <LinhaTime icone={<span className="text-base leading-none">{EMOJI_NACIONALIDADE[c.nac] || "🌎"}</span>} nome={`${sel.nome} (seleção)`} resultado={sel.convocado ? (sel.campeao ? "Campeão" : sel.resultado) : "Fora da lista"} destaque={sel.campeao ? "ouro" : null} />}
+        </div>
+        {/* taças e prêmios */}
+        {card.titulos.length > 0 && (
+          <div className="mx-3 mb-3 rounded-2xl p-3 border border-[#D8B44A]/40" style={{ background: "linear-gradient(135deg, rgba(216,180,74,.18), rgba(19,26,23,.85) 60%)" }}>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#EBC557]">Conquistas</span>
+              {temFesta && <button onClick={onRever} className="text-[13px] font-bold text-[#EBC557] min-h-[36px] px-2">Rever festa</button>}
+            </div>
+            <div className="flex flex-wrap gap-x-4 gap-y-2 mt-1">
+              {card.titulos.map((t, i) => (
+                <div key={i} className="flex items-center gap-2 rp-sobe" style={{ animationDelay: `${0.15 + i * 0.12}s` }}>
+                  <IconeTitulo tipo={t.tipo} nome={t.nome} size={30} />
+                  <div className="leading-tight"><div className="text-[14px] font-bold text-[#F5D77A]">{t.nome}</div><div className="text-[11px] text-[#C9D3CE]">{t.n > 1 ? `${t.n}º da carreira` : "1º da carreira"}</div></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {(bola.pos <= 10 || card.artilharia) && (
+          <div className="px-4 pb-3 flex flex-wrap gap-x-4 gap-y-1 text-[14px] text-[#C9D3CE]">
+            {bola.pos <= 10 && <span className="flex items-center gap-1.5"><BolaDourada size={16} /> Bola de Ouro: <b className="font-stat text-[16px] text-[#EBC557]">{bola.pos}º</b></span>}
+            {card.artilharia && card.artilharia.pontos >= card.artilharia.alvo * 0.7 && <span className="flex items-center gap-1.5"><BotaDourada size={16} /> Bota de Ouro: {card.titulos.some((t) => t.tipo === "botaOuro") ? <b className="text-[#EBC557]">sua!</b> : <span className="font-stat text-[16px]">{card.artilharia.pontos}/{card.artilharia.alvo} pts</span>}</span>}
+          </div>
+        )}
       </div>
 
-      {card.titulos.length > 0 && (
-        <div className="rounded-[20px] p-4 border border-[#D8B44A]/45 rp-carta" style={{ background: "linear-gradient(135deg, rgba(216,180,74,.20), rgba(19,26,23,.85) 60%)" }}>
-          <div className="flex items-center justify-between">
-            <span className="rp-chip" style={{ color: "#1A1405", background: "#EBC557" }}>Conquistas da temporada</span>
-            {temFesta && <button onClick={onRever} className="text-[14px] font-bold text-[#EBC557] min-h-[40px] px-2">Rever festa</button>}
-          </div>
-          <div className="flex flex-col gap-3 mt-3">
-            {card.titulos.map((t, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <IconeTitulo tipo={t.tipo} nome={t.nome} size={40} />
-                <div>
-                  <div className="text-[18px] font-bold text-[#F5D77A] leading-tight">{t.nome}</div>
-                  <div className="text-[13px] text-[#C9D3CE]">{t.n > 1 ? `${t.n}º da carreira` : "Primeiro da carreira"}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {card.marcos?.length > 0 && (
-        <div className="grid gap-2">
-          {card.marcos.map((m, i) => (
-            <div key={i} className="rp-painel px-4 py-3 flex items-center gap-3 rp-entra" style={{ animationDelay: `${i * 0.08}s`, borderColor: "rgba(46,111,224,.35)" }}>
-              <span className="text-2xl">{m.icone}</span>
-              <div><div className="text-[16px] font-bold text-[#F2F5F3]">{m.titulo}</div><div className="text-[14px] text-[#8FA39A]">{m.texto}</div></div>
-            </div>
-          ))}
+        <div className="flex flex-wrap gap-1.5">
+          {card.marcos.map((m, i) => <span key={i} className="rp-chip rp-entra" style={{ color: "#C9DBFF", background: "rgba(46,111,224,.18)", animationDelay: `${i * 0.08}s` }}>{m.icone} {m.titulo}</span>)}
         </div>
       )}
 
-      {card.lesao && <div className="rp-painel px-4 py-3 text-[16px] text-[#F0A99E]">🩹 Desfalcou parte da temporada: {card.lesao}.</div>}
+      {forcada ? (
+        <div className="flex flex-col gap-2">
+          <p className="text-[16px] text-[#F0A99E]">{forcada}</p>
+          <button onClick={onAposentar} className="rp-btn rp-ouro display text-sm">Ver o legado</button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          <button onClick={onContinuar} className="rp-btn rp-prim display text-sm">Continuar</button>
+          {podeAposentar(c) && <button onClick={onAposentar} className="rp-btn rp-sec text-[16px]">Pendurar as chuteiras aos {c.idade - 1}</button>}
+        </div>
+      )}
 
+      <button onClick={() => setDetalhes((v) => !v)} aria-expanded={detalhes} className="text-[15px] font-bold text-[#7FE3BC] min-h-[44px]">{detalhes ? "Esconder detalhes" : "Ver detalhes da temporada"}</button>
+      {detalhes && (
+      <div className="flex flex-col gap-3 rp-entra">
       {card.rival && c.rival && <PainelRival c={c} card={card} />}
-
-      {(card.continental || sel) && (
-        <div className="grid gap-2">
-          {card.continental && (
-            <div className="rp-painel px-4 py-3 flex items-center justify-between gap-3">
-              <span className="text-[16px] text-[#C9D3CE]">🌟 {card.continental.nome}</span>
-              <span className="font-stat text-[15px] text-[#F2F5F3]">{card.titulos.some((t) => t.tipo === "continental") ? "Campeão" : card.continental.faseNome}</span>
-            </div>
-          )}
-          {sel && (
-            <div className="rp-painel px-4 py-3 pt-10" style={{ background: `linear-gradient(180deg, rgba(19,26,23,.15) 0%, rgba(19,26,23,.88) 65%), linear-gradient(135deg, rgba(46,111,224,.3), transparent), url(${ARTE.torcida}) center 55%/cover` }}>
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-[16px] text-[#C9D3CE]">🌎 {sel.nome} {sel.ano}</span>
-                <span className="font-stat text-[15px] text-[#F2F5F3]">{sel.convocado ? sel.resultado : "Fora da lista"}</span>
-              </div>
-              {sel.convocado && <div className="text-[14px] text-[#8FA39A]">{nacDe(c.nac).label} · {sel.titular ? "titular" : "reserva"} · {sel.gols} gol(s)</div>}
-            </div>
-          )}
-        </div>
-      )}
 
       <div className="rp-painel p-4">
         <div className="flex items-center justify-between">
@@ -1068,25 +1261,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever }) {
         </ol>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        <div className="rp-painel px-3 py-3">
-          <div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">OVERALL</div>
-          <div className="font-stat text-lg text-[#F2F5F3]">{card.ovrDepois} <span className={delta > 0 ? "text-[#1BC28A]" : delta < 0 ? "text-[#E36B5B]" : "text-[#8FA39A]"}>{delta > 0 ? `+${delta}` : delta === 0 ? "=" : delta}</span></div>
-        </div>
-        <div className="rp-painel px-3 py-3">
-          <div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">TORCIDA</div>
-          <div className="font-stat text-lg text-[#F2F5F3]">{card.torcida} <span className={card.torcidaDelta > 0 ? "text-[#1BC28A]" : card.torcidaDelta < 0 ? "text-[#E36B5B]" : "text-[#8FA39A]"}>{card.torcidaDelta > 0 ? `+${card.torcidaDelta}` : card.torcidaDelta || "="}</span></div>
-        </div>
-        <div className="rp-painel px-3 py-3">
-          <div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">VALOR</div>
-          <div className="font-stat text-lg text-[#F2F5F3] truncate">{formatarValor(card.valor)}</div>
-          {card.valorAntes != null && card.valor !== card.valorAntes && (
-            <div className={`font-stat text-[13px] truncate ${card.valor > card.valorAntes ? "text-[#1BC28A]" : "text-[#E36B5B]"}`}>{card.valor > card.valorAntes ? "▲ +" : "▼ −"}{formatarValor(Math.abs(card.valor - card.valorAntes)).replace("€ ", "")}</div>
-          )}
-        </div>
-      </div>
-
-      {card.moral != null && <div className="-mt-2"><BarraMental moral={card.moral} delta={card.moralDelta} /></div>}
+      {card.moral != null && <BarraMental moral={card.moral} delta={card.moralDelta} />}
 
       <GraficoCarreira c={c} altura={112} />
 
@@ -1132,17 +1307,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever }) {
           {card.destaques.map((d, i) => <li key={i} className="text-[16px] text-[#C9D3CE]">✨ {d}</li>)}
         </ul>
       )}
-
-      {forcada ? (
-        <div className="flex flex-col gap-2">
-          <p className="text-[16px] text-[#F0A99E]">{forcada}</p>
-          <button onClick={onAposentar} className="rp-btn rp-ouro display text-sm">Ver o legado</button>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-2">
-          <button onClick={onContinuar} className="rp-btn rp-prim display text-sm">Continuar</button>
-          {podeAposentar(c) && <button onClick={onAposentar} className="rp-btn rp-sec text-[16px]">Pendurar as chuteiras aos {c.idade - 1}</button>}
-        </div>
+      </div>
       )}
     </div>
   );
@@ -1225,7 +1390,31 @@ function CartaoEvento({ evento, resultado, efeitos, onEscolher, onPedirLiga }) {
           <p className="text-[17px] text-[#C9D3CE] mt-1.5 leading-snug">{evento.texto}</p>
         </div>
       </div>
-      {!resultado && (
+      {!resultado && evento.grade && (
+        <div className="p-3 pt-0 flex flex-col gap-2">
+          {/* clubes lado a lado com o escudo grande (como no Copero) */}
+          <div className="grid grid-cols-3 gap-2">
+            {evento.opcoes.filter((o) => o.oferta).map((o) => {
+              const cl = clubeDe(o.oferta.clube);
+              return (
+                <button key={o.id} onClick={() => onEscolher(o.id)} className="rp-opcao px-1.5 py-3 flex flex-col items-center text-center min-h-[150px]" aria-label={o.label}>
+                  <span className="text-[11px] text-[#8FA39A] leading-tight">{evento.id === "emprestimo" ? "Empréstimo para" : "Assinar com"}</span>
+                  <span className="text-[14px] font-bold text-[#F2F5F3] leading-tight mt-0.5 line-clamp-2">{o.oferta.clube}</span>
+                  <span className="my-2"><ClubDot club={cl} size={46} /></span>
+                  <span className="text-[11px] text-[#8FA39A] leading-tight">{o.oferta.ligaNome}</span>
+                </button>
+              );
+            })}
+          </div>
+          {evento.opcoes.filter((o) => !o.oferta).map((o) => (
+            <button key={o.id} onClick={() => onEscolher(o.id)} className="rp-opcao px-4 py-3">
+              <div className="font-bold text-[16px] text-[#F2F5F3]">{o.label}</div>
+              {o.dica && <div className="text-[14px] text-[#8FA39A] mt-0.5">{o.dica}</div>}
+            </button>
+          ))}
+        </div>
+      )}
+      {!resultado && !evento.grade && (
         <div className="flex flex-col gap-2 p-4 pt-1">
           {evento.opcoes.map((o) => {
             const r = RISCO[o.risco] || RISCO.seguro;
@@ -1259,8 +1448,8 @@ function CartaoEvento({ evento, resultado, efeitos, onEscolher, onPedirLiga }) {
                 {o.chances && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {o.chances.map((x, i) => (
-                      <span key={i} className="rp-chip" style={{ color: x.d > 0 ? "#7FE3BC" : x.d < 0 ? "#F0A99E" : "#C9D3CE", background: x.d > 0 ? "rgba(18,168,118,.16)" : x.d < 0 ? "rgba(227,107,91,.16)" : "rgba(255,255,255,.07)" }}>
-                        {x.d > 0 ? `+${x.d} OVR` : x.d < 0 ? `−${-x.d} OVR` : "nada muda"} · {Math.round(x.p * 100)}%
+                      <span key={i} className="rp-chip" style={(() => { const b = x.d > 0 || (!x.d && ((x.fama || 0) > 0 || (x.torcida || 0) > 0 || (x.minutos || 0) > 0)); const m = x.d < 0 || (x.torcida || 0) < 0 || (x.lesao || 0) > 0; return { color: m ? "#F0A99E" : b ? "#7FE3BC" : "#C9D3CE", background: m ? "rgba(227,107,91,.16)" : b ? "rgba(18,168,118,.16)" : "rgba(255,255,255,.07)" }; })()}>
+                        {x.rotulo || (x.d > 0 ? `+${x.d} OVR` : x.d < 0 ? `−${-x.d} OVR` : "nada muda")} · {Math.round(x.p * 100)}%
                       </span>
                     ))}
                   </div>
@@ -1304,31 +1493,53 @@ function SeletorPretemporada({ c, onEscolher }) {
   const cartas = opcoesPretemporada(c);
   const escolhida = c.pretemporada?.ano === c.ano ? c.pretemporada.id : null;
   const rot = (a) => (c.posicao === "GOL" && NOME_ATTR_GOL[a]) || NOME_ATTR[a] || a;
+  // as cartas chegam viradas e se revelam uma a uma (só na primeira vez do ano)
+  const [reveladas, setReveladas] = useState(escolhida ? 3 : 0);
+  useEffect(() => {
+    if (reveladas >= 3) return undefined;
+    const t = setTimeout(() => setReveladas((x) => x + 1), reveladas === 0 ? 450 : 380);
+    return () => clearTimeout(t);
+  }, [reveladas]);
   return (
-    <div className="rp-painel p-4" style={escolhida ? undefined : { borderColor: "rgba(216,180,74,.45)" }}>
-      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Pré-temporada · escolha seu treino</div>
-      <div className="grid grid-cols-3 gap-2 mt-3">
-        {cartas.map((k0) => {
+    <div className="rp-painel p-3" style={escolhida ? undefined : { borderColor: "rgba(216,180,74,.45)" }}>
+      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A] px-1">Pré-temporada · escolha seu treino</div>
+      <div className="grid grid-cols-3 gap-2 mt-2.5">
+        {cartas.map((k0, idx) => {
           const k = textoCarta(k0, c.posicao);
+          const rar = RARIDADES[k0.raridade] || RARIDADES.comum;
+          const ganhos = ganhosDaCarta(k0, c.posicao);
+          const efeitos = efeitosDaCarta(k0, c.posicao);
           const sel = escolhida === k.id;
+          const virada = idx >= reveladas;
           return (
-            <button key={k.id} onClick={() => onEscolher(k.id)} aria-pressed={sel}
-              className={`rp-opcao px-2 py-2.5 text-center min-h-[92px] flex flex-col items-center ${sel ? "sel" : ""}`}>
-              <div className="text-xl leading-none">{k.icone}</div>
-              <div className="text-[13px] font-bold text-[#F2F5F3] mt-1 leading-tight">{k.nome}</div>
-              <div className="flex flex-wrap justify-center gap-x-1.5 mt-1">
-                {Object.entries(k.ganhos).map(([a, g]) => (
-                  <span key={a} className="font-stat text-[12px]" style={{ color: g > 0 ? "#1BC28A" : "#E36B5B" }}>{g > 0 ? "+" : ""}{g} {rot(a)}</span>
-                ))}
-                {k.desafio && <span className="font-stat text-[12px] text-[#EBC557]">+{Math.round(k.desafio * 100)}% desafios</span>}
-                {k.moral && <span className="font-stat text-[12px] text-[#8DB4F5]">+moral</span>}
+            <div key={k.id} className="rp-flip">
+              <div className={`rp-flip-in ${virada ? "virada" : ""}`}>
+                <button onClick={() => !virada && onEscolher(k.id)} aria-pressed={sel} disabled={virada} aria-label={`${k.nome}, carta ${rar.nome.toLowerCase()}`}
+                  className={`rp-face rp-opcao w-full px-1.5 pt-0 pb-2 text-center min-h-[168px] flex flex-col items-center overflow-hidden ${sel ? "sel" : ""}`}
+                  style={{ borderColor: sel ? undefined : `${rar.cor}88`, boxShadow: k0.raridade === "epica" && !virada ? `0 0 18px ${rar.cor}55` : undefined }}>
+                  <div className="w-full text-[10px] font-bold tracking-[0.15em] uppercase py-0.5" style={{ background: `${rar.cor}30`, color: rar.cor }}>{rar.nome}</div>
+                  <div className="text-2xl leading-none mt-2">{k.icone}</div>
+                  <div className="text-[13px] font-bold text-[#F2F5F3] mt-1 leading-tight">{k.nome}</div>
+                  <div className="flex flex-wrap justify-center gap-x-1.5 mt-1">
+                    {Object.entries(ganhos).map(([a, g]) => (
+                      <span key={a} className="font-stat text-[13px]" style={{ color: g > 0 ? "#1BC28A" : "#E36B5B" }}>{g > 0 ? "+" : ""}{g} {rot(a)}</span>
+                    ))}
+                  </div>
+                  <div className="mt-auto flex flex-col gap-0.5 pt-1">
+                    {efeitos.slice(0, 3).map((e) => <span key={e} className="text-[11px] leading-tight text-[#EBC557]">{e}</span>)}
+                  </div>
+                </button>
+                <div className="rp-verso rounded-[16px] flex items-center justify-center" aria-hidden="true"
+                  style={{ background: "repeating-linear-gradient(45deg, #13201A 0 8px, #0F1A15 8px 16px)", border: "1px solid rgba(216,180,74,.35)" }}>
+                  <Gema size={40} />
+                </div>
               </div>
-            </button>
+            </div>
           );
         })}
       </div>
-      <p className="text-[14px] text-[#8FA39A] mt-2 min-h-[20px]">
-        {escolhida ? textoCarta(cartas.find((k) => k.id === escolhida) || cartas[0], c.posicao).desc : "Sem treino escolhido, a temporada começa sem bônus."}
+      <p className="text-[14px] text-[#8FA39A] mt-2 min-h-[20px] px-1">
+        {escolhida ? textoCarta(cartas.find((k) => k.id === escolhida) || cartas[0], c.posicao).desc : reveladas < 3 ? "Revelando os treinos…" : "Sem treino escolhido, a temporada começa sem bônus."}
       </p>
     </div>
   );
@@ -1407,13 +1618,13 @@ function TelaEvento({ c, evento, resultado, efeitos, temMais, aviso, manchete, o
       {pronto && temMais && <button onClick={onProximo} className="rp-btn rp-prim display text-sm">Ver próxima notícia</button>}
       {pronto && !temMais && (
         <>
-          <Ficha c={c} />
+          <Ficha c={c} semTopo />
           <button onClick={onPatrimonio} className="rp-painel px-4 py-3 flex items-center gap-3 text-left hover:border-[#D8B44A]/50">
             <span className="text-2xl">💼</span>
             <span className="flex-1"><span className="block text-[13px] font-bold uppercase tracking-[0.15em] text-[#8FA39A]">Patrimônio</span><span className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</span></span>
             <span className="text-[15px] font-bold text-[#EBC557]">Investir →</span>
           </button>
-          <SeletorPretemporada c={c} onEscolher={onPretemporada} />
+          <SeletorPretemporada key={c.ano} c={c} onEscolher={onPretemporada} />
           <SeletorFoco c={c} onFoco={onFoco} />
           {torneio && <div className="rp-painel px-4 py-3 text-[16px] text-[#8DB4F5]" style={{ borderColor: "rgba(46,111,224,.35)" }}>🌎 Ano de {torneio}. Jogue bem para ser convocado.</div>}
           <button onClick={onJogar} className="rp-btn rp-prim display text-sm">Jogar temporada {c.ano}</button>
@@ -1548,7 +1759,7 @@ function EmblemaLegado({ c, L, size = 96 }) {
   const interno = size * 0.62;
   let conteudo;
   if (L.nivel.min >= 950) conteudo = <Gema size={interno} />;
-  else if (L.nivel.min >= 640) conteudo = (c.titulos.bolaOuro ? <BolaDourada size={interno} /> : <TacaCompeticao tipo={ORDEM_TIPOS.find((t) => t !== "bolaOuro" && c.titulos[t]) || "liga"} size={interno * 0.95} />);
+  else if (L.nivel.min >= 640) conteudo = (c.titulos.bolaOuro ? <BolaDourada size={interno} /> : <TacaCompeticao tipo={ORDEM_TIPOS.find((t) => !ehPremioIndividual(t) && c.titulos[t]) || "liga"} size={interno * 0.95} />);
   else {
     const idolo = Object.entries(c.torcida || {}).sort((a, b) => b[1] - a[1])[0];
     const clube = L.nivel.min >= 230 && idolo ? idolo[0] : clubeDaVida(c);
@@ -1563,7 +1774,7 @@ function EmblemaLegado({ c, L, size = 96 }) {
 
 /* Uma peça por temporada, com imagem: Bola de Ouro, taça, escudo do clube novo, lesão ou intensidade da temporada */
 function PecaTemporada({ s, anterior, size = 36 }) {
-  const titulo = s.titulos.find((t) => t.tipo !== "bolaOuro");
+  const titulo = s.titulos.find((t) => !ehPremioIndividual(t.tipo));
   const bola = s.titulos.some((t) => t.tipo === "bolaOuro");
   const lesao = s.lesao && s.jogos < 25;
   const novo = anterior && anterior.clube !== s.clube;
@@ -1607,7 +1818,7 @@ function MarcadorMomento({ c, m }) {
   const clubeDoAno = c.temporadas.find((s) => s.ano === m.ano)?.clube;
   if (id.startsWith("idolo:") || id.startsWith("apelido:")) return <Escudo nome={id.split(":")[1]} size={26} />;
   if (id.startsWith("transf:") || id === "valor100") return <FotoMini src={ARTE.contrato} size={26} />;
-  if (id === "primeiroTitulo") return <TacaCompeticao tipo={(c.lista.find((x) => x.tipo !== "bolaOuro") || {}).tipo || "liga"} size={20} />;
+  if (id === "primeiroTitulo") return <TacaCompeticao tipo={(c.lista.find((x) => !ehPremioIndividual(x.tipo)) || {}).tipo || "liga"} size={20} />;
   if (id === "top10" || id === "podio") return <BolaDourada size={24} />;
   if (id === "ovr90") return <Gema size={24} />;
   if (id === "selecao") return <FotoMini src={ARTE.torcida} size={26} />;
@@ -1618,7 +1829,7 @@ function MarcadorMomento({ c, m }) {
 function CartaFinal({ c }) {
   const L = c.legado || calcularLegado(c);
   const t = c.titulos;
-  const totalTitulos = c.lista.filter((x) => x.tipo !== "bolaOuro").length;
+  const totalTitulos = c.lista.filter((x) => !ehPremioIndividual(x.tipo)).length;
   return (
     <div className="rp-carta w-full rounded-[28px] p-[2px]" style={{ background: `linear-gradient(160deg, ${L.nivel.cor}, #0E1512 55%, ${L.nivel.cor})` }}>
       <div className="rounded-[26px] p-5 relative overflow-hidden" style={{ background: "linear-gradient(170deg, #17201C, #0E1512)" }}>
@@ -1692,14 +1903,46 @@ function PosCarreira({ c, onEscolher }) {
   );
 }
 
+/* Fim de carreira enxuto (como no Copero): números, ano a ano e dois botões.
+   O resumo completo (carta, legado, trajetória…) fica em "Ver resumo". */
+function FimDeCarreira(props) {
+  const { c, onNova } = props;
+  const [completo, setCompleto] = useState(false);
+  if (completo) return <TelaFim {...props} />;
+  const L = c.legado || calcularLegado(c);
+  const titulos = c.lista.filter((x) => !ehPremioIndividual(x.tipo)).length;
+  return (
+    <div className="flex flex-col gap-3 pb-6 rp-entra">
+      <div className="max-w-xl mx-auto w-full px-3 pt-4">
+        <div className="rp-painel p-4 text-center" style={{ borderColor: `${L.nivel.cor}66`, background: `linear-gradient(160deg, ${L.nivel.cor}22, rgba(19,26,23,.9) 60%)` }}>
+          <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#C9D3CE]">Sua carreira chegou ao fim</div>
+          <div className="flex justify-center my-3"><EmblemaLegado c={c} L={L} size={84} /></div>
+          <div className="display text-lg" style={{ color: L.nivel.cor }}>{L.nivel.nome}</div>
+          <div className="text-[14px] text-[#8FA39A]">{c.nome} · {c.idade - 1} anos · {L.pontos} pontos de legado</div>
+          <div className="grid grid-cols-4 gap-2 mt-4">
+            {[["JOGOS", c.totais.jogos], ["GOLS", c.totais.gols], ["AST", c.totais.assist], ["TÍTULOS", titulos]].map(([k, v]) => (
+              <div key={k} className="rounded-xl bg-[#0E1512]/70 py-2"><div className="font-stat text-[24px] text-[#F2F5F3] leading-none">{v}</div><div className="text-[10px] font-bold tracking-wider text-[#8FA39A] mt-1">{k}</div></div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <TabelaCarreira c={c} proxima={false} />
+      <div className="max-w-xl mx-auto w-full px-3 grid grid-cols-2 gap-2">
+        <button onClick={() => { setCompleto(true); window.scrollTo({ top: 0 }); }} className="rp-btn rp-ouro display text-xs">Ver resumo</button>
+        <button onClick={onNova} className="rp-btn rp-prim display text-xs">Jogar novamente</button>
+      </div>
+    </div>
+  );
+}
+
 function TelaFim({ c, onNova, onSair, onPosCarreira }) {
   const L = c.legado || calcularLegado(c);
   const [copiado, setCopiado] = useState(false);
   const clubes = [];
   c.temporadas.forEach((s) => {
     const ult = clubes[clubes.length - 1];
-    if (ult && ult.nome === s.clube) { ult.ate = s.ano; ult.jogos += s.jogos; ult.gols += s.gols; ult.titulos += s.titulos.filter((x) => x.tipo !== "bolaOuro" && x.tipo !== "copaMundo" && x.tipo !== "continentalSelecao").length; }
-    else clubes.push({ nome: s.clube, de: s.ano, ate: s.ano, jogos: s.jogos, gols: s.gols, emp: s.emprestado, titulos: s.titulos.filter((x) => x.tipo !== "bolaOuro" && x.tipo !== "copaMundo" && x.tipo !== "continentalSelecao").length });
+    if (ult && ult.nome === s.clube) { ult.ate = s.ano; ult.jogos += s.jogos; ult.gols += s.gols; ult.titulos += s.titulos.filter((x) => !ehPremioIndividual(x.tipo) && x.tipo !== "copaMundo" && x.tipo !== "continentalSelecao").length; }
+    else clubes.push({ nome: s.clube, de: s.ano, ate: s.ano, jogos: s.jogos, gols: s.gols, emp: s.emprestado, titulos: s.titulos.filter((x) => !ehPremioIndividual(x.tipo) && x.tipo !== "copaMundo" && x.tipo !== "continentalSelecao").length });
   });
   const proximo = NIVEIS_LEGADO.find((n) => n.min > L.pontos);
   const rotulos = { numeros: "Números em campo", titulos: "Títulos por clubes", selecao: "Seleção", premios: "Prêmios individuais", auge: "Auge técnico", torcida: "Idolatria e legado", rival: "Duelo com o rival" };
@@ -1882,6 +2125,7 @@ export default function ModoRapido({ onSair }) {
   const [estanteAberta, setEstanteAberta] = useState(false);
   const [apresentacao, setApresentacao] = useState(null);
   const [patrimonioAberto, setPatrimonioAberto] = useState(false);
+  const [contadorPulsa, setContadorPulsa] = useState(0);
   const { etapa, c, card, evento, resultado, opcoesTraco, fila } = estado;
 
   useEffect(() => {
@@ -1890,11 +2134,12 @@ export default function ModoRapido({ onSair }) {
   }, [estado, etapa]);
   useEffect(() => { window.scrollTo({ top: 0 }); }, [etapa, evento?.id]);
 
-  const criar = (dados) => setEstado({ etapa: "evento", c: criarJogador(dados), evento: null, resultado: null });
+  // a primeira decisão é dentro do jogo: três clubes de base para escolher
+  const criar = (dados) => { const cc = criarJogador(dados); setEstado({ etapa: "evento", c: cc, evento: sortearEvento(cc, { somente: "base" }), resultado: null, fila: false }); };
 
   const aposFechar = (f) => {
-    const festa = f.card.titulos.length > 0 || f.card.bola.pos <= 3;
-    setEstado({ etapa: festa ? "festa" : "resumo", c: f.c, card: f.card });
+    // festa em tela cheia só para as taças grandes; as outras voam no resumo
+    setEstado({ etapa: temFestaGrande(f.card) ? "festa" : "resumo", c: f.c, card: f.card, voar: true });
   };
   const jogar = () => {
     const { c: c2, card: k, momento } = jogarTemporada(c);
@@ -1969,16 +2214,20 @@ export default function ModoRapido({ onSair }) {
   const nova = () => setEstado({ etapa: "criacao" });
 
   const mostrarCabecalho = etapa !== "criacao" && etapa !== "fim";
+  // painel de carreira (cartão + ano a ano) nas telas de decisão e de resumo
+  const painel = c && ["evento", "negociacao", "resumo", "coletiva", "traco"].includes(etapa);
   return (
     <div className="rp">
       <style>{ESTILO_BASE}</style>
-      <Cabecalho c={mostrarCabecalho ? c : null} onSair={onSair} onEstante={() => setEstanteAberta(true)} />
+      {painel ? <CartaoCarreira c={c} onSair={onSair} onEstante={() => setEstanteAberta(true)} contadorPulsa={contadorPulsa} />
+        : <Cabecalho c={mostrarCabecalho ? c : null} onSair={onSair} onEstante={() => setEstanteAberta(true)} />}
       <main className="pb-10">
+        {painel && <TabelaCarreira c={c} />}
         {etapa === "criacao" && <TelaCriacao onCriar={criar} />}
         {etapa === "evento" && (
           <>
-            {!evento && c.temporadas.length === 0 && <DicasIniciais />}
-            {!evento && c.temporadas.length === 0 && (
+            {c.temporadas.length === 0 && <DicasIniciais />}
+            {(!evento || resultado) && c.temporadas.length === 0 && (
               <div className="max-w-xl mx-auto px-4 pt-6 rp-entra">
                 <h2 className="display text-lg text-[#F2F5F3]">A história começa aqui</h2>
                 <p className="text-[17px] text-[#8FA39A] mt-1">{c.nome}, {c.idade} anos, {posicaoDe(c.posicao).label.toLowerCase()} da base do {c.clubeNome}. {origemDe(c.origem) ? `${origemDe(c.origem).nome}. ` : ""}Perfil: {personaDe(c.personalidade).label.toLowerCase()}. Empresário: {(EMPRESARIOS.find((e) => e.id === c.empresario) || EMPRESARIOS[0]).nome.toLowerCase()}.</p>
@@ -1989,11 +2238,11 @@ export default function ModoRapido({ onSair }) {
         )}
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}
         {etapa === "momento" && <TelaMomento key={`${card.ano}:${(card.momentos || []).length}`} c={c} momento={card.pendente} onFim={fimMomento} />}
-        {etapa === "festa" && <TelaFesta c={c} card={card} onFim={() => setEstado({ etapa: "resumo", c, card })} />}
-        {etapa === "resumo" && <TelaResumo c={c} card={card} onContinuar={continuar} onAposentar={encerrar} onRever={() => setEstado({ etapa: "festa", c, card })} />}
+        {etapa === "festa" && <TelaFesta c={c} card={card} onFim={() => setEstado((st) => ({ etapa: "resumo", c, card, voar: st.voar }))} />}
+        {etapa === "resumo" && <TelaResumo c={c} card={card} voar={!!estado.voar} onPousou={() => setContadorPulsa((x) => x + 1)} onContinuar={continuar} onAposentar={encerrar} onRever={() => setEstado({ etapa: "festa", c, card, voar: false })} />}
         {etapa === "coletiva" && estado.coletiva && <TelaColetiva c={c} coletiva={estado.coletiva} resposta={estado.resposta} onResponder={responder} onSeguir={() => irParaEvento(c)} />}
         {etapa === "traco" && <TelaTraco c={c} opcoes={(opcoesTraco || []).map(tracoDe).filter(Boolean)} onEscolher={escolherT} />}
-        {etapa === "fim" && <TelaFim c={c} onNova={nova} onSair={onSair} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
+        {etapa === "fim" && <FimDeCarreira c={c} onNova={nova} onSair={onSair} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
       </main>
       {estanteAberta && c && <Estante c={c} onFechar={() => setEstanteAberta(false)} />}
       {patrimonioAberto && c && <Patrimonio c={c} onComprar={comprar} onFechar={() => setPatrimonioAberto(false)} />}

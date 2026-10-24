@@ -1717,7 +1717,7 @@ function fecharTemporadaBase(c0, card0) {
   // Curva do Modo Rápido: cresce e começa a cair 2 anos depois do Modo Carreira,
   // pra o auge cair entre 27 e 30, como no Copero (o modo completo não muda).
   // o garoto tem vantagem: quanto mais jovem, mais rápido anda na direção do teto
-  const ritmoJovem = c.idade <= 19 ? 1.2 : c.idade <= 22 ? 1.08 : 1;
+  const ritmoJovem = c.idade <= 19 ? 1.12 : c.idade <= 22 ? 1.04 : 1;
   const personaCurva = { ...persona, picoFim: (persona.picoFim ?? 28) + 2, declinioApartir: (persona.declinioApartir ?? 31) + 2 };
   const novos = evoluirAtributos({ ...c.attrs, fintas: 3, pernaRuim: 3 }, { ...c.potencial, fintas: 3, pernaRuim: 3 }, c.idade, personaCurva, null, reduc, fatorDes * ritmoJovem, 1 + nTit * 0.05);
   ATTRS.forEach((a) => { c.attrs[a] = novos[a]; });
@@ -1863,6 +1863,22 @@ export function calcularLegado(c) {
 /* ---------- propostas ---------- */
 const afinidade = (c, ligaId) => (tracoDe("cidadao") && (c.tracos || []).includes("cidadao") ? 1.2 : (AFINIDADE_MERCADO[c.nac]?.[ligaId] ?? 1));
 
+/* Clube grande (força 84+) não contrata só pelo número: olha o nome que você fez.
+   Prestígio (0 a 5) = última temporada + fama + Bola de Ouro. Quanto maior o clube,
+   mais perto do nível dele você precisa estar; fora disso, ainda há uma chance pequena. */
+export function prestigio(c) {
+  const ult = c.temporadas?.[c.temporadas.length - 1];
+  const nota = ult?.jogos >= 10 ? ult.nota : 6.5;
+  return (nota >= 7.6 ? 2 : nota >= 7.1 ? 1 : 0) + (c.fama >= 60 ? 2 : c.fama >= 35 ? 1 : 0) + (ult?.bola?.pos <= 10 ? 1 : 0);
+}
+function grandeAceita(c, x, ovr, prest) {
+  if (x.forca < 84) return true;
+  const exigencia = x.forca >= 92 ? 3 : x.forca >= 88 ? 2 : 1;
+  // a joia de 21 anos ou menos ganha um voto de confiança
+  const margem = prest - exigencia + (c.idade <= 21 ? 1 : 0);
+  if (ovr + margem >= x.forca) return true;
+  return ovr + margem >= x.forca - 3 && chance(0.12);
+}
 export function gerarOfertas(c, n, opts = {}) {
   const ovr = ovrDe(c);
   const atual = clubeDe(c.clubeNome);
@@ -1872,6 +1888,8 @@ export function gerarOfertas(c, n, opts = {}) {
   let pool = clubesJogaveis().filter((x) => x.nome !== c.clubeNome && x.forca >= lo && x.forca <= hi
     && !(c.flags.traidor || []).includes(x.nome) && (opts.ligas ? opts.ligas.includes(x.liga) : x.liga !== "arabia" || c.idade >= 27));
   if (!opts.permitirSegunda && ovr >= 66) pool = pool.filter((x) => !ehSegundaDivisao(x.liga));
+  const prest = prestigio(c);
+  pool = pool.filter((x) => grandeAceita(c, x, ovr, prest));
   const escolhidas = [];
   for (let i = 0; i < n && pool.length; i++) {
     const pesos = pool.map((x) => afinidade(c, x.liga) * (1 + clampR((x.forca - atual.forca) / 15, -0.6, 1)));
@@ -3009,7 +3027,8 @@ export function mexerNivel(c, d, mexeTeto = true) {
     const a = ordem[k % ordem.length];
     c.attrs[a] = clampR(c.attrs[a] + Math.sign(d), 40, 99);
     // vale para o resto da carreira: o teto acompanha (senão a perda se recuperava sozinha e o ganho ficava)
-    if (mexeTeto) c.potencial[a] = clampR(c.potencial[a] + Math.sign(d), 40, 99);
+    // "metade": só um a cada dois pontos vai para o teto
+    if (mexeTeto === "metade" ? k % 2 === 0 : mexeTeto) c.potencial[a] = clampR(c.potencial[a] + Math.sign(d), 40, 99);
   }
   return d;
 }
@@ -3187,8 +3206,9 @@ export function resolverDesafio(c0, id) {
     let acc = 0, idx = chances.length - 1;
     for (let i = 0; i < chances.length; i++) { if (r < acc + chances[i].p) { idx = i; break; } acc += chances[i].p; }
     const antes = ovrDe(c);
-    // jovem que perde no desafio se recupera com o tempo (o teto não cai); a partir dos 23 a perda é para valer
-    mexerNivel(c, chances[idx].d, chances[idx].d > 0 || c.idade >= 23);
+    // até os 22 a perda se recupera (o teto não cai) e o ganho só leva metade para o teto;
+    // a partir dos 23 o resultado é para valer
+    mexerNivel(c, chances[idx].d, c.idade >= 23 ? true : chances[idx].d > 0 ? "metade" : false);
     const depois = ovrDe(c);
     c.desafios = [...(c.desafios || []), { ano: c.ano, id, d: depois - antes }];
     return { c, res: { id, icone: x.icone, nome: x.nome, chances, idx, roll: r, d: depois - antes, txt: chances[idx].txt, ovrAntes: antes, ovrDepois: depois } };

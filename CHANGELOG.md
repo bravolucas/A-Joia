@@ -4,6 +4,19 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## ⚖️ OVR mais contido e clube grande mais exigente
+
+- **OVR sobe mais devagar**: o pico típico de uma carreira caiu de 92 para 89, e aos 21 anos o OVR mediano foi de 83 para 81
+  - Até os 22 anos, o ganho no desafio de OVR leva só metade para o teto (o resto acelera o caminho até ele)
+  - O garoto ainda evolui mais rápido que o veterano, só que com uma vantagem menor
+- **Clube grande (força 84+) olha o seu prestígio**, não só o OVR: nota da última temporada, fama e Bola de Ouro
+  - Quanto maior o clube, mais perto do nível dele você precisa estar (PSG, Real, Arsenal, Barça e City são os mais exigentes)
+  - Até os 21 anos, a joia ganha um voto de confiança
+  - Abaixo disso ainda existe uma chance pequena de proposta: difícil, não impossível
+- Nas simulações, carreiras que nunca chegaram a um gigante passaram de 25% para 41%; as que chegaram a PSG, Real e cia. caíram de 60% para 41%
+
+---
+
 ## 🌎 Copa do Mundo vira evento jogável
 
 - **A cada 4 anos** (2030, 2034…), depois da temporada do clube, a Copa do Mundo ganha tela própria, fase a fase

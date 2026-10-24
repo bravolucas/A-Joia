@@ -3,7 +3,7 @@ import React, { Suspense, lazy, useState } from "react";
 import { ARTE } from "./arte.js";
 // o Modo Carreira é grande: só baixa quando a pessoa entra nele
 const AJoiaGame = lazy(() => import("./AJoiaGame.jsx"));
-import ModoRapido, { ESTILO_BASE } from "./ModoRapido.jsx";
+import ModoRapido, { ESTILO_BASE, BotaoSom } from "./ModoRapido.jsx";
 import { Gema } from "./components.jsx";
 import { carregarRapido, RITMOS, ritmoDe } from "./rapido.js";
 
@@ -32,6 +32,7 @@ export default function App() {
     <div className="rp min-h-screen" style={{ background: "radial-gradient(120% 60% at 50% -10%, #12352A 0%, #0E1512 55%, #0A0F0D 100%)" }}>
       <style>{ESTILO_BASE}</style>
       <main className="max-w-md mx-auto px-4 pt-6 pb-10 flex flex-col gap-5">
+        <div className="flex justify-end -mb-3"><BotaoSom compacto /></div>
         {/* marca: a gema no centro, a foto ao fundo */}
         <section className="relative rounded-[28px] overflow-hidden border border-[#D8B44A]/25 rp-entra" aria-label="A JOIA">
           <div className="absolute inset-0" style={{ background: `url(${ARTE.porDoSol}) center 55%/cover` }} aria-hidden="true" />

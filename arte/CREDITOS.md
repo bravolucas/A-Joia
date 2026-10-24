@@ -60,3 +60,8 @@ real. As fotos de taças do Adobe Stock usadas antes foram aposentadas.
 - **Gramado** (`arte/campo.svg`): gerado com [Kyogijo Stadiums](https://github.com/johnmorrisdotca/kyogijo-stadiums), licença MIT, em escala oficial.
 - **Confete** das comemorações: [canvas-confetti](https://github.com/catdad/canvas-confetti), licença ISC.
 - **Animações Lottie** (opcionais, `arte/animacoes/`): tocadas com [lottie-web](https://github.com/airbnb/lottie-web), licença MIT.
+
+## Sons
+
+- **Efeitos de interface** (`arte/sons/`): [Kenney — Interface Sounds](https://kenney.nl/assets/interface-sounds), licença CC0 (domínio público), pelo espelho [Calinou/kenney-interface-sounds](https://github.com/Calinou/kenney-interface-sounds). Convertidos para MP3 mono.
+- **Apito e torcida**: sintetizados no próprio jogo (Web Audio), sem arquivo.

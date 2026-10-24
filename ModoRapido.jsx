@@ -1,5 +1,6 @@
 import Icone from "./Icone.jsx";
 import Lottie from "./Lottie.jsx";
+import { tocar, apito, torcida, somLigado, alternarSom } from "./som.js";
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import confetti from "canvas-confetti";
@@ -256,6 +257,14 @@ export function festejar(tipo = "titulo", cores = ["#EBC557", "#FFFFFF", "#12A87
       confetti({ ...base, particleCount: 120, spread: 80, startVelocity: 45, origin: { x: 0.5, y: 0.65 } });
     }
   } catch { /* sem canvas */ }
+}
+
+/* liga e desliga os sons do jogo */
+export function BotaoSom({ compacto = false }) {
+  const [on, setOn] = useState(somLigado());
+  const trocar = () => { const n = alternarSom(); setOn(n); if (n) tocar("confirma", 0.4); };
+  if (compacto) return <button onClick={trocar} className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-[18px]" aria-label={on ? "Desligar sons" : "Ligar sons"} aria-pressed={on}>{on ? "🔊" : "🔇"}</button>;
+  return <button onClick={trocar} className="rp-btn rp-sec text-[15px]" aria-pressed={on}>{on ? "🔊 Sons ligados" : "🔇 Sons desligados"}</button>;
 }
 
 /* vibração curta no celular (onde o navegador permite) */
@@ -829,6 +838,7 @@ function CabecalhoMomento({ c, momento }) {
 }
 
 function PlacarMomento({ ok, texto }) {
+  useEffect(() => { if (ok) { torcida(2.6, 0.22); tocar("sobe", 0.5); } else tocar("desce", 0.5); }, [ok]);
   return (
     <div className="relative">
       {ok && <Lottie nome="gol" className="absolute left-1/2 -translate-x-1/2 -top-24 w-48 h-48 pointer-events-none" />}
@@ -1776,7 +1786,7 @@ function SeletorPretemporada({ c, onEscolher, onJogar, dica }) {
           return (
             <div key={k.id} className="rp-flip">
               <div className={`rp-flip-in ${virada ? "virada" : ""}`}>
-                <button onClick={() => { if (virada) return; if (onJogar) { vibrar(15); onJogar(k.id); } else onEscolher(k.id); }} aria-pressed={sel} disabled={virada} aria-label={`${k.nome}, carta ${rar.nome.toLowerCase()}`}
+                <button onClick={() => { if (virada) return; if (onJogar) { vibrar(15); tocar("carta", 0.6); onJogar(k.id); } else onEscolher(k.id); }} aria-pressed={sel} disabled={virada} aria-label={`${k.nome}, carta ${rar.nome.toLowerCase()}`}
                   className={`rp-face rp-opcao w-full px-1.5 pt-0 pb-2 text-center min-h-[168px] flex flex-col items-center overflow-hidden ${sel ? "sel" : ""}`}
                   style={{ borderColor: sel ? undefined : `${rar.cor}88`, boxShadow: k0.raridade === "epica" && !virada ? `0 0 18px ${rar.cor}55` : undefined }}>
                   <div className="w-full text-[10px] font-bold tracking-[0.15em] uppercase py-0.5" style={{ background: `${rar.cor}30`, color: rar.cor }}>{rar.nome}</div>
@@ -2394,11 +2404,32 @@ function GaleriaFim({ c }) {
 function FimDeCarreira(props) {
   const { c, onNova } = props;
   const [completo, setCompleto] = useState(false);
+  const galeriaRef = useRef(null);
+  const [img, setImg] = useState("pronto");
+  // a galeria vira uma imagem para postar (html-to-image, MIT)
+  const salvarImagem = async () => {
+    if (!galeriaRef.current) return;
+    setImg("gerando");
+    try {
+      const { toPng } = await import("html-to-image");
+      const opts = { pixelRatio: 2, cacheBust: true, backgroundColor: "#0B0B0C" };
+      let url;
+      try { url = await toPng(galeriaRef.current, opts); } catch { url = await toPng(galeriaRef.current, { ...opts, skipFonts: true }); }
+      const nomeArq = `a-joia-galeria-${c.nome.normalize("NFD").replace(/[^\w]+/g, "-").toLowerCase()}.png`;
+      const blob = await (await fetch(url)).blob();
+      const file = typeof File === "function" ? new File([blob], nomeArq, { type: "image/png" }) : null;
+      if (file && /Android|iPhone|iPad/i.test(navigator.userAgent) && navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], title: "Minha carreira em A JOIA" });
+      else { const a = document.createElement("a"); a.href = url; a.download = nomeArq; document.body.appendChild(a); a.click(); a.remove(); }
+      setImg("ok");
+    } catch (e) { setImg(e?.name === "AbortError" ? "pronto" : "erro"); }
+    setTimeout(() => setImg("pronto"), 2500);
+  };
   if (completo) return <TelaFim {...props} />;
   return (
     <div className="flex flex-col gap-3 pb-8 rp-entra">
-      <div className="max-w-6xl mx-auto w-full px-3 pt-4"><GaleriaFim c={c} /></div>
+      <div className="max-w-6xl mx-auto w-full px-3 pt-4"><div ref={galeriaRef} className="rounded-[24px]"><GaleriaFim c={c} /></div></div>
       <div className="max-w-6xl mx-auto w-full px-3 flex flex-wrap justify-end gap-2">
+        <button onClick={salvarImagem} disabled={img === "gerando"} className="cp-pill cp-branca text-[15px] min-h-[46px]">{img === "gerando" ? "Gerando imagem…" : img === "ok" ? "Imagem pronta!" : img === "erro" ? "Não deu, tente de novo" : "📸 Salvar imagem"}</button>
         <button onClick={() => { setCompleto(true); window.scrollTo({ top: 0 }); }} className="cp-pill cp-contorno text-[15px] min-h-[46px]">Ver resumo completo</button>
         <button onClick={onNova} className="cp-pill cp-contorno text-[15px] min-h-[46px]"><span aria-hidden="true">↻</span> Jogar novamente</button>
       </div>
@@ -2679,11 +2710,14 @@ function ScannerChances({ chances, alvo, idx, estatico, onFim, dReal = null }) {
   useEffect(() => {
     if (estatico) { setAng(alvo * 360); setFim(true); return undefined; }
     const dur = 2600, total = 720 + alvo * 360;
-    let raf, t0;
+    let raf, t0, ultTique = -1;
     const passo = (agora) => {
       t0 = t0 || agora;
       const f = Math.min(1, (agora - t0) / dur);
-      setAng(total * (1 - Math.pow(1 - f, 3.2)));
+      const a = total * (1 - Math.pow(1 - f, 3.2));
+      setAng(a);
+      const marca = Math.floor(a / 30);
+      if (marca !== ultTique) { ultTique = marca; tocar("tique", 0.25); }
       setRuido(Math.floor(Math.random() * 100));
       if (f < 1) raf = requestAnimationFrame(passo);
       else { setFim(true); onFim(); }
@@ -2761,7 +2795,7 @@ export function PopupResultado({ info, onFechar }) {
   const dOvr = (info.ovrDepois ?? 0) - (info.ovrAntes ?? 0);
   const outros = (info.efeitos || []).filter((e) => !/OVR$/.test(e.txt));
   const corFundo = !revelado ? "#3F3F46" : dOvr > 0 ? "#16A34A" : dOvr < 0 ? "#DC2626" : outros.some((e) => !e.bom) ? "#B45309" : "#2563EB";
-  const revelar = () => { setRevelado(true); vibrar(dOvr > 0 ? [30, 50, 30] : 60); };
+  const revelar = () => { setRevelado(true); vibrar(dOvr > 0 ? [30, 50, 30] : 60); tocar(dOvr > 0 ? "sobe" : dOvr < 0 ? "desce" : outros.some((e) => !e.bom) ? "erro" : "confirma", 0.55); };
   const sorteado = temRoleta ? info.chances[info.idx] : null;
   return (
     <TelaCheia rotulo={info.titulo} cor={corFundo} centro={!info.foto} botao={revelado ? "Continuar" : "Pular sorteio"} bloqueado={!revelado} onFechar={() => (revelado ? onFechar() : revelar())}>
@@ -2798,6 +2832,8 @@ export function PopupResultado({ info, onFechar }) {
 /* Fim de temporada: tudo o que aconteceu numa tela só */
 function PopupTemporada({ c, card, onFechar }) {
   useEffect(() => {
+    apito(3);
+    if (card.titulos.length) { setTimeout(() => { torcida(2.8, 0.2); tocar("conquista", 0.5); }, 600); }
     if (card.titulos.length) setTimeout(() => festejar(card.titulos.length > 1 ? "chuva" : "titulo", [clubeDe(card.clube)?.cor || "#EBC557", "#EBC557", "#FFFFFF"]), 600);
     else if (card.acesso) setTimeout(() => festejar("titulo", ["#22C55E", "#FFFFFF", "#EBC557"]), 500);
   }, []);
@@ -2905,7 +2941,7 @@ function DesafioOvr({ c, onEscolher }) {
         {ops.map((o) => {
           const f = FAIXA_DESAFIO[o.faixa];
           return (
-            <button key={o.id} onClick={() => { vibrar(15); onEscolher(o.id); }} className="text-left rounded-2xl bg-[#1C1C1F] border border-[#2A2A2E] hover:border-[#52525B] px-3 py-2.5 transition-colors" aria-label={`${o.nome}: ${o.chances.map((x) => `${Math.round(x.p * 100)}% ${x.d > 0 ? "+" : ""}${x.d}`).join(", ")}`}>
+            <button key={o.id} onClick={() => { vibrar(15); tocar("clique"); onEscolher(o.id); }} className="text-left rounded-2xl bg-[#1C1C1F] border border-[#2A2A2E] hover:border-[#52525B] px-3 py-2.5 transition-colors" aria-label={`${o.nome}: ${o.chances.map((x) => `${Math.round(x.p * 100)}% ${x.d > 0 ? "+" : ""}${x.d}`).join(", ")}`}>
               <div className="flex items-center gap-2.5">
                 <span className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${f.cor}14`, border: `1px solid ${f.cor}33` }}><Icone e={o.icone} size={22} cor={f.cor} /></span>
                 <span className="flex-1 min-w-0">
@@ -2935,7 +2971,7 @@ export function ApresentacaoGrande({ clube, nome, numero, posicao, idade, deOnde
   const sobrenome = (nome || "").trim().split(/\s+/).slice(-1)[0].toUpperCase();
   const estadio = ((clube?.nome || "").length + (numero || 0)) % 2 === 1;
   const [pronto, setPronto] = useState(false);
-  useEffect(() => { vibrar([30, 40, 30]); const t = setTimeout(() => setPronto(true), 2000); return () => clearTimeout(t); }, []);
+  useEffect(() => { vibrar([30, 40, 30]); torcida(3.2, 0.12); setTimeout(() => tocar("vidro", 0.4), 400); setTimeout(() => tocar("vidro", 0.35), 1300); const t = setTimeout(() => setPronto(true), 2000); return () => clearTimeout(t); }, []);
   const fonteNome = sobrenome.length > 9 ? 12 : sobrenome.length > 6 ? 15 : 18;
   return createPortal(
     <div className="cp fixed inset-0 z-[72] overflow-y-auto" role="dialog" aria-modal="true" aria-label={`Apresentação no ${clube?.nome}`} style={{ background: "#05070A" }}>
@@ -3271,6 +3307,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
             <span className="flex-1"><span className="block text-[13px] font-bold uppercase tracking-[0.15em] text-[#8FA39A]">Patrimônio</span><span className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</span></span>
             <span className="text-[15px] font-bold text-[#EBC557]">Investir →</span>
           </button>
+          <BotaoSom />
           <button onClick={onSair} className="rp-btn rp-sec text-[15px]">Voltar ao menu (o jogo fica salvo)</button>
         </Gaveta>
       )}

@@ -4,6 +4,18 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🔊 Sons, imagem da galeria e app instalável
+
+- **Sons**: efeitos de interface da Kenney (CC0) e apito/torcida sintetizados no jogo.
+  - Carta de treino, escolha do desafio, tique-taque do sorteio enquanto o scanner gira, som de subir/descer no resultado
+  - Apito final no fim de cada temporada; torcida e som de conquista quando há título
+  - Torcida no gol dos minigames; flashes e torcida baixinha na apresentação oficial
+  - Botão 🔊/🔇 no menu e na ficha (fica salvo no aparelho)
+- **Salvar imagem da galeria**: botão "📸 Salvar imagem" no fim de carreira gera um PNG da galeria (no celular abre o compartilhar; no computador baixa o arquivo)
+- **App instalável (PWA)**: dá para "Adicionar à tela inicial" no celular ou instalar no computador, com o ícone da gema, tela cheia e abrindo mesmo sem internet (escudos, bandeiras e fotos ficam guardados conforme aparecem). Atualiza sozinho quando sai versão nova
+
+---
+
 ## 🧍 Avatar 3D, confete novo, gramado em escala e espaço para animações
 
 - **Avatar genérico do jogador**: um manequim com volume e luz (sem rosto), vestindo a camisa do clube com o escudo no peito. Aparece na ficha, no fim de temporada e na galeria do fim de carreira

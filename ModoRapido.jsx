@@ -1,7 +1,9 @@
 import Icone from "./Icone.jsx";
+import Lottie from "./Lottie.jsx";
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ARTE, ARTE_EVENTO, logoCompeticao, bandeiraDe } from "./arte.js";
+import confetti from "canvas-confetti";
+import { ARTE, ARTE_EVENTO, logoCompeticao, bandeiraDe, escudoDe } from "./arte.js";
 import { POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS, EMOJI_NACIONALIDADE } from "./data.js";
 import { Gema, ClubDot, Brasao, Confetti, ApresentacaoNovoClube, FreeKickMini, PasseMini } from "./components.jsx";
 import { calcularSucessoFalta, tipoResultadoFalta } from "./lib.js";
@@ -233,8 +235,64 @@ function useOvrAnimado(ovr) {
   return [mostrado, delta];
 }
 
+/* comemorações com canvas-confetti (ISC): chuva de papel nas cores do clube, fogos e estrelas */
+const semMovimento = () => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } };
+export function festejar(tipo = "titulo", cores = ["#EBC557", "#FFFFFF", "#12A876"]) {
+  if (semMovimento()) return;
+  const base = { colors: cores, zIndex: 80, disableForReducedMotion: true };
+  try {
+    if (tipo === "chuva") {
+      const fim = Date.now() + 1600;
+      (function quadro() {
+        confetti({ ...base, particleCount: 4, angle: 60, spread: 60, origin: { x: 0, y: 0.7 } });
+        confetti({ ...base, particleCount: 4, angle: 120, spread: 60, origin: { x: 1, y: 0.7 } });
+        if (Date.now() < fim) requestAnimationFrame(quadro);
+      })();
+    } else if (tipo === "fogos") {
+      [0, 350, 700].forEach((t, i) => setTimeout(() => confetti({ ...base, particleCount: 70, spread: 360, startVelocity: 28, ticks: 70, gravity: 0.6, origin: { x: 0.25 + i * 0.25, y: 0.3 + (i % 2) * 0.1 } }), t));
+    } else if (tipo === "estrelas") {
+      confetti({ ...base, particleCount: 40, spread: 360, startVelocity: 22, ticks: 80, gravity: 0.4, shapes: ["star"], scalar: 1.3, origin: { x: 0.5, y: 0.35 } });
+    } else {
+      confetti({ ...base, particleCount: 120, spread: 80, startVelocity: 45, origin: { x: 0.5, y: 0.65 } });
+    }
+  } catch { /* sem canvas */ }
+}
+
 /* vibração curta no celular (onde o navegador permite) */
 export const vibrar = (p = 30) => { try { navigator.vibrate?.(p); } catch { /* sem suporte */ } };
+
+/* Avatar genérico do jogador: manequim com volume (sem rosto), vestindo a camisa do clube com o escudo no peito */
+function AvatarJogador({ clube, size = 72, numero = null }) {
+  const cor = clube?.cor || "#12A876";
+  const claro = lumi(cor) > 0.62;
+  const id = React.useId().replace(/[^a-zA-Z0-9]/g, "");
+  const escudo = clube ? escudoDe(clube.nome) : null;
+  const tronco = "M20 220 L24 178 Q28 156 56 148 L82 142 Q100 156 118 142 L144 148 Q172 156 176 178 L180 220 Z";
+  return (
+    <svg viewBox="0 0 200 220" width={size} height={size * 1.1} className="shrink-0" aria-hidden="true">
+      <defs>
+        <radialGradient id={`p${id}`} cx="38%" cy="30%" r="75%"><stop offset="0" stopColor="#ECE7E1" /><stop offset=".45" stopColor="#BFB8B0" /><stop offset=".85" stopColor="#7E776F" /><stop offset="1" stopColor="#5A544E" /></radialGradient>
+        <linearGradient id={`n${id}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#6A645D" /><stop offset=".6" stopColor="#A39C94" /></linearGradient>
+        <linearGradient id={`c${id}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#000" stopOpacity=".45" /><stop offset=".3" stopColor="#000" stopOpacity="0" /><stop offset=".45" stopColor="#fff" stopOpacity=".22" /><stop offset=".7" stopColor="#000" stopOpacity="0" /><stop offset="1" stopColor="#000" stopOpacity=".5" /></linearGradient>
+        <linearGradient id={`v${id}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fff" stopOpacity=".18" /><stop offset=".5" stopColor="#fff" stopOpacity="0" /><stop offset="1" stopColor="#000" stopOpacity=".38" /></linearGradient>
+        <filter id={`b${id}`}><feGaussianBlur stdDeviation="2.5" /></filter>
+        <clipPath id={`t${id}`}><path d={tronco} /></clipPath>
+      </defs>
+      <path d="M84 118 Q84 140 78 150 L122 150 Q116 140 116 118 Z" fill={`url(#n${id})`} />
+      <ellipse cx="100" cy="142" rx="22" ry="8" fill="#000" opacity=".28" filter={`url(#b${id})`} />
+      <path d={tronco} fill={cor} />
+      <g clipPath={`url(#t${id})`}><path d={tronco} fill={`url(#c${id})`} /><path d={tronco} fill={`url(#v${id})`} /></g>
+      <path d="M82 142 Q100 160 118 142" fill="none" stroke={claro ? "#1E293B" : "#fff"} strokeOpacity=".55" strokeWidth="5" />
+      <path d="M56 148 Q50 175 52 220 M144 148 Q150 175 148 220" stroke="#000" strokeOpacity=".18" strokeWidth="3" fill="none" />
+      {escudo ? <image href={escudo} x="118" y="168" width="26" height="26" preserveAspectRatio="xMidYMid meet" />
+        : numero != null && <text x="131" y="190" textAnchor="middle" fontFamily="Inter, system-ui" fontWeight="900" fontSize="20" fill={claro ? "#111" : "#fff"} fillOpacity=".9">{numero}</text>}
+      <ellipse cx="62" cy="88" rx="6" ry="11" fill="#9D968E" /><ellipse cx="138" cy="88" rx="6" ry="11" fill="#7B746D" />
+      <ellipse cx="100" cy="82" rx="38" ry="46" fill={`url(#p${id})`} />
+      <ellipse cx="86" cy="58" rx="14" ry="9" fill="#fff" opacity=".25" filter={`url(#b${id})`} />
+      <path d="M76 104 Q100 122 124 104" stroke="#000" strokeOpacity=".08" strokeWidth="6" fill="none" filter={`url(#b${id})`} />
+    </svg>
+  );
+}
 
 /* camisa de costas nas cores do clube, com o sobrenome e o número (cartão do topo) */
 function CamisaMini({ cor = "#12A876", nome = "", numero = 9, size = 44 }) {
@@ -531,6 +589,7 @@ function Ficha({ c, semTopo = false }) {
   return (
     <div className="rp-painel overflow-hidden">
       {!semTopo && <div className="p-4 flex items-center gap-3" style={{ background: `linear-gradient(120deg, ${clube.cor}33, transparent 70%)` }}>
+        <AvatarJogador clube={clube} size={64} numero={numeroDe(c)} />
         <div className="w-16 h-16 rounded-2xl flex flex-col items-center justify-center bg-[#0E1512]/80 border border-[#D8B44A]/40 shrink-0">
           <span className="font-stat text-2xl font-bold text-[#EBC557] leading-none">{ovr}</span>
           <span className="text-[10px] font-bold tracking-widest text-[#8FA39A]">{c.posicao}</span>
@@ -770,7 +829,12 @@ function CabecalhoMomento({ c, momento }) {
 }
 
 function PlacarMomento({ ok, texto }) {
-  return <div className={`display text-3xl rp-sobe ${ok ? "text-[#1BC28A]" : "text-[#E36B5B]"}`}>{texto}</div>;
+  return (
+    <div className="relative">
+      {ok && <Lottie nome="gol" className="absolute left-1/2 -translate-x-1/2 -top-24 w-48 h-48 pointer-events-none" />}
+      <div className={`display text-3xl rp-sobe ${ok ? "text-[#1BC28A]" : "text-[#E36B5B]"}`}>{texto}</div>
+    </div>
+  );
 }
 
 /* Cena do gol: estádio ao fundo, trave com rede em profundidade e um goleiro de verdade */
@@ -1005,6 +1069,7 @@ function TelaMomento({ c, momento, onFim }) {
 
 /* ---------- celebração: uma tela por conquista ---------- */
 function SlideTitulo({ c, card, titulo }) {
+  useEffect(() => { festejar(titulo?.tipo === "copaMundo" ? "fogos" : "chuva", [clubeDe(card.clube)?.cor || "#EBC557", "#EBC557", "#FFFFFF"]); }, [titulo?.nome]);
   const pelaSelecao = titulo.tipo === "copaMundo" || titulo.tipo === "continentalSelecao";
   const cor = pelaSelecao ? "#2E6FE0" : card.cor || "#12A876";
   const contagem = titulo.n > 1 ? `Seu ${titulo.n}º título de ${titulo.nome}` : titulo.primeiro ? "O primeiro título da sua carreira" : `Seu primeiro título de ${titulo.nome}`;
@@ -1015,7 +1080,7 @@ function SlideTitulo({ c, card, titulo }) {
         style={{ background: `repeating-conic-gradient(${cor} 0deg 8deg, transparent 8deg 24deg)`, animation: "rpRaios 26s linear infinite", borderRadius: "50%" }} />
       <Confetti />
       <div className="relative rp-sobe" style={{ animationDelay: ".1s" }}>
-        <div style={{ animation: "floatY 2.6s ease-in-out infinite" }}><IconeTitulo tipo={titulo.tipo} nome={titulo.nome} size={120} /></div>
+        <div className="relative" style={{ animation: "floatY 2.6s ease-in-out infinite" }}><Lottie nome="taca" className="absolute -inset-16 pointer-events-none" /><IconeTitulo tipo={titulo.tipo} nome={titulo.nome} size={120} /></div>
       </div>
       <div className="relative mt-5 rp-sobe" style={{ animationDelay: ".35s" }}>
         <div className="display text-3xl text-[#F5D77A] tracking-wide">CAMPEÃO!</div>
@@ -1041,6 +1106,7 @@ function SlideBolaDeOuro({ c, card }) {
   }, [revelados, top.length]);
   const ganhou = card.bola.pos === 1;
   const fim = revelados >= top.length;
+  useEffect(() => { if (fim && ganhou) { festejar("fogos", ["#FFF1B8", "#E3B93B", "#FFFFFF"]); setTimeout(() => festejar("estrelas", ["#F5D77A", "#FFFFFF"]), 900); } }, [fim, ganhou]);
   return (
     <div className="relative overflow-hidden rounded-[28px] min-h-[440px] flex flex-col items-center justify-center text-center px-5 py-8 border border-[#D8B44A]/30"
       style={{ background: `radial-gradient(circle at 50% 25%, rgba(216,180,74,.35) 0%, rgba(14,21,18,.6) 70%), url(${ARTE.confete}) center/cover, #0E1512` }}>
@@ -2254,6 +2320,7 @@ function GaleriaFim({ c }) {
         {/* o jogador */}
         <div className="rounded-[18px] bg-[#18181B] border border-white/5 p-4 flex flex-col justify-between gap-3 cp-surge min-w-0">
           <div className="flex items-start gap-3">
+            <AvatarJogador clube={clubeDe(c.temporadas[c.temporadas.length - 1]?.clube || c.clubeNome)} size={62} numero={numeroDe(c)} />
             <div className="min-w-0 flex-1">
               <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#71717A]">Carreira finalizada</div>
               <div className="text-[24px] sm:text-[30px] font-black uppercase text-white leading-none mt-1 truncate">{sobrenome}</div>
@@ -2730,6 +2797,10 @@ export function PopupResultado({ info, onFechar }) {
 
 /* Fim de temporada: tudo o que aconteceu numa tela só */
 function PopupTemporada({ c, card, onFechar }) {
+  useEffect(() => {
+    if (card.titulos.length) setTimeout(() => festejar(card.titulos.length > 1 ? "chuva" : "titulo", [clubeDe(card.clube)?.cor || "#EBC557", "#EBC557", "#FFFFFF"]), 600);
+    else if (card.acesso) setTimeout(() => festejar("titulo", ["#22C55E", "#FFFFFF", "#EBC557"]), 500);
+  }, []);
   const delta = card.ovrDepois - (card.ovrAntes ?? card.ovr);
   const corNota = card.nota >= 7.5 ? "#4ADE80" : card.nota >= 6.6 ? "#FACC15" : "#F87171";
   const clube = clubeDe(card.clube);
@@ -2751,7 +2822,7 @@ function PopupTemporada({ c, card, onFechar }) {
   return (
     <TelaCheia rotulo={`Fim da temporada ${card.ano}`} cor={card.titulos.length ? "#CA8A04" : clube?.cor || "#3F3F46"} onFechar={onFechar}>
       <div className="flex items-center gap-3 pt-2">
-        <ClubDot club={clube} size={54} />
+        <span className="relative shrink-0"><AvatarJogador clube={clube} size={64} numero={numeroDe(c)} /><span className="absolute -right-1 bottom-0"><ClubDot club={clube} size={26} /></span></span>
         <div className="min-w-0 flex-1">
           <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-[#A1A1AA]">Fim da temporada {card.ano}</div>
           <div className="text-[24px] font-extrabold text-white leading-tight truncate">{card.clube}{card.emprestado ? " (empr.)" : ""}</div>
@@ -2874,7 +2945,7 @@ export function ApresentacaoGrande({ clube, nome, numero, posicao, idade, deOnde
           {estadio ? (
             <>
               <div className="absolute inset-0" style={{ background: `url(${ARTE.estadioNoite}) center 30%/cover`, filter: "saturate(1.1) brightness(.85)" }} aria-hidden="true" />
-              <div className="absolute inset-x-0 bottom-0 h-[34%]" style={{ background: "repeating-linear-gradient(90deg, #1F6E3C 0 34px, #1A6034 34px 68px)", transform: "perspective(260px) rotateX(42deg)", transformOrigin: "bottom" }} aria-hidden="true" />
+              <div className="absolute left-[-30%] right-[-30%] bottom-0 h-[42%]" style={{ background: `url(${ARTE.campo}) center 40%/100% auto no-repeat, #2E7D46`, transform: "perspective(240px) rotateX(48deg)", transformOrigin: "bottom", filter: "brightness(.8) saturate(1.1)" }} aria-hidden="true" />
               <div className="absolute left-1/2 top-[26px] -translate-x-1/2 rounded-2xl px-4 py-2 flex items-center gap-3 border" style={{ background: "rgba(5,7,10,.6)", borderColor: `${luz}55`, boxShadow: `0 0 30px ${luz}33`, backdropFilter: "blur(6px)" }} aria-hidden="true">
                 <ClubDot club={clube} size={36} />
                 <span className="text-left leading-tight"><span className="block text-[10px] font-bold tracking-[0.3em] text-white/60">BEM-VINDO</span><span className="block text-[15px] font-black tracking-wide text-white">{sobrenome} {numero}</span></span>
@@ -3019,6 +3090,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   // depois da temporada: estouros visuais e o caminho até a próxima ação
   const aposFechar = (antes, f) => {
     if (f.card.ovrDepois > (antes.picoOvr || 0) && antes.temporadas.length > 0) setRecorde(Date.now());
+    if (f.card.ovrDepois >= 90 && f.card.ovrDepois > (antes.picoOvr || 0)) setTimeout(() => festejar("estrelas", ["#FB923C", "#FFFFFF", "#EBC557"]), 2600);
     if (f.card.titulos.length) vibrar([30, 60, 30]);
     if (temFestaGrande(f.card)) setEstado({ etapa: "festa", c: f.c, card: f.card, ultimo: f.card, voar: true });
     else { setPopTemp(f.card); posTemporada(f.c, f.card); }

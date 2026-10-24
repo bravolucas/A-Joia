@@ -19,8 +19,10 @@ import protesto from "./arte/protesto.webp";
 import casa from "./arte/casa.webp";
 import festa from "./arte/festa.webp";
 import salaApresentacao from "./arte/sala-apresentacao.webp";
+// gramado em escala oficial (Kyogijo Stadiums, MIT)
+import campo from "./arte/campo.svg";
 
-export const ARTE = { refletores, coletiva, confete, estadioNoite, porDoSol, tunel, torcida, lesao, contrato, vestiario, fisio, aviao, treino, mansao, carro, protesto, casa, festa, salaApresentacao };
+export const ARTE = { refletores, coletiva, confete, estadioNoite, porDoSol, tunel, torcida, lesao, contrato, vestiario, fisio, aviao, treino, mansao, carro, protesto, casa, festa, salaApresentacao, campo };
 
 /* Escudos e logos de competição opcionais. O jogo não traz nenhum: quem quiser
    usar imagens próprias coloca os arquivos em arte/escudos/ e arte/competicoes/

@@ -4,6 +4,15 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🧍 Avatar 3D, confete novo, gramado em escala e espaço para animações
+
+- **Avatar genérico do jogador**: um manequim com volume e luz (sem rosto), vestindo a camisa do clube com o escudo no peito. Aparece na ficha, no fim de temporada e na galeria do fim de carreira
+- **Confete novo** (canvas-confetti): chuva de papel nas cores do clube nos títulos e no acesso, fogos na Copa do Mundo e na Bola de Ouro (com estrelas), estrelas ao bater recorde de OVR acima de 90. Respeita quem desativou animações no aparelho
+- **Gramado em escala oficial** (Kyogijo Stadiums) no chão da apresentação no estádio, com as linhas do campo
+- **Animações Lottie opcionais**: o jogo já toca `gol.json` no gol dos minigames e `taca.json` na festa de título se os arquivos estiverem em `arte/animacoes/` (o tocador só é baixado quando existe animação)
+
+---
+
 ## 📸 Fotos novas do Adobe Stock
 
 - 10 fotos novas licenciadas no Adobe Stock e tratadas no tom do jogo: vestiário, fisioterapia, avião, treino, mansão, carro esportivo, torcida com sinalizadores, casa de família, festa e sala de coletiva

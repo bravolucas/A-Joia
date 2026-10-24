@@ -54,3 +54,9 @@ real. As fotos de taças do Adobe Stock usadas antes foram aposentadas.
 
 - **Ícones** (`icones.js`): [game-icons.net](https://game-icons.net), de Lorc, Delapouite e colaboradores, licença [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/), obtidos pelo pacote `@iconify-json/game-icons`. Usados no lugar dos emojis (cartas de treino, desafios, eventos, ritmos, pós-carreira e outros).
 - **Bandeiras** (`arte/bandeiras/`): pacote [flag-icons](https://github.com/lipis/flag-icons), licença MIT, formato 4:3.
+
+## Outras bibliotecas visuais
+
+- **Gramado** (`arte/campo.svg`): gerado com [Kyogijo Stadiums](https://github.com/johnmorrisdotca/kyogijo-stadiums), licença MIT, em escala oficial.
+- **Confete** das comemorações: [canvas-confetti](https://github.com/catdad/canvas-confetti), licença ISC.
+- **Animações Lottie** (opcionais, `arte/animacoes/`): tocadas com [lottie-web](https://github.com/airbnb/lottie-web), licença MIT.

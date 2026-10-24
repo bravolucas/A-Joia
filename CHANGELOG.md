@@ -4,6 +4,16 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 💎 Tela inicial com a cara da A JOIA
+
+- Saiu o layout parecido com o Copero (banner com frase, pílulas e botão branco)
+- Agora: a gema no centro com raios dourados girando, "A JOIA" em dourado, e o lema "Da peneira à Bola de Ouro. Cada escolha lapida a sua carreira."
+- O ritmo virou três cartões (Intenso, Normal, Expresso) com uma linha de losangos mostrando os anos de decisão (◆ dourado) de cada um
+- Botão dourado "Começar carreira" com a gema; "Continuar" em verde quando há carreira salva
+- Cores da marca: verde-esmeralda e dourado
+
+---
+
 ## 📈 Evolução de OVR destravada
 
 - **Nota de acordo com a idade**: antes um garoto de 17 anos com OVR 60 era comparado com um adulto e tirava ~5,4 mesmo sendo titular, o que freava a evolução e ainda derrubava a fase. Agora a nota compara com o que se espera da idade (mediana dos 16–19 anos foi de 5,4 para ~5,9; dos 20–23, de 6,3 para ~6,9)

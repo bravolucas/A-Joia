@@ -4,6 +4,22 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🧑‍💼 Depois da bola: uma segunda carreira sorteada
+
+- **Cada caminho vira uma história própria**, sorteada pelo código da carreira e puxada pelo que você fez em campo (legado, títulos, fama, idolatria, patrimônio):
+  - **Técnico**: 3 a 6 clubes (começa por baixo e sobe se ganhar), títulos com ano e clube, aproveitamento e, para os maiores, a seleção (Copa do Mundo e copa continental)
+  - **Auxiliar técnico**: ao lado de um técnico, os clubes e as taças que ganharam juntos (e às vezes um período como interino)
+  - **Dirigente**: 2 ou 3 clubes (começando pelo clube onde é ídolo), os títulos dos times montados, a maior contratação, a joia revelada na base e o saldo da gestão
+  - **Empresário**: atletas agenciados, o maior negócio (jogador, clubes e valor), comissões e, com sorte, um cliente Bola de Ouro ou campeão europeu
+  - **Comentarista**: emissoras, Copas do Mundo comentadas, prêmio de melhor comentarista e até um bordão que virou meme
+  - **Embaixador**: o clube do coração, estátua, camisa aposentada e as conquistas do time nesse período
+  - **Sumir do futebol**: um destino de vida (escolinha, ONG, interior, negócios fora do futebol)
+- **Todos os caminhos ficam abertos**: em vez de bloquear, cada opção mostra "chance alta / média / baixa" e o que pesa a favor
+- **Tela cheia com o resultado**: foto, manchete, números, taças agrupadas (com os anos), trajetória clube a clube com escudos e destaques. Depois ela fica resumida no fim de carreira e pode ser reaberta
+- A escolha aparece já no fim de carreira enxuto (não só no resumo completo) e entra no texto de compartilhar
+
+---
+
 ## 🎲 Desafio de OVR toda temporada e pop-ups de tela cheia
 
 - **Desafio da temporada**: antes de cada temporada, três desafios para escolher — um de risco baixo, um médio e um "tudo ou nada" — cada um com chances diferentes de ganhar ou perder OVR (ex.: 75% +1 / 25% −3, 50% +2 / 50% −2, 12% +6 / 88% −1). São 15 desafios no total, sorteados a cada ano; "Não arriscar este ano" pula

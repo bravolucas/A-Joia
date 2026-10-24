@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ARTE, ARTE_EVENTO } from "./arte.js";
 import { POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS, EMOJI_NACIONALIDADE } from "./data.js";
 import { Gema, ClubDot, Brasao, Confetti, ApresentacaoNovoClube, FreeKickMini, PasseMini } from "./components.jsx";
@@ -2020,27 +2021,125 @@ function CartaFinal({ c }) {
   );
 }
 
-function PosCarreira({ c, onEscolher }) {
-  if (c.posCarreira) {
-    return (
-      <div className="rp-painel p-5" style={{ borderColor: `${c.posCarreira.cor}66` }}>
-        <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Depois da bola</div>
-        <div className="-mx-5 mt-3 h-28" style={{ background: `linear-gradient(180deg, rgba(18,25,22,.1), #121916), url(${FOTO_POS_CARREIRA[c.posCarreira.id] || ARTE.porDoSol}) center/cover` }} aria-hidden="true" />
-        <div className="display text-base -mt-4 relative" style={{ color: c.posCarreira.cor }}>{c.posCarreira.nome}</div>
-        <p className="text-[17px] text-[#C9D3CE] mt-2 leading-snug">{c.posCarreira.epilogo}</p>
+/* Depois da bola: a segunda carreira sorteada, com clubes, taças e destaques */
+const COR_CHANCE_POS = { alta: "#4ADE80", média: "#FACC15", baixa: "#F87171" };
+function TacasAgrupadas({ titulos, size = 40 }) {
+  const grupos = [];
+  titulos.forEach((t) => { const g = grupos.find((x) => x.nome === t.nome); if (g) g.anos.push(t.ano); else grupos.push({ tipo: t.tipo, nome: t.nome, anos: [t.ano] }); });
+  const ordem = ["bolaOuro", "copaMundo", "continentalSelecao", "mundial", "continental", "liga", "copa", "segunda"];
+  grupos.sort((a, b) => ordem.indexOf(a.tipo) - ordem.indexOf(b.tipo) || b.anos.length - a.anos.length);
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {grupos.map((g, i) => (
+        <div key={g.nome} className="cp-card px-2.5 py-2 flex items-center gap-2 rp-sobe" style={{ animationDelay: `${0.3 + i * 0.1}s` }}>
+          <span className="relative shrink-0"><IconeTitulo tipo={g.tipo} nome={g.nome} size={size} />
+            {g.anos.length > 1 && <span className="absolute -right-1 -bottom-1 text-[11px] font-black text-[#1A1405] rounded-full px-1.5" style={{ background: "#FACC15" }}>×{g.anos.length}</span>}</span>
+          <span className="min-w-0">
+            <span className="block text-[13px] font-bold text-[#FDE68A] leading-tight truncate">{g.nome}</span>
+            <span className="block text-[11px] text-[#A1A1AA] leading-tight">{g.anos.sort((a, b) => a - b).join(", ")}</span>
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+function PopupPosCarreira({ c, onFechar }) {
+  const pc = c.posCarreira;
+  return (
+    <TelaCheia rotulo={`Depois da bola: ${pc.nome}`} cor={pc.cor} onFechar={onFechar} botao="Ver o legado" centro={false}>
+      <div className="-mx-4 -mt-6 h-36 relative shrink-0" style={{ background: `linear-gradient(180deg, rgba(11,11,12,.1), #0B0B0C), url(${FOTO_POS_CARREIRA[pc.id] || ARTE.porDoSol}) center/cover` }}>
+        <div className="absolute left-4 bottom-1 flex items-center gap-3">
+          <span className="w-12 h-12 rounded-2xl flex items-center justify-center text-[26px] border border-white/15" style={{ background: `${pc.cor}33` }}>{pc.icone}</span>
+          <span>
+            <span className="block text-[12px] font-bold uppercase tracking-[0.2em] text-[#D4D4D8]">Depois da bola{pc.de ? ` · ${pc.de}${pc.ate ? `–${pc.ate}` : ""}` : ""}</span>
+            <span className="block text-[22px] font-extrabold text-white leading-tight">{pc.nome}</span>
+          </span>
+        </div>
       </div>
+      <div className="cp-pop text-[24px] font-black leading-tight text-center mt-2" style={{ color: pc.cor }}>{pc.manchete}</div>
+      {pc.numeros?.length > 0 && (
+        <div className={`grid gap-2 ${pc.numeros.length > 2 ? "grid-cols-4" : "grid-cols-2"}`}>
+          {pc.numeros.map(([k, v], i) => (
+            <div key={k} className="cp-card py-2.5 px-1 text-center cp-surge min-w-0" style={{ animationDelay: `${0.1 + i * 0.07}s` }}>
+              <div className={`${String(v).length > 7 ? "text-[14px]" : "text-[22px]"} font-black text-white leading-none truncate`}>{v}</div>
+              <div className="text-[11px] font-semibold text-[#A1A1AA] mt-1">{k}</div>
+            </div>
+          ))}
+        </div>
+      )}
+      {pc.titulos?.length > 0 && (
+        <div className="rounded-[20px] p-3 border border-[#CA8A04]/50" style={{ background: "linear-gradient(160deg, rgba(234,179,8,.14), #161618 65%)" }}>
+          <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#FACC15] mb-2">{pc.titulos.length} {pc.titulos.length > 1 ? "conquistas" : "conquista"}</div>
+          <TacasAgrupadas titulos={pc.titulos} size={34} />
+        </div>
+      )}
+      {pc.passagens?.length > 0 && (
+        <div className="cp-card px-3.5 py-2">
+          <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#A1A1AA] py-1">Trajetória</div>
+          {pc.passagens.map((x, i) => (
+            <div key={i} className="flex items-center gap-3 py-2 border-t border-white/[.06] first:border-0 cp-surge" style={{ animationDelay: `${0.25 + i * 0.08}s` }}>
+              <span className="w-8 flex justify-center shrink-0">{x.band ? <span className="text-[22px] leading-none">{EMOJI_NACIONALIDADE[x.band] || "🌎"}</span> : <ClubDot club={clubeDe(x.clube)} size={28} />}</span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-[15px] font-semibold text-[#E4E4E7] truncate">{x.clube}</span>
+                <span className="block text-[12px] text-[#A1A1AA]">{x.de === x.ate ? x.de : `${x.de}–${x.ate}`} · {x.liga}</span>
+              </span>
+              <span className="flex items-center gap-0.5 shrink-0">
+                {x.titulos.slice(0, 4).map((t, k) => <IconeTitulo key={k} tipo={t.tipo} nome={t.nome} size={20} />)}
+                {x.titulos.length > 4 && <span className="text-[12px] font-bold text-[#FACC15] ml-0.5">+{x.titulos.length - 4}</span>}
+                {!x.titulos.length && <span className="text-[12px] text-[#71717A]">sem taças</span>}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      {pc.destaques?.length > 0 && (
+        <ul className="flex flex-col gap-1.5 px-1">
+          {pc.destaques.map((d, i) => <li key={i} className="text-[15px] text-[#D4D4D8] leading-snug flex gap-2 cp-surge" style={{ animationDelay: `${0.4 + i * 0.08}s` }}><span style={{ color: pc.cor }}>●</span><span>{d}</span></li>)}
+        </ul>
+      )}
+    </TelaCheia>
+  );
+}
+function PosCarreira({ c, onEscolher }) {
+  const [aberto, setAberto] = useState(false);
+  const pc = c.posCarreira;
+  if (pc && pc.manchete) {
+    return (
+      <>
+        {aberto && <PopupPosCarreira c={c} onFechar={() => setAberto(false)} />}
+        <button onClick={() => setAberto(true)} className="rp-painel p-4 text-left w-full" style={{ borderColor: `${pc.cor}66` }}>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Depois da bola</div>
+          <div className="flex items-center gap-3 mt-2">
+            <span className="w-12 h-12 rounded-xl shrink-0 border border-white/10" style={{ background: `url(${FOTO_POS_CARREIRA[pc.id] || ARTE.porDoSol}) center/cover` }} aria-hidden="true" />
+            <span className="min-w-0 flex-1">
+              <span className="block text-[17px] font-bold leading-tight" style={{ color: pc.cor }}>{pc.icone} {pc.nome}</span>
+              <span className="block text-[15px] text-[#E1E6E3] leading-snug">{pc.manchete}</span>
+            </span>
+          </div>
+          {pc.titulos?.length > 0 && <div className="flex flex-wrap items-center gap-1 mt-2">{pc.titulos.slice(0, 10).map((t, i) => <IconeTitulo key={i} tipo={t.tipo} nome={t.nome} size={22} />)}{pc.titulos.length > 10 && <span className="text-[13px] font-bold text-[#EBC557]">+{pc.titulos.length - 10}</span>}</div>}
+          <div className="text-[13px] font-bold text-[#7FE3BC] mt-2">Ver a trajetória ›</div>
+        </button>
+      </>
     );
+  }
+  if (pc) { // saves antigos: só o texto
+    return <div className="rp-painel p-4"><div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Depois da bola</div><div className="display text-base mt-2" style={{ color: pc.cor }}>{pc.nome}</div><p className="text-[16px] text-[#C9D3CE] mt-1">{pc.epilogo}</p></div>;
   }
   return (
     <div className="rp-painel p-4">
       <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">E agora? O que vem depois da bola</div>
+      <p className="text-[14px] text-[#8FA39A] mt-1">Cada caminho vira uma segunda carreira. O que você fez em campo pesa na chance de dar certo.</p>
       <div className="grid gap-2 mt-3">
         {caminhosPosCarreira(c).map((p) => (
-          <button key={p.id} disabled={!p.disponivel} onClick={() => onEscolher(p.id)} className="rp-opcao px-3 py-3 flex items-center gap-3 disabled:opacity-40 disabled:hover:translate-y-0">
-            <span aria-hidden="true" className="shrink-0 w-14 h-14 rounded-xl border border-white/10" style={{ background: `url(${FOTO_POS_CARREIRA[p.id] || ARTE.porDoSol}) center/cover`, filter: p.disponivel ? undefined : "grayscale(1)" }} />
-            <span className="min-w-0">
-              <span className="block font-bold text-[16px] text-[#F2F5F3]">{p.nome}</span>
-              <span className="block text-[14px] text-[#8FA39A]">{p.disponivel ? p.desc : `Requer: ${p.requisito}`}</span>
+          <button key={p.id} onClick={() => { vibrar(15); onEscolher(p.id); setAberto(true); }} className="rp-opcao px-3 py-3 flex items-center gap-3">
+            <span aria-hidden="true" className="shrink-0 w-14 h-14 rounded-xl border border-white/10" style={{ background: `url(${FOTO_POS_CARREIRA[p.id] || ARTE.porDoSol}) center/cover` }} />
+            <span className="min-w-0 flex-1">
+              <span className="flex items-center gap-2">
+                <span className="font-bold text-[16px] text-[#F2F5F3] truncate">{p.icone} {p.nome}</span>
+                {p.id !== "afastar" && <span className="ml-auto shrink-0 text-[10px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ color: COR_CHANCE_POS[p.chance], background: `${COR_CHANCE_POS[p.chance]}1F` }}>chance {p.chance}</span>}
+              </span>
+              <span className="block text-[14px] text-[#C9D3CE] leading-snug">{p.desc}</span>
+              <span className="block text-[12px] text-[#8FA39A] mt-0.5">Pesa a favor: {p.aFavor}</span>
             </span>
           </button>
         ))}
@@ -2073,6 +2172,7 @@ function FimDeCarreira(props) {
         </div>
       </div>
       <TabelaCarreira c={c} proxima={false} />
+      {props.onPosCarreira && <div className="max-w-xl mx-auto w-full px-3"><PosCarreira c={c} onEscolher={props.onPosCarreira} /></div>}
       <div className="max-w-xl mx-auto w-full px-3 grid grid-cols-2 gap-2">
         <button onClick={() => { setCompleto(true); window.scrollTo({ top: 0 }); }} className="rp-btn rp-ouro display text-xs">Ver resumo</button>
         <button onClick={onNova} className="rp-btn rp-prim display text-xs">Jogar novamente</button>
@@ -2285,16 +2385,17 @@ function useContagem(de, para, atraso = 350, dur = 900) {
   }, [de, para, atraso, dur]);
   return v;
 }
-function TelaCheia({ rotulo, cor = "#3F3F46", children, botao = "Continuar", onFechar, bloqueado = false }) {
+function TelaCheia({ rotulo, cor = "#3F3F46", children, botao = "Continuar", onFechar, bloqueado = false, centro = true }) {
   useEffect(() => { document.body.style.overflow = "hidden"; return () => { document.body.style.overflow = ""; }; }, []);
-  return (
+  return createPortal(
     <div className="cp fixed inset-0 z-[70] overflow-y-auto cp-surge" role="dialog" aria-modal="true" aria-label={rotulo} data-pop=""
       style={{ background: `radial-gradient(130% 55% at 50% 0%, ${cor}55, #0B0B0C 62%), #0B0B0C` }}>
       <div className="min-h-full max-w-md mx-auto px-4 pt-6 pb-5 flex flex-col">
-        <div className="flex-1 flex flex-col justify-center gap-3">{children}</div>
+        <div className={`flex-1 flex flex-col gap-3 ${centro ? "justify-center" : ""}`}>{children}</div>
         <button onClick={onFechar} className={`cp-pill cp-branca text-[16px] w-full mt-5 sticky bottom-4 ${bloqueado ? "opacity-60" : ""}`}>{botao}</button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 /* OVR antes → depois, com o número correndo */

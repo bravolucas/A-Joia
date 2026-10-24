@@ -679,33 +679,226 @@ function fecharFinancas(c, card) {
 
 /* ---------- pós-carreira (os mesmos caminhos do Modo Carreira) ---------- */
 export function caminhosPosCarreira(c) {
-  const titulos = (c.lista || []).filter((x) => !ehPremioIndividual(x.tipo)).length;
-  const idolo = Object.values(c.torcida).some((v) => v >= 75);
-  const req = {
-    tecnico: c.temporadas.length >= 15 || titulos >= 5,
-    auxiliar: true,
-    embaixador: idolo,
-    comentarista: c.fama >= 55,
-    dirigente: (c.patrimonio || 0) >= 10000 || (c.repNeg || 0) >= 20,
-    empresario: (c.patrimonio || 0) >= 3000,
-    afastar: true,
-  };
-  const textoReq = { tecnico: "Carreira longa (15+ temporadas) ou 5 títulos", dirigente: "Patrimônio de € 10 mi ou fama de negociador duro", empresario: "Patrimônio de € 3 mi" };
-  return CAMINHOS_POS_CARREIRA.map((p) => ({ id: p.id, nome: p.nome, icone: p.icone, cor: p.cor, desc: p.desc, disponivel: !!req[p.id], requisito: textoReq[p.id] || p.textoRequisito }));
+  // todos os caminhos ficam abertos; o que a carreira de jogador muda é a chance de dar certo
+  return CAMINHOS_POS_CARREIRA.map((p) => ({ id: p.id, nome: p.nome, icone: p.icone, cor: p.cor, desc: p.desc, disponivel: true, chance: chancePosCarreira(c, p.id), aFavor: PESA_A_FAVOR[p.id] }));
 }
+/* ---------- depois da bola: uma segunda carreira sorteada (puxada pelo que você fez em campo) ---------- */
+const NAC_DA_LIGA = { brasileirao: "BRA", serieB: "BRA", inglaterra: "ENG", inglaterra2: "ENG", espanha: "ESP", espanha2: "ESP", italia: "ITA", italia2: "ITA", alemanha: "ALE", alemanha2: "ALE", franca: "FRA", franca2: "FRA", portugal: "POR", portugal2: "POR" };
+const LIGAS_TOP = ["inglaterra", "espanha", "italia", "alemanha", "franca"];
+function talentoPos(c) {
+  const L = c.legado || calcularLegado(c);
+  const tit = (c.lista || []).filter((x) => !ehPremioIndividual(x.tipo)).length;
+  const idolo = Object.values(c.torcida || {}).some((v) => v >= 75);
+  return clampR(L.pontos / 1100 * 0.45 + tit / 25 * 0.25 + (c.fama || 0) / 100 * 0.2 + (idolo ? 0.08 : 0), 0, 1);
+}
+const PESA_A_FAVOR = {
+  tecnico: "títulos, liderança e carreira longa", auxiliar: "experiência e boa relação com o vestiário", embaixador: "ser ídolo de uma torcida",
+  comentarista: "fama e carisma", dirigente: "patrimônio e faro para negociar", empresario: "patrimônio e contatos", afastar: "o que você guardou",
+};
+function notaPos(c, id) {
+  const t = talentoPos(c);
+  const pat = Math.min(1, (c.patrimonio || 0) / 40000);
+  const torc = Math.max(0, ...Object.values(c.torcida || { x: 0 })) / 100;
+  const v = { tecnico: t * 0.8 + Math.min(1, c.temporadas.length / 20) * 0.25, auxiliar: t * 0.6 + 0.25, embaixador: torc * 0.7 + t * 0.3,
+    comentarista: (c.fama || 0) / 100 * 0.8 + t * 0.2, dirigente: t * 0.4 + pat * 0.4 + Math.min(1, (c.repNeg || 0) / 30) * 0.3,
+    empresario: pat * 0.6 + t * 0.3 + (c.fama || 0) / 100 * 0.15, afastar: 0.5 }[id] ?? 0.4;
+  return clampR(v, 0, 1);
+}
+export const chancePosCarreira = (c, id) => { const v = notaPos(c, id); return v >= 0.6 ? "alta" : v >= 0.35 ? "média" : "baixa"; };
+const clubeAlvo = (ligas, forca, usados) => {
+  const cands = clubesJogaveis().filter((x) => ligas.includes(x.liga) && !usados.includes(x.nome));
+  if (!cands.length) return null;
+  return cands.map((x) => ({ x, d: Math.abs(x.forca - forca) + rnd() * 5 })).sort((a, b) => a.d - b.d)[0].x;
+};
+// um ano de um clube: quais taças ele ganha, com um bônus de quem está no comando
+function anoDoClube(clube, ano, bonus) {
+  const out = [];
+  const liga = ligaDe(clube.liga);
+  const seg = ehSegundaDivisao(clube.liga);
+  if (chance(clampR(0.05 + (clube.forca - 74) * 0.022 + bonus, 0.01, 0.6))) out.push({ tipo: seg ? "segunda" : "liga", nome: liga.nome, ano, clube: clube.nome });
+  const copa = COPA_POR_LIGA[clube.liga];
+  if (copa && chance(clampR(0.07 + (clube.forca - 72) * 0.01 + bonus * 0.6, 0.02, 0.35))) out.push({ tipo: "copa", nome: copa, ano, clube: clube.nome });
+  if (liga.continental && clube.forca >= 78 && chance(clampR(0.02 + (clube.forca - 80) * 0.018 + bonus * 0.6, 0.004, 0.3))) out.push({ tipo: "continental", nome: liga.continental, ano, clube: clube.nome });
+  return out;
+}
+function ligasDoJogador(c) {
+  const ult = clubeDe(c.temporadas[c.temporadas.length - 1]?.clube || c.clubeNome);
+  const base = LIGA_BASE_POR_NAC[c.nac] || [ult?.liga || "brasileirao"];
+  const casa = base.map((l) => l.replace(/2$/, "")).map((l) => (l === "serieB" ? "brasileirao" : l));
+  return { casa: [...new Set([...casa, ...base])], ult: ult?.liga };
+}
+const nomeLigaCurto = (id) => ligaDe(id)?.nome || id;
+
+function posTecnico(c, s, auxiliar = false) {
+  const inicio = c.ano + rand(0, 2);
+  const anosTot = auxiliar ? rand(6, 14) : Math.round(6 + s * 12 + rand(0, 6));
+  const bonus = (s - 0.45) * (auxiliar ? 0.06 : 0.16);
+  const { casa, ult } = ligasDoJogador(c);
+  let ligas = [ult, ...casa].filter(Boolean);
+  let forca = auxiliar ? 78 + s * 10 : 66 + s * 8;
+  const passagens = [], titulos = [], usados = [];
+  let ano = inicio;
+  while (ano < inicio + anosTot && passagens.length < 6) {
+    const cl = clubeAlvo(ligas, forca, usados);
+    if (!cl) break;
+    usados.push(cl.nome);
+    const dur = Math.min(rand(1, 5), inicio + anosTot - ano);
+    const tits = [];
+    for (let a = ano; a < ano + Math.max(1, dur); a++) tits.push(...anoDoClube(cl, a, bonus));
+    passagens.push({ clube: cl.nome, de: ano, ate: ano + Math.max(1, dur) - 1, titulos: tits, liga: nomeLigaCurto(cl.liga) });
+    titulos.push(...tits);
+    ano += Math.max(1, dur);
+    const foiBem = tits.length > 0 || chance(s * 0.7);
+    forca = clampR(forca + (foiBem ? rand(3, 8) : rand(-5, 1)), 62, 92);
+    if (foiBem && s > 0.45 && chance(0.4)) ligas = [...new Set([...ligas, pick(LIGAS_TOP)])];
+  }
+  // os maiores terminam na seleção
+  let selecao = null;
+  if (!auxiliar && s >= 0.55 && chance(0.25 + s * 0.3)) {
+    const de = ano, ate = ano + rand(4, 8) - 1;
+    const tits = [];
+    for (let a = de; a <= ate; a++) {
+      if (anoDeCopa(a) && chance(clampR(0.06 + (forcaSelecao(c) - 85) * 0.02 + bonus, 0.02, 0.4))) tits.push({ tipo: "copaMundo", nome: "Copa do Mundo", ano: a, clube: nacDe(c.nac).label });
+      if (anoDeContinentalSelecao(a) && chance(clampR(0.12 + (forcaSelecao(c) - 85) * 0.02 + bonus, 0.04, 0.5))) tits.push({ tipo: "continentalSelecao", nome: nomeCopaContinental(c.nac), ano: a, clube: nacDe(c.nac).label });
+    }
+    selecao = { clube: `Seleção (${nacDe(c.nac).label})`, de, ate, titulos: tits, liga: "Seleção", band: c.nac };
+    passagens.push(selecao);
+    titulos.push(...tits);
+    ano = ate + 1;
+  }
+  const fim = Math.max(ano - 1, inicio);
+  const aprov = Math.round(clampR(44 + s * 24 + rand(-6, 6) + titulos.length * 0.6, 33, 79));
+  const n = titulos.length;
+  const tecnicoParceiro = `${pick(["Carlos", "Jorge", "Luis", "Marco", "André", "Paulo", "Rui", "Diego"])} ${pick(SOBRENOMES)}`;
+  const manchete = auxiliar
+    ? (n >= 4 ? `Braço direito de campeões: ${n} taças ao lado de ${tecnicoParceiro}` : n ? `Ao lado de ${tecnicoParceiro}, levantou ${n} ${n > 1 ? "taças" : "taça"}` : `Anos de vestiário ao lado de ${tecnicoParceiro}`)
+    : n >= 12 ? "Um dos maiores técnicos da sua geração" : n >= 6 ? "Técnico multicampeão" : n >= 2 ? "Técnico vencedor" : n === 1 ? "Uma taça para a história" : "Nunca levantou uma taça no banco";
+  const destaques = [];
+  if (auxiliar && chance(0.35)) { const p0 = pick(passagens); destaques.push(`Assumiu como interino no ${p0.clube} e ganhou ${rand(3, 7)} jogos seguidos`); }
+  const melhor = passagens.filter((x) => !x.band && x.titulos.length).sort((a, b) => b.titulos.length - a.titulos.length)[0];
+  if (!auxiliar && melhor) destaques.push(`Melhor trabalho: ${melhor.clube} (${melhor.de}–${melhor.ate}), ${melhor.titulos.length} ${melhor.titulos.length > 1 ? "taças" : "taça"}`);
+  else if (!auxiliar && passagens.length) destaques.push(`Passou por ${passagens.length} ${passagens.length > 1 ? "clubes" : "clube"} sem conseguir um título`);
+  if (selecao) destaques.push(`Comandou a seleção de ${nacDe(c.nac).label} de ${selecao.de} a ${selecao.ate}`);
+  return {
+    de: inicio, ate: fim, manchete, passagens, titulos,
+    numeros: [["Anos", fim - inicio + 1], ["Clubes", passagens.length], ["Títulos", n], [auxiliar ? "Jogos" : "Aproveitamento", auxiliar ? (fim - inicio + 1) * rand(45, 58) : `${aprov}%`]],
+    destaques,
+  };
+}
+const SOBRENOMES = ["Ferreira", "Mendes", "Sampaio", "Aguirre", "Bianchi", "Vidal", "Machado", "Otero", "Salgado", "Ramírez", "Duarte", "Pellegrini", "Fontana", "Nunes", "Kroos", "Laurent"];
+
+function posDirigente(c, s) {
+  const inicio = c.ano + rand(1, 3);
+  const idolos = Object.entries(c.torcida || {}).sort((a, b) => b[1] - a[1]).map(([n]) => clubeDe(n)).filter(Boolean);
+  const passagens = [], titulos = [], usados = [];
+  let ano = inicio;
+  const bonus = (s - 0.45) * 0.12;
+  const nPass = rand(2, 3);
+  for (let k = 0; k < nPass; k++) {
+    let cl = k === 0 && idolos[0] ? idolos[0] : clubeAlvo([idolos[0]?.liga || "brasileirao", pick(LIGAS_TOP)], 76 + s * 12, usados);
+    if (!cl || usados.includes(cl.nome)) cl = clubeAlvo([cl?.liga || "brasileirao"], 76, usados);
+    if (!cl) break;
+    usados.push(cl.nome);
+    const dur = rand(3, 7);
+    const tits = [];
+    for (let a = ano; a < ano + dur; a++) tits.push(...anoDoClube(cl, a, bonus));
+    passagens.push({ clube: cl.nome, de: ano, ate: ano + dur - 1, titulos: tits, liga: nomeLigaCurto(cl.liga) });
+    titulos.push(...tits);
+    ano += dur;
+  }
+  const fim = ano - 1;
+  const contratacoes = rand(18, 45) * passagens.length;
+  const maior = { nome: nomeMundo(pick(Object.keys(NAC_DA_LIGA).map((l) => NAC_DA_LIGA[l]))), valor: Math.round((30 + s * 90 + rand(0, 40)) * 1000), clube: pick(passagens).clube };
+  const revelado = chance(0.5 + s * 0.3) ? { nome: nomeMundo(NAC_DA_LIGA[clubeDe(passagens[0]?.clube)?.liga] || c.nac), valor: Math.round((20 + rand(0, 80)) * 1000) } : null;
+  const saldo = Math.round((s - 0.4 + (rnd() - 0.5) * 0.6) * 120) * 1000;
+  const n = titulos.length;
+  const destaques = [`Maior contratação: ${maior.nome}, por ${formatarValor(maior.valor)}, para o ${maior.clube}`];
+  if (revelado) destaques.push(`Revelou ${revelado.nome} na base e vendeu por ${formatarValor(revelado.valor)}`);
+  return {
+    de: inicio, ate: fim, passagens, titulos, destaques,
+    manchete: n >= 8 ? "Montou uma dinastia" : n >= 3 ? "Montou times campeões" : n ? "Uma taça na gestão" : "Gestão sem taças",
+    numeros: [["Anos", fim - inicio + 1], ["Clubes", passagens.length], ["Títulos", n], ["Saldo", `${saldo >= 0 ? "+" : "−"}${formatarValor(Math.abs(saldo))}`]],
+  };
+}
+
+function posEmpresario(c, s) {
+  const inicio = c.ano + rand(0, 2), fim = inicio + rand(10, 24);
+  const atletas = Math.round(6 + s * 50 + rand(0, 15));
+  const grandes = clubesJogaveis().filter((x) => x.forca >= 84);
+  const de = pick(clubesJogaveis().filter((x) => x.forca >= 72 && x.forca < 82)), para = pick(grandes);
+  const valor = Math.round((25 + s * 120 + rand(0, 40)) * 1000);
+  const estrela = nomeMundo(c.nac);
+  const destaques = [`Maior negócio: ${estrela}, do ${de.nome} para o ${para.nome}, por ${formatarValor(valor)}`];
+  const titulos = [];
+  if (chance(0.12 + s * 0.35)) { const a = rand(inicio + 4, fim); titulos.push({ tipo: "bolaOuro", nome: "Bola de Ouro", ano: a, clube: estrela }); destaques.push(`Seu cliente ${estrela} ganhou a Bola de Ouro de ${a}`); }
+  if (chance(0.25 + s * 0.3)) { const a = rand(inicio + 2, fim); const t = { tipo: "continental", nome: ligaDe(para.liga).continental || "Champions League", ano: a, clube: para.nome }; titulos.push(t); destaques.push(`Três clientes seus foram campeões da ${t.nome} de ${a} pelo ${para.nome}`); }
+  if (chance(0.4)) destaques.push(`Agência com escritórios em ${pick(["Lisboa", "Madri", "Londres", "São Paulo", "Milão", "Paris"])} e ${pick(["Buenos Aires", "Munique", "Rio", "Barcelona", "Dubai"])}`);
+  const comissao = Math.round(atletas * (40 + s * 120)) * 10;
+  return {
+    de: inicio, ate: fim, passagens: [], titulos, destaques,
+    manchete: atletas >= 45 ? "Um dos agentes mais poderosos do mundo" : atletas >= 25 ? "Agência de respeito" : "Agência pequena, de confiança",
+    numeros: [["Anos", fim - inicio + 1], ["Atletas", atletas], ["Maior negócio", formatarValor(valor)], ["Comissões", formatarValor(comissao)]],
+  };
+}
+
+function posComentarista(c, s) {
+  const inicio = c.ano + rand(0, 1), fim = inicio + rand(8, 22);
+  const tvs = ["TV Arena", "Canal Bola", "Rede Esporte", "Sport Total", "Estádio TV", "Rádio Gol", "Placar+"];
+  const emissoras = [pick(tvs)]; if (chance(0.6)) emissoras.push(pick(tvs.filter((x) => !emissoras.includes(x))));
+  let copas = 0; for (let a = inicio; a <= fim; a++) if (anoDeCopa(a)) copas++;
+  const destaques = [`Trabalhou na ${emissoras.join(" e na ")}`];
+  if (copas) destaques.push(`Comentou ${copas} ${copas > 1 ? "Copas do Mundo" : "Copa do Mundo"}${chance(0.5) ? ", incluindo uma final" : ""}`);
+  if (chance(0.3 + s * 0.4)) destaques.push(`Eleito melhor comentarista do país em ${rand(inicio + 2, fim)}`);
+  if (chance(0.35)) destaques.push(`Um bordão seu virou meme: “${pick(["Isso aqui é futebol raiz!", "Bola na rede, alma lavada!", "Tá pegando fogo, torcida!", "Eu avisei no intervalo!"])}”`);
+  const audiencia = Math.round(clampR(0.4 + s * 0.6 + rnd() * 0.3, 0.3, 1.2) * 10) / 10;
+  return {
+    de: inicio, ate: fim, passagens: [], titulos: [], destaques,
+    manchete: s >= 0.6 ? "A voz do futebol no país" : "Comentarista querido aos domingos",
+    numeros: [["Anos", fim - inicio + 1], ["Emissoras", emissoras.length], ["Copas", copas], ["Jogos", (fim - inicio + 1) * rand(60, 95)]],
+    audiencia,
+  };
+}
+
+function posEmbaixador(c, s) {
+  const [clubeN] = Object.entries(c.torcida || {}).sort((a, b) => b[1] - a[1])[0] || [c.clubeNome];
+  const cl = clubeDe(clubeN);
+  const inicio = c.ano + rand(0, 2), fim = inicio + rand(10, 25);
+  const tits = [];
+  for (let a = inicio; a <= fim; a++) tits.push(...anoDoClube(cl, a, 0));
+  const destaques = [];
+  if (chance(0.35 + s * 0.4)) destaques.push(`Ganhou uma estátua na frente do estádio do ${cl.nome} em ${rand(inicio + 1, fim)}`);
+  if (chance(0.5)) destaques.push(`A camisa ${numeroDe(c)} foi aposentada em sua homenagem`);
+  destaques.push(`Representou o clube em ${rand(4, 15)} países`);
+  if (tits.length) destaques.push(`Esteve ao lado do time em ${tits.length} ${tits.length > 1 ? "conquistas" : "conquista"}`);
+  return {
+    de: inicio, ate: fim, passagens: [{ clube: cl.nome, de: inicio, ate: fim, titulos: tits, liga: nomeLigaCurto(cl.liga) }], titulos: tits, destaques,
+    manchete: `O rosto eterno do ${cl.nome}`,
+    numeros: [["Anos", fim - inicio + 1], ["Clube", cl.nome], ["Conquistas", tits.length], ["Torcida", `${Math.round(c.torcida[clubeN] ?? 70)}/100`]],
+  };
+}
+
+function posAfastar(c, s) {
+  const inicio = c.ano;
+  const destino = pick([
+    { m: "Abriu uma escolinha de futebol", d: () => [`Mais de ${rand(3, 20) * 100} crianças passaram pela escolinha`, chance(0.5) ? `Um aluno, ${nomeMundo(c.nac)}, virou profissional no ${pick(clubesJogaveis()).nome}` : "Os melhores times de base da região saíram de lá"] },
+    { m: "Criou uma ONG na cidade natal", d: () => [`Projeto social com ${rand(5, 40) * 50} jovens atendidos`, "Recebeu um prêmio de cidadania"] },
+    { m: "Foi viver longe dos holofotes", d: () => [`Mudou-se para ${pick(["uma fazenda no interior", "o litoral", "a cidade onde nasceu", "Portugal"])}`, "Aparece no estádio só em dia de festa"] },
+    { m: "Virou empresário fora do futebol", d: () => [`Rede de ${pick(["restaurantes", "academias", "padarias", "hotéis"])} com ${rand(3, 25)} unidades`, `Patrimônio de ${formatarValor(Math.round((c.patrimonio || 0) * (1 + rnd())))}`] },
+  ]);
+  const destaques = destino.d();
+  if (chance(0.35)) destaques.push(`O filho entrou na base do ${pick(clubesJogaveis().filter((x) => x.forca >= 75)).nome}`);
+  return { de: inicio, ate: null, passagens: [], titulos: [], destaques, manchete: destino.m, numeros: [["Patrimônio", formatarValor(c.patrimonio || 0)], ["Anos de bola", c.temporadas.length]] };
+}
+
 export function escolherPosCarreira(c0, id) {
   const c = clone(c0);
   const p = CAMINHOS_POS_CARREIRA.find((x) => x.id === id);
   if (!p) return c;
-  const ultimo = c.temporadas[c.temporadas.length - 1];
-  const adaptado = {
-    titulos: c.lista.filter((x) => !ehPremioIndividual(x.tipo)).length, bolasDeOuro: c.titulos.bolaOuro || 0,
-    clube: { nome: ultimo?.clube || c.clubeNome }, torcidaPorClube: c.torcida, fama: c.fama, cofre: c.patrimonio || 0,
-    tecnicoConfianca: 60, relacaoDiretoria: 50,
-  };
-  let epilogo = "";
-  try { epilogo = p.epilogo(adaptado, c.temporadas); } catch { epilogo = ""; }
-  c.posCarreira = { id: p.id, nome: p.nome, icone: p.icone, cor: p.cor, epilogo: epilogo.replace(/\$([\d.]+M?k?)/g, (_, v) => `€ ${v}`) };
+  const s = notaPos(c, id);
+  const fn = { tecnico: (x) => posTecnico(x, s), auxiliar: (x) => posTecnico(x, s, true), dirigente: (x) => posDirigente(x, s), empresario: (x) => posEmpresario(x, s),
+    comentarista: (x) => posComentarista(x, s), embaixador: (x) => posEmbaixador(x, s), afastar: (x) => posAfastar(x, s) }[id];
+  const r = comSemente(c.codigo, `pos:${id}`, () => fn(c));
+  c.posCarreira = { id: p.id, nome: p.nome, icone: p.icone, cor: p.cor, chance: chancePosCarreira(c, id), ...r };
   return c;
 }
 
@@ -3074,6 +3267,7 @@ export function textoCompartilhar(c) {
     `Clubes: ${[...new Set(c.temporadas.map((s) => s.clube))].join(" → ")}`,
   ];
   if (c.lenda) linhas.splice(3, 0, `🪞 Você foi como ${c.lenda.nome} (${c.lenda.similaridade}% de semelhança)`);
+  if (c.posCarreira) linhas.push(`${c.posCarreira.icone} Depois da bola: ${c.posCarreira.nome} — ${c.posCarreira.manchete}${c.posCarreira.titulos?.length ? ` (${c.posCarreira.titulos.length} títulos)` : ""}`);
   if (c.rival) linhas.push(`⚔️ Rival: ${c.rival.nome} — ${duelo(c).venceu ? "você venceu o duelo de geração" : "ele levou a melhor"}`);
   linhas.push(c.diario ? `📅 Carreira do Dia ${dataDoCodigo(c.codigo)} · jogue a mesma em A JOIA` : `🔑 Código da carreira: ${c.codigo}`);
   return linhas.join("\n");

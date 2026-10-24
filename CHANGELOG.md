@@ -4,6 +4,17 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🎲 Desafio de OVR toda temporada e pop-ups de tela cheia
+
+- **Desafio da temporada**: antes de cada temporada, três desafios para escolher — um de risco baixo, um médio e um "tudo ou nada" — cada um com chances diferentes de ganhar ou perder OVR (ex.: 75% +1 / 25% −3, 50% +2 / 50% −2, 12% +6 / 88% −1). São 15 desafios no total, sorteados a cada ano; "Não arriscar este ano" pula
+- **Sorteio animado**: a barra de chances aparece em verde e vermelho e um ponteiro corre por ela até parar no resultado; depois o OVR anda do valor antigo para o novo
+- **Equilíbrio**: na média os desafios não inflam a carreira (OVR máximo mediano igual ao de antes), mas as carreiras ficam mais variadas. Veteranos ganham um pouco menos nos saltos grandes. As decisões de janela que só mexiam no OVR saíram, já que o desafio cuida disso
+- **Fim de temporada em tela cheia**: escudo e clube, nota grande, OVR antes → depois, jogos/gols/assistências com ícones, campanha em cada competição (campeão em dourado), taças conquistadas, faixa de acesso/rebaixamento/ídolo, torcida e valor
+- **Resultado das decisões em tela cheia**: o que aconteceu, a sua escolha, o resultado, o OVR antes → depois e cada efeito em destaque (verde sobe, vermelho desce). Decisões com chance também mostram o sorteio
+- O aviso rápido no topo e as taças voando saíram (tudo está nos pop-ups)
+
+---
+
 ## 🎨 Visual mais próximo do Copero: pop-ups, tabela e menu
 
 - **Menu inicial novo**: banner com a foto do estádio, frase de abertura, ritmo escolhido em pílulas (Intenso/Normal/Expresso) e um botão branco "Começar carreira". Com carreira salva aparece "Continuar · nome, idade" e "Nova carreira". O Modo Carreira completo virou um cartão abaixo

@@ -2711,6 +2711,68 @@ export const EVENTOS_APOSTA = [
     ] },
 ];
 
+/* ---------- Desafio de OVR (como no Copero): toda temporada, três apostas com chances diferentes ----------
+   faixa "baixo": perde pouco e quase sempre ganha 1; "medio": moeda no ar; "alto": tudo ou nada.
+   O valor esperado fica perto de zero (o risco alto é levemente negativo) para não inflar o OVR da carreira. */
+export const DESAFIOS_OVR = [
+  { id: "treinoExtra", faixa: "baixo", icone: "🏃", nome: "Treino depois do treino", texto: "Ficar mais uma hora no CT todo dia.",
+    chances: [{ p: 0.75, d: 1, txt: "A repetição virou automático em campo." }, { p: 0.25, d: -3, txt: "Sobrecarga: uma fisgada te tirou da pré-temporada." }] },
+  { id: "estudoVideo", faixa: "baixo", icone: "📺", nome: "Estudo de vídeo", texto: "Horas revendo seus jogos com o analista.",
+    chances: [{ p: 0.7, d: 1, txt: "Você passou a ler o jogo um segundo antes." }, { p: 0.3, d: -2, txt: "Pensou demais e perdeu o instinto." }] },
+  { id: "sono", faixa: "baixo", icone: "😴", nome: "Rotina de sono rígida", texto: "Dormir cedo, sem celular, nove horas por noite.",
+    chances: [{ p: 0.6, d: 1, txt: "Recuperação perfeita entre os jogos." }, { p: 0.4, d: -1, txt: "A ansiedade não deixou a rotina funcionar." }] },
+  { id: "fisio", faixa: "baixo", icone: "🧊", nome: "Pré-temporada com fisioterapeuta", texto: "Prevenção, mobilidade e fortalecimento.",
+    chances: [{ p: 0.45, d: 2, txt: "Corpo blindado e mais explosão." }, { p: 0.25, d: 0, txt: "Ficou tudo como estava." }, { p: 0.3, d: -3, txt: "Descobriram um desgaste antigo no joelho." }] },
+  { id: "veterano", faixa: "baixo", icone: "🧓", nome: "Conselhos de um veterano", texto: "O capitão do time topa te orientar.",
+    chances: [{ p: 0.8, d: 1, txt: "Pequenos truques que fazem diferença." }, { p: 0.2, d: -4, txt: "Vocês brigaram e o clima pesou no vestiário." }] },
+  { id: "altitude", faixa: "medio", icone: "🏔️", nome: "Treino na altitude", texto: "Três semanas a 2.500 metros.",
+    chances: [{ p: 0.5, d: 2, txt: "Fôlego de sobra durante a temporada." }, { p: 0.5, d: -2, txt: "Uma gripe forte atrapalhou tudo." }] },
+  { id: "massa", faixa: "medio", icone: "🏋️", nome: "Ganho de massa muscular", texto: "Mais força nas divididas, se não pesar.",
+    chances: [{ p: 0.6, d: 2, txt: "Mais forte e sem perder velocidade." }, { p: 0.4, d: -3, txt: "Ficou pesado e lento." }] },
+  { id: "dieta", faixa: "medio", icone: "🥗", nome: "Dieta radical", texto: "Um nutricionista quer mudar tudo no seu prato.",
+    chances: [{ p: 0.4, d: 3, txt: "O corpo respondeu muito bem." }, { p: 0.6, d: -2, txt: "Perdeu massa demais e sentiu nos treinos." }] },
+  { id: "foraPosicao", faixa: "medio", icone: "🔄", nome: "Treinar em outra função", texto: "O técnico quer te testar em outro setor.",
+    chances: [{ p: 0.35, d: 3, txt: "Virou um jogador mais completo." }, { p: 0.65, d: -2, txt: "Ficou perdido em campo." }] },
+  { id: "preparador", faixa: "medio", icone: "📋", nome: "Método do novo preparador", texto: "Um método que ninguém no clube conhece.",
+    chances: [{ p: 0.1, d: 5, txt: "Revolucionou o seu físico." }, { p: 0.55, d: 1, txt: "Funcionou um pouco." }, { p: 0.35, d: -3, txt: "O método não serviu para você." }] },
+  { id: "choque", faixa: "alto", icone: "🔥", nome: "Treino de choque", texto: "Carga máxima durante um mês inteiro.",
+    chances: [{ p: 0.3, d: 4, txt: "Você voltou outro jogador." }, { p: 0.7, d: -2, txt: "Exagerou na carga e chegou desgastado." }] },
+  { id: "guru", faixa: "alto", icone: "🧘", nome: "Guru do alto rendimento", texto: "Caro, polêmico e cheio de promessas.",
+    chances: [{ p: 0.15, d: 5, txt: "Mente e corpo no auge." }, { p: 0.85, d: -1, txt: "Muito incenso e pouco resultado." }] },
+  { id: "lenda", faixa: "alto", icone: "⭐", nome: "Treinar com uma lenda", texto: "Um ídolo aposentado aceita te treinar nas férias.",
+    chances: [{ p: 0.12, d: 6, txt: "Ele te ensinou o que não se aprende em escolinha." }, { p: 0.88, d: -1, txt: "As férias foram mais cansativas que úteis." }] },
+  { id: "experimental", faixa: "alto", icone: "🧪", nome: "Programa experimental", texto: "Tecnologia nova testada em poucos atletas.",
+    chances: [{ p: 0.3, d: 3, txt: "Os números dispararam." }, { p: 0.45, d: 0, txt: "Nenhuma diferença." }, { p: 0.25, d: -4, txt: "Efeito colateral: semanas parado." }] },
+  { id: "corrida", faixa: "alto", icone: "🦵", nome: "Mudar a técnica de corrida", texto: "Reaprender a correr para ganhar arranque.",
+    chances: [{ p: 0.22, d: 4, txt: "Arranque de velocista." }, { p: 0.78, d: -1, txt: "Ficou desajeitado por meses." }] },
+];
+// veteranos ganham um pouco menos nos saltos grandes
+const chancesDoDesafio = (c, x) => x.chances.map((o) => ({ ...o, d: c.idade >= 31 && o.d >= 3 ? o.d - 1 : o.d }));
+export const desafioPendente = (c) => !!c && !c.aposentado && !!c.flags?.baseEscolhida && c.desafioAno !== c.ano;
+export function desafiosDaTemporada(c) {
+  return comSemente(c.codigo, `desafio:${c.ano}`, () => ["baixo", "medio", "alto"].map((f) => {
+    const x = pick(DESAFIOS_OVR.filter((y) => y.faixa === f));
+    return { id: x.id, faixa: f, icone: x.icone, nome: x.nome, texto: x.texto, chances: chancesDoDesafio(c, x) };
+  }));
+}
+export function resolverDesafio(c0, id) {
+  const c = clone(c0);
+  c.desafioAno = c.ano;
+  const x = DESAFIOS_OVR.find((y) => y.id === id);
+  if (!x) { c.desafios = [...(c.desafios || []), { ano: c.ano, id: "recusou", d: 0 }]; return { c, res: null }; }
+  return comSemente(c0.codigo, `desafioRes:${c0.ano}:${id}`, () => {
+    const chances = chancesDoDesafio(c, x);
+    const r = rnd();
+    let acc = 0, idx = chances.length - 1;
+    for (let i = 0; i < chances.length; i++) { if (r < acc + chances[i].p) { idx = i; break; } acc += chances[i].p; }
+    const antes = ovrDe(c);
+    mexerNivel(c, chances[idx].d);
+    const depois = ovrDe(c);
+    c.desafios = [...(c.desafios || []), { ano: c.ano, id, d: depois - antes }];
+    return { c, res: { id, icone: x.icone, nome: x.nome, chances, idx, roll: r, d: depois - antes, txt: chances[idx].txt, ovrAntes: antes, ovrDepois: depois } };
+  });
+}
+
 /* Primeira decisão da carreira (como no Copero): três clubes querem você na base */
 const EVENTO_BASE = {
   id: "base", icone: "🌱", grade: true,
@@ -2820,6 +2882,8 @@ const EVENTOS_IMPORTANTES = ["propostas", "fimContrato", "clausula", "livre", "f
 /* Evento principal da janela, respeitando o ritmo escolhido */
 /* Ritmo como no Copero: Intenso = decisão toda temporada; Normal = a cada 2; Expresso = a cada 3.
    Fora dessas janelas só aparece o que é obrigatório (fim de contrato). */
+// apostas que só mexem no OVR: agora ficam com o desafio de toda temporada
+const APOSTAS_DE_OVR = ["dieta", "concentracao", "especialista", "academia", "novaPosicao", "intertemporada", "recuperacao", "video", "treinoFerias"];
 export const CADENCIA = { intenso: 1, normal: 2, expresso: 3 };
 export const anoDeDecisao = (c) => (c.temporadas.length || 0) % (CADENCIA[c.ritmo] || 2) === 0;
 export function eventoDaJanela(c) {
@@ -2828,9 +2892,9 @@ export function eventoDaJanela(c) {
   const forcado = ev && (EVENTOS_IMPORTANTES.includes(ev.id) || ev.id === "fimContrato");
   // decisão de risco (estilo Copero) em boa parte das janelas: ~45% no Normal e no Intenso,
   // e ela é o acontecimento do Expresso quando nada importante acontece
-  const querAposta = comSemente(c.codigo, `aposta:${c.ano}`, () => chance(c.ritmo === "expresso" ? 0.4 : 0.45));
+  const querAposta = comSemente(c.codigo, `aposta:${c.ano}`, () => chance(c.ritmo === "expresso" ? 0.35 : 0.25));
   if (!forcado && querAposta) {
-    const ap = sortearEvento(c, { excluir: ["propostas"], soApostas: true });
+    const ap = sortearEvento(c, { excluir: ["propostas", ...APOSTAS_DE_OVR], soApostas: true });
     if (ap) return ap;
   }
   if (!ev || c.ritmo !== "expresso" || forcado) return ev;
@@ -3148,6 +3212,7 @@ function simularCarreiraAutomaticaBase(dados, escolher, escolherFoco) {
     const compra = INVESTIMENTOS.filter((i) => !(c.investimentos || []).includes(i.id) && i.custo <= c.patrimonio * 0.5);
     if (compra.length && chance(0.4)) c = comprarInvestimento(c, pick(compra).id).c;
     c = definirFoco(c, escolherFoco(c));
+    if (desafioPendente(c)) c = resolverDesafio(c, pick(desafiosDaTemporada(c)).id).c;
     c = escolherPretemporada(c, pick(opcoesPretemporada(c)).id);
   }
   if (!c.aposentado) c = aposentar(c);

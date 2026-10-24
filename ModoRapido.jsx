@@ -14,7 +14,7 @@ import {
   iniciarNegociacao, ajustarNegociacao, fecharNegociacao, CAMPOS_NEGOCIACAO, fama_negociador,
   INVESTIMENTOS, comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
   chanceMomento, miniDaPosicao, ehPremioIndividual, RARIDADES, ganhosDaCarta, efeitosDaCarta, vagasDaLiga, ehSegundaDivisao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
-  eventoDaJanela, segundoEvento, anoDeDecisao, eventoImpasse, valorAtual, comparaSalario, textoEmoji, efeitosDaDecisao, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
+  eventoDaJanela, segundoEvento, anoDeDecisao, eventoImpasse, valorAtual, comparaSalario, textoEmoji, efeitosDaDecisao, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, desafiosDaTemporada, resolverDesafio, desafioPendente, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
 } from "./rapido.js";
 
 /* Estilo do seletor de modos e do Modo Rápido. Inclui as animações que as
@@ -107,6 +107,11 @@ export const ESTILO_BASE = `
 .rp-flip-in.virada{transform:rotateY(180deg);}
 .rp-face{backface-visibility:hidden;-webkit-backface-visibility:hidden;}
 .rp-verso{position:absolute;inset:0;transform:rotateY(180deg);backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+/* pop-ups de tela cheia (fim de temporada, resultado, desafio) */
+@keyframes cpPop{0%{opacity:0;transform:scale(.6)}60%{opacity:1;transform:scale(1.12)}100%{transform:scale(1)}}
+.cp-pop{animation:cpPop .5s cubic-bezier(.2,.8,.2,1) both;}
+@keyframes cpBrilhoRes{0%,100%{filter:drop-shadow(0 0 0 transparent)}50%{filter:drop-shadow(0 0 22px var(--brilho))}}
+.cp-brilho-res{animation:cpBrilhoRes 1.6s ease-in-out 2;}
 `;
 
 const ATTR_LABEL = { velocidade: "VEL", finalizacao: "FIN", passe: "PAS", drible: "DRI", defesa: "DEF", fisico: "FIS" };
@@ -2261,23 +2266,276 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
 
 /* ---------- orquestração ---------- */
 /* Aviso curto no topo com o resultado de uma decisão (some sozinho) */
-function ToastDecisao({ toast, onFechar }) {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { const t = setTimeout(onFechar, 3400); return () => clearTimeout(t); }, [toast.k]);
+/* ---------- pop-ups de tela cheia (estilo Copero) ---------- */
+function useContagem(de, para, atraso = 350, dur = 900) {
+  const [v, setV] = useState(de);
+  useEffect(() => {
+    if (de === para) { setV(para); return undefined; }
+    let raf, t0;
+    const t = setTimeout(() => {
+      const passo = (agora) => {
+        t0 = t0 || agora;
+        const f = Math.min(1, (agora - t0) / dur);
+        setV(Math.round(de + (para - de) * (1 - Math.pow(1 - f, 3))));
+        if (f < 1) raf = requestAnimationFrame(passo);
+      };
+      raf = requestAnimationFrame(passo);
+    }, atraso);
+    return () => { clearTimeout(t); cancelAnimationFrame(raf); };
+  }, [de, para, atraso, dur]);
+  return v;
+}
+function TelaCheia({ rotulo, cor = "#3F3F46", children, botao = "Continuar", onFechar, bloqueado = false }) {
+  useEffect(() => { document.body.style.overflow = "hidden"; return () => { document.body.style.overflow = ""; }; }, []);
   return (
-    <button key={toast.k} onClick={onFechar} className="cp-toast cp cp-card text-left px-4 py-3 shadow-2xl" style={{ background: "#1C1C1F" }} aria-live="polite">
-      <div className="text-[14px] font-semibold text-[#F4F4F5] leading-snug line-clamp-2">{toast.texto}</div>
-      {toast.efeitos?.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mt-2">
-          {toast.efeitos.map((e) => (
-            <span key={e.txt} className="text-[12px] font-bold px-2 py-0.5 rounded-full" style={{ color: e.bom ? "#4ADE80" : "#F87171", background: e.bom ? "rgba(74,222,128,.12)" : "rgba(248,113,113,.12)" }}>{e.txt}</span>
-          ))}
+    <div className="cp fixed inset-0 z-[70] overflow-y-auto cp-surge" role="dialog" aria-modal="true" aria-label={rotulo} data-pop=""
+      style={{ background: `radial-gradient(130% 55% at 50% 0%, ${cor}55, #0B0B0C 62%), #0B0B0C` }}>
+      <div className="min-h-full max-w-md mx-auto px-4 pt-6 pb-5 flex flex-col">
+        <div className="flex-1 flex flex-col justify-center gap-3">{children}</div>
+        <button onClick={onFechar} className={`cp-pill cp-branca text-[16px] w-full mt-5 sticky bottom-4 ${bloqueado ? "opacity-60" : ""}`}>{botao}</button>
+      </div>
+    </div>
+  );
+}
+/* OVR antes → depois, com o número correndo */
+function OvrAntesDepois({ de, para, atraso = 350, grande = false }) {
+  const v = useContagem(de, para, atraso);
+  const d = para - de;
+  const cor = d > 0 ? "#4ADE80" : d < 0 ? "#F87171" : "#A1A1AA";
+  return (
+    <div className="flex items-center justify-center gap-3">
+      <div className="text-center">
+        <div className="text-[11px] font-bold tracking-[0.15em] text-[#71717A]">ANTES</div>
+        <div className={`${grande ? "text-[30px]" : "text-[24px]"} font-black text-[#71717A] leading-none mt-1`}>{de}</div>
+      </div>
+      <span className="text-[22px]" style={{ color: cor }} aria-hidden="true">→</span>
+      <div className="text-center">
+        <div className="text-[11px] font-bold tracking-[0.15em] text-[#A1A1AA]">OVR</div>
+        <div className={`cp-ovr rounded-2xl mt-1 ${grande ? "px-5 py-2 text-[44px]" : "px-4 py-1.5 text-[32px]"} font-black leading-none ${d ? "cp-brilho-res" : ""}`} style={{ "--brilho": cor }}>{v}</div>
+      </div>
+      <span key={d} className="cp-pop text-[20px] font-black px-2.5 py-1 rounded-xl" style={{ color: cor, background: `${cor}1F`, animationDelay: `${atraso + 700}ms` }}>{d > 0 ? `+${d}` : d < 0 ? `−${-d}` : "="}</span>
+    </div>
+  );
+}
+const corChance = (d) => (d > 0 ? (d >= 4 ? "#15803D" : "#16A34A") : d < 0 ? (d <= -3 ? "#B91C1C" : "#DC2626") : "#3F3F46");
+/* barra das chances (verde ganha, cinza nada, vermelho perde) */
+function BarraChances({ chances, alta = false, ponteiro = null, destaque = null }) {
+  return (
+    <div className="relative">
+      <div className={`flex ${alta ? "h-12" : "h-8"} rounded-xl overflow-hidden`}>
+        {chances.map((x, i) => (
+          <div key={i} className="flex flex-col items-center justify-center text-white leading-none transition-opacity duration-300"
+            style={{ width: `${x.p * 100}%`, background: corChance(x.d), opacity: destaque == null || destaque === i ? 1 : 0.35, borderLeft: i ? "2px solid #0B0B0C" : undefined }}>
+            <span className={`${alta ? "text-[15px]" : "text-[13px]"} font-black`}>{x.d > 0 ? `+${x.d}` : x.d < 0 ? `−${-x.d}` : "0"}</span>
+            {x.p >= 0.18 && <span className={`${alta ? "text-[11px]" : "text-[10px]"} font-semibold opacity-85 mt-0.5`}>{Math.round(x.p * 100)}%</span>}
+          </div>
+        ))}
+      </div>
+      {ponteiro != null && (
+        <div className="absolute -top-2 -bottom-2 w-0" style={{ left: `${ponteiro * 100}%` }} aria-hidden="true">
+          <div className="absolute -translate-x-1/2 -top-2 w-0 h-0" style={{ borderLeft: "8px solid transparent", borderRight: "8px solid transparent", borderTop: "11px solid #fff" }} />
+          <div className="absolute -translate-x-1/2 top-0 bottom-0 w-[3px] rounded bg-white shadow-[0_0_10px_rgba(255,255,255,.8)]" />
         </div>
       )}
-    </button>
+    </div>
+  );
+}
+/* o ponteiro vai e volta pela barra e para na faixa sorteada */
+function Roleta({ chances, alvo, idx, onFim }) {
+  const [pos, setPos] = useState(0);
+  const [fim, setFim] = useState(false);
+  useEffect(() => {
+    const dur = 2100, dist = 2 + alvo;
+    let raf, t0;
+    const passo = (agora) => {
+      t0 = t0 || agora;
+      const f = Math.min(1, (agora - t0) / dur);
+      const x = dist * (1 - Math.pow(1 - f, 3)) % 2;
+      setPos(x <= 1 ? x : 2 - x);
+      if (f < 1) raf = requestAnimationFrame(passo);
+      else { setFim(true); onFim(); }
+    };
+    raf = requestAnimationFrame(passo);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return <BarraChances chances={chances} alta ponteiro={pos} destaque={fim ? idx : null} />;
+}
+/* Resultado de uma escolha (decisão da janela ou desafio de OVR): tela cheia, com sorteio quando há chances */
+function PopupResultado({ info, onFechar }) {
+  const temRoleta = !!info.chances;
+  const [revelado, setRevelado] = useState(!temRoleta);
+  const dOvr = (info.ovrDepois ?? 0) - (info.ovrAntes ?? 0);
+  const outros = (info.efeitos || []).filter((e) => !/OVR$/.test(e.txt));
+  const corFundo = !revelado ? "#3F3F46" : dOvr > 0 ? "#16A34A" : dOvr < 0 ? "#DC2626" : outros.some((e) => !e.bom) ? "#B45309" : "#2563EB";
+  const revelar = () => { setRevelado(true); vibrar(dOvr > 0 ? [30, 50, 30] : 60); };
+  const sorteado = temRoleta ? info.chances[info.idx] : null;
+  return (
+    <TelaCheia rotulo={info.titulo} cor={corFundo} botao={revelado ? "Continuar" : "Sorteando…"} bloqueado={!revelado} onFechar={() => (revelado ? onFechar() : revelar())}>
+      <div className="flex flex-col items-center text-center pt-4">
+        <span className="w-16 h-16 rounded-2xl bg-white/[.06] border border-white/10 flex items-center justify-center text-[34px]">{info.icone}</span>
+        <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-[#A1A1AA] mt-3">{info.titulo}</div>
+        {info.contexto && <p className="text-[14px] text-[#A1A1AA] leading-snug mt-2 line-clamp-3">{info.contexto}</p>}
+        {info.escolha && <div className="mt-3 inline-flex flex-col items-center"><span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#71717A]">Sua escolha</span><span className="text-[22px] font-extrabold text-white leading-tight mt-0.5">{info.escolha}</span></div>}
+      </div>
+      {temRoleta && (
+        <div className="cp-card p-4 mt-2">
+          <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#A1A1AA] mb-3">{revelado ? "Resultado do sorteio" : "Sorteando…"}</div>
+          {revelado ? <BarraChances chances={info.chances} alta destaque={info.idx} ponteiro={info.alvo} />
+            : <Roleta chances={info.chances} alvo={info.alvo} idx={info.idx} onFim={revelar} />}
+        </div>
+      )}
+      {revelado && (
+        <div className="flex flex-col gap-3 cp-surge">
+          {temRoleta && (
+            <div className="cp-pop text-center text-[40px] font-black leading-none mt-1" style={{ color: corChance(sorteado.d) === "#3F3F46" ? "#D4D4D8" : sorteado.d > 0 ? "#4ADE80" : "#F87171" }}>
+              {sorteado.d > 0 ? `+${sorteado.d} OVR` : sorteado.d < 0 ? `−${-sorteado.d} OVR` : sorteado.rotulo || "Nada mudou"}
+            </div>
+          )}
+          <p className="text-[18px] leading-snug text-[#F4F4F5] text-center font-medium px-1">{info.texto}</p>
+          {dOvr !== 0 && <div className="cp-card p-4"><OvrAntesDepois de={info.ovrAntes} para={info.ovrDepois} grande /></div>}
+          {outros.length > 0 && (
+            <div className={`grid gap-2 ${outros.length > 2 ? "grid-cols-2" : "grid-cols-1"}`}>
+              {outros.map((e, i) => (
+                <div key={e.txt} className="cp-card px-3 py-3 flex items-center gap-2 cp-surge" style={{ animationDelay: `${0.2 + i * 0.1}s`, borderColor: e.bom ? "rgba(74,222,128,.35)" : "rgba(248,113,113,.35)" }}>
+                  <span className="text-[18px] font-black" style={{ color: e.bom ? "#4ADE80" : "#F87171" }}>{e.bom ? "▲" : "▼"}</span>
+                  <span className="text-[15px] font-semibold text-[#F4F4F5] leading-tight">{e.txt}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {info.dica && !temRoleta && <div className="cp-card px-4 py-3 text-center"><div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#A1A1AA]">O que muda</div><div className="text-[15px] font-semibold text-[#E4E4E7] mt-1">{info.dica}</div></div>}
+          {dOvr === 0 && outros.length === 0 && !temRoleta && !info.dica && <div className="text-center text-[14px] text-[#A1A1AA]">Nada mudou nos seus números.</div>}
+        </div>
+      )}
+    </TelaCheia>
   );
 }
 
+/* Fim de temporada: tudo o que aconteceu numa tela só */
+function PopupTemporada({ c, card, onFechar }) {
+  const delta = card.ovrDepois - (card.ovrAntes ?? card.ovr);
+  const corNota = card.nota >= 7.5 ? "#4ADE80" : card.nota >= 6.6 ? "#FACC15" : "#F87171";
+  const clube = clubeDe(card.clube);
+  const contRes = card.continental ? (card.titulos.some((t) => t.tipo === "continental") ? "Campeão" : card.continental.faseNome) : null;
+  const vagas = vagasDaLiga(card.ligaId);
+  const ligaRes = card.posLiga === 1 ? "Campeão" : `${card.posLiga}º de ${card.totalLiga}`;
+  const linhas = [
+    { tipo: ehSegundaDivisao(card.ligaId) ? "segunda" : "liga", nome: card.ligaNome, res: ligaRes, ouro: card.posLiga === 1, extra: card.acesso || (vagas && ehSegundaDivisao(card.ligaId) && card.posLiga <= vagas) ? "acesso" : card.rebaixado ? "rebaixado" : null },
+    card.copaNac && { tipo: "copa", nome: card.copaNac.nome, res: card.copaNac.fase, ouro: card.copaNac.fase === "Campeão" },
+    card.continental && { tipo: "continental", nome: card.continental.nome, res: contRes, ouro: contRes === "Campeão" },
+    card.mundialRes && { tipo: "mundial", nome: "Mundial de Clubes", res: card.mundialRes, ouro: card.mundialRes === "Campeão" },
+    card.selecao && { band: EMOJI_NACIONALIDADE[c.nac] || "🌎", nome: card.selecao.nome, res: card.selecao.convocado ? (card.selecao.campeao ? "Campeão" : card.selecao.resultado) : "Fora da lista", ouro: !!card.selecao.campeao },
+  ].filter(Boolean);
+  const idolo = (card.marcos || []).find((m) => m.id?.startsWith("idolo:"));
+  const faixa = card.acesso ? { txt: `ACESSO! O ${card.clube} sobe em ${card.ano + 1}`, cor: "#22C55E" }
+    : card.rebaixado ? { txt: `Rebaixado: o ${card.clube} cai em ${card.ano + 1}`, cor: "#EF4444" }
+    : idolo ? { txt: `Ídolo do ${card.clube}!`, cor: "#FACC15" } : null;
+  const n = (v, cls) => <span className={cls}>{v}</span>;
+  return (
+    <TelaCheia rotulo={`Fim da temporada ${card.ano}`} cor={card.titulos.length ? "#CA8A04" : clube?.cor || "#3F3F46"} onFechar={onFechar}>
+      <div className="flex items-center gap-3 pt-2">
+        <ClubDot club={clube} size={54} />
+        <div className="min-w-0 flex-1">
+          <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-[#A1A1AA]">Fim da temporada {card.ano}</div>
+          <div className="text-[24px] font-extrabold text-white leading-tight truncate">{card.clube}{card.emprestado ? " (empr.)" : ""}</div>
+          <div className="text-[14px] text-[#A1A1AA] truncate">{card.idade} anos · {card.status}{card.lesao ? ` · 🩹 ${card.lesao}` : ""}</div>
+        </div>
+      </div>
+      {faixa && <div className="cp-pop rounded-2xl px-4 py-2.5 text-center text-[16px] font-extrabold" style={{ color: faixa.cor, background: `${faixa.cor}1A`, border: `1px solid ${faixa.cor}66` }}>{faixa.txt}</div>}
+      {/* nota e OVR */}
+      <div className="grid grid-cols-[0.8fr_1.2fr] gap-2">
+        <div className="cp-card p-3 flex flex-col items-center justify-center">
+          <div className="text-[11px] font-bold tracking-[0.18em] text-[#A1A1AA]">NOTA</div>
+          <div className="cp-pop text-[46px] font-black leading-none mt-1" style={{ color: corNota, animationDelay: ".15s" }}>{card.nota ? card.nota.toFixed(1) : "—"}</div>
+        </div>
+        <div className="cp-card p-3 flex items-center justify-center"><OvrAntesDepois de={card.ovrAntes ?? card.ovr} para={card.ovrDepois} atraso={450} /></div>
+      </div>
+      {/* números do jogador */}
+      <div className="grid grid-cols-3 gap-2">
+        {[[<IcoJogos s={20} key="j" />, card.jogos, "Jogos"], [<IcoGol s={20} key="g" />, card.gols, "Gols"], [<IcoAssist s={20} key="a" />, card.assist, "Assist."]].map(([ico, v, l], i) => (
+          <div key={l} className="cp-card py-3 flex flex-col items-center cp-surge" style={{ animationDelay: `${0.1 + i * 0.08}s` }}>
+            <span className="text-[#A1A1AA]">{ico}</span>
+            {n(v, "text-[30px] font-black text-white leading-none mt-1.5")}
+            <span className="text-[12px] font-semibold text-[#A1A1AA] mt-1">{l}</span>
+          </div>
+        ))}
+      </div>
+      {/* campanha do time */}
+      <div className="cp-card px-3.5 py-2">
+        <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#A1A1AA] py-1">Campanha</div>
+        {linhas.map((x, i) => (
+          <div key={i} className="flex items-center gap-3 py-2 border-t border-white/[.06] first:border-0 cp-surge" style={{ animationDelay: `${0.25 + i * 0.08}s` }}>
+            <span className="w-7 flex justify-center shrink-0">{x.band ? <span className="text-[20px] leading-none">{x.band}</span> : <TacaCompeticao tipo={x.tipo} nome={x.nome} size={24} />}</span>
+            <span className="flex-1 min-w-0 text-[15px] font-semibold text-[#E4E4E7] truncate">{x.nome}</span>
+            {x.extra && <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded-md text-white shrink-0" style={{ background: x.extra === "acesso" ? "#16A34A" : "#DC2626" }}>{x.extra}</span>}
+            <span className={`text-[14px] font-bold px-2.5 py-1 rounded-full shrink-0 ${x.ouro ? "text-[#1A1405]" : "text-[#E4E4E7] bg-[#27272A]"}`} style={x.ouro ? { background: "linear-gradient(90deg,#EAB308,#FDE047)" } : undefined}>{x.ouro ? "🏆 Campeão" : x.res}</span>
+          </div>
+        ))}
+      </div>
+      {/* taças */}
+      {card.titulos.length > 0 && (
+        <div className="rounded-[20px] p-3 border border-[#CA8A04]/50" style={{ background: "linear-gradient(160deg, rgba(234,179,8,.16), #161618 65%)" }}>
+          <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#FACC15] mb-2">{card.titulos.length > 1 ? `${card.titulos.length} conquistas` : "Conquista"}</div>
+          <div className="flex flex-wrap justify-center gap-y-3">
+            {card.titulos.map((t, i) => (
+              <div key={i} className="w-1/3 px-1 flex flex-col items-center text-center rp-sobe" style={{ animationDelay: `${0.4 + i * 0.15}s` }}>
+                <IconeTitulo tipo={t.tipo} nome={t.nome} size={56} />
+                <div className="text-[12px] font-bold text-[#FDE68A] leading-tight mt-1 line-clamp-2">{t.nome}</div>
+                <div className="text-[10px] text-[#A1A1AA]">{t.n > 1 ? `${t.n}º da carreira` : "1º da carreira"}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {/* torcida, valor e prêmios */}
+      <div className="grid grid-cols-2 gap-2">
+        <div className="cp-card px-3 py-2.5"><div className="text-[11px] font-bold tracking-[0.15em] text-[#A1A1AA]">TORCIDA</div><div className="text-[20px] font-extrabold text-white leading-tight">{card.torcida}<Delta v={card.torcidaDelta} /></div></div>
+        <div className="cp-card px-3 py-2.5 min-w-0"><div className="text-[11px] font-bold tracking-[0.15em] text-[#A1A1AA]">VALOR</div><div className="text-[20px] font-extrabold text-white leading-tight truncate">{formatarValor(card.valor).replace(/\s/g, "")}{card.valorAntes != null && card.valor !== card.valorAntes && <span className="text-[13px]"><Delta v={card.valor - card.valorAntes} fmt={(x) => formatarValor(x).replace(/€\s?/, "").replace(/\s/g, "")} /></span>}</div></div>
+      </div>
+      {(card.bola?.pos <= 10 || delta !== 0) && (
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[13px] text-[#A1A1AA]">
+          {card.bola?.pos <= 10 && <span className="flex items-center gap-1.5"><BolaDourada size={16} /> Bola de Ouro: <b className="text-[#FACC15]">{card.bola.pos}º</b></span>}
+          {card.artilharia && card.artilharia.pontos >= card.artilharia.alvo * 0.7 && !card.titulos.some((t) => t.tipo === "botaOuro") && <span className="flex items-center gap-1.5"><BotaDourada size={16} /> Bota de Ouro: {card.artilharia.pontos}/{card.artilharia.alvo}</span>}
+        </div>
+      )}
+    </TelaCheia>
+  );
+}
+
+/* Desafio de OVR de toda temporada: três apostas com chances diferentes */
+const FAIXA_DESAFIO = { baixo: { txt: "Risco baixo", cor: "#4ADE80" }, medio: { txt: "Risco médio", cor: "#60A5FA" }, alto: { txt: "Tudo ou nada", cor: "#F87171" } };
+function DesafioOvr({ c, onEscolher }) {
+  const ops = desafiosDaTemporada(c);
+  return (
+    <div className="cp cp-card p-3 rp-entra" style={{ borderColor: "rgba(251,146,60,.45)" }}>
+      <div className="flex items-baseline justify-between px-1">
+        <div className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#FB923C]">Desafio da temporada {c.ano}</div>
+        <div className="text-[12px] text-[#A1A1AA]">OVR {ovrDe(c)}</div>
+      </div>
+      <p className="text-[14px] text-[#D4D4D8] px-1 mt-1">Escolha um desafio: ele pode aumentar ou derrubar seu OVR.</p>
+      <div className="flex flex-col gap-2 mt-2.5">
+        {ops.map((o) => {
+          const f = FAIXA_DESAFIO[o.faixa];
+          return (
+            <button key={o.id} onClick={() => { vibrar(15); onEscolher(o.id); }} className="text-left rounded-2xl bg-[#1C1C1F] border border-[#2A2A2E] hover:border-[#52525B] px-3 py-2.5 transition-colors" aria-label={`${o.nome}: ${o.chances.map((x) => `${Math.round(x.p * 100)}% ${x.d > 0 ? "+" : ""}${x.d}`).join(", ")}`}>
+              <div className="flex items-center gap-2.5">
+                <span className="text-[22px] w-9 text-center shrink-0">{o.icone}</span>
+                <span className="flex-1 min-w-0">
+                  <span className="block text-[15px] font-bold text-white leading-tight">{o.nome}</span>
+                  <span className="block text-[12px] text-[#A1A1AA] leading-tight truncate">{o.texto}</span>
+                </span>
+                <span className="text-[10px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-full shrink-0" style={{ color: f.cor, background: `${f.cor}1F` }}>{f.txt}</span>
+              </div>
+              <div className="mt-2"><BarraChances chances={o.chances} /></div>
+            </button>
+          );
+        })}
+      </div>
+      <button onClick={() => onEscolher(null)} className="w-full text-[13px] font-bold text-[#A1A1AA] min-h-[40px] mt-1">Não arriscar este ano</button>
+    </div>
+  );
+}
 
 /* Barra de "a temporada vai rolar sozinha" (anos sem decisão, como no Copero) */
 function AutoAvanco({ c, ms, onAgora, onPausar }) {
@@ -2304,7 +2562,8 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const [gaveta, setGaveta] = useState(null);
   const [recorde, setRecorde] = useState(0);
   const [selo, setSelo] = useState(null);
-  const [toast, setToast] = useState(null);
+  const [popup, setPopup] = useState(null); // resultado de decisão ou desafio
+  const [popTemp, setPopTemp] = useState(null); // fim de temporada
   const { etapa, c, card, evento, resultado, opcoesTraco, fila } = estado;
 
   useEffect(() => {
@@ -2319,13 +2578,9 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   // depois da temporada: estouros visuais e o caminho até a próxima ação
   const aposFechar = (antes, f) => {
     if (f.card.ovrDepois > (antes.picoOvr || 0) && antes.temporadas.length > 0) setRecorde(Date.now());
-    const idolo = (f.card.marcos || []).find((m) => m.id?.startsWith("idolo:"));
-    if (f.card.acesso) setSelo({ txt: "ACESSO!", cor: "#1BC28A", k: Date.now() });
-    else if (idolo) setSelo({ txt: `Ídolo do ${f.card.clube}!`, cor: "#EBC557", k: Date.now() });
-    else if (f.card.rebaixado) setSelo({ txt: "Rebaixado", cor: "#E36B5B", k: Date.now() });
     if (f.card.titulos.length) vibrar([30, 60, 30]);
     if (temFestaGrande(f.card)) setEstado({ etapa: "festa", c: f.c, card: f.card, ultimo: f.card, voar: true });
-    else posTemporada(f.c, f.card);
+    else { setPopTemp(f.card); posTemporada(f.c, f.card); }
   };
   const posTemporada = (cc, k) => {
     const forcada = aposentadoriaForcada(cc);
@@ -2382,12 +2637,24 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
       const clube = clubeDe(r.c.clubeNome);
       const grande = clube.forca > clubeDe(c.clubeNome).forca + 3;
       setApresentacao({ clube, grande, curto: !(grande && clube.forca >= 84), deOnde: clubeDe(c.clubeNome), contrato: r.c.contrato, valor: r.c.ultimaTransferencia?.valor ?? null });
-    } else setToast({ texto: r.resultado || "Decisão tomada.", efeitos: efeitosDaDecisao(c, r.c), k: Date.now() });
+    } else if (evento.id !== "base") {
+      const op = evento.opcoes.find((o) => o.id === opId);
+      const idx = op?.chances ? op.chances.findIndex((x) => x.txt === r.resultado) : -1;
+      const ini = idx > 0 ? op.chances.slice(0, idx).reduce((a, x) => a + x.p, 0) : 0;
+      setPopup({ icone: evento.icone, titulo: evento.titulo, contexto: evento.texto, dica: op?.chances || op?.oferta ? null : op?.dica, escolha: op?.oferta ? op.oferta.clube : op?.label, texto: r.resultado || "Decisão tomada.", efeitos: efeitosDaDecisao(c, r.c),
+        ovrAntes: ovrDe(c), ovrDepois: ovrDe(r.c), chances: idx >= 0 ? op.chances : null, idx, alvo: idx >= 0 ? ini + op.chances[idx].p * 0.5 : null, k: Date.now() });
+    }
   };
   // depois de ler o resultado: próxima notícia ou as cartas de treino (sozinho, ou com um toque)
   const avancar = () => setEstado((s) => (s.proximo
     ? { ...s, evento: s.proximo, resultado: null, efeitos: null, proximo: null, manchete: null }
     : { ...s, evento: null, resultado: null, efeitos: null, manchete: null, auto: !anoDeDecisao(s.c) }));
+  const desafiar = (id) => {
+    const r = resolverDesafio(c, id);
+    setEstado((st) => ({ ...st, c: r.c }));
+    if (r.res) setPopup({ icone: r.res.icone, titulo: `Desafio da temporada ${c.ano}`, escolha: r.res.nome, texto: r.res.txt, efeitos: efeitosDaDecisao(c, r.c),
+      ovrAntes: r.res.ovrAntes, ovrDepois: r.res.ovrDepois, chances: r.res.chances, idx: r.res.idx, alvo: r.res.roll, k: Date.now() });
+  };
   const ajustarNeg = (campo, dir) => setEstado((st) => ({ ...st, neg: ajustarNegociacao(st.neg, campo, dir) }));
   const assinar = () => {
     const op = evento.opcoes.find((o) => o.id === estado.negOp);
@@ -2417,11 +2684,11 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const nova = () => setEstado({ etapa: "criacao" });
 
   // pausas automáticas: qualquer gaveta ou cena aberta segura o relógio
-  const pausado = !!gaveta || estanteAberta || patrimonioAberto || !!apresentacao;
+  const pausado = !!gaveta || estanteAberta || patrimonioAberto || !!apresentacao || !!popup || !!popTemp;
   const ESPERA_AUTO = 1900;
   const espera = estado.manchete ? 4600 : 2800;
   useEffect(() => {
-    if (etapa !== "evento" || !estado.auto || evento || pausado || estado.forcada) return undefined;
+    if (etapa !== "evento" || !estado.auto || evento || pausado || estado.forcada || desafioPendente(c)) return undefined;
     const t = setTimeout(() => jogar(null), ESPERA_AUTO);
     return () => clearTimeout(t);
   }, [etapa, estado.auto, evento, pausado, c]);
@@ -2435,7 +2702,6 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const mostrarCabecalho = etapa !== "criacao" && etapa !== "fim";
   const painel = c && ["evento", "negociacao", "resumo", "coletiva", "traco"].includes(etapa);
   const ultimo = estado.ultimo;
-  const pequenas = ultimo ? ultimo.titulos.filter((t) => !TIPOS_GRANDES.includes(t.tipo)) : [];
   const torneio = c && c.idade >= 18 ? (anoDeCopa(c.ano) ? "Copa do Mundo" : anoDeContinentalSelecao(c.ano) ? nomeCopaContinental(c.nac) : null) : null;
   return (
     <div className="rp">
@@ -2460,6 +2726,8 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
                   <CartaoEvento key={`${evento.id}:${evento.texto}`} evento={evento} resultado={resultado} efeitos={estado.efeitos} onEscolher={escolherEvento} onPedirLiga={pedirLigaUI} onAvancar={avancar} espera={pausado ? 0 : espera} />
                   {resultado && estado.manchete && c.ultimaTransferencia && <RecorteJornal manchete={estado.manchete} transf={c.ultimaTransferencia} />}
                 </>
+              ) : desafioPendente(c) ? (
+                <DesafioOvr key={c.ano} c={c} onEscolher={desafiar} />
               ) : estado.auto ? (
                 <AutoAvanco c={c} ms={ESPERA_AUTO} onAgora={() => jogar(null)} onPausar={() => setEstado((s) => ({ ...s, auto: false }))} />
               ) : (
@@ -2470,14 +2738,11 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
                 <button onClick={encerrar} className="text-[14px] font-bold text-[#8FA39A] min-h-[40px]">Pendurar as chuteiras aos {c.idade - 1}</button>
               )}
             </div>
-            {estado.voar && pequenas.length > 0 && !evento && (
-              <TacasVoando key={ultimo.ano} titulos={pequenas} onPousou={() => { setContadorPulsa((x) => x + 1); vibrar(20); }} />
-            )}
           </>
         )}
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}
         {etapa === "momento" && <TelaMomento key={`${card.ano}:${(card.momentos || []).length}`} c={c} momento={card.pendente} onFim={fimMomento} />}
-        {etapa === "festa" && <TelaFesta c={c} card={card} onFim={() => (estado.retorno ? setEstado({ ...estado.retorno, voar: false }) : posTemporada(c, card))} />}
+        {etapa === "festa" && <TelaFesta c={c} card={card} onFim={() => { if (estado.retorno) setEstado({ ...estado.retorno, voar: false }); else { setPopTemp(card); posTemporada(c, card); } }} />}
         {etapa === "resumo" && <TelaResumo c={c} card={card} voar={!!estado.voar} onPousou={() => setContadorPulsa((x) => x + 1)} onContinuar={continuar} onAposentar={encerrar} onRever={() => setEstado({ etapa: "festa", c, card, voar: false })} />}
         {etapa === "coletiva" && estado.coletiva && <TelaColetiva c={c} coletiva={estado.coletiva} resposta={estado.resposta} onResponder={responder} onSeguir={() => abrirJanela(c, estado.ultimo, false)} />}
         {etapa === "traco" && <TelaTraco c={c} opcoes={(opcoesTraco || []).map(tracoDe).filter(Boolean)} onEscolher={escolherT} />}
@@ -2507,7 +2772,8 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         <ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label}
           idade={c.idade} grandeChegada={apresentacao.grande} curto={apresentacao.curto} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={() => setApresentacao(null)} />
       )}
-      {toast && <ToastDecisao toast={toast} onFechar={() => setToast(null)} />}
+      {popTemp && c && <PopupTemporada key={popTemp.ano} c={c} card={popTemp} onFechar={() => { if (popTemp.titulos.length) { setContadorPulsa((x) => x + 1); vibrar(20); } setPopTemp(null); }} />}
+      {popup && !popTemp && <PopupResultado key={popup.k} info={popup} onFechar={() => setPopup(null)} />}
     </div>
   );
 }

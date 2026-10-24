@@ -113,6 +113,12 @@ export const ESTILO_BASE = `
 .cp-pop{animation:cpPop .5s cubic-bezier(.2,.8,.2,1) both;}
 @keyframes cpBrilhoRes{0%,100%{filter:drop-shadow(0 0 0 transparent)}50%{filter:drop-shadow(0 0 22px var(--brilho))}}
 .cp-brilho-res{animation:cpBrilhoRes 1.6s ease-in-out 2;}
+/* galeria do fim de carreira (estilo Copero no computador) */
+.cp-galeria{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr));}
+@media(min-width:640px){.cp-galeria{grid-template-columns:repeat(3,minmax(0,1fr));}}
+@media(min-width:1024px){.cp-galeria{grid-template-columns:repeat(var(--cols),minmax(0,1fr));}}
+.cp-topo-fim{display:grid;gap:10px;grid-template-columns:minmax(0,1fr);}
+@media(min-width:900px){.cp-topo-fim{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,1fr);}}
 `;
 
 const ATTR_LABEL = { velocidade: "VEL", finalizacao: "FIN", passe: "PAS", drible: "DRI", defesa: "DEF", fisico: "FIS" };
@@ -2129,9 +2135,9 @@ function PosCarreira({ c, onEscolher }) {
     <div className="rp-painel p-4">
       <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">E agora? O que vem depois da bola</div>
       <p className="text-[14px] text-[#8FA39A] mt-1">Cada caminho vira uma segunda carreira. O que você fez em campo pesa na chance de dar certo.</p>
-      <div className="grid gap-2 mt-3">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-2 mt-3">
         {caminhosPosCarreira(c).map((p) => (
-          <button key={p.id} onClick={() => { vibrar(15); onEscolher(p.id); setAberto(true); }} className="rp-opcao px-3 py-3 flex items-center gap-3">
+          <button key={p.id} onClick={() => { vibrar(15); onEscolher(p.id); setAberto(true); }} className="rp-opcao w-full min-w-0 px-3 py-3 flex items-center gap-3">
             <span aria-hidden="true" className="shrink-0 w-14 h-14 rounded-xl border border-white/10" style={{ background: `url(${FOTO_POS_CARREIRA[p.id] || ARTE.porDoSol}) center/cover` }} />
             <span className="min-w-0 flex-1">
               <span className="flex items-center gap-2">
@@ -2148,35 +2154,144 @@ function PosCarreira({ c, onEscolher }) {
   );
 }
 
-/* Fim de carreira enxuto (como no Copero): números, ano a ano e dois botões.
-   O resumo completo (carta, legado, trajetória…) fica em "Ver resumo". */
+/* ---------- galeria do fim de carreira (como no Copero, versão de computador) ---------- */
+function LinhaJGA({ j, g, a, escura = false }) {
+  return (
+    <div className={`grid grid-cols-3 rounded-xl ${escura ? "bg-black/35" : "bg-black/25"} py-1.5`}>
+      {[["JOGOS", j], ["GOLS", g], ["AST", a]].map(([k, v], i) => (
+        <div key={k} className={`text-center ${i ? "border-l border-white/10" : ""}`}>
+          <div className="text-[9px] font-bold tracking-[0.14em] text-white/55">{k}</div>
+          <div className="text-[16px] font-extrabold text-white leading-tight">{v}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+function conquistasDeCarreira(c) {
+  const ts = c.temporadas;
+  const ligas = new Set(ts.map((x) => clubeDe(x.clube)?.liga).filter(Boolean).map((l) => l.replace(/2$/, "")));
+  const porClube = {};
+  ts.forEach((x) => { porClube[x.clube] = (porClube[x.clube] || 0) + 1; });
+  const tits = c.lista || [];
+  const ligasGanhas = tits.filter((x) => x.tipo === "liga").length;
+  const triplice = ts.some((x) => ["liga", "copa", "continental"].every((t) => (x.titulos || []).some((y) => y.tipo === t)));
+  const sel = c.selecao || {};
+  return [
+    ["Tríplice coroa", triplice], ["Campeão do mundo", (c.titulos?.copaMundo || 0) > 0], ["Rodou o mundo", ligas.size >= 4],
+    ["Colecionador de ligas", ligasGanhas >= 5], ["Cem gols", c.totais.gols >= 100], ["Duzentos gols", c.totais.gols >= 200],
+    ["Trezentos gols", c.totais.gols >= 300], ["Garçom", c.totais.assist >= 150], ["Quinhentos jogos", c.totais.jogos >= 500],
+    ["Bandeira de um clube", Object.values(porClube).some((n) => n >= 10)], ["Andarilho", Object.keys(porClube).length >= 6],
+    ["Cem jogos pela seleção", (sel.jogos || 0) >= 100], ["Campeão precoce", tits.some((x) => !ehPremioIndividual(x.tipo) && x.ano - (c.temporadas[0]?.ano || x.ano) <= 3)],
+    ["Ídolo", Object.values(c.torcida || {}).some((v) => v >= 85)], ["Veterano", c.idade - 1 >= 38],
+  ];
+}
+function GaleriaFim({ c }) {
+  const L = c.legado || calcularLegado(c);
+  const valorMax = Math.max(0, ...c.temporadas.map((x) => x.valor || 0));
+  const nacLabel = nacDe(c.nac).label;
+  // clubes na ordem em que você passou por eles
+  const clubes = [];
+  c.temporadas.forEach((x) => {
+    let k = clubes.find((y) => y.nome === x.clube);
+    if (!k) { k = { nome: x.clube, jogos: 0, gols: 0, assist: 0, temporadas: 0, de: x.ano, ate: x.ano }; clubes.push(k); }
+    k.jogos += x.jogos || 0; k.gols += x.gols || 0; k.assist += x.assist || 0; k.temporadas += 1; k.ate = x.ano;
+  });
+  const titulosDe = (nome) => (c.lista || []).filter((t) => t.clube === nome && !ehPremioIndividual(t.tipo));
+  const sel = c.selecao || {};
+  const titSel = (c.lista || []).filter((t) => t.clube === nacLabel);
+  const premios = (c.lista || []).filter((t) => ehPremioIndividual(t.tipo));
+  const badges = conquistasDeCarreira(c);
+  const cols = clubes.length <= 6 ? Math.max(3, clubes.length) : clubes.length <= 8 ? 4 : 5;
+  const alta = clubes.length <= 6;
+  const sobrenome = c.nome.trim().split(/\s+/).slice(-1)[0];
+  return (
+    <div className="cp rounded-[24px] border border-[#26262A] bg-[#111113] p-3 sm:p-4 flex flex-col gap-2.5">
+      <div className="cp-topo-fim">
+        {/* o jogador */}
+        <div className="rounded-[18px] bg-[#18181B] border border-white/5 p-4 flex flex-col justify-between gap-3 cp-surge min-w-0">
+          <div className="flex items-start gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#71717A]">Carreira finalizada</div>
+              <div className="text-[24px] sm:text-[30px] font-black uppercase text-white leading-none mt-1 truncate">{sobrenome}</div>
+              <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#27272A] text-[#D4D4D8]">#{numeroDe(c)}</span>
+                <span className="text-[11px] font-extrabold px-2 py-0.5 rounded-full text-white" style={{ background: "#E11D48" }}>{c.posicao}</span>
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ color: L.nivel.cor, background: `${L.nivel.cor}22` }}>{L.nivel.nome}</span>
+              </div>
+            </div>
+            <div className="text-right shrink-0 self-center">
+              <div className="text-[10px] font-bold tracking-[0.15em] text-[#71717A]">VALOR</div>
+              <div className="text-[15px] sm:text-[18px] font-black text-white">{formatarValor(valorMax).replace(/\s/g, "")}</div>
+            </div>
+            <div className="shrink-0 w-[68px] h-[68px] rounded-2xl flex flex-col items-center justify-center" style={{ background: "linear-gradient(160deg,#FDE047,#EAB308)", boxShadow: "0 6px 24px rgba(234,179,8,.35)" }}>
+              <span className="text-[10px] font-bold text-[#713F12] tracking-wider">OVR</span>
+              <span className="text-[32px] font-black text-[#1C1305] leading-none">{c.picoOvr}</span>
+            </div>
+          </div>
+          <LinhaJGA j={c.totais.jogos} g={c.totais.gols} a={c.totais.assist} escura />
+        </div>
+        {/* seleção */}
+        <div className="rounded-[18px] p-4 flex flex-col gap-2.5 cp-surge" style={{ background: "linear-gradient(150deg, #6B5D13, #3A3410 70%)", animationDelay: ".08s" }}>
+          <div className="flex items-center gap-3">
+            <span className="w-12 h-9 rounded-md bg-black/25 flex items-center justify-center text-[26px] leading-none">{EMOJI_NACIONALIDADE[c.nac] || "🌎"}</span>
+            <span><span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-[#FDE68A]/70">Seleção</span><span className="block text-[18px] font-extrabold text-white leading-tight">{nacLabel}</span></span>
+          </div>
+          <LinhaJGA j={sel.jogos || 0} g={sel.gols || 0} a={sel.assist || 0} />
+          <div className="flex-1 flex items-center justify-center gap-1.5 min-h-[40px]">
+            {titSel.length ? titSel.map((t, i) => <IconeTitulo key={i} tipo={t.tipo} nome={t.nome} size={36} />) : <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">Vitrine vazia</span>}
+          </div>
+        </div>
+        {/* prêmios e conquistas */}
+        <div className="rounded-[18px] p-4 flex flex-col gap-2 cp-surge" style={{ background: "linear-gradient(150deg, #1C1917, #2A1F0E 80%)", border: "1px solid rgba(251,146,60,.15)", animationDelay: ".16s" }}>
+          <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#FB923C]">Prêmios</div>
+          <div className="flex flex-wrap gap-1">
+            {badges.map(([nome, ok]) => <span key={nome} className={`text-[10.5px] font-bold px-1.5 py-0.5 rounded-md border ${ok ? "text-[#FDE68A] border-[#CA8A04]/70 bg-[#CA8A04]/15" : "text-white/25 border-white/10"}`}>{nome}</span>)}
+          </div>
+          <div className="flex-1 flex items-end justify-center gap-1.5 min-h-[36px]">
+            {premios.length ? premios.map((t, i) => <IconeTitulo key={i} tipo={t.tipo} nome={t.nome} size={32} />) : <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/30 self-center">Vitrine vazia</span>}
+          </div>
+        </div>
+      </div>
+      {/* um cartão por clube */}
+      <div className="cp-galeria" style={{ "--cols": cols }}>
+        {clubes.map((k, i) => {
+          const cl = clubeDe(k.nome);
+          const cor = cl?.cor || "#3F3F46";
+          const tits = titulosDe(k.nome);
+          return (
+            <div key={k.nome} className={`relative overflow-hidden rounded-[18px] p-2.5 flex flex-col items-center ${alta ? "lg:min-h-[400px] lg:justify-center" : ""} min-h-[200px] cp-surge`}
+              style={{ background: `linear-gradient(180deg, ${cor}CC, ${cor}55 55%, #141416)`, animationDelay: `${0.2 + i * 0.05}s` }}>
+              <div className="absolute inset-0 flex items-center justify-center opacity-[.09] pointer-events-none" aria-hidden="true" style={{ transform: "scale(3.2)" }}><ClubDot club={cl} size={60} /></div>
+              <div className="absolute top-2 left-3 text-[10px] font-bold text-white/50">{k.de === k.ate ? k.de : `${k.de}–${k.ate}`}</div>
+              <div className="relative mt-4"><ClubDot club={cl} size={52} /></div>
+              <div className="relative text-[15px] font-extrabold text-white text-center leading-tight mt-1.5 line-clamp-1" style={{ textShadow: "0 1px 6px rgba(0,0,0,.65)" }}>{k.nome}</div>
+              <div className="relative text-[10px] font-semibold text-white/70 mb-1.5" style={{ textShadow: "0 1px 4px rgba(0,0,0,.6)" }}>{k.temporadas} {k.temporadas > 1 ? "temporadas" : "temporada"}</div>
+              <div className="relative w-full"><LinhaJGA j={k.jogos} g={k.gols} a={k.assist} /></div>
+              <div className="relative flex flex-wrap justify-center items-end gap-1 mt-2 min-h-[34px]">
+                {tits.slice(0, 6).map((t, x) => <IconeTitulo key={x} tipo={t.tipo} nome={t.nome} size={30} />)}
+                {tits.length > 6 && <span className="text-[12px] font-black text-[#FDE047]">+{tits.length - 6}</span>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* Fim de carreira: galeria, depois da bola e os botões */
 function FimDeCarreira(props) {
   const { c, onNova } = props;
   const [completo, setCompleto] = useState(false);
   if (completo) return <TelaFim {...props} />;
-  const L = c.legado || calcularLegado(c);
-  const titulos = c.lista.filter((x) => !ehPremioIndividual(x.tipo)).length;
   return (
-    <div className="flex flex-col gap-3 pb-6 rp-entra">
-      <div className="max-w-xl mx-auto w-full px-3 pt-4">
-        <div className="rp-painel p-4 text-center" style={{ borderColor: `${L.nivel.cor}66`, background: `linear-gradient(160deg, ${L.nivel.cor}22, rgba(19,26,23,.9) 60%)` }}>
-          <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#C9D3CE]">Sua carreira chegou ao fim</div>
-          <div className="flex justify-center my-3"><EmblemaLegado c={c} L={L} size={84} /></div>
-          <div className="display text-lg" style={{ color: L.nivel.cor }}>{L.nivel.nome}</div>
-          <div className="text-[14px] text-[#8FA39A]">{c.nome} · {c.idade - 1} anos · {L.pontos} pontos de legado</div>
-          <div className="grid grid-cols-4 gap-2 mt-4">
-            {[["JOGOS", c.totais.jogos], ["GOLS", c.totais.gols], ["AST", c.totais.assist], ["TÍTULOS", titulos]].map(([k, v]) => (
-              <div key={k} className="rounded-xl bg-[#0E1512]/70 py-2"><div className="font-stat text-[24px] text-[#F2F5F3] leading-none">{v}</div><div className="text-[10px] font-bold tracking-wider text-[#8FA39A] mt-1">{k}</div></div>
-            ))}
-          </div>
-        </div>
+    <div className="flex flex-col gap-3 pb-8 rp-entra">
+      <div className="max-w-6xl mx-auto w-full px-3 pt-4"><GaleriaFim c={c} /></div>
+      <div className="max-w-6xl mx-auto w-full px-3 flex flex-wrap justify-end gap-2">
+        <button onClick={() => { setCompleto(true); window.scrollTo({ top: 0 }); }} className="cp-pill cp-contorno text-[15px] min-h-[46px]">Ver resumo completo</button>
+        <button onClick={onNova} className="cp-pill cp-contorno text-[15px] min-h-[46px]"><span aria-hidden="true">↻</span> Jogar novamente</button>
       </div>
-      <TabelaCarreira c={c} proxima={false} />
-      {props.onPosCarreira && <div className="max-w-xl mx-auto w-full px-3"><PosCarreira c={c} onEscolher={props.onPosCarreira} /></div>}
-      <div className="max-w-xl mx-auto w-full px-3 grid grid-cols-2 gap-2">
-        <button onClick={() => { setCompleto(true); window.scrollTo({ top: 0 }); }} className="rp-btn rp-ouro display text-xs">Ver resumo</button>
-        <button onClick={onNova} className="rp-btn rp-prim display text-xs">Jogar novamente</button>
-      </div>
+      {props.onPosCarreira && <div className="max-w-3xl mx-auto w-full px-3"><PosCarreira c={c} onEscolher={props.onPosCarreira} /></div>}
     </div>
   );
 }

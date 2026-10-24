@@ -4,6 +4,15 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🖼️ Galeria do fim de carreira (como no Copero no computador)
+
+- **Fim de carreira virou uma galeria**: no topo, três cartões — o jogador (sobrenome, camisa, posição, nível de legado, maior valor de mercado, OVR máximo em dourado e jogos/gols/assistências), a **seleção** (bandeira, números e as taças pela seleção, ou "vitrine vazia") e os **prêmios** (Bola e Bota de Ouro, mais 15 conquistas de carreira que acendem quando você chega lá: Tríplice coroa, Rodou o mundo, Cem gols, Bandeira de um clube, Andarilho…)
+- **Um cartão por clube**, na ordem da carreira: fundo na cor do clube com o escudo grande apagado atrás, escudo, nome, anos, temporadas, jogos/gols/assistências ali e as taças conquistadas naquele clube
+- No computador os cartões se espalham em até 5 colunas (com poucos clubes eles ficam altos, como no Copero); no celular ficam em 2 colunas
+- Botões "Ver resumo completo" e "Jogar novamente" no canto, e a escolha do pós-carreira logo abaixo
+
+---
+
 ## 🧑‍💼 Depois da bola: uma segunda carreira sorteada
 
 - **Cada caminho vira uma história própria**, sorteada pelo código da carreira e puxada pelo que você fez em campo (legado, títulos, fama, idolatria, patrimônio):

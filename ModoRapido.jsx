@@ -114,6 +114,10 @@ export const ESTILO_BASE = `
 .ap-sobe{animation:apSobe .7s cubic-bezier(.2,.8,.2,1) both;}
 .ap-camisa{animation:apCamisa .9s cubic-bezier(.2,.8,.2,1) both;transform-box:fill-box;transform-origin:50% 100%;}
 .ap-texto{animation:apTexto .5s ease-out both;}
+@keyframes apHolofote{0%,100%{opacity:.55}50%{opacity:.9}}
+.ap-holofote{background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,0) 70%);clip-path:polygon(42% 0,58% 0,100% 100%,0 100%);mix-blend-mode:screen;animation:apHolofote 3.2s ease-in-out infinite;pointer-events:none;}
+@keyframes apBrilho{0%{transform:translateX(-120%)}60%,100%{transform:translateX(120%)}}
+.ap-brilho{background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.14) 50%,transparent 65%);animation:apBrilho 4.5s ease-in-out 1s infinite;pointer-events:none;}
 .ap-flash{position:absolute;width:70px;height:70px;border-radius:999px;background:radial-gradient(circle,#fff 0%,rgba(255,255,255,.5) 30%,transparent 70%);animation:apFlash 2.6s ease-out infinite;pointer-events:none;}
 .rp-face{backface-visibility:hidden;-webkit-backface-visibility:hidden;}
 .rp-verso{position:absolute;inset:0;transform:rotateY(180deg);backface-visibility:hidden;-webkit-backface-visibility:hidden;}
@@ -2568,29 +2572,95 @@ function BarraChances({ chances, alta = false, ponteiro = null, destaque = null 
     </div>
   );
 }
-/* o ponteiro vai e volta pela barra e para na faixa sorteada */
-function Roleta({ chances, alvo, idx, onFim }) {
-  const [pos, setPos] = useState(0);
-  const [fim, setFim] = useState(false);
+/* Scanner do sorteio: anel com as faixas de chance (verde ganha, cinza nada, vermelho perde),
+   um feixe que gira e desacelera até parar na faixa sorteada, e os números correndo no centro. */
+const NEON = (d) => (d > 0 ? "#22F59B" : d < 0 ? "#FF4D6D" : "#94A3B8");
+function polar(cx, cy, r, ang) { const a = (ang - 90) * Math.PI / 180; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; }
+function arco(cx, cy, r, a0, a1) { const [x0, y0] = polar(cx, cy, r, a0), [x1, y1] = polar(cx, cy, r, a1); return `M${x0} ${y0} A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1} ${y1}`; }
+function ScannerChances({ chances, alvo, idx, estatico, onFim }) {
+  const [ang, setAng] = useState(estatico ? alvo * 360 : 0);
+  const [fim, setFim] = useState(!!estatico);
+  const [ruido, setRuido] = useState(0);
   useEffect(() => {
-    const dur = 2100, dist = 2 + alvo;
+    if (estatico) { setAng(alvo * 360); setFim(true); return undefined; }
+    const dur = 2600, total = 720 + alvo * 360;
     let raf, t0;
     const passo = (agora) => {
       t0 = t0 || agora;
       const f = Math.min(1, (agora - t0) / dur);
-      const x = dist * (1 - Math.pow(1 - f, 3)) % 2;
-      setPos(x <= 1 ? x : 2 - x);
+      setAng(total * (1 - Math.pow(1 - f, 3.2)));
+      setRuido(Math.floor(Math.random() * 100));
       if (f < 1) raf = requestAnimationFrame(passo);
       else { setFim(true); onFim(); }
     };
     raf = requestAnimationFrame(passo);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  return <BarraChances chances={chances} alta ponteiro={pos} destaque={fim ? idx : null} />;
+  }, [estatico]);
+  const C = 120, R = 92;
+  let acc = 0;
+  const faixas = chances.map((x, i) => { const a0 = acc * 360, a1 = (acc + x.p) * 360; acc += x.p; return { ...x, i, a0, a1 }; });
+  const sorteado = chances[idx];
+  const corRes = NEON(sorteado.d);
+  const [px, py] = polar(C, C, R + 14, ang % 360);
+  return (
+    <div className="relative rounded-[22px] border border-white/10 p-4 overflow-hidden" style={{ background: "radial-gradient(circle at 50% 45%, rgba(34,245,155,.06), transparent 60%), #0C0F12" }}>
+      <div className="absolute inset-0 pointer-events-none opacity-[.07]" style={{ backgroundImage: "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)", backgroundSize: "22px 22px" }} aria-hidden="true" />
+      {["top-2 left-2 border-t border-l", "top-2 right-2 border-t border-r", "bottom-2 left-2 border-b border-l", "bottom-2 right-2 border-b border-r"].map((k) => <span key={k} className={`absolute w-4 h-4 ${k} border-[#22F59B]/60`} aria-hidden="true" />)}
+      <div className="relative flex items-center justify-between text-[10px] font-bold tracking-[0.22em] font-mono">
+        <span className="text-[#22F59B]/80">{fim ? "RESULTADO" : "ANALISANDO"}</span>
+        <span className="text-white/40">{fim ? `${Math.round(sorteado.p * 100)}% DE CHANCE` : `${chances.length} FAIXAS`}</span>
+      </div>
+      <svg viewBox="0 0 240 240" className="relative w-full max-w-[260px] mx-auto block mt-1" role="img" aria-label={fim ? `Resultado: ${sorteado.d > 0 ? "+" : ""}${sorteado.d} OVR` : "Sorteando"}>
+        <defs>
+          <filter id="scGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.2" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+          <radialGradient id="scCentro"><stop offset="0" stopColor="#151A1F" /><stop offset="1" stopColor="#0C0F12" /></radialGradient>
+        </defs>
+        {/* régua de marcações */}
+        {Array.from({ length: 72 }, (_, k) => { const [x0, y0] = polar(C, C, 112, k * 5), [x1, y1] = polar(C, C, k % 6 ? 108 : 104, k * 5); return <line key={k} x1={x0} y1={y0} x2={x1} y2={y1} stroke="#fff" strokeOpacity={k % 6 ? 0.15 : 0.35} strokeWidth="1" />; })}
+        {/* faixas de chance */}
+        <circle cx={C} cy={C} r={R} fill="none" stroke="#fff" strokeOpacity=".05" strokeWidth="16" />
+        {faixas.map((f) => (
+          <path key={f.i} d={arco(C, C, R, f.a0 + 1.2, f.a1 - 1.2)} fill="none" stroke={NEON(f.d)} strokeWidth={fim && f.i === idx ? 18 : 14} strokeLinecap="butt"
+            opacity={fim ? (f.i === idx ? 1 : 0.22) : 0.85} filter={fim && f.i === idx ? "url(#scGlow)" : undefined} style={{ transition: "opacity .4s, stroke-width .4s" }} />
+        ))}
+        {/* feixe que varre */}
+        <g transform={`rotate(${ang % 360} ${C} ${C})`}>
+          <path d={`M${C} ${C} L${C - 9} ${C - R - 4} A ${R + 4} ${R + 4} 0 0 1 ${C + 9} ${C - R - 4} Z`} fill={fim ? corRes : "#22F59B"} opacity=".16" />
+          <line x1={C} y1={C - 60} x2={C} y2={C - R - 12} stroke={fim ? corRes : "#E6FFF4"} strokeWidth="3.5" strokeLinecap="round" filter="url(#scGlow)" />
+        </g>
+        <circle cx={px} cy={py} r="4" fill={fim ? corRes : "#E6FFF4"} filter="url(#scGlow)" />
+        {/* centro */}
+        <circle cx={C} cy={C} r="62" fill="url(#scCentro)" stroke="#fff" strokeOpacity=".08" />
+        <circle cx={C} cy={C} r="56" fill="none" stroke={fim ? corRes : "#22F59B"} strokeOpacity=".35" strokeDasharray="2 5" />
+        {fim ? (
+          <g className="cp-pop">
+            <text x={C} y={C + (sorteado.d ? 8 : 4)} textAnchor="middle" fontFamily="Inter, system-ui" fontWeight="900" fontSize={sorteado.d ? 46 : sorteado.rotulo ? 13 : 30} fill={corRes} filter="url(#scGlow)">
+              {sorteado.d > 0 ? `+${sorteado.d}` : sorteado.d < 0 ? `−${-sorteado.d}` : sorteado.rotulo ? sorteado.rotulo.slice(0, 18) : "0"}
+            </text>
+            {sorteado.d !== 0 && <text x={C} y={C + 30} textAnchor="middle" fontFamily="ui-monospace, monospace" fontWeight="700" fontSize="12" letterSpacing="3" fill="#fff" fillOpacity=".6">OVR</text>}
+          </g>
+        ) : (
+          <>
+            <text x={C} y={C + 10} textAnchor="middle" fontFamily="ui-monospace, monospace" fontWeight="700" fontSize="30" fill="#E6FFF4">{String(ruido).padStart(2, "0")}%</text>
+            <text x={C} y={C + 30} textAnchor="middle" fontFamily="ui-monospace, monospace" fontSize="9" letterSpacing="2.5" fill="#22F59B" fillOpacity=".7">CALCULANDO</text>
+          </>
+        )}
+      </svg>
+      {/* legenda das faixas */}
+      <div className="relative flex flex-wrap justify-center gap-1.5 mt-2">
+        {faixas.map((f) => (
+          <span key={f.i} className="font-mono text-[11px] font-bold px-2 py-1 rounded-md border transition-opacity" style={{ color: NEON(f.d), borderColor: `${NEON(f.d)}55`, background: `${NEON(f.d)}12`, opacity: fim && f.i !== idx ? 0.35 : 1 }}>
+            {f.d > 0 ? `+${f.d}` : f.d < 0 ? `−${-f.d}` : f.rotulo ? f.rotulo.slice(0, 14) : "0"} · {Math.round(f.p * 100)}%
+          </span>
+        ))}
+      </div>
+    </div>
+  );
 }
+
 /* Resultado de uma escolha (decisão da janela ou desafio de OVR): tela cheia, com sorteio quando há chances */
-function PopupResultado({ info, onFechar }) {
+export function PopupResultado({ info, onFechar }) {
   const temRoleta = !!info.chances;
   const [revelado, setRevelado] = useState(!temRoleta);
   const dOvr = (info.ovrDepois ?? 0) - (info.ovrAntes ?? 0);
@@ -2599,27 +2669,16 @@ function PopupResultado({ info, onFechar }) {
   const revelar = () => { setRevelado(true); vibrar(dOvr > 0 ? [30, 50, 30] : 60); };
   const sorteado = temRoleta ? info.chances[info.idx] : null;
   return (
-    <TelaCheia rotulo={info.titulo} cor={corFundo} botao={revelado ? "Continuar" : "Sorteando…"} bloqueado={!revelado} onFechar={() => (revelado ? onFechar() : revelar())}>
+    <TelaCheia rotulo={info.titulo} cor={corFundo} botao={revelado ? "Continuar" : "Pular sorteio"} bloqueado={!revelado} onFechar={() => (revelado ? onFechar() : revelar())}>
       <div className="flex flex-col items-center text-center pt-4">
         <span className="w-16 h-16 rounded-2xl bg-white/[.06] border border-white/10 flex items-center justify-center text-[34px]">{info.icone}</span>
         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-[#A1A1AA] mt-3">{info.titulo}</div>
         {info.contexto && <p className="text-[14px] text-[#A1A1AA] leading-snug mt-2 line-clamp-3">{info.contexto}</p>}
         {info.escolha && <div className="mt-3 inline-flex flex-col items-center"><span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#71717A]">Sua escolha</span><span className="text-[22px] font-extrabold text-white leading-tight mt-0.5">{info.escolha}</span></div>}
       </div>
-      {temRoleta && (
-        <div className="cp-card p-4 mt-2">
-          <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#A1A1AA] mb-3">{revelado ? "Resultado do sorteio" : "Sorteando…"}</div>
-          {revelado ? <BarraChances chances={info.chances} alta destaque={info.idx} ponteiro={info.alvo} />
-            : <Roleta chances={info.chances} alvo={info.alvo} idx={info.idx} onFim={revelar} />}
-        </div>
-      )}
+      {temRoleta && <div className="mt-1"><ScannerChances chances={info.chances} alvo={info.alvo} idx={info.idx} estatico={revelado} onFim={revelar} /></div>}
       {revelado && (
         <div className="flex flex-col gap-3 cp-surge">
-          {temRoleta && (
-            <div className="cp-pop text-center text-[40px] font-black leading-none mt-1" style={{ color: corChance(sorteado.d) === "#3F3F46" ? "#D4D4D8" : sorteado.d > 0 ? "#4ADE80" : "#F87171" }}>
-              {sorteado.d > 0 ? `+${sorteado.d} OVR` : sorteado.d < 0 ? `−${-sorteado.d} OVR` : sorteado.rotulo || "Nada mudou"}
-            </div>
-          )}
           <p className="text-[18px] leading-snug text-[#F4F4F5] text-center font-medium px-1">{info.texto}</p>
           {dOvr !== 0 && <div className="cp-card p-4"><OvrAntesDepois de={info.ovrAntes} para={info.ovrDepois} grande /></div>}
           {outros.length > 0 && (
@@ -2771,99 +2830,116 @@ const lumi = (hex) => { const h = (hex || "#333").replace("#", ""); const n = pa
 export function ApresentacaoGrande({ clube, nome, numero, posicao, idade, deOnde, contrato, valor, onConcluir }) {
   const cor = clube?.cor || "#12A876";
   const claro = lumi(cor) > 0.62;
-  const tinta = claro ? "#111315" : "#FFFFFF";
+  const tinta = claro ? "#0E1116" : "#FFFFFF";
+  const luz = claro ? "#FFFFFF" : cor; // cor do contorno de luz nas silhuetas
   const sobrenome = (nome || "").trim().split(/\s+/).slice(-1)[0].toUpperCase();
   const estadio = ((clube?.nome || "").length + (numero || 0)) % 2 === 1;
   const [pronto, setPronto] = useState(false);
-  useEffect(() => { vibrar([30, 40, 30]); const t = setTimeout(() => setPronto(true), 1900); return () => clearTimeout(t); }, []);
-  const fonteNome = sobrenome.length > 9 ? 13 : sobrenome.length > 6 ? 16 : 19;
+  useEffect(() => { vibrar([30, 40, 30]); const t = setTimeout(() => setPronto(true), 2000); return () => clearTimeout(t); }, []);
+  const fonteNome = sobrenome.length > 9 ? 12 : sobrenome.length > 6 ? 15 : 18;
   return createPortal(
-    <div className="cp fixed inset-0 z-[72] overflow-y-auto" role="dialog" aria-modal="true" aria-label={`Apresentação no ${clube?.nome}`} data-pop="" style={{ background: "#07090A" }}>
+    <div className="cp fixed inset-0 z-[72] overflow-y-auto" role="dialog" aria-modal="true" aria-label={`Apresentação no ${clube?.nome}`} style={{ background: "#05070A" }}>
       <div className="min-h-full max-w-md mx-auto flex flex-col">
-        <div className="relative h-[430px] overflow-hidden shrink-0">
+        <div className="relative h-[460px] overflow-hidden shrink-0">
           {/* fundo */}
           {estadio ? (
             <>
-              <div className="absolute inset-0" style={{ background: `url(${ARTE.estadioNoite}) center 30%/cover` }} aria-hidden="true" />
-              <div className="absolute inset-x-0 bottom-0 h-[38%]" style={{ background: "repeating-linear-gradient(90deg, #1E6B3A 0 36px, #1A5E33 36px 72px)", transform: "perspective(300px) rotateX(38deg)", transformOrigin: "bottom" }} aria-hidden="true" />
-              <div className="absolute left-1/2 top-[22px] -translate-x-1/2 rounded-xl px-5 py-2 flex items-center gap-2 border border-white/15" style={{ background: "rgba(0,0,0,.55)" }} aria-hidden="true">
-                <ClubDot club={clube} size={34} /><span className="text-[12px] font-extrabold tracking-[0.2em] text-white">BEM-VINDO</span>
+              <div className="absolute inset-0" style={{ background: `url(${ARTE.estadioNoite}) center 30%/cover`, filter: "saturate(1.1) brightness(.85)" }} aria-hidden="true" />
+              <div className="absolute inset-x-0 bottom-0 h-[34%]" style={{ background: "repeating-linear-gradient(90deg, #1F6E3C 0 34px, #1A6034 34px 68px)", transform: "perspective(260px) rotateX(42deg)", transformOrigin: "bottom" }} aria-hidden="true" />
+              <div className="absolute left-1/2 top-[26px] -translate-x-1/2 rounded-2xl px-4 py-2 flex items-center gap-3 border" style={{ background: "rgba(5,7,10,.6)", borderColor: `${luz}55`, boxShadow: `0 0 30px ${luz}33`, backdropFilter: "blur(6px)" }} aria-hidden="true">
+                <ClubDot club={clube} size={36} />
+                <span className="text-left leading-tight"><span className="block text-[10px] font-bold tracking-[0.3em] text-white/60">BEM-VINDO</span><span className="block text-[15px] font-black tracking-wide text-white">{sobrenome} {numero}</span></span>
               </div>
             </>
           ) : (
             <>
-              <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${cor} 0%, ${cor}CC 60%, #07090A 100%)` }} aria-hidden="true" />
-              <div className="absolute inset-0 grid grid-cols-6 gap-y-4 px-2 pt-3 opacity-[.22]" aria-hidden="true">
-                {Array.from({ length: 48 }, (_, k) => <div key={k} className="flex justify-center" style={{ transform: Math.floor(k / 6) % 2 ? "translateX(50%)" : undefined }}><ClubDot club={clube} size={26} /></div>)}
+              <div className="absolute inset-0" style={{ background: `radial-gradient(90% 70% at 50% 30%, ${cor} 0%, ${cor}AA 45%, #05070A 100%)` }} aria-hidden="true" />
+              <div className="absolute inset-0 grid grid-cols-6 gap-y-5 px-2 pt-4 opacity-[.2]" aria-hidden="true" style={{ maskImage: "linear-gradient(180deg,#000 55%,transparent 85%)", WebkitMaskImage: "linear-gradient(180deg,#000 55%,transparent 85%)" }}>
+                {Array.from({ length: 42 }, (_, k) => <div key={k} className="flex justify-center" style={{ transform: Math.floor(k / 6) % 2 ? "translateX(50%)" : undefined }}><ClubDot club={clube} size={26} /></div>)}
               </div>
+              {/* brilho passando no painel */}
+              <div className="absolute inset-0 ap-brilho" aria-hidden="true" />
             </>
           )}
-          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.15) 55%, rgba(7,9,10,.95))" }} aria-hidden="true" />
+          {/* holofotes */}
+          <div className="absolute -top-10 left-[8%] w-[46%] h-[120%] ap-holofote" style={{ transform: "rotate(-14deg)" }} aria-hidden="true" />
+          <div className="absolute -top-10 right-[8%] w-[46%] h-[120%] ap-holofote" style={{ transform: "rotate(14deg)", animationDelay: "1.1s" }} aria-hidden="true" />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.1) 55%, rgba(5,7,10,.97))" }} aria-hidden="true" />
           {/* flashes dos fotógrafos */}
-          {[[12, 58, 0], [78, 40, 0.9], [30, 30, 1.6], [86, 70, 2.1], [55, 18, 0.4]].map(([x, y, d], k) => <span key={k} className="ap-flash" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${d}s` }} aria-hidden="true" />)}
-          {/* o dirigente, o jogador e a camisa */}
+          {[[10, 62, 0], [80, 44, 0.9], [28, 34, 1.6], [88, 72, 2.1], [56, 20, 0.4], [4, 30, 1.3]].map(([x, y, d], k) => <span key={k} className="ap-flash" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${d}s` }} aria-hidden="true" />)}
+          {/* silhuetas com contorno de luz e a camisa */}
           <svg viewBox="0 0 360 300" className="absolute left-0 right-0 bottom-0 w-full" aria-hidden="true">
             <defs>
-              <linearGradient id="apTerno" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#2B3242" /><stop offset="1" stopColor="#141821" /></linearGradient>
-              <linearGradient id="apAgasalho" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#24282B" /><stop offset="1" stopColor="#101214" /></linearGradient>
-              <linearGradient id="apCamisaG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor={cor} /><stop offset="1" stopColor={cor} stopOpacity=".82" /></linearGradient>
+              <linearGradient id="apSil" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#1A1E24" /><stop offset="1" stopColor="#07090C" /></linearGradient>
+              <linearGradient id="apAro" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor={luz} stopOpacity="0" /><stop offset=".7" stopColor={luz} stopOpacity=".15" /><stop offset="1" stopColor={luz} stopOpacity=".95" /></linearGradient>
+              <linearGradient id="apAroE" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stopColor={luz} stopOpacity="0" /><stop offset=".7" stopColor={luz} stopOpacity=".15" /><stop offset="1" stopColor={luz} stopOpacity=".95" /></linearGradient>
+              <linearGradient id="apTecido" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stopColor="#000" stopOpacity=".28" /><stop offset=".18" stopColor="#000" stopOpacity="0" /><stop offset=".5" stopColor="#fff" stopOpacity=".1" /><stop offset=".82" stopColor="#000" stopOpacity="0" /><stop offset="1" stopColor="#000" stopOpacity=".3" />
+              </linearGradient>
+              <linearGradient id="apTecidoV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fff" stopOpacity=".12" /><stop offset=".4" stopColor="#fff" stopOpacity="0" /><stop offset="1" stopColor="#000" stopOpacity=".22" /></linearGradient>
+              <filter id="apSombra" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#000" floodOpacity=".55" /></filter>
             </defs>
-            {/* dirigente (esquerda) */}
+            {/* dirigente (esquerda): terno, luz vindo da direita */}
             <g className="ap-sobe" style={{ animationDelay: ".15s" }}>
-              <path d="M40 300 L46 200 Q48 176 70 168 L92 162 L114 168 Q134 176 136 200 L142 300 Z" fill="url(#apTerno)" />
-              <path d="M80 165 L92 196 L104 165 Z" fill="#F2F2F2" />
-              <path d="M89 172 L95 172 L97 205 L92 214 L87 205 Z" fill={claro ? "#1E293B" : cor} />
-              <path d="M70 168 L88 200 L80 210 Z M114 168 L96 200 L104 210 Z" fill="#1A1F2B" />
-              <rect x="84" y="146" width="16" height="18" rx="6" fill="#B98763" />
-              <ellipse cx="92" cy="128" rx="20" ry="23" fill="#C69472" />
-              <path d="M72 124 Q74 100 94 102 Q112 103 112 122 Q106 112 92 112 Q80 112 72 124 Z" fill="#9AA0A6" />
-              {/* braço segurando a manga da camisa */}
-              <path d="M126 186 Q140 170 144 154 L154 158 Q150 182 134 202 Z" fill="url(#apTerno)" />
+              <path d="M36 300 L42 202 Q45 176 70 167 L92 161 L114 167 Q137 176 140 202 L146 300 Z" fill="url(#apSil)" />
+              <path d="M36 300 L42 202 Q45 176 70 167 L92 161 L114 167 Q137 176 140 202 L146 300 Z" fill="none" stroke="url(#apAroE)" strokeWidth="2.2" />
+              <path d="M82 164 L92 190 L102 164 Z" fill="#D9DEE5" opacity=".85" />
+              <path d="M90 170 L94 170 L96 200 L92 207 L88 200 Z" fill={claro ? "#1E293B" : cor} />
+              <rect x="84" y="145" width="16" height="18" rx="6" fill="url(#apSil)" />
+              <ellipse cx="92" cy="127" rx="19" ry="22" fill="url(#apSil)" />
+              <path d="M110 118 Q112 140 100 148" fill="none" stroke={luz} strokeOpacity=".8" strokeWidth="2" />
+              <path d="M126 188 Q140 170 144 154 L154 158 Q150 184 134 204 Z" fill="url(#apSil)" />
             </g>
-            {/* jogador (direita) */}
+            {/* jogador (direita): agasalho, luz vindo da esquerda */}
             <g className="ap-sobe" style={{ animationDelay: ".3s" }}>
-              <path d="M222 300 L228 196 Q232 172 256 164 L278 158 L300 164 Q322 172 326 196 L332 300 Z" fill="url(#apAgasalho)" />
-              <path d="M262 162 L278 176 L294 162" fill="none" stroke={cor} strokeWidth="4" />
-              <path d="M228 230 L332 230" stroke={cor} strokeWidth="3" opacity=".7" />
-              <rect x="270" y="140" width="17" height="20" rx="6" fill="#8D5F42" />
-              <ellipse cx="278" cy="120" rx="21" ry="24" fill="#9C6A4A" />
-              <path d="M257 116 Q258 92 279 93 Q300 94 299 116 Q294 104 279 104 Q264 104 257 116 Z" fill="#1C1410" />
-              <path d="M236 184 Q222 170 218 154 L208 158 Q212 182 228 202 Z" fill="url(#apAgasalho)" />
+              <path d="M220 300 L226 198 Q230 172 255 163 L278 157 L301 163 Q324 172 328 198 L334 300 Z" fill="url(#apSil)" />
+              <path d="M220 300 L226 198 Q230 172 255 163 L278 157 L301 163 Q324 172 328 198 L334 300 Z" fill="none" stroke="url(#apAro)" strokeWidth="2.2" />
+              <path d="M262 161 L278 175 L294 161" fill="none" stroke={luz} strokeOpacity=".9" strokeWidth="2.5" />
+              <path d="M226 232 L334 232" stroke={luz} strokeOpacity=".35" strokeWidth="2" />
+              <rect x="270" y="139" width="17" height="20" rx="6" fill="url(#apSil)" />
+              <ellipse cx="278" cy="118" rx="20" ry="23" fill="url(#apSil)" />
+              <path d="M259 110 Q257 134 268 144" fill="none" stroke={luz} strokeOpacity=".8" strokeWidth="2" />
+              <path d="M236 186 Q222 170 218 154 L208 158 Q212 184 228 204 Z" fill="url(#apSil)" />
             </g>
-            {/* a camisa, de costas, com o nome e o número */}
-            <g className="ap-camisa" style={{ animationDelay: ".75s" }}>
-              <path d="M150 150 L168 140 Q181 150 194 140 L212 150 L230 176 L214 186 L210 178 L210 268 L152 268 L152 178 L148 186 L132 176 Z" fill="url(#apCamisaG)" stroke={claro ? "rgba(0,0,0,.25)" : "rgba(255,255,255,.35)"} strokeWidth="1.5" strokeLinejoin="round" />
-              <path d="M168 140 Q181 150 194 140" fill="none" stroke={tinta} strokeOpacity=".5" strokeWidth="2.5" />
-              <path d="M132 176 L148 186 M230 176 L214 186" stroke={tinta} strokeOpacity=".45" strokeWidth="3" />
-              <text x="181" y="178" textAnchor="middle" fontFamily="Inter, system-ui, sans-serif" fontWeight="900" fontSize={fonteNome} letterSpacing="1" fill={tinta} className="ap-texto" style={{ animationDelay: "1.35s" }}>{sobrenome}</text>
-              <text x="181" y="238" textAnchor="middle" fontFamily="Inter, system-ui, sans-serif" fontWeight="900" fontSize="52" fill={tinta} className="ap-texto" style={{ animationDelay: "1.5s" }}>{numero}</text>
-              {/* as mãos segurando os ombros da camisa */}
-              <circle cx="150" cy="154" r="7.5" fill="#C69472" />
-              <circle cx="212" cy="154" r="7.5" fill="#9C6A4A" />
+            {/* a camisa, de costas */}
+            <g className="ap-camisa" style={{ animationDelay: ".75s" }} filter="url(#apSombra)">
+              <path id="apForma" d="M150 150 L168 140 Q181 151 194 140 L212 150 L231 177 L214 188 L210 180 L210 270 L152 270 L152 180 L148 188 L131 177 Z" fill={cor} />
+              <path d="M150 150 L168 140 Q181 151 194 140 L212 150 L231 177 L214 188 L210 180 L210 270 L152 270 L152 180 L148 188 L131 177 Z" fill="url(#apTecido)" />
+              <path d="M150 150 L168 140 Q181 151 194 140 L212 150 L231 177 L214 188 L210 180 L210 270 L152 270 L152 180 L148 188 L131 177 Z" fill="url(#apTecidoV)" stroke={claro ? "rgba(0,0,0,.25)" : "rgba(255,255,255,.28)"} strokeWidth="1.2" strokeLinejoin="round" />
+              <path d="M168 140 Q181 151 194 140" fill="none" stroke={tinta} strokeOpacity=".55" strokeWidth="3" />
+              <path d="M131 177 L148 188 M231 177 L214 188" stroke={tinta} strokeOpacity=".5" strokeWidth="3.5" />
+              <path d="M163 210 Q181 214 199 210 M160 246 Q181 252 202 246" stroke="#000" strokeOpacity=".08" strokeWidth="3" fill="none" />
+              <text x="181" y="177" textAnchor="middle" fontFamily="Inter, system-ui, sans-serif" fontWeight="900" fontSize={fonteNome} letterSpacing="1.5" fill={tinta} className="ap-texto" style={{ animationDelay: "1.35s" }}>{sobrenome}</text>
+              <text x="181" y="240" textAnchor="middle" fontFamily="Inter, system-ui, sans-serif" fontWeight="900" fontSize="54" fill={tinta} stroke={claro ? "none" : "rgba(0,0,0,.25)"} strokeWidth="1" className="ap-texto" style={{ animationDelay: "1.5s" }}>{numero}</text>
+              {/* as mãos nos ombros da camisa */}
+              <circle cx="150" cy="154" r="7.5" fill="#12161B" stroke={luz} strokeOpacity=".7" strokeWidth="1.2" />
+              <circle cx="212" cy="154" r="7.5" fill="#12161B" stroke={luz} strokeOpacity=".7" strokeWidth="1.2" />
             </g>
-            {/* mesa com microfones (sala de imprensa) */}
             {!estadio && (
               <g className="ap-sobe" style={{ animationDelay: ".05s" }}>
-                <rect x="0" y="268" width="360" height="32" fill="#0C0E10" />
-                <rect x="0" y="266" width="360" height="4" fill={cor} opacity=".85" />
-                {[120, 150, 212, 242].map((x) => <g key={x}><rect x={x} y="250" width="3" height="18" fill="#2A2E33" /><rect x={x - 3} y="242" width="9" height="12" rx="4" fill="#3A3F45" /></g>)}
+                <rect x="0" y="270" width="360" height="30" fill="#07090C" />
+                <rect x="0" y="268" width="360" height="3" fill={luz} opacity=".9" />
+                {[118, 150, 212, 244].map((x) => <g key={x}><rect x={x} y="252" width="2.5" height="16" fill="#2A2E33" /><rect x={x - 3.5} y="243" width="9.5" height="13" rx="4.5" fill="#1C2026" stroke="#3A3F45" /></g>)}
               </g>
             )}
           </svg>
+          <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-[0.18em] text-white bg-black/45" aria-hidden="true"><span className="w-1.5 h-1.5 rounded-full bg-[#FF3B3B] animate-pulse" />AO VIVO</div>
           <div className="absolute top-3 right-3"><button onClick={onConcluir} className="text-[13px] font-bold text-white/85 bg-black/45 rounded-full px-3 py-1.5">Pular</button></div>
         </div>
-        {/* legenda */}
-        <div className="px-5 pb-6 -mt-2 flex flex-col items-center text-center gap-3">
-          <div className="ap-texto text-[11px] font-bold uppercase tracking-[0.25em] text-[#A1A1AA]" style={{ animationDelay: "1.6s" }}>Apresentação oficial{estadio ? " · no estádio" : ""}</div>
-          <div className="ap-texto text-[28px] font-black text-white leading-tight" style={{ animationDelay: "1.7s" }}>{clube?.nome}</div>
-          <div className="ap-texto text-[16px] font-semibold text-[#E4E4E7] -mt-2" style={{ animationDelay: "1.75s" }}>{nome} é o novo reforço</div>
-          <div className="ap-texto text-[14px] text-[#A1A1AA]" style={{ animationDelay: "1.8s" }}>{posicao} · {idade} anos · camisa {numero}{deOnde ? ` · chega do ${deOnde.nome}` : ""}</div>
-          <div className="ap-texto grid grid-cols-3 gap-2 w-full" style={{ animationDelay: "1.9s" }}>
-            {[["Transferência", valor ? formatarValor(valor) : "Sem custo"], ["Contrato", `${contrato?.anos || 1} anos`], ["Salário", contrato?.salario ? `${formatarValor(contrato.salario)}/ano` : "—"]].map(([k, v]) => (
-              <div key={k} className="cp-card px-2 py-2"><div className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">{k}</div><div className="text-[14px] font-extrabold text-white truncate">{v}</div></div>
+        {/* legenda em painel de vidro */}
+        <div className="relative mx-4 -mt-5 rounded-[22px] border border-white/10 p-4 flex flex-col items-center text-center gap-2.5 ap-texto" style={{ animationDelay: "1.6s", background: "rgba(14,17,22,.72)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", boxShadow: `0 -1px 0 ${luz}55 inset, 0 20px 50px rgba(0,0,0,.5)` }}>
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-white/55"><span className="h-px w-6" style={{ background: luz }} />Apresentação oficial<span className="h-px w-6" style={{ background: luz }} /></div>
+          <div className="flex items-center gap-2.5"><ClubDot club={clube} size={34} /><span className="text-[26px] font-black text-white leading-none tracking-tight">{clube?.nome}</span></div>
+          <div className="text-[15px] font-semibold text-[#E4E4E7]">{nome} é o novo reforço</div>
+          <div className="text-[13px] text-[#A1A1AA]">{posicao} · {idade} anos · camisa {numero}{deOnde ? ` · chega do ${deOnde.nome}` : ""}</div>
+          <div className="grid grid-cols-3 gap-2 w-full mt-1">
+            {[["Transferência", valor ? formatarValor(valor) : "Sem custo"], ["Contrato", `${contrato?.anos || 1} anos`], ["Salário/ano", contrato?.salario ? formatarValor(contrato.salario) : "—"]].map(([k, v]) => (
+              <div key={k} className="rounded-xl bg-white/[.04] border border-white/[.07] px-2 py-2"><div className="text-[9px] font-bold uppercase tracking-wider text-[#71717A]">{k}</div><div className="text-[14px] font-extrabold text-white truncate">{v}</div></div>
             ))}
           </div>
-          <button onClick={onConcluir} className={`cp-pill cp-branca text-[16px] w-full mt-1 transition-opacity ${pronto ? "" : "opacity-0 pointer-events-none"}`}>Vestir a camisa</button>
+        </div>
+        <div className="px-4 pt-4 pb-6">
+          <button onClick={onConcluir} className={`cp-pill cp-branca text-[16px] w-full transition-opacity ${pronto ? "" : "opacity-0 pointer-events-none"}`}>Vestir a camisa</button>
         </div>
       </div>
     </div>,

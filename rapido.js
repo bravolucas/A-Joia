@@ -243,7 +243,7 @@ function criarJogadorBase({ nome, nac, posicao, personalidade, origem, pe, numer
   const persona = personaDe(personalidade);
   const org = origemDe(origem);
   // potencial: ponto alto nos atributos que a posição mais usa, com uma faixa de sorte
-  const teto = rand(79, 90) + (persona.id === "festeiro" ? 2 : 0);
+  const teto = rand(77, 88) + (persona.id === "festeiro" ? 2 : 0);
   const pesos = Object.entries(pos.pesos).sort((a, b) => b[1] - a[1]);
   const potencial = {};
   pesos.forEach(([a], i) => { potencial[a] = clampR(teto - i * rand(2, 5) + rand(-2, 2) + Math.round((org?.bias?.[a] || 0) * 0.25) + (org?.id === "prodigio" ? 1 : 0), 50, 97); });
@@ -1492,8 +1492,8 @@ function fecharTemporadaBase(c0, card0) {
   const ovrNivelAntes = ovrDe(c);
   // Curva do Modo Rápido: cresce e começa a cair 2 anos depois do Modo Carreira,
   // pra o auge cair entre 27 e 30, como no Copero (o modo completo não muda).
-  // e o garoto chega ao teto mais devagar (antes batia o potencial aos 23-24)
-  const ritmoJovem = c.idade < 23 ? 0.8 : c.idade < 26 ? 0.9 : 1;
+  // o garoto tem vantagem: quanto mais jovem, mais rápido anda na direção do teto
+  const ritmoJovem = c.idade <= 19 ? 1.2 : c.idade <= 22 ? 1.08 : 1;
   const personaCurva = { ...persona, picoFim: (persona.picoFim ?? 28) + 2, declinioApartir: (persona.declinioApartir ?? 31) + 2 };
   const novos = evoluirAtributos({ ...c.attrs, fintas: 3, pernaRuim: 3 }, { ...c.potencial, fintas: 3, pernaRuim: 3 }, c.idade, personaCurva, null, reduc, fatorDes * ritmoJovem, 1 + nTit * 0.05);
   ATTRS.forEach((a) => { c.attrs[a] = novos[a]; });
@@ -2943,7 +2943,8 @@ export const DESAFIOS_OVR = [
     chances: [{ p: 0.22, d: 4, txt: "Arranque de velocista." }, { p: 0.78, d: -1, txt: "Ficou desajeitado por meses." }] },
 ];
 // veteranos ganham um pouco menos nos saltos grandes
-const chancesDoDesafio = (c, x) => x.chances.map((o) => ({ ...o, d: c.idade >= 31 && o.d >= 3 ? o.d - 1 : o.d }));
+// jovens (até 21) ganham +1 quando dá certo; veteranos ganham um pouco menos nos saltos grandes
+const chancesDoDesafio = (c, x) => x.chances.map((o) => ({ ...o, d: o.d > 0 && c.idade <= 21 ? o.d + 1 : c.idade >= 31 && o.d >= 3 ? o.d - 1 : o.d }));
 export const desafioPendente = (c) => !!c && !c.aposentado && !!c.flags?.baseEscolhida && c.desafioAno !== c.ano;
 export function desafiosDaTemporada(c) {
   return comSemente(c.codigo, `desafio:${c.ano}`, () => ["baixo", "medio", "alto"].map((f) => {

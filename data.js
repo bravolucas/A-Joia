@@ -870,7 +870,7 @@ export const CLUBES = [
   { nome: "Athletic Bilbao", forca: 84, liga: "espanha", cor: "#D8112B" },
   { nome: "Atlético de Madrid", forca: 88, liga: "espanha", cor: "#CB3524" },
   { nome: "Barcelona", forca: 94, liga: "espanha", cor: "#A50044" },
-  { nome: "Real Madrid", forca: 95, liga: "espanha", cor: "#FEBE10", escuro: true },
+  { nome: "Real Madrid", forca: 95, liga: "espanha", cor: "#FFFFFF", escuro: true },
   { nome: "Celta Vigo", forca: 74, liga: "espanha", cor: "#8ACBEA", escuro: true },
   { nome: "Osasuna", forca: 67, liga: "espanha", modesto: true, cor: "#E4181C" },
   { nome: "Mallorca", forca: 58, liga: "espanha", modesto: true, cor: "#E4181C" },

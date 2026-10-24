@@ -4,6 +4,16 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## ⚡ Jovens evoluem mais rápido, sorteio novo e apresentação cinematográfica
+
+- **Vantagem de ser jovem**: até os 19 anos o jogador anda 20% mais rápido em direção ao teto, e até os 22, 8% mais rápido (antes era o contrário: o garoto andava mais devagar). No desafio de OVR, quem tem até 21 anos ganha +1 a mais quando dá certo
+- OVR mediano por idade (160 carreiras simuladas): 19 anos 73 → 77, 21 anos 78 → 82, 23 anos 83 → 85. O pico mediano continua ~92 (o teto inicial foi ajustado para compensar)
+- **Sorteio com cara de tecnologia**: o resultado das escolhas com chance virou um "scanner" — anel com as faixas de chance em neon (verde ganha, cinza nada, vermelho perde), um feixe que gira e desacelera até parar, porcentagem correndo no centro, grade e cantos de mira; no fim a faixa sorteada acende e o resultado aparece no meio do anel
+- **Apresentação oficial mais moderna**: silhuetas com contorno de luz na cor do clube, holofotes, brilho passando no painel de escudos, camisa com sombra e dobra de tecido, selo "AO VIVO" e legenda num painel de vidro com o escudo
+- **Real Madrid em branco** (estava amarelo)
+
+---
+
 ## 🎤 Apresentação oficial nos clubes grandes
 
 - Quando a transferência é um salto para um clube grande, a animação vira uma **apresentação oficial**: o dirigente e o jogador seguram a camisa de costas, com o seu sobrenome e o número, nas cores do clube

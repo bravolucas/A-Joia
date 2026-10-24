@@ -38,3 +38,9 @@ real. As fotos de taças do Adobe Stock usadas antes foram aposentadas.
 
 - coletiva.webp: o original tinha parede azul saturada, fora da paleta. Recebeu um duotone grafite-esverdeado (sombras #0B1310, meios #2C4A3F, luzes #E6EFEA) para conversar com as outras cenas.
 
+
+
+## Ícones e bandeiras
+
+- **Ícones** (`icones.js`): [game-icons.net](https://game-icons.net), de Lorc, Delapouite e colaboradores, licença [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/), obtidos pelo pacote `@iconify-json/game-icons`. Usados no lugar dos emojis (cartas de treino, desafios, eventos, ritmos, pós-carreira e outros).
+- **Bandeiras** (`arte/bandeiras/`): pacote [flag-icons](https://github.com/lipis/flag-icons), licença MIT, formato 4:3.

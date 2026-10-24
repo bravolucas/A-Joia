@@ -1,3 +1,4 @@
+import Icone from "./Icone.jsx";
 import React, { Suspense, lazy, useState } from "react";
 import { ARTE } from "./arte.js";
 // o Modo Carreira é grande: só baixa quando a pessoa entra nele
@@ -59,7 +60,7 @@ export default function App() {
               return (
                 <button key={r.id} role="radio" aria-checked={sel} onClick={() => setRitmo(r.id)}
                   className={`rp-opcao px-3.5 py-3 flex items-center gap-3 ${sel ? "sel" : ""}`}>
-                  <span className="w-11 h-11 rounded-xl flex items-center justify-center text-[22px] shrink-0 border" style={{ background: sel ? "rgba(18,168,118,.18)" : "rgba(255,255,255,.04)", borderColor: sel ? "#12A876" : "rgba(255,255,255,.08)" }}>{r.icone}</span>
+                  <span className="w-11 h-11 rounded-xl flex items-center justify-center text-[22px] shrink-0 border" style={{ background: sel ? "rgba(18,168,118,.18)" : "rgba(255,255,255,.04)", borderColor: sel ? "#12A876" : "rgba(255,255,255,.08)" }}><Icone e={r.icone} size={24} cor={sel ? "#12A876" : "#C9D3CE"} /></span>
                   <span className="flex-1 min-w-0">
                     <span className="flex items-center justify-between gap-2">
                       <span className="text-[18px] font-bold text-[#F2F5F3]">{r.nome}</span>
@@ -95,7 +96,7 @@ export default function App() {
           <span className="text-[#7FE3BC] text-xl" aria-hidden="true">›</span>
         </button>
 
-        <p className="text-[12px] leading-snug text-center text-[#5F6E68] mt-1">Nomes de clubes, competições e jogadores reais aparecem só para identificação dentro da simulação. A JOIA não é afiliado, patrocinado nem endossado por eles.</p>
+        <p className="text-[12px] leading-snug text-center text-[#5F6E68] mt-1">Nomes de clubes, competições e jogadores reais aparecem só para identificação dentro da simulação. A JOIA não é afiliado, patrocinado nem endossado por eles. Ícones: game-icons.net (CC BY 3.0) · bandeiras: flag-icons (MIT).</p>
       </main>
     </div>
   );

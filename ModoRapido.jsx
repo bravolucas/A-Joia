@@ -1,6 +1,7 @@
+import Icone from "./Icone.jsx";
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ARTE, ARTE_EVENTO, logoCompeticao } from "./arte.js";
+import { ARTE, ARTE_EVENTO, logoCompeticao, bandeiraDe } from "./arte.js";
 import { POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS, EMOJI_NACIONALIDADE } from "./data.js";
 import { Gema, ClubDot, Brasao, Confetti, ApresentacaoNovoClube, FreeKickMini, PasseMini } from "./components.jsx";
 import { calcularSucessoFalta, tipoResultadoFalta } from "./lib.js";
@@ -163,6 +164,12 @@ function Barra({ valor, cor = "#12A876" }) {
   );
 }
 
+/* bandeira do país (SVG); sem arquivo, cai no emoji */
+function Bandeira({ nac, size = 20, className = "" }) {
+  const src = bandeiraDe(nac);
+  if (!src) return <span className={`leading-none ${className}`} style={{ fontSize: size * 0.8 }}>{EMOJI_NACIONALIDADE[nac] || "🌎"}</span>;
+  return <img src={src} alt={nacDe(nac)?.label || nac} className={`inline-block shrink-0 object-cover ${className}`} style={{ width: size, height: Math.round(size * 0.75), borderRadius: Math.max(2, size / 9), boxShadow: "0 0 0 1px rgba(255,255,255,.12), 0 1px 3px rgba(0,0,0,.4)" }} draggable="false" />;
+}
 const Escudo = ({ nome, size = 24 }) => <ClubDot club={clubeDe(nome)} size={size} />;
 
 /* Bola de Ouro (desenho próprio: uma bola dourada simples) */
@@ -229,13 +236,28 @@ function useOvrAnimado(ovr) {
 /* vibração curta no celular (onde o navegador permite) */
 export const vibrar = (p = 30) => { try { navigator.vibrate?.(p); } catch { /* sem suporte */ } };
 
+/* camisa de costas nas cores do clube, com o sobrenome e o número (cartão do topo) */
+function CamisaMini({ cor = "#12A876", nome = "", numero = 9, size = 44 }) {
+  const claro = lumi(cor) > 0.62;
+  const tinta = claro ? "#0E1116" : "#FFFFFF";
+  const sob = (nome || "").trim().split(/\s+/).slice(-1)[0].toUpperCase();
+  const id = `cm${(cor || "").replace("#", "")}`;
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} className="shrink-0" aria-hidden="true" style={{ filter: "drop-shadow(0 3px 6px rgba(0,0,0,.45))" }}>
+      <defs><linearGradient id={id} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#000" stopOpacity=".25" /><stop offset=".5" stopColor="#fff" stopOpacity=".12" /><stop offset="1" stopColor="#000" stopOpacity=".28" /></linearGradient></defs>
+      <path d="M30 10 L42 5 Q50 12 58 5 L70 10 L94 30 L82 42 L76 36 L76 96 L24 96 L24 36 L18 42 L6 30 Z" fill={cor} stroke={claro ? "rgba(0,0,0,.3)" : "rgba(255,255,255,.3)"} strokeWidth="2" strokeLinejoin="round" />
+      <path d="M30 10 L42 5 Q50 12 58 5 L70 10 L94 30 L82 42 L76 36 L76 96 L24 96 L24 36 L18 42 L6 30 Z" fill={`url(#${id})`} />
+      <text x="50" y="34" textAnchor="middle" fontFamily="Inter, system-ui" fontWeight="900" fontSize={sob.length > 8 ? 9 : 11} fill={tinta}>{sob}</text>
+      <text x="50" y="78" textAnchor="middle" fontFamily="Inter, system-ui" fontWeight="900" fontSize="40" fill={tinta}>{numero}</text>
+    </svg>
+  );
+}
 function CartaoCarreira({ c, onEstante, onFicha, contadorPulsa, recorde }) {
   const ovr = ovrDe(c);
   const [mostrado, delta] = useOvrAnimado(ovr);
   useEffect(() => { if (delta?.d > 0) vibrar(25); }, [delta?.k]);
   const clube = clubeDe(c.emprestimo?.destino || c.clubeNome);
   const cor = corOvr(ovr);
-  const bandeira = EMOJI_NACIONALIDADE[c.nac] || "";
   const semClube = c.temporadas.length === 0 && !c.flags?.baseEscolhida;
   return (
     <header className="sticky top-0 z-30 bg-[#0E1512]/95 backdrop-blur border-b border-white/5">
@@ -252,16 +274,19 @@ function CartaoCarreira({ c, onEstante, onFicha, contadorPulsa, recorde }) {
           )}
           {recorde ? <Fogos key={recorde} /> : null}
         </div>
-        <div className="flex-1 min-w-0 rounded-2xl px-3 py-2 flex flex-col justify-between gap-1" style={{ background: `linear-gradient(120deg, ${clube.cor || "#12A876"}40, rgba(19,26,23,.9) 70%)`, border: "1px solid rgba(255,255,255,.07)" }}>
+        <div className="flex-1 min-w-0 rounded-2xl pl-1.5 pr-3 py-2 flex items-center gap-1.5" style={{ background: `linear-gradient(120deg, ${clube.cor || "#12A876"}40, rgba(19,26,23,.9) 70%)`, border: "1px solid rgba(255,255,255,.07)" }}>
+          {!semClube && <CamisaMini key={clube.nome} cor={clube.cor} nome={c.nome} numero={numeroDe(c)} size={46} />}
+          <div className="flex-1 min-w-0 flex flex-col justify-between gap-1 self-stretch">
           <div className="flex items-center gap-1.5 text-[12px] font-bold">
-            <span className="text-[#C9D3CE]">{bandeira} {c.nac}</span>
-            <span className="px-1.5 rounded-md bg-[#0E1512]/60 text-[#F2F5F3]">#{numeroDe(c)} {c.posicao}</span>
+            <span className="text-[#C9D3CE] inline-flex items-center gap-1"><Bandeira nac={c.nac} size={16} /> {c.nac}</span>
+            <span className="px-1.5 rounded-md bg-[#0E1512]/60 text-[#F2F5F3]">{semClube ? `#${numeroDe(c)} ` : ""}{c.posicao}</span>
             <span className="ml-auto text-[#8FA39A]">IDADE <span className="font-stat text-[17px] text-[#F2F5F3]">{c.idade}</span></span>
           </div>
           <div className="flex items-center gap-2 min-w-0">
             {semClube ? <span className="w-[22px] h-[22px] rounded-full border border-white/25 flex items-center justify-center text-[12px] text-[#8FA39A] shrink-0">?</span> : <ClubDot club={clube} size={22} />}
             <span className={`display text-[13px] truncate ${semClube ? "text-[#8FA39A]" : "text-[#F2F5F3]"}`}>{semClube ? "Sem clube" : clube.nome}</span>
             <span className="ml-auto font-stat text-[17px] text-[#EBC557] shrink-0">{formatarValor(valorAtual(c)).replace(/\s/g, "")}</span>
+          </div>
           </div>
         </div>
         <div className="flex flex-col gap-1.5 shrink-0">
@@ -353,7 +378,7 @@ function TabelaCarreira({ c, proxima = true, compacta = true }) {
         </div>
         {aberta && <button onClick={() => setAberta(false)} className="w-full text-left text-[12px] font-semibold text-[#A1A1AA] pt-1">↓ mostrar só as últimas</button>}
         <div className={`${grid} pt-2 mt-1.5 border-t border-[#2A2A2E]`} aria-label="Pela seleção">
-          <span className="w-[30px] h-[26px] rounded-lg bg-[#27272A] flex items-center justify-center text-[15px] leading-none">{EMOJI_NACIONALIDADE[c.nac] || "🌎"}</span>
+          <span className="w-[30px] h-[26px] rounded-lg bg-[#27272A] flex items-center justify-center"><Bandeira nac={c.nac} size={20} /></span>
           <span className="truncate text-[14px] font-semibold text-[#E4E4E7]">{nacDe(c.nac).label}{sel.convocacoes ? <span className="font-normal text-[#71717A]"> · {sel.convocacoes} torneio{sel.convocacoes > 1 ? "s" : ""}</span> : ""}</span>
           <span />
           <span className="text-right text-[14px] font-semibold text-[#A1A1AA]">{sel.jogos || 0}</span>
@@ -472,7 +497,7 @@ function Estante({ c, onFechar }) {
             <ul className="flex flex-col gap-2">
               {[...c.marcos].reverse().map((m, i) => (
                 <li key={i} className="flex items-start gap-3 text-[15px]">
-                  <span className="text-xl leading-none">{m.icone}</span>
+                  <span className="text-xl leading-none"><Icone e={m.icone} /></span>
                   <span><span className="font-bold text-[#F2F5F3]">{m.titulo}</span> <span className="text-[#8FA39A]">· {m.ano}</span><br /><span className="text-[#8FA39A]">{m.texto}</span></span>
                 </li>
               ))}
@@ -491,7 +516,7 @@ function BarraMental({ moral = 65, delta = null }) {
     <div className="mt-2 rounded-xl bg-[#0E1512]/70 px-3 py-2.5" title="Estado mental: afeta nota, evolução e risco de lesão">
       <div className="flex items-center justify-between text-[14px] mb-1.5">
         <span className="text-[#C9D3CE]">🧠 Cabeça</span>
-        <span className="font-bold" style={{ color: e.cor }}>{e.icone} {e.nome} <span className="font-stat text-[#8FA39A]">{moral}</span>{delta ? <span className={delta > 0 ? "text-[#1BC28A]" : "text-[#E36B5B]"}> {delta > 0 ? `+${delta}` : delta}</span> : null}</span>
+        <span className="font-bold" style={{ color: e.cor }}><Icone e={e.icone} /> {e.nome} <span className="font-stat text-[#8FA39A]">{moral}</span>{delta ? <span className={delta > 0 ? "text-[#1BC28A]" : "text-[#E36B5B]"}> {delta > 0 ? `+${delta}` : delta}</span> : null}</span>
       </div>
       <Barra valor={moral} cor={e.cor} />
     </div>
@@ -545,7 +570,7 @@ function Ficha({ c, semTopo = false }) {
         </div>
         {c.tracos.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-3">
-            {c.tracos.map((id) => { const t = tracoDe(id); return t ? <span key={id} className="text-[13px] font-semibold px-2 py-1 rounded-lg bg-[#D8B44A]/12 text-[#EBC557] border border-[#D8B44A]/30">{t.icone} {t.nome}</span> : null; })}
+            {c.tracos.map((id) => { const t = tracoDe(id); return t ? <span key={id} className="text-[13px] font-semibold px-2 py-1 rounded-lg bg-[#D8B44A]/12 text-[#EBC557] border border-[#D8B44A]/30"><Icone e={t.icone} /> {t.nome}</span> : null; })}
           </div>
         )}
       </div>
@@ -574,7 +599,7 @@ function MelhoresCarreiras() {
             <span className="font-stat text-lg w-6 text-center" style={{ color: i === 0 ? "#EBC557" : "#8FA39A" }}>{i + 1}</span>
             <div className="min-w-0 flex-1">
               <div className="text-[16px] font-semibold text-[#F2F5F3] truncate">{h.nome} <span className="text-[13px] font-normal text-[#8FA39A]">· {h.posicao}{h.diario ? " · do dia" : ""}</span></div>
-              <div className="text-[13px] text-[#8FA39A]">{h.icone} {h.nivel} · {h.gols} gols · {h.titulos} títulos</div>
+              <div className="text-[13px] text-[#8FA39A]"><Icone e={h.icone} /> {h.nivel} · {h.gols} gols · {h.titulos} títulos</div>
             </div>
             <span className="font-stat text-lg" style={{ color: h.cor }}>{h.pontos}</span>
           </li>
@@ -668,7 +693,7 @@ function TelaCriacao({ onCriar, ritmoInicial = "normal" }) {
             <div className="grid grid-cols-2 gap-2">
               {ORIGENS_RAPIDO.map((o) => (
                 <button key={o.id} onClick={() => setOrigem(o.id)} className={`rp-opcao px-3 py-3 ${origem === o.id ? "sel" : ""}`}>
-                  <div className="font-bold text-[16px] text-[#F2F5F3]">{o.icone} {o.nome}</div>
+                  <div className="font-bold text-[16px] text-[#F2F5F3]"><Icone e={o.icone} /> {o.nome}</div>
                   <div className="text-[13px] leading-snug text-[#8FA39A] mt-0.5">{o.perk}</div>
                 </button>
               ))}
@@ -680,7 +705,7 @@ function TelaCriacao({ onCriar, ritmoInicial = "normal" }) {
             <div className="grid sm:grid-cols-2 gap-2">
               {PERSONALIDADES.map((p) => (
                 <button key={p.id} onClick={() => setPersonalidade(p.id)} className={`rp-opcao px-4 py-3 ${personalidade === p.id ? "sel" : ""}`}>
-                  <div className="font-bold text-[16px] text-[#F2F5F3]">{p.icone} {p.label}</div>
+                  <div className="font-bold text-[16px] text-[#F2F5F3]"><Icone e={p.icone} /> {p.label}</div>
                   <div className="text-[14px] leading-snug text-[#8FA39A] mt-0.5">{p.desc}</div>
                 </button>
               ))}
@@ -691,7 +716,7 @@ function TelaCriacao({ onCriar, ritmoInicial = "normal" }) {
             <div className="grid sm:grid-cols-3 gap-2">
               {PES.map((p) => (
                 <button key={p.id} onClick={() => setPe(p.id)} className={`rp-opcao px-4 py-3 ${pe === p.id ? "sel" : ""}`}>
-                  <div className="font-bold text-[16px] text-[#F2F5F3]">{p.icone} {p.nome}</div>
+                  <div className="font-bold text-[16px] text-[#F2F5F3]"><Icone e={p.icone} /> {p.nome}</div>
                   <div className="text-[13px] leading-snug text-[#8FA39A] mt-0.5">{p.desc}</div>
                 </button>
               ))}
@@ -1291,7 +1316,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
           {card.copaNac && <LinhaTime icone={<TacaCompeticao tipo="copa" nome={card.copaNac.nome} size={18} />} nome={card.copaNac.nome} resultado={card.copaNac.fase} destaque={card.copaNac.fase === "Campeão" ? "ouro" : null} />}
           {card.continental && <LinhaTime icone={<TacaCompeticao tipo="continental" nome={card.continental.nome} size={18} />} nome={card.continental.nome} resultado={contRes} destaque={contRes === "Campeão" ? "ouro" : null} />}
           {card.mundialRes && <LinhaTime icone={<TacaCompeticao tipo="mundial" nome="Mundial de Clubes" size={18} />} nome="Mundial de Clubes" resultado={card.mundialRes} destaque={card.mundialRes === "Campeão" ? "ouro" : null} />}
-          {sel && <LinhaTime icone={<span className="text-base leading-none">{EMOJI_NACIONALIDADE[c.nac] || "🌎"}</span>} nome={`${sel.nome} (seleção)`} resultado={sel.convocado ? (sel.campeao ? "Campeão" : sel.resultado) : "Fora da lista"} destaque={sel.campeao ? "ouro" : null} />}
+          {sel && <LinhaTime icone={<Bandeira nac={c.nac} size={18} />} nome={`${sel.nome} (seleção)`} resultado={sel.convocado ? (sel.campeao ? "Campeão" : sel.resultado) : "Fora da lista"} destaque={sel.campeao ? "ouro" : null} />}
         </div>
         {/* taças e prêmios */}
         {card.titulos.length > 0 && (
@@ -1320,7 +1345,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
 
       {card.marcos?.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
-          {card.marcos.map((m, i) => <span key={i} className="rp-chip rp-entra" style={{ color: "#C9DBFF", background: "rgba(46,111,224,.18)", animationDelay: `${i * 0.08}s` }}>{m.icone} {m.titulo}</span>)}
+          {card.marcos.map((m, i) => <span key={i} className="rp-chip rp-entra" style={{ color: "#C9DBFF", background: "rgba(46,111,224,.18)", animationDelay: `${i * 0.08}s` }}><Icone e={m.icone} /> {m.titulo}</span>)}
         </div>
       )}
 
@@ -1473,7 +1498,7 @@ function TelaColetiva({ c, coletiva, resposta, onResponder, onSeguir }) {
           <div className="flex flex-col gap-2 p-4 pt-1">
             {coletiva.opcoes.map((o) => (
               <button key={o.id} onClick={() => onResponder(o.id)} className="rp-opcao px-4 py-3">
-                <div className="font-bold text-[16px] text-[#F2F5F3]">{o.icone} {o.label}</div>
+                <div className="font-bold text-[16px] text-[#F2F5F3]"><Icone e={o.icone} /> {o.label}</div>
                 <div className="text-[15px] text-[#8FA39A] mt-1 italic">{o.fala}</div>
               </button>
             ))}
@@ -1508,7 +1533,7 @@ function TelaTraco({ c, opcoes, onEscolher }) {
       </div>
       {opcoes.map((t) => (
         <button key={t.id} onClick={() => onEscolher(t.id)} className="rp-opcao px-4 py-4 flex items-center gap-4">
-          <span className="text-3xl w-12 h-12 rounded-2xl bg-[#D8B44A]/12 border border-[#D8B44A]/30 flex items-center justify-center shrink-0">{t.icone}</span>
+          <span className="text-3xl w-12 h-12 rounded-2xl bg-[#D8B44A]/12 border border-[#D8B44A]/30 flex items-center justify-center shrink-0"><Icone e={t.icone} /></span>
           <span>
             <span className="block font-bold text-[18px] text-[#F2F5F3]">{t.nome}</span>
             <span className="block text-[15px] text-[#8FA39A] mt-0.5">{t.desc}</span>
@@ -1525,7 +1550,7 @@ function CartaoEvento({ evento, resultado, efeitos, onEscolher, onPedirLiga, onA
   return (
     <div className="rp-painel overflow-hidden rp-entra">
       <div className="relative px-4 pt-3.5 pb-2.5 flex items-start gap-3" style={{ background: evento.vida ? "linear-gradient(135deg, rgba(140,110,230,.18), transparent 70%)" : "linear-gradient(135deg, rgba(18,168,118,.14), transparent 70%)" }}>
-        <span className="text-2xl w-11 h-11 rounded-xl bg-[#0E1512]/70 border border-white/10 flex items-center justify-center shrink-0">{evento.icone}</span>
+        <span className="text-2xl w-11 h-11 rounded-xl bg-[#0E1512]/70 border border-white/10 flex items-center justify-center shrink-0"><Icone e={evento.icone} size={26} cor={evento.vida ? "#C7B8F5" : "#7FE3BC"} /></span>
         <div className="min-w-0">
           <h2 className="display text-[14px] leading-snug text-[#F2F5F3]">{evento.titulo}{evento.vida && <span className="ml-1.5 align-middle rp-chip !text-[9px] !py-0.5" style={{ color: "#C7B8F5", background: "rgba(140,110,230,.18)" }}>vida</span>}</h2>
           <p className="text-[15px] text-[#C9D3CE] mt-1 leading-snug line-clamp-3">{evento.texto}</p>
@@ -1570,7 +1595,7 @@ function CartaoEvento({ evento, resultado, efeitos, onEscolher, onPedirLiga, onA
                     <div className="grid grid-cols-2 gap-2 px-3 pb-3 rp-entra">
                       {LIGAS_EMPRESARIO.map((l) => (
                         <button key={l.id || "qualquer"} onClick={() => onPedirLiga(l.id)} className="rp-opcao px-3 py-2.5 text-left min-h-[48px]">
-                          <span className="font-bold text-[15px] text-[#F2F5F3]">{l.icone} {l.nome}</span>
+                          <span className="font-bold text-[15px] text-[#F2F5F3]"><Icone e={l.icone} /> {l.nome}</span>
                         </button>
                       ))}
                     </div>
@@ -1642,7 +1667,7 @@ function SeletorFoco({ c, onFoco }) {
       <div className="grid grid-cols-3 gap-2 mt-3">
         {FOCOS.map((f) => (
           <button key={f.id} onClick={() => onFoco(f.id)} className={`rp-opcao px-2 py-2.5 text-center min-h-[64px] ${c.foco === f.id ? "sel" : ""}`} aria-pressed={c.foco === f.id}>
-            <div className="text-xl leading-none">{f.icone}</div>
+            <div className="text-xl leading-none"><Icone e={f.icone} /></div>
             <div className="text-[13px] font-bold text-[#F2F5F3] mt-1 leading-tight">{f.nome}</div>
           </button>
         ))}
@@ -1687,7 +1712,7 @@ function SeletorPretemporada({ c, onEscolher, onJogar, dica }) {
                   className={`rp-face rp-opcao w-full px-1.5 pt-0 pb-2 text-center min-h-[168px] flex flex-col items-center overflow-hidden ${sel ? "sel" : ""}`}
                   style={{ borderColor: sel ? undefined : `${rar.cor}88`, boxShadow: k0.raridade === "epica" && !virada ? `0 0 18px ${rar.cor}55` : undefined }}>
                   <div className="w-full text-[10px] font-bold tracking-[0.15em] uppercase py-0.5" style={{ background: `${rar.cor}30`, color: rar.cor }}>{rar.nome}</div>
-                  <div className="text-2xl leading-none mt-2">{k.icone}</div>
+                  <div className="leading-none mt-2"><Icone e={k.icone} size={30} cor={rar.cor} /></div>
                   <div className="text-[13px] font-bold text-[#F2F5F3] mt-1 leading-tight">{k.nome}</div>
                   <div className="flex flex-wrap justify-center gap-x-1.5 mt-1">
                     {Object.entries(ganhos).map(([a, g]) => (
@@ -1734,7 +1759,7 @@ function DicasIniciais() {
           <button onClick={fechar} className="text-[14px] text-[#8FA39A] min-h-[40px] px-2">Pular</button>
         </div>
         <div className="flex gap-3 mt-1">
-          <span className="text-3xl" aria-hidden="true">{d.icone}</span>
+          <span className="text-3xl" aria-hidden="true"><Icone e={d.icone} /></span>
           <div><div className="font-bold text-[17px] text-[#F2F5F3]">{d.titulo}</div><p className="text-[16px] text-[#C9D3CE] leading-snug mt-0.5">{d.texto}</p></div>
         </div>
         <button onClick={() => (passo + 1 < DICAS.length ? setPasso(passo + 1) : fechar())} className="rp-btn rp-sec text-[16px] w-full mt-3">{passo + 1 < DICAS.length ? "Próxima dica" : "Entendi, bora jogar"}</button>
@@ -1838,7 +1863,7 @@ function TelaNegociacao({ c, n, onAjustar, onAssinar, onSair }) {
           const bloqueado = n.pedidos <= 0 || n.colapsou;
           return (
             <div key={campo.id} className="flex items-center gap-2 px-2 py-2.5 border-b border-white/5 last:border-0">
-              <span className="text-xl w-7 text-center">{campo.icone}</span>
+              <span className="text-xl w-7 text-center"><Icone e={campo.icone} /></span>
               <div className="flex-1 min-w-0">
                 <div className="text-[13px] text-[#8FA39A]">{campo.label}</div>
                 <div className={`font-stat text-[17px] ${mudou ? "text-[#EBC557]" : "text-[#F2F5F3]"}`}>{fmt[campo.id](t[campo.id])}</div>
@@ -1888,7 +1913,7 @@ function Patrimonio({ c, onComprar, onFechar }) {
             const pode = !tem && (c.patrimonio || 0) >= inv.custo;
             return (
               <div key={inv.id} className={`rounded-2xl border p-3 flex items-center gap-3 ${tem ? "border-[#12A876]/50 bg-[#12A876]/8" : "border-white/8 bg-[#0E1512]"}`}>
-                <span className="text-2xl w-10 text-center">{inv.icone}</span>
+                <span className="text-2xl w-10 text-center"><Icone e={inv.icone} /></span>
                 <div className="flex-1 min-w-0">
                   <div className="text-[16px] font-bold text-[#F2F5F3]">{inv.nome} {inv.luxo && <span className="rp-chip ml-1" style={{ color: "#F0A99E", background: "rgba(227,107,91,.14)" }}>Luxo</span>}</div>
                   <div className="text-[13px] text-[#8FA39A] leading-snug">{inv.desc}</div>
@@ -2071,7 +2096,7 @@ function PopupPosCarreira({ c, onFechar }) {
     <TelaCheia rotulo={`Depois da bola: ${pc.nome}`} cor={pc.cor} onFechar={onFechar} botao="Ver o legado" centro={false}>
       <div className="-mx-4 -mt-6 h-36 relative shrink-0" style={{ background: `linear-gradient(180deg, rgba(11,11,12,.1), #0B0B0C), url(${FOTO_POS_CARREIRA[pc.id] || ARTE.porDoSol}) center/cover` }}>
         <div className="absolute left-4 bottom-1 flex items-center gap-3">
-          <span className="w-12 h-12 rounded-2xl flex items-center justify-center text-[26px] border border-white/15" style={{ background: `${pc.cor}33` }}>{pc.icone}</span>
+          <span className="w-12 h-12 rounded-2xl flex items-center justify-center text-[26px] border border-white/15" style={{ background: `${pc.cor}33` }}><Icone e={pc.icone} size={26} cor={pc.cor} /></span>
           <span>
             <span className="block text-[12px] font-bold uppercase tracking-[0.2em] text-[#D4D4D8]">Depois da bola{pc.de ? ` · ${pc.de}${pc.ate ? `–${pc.ate}` : ""}` : ""}</span>
             <span className="block text-[22px] font-extrabold text-white leading-tight">{pc.nome}</span>
@@ -2100,7 +2125,7 @@ function PopupPosCarreira({ c, onFechar }) {
           <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#A1A1AA] py-1">Trajetória</div>
           {pc.passagens.map((x, i) => (
             <div key={i} className="flex items-center gap-3 py-2 border-t border-white/[.06] first:border-0 cp-surge" style={{ animationDelay: `${0.25 + i * 0.08}s` }}>
-              <span className="w-8 flex justify-center shrink-0">{x.band ? <span className="text-[22px] leading-none">{EMOJI_NACIONALIDADE[x.band] || "🌎"}</span> : <ClubDot club={clubeDe(x.clube)} size={28} />}</span>
+              <span className="w-8 flex justify-center shrink-0">{x.band ? <Bandeira nac={x.band} size={26} /> : <ClubDot club={clubeDe(x.clube)} size={28} />}</span>
               <span className="flex-1 min-w-0">
                 <span className="block text-[15px] font-semibold text-[#E4E4E7] truncate">{x.clube}</span>
                 <span className="block text-[12px] text-[#A1A1AA]">{x.de === x.ate ? x.de : `${x.de}–${x.ate}`} · {x.liga}</span>
@@ -2134,7 +2159,7 @@ function PosCarreira({ c, onEscolher }) {
           <div className="flex items-center gap-3 mt-2">
             <span className="w-12 h-12 rounded-xl shrink-0 border border-white/10" style={{ background: `url(${FOTO_POS_CARREIRA[pc.id] || ARTE.porDoSol}) center/cover` }} aria-hidden="true" />
             <span className="min-w-0 flex-1">
-              <span className="block text-[17px] font-bold leading-tight" style={{ color: pc.cor }}>{pc.icone} {pc.nome}</span>
+              <span className="block text-[17px] font-bold leading-tight" style={{ color: pc.cor }}><Icone e={pc.icone} /> {pc.nome}</span>
               <span className="block text-[15px] text-[#E1E6E3] leading-snug">{pc.manchete}</span>
             </span>
           </div>
@@ -2157,7 +2182,7 @@ function PosCarreira({ c, onEscolher }) {
             <span aria-hidden="true" className="shrink-0 w-14 h-14 rounded-xl border border-white/10" style={{ background: `url(${FOTO_POS_CARREIRA[p.id] || ARTE.porDoSol}) center/cover` }} />
             <span className="min-w-0 flex-1">
               <span className="flex items-center gap-2">
-                <span className="font-bold text-[16px] text-[#F2F5F3] truncate">{p.icone} {p.nome}</span>
+                <span className="font-bold text-[16px] text-[#F2F5F3] truncate"><Icone e={p.icone} cor={p.cor} /> {p.nome}</span>
                 {p.id !== "afastar" && <span className="ml-auto shrink-0 text-[10px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ color: COR_CHANCE_POS[p.chance], background: `${COR_CHANCE_POS[p.chance]}1F` }}>chance {p.chance}</span>}
               </span>
               <span className="block text-[14px] text-[#C9D3CE] leading-snug">{p.desc}</span>
@@ -2249,11 +2274,11 @@ function GaleriaFim({ c }) {
         {/* seleção */}
         <div className="rounded-[18px] p-4 flex flex-col gap-2.5 cp-surge" style={{ background: "linear-gradient(150deg, #6B5D13, #3A3410 70%)", animationDelay: ".08s" }}>
           <div className="flex items-center gap-3">
-            <span className="w-12 h-9 rounded-md bg-black/25 flex items-center justify-center text-[26px] leading-none">{EMOJI_NACIONALIDADE[c.nac] || "🌎"}</span>
+            <span className="w-12 h-9 rounded-md bg-black/25 flex items-center justify-center"><Bandeira nac={c.nac} size={36} /></span>
             <span><span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-[#FDE68A]/70">Seleção</span><span className="block text-[18px] font-extrabold text-white leading-tight">{nacLabel}</span></span>
           </div>
           <LinhaJGA j={sel.jogos || 0} g={sel.gols || 0} a={sel.assist || 0} />
-          <div className="flex-1 flex items-center justify-center gap-1.5 min-h-[40px]">
+          <div className="flex-1 flex flex-wrap items-center justify-center gap-1.5 min-h-[40px]">
             {titSel.length ? titSel.map((t, i) => <IconeTitulo key={i} tipo={t.tipo} nome={t.nome} size={36} />) : <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">Vitrine vazia</span>}
           </div>
         </div>
@@ -2263,7 +2288,7 @@ function GaleriaFim({ c }) {
           <div className="flex flex-wrap gap-1">
             {badges.map(([nome, ok]) => <span key={nome} className={`text-[10.5px] font-bold px-1.5 py-0.5 rounded-md border ${ok ? "text-[#FDE68A] border-[#CA8A04]/70 bg-[#CA8A04]/15" : "text-white/25 border-white/10"}`}>{nome}</span>)}
           </div>
-          <div className="flex-1 flex items-end justify-center gap-1.5 min-h-[36px]">
+          <div className="flex-1 flex flex-wrap items-end justify-center gap-1.5 min-h-[36px]">
             {premios.length ? premios.map((t, i) => <IconeTitulo key={i} tipo={t.tipo} nome={t.nome} size={32} />) : <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/30 self-center">Vitrine vazia</span>}
           </div>
         </div>
@@ -2671,7 +2696,7 @@ export function PopupResultado({ info, onFechar }) {
   return (
     <TelaCheia rotulo={info.titulo} cor={corFundo} botao={revelado ? "Continuar" : "Pular sorteio"} bloqueado={!revelado} onFechar={() => (revelado ? onFechar() : revelar())}>
       <div className="flex flex-col items-center text-center pt-4">
-        <span className="w-16 h-16 rounded-2xl bg-white/[.06] border border-white/10 flex items-center justify-center text-[34px]">{info.icone}</span>
+        <span className="w-16 h-16 rounded-2xl bg-white/[.06] border border-white/10 flex items-center justify-center text-[34px]"><Icone e={info.icone} size={34} cor="#22F59B" /></span>
         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-[#A1A1AA] mt-3">{info.titulo}</div>
         {info.contexto && <p className="text-[14px] text-[#A1A1AA] leading-snug mt-2 line-clamp-3">{info.contexto}</p>}
         {info.escolha && <div className="mt-3 inline-flex flex-col items-center"><span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#71717A]">Sua escolha</span><span className="text-[22px] font-extrabold text-white leading-tight mt-0.5">{info.escolha}</span></div>}
@@ -2712,7 +2737,7 @@ function PopupTemporada({ c, card, onFechar }) {
     card.copaNac && { tipo: "copa", nome: card.copaNac.nome, res: card.copaNac.fase, ouro: card.copaNac.fase === "Campeão" },
     card.continental && { tipo: "continental", nome: card.continental.nome, res: contRes, ouro: contRes === "Campeão" },
     card.mundialRes && { tipo: "mundial", nome: "Mundial de Clubes", res: card.mundialRes, ouro: card.mundialRes === "Campeão" },
-    card.selecao && { band: EMOJI_NACIONALIDADE[c.nac] || "🌎", nome: card.selecao.nome, res: card.selecao.convocado ? (card.selecao.campeao ? "Campeão" : card.selecao.resultado) : "Fora da lista", ouro: !!card.selecao.campeao },
+    card.selecao && { band: c.nac, nome: card.selecao.nome, res: card.selecao.convocado ? (card.selecao.campeao ? "Campeão" : card.selecao.resultado) : "Fora da lista", ouro: !!card.selecao.campeao },
   ].filter(Boolean);
   const idolo = (card.marcos || []).find((m) => m.id?.startsWith("idolo:"));
   const faixa = card.acesso ? { txt: `ACESSO! O ${card.clube} sobe em ${card.ano + 1}`, cor: "#22C55E" }
@@ -2753,7 +2778,7 @@ function PopupTemporada({ c, card, onFechar }) {
         <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#A1A1AA] py-1">Campanha</div>
         {linhas.map((x, i) => (
           <div key={i} className="flex items-center gap-3 py-2 border-t border-white/[.06] first:border-0 cp-surge" style={{ animationDelay: `${0.25 + i * 0.08}s` }}>
-            <span className="w-7 flex justify-center shrink-0">{x.band ? <span className="text-[20px] leading-none">{x.band}</span> : <TacaCompeticao tipo={x.tipo} nome={x.nome} size={24} />}</span>
+            <span className="w-7 flex justify-center shrink-0">{x.band ? <Bandeira nac={x.band} size={24} /> : <TacaCompeticao tipo={x.tipo} nome={x.nome} size={24} />}</span>
             <span className="flex-1 min-w-0 text-[15px] font-semibold text-[#E4E4E7] truncate">{x.nome}</span>
             {x.extra && <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded-md text-white shrink-0" style={{ background: x.extra === "acesso" ? "#16A34A" : "#DC2626" }}>{x.extra}</span>}
             <span className={`text-[14px] font-bold px-2.5 py-1 rounded-full shrink-0 ${x.ouro ? "text-[#1A1405]" : "text-[#E4E4E7] bg-[#27272A]"}`} style={x.ouro ? { background: "linear-gradient(90deg,#EAB308,#FDE047)" } : undefined}>{x.ouro ? "🏆 Campeão" : x.res}</span>
@@ -2807,7 +2832,7 @@ function DesafioOvr({ c, onEscolher }) {
           return (
             <button key={o.id} onClick={() => { vibrar(15); onEscolher(o.id); }} className="text-left rounded-2xl bg-[#1C1C1F] border border-[#2A2A2E] hover:border-[#52525B] px-3 py-2.5 transition-colors" aria-label={`${o.nome}: ${o.chances.map((x) => `${Math.round(x.p * 100)}% ${x.d > 0 ? "+" : ""}${x.d}`).join(", ")}`}>
               <div className="flex items-center gap-2.5">
-                <span className="text-[22px] w-9 text-center shrink-0">{o.icone}</span>
+                <span className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${f.cor}14`, border: `1px solid ${f.cor}33` }}><Icone e={o.icone} size={22} cor={f.cor} /></span>
                 <span className="flex-1 min-w-0">
                   <span className="block text-[15px] font-bold text-white leading-tight">{o.nome}</span>
                   <span className="block text-[12px] text-[#A1A1AA] leading-tight truncate">{o.texto}</span>

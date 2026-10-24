@@ -4,6 +4,16 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🎨 Ícones próprios, bandeiras de verdade e camisa no cartão
+
+- **Bandeiras em imagem** (pacote flag-icons, MIT) no lugar dos emojis, que no Windows apareciam como letras ("BR"). Valem para o cartão do topo, a tabela, a seleção, o fim de temporada, a galeria e o pós-carreira — 76 países
+- **190 ícones no mesmo traço** (game-icons.net, CC BY 3.0) no lugar dos emojis: cartas de pré-temporada (na cor da raridade), desafios (na cor do risco), eventos, ritmos, pós-carreira, foco, traços, investimentos e outros. Ficam iguais em qualquer aparelho
+- **Camisa no cartão do topo**: uma camisinha de costas nas cores do clube atual, com o sobrenome e o número; muda quando você troca de clube
+- Vitrines da seleção e de prêmios quebram linha (com muitas Bolas de Ouro a página passava da largura do celular)
+- Créditos dos ícones e das bandeiras no rodapé do menu e em `arte/CREDITOS.md`
+
+---
+
 ## ⚡ Jovens evoluem mais rápido, sorteio novo e apresentação cinematográfica
 
 - **Vantagem de ser jovem**: até os 19 anos o jogador anda 20% mais rápido em direção ao teto, e até os 22, 8% mais rápido (antes era o contrário: o garoto andava mais devagar). No desafio de OVR, quem tem até 21 anos ganha +1 a mais quando dá certo

@@ -22,6 +22,9 @@ const ESCUDOS = porNome(import.meta.glob("./arte/escudos/*.{svg,png,webp}", { ea
 const LOGOS = porNome(import.meta.glob("./arte/competicoes/*.{svg,png,webp}", { eager: true, query: "?url", import: "default" }));
 export const escudoDe = (nome) => ESCUDOS[slug(nome)] || null;
 export const logoCompeticao = (nome) => LOGOS[slug(nome)] || null;
+const BANDEIRAS = porNome(import.meta.glob("./arte/bandeiras/*.svg", { eager: true, query: "?url", import: "default" }));
+/* bandeiras em SVG (pacote flag-icons, MIT): o emoji de bandeira não aparece no Windows */
+export const bandeiraDe = (nac) => BANDEIRAS[nac] || null;
 export const temImagensOficiais = Object.keys(ESCUDOS).length + Object.keys(LOGOS).length > 0;
 
 /* Foto de cabeçalho por evento do Modo Rápido (eventos sem foto ficam só com o ícone) */

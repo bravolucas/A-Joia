@@ -243,7 +243,7 @@ function criarJogadorBase({ nome, nac, posicao, personalidade, origem, pe, numer
   const persona = personaDe(personalidade);
   const org = origemDe(origem);
   // potencial: ponto alto nos atributos que a posição mais usa, com uma faixa de sorte
-  const teto = rand(82, 93) + (persona.id === "festeiro" ? 2 : 0);
+  const teto = rand(79, 90) + (persona.id === "festeiro" ? 2 : 0);
   const pesos = Object.entries(pos.pesos).sort((a, b) => b[1] - a[1]);
   const potencial = {};
   pesos.forEach(([a], i) => { potencial[a] = clampR(teto - i * rand(2, 5) + rand(-2, 2) + Math.round((org?.bias?.[a] || 0) * 0.25) + (org?.id === "prodigio" ? 1 : 0), 50, 97); });
@@ -1067,7 +1067,9 @@ function jogarTemporadaBase(c0) {
   const assist = Math.round(poisson(pos.assistBase * nivel * jogos * (c.posicao === "GOL" ? 0.1 : 1)) * multTraco(c, "assistMult") * (fx.golsMult ?? 1) * (mod.assistMult ?? 1) * (c.pe === "ambidestro" ? 1.06 : 1));
   // quem não faz gol também precisa de nota alta quando joga bem
   const defBonus = c.posicao === "GOL" ? 0.4 : DEFENSIVAS.includes(c.posicao) ? 0.25 : 0;
-  const nota = jogos === 0 ? 0 : +clamp(6.2 + (ovr - 70) * 0.035 + (ovr - clube.forca) * 0.02 + ((gols + assist) / Math.max(1, jogos)) * 1.2
+  // a nota compara com o que se espera da idade: um garoto de 17 com OVR 60 está bem, não mal
+  const ovrEsperado = clampR(70 - (24 - c.idade) * 2.6, 52, 70);
+  const nota = jogos === 0 ? 0 : +clamp(6.2 + (ovr - ovrEsperado) * 0.035 + (ovr - clube.forca) * 0.02 + ((gols + assist) / Math.max(1, jogos)) * 1.2
     + defBonus + somaTraco(c, "notaBonus") + somaInv(c, "notaBonus") + (mod.notaBonus || 0) + (moral - 60) * 0.008 + efTorcida
     // mais variação: a fase do jogador, os minutos e um pouco de sorte (soma de dois sorteios = mais perto do meio, mas com pontas)
     + (c.formaNivel || 0) * 0.12 + (share - 0.6) * 0.5 - 0.25 + (rnd() + rnd() - 1) * 0.8 * (fx.notaRuido || 1), 5.2, 9.7).toFixed(2);
@@ -1515,8 +1517,9 @@ function fecharTemporadaBase(c0, card0) {
   // a fase pra cima e ~20% pra baixo (gala e "muito abaixo" são os ~6% das pontas)
   if (card.jogos >= 15 && card.nota >= 8.2) { swing = 2; swingTxt = "temporada de gala"; }
   else if (card.jogos >= 15 && card.nota >= 7.65) { swing = 1; swingTxt = "temporada de afirmação"; }
-  else if (card.jogos >= 10 && card.nota < 6.05) { swing = -2; swingTxt = "temporada muito abaixo"; }
-  else if (card.jogos >= 10 && card.nota < 6.5) { swing = -1; swingTxt = "temporada abaixo do esperado"; }
+  // garoto é cobrado menos: a régua das notas ruins baixa até os 21 anos
+  else if (card.jogos >= 10 && card.nota < 6.05 - (c.idade < 20 ? 0.45 : c.idade < 22 ? 0.2 : 0)) { swing = -2; swingTxt = "temporada muito abaixo"; }
+  else if (card.jogos >= 10 && card.nota < 6.5 - (c.idade < 20 ? 0.45 : c.idade < 22 ? 0.2 : 0)) { swing = -1; swingTxt = "temporada abaixo do esperado"; }
   else if (card.jogos < 8 && !card.lesao && c.idade >= 20) { swing = -1; swingTxt = "sem ritmo de jogo"; }
   // só uma temporada de gala eleva o teto (permanente), e no máximo 3 vezes na carreira
   if (swing === 2 && (c.tetoExtra || 0) < 3) {
@@ -2773,7 +2776,7 @@ const EVENTO_IMPASSE = {
    Cada opção arriscada mostra o que pode acontecer e com que probabilidade
    ("+3 OVR · 60% / −2 OVR · 40%"). O efeito mexe no NÍVEL do atleta (não na fase),
    então fica para o resto da carreira. */
-export function mexerNivel(c, d) {
+export function mexerNivel(c, d, mexeTeto = true) {
   if (!d) return 0;
   const pesos = posicaoDe(c.posicao).pesos || {};
   const ordem = ATTRS.slice().sort((a, b) => (pesos[b] || 0) - (pesos[a] || 0)).slice(0, 4);
@@ -2782,7 +2785,7 @@ export function mexerNivel(c, d) {
     const a = ordem[k % ordem.length];
     c.attrs[a] = clampR(c.attrs[a] + Math.sign(d), 40, 99);
     // vale para o resto da carreira: o teto acompanha (senão a perda se recuperava sozinha e o ganho ficava)
-    c.potencial[a] = clampR(c.potencial[a] + Math.sign(d), 40, 99);
+    if (mexeTeto) c.potencial[a] = clampR(c.potencial[a] + Math.sign(d), 40, 99);
   }
   return d;
 }
@@ -2959,7 +2962,8 @@ export function resolverDesafio(c0, id) {
     let acc = 0, idx = chances.length - 1;
     for (let i = 0; i < chances.length; i++) { if (r < acc + chances[i].p) { idx = i; break; } acc += chances[i].p; }
     const antes = ovrDe(c);
-    mexerNivel(c, chances[idx].d);
+    // jovem que perde no desafio se recupera com o tempo (o teto não cai); a partir dos 23 a perda é para valer
+    mexerNivel(c, chances[idx].d, chances[idx].d > 0 || c.idade >= 23);
     const depois = ovrDe(c);
     c.desafios = [...(c.desafios || []), { ano: c.ano, id, d: depois - antes }];
     return { c, res: { id, icone: x.icone, nome: x.nome, chances, idx, roll: r, d: depois - antes, txt: chances[idx].txt, ovrAntes: antes, ovrDepois: depois } };

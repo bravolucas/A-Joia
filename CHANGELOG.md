@@ -4,6 +4,16 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 📈 Evolução de OVR destravada
+
+- **Nota de acordo com a idade**: antes um garoto de 17 anos com OVR 60 era comparado com um adulto e tirava ~5,4 mesmo sendo titular, o que freava a evolução e ainda derrubava a fase. Agora a nota compara com o que se espera da idade (mediana dos 16–19 anos foi de 5,4 para ~5,9; dos 20–23, de 6,3 para ~6,9)
+- **Régua mais leve para os jovens**: até os 21 anos, é preciso ir pior para levar "temporada abaixo do esperado"
+- **Desafio de OVR**: quem perde antes dos 23 anos se recupera com o tempo (o teto não cai); a partir dos 23 a perda é para valer. Ganhos continuam permanentes
+- **Teto de potencial um pouco menor** para compensar e o jogo não ficar fácil demais
+- Resultado em 160 carreiras simuladas: carreiras que não passam de 76 caíram de ~15% para ~4%; OVR máximo mediano ~91
+
+---
+
 ## 🏆 Taças oficiais
 
 - 31 troféus reais no lugar das taças desenhadas: as ligas principais e as segundas divisões de Brasil, Inglaterra, Itália, Alemanha e França, Libertadores, Champions League, as copas nacionais (Copa do Brasil, FA Cup, Copa do Rei, Coppa Italia, DFB-Pokal, Copa da França, Taça de Portugal, US Open Cup), Mundial de Clubes, Copa do Mundo, Copa América, Eurocopa, Copa da Ásia, Bola de Ouro e Bota de Ouro

@@ -4,6 +4,20 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🌎 Copa do Mundo vira evento jogável
+
+- **A cada 4 anos** (2030, 2034…), depois da temporada do clube, a Copa do Mundo ganha tela própria, fase a fase
+  - **Convocação**: se você está na briga pela última vaga, escolhe como ir atrás dela ("Voar na reta final" ou "Pedir a vaga em público", que fecha a porta se der errado)
+  - **Fase de grupos**: três jogos com placar, seus gols e assistências; os dois primeiros avançam
+  - **Mata-mata** (oitavas, quartas, semi): antes de cada jogo você escolhe "Jogar para o time" (seguro) ou "Chamar a responsabilidade" (chance maior para quem é craque; se der certo, gol e fama; se der errado, abala a cabeça). Reserva pode "Pedir para entrar" e, se decidir, vira titular
+  - **Discurso no vestiário**: uma vez por Copa, garante a vitória numa fase, mas não vale na final (inspirado na "arenga" do El Ídolo)
+  - **Final**: titular decide no momento decisivo da posição (pênalti, falta, passe ou defesa)
+- **Prêmios da Copa**: craque da Copa (ajuda na Bola de Ouro) e artilheiro da Copa
+- Ficou fora da lista? O jogo conta até onde a seleção foi sem você
+- A dificuldade para ser campeão ficou parecida com a de antes; a diferença é que agora as escolhas são suas
+
+---
+
 ## 🌍 Ligas 2026/27, três ligas novas e as taças que faltavam
 
 - **Temporada 2026/27**: quem subiu e quem caiu em Inglaterra, Espanha, Itália, Alemanha, França, Portugal e Brasil, conferido nos dados do openfootball

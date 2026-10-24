@@ -20,6 +20,7 @@ import {
   INVESTIMENTOS, comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
   chanceMomento, miniDaPosicao, ehPremioIndividual, RARIDADES, ganhosDaCarta, efeitosDaCarta, vagasDaLiga, ehSegundaDivisao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
   eventoDaJanela, segundoEvento, anoDeDecisao, eventoImpasse, valorAtual, comparaSalario, textoEmoji, efeitosDaDecisao, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, desafiosDaTemporada, resolverDesafio, desafioPendente, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
+  copaPendente, opcoesCopa, jogarCopa,
 } from "./rapido.js";
 
 /* Estilo do seletor de modos e do Modo Rápido. Inclui as animações que as
@@ -2684,7 +2685,7 @@ function BarraChances({ chances, alta = false, ponteiro = null, destaque = null 
         {chances.map((x, i) => (
           <div key={i} className="flex flex-col items-center justify-center text-white leading-none transition-opacity duration-300"
             style={{ width: `${x.p * 100}%`, background: corChance(x.d), opacity: destaque == null || destaque === i ? 1 : 0.35, borderLeft: i ? "2px solid #0B0B0C" : undefined }}>
-            <span className={`${alta ? "text-[15px]" : "text-[13px]"} font-black`}>{x.d > 0 ? `+${x.d}` : x.d < 0 ? `−${-x.d}` : "0"}</span>
+            <span className={`${alta ? "text-[15px]" : "text-[13px]"} font-black`}>{x.marca || (x.d > 0 ? `+${x.d}` : x.d < 0 ? `−${-x.d}` : "0")}</span>
             {x.p >= 0.18 && <span className={`${alta ? "text-[11px]" : "text-[10px]"} font-semibold opacity-85 mt-0.5`}>{Math.round(x.p * 100)}%</span>}
           </div>
         ))}
@@ -2730,6 +2731,8 @@ function ScannerChances({ chances, alvo, idx, estatico, onFim, dReal = null }) {
   let acc = 0;
   const faixas = chances.map((x, i) => { const a0 = acc * 360, a1 = (acc + x.p) * 360; acc += x.p; return { ...x, i, a0, a1 }; });
   const sorteado = dReal != null && chances[idx].d !== 0 ? { ...chances[idx], d: dReal } : chances[idx];
+  // faixas com nome (vitória/eliminado) em vez de pontos de OVR
+  const txtFaixa = (f, n) => (f.marca ? f.marca : f.d > 0 ? `+${f.d}` : f.d < 0 ? `−${-f.d}` : f.rotulo ? f.rotulo.slice(0, n) : "0");
   const corRes = NEON(sorteado.d);
   const [px, py] = polar(C, C, R + 14, ang % 360);
   return (
@@ -2740,7 +2743,7 @@ function ScannerChances({ chances, alvo, idx, estatico, onFim, dReal = null }) {
         <span className="text-[#22F59B]/80">{fim ? "RESULTADO" : "ANALISANDO"}</span>
         <span className="text-white/40">{fim ? `${Math.round(sorteado.p * 100)}% DE CHANCE` : `${chances.length} FAIXAS`}</span>
       </div>
-      <svg viewBox="0 0 240 240" className="relative w-full max-w-[260px] mx-auto block mt-1" role="img" aria-label={fim ? `Resultado: ${sorteado.d > 0 ? "+" : ""}${sorteado.d} OVR` : "Sorteando"}>
+      <svg viewBox="0 0 240 240" className="relative w-full max-w-[260px] mx-auto block mt-1" role="img" aria-label={fim ? `Resultado: ${sorteado.marca || `${sorteado.d > 0 ? "+" : ""}${sorteado.d} OVR`}` : "Sorteando"}>
         <defs>
           <filter id="scGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.2" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
           <radialGradient id="scCentro"><stop offset="0" stopColor="#151A1F" /><stop offset="1" stopColor="#0C0F12" /></radialGradient>
@@ -2764,10 +2767,10 @@ function ScannerChances({ chances, alvo, idx, estatico, onFim, dReal = null }) {
         <circle cx={C} cy={C} r="56" fill="none" stroke={fim ? corRes : "#22F59B"} strokeOpacity=".35" strokeDasharray="2 5" />
         {fim ? (
           <g className="cp-pop">
-            <text x={C} y={C + (sorteado.d ? 8 : 4)} textAnchor="middle" fontFamily="Inter, system-ui" fontWeight="900" fontSize={sorteado.d ? 46 : sorteado.rotulo ? 13 : 30} fill={corRes} filter="url(#scGlow)">
-              {sorteado.d > 0 ? `+${sorteado.d}` : sorteado.d < 0 ? `−${-sorteado.d}` : sorteado.rotulo ? sorteado.rotulo.slice(0, 18) : "0"}
+            <text x={C} y={C + (sorteado.marca ? 6 : sorteado.d ? 8 : 4)} textAnchor="middle" fontFamily="Inter, system-ui" fontWeight="900" fontSize={sorteado.marca ? (sorteado.marca.length > 9 ? 17 : 22) : sorteado.d ? 46 : sorteado.rotulo ? 13 : 30} fill={corRes} filter="url(#scGlow)">
+              {txtFaixa(sorteado, 18)}
             </text>
-            {sorteado.d !== 0 && <text x={C} y={C + 30} textAnchor="middle" fontFamily="ui-monospace, monospace" fontWeight="700" fontSize="12" letterSpacing="3" fill="#fff" fillOpacity=".6">OVR</text>}
+            {sorteado.d !== 0 && !sorteado.marca && <text x={C} y={C + 30} textAnchor="middle" fontFamily="ui-monospace, monospace" fontWeight="700" fontSize="12" letterSpacing="3" fill="#fff" fillOpacity=".6">OVR</text>}
           </g>
         ) : (
           <>
@@ -2780,7 +2783,7 @@ function ScannerChances({ chances, alvo, idx, estatico, onFim, dReal = null }) {
       <div className="relative flex flex-wrap justify-center gap-1.5 mt-2">
         {faixas.map((f) => (
           <span key={f.i} className="font-mono text-[11px] font-bold px-2 py-1 rounded-md border transition-opacity" style={{ color: NEON(f.d), borderColor: `${NEON(f.d)}55`, background: `${NEON(f.d)}12`, opacity: fim && f.i !== idx ? 0.35 : 1 }}>
-            {f.d > 0 ? `+${f.d}` : f.d < 0 ? `−${-f.d}` : f.rotulo ? f.rotulo.slice(0, 14) : "0"} · {Math.round(f.p * 100)}%
+            {txtFaixa(f, 14)} · {Math.round(f.p * 100)}%
           </span>
         ))}
       </div>
@@ -2956,6 +2959,148 @@ function DesafioOvr({ c, onEscolher }) {
         })}
       </div>
       <button onClick={() => onEscolher(null)} className="w-full text-[13px] font-bold text-[#A1A1AA] min-h-[40px] mt-1">Não arriscar este ano</button>
+    </div>
+  );
+}
+
+/* ---------- Copa do Mundo: tela própria, fase a fase ---------- */
+const FAIXA_COPA = { baixo: { txt: "Seguro", cor: "#4ADE80" }, alto: { txt: "Holofote", cor: "#FB923C" }, ouro: { txt: "1x por Copa", cor: "#EBC557" } };
+const CURTO_FASE = ["Grupos", "Oitavas", "Quartas", "Semi", "Final"];
+const corRes = (r) => (r === "V" ? "#4ADE80" : r === "E" ? "#A1A1AA" : "#F87171");
+function LinhaJogoCopa({ j, nac, i = 0 }) {
+  return (
+    <div className="flex items-center gap-2.5 py-2 border-t border-white/[.06] first:border-0 cp-surge" style={{ animationDelay: `${i * 0.18}s` }}>
+      <span className="w-14 shrink-0 text-[11px] font-bold uppercase tracking-wide text-[#71717A]">{CURTO_FASE[j.fase]}</span>
+      <Bandeira nac={nac} size={18} />
+      <span className="text-[16px] font-black tabular-nums shrink-0" style={{ color: corRes(j.res) }}>{j.gp} x {j.gc}</span>
+      <Bandeira nac={j.adv.id} size={18} />
+      <span className="flex-1 min-w-0 truncate text-[14px] font-semibold text-[#E4E4E7]">{j.adv.label}{j.penaltis ? <span className="text-[#71717A] font-normal"> · pên.</span> : null}</span>
+      {(j.gols > 0 || j.assist > 0) && <span className="shrink-0 text-[12px] font-bold text-[#FDE68A]">{j.gols > 0 ? `${j.gols} gol${j.gols > 1 ? "s" : ""}` : ""}{j.gols > 0 && j.assist > 0 ? " · " : ""}{j.assist > 0 ? `${j.assist} assist.` : ""}</span>}
+    </div>
+  );
+}
+function TelaCopa({ c, card, onAvancar }) {
+  const k = card.copa;
+  const info = opcoesCopa(c, card);
+  const [jogada, setJogada] = useState(null); // { card, res, op }
+  const [revelado, setRevelado] = useState(false);
+  const taca = logoCompeticao("Copa do Mundo");
+  useEffect(() => { torcida(1.4, 0.1); }, []);
+  const escolher = (op) => {
+    vibrar(15); tocar("clique");
+    const r = jogarCopa(c, card, op.id);
+    setJogada({ ...r, op });
+    setRevelado(r.res.etapa === "grupos");
+    if (r.res.etapa === "grupos") setTimeout(() => tocar(r.res.venceu ? "sobe" : "desce", 0.5), 700);
+  };
+  const revelar = () => {
+    setRevelado(true);
+    const v = jogada.res.venceu;
+    vibrar(v ? [30, 50, 30] : 60); tocar(v ? "sobe" : "desce", 0.55);
+    if (v && jogada.card.copa.campeao) { torcida(3, 0.25); festejar("chuva", ["#EBC557", "#FFFFFF", "#12A876"]); }
+    else if (v) torcida(1.8, 0.18);
+  };
+  const seguir = () => { const novo = jogada.card; setJogada(null); onAvancar(novo); };
+  const faseAtual = k.etapa === "convocacao" ? -1 : k.etapa === "grupos" ? 0 : k.fase;
+  const chancesDe = (op, r) => (op.p >= 1 ? [{ p: 1, d: 1, marca: r.venceu ? "Vitória" : "Vence" }]
+    : [{ p: op.p, d: 1, marca: k.etapa === "convocacao" ? "Convocado" : "Vence" }, { p: 1 - op.p, d: -1, marca: k.etapa === "convocacao" ? "Fora" : "Cai" }]);
+  const r = jogada?.res;
+  const corTela = !r ? "#3F3F46" : !revelado ? "#3F3F46" : r.venceu ? (jogada.card.copa.campeao ? "#CA8A04" : "#16A34A") : "#DC2626";
+  return (
+    <div className="cp px-4 pt-4 flex flex-col gap-3 max-w-md mx-auto">
+      {/* cabeçalho da Copa */}
+      <section className="relative rounded-[22px] overflow-hidden border border-[#D8B44A]/35 rp-entra" style={{ background: "radial-gradient(120% 90% at 85% 0%, rgba(216,180,74,.28), transparent 60%), linear-gradient(160deg, #0F2A20, #0B0B0C 70%)" }}>
+        <div className="absolute inset-0 opacity-[.18]" style={{ background: `url(${ARTE.torcida}) center/cover`, mixBlendMode: "luminosity" }} aria-hidden="true" />
+        <div className="relative flex items-center gap-3 p-4">
+          {taca ? <img src={taca} alt="" aria-hidden="true" className="w-16 h-20 object-contain drop-shadow-[0_6px_16px_rgba(216,180,74,.45)] shrink-0" /> : <IconeTitulo tipo="copaMundo" size={56} />}
+          <div className="min-w-0 flex-1">
+            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#EBC557]">Evento · a cada 4 anos</div>
+            <div className="text-[24px] font-black text-white leading-tight">Copa do Mundo {k.ano}</div>
+            <div className="flex items-center gap-2 mt-1 text-[14px] text-[#D4D4D8]"><Bandeira nac={k.nac} size={18} /> {k.label} · força {k.fs}</div>
+          </div>
+        </div>
+        <div className="relative flex flex-wrap gap-1.5 px-4 pb-3">
+          {k.convocado && <span className="text-[11px] font-extrabold uppercase tracking-wide px-2 py-1 rounded-full" style={{ color: k.titular ? "#4ADE80" : "#A1A1AA", background: k.titular ? "rgba(74,222,128,.12)" : "rgba(161,161,170,.12)" }}>{k.titular ? "Titular" : "Reserva"}</span>}
+          <span className="text-[11px] font-extrabold uppercase tracking-wide px-2 py-1 rounded-full" style={{ color: k.arenga ? "#EBC557" : "#71717A", background: k.arenga ? "rgba(235,197,87,.12)" : "rgba(113,113,122,.12)" }}>📣 Discurso {k.arenga ? "disponível" : "usado"}</span>
+          {k.jogos.length > 0 && <span className="text-[11px] font-extrabold uppercase tracking-wide px-2 py-1 rounded-full text-[#FDE68A] bg-[#FDE68A]/10">{k.gols} gols · {k.assist} assist.</span>}
+        </div>
+      </section>
+
+      {/* caminho até a taça */}
+      <div className="grid grid-cols-5 gap-1" aria-label="Fases da Copa">
+        {CURTO_FASE.map((f, i) => {
+          const feito = i < faseAtual, agora = i === faseAtual;
+          return (
+            <div key={f} className="flex flex-col items-center gap-1">
+              <div className="h-1.5 w-full rounded-full" style={{ background: feito ? "#12A876" : agora ? "linear-gradient(90deg,#EBC557,#FDE68A)" : "rgba(255,255,255,.08)" }} />
+              <span className={`text-[11px] font-bold ${agora ? "text-[#EBC557]" : feito ? "text-[#7FE3BC]" : "text-[#52525B]"}`}>{f}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* jogos já disputados */}
+      {k.jogos.length > 0 && (
+        <div className="cp-card px-3.5 py-1.5">
+          {k.jogos.map((j, i) => <LinhaJogoCopa key={i} j={j} nac={k.nac} />)}
+        </div>
+      )}
+
+      {/* a etapa de agora */}
+      {info && (
+        <div className="cp-card p-3 rp-entra" style={{ borderColor: "rgba(235,197,87,.4)" }}>
+          <div className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#EBC557] px-1">{info.titulo}</div>
+          {info.adversario && (
+            <div className="flex items-center justify-center gap-3 py-3">
+              <span className="flex flex-col items-center gap-1 min-w-0"><Bandeira nac={k.nac} size={40} /><span className="text-[13px] font-bold text-white truncate max-w-[110px]">{k.label}</span><span className="text-[11px] text-[#A1A1AA]">força {Math.round(k.fs)}</span></span>
+              <span className="display text-[20px] text-[#EBC557]">x</span>
+              <span className="flex flex-col items-center gap-1 min-w-0"><Bandeira nac={info.adversario.id} size={40} /><span className="text-[13px] font-bold text-white truncate max-w-[110px]">{info.adversario.label}</span><span className="text-[11px] text-[#A1A1AA]">força {info.adversario.forca}</span></span>
+            </div>
+          )}
+          <p className="text-[14px] text-[#D4D4D8] px-1 mt-1">{info.texto}</p>
+          <div className="flex flex-col gap-2 mt-2.5">
+            {info.opcoes.map((o) => {
+              if (o.p == null) return <button key={o.id} onClick={() => escolher(o)} className="rp-btn rp-ouro display text-[14px] tracking-wide flex items-center justify-center gap-2"><Icone e={o.icone} size={20} /> {o.nome}</button>;
+              const f = FAIXA_COPA[o.faixa] || FAIXA_COPA.baixo;
+              return (
+                <button key={o.id} onClick={() => escolher(o)} className="text-left rounded-2xl bg-[#1C1C1F] border border-[#2A2A2E] hover:border-[#52525B] px-3 py-2.5 transition-colors" style={o.faixa === "ouro" ? { borderColor: "rgba(235,197,87,.5)", background: "linear-gradient(160deg, rgba(235,197,87,.12), #1C1C1F 70%)" } : undefined}
+                  aria-label={`${o.nome}: ${Math.round(o.p * 100)}% de chance`}>
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${f.cor}14`, border: `1px solid ${f.cor}33` }}><Icone e={o.icone} size={22} cor={f.cor} /></span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-[15px] font-bold text-white leading-tight">{o.nome}</span>
+                      <span className="block text-[12px] text-[#A1A1AA] leading-tight">{o.texto}</span>
+                    </span>
+                    <span className="text-[10px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-full shrink-0" style={{ color: f.cor, background: `${f.cor}1F` }}>{f.txt}</span>
+                  </div>
+                  <div className="mt-2"><BarraChances chances={chancesDe(o, {})} /></div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* resultado da escolha */}
+      {jogada && (
+        <TelaCheia rotulo={`Copa do Mundo ${k.ano}`} cor={corTela} centro botao={revelado ? "Continuar" : "Pular sorteio"} bloqueado={!revelado} onFechar={() => (revelado ? seguir() : revelar())}>
+          <div className="flex flex-col items-center text-center pt-2">
+            <div className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.2em] text-[#A1A1AA]"><Bandeira nac={k.nac} size={16} /> Copa do Mundo {k.ano}</div>
+            <div className="text-[22px] font-extrabold text-white leading-tight mt-2">{r.etapa === "grupos" ? "Fase de grupos" : r.etapa === "convocacao" ? "A convocação" : `${r.fase} · ${r.adv.label}`}</div>
+            {r.escolha && <div className="mt-2 inline-flex flex-col items-center"><span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#71717A]">Sua escolha</span><span className="text-[18px] font-bold text-[#E4E4E7] leading-tight mt-0.5">{r.escolha}</span></div>}
+          </div>
+          {r.etapa !== "grupos" && <ScannerChances chances={chancesDe(jogada.op, r)} alvo={jogada.op.p >= 1 ? 0.5 : r.venceu ? jogada.op.p * 0.5 : jogada.op.p + (1 - jogada.op.p) * 0.5} idx={jogada.op.p >= 1 || r.venceu ? 0 : 1} estatico={revelado} onFim={revelar} />}
+          {r.etapa === "grupos" && <div className="cp-card px-3.5 py-1.5">{r.jogos.map((j, i) => <LinhaJogoCopa key={i} j={j} nac={k.nac} i={i} />)}</div>}
+          {revelado && (
+            <div className="flex flex-col items-center gap-3 cp-surge" style={r.etapa === "grupos" ? { animationDelay: ".6s" } : undefined}>
+              {r.placar && <div className="display text-[34px] leading-none" style={{ color: r.venceu ? "#4ADE80" : "#F87171" }}>{r.placar}</div>}
+              <span className="cp-pop text-[14px] font-extrabold uppercase tracking-wide px-3 py-1 rounded-full" style={{ color: r.venceu ? "#1A1405" : "#fff", background: r.venceu ? "linear-gradient(90deg,#EAB308,#FDE047)" : "#DC2626" }}>{jogada.card.copa.campeao ? "🏆 Campeão do mundo" : r.marca}</span>
+              <p className="text-[18px] leading-snug text-[#F4F4F5] text-center font-medium px-1">{r.texto}</p>
+              {jogada.card.copa.craqueCopa && <div className="cp-card px-4 py-2.5 text-center text-[15px] font-bold text-[#FDE68A]">⭐ Eleito o craque da Copa</div>}
+            </div>
+          )}
+        </TelaCheia>
+      )}
     </div>
   );
 }
@@ -3152,6 +3297,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     const base = cartaId ? escolherPretemporada(c, cartaId) : c;
     const { c: c2, card: k } = jogarTemporada(base);
     if (k.pendente) setEstado({ etapa: "momento", c: c2, card: k, ultimo: estado.ultimo });
+    else if (copaPendente(k)) setEstado({ etapa: "copa", c: c2, card: k, ultimo: estado.ultimo });
     else aposFechar(c, fecharTemporada(c2, k));
   };
   const fimMomento = (acertou) => {
@@ -3159,6 +3305,13 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     const k = aplicarMomento(card, acertou);
     // mais de um título em jogo na temporada: um desafio por vez
     if (k.pendente) setEstado({ etapa: "momento", c, card: k, ultimo: estado.ultimo });
+    else if (copaPendente(k)) setEstado({ etapa: "copa", c, card: k, ultimo: estado.ultimo });
+    else aposFechar(c, fecharTemporada(c, k));
+  };
+  // Copa do Mundo: cada etapa volta pra cá; a final (titular) vira momento decisivo
+  const avancarCopa = (k) => {
+    if (k.pendente) setEstado({ etapa: "momento", c, card: k, ultimo: estado.ultimo });
+    else if (copaPendente(k)) setEstado({ etapa: "copa", c, card: k, ultimo: estado.ultimo });
     else aposFechar(c, fecharTemporada(c, k));
   };
   // compatibilidade com saves parados na tela de resumo antiga
@@ -3290,6 +3443,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           </>
         )}
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}
+        {etapa === "copa" && card?.copa && <TelaCopa key={`${card.copa.etapa}:${card.copa.fase}`} c={c} card={card} onAvancar={avancarCopa} />}
         {etapa === "momento" && <TelaMomento key={`${card.ano}:${(card.momentos || []).length}`} c={c} momento={card.pendente} onFim={fimMomento} />}
         {etapa === "festa" && <TelaFesta c={c} card={card} onFim={() => { if (estado.retorno) setEstado({ ...estado.retorno, voar: false }); else { setPopTemp(card); posTemporada(c, card); } }} />}
         {etapa === "resumo" && <TelaResumo c={c} card={card} voar={!!estado.voar} onPousou={() => setContadorPulsa((x) => x + 1)} onContinuar={continuar} onAposentar={encerrar} onRever={() => setEstado({ etapa: "festa", c, card, voar: false })} />}

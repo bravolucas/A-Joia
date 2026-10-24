@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ARTE, ARTE_EVENTO } from "./arte.js";
+import { ARTE, ARTE_EVENTO, logoCompeticao } from "./arte.js";
 import { POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS, EMOJI_NACIONALIDADE } from "./data.js";
 import { Gema, ClubDot, Brasao, Confetti, ApresentacaoNovoClube, FreeKickMini, PasseMini } from "./components.jsx";
 import { calcularSucessoFalta, tipoResultadoFalta } from "./lib.js";
@@ -180,6 +180,9 @@ function BotaDourada({ size = 80 }) {
 }
 
 function IconeTitulo({ tipo, size = 40, nome = null }) {
+  // prêmios individuais: imagem do troféu se existir em arte/competicoes/, senão o desenho do jogo
+  const premio = tipo === "bolaOuro" ? logoCompeticao("Bola de Ouro") : tipo === "botaOuro" ? logoCompeticao("Bota de Ouro") : null;
+  if (premio) return <img src={premio} alt="" aria-hidden="true" className="shrink-0 object-contain select-none" draggable="false" style={{ width: size, height: size * 1.2, filter: "drop-shadow(0 2px 6px rgba(0,0,0,.5))" }} />;
   if (tipo === "bolaOuro") return <BolaDourada size={size} />;
   if (tipo === "botaOuro") return <BotaDourada size={size} />;
   return <TacaCompeticao tipo={tipo} size={size} nome={nome} />;

@@ -4,6 +4,14 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🏆 Taças oficiais
+
+- 31 troféus reais no lugar das taças desenhadas: as ligas principais e as segundas divisões de Brasil, Inglaterra, Itália, Alemanha e França, Libertadores, Champions League, as copas nacionais (Copa do Brasil, FA Cup, Copa do Rei, Coppa Italia, DFB-Pokal, Copa da França, Taça de Portugal, US Open Cup), Mundial de Clubes, Copa do Mundo, Copa América, Eurocopa, Copa da Ásia, Bola de Ouro e Bota de Ouro
+- Vindos do repositório público Football-Career (licença MIT), recortados e convertidos para WebP (≈570 KB no total). Créditos em `arte/competicoes/CREDITOS.md`
+- Sem imagem ainda (continuam desenhadas): LaLiga 2, Liga Portugal 2, Champions Asiática, Concacaf, King's Cup, Copa Ouro, Copa Africana e Copa da OFC
+
+---
+
 ## 🛡️ Escudos oficiais dos clubes
 
 - Os 300 clubes do jogo agora usam o escudo oficial, vindos do repositório público football-logos (Jose Arroyave, licença MIT). Cada escudo foi conferido um a um e convertido para WebP 256 × 256 (≈4 MB no total, carregados só quando aparecem)

@@ -1032,9 +1032,9 @@ function iniciarCopa(c, ovr) {
   const vitrine = c.foco === "vitrine" ? 2 : 0;
   const corte = fs - 6 + (c.flags.selecaoFria || 0) * 2 - vitrine;
   const dentro = ovr >= corte;
-  const bolha = !dentro && ovr >= corte - 4;
+  // fora da lista, o evento aparece mesmo assim: quanto mais longe do corte, menor a chance de entrar
+  const bolha = !dentro;
   const selecao = { ano: c.ano, nome: "Copa do Mundo", tipo: "copaMundo", convocado: dentro, titular: ovr >= fs - 2, fase: 0, resultado: dentro ? "Convocado" : "Fora da convocação", gols: 0, assist: 0, jogos: 0 };
-  if (!dentro && !bolha) { selecao.semVoce = campanhaSemVoce(fs); return { selecao, copa: null }; }
   const copa = {
     ano: c.ano, nome: "Copa do Mundo", nac: c.nac, label: nacDe(c.nac).label, fs, ovr, corte, titular: selecao.titular,
     etapa: dentro ? "grupos" : "convocacao", fase: 0, arenga: true, convocado: dentro, bolha,
@@ -1051,10 +1051,14 @@ export function opcoesCopa(c, card) {
   const k = card.copa;
   if (!k || k.fim) return null;
   if (k.etapa === "convocacao") {
-    const pTreino = clampR(0.4 + (k.ovr - (k.corte - 4)) * 0.08, 0.4, 0.7);
-    return { etapa: k.etapa, titulo: `Lista da ${k.label}`, texto: `Faltam poucos dias para a convocação e seu nome está na briga pela última vaga. Como você vai atrás dela?`, opcoes: [
+    const dist = Math.max(1, k.corte - k.ovr);
+    const pTreino = clampR(0.72 - dist * 0.08, 0.05, 0.7);
+    const pPedir = clampR(0.55 - dist * 0.05, 0.08, 0.45);
+    const texto = dist <= 4 ? "Faltam poucos dias para a convocação e seu nome está na briga pela última vaga. Como você vai atrás dela?"
+      : "Seu nome corre por fora da lista. Só algo fora do comum convence o técnico a te levar.";
+    return { etapa: k.etapa, titulo: `Lista da ${k.label}`, texto, opcoes: [
       { id: "treino", icone: "🏋️", nome: "Voar na reta final", texto: "Fazer os melhores jogos do ano pelo clube.", p: pTreino, faixa: "baixo" },
-      { id: "pedir", icone: "🎙️", nome: "Pedir a vaga em público", texto: "Entrevista mirando o técnico. Se não colar, a porta fecha.", p: 0.45, faixa: "alto" },
+      { id: "pedir", icone: "🎙️", nome: "Pedir a vaga em público", texto: "Entrevista mirando o técnico. Se não colar, a porta fecha.", p: pPedir, faixa: "alto" },
     ] };
   }
   if (k.etapa === "grupos") return { etapa: k.etapa, titulo: "Fase de grupos", texto: `Três jogos. Os dois primeiros seguem no mata-mata.`, opcoes: [{ id: "grupos", icone: "⚽", nome: "Jogar a fase de grupos" }] };

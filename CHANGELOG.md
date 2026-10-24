@@ -13,6 +13,7 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
   - **Discurso no vestiário**: uma vez por Copa, garante a vitória numa fase, mas não vale na final (inspirado na "arenga" do El Ídolo)
   - **Final**: titular decide no momento decisivo da posição (pênalti, falta, passe ou defesa)
 - **Prêmios da Copa**: craque da Copa (ajuda na Bola de Ouro) e artilheiro da Copa
+- **O evento aparece em toda Copa** a partir dos 18 anos: mesmo longe da lista, você tenta a convocação (com chance menor quanto mais longe do corte). Só não aparece para quem já se aposentou da seleção
 - Ficou fora da lista? O jogo conta até onde a seleção foi sem você
 - A dificuldade para ser campeão ficou parecida com a de antes; a diferença é que agora as escolhas são suas
 

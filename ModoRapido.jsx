@@ -1549,7 +1549,9 @@ function CartaoEvento({ evento, resultado, efeitos, onEscolher, onPedirLiga, onA
   const [ligas, setLigas] = useState(false);
   return (
     <div className="rp-painel overflow-hidden rp-entra">
-      <div className="relative px-4 pt-3.5 pb-2.5 flex items-start gap-3" style={{ background: evento.vida ? "linear-gradient(135deg, rgba(140,110,230,.18), transparent 70%)" : "linear-gradient(135deg, rgba(18,168,118,.14), transparent 70%)" }}>
+      <div className="relative px-4 pt-3.5 pb-2.5 flex items-start gap-3" style={{ background: ARTE_EVENTO[evento.id]
+        ? `linear-gradient(90deg, rgba(14,21,18,.97) 0%, rgba(14,21,18,.88) 50%, rgba(14,21,18,.55) 100%), url(${ARTE_EVENTO[evento.id]}) right center/cover`
+        : evento.vida ? "linear-gradient(135deg, rgba(140,110,230,.18), transparent 70%)" : "linear-gradient(135deg, rgba(18,168,118,.14), transparent 70%)" }}>
         <span className="text-2xl w-11 h-11 rounded-xl bg-[#0E1512]/70 border border-white/10 flex items-center justify-center shrink-0"><Icone e={evento.icone} size={26} cor={evento.vida ? "#C7B8F5" : "#7FE3BC"} /></span>
         <div className="min-w-0">
           <h2 className="display text-[14px] leading-snug text-[#F2F5F3]">{evento.titulo}{evento.vida && <span className="ml-1.5 align-middle rp-chip !text-[9px] !py-0.5" style={{ color: "#C7B8F5", background: "rgba(140,110,230,.18)" }}>vida</span>}</h2>
@@ -1901,6 +1903,7 @@ function Patrimonio({ c, onComprar, onFechar }) {
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center" onClick={onFechar}>
       <div className="w-full max-w-xl max-h-[85vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-[#121916] border border-white/10 p-5 rp-entra" onClick={(e) => e.stopPropagation()}>
+        <div className="-mx-5 -mt-5 mb-3 h-28 rounded-t-3xl" style={{ background: `linear-gradient(180deg, rgba(18,25,22,.1), #121916), url(${(c.patrimonio || 0) >= 20000 ? ARTE.mansao : ARTE.carro}) center/cover` }} aria-hidden="true" />
         <div className="flex items-center justify-between">
           <h2 className="display text-base text-[#F2F5F3]">Patrimônio</h2>
           <button onClick={onFechar} className="min-h-[44px] px-3 text-[15px] font-bold text-[#8FA39A]">Fechar</button>
@@ -2602,7 +2605,7 @@ function BarraChances({ chances, alta = false, ponteiro = null, destaque = null 
 const NEON = (d) => (d > 0 ? "#22F59B" : d < 0 ? "#FF4D6D" : "#94A3B8");
 function polar(cx, cy, r, ang) { const a = (ang - 90) * Math.PI / 180; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; }
 function arco(cx, cy, r, a0, a1) { const [x0, y0] = polar(cx, cy, r, a0), [x1, y1] = polar(cx, cy, r, a1); return `M${x0} ${y0} A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1} ${y1}`; }
-function ScannerChances({ chances, alvo, idx, estatico, onFim }) {
+function ScannerChances({ chances, alvo, idx, estatico, onFim, dReal = null }) {
   const [ang, setAng] = useState(estatico ? alvo * 360 : 0);
   const [fim, setFim] = useState(!!estatico);
   const [ruido, setRuido] = useState(0);
@@ -2625,7 +2628,7 @@ function ScannerChances({ chances, alvo, idx, estatico, onFim }) {
   const C = 120, R = 92;
   let acc = 0;
   const faixas = chances.map((x, i) => { const a0 = acc * 360, a1 = (acc + x.p) * 360; acc += x.p; return { ...x, i, a0, a1 }; });
-  const sorteado = chances[idx];
+  const sorteado = dReal != null && chances[idx].d !== 0 ? { ...chances[idx], d: dReal } : chances[idx];
   const corRes = NEON(sorteado.d);
   const [px, py] = polar(C, C, R + 14, ang % 360);
   return (
@@ -2694,14 +2697,15 @@ export function PopupResultado({ info, onFechar }) {
   const revelar = () => { setRevelado(true); vibrar(dOvr > 0 ? [30, 50, 30] : 60); };
   const sorteado = temRoleta ? info.chances[info.idx] : null;
   return (
-    <TelaCheia rotulo={info.titulo} cor={corFundo} botao={revelado ? "Continuar" : "Pular sorteio"} bloqueado={!revelado} onFechar={() => (revelado ? onFechar() : revelar())}>
-      <div className="flex flex-col items-center text-center pt-4">
-        <span className="w-16 h-16 rounded-2xl bg-white/[.06] border border-white/10 flex items-center justify-center text-[34px]"><Icone e={info.icone} size={34} cor="#22F59B" /></span>
+    <TelaCheia rotulo={info.titulo} cor={corFundo} centro={!info.foto} botao={revelado ? "Continuar" : "Pular sorteio"} bloqueado={!revelado} onFechar={() => (revelado ? onFechar() : revelar())}>
+      {info.foto && <div className="-mx-4 -mt-6 h-32 shrink-0 cp-surge" style={{ background: `linear-gradient(180deg, rgba(11,11,12,.15), #0B0B0C), url(${info.foto}) center/cover` }} aria-hidden="true" />}
+      <div className={`flex flex-col items-center text-center ${info.foto ? "-mt-12 relative" : "pt-4"}`}>
+        <span className="w-16 h-16 rounded-2xl bg-[#0B0B0C]/80 backdrop-blur border border-white/10 flex items-center justify-center text-[34px]"><Icone e={info.icone} size={34} cor="#22F59B" /></span>
         <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-[#A1A1AA] mt-3">{info.titulo}</div>
         {info.contexto && <p className="text-[14px] text-[#A1A1AA] leading-snug mt-2 line-clamp-3">{info.contexto}</p>}
         {info.escolha && <div className="mt-3 inline-flex flex-col items-center"><span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#71717A]">Sua escolha</span><span className="text-[22px] font-extrabold text-white leading-tight mt-0.5">{info.escolha}</span></div>}
       </div>
-      {temRoleta && <div className="mt-1"><ScannerChances chances={info.chances} alvo={info.alvo} idx={info.idx} estatico={revelado} onFim={revelar} /></div>}
+      {temRoleta && <div className="mt-1"><ScannerChances chances={info.chances} alvo={info.alvo} idx={info.idx} estatico={revelado} onFim={revelar} dReal={info.chances[info.idx]?.d && info.ovrDepois != null ? info.ovrDepois - info.ovrAntes : null} /></div>}
       {revelado && (
         <div className="flex flex-col gap-3 cp-surge">
           <p className="text-[18px] leading-snug text-[#F4F4F5] text-center font-medium px-1">{info.texto}</p>
@@ -2878,8 +2882,10 @@ export function ApresentacaoGrande({ clube, nome, numero, posicao, idade, deOnde
             </>
           ) : (
             <>
-              <div className="absolute inset-0" style={{ background: `radial-gradient(90% 70% at 50% 30%, ${cor} 0%, ${cor}AA 45%, #05070A 100%)` }} aria-hidden="true" />
-              <div className="absolute inset-0 grid grid-cols-6 gap-y-5 px-2 pt-4 opacity-[.2]" aria-hidden="true" style={{ maskImage: "linear-gradient(180deg,#000 55%,transparent 85%)", WebkitMaskImage: "linear-gradient(180deg,#000 55%,transparent 85%)" }}>
+              <div className="absolute inset-0" style={{ background: `url(${ARTE.salaApresentacao}) center 20%/cover`, filter: "grayscale(1) contrast(1.15) brightness(.8)" }} aria-hidden="true" />
+              <div className="absolute inset-0" style={{ background: cor, mixBlendMode: claro ? "soft-light" : "color", opacity: claro ? 0.5 : 0.85 }} aria-hidden="true" />
+              <div className="absolute inset-0" style={{ background: `radial-gradient(80% 60% at 50% 30%, ${cor}55, transparent 70%)` }} aria-hidden="true" />
+              <div className="absolute inset-0 grid grid-cols-6 gap-y-5 px-2 pt-4 opacity-[.28] mix-blend-screen" aria-hidden="true" style={{ maskImage: "linear-gradient(180deg,#000 55%,transparent 85%)", WebkitMaskImage: "linear-gradient(180deg,#000 55%,transparent 85%)" }}>
                 {Array.from({ length: 42 }, (_, k) => <div key={k} className="flex justify-center" style={{ transform: Math.floor(k / 6) % 2 ? "translateX(50%)" : undefined }}><ClubDot club={clube} size={26} /></div>)}
               </div>
               {/* brilho passando no painel */}
@@ -3076,7 +3082,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
       const op = evento.opcoes.find((o) => o.id === opId);
       const idx = op?.chances ? op.chances.findIndex((x) => x.txt === r.resultado) : -1;
       const ini = idx > 0 ? op.chances.slice(0, idx).reduce((a, x) => a + x.p, 0) : 0;
-      setPopup({ icone: evento.icone, titulo: evento.titulo, contexto: evento.texto, dica: op?.chances || op?.oferta ? null : op?.dica, escolha: op?.oferta ? op.oferta.clube : op?.label, texto: r.resultado || "Decisão tomada.", efeitos: efeitosDaDecisao(c, r.c),
+      setPopup({ icone: evento.icone, foto: ARTE_EVENTO[evento.id] || null, titulo: evento.titulo, contexto: evento.texto, dica: op?.chances || op?.oferta ? null : op?.dica, escolha: op?.oferta ? op.oferta.clube : op?.label, texto: r.resultado || "Decisão tomada.", efeitos: efeitosDaDecisao(c, r.c),
         ovrAntes: ovrDe(c), ovrDepois: ovrDe(r.c), chances: idx >= 0 ? op.chances : null, idx, alvo: idx >= 0 ? ini + op.chances[idx].p * 0.5 : null, k: Date.now() });
     }
   };
@@ -3087,7 +3093,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const desafiar = (id) => {
     const r = resolverDesafio(c, id);
     setEstado((st) => ({ ...st, c: r.c }));
-    if (r.res) setPopup({ icone: r.res.icone, titulo: `Desafio da temporada ${c.ano}`, escolha: r.res.nome, texto: r.res.txt, efeitos: efeitosDaDecisao(c, r.c),
+    if (r.res) setPopup({ icone: r.res.icone, foto: ARTE.treino, titulo: `Desafio da temporada ${c.ano}`, escolha: r.res.nome, texto: r.res.txt, efeitos: efeitosDaDecisao(c, r.c),
       ovrAntes: r.res.ovrAntes, ovrDepois: r.res.ovrDepois, chances: r.res.chances, idx: r.res.idx, alvo: r.res.roll, k: Date.now() });
   };
   const ajustarNeg = (campo, dir) => setEstado((st) => ({ ...st, neg: ajustarNegociacao(st.neg, campo, dir) }));

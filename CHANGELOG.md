@@ -4,6 +4,17 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 📸 Fotos novas do Adobe Stock
+
+- 10 fotos novas licenciadas no Adobe Stock e tratadas no tom do jogo: vestiário, fisioterapia, avião, treino, mansão, carro esportivo, torcida com sinalizadores, casa de família, festa e sala de coletiva
+- **Eventos com foto**: o cabeçalho de cada decisão mostra a foto do tema ao fundo (mais de 60 eventos cobertos, antes nenhum aparecia no Modo Rápido)
+- **Pop-up do resultado** abre com a foto do evento no topo; o desafio de OVR usa a foto do treino
+- **Apresentação oficial na sala de imprensa** agora usa a foto real da sala, tingida na cor do clube, com o painel de escudos por cima
+- **Patrimônio** com foto no topo (carro esportivo, ou mansão quando o patrimônio passa de € 20 mi)
+- Correção: o centro do sorteio mostra a variação real do OVR
+
+---
+
 ## 🎨 Ícones próprios, bandeiras de verdade e camisa no cartão
 
 - **Bandeiras em imagem** (pacote flag-icons, MIT) no lugar dos emojis, que no Windows apareciam como letras ("BR"). Valem para o cartão do topo, a tabela, a seleção, o fim de temporada, a galeria e o pós-carreira — 76 países

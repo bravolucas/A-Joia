@@ -1,7 +1,7 @@
 # Créditos das imagens
 
 Fotos licenciadas pelo Adobe Stock (licença padrão, conteúdo gratuito) na conta do projeto,
-redimensionadas pelo Adobe Photoshop (API) e convertidas para WebP.
+redimensionadas pelo Adobe Photoshop (API) ou recortadas e tratadas no próprio projeto, e convertidas para WebP.
 
 | Arquivo | Adobe Stock ID | Título original | Uso no jogo |
 |---|---|---|---|
@@ -9,6 +9,16 @@ redimensionadas pelo Adobe Photoshop (API) e convertidas para WebP.
 | confete-dourado.webp | 359746417 | shiny gold glitter confetti golden on black background, 3d rendering | Festa de título e Bola de Ouro |
 | estadio-noite.webp | 239375308 | Lights on empty football stadium | Menu inicial |
 | estadio-por-do-sol.webp | 285253487 | Soccer stadium, green grass and night sky | Aposentadoria e fim de carreira |
+| vestiario.webp | 607270659 | Soccer team uniforms in locker room | Eventos de vestiário, capitão, mentor |
+| fisio.webp | 263196654 | Doctor physiotherapist assisting a male patient… | Lesões e recuperação |
+| aviao.webp | 341241308 | Night cityscape from airplane two window | Empréstimo, saída, volta para casa, naturalização |
+| treino.webp | 284556130 | Football training cone is aligned on artificial grass pitch | Pré-temporada, treino, desafio de OVR |
+| mansao.webp | 129999183 | Lit swimming pool and building exterior at night | Fortuna, patrimônio |
+| carro.webp | 410686542 | Red Sports Car in Dark | Patrocínio, golpe, patrimônio |
+| protesto.webp | 197937420 | Football fans burn the lights and smoke bombs | Protesto da organizada, ódio nas redes |
+| casa.webp | 293866842 | Smoke from the chimney of house during sunset | Eventos de família e vida pessoal |
+| festa.webp | 237668684 | Blurred concept night scene in concert party… | Noitada, polêmica |
+| sala-apresentacao.webp | 1534097092 | Press conference concept with podium and multiple microphones… | Apresentação oficial (sala de imprensa) |
 
 A licença do Adobe Stock permite uso em projetos, mas não a redistribuição das imagens isoladas
 (por exemplo, como banco de imagens). Não reutilize estes arquivos fora do A JOIA.

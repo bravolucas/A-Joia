@@ -9,8 +9,18 @@ import tunel from "./arte/tunel.webp";
 import torcida from "./arte/torcida.webp";
 import lesao from "./arte/lesao.webp";
 import contrato from "./arte/contrato.webp";
+import vestiario from "./arte/vestiario.webp";
+import fisio from "./arte/fisio.webp";
+import aviao from "./arte/aviao.webp";
+import treino from "./arte/treino.webp";
+import mansao from "./arte/mansao.webp";
+import carro from "./arte/carro.webp";
+import protesto from "./arte/protesto.webp";
+import casa from "./arte/casa.webp";
+import festa from "./arte/festa.webp";
+import salaApresentacao from "./arte/sala-apresentacao.webp";
 
-export const ARTE = { refletores, coletiva, confete, estadioNoite, porDoSol, tunel, torcida, lesao, contrato };
+export const ARTE = { refletores, coletiva, confete, estadioNoite, porDoSol, tunel, torcida, lesao, contrato, vestiario, fisio, aviao, treino, mansao, carro, protesto, casa, festa, salaApresentacao };
 
 /* Escudos e logos de competição opcionais. O jogo não traz nenhum: quem quiser
    usar imagens próprias coloca os arquivos em arte/escudos/ e arte/competicoes/
@@ -29,11 +39,16 @@ export const temImagensOficiais = Object.keys(ESCUDOS).length + Object.keys(LOGO
 
 /* Foto de cabeçalho por evento do Modo Rápido (eventos sem foto ficam só com o ícone) */
 export const ARTE_EVENTO = {
-  propostas: contrato, renovacao: contrato, fimContrato: contrato, livre: contrato, clausula: contrato, fortuna: contrato,
-  lesaoPre: lesao, veterano: lesao,
-  sub20: torcida, selecaoAmistoso: torcida, naturalizacao: torcida, classico: torcida, golDePlaca: torcida, capitao: torcida,
-  mentor: tunel, jovemMentor: tunel, emprestimo: tunel, forcarSaida: tunel, voltarCasa: tunel, camisa10: tunel,
-  pretemporada: estadioNoite, novoTecnico: estadioNoite, parceria: estadioNoite, presidente: estadioNoite,
-  polemica: refletores, noitada: refletores, documentario: refletores, patrocinio: refletores, rivalMundo: refletores, empresario: refletores,
-  traicao: refletores, social: porDoSol,
+  propostas: contrato, renovacao: contrato, fimContrato: contrato, livre: contrato, clausula: contrato, empresario: contrato, parceria: contrato,
+  lesaoPre: fisio, voltaLesao: fisio, esgotamento: fisio, machucado: fisio, infiltracao: fisio, recuperacao: fisio, veterano: lesao,
+  emprestimo: aviao, forcarSaida: aviao, voltarCasa: aviao, excursao: aviao, saudade: aviao, idiomaImprensa: aviao, naturalizacao: aviao,
+  pretemporada: treino, novoTecnico: treino, treinoExtra: treino, academia: treino, intertemporada: treino, concentracao: treino, especialista: treino,
+  novaPosicao: treino, garotoBase: treino, video: treino, batedor: treino, olheiros: treino,
+  vestiario, capitao: vestiario, mentor: vestiario, jovemMentor: vestiario, camisa10: vestiario, expulsao: vestiario, traicao: vestiario,
+  noitada: festa, polemica: festa, romance: festa, videogame: festa,
+  organizada: protesto, odioRedes: protesto, salarioAtrasado: protesto,
+  casaPais: casa, filho: casa, luto: casa, cachorro: casa, amigo: casa, reencontro: casa, social: casa, beneficente: casa, paiEmpresario: casa, estudos: casa, treinoFerias: casa, dieta: casa,
+  fortuna: mansao, patrocinio: carro, golpe: carro,
+  sub20: torcida, selecaoAmistoso: torcida, classico: torcida, golDePlaca: torcida, homenagem: torcida, recordeClube: torcida, foraDaLista: torcida, pressaoCopa: torcida, adeusSelecao: torcida,
+  presidente: estadioNoite, documentario: refletores, rivalMundo: refletores,
 };

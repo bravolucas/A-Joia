@@ -4,6 +4,21 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🌍 Ligas 2026/27, três ligas novas e as taças que faltavam
+
+- **Temporada 2026/27**: quem subiu e quem caiu em Inglaterra, Espanha, Itália, Alemanha, França, Portugal e Brasil, conferido nos dados do openfootball
+  - Ex.: Coventry, Hull, Leeds e Sunderland na Premier League; Wolves, West Ham e Leicester na Championship
+  - Chapecoense e Remo no Brasileirão; Fortaleza e Sport na Série B
+  - Clubes novos nas segundas divisões (Burnley, Birmingham, Wrexham, Valladolid, Las Palmas e outros)
+- **Ligas novas**: Eredivisie 🇳🇱 (18 clubes), Süper Lig 🇹🇷 (18) e Liga Profesional 🇦🇷 (20, com Boca, River, Racing e cia.)
+  - Jogador holandês, turco ou argentino começa na liga do seu país
+  - Copas nacionais (KNVB Beker, Copa da Turquia, Copa Argentina); a Argentina disputa a Libertadores
+  - Também aparecem para o empresário e no Modo Carreira
+- **64 escudos novos** dos clubes que entraram
+- **Taças novas**: LaLiga 2, Liga Portugal 2, Champions Asiática, Concacaf, Copa Ouro, Copa Africana de Nações, Copa das Nações da OFC, Eredivisie, KNVB Beker, Süper Lig, Liga Profesional, Copa Argentina e Supercopa Argentina
+
+---
+
 ## 🔊 Sons, imagem da galeria e app instalável
 
 - **Sons**: efeitos de interface da Kenney (CC0) e apito/torcida sintetizados no jogo.

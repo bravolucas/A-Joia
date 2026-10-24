@@ -65,3 +65,7 @@ real. As fotos de taças do Adobe Stock usadas antes foram aposentadas.
 
 - **Efeitos de interface** (`arte/sons/`): [Kenney — Interface Sounds](https://kenney.nl/assets/interface-sounds), licença CC0 (domínio público), pelo espelho [Calinou/kenney-interface-sounds](https://github.com/Calinou/kenney-interface-sounds). Convertidos para MP3 mono.
 - **Apito e torcida**: sintetizados no próprio jogo (Web Audio), sem arquivo.
+
+## Dados das ligas
+
+- **Elencos das ligas 2026/27** (quem subiu e quem caiu, Eredivisie, Süper Lig e Liga Profesional): conferidos nos dados públicos do [openfootball](https://github.com/openfootball) (domínio público, CC0). As forças dos clubes são estimativas do próprio jogo.

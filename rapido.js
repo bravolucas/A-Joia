@@ -109,15 +109,16 @@ export const NACS_DESTAQUE = ["BRA", "ARG", "POR", "ESP", "FRA", "ENG", "ITA", "
 const COPA_POR_LIGA = {
   brasileirao: "Copa do Brasil", inglaterra: "FA Cup", espanha: "Copa do Rei", italia: "Coppa Italia",
   alemanha: "DFB-Pokal", franca: "Copa da França", portugal: "Taça de Portugal", arabia: "King's Cup", mls: "US Open Cup",
+  holanda: "KNVB Beker", turquia: "Copa da Turquia", argentina: "Copa Argentina",
 };
 
 /* Clube de base: um time pequeno do país do jogador (ou de um país vizinho no mercado) */
 const LIGA_BASE_POR_NAC = {
   BRA: ["serieB", "brasileirao"], ENG: ["inglaterra2"], ESP: ["espanha2"], ITA: ["italia2"], ALE: ["alemanha2"],
   FRA: ["franca2"], POR: ["portugal2", "portugal"], EUA: ["mls"], MEX: ["mls"], CAN: ["mls"],
-  ARG: ["espanha2", "italia2"], URU: ["espanha2", "portugal2"], COL: ["serieB", "espanha2"], CHI: ["espanha2"],
+  ARG: ["argentina"], URU: ["espanha2", "portugal2"], COL: ["serieB", "espanha2"], CHI: ["espanha2"],
   PAR: ["serieB"], EQU: ["serieB"], PER: ["serieB"], BOL: ["serieB"],
-  HOL: ["alemanha2"], BEL: ["franca2"], SUI: ["alemanha2"], AUT: ["alemanha2"], DIN: ["alemanha2"],
+  HOL: ["holanda"], TUR: ["turquia"], BEL: ["franca2"], SUI: ["alemanha2"], AUT: ["alemanha2"], DIN: ["alemanha2"],
   MAR: ["franca2"], SNE: ["franca2"], CSC: ["franca2"], ALG: ["franca2"], TUN: ["franca2"], CMR: ["franca2"],
   JAP: ["alemanha2"], COR: ["alemanha2"], ARS: ["arabia"], QAT: ["arabia"], EAU: ["arabia"],
 };
@@ -546,7 +547,7 @@ export function formatarValor(k) {
    Mesma ideia do Modo Carreira (salário, cláusula, bônus, comissão do
    empresário, gastos), com valores em milhares de euro e escala realista. */
 const LIGA_PAGA = {
-  inglaterra: 1.35, espanha: 1.1, italia: 1.0, alemanha: 1.0, franca: 0.9, portugal: 0.55, brasileirao: 0.5, arabia: 2.4, mls: 0.8,
+  inglaterra: 1.35, espanha: 1.1, italia: 1.0, alemanha: 1.0, franca: 0.9, portugal: 0.55, brasileirao: 0.5, arabia: 2.4, mls: 0.8, holanda: 0.6, turquia: 0.75, argentina: 0.35,
   inglaterra2: 0.45, espanha2: 0.3, italia2: 0.28, alemanha2: 0.32, franca2: 0.28, portugal2: 0.18, serieB: 0.2,
 };
 export function salarioAnual(clubeNome, ovr) {
@@ -683,7 +684,7 @@ export function caminhosPosCarreira(c) {
   return CAMINHOS_POS_CARREIRA.map((p) => ({ id: p.id, nome: p.nome, icone: p.icone, cor: p.cor, desc: p.desc, disponivel: true, chance: chancePosCarreira(c, p.id), aFavor: PESA_A_FAVOR[p.id] }));
 }
 /* ---------- depois da bola: uma segunda carreira sorteada (puxada pelo que você fez em campo) ---------- */
-const NAC_DA_LIGA = { brasileirao: "BRA", serieB: "BRA", inglaterra: "ENG", inglaterra2: "ENG", espanha: "ESP", espanha2: "ESP", italia: "ITA", italia2: "ITA", alemanha: "ALE", alemanha2: "ALE", franca: "FRA", franca2: "FRA", portugal: "POR", portugal2: "POR" };
+const NAC_DA_LIGA = { holanda: "HOL", turquia: "TUR", argentina: "ARG", brasileirao: "BRA", serieB: "BRA", inglaterra: "ENG", inglaterra2: "ENG", espanha: "ESP", espanha2: "ESP", italia: "ITA", italia2: "ITA", alemanha: "ALE", alemanha2: "ALE", franca: "FRA", franca2: "FRA", portugal: "POR", portugal2: "POR" };
 const LIGAS_TOP = ["inglaterra", "espanha", "italia", "alemanha", "franca"];
 function talentoPos(c) {
   const L = c.legado || calcularLegado(c);
@@ -3066,6 +3067,7 @@ export const LIGAS_EMPRESARIO = [
   { id: "franca", nome: "Ligue 1", icone: "🇫🇷" }, { id: "portugal", nome: "Liga Portugal", icone: "🇵🇹" },
   { id: "brasileirao", nome: "Brasileirão", icone: "🇧🇷" }, { id: "arabia", nome: "Liga Saudita", icone: "🇸🇦" },
   { id: "mls", nome: "MLS", icone: "🇺🇸" },
+  { id: "holanda", nome: "Eredivisie", icone: "🇳🇱" }, { id: "turquia", nome: "Süper Lig", icone: "🇹🇷" }, { id: "argentina", nome: "Liga Profesional", icone: "🇦🇷" },
 ];
 /* Pede ao empresário outra liga durante a janela: refaz as propostas uma vez por janela */
 export function pedirLiga(c0, ligaId) {

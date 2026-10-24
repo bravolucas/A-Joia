@@ -106,6 +106,15 @@ export const ESTILO_BASE = `
 .rp-flip{perspective:900px;}
 .rp-flip-in{transform-style:preserve-3d;transition:transform .7s cubic-bezier(.2,.8,.2,1);position:relative;}
 .rp-flip-in.virada{transform:rotateY(180deg);}
+/* apresentação no clube grande */
+@keyframes apSobe{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+@keyframes apCamisa{0%{opacity:0;transform:translateY(36px) scale(.75) rotate(-8deg)}70%{opacity:1;transform:translateY(-6px) scale(1.04) rotate(1deg)}100%{opacity:1;transform:none}}
+@keyframes apTexto{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes apFlash{0%,100%{opacity:0}6%{opacity:.95}14%{opacity:0}}
+.ap-sobe{animation:apSobe .7s cubic-bezier(.2,.8,.2,1) both;}
+.ap-camisa{animation:apCamisa .9s cubic-bezier(.2,.8,.2,1) both;transform-box:fill-box;transform-origin:50% 100%;}
+.ap-texto{animation:apTexto .5s ease-out both;}
+.ap-flash{position:absolute;width:70px;height:70px;border-radius:999px;background:radial-gradient(circle,#fff 0%,rgba(255,255,255,.5) 30%,transparent 70%);animation:apFlash 2.6s ease-out infinite;pointer-events:none;}
 .rp-face{backface-visibility:hidden;-webkit-backface-visibility:hidden;}
 .rp-verso{position:absolute;inset:0;transform:rotateY(180deg);backface-visibility:hidden;-webkit-backface-visibility:hidden;}
 /* pop-ups de tela cheia (fim de temporada, resultado, desafio) */
@@ -2756,6 +2765,112 @@ function DesafioOvr({ c, onEscolher }) {
   );
 }
 
+/* Apresentação oficial num clube grande: o jogador e o dirigente seguram a camisa com o nome
+   e o número, na sala de imprensa (painel com o escudo repetido) ou no gramado do estádio. */
+const lumi = (hex) => { const h = (hex || "#333").replace("#", ""); const n = parseInt(h.length === 3 ? h.split("").map((x) => x + x).join("") : h, 16); return (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
+export function ApresentacaoGrande({ clube, nome, numero, posicao, idade, deOnde, contrato, valor, onConcluir }) {
+  const cor = clube?.cor || "#12A876";
+  const claro = lumi(cor) > 0.62;
+  const tinta = claro ? "#111315" : "#FFFFFF";
+  const sobrenome = (nome || "").trim().split(/\s+/).slice(-1)[0].toUpperCase();
+  const estadio = ((clube?.nome || "").length + (numero || 0)) % 2 === 1;
+  const [pronto, setPronto] = useState(false);
+  useEffect(() => { vibrar([30, 40, 30]); const t = setTimeout(() => setPronto(true), 1900); return () => clearTimeout(t); }, []);
+  const fonteNome = sobrenome.length > 9 ? 13 : sobrenome.length > 6 ? 16 : 19;
+  return createPortal(
+    <div className="cp fixed inset-0 z-[72] overflow-y-auto" role="dialog" aria-modal="true" aria-label={`Apresentação no ${clube?.nome}`} data-pop="" style={{ background: "#07090A" }}>
+      <div className="min-h-full max-w-md mx-auto flex flex-col">
+        <div className="relative h-[430px] overflow-hidden shrink-0">
+          {/* fundo */}
+          {estadio ? (
+            <>
+              <div className="absolute inset-0" style={{ background: `url(${ARTE.estadioNoite}) center 30%/cover` }} aria-hidden="true" />
+              <div className="absolute inset-x-0 bottom-0 h-[38%]" style={{ background: "repeating-linear-gradient(90deg, #1E6B3A 0 36px, #1A5E33 36px 72px)", transform: "perspective(300px) rotateX(38deg)", transformOrigin: "bottom" }} aria-hidden="true" />
+              <div className="absolute left-1/2 top-[22px] -translate-x-1/2 rounded-xl px-5 py-2 flex items-center gap-2 border border-white/15" style={{ background: "rgba(0,0,0,.55)" }} aria-hidden="true">
+                <ClubDot club={clube} size={34} /><span className="text-[12px] font-extrabold tracking-[0.2em] text-white">BEM-VINDO</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${cor} 0%, ${cor}CC 60%, #07090A 100%)` }} aria-hidden="true" />
+              <div className="absolute inset-0 grid grid-cols-6 gap-y-4 px-2 pt-3 opacity-[.22]" aria-hidden="true">
+                {Array.from({ length: 48 }, (_, k) => <div key={k} className="flex justify-center" style={{ transform: Math.floor(k / 6) % 2 ? "translateX(50%)" : undefined }}><ClubDot club={clube} size={26} /></div>)}
+              </div>
+            </>
+          )}
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.15) 55%, rgba(7,9,10,.95))" }} aria-hidden="true" />
+          {/* flashes dos fotógrafos */}
+          {[[12, 58, 0], [78, 40, 0.9], [30, 30, 1.6], [86, 70, 2.1], [55, 18, 0.4]].map(([x, y, d], k) => <span key={k} className="ap-flash" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${d}s` }} aria-hidden="true" />)}
+          {/* o dirigente, o jogador e a camisa */}
+          <svg viewBox="0 0 360 300" className="absolute left-0 right-0 bottom-0 w-full" aria-hidden="true">
+            <defs>
+              <linearGradient id="apTerno" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#2B3242" /><stop offset="1" stopColor="#141821" /></linearGradient>
+              <linearGradient id="apAgasalho" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#24282B" /><stop offset="1" stopColor="#101214" /></linearGradient>
+              <linearGradient id="apCamisaG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor={cor} /><stop offset="1" stopColor={cor} stopOpacity=".82" /></linearGradient>
+            </defs>
+            {/* dirigente (esquerda) */}
+            <g className="ap-sobe" style={{ animationDelay: ".15s" }}>
+              <path d="M40 300 L46 200 Q48 176 70 168 L92 162 L114 168 Q134 176 136 200 L142 300 Z" fill="url(#apTerno)" />
+              <path d="M80 165 L92 196 L104 165 Z" fill="#F2F2F2" />
+              <path d="M89 172 L95 172 L97 205 L92 214 L87 205 Z" fill={claro ? "#1E293B" : cor} />
+              <path d="M70 168 L88 200 L80 210 Z M114 168 L96 200 L104 210 Z" fill="#1A1F2B" />
+              <rect x="84" y="146" width="16" height="18" rx="6" fill="#B98763" />
+              <ellipse cx="92" cy="128" rx="20" ry="23" fill="#C69472" />
+              <path d="M72 124 Q74 100 94 102 Q112 103 112 122 Q106 112 92 112 Q80 112 72 124 Z" fill="#9AA0A6" />
+              {/* braço segurando a manga da camisa */}
+              <path d="M126 186 Q140 170 144 154 L154 158 Q150 182 134 202 Z" fill="url(#apTerno)" />
+            </g>
+            {/* jogador (direita) */}
+            <g className="ap-sobe" style={{ animationDelay: ".3s" }}>
+              <path d="M222 300 L228 196 Q232 172 256 164 L278 158 L300 164 Q322 172 326 196 L332 300 Z" fill="url(#apAgasalho)" />
+              <path d="M262 162 L278 176 L294 162" fill="none" stroke={cor} strokeWidth="4" />
+              <path d="M228 230 L332 230" stroke={cor} strokeWidth="3" opacity=".7" />
+              <rect x="270" y="140" width="17" height="20" rx="6" fill="#8D5F42" />
+              <ellipse cx="278" cy="120" rx="21" ry="24" fill="#9C6A4A" />
+              <path d="M257 116 Q258 92 279 93 Q300 94 299 116 Q294 104 279 104 Q264 104 257 116 Z" fill="#1C1410" />
+              <path d="M236 184 Q222 170 218 154 L208 158 Q212 182 228 202 Z" fill="url(#apAgasalho)" />
+            </g>
+            {/* a camisa, de costas, com o nome e o número */}
+            <g className="ap-camisa" style={{ animationDelay: ".75s" }}>
+              <path d="M150 150 L168 140 Q181 150 194 140 L212 150 L230 176 L214 186 L210 178 L210 268 L152 268 L152 178 L148 186 L132 176 Z" fill="url(#apCamisaG)" stroke={claro ? "rgba(0,0,0,.25)" : "rgba(255,255,255,.35)"} strokeWidth="1.5" strokeLinejoin="round" />
+              <path d="M168 140 Q181 150 194 140" fill="none" stroke={tinta} strokeOpacity=".5" strokeWidth="2.5" />
+              <path d="M132 176 L148 186 M230 176 L214 186" stroke={tinta} strokeOpacity=".45" strokeWidth="3" />
+              <text x="181" y="178" textAnchor="middle" fontFamily="Inter, system-ui, sans-serif" fontWeight="900" fontSize={fonteNome} letterSpacing="1" fill={tinta} className="ap-texto" style={{ animationDelay: "1.35s" }}>{sobrenome}</text>
+              <text x="181" y="238" textAnchor="middle" fontFamily="Inter, system-ui, sans-serif" fontWeight="900" fontSize="52" fill={tinta} className="ap-texto" style={{ animationDelay: "1.5s" }}>{numero}</text>
+              {/* as mãos segurando os ombros da camisa */}
+              <circle cx="150" cy="154" r="7.5" fill="#C69472" />
+              <circle cx="212" cy="154" r="7.5" fill="#9C6A4A" />
+            </g>
+            {/* mesa com microfones (sala de imprensa) */}
+            {!estadio && (
+              <g className="ap-sobe" style={{ animationDelay: ".05s" }}>
+                <rect x="0" y="268" width="360" height="32" fill="#0C0E10" />
+                <rect x="0" y="266" width="360" height="4" fill={cor} opacity=".85" />
+                {[120, 150, 212, 242].map((x) => <g key={x}><rect x={x} y="250" width="3" height="18" fill="#2A2E33" /><rect x={x - 3} y="242" width="9" height="12" rx="4" fill="#3A3F45" /></g>)}
+              </g>
+            )}
+          </svg>
+          <div className="absolute top-3 right-3"><button onClick={onConcluir} className="text-[13px] font-bold text-white/85 bg-black/45 rounded-full px-3 py-1.5">Pular</button></div>
+        </div>
+        {/* legenda */}
+        <div className="px-5 pb-6 -mt-2 flex flex-col items-center text-center gap-3">
+          <div className="ap-texto text-[11px] font-bold uppercase tracking-[0.25em] text-[#A1A1AA]" style={{ animationDelay: "1.6s" }}>Apresentação oficial{estadio ? " · no estádio" : ""}</div>
+          <div className="ap-texto text-[28px] font-black text-white leading-tight" style={{ animationDelay: "1.7s" }}>{clube?.nome}</div>
+          <div className="ap-texto text-[16px] font-semibold text-[#E4E4E7] -mt-2" style={{ animationDelay: "1.75s" }}>{nome} é o novo reforço</div>
+          <div className="ap-texto text-[14px] text-[#A1A1AA]" style={{ animationDelay: "1.8s" }}>{posicao} · {idade} anos · camisa {numero}{deOnde ? ` · chega do ${deOnde.nome}` : ""}</div>
+          <div className="ap-texto grid grid-cols-3 gap-2 w-full" style={{ animationDelay: "1.9s" }}>
+            {[["Transferência", valor ? formatarValor(valor) : "Sem custo"], ["Contrato", `${contrato?.anos || 1} anos`], ["Salário", contrato?.salario ? `${formatarValor(contrato.salario)}/ano` : "—"]].map(([k, v]) => (
+              <div key={k} className="cp-card px-2 py-2"><div className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">{k}</div><div className="text-[14px] font-extrabold text-white truncate">{v}</div></div>
+            ))}
+          </div>
+          <button onClick={onConcluir} className={`cp-pill cp-branca text-[16px] w-full mt-1 transition-opacity ${pronto ? "" : "opacity-0 pointer-events-none"}`}>Vestir a camisa</button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
 /* Barra de "a temporada vai rolar sozinha" (anos sem decisão, como no Copero) */
 function AutoAvanco({ c, ms, onAgora, onPausar }) {
   return (
@@ -2987,7 +3102,11 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
       )}
       {estanteAberta && c && <Estante c={c} onFechar={() => setEstanteAberta(false)} />}
       {patrimonioAberto && c && <Patrimonio c={c} onComprar={comprar} onFechar={() => setPatrimonioAberto(false)} />}
-      {apresentacao && (
+      {apresentacao && !apresentacao.curto && (
+        <ApresentacaoGrande clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade}
+          deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={() => setApresentacao(null)} />
+      )}
+      {apresentacao && apresentacao.curto && (
         <ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label}
           idade={c.idade} grandeChegada={apresentacao.grande} curto={apresentacao.curto} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={() => setApresentacao(null)} />
       )}

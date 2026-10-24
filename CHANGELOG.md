@@ -4,6 +4,15 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🎤 Apresentação oficial nos clubes grandes
+
+- Quando a transferência é um salto para um clube grande, a animação vira uma **apresentação oficial**: o dirigente e o jogador seguram a camisa de costas, com o seu sobrenome e o número, nas cores do clube
+- Dois cenários (o jogo alterna): **sala de imprensa**, com o painel do escudo repetido ao fundo, mesa e microfones; ou **no estádio**, com o gramado, a arquibancada iluminada e o telão "BEM-VINDO" com o escudo
+- Flashes dos fotógrafos, a camisa sobe e o nome e o número aparecem; depois a legenda com o clube, "é o novo reforço", posição, idade, de onde veio, valor, contrato e salário
+- Desenhos próprios do jogo (pessoas genéricas, nenhuma pessoa real). As outras trocas de clube continuam com a animação "OFICIAL" de antes
+
+---
+
 ## 💎 Tela inicial com a cara da A JOIA
 
 - Saiu o layout parecido com o Copero (banner com frase, pílulas e botão branco)

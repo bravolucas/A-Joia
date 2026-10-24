@@ -1001,7 +1001,7 @@ function hashNome(s) { let h = 7; for (let i = 0; i < s.length; i++) h = (h * 31
 
 export function Brasao({ club, size = 20 }) {
   const arquivo = escudoDe(club.nome);
-  if (arquivo) return <img src={arquivo} alt={`Escudo do ${club.nome}`} width={size} height={Math.round(size * 1.14)} className="shrink-0 object-contain" style={{ width: size, height: size * 1.14 }} draggable="false" />;
+  if (arquivo) return <img src={arquivo} alt={`Escudo do ${club.nome}`} width={size} height={Math.round(size * 1.14)} className="shrink-0 object-contain" style={{ width: size, height: size * 1.14, filter: "drop-shadow(0 0 1px rgba(255,255,255,.35)) drop-shadow(0 2px 3px rgba(0,0,0,.35))" }} draggable="false" loading="lazy" />;
   const h = hashNome(club.nome);
   const forma = FORMAS_BRASAO[h % FORMAS_BRASAO.length];
   const padrao = (h >> 3) % 6;

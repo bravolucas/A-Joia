@@ -4,6 +4,16 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 🛡️ Escudos oficiais dos clubes
+
+- Os 300 clubes do jogo agora usam o escudo oficial, vindos do repositório público football-logos (Jose Arroyave, licença MIT). Cada escudo foi conferido um a um e convertido para WebP 256 × 256 (≈4 MB no total, carregados só quando aparecem)
+- Aparecem em tudo: tabela da carreira, propostas, pop-ups, anúncio "OFICIAL", galeria do fim de carreira, pós-carreira e no Modo Carreira
+- Contorno leve para escudos escuros não sumirem no fundo
+- Créditos e aviso de uso só para identificação em `arte/escudos/CREDITOS.md`. Apagar um arquivo volta o clube ao brasão desenhado
+- Taças e logos de competições continuam com os desenhos do jogo
+
+---
+
 ## 🖼️ Galeria do fim de carreira (como no Copero no computador)
 
 - **Fim de carreira virou uma galeria**: no topo, três cartões — o jogador (sobrenome, camisa, posição, nível de legado, maior valor de mercado, OVR máximo em dourado e jogos/gols/assistências), a **seleção** (bandeira, números e as taças pela seleção, ou "vitrine vazia") e os **prêmios** (Bola e Bota de Ouro, mais 15 conquistas de carreira que acendem quando você chega lá: Tríplice coroa, Rodou o mundo, Cem gols, Bandeira de um clube, Andarilho…)

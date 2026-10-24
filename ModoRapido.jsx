@@ -20,7 +20,7 @@ import {
 /* Estilo do seletor de modos e do Modo Rápido. Inclui as animações que as
    cenas reaproveitadas do Modo Carreira (apresentação no clube, confete) usam. */
 export const ESTILO_BASE = `
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Oswald:wght@500;600;700&family=Unbounded:wght@700;900&family=Playfair+Display:wght@800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Oswald:wght@500;600;700&family=Unbounded:wght@700;900&family=Playfair+Display:wght@800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
 .rp{min-height:100vh;background:#0E1512;color:#E1E6E3;font-family:'Rajdhani',ui-sans-serif,system-ui,sans-serif;}
 .rp .display{font-family:'Unbounded',sans-serif;}
 .rp .font-stat{font-family:'bebas-neue','Oswald',sans-serif;letter-spacing:.02em;font-synthesis:none;}
@@ -63,6 +63,24 @@ export const ESTILO_BASE = `
 @keyframes ceremonyGlow{0%,100%{box-shadow:0 0 10px rgba(216,180,74,0.35)}50%{box-shadow:0 0 22px rgba(216,180,74,0.75)}}
 @keyframes flipOut{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 @keyframes flipIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+/* visual neutro estilo Copero: Inter, cinza-grafite, pílulas */
+.cp{font-family:'Inter',system-ui,sans-serif;font-feature-settings:'tnum' 1;letter-spacing:-0.01em;}
+.cp-card{background:#161618;border:1px solid #2A2A2E;border-radius:20px;}
+.cp-pill{border-radius:999px;font-weight:700;min-height:52px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 22px;transition:transform .15s ease,background .15s ease;font-family:'Inter',system-ui,sans-serif;}
+.cp-pill:active{transform:scale(.98);}
+.cp-branca{background:#FFFFFF;color:#0B0B0C;} .cp-branca:hover{background:#E9E9EB;}
+.cp-contorno{background:transparent;color:#F4F4F5;border:1px solid #3F3F46;} .cp-contorno:hover{border-color:#71717A;}
+.cp-seg{display:flex;gap:6px;background:#161618;border:1px solid #2A2A2E;border-radius:999px;padding:4px;}
+.cp-seg button{flex:1;border-radius:999px;min-height:40px;font-weight:700;font-size:15px;color:#A1A1AA;transition:all .15s ease;}
+.cp-seg button[aria-pressed=true]{background:#F4F4F5;color:#0B0B0C;}
+.cp-ovr{background:linear-gradient(160deg,#FB923C,#EA580C);color:#fff;}
+@keyframes cpFundo{0%{opacity:0}12%{opacity:1}72%{opacity:1}100%{opacity:0}}
+.cp-fundo{position:fixed;inset:0;background:rgba(5,5,6,.6);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);z-index:58;}
+.cp-fundo-voo{animation:cpFundo 2.2s ease both;pointer-events:none;}
+@keyframes cpToast{0%{opacity:0;transform:translate(-50%,-14px)}10%{opacity:1;transform:translate(-50%,0)}88%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-10px)}}
+.cp-toast{position:fixed;left:50%;top:96px;width:min(92vw,520px);z-index:57;animation:cpToast 3.4s ease both;}
+@keyframes cpSurge{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}
+.cp-surge{animation:cpSurge .35s cubic-bezier(.2,.8,.2,1) both;}
 /* painel de carreira (estilo Copero) */
 @keyframes rpDelta{0%{opacity:0;transform:translate(-50%,6px) scale(.7)}20%{opacity:1;transform:translate(-50%,-6px) scale(1.15)}80%{opacity:1;transform:translate(-50%,-22px) scale(1)}100%{opacity:0;transform:translate(-50%,-34px) scale(.9)}}
 .rp-delta{position:absolute;left:50%;top:-6px;animation:rpDelta 1.6s ease-out both;pointer-events:none;}
@@ -71,8 +89,10 @@ export const ESTILO_BASE = `
 @keyframes rpLinhaNova{from{background:rgba(216,180,74,.22)}to{background:transparent}}
 .rp-linha-nova{animation:rpLinhaNova 2.2s ease-out;}
 /* taça voando até o contador */
-@keyframes rpTacaVoa{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}30%{transform:translate(-50%,-50%) scale(1)}62%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:.4;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.14)}}
-.rp-taca-voa{position:fixed;left:50%;top:46%;animation:rpTacaVoa 1.9s cubic-bezier(.5,0,.3,1) both;z-index:60;pointer-events:none;}
+@keyframes rpTacaVoa{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}24%{transform:translate(-50%,-50%) scale(1)}70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:.4;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.14)}}
+.rp-taca-voa{position:fixed;left:50%;top:46%;animation:rpTacaVoa 2.2s cubic-bezier(.5,0,.3,1) both;z-index:60;pointer-events:none;}
+@keyframes rpLegenda{0%,10%{opacity:0;transform:translateY(8px)}20%,66%{opacity:1;transform:none}80%,100%{opacity:0}}
+.rp-legenda{animation:rpLegenda 2.2s ease both;}
 @keyframes rpContador{0%,100%{transform:scale(1)}40%{transform:scale(1.35)}}
 .rp-contador{animation:rpContador .5s ease-out;}
 @keyframes rpFogo{0%{transform:translate(-50%,-50%) scale(.3);opacity:1}100%{transform:translate(calc(-50% + var(--fx)),calc(-50% + var(--fy))) scale(1);opacity:0}}
@@ -192,11 +212,11 @@ function CartaoCarreira({ c, onEstante, onFicha, contadorPulsa, recorde }) {
   return (
     <header className="sticky top-0 z-30 bg-[#0E1512]/95 backdrop-blur border-b border-white/5">
       <div className="max-w-xl mx-auto px-3 py-2.5 flex items-stretch gap-2">
-        <div key={delta?.k || 0} className={`relative w-[70px] shrink-0 rounded-2xl flex flex-col items-center justify-center ${delta ? "rp-ovr-brilho" : ""}`}
-          style={{ background: `linear-gradient(160deg, ${cor}, ${cor}99)`, "--brilho": delta ? (delta.d > 0 ? "rgba(27,194,138,.55)" : "rgba(227,107,91,.55)") : "transparent" }}
+        <div key={delta?.k || 0} className={`cp cp-ovr relative w-[70px] shrink-0 rounded-2xl flex flex-col items-center justify-center ${delta ? "rp-ovr-brilho" : ""}`}
+          style={{ "--brilho": delta ? (delta.d > 0 ? "rgba(27,194,138,.55)" : "rgba(227,107,91,.55)") : "transparent" }}
           aria-label={`Overall ${ovr}`}>
-          <span className="text-[10px] font-bold tracking-[0.2em] text-[#0E1512]/70">OVR</span>
-          <span className="font-stat text-[38px] leading-none text-[#0E1512]">{mostrado}</span>
+          <span className="text-[10px] font-semibold tracking-[0.15em] text-white/80">OVR</span>
+          <span className="text-[34px] font-black leading-none text-white">{mostrado}</span>
           {delta && (
             <span key={delta.k} className="rp-delta font-stat text-[22px] px-2 rounded-lg" style={{ color: "#fff", background: delta.d > 0 ? "#12A876" : "#C9493A", boxShadow: "0 4px 14px rgba(0,0,0,.4)" }}>
               {delta.d > 0 ? `+${delta.d}` : delta.d}
@@ -242,67 +262,83 @@ function Fogos() {
   );
 }
 
-/* Tabela ano a ano: últimas temporadas + seleção; toque abre a carreira toda */
+/* ícones de linha (jogos, gols, assistências), no lugar de letras */
+const IcoJogos = ({ s = 13 }) => (<svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" aria-hidden="true"><path d="M8 3 4 6l2 4 2-1v12h8V9l2 1 2-4-4-3c-1 2-2.5 3-4 3S9 5 8 3Z" /></svg>);
+const IcoGol = ({ s = 13 }) => (<svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="m12 7 4 3-1.5 4.5h-5L8 10Z" fill="currentColor" /></svg>);
+const IcoAssist = ({ s = 13 }) => (<svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 17c3 0 5-1 6-4l1-6h4l1 5c2 1 4 2 4 4v2H4Z" /><path d="M4 21h16" /></svg>);
+
+/* Tabela ano a ano no estilo Copero: idade em quadradinho, OVR em pílula laranja,
+   as próximas idades apagadas abaixo e a linha do país no fim */
 function TabelaCarreira({ c, proxima = true, compacta = true }) {
   const [aberta, setAberta] = useState(false);
   const ts = c.temporadas || [];
   const caixa = useRef(null);
   useEffect(() => { if (caixa.current) caixa.current.scrollTop = caixa.current.scrollHeight; }, [ts.length, aberta]);
   const sel = c.selecao || {};
-  const grid = "grid grid-cols-[38px_1fr_34px_30px_30px_30px] gap-x-1.5 items-center";
+  const grid = "grid grid-cols-[34px_1fr_42px_30px_30px_30px] gap-x-1.5 items-center";
   const visiveis = compacta && !aberta ? ts.slice(-4) : ts;
   const escondidas = ts.length - visiveis.length;
+  const futuras = proxima && !c.aposentado ? [c.idade, c.idade + 1].filter((a) => a <= 39) : [];
+  const temClube = ts.length > 0 || c.flags?.baseEscolhida;
   return (
-    <div className="max-w-xl mx-auto px-3 pt-2">
-      <div className="rp-painel px-3 py-1.5">
-        <div className={`${grid} text-[10px] font-bold tracking-wider text-[#8FA39A] pb-0.5 border-b border-white/5`}>
-          <span>IDADE</span><span>CLUBE</span><span className="text-center">OVR</span><span className="text-right">J</span><span className="text-right">G</span><span className="text-right">A</span>
+    <div className="max-w-xl mx-auto px-3 pt-2 cp">
+      <div className="cp-card px-3 py-2">
+        <div className={`${grid} text-[10px] font-semibold uppercase tracking-wide text-[#71717A] pb-1.5`}>
+          <span>Idade</span><span>Clube</span><span className="text-center">OVR</span>
+          <span className="flex justify-end" title="Jogos"><IcoJogos /></span><span className="flex justify-end" title="Gols"><IcoGol /></span><span className="flex justify-end" title="Assistências"><IcoAssist /></span>
         </div>
-        {escondidas > 0 && <button onClick={() => setAberta(true)} className="w-full text-left text-[12px] font-bold text-[#7FE3BC] py-1">↑ ver as {ts.length} temporadas</button>}
-        <div ref={caixa} className={aberta ? "max-h-[260px] overflow-y-auto" : ""}>
+        {escondidas > 0 && <button onClick={() => setAberta(true)} className="w-full text-left text-[12px] font-semibold text-[#A1A1AA] pb-1">↑ ver as {ts.length} temporadas</button>}
+        <div ref={caixa} className={`flex flex-col gap-1 ${aberta ? "max-h-[260px] overflow-y-auto" : ""}`}>
           {visiveis.map((s) => {
             const i = ts.indexOf(s);
             const o = s.ovrDepois ?? s.ovr;
             const tit = s.titulos.filter((t) => !ehPremioIndividual(t.tipo)).length;
+            const ultima = i === ts.length - 1;
             return (
-              <div key={i} className={`${grid} py-[3px] border-b border-white/5 text-[14px] ${i === ts.length - 1 ? "rp-linha-nova" : ""}`}>
-                <span className="font-stat text-[#C9D3CE]">{s.idade}</span>
-                <span className="flex items-center gap-1.5 min-w-0"><ClubDot club={clubeDe(s.clube)} size={16} /><span className="truncate text-[#F2F5F3]">{s.clube}</span>
+              <div key={i} className={`${grid} rounded-xl py-1 ${ultima ? "rp-linha-nova bg-white/[.04]" : ""}`}>
+                <span className="w-[30px] h-[26px] rounded-lg bg-[#27272A] flex items-center justify-center text-[13px] font-bold text-[#E4E4E7]">{s.idade}</span>
+                <span className="flex items-center gap-1.5 min-w-0">
+                  <ClubDot club={clubeDe(s.clube)} size={18} />
+                  <span className="truncate text-[14px] font-semibold text-[#F4F4F5]">{s.clube}</span>
                   {tit > 0 && <span className="shrink-0 flex items-center gap-0.5 text-[11px] font-bold text-[#EBC557]"><TacaCompeticao tipo="liga" size={11} />{tit > 1 ? tit : ""}</span>}
-                  {s.acesso && <span className="shrink-0 rp-chip !px-1.5 !py-0 !text-[9px]" style={{ color: "#06110C", background: "#1BC28A" }}>Acesso</span>}
-                  {s.rebaixado && <span className="shrink-0 rp-chip !px-1.5 !py-0 !text-[9px]" style={{ color: "#fff", background: "#C9493A" }}>Caiu</span>}
+                  {s.acesso && <span className="shrink-0 text-[10px] font-bold px-1.5 rounded-full bg-[#16A34A] text-white">ACESSO</span>}
+                  {s.rebaixado && <span className="shrink-0 text-[10px] font-bold px-1.5 rounded-full bg-[#DC2626] text-white">CAIU</span>}
                 </span>
-                <span className="font-stat text-center rounded-md text-[#0E1512] text-[13px]" style={{ background: corOvr(o) }}>{o}</span>
-                <span className="font-stat text-right text-[#C9D3CE]">{s.jogos}</span>
-                <span className="font-stat text-right text-[#F2F5F3]">{s.gols}</span>
-                <span className="font-stat text-right text-[#C9D3CE]">{s.assist}</span>
+                <span className="cp-ovr text-center rounded-full text-[13px] font-extrabold leading-[22px]">{o}</span>
+                <span className="text-right text-[14px] font-semibold text-[#A1A1AA]">{s.jogos}</span>
+                <span className="text-right text-[14px] font-bold text-[#F4F4F5]">{s.gols}</span>
+                <span className="text-right text-[14px] font-semibold text-[#A1A1AA]">{s.assist}</span>
               </div>
             );
           })}
-          {proxima && !c.aposentado && (
-            <div className={`${grid} py-[3px] text-[14px] opacity-70`}>
-              <span className="font-stat text-[#C9D3CE]">{c.idade}</span>
-              <span className="flex items-center gap-1.5 min-w-0">{ts.length || c.flags?.baseEscolhida ? <ClubDot club={clubeDe(c.emprestimo?.destino || c.clubeNome)} size={16} /> : <span className="text-[#8FA39A]">?</span>}<span className="truncate text-[#8FA39A] italic">{ts.length || c.flags?.baseEscolhida ? "próxima temporada" : "escolhendo clube…"}</span></span>
-              <span className="font-stat text-center rounded-md text-[13px] border border-white/15 text-[#C9D3CE]">{ovrDe(c)}</span>
+          {futuras.map((idade, n) => (
+            <div key={`f${idade}`} className={`${grid} py-1`} style={{ opacity: n === 0 ? 0.55 : 0.28 }}>
+              <span className="w-[30px] h-[26px] rounded-lg border border-[#3F3F46] flex items-center justify-center text-[13px] font-bold text-[#A1A1AA]">{idade}</span>
+              <span className="flex items-center gap-1.5 min-w-0">
+                {n === 0 && temClube ? <ClubDot club={clubeDe(c.emprestimo?.destino || c.clubeNome)} size={18} /> : <span className="w-[18px] h-[18px] rounded-full border border-dashed border-[#52525B] text-[10px] text-[#71717A] flex items-center justify-center">?</span>}
+                <span className="truncate text-[13px] italic text-[#A1A1AA]">{n === 0 ? (temClube ? "próxima temporada" : "escolhendo clube…") : ""}</span>
+              </span>
+              <span className="text-center rounded-full text-[13px] font-bold border border-[#3F3F46] text-[#A1A1AA] leading-[20px]">{n === 0 ? ovrDe(c) : "?"}</span>
               <span /><span /><span />
             </div>
-          )}
+          ))}
         </div>
-        {aberta && <button onClick={() => setAberta(false)} className="w-full text-left text-[12px] font-bold text-[#7FE3BC] py-1">↓ mostrar só as últimas</button>}
-        <div className={`${grid} pt-1 mt-0.5 border-t border-white/10 text-[14px]`} aria-label="Pela seleção">
-          <span className="text-base leading-none">{EMOJI_NACIONALIDADE[c.nac] || "🌎"}</span>
-          <span className="truncate text-[#C9D3CE]">Seleção{sel.convocacoes ? ` · ${sel.convocacoes} torneio${sel.convocacoes > 1 ? "s" : ""}` : ""}</span>
+        {aberta && <button onClick={() => setAberta(false)} className="w-full text-left text-[12px] font-semibold text-[#A1A1AA] pt-1">↓ mostrar só as últimas</button>}
+        <div className={`${grid} pt-2 mt-1.5 border-t border-[#2A2A2E]`} aria-label="Pela seleção">
+          <span className="w-[30px] h-[26px] rounded-lg bg-[#27272A] flex items-center justify-center text-[15px] leading-none">{EMOJI_NACIONALIDADE[c.nac] || "🌎"}</span>
+          <span className="truncate text-[14px] font-semibold text-[#E4E4E7]">{nacDe(c.nac).label}{sel.convocacoes ? <span className="font-normal text-[#71717A]"> · {sel.convocacoes} torneio{sel.convocacoes > 1 ? "s" : ""}</span> : ""}</span>
           <span />
-          <span className="font-stat text-right text-[#C9D3CE]">{sel.jogos || 0}</span>
-          <span className="font-stat text-right text-[#F2F5F3]">{sel.gols || 0}</span>
-          <span className="font-stat text-right text-[#C9D3CE]">{sel.assist || 0}</span>
+          <span className="text-right text-[14px] font-semibold text-[#A1A1AA]">{sel.jogos || 0}</span>
+          <span className="text-right text-[14px] font-bold text-[#F4F4F5]">{sel.gols || 0}</span>
+          <span className="text-right text-[14px] font-semibold text-[#A1A1AA]">{sel.assist || 0}</span>
         </div>
       </div>
     </div>
   );
 }
 
-/* Taças pequenas da temporada: aparecem no meio da tela e voam até o contador */
+/* Pop-up de taça (estilo Copero): o painel escurece e desfoca, a taça aparece no
+   centro com o nome e "Campeão", e depois voa até o contador */
 function TacasVoando({ titulos, onPousou }) {
   const [i, setI] = useState(0);
   const [alvo] = useState(() => {
@@ -313,16 +349,24 @@ function TacasVoando({ titulos, onPousou }) {
   });
   useEffect(() => {
     if (i >= titulos.length) return undefined;
-    const t = setTimeout(() => { onPousou?.(i); setI((x) => x + 1); }, 1900);
+    const t = setTimeout(() => { onPousou?.(i); setI((x) => x + 1); }, 2200);
     return () => clearTimeout(t);
   }, [i, titulos.length, onPousou]);
   if (i >= titulos.length) return null;
   const t = titulos[i];
+  const premio = ehPremioIndividual(t.tipo);
   return (
-    <div key={i} className="rp-taca-voa flex flex-col items-center" style={{ "--dx": alvo.dx, "--dy": alvo.dy }} aria-live="polite">
-      <IconeTitulo tipo={t.tipo} nome={t.nome} size={150} />
-      <div className="display text-[15px] text-[#F5D77A] mt-2 text-center px-3 py-1 rounded-xl bg-[#0E1512]/85" style={{ textShadow: "0 2px 10px rgba(0,0,0,.8)" }}>{t.nome}</div>
-    </div>
+    <>
+      <div key={`f${i}`} className="cp-fundo cp-fundo-voo" aria-hidden="true" />
+      <div key={i} className="rp-taca-voa flex flex-col items-center" style={{ "--dx": alvo.dx, "--dy": alvo.dy }} aria-live="polite">
+        <IconeTitulo tipo={t.tipo} nome={t.nome} size={160} />
+      </div>
+      <div key={`l${i}`} className="fixed left-0 right-0 z-[61] text-center cp rp-legenda pointer-events-none" style={{ top: "calc(46% + 120px)" }}>
+        <div className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#A1A1AA]">{premio ? "Prêmio individual" : "Campeão"}</div>
+        <div className="text-[22px] font-extrabold text-white mt-0.5">{t.nome}</div>
+        {t.n > 1 && <div className="text-[13px] text-[#A1A1AA]">{t.n}º da carreira</div>}
+      </div>
+    </>
   );
 }
 
@@ -512,7 +556,7 @@ function MelhoresCarreiras() {
   );
 }
 
-function TelaCriacao({ onCriar }) {
+function TelaCriacao({ onCriar, ritmoInicial = "normal" }) {
   const [modo, setModo] = useState("livre");
   const [nome, setNome] = useState("");
   const [nac, setNac] = useState("BRA");
@@ -522,7 +566,7 @@ function TelaCriacao({ onCriar }) {
   const [codigo, setCodigo] = useState("");
   const [pe, setPe] = useState("destro");
   const [numero, setNumero] = useState("");
-  const [ritmo, setRitmo] = useState("normal");
+  const [ritmo, setRitmo] = useState(ritmoInicial);
   const [gerando, setGerando] = useState(false);
   const destaque = NACS_DESTAQUE.map((id) => NACIONALIDADES.find((n) => n.id === id)).filter(Boolean);
   const outras = NACIONALIDADES.filter((n) => !NACS_DESTAQUE.includes(n.id)).sort((a, b) => a.label.localeCompare(b.label));
@@ -985,11 +1029,12 @@ function SlideBolaDeOuro({ c, card }) {
 }
 
 /* Taças grandes ganham festa em tela cheia; as outras voam até o contador no resumo */
-const TIPOS_GRANDES = ["continental", "mundial", "copaMundo", "continentalSelecao"];
-export const temFestaGrande = (card) => card.titulos.some((t) => TIPOS_GRANDES.includes(t.tipo)) || card.bola.pos <= 3;
+// festa em tela cheia só para Copa do Mundo e Bola de Ouro; o resto vira o pop-up da taça
+const TIPOS_GRANDES = ["copaMundo", "bolaOuro"];
+export const temFestaGrande = (card) => card.titulos.some((t) => TIPOS_GRANDES.includes(t.tipo));
 function TelaFesta({ c, card, onFim }) {
   const titulos = card.titulos.filter((t) => TIPOS_GRANDES.includes(t.tipo));
-  const slides = [...titulos.map((t) => ({ tipo: "titulo", t })), ...(card.bola.pos <= 3 ? [{ tipo: "bola" }] : [])];
+  const slides = [...titulos.filter((t) => t.tipo !== "bolaOuro").map((t) => ({ tipo: "titulo", t })), ...(card.bola.pos === 1 ? [{ tipo: "bola" }] : [])];
   const [i, setI] = useState(0);
   const s = slides[i];
   if (!s) return null;
@@ -2225,6 +2270,54 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
 }
 
 /* ---------- orquestração ---------- */
+/* Aviso curto no topo com o resultado de uma decisão (some sozinho) */
+function ToastDecisao({ toast, onFechar }) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { const t = setTimeout(onFechar, 3400); return () => clearTimeout(t); }, [toast.k]);
+  return (
+    <button key={toast.k} onClick={onFechar} className="cp-toast cp cp-card text-left px-4 py-3 shadow-2xl" style={{ background: "#1C1C1F" }} aria-live="polite">
+      <div className="text-[14px] font-semibold text-[#F4F4F5] leading-snug line-clamp-2">{toast.texto}</div>
+      {toast.efeitos?.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          {toast.efeitos.map((e) => (
+            <span key={e.txt} className="text-[12px] font-bold px-2 py-0.5 rounded-full" style={{ color: e.bom ? "#4ADE80" : "#F87171", background: e.bom ? "rgba(74,222,128,.12)" : "rgba(248,113,113,.12)" }}>{e.txt}</span>
+          ))}
+        </div>
+      )}
+    </button>
+  );
+}
+
+/* Pop-up de transferência (estilo Copero): de → para, valor e contrato, com a manchete */
+function PopupTransferencia({ t, nome, onFechar }) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { const x = setTimeout(onFechar, 5200); return () => clearTimeout(x); }, []);
+  const de = clubeDe(t.de), para = clubeDe(t.para);
+  const fmt = (k) => formatarValor(k).replace(/\s/g, "");
+  return (
+    <div className="fixed inset-0 z-[62] flex items-center justify-center px-5 cp" role="dialog" aria-label={`Transferência para o ${t.para}`}>
+      <div className="cp-fundo" onClick={onFechar} />
+      <div className="relative z-[63] w-full max-w-sm cp-card p-5 text-center cp-surge" style={{ background: "#18181B" }}>
+        <div className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#A1A1AA]">{t.valor ? "Transferência" : "Chegada sem custo"}</div>
+        <div className="flex items-center justify-center gap-4 mt-4">
+          <div className="flex flex-col items-center gap-1 opacity-60"><ClubDot club={de} size={44} /><span className="text-[12px] text-[#A1A1AA] max-w-[90px] truncate">{de.nome}</span></div>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          <div className="flex flex-col items-center gap-1"><ClubDot club={para} size={68} /></div>
+        </div>
+        <div className="text-[24px] font-extrabold text-white mt-3 leading-tight">{para.nome}</div>
+        <div className="text-[14px] text-[#A1A1AA]">{nome} · {ligaDe(para.liga).nome}</div>
+        <div className="grid grid-cols-3 gap-2 mt-4">
+          {[["Valor", t.valor ? fmt(t.valor) : "Grátis"], ["Contrato", `${t.anos} anos`], ["Salário", t.salario ? `${fmt(t.salario)}/ano` : "—"]].map(([k, v]) => (
+            <div key={k} className="rounded-xl bg-[#232326] py-2"><div className="text-[11px] font-semibold text-[#71717A]">{k}</div><div className="text-[15px] font-bold text-[#F4F4F5]">{v}</div></div>
+          ))}
+        </div>
+        {t.manchete && <p className="text-[13px] italic text-[#A1A1AA] mt-3 leading-snug">“{t.manchete.titulo}” — {t.manchete.jornal}</p>}
+        <button onClick={onFechar} className="cp-pill cp-branca w-full mt-4">Vestir a camisa</button>
+      </div>
+    </div>
+  );
+}
+
 /* Barra de "a temporada vai rolar sozinha" (anos sem decisão, como no Copero) */
 function AutoAvanco({ c, ms, onAgora, onPausar }) {
   return (
@@ -2239,10 +2332,10 @@ function AutoAvanco({ c, ms, onAgora, onPausar }) {
   );
 }
 
-export default function ModoRapido({ onSair }) {
+export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: comecarDoZero = false }) {
   // fluxo: criação → oferta de base → [cartas de treino = jogar] → (desafio) → (festa) → painel com o resumo curto
   //        → (traço) → (coletiva) → decisão/mercado nos anos de decisão; nos outros, a temporada rola sozinha
-  const [estado, setEstado] = useState(() => carregarRapido() || { etapa: "criacao" });
+  const [estado, setEstado] = useState(() => (comecarDoZero ? null : carregarRapido()) || { etapa: "criacao" });
   const [estanteAberta, setEstanteAberta] = useState(false);
   const [apresentacao, setApresentacao] = useState(null);
   const [patrimonioAberto, setPatrimonioAberto] = useState(false);
@@ -2250,6 +2343,7 @@ export default function ModoRapido({ onSair }) {
   const [gaveta, setGaveta] = useState(null);
   const [recorde, setRecorde] = useState(0);
   const [selo, setSelo] = useState(null);
+  const [toast, setToast] = useState(null);
   const { etapa, c, card, evento, resultado, opcoesTraco, fila } = estado;
 
   useEffect(() => {
@@ -2321,12 +2415,12 @@ export default function ModoRapido({ onSair }) {
     const r = resolverEvento(cBase, evento, opId, extra);
     const extraEv = eventoImpasse(r.c) || (fila ? segundoEvento(r.c, evento.id) : null);
     const mudou = r.c.clubeNome !== c.clubeNome && evento.id !== "base";
-    setEstado((st) => ({ ...st, etapa: "evento", c: r.c, evento, resultado: r.resultado || "Decisão tomada.", efeitos: efeitosDaDecisao(c, r.c), proximo: extraEv, fila: false, manchete: mudou ? r.c.ultimaTransferencia?.manchete : null, aviso: null }));
+    // o resultado vira um aviso curto no topo e o jogo segue (próxima notícia ou cartas de treino)
+    setEstado((st) => ({ ...st, etapa: "evento", c: r.c, evento: extraEv, resultado: null, efeitos: null, proximo: null, fila: false, manchete: null, aviso: null, auto: !extraEv && !anoDeDecisao(r.c) }));
     if (mudou) {
-      const clube = clubeDe(r.c.clubeNome);
-      const grande = clube.forca > clubeDe(c.clubeNome).forca + 3;
-      setApresentacao({ clube, grande, curto: !(grande && clube.forca >= 84), deOnde: clubeDe(c.clubeNome), contrato: r.c.contrato, valor: r.c.ultimaTransferencia?.valor ?? null });
-    }
+      const t = r.c.ultimaTransferencia;
+      setApresentacao(t ? { ...t, salario: r.c.contrato?.salario } : { de: c.clubeNome, para: r.c.clubeNome, valor: 0, anos: r.c.contrato?.anos || 1, salario: r.c.contrato?.salario });
+    } else setToast({ texto: r.resultado || "Decisão tomada.", efeitos: efeitosDaDecisao(c, r.c), k: Date.now() });
   };
   // depois de ler o resultado: próxima notícia ou as cartas de treino (sozinho, ou com um toque)
   const avancar = () => setEstado((s) => (s.proximo
@@ -2387,7 +2481,7 @@ export default function ModoRapido({ onSair }) {
       {painel ? <CartaoCarreira c={c} onEstante={() => setEstanteAberta(true)} onFicha={() => setGaveta("ficha")} contadorPulsa={contadorPulsa} recorde={recorde} />
         : <Cabecalho c={mostrarCabecalho ? c : null} onSair={onSair} onEstante={() => setEstanteAberta(true)} />}
       <main className="pb-10">
-        {etapa === "criacao" && <TelaCriacao onCriar={criar} />}
+        {etapa === "criacao" && <TelaCriacao onCriar={criar} ritmoInicial={ritmoInicial} />}
         {etapa === "evento" && (
           <>
             <TabelaCarreira c={c} />
@@ -2447,10 +2541,8 @@ export default function ModoRapido({ onSair }) {
       )}
       {estanteAberta && c && <Estante c={c} onFechar={() => setEstanteAberta(false)} />}
       {patrimonioAberto && c && <Patrimonio c={c} onComprar={comprar} onFechar={() => setPatrimonioAberto(false)} />}
-      {apresentacao && (
-        <ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label}
-          idade={c.idade} grandeChegada={apresentacao.grande} curto={apresentacao.curto} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={() => setApresentacao(null)} />
-      )}
+      {apresentacao && <PopupTransferencia t={apresentacao} nome={c.nome} onFechar={() => setApresentacao(null)} />}
+      {toast && <ToastDecisao toast={toast} onFechar={() => setToast(null)} />}
     </div>
   );
 }

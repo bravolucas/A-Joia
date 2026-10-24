@@ -566,7 +566,7 @@ function TelaCriacao({ onCriar, ritmoInicial = "normal" }) {
   const [codigo, setCodigo] = useState("");
   const [pe, setPe] = useState("destro");
   const [numero, setNumero] = useState("");
-  const [ritmo, setRitmo] = useState(ritmoInicial);
+  const ritmo = ritmoInicial; // escolhido no menu inicial
   const [gerando, setGerando] = useState(false);
   const destaque = NACS_DESTAQUE.map((id) => NACIONALIDADES.find((n) => n.id === id)).filter(Boolean);
   const outras = NACIONALIDADES.filter((n) => !NACS_DESTAQUE.includes(n.id)).sort((a, b) => a.label.localeCompare(b.label));
@@ -689,16 +689,6 @@ function TelaCriacao({ onCriar, ritmoInicial = "normal" }) {
         </>
       )}
 
-      <Secao titulo="Ritmo">
-        <div className="grid grid-cols-3 gap-2">
-          {RITMOS.map((r) => (
-            <button key={r.id} onClick={() => setRitmo(r.id)} className={`rp-opcao px-3 py-3 ${ritmo === r.id ? "sel" : ""}`}>
-              <div className="font-bold text-[16px] text-[#F2F5F3]">{r.icone} {r.nome}</div>
-              <div className="text-[12px] leading-snug text-[#8FA39A] mt-0.5">{r.desc}</div>
-            </button>
-          ))}
-        </div>
-      </Secao>
 
       <button disabled={!pronto || gerando} onClick={comecar} className="rp-btn rp-prim display text-sm tracking-wide">
         {gerando ? "Montando o mundo do futebol…" : doDia ? "Jogar a Carreira do Dia" : "Começar carreira"}
@@ -2288,35 +2278,6 @@ function ToastDecisao({ toast, onFechar }) {
   );
 }
 
-/* Pop-up de transferência (estilo Copero): de → para, valor e contrato, com a manchete */
-function PopupTransferencia({ t, nome, onFechar }) {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { const x = setTimeout(onFechar, 5200); return () => clearTimeout(x); }, []);
-  const de = clubeDe(t.de), para = clubeDe(t.para);
-  const fmt = (k) => formatarValor(k).replace(/\s/g, "");
-  return (
-    <div className="fixed inset-0 z-[62] flex items-center justify-center px-5 cp" role="dialog" aria-label={`Transferência para o ${t.para}`}>
-      <div className="cp-fundo" onClick={onFechar} />
-      <div className="relative z-[63] w-full max-w-sm cp-card p-5 text-center cp-surge" style={{ background: "#18181B" }}>
-        <div className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#A1A1AA]">{t.valor ? "Transferência" : "Chegada sem custo"}</div>
-        <div className="flex items-center justify-center gap-4 mt-4">
-          <div className="flex flex-col items-center gap-1 opacity-60"><ClubDot club={de} size={44} /><span className="text-[12px] text-[#A1A1AA] max-w-[90px] truncate">{de.nome}</span></div>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-          <div className="flex flex-col items-center gap-1"><ClubDot club={para} size={68} /></div>
-        </div>
-        <div className="text-[24px] font-extrabold text-white mt-3 leading-tight">{para.nome}</div>
-        <div className="text-[14px] text-[#A1A1AA]">{nome} · {ligaDe(para.liga).nome}</div>
-        <div className="grid grid-cols-3 gap-2 mt-4">
-          {[["Valor", t.valor ? fmt(t.valor) : "Grátis"], ["Contrato", `${t.anos} anos`], ["Salário", t.salario ? `${fmt(t.salario)}/ano` : "—"]].map(([k, v]) => (
-            <div key={k} className="rounded-xl bg-[#232326] py-2"><div className="text-[11px] font-semibold text-[#71717A]">{k}</div><div className="text-[15px] font-bold text-[#F4F4F5]">{v}</div></div>
-          ))}
-        </div>
-        {t.manchete && <p className="text-[13px] italic text-[#A1A1AA] mt-3 leading-snug">“{t.manchete.titulo}” — {t.manchete.jornal}</p>}
-        <button onClick={onFechar} className="cp-pill cp-branca w-full mt-4">Vestir a camisa</button>
-      </div>
-    </div>
-  );
-}
 
 /* Barra de "a temporada vai rolar sozinha" (anos sem decisão, como no Copero) */
 function AutoAvanco({ c, ms, onAgora, onPausar }) {
@@ -2418,8 +2379,9 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     // o resultado vira um aviso curto no topo e o jogo segue (próxima notícia ou cartas de treino)
     setEstado((st) => ({ ...st, etapa: "evento", c: r.c, evento: extraEv, resultado: null, efeitos: null, proximo: null, fila: false, manchete: null, aviso: null, auto: !extraEv && !anoDeDecisao(r.c) }));
     if (mudou) {
-      const t = r.c.ultimaTransferencia;
-      setApresentacao(t ? { ...t, salario: r.c.contrato?.salario } : { de: c.clubeNome, para: r.c.clubeNome, valor: 0, anos: r.c.contrato?.anos || 1, salario: r.c.contrato?.salario });
+      const clube = clubeDe(r.c.clubeNome);
+      const grande = clube.forca > clubeDe(c.clubeNome).forca + 3;
+      setApresentacao({ clube, grande, curto: !(grande && clube.forca >= 84), deOnde: clubeDe(c.clubeNome), contrato: r.c.contrato, valor: r.c.ultimaTransferencia?.valor ?? null });
     } else setToast({ texto: r.resultado || "Decisão tomada.", efeitos: efeitosDaDecisao(c, r.c), k: Date.now() });
   };
   // depois de ler o resultado: próxima notícia ou as cartas de treino (sozinho, ou com um toque)
@@ -2541,7 +2503,10 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
       )}
       {estanteAberta && c && <Estante c={c} onFechar={() => setEstanteAberta(false)} />}
       {patrimonioAberto && c && <Patrimonio c={c} onComprar={comprar} onFechar={() => setPatrimonioAberto(false)} />}
-      {apresentacao && <PopupTransferencia t={apresentacao} nome={c.nome} onFechar={() => setApresentacao(null)} />}
+      {apresentacao && (
+        <ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label}
+          idade={c.idade} grandeChegada={apresentacao.grande} curto={apresentacao.curto} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={() => setApresentacao(null)} />
+      )}
       {toast && <ToastDecisao toast={toast} onFechar={() => setToast(null)} />}
     </div>
   );

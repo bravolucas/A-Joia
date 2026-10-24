@@ -7,12 +7,12 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 ## 🎨 Visual mais próximo do Copero: pop-ups, tabela e menu
 
 - **Menu inicial novo**: banner com a foto do estádio, frase de abertura, ritmo escolhido em pílulas (Intenso/Normal/Expresso) e um botão branco "Começar carreira". Com carreira salva aparece "Continuar · nome, idade" e "Nova carreira". O Modo Carreira completo virou um cartão abaixo
-- **O ritmo escolhido no menu já vem marcado** na criação do jogador
+- **Ritmo escolhido só no menu**: a tela de criação do jogador não repete mais a escolha
 - **Tabela da carreira redesenhada**: idade num quadrado cinza, OVR numa pílula laranja, ícones para jogos, gols e assistências, as duas próximas idades apagadas embaixo e a linha da seleção com a bandeira no fim
 - **Taças em pop-up**: a taça aparece no centro sobre o fundo escurecido e desfocado, com "Campeão" e o nome, e voa para o contador
 - **Festa só para o que é gigante**: Copa do Mundo e Bola de Ouro; os outros títulos usam o pop-up
 - **Resultado da decisão vira aviso rápido** no topo, com os efeitos em verde e vermelho, e some sozinho
-- **Transferência num cartão central**: escudo de origem → destino, valor, contrato, salário e a manchete, com "Vestir a camisa" (fecha sozinho em ~5 segundos)
+- **Troca de clube mantém a animação "OFICIAL"** de antes (curta na maioria, longa nos saltos grandes)
 - **OVR do cartão em laranja** e fonte Inter nos elementos novos
 
 ---

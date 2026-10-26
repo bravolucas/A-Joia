@@ -130,5 +130,22 @@ test('idolatria e tempo no clube abrem portas para iniciar carreira técnica', (
   c = iniciarNoClubeIdolo(c, 'Clube A');
   assert.equal(c.tecnico.clube, 'Clube A');
   assert.ok(c.tecnico.torcida > 55);
+  assert.equal(c.tecnico.retornoIdolo, true);
   assert.throws(() => iniciarNoClubeIdolo(c, 'Clube Desconhecido'));
+});
+
+test('ícone de ídolo é registrado e aumenta cobrança após meta não cumprida', () => {
+  const idolo = { ...atleta, aposentado: true, clubeNome: 'Clube A', torcida: { 'Clube A': 95 },
+    temporadas: Array(5).fill({ clube: 'Clube A', jogos: 28, titulos: [{ tipo: 'liga' }] }) };
+  const normal = { ...idolo, torcida: { 'Clube A': 20 }, temporadas: [{ clube: 'Clube A', jogos: 28 }] };
+  const montar = (a) => {
+    let c = iniciarCarreiraTecnico(a);
+    c = { ...c, tecnico: { ...c.tecnico, cartas: ['reforcos','vestiario','craque','classico'], diretoria: 70, torcida: 70 } };
+    for (const opcao of ['pedir','dialogo','apoiar','prudente']) c = tomarDecisaoTecnico(c, opcao, () => 0.99);
+    return simularTemporadaTecnico(c, () => 0.99);
+  };
+  const a = montar(idolo), b = montar(normal);
+  assert.equal(a.tecnico.temporadas.at(-1).idoloEmCasa, true);
+  assert.equal(b.tecnico.temporadas.at(-1).idoloEmCasa, false);
+  assert.ok(a.tecnico.torcida < b.tecnico.torcida);
 });

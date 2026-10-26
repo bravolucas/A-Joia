@@ -83,10 +83,14 @@ export function tomarDecisaoTecnico(c, opcaoId, rng = sorteio) {
   if (!op) throw new Error('Opção inválida.');
   const riscoAtivado = !!op.risco && rng() < op.risco;
   const resultado = riscoAtivado ? 'A aposta trouxe consequências inesperadas.' : 'O plano foi recebido como esperado.';
+  const impacto = { elenco: (op.elenco || 0), moral: (op.moral || 0) + (riscoAtivado ? op.riscoMoral || 0 : 0), diretoria: (op.diretoria || 0) + (riscoAtivado ? op.riscoDiretoria || 0 : 0) };
+  // Uma fração do impacto permanece no início do próximo ano, para decisões acumulativas.
+  const heranca = Object.fromEntries(Object.entries(impacto).map(([k, v]) => [k, Math.trunc(v * 0.4)]));
   return { ...c, tecnico: {
     ...t, elenco: limitar((t.elenco ?? 50) + (op.elenco || 0), 10, 95),
     moral: limitar((t.moral ?? 50) + (op.moral || 0) + (riscoAtivado ? op.riscoMoral || 0 : 0), 10, 95),
     diretoria: limitar((t.diretoria ?? 60) + (op.diretoria || 0) + (riscoAtivado ? op.riscoDiretoria || 0 : 0), 0, 100),
+    efeitosPendentes: [...(t.efeitosPendentes || []), { carta: carta.id, opcao: op.id, heranca, aplicarEm: t.ano + 1 }],
     decisoes: [...(t.decisoes || []), { carta: carta.id, opcao: op.id, nome: op.nome, resultado, riscoAtivado }]
   }};
 }
@@ -137,6 +141,13 @@ export function proximaTemporadaTecnico(c) {
   if (!c?.tecnico || c.tecnico.fase !== 'resultado') throw new Error('Nenhum resultado pendente.');
   const t = c.tecnico;
   const historicoCartas = [...(t.historicoCartas || []), ...(t.cartas || [])].slice(-32);
-  const proximo = { ...t, historicoCartas, decisoes: [], fase: 'pretemporada', moral: limitar(t.moral + 2, 10, 95) };
+  const vencidos = (t.efeitosPendentes || []).filter(e => e.aplicarEm <= t.ano);
+  const pendentes = (t.efeitosPendentes || []).filter(e => e.aplicarEm > t.ano);
+  const soma = (atributo) => vencidos.reduce((acc, e) => acc + (e.heranca?.[atributo] || 0), 0);
+  const proximo = { ...t, historicoCartas, decisoes: [], fase: 'pretemporada',
+    efeitosPendentes: pendentes, efeitosRecebidos: vencidos,
+    elenco: limitar(t.elenco + soma('elenco'), 10, 95),
+    moral: limitar(t.moral + 2 + soma('moral'), 10, 95),
+    diretoria: limitar(t.diretoria + soma('diretoria'), 0, 100) };
   return { ...c, tecnico: { ...proximo, cartas: sortearCartasTecnico(proximo) } };
 }

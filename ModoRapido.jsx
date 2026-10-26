@@ -1,6 +1,7 @@
+import { avancarTecnicoRapido } from "./tecnicoRapido.js";
 import Icone from "./Icone.jsx";
 import CarreiraTecnico from "./CarreiraTecnico.jsx";
-import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, definirEstiloTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico } from "./tecnico.js";
+import { iniciarCarreiraTecnico } from "./tecnico.js";
 import Lottie from "./Lottie.jsx";
 import { tocar, apito, torcida, somLigado, alternarSom } from "./som.js";
 import React, { useEffect, useRef, useState } from "react";
@@ -3518,14 +3519,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "traco" && <TelaTraco c={c} opcoes={(opcoesTraco || []).map(tracoDe).filter(Boolean)} onEscolher={escolherT} />}
         {etapa === "fim" && <FimDeCarreira c={c} onNova={nova} onSair={onSair} onComecarTecnico={comecarTecnico} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
         {etapa === "tecnico" && <CarreiraTecnico c={c}
-          onEstilo={(id) => setEstado((st) => ({ ...st, c: definirEstiloTecnico(st.c, id) }))}
-          onDecisao={(id) => setEstado((st) => ({ ...st, c: tomarDecisaoTecnico(st.c, id) }))}
-          onReuniao={(id) => setEstado((st) => ({ ...st, c: reuniaoEmergenciaTecnico(st.c, id) }))}
-          onJogar={() => setEstado((st) => ({ ...st, c: simularEtapaTecnico(st.c) }))}
-          onEscolherClubeInicial={(nome) => setEstado((st) => ({ ...st, c: iniciarNoClubeIdolo(st.c, nome) }))}
-          onEsperar={() => setEstado((st) => ({ ...st, c: passarAnoDesempregado(st.c) }))}
-          onAceitarProposta={(nome, estrategia) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia); return { ...st, c: negociado.tecnico.ultimaNegociacao?.aceita ? proximaTemporadaTecnico(negociado) : negociado }; })}
-          onAvancar={() => setEstado((st) => ({ ...st, c: proximaTemporadaTecnico(st.c) }))}
+          onEscolha={(acao) => { const proximo = avancarTecnicoRapido(c, acao); setEstado((st) => ({ ...st, c: proximo })); }}
           onLegado={() => setEstado((st) => ({ ...st, etapa: "fim" }))}
           onSair={onSair} />}
       </main>
@@ -3563,3 +3557,4 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     </div>
   );
 }
+

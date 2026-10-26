@@ -1,0 +1,25 @@
+import { test, expect } from '@playwright/test';
+import { criarJogador, aposentar } from '../rapido.js';
+import { iniciarCarreiraTecnico } from '../tecnico.js';
+for (const width of [390, 1366]) test(`treinador rápido, save e legado em ${width}px`, async ({ page }) => {
+ await page.setViewportSize({width,height:844});
+ let c=criarJogador({nome:'Teste técnico',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,ritmo:'normal',codigo:'TECNICOUI'});
+ c=iniciarCarreiraTecnico(aposentar({...c,idade:40}));
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('http://127.0.0.1:4173/A-Joia/');
+ await page.evaluate(c=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,etapa:'tecnico',c})),c);
+ await page.reload();
+ await page.getByRole('button',{name:/Continuar ·/}).click();
+ await expect(page.getByRole('heading',{name:'Sua trajetória no banco'})).toBeVisible();
+ await page.getByRole('button',{name:'Intenso',exact:true}).click();
+ await page.getByRole('button',{name:/^Ofensivo/}).click();
+ await expect(page.getByRole('region',{name:'Próxima decisão'})).toBeVisible();
+ const salvo=await page.evaluate(()=>JSON.parse(localStorage.getItem('ajoia_rapido_v1')));
+ expect(salvo.c.tecnico.temporadas.length>0 || salvo.c.tecnico.reuniaoPendente).toBeTruthy();
+ expect(salvo.c.temporadas).toEqual(c.temporadas);
+ await page.reload();await page.getByRole('button',{name:/Continuar ·/}).click();
+ await expect(page.getByRole('heading',{name:'Sua trajetória no banco'})).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
+ expect(errors).toEqual([]);
+ await page.screenshot({path:`test-results/treinador-${width}.png`,fullPage:true});
+});

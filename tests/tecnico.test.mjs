@@ -541,7 +541,7 @@ test('entrevista recusada mantém emprego anterior e remove somente a proposta r
     { nome: 'Clube Dois', pais: 'Brasil', elenco: 65, salario: 20, exigencia: 35 }
   ];
   const c = { ...base, tecnico: { ...base.tecnico, fase: 'resultado', propostas: ofertas } };
-  const recusado = negociarContratoTecnico(c, 'Clube Um', 'prudente', () => 0);
+  const recusado = negociarContratoTecnico(c, 'Clube Um', 'salario', () => 0);
   assert.equal(recusado.tecnico.clube, c.tecnico.clube);
   assert.equal(recusado.tecnico.salario, c.tecnico.salario);
   assert.equal(recusado.tecnico.propostas.length, 1);

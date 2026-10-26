@@ -123,6 +123,36 @@ export function objetivoTecnico(t) {
   if ((t.reputacao || 0) >= 40) return OBJETIVOS_TECNICO[2];
   return OBJETIVOS_TECNICO[3];
 }
+export function vinculosComoJogador(c) {
+  const porClube = new Map();
+  for (const temporada of c?.temporadas || []) {
+    if (!temporada?.clube) continue;
+    const anterior = porClube.get(temporada.clube) || { clube: temporada.clube, temporadas: 0, jogos: 0, titulos: 0, nota: 0 };
+    anterior.temporadas++;
+    anterior.jogos += temporada.jogos || 0;
+    anterior.titulos += (temporada.titulos || []).length;
+    anterior.nota += temporada.nota || 0;
+    porClube.set(temporada.clube, anterior);
+  }
+  return [...porClube.values()].map(v => {
+    const torcida = c?.torcida?.[v.clube] ?? 0;
+    const idolatria = torcida >= 75 || (v.temporadas >= 5 && v.titulos >= 2);
+    const afinidade = limitar(Math.round(v.temporadas * 8 + v.titulos * 7 + torcida * 0.35 + (idolatria ? 20 : 0)), 0, 100);
+    return { ...v, torcida, idolatria, afinidade };
+  }).sort((a,b) => b.afinidade - a.afinidade);
+}
+export function opcoesInicioTecnico(c) {
+  const vinculos = vinculosComoJogador(c);
+  const elegiveis = vinculos.filter(v => v.idolatria || v.temporadas >= 3 || v.afinidade >= 45);
+  return elegiveis.slice(0, 5).map(v => ({ ...v, motivo: v.idolatria ? 'Ídolo do clube' : 'Ex-jogador com vínculo forte' }));
+}
+export function iniciarNoClubeIdolo(c, clube) {
+  if (!c?.tecnico || c.tecnico.temporadas.length || c.tecnico.fase !== 'pretemporada') throw new Error('Escolha disponível somente no início da carreira.');
+  const opcao = (c.tecnico.opcoesInicio || []).find(x => x.clube === clube);
+  if (!opcao) throw new Error('Clube sem vínculo suficiente.');
+  return { ...c, tecnico: { ...c.tecnico, clube, torcida: limitar(55 + Math.round(opcao.afinidade * 0.35), 0, 100),
+    diretoria: limitar(60 + Math.round(opcao.afinidade * 0.15), 0, 100), clubeInicialEscolhido: true } };
+}
 export const CLUBES_CONVITES_TECNICO = [
   { nome: 'Clube do Interior', pais: 'Brasil', exigencia: 30, elenco: 42, salario: 8, rival: 'Tradicional Nacional' },
   { nome: 'Projeto Emergente', pais: 'Brasil', exigencia: 40, elenco: 52, salario: 14 },
@@ -144,14 +174,17 @@ export function salarioTecnico(t) {
 export function gerarPropostasTecnico(t, rng = sorteio) {
   const ovr = calcularOvrTecnico(t);
   const clubesPassados = new Set((t.temporadas || []).map(x => x.clube));
+  const vinculosJogador = new Map((t.vinculosJogador || []).map(x => [x.clube, x]));
   const clubeAtual = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
   const elegiveis = CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube && ovr >= x.exigencia)
     .map(x => {
       const mesmoPais = !!clubeAtual && x.pais === clubeAtual.pais;
       const retorno = clubesPassados.has(x.nome);
+      const vinculo = vinculosJogador.get(x.nome);
+      const bonusIdolo = vinculo?.idolatria ? 0.32 : (vinculo?.temporadas || 0) >= 3 ? 0.17 : 0;
       const rival = x.nome === clubeAtual?.rival || clubeAtual?.nome === x.rival;
       const chance = limitar(0.38 + (ovr - x.exigencia) / 160 + (mesmoPais ? 0.15 : -0.06)
-        + (retorno ? 0.12 : 0) - (rival ? 0.30 : 0) + ((t.temporadas || []).length >= 4 ? 0.08 : 0), 0.06, 0.90);
+        + (retorno ? 0.12 : 0) + bonusIdolo - (rival ? 0.30 : 0) + ((t.temporadas || []).length >= 4 ? 0.08 : 0), 0.06, 0.90);
       return { ...x, chance, rival, retorno, objetivo: objetivoTecnico({ ...t, elenco: x.elenco }).nome };
     });
   // Sorteio por clube: mesmo um treinador consagrado pode terminar sem convites.
@@ -187,10 +220,14 @@ export function iniciarCarreiraTecnico(c) {
   if (c.tecnico) return c;
   const legado = c.legado?.pontos || 0;
   const reputacao = limitar(Math.round(25 + legado / 22), 25, 85);
+  const vinculosJogador = vinculosComoJogador(c);
+  const opcoesInicio = opcoesInicioTecnico(c);
+  const clubeInicial = opcoesInicio[0]?.clube || c.clubeNome || 'Clube inicial';
+  const afinidadeInicial = opcoesInicio[0]?.afinidade || 0;
   return { ...c, tecnico: {
-    idadeInicio: c.idade, ano: c.ano, clube: c.clubeNome || 'Clube inicial',
+    idadeInicio: c.idade, ano: c.ano, clube: clubeInicial, vinculosJogador, opcoesInicio, clubeInicialEscolhido: false,
     reputacao, pais: 'Brasil', salario: 12, desempregado: false, anosDesempregado: 0, estilo: 'equilibrado', temporadas: [], vitorias: 0, empates: 0,
-    derrotas: 0, titulos: 0, elenco: 50, moral: 50, diretoria: 60, torcida: 55, decisoes: [], demitido: false, propostas: [], historicoCartas: [], cartas: sortearCartasTecnico({ reputacao, temporadas: [], diretoria: 60, moral: 50 }), fase: 'pretemporada'
+    derrotas: 0, titulos: 0, elenco: 50, moral: 50, diretoria: limitar(60 + Math.round(afinidadeInicial * 0.15), 0, 100), torcida: limitar(55 + Math.round(afinidadeInicial * 0.35), 0, 100), decisoes: [], demitido: false, propostas: [], historicoCartas: [], cartas: sortearCartasTecnico({ reputacao, temporadas: [], diretoria: 60, moral: 50 }), fase: 'pretemporada'
   }};
 }
 export function definirEstiloTecnico(c, estilo) {

@@ -1,7 +1,7 @@
 import { CLUBES } from '../data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, perfilClubeTecnico, probabilidadesTecnico, calendarioAdversariosTecnico, probabilidadesConfrontoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, perfilClubeTecnico, probabilidadesTecnico, calendarioAdversariosTecnico, probabilidadesConfrontoTecnico, tabelaClassificacaoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -314,4 +314,23 @@ test('confrontos persistem entre as etapas sem repetir resultados', () => {
   c = simularEtapaTecnico(c, () => 0.4);
   assert.deepEqual(c.tecnico.andamento.confrontos.slice(0, 10), primeira);
   assert.equal(c.tecnico.andamento.confrontos.length, 19);
+});
+
+test('tabela classifica por pontos e vitórias, destacando o clube treinado', () => {
+  const clube = CLUBES[0];
+  const t = { clube: clube.nome, elenco: clube.forca };
+  const tabela = tabelaClassificacaoTecnico(t, { jogos: 10, pontos: 19, vitorias: 6, empates: 1, derrotas: 3 });
+  assert.ok(tabela.length > 1);
+  assert.equal(tabela.filter(x => x.meuClube).length, 1);
+  assert.ok(tabela.every(x => x.jogos === 10 && x.vitorias + x.empates + x.derrotas === 10));
+  assert.ok(tabela.every((x, i) => x.posicao === i + 1));
+  assert.ok(tabela.every((x, i) => !i || tabela[i - 1].pontos >= x.pontos));
+});
+test('posição da etapa corresponde à tabela e permanece no andamento', () => {
+  let c = iniciarCarreiraTecnico(atleta);
+  c = { ...c, tecnico: { ...c.tecnico, decisoes: Array(4).fill({ id: 'teste' }) } };
+  c = simularEtapaTecnico(c, () => 0.4);
+  const tabela = c.tecnico.andamento.classificacao;
+  assert.equal(tabela.find(x => x.meuClube).pontos, c.tecnico.andamento.pontos);
+  assert.equal(tabela.find(x => x.meuClube).jogos, 10);
 });

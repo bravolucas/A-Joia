@@ -1,3 +1,4 @@
+import { CLUBES } from '../data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
@@ -94,16 +95,16 @@ test('OVR técnico independe da aprovação local e cresce com experiência', ()
 test('torcida e diretoria baixas aumentam pressão e OVR filtra clubes', () => {
   assert.ok(riscoDemissaoTecnico({ torcida: 10, diretoria: 15 }).pressao > riscoDemissaoTecnico({ torcida: 90, diretoria: 90 }).pressao);
   const iniciante = { reputacao: 25, temporadas: [], titulos: 0, clube: 'Outro' };
-  assert.ok(!gerarPropostasTecnico(iniciante).some(p => p.nome === 'Gigante Mundial'));
+  assert.ok(gerarPropostasTecnico(iniciante, () => 0).every(p => p.exigencia <= calcularOvrTecnico(iniciante)));
   const consagrado = { reputacao: 99, temporadas: Array(10).fill({}), titulos: 5, vitorias: 300, empates: 40, derrotas: 40, clube: 'Outro' };
-  assert.ok(gerarPropostasTecnico(consagrado, () => 0).some(p => p.exigencia >= 70));
+  assert.ok(gerarPropostasTecnico(consagrado, () => 0).every(p => CLUBES.some(clube => clube.nome === p.nome)));
 });
 
 test('ofertas dependem do sorteio e do OVR, sem garantir clubes grandes', () => {
   const consagrado = { reputacao: 99, temporadas: Array(10).fill({ clube: 'Projeto Emergente' }), titulos: 5, vitorias: 300, empates: 40, derrotas: 40, clube: 'Outro' };
   assert.equal(gerarPropostasTecnico(consagrado, () => 0.99).length, 0);
   assert.ok(gerarPropostasTecnico(consagrado, () => 0).length > 0);
-  assert.ok(salarioTecnico({ ...consagrado, clube: 'Gigante Mundial' }) > salarioTecnico({ ...consagrado, clube: 'Clube do Interior' }));
+  assert.ok(salarioTecnico({ ...consagrado, clube: 'Real Madrid' }) > salarioTecnico({ ...consagrado, clube: 'Guarani' }));
 });
 test('desemprego avança o calendário e permite retornar após proposta', () => {
   let c = iniciarCarreiraTecnico(atleta);
@@ -114,6 +115,7 @@ test('desemprego avança o calendário e permite retornar após proposta', () =>
   assert.equal(c.tecnico.desempregado, true);
   assert.equal(c.tecnico.salario, 0);
   assert.ok(c.tecnico.propostas.length > 0);
+  assert.ok(c.tecnico.propostas.every(p => CLUBES.some(clube => clube.nome === p.nome)));
   c = aceitarPropostaTecnico(c, c.tecnico.propostas[0].nome);
   assert.equal(c.tecnico.desempregado, false);
   assert.equal(proximaTemporadaTecnico(c).tecnico.fase, 'pretemporada');
@@ -148,4 +150,14 @@ test('ícone de ídolo é registrado e aumenta cobrança após meta não cumprid
   assert.equal(a.tecnico.temporadas.at(-1).idoloEmCasa, true);
   assert.equal(b.tecnico.temporadas.at(-1).idoloEmCasa, false);
   assert.ok(a.tecnico.torcida < b.tecnico.torcida);
+});
+
+test('mercado de técnicos usa clubes reais e preserva a identidade do cadastro', () => {
+  const clubes = gerarPropostasTecnico({ reputacao: 99, temporadas: Array(12).fill({}), titulos: 8, vitorias: 350, empates: 30, derrotas: 30, clube: 'Outro' }, () => 0);
+  assert.ok(clubes.length > 0);
+  for (const clube of clubes) {
+    const original = CLUBES.find(x => x.nome === clube.nome);
+    assert.ok(original);
+    assert.equal(clube.elenco, original.forca);
+  }
 });

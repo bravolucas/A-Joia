@@ -16,3 +16,18 @@ test("campeão e Bola de Ouro ganham destaque",()=>{const x=noticias(c,{...base,
 test("rebaixamento não é descrito como sucesso",()=>{const x=noticias(c,{...base,rebaixado:true});assert.ok(x.some(n=>n.tipo==="alerta"));});
 test("notícias limitadas a quatro",()=>{const x=noticias(c,{...base,rebaixado:true,lesao:"Tornozelo",bola:{pos:1},titulos:[{tipo:"continental",nome:"Champions"}],nota:8});assert.ok(x.length<=4);});
 test("saves antigos e temporadas vazias",()=>{assert.equal(noticias(c,null).length,0);assert.ok(noticias(c,{...base,titulos:[],bola:null}).length>=1);assert.match(source,/export const VERSAO_RAPIDO = 1;/);});
+
+test("transferência do rival só aparece quando registrada",()=>{
+ const rival={...base,rival:{mudou:"Clube Antigo",clube:"Clube Novo",bola:null}};
+ const x=noticias({...c,rival:{nome:"Rival Teste"}},rival);
+ assert.ok(x.some(n=>n.tipo==="mercado"&&n.titulo.includes("Rival Teste")));
+ assert.ok(!noticias(c,base).some(n=>n.tipo==="mercado"));
+});
+test("craque mundial aparece a partir do ranking simulado",()=>{
+ const x=noticias(c,{...base,bola:{pos:8,top:[{nome:"Craque Externo",clube:"Clube B",voce:false}]}});
+ assert.ok(x.some(n=>n.titulo.includes("Craque Externo")));
+});
+test("não anuncia rival sem registro de temporada",()=>{
+ const x=noticias({...c,rival:{nome:"Rival Teste"}},base);
+ assert.ok(!x.some(n=>n.titulo.includes("Rival Teste")));
+});

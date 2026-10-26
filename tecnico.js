@@ -1,3 +1,4 @@
+import { CLUBES, CLASSICOS } from './data.js';
 import { EVENTOS_CONTEXTO_TECNICO } from './eventosTecnico.js';
 // Continuação da mesma carreira, sem alterar o histórico do atleta.
 export const ESTILOS_TECNICO = [
@@ -150,22 +151,16 @@ export function iniciarNoClubeIdolo(c, clube) {
   if (!c?.tecnico || c.tecnico.temporadas.length || c.tecnico.fase !== 'pretemporada') throw new Error('Escolha disponível somente no início da carreira.');
   const opcao = (c.tecnico.opcoesInicio || []).find(x => x.clube === clube);
   if (!opcao) throw new Error('Clube sem vínculo suficiente.');
-  return { ...c, tecnico: { ...c.tecnico, clube, torcida: limitar(55 + Math.round(opcao.afinidade * 0.35), 0, 100),
+  const dadosClube = CLUBES_CONVITES_TECNICO.find(x => x.nome === clube);
+  return { ...c, tecnico: { ...c.tecnico, clube, pais: dadosClube?.pais || c.tecnico.pais, elenco: dadosClube?.elenco || c.tecnico.elenco, salario: dadosClube?.salario || c.tecnico.salario, torcida: limitar(55 + Math.round(opcao.afinidade * 0.35), 0, 100),
     diretoria: limitar(60 + Math.round(opcao.afinidade * 0.15), 0, 100), clubeInicialEscolhido: true, retornoIdolo: !!opcao.idolatria } };
 }
-export const CLUBES_CONVITES_TECNICO = [
-  { nome: 'Clube do Interior', pais: 'Brasil', exigencia: 30, elenco: 42, salario: 8, rival: 'Tradicional Nacional' },
-  { nome: 'Projeto Emergente', pais: 'Brasil', exigencia: 40, elenco: 52, salario: 14 },
-  { nome: 'Tradicional Nacional', pais: 'Brasil', exigencia: 56, elenco: 64, salario: 28, rival: 'Clube do Interior' },
-  { nome: 'Potência Continental', pais: 'Argentina', exigencia: 70, elenco: 78, salario: 55 },
-  { nome: 'Gigante Mundial', pais: 'Espanha', exigencia: 88, elenco: 90, salario: 110 },
-  { nome: 'Projeto Português', pais: 'Portugal', exigencia: 52, elenco: 58, salario: 23 },
-  { nome: 'Clube Italiano', pais: 'Itália', exigencia: 75, elenco: 77, salario: 65 },
-  { nome: 'Equipe Inglesa', pais: 'Inglaterra', exigencia: 82, elenco: 84, salario: 90 },
-  { nome: 'Projeto Japonês', pais: 'Japão', exigencia: 45, elenco: 53, salario: 25 },
-  { nome: 'Clube Mexicano', pais: 'México', exigencia: 48, elenco: 57, salario: 27 },
-  { nome: 'Equipe Alemã', pais: 'Alemanha', exigencia: 73, elenco: 79, salario: 70 }
-];
+const PAIS_LIGA_TECNICO = { brasileirao: 'Brasil', serieB: 'Brasil', argentina: 'Argentina', portugal: 'Portugal', portugal2: 'Portugal', espanha: 'Espanha', espanha2: 'Espanha', inglaterra: 'Inglaterra', inglaterra2: 'Inglaterra', italia: 'Itália', italia2: 'Itália', alemanha: 'Alemanha', alemanha2: 'Alemanha', franca: 'França', franca2: 'França', sulamericano: 'América do Sul' };
+export const CLUBES_CONVITES_TECNICO = CLUBES.map(x => ({
+  nome: x.nome, pais: PAIS_LIGA_TECNICO[x.liga] || x.liga, liga: x.liga,
+  exigencia: limitar(Math.round(25 + (x.forca - 45) * 1.12), 25, 94),
+  elenco: x.forca, salario: Math.max(5, Math.round(x.forca * x.forca / 85))
+}));
 export function salarioTecnico(t) {
   const clube = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
   const base = clube?.salario ?? 12;
@@ -176,13 +171,16 @@ export function gerarPropostasTecnico(t, rng = sorteio) {
   const clubesPassados = new Set((t.temporadas || []).map(x => x.clube));
   const vinculosJogador = new Map((t.vinculosJogador || []).map(x => [x.clube, x]));
   const clubeAtual = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
-  const elegiveis = CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube && ovr >= x.exigencia)
+  const elegiveis = CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube && (ovr >= x.exigencia || (vinculosJogador.get(x.nome)?.idolatria && ovr >= x.exigencia - 16)))
     .map(x => {
       const mesmoPais = !!clubeAtual && x.pais === clubeAtual.pais;
       const retorno = clubesPassados.has(x.nome);
       const vinculo = vinculosJogador.get(x.nome);
       const bonusIdolo = vinculo?.idolatria ? 0.32 : (vinculo?.temporadas || 0) >= 3 ? 0.17 : 0;
-      const rival = x.nome === clubeAtual?.rival || clubeAtual?.nome === x.rival;
+      const rival = (CLASSICOS || []).some(derby => {
+        const nomes = Array.isArray(derby) ? derby : [derby.a, derby.b, derby.casa, derby.fora, derby.clube1, derby.clube2];
+        return nomes.includes(x.nome) && nomes.includes(t.clube);
+      });
       const chance = limitar(0.38 + (ovr - x.exigencia) / 160 + (mesmoPais ? 0.15 : -0.06)
         + (retorno ? 0.12 : 0) + bonusIdolo - (rival ? 0.30 : 0) + ((t.temporadas || []).length >= 4 ? 0.08 : 0), 0.06, 0.90);
       return { ...x, chance, rival, retorno, objetivo: objetivoTecnico({ ...t, elenco: x.elenco }).nome };
@@ -223,11 +221,12 @@ export function iniciarCarreiraTecnico(c) {
   const vinculosJogador = vinculosComoJogador(c);
   const opcoesInicio = opcoesInicioTecnico(c);
   const clubeInicial = opcoesInicio[0]?.clube || c.clubeNome || 'Clube inicial';
+  const dadosClubeInicial = CLUBES_CONVITES_TECNICO.find(x => x.nome === clubeInicial);
   const afinidadeInicial = opcoesInicio[0]?.afinidade || 0;
   return { ...c, tecnico: {
     idadeInicio: c.idade, ano: c.ano, clube: clubeInicial, vinculosJogador, opcoesInicio, clubeInicialEscolhido: false,
-    reputacao, pais: 'Brasil', salario: 12, desempregado: false, anosDesempregado: 0, estilo: 'equilibrado', temporadas: [], vitorias: 0, empates: 0,
-    derrotas: 0, titulos: 0, elenco: 50, moral: 50, diretoria: limitar(60 + Math.round(afinidadeInicial * 0.15), 0, 100), torcida: limitar(55 + Math.round(afinidadeInicial * 0.35), 0, 100), decisoes: [], demitido: false, propostas: [], historicoCartas: [], cartas: sortearCartasTecnico({ reputacao, temporadas: [], diretoria: 60, moral: 50 }), fase: 'pretemporada'
+    reputacao, pais: dadosClubeInicial?.pais || 'Brasil', salario: dadosClubeInicial?.salario || 12, desempregado: false, anosDesempregado: 0, estilo: 'equilibrado', temporadas: [], vitorias: 0, empates: 0,
+    derrotas: 0, titulos: 0, elenco: dadosClubeInicial?.elenco || 50, moral: 50, diretoria: limitar(60 + Math.round(afinidadeInicial * 0.15), 0, 100), torcida: limitar(55 + Math.round(afinidadeInicial * 0.35), 0, 100), decisoes: [], demitido: false, propostas: [], historicoCartas: [], cartas: sortearCartasTecnico({ reputacao, temporadas: [], diretoria: 60, moral: 50 }), fase: 'pretemporada'
   }};
 }
 export function definirEstiloTecnico(c, estilo) {

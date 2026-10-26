@@ -56,3 +56,17 @@ test('evita repetir as últimas 16 cartas quando há alternativas', () => {
   const seguintes = sortearCartasTecnico({ ...t, historicoCartas: primeiras }, () => 0.3);
   assert.equal(seguintes.filter(id => primeiras.includes(id)).length, 0);
 });
+
+test('consequências de decisões atravessam temporadas e não duplicam', () => {
+  let c = iniciarCarreiraTecnico(atleta);
+  c = { ...c, tecnico: { ...c.tecnico, cartas: ['reforcos','vestiario','craque','classico'] } };
+  for (const opcao of ['pedir','dialogo','apoiar','prudente']) c = tomarDecisaoTecnico(c, opcao, () => 0.99);
+  const pendentes = c.tecnico.efeitosPendentes;
+  assert.equal(pendentes.length, 4);
+  c = simularTemporadaTecnico(c, () => 0.1);
+  const antes = c.tecnico.elenco;
+  c = proximaTemporadaTecnico(c);
+  assert.equal(c.tecnico.efeitosPendentes.length, 0);
+  assert.equal(c.tecnico.efeitosRecebidos.length, 4);
+  assert.ok(c.tecnico.elenco > antes);
+});

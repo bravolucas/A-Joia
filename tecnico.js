@@ -439,7 +439,7 @@ export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario,
   }
   // Alterna a folga nas ligas de quantidade ímpar, evitando favorecer sempre o mesmo clube.
   const rivais = linhas.filter(x => !x.meuClube && x.nome !== adversario);
-  if (rivais.length % 2 === 1) rivais.push(...rivais.splice((rodada - 1) % rivais.length, 1));
+  if (rivais.length % 2 === 1) rivais.splice((rodada - 1) % rivais.length, 1);
   for (let i = 0; i + 1 < rivais.length; i += 2) {
     const a = rivais[i], b = rivais[i + 1];
     const forcaA = CLUBES_CONVITES_TECNICO.find(x => x.nome === a.nome)?.elenco ?? 50;

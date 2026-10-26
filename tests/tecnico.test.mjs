@@ -1,7 +1,7 @@
 import { CLUBES } from '../data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -241,4 +241,23 @@ test('reunião de emergência bloqueia avanço e permite recuperar confiança', 
   assert.equal(c.tecnico.reunioes.length, 1);
   c = simularEtapaTecnico(c, () => 0.4);
   assert.equal(c.tecnico.andamento.jogos, 19);
+});
+
+test('histórico do treinador agrupa clubes, títulos e demissões sem misturar estatísticas do atleta', () => {
+  const c = iniciarCarreiraTecnico(atleta);
+  const temporadas = [
+    { ano: 2045, clube: 'Corinthians', vitorias: 20, empates: 10, derrotas: 8, campeao: true, posicao: 1 },
+    { ano: 2046, clube: 'Corinthians', vitorias: 12, empates: 8, derrotas: 10, interrompida: true, demitido: true, posicao: 15 },
+    { ano: 2047, clube: 'Guarani', vitorias: 10, empates: 12, derrotas: 16, posicao: 13 }
+  ];
+  const resumo = historicoProfissionalTecnico({ ...c.tecnico, temporadas, reunioes: [{}, {}] });
+  assert.equal(resumo.jogos, 106);
+  assert.equal(resumo.vitorias, 42);
+  assert.equal(resumo.titulos, 1);
+  assert.equal(resumo.demissoes, 1);
+  assert.equal(resumo.clubes.length, 2);
+  assert.equal(resumo.clubes[0].temporadas, 2);
+  assert.equal(resumo.clubes[0].demissoes, 1);
+  assert.equal(resumo.reunioes, 2);
+  assert.equal(c.totais.gols, atleta.totais.gols);
 });

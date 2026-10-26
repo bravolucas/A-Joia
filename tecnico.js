@@ -379,7 +379,18 @@ export function probabilidadesConfrontoTecnico(t, adversario) {
   const empate = Math.min(base.empate, 0.93 - vitoria);
   return { vitoria, empate, derrota: 1 - vitoria - empate };
 }
-export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario, resultado, rng = sorteio, rodada = 1) {
+export function placarTecnico(resultado, rng = sorteio) {
+  if (resultado === 'E') { const gols = Math.floor(rng() * 3); return { pro: gols, contra: gols }; }
+  const vencedor = 1 + Math.floor(rng() * 3);
+  const perdedor = Math.floor(rng() * vencedor);
+  return resultado === 'V' ? { pro: vencedor, contra: perdedor } : { pro: perdedor, contra: vencedor };
+}
+export function registrarGolsTecnico(linha, pro, contra) {
+  linha.golsPro = (linha.golsPro || 0) + pro;
+  linha.golsContra = (linha.golsContra || 0) + contra;
+  linha.saldoGols = linha.golsPro - linha.golsContra;
+}
+export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario, resultado, rng = sorteio, rodada = 1, placarTreinador = null) {
   const linhas = classificacaoAnterior.map(x => ({ ...x }));
   const calendario = calendarioLigaTecnico(t);
   const partidas = calendario?.[rodada - 1];
@@ -398,11 +409,16 @@ export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario,
         : r < chanceCasa ? 'V' : r < chanceCasa + 0.25 ? 'E' : 'D';
       if (envolveTreinador) {
         const rival = casa.meuClube ? fora : casa;
+        const placar = placarTreinador || placarTecnico(resultado, rng);
+        registrarGolsTecnico(rival, placar.contra, placar.pro);
         rival.jogos++;
         if (resultado === 'E') { rival.empates++; rival.pontos++; }
         else if (resultado === 'V') rival.derrotas++;
         else { rival.vitorias++; rival.pontos += 3; }
       } else {
+        const placar = placarTecnico(desfecho, rng);
+        registrarGolsTecnico(casa, placar.pro, placar.contra);
+        registrarGolsTecnico(fora, placar.contra, placar.pro);
         casa.jogos++; fora.jogos++;
         if (desfecho === 'V') { casa.vitorias++; fora.derrotas++; casa.pontos += 3; }
         else if (desfecho === 'E') { casa.empates++; fora.empates++; casa.pontos++; fora.pontos++; }
@@ -414,6 +430,8 @@ export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario,
   // Compatibilidade com ligas de tamanho diferente ou carreiras antigas.
   const rivalDireto = linhas.find(x => !x.meuClube && x.nome === adversario);
   if (rivalDireto) {
+    const placar = placarTreinador || placarTecnico(resultado, rng);
+    registrarGolsTecnico(rivalDireto, placar.contra, placar.pro);
     rivalDireto.jogos++;
     if (resultado === 'V') rivalDireto.derrotas++;
     else if (resultado === 'E') { rivalDireto.empates++; rivalDireto.pontos++; }
@@ -426,6 +444,10 @@ export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario,
     const forcaB = CLUBES_CONVITES_TECNICO.find(x => x.nome === b.nome)?.elenco ?? 50;
     const chanceA = limitar(0.38 + (forcaA - forcaB) * 0.007, 0.16, 0.68);
     const r = rng();
+    const desfecho = r < chanceA ? 'V' : r < chanceA + 0.25 ? 'E' : 'D';
+    const placar = placarTecnico(desfecho, rng);
+    registrarGolsTecnico(a, placar.pro, placar.contra);
+    registrarGolsTecnico(b, placar.contra, placar.pro);
     if (r < chanceA) { a.vitorias++; b.derrotas++; a.pontos += 3; }
     else if (r < chanceA + 0.25) { a.empates++; b.empates++; a.pontos++; b.pontos++; }
     else { b.vitorias++; a.derrotas++; b.pontos += 3; }
@@ -499,7 +521,8 @@ export function simularEtapaTecnico(c, rng = sorteio) {
     const r = rng();
     const resultado = r < pVitoria ? 'V' : r < pVitoria + pEmpate ? 'E' : 'D';
     if (resultado === 'V') v++; else if (resultado === 'E') e++; else d++;
-    confrontos.push({ ...adversario, resultado });
+    const placar = placarTecnico(resultado, rng);
+    confrontos.push({ ...adversario, resultado, golsPro: placar.pro, golsContra: placar.contra });
   }
   const pontos = v * 3 + e;
   const aproveitamento = pontos / (limite * 3);
@@ -521,9 +544,11 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   const base = anterior.classificacao || tabelaClassificacaoTecnico(t, { jogos: anterior.jogos, pontos: anterior.pontos, vitorias: anterior.vitorias, empates: anterior.empates, derrotas: anterior.derrotas });
   let classificacao = base;
   for (let rodada = anterior.jogos; rodada < limite; rodada++) {
-    classificacao = simularRodadaRivaisTecnico(t, classificacao, confrontos[rodada]?.nome, confrontos[rodada]?.resultado, rng, rodada + 1);
+    classificacao = simularRodadaRivaisTecnico(t, classificacao, confrontos[rodada]?.nome, confrontos[rodada]?.resultado, rng, rodada + 1, { pro: confrontos[rodada]?.golsPro, contra: confrontos[rodada]?.golsContra });
   }
-  classificacao = classificacao.map(x => x.meuClube ? { ...x, jogos: limite, pontos, vitorias: v, empates: e, derrotas: d } : x);
+  const golsPro = confrontos.reduce((n, j) => n + (j.golsPro || 0), 0);
+  const golsContra = confrontos.reduce((n, j) => n + (j.golsContra || 0), 0);
+  classificacao = classificacao.map(x => x.meuClube ? { ...x, jogos: limite, pontos, vitorias: v, empates: e, derrotas: d, golsPro, golsContra, saldoGols: golsPro - golsContra } : x);
   andamento.classificacao = ordenarClassificacaoTecnico(classificacao);
   if (demitido) {
     const posicao = andamento.classificacao.find(x => x.meuClube)?.posicao || 18;

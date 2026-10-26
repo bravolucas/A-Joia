@@ -1,4 +1,6 @@
 import Icone from "./Icone.jsx";
+import CarreiraTecnico from "./CarreiraTecnico.jsx";
+import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, definirEstiloTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico } from "./tecnico.js";
 import Lottie from "./Lottie.jsx";
 import { tocar, apito, torcida, somLigado, alternarSom } from "./som.js";
 import React, { useEffect, useRef, useState } from "react";
@@ -2462,7 +2464,7 @@ function GaleriaFim({ c }) {
 
 /* Fim de carreira: galeria, depois da bola e os botões */
 function FimDeCarreira(props) {
-  const { c, onNova } = props;
+  const { c, onNova, onComecarTecnico } = props;
   const [completo, setCompleto] = useState(false);
   const galeriaRef = useRef(null);
   const [img, setImg] = useState("pronto");
@@ -2493,12 +2495,16 @@ function FimDeCarreira(props) {
         <button onClick={() => { setCompleto(true); window.scrollTo({ top: 0 }); }} className="cp-pill cp-contorno text-[15px] min-h-[46px]">Ver resumo completo</button>
         <button onClick={onNova} className="cp-pill cp-contorno text-[15px] min-h-[46px]"><span aria-hidden="true">↻</span> Jogar novamente</button>
       </div>
-      {props.onPosCarreira && <div className="max-w-3xl mx-auto w-full px-3"><PosCarreira c={c} onEscolher={props.onPosCarreira} /></div>}
+      <div className="max-w-3xl mx-auto w-full px-3 flex flex-col gap-2">
+        <p className="text-center text-[#C9D3CE] font-bold">O que vem depois dos gramados?</p>
+        <button onClick={() => { setCompleto(true); window.scrollTo({ top: 0 }); }} className="rp-btn rp-sec w-full">ENCERRAR CARREIRA · Ver legado completo</button>
+        <button onClick={onComecarTecnico} className="rp-btn rp-ouro w-full">CONTINUAR COMO TÉCNICO</button>
+      </div>
     </div>
   );
 }
 
-function TelaFim({ c, onNova, onSair, onPosCarreira }) {
+function TelaFim({ c, onNova, onSair, onPosCarreira, onComecarTecnico }) {
   const L = c.legado || calcularLegado(c);
   const [copiado, setCopiado] = useState(false);
   const clubes = [];
@@ -2673,6 +2679,7 @@ function TelaFim({ c, onNova, onSair, onPosCarreira }) {
         </div>
       )}
 
+      <button onClick={onComecarTecnico} className="rp-btn rp-ouro w-full">CONTINUAR COMO TÉCNICO</button>
       <div className="grid grid-cols-2 gap-2">
         <button onClick={onNova} className="rp-btn rp-prim display text-xs">Nova carreira</button>
         <button onClick={onSair} className="rp-btn rp-sec text-[16px]">Menu</button>
@@ -3443,6 +3450,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     setEstado({ etapa: "fim", c: cc });
   };
   const nova = () => setEstado({ etapa: "criacao" });
+  const comecarTecnico = () => setEstado((st) => ({ ...st, etapa: "tecnico", c: iniciarCarreiraTecnico(st.c) }));
 
   // pausas automáticas: qualquer gaveta ou cena aberta segura o relógio
   const pausado = !!gaveta || estanteAberta || patrimonioAberto || !!apresentacao || !!popup || !!popTemp;
@@ -3508,7 +3516,18 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "resumo" && <TelaResumo c={c} card={card} voar={!!estado.voar} onPousou={() => setContadorPulsa((x) => x + 1)} onContinuar={continuar} onAposentar={encerrar} onRever={() => setEstado({ etapa: "festa", c, card, voar: false })} />}
         {etapa === "coletiva" && estado.coletiva && <TelaColetiva c={c} coletiva={estado.coletiva} resposta={estado.resposta} onResponder={responder} onSeguir={() => abrirJanela(c, estado.ultimo, false)} />}
         {etapa === "traco" && <TelaTraco c={c} opcoes={(opcoesTraco || []).map(tracoDe).filter(Boolean)} onEscolher={escolherT} />}
-        {etapa === "fim" && <FimDeCarreira c={c} onNova={nova} onSair={onSair} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
+        {etapa === "fim" && <FimDeCarreira c={c} onNova={nova} onSair={onSair} onComecarTecnico={comecarTecnico} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
+        {etapa === "tecnico" && <CarreiraTecnico c={c}
+          onEstilo={(id) => setEstado((st) => ({ ...st, c: definirEstiloTecnico(st.c, id) }))}
+          onDecisao={(id) => setEstado((st) => ({ ...st, c: tomarDecisaoTecnico(st.c, id) }))}
+          onReuniao={(id) => setEstado((st) => ({ ...st, c: reuniaoEmergenciaTecnico(st.c, id) }))}
+          onJogar={() => setEstado((st) => ({ ...st, c: simularEtapaTecnico(st.c) }))}
+          onEscolherClubeInicial={(nome) => setEstado((st) => ({ ...st, c: iniciarNoClubeIdolo(st.c, nome) }))}
+          onEsperar={() => setEstado((st) => ({ ...st, c: passarAnoDesempregado(st.c) }))}
+          onAceitarProposta={(nome, estrategia) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia); return { ...st, c: negociado.tecnico.ultimaNegociacao?.aceita ? proximaTemporadaTecnico(negociado) : negociado }; })}
+          onAvancar={() => setEstado((st) => ({ ...st, c: proximaTemporadaTecnico(st.c) }))}
+          onLegado={() => setEstado((st) => ({ ...st, etapa: "fim" }))}
+          onSair={onSair} />}
       </main>
       {selo && <div key={selo.k} className="rp-selo display text-[22px] px-5 py-2 rounded-2xl" style={{ background: "#0E1512", color: selo.cor, border: `2px solid ${selo.cor}`, boxShadow: `0 0 30px ${selo.cor}66` }}>{selo.txt}</div>}
       {gaveta === "ficha" && c && (

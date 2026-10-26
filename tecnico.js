@@ -330,17 +330,46 @@ export function probabilidadesTecnico(t = {}) {
   const empate = t.estilo === 'defensivo' ? 0.29 : t.estilo === 'ofensivo' ? 0.18 : 0.24;
   return { vitoria, empate: Math.min(empate, 0.94 - vitoria), derrota: Math.max(0.06, 1 - vitoria - empate) };
 }
-export function calendarioAdversariosTecnico(t = {}) {
+export function calendarioLigaTecnico(t = {}) {
   const clube = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
   const liga = clube?.liga || t.liga;
-  const candidatos = CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube && (!liga || x.liga === liga));
-  const outros = candidatos.length ? candidatos : CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube);
-  if (!outros.length) return Array.from({ length: 38 }, (_, i) => ({ rodada: i + 1, nome: 'Adversário', forca: 50, casa: i % 2 === 0 }));
-  const ordenados = [...outros].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
-  const turno = Array.from({ length: 19 }, (_, i) => ordenados[i % ordenados.length]);
-  return Array.from({ length: 38 }, (_, i) => ({
-    rodada: i + 1, nome: turno[i % 19].nome, forca: turno[i % 19].elenco, casa: i < 19
-  }));
+  const participantes = CLUBES_CONVITES_TECNICO.filter(x => !liga || x.liga === liga)
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  if (!participantes.some(x => x.nome === t.clube)) {
+    participantes.unshift({ nome: t.clube || 'Meu clube', elenco: t.elenco ?? 50 });
+  }
+  if (participantes.length !== 20) return null;
+  const times = [...participantes];
+  const rodadas = [];
+  for (let r = 0; r < 19; r++) {
+    const jogos = [];
+    for (let i = 0; i < 10; i++) {
+      const a = times[i], b = times[19 - i];
+      const casa = (r + i) % 2 === 0 ? a : b;
+      const fora = casa === a ? b : a;
+      jogos.push({ casa: casa.nome, fora: fora.nome });
+    }
+    rodadas.push(jogos);
+    times.splice(1, 0, times.pop());
+  }
+  return [...rodadas, ...rodadas.map(jogos => jogos.map(j => ({ casa: j.fora, fora: j.casa })))];
+}
+export function calendarioAdversariosTecnico(t = {}) {
+  const liga = calendarioLigaTecnico(t);
+  if (liga) return liga.map((jogos, i) => {
+    const partida = jogos.find(j => j.casa === t.clube || j.fora === t.clube);
+    const nome = partida.casa === t.clube ? partida.fora : partida.casa;
+    return { rodada: i + 1, nome, forca: CLUBES_CONVITES_TECNICO.find(x => x.nome === nome)?.elenco ?? 50,
+      casa: partida.casa === t.clube };
+  });
+  const clube = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
+  const candidatos = CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube && (!clube || x.liga === clube.liga))
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  if (!candidatos.length) return Array.from({ length: 38 }, (_, i) => ({ rodada: i + 1, nome: 'Adversário', forca: 50, casa: i % 2 === 0 }));
+  return Array.from({ length: 38 }, (_, i) => {
+    const rival = candidatos[i % candidatos.length];
+    return { rodada: i + 1, nome: rival.nome, forca: rival.elenco, casa: i < 19 };
+  });
 }
 export function probabilidadesConfrontoTecnico(t, adversario) {
   const base = probabilidadesTecnico(t);

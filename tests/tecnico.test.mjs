@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -38,4 +38,21 @@ test('sorteia quatro eventos diferentes por temporada', () => {
   const cartas = sortearCartasTecnico(() => 0.5);
   assert.equal(cartas.length, 4);
   assert.equal(new Set(cartas).size, 4);
+});
+
+test('banco amplo e cartas relevantes ao contexto', () => {
+  assert.ok(TODAS_CARTAS_TECNICO.length >= 60);
+  const novato = { temporadas: [], reputacao: 25, diretoria: 70, moral: 60 };
+  assert.equal(elegivelTecnico(TODAS_CARTAS_TECNICO.find(x => x.id === 'ultimato'), novato), true);
+  assert.equal(elegivelTecnico(TODAS_CARTAS_TECNICO.find(x => x.id === 'boicote'), novato), false);
+  const crise = { ...novato, diretoria: 20 };
+  assert.equal(elegivelTecnico(TODAS_CARTAS_TECNICO.find(x => x.id === 'boicote'), crise), true);
+  const veterano = { ...novato, reputacao: 85, temporadas: Array(6).fill({posicao: 3}) };
+  assert.equal(elegivelTecnico(TODAS_CARTAS_TECNICO.find(x => x.id === 'mentor'), veterano), true);
+});
+test('evita repetir as últimas 16 cartas quando há alternativas', () => {
+  const t = { temporadas: [], reputacao: 35, diretoria: 60, moral: 60 };
+  const primeiras = sortearCartasTecnico(t, () => 0.3);
+  const seguintes = sortearCartasTecnico({ ...t, historicoCartas: primeiras }, () => 0.3);
+  assert.equal(seguintes.filter(id => primeiras.includes(id)).length, 0);
 });

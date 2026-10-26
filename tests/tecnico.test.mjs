@@ -72,9 +72,10 @@ test('consequências de decisões atravessam temporadas e não duplicam', () => 
   assert.ok(c.tecnico.elenco > antes);
 });
 
-test('objetivos dependem da reputação e força do elenco', () => {
+test('objetivos seguem força do clube, sem exigir reputação elevada', () => {
   assert.equal(objetivoTecnico({ reputacao: 30, elenco: 45 }).id, 'permanencia');
-  assert.equal(objetivoTecnico({ reputacao: 90, elenco: 80 }).id, 'titulo');
+  assert.equal(objetivoTecnico({ reputacao: 90, elenco: 80 }).id, 'continental');
+  assert.equal(objetivoTecnico({ reputacao: 20, elenco: 85 }).id, 'titulo');
 });
 test('demissão exige mudança de clube, preservando o histórico', () => {
   let c = iniciarCarreiraTecnico(atleta);

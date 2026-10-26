@@ -80,7 +80,7 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onReuniao, onJ
           <h3 className="text-[#EBC557] text-sm font-bold">Classificação</h3>
           <div className="overflow-x-auto mt-2"><table className="w-full text-xs text-[#C9D3CE]">
             <thead><tr className="text-[#8FA39A]"><th className="text-left py-1">#</th><th className="text-left">Clube</th><th>PTS</th><th>J</th><th>V</th><th>E</th><th>D</th></tr></thead>
-            <tbody>{t.andamento.classificacao.map(x => <tr key={x.nome} className={x.meuClube ? 'text-[#EBC557] font-bold bg-white/5' : 'border-t border-white/5'}>
+            <tbody>{t.andamento.classificacao.map(x => <tr key={x.nome} className={x.meuClube ? 'text-[#EBC557] font-bold bg-white/5' : x.zona === 'rebaixamento' ? 'border-t border-white/5 text-[#F0A99E]' : x.zona === 'continental' || x.zona === 'campeao' ? 'border-t border-white/5 text-[#7FE3BC]' : 'border-t border-white/5'}>
               <td className="py-1">{x.posicao}</td><td>{x.nome}</td><td className="text-center">{x.pontos}</td><td className="text-center">{x.jogos}</td><td className="text-center">{x.vitorias}</td><td className="text-center">{x.empates}</td><td className="text-center">{x.derrotas}</td>
             </tr>)}</tbody>
           </table></div>

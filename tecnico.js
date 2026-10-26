@@ -456,7 +456,7 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
     else derrotas++;
   }
   const pontos = vitorias * 3 + empates;
-  const classificacao = andamento.classificacao || tabelaClassificacaoTecnico(t, andamento);
+  const classificacao = tabelaClassificacaoTecnico(t, { jogos: 38, pontos, vitorias, empates, derrotas });
   const posicao = classificacao.find(x => x.meuClube)?.posicao || 18;
   const campeao = posicao === 1;
   const objetivo = objetivoTecnico(t);

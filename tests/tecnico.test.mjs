@@ -1,7 +1,7 @@
 import { CLUBES } from '../data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, perfilClubeTecnico, probabilidadesTecnico, calendarioAdversariosTecnico, calendarioLigaTecnico, probabilidadesConfrontoTecnico, tabelaClassificacaoTecnico, ordenarClassificacaoTecnico, zonaClassificacaoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, perfilClubeTecnico, probabilidadesTecnico, calendarioAdversariosTecnico, calendarioLigaTecnico, probabilidadesConfrontoTecnico, tabelaClassificacaoTecnico, ordenarClassificacaoTecnico, zonaClassificacaoTecnico, placarTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -383,4 +383,22 @@ test('desempate por vitórias e saldo de gols e marcação de zonas', () => {
   assert.equal(zonaClassificacaoTecnico(4, 20), 'continental');
   assert.equal(zonaClassificacaoTecnico(17, 20), 'rebaixamento');
   assert.equal(zonaClassificacaoTecnico(10, 20), 'meio');
+});
+
+test('placares respeitam vitória, empate e derrota', () => {
+  for (const resultado of ['V', 'E', 'D']) {
+    const p = placarTecnico(resultado, () => 0.5);
+    assert.ok(p.pro >= 0 && p.contra >= 0);
+    assert.equal(Math.sign(p.pro - p.contra), resultado === 'V' ? 1 : resultado === 'D' ? -1 : 0);
+  }
+});
+test('saldo de gols da classificação corresponde aos confrontos registrados', () => {
+  let c = iniciarCarreiraTecnico(atleta);
+  c = { ...c, tecnico: { ...c.tecnico, decisoes: Array(4).fill({ id: 'teste' }) } };
+  c = simularEtapaTecnico(c, () => 0.4);
+  const partidas = c.tecnico.andamento.confrontos;
+  const time = c.tecnico.andamento.classificacao.find(x => x.meuClube);
+  assert.equal(time.golsPro, partidas.reduce((n, j) => n + j.golsPro, 0));
+  assert.equal(time.golsContra, partidas.reduce((n, j) => n + j.golsContra, 0));
+  assert.equal(time.saldoGols, time.golsPro - time.golsContra);
 });

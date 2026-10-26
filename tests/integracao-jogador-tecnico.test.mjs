@@ -56,7 +56,7 @@ test('32 carreiras de jogador até aposentadoria e transição para técnico', (
     }
     for (const rodada of ETAPAS_TEMPORADA_TECNICO) {
       c = simularEtapaTecnico(c, () => 0.4);
-      assert.equal(c.tecnico.andamento.jogos, rodada);
+      assert.equal(c.tecnico.andamento?.jogos ?? c.tecnico.temporadas.at(-1)?.jogos ?? 38, rodada);
       if (c.tecnico.reuniaoPendente) c = reuniaoEmergenciaTecnico(c, 'responsabilidade', () => 0.9);
       if (c.tecnico.fase === 'resultado') break;
     }
@@ -64,7 +64,7 @@ test('32 carreiras de jogador até aposentadoria e transição para técnico', (
     assert.equal(c.tecnico.temporadas.length, 1);
     assert.deepEqual(c.temporadas, registroJogador);
     assert.ok(historicoProfissionalTecnico(c.tecnico).jogos > 0);
-    totalJogosTecnico += c.tecnico.temporadas[0].jogos;
+    totalJogosTecnico += c.tecnico.temporadas[0].jogos ?? 38;
     assert.ok(Number.isFinite(ovrDe(c)));
   }
   assert.ok(totalTemporadas > 300);

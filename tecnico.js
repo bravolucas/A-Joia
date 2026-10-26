@@ -350,9 +350,16 @@ export function probabilidadesConfrontoTecnico(t, adversario) {
   const empate = Math.min(base.empate, 0.93 - vitoria);
   return { vitoria, empate, derrota: 1 - vitoria - empate };
 }
-export function simularRodadaRivaisTecnico(t, classificacaoAnterior, rng = sorteio) {
+export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario, resultado, rng = sorteio) {
   const linhas = classificacaoAnterior.map(x => ({ ...x }));
-  const rivais = linhas.filter(x => !x.meuClube);
+  const rivalDireto = linhas.find(x => !x.meuClube && x.nome === adversario);
+  if (rivalDireto) {
+    rivalDireto.jogos++;
+    if (resultado === 'V') rivalDireto.derrotas++;
+    else if (resultado === 'E') { rivalDireto.empates++; rivalDireto.pontos++; }
+    else { rivalDireto.vitorias++; rivalDireto.pontos += 3; }
+  }
+  const rivais = linhas.filter(x => !x.meuClube && x.nome !== adversario);
   // Partidas pareadas por rodada: nenhum rival joga mais de uma vez.
   for (let i = 0; i < rivais.length; i += 2) {
     const a = rivais[i], b = rivais[i + 1];
@@ -446,7 +453,7 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   const base = anterior.classificacao || tabelaClassificacaoTecnico(t, { jogos: anterior.jogos, pontos: anterior.pontos, vitorias: anterior.vitorias, empates: anterior.empates, derrotas: anterior.derrotas });
   let classificacao = base;
   for (let rodada = anterior.jogos; rodada < limite; rodada++) {
-    classificacao = simularRodadaRivaisTecnico(t, classificacao, rng);
+    classificacao = simularRodadaRivaisTecnico(t, classificacao, confrontos[rodada]?.nome, confrontos[rodada]?.resultado, rng);
   }
   classificacao = classificacao.map(x => x.meuClube ? { ...x, jogos: limite, pontos, vitorias: v, empates: e, derrotas: d } : x);
   classificacao.sort((a, b) => b.pontos - a.pontos || b.vitorias - a.vitorias || a.nome.localeCompare(b.nome, 'pt-BR'));

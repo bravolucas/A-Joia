@@ -540,12 +540,6 @@ export function simularEtapaTecnico(c, rng = sorteio) {
     diretoria, torcida, pressao };
   const andamento = { jogos: limite, calendario, confrontos, vitorias: v, empates: e, derrotas: d, pontos,
     avaliacoes: [...anterior.avaliacoes, avaliacao] };
-  // Mantém os resultados dos rivais entre etapas; saves antigos iniciam pela tabela estimada.
-  const base = anterior.classificacao || tabelaClassificacaoTecnico(t, { jogos: anterior.jogos, pontos: anterior.pontos, vitorias: anterior.vitorias, empates: anterior.empates, derrotas: anterior.derrotas });
-  let classificacao = base;
-  for (let rodada = anterior.jogos; rodada < limite; rodada++) {
-    classificacao = simularRodadaRivaisTecnico(t, classificacao, confrontos[rodada]?.nome, confrontos[rodada]?.resultado, rng, rodada + 1, { pro: confrontos[rodada]?.golsPro, contra: confrontos[rodada]?.golsContra });
-  }
   // Saves anteriores à introdução dos placares preservam resultados e recebem gols coerentes.
   for (const jogo of confrontos) {
     if (!Number.isFinite(jogo.golsPro) || !Number.isFinite(jogo.golsContra)) {
@@ -553,6 +547,12 @@ export function simularEtapaTecnico(c, rng = sorteio) {
       jogo.golsPro = placar.pro;
       jogo.golsContra = placar.contra;
     }
+  }
+  // Mantém os resultados dos rivais entre etapas; saves antigos iniciam pela tabela estimada.
+  const base = anterior.classificacao || tabelaClassificacaoTecnico(t, { jogos: anterior.jogos, pontos: anterior.pontos, vitorias: anterior.vitorias, empates: anterior.empates, derrotas: anterior.derrotas });
+  let classificacao = base;
+  for (let rodada = anterior.jogos; rodada < limite; rodada++) {
+    classificacao = simularRodadaRivaisTecnico(t, classificacao, confrontos[rodada]?.nome, confrontos[rodada]?.resultado, rng, rodada + 1, { pro: confrontos[rodada]?.golsPro, contra: confrontos[rodada]?.golsContra });
   }
   const golsPro = confrontos.reduce((n, j) => n + (j.golsPro || 0), 0);
   const golsContra = confrontos.reduce((n, j) => n + (j.golsContra || 0), 0);

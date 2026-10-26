@@ -151,7 +151,7 @@ export function iniciarNoClubeIdolo(c, clube) {
   const opcao = (c.tecnico.opcoesInicio || []).find(x => x.clube === clube);
   if (!opcao) throw new Error('Clube sem vínculo suficiente.');
   return { ...c, tecnico: { ...c.tecnico, clube, torcida: limitar(55 + Math.round(opcao.afinidade * 0.35), 0, 100),
-    diretoria: limitar(60 + Math.round(opcao.afinidade * 0.15), 0, 100), clubeInicialEscolhido: true } };
+    diretoria: limitar(60 + Math.round(opcao.afinidade * 0.15), 0, 100), clubeInicialEscolhido: true, retornoIdolo: !!opcao.idolatria } };
 }
 export const CLUBES_CONVITES_TECNICO = [
   { nome: 'Clube do Interior', pais: 'Brasil', exigencia: 30, elenco: 42, salario: 8, rival: 'Tradicional Nacional' },
@@ -202,7 +202,7 @@ export function aceitarPropostaTecnico(c, clube) {
   if (!proposta) throw new Error('Proposta indisponível.');
   return { ...c, tecnico: { ...t, clube: proposta.nome, pais: proposta.pais, elenco: proposta.elenco,
     moral: 50, diretoria: proposta.rival ? 48 : 65, torcida: proposta.rival ? 35 : 55,
-    demitido: false, desempregado: false, propostas: [], salario: proposta.salario } };
+    demitido: false, desempregado: false, retornoIdolo: !!(t.vinculosJogador || []).find(v => v.clube === proposta.nome && v.idolatria), propostas: [], salario: proposta.salario } };
 }
 export function passarAnoDesempregado(c, rng = sorteio) {
   if (!c?.tecnico || c.tecnico.fase !== 'resultado') throw new Error('Só é possível aguardar entre temporadas.');
@@ -254,10 +254,16 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   const posicao = pontos >= 84 ? 1 : pontos >= 73 ? 2 : pontos >= 65 ? 4 : pontos >= 57 ? 7 : pontos >= 48 ? 11 : pontos >= 40 ? 15 : 18;
   const campeao = posicao === 1;
   const objetivo = objetivoTecnico(t);
+  // O ídolo começa protegido pelo carinho da torcida, mas uma campanha ruim
+  // provoca frustração maior que a de um treinador sem história no clube.
+  const vinculoAtual = (t.vinculosJogador || []).find(v => v.clube === t.clube);
+  const idoloEmCasa = !!vinculoAtual?.idolatria;
   const cumpriuObjetivo = posicao <= objetivo.posicao;
-  const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivo.nome, cumpriuObjetivo, estilo: t.estilo, decisoes: t.decisoes, vitorias, empates, derrotas, pontos, posicao, campeao };
-  const novaConfianca = limitar(t.diretoria + (cumpriuObjetivo ? 8 : -14) + (posicao <= 4 ? 5 : posicao >= 15 ? -8 : 0), 0, 100);
-  const variacaoTorcida = campeao ? 18 : posicao <= 4 ? 10 : cumpriuObjetivo ? 5 : posicao >= 17 ? -23 : -12;
+  const temporada = { ano: t.ano, clube: t.clube, idoloEmCasa, objetivo: objetivo.nome, cumpriuObjetivo, estilo: t.estilo, decisoes: t.decisoes, vitorias, empates, derrotas, pontos, posicao, campeao };
+  const novaConfianca = limitar(t.diretoria + (cumpriuObjetivo ? 8 : -14) + (posicao <= 4 ? 5 : posicao >= 15 ? -8 : 0)
+    + (idoloEmCasa && !cumpriuObjetivo ? -4 : 0), 0, 100);
+  const variacaoTorcida = (campeao ? 18 : posicao <= 4 ? 10 : cumpriuObjetivo ? 5 : posicao >= 17 ? -23 : -12)
+    + (idoloEmCasa && !cumpriuObjetivo ? -9 : idoloEmCasa && cumpriuObjetivo ? 4 : 0);
   const novaTorcida = limitar((t.torcida ?? 55) + variacaoTorcida, 0, 100);
   const situacaoCargo = riscoDemissaoTecnico({ ...t, diretoria: novaConfianca, torcida: novaTorcida });
   const demitido = novaConfianca < 20 || (novaConfianca < 40 && novaTorcida < 35) || situacaoCargo.pressao >= 82;

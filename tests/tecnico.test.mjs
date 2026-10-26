@@ -334,3 +334,19 @@ test('posição da etapa corresponde à tabela e permanece no andamento', () => 
   assert.equal(tabela.find(x => x.meuClube).pontos, c.tecnico.andamento.pontos);
   assert.equal(tabela.find(x => x.meuClube).jogos, 10);
 });
+
+test('liga evolui por resultados dos rivais sem recalcular rodadas anteriores', () => {
+  const clube = CLUBES.find(x => CLUBES.filter(y => y.liga === x.liga).length >= 20);
+  if (!clube) return;
+  let c = iniciarCarreiraTecnico(atleta);
+  c = { ...c, tecnico: { ...c.tecnico, clube: clube.nome, elenco: clube.forca, decisoes: Array(4).fill({ id: 'teste' }) } };
+  c = simularEtapaTecnico(c, () => 0.4);
+  const tabela = c.tecnico.andamento.classificacao;
+  assert.equal(tabela.length, 20);
+  assert.ok(tabela.every(x => x.jogos === 10));
+  const totalPontos = tabela.reduce((n, x) => n + x.pontos, 0);
+  assert.ok(totalPontos <= 10 * 10 * 3);
+  c = simularEtapaTecnico(c, () => 0.4);
+  assert.ok(c.tecnico.andamento.classificacao.every(x => x.jogos === 19));
+  assert.equal(c.tecnico.andamento.classificacao.find(x => x.meuClube).pontos, c.tecnico.andamento.pontos);
+});

@@ -164,7 +164,7 @@ export function gerarPropostasTecnico(t, rng = sorteio) {
 }
 export function aceitarPropostaTecnico(c, clube) {
   const t = c.tecnico;
-  if (!t || t.fase !== 'resultado') throw new Error('Propostas só podem ser aceitas entre temporadas.');
+  if (!t || (t.fase !== 'resultado' && !t.desempregado)) throw new Error('Propostas só podem ser aceitas entre temporadas.');
   const proposta = (t.propostas || []).find(x => x.nome === clube);
   if (!proposta) throw new Error('Proposta indisponível.');
   return { ...c, tecnico: { ...t, clube: proposta.nome, pais: proposta.pais, elenco: proposta.elenco,

@@ -96,7 +96,7 @@ test('torcida e diretoria baixas aumentam pressão e OVR filtra clubes', () => {
   const iniciante = { reputacao: 25, temporadas: [], titulos: 0, clube: 'Outro' };
   assert.ok(!gerarPropostasTecnico(iniciante).some(p => p.nome === 'Gigante Mundial'));
   const consagrado = { reputacao: 99, temporadas: Array(10).fill({}), titulos: 5, vitorias: 300, empates: 40, derrotas: 40, clube: 'Outro' };
-  assert.ok(gerarPropostasTecnico(consagrado).some(p => p.nome === 'Gigante Mundial'));
+  assert.ok(gerarPropostasTecnico(consagrado, () => 0).some(p => p.exigencia >= 70));
 });
 
 test('ofertas dependem do sorteio e do OVR, sem garantir clubes grandes', () => {

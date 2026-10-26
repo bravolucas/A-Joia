@@ -429,3 +429,31 @@ test('carreira continua por duas temporadas sem perder histórico ou duplicar jo
   assert.equal(historicoProfissionalTecnico(c.tecnico).jogos, 76);
   assert.equal(c.tecnico.temporadas[0].confrontos.length, 38);
 });
+
+test('save JSON no meio da temporada retoma sem repetir partidas', () => {
+  let c = iniciarCarreiraTecnico(atleta);
+  c = { ...c, tecnico: { ...c.tecnico, decisoes: Array(QUANTIDADE_DECISOES_TECNICO).fill({ id: 'teste' }), diretoria: 95, torcida: 95, elenco: 90 } };
+  c = simularEtapaTecnico(c, () => 0.01);
+  const anterior = JSON.stringify(c);
+  const salvo = JSON.parse(anterior);
+  const retomado = simularEtapaTecnico(salvo, () => 0.01);
+  assert.equal(JSON.stringify(c), anterior);
+  assert.equal(retomado.tecnico.andamento.jogos, 19);
+  assert.equal(retomado.tecnico.andamento.confrontos.length, 19);
+  assert.deepEqual(retomado.tecnico.andamento.confrontos.slice(0, 10), c.tecnico.andamento.confrontos);
+  assert.equal(retomado.tecnico.andamento.classificacao.find(x => x.meuClube).jogos, 19);
+});
+test('save antigo sem placares é migrado sem alterar o objeto original', () => {
+  let c = iniciarCarreiraTecnico(atleta);
+  c = { ...c, tecnico: { ...c.tecnico, decisoes: Array(QUANTIDADE_DECISOES_TECNICO).fill({ id: 'teste' }), diretoria: 95, torcida: 95, elenco: 90 } };
+  c = simularEtapaTecnico(c, () => 0.01);
+  const antigo = JSON.parse(JSON.stringify(c));
+  antigo.tecnico.andamento.confrontos.forEach(j => { delete j.golsPro; delete j.golsContra; });
+  const snapshot = JSON.stringify(antigo);
+  const retomado = simularEtapaTecnico(antigo, () => 0.01);
+  assert.equal(JSON.stringify(antigo), snapshot);
+  assert.ok(retomado.tecnico.andamento.confrontos.every(j => Number.isFinite(j.golsPro) && Number.isFinite(j.golsContra)));
+  assert.equal(retomado.tecnico.andamento.confrontos.length, 19);
+  const time = retomado.tecnico.andamento.classificacao.find(x => x.meuClube);
+  assert.equal(time.saldoGols, time.golsPro - time.golsContra);
+});

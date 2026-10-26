@@ -1,10 +1,17 @@
 import React from 'react';
-import { ESTILOS_TECNICO, cartaAtualTecnico, objetivoTecnico, QUANTIDADE_DECISOES_TECNICO } from './tecnico.js';
+import { ESTILOS_TECNICO, cartaAtualTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, QUANTIDADE_DECISOES_TECNICO } from './tecnico.js';
 
 export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAvancar, onAceitarProposta, onSair, onLegado }) {
   const t = c.tecnico;
   const ultima = t.temporadas[t.temporadas.length - 1];
   const decisao = cartaAtualTecnico(t);
+  const risco = riscoDemissaoTecnico(t);
+  const indicador = (titulo, valor) => <div className="flex flex-col gap-1">
+    <div className="flex justify-between text-sm"><span className="text-[#C9D3CE]">{titulo}</span><strong className="text-white">{valor}/100</strong></div>
+    <div className="h-2.5 rounded-full bg-white/10 overflow-hidden" role="progressbar" aria-label={titulo} aria-valuemin={0} aria-valuemax={100} aria-valuenow={valor}>
+      <div className="h-full rounded-full transition-all" style={{ width: `${valor}%`, background: valor < 35 ? '#E36B5B' : valor < 60 ? '#EBC557' : '#7FE3BC' }} />
+    </div>
+  </div>;
   return <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-4 rp-entra">
     <div className="rp-painel p-5 text-center">
       <p className="text-[#EBC557] text-xs font-bold tracking-[.2em] uppercase">A JOIA · Segunda carreira</p>
@@ -12,7 +19,12 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAva
       <p className="text-[#C9D3CE] mt-2">{c.nome} · {c.idade} anos</p>
       <p className="text-[#7FE3BC] mt-1 font-bold">{t.clube} · Temporada {t.ano}</p>
       <p className="text-[#C9D3CE] text-sm mt-3">Objetivo da diretoria: <strong className="text-white">{objetivoTecnico(t).nome}</strong></p>
-      <p className="text-[#8FA39A] text-sm">Confiança da diretoria: {t.diretoria}/100</p>
+      <div className="rp-painel p-3 mt-3 text-left flex flex-col gap-3">
+        <div className="flex justify-between items-center"><span className="font-bold text-[#EBC557]">OVR Técnico</span><strong className="font-stat text-2xl text-white">{calcularOvrTecnico(t)}</strong></div>
+        {indicador('Aprovação da torcida', t.torcida ?? 55)}
+        {indicador('Confiança da diretoria', t.diretoria ?? 60)}
+        <p className="text-xs text-[#8FA39A]">Situação no cargo: <strong className="text-white">{risco.situacao}</strong> · Pressão {risco.pressao}/100</p>
+      </div>
       <div className="grid grid-cols-3 gap-2 mt-5">
         <div><strong className="block text-xl text-[#EBC557]">{t.reputacao}</strong><span className="text-xs text-[#8FA39A]">Reputação</span></div>
         <div><strong className="block text-xl text-white">{t.temporadas.length}</strong><span className="text-xs text-[#8FA39A]">Temporadas</span></div>

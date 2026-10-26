@@ -6,6 +6,7 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onReuniao, onJ
   const ultima = (t.temporadas || []).at(-1);
   const decisao = cartaAtualTecnico(t);
   const aguardandoDecisoes = (t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO;
+  const aguardandoClubeInicial = t.temporadas.length === 0 && !t.clubeInicialEscolhido && (t.opcoesInicio || []).length > 0;
   const estabilidade = painelEstabilidadeTecnico(t);
   const historico = historicoProfissionalTecnico(t);
   const indicador = (titulo, valor) => <div className="flex flex-col gap-1">
@@ -41,7 +42,7 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onReuniao, onJ
         <div><strong className="block text-xl text-white">{t.titulos}</strong><span className="text-xs text-[#8FA39A]">Títulos</span></div>
       </div>
     </div>
-    {t.temporadas.length === 0 && !t.clubeInicialEscolhido && (t.opcoesInicio || []).length > 0 && <section className="rp-painel p-4 flex flex-col gap-2"><h2 className="font-bold text-[#EBC557]">Comece onde você fez história</h2><p className="text-sm text-[#C9D3CE]">Sua trajetória como jogador abriu portas. Escolha um clube com vínculo afetivo para iniciar como técnico.</p>{t.opcoesInicio.map(v => <button key={v.clube} onClick={() => onEscolherClubeInicial(v.clube)} className="rp-opcao p-3 text-left"><strong className="block text-white">{v.clube} {v.idolatria ? '★ Ídolo' : ''}</strong><span className="text-sm text-[#8FA39A]">{v.temporadas} temporadas · {v.titulos} títulos · Afinidade {v.afinidade}/100</span></button>)}</section>}
+    {aguardandoClubeInicial && <section className="rp-painel p-4 flex flex-col gap-2"><h2 className="font-bold text-[#EBC557]">Comece onde você fez história</h2><p className="text-sm text-[#C9D3CE]">Sua trajetória como jogador abriu portas. Escolha um clube com vínculo afetivo para iniciar como técnico.</p>{t.opcoesInicio.map(v => <button key={v.clube} onClick={() => onEscolherClubeInicial(v.clube)} className="rp-opcao p-3 text-left"><strong className="block text-white">{v.clube} {v.idolatria ? '★ Ídolo' : ''}</strong><span className="text-sm text-[#8FA39A]">{v.temporadas} temporadas · {v.titulos} títulos · Afinidade {v.afinidade}/100</span></button>)}</section>}
     {t.ultimaNegociacao && !t.ultimaNegociacao.aceita && <p role="status" className="rp-painel p-3 text-[#F0A99E] text-sm">{t.ultimaNegociacao.clube}: {t.ultimaNegociacao.motivo}</p>}
     {t.desempregado ? <section className="rp-painel p-4 flex flex-col gap-3">
       <h2 className="font-bold text-white">Mercado de treinadores</h2>
@@ -49,14 +50,14 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onReuniao, onJ
       {(t.propostas || []).map(p => <div key={p.nome} className="rp-painel p-3"><strong className="block text-white">{p.nome} · {p.pais}</strong><span className="text-sm text-[#8FA39A]">OVR mínimo {p.exigencia} · R$ {p.salario} mil/mês · Meta: {p.objetivo}</span><div className="flex flex-wrap gap-2 mt-2">{ENTREVISTAS_TECNICO.map(e => <button key={e.id} onClick={() => onAceitarProposta(p.nome, e.id)} className="rp-opcao p-2 text-xs">{e.nome}</button>)}</div></div>)}
       <button onClick={onEsperar} className="rp-btn rp-sec">Aguardar mais uma temporada</button>
     </section> : t.fase === 'pretemporada' ? <>
-      <section className="rp-painel p-4">
+      {!aguardandoClubeInicial && <section className="rp-painel p-4">
         <h2 className="text-lg font-bold text-white mb-3">Escolha seu estilo de jogo</h2>
         <div className="flex flex-col gap-2">{ESTILOS_TECNICO.map(e =>
           <button key={e.id} onClick={() => onEstilo(e.id)} aria-pressed={t.estilo === e.id} className={`rp-opcao p-3 text-left ${t.estilo === e.id ? 'sel' : ''}`}>
             <strong className="block text-white">{e.nome}</strong><span className="text-sm text-[#C9D3CE]">{e.descricao}</span>
           </button>)}</div>
-      </section>
-      <section className="rp-painel p-4">
+      </section>}
+      {!aguardandoClubeInicial && <section className="rp-painel p-4">
         <h2 className="text-lg font-bold text-white">Decisões da temporada · {t.decisoes.length}/{QUANTIDADE_DECISOES_TECNICO}</h2>
         <p className="text-sm text-[#8FA39A] mt-1">Elenco {t.elenco} · Moral {t.moral} · Diretoria {t.diretoria}</p>
         {t.decisoes.length > 0 && <p className="text-sm text-[#EBC557] mt-2">{t.decisoes[t.decisoes.length - 1].resultado}</p>}
@@ -68,7 +69,7 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onReuniao, onJ
             <span className="text-sm text-[#8FA39A]">{op.detalhe}</span>
           </button>)}
         </div> : <p className="text-[#7FE3BC] mt-3">Decisões concluídas. Sua equipe está pronta.</p>}
-      </section>
+      </section>}
       {t.andamento && <section className="rp-painel p-4" aria-label="Acompanhamento da temporada">
         <h2 className="text-white font-bold">Temporada em andamento</h2>
         <p className="text-[#C9D3CE] text-sm mt-1">Rodada {t.andamento.jogos}/38 · {t.andamento.pontos} pontos · {t.andamento.vitorias}V {t.andamento.empates}E {t.andamento.derrotas}D</p>
@@ -94,7 +95,7 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onReuniao, onJ
         <p className="text-[#C9D3CE] text-sm mt-2">A diretoria exige explicações pela campanha. Sua resposta pode recuperar a confiança ou agravar a crise.</p>
         <div className="flex flex-col gap-2 mt-3">{OPCOES_REUNIAO_TECNICO.map(op => <button key={op.id} onClick={() => onReuniao(op.id)} className="rp-opcao p-3 text-left"><strong className="text-white block">{op.nome}</strong><span className="text-[#8FA39A] text-sm">{op.descricao}</span></button>)}</div>
       </section>}
-      <button disabled={aguardandoDecisoes || !!t.reuniaoPendente} title={t.reuniaoPendente ? 'Responda à reunião da diretoria' : aguardandoDecisoes ? 'Conclua as decisões da pré-temporada' : undefined} onClick={onJogar} className="rp-btn rp-ouro p-3">{t.andamento ? `Avançar até a rodada ${ETAPAS_TEMPORADA_TECNICO.find(n => n > t.andamento.jogos) || 38}` : 'Iniciar campeonato (10 rodadas)'}</button>
+      <button disabled={aguardandoClubeInicial || aguardandoDecisoes || !!t.reuniaoPendente} title={aguardandoClubeInicial ? 'Escolha o clube inicial antes de jogar' : t.reuniaoPendente ? 'Responda à reunião da diretoria' : aguardandoDecisoes ? 'Conclua as decisões da pré-temporada' : undefined} onClick={onJogar} className="rp-btn rp-ouro p-3">{t.andamento ? `Avançar até a rodada ${ETAPAS_TEMPORADA_TECNICO.find(n => n > t.andamento.jogos) || 38}` : 'Iniciar campeonato (10 rodadas)'}</button>
     </> : <section className="rp-painel p-5">
       <p className="text-[#EBC557] uppercase tracking-wider text-xs">Fim de temporada · {ultima.ano}</p>
       <h2 className="text-2xl font-bold mt-2 text-white">{ultima.campeao ? '🏆 Campeão!' : `${ultima.posicao}º lugar`}</h2>

@@ -276,11 +276,59 @@ export function definirEstiloTecnico(c, estilo) {
   if (!c?.tecnico) throw new Error('Carreira técnica não iniciada.');
   return { ...c, tecnico: { ...c.tecnico, estilo } };
 }
+export const ETAPAS_TEMPORADA_TECNICO = [10, 19, 29, 38];
+export function simularEtapaTecnico(c, rng = sorteio) {
+  const t = c?.tecnico;
+  if (!t || t.fase !== 'pretemporada') throw new Error('Etapa indisponível.');
+  if ((t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) throw new Error('Conclua as decisões antes de jogar.');
+  const anterior = t.andamento || { jogos: 0, vitorias: 0, empates: 0, derrotas: 0, pontos: 0, avaliacoes: [] };
+  const limite = ETAPAS_TEMPORADA_TECNICO.find(n => n > anterior.jogos);
+  if (!limite) throw new Error('Temporada já concluída.');
+  const bonus = t.estilo === 'equilibrado' ? 0.04 : 0;
+  const pVitoria = limitar(0.20 + t.reputacao / 600 + (t.elenco - 50) / 500 + (t.moral - 50) / 700 + bonus, 0.20, 0.67);
+  const pEmpate = t.estilo === 'defensivo' ? 0.29 : t.estilo === 'ofensivo' ? 0.17 : 0.23;
+  let v = anterior.vitorias, e = anterior.empates, d = anterior.derrotas;
+  for (let i = anterior.jogos; i < limite; i++) {
+    const r = rng();
+    if (r < pVitoria) v++; else if (r < pVitoria + pEmpate) e++; else d++;
+  }
+  const pontos = v * 3 + e;
+  const aproveitamento = pontos / (limite * 3);
+  const expectativa = objetivoTecnico(t).posicao;
+  const ruim = aproveitamento < (expectativa <= 4 ? 0.44 : expectativa <= 8 ? 0.35 : 0.25);
+  const otimo = aproveitamento > (expectativa <= 4 ? 0.72 : 0.62);
+  const ajuste = otimo ? 6 : ruim ? -9 : 1;
+  const diretoria = limitar((t.diretoria ?? 60) + ajuste, 0, 100);
+  const torcida = limitar((t.torcida ?? 55) + (otimo ? 7 : ruim ? -8 : 1), 0, 100);
+  const pressao = riscoDemissaoTecnico({ ...t, diretoria, torcida }).pressao;
+  const demitido = (diretoria < 18 || pressao >= 85) && limite < 38;
+  const avaliacao = { rodada: limite, pontos, aproveitamento: Math.round(aproveitamento * 100),
+    situacao: demitido ? 'Demitido durante a temporada' : ruim ? 'Diretoria insatisfeita' : otimo ? 'Diretoria satisfeita' : 'Diretoria acompanha os resultados',
+    diretoria, torcida, pressao };
+  const andamento = { jogos: limite, vitorias: v, empates: e, derrotas: d, pontos,
+    avaliacoes: [...anterior.avaliacoes, avaliacao] };
+  if (demitido) {
+    const posicao = pontos / limite >= 2.1 ? 3 : pontos / limite >= 1.5 ? 8 : pontos / limite >= 1 ? 15 : 18;
+    const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivoTecnico(t).nome,
+      cumpriuObjetivo: false, posicao, pontos, vitorias: v, empates: e, derrotas: d,
+      jogos: limite, interrompida: true, avaliacoes: andamento.avaliacoes };
+    const novo = { ...t, diretoria, torcida, demitido: true, andamento: null,
+      fase: 'resultado', temporadas: [...t.temporadas, temporada],
+      vitorias: t.vitorias + v, empates: t.empates + e, derrotas: t.derrotas + d,
+      propostas: gerarPropostasTecnico({ ...t, diretoria, torcida, clube: null }, rng),
+      promessaContrato: null, ano: t.ano + 1 };
+    return { ...c, idade: c.idade + 1, ano: c.ano + 1, tecnico: novo };
+  }
+  if (limite < 38) return { ...c, tecnico: { ...t, diretoria, torcida, andamento } };
+  // Finalizar usando os resultados já disputados, sem sortear partidas novamente.
+  return finalizarTemporadaTecnico(c, { ...andamento, diretoria, torcida }, rng);
+}
 export function simularTemporadaTecnico(c, rng = sorteio) {
   if (!c?.tecnico) throw new Error('Carreira técnica não iniciada.');
   if (c.tecnico.fase !== 'pretemporada') throw new Error('Conclua a temporada anterior antes de simular.');
   const t = c.tecnico;
   if ((t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) throw new Error('Tome as decisões da temporada antes de simular.');
+  if (t.andamento?.jogos) throw new Error('Temporada em andamento: avance pelas etapas.');
   const bonus = t.estilo === 'equilibrado' ? 0.04 : 0;
   const pVitoria = limitar(0.20 + t.reputacao / 600 + (t.elenco - 50) / 500 + (t.moral - 50) / 700 + bonus, 0.20, 0.67);
   const pEmpate = t.estilo === 'defensivo' ? 0.29 : t.estilo === 'ofensivo' ? 0.17 : 0.23;
@@ -318,6 +366,33 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
     diretoria: novaConfianca, torcida: novaTorcida
   }};
 }
+function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
+  const t = c.tecnico;
+  const { vitorias, empates, derrotas, pontos } = andamento;
+  const posicao = pontos >= 84 ? 1 : pontos >= 73 ? 2 : pontos >= 65 ? 4 : pontos >= 57 ? 7 : pontos >= 48 ? 11 : pontos >= 40 ? 15 : 18;
+  const campeao = posicao === 1;
+  const objetivo = objetivoTecnico(t);
+  const idoloEmCasa = !!(t.vinculosJogador || []).find(v => v.clube === t.clube && v.idolatria);
+  const cumpriuObjetivo = posicao <= objetivo.posicao;
+  const promessaDescumprida = !!(t.promessaContrato?.clube === t.clube && posicao > t.promessaContrato.posicaoMaxima);
+  const novaConfianca = limitar(andamento.diretoria + (cumpriuObjetivo ? 8 : -14) + (posicao <= 4 ? 5 : posicao >= 15 ? -8 : 0)
+    + (idoloEmCasa && !cumpriuObjetivo ? -4 : 0) - (promessaDescumprida ? 12 : 0), 0, 100);
+  const novaTorcida = limitar(andamento.torcida + (campeao ? 18 : posicao <= 4 ? 10 : cumpriuObjetivo ? 5 : posicao >= 17 ? -23 : -12)
+    + (idoloEmCasa && !cumpriuObjetivo ? -9 : idoloEmCasa && cumpriuObjetivo ? 4 : 0) - (promessaDescumprida ? 7 : 0), 0, 100);
+  const demitido = novaConfianca < 20 || (novaConfianca < 40 && novaTorcida < 35) ||
+    riscoDemissaoTecnico({ ...t, diretoria: novaConfianca, torcida: novaTorcida }).pressao >= 82;
+  const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivo.nome, cumpriuObjetivo,
+    promessaDescumprida, idoloEmCasa, estilo: t.estilo, decisoes: t.decisoes,
+    vitorias, empates, derrotas, pontos, posicao, campeao, avaliacoes: andamento.avaliacoes };
+  const proximo = { ...t, ano: t.ano + 1, fase: 'resultado', andamento: null,
+    temporadas: [...t.temporadas, temporada], vitorias: t.vitorias + vitorias,
+    empates: t.empates + empates, derrotas: t.derrotas + derrotas,
+    titulos: t.titulos + (campeao ? 1 : 0), demitido, promessaContrato: null,
+    objetivoAtual: objetivo.nome, diretoria: novaConfianca, torcida: novaTorcida,
+    reputacao: limitar(t.reputacao + (campeao ? 9 : posicao <= 4 ? 5 : posicao >= 15 ? -5 : 1), 10, 99) };
+  proximo.propostas = gerarPropostasTecnico({ ...proximo, clube: demitido ? null : t.clube }, rng);
+  return { ...c, idade: c.idade + 1, ano: c.ano + 1, tecnico: proximo };
+}
 export function proximaTemporadaTecnico(c) {
   if (!c?.tecnico || c.tecnico.fase !== 'resultado') throw new Error('Nenhum resultado pendente.');
   const t = c.tecnico;
@@ -326,7 +401,7 @@ export function proximaTemporadaTecnico(c) {
   const vencidos = (t.efeitosPendentes || []).filter(e => e.aplicarEm <= t.ano);
   const pendentes = (t.efeitosPendentes || []).filter(e => e.aplicarEm > t.ano);
   const soma = (atributo) => vencidos.reduce((acc, e) => acc + (e.heranca?.[atributo] || 0), 0);
-  const proximo = { ...t, historicoCartas, decisoes: [], fase: 'pretemporada', ultimaNegociacao: null,
+  const proximo = { ...t, historicoCartas, decisoes: [], andamento: null, fase: 'pretemporada', ultimaNegociacao: null,
     efeitosPendentes: pendentes, efeitosRecebidos: vencidos,
     elenco: limitar(t.elenco + soma('elenco'), 10, 95),
     moral: limitar(t.moral + 2 + soma('moral'), 10, 95),

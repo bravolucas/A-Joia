@@ -463,14 +463,14 @@ export function tabelaClassificacaoTecnico(t, andamento) {
     .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).slice(0, 19);
   const pontos = andamento?.pontos || 0;
   const linhas = [{ nome: t.clube || 'Meu clube', jogos, pontos, vitorias: andamento?.vitorias || 0,
-    empates: andamento?.empates || 0, derrotas: andamento?.derrotas || 0, meuClube: true }];
+    empates: andamento?.empates || 0, derrotas: andamento?.derrotas || 0, golsPro: andamento?.golsPro || 0, golsContra: andamento?.golsContra || 0, saldoGols: (andamento?.golsPro || 0) - (andamento?.golsContra || 0), meuClube: true }];
   for (const rival of rivais) {
     const forca = rival.elenco;
     const expectativa = limitar(0.22 + (forca - 45) * 0.007, 0.16, 0.57);
     const empates = Math.min(jogos, Math.round(jogos * 0.24));
     const vitorias = Math.min(jogos - empates, Math.round(jogos * expectativa));
     const derrotas = jogos - vitorias - empates;
-    linhas.push({ nome: rival.nome, jogos, pontos: vitorias * 3 + empates, vitorias, empates, derrotas, meuClube: false });
+    linhas.push({ nome: rival.nome, jogos, pontos: vitorias * 3 + empates, vitorias, empates, derrotas, golsPro: 0, golsContra: 0, saldoGols: 0, meuClube: false });
   }
   return ordenarClassificacaoTecnico(linhas);
 }

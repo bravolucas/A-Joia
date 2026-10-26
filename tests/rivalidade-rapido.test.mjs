@@ -1,0 +1,14 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import vm from "node:vm";
+const source=fs.readFileSync(new URL("../rapido.js",import.meta.url),"utf8");
+const start=source.indexOf("export function retrospectoRivalidade(");
+const end=source.indexOf("/* ---------- aposentadoria ---------- */",start);
+assert.ok(start>=0&&end>start);
+const ctx={};
+vm.runInNewContext(source.slice(start,end).replace("export function","function")+"\nglobalThis.retrospectoRivalidade=retrospectoRivalidade;",ctx);
+const fn=ctx.retrospectoRivalidade;
+test("saves antigos sem rival não quebram",()=>{assert.equal(fn({temporadas:[{ano:2029}]}).anos.length,0);});
+test("pontua anos simulados sem alterar save",()=>{const c={temporadas:[{ano:2030,gols:15,assist:4,titulos:[],bola:{pos:9},rival:{gols:8,assist:3,titulos:[],bola:null}},{ano:2031,gols:0,assist:0,titulos:[],rival:{gols:10,assist:1,titulos:[],bola:null}}]};const before=JSON.stringify(c),r=fn(c);assert.equal(r.voce,1);assert.equal(r.rival,1);assert.equal(r.empates,0);assert.equal(JSON.stringify(c),before);});
+test("empates e temporadas sem dados opcionais",()=>{const r=fn({temporadas:[{ano:2030,rival:{}}]});assert.equal(r.empates,1);});

@@ -20,6 +20,7 @@ import {
   INVESTIMENTOS, comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
   chanceMomento, miniDaPosicao, ehPremioIndividual, RARIDADES, ganhosDaCarta, efeitosDaCarta, vagasDaLiga, ehSegundaDivisao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
   eventoDaJanela, segundoEvento, anoDeDecisao, eventoImpasse, valorAtual, comparaSalario, textoEmoji, efeitosDaDecisao, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, desafiosDaTemporada, resolverDesafio, desafioPendente, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
+  noticiasDaTemporada, retrospectoRivalidade,
   copaPendente, opcoesCopa, jogarCopa,
 } from "./rapido.js";
 
@@ -1204,6 +1205,7 @@ function Stat({ label, valor }) {
 const NOME_TIT_RIVAL = { liga: "a liga", copa: "a copa nacional", continental: "a continental", copaMundo: "a Copa do Mundo" };
 function PainelRival({ c, card }) {
   const r = c.rival, l = card.rival;
+  const retrospecto = retrospectoRivalidade(c);
   const cor = clubeDe(l.clube).cor || "#E36B5B";
   const comp = [["Temporada", `${card.gols}G ${card.assist}A`, `${l.gols}G ${l.assist}A`], ["Carreira", `${c.totais.gols} gols`, `${r.totais.gols} gols`], ["OVR", card.ovrDepois, l.ovr]];
   const noticia = l.aposentou ? `${r.nome} anunciou a aposentadoria.`
@@ -1222,6 +1224,19 @@ function PainelRival({ c, card }) {
         <ClubDot club={clubeDe(l.clube)} size={30} />
       </div>
       {noticia && <p className="text-[15px] text-[#C9D3CE] mt-2">{noticia}</p>}
+      {retrospecto.anos.length > 0 && <div className="mt-3 rounded-xl bg-[#0E1512]/70 p-3" aria-label="Histórico da rivalidade">
+        <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8FA39A]">Histórico da rivalidade</div>
+        <div className="grid grid-cols-3 gap-2 mt-2 text-center">
+          <div><div className="font-stat text-[22px] text-[#7FE3BC]">{retrospecto.voce}</div><div className="text-[11px] text-[#8FA39A]">Você</div></div>
+          <div><div className="font-stat text-[22px] text-[#F2F5F3]">{retrospecto.empates}</div><div className="text-[11px] text-[#8FA39A]">Empates</div></div>
+          <div><div className="font-stat text-[22px] text-[#F0A99E]">{retrospecto.rival}</div><div className="text-[11px] text-[#8FA39A]">Rival</div></div>
+        </div>
+        <div className="text-[11px] text-[#8FA39A] mt-2">Comparação por desempenho anual (gols, assistências, títulos e Bola de Ouro). Não representa confrontos diretos.</div>
+        <div className="flex gap-1 mt-2" aria-label="Resultados por temporada">
+          {retrospecto.anos.map((ano, i) => <span key={i} title={`${ano.ano}: ${ano.resultado === "voce" ? "Você" : ano.resultado === "rival" ? "Rival" : "Empate"}`}
+            className={`h-2 flex-1 rounded-sm ${ano.resultado === "voce" ? "bg-[#1BC28A]" : ano.resultado === "rival" ? "bg-[#E36B5B]" : "bg-[#8FA39A]"}`} />)}
+        </div>
+      </div>}
       <div className="grid grid-cols-[1fr_auto_1fr] gap-x-3 gap-y-1 mt-3 text-[15px] items-center">
         <div className="text-[12px] font-bold tracking-wider text-[#7FE3BC] text-right">VOCÊ</div><div /><div className="text-[12px] font-bold tracking-wider" style={{ color: "#F0A99E" }}>ELE</div>
         {comp.map(([k, a, b]) => (
@@ -1347,6 +1362,7 @@ function Delta({ v, fmt = (x) => x }) {
 }
 
 function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou, gaveta = false }) {
+  const noticias = noticiasDaTemporada(c, card);
   const forcada = aposentadoriaForcada(c);
   const [detalhes0, setDetalhes] = useState(false);
   const detalhes = gaveta || detalhes0;
@@ -1385,6 +1401,16 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
           <div className="rounded-xl bg-[#0E1512]/70 px-2.5 py-2"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">TORCIDA</div><div className="font-stat text-[19px] text-[#F2F5F3] leading-tight">{card.torcida}<Delta v={card.torcidaDelta} /></div></div>
           <div className="rounded-xl bg-[#0E1512]/70 px-2.5 py-2 min-w-0"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">VALOR</div><div className="font-stat text-[19px] text-[#F2F5F3] leading-tight truncate">{formatarValor(card.valor).replace(/\s/g, "")}</div>{card.valorAntes != null && card.valor !== card.valorAntes && <div className="font-stat text-[13px] leading-tight truncate"><Delta v={card.valor - card.valorAntes} fmt={(x) => formatarValor(x).replace(/€\s?/, "").replace(/\s/g, "")} /></div>}</div>
         </div>
+        {/* Central de notícias: manchetes baseadas nos dados simulados */}
+        {noticias.length > 0 && <section className="px-3 pt-3" aria-label="Notícias da temporada">
+          <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-2">📰 Na imprensa</div>
+          <div className="flex flex-col gap-1.5">
+            {noticias.map((noticia, i) => <div key={i} className="rounded-xl border border-white/5 bg-[#0E1512]/70 px-3 py-2">
+              <div className="text-[13px] font-bold text-[#F2F5F3]">{noticia.titulo}</div>
+              <div className="text-[12px] text-[#8FA39A]">{noticia.detalhe}</div>
+            </div>)}
+          </div>
+        </section>}
         {/* o time na temporada */}
         <div className="px-4 pt-3 pb-2">
           <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-0.5">O time na temporada</div>

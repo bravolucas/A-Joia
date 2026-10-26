@@ -1815,6 +1815,63 @@ function fecharTemporadaBase(c0, card0) {
   return { c, card };
 }
 
+/* Manchetes derivadas dos resultados efetivos, sem estado adicional no save.
+   O mesmo card sempre gera as mesmas notícias, inclusive em saves antigos. */
+export function noticiasDaTemporada(c, card) {
+  if (!card) return [];
+  const noticias = [];
+  const add = (tipo, titulo, detalhe) => {
+    if (noticias.length < 4) noticias.push({ tipo, titulo, detalhe });
+  };
+  const titulos = card.titulos || [];
+  const grande = titulos.find(t => ["copaMundo", "continental", "mundial", "continentalSelecao"].includes(t.tipo));
+  if (grande) add("conquista", `${card.clube} celebra: ${grande.nome}`, "Conquista histórica na temporada.");
+  if (card.bola?.pos === 1) add("premio", `${c.nome} conquista a Bola de Ouro`, "O melhor jogador do mundo na temporada.");
+  else if (card.bola?.pos <= 3) add("premio", `${c.nome} termina no top 3 da Bola de Ouro`, `Posição no ranking: ${card.bola.pos}º.`);
+  // O rival é simulado de verdade no fechamento da temporada.
+  // Noticiar apenas acontecimentos registrados no card, nunca inventar transferências.
+  const rival = card.rival;
+  if (rival && c.rival?.nome) {
+    const nome = c.rival.nome;
+    if (rival.mudou) add("mercado", `${nome} troca de clube`, `De ${rival.mudou} para ${rival.clube}.`);
+    if (rival.bola === 1) add("rival", `${nome} conquista a Bola de Ouro`, `Seu rival de geração brilhou pelo ${rival.clube}.`);
+    else if (rival.bola && rival.bola <= 3) add("rival", `${nome} termina entre os melhores do mundo`, `Top ${rival.bola} na Bola de Ouro.`);
+    if (rival.aposentou) add("rival", `${nome} anuncia aposentadoria`, `Fim de carreira após passagem pelo ${rival.clube}.`);
+  }
+  // O ranking de Bola de Ouro também representa outros atletas do mundo.
+  const vencedor = card.bola?.top?.[0];
+  if (vencedor && !vencedor.voce && card.bola?.pos !== 1) {
+    add("mundo", `${vencedor.nome} lidera a Bola de Ouro`, `Destaque do ${vencedor.clube} na temporada.`);
+  }
+  if (card.rebaixado) add("alerta", `${card.clube} sofre rebaixamento`, `A equipe encerrou a liga em ${card.posLiga}º lugar.`);
+  else if (card.acesso) add("conquista", `${card.clube} garante o acesso`, `Campanha de ${card.posLiga}º lugar na ${card.ligaNome}.`);
+  if (card.selecao?.campeao) add("selecao", `${c.nome} comemora título pela seleção`, card.selecao.nome || "Título internacional.");
+  if (card.lesao) add("alerta", `Lesão afeta a temporada de ${c.nome}`, String(card.lesao));
+  if (card.jogos >= 15 && card.nota >= 7.6) add("destaque", `${c.nome} brilha no ${card.clube}`, `${card.gols} gols, ${card.assist} assistências e nota ${Number(card.nota).toFixed(1)}.`);
+  if (noticias.length < 2) add("temporada", `${card.clube} encerra a temporada`, `${card.posLiga}º lugar na ${card.ligaNome} · ${card.jogos} jogos de ${c.nome}.`);
+  return noticias;
+}
+
+/* Histórico derivado das temporadas já salvas: não altera o formato do save.
+   Considera apenas temporadas em que o rival foi efetivamente simulado. */
+export function retrospectoRivalidade(c) {
+  const temporadas = (c?.temporadas || []).filter(t => t?.rival);
+  const pontos = t => {
+    const r = t.rival;
+    const eu = (t.gols || 0) + (t.assist || 0) * 0.7 + (t.titulos || []).length * 5 + (t.bola?.pos === 1 ? 12 : 0);
+    const ele = (r.gols || 0) + (r.assist || 0) * 0.7 + (r.titulos || []).length * 5 + (r.bola === 1 ? 12 : 0);
+    return { eu, ele };
+  };
+  const anos = temporadas.map(t => {
+    const p = pontos(t);
+    return { ano: t.ano, eu: Math.round(p.eu * 10) / 10, rival: Math.round(p.ele * 10) / 10,
+      resultado: p.eu > p.ele ? "voce" : p.eu < p.ele ? "rival" : "empate" };
+  });
+  return { anos, voce: anos.filter(x => x.resultado === "voce").length,
+    rival: anos.filter(x => x.resultado === "rival").length,
+    empates: anos.filter(x => x.resultado === "empate").length };
+}
+
 /* ---------- aposentadoria ---------- */
 export const podeAposentar = (c) => c.idade >= 33;
 export function aposentadoriaForcada(c) {
@@ -1879,6 +1936,51 @@ function grandeAceita(c, x, ovr, prest) {
   if (ovr + margem >= x.forca) return true;
   return ovr + margem >= x.forca - 3 && chance(0.12);
 }
+/* O mercado espontâneo prioriza continuidade competitiva. Ligas alternativas
+   continuam possíveis, especialmente para veteranos, jogadores em baixa ou
+   quando o atleta pede expressamente ao empresário aquele destino. */
+const LIGAS_ELITE_EUROPA_RAPIDO = new Set(["inglaterra", "espanha", "italia", "alemanha", "franca"]);
+const LIGAS_EUROPA_RAPIDO = new Set([...LIGAS_ELITE_EUROPA_RAPIDO, "portugal", "holanda", "turquia"]);
+const LIGAS_BRASIL_RAPIDO = new Set(["brasileirao", "serieB"]);
+const LIGAS_ALTERNATIVAS_RAPIDO = new Set(["brasileirao", "serieB", "argentina", "arabia", "mls"]);
+function pesoMercadoRapido(c, atual, destino, ovr, opts) {
+  const pedido = !!opts.ligas?.length;
+  const idade = c.idade;
+  const eliteAtual = LIGAS_ELITE_EUROPA_RAPIDO.has(atual.liga);
+  const europaAtual = LIGAS_EUROPA_RAPIDO.has(atual.liga);
+  const alternativa = LIGAS_ALTERNATIVAS_RAPIDO.has(destino.liga);
+  const europaDestino = LIGAS_EUROPA_RAPIDO.has(destino.liga);
+  const ultima = c.temporadas?.[c.temporadas.length - 1];
+  const boaFase = (ultima?.jogos || 0) >= 10 && (ultima?.nota || 0) >= 7.1;
+  const maFase = (ultima?.jogos || 0) >= 10 && (ultima?.nota || 0) < 6.5;
+  let peso = afinidade(c, destino.liga);
+  // Prefere clubes de força compatível, sem premiar sempre o maior da liga.
+  const distancia = Math.abs(destino.forca - ovr);
+  peso *= Math.max(0.3, 1.3 - distancia * 0.075);
+  peso *= 0.8 + Math.max(0, Math.min(0.6, (destino.forca - atual.forca) / 25));
+  if (!pedido) {
+    if (europaAtual && alternativa) {
+      // Estrela em plena atividade na Europa raramente recebe proposta
+      // espontânea de retorno; com a idade ou má fase a porta se abre.
+      const auge = idade >= 23 && idade <= 30 && ovr >= 80 && !maFase;
+      peso *= auge ? (eliteAtual ? 0.035 : 0.09) : idade >= 34 ? 0.9 : idade >= 31 ? 0.38 : 0.22;
+      if (boaFase && auge) peso *= 0.7;
+    } else if (europaAtual && europaDestino) {
+      peso *= eliteAtual && LIGAS_ELITE_EUROPA_RAPIDO.has(destino.liga) ? 1.6 : 1.25;
+    } else if (!europaAtual && europaDestino && idade <= 29) {
+      peso *= 1.35;
+    }
+    if (LIGAS_BRASIL_RAPIDO.has(destino.liga) && c.nac === "brasil" && idade >= 32) peso *= 1.7;
+    if (destino.liga === "arabia" && idade < 30) peso *= 0.45;
+  } else {
+    // Pedido explícito: não aplicar bloqueio regional nem penalidade de auge.
+    peso *= 1.15;
+  }
+  // Pequena variação por clube, estável dentro da mesma carreira e ano:
+  // impede que o topo do ranking seja sempre o mesmo sem quebrar o código-semente.
+  const ruido = hashTexto(`${c.codigo || ""}|${c.ano}|${destino.nome}|mercado`) % 1000;
+  return Math.max(0.0001, peso * (0.7 + ruido / 1000 * 0.6));
+}
 export function gerarOfertas(c, n, opts = {}) {
   const ovr = ovrDe(c);
   const atual = clubeDe(c.clubeNome);
@@ -1886,19 +1988,20 @@ export function gerarOfertas(c, n, opts = {}) {
   const alcance = emp.alcance;
   const lo = opts.lo ?? ovr - 7, hi = opts.hi ?? ovr + Math.round(alcance * 0.4);
   let pool = clubesJogaveis().filter((x) => x.nome !== c.clubeNome && x.forca >= lo && x.forca <= hi
-    && !(c.flags.traidor || []).includes(x.nome) && (opts.ligas ? opts.ligas.includes(x.liga) : x.liga !== "arabia" || c.idade >= 27));
+    && !(c.flags?.traidor || []).includes(x.nome) && (opts.ligas ? opts.ligas.includes(x.liga) : x.liga !== "arabia" || c.idade >= 27));
   if (!opts.permitirSegunda && ovr >= 66) pool = pool.filter((x) => !ehSegundaDivisao(x.liga));
   const prest = prestigio(c);
   pool = pool.filter((x) => grandeAceita(c, x, ovr, prest));
   const escolhidas = [];
   for (let i = 0; i < n && pool.length; i++) {
-    const pesos = pool.map((x) => afinidade(c, x.liga) * (1 + clampR((x.forca - atual.forca) / 15, -0.6, 1)));
+    const pesos = pool.map((x) => pesoMercadoRapido(c, atual, x, ovr, opts));
     const tot = pesos.reduce((a, b) => a + b, 0);
     let r = rnd() * tot, k = 0;
     while (k < pool.length - 1 && r > pesos[k]) { r -= pesos[k]; k++; }
     const x = pool.splice(k, 1)[0];
-    // evita duas propostas do mesmo país quando há outras opções
-    pool = pool.filter((y) => y.liga !== x.liga || pool.length < 4);
+    // Sem liga solicitada, diversificar destinos; com liga solicitada,
+    // permitir múltiplos clubes daquela liga na mesma janela.
+    if (!opts.ligas) pool = pool.filter((y) => y.liga !== x.liga || pool.length < 4);
     escolhidas.push(x);
   }
   return escolhidas.sort((a, b) => b.forca - a.forca).map((x) => ({

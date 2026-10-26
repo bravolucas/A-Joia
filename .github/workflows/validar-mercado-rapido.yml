@@ -1,0 +1,17 @@
+name: Validar mercado do Modo Rápido
+on:
+  push:
+    branches: [feature/mercado-realista-modo-rapido]
+  pull_request:
+    branches: [main]
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: node --test tests/mercado-rapido.test.mjs
+      - run: npm run build

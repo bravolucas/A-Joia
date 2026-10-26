@@ -72,6 +72,10 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onReuniao, onJ
         <h2 className="text-white font-bold">Temporada em andamento</h2>
         <p className="text-[#C9D3CE] text-sm mt-1">Rodada {t.andamento.jogos}/38 · {t.andamento.pontos} pontos · {t.andamento.vitorias}V {t.andamento.empates}E {t.andamento.derrotas}D</p>
         <div className="h-2 bg-white/10 rounded-full mt-2 overflow-hidden"><div className="h-full bg-[#7FE3BC]" style={{width: `${t.andamento.jogos / 38 * 100}%`}} /></div>
+        {(t.andamento.confrontos || []).length > 0 && <div className="mt-3">
+          <h3 className="text-[#EBC557] text-sm font-bold">Últimos confrontos</h3>
+          <div className="flex flex-col gap-1 mt-2">{t.andamento.confrontos.slice(-5).reverse().map(j => <p key={j.rodada} className="text-[#C9D3CE] text-xs">Rodada {j.rodada} · {j.nome} ({j.casa ? 'casa' : 'fora'}) · <strong className={j.resultado === 'V' ? 'text-[#7FE3BC]' : j.resultado === 'D' ? 'text-[#F0A99E]' : 'text-white'}>{j.resultado === 'V' ? 'Vitória' : j.resultado === 'E' ? 'Empate' : 'Derrota'}</strong></p>)}</div>
+        </div>}
         <h3 className="text-[#EBC557] text-sm font-bold mt-3">Avaliações da diretoria</h3>
         <div className="flex flex-col gap-2 mt-2">{t.andamento.avaliacoes.map(a => <p key={a.rodada} className="text-[#C9D3CE] text-xs">Rodada {a.rodada}: {a.situacao} · {a.aproveitamento}% de aproveitamento · Pressão {a.pressao}/100</p>)}</div>
       </section>}

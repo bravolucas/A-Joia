@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, gerarPropostasTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -84,4 +84,17 @@ test('demissão exige mudança de clube, preservando o histórico', () => {
   assert.equal(c.tecnico.demitido, false);
   assert.equal(c.tecnico.clube, 'Clube do Interior');
   assert.equal(proximaTemporadaTecnico(c).tecnico.fase, 'pretemporada');
+});
+
+test('OVR técnico independe da aprovação local e cresce com experiência', () => {
+  const base = { reputacao: 60, torcida: 90, diretoria: 90, temporadas: [], titulos: 0 };
+  assert.equal(calcularOvrTecnico(base), calcularOvrTecnico({ ...base, torcida: 10, diretoria: 10 }));
+  assert.ok(calcularOvrTecnico({ ...base, temporadas: Array(6).fill({}), titulos: 2 }) > calcularOvrTecnico(base));
+});
+test('torcida e diretoria baixas aumentam pressão e OVR filtra clubes', () => {
+  assert.ok(riscoDemissaoTecnico({ torcida: 10, diretoria: 15 }).pressao > riscoDemissaoTecnico({ torcida: 90, diretoria: 90 }).pressao);
+  const iniciante = { reputacao: 25, temporadas: [], titulos: 0, clube: 'Outro' };
+  assert.ok(!gerarPropostasTecnico(iniciante).some(p => p.nome === 'Gigante Mundial'));
+  const consagrado = { reputacao: 99, temporadas: Array(10).fill({}), titulos: 5, vitorias: 300, empates: 40, derrotas: 40, clube: 'Outro' };
+  assert.ok(gerarPropostasTecnico(consagrado).some(p => p.nome === 'Gigante Mundial'));
 });

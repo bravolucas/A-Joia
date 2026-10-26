@@ -546,6 +546,14 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   for (let rodada = anterior.jogos; rodada < limite; rodada++) {
     classificacao = simularRodadaRivaisTecnico(t, classificacao, confrontos[rodada]?.nome, confrontos[rodada]?.resultado, rng, rodada + 1, { pro: confrontos[rodada]?.golsPro, contra: confrontos[rodada]?.golsContra });
   }
+  // Saves anteriores à introdução dos placares preservam resultados e recebem gols coerentes.
+  for (const jogo of confrontos) {
+    if (!Number.isFinite(jogo.golsPro) || !Number.isFinite(jogo.golsContra)) {
+      const placar = placarTecnico(jogo.resultado, rng);
+      jogo.golsPro = placar.pro;
+      jogo.golsContra = placar.contra;
+    }
+  }
   const golsPro = confrontos.reduce((n, j) => n + (j.golsPro || 0), 0);
   const golsContra = confrontos.reduce((n, j) => n + (j.golsContra || 0), 0);
   classificacao = classificacao.map(x => x.meuClube ? { ...x, jogos: limite, pontos, vitorias: v, empates: e, derrotas: d, golsPro, golsContra, saldoGols: golsPro - golsContra } : x);

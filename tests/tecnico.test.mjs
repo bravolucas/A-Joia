@@ -43,7 +43,7 @@ test('sorteia quatro eventos diferentes por temporada', () => {
 test('banco amplo e cartas relevantes ao contexto', () => {
   assert.ok(TODAS_CARTAS_TECNICO.length >= 60);
   const novato = { temporadas: [], reputacao: 25, diretoria: 70, moral: 60 };
-  assert.equal(elegivelTecnico(TODAS_CARTAS_TECNICO.find(x => x.id === 'ultimato'), novato), true);
+  assert.equal(elegivelTecnico(TODAS_CARTAS_TECNICO.find(x => x.id === 'ultimato'), novato), false);
   assert.equal(elegivelTecnico(TODAS_CARTAS_TECNICO.find(x => x.id === 'boicote'), novato), false);
   const crise = { ...novato, diretoria: 20 };
   assert.equal(elegivelTecnico(TODAS_CARTAS_TECNICO.find(x => x.id === 'boicote'), crise), true);

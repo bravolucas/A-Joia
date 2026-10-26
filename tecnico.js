@@ -320,6 +320,16 @@ export function definirEstiloTecnico(c, estilo) {
   if (!c?.tecnico) throw new Error('Carreira técnica não iniciada.');
   return { ...c, tecnico: { ...c.tecnico, estilo } };
 }
+export function probabilidadesTecnico(t = {}) {
+  const forca = limitar(t.elenco ?? 50, 10, 95);
+  const moral = limitar(t.moral ?? 50, 10, 95);
+  const reputacao = limitar(t.reputacao ?? 40, 10, 99);
+  const bonusEstilo = t.estilo === 'equilibrado' ? 0.015 : t.estilo === 'ofensivo' ? 0.025 : -0.015;
+  const vitoria = limitar(0.16 + (forca - 35) * 0.0075 + (moral - 50) * 0.0015 +
+    (reputacao - 50) * 0.001 + bonusEstilo, 0.16, 0.69);
+  const empate = t.estilo === 'defensivo' ? 0.29 : t.estilo === 'ofensivo' ? 0.18 : 0.24;
+  return { vitoria, empate: Math.min(empate, 0.94 - vitoria), derrota: Math.max(0.06, 1 - vitoria - empate) };
+}
 export const ETAPAS_TEMPORADA_TECNICO = [10, 19, 29, 38];
 export const OPCOES_REUNIAO_TECNICO = [
   { id: 'responsabilidade', nome: 'Assumir responsabilidade', descricao: 'Confiança +12 · moral -4; compromete-se a reagir.' },
@@ -347,9 +357,7 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   const anterior = t.andamento || { jogos: 0, vitorias: 0, empates: 0, derrotas: 0, pontos: 0, avaliacoes: [] };
   const limite = ETAPAS_TEMPORADA_TECNICO.find(n => n > anterior.jogos);
   if (!limite) throw new Error('Temporada já concluída.');
-  const bonus = t.estilo === 'equilibrado' ? 0.04 : 0;
-  const pVitoria = limitar(0.20 + t.reputacao / 600 + (t.elenco - 50) / 500 + (t.moral - 50) / 700 + bonus, 0.20, 0.67);
-  const pEmpate = t.estilo === 'defensivo' ? 0.29 : t.estilo === 'ofensivo' ? 0.17 : 0.23;
+  const { vitoria: pVitoria, empate: pEmpate } = probabilidadesTecnico(t);
   let v = anterior.vitorias, e = anterior.empates, d = anterior.derrotas;
   for (let i = anterior.jogos; i < limite; i++) {
     const r = rng();
@@ -393,9 +401,7 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   const t = c.tecnico;
   if ((t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) throw new Error('Tome as decisões da temporada antes de simular.');
   if (t.andamento?.jogos) throw new Error('Temporada em andamento: avance pelas etapas.');
-  const bonus = t.estilo === 'equilibrado' ? 0.04 : 0;
-  const pVitoria = limitar(0.20 + t.reputacao / 600 + (t.elenco - 50) / 500 + (t.moral - 50) / 700 + bonus, 0.20, 0.67);
-  const pEmpate = t.estilo === 'defensivo' ? 0.29 : t.estilo === 'ofensivo' ? 0.17 : 0.23;
+  const { vitoria: pVitoria, empate: pEmpate } = probabilidadesTecnico(t);
   let vitorias = 0, empates = 0, derrotas = 0;
   for (let i = 0; i < 38; i++) {
     const r = rng();

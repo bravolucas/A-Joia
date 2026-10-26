@@ -27,6 +27,13 @@ import {
 /* Estilo do seletor de modos e do Modo Rápido. Inclui as animações que as
    cenas reaproveitadas do Modo Carreira (apresentação no clube, confete) usam. */
 export const ESTILO_BASE = `
+.rp-pen-cena { position:relative; overflow:hidden; border-radius:14px; transform-origin:center 55%; }
+.rp-pen-acao { animation: rpPenImpacto 700ms cubic-bezier(.2,.7,.2,1) both; }
+.rp-pen-flash { animation: rpPenFlash 850ms ease-out both; }
+@keyframes rpPenImpacto { 0% { transform:scale(1); } 28% { transform:scale(1.025); } 100% { transform:scale(1); } }
+@keyframes rpPenFlash { 0% { opacity:0; } 28% { opacity:1; } 100% { opacity:0; } }
+@media (prefers-reduced-motion:reduce) { .rp-pen-acao, .rp-pen-flash { animation:none; } }
+
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Oswald:wght@500;600;700&family=Unbounded:wght@700;900&family=Playfair+Display:wght@800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
 .rp{min-height:100vh;background:#0E1512;color:#E1E6E3;font-family:'Rajdhani',ui-sans-serif,system-ui,sans-serif;}
 .rp .display{font-family:'Unbounded',sans-serif;}
@@ -1010,7 +1017,19 @@ function TelaPenalti({ c, momento, onFim, goleiro = false }) {
     <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
       <CabecalhoMomento c={c} momento={momento} />
       <div className="rp-painel p-3 overflow-hidden" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
-        <CenaGol goleiro={goleiro} res={res} bola={bola} fora={fora} podeEscolher={escolha == null} onZona={chutar} />
+        <div className="relative">
+          <div className="flex justify-between items-center px-2 pb-2 text-[11px] font-bold uppercase tracking-widest text-[#D5E6DC]">
+            <span>⚽ {goleiro ? "Defesa decisiva" : "Cobrança decisiva"}</span>
+            <span className="text-[#EBC557]">{res ? (res.ok ? "LANCE VENCIDO" : "LANCE PERDIDO") : "ESCOLHA O CANTO"}</span>
+          </div>
+          <div className={res ? "rp-pen-cena rp-pen-acao" : "rp-pen-cena"}>
+            <CenaGol goleiro={goleiro} res={res} bola={bola} fora={fora} podeEscolher={escolha == null} onZona={chutar} />
+            {res && <div className="absolute inset-0 pointer-events-none rp-pen-flash" style={{ background: res.ok ? "radial-gradient(circle at 50% 30%, rgba(27,194,138,.24), transparent 65%)" : "radial-gradient(circle at 50% 30%, rgba(227,107,91,.22), transparent 65%)" }} />}
+          </div>
+          <div className="flex items-center justify-between text-[11px] text-[#8FA39A] px-2 pt-2">
+            <span>VISÃO DO BATEDOR</span><span>{res ? "REPLAY DO LANCE" : "TOQUE NO GOL"}</span>
+          </div>
+        </div>
       </div>
       <div className="text-center min-h-[64px]">
         {!res && (goleiro

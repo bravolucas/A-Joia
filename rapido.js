@@ -1828,16 +1828,27 @@ export function noticiasDaTemporada(c, card) {
   if (grande) add("conquista", `${card.clube} celebra: ${grande.nome}`, "Conquista histórica na temporada.");
   if (card.bola?.pos === 1) add("premio", `${c.nome} conquista a Bola de Ouro`, "O melhor jogador do mundo na temporada.");
   else if (card.bola?.pos <= 3) add("premio", `${c.nome} termina no top 3 da Bola de Ouro`, `Posição no ranking: ${card.bola.pos}º.`);
+  // O rival é simulado de verdade no fechamento da temporada.
+  // Noticiar apenas acontecimentos registrados no card, nunca inventar transferências.
+  const rival = card.rival;
+  if (rival && c.rival?.nome) {
+    const nome = c.rival.nome;
+    if (rival.mudou) add("mercado", `${nome} troca de clube`, `De ${rival.mudou} para ${rival.clube}.`);
+    if (rival.bola === 1) add("rival", `${nome} conquista a Bola de Ouro`, `Seu rival de geração brilhou pelo ${rival.clube}.`);
+    else if (rival.bola && rival.bola <= 3) add("rival", `${nome} termina entre os melhores do mundo`, `Top ${rival.bola} na Bola de Ouro.`);
+    if (rival.aposentou) add("rival", `${nome} anuncia aposentadoria`, `Fim de carreira após passagem pelo ${rival.clube}.`);
+  }
+  // O ranking de Bola de Ouro também representa outros atletas do mundo.
+  const vencedor = card.bola?.top?.[0];
+  if (vencedor && !vencedor.voce && card.bola?.pos !== 1) {
+    add("mundo", `${vencedor.nome} lidera a Bola de Ouro`, `Destaque do ${vencedor.clube} na temporada.`);
+  }
   if (card.rebaixado) add("alerta", `${card.clube} sofre rebaixamento`, `A equipe encerrou a liga em ${card.posLiga}º lugar.`);
   else if (card.acesso) add("conquista", `${card.clube} garante o acesso`, `Campanha de ${card.posLiga}º lugar na ${card.ligaNome}.`);
   if (card.selecao?.campeao) add("selecao", `${c.nome} comemora título pela seleção`, card.selecao.nome || "Título internacional.");
   if (card.lesao) add("alerta", `Lesão afeta a temporada de ${c.nome}`, String(card.lesao));
   if (card.jogos >= 15 && card.nota >= 7.6) add("destaque", `${c.nome} brilha no ${card.clube}`, `${card.gols} gols, ${card.assist} assistências e nota ${Number(card.nota).toFixed(1)}.`);
   if (noticias.length < 2) add("temporada", `${card.clube} encerra a temporada`, `${card.posLiga}º lugar na ${card.ligaNome} · ${card.jogos} jogos de ${c.nome}.`);
-  if (noticias.length < 2 && card.bola?.top?.[0]?.nome) {
-    const lider = card.bola.top[0];
-    add("mundo", `${lider.nome} aparece entre os destaques mundiais`, lider.clube || "Ranking da Bola de Ouro.");
-  }
   return noticias;
 }
 

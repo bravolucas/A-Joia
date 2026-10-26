@@ -1,7 +1,7 @@
 import React from 'react';
-import { ESTILOS_TECNICO, cartaAtualTecnico, QUANTIDADE_DECISOES_TECNICO } from './tecnico.js';
+import { ESTILOS_TECNICO, cartaAtualTecnico, objetivoTecnico, QUANTIDADE_DECISOES_TECNICO } from './tecnico.js';
 
-export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAvancar, onSair, onLegado }) {
+export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAvancar, onAceitarProposta, onSair, onLegado }) {
   const t = c.tecnico;
   const ultima = t.temporadas[t.temporadas.length - 1];
   const decisao = cartaAtualTecnico(t);
@@ -11,6 +11,8 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAva
       <h1 className="display text-xl mt-3 text-white">À beira do campo</h1>
       <p className="text-[#C9D3CE] mt-2">{c.nome} · {c.idade} anos</p>
       <p className="text-[#7FE3BC] mt-1 font-bold">{t.clube} · Temporada {t.ano}</p>
+      <p className="text-[#C9D3CE] text-sm mt-3">Objetivo da diretoria: <strong className="text-white">{objetivoTecnico(t).nome}</strong></p>
+      <p className="text-[#8FA39A] text-sm">Confiança da diretoria: {t.diretoria}/100</p>
       <div className="grid grid-cols-3 gap-2 mt-5">
         <div><strong className="block text-xl text-[#EBC557]">{t.reputacao}</strong><span className="text-xs text-[#8FA39A]">Reputação</span></div>
         <div><strong className="block text-xl text-white">{t.temporadas.length}</strong><span className="text-xs text-[#8FA39A]">Temporadas</span></div>
@@ -43,7 +45,16 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAva
       <p className="text-[#EBC557] uppercase tracking-wider text-xs">Fim de temporada · {ultima.ano}</p>
       <h2 className="text-2xl font-bold mt-2 text-white">{ultima.campeao ? '🏆 Campeão!' : `${ultima.posicao}º lugar`}</h2>
       <p className="text-[#C9D3CE] mt-2">{ultima.pontos} pontos · {ultima.vitorias} vitórias · {ultima.empates} empates · {ultima.derrotas} derrotas</p>
-      <button onClick={onAvancar} className="rp-btn rp-prim w-full mt-4">Próxima temporada</button>
+      <p className="text-sm text-[#C9D3CE] mt-2">Meta: {ultima.objetivo} — <strong>{ultima.cumpriuObjetivo ? 'cumprida' : 'não cumprida'}</strong></p>
+      {t.demitido && <p className="text-[#F0A99E] font-bold mt-3">Você foi demitido. Escolha um novo clube para continuar.</p>}
+      {(t.propostas || []).length > 0 && <div className="mt-4 flex flex-col gap-2">
+        <h3 className="text-white font-bold">Propostas de trabalho</h3>
+        {t.propostas.map(p => <button key={p.nome} onClick={() => onAceitarProposta(p.nome)} className="rp-opcao p-3 text-left">
+          <strong className="block text-white">{p.nome}</strong>
+          <span className="text-[#8FA39A] text-sm">Força do elenco {p.elenco} · {p.objetivo}</span>
+        </button>)}
+      </div>}
+      {!t.demitido && <button onClick={onAvancar} className="rp-btn rp-prim w-full mt-4">Permanecer e iniciar próxima temporada</button>}
     </section>}
     <section className="rp-painel p-4">
       <h2 className="font-bold text-white mb-2">Histórico como técnico</h2>

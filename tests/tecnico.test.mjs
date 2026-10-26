@@ -402,3 +402,30 @@ test('saldo de gols da classificação corresponde aos confrontos registrados', 
   assert.equal(time.golsContra, partidas.reduce((n, j) => n + j.golsContra, 0));
   assert.equal(time.saldoGols, time.golsPro - time.golsContra);
 });
+
+test('carreira continua por duas temporadas sem perder histórico ou duplicar jogos', () => {
+  let c = iniciarCarreiraTecnico(atleta);
+  c = { ...c, tecnico: { ...c.tecnico, decisoes: Array(QUANTIDADE_DECISOES_TECNICO).fill({ id: 'teste' }), diretoria: 95, torcida: 95, elenco: 90, reputacao: 90 } };
+  for (let temporada = 0; temporada < 2; temporada++) {
+    for (const marco of ETAPAS_TEMPORADA_TECNICO) {
+      c = simularEtapaTecnico(c, () => 0.01);
+      if (marco < 38) {
+        assert.equal(c.tecnico.andamento.jogos, marco);
+        assert.equal(c.tecnico.andamento.confrontos.length, marco);
+      }
+    }
+    assert.equal(c.tecnico.fase, 'resultado');
+    assert.equal(c.tecnico.temporadas.length, temporada + 1);
+    assert.equal(c.tecnico.temporadas.at(-1).confrontos.length, 38);
+    if (temporada === 0) {
+      assert.equal(c.tecnico.demitido, false);
+      c = proximaTemporadaTecnico(c);
+      assert.equal(c.tecnico.andamento, null);
+      assert.equal(c.tecnico.decisoes.length, 0);
+      c = { ...c, tecnico: { ...c.tecnico, decisoes: Array(QUANTIDADE_DECISOES_TECNICO).fill({ id: 'teste' }) } };
+    }
+  }
+  assert.equal(c.tecnico.temporadas.length, 2);
+  assert.equal(historicoProfissionalTecnico(c.tecnico).jogos, 76);
+  assert.equal(c.tecnico.temporadas[0].confrontos.length, 38);
+});

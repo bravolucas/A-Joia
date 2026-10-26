@@ -520,7 +520,8 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
 function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
   const t = c.tecnico;
   const { vitorias, empates, derrotas, pontos } = andamento;
-  const posicao = pontos >= 84 ? 1 : pontos >= 73 ? 2 : pontos >= 65 ? 4 : pontos >= 57 ? 7 : pontos >= 48 ? 11 : pontos >= 40 ? 15 : 18;
+  const classificacao = andamento.classificacao || tabelaClassificacaoTecnico(t, andamento);
+  const posicao = classificacao.find(x => x.meuClube)?.posicao || 18;
   const campeao = posicao === 1;
   const objetivo = objetivoTecnico(t);
   const idoloEmCasa = !!(t.vinculosJogador || []).find(v => v.clube === t.clube && v.idolatria);

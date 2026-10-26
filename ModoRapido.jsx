@@ -1464,6 +1464,20 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
         </div>
       ))}
 
+      {!gaveta && card.rival && c.rival && (
+        <button type="button" onClick={() => setDetalhes(true)}
+          className="rp-painel p-3 text-left w-full border border-[#EBC557]/30"
+          aria-label="Abrir histórico da rivalidade">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#EBC557]">⚔️ Rivalidade de geração</div>
+              <div className="text-[14px] font-bold text-[#F2F5F3] truncate">Você x {c.rival.nome}</div>
+              <div className="text-[12px] text-[#8FA39A]">Histórico, evolução e comparação de temporadas</div>
+            </div>
+            <span className="text-[#7FE3BC] text-[13px] font-bold shrink-0">Ver histórico ›</span>
+          </div>
+        </button>
+      )}
       {!gaveta && <button onClick={() => setDetalhes((v) => !v)} aria-expanded={detalhes} className="text-[15px] font-bold text-[#7FE3BC] min-h-[44px]">{detalhes ? "Esconder detalhes" : "Ver detalhes da temporada"}</button>}
       {detalhes && (
       <div className="flex flex-col gap-3 rp-entra">

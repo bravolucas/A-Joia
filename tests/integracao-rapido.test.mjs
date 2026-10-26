@@ -2,10 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { criarJogador, jogarTemporada, fecharTemporada, noticiasDaTemporada, retrospectoRivalidade, VERSAO_RAPIDO, CHAVE_SAVE_RAPIDO } from "../rapido.js";
 
-test("carreira real: criação, três temporadas, notícias e retrospecto",()=>{
+test("carreira real: criação, cinco temporadas, notícias e retrospecto",()=>{
   let c=criarJogador({nome:"Jogador de Teste",nac:"BRA",posicao:"ATA",personalidade:"equilibrado",origem:"base",pe:"destro",numero:9,ritmo:"equilibrado",codigo:"AUDIT2026"});
   assert.ok(c.attrs && c.rival);
-  for(let i=0;i<3;i++){
+  for(let i=0;i<5;i++){
     const anterior=c.ano;
     const simulacao=jogarTemporada(c);
     const card=simulacao.card;

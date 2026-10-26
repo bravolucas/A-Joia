@@ -427,6 +427,24 @@ function AnuncioClube({ clube, nome, numero, posicao, idade, grandeChegada, deOn
       <div className="absolute -top-24 right-[8%] w-56 h-56 rounded-full blur-3xl" style={{ background: "#fff", animation: "ancLuz 3s ease-in-out infinite .8s" }} />
       {fase >= 2 && flashes.map((f, i) => <div key={i} className="absolute w-24 h-24 rounded-full blur-2xl bg-white" style={{ left: `${f.x}%`, top: `${f.y}%`, opacity: 0, animation: `ancFlash ${f.t}s ${f.d}s infinite` }} />)}
 
+      {/* Camada cinematográfica: gramado, luzes de estádio e silhueta do novo reforço.
+          SVG inline evita imagens externas e mantém o anúncio leve e offline. */}
+      <div className="absolute inset-x-0 bottom-0 h-[46%] pointer-events-none" aria-hidden="true"
+        style={{ background: "linear-gradient(0deg, #07100C 2%, #143F29 40%, transparent 100%)", opacity: fase >= 2 ? .65 : .25, transition: "opacity 900ms" }}>
+        <div className="absolute bottom-[19%] left-[-15%] w-[130%] h-px bg-white/20" style={{ transform: "perspective(120px) rotateX(50deg)" }} />
+        <div className="absolute bottom-0 left-1/2 w-[70%] h-[80%] -translate-x-1/2 rounded-[50%] border border-white/10" />
+      </div>
+      {fase >= 3 && <div className="absolute inset-x-0 bottom-[5%] flex justify-center pointer-events-none" aria-hidden="true"
+        style={{ opacity: .24, animation: "ancSobe .85s ease-out both" }}>
+        <svg width="220" height="300" viewBox="0 0 220 300" fill="none">
+          <ellipse cx="110" cy="288" rx="75" ry="9" fill="#000" opacity=".5" />
+          <circle cx="110" cy="52" r="30" fill="#0A1712" stroke={cor} strokeWidth="2" />
+          <path d="M75 90 Q110 72 145 90 L165 183 L137 195 L127 280 L103 280 L110 190 L94 280 L69 280 L80 187 L55 183 Z" fill={cor} stroke="#fff" strokeOpacity=".65" strokeWidth="2" />
+          <path d="M76 96 L54 175 M145 96 L167 175" stroke="#0A1712" strokeWidth="20" strokeLinecap="round" />
+          <path d="M84 187 L75 279 M135 187 L127 279" stroke="#0A1712" strokeWidth="23" strokeLinecap="round" />
+          <text x="110" y="143" fill="white" textAnchor="middle" fontWeight="900" fontSize="34">{numero}</text>
+        </svg>
+      </div>}
       {/* varredura de abertura */}
       <div className="absolute inset-y-0 -left-[20%] w-[140%]" style={{ background: `linear-gradient(90deg, ${cor}, ${cor}dd)`, animation: fase === 0 ? "ancVarre .6s cubic-bezier(.7,0,.3,1) both" : "ancSai .5s cubic-bezier(.7,0,.3,1) both" }} />
 

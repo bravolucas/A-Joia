@@ -665,3 +665,28 @@ export function proximaTemporadaTecnico(c) {
     torcida: limitar((t.torcida ?? 55) + Math.round(soma('torcida') * 0.5), 0, 100) };
   return { ...c, tecnico: { ...proximo, cartas: sortearCartasTecnico(proximo) } };
 }
+
+/** Fluxo expresso: uma escolha visível por temporada, sem alterar saves antigos. */
+export function jogarTemporadaExpressaTecnico(c, opcaoId, rng = sorteio) {
+  if (!c?.tecnico || c.tecnico.fase !== 'pretemporada') throw new Error('Temporada indisponível.');
+  if (c.tecnico.temporadas.length === 0 && !c.tecnico.clubeInicialEscolhido && c.tecnico.opcoesInicio?.length) throw new Error('Escolha o clube inicial.');
+  let atual = c;
+  if ((atual.tecnico.decisoes?.length || 0) === 0) {
+    atual = tomarDecisaoTecnico(atual, opcaoId, rng);
+  }
+  // Saves da interface anterior podem ter decisões parcialmente concluídas.
+  while ((atual.tecnico.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) {
+    const carta = cartaAtualTecnico(atual.tecnico);
+    if (!carta?.opcoes?.length) throw new Error('Não foi possível preparar a temporada.');
+    atual = tomarDecisaoTecnico(atual, carta.opcoes[0].id, rng);
+  }
+  // Se a temporada antiga já começou, conclui suas etapas preservando o andamento.
+  if (atual.tecnico.andamento?.jogos) {
+    while (atual.tecnico.fase === 'pretemporada') {
+      if (atual.tecnico.reuniaoPendente) atual = reuniaoEmergenciaTecnico(atual, 'responsabilidade', rng);
+      atual = simularEtapaTecnico(atual, rng);
+    }
+    return atual;
+  }
+  return simularTemporadaTecnico(atual, rng);
+}

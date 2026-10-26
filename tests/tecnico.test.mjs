@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -15,11 +15,15 @@ test('mantém histórico do atleta e evita reinicialização', () => {
 test('tática, temporada, resultado e avanço são persistentes', () => {
   const c = definirEstiloTecnico(iniciarCarreiraTecnico(atleta), 'defensivo');
   assert.throws(() => simularTemporadaTecnico(c));
-  const d1 = tomarDecisaoTecnico(c, 'base');
-  const d2 = tomarDecisaoTecnico(d1, 'dialogo');
-  assert.equal(d2.tecnico.decisoes.length, 2);
-  assert.ok(d2.tecnico.moral > c.tecnico.moral);
-  const r = simularTemporadaTecnico(d2, () => 0.1);
+  let d = c;
+  for (let i = 0; i < QUANTIDADE_DECISOES_TECNICO; i++) {
+    const carta = cartaAtualTecnico(d.tecnico);
+    d = tomarDecisaoTecnico(d, carta.opcoes[0].id, () => 0.1);
+  }
+  assert.equal(d.tecnico.decisoes.length, 4);
+  assert.equal(cartaAtualTecnico(d.tecnico), null);
+  assert.throws(() => tomarDecisaoTecnico(d, 'base'));
+  const r = simularTemporadaTecnico(d, () => 0.1);
   assert.equal(r.tecnico.temporadas.length, 1);
   assert.equal(r.tecnico.temporadas[0].vitorias, 38);
   assert.equal(r.tecnico.fase, 'resultado');
@@ -28,4 +32,10 @@ test('tática, temporada, resultado e avanço são persistentes', () => {
   assert.equal(n.tecnico.fase, 'pretemporada');
   assert.equal(n.tecnico.temporadas.length, 1);
   assert.equal(n.idade, 41);
+});
+
+test('sorteia quatro eventos diferentes por temporada', () => {
+  const cartas = sortearCartasTecnico(() => 0.5);
+  assert.equal(cartas.length, 4);
+  assert.equal(new Set(cartas).size, 4);
 });

@@ -514,3 +514,22 @@ test('desemprego avança idade e ano sem inventar temporada disputada', () => {
   assert.equal(proximo.tecnico.clube, null);
   assert.equal(proximo.tecnico.temporadas.length, 0);
 });
+
+test('demissão durante o campeonato preserva somente jogos realizados', () => {
+  const base = iniciarCarreiraTecnico(atleta);
+  const c = { ...base, tecnico: { ...base.tecnico, clubeInicialEscolhido: true,
+    decisoes: Array(QUANTIDADE_DECISOES_TECNICO).fill({ id: 'teste' }),
+    diretoria: 0, torcida: 0, elenco: 12, reputacao: 25, moral: 10 } };
+  const proximo = simularEtapaTecnico(c, () => 0.99);
+  assert.equal(proximo.tecnico.fase, 'resultado');
+  assert.equal(proximo.tecnico.demitido, true);
+  assert.equal(proximo.tecnico.temporadas.length, 1);
+  const temporada = proximo.tecnico.temporadas[0];
+  assert.equal(temporada.interrompida, true);
+  assert.equal(temporada.jogos, 10);
+  assert.equal(temporada.confrontos.length, 10);
+  assert.equal(temporada.vitorias + temporada.empates + temporada.derrotas, 10);
+  assert.equal(historicoProfissionalTecnico(proximo.tecnico).jogos, 10);
+  assert.equal(proximo.tecnico.andamento, null);
+  assert.equal(proximo.idade, c.idade + 1);
+});

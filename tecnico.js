@@ -106,6 +106,36 @@ export function calcularOvrTecnico(t) {
   const desempenho = Math.round((aproveitamento - 0.45) * 22);
   return limitar(Math.round(30 + (t.reputacao || 25) * 0.36 + experiencia + titulos + desempenho), 25, 99);
 }
+export function historicoProfissionalTecnico(t = {}) {
+  const temporadas = t.temporadas || [];
+  const clubes = [];
+  for (const temporada of temporadas) {
+    const clube = temporada.clube || 'Sem clube';
+    let registro = clubes.find(x => x.nome === clube);
+    if (!registro) {
+      registro = { nome: clube, temporadas: 0, jogos: 0, vitorias: 0, empates: 0, derrotas: 0, titulos: 0, demissoes: 0, melhorPosicao: null, anos: [] };
+      clubes.push(registro);
+    }
+    registro.temporadas++;
+    registro.jogos += (temporada.vitorias || 0) + (temporada.empates || 0) + (temporada.derrotas || 0);
+    registro.vitorias += temporada.vitorias || 0;
+    registro.empates += temporada.empates || 0;
+    registro.derrotas += temporada.derrotas || 0;
+    registro.titulos += temporada.campeao ? 1 : 0;
+    registro.demissoes += temporada.interrompida || temporada.demitido ? 1 : 0;
+    if (Number.isFinite(temporada.posicao)) registro.melhorPosicao = registro.melhorPosicao === null ? temporada.posicao : Math.min(registro.melhorPosicao, temporada.posicao);
+    registro.anos.push(temporada.ano);
+  }
+  const jogos = temporadas.reduce((n, x) => n + (x.vitorias || 0) + (x.empates || 0) + (x.derrotas || 0), 0);
+  const vitorias = temporadas.reduce((n, x) => n + (x.vitorias || 0), 0);
+  const empates = temporadas.reduce((n, x) => n + (x.empates || 0), 0);
+  const derrotas = temporadas.reduce((n, x) => n + (x.derrotas || 0), 0);
+  return { clubes, temporadas: temporadas.length, jogos, vitorias, empates, derrotas,
+    aproveitamento: jogos ? Math.round((vitorias * 3 + empates) / (jogos * 3) * 100) : 0,
+    titulos: temporadas.filter(x => x.campeao).length,
+    demissoes: temporadas.filter(x => x.interrompida || x.demitido).length,
+    reunioes: (t.reunioes || []).length };
+}
 export function painelEstabilidadeTecnico(t = {}) {
   const objetivo = objetivoTecnico(t);
   const pressao = riscoDemissaoTecnico(t);
@@ -331,7 +361,7 @@ export function simularEtapaTecnico(c, rng = sorteio) {
     const posicao = pontos / limite >= 2.1 ? 3 : pontos / limite >= 1.5 ? 8 : pontos / limite >= 1 ? 15 : 18;
     const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivoTecnico(t).nome,
       cumpriuObjetivo: false, posicao, pontos, vitorias: v, empates: e, derrotas: d,
-      jogos: limite, interrompida: true, avaliacoes: andamento.avaliacoes };
+      jogos: limite, interrompida: true, demitido: true, avaliacoes: andamento.avaliacoes };
     const novo = { ...t, diretoria, torcida, demitido: true, reuniaoPendente: false, andamento: null,
       fase: 'resultado', temporadas: [...t.temporadas, temporada],
       vitorias: t.vitorias + v, empates: t.empates + e, derrotas: t.derrotas + d,
@@ -377,6 +407,7 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   const novaTorcida = limitar((t.torcida ?? 55) + variacaoTorcida, 0, 100);
   const situacaoCargo = riscoDemissaoTecnico({ ...t, diretoria: novaConfianca, torcida: novaTorcida });
   const demitido = novaConfianca < 20 || (novaConfianca < 40 && novaTorcida < 35) || situacaoCargo.pressao >= 82;
+  temporada.demitido = demitido;
   const propostas = gerarPropostasTecnico({ ...t, clube: demitido ? null : t.clube, reputacao: limitar(t.reputacao + (campeao ? 9 : cumpriuObjetivo ? 4 : -3), 10, 99) }, rng);
   return { ...c, idade: c.idade + 1, ano: c.ano + 1, tecnico: {
     ...t, ano: t.ano + 1, fase: 'resultado', temporadas: [...t.temporadas, temporada],
@@ -404,6 +435,7 @@ function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
   const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivo.nome, cumpriuObjetivo,
     promessaDescumprida, idoloEmCasa, estilo: t.estilo, decisoes: t.decisoes,
     vitorias, empates, derrotas, pontos, posicao, campeao, avaliacoes: andamento.avaliacoes };
+  temporada.demitido = demitido;
   const proximo = { ...t, ano: t.ano + 1, fase: 'resultado', andamento: null,
     temporadas: [...t.temporadas, temporada], reuniaoPendente: false, vitorias: t.vitorias + vitorias,
     empates: t.empates + empates, derrotas: t.derrotas + derrotas,

@@ -56,8 +56,8 @@ test('simulação massiva: 80 carreiras, diferentes legados, estilos, resultados
       c = preparar(c, rng);
       for (const rodada of ETAPAS_TEMPORADA_TECNICO) {
         c = simularEtapaTecnico(c, rng);
-        assert.equal(c.tecnico.andamento.jogos, rodada);
-        const a = c.tecnico.andamento;
+        assert.equal(c.tecnico.andamento?.jogos ?? c.tecnico.temporadas.at(-1)?.jogos, rodada);
+        const a = c.tecnico.andamento || { ...c.tecnico.temporadas.at(-1), confrontos: c.tecnico.temporadas.at(-1)?.confrontos || [] };
         assert.equal(a.vitorias + a.empates + a.derrotas, a.jogos);
         assert.equal(a.pontos, 3 * a.vitorias + a.empates);
         assert.equal(a.confrontos.length, a.jogos);

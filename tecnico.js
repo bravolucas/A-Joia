@@ -513,7 +513,8 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   const limite = ETAPAS_TEMPORADA_TECNICO.find(n => n > anterior.jogos);
   if (!limite) throw new Error('Temporada já concluída.');
   const calendario = anterior.calendario || calendarioAdversariosTecnico(t);
-  const confrontos = [...(anterior.confrontos || [])];
+  // Copia cada partida para não alterar saves anteriores por referência.
+  const confrontos = (anterior.confrontos || []).map(jogo => ({ ...jogo }));
   let v = anterior.vitorias, e = anterior.empates, d = anterior.derrotas;
   for (let i = anterior.jogos; i < limite; i++) {
     const adversario = calendario[i];

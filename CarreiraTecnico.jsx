@@ -1,10 +1,10 @@
 import React from 'react';
-import { ESTILOS_TECNICO, DECISOES_TECNICO } from './tecnico.js';
+import { ESTILOS_TECNICO, cartaAtualTecnico, QUANTIDADE_DECISOES_TECNICO } from './tecnico.js';
 
 export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAvancar, onSair, onLegado }) {
   const t = c.tecnico;
   const ultima = t.temporadas[t.temporadas.length - 1];
-  const decisao = DECISOES_TECNICO[t.decisoes?.length || 0];
+  const decisao = cartaAtualTecnico(t);
   return <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-4 rp-entra">
     <div className="rp-painel p-5 text-center">
       <p className="text-[#EBC557] text-xs font-bold tracking-[.2em] uppercase">A JOIA · Segunda carreira</p>
@@ -26,8 +26,9 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAva
           </button>)}</div>
       </section>
       <section className="rp-painel p-4">
-        <h2 className="text-lg font-bold text-white">Decisões da temporada</h2>
+        <h2 className="text-lg font-bold text-white">Decisões da temporada · {t.decisoes.length}/{QUANTIDADE_DECISOES_TECNICO}</h2>
         <p className="text-sm text-[#8FA39A] mt-1">Elenco {t.elenco} · Moral {t.moral} · Diretoria {t.diretoria}</p>
+        {t.decisoes.length > 0 && <p className="text-sm text-[#EBC557] mt-2">{t.decisoes[t.decisoes.length - 1].resultado}</p>}
         {decisao ? <div className="mt-3 flex flex-col gap-2">
           <h3 className="font-bold text-[#EBC557]">{decisao.titulo}</h3>
           <p className="text-sm text-[#C9D3CE]">{decisao.texto}</p>

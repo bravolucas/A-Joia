@@ -350,6 +350,26 @@ export function probabilidadesConfrontoTecnico(t, adversario) {
   const empate = Math.min(base.empate, 0.93 - vitoria);
   return { vitoria, empate, derrota: 1 - vitoria - empate };
 }
+export function tabelaClassificacaoTecnico(t, andamento) {
+  const jogos = andamento?.jogos || 0;
+  const clube = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
+  const liga = clube?.liga || t.liga;
+  const rivais = CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube && (!liga || x.liga === liga))
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).slice(0, 19);
+  const pontos = andamento?.pontos || 0;
+  const linhas = [{ nome: t.clube || 'Meu clube', jogos, pontos, vitorias: andamento?.vitorias || 0,
+    empates: andamento?.empates || 0, derrotas: andamento?.derrotas || 0, meuClube: true }];
+  for (const rival of rivais) {
+    const forca = rival.elenco;
+    const expectativa = limitar(0.22 + (forca - 45) * 0.007, 0.16, 0.57);
+    const empates = Math.min(jogos, Math.round(jogos * 0.24));
+    const vitorias = Math.min(jogos - empates, Math.round(jogos * expectativa));
+    const derrotas = jogos - vitorias - empates;
+    linhas.push({ nome: rival.nome, jogos, pontos: vitorias * 3 + empates, vitorias, empates, derrotas, meuClube: false });
+  }
+  linhas.sort((a, b) => b.pontos - a.pontos || b.vitorias - a.vitorias || a.nome.localeCompare(b.nome, 'pt-BR'));
+  return linhas.map((x, i) => ({ ...x, posicao: i + 1 }));
+}
 export const ETAPAS_TEMPORADA_TECNICO = [10, 19, 29, 38];
 export const OPCOES_REUNIAO_TECNICO = [
   { id: 'responsabilidade', nome: 'Assumir responsabilidade', descricao: 'Confiança +12 · moral -4; compromete-se a reagir.' },
@@ -404,11 +424,12 @@ export function simularEtapaTecnico(c, rng = sorteio) {
     diretoria, torcida, pressao };
   const andamento = { jogos: limite, calendario, confrontos, vitorias: v, empates: e, derrotas: d, pontos,
     avaliacoes: [...anterior.avaliacoes, avaliacao] };
+  andamento.classificacao = tabelaClassificacaoTecnico(t, andamento);
   if (demitido) {
-    const posicao = pontos / limite >= 2.1 ? 3 : pontos / limite >= 1.5 ? 8 : pontos / limite >= 1 ? 15 : 18;
+    const posicao = andamento.classificacao.find(x => x.meuClube)?.posicao || 18;
     const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivoTecnico(t).nome,
       cumpriuObjetivo: false, posicao, pontos, vitorias: v, empates: e, derrotas: d,
-      jogos: limite, interrompida: true, demitido: true, confrontos, avaliacoes: andamento.avaliacoes };
+      jogos: limite, interrompida: true, demitido: true, confrontos, classificacao: andamento.classificacao, avaliacoes: andamento.avaliacoes };
     const novo = { ...t, diretoria, torcida, demitido: true, reuniaoPendente: false, andamento: null,
       fase: 'resultado', temporadas: [...t.temporadas, temporada],
       vitorias: t.vitorias + v, empates: t.empates + e, derrotas: t.derrotas + d,
@@ -435,7 +456,8 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
     else derrotas++;
   }
   const pontos = vitorias * 3 + empates;
-  const posicao = pontos >= 84 ? 1 : pontos >= 73 ? 2 : pontos >= 65 ? 4 : pontos >= 57 ? 7 : pontos >= 48 ? 11 : pontos >= 40 ? 15 : 18;
+  const classificacao = andamento.classificacao || tabelaClassificacaoTecnico(t, andamento);
+  const posicao = classificacao.find(x => x.meuClube)?.posicao || 18;
   const campeao = posicao === 1;
   const objetivo = objetivoTecnico(t);
   // O ídolo começa protegido pelo carinho da torcida, mas uma campanha ruim
@@ -479,7 +501,7 @@ function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
     riscoDemissaoTecnico({ ...t, diretoria: novaConfianca, torcida: novaTorcida }).pressao >= 82;
   const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivo.nome, cumpriuObjetivo,
     promessaDescumprida, idoloEmCasa, estilo: t.estilo, decisoes: t.decisoes,
-    vitorias, empates, derrotas, pontos, posicao, campeao, confrontos: andamento.confrontos || [], avaliacoes: andamento.avaliacoes };
+    vitorias, empates, derrotas, pontos, posicao, campeao, classificacao, confrontos: andamento.confrontos || [], avaliacoes: andamento.avaliacoes };
   temporada.demitido = demitido;
   const proximo = { ...t, ano: t.ano + 1, fase: 'resultado', andamento: null,
     temporadas: [...t.temporadas, temporada], reuniaoPendente: false, vitorias: t.vitorias + vitorias,

@@ -1,7 +1,7 @@
 import { CLUBES } from '../data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -178,4 +178,25 @@ test('entrevista prudente contrata, salário negociado e promessa tem consequên
   assert.equal(ambicioso.tecnico.salario, 22);
   assert.equal(ambicioso.tecnico.promessaContrato.posicaoMaxima, 4);
   assert.throws(() => negociarContratoTecnico(base, 'Clube Inventado'));
+});
+
+test('painel de estabilidade separa meta do clube e promessa do treinador', () => {
+  const t = { clube: 'Guarani', reputacao: 65, elenco: 60, torcida: 35, diretoria: 45,
+    promessaContrato: { clube: 'Guarani', posicaoMaxima: 4 }, temporadas: [] };
+  const p = painelEstabilidadeTecnico(t);
+  assert.equal(p.objetivo, objetivoTecnico(t).nome);
+  assert.equal(p.promessa.posicaoMaxima, 4);
+  assert.equal(p.torcida, 35);
+  assert.equal(p.diretoria, 45);
+  assert.ok(p.pressao > painelEstabilidadeTecnico({ ...t, torcida: 90, diretoria: 90 }).pressao);
+  assert.equal(painelEstabilidadeTecnico({ ...t, clube: 'Outro' }).promessa, null);
+  assert.equal(painelEstabilidadeTecnico({ ...t, demitido: true }).situacao, 'Demitido');
+});
+test('novo clube não herda promessa feita à diretoria anterior', () => {
+  const c = iniciarCarreiraTecnico(atleta);
+  const comOferta = { ...c, tecnico: { ...c.tecnico, fase: 'resultado',
+    promessaContrato: { clube: 'Clube Antigo', posicaoMaxima: 4 },
+    propostas: [{ nome: 'Guarani', pais: 'Brasil', elenco: 55, salario: 20, exigencia: 30 }] } };
+  const novo = aceitarPropostaTecnico(comOferta, 'Guarani');
+  assert.equal(novo.tecnico.promessaContrato, null);
 });

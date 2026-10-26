@@ -3477,7 +3477,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     <div className="rp">
       <style>{ESTILO_BASE}</style>
       {painel ? <CartaoCarreira c={c} onEstante={() => setEstanteAberta(true)} onFicha={() => setGaveta("ficha")} contadorPulsa={contadorPulsa} recorde={recorde} />
-        : <Cabecalho c={mostrarCabecalho ? c : null} onSair={onSair} onEstante={() => setEstanteAberta(true)} />}
+        : etapa === "tecnico" ? null : <Cabecalho c={mostrarCabecalho ? c : null} onSair={onSair} onEstante={() => setEstanteAberta(true)} />}
       <main className="pb-10">
         {etapa === "criacao" && <TelaCriacao onCriar={criar} ritmoInicial={ritmoInicial} />}
         {etapa === "evento" && (

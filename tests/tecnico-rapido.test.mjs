@@ -1,10 +1,13 @@
-import test from 'node:test';
+import test, { beforeEach, afterEach, mock } from 'node:test';
+beforeEach(() => mock.method(Math, 'random', () => 0.1));
+afterEach(() => mock.restoreAll());
 import assert from 'node:assert/strict';
 import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, cartaAtualTecnico, tomarDecisaoTecnico, simularEtapaTecnico } from '../tecnico.js';
 import { avancarTecnicoRapido } from '../tecnicoRapido.js';
 function criar() {
  let c = iniciarCarreiraTecnico({ nome:'Teste', aposentado:true, idade:40, ano:2050, clubeNome:'Flamengo', temporadas:[], legado:{pontos:300}, attrs:{passe:80} });
  if(c.tecnico.opcoesInicio.length) c=iniciarNoClubeIdolo(c,c.tecnico.opcoesInicio[0].clube);
+ c.tecnico.diretoria=95; c.tecnico.torcida=95;
  return c;
 }
 for(const [ritmo,anos] of [['intenso',1],['normal',2],['expresso',3]]) test(`ritmo ${ritmo} registra ${anos} anos sem alterar atleta`,()=>{

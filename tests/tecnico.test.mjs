@@ -1,7 +1,7 @@
 import { CLUBES } from '../data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, perfilClubeTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -260,4 +260,19 @@ test('histórico do treinador agrupa clubes, títulos e demissões sem misturar 
   assert.equal(resumo.clubes[0].demissoes, 1);
   assert.equal(resumo.reunioes, 2);
   assert.equal(c.totais.gols, atleta.totais.gols);
+});
+
+test('objetivos são definidos pelo perfil do clube e não pela fama do treinador', () => {
+  const forte = CLUBES.reduce((a, b) => b.forca > a.forca ? b : a);
+  const fraco = CLUBES.reduce((a, b) => b.forca < a.forca ? b : a);
+  const elite = perfilClubeTecnico({ clube: forte.nome, reputacao: 20 });
+  const pequeno = perfilClubeTecnico({ clube: fraco.nome, reputacao: 99 });
+  assert.equal(elite.forca, forte.forca);
+  assert.equal(pequeno.forca, fraco.forca);
+  assert.equal(objetivoTecnico({ clube: forte.nome, reputacao: 20 }).id,
+    objetivoTecnico({ clube: forte.nome, reputacao: 99 }).id);
+  assert.equal(objetivoTecnico({ clube: fraco.nome, reputacao: 20 }).id,
+    objetivoTecnico({ clube: fraco.nome, reputacao: 99 }).id);
+  const oferta = gerarPropostasTecnico({ ...iniciarCarreiraTecnico(atleta).tecnico, reputacao: 99 }, () => 0)[0];
+  if (oferta) assert.equal(oferta.objetivo, objetivoTecnico({ clube: oferta.nome }).nome);
 });

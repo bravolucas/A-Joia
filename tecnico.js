@@ -381,6 +381,37 @@ export function probabilidadesConfrontoTecnico(t, adversario) {
 }
 export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario, resultado, rng = sorteio, rodada = 1) {
   const linhas = classificacaoAnterior.map(x => ({ ...x }));
+  const calendario = calendarioLigaTecnico(t);
+  const partidas = calendario?.[rodada - 1];
+  if (partidas) {
+    for (const partida of partidas) {
+      const casa = linhas.find(x => x.nome === partida.casa);
+      const fora = linhas.find(x => x.nome === partida.fora);
+      if (!casa || !fora) continue;
+      const envolveTreinador = casa.meuClube || fora.meuClube;
+      const forcaCasa = CLUBES_CONVITES_TECNICO.find(x => x.nome === casa.nome)?.elenco ?? t.elenco ?? 50;
+      const forcaFora = CLUBES_CONVITES_TECNICO.find(x => x.nome === fora.nome)?.elenco ?? t.elenco ?? 50;
+      const chanceCasa = limitar(0.42 + (forcaCasa - forcaFora) * 0.007, 0.16, 0.69);
+      const r = envolveTreinador ? null : rng();
+      const desfecho = envolveTreinador
+        ? (casa.meuClube ? resultado : resultado === 'V' ? 'D' : resultado === 'D' ? 'V' : 'E')
+        : r < chanceCasa ? 'V' : r < chanceCasa + 0.25 ? 'E' : 'D';
+      if (envolveTreinador) {
+        const rival = casa.meuClube ? fora : casa;
+        rival.jogos++;
+        if (resultado === 'E') { rival.empates++; rival.pontos++; }
+        else if (resultado === 'V') rival.derrotas++;
+        else { rival.vitorias++; rival.pontos += 3; }
+      } else {
+        casa.jogos++; fora.jogos++;
+        if (desfecho === 'V') { casa.vitorias++; fora.derrotas++; casa.pontos += 3; }
+        else if (desfecho === 'E') { casa.empates++; fora.empates++; casa.pontos++; fora.pontos++; }
+        else { fora.vitorias++; casa.derrotas++; fora.pontos += 3; }
+      }
+    }
+    return linhas;
+  }
+  // Compatibilidade com ligas de tamanho diferente ou carreiras antigas.
   const rivalDireto = linhas.find(x => !x.meuClube && x.nome === adversario);
   if (rivalDireto) {
     rivalDireto.jogos++;
@@ -389,17 +420,8 @@ export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario,
     else { rivalDireto.vitorias++; rivalDireto.pontos += 3; }
   }
   const rivais = linhas.filter(x => !x.meuClube && x.nome !== adversario);
-  // Rodízio de adversários para evitar confrontos idênticos em todas as rodadas.
-  if (rivais.length > 2) {
-    const deslocamento = (rodada - 1) % (rivais.length - 1);
-    const primeiro = rivais.shift();
-    rivais.push(...rivais.splice(0, deslocamento));
-    rivais.unshift(primeiro);
-  }
-  // Partidas pareadas por rodada: nenhum rival joga mais de uma vez.
-  for (let i = 0; i < rivais.length; i += 2) {
+  for (let i = 0; i + 1 < rivais.length; i += 2) {
     const a = rivais[i], b = rivais[i + 1];
-    if (!b) continue;
     const forcaA = CLUBES_CONVITES_TECNICO.find(x => x.nome === a.nome)?.elenco ?? 50;
     const forcaB = CLUBES_CONVITES_TECNICO.find(x => x.nome === b.nome)?.elenco ?? 50;
     const chanceA = limitar(0.38 + (forcaA - forcaB) * 0.007, 0.16, 0.68);

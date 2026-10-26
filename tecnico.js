@@ -442,7 +442,15 @@ export function simularEtapaTecnico(c, rng = sorteio) {
     diretoria, torcida, pressao };
   const andamento = { jogos: limite, calendario, confrontos, vitorias: v, empates: e, derrotas: d, pontos,
     avaliacoes: [...anterior.avaliacoes, avaliacao] };
-  andamento.classificacao = tabelaClassificacaoTecnico(t, andamento);
+  // Mantém os resultados dos rivais entre etapas; saves antigos iniciam pela tabela estimada.
+  const base = anterior.classificacao || tabelaClassificacaoTecnico(t, { jogos: anterior.jogos, pontos: anterior.pontos, vitorias: anterior.vitorias, empates: anterior.empates, derrotas: anterior.derrotas });
+  let classificacao = base;
+  for (let rodada = anterior.jogos; rodada < limite; rodada++) {
+    classificacao = simularRodadaRivaisTecnico(t, classificacao, rng);
+  }
+  classificacao = classificacao.map(x => x.meuClube ? { ...x, jogos: limite, pontos, vitorias: v, empates: e, derrotas: d } : x);
+  classificacao.sort((a, b) => b.pontos - a.pontos || b.vitorias - a.vitorias || a.nome.localeCompare(b.nome, 'pt-BR'));
+  andamento.classificacao = classificacao.map((x, i) => ({ ...x, posicao: i + 1 }));
   if (demitido) {
     const posicao = andamento.classificacao.find(x => x.meuClube)?.posicao || 18;
     const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivoTecnico(t).nome,

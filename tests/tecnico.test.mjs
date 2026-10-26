@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -69,4 +69,19 @@ test('consequências de decisões atravessam temporadas e não duplicam', () => 
   assert.equal(c.tecnico.efeitosPendentes.length, 0);
   assert.equal(c.tecnico.efeitosRecebidos.length, 4);
   assert.ok(c.tecnico.elenco > antes);
+});
+
+test('objetivos dependem da reputação e força do elenco', () => {
+  assert.equal(objetivoTecnico({ reputacao: 30, elenco: 45 }).id, 'permanencia');
+  assert.equal(objetivoTecnico({ reputacao: 90, elenco: 80 }).id, 'titulo');
+});
+test('demissão exige mudança de clube, preservando o histórico', () => {
+  let c = iniciarCarreiraTecnico(atleta);
+  c = { ...c, tecnico: { ...c.tecnico, fase: 'resultado', demitido: true,
+    propostas: [{ nome: 'Clube do Interior', elenco: 42 }] } };
+  assert.throws(() => proximaTemporadaTecnico(c));
+  c = aceitarPropostaTecnico(c, 'Clube do Interior');
+  assert.equal(c.tecnico.demitido, false);
+  assert.equal(c.tecnico.clube, 'Clube do Interior');
+  assert.equal(proximaTemporadaTecnico(c).tecnico.fase, 'pretemporada');
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ESTILOS_TECNICO, cartaAtualTecnico, objetivoTecnico, salarioTecnico, calcularOvrTecnico, riscoDemissaoTecnico, QUANTIDADE_DECISOES_TECNICO } from './tecnico.js';
 
-export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAvancar, onAceitarProposta, onEsperar, onSair, onLegado }) {
+export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAvancar, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado }) {
   const t = c.tecnico;
   const ultima = t.temporadas[t.temporadas.length - 1];
   const decisao = cartaAtualTecnico(t);
@@ -32,6 +32,7 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAva
         <div><strong className="block text-xl text-white">{t.titulos}</strong><span className="text-xs text-[#8FA39A]">Títulos</span></div>
       </div>
     </div>
+    {t.temporadas.length === 0 && !t.clubeInicialEscolhido && (t.opcoesInicio || []).length > 0 && <section className="rp-painel p-4 flex flex-col gap-2"><h2 className="font-bold text-[#EBC557]">Comece onde você fez história</h2><p className="text-sm text-[#C9D3CE]">Sua trajetória como jogador abriu portas. Escolha um clube com vínculo afetivo para iniciar como técnico.</p>{t.opcoesInicio.map(v => <button key={v.clube} onClick={() => onEscolherClubeInicial(v.clube)} className="rp-opcao p-3 text-left"><strong className="block text-white">{v.clube} {v.idolatria ? '★ Ídolo' : ''}</strong><span className="text-sm text-[#8FA39A]">{v.temporadas} temporadas · {v.titulos} títulos · Afinidade {v.afinidade}/100</span></button>)}</section>}
     {t.desempregado ? <section className="rp-painel p-4 flex flex-col gap-3">
       <h2 className="font-bold text-white">Mercado de treinadores</h2>
       <p className="text-sm text-[#C9D3CE]">{t.anosDesempregado || 0} ano(s) sem clube. Oportunidades dependem do OVR e da trajetória.</p>

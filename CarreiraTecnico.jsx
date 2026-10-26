@@ -1,11 +1,12 @@
 import React from 'react';
-import { ESTILOS_TECNICO, ENTREVISTAS_TECNICO, OPCOES_REUNIAO_TECNICO, ETAPAS_TEMPORADA_TECNICO, cartaAtualTecnico, objetivoTecnico, salarioTecnico, calcularOvrTecnico, painelEstabilidadeTecnico, QUANTIDADE_DECISOES_TECNICO } from './tecnico.js';
+import { ESTILOS_TECNICO, ENTREVISTAS_TECNICO, OPCOES_REUNIAO_TECNICO, ETAPAS_TEMPORADA_TECNICO, cartaAtualTecnico, objetivoTecnico, salarioTecnico, calcularOvrTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, QUANTIDADE_DECISOES_TECNICO } from './tecnico.js';
 
 export default function CarreiraTecnico({ c, onEstilo, onDecisao, onReuniao, onJogar, onAvancar, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado }) {
   const t = c.tecnico;
   const ultima = t.temporadas[t.temporadas.length - 1];
   const decisao = cartaAtualTecnico(t);
   const estabilidade = painelEstabilidadeTecnico(t);
+  const historico = historicoProfissionalTecnico(t);
   const indicador = (titulo, valor) => <div className="flex flex-col gap-1">
     <div className="flex justify-between text-sm"><span className="text-[#C9D3CE]">{titulo}</span><strong className="text-white">{valor}/100</strong></div>
     <div className="h-2.5 rounded-full bg-white/10 overflow-hidden" role="progressbar" aria-label={titulo} aria-valuemin={0} aria-valuemax={100} aria-valuenow={valor}>
@@ -99,11 +100,33 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onReuniao, onJ
       {t.demitido && <button onClick={onEsperar} className="rp-btn rp-sec w-full mt-3">Ficar desempregado e aguardar propostas</button>}
       {!t.demitido && <button onClick={onAvancar} className="rp-btn rp-prim w-full mt-4">Permanecer e iniciar próxima temporada</button>}
     </section>}
-    <section className="rp-painel p-4">
-      <h2 className="font-bold text-white mb-2">Histórico como técnico</h2>
+    <section className="rp-painel p-4" aria-label="Histórico profissional como treinador">
+      <h2 className="font-bold text-white mb-2">Carreira como técnico</h2>
+      <p className="text-[#8FA39A] text-xs mb-3">Estatísticas exclusivas do banco de reservas; seu legado como jogador permanece separado.</p>
+      <div className="grid grid-cols-3 gap-2 text-center mb-4">
+        <div><strong className="block text-white text-xl">{historico.jogos}</strong><span className="text-[#8FA39A] text-xs">Jogos</span></div>
+        <div><strong className="block text-[#7FE3BC] text-xl">{historico.aproveitamento}%</strong><span className="text-[#8FA39A] text-xs">Aproveitamento</span></div>
+        <div><strong className="block text-[#EBC557] text-xl">{historico.titulos}</strong><span className="text-[#8FA39A] text-xs">Títulos</span></div>
+        <div><strong className="block text-white text-lg">{historico.vitorias}V</strong><span className="text-[#8FA39A] text-xs">Vitórias</span></div>
+        <div><strong className="block text-white text-lg">{historico.empates}E</strong><span className="text-[#8FA39A] text-xs">Empates</span></div>
+        <div><strong className="block text-white text-lg">{historico.demissoes}</strong><span className="text-[#8FA39A] text-xs">Demissões</span></div>
+      </div>
+      {historico.clubes.length > 0 && <div className="flex flex-col gap-2 mb-4">
+        <h3 className="text-[#EBC557] text-sm font-bold">Clubes comandados</h3>
+        {historico.clubes.map(clube => <div key={clube.nome} className="border-b border-white/10 pb-2">
+          <strong className="text-white text-sm">{clube.nome}</strong>
+          <p className="text-[#8FA39A] text-xs">{clube.temporadas} temporada(s) · {clube.jogos} jogos · {clube.vitorias} vitórias · {clube.titulos} título(s){clube.demissoes ? ` · ${clube.demissoes} demissão(ões)` : ''}</p>
+        </div>)}
+      </div>}
       {t.temporadas.length === 0 ? <p className="text-sm text-[#8FA39A]">Sua história no banco começa agora.</p> :
-        <div className="flex flex-col gap-2">{[...t.temporadas].reverse().slice(0, 8).map(a =>
-          <div key={a.ano} className="flex justify-between gap-3 text-sm border-b border-white/10 pb-2"><span>{a.ano} · {a.clube}</span><span>{a.posicao}º · {a.pontos} pts</span></div>)}</div>}
+        <div className="flex flex-col gap-2">
+          <h3 className="text-[#EBC557] text-sm font-bold">Temporadas</h3>
+          {[...t.temporadas].reverse().map((a, i) =>
+            <div key={`${a.ano}-${a.clube}-${i}`} className="border-b border-white/10 pb-2 text-sm">
+              <div className="flex justify-between gap-2"><span className="text-white">{a.ano} · {a.clube}</span><span className="text-[#C9D3CE]">{a.posicao}º · {a.pontos} pts</span></div>
+              <p className="text-[#8FA39A] text-xs mt-1">{a.vitorias}V {a.empates}E {a.derrotas}D{a.campeao ? ' · 🏆 Campeão' : ''}{a.demitido || a.interrompida ? ' · Demitido' : ''}{a.interrompida ? ` após ${a.jogos} rodadas` : ''}</p>
+            </div>)}
+        </div>}
     </section>
     <button onClick={onLegado} className="rp-btn rp-sec">Rever legado como jogador</button>
     <button onClick={onSair} className="text-sm text-[#8FA39A] py-3">Voltar ao menu (progresso salvo)</button>

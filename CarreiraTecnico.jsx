@@ -21,6 +21,7 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onReuniao, onJ
       <p className="text-[#7FE3BC] mt-1 font-bold">{t.clube || "Sem clube"} · Temporada {t.ano}</p>
       <section className="rp-painel p-3 mt-3 text-left" aria-label="Metas e estabilidade no cargo">
         <h2 className="text-[#EBC557] font-bold text-sm">Metas e estabilidade</h2>
+        <p className="text-[#8FA39A] text-xs mt-1">{estabilidade.expectativa}</p>
         <p className="text-[#C9D3CE] text-sm mt-2">Objetivo da diretoria: <strong className="text-white">{estabilidade.objetivo}</strong></p>
         <p className="text-[#8FA39A] text-xs mt-1">Meta: terminar até a {estabilidade.posicaoMeta}ª posição</p>
         {estabilidade.promessa && <div className="mt-2 border-l-2 border-[#EBC557] pl-3"><p className="text-[#EBC557] text-sm font-bold">Promessa contratual ativa</p><p className="text-[#C9D3CE] text-sm">{estabilidade.promessa.descricao}</p><p className="text-[#8FA39A] text-xs">Descumprir reduz a confiança da diretoria e a aprovação da torcida.</p></div>}
@@ -44,7 +45,7 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onReuniao, onJ
     {t.desempregado ? <section className="rp-painel p-4 flex flex-col gap-3">
       <h2 className="font-bold text-white">Mercado de treinadores</h2>
       <p className="text-sm text-[#C9D3CE]">{t.anosDesempregado || 0} ano(s) sem clube. Oportunidades dependem do OVR e da trajetória.</p>
-      {(t.propostas || []).map(p => <div key={p.nome} className="rp-painel p-3"><strong className="block text-white">{p.nome} · {p.pais}</strong><span className="text-sm text-[#8FA39A]">OVR mínimo {p.exigencia} · R$ {p.salario} mil/mês</span><div className="flex flex-wrap gap-2 mt-2">{ENTREVISTAS_TECNICO.map(e => <button key={e.id} onClick={() => onAceitarProposta(p.nome, e.id)} className="rp-opcao p-2 text-xs">{e.nome}</button>)}</div></div>)}
+      {(t.propostas || []).map(p => <div key={p.nome} className="rp-painel p-3"><strong className="block text-white">{p.nome} · {p.pais}</strong><span className="text-sm text-[#8FA39A]">OVR mínimo {p.exigencia} · R$ {p.salario} mil/mês · Meta: {p.objetivo}</span><div className="flex flex-wrap gap-2 mt-2">{ENTREVISTAS_TECNICO.map(e => <button key={e.id} onClick={() => onAceitarProposta(p.nome, e.id)} className="rp-opcao p-2 text-xs">{e.nome}</button>)}</div></div>)}
       <button onClick={onEsperar} className="rp-btn rp-sec">Aguardar mais uma temporada</button>
     </section> : t.fase === 'pretemporada' ? <>
       <section className="rp-painel p-4">

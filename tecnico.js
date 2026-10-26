@@ -350,6 +350,24 @@ export function probabilidadesConfrontoTecnico(t, adversario) {
   const empate = Math.min(base.empate, 0.93 - vitoria);
   return { vitoria, empate, derrota: 1 - vitoria - empate };
 }
+export function simularRodadaRivaisTecnico(t, classificacaoAnterior, rng = sorteio) {
+  const linhas = classificacaoAnterior.map(x => ({ ...x }));
+  const rivais = linhas.filter(x => !x.meuClube);
+  // Partidas pareadas por rodada: nenhum rival joga mais de uma vez.
+  for (let i = 0; i < rivais.length; i += 2) {
+    const a = rivais[i], b = rivais[i + 1];
+    if (!b) continue;
+    const forcaA = CLUBES_CONVITES_TECNICO.find(x => x.nome === a.nome)?.elenco ?? 50;
+    const forcaB = CLUBES_CONVITES_TECNICO.find(x => x.nome === b.nome)?.elenco ?? 50;
+    const chanceA = limitar(0.38 + (forcaA - forcaB) * 0.007, 0.16, 0.68);
+    const r = rng();
+    if (r < chanceA) { a.vitorias++; b.derrotas++; a.pontos += 3; }
+    else if (r < chanceA + 0.25) { a.empates++; b.empates++; a.pontos++; b.pontos++; }
+    else { b.vitorias++; a.derrotas++; b.pontos += 3; }
+    a.jogos++; b.jogos++;
+  }
+  return linhas;
+}
 export function tabelaClassificacaoTecnico(t, andamento) {
   const jogos = andamento?.jogos || 0;
   const clube = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);

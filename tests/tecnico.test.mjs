@@ -484,3 +484,33 @@ test('liga alternativa com rival ímpar alterna a folga e não cria partida fict
   assert.equal(tabela.find(x => x.nome === 'Clube Teste').jogos, 0);
   assert.equal(tabela.filter(x => x.nome !== 'Clube Teste').reduce((n, x) => n + x.jogos, 0), 12);
 });
+
+test('troca de clube após demissão preserva histórico e reinicia vínculo contratual', () => {
+  const base = iniciarCarreiraTecnico(atleta);
+  const proposta = { nome: 'Novo Clube', pais: 'Brasil', elenco: 72, salario: 24, exigencia: 30, rival: false };
+  const c = { ...base, tecnico: { ...base.tecnico, fase: 'resultado', demitido: true,
+    temporadas: [{ ano: 2045, clube: 'Antigo Clube', vitorias: 12, empates: 8, derrotas: 18 }],
+    promessaContrato: { clube: 'Antigo Clube', posicaoMaxima: 4 }, propostas: [proposta] } };
+  const novo = negociarContratoTecnico(c, 'Novo Clube', 'prudente', () => 0.99);
+  assert.equal(novo.tecnico.clube, 'Novo Clube');
+  assert.equal(novo.tecnico.demitido, false);
+  assert.equal(novo.tecnico.desempregado, false);
+  assert.equal(novo.tecnico.promessaContrato, null);
+  assert.equal(novo.tecnico.temporadas.length, 1);
+  const proximo = proximaTemporadaTecnico(novo);
+  assert.equal(proximo.tecnico.fase, 'pretemporada');
+  assert.equal(proximo.tecnico.clube, 'Novo Clube');
+  assert.equal(proximo.tecnico.temporadas.length, 1);
+});
+
+test('desemprego avança idade e ano sem inventar temporada disputada', () => {
+  const base = iniciarCarreiraTecnico(atleta);
+  const c = { ...base, tecnico: { ...base.tecnico, fase: 'resultado', demitido: true, propostas: [] } };
+  const proximo = passarAnoDesempregado(c, () => 0.5);
+  assert.equal(proximo.idade, c.idade + 1);
+  assert.equal(proximo.ano, c.ano + 1);
+  assert.equal(proximo.tecnico.ano, c.tecnico.ano + 1);
+  assert.equal(proximo.tecnico.desempregado, true);
+  assert.equal(proximo.tecnico.clube, null);
+  assert.equal(proximo.tecnico.temporadas.length, 0);
+});

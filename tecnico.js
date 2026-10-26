@@ -193,6 +193,32 @@ export function gerarPropostasTecnico(t, rng = sorteio) {
   }
   return selecionados.slice(0, 3);
 }
+export const ENTREVISTAS_TECNICO = [
+  { id: 'prudente', nome: 'Aceitar o projeto', multiplicador: 1, bonusDiretoria: 8, bonusTorcida: 0, exigenciaExtra: 0, risco: 0 },
+  { id: 'salario', nome: 'Negociar salário maior (+20%)', multiplicador: 1.2, bonusDiretoria: -5, bonusTorcida: 0, exigenciaExtra: 6, risco: 0.18 },
+  { id: 'ambicioso', nome: 'Prometer grandes resultados (+10%)', multiplicador: 1.1, bonusDiretoria: 10, bonusTorcida: 6, exigenciaExtra: 2, risco: 0.12 }
+];
+export function negociarContratoTecnico(c, clube, estrategia = 'prudente', rng = sorteio) {
+  const t = c?.tecnico;
+  if (!t || (t.fase !== 'resultado' && !t.desempregado)) throw new Error('Negociação indisponível nesta fase.');
+  const proposta = (t.propostas || []).find(p => p.nome === clube);
+  const opcao = ENTREVISTAS_TECNICO.find(x => x.id === estrategia);
+  if (!proposta || !opcao) throw new Error('Proposta ou estratégia inválida.');
+  const ovr = calcularOvrTecnico(t);
+  const risco = limitar(opcao.risco + Math.max(0, proposta.exigencia + opcao.exigenciaExtra - ovr) / 100, 0, 0.9);
+  if (rng() < risco) {
+    return { ...c, tecnico: { ...t, propostas: t.propostas.filter(p => p.nome !== clube),
+      ultimaNegociacao: { clube, estrategia, aceita: false, motivo: 'A diretoria recusou suas condições.' } } };
+  }
+  const contratado = aceitarPropostaTecnico(c, clube);
+  const novo = contratado.tecnico;
+  return { ...contratado, tecnico: { ...novo,
+    salario: Math.round(proposta.salario * opcao.multiplicador),
+    diretoria: limitar(novo.diretoria + opcao.bonusDiretoria, 0, 100),
+    torcida: limitar(novo.torcida + opcao.bonusTorcida, 0, 100),
+    promessaContrato: estrategia === 'ambicioso' ? { clube, posicaoMaxima: 4, temporada: t.ano } : null,
+    ultimaNegociacao: { clube, estrategia, aceita: true } } };
+}
 export function aceitarPropostaTecnico(c, clube) {
   const t = c.tecnico;
   if (!t || (t.fase !== 'resultado' && !t.desempregado)) throw new Error('Propostas só podem ser aceitas entre temporadas.');
@@ -258,11 +284,12 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   const vinculoAtual = (t.vinculosJogador || []).find(v => v.clube === t.clube);
   const idoloEmCasa = !!vinculoAtual?.idolatria;
   const cumpriuObjetivo = posicao <= objetivo.posicao;
-  const temporada = { ano: t.ano, clube: t.clube, idoloEmCasa, objetivo: objetivo.nome, cumpriuObjetivo, estilo: t.estilo, decisoes: t.decisoes, vitorias, empates, derrotas, pontos, posicao, campeao };
+  const promessaDescumprida = !!(t.promessaContrato && t.promessaContrato.clube === t.clube && posicao > t.promessaContrato.posicaoMaxima);
+  const temporada = { ano: t.ano, clube: t.clube, idoloEmCasa, objetivo: objetivo.nome, cumpriuObjetivo, promessaDescumprida, estilo: t.estilo, decisoes: t.decisoes, vitorias, empates, derrotas, pontos, posicao, campeao };
   const novaConfianca = limitar(t.diretoria + (cumpriuObjetivo ? 8 : -14) + (posicao <= 4 ? 5 : posicao >= 15 ? -8 : 0)
-    + (idoloEmCasa && !cumpriuObjetivo ? -4 : 0), 0, 100);
+    + (idoloEmCasa && !cumpriuObjetivo ? -4 : 0) - (promessaDescumprida ? 12 : 0), 0, 100);
   const variacaoTorcida = (campeao ? 18 : posicao <= 4 ? 10 : cumpriuObjetivo ? 5 : posicao >= 17 ? -23 : -12)
-    + (idoloEmCasa && !cumpriuObjetivo ? -9 : idoloEmCasa && cumpriuObjetivo ? 4 : 0);
+    + (idoloEmCasa && !cumpriuObjetivo ? -9 : idoloEmCasa && cumpriuObjetivo ? 4 : 0) - (promessaDescumprida ? 7 : 0);
   const novaTorcida = limitar((t.torcida ?? 55) + variacaoTorcida, 0, 100);
   const situacaoCargo = riscoDemissaoTecnico({ ...t, diretoria: novaConfianca, torcida: novaTorcida });
   const demitido = novaConfianca < 20 || (novaConfianca < 40 && novaTorcida < 35) || situacaoCargo.pressao >= 82;
@@ -270,7 +297,7 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   return { ...c, idade: c.idade + 1, ano: c.ano + 1, tecnico: {
     ...t, ano: t.ano + 1, fase: 'resultado', temporadas: [...t.temporadas, temporada],
     vitorias: t.vitorias + vitorias, empates: t.empates + empates, derrotas: t.derrotas + derrotas,
-    titulos: t.titulos + (campeao ? 1 : 0), demitido, propostas, objetivoAtual: objetivo.nome,
+    titulos: t.titulos + (campeao ? 1 : 0), demitido, propostas, promessaContrato: null, objetivoAtual: objetivo.nome,
     reputacao: limitar(t.reputacao + (campeao ? 9 : posicao <= 4 ? 5 : posicao >= 15 ? -5 : 1), 10, 99),
     diretoria: novaConfianca, torcida: novaTorcida
   }};
@@ -283,7 +310,7 @@ export function proximaTemporadaTecnico(c) {
   const vencidos = (t.efeitosPendentes || []).filter(e => e.aplicarEm <= t.ano);
   const pendentes = (t.efeitosPendentes || []).filter(e => e.aplicarEm > t.ano);
   const soma = (atributo) => vencidos.reduce((acc, e) => acc + (e.heranca?.[atributo] || 0), 0);
-  const proximo = { ...t, historicoCartas, decisoes: [], fase: 'pretemporada',
+  const proximo = { ...t, historicoCartas, decisoes: [], fase: 'pretemporada', ultimaNegociacao: null,
     efeitosPendentes: pendentes, efeitosRecebidos: vencidos,
     elenco: limitar(t.elenco + soma('elenco'), 10, 95),
     moral: limitar(t.moral + 2 + soma('moral'), 10, 95),

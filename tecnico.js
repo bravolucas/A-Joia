@@ -106,6 +106,22 @@ export function calcularOvrTecnico(t) {
   const desempenho = Math.round((aproveitamento - 0.45) * 22);
   return limitar(Math.round(30 + (t.reputacao || 25) * 0.36 + experiencia + titulos + desempenho), 25, 99);
 }
+export function painelEstabilidadeTecnico(t = {}) {
+  const objetivo = objetivoTecnico(t);
+  const pressao = riscoDemissaoTecnico(t);
+  const promessa = t.promessaContrato?.clube === t.clube ? t.promessaContrato : null;
+  const ult = (t.temporadas || []).at(-1);
+  return {
+    objetivo: objetivo.nome,
+    posicaoMeta: objetivo.posicao,
+    promessa: promessa ? { posicaoMaxima: promessa.posicaoMaxima, descricao: 'Terminar entre os 4 primeiros' } : null,
+    torcida: limitar(t.torcida ?? 55, 0, 100),
+    diretoria: limitar(t.diretoria ?? 60, 0, 100),
+    pressao: pressao.pressao,
+    situacao: t.demitido ? 'Demitido' : t.desempregado ? 'Sem clube' : pressao.situacao,
+    ultimaTemporada: ult ? { posicao: ult.posicao, cumpriuObjetivo: !!ult.cumpriuObjetivo, promessaDescumprida: !!ult.promessaDescumprida } : null
+  };
+}
 export function riscoDemissaoTecnico(t) {
   const torcida = t.torcida ?? 55;
   const diretoria = t.diretoria ?? 60;
@@ -226,7 +242,7 @@ export function aceitarPropostaTecnico(c, clube) {
   if (!proposta) throw new Error('Proposta indisponível.');
   return { ...c, tecnico: { ...t, clube: proposta.nome, pais: proposta.pais, elenco: proposta.elenco,
     moral: 50, diretoria: proposta.rival ? 48 : 65, torcida: proposta.rival ? 35 : 55,
-    demitido: false, desempregado: false, retornoIdolo: !!(t.vinculosJogador || []).find(v => v.clube === proposta.nome && v.idolatria), propostas: [], salario: proposta.salario } };
+    demitido: false, desempregado: false, promessaContrato: null, retornoIdolo: !!(t.vinculosJogador || []).find(v => v.clube === proposta.nome && v.idolatria), propostas: [], salario: proposta.salario } };
 }
 export function passarAnoDesempregado(c, rng = sorteio) {
   if (!c?.tecnico || c.tecnico.fase !== 'resultado') throw new Error('Só é possível aguardar entre temporadas.');

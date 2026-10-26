@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, gerarPropostasTecnico, salarioTecnico, passarAnoDesempregado, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -117,4 +117,18 @@ test('desemprego avança o calendário e permite retornar após proposta', () =>
   c = aceitarPropostaTecnico(c, c.tecnico.propostas[0].nome);
   assert.equal(c.tecnico.desempregado, false);
   assert.equal(proximaTemporadaTecnico(c).tecnico.fase, 'pretemporada');
+});
+
+test('idolatria e tempo no clube abrem portas para iniciar carreira técnica', () => {
+  const atletaIdolo = { ...atleta, aposentado: true, clubeNome: 'Clube B', torcida: { 'Clube A': 91, 'Clube B': 30 },
+    temporadas: Array.from({ length: 6 }, (_, i) => ({ ano: 2020 + i, clube: 'Clube A', jogos: 30, titulos: i < 3 ? [{ tipo: 'liga' }] : [] })) };
+  const vinculo = vinculosComoJogador(atletaIdolo)[0];
+  assert.equal(vinculo.clube, 'Clube A');
+  assert.equal(vinculo.idolatria, true);
+  assert.ok(opcoesInicioTecnico(atletaIdolo).some(x => x.clube === 'Clube A'));
+  let c = iniciarCarreiraTecnico(atletaIdolo);
+  c = iniciarNoClubeIdolo(c, 'Clube A');
+  assert.equal(c.tecnico.clube, 'Clube A');
+  assert.ok(c.tecnico.torcida > 55);
+  assert.throws(() => iniciarNoClubeIdolo(c, 'Clube Desconhecido'));
 });

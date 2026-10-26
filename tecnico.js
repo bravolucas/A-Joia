@@ -1,3 +1,4 @@
+import { EVENTOS_CONTEXTO_TECNICO } from './eventosTecnico.js';
 // Continuação da mesma carreira, sem alterar o histórico do atleta.
 export const ESTILOS_TECNICO = [
   { id: 'ofensivo', nome: 'Ofensivo', descricao: 'Mais gols e mais riscos.' },
@@ -44,17 +45,34 @@ export const DECISOES_TECNICO = [
   ] }
 ];
 export const QUANTIDADE_DECISOES_TECNICO = 4;
-export function sortearCartasTecnico(rng = sorteio) {
-  const cartas = [...DECISOES_TECNICO];
+export const TODAS_CARTAS_TECNICO = [...DECISOES_TECNICO, ...EVENTOS_CONTEXTO_TECNICO];
+export function elegivelTecnico(carta, t) {
+  switch (carta.contexto) {
+    case 'inicio': return (t.temporadas?.length || 0) <= 2;
+    case 'crise': return (t.diretoria ?? 60) < 52 || (t.moral ?? 50) < 40 || (t.temporadas?.at(-1)?.posicao ?? 1) >= 15;
+    case 'lider': return (t.temporadas?.at(-1)?.posicao ?? 20) <= 4 || (t.titulos || 0) >= 1;
+    case 'prestigio': return (t.reputacao ?? 25) >= 65 || (t.titulos || 0) >= 2;
+    case 'experiente': return (t.temporadas?.length || 0) >= 4;
+    default: return true;
+  }
+}
+export function sortearCartasTecnico(t = {}, rng = sorteio) {
+  // Compatibilidade com chamadas antigas que passavam somente o gerador aleatório.
+  if (typeof t === 'function') { rng = t; t = {}; }
+  const recentes = new Set((t.historicoCartas || []).slice(-16));
+  const candidatas = TODAS_CARTAS_TECNICO.filter(x => elegivelTecnico(x, t));
+  const novas = candidatas.filter(x => !recentes.has(x.id));
+  const pool = novas.length >= QUANTIDADE_DECISOES_TECNICO ? novas : candidatas;
+  const cartas = [...pool];
   for (let i = cartas.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
+    const j = Math.min(i, Math.floor(rng() * (i + 1)));
     [cartas[i], cartas[j]] = [cartas[j], cartas[i]];
   }
   return cartas.slice(0, QUANTIDADE_DECISOES_TECNICO).map(x => x.id);
 }
 export function cartaAtualTecnico(t) {
   const ids = t.cartas || DECISOES_TECNICO.slice(0, QUANTIDADE_DECISOES_TECNICO).map(x => x.id);
-  return DECISOES_TECNICO.find(x => x.id === ids[t.decisoes?.length || 0]) || null;
+  return TODAS_CARTAS_TECNICO.find(x => x.id === ids[t.decisoes?.length || 0]) || null;
 }
 export function tomarDecisaoTecnico(c, opcaoId, rng = sorteio) {
   if (!c?.tecnico || c.tecnico.fase !== 'pretemporada') throw new Error('Decisão indisponível.');
@@ -80,7 +98,7 @@ export function iniciarCarreiraTecnico(c) {
   return { ...c, tecnico: {
     idadeInicio: c.idade, ano: c.ano, clube: c.clubeNome || 'Clube inicial',
     reputacao, estilo: 'equilibrado', temporadas: [], vitorias: 0, empates: 0,
-    derrotas: 0, titulos: 0, elenco: 50, moral: 50, diretoria: 60, decisoes: [], cartas: sortearCartasTecnico(), fase: 'pretemporada'
+    derrotas: 0, titulos: 0, elenco: 50, moral: 50, diretoria: 60, decisoes: [], historicoCartas: [], cartas: sortearCartasTecnico({ reputacao, temporadas: [], diretoria: 60, moral: 50 }), fase: 'pretemporada'
   }};
 }
 export function definirEstiloTecnico(c, estilo) {
@@ -117,5 +135,8 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
 }
 export function proximaTemporadaTecnico(c) {
   if (!c?.tecnico || c.tecnico.fase !== 'resultado') throw new Error('Nenhum resultado pendente.');
-  return { ...c, tecnico: { ...c.tecnico, fase: 'pretemporada', decisoes: [], cartas: sortearCartasTecnico(), moral: limitar(c.tecnico.moral + 2, 10, 95) } };
+  const t = c.tecnico;
+  const historicoCartas = [...(t.historicoCartas || []), ...(t.cartas || [])].slice(-32);
+  const proximo = { ...t, historicoCartas, decisoes: [], fase: 'pretemporada', moral: limitar(t.moral + 2, 10, 95) };
+  return { ...c, tecnico: { ...proximo, cartas: sortearCartasTecnico(proximo) } };
 }

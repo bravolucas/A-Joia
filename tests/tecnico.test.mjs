@@ -1,7 +1,7 @@
 import { CLUBES } from '../data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, perfilClubeTecnico, probabilidadesTecnico, calendarioAdversariosTecnico, probabilidadesConfrontoTecnico, tabelaClassificacaoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, perfilClubeTecnico, probabilidadesTecnico, calendarioAdversariosTecnico, calendarioLigaTecnico, probabilidadesConfrontoTecnico, tabelaClassificacaoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -349,4 +349,26 @@ test('liga evolui por resultados dos rivais sem recalcular rodadas anteriores', 
   c = simularEtapaTecnico(c, () => 0.4);
   assert.ok(c.tecnico.andamento.classificacao.every(x => x.jogos === 19));
   assert.equal(c.tecnico.andamento.classificacao.find(x => x.meuClube).pontos, c.tecnico.andamento.pontos);
+});
+
+test('liga de 20 clubes possui 380 jogos únicos por turno e returno invertido', () => {
+  const clube = CLUBES.find(x => CLUBES.filter(y => y.liga === x.liga).length === 20);
+  if (!clube) return;
+  const calendario = calendarioLigaTecnico({ clube: clube.nome });
+  assert.equal(calendario.length, 38);
+  const ida = new Set();
+  for (let r = 0; r < 38; r++) {
+    assert.equal(calendario[r].length, 10);
+    assert.equal(new Set(calendario[r].flatMap(j => [j.casa, j.fora])).size, 20);
+    for (const j of calendario[r]) {
+      const chave = [j.casa, j.fora].sort().join('|');
+      if (r < 19) { assert.ok(!ida.has(chave)); ida.add(chave); }
+      else assert.ok(ida.has(chave));
+    }
+  }
+  assert.equal(ida.size, 190);
+  for (let r = 0; r < 19; r++) {
+    const volta = calendario[r + 19];
+    for (const j of calendario[r]) assert.ok(volta.some(v => v.casa === j.fora && v.fora === j.casa));
+  }
 });

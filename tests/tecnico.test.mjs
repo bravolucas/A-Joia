@@ -1,7 +1,7 @@
 import { CLUBES } from '../data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, perfilClubeTecnico, probabilidadesTecnico, calendarioAdversariosTecnico, calendarioLigaTecnico, probabilidadesConfrontoTecnico, tabelaClassificacaoTecnico, ordenarClassificacaoTecnico, zonaClassificacaoTecnico, placarTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, perfilClubeTecnico, probabilidadesTecnico, calendarioAdversariosTecnico, calendarioLigaTecnico, probabilidadesConfrontoTecnico, tabelaClassificacaoTecnico, ordenarClassificacaoTecnico, zonaClassificacaoTecnico, placarTecnico, simularRodadaRivaisTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -468,4 +468,19 @@ test('save antigo sem placares é migrado sem alterar o objeto original', () => 
   assert.equal(retomado.tecnico.andamento.confrontos.length, 19);
   const time = retomado.tecnico.andamento.classificacao.find(x => x.meuClube);
   assert.equal(time.saldoGols, time.golsPro - time.golsContra);
+});
+
+test('liga alternativa com rival ímpar alterna a folga e não cria partida fictícia', () => {
+  const t = { clube: 'Clube Teste', liga: 'Liga Inexistente', elenco: 60 };
+  const base = [
+    { nome: 'Clube Teste', meuClube: true, jogos: 0, pontos: 0, vitorias: 0, empates: 0, derrotas: 0 },
+    ...['A', 'B', 'C', 'D'].map(nome => ({ nome, jogos: 0, pontos: 0, vitorias: 0, empates: 0, derrotas: 0 }))
+  ];
+  let tabela = base;
+  for (let rodada = 1; rodada <= 4; rodada++) {
+    tabela = simularRodadaRivaisTecnico(t, tabela, 'A', 'V', () => 0.4, rodada);
+  }
+  assert.equal(tabela.find(x => x.nome === 'A').jogos, 4);
+  assert.equal(tabela.find(x => x.nome === 'Clube Teste').jogos, 0);
+  assert.equal(tabela.filter(x => x.nome !== 'Clube Teste').reduce((n, x) => n + x.jogos, 0), 10);
 });

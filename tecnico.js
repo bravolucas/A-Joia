@@ -16,21 +16,60 @@ export const DECISOES_TECNICO = [
     { id: 'intenso', nome: 'Cobrar mais intensidade', detalhe: 'Elenco +5 · moral -6', elenco: 5, moral: -6 },
     { id: 'dialogo', nome: 'Conversar com o grupo', detalhe: 'Moral +8 · diretoria +2', moral: 8, diretoria: 2 },
     { id: 'descanso', nome: 'Reduzir a carga', detalhe: 'Moral +5 · elenco -2', moral: 5, elenco: -2 }
+  ] },
+  { id: 'craque', titulo: 'O craque quer privilégios', texto: 'O principal jogador ameaça pedir transferência.', opcoes: [
+    { id: 'apoiar', nome: 'Dar liberdade ao craque', detalhe: 'Moral +7 · diretoria -5', moral: 7, diretoria: -5 },
+    { id: 'cobrar', nome: 'Exigir disciplina', detalhe: 'Diretoria +5 · moral -7', diretoria: 5, moral: -7 },
+    { id: 'negociar', nome: 'Conversar reservadamente', detalhe: 'Resultado incerto', moral: 3, risco: 0.45, riscoMoral: -8, riscoDiretoria: -4 }
+  ] },
+  { id: 'classico', titulo: 'Semana de clássico', texto: 'A imprensa exige uma vitória contra o rival.', opcoes: [
+    { id: 'atacar', nome: 'Prometer vitória', detalhe: 'Moral +5 · pressão maior', moral: 5, risco: 0.5, riscoDiretoria: -9 },
+    { id: 'prudente', nome: 'Diminuir expectativas', detalhe: 'Diretoria +3 · moral -2', diretoria: 3, moral: -2 },
+    { id: 'foco', nome: 'Blindar o elenco', detalhe: 'Elenco +3 · moral +2', elenco: 3, moral: 2 }
+  ] },
+  { id: 'lesoes', titulo: 'Departamento médico em alerta', texto: 'Os jogadores reclamam de desgaste.', opcoes: [
+    { id: 'rodizio', nome: 'Rodar o elenco', detalhe: 'Moral +5 · elenco -3', moral: 5, elenco: -3 },
+    { id: 'arriscar', nome: 'Manter os titulares', detalhe: 'Elenco +5 · risco de queda de moral', elenco: 5, risco: 0.55, riscoMoral: -9 },
+    { id: 'preparacao', nome: 'Reforçar preparação física', detalhe: 'Elenco +3 · diretoria -3', elenco: 3, diretoria: -3 }
+  ] },
+  { id: 'diretoria', titulo: 'Ultimato da diretoria', texto: 'Os dirigentes cobram uma resposta à pressão.', opcoes: [
+    { id: 'ambicioso', nome: 'Prometer classificação', detalhe: 'Diretoria +7 · risco de cobrança', diretoria: 7, risco: 0.5, riscoDiretoria: -12 },
+    { id: 'realista', nome: 'Defender o projeto', detalhe: 'Diretoria +2 · moral +2', diretoria: 2, moral: 2 },
+    { id: 'confrontar', nome: 'Exigir apoio público', detalhe: 'Moral +6 · diretoria -8', moral: 6, diretoria: -8 }
+  ] },
+  { id: 'jovem', titulo: 'Uma promessa pede espaço', texto: 'Um jovem da base impressiona nos treinos.', opcoes: [
+    { id: 'titular', nome: 'Promover a titular', detalhe: 'Elenco +5 · risco de pressão', elenco: 5, risco: 0.4, riscoMoral: -5 },
+    { id: 'gradual', nome: 'Integrar aos poucos', detalhe: 'Elenco +2 · moral +3', elenco: 2, moral: 3 },
+    { id: 'emprestar', nome: 'Emprestar para evoluir', detalhe: 'Diretoria +4 · elenco -2', diretoria: 4, elenco: -2 }
   ] }
 ];
-export function tomarDecisaoTecnico(c, opcaoId) {
+export const QUANTIDADE_DECISOES_TECNICO = 4;
+export function sortearCartasTecnico(rng = sorteio) {
+  const cartas = [...DECISOES_TECNICO];
+  for (let i = cartas.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [cartas[i], cartas[j]] = [cartas[j], cartas[i]];
+  }
+  return cartas.slice(0, QUANTIDADE_DECISOES_TECNICO).map(x => x.id);
+}
+export function cartaAtualTecnico(t) {
+  const ids = t.cartas || DECISOES_TECNICO.slice(0, QUANTIDADE_DECISOES_TECNICO).map(x => x.id);
+  return DECISOES_TECNICO.find(x => x.id === ids[t.decisoes?.length || 0]) || null;
+}
+export function tomarDecisaoTecnico(c, opcaoId, rng = sorteio) {
   if (!c?.tecnico || c.tecnico.fase !== 'pretemporada') throw new Error('Decisão indisponível.');
   const t = c.tecnico;
-  const indice = t.decisoes?.length || 0;
-  const carta = DECISOES_TECNICO[indice];
+  const carta = cartaAtualTecnico(t);
   if (!carta) throw new Error('Todas as decisões já foram tomadas.');
   const op = carta.opcoes.find(x => x.id === opcaoId);
   if (!op) throw new Error('Opção inválida.');
+  const riscoAtivado = !!op.risco && rng() < op.risco;
+  const resultado = riscoAtivado ? 'A aposta trouxe consequências inesperadas.' : 'O plano foi recebido como esperado.';
   return { ...c, tecnico: {
     ...t, elenco: limitar((t.elenco ?? 50) + (op.elenco || 0), 10, 95),
-    moral: limitar((t.moral ?? 50) + (op.moral || 0), 10, 95),
-    diretoria: limitar((t.diretoria ?? 60) + (op.diretoria || 0), 0, 100),
-    decisoes: [...(t.decisoes || []), { carta: carta.id, opcao: op.id, nome: op.nome }]
+    moral: limitar((t.moral ?? 50) + (op.moral || 0) + (riscoAtivado ? op.riscoMoral || 0 : 0), 10, 95),
+    diretoria: limitar((t.diretoria ?? 60) + (op.diretoria || 0) + (riscoAtivado ? op.riscoDiretoria || 0 : 0), 0, 100),
+    decisoes: [...(t.decisoes || []), { carta: carta.id, opcao: op.id, nome: op.nome, resultado, riscoAtivado }]
   }};
 }
 export function iniciarCarreiraTecnico(c) {
@@ -41,7 +80,7 @@ export function iniciarCarreiraTecnico(c) {
   return { ...c, tecnico: {
     idadeInicio: c.idade, ano: c.ano, clube: c.clubeNome || 'Clube inicial',
     reputacao, estilo: 'equilibrado', temporadas: [], vitorias: 0, empates: 0,
-    derrotas: 0, titulos: 0, elenco: 50, moral: 50, diretoria: 60, decisoes: [], fase: 'pretemporada'
+    derrotas: 0, titulos: 0, elenco: 50, moral: 50, diretoria: 60, decisoes: [], cartas: sortearCartasTecnico(), fase: 'pretemporada'
   }};
 }
 export function definirEstiloTecnico(c, estilo) {
@@ -53,7 +92,7 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   if (!c?.tecnico) throw new Error('Carreira técnica não iniciada.');
   if (c.tecnico.fase !== 'pretemporada') throw new Error('Conclua a temporada anterior antes de simular.');
   const t = c.tecnico;
-  if ((t.decisoes?.length || 0) < DECISOES_TECNICO.length) throw new Error('Tome as decisões da temporada antes de simular.');
+  if ((t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) throw new Error('Tome as decisões da temporada antes de simular.');
   const bonus = t.estilo === 'equilibrado' ? 0.04 : 0;
   const pVitoria = limitar(0.20 + t.reputacao / 600 + (t.elenco - 50) / 500 + (t.moral - 50) / 700 + bonus, 0.20, 0.67);
   const pEmpate = t.estilo === 'defensivo' ? 0.29 : t.estilo === 'ofensivo' ? 0.17 : 0.23;
@@ -78,5 +117,5 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
 }
 export function proximaTemporadaTecnico(c) {
   if (!c?.tecnico || c.tecnico.fase !== 'resultado') throw new Error('Nenhum resultado pendente.');
-  return { ...c, tecnico: { ...c.tecnico, fase: 'pretemporada', decisoes: [], moral: limitar(c.tecnico.moral + 2, 10, 95) } };
+  return { ...c, tecnico: { ...c.tecnico, fase: 'pretemporada', decisoes: [], cartas: sortearCartasTecnico(), moral: limitar(c.tecnico.moral + 2, 10, 95) } };
 }

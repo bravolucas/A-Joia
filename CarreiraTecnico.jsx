@@ -1,7 +1,7 @@
 import React from 'react';
-import { ESTILOS_TECNICO, ENTREVISTAS_TECNICO, ETAPAS_TEMPORADA_TECNICO, cartaAtualTecnico, objetivoTecnico, salarioTecnico, calcularOvrTecnico, painelEstabilidadeTecnico, QUANTIDADE_DECISOES_TECNICO } from './tecnico.js';
+import { ESTILOS_TECNICO, ENTREVISTAS_TECNICO, OPCOES_REUNIAO_TECNICO, ETAPAS_TEMPORADA_TECNICO, cartaAtualTecnico, objetivoTecnico, salarioTecnico, calcularOvrTecnico, painelEstabilidadeTecnico, QUANTIDADE_DECISOES_TECNICO } from './tecnico.js';
 
-export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAvancar, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado }) {
+export default function CarreiraTecnico({ c, onEstilo, onDecisao, onReuniao, onJogar, onAvancar, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado }) {
   const t = c.tecnico;
   const ultima = t.temporadas[t.temporadas.length - 1];
   const decisao = cartaAtualTecnico(t);
@@ -73,7 +73,12 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAva
         <h3 className="text-[#EBC557] text-sm font-bold mt-3">Avaliações da diretoria</h3>
         <div className="flex flex-col gap-2 mt-2">{t.andamento.avaliacoes.map(a => <p key={a.rodada} className="text-[#C9D3CE] text-xs">Rodada {a.rodada}: {a.situacao} · {a.aproveitamento}% de aproveitamento · Pressão {a.pressao}/100</p>)}</div>
       </section>}
-      <button disabled={!!decisao} onClick={onJogar} className="rp-btn rp-ouro p-3">{t.andamento ? `Avançar até a rodada ${ETAPAS_TEMPORADA_TECNICO.find(n => n > t.andamento.jogos) || 38}` : 'Iniciar campeonato (10 rodadas)'}</button>
+      {t.reuniaoPendente && <section className="rp-painel p-4 border border-[#EBC557]/40" aria-label="Reunião de emergência com a diretoria">
+        <h2 className="text-[#EBC557] font-bold">Reunião de emergência</h2>
+        <p className="text-[#C9D3CE] text-sm mt-2">A diretoria exige explicações pela campanha. Sua resposta pode recuperar a confiança ou agravar a crise.</p>
+        <div className="flex flex-col gap-2 mt-3">{OPCOES_REUNIAO_TECNICO.map(op => <button key={op.id} onClick={() => onReuniao(op.id)} className="rp-opcao p-3 text-left"><strong className="text-white block">{op.nome}</strong><span className="text-[#8FA39A] text-sm">{op.descricao}</span></button>)}</div>
+      </section>}
+      <button disabled={!!decisao || !!t.reuniaoPendente} onClick={onJogar} className="rp-btn rp-ouro p-3">{t.andamento ? `Avançar até a rodada ${ETAPAS_TEMPORADA_TECNICO.find(n => n > t.andamento.jogos) || 38}` : 'Iniciar campeonato (10 rodadas)'}</button>
     </> : <section className="rp-painel p-5">
       <p className="text-[#EBC557] uppercase tracking-wider text-xs">Fim de temporada · {ultima.ano}</p>
       <h2 className="text-2xl font-bold mt-2 text-white">{ultima.campeao ? '🏆 Campeão!' : `${ultima.posicao}º lugar`}</h2>

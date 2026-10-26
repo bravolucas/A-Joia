@@ -510,6 +510,11 @@ export function ApresentacaoNovoClube(props) {
   return <AnuncioClube {...props} />;
 }
 
+// Movimento da bola respeita as configurações de acessibilidade do sistema.
+const ESTILO_BOLA_CINEMATICA = `
+@keyframes penBolaGiro { from { transform:rotate(0deg); } to { transform:rotate(440deg); } }
+@media (prefers-reduced-motion:reduce) { .pen-bola-reduzida { animation:none !important; } }
+`;
 // Taça genérica — silhueta própria (taça, duas alças, haste, base), sem
 // reproduzir nenhum troféu real. A cor muda pelo nível da competição.
 export function TrofeuIcone({ tier = "ouro", size = 80 }) {
@@ -1311,6 +1316,7 @@ export function PenBola({ resultado }) {
   const noChao = !resultado;
   return (
     <>
+      <style>{ESTILO_BOLA_CINEMATICA}</style>
       <div className="absolute rounded-full transition-all ease-in" style={{
         width: 26 * (noChao ? 1.6 : alvo.scale), height: 7 * (noChao ? 1.6 : alvo.scale), left: alvo.x,
         top: noChao ? 205 : alvo.y + 9 * alvo.scale,
@@ -1323,6 +1329,7 @@ export function PenBola({ resultado }) {
         background: "radial-gradient(circle at 32% 28%, #fff, #dcdcdc 55%, #a8a8a8)",
         boxShadow: resultado && resultado.gol ? "0 0 16px 4px rgba(57,255,136,0.85), inset 0 0 0 1.5px #222" : "inset 0 0 0 1.5px #222, 0 2px 4px rgba(0,0,0,0.5)",
       }}>
+        {resultado && <span aria-hidden="true" className="absolute inset-0 rounded-full pen-bola-reduzida" style={{ animation: "penBolaGiro 620ms ease-in both", background: "repeating-conic-gradient(from 20deg, transparent 0deg 45deg, rgba(20,20,20,.4) 46deg 62deg, transparent 63deg 120deg)", opacity: .45 }} />}
         {alvo.scale > 1.2 && (
           <svg viewBox="0 0 100 100" className="w-full h-full">
             <polygon points="50,20 65,32 59,50 41,50 35,32" fill="#1a1a1a" opacity="0.85" />
@@ -1452,6 +1459,9 @@ export function GoalMini({ onPick, resultado }) {
           <PenBola resultado={resultado} />
           {resultado && resultado.gol && <PenEfeitoGol key={golKey} ativo />}
         </div>
+      </div>
+      <div className="mx-auto mt-2 flex justify-center gap-2 text-[10px] uppercase tracking-widest text-emerald-100/70" aria-live="polite">
+        <span className="rounded-full border border-white/20 px-3 py-1">{resultado ? (resultado.gol ? "⚽ Bola na rede" : resultado.tipo || "Cobrança concluída") : "🎯 Escolha a direção"}</span>
       </div>
       {!resultado && <div className="grid grid-cols-3 gap-1.5 mt-2 mx-auto" style={{ width: 220 }}>
         <Button variant="ghost" onClick={() => onPick("esquerdo")}>Esq.</Button>

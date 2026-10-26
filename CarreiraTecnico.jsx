@@ -113,8 +113,8 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onReuniao, onJ
           <div className="flex flex-wrap gap-2 mt-2">{ENTREVISTAS_TECNICO.map(e => <button key={e.id} onClick={() => onAceitarProposta(p.nome, e.id)} className="rp-opcao p-2 text-xs">{e.nome}</button>)}</div>
         </div>)}
       </div>}
-      {t.demitido && <button onClick={onEsperar} className="rp-btn rp-sec w-full mt-3">Ficar desempregado e aguardar propostas</button>}
-      {!t.demitido && <button onClick={onAvancar} className="rp-btn rp-prim w-full mt-4">Permanecer e iniciar próxima temporada</button>}
+      {(t.demitido || t.desempregado) && <button onClick={onEsperar} className="rp-btn rp-sec w-full mt-3">{t.desempregado ? 'Aguardar mais um ano por propostas' : 'Ficar desempregado e aguardar propostas'}</button>}
+      {!t.demitido && !t.desempregado && <button onClick={onAvancar} className="rp-btn rp-prim w-full mt-4">Permanecer e iniciar próxima temporada</button>}
     </section>}
     <section className="rp-painel p-4" aria-label="Histórico profissional como treinador">
       <h2 className="font-bold text-white mb-2">Carreira como técnico</h2>

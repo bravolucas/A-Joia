@@ -1,5 +1,5 @@
 import React from 'react';
-import { ESTILOS_TECNICO, ENTREVISTAS_TECNICO, cartaAtualTecnico, objetivoTecnico, salarioTecnico, calcularOvrTecnico, painelEstabilidadeTecnico, QUANTIDADE_DECISOES_TECNICO } from './tecnico.js';
+import { ESTILOS_TECNICO, ENTREVISTAS_TECNICO, ETAPAS_TEMPORADA_TECNICO, cartaAtualTecnico, objetivoTecnico, salarioTecnico, calcularOvrTecnico, painelEstabilidadeTecnico, QUANTIDADE_DECISOES_TECNICO } from './tecnico.js';
 
 export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAvancar, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado }) {
   const t = c.tecnico;
@@ -66,12 +66,21 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAva
           </button>)}
         </div> : <p className="text-[#7FE3BC] mt-3">Decisões concluídas. Sua equipe está pronta.</p>}
       </section>
-      <button disabled={!!decisao} onClick={onJogar} className="rp-btn rp-ouro p-3">Simular temporada {t.ano}</button>
+      {t.andamento && <section className="rp-painel p-4" aria-label="Acompanhamento da temporada">
+        <h2 className="text-white font-bold">Temporada em andamento</h2>
+        <p className="text-[#C9D3CE] text-sm mt-1">Rodada {t.andamento.jogos}/38 · {t.andamento.pontos} pontos · {t.andamento.vitorias}V {t.andamento.empates}E {t.andamento.derrotas}D</p>
+        <div className="h-2 bg-white/10 rounded-full mt-2 overflow-hidden"><div className="h-full bg-[#7FE3BC]" style={{width: `${t.andamento.jogos / 38 * 100}%`}} /></div>
+        <h3 className="text-[#EBC557] text-sm font-bold mt-3">Avaliações da diretoria</h3>
+        <div className="flex flex-col gap-2 mt-2">{t.andamento.avaliacoes.map(a => <p key={a.rodada} className="text-[#C9D3CE] text-xs">Rodada {a.rodada}: {a.situacao} · {a.aproveitamento}% de aproveitamento · Pressão {a.pressao}/100</p>)}</div>
+      </section>}
+      <button disabled={!!decisao} onClick={onJogar} className="rp-btn rp-ouro p-3">{t.andamento ? `Avançar até a rodada ${ETAPAS_TEMPORADA_TECNICO.find(n => n > t.andamento.jogos) || 38}` : 'Iniciar campeonato (10 rodadas)'}</button>
     </> : <section className="rp-painel p-5">
       <p className="text-[#EBC557] uppercase tracking-wider text-xs">Fim de temporada · {ultima.ano}</p>
       <h2 className="text-2xl font-bold mt-2 text-white">{ultima.campeao ? '🏆 Campeão!' : `${ultima.posicao}º lugar`}</h2>
       <p className="text-[#C9D3CE] mt-2">{ultima.pontos} pontos · {ultima.vitorias} vitórias · {ultima.empates} empates · {ultima.derrotas} derrotas</p>
       <p className="text-sm text-[#C9D3CE] mt-2">Meta: {ultima.objetivo} — <strong>{ultima.cumpriuObjetivo ? 'cumprida' : 'não cumprida'}</strong></p>
+      {ultima.interrompida && <p className="text-[#F0A99E] text-sm mt-2">Demissão antecipada após {ultima.jogos} rodadas.</p>}
+      {(ultima.avaliacoes || []).length > 0 && <div className="mt-3 flex flex-col gap-1">{ultima.avaliacoes.map(a => <p key={a.rodada} className="text-[#8FA39A] text-xs">Rodada {a.rodada}: {a.situacao} · Pressão {a.pressao}/100</p>)}</div>}
       {ultima.promessaDescumprida && <p className="text-[#F0A99E] text-sm font-bold mt-2">Promessa contratual não cumprida: confiança e aprovação sofreram penalidades.</p>}
       {t.demitido && <p className="text-[#F0A99E] font-bold mt-3">Você foi demitido. Aceite uma proposta ou aguarde oportunidades.</p>}
       {(t.propostas || []).length > 0 && <div className="mt-4 flex flex-col gap-2">

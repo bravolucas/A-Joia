@@ -7,9 +7,10 @@ test("carreira real: criação, três temporadas, notícias e retrospecto",()=>{
   assert.ok(c.attrs && c.rival);
   for(let i=0;i<3;i++){
     const anterior=c.ano;
-    const card=jogarTemporada(c);
+    const simulacao=jogarTemporada(c);
+    const card=simulacao.card;
     assert.ok(card && Number.isFinite(card.jogos));
-    const resultado=fecharTemporada(c,card);
+    const resultado=fecharTemporada(simulacao.c,card);
     c=resultado.c;
     assert.equal(c.ano,anterior+1);
     assert.equal(c.temporadas.length,i+1);

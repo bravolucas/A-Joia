@@ -1,11 +1,11 @@
 import React from 'react';
-import { ESTILOS_TECNICO, ENTREVISTAS_TECNICO, cartaAtualTecnico, objetivoTecnico, salarioTecnico, calcularOvrTecnico, riscoDemissaoTecnico, QUANTIDADE_DECISOES_TECNICO } from './tecnico.js';
+import { ESTILOS_TECNICO, ENTREVISTAS_TECNICO, cartaAtualTecnico, objetivoTecnico, salarioTecnico, calcularOvrTecnico, painelEstabilidadeTecnico, QUANTIDADE_DECISOES_TECNICO } from './tecnico.js';
 
 export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAvancar, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado }) {
   const t = c.tecnico;
   const ultima = t.temporadas[t.temporadas.length - 1];
   const decisao = cartaAtualTecnico(t);
-  const risco = riscoDemissaoTecnico(t);
+  const estabilidade = painelEstabilidadeTecnico(t);
   const indicador = (titulo, valor) => <div className="flex flex-col gap-1">
     <div className="flex justify-between text-sm"><span className="text-[#C9D3CE]">{titulo}</span><strong className="text-white">{valor}/100</strong></div>
     <div className="h-2.5 rounded-full bg-white/10 overflow-hidden" role="progressbar" aria-label={titulo} aria-valuemin={0} aria-valuemax={100} aria-valuenow={valor}>
@@ -18,12 +18,18 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAva
       <h1 className="display text-xl mt-3 text-white">À beira do campo</h1>
       <p className="text-[#C9D3CE] mt-2">{c.nome} · {c.idade} anos</p>
       <p className="text-[#7FE3BC] mt-1 font-bold">{t.clube || "Sem clube"} · Temporada {t.ano}</p>
-      <p className="text-[#C9D3CE] text-sm mt-3">Objetivo da diretoria: <strong className="text-white">{objetivoTecnico(t).nome}</strong></p>
+      <section className="rp-painel p-3 mt-3 text-left" aria-label="Metas e estabilidade no cargo">
+        <h2 className="text-[#EBC557] font-bold text-sm">Metas e estabilidade</h2>
+        <p className="text-[#C9D3CE] text-sm mt-2">Objetivo da diretoria: <strong className="text-white">{estabilidade.objetivo}</strong></p>
+        <p className="text-[#8FA39A] text-xs mt-1">Meta: terminar até a {estabilidade.posicaoMeta}ª posição</p>
+        {estabilidade.promessa && <div className="mt-2 border-l-2 border-[#EBC557] pl-3"><p className="text-[#EBC557] text-sm font-bold">Promessa contratual ativa</p><p className="text-[#C9D3CE] text-sm">{estabilidade.promessa.descricao}</p><p className="text-[#8FA39A] text-xs">Descumprir reduz a confiança da diretoria e a aprovação da torcida.</p></div>}
+        {estabilidade.ultimaTemporada && <p className="text-[#8FA39A] text-xs mt-2">Última temporada: {estabilidade.ultimaTemporada.posicao}º lugar · Meta {estabilidade.ultimaTemporada.cumpriuObjetivo ? 'cumprida' : 'não cumprida'}{estabilidade.ultimaTemporada.promessaDescumprida ? ' · Promessa quebrada' : ''}</p>}
+      </section>
       <div className="rp-painel p-3 mt-3 text-left flex flex-col gap-3">
         <div className="flex justify-between items-center"><span className="font-bold text-[#EBC557]">OVR Técnico</span><strong className="font-stat text-2xl text-white">{calcularOvrTecnico(t)}</strong></div>
-        {indicador('Aprovação da torcida', t.torcida ?? 55)}
-        {indicador('Confiança da diretoria', t.diretoria ?? 60)}
-        <p className="text-xs text-[#8FA39A]">Situação no cargo: <strong className="text-white">{risco.situacao}</strong> · Pressão {risco.pressao}/100</p>
+        {indicador('Aprovação da torcida', estabilidade.torcida)}
+        {indicador('Confiança da diretoria', estabilidade.diretoria)}
+        <p className="text-xs text-[#8FA39A]">Situação no cargo: <strong className="text-white">{estabilidade.situacao}</strong> · Pressão {estabilidade.pressao}/100</p>
       </div>
       <p className="text-[#8FA39A] text-xs mt-1">{t.pais || "Mercado internacional"} · {t.clube ? `R$ ${t.salario ?? salarioTecnico(t)} mil/mês` : "Sem contrato"}</p>
       <div className="grid grid-cols-3 gap-2 mt-5">
@@ -66,6 +72,7 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAva
       <h2 className="text-2xl font-bold mt-2 text-white">{ultima.campeao ? '🏆 Campeão!' : `${ultima.posicao}º lugar`}</h2>
       <p className="text-[#C9D3CE] mt-2">{ultima.pontos} pontos · {ultima.vitorias} vitórias · {ultima.empates} empates · {ultima.derrotas} derrotas</p>
       <p className="text-sm text-[#C9D3CE] mt-2">Meta: {ultima.objetivo} — <strong>{ultima.cumpriuObjetivo ? 'cumprida' : 'não cumprida'}</strong></p>
+      {ultima.promessaDescumprida && <p className="text-[#F0A99E] text-sm font-bold mt-2">Promessa contratual não cumprida: confiança e aprovação sofreram penalidades.</p>}
       {t.demitido && <p className="text-[#F0A99E] font-bold mt-3">Você foi demitido. Aceite uma proposta ou aguarde oportunidades.</p>}
       {(t.propostas || []).length > 0 && <div className="mt-4 flex flex-col gap-2">
         <h3 className="text-white font-bold">Propostas de trabalho</h3>

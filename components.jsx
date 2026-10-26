@@ -427,6 +427,24 @@ function AnuncioClube({ clube, nome, numero, posicao, idade, grandeChegada, deOn
       <div className="absolute -top-24 right-[8%] w-56 h-56 rounded-full blur-3xl" style={{ background: "#fff", animation: "ancLuz 3s ease-in-out infinite .8s" }} />
       {fase >= 2 && flashes.map((f, i) => <div key={i} className="absolute w-24 h-24 rounded-full blur-2xl bg-white" style={{ left: `${f.x}%`, top: `${f.y}%`, opacity: 0, animation: `ancFlash ${f.t}s ${f.d}s infinite` }} />)}
 
+      {/* Camada cinematográfica: gramado, luzes de estádio e silhueta do novo reforço.
+          SVG inline evita imagens externas e mantém o anúncio leve e offline. */}
+      <div className="absolute inset-x-0 bottom-0 h-[46%] pointer-events-none" aria-hidden="true"
+        style={{ background: "linear-gradient(0deg, #07100C 2%, #143F29 40%, transparent 100%)", opacity: fase >= 2 ? .65 : .25, transition: "opacity 900ms" }}>
+        <div className="absolute bottom-[19%] left-[-15%] w-[130%] h-px bg-white/20" style={{ transform: "perspective(120px) rotateX(50deg)" }} />
+        <div className="absolute bottom-0 left-1/2 w-[70%] h-[80%] -translate-x-1/2 rounded-[50%] border border-white/10" />
+      </div>
+      {fase >= 3 && <div className="absolute inset-x-0 bottom-[5%] flex justify-center pointer-events-none" aria-hidden="true"
+        style={{ opacity: .24, animation: "ancSobe .85s ease-out both" }}>
+        <svg width="220" height="300" viewBox="0 0 220 300" fill="none">
+          <ellipse cx="110" cy="288" rx="75" ry="9" fill="#000" opacity=".5" />
+          <circle cx="110" cy="52" r="30" fill="#0A1712" stroke={cor} strokeWidth="2" />
+          <path d="M75 90 Q110 72 145 90 L165 183 L137 195 L127 280 L103 280 L110 190 L94 280 L69 280 L80 187 L55 183 Z" fill={cor} stroke="#fff" strokeOpacity=".65" strokeWidth="2" />
+          <path d="M76 96 L54 175 M145 96 L167 175" stroke="#0A1712" strokeWidth="20" strokeLinecap="round" />
+          <path d="M84 187 L75 279 M135 187 L127 279" stroke="#0A1712" strokeWidth="23" strokeLinecap="round" />
+          <text x="110" y="143" fill="white" textAnchor="middle" fontWeight="900" fontSize="34">{numero}</text>
+        </svg>
+      </div>}
       {/* varredura de abertura */}
       <div className="absolute inset-y-0 -left-[20%] w-[140%]" style={{ background: `linear-gradient(90deg, ${cor}, ${cor}dd)`, animation: fase === 0 ? "ancVarre .6s cubic-bezier(.7,0,.3,1) both" : "ancSai .5s cubic-bezier(.7,0,.3,1) both" }} />
 
@@ -492,6 +510,11 @@ export function ApresentacaoNovoClube(props) {
   return <AnuncioClube {...props} />;
 }
 
+// Movimento da bola respeita as configurações de acessibilidade do sistema.
+const ESTILO_BOLA_CINEMATICA = `
+@keyframes penBolaGiro { from { transform:rotate(0deg); } to { transform:rotate(440deg); } }
+@media (prefers-reduced-motion:reduce) { .pen-bola-reduzida { animation:none !important; } }
+`;
 // Taça genérica — silhueta própria (taça, duas alças, haste, base), sem
 // reproduzir nenhum troféu real. A cor muda pelo nível da competição.
 export function TrofeuIcone({ tier = "ouro", size = 80 }) {
@@ -1293,6 +1316,7 @@ export function PenBola({ resultado }) {
   const noChao = !resultado;
   return (
     <>
+      <style>{ESTILO_BOLA_CINEMATICA}</style>
       <div className="absolute rounded-full transition-all ease-in" style={{
         width: 26 * (noChao ? 1.6 : alvo.scale), height: 7 * (noChao ? 1.6 : alvo.scale), left: alvo.x,
         top: noChao ? 205 : alvo.y + 9 * alvo.scale,
@@ -1305,6 +1329,7 @@ export function PenBola({ resultado }) {
         background: "radial-gradient(circle at 32% 28%, #fff, #dcdcdc 55%, #a8a8a8)",
         boxShadow: resultado && resultado.gol ? "0 0 16px 4px rgba(57,255,136,0.85), inset 0 0 0 1.5px #222" : "inset 0 0 0 1.5px #222, 0 2px 4px rgba(0,0,0,0.5)",
       }}>
+        {resultado && <span aria-hidden="true" className="absolute inset-0 rounded-full pen-bola-reduzida" style={{ animation: "penBolaGiro 620ms ease-in both", background: "repeating-conic-gradient(from 20deg, transparent 0deg 45deg, rgba(20,20,20,.4) 46deg 62deg, transparent 63deg 120deg)", opacity: .45 }} />}
         {alvo.scale > 1.2 && (
           <svg viewBox="0 0 100 100" className="w-full h-full">
             <polygon points="50,20 65,32 59,50 41,50 35,32" fill="#1a1a1a" opacity="0.85" />
@@ -1434,6 +1459,9 @@ export function GoalMini({ onPick, resultado }) {
           <PenBola resultado={resultado} />
           {resultado && resultado.gol && <PenEfeitoGol key={golKey} ativo />}
         </div>
+      </div>
+      <div className="mx-auto mt-2 flex justify-center gap-2 text-[10px] uppercase tracking-widest text-emerald-100/70" aria-live="polite">
+        <span className="rounded-full border border-white/20 px-3 py-1">{resultado ? (resultado.gol ? "⚽ Bola na rede" : resultado.tipo || "Cobrança concluída") : "🎯 Escolha a direção"}</span>
       </div>
       {!resultado && <div className="grid grid-cols-3 gap-1.5 mt-2 mx-auto" style={{ width: 220 }}>
         <Button variant="ghost" onClick={() => onPick("esquerdo")}>Esq.</Button>

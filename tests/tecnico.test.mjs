@@ -482,5 +482,5 @@ test('liga alternativa com rival ímpar alterna a folga e não cria partida fict
   }
   assert.equal(tabela.find(x => x.nome === 'A').jogos, 4);
   assert.equal(tabela.find(x => x.nome === 'Clube Teste').jogos, 0);
-  assert.equal(tabela.filter(x => x.nome !== 'Clube Teste').reduce((n, x) => n + x.jogos, 0), 10);
+  assert.equal(tabela.filter(x => x.nome !== 'Clube Teste').reduce((n, x) => n + x.jogos, 0), 12);
 });

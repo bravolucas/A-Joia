@@ -1,7 +1,7 @@
 import { CLUBES } from '../data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, perfilClubeTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, perfilClubeTecnico, probabilidadesTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -276,4 +276,15 @@ test('objetivos são definidos pelo perfil do clube e não pela fama do treinado
     objetivoTecnico({ clube: fraco.nome, reputacao: 99 }).id);
   const oferta = gerarPropostasTecnico({ ...iniciarCarreiraTecnico(atleta).tecnico, reputacao: 99 }, () => 0)[0];
   if (oferta) assert.equal(oferta.objetivo, objetivoTecnico({ clube: oferta.nome }).nome);
+});
+
+test('força do elenco influencia chance de vitória sem tornar título automático', () => {
+  const fraco = probabilidadesTecnico({ elenco: 42, moral: 50, reputacao: 60, estilo: 'equilibrado' });
+  const medio = probabilidadesTecnico({ elenco: 65, moral: 50, reputacao: 60, estilo: 'equilibrado' });
+  const forte = probabilidadesTecnico({ elenco: 90, moral: 50, reputacao: 60, estilo: 'equilibrado' });
+  assert.ok(fraco.vitoria < medio.vitoria && medio.vitoria < forte.vitoria);
+  assert.ok(forte.vitoria < 0.70);
+  assert.ok(fraco.derrota > forte.derrota);
+  for (const p of [fraco, medio, forte]) assert.ok(Math.abs(p.vitoria + p.empate + p.derrota - 1) < 1e-9);
+  assert.ok(probabilidadesTecnico({ elenco: 65, moral: 85 }).vitoria > probabilidadesTecnico({ elenco: 65, moral: 20 }).vitoria);
 });

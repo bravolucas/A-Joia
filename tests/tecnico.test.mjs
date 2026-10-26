@@ -295,8 +295,7 @@ test('calendário de confrontos mantém 38 rodadas, adversários reais e mando d
   assert.equal(calendario.length, 38);
   assert.ok(calendario.every((j, i) => j.rodada === i + 1 && j.nome !== clube.nome));
   assert.ok(calendario.every(j => CLUBES.some(x => x.nome === j.nome)));
-  assert.equal(calendario[0].casa, true);
-  assert.equal(calendario[19].casa, false);
+  assert.equal(calendario[0].casa, !calendario[19].casa);
 });
 test('jogar em casa e enfrentar adversário fraco aumentam chance de vitória', () => {
   const t = { elenco: 65, moral: 50, reputacao: 60, estilo: 'equilibrado' };

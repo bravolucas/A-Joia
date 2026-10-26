@@ -1,7 +1,7 @@
 import { CLUBES } from '../data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, perfilClubeTecnico, probabilidadesTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, perfilClubeTecnico, probabilidadesTecnico, calendarioAdversariosTecnico, probabilidadesConfrontoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -287,4 +287,31 @@ test('força do elenco influencia chance de vitória sem tornar título automát
   assert.ok(fraco.derrota > forte.derrota);
   for (const p of [fraco, medio, forte]) assert.ok(Math.abs(p.vitoria + p.empate + p.derrota - 1) < 1e-9);
   assert.ok(probabilidadesTecnico({ elenco: 65, moral: 85 }).vitoria > probabilidadesTecnico({ elenco: 65, moral: 20 }).vitoria);
+});
+
+test('calendário de confrontos mantém 38 rodadas, adversários reais e mando de campo', () => {
+  const clube = CLUBES[0];
+  const calendario = calendarioAdversariosTecnico({ clube: clube.nome, elenco: clube.forca });
+  assert.equal(calendario.length, 38);
+  assert.ok(calendario.every((j, i) => j.rodada === i + 1 && j.nome !== clube.nome));
+  assert.ok(calendario.every(j => CLUBES.some(x => x.nome === j.nome)));
+  assert.equal(calendario[0].casa, true);
+  assert.equal(calendario[19].casa, false);
+});
+test('jogar em casa e enfrentar adversário fraco aumentam chance de vitória', () => {
+  const t = { elenco: 65, moral: 50, reputacao: 60, estilo: 'equilibrado' };
+  const facil = probabilidadesConfrontoTecnico(t, { forca: 40, casa: true });
+  const dificil = probabilidadesConfrontoTecnico(t, { forca: 85, casa: false });
+  assert.ok(facil.vitoria > dificil.vitoria);
+  assert.ok(Math.abs(facil.vitoria + facil.empate + facil.derrota - 1) < 1e-9);
+});
+test('confrontos persistem entre as etapas sem repetir resultados', () => {
+  let c = iniciarCarreiraTecnico(atleta);
+  c = { ...c, tecnico: { ...c.tecnico, decisoes: Array(4).fill({ id: 'teste' }) } };
+  c = simularEtapaTecnico(c, () => 0.4);
+  const primeira = c.tecnico.andamento.confrontos.map(x => ({ ...x }));
+  assert.equal(primeira.length, 10);
+  c = simularEtapaTecnico(c, () => 0.4);
+  assert.deepEqual(c.tecnico.andamento.confrontos.slice(0, 10), primeira);
+  assert.equal(c.tecnico.andamento.confrontos.length, 19);
 });

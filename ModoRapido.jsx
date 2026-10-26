@@ -1,6 +1,6 @@
 import Icone from "./Icone.jsx";
 import CarreiraTecnico from "./CarreiraTecnico.jsx";
-import { iniciarCarreiraTecnico, definirEstiloTecnico, simularTemporadaTecnico, proximaTemporadaTecnico } from "./tecnico.js";
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, simularTemporadaTecnico, proximaTemporadaTecnico } from "./tecnico.js";
 import Lottie from "./Lottie.jsx";
 import { tocar, apito, torcida, somLigado, alternarSom } from "./som.js";
 import React, { useEffect, useRef, useState } from "react";
@@ -3519,6 +3519,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "fim" && <FimDeCarreira c={c} onNova={nova} onSair={onSair} onComecarTecnico={comecarTecnico} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
         {etapa === "tecnico" && <CarreiraTecnico c={c}
           onEstilo={(id) => setEstado((st) => ({ ...st, c: definirEstiloTecnico(st.c, id) }))}
+          onDecisao={(id) => setEstado((st) => ({ ...st, c: tomarDecisaoTecnico(st.c, id) }))}
           onJogar={() => setEstado((st) => ({ ...st, c: simularTemporadaTecnico(st.c) }))}
           onAvancar={() => setEstado((st) => ({ ...st, c: proximaTemporadaTecnico(st.c) }))}
           onLegado={() => setEstado((st) => ({ ...st, etapa: "fim" }))}

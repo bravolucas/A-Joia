@@ -1,7 +1,7 @@
 import { CLUBES } from '../data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -199,4 +199,29 @@ test('novo clube não herda promessa feita à diretoria anterior', () => {
     propostas: [{ nome: 'Guarani', pais: 'Brasil', elenco: 55, salario: 20, exigencia: 30 }] } };
   const novo = aceitarPropostaTecnico(comOferta, 'Guarani');
   assert.equal(novo.tecnico.promessaContrato, null);
+});
+
+test('temporada em etapas registra avaliações intermediárias e evita sorteio duplicado', () => {
+  let c = iniciarCarreiraTecnico(atleta);
+  c = { ...c, tecnico: { ...c.tecnico, decisoes: Array(4).fill({ id: 'teste' }) } };
+  for (const rodada of ETAPAS_TEMPORADA_TECNICO) {
+    c = simularEtapaTecnico(c, () => 0.4);
+    if (rodada < 38) {
+      assert.equal(c.tecnico.andamento.jogos, rodada);
+      assert.equal(c.tecnico.andamento.avaliacoes.length, ETAPAS_TEMPORADA_TECNICO.indexOf(rodada) + 1);
+      assert.throws(() => simularTemporadaTecnico(c, () => 0.4));
+    }
+  }
+  assert.equal(c.tecnico.fase, 'resultado');
+  assert.equal(c.tecnico.temporadas.at(-1).vitorias + c.tecnico.temporadas.at(-1).empates + c.tecnico.temporadas.at(-1).derrotas, 38);
+  assert.equal(c.tecnico.temporadas.at(-1).avaliacoes.length, 4);
+});
+test('sequência desastrosa pode causar demissão antes da rodada 38', () => {
+  let c = iniciarCarreiraTecnico(atleta);
+  c = { ...c, tecnico: { ...c.tecnico, decisoes: Array(4).fill({ id: 'teste' }), diretoria: 19, torcida: 12 } };
+  c = simularEtapaTecnico(c, () => 0.99);
+  assert.equal(c.tecnico.demitido, true);
+  assert.equal(c.tecnico.fase, 'resultado');
+  assert.equal(c.tecnico.temporadas.at(-1).interrompida, true);
+  assert.equal(c.tecnico.temporadas.at(-1).jogos, 10);
 });

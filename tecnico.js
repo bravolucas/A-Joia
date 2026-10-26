@@ -350,7 +350,7 @@ export function probabilidadesConfrontoTecnico(t, adversario) {
   const empate = Math.min(base.empate, 0.93 - vitoria);
   return { vitoria, empate, derrota: 1 - vitoria - empate };
 }
-export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario, resultado, rng = sorteio) {
+export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario, resultado, rng = sorteio, rodada = 1) {
   const linhas = classificacaoAnterior.map(x => ({ ...x }));
   const rivalDireto = linhas.find(x => !x.meuClube && x.nome === adversario);
   if (rivalDireto) {
@@ -360,6 +360,13 @@ export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario,
     else { rivalDireto.vitorias++; rivalDireto.pontos += 3; }
   }
   const rivais = linhas.filter(x => !x.meuClube && x.nome !== adversario);
+  // Rodízio de adversários para evitar confrontos idênticos em todas as rodadas.
+  if (rivais.length > 2) {
+    const deslocamento = (rodada - 1) % (rivais.length - 1);
+    const primeiro = rivais.shift();
+    rivais.push(...rivais.splice(0, deslocamento));
+    rivais.unshift(primeiro);
+  }
   // Partidas pareadas por rodada: nenhum rival joga mais de uma vez.
   for (let i = 0; i < rivais.length; i += 2) {
     const a = rivais[i], b = rivais[i + 1];
@@ -453,7 +460,7 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   const base = anterior.classificacao || tabelaClassificacaoTecnico(t, { jogos: anterior.jogos, pontos: anterior.pontos, vitorias: anterior.vitorias, empates: anterior.empates, derrotas: anterior.derrotas });
   let classificacao = base;
   for (let rodada = anterior.jogos; rodada < limite; rodada++) {
-    classificacao = simularRodadaRivaisTecnico(t, classificacao, confrontos[rodada]?.nome, confrontos[rodada]?.resultado, rng);
+    classificacao = simularRodadaRivaisTecnico(t, classificacao, confrontos[rodada]?.nome, confrontos[rodada]?.resultado, rng, rodada + 1);
   }
   classificacao = classificacao.map(x => x.meuClube ? { ...x, jogos: limite, pontos, vitorias: v, empates: e, derrotas: d } : x);
   classificacao.sort((a, b) => b.pontos - a.pontos || b.vitorias - a.vitorias || a.nome.localeCompare(b.nome, 'pt-BR'));

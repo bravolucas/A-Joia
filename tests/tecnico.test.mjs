@@ -1,7 +1,7 @@
 import { CLUBES } from '../data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -160,4 +160,22 @@ test('mercado de técnicos usa clubes reais e preserva a identidade do cadastro'
     assert.ok(original);
     assert.equal(clube.elenco, original.forca);
   }
+});
+
+test('entrevista prudente contrata, salário negociado e promessa tem consequência', () => {
+  const proposta = { nome: 'Guarani', pais: 'Brasil', elenco: 55, salario: 20, exigencia: 35 };
+  const base = { ...iniciarCarreiraTecnico(atleta), tecnico: {
+    ...iniciarCarreiraTecnico(atleta).tecnico, fase: 'resultado', propostas: [proposta]
+  }};
+  const prudente = negociarContratoTecnico(base, 'Guarani', 'prudente', () => 0.99);
+  assert.equal(prudente.tecnico.clube, 'Guarani');
+  assert.equal(prudente.tecnico.salario, 20);
+  assert.equal(prudente.tecnico.promessaContrato, null);
+  const rejeitada = negociarContratoTecnico(base, 'Guarani', 'salario', () => 0);
+  assert.equal(rejeitada.tecnico.ultimaNegociacao.aceita, false);
+  assert.equal(rejeitada.tecnico.propostas.length, 0);
+  const ambicioso = negociarContratoTecnico(base, 'Guarani', 'ambicioso', () => 0.99);
+  assert.equal(ambicioso.tecnico.salario, 22);
+  assert.equal(ambicioso.tecnico.promessaContrato.posicaoMaxima, 4);
+  assert.throws(() => negociarContratoTecnico(base, 'Clube Inventado'));
 });

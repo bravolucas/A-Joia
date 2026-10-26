@@ -330,6 +330,26 @@ export function probabilidadesTecnico(t = {}) {
   const empate = t.estilo === 'defensivo' ? 0.29 : t.estilo === 'ofensivo' ? 0.18 : 0.24;
   return { vitoria, empate: Math.min(empate, 0.94 - vitoria), derrota: Math.max(0.06, 1 - vitoria - empate) };
 }
+export function calendarioAdversariosTecnico(t = {}) {
+  const clube = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
+  const liga = clube?.liga || t.liga;
+  const candidatos = CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube && (!liga || x.liga === liga));
+  const outros = candidatos.length ? candidatos : CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube);
+  if (!outros.length) return Array.from({ length: 38 }, (_, i) => ({ rodada: i + 1, nome: 'Adversário', forca: 50, casa: i % 2 === 0 }));
+  const ordenados = [...outros].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  const turno = Array.from({ length: 19 }, (_, i) => ordenados[i % ordenados.length]);
+  return Array.from({ length: 38 }, (_, i) => ({
+    rodada: i + 1, nome: turno[i % 19].nome, forca: turno[i % 19].elenco, casa: i < 19
+  }));
+}
+export function probabilidadesConfrontoTecnico(t, adversario) {
+  const base = probabilidadesTecnico(t);
+  const diferenca = limitar(((t.elenco ?? 50) - (adversario?.forca ?? 50)) * 0.005, -0.24, 0.24);
+  const mando = adversario?.casa ? 0.035 : -0.035;
+  const vitoria = limitar(base.vitoria + diferenca + mando, 0.10, 0.78);
+  const empate = Math.min(base.empate, 0.93 - vitoria);
+  return { vitoria, empate, derrota: 1 - vitoria - empate };
+}
 export const ETAPAS_TEMPORADA_TECNICO = [10, 19, 29, 38];
 export const OPCOES_REUNIAO_TECNICO = [
   { id: 'responsabilidade', nome: 'Assumir responsabilidade', descricao: 'Confiança +12 · moral -4; compromete-se a reagir.' },
@@ -357,11 +377,16 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   const anterior = t.andamento || { jogos: 0, vitorias: 0, empates: 0, derrotas: 0, pontos: 0, avaliacoes: [] };
   const limite = ETAPAS_TEMPORADA_TECNICO.find(n => n > anterior.jogos);
   if (!limite) throw new Error('Temporada já concluída.');
-  const { vitoria: pVitoria, empate: pEmpate } = probabilidadesTecnico(t);
+  const calendario = anterior.calendario || calendarioAdversariosTecnico(t);
+  const confrontos = [...(anterior.confrontos || [])];
   let v = anterior.vitorias, e = anterior.empates, d = anterior.derrotas;
   for (let i = anterior.jogos; i < limite; i++) {
+    const adversario = calendario[i];
+    const { vitoria: pVitoria, empate: pEmpate } = probabilidadesConfrontoTecnico(t, adversario);
     const r = rng();
-    if (r < pVitoria) v++; else if (r < pVitoria + pEmpate) e++; else d++;
+    const resultado = r < pVitoria ? 'V' : r < pVitoria + pEmpate ? 'E' : 'D';
+    if (resultado === 'V') v++; else if (resultado === 'E') e++; else d++;
+    confrontos.push({ ...adversario, resultado });
   }
   const pontos = v * 3 + e;
   const aproveitamento = pontos / (limite * 3);
@@ -377,13 +402,13 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   const avaliacao = { rodada: limite, pontos, aproveitamento: Math.round(aproveitamento * 100),
     situacao: demitido ? 'Demitido durante a temporada' : ruim ? 'Diretoria insatisfeita' : otimo ? 'Diretoria satisfeita' : 'Diretoria acompanha os resultados',
     diretoria, torcida, pressao };
-  const andamento = { jogos: limite, vitorias: v, empates: e, derrotas: d, pontos,
+  const andamento = { jogos: limite, calendario, confrontos, vitorias: v, empates: e, derrotas: d, pontos,
     avaliacoes: [...anterior.avaliacoes, avaliacao] };
   if (demitido) {
     const posicao = pontos / limite >= 2.1 ? 3 : pontos / limite >= 1.5 ? 8 : pontos / limite >= 1 ? 15 : 18;
     const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivoTecnico(t).nome,
       cumpriuObjetivo: false, posicao, pontos, vitorias: v, empates: e, derrotas: d,
-      jogos: limite, interrompida: true, demitido: true, avaliacoes: andamento.avaliacoes };
+      jogos: limite, interrompida: true, demitido: true, confrontos, avaliacoes: andamento.avaliacoes };
     const novo = { ...t, diretoria, torcida, demitido: true, reuniaoPendente: false, andamento: null,
       fase: 'resultado', temporadas: [...t.temporadas, temporada],
       vitorias: t.vitorias + v, empates: t.empates + e, derrotas: t.derrotas + d,
@@ -454,7 +479,7 @@ function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
     riscoDemissaoTecnico({ ...t, diretoria: novaConfianca, torcida: novaTorcida }).pressao >= 82;
   const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivo.nome, cumpriuObjetivo,
     promessaDescumprida, idoloEmCasa, estilo: t.estilo, decisoes: t.decisoes,
-    vitorias, empates, derrotas, pontos, posicao, campeao, avaliacoes: andamento.avaliacoes };
+    vitorias, empates, derrotas, pontos, posicao, campeao, confrontos: andamento.confrontos || [], avaliacoes: andamento.avaliacoes };
   temporada.demitido = demitido;
   const proximo = { ...t, ano: t.ano + 1, fase: 'resultado', andamento: null,
     temporadas: [...t.temporadas, temporada], reuniaoPendente: false, vitorias: t.vitorias + vitorias,

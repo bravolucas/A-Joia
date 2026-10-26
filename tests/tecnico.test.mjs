@@ -533,3 +533,31 @@ test('demissão durante o campeonato preserva somente jogos realizados', () => {
   assert.equal(proximo.tecnico.andamento, null);
   assert.equal(proximo.idade, c.idade + 1);
 });
+
+test('entrevista recusada mantém emprego anterior e remove somente a proposta recusada', () => {
+  const base = iniciarCarreiraTecnico(atleta);
+  const ofertas = [
+    { nome: 'Clube Um', pais: 'Brasil', elenco: 75, salario: 30, exigencia: 40 },
+    { nome: 'Clube Dois', pais: 'Brasil', elenco: 65, salario: 20, exigencia: 35 }
+  ];
+  const c = { ...base, tecnico: { ...base.tecnico, fase: 'resultado', propostas: ofertas } };
+  const recusado = negociarContratoTecnico(c, 'Clube Um', 'prudente', () => 0);
+  assert.equal(recusado.tecnico.clube, c.tecnico.clube);
+  assert.equal(recusado.tecnico.salario, c.tecnico.salario);
+  assert.equal(recusado.tecnico.propostas.length, 1);
+  assert.equal(recusado.tecnico.propostas[0].nome, 'Clube Dois');
+  assert.equal(recusado.tecnico.ultimaNegociacao.aceita, false);
+  assert.equal(c.tecnico.propostas.length, 2);
+});
+
+test('entrevista ambiciosa registra promessa apenas para novo clube', () => {
+  const base = iniciarCarreiraTecnico(atleta);
+  const oferta = { nome: 'Clube Ambicioso', pais: 'Brasil', elenco: 80, salario: 40, exigencia: 35 };
+  const c = { ...base, tecnico: { ...base.tecnico, fase: 'resultado', propostas: [oferta] } };
+  const contratado = negociarContratoTecnico(c, oferta.nome, 'ambicioso', () => 0.99);
+  assert.equal(contratado.tecnico.clube, oferta.nome);
+  assert.equal(contratado.tecnico.promessaContrato.clube, oferta.nome);
+  assert.equal(contratado.tecnico.promessaContrato.posicaoMaxima, 4);
+  assert.ok(contratado.tecnico.salario > oferta.salario);
+  assert.equal(c.tecnico.promessaContrato, undefined);
+});

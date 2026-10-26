@@ -3,8 +3,9 @@ import { ESTILOS_TECNICO, ENTREVISTAS_TECNICO, OPCOES_REUNIAO_TECNICO, ETAPAS_TE
 
 export default function CarreiraTecnico({ c, onEstilo, onDecisao, onReuniao, onJogar, onAvancar, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado }) {
   const t = c.tecnico;
-  const ultima = t.temporadas[t.temporadas.length - 1];
+  const ultima = (t.temporadas || []).at(-1);
   const decisao = cartaAtualTecnico(t);
+  const aguardandoDecisoes = (t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO;
   const estabilidade = painelEstabilidadeTecnico(t);
   const historico = historicoProfissionalTecnico(t);
   const indicador = (titulo, valor) => <div className="flex flex-col gap-1">
@@ -93,7 +94,7 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onReuniao, onJ
         <p className="text-[#C9D3CE] text-sm mt-2">A diretoria exige explicações pela campanha. Sua resposta pode recuperar a confiança ou agravar a crise.</p>
         <div className="flex flex-col gap-2 mt-3">{OPCOES_REUNIAO_TECNICO.map(op => <button key={op.id} onClick={() => onReuniao(op.id)} className="rp-opcao p-3 text-left"><strong className="text-white block">{op.nome}</strong><span className="text-[#8FA39A] text-sm">{op.descricao}</span></button>)}</div>
       </section>}
-      <button disabled={!!decisao || !!t.reuniaoPendente} onClick={onJogar} className="rp-btn rp-ouro p-3">{t.andamento ? `Avançar até a rodada ${ETAPAS_TEMPORADA_TECNICO.find(n => n > t.andamento.jogos) || 38}` : 'Iniciar campeonato (10 rodadas)'}</button>
+      <button disabled={aguardandoDecisoes || !!t.reuniaoPendente} title={t.reuniaoPendente ? 'Responda à reunião da diretoria' : aguardandoDecisoes ? 'Conclua as decisões da pré-temporada' : undefined} onClick={onJogar} className="rp-btn rp-ouro p-3">{t.andamento ? `Avançar até a rodada ${ETAPAS_TEMPORADA_TECNICO.find(n => n > t.andamento.jogos) || 38}` : 'Iniciar campeonato (10 rodadas)'}</button>
     </> : <section className="rp-painel p-5">
       <p className="text-[#EBC557] uppercase tracking-wider text-xs">Fim de temporada · {ultima.ano}</p>
       <h2 className="text-2xl font-bold mt-2 text-white">{ultima.campeao ? '🏆 Campeão!' : `${ultima.posicao}º lugar`}</h2>

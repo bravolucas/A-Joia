@@ -1852,6 +1852,26 @@ export function noticiasDaTemporada(c, card) {
   return noticias;
 }
 
+/* Histórico derivado das temporadas já salvas: não altera o formato do save.
+   Considera apenas temporadas em que o rival foi efetivamente simulado. */
+export function retrospectoRivalidade(c) {
+  const temporadas = (c?.temporadas || []).filter(t => t?.rival);
+  const pontos = t => {
+    const r = t.rival;
+    const eu = (t.gols || 0) + (t.assist || 0) * 0.7 + (t.titulos || []).length * 5 + (t.bola?.pos === 1 ? 12 : 0);
+    const ele = (r.gols || 0) + (r.assist || 0) * 0.7 + (r.titulos || []).length * 5 + (r.bola === 1 ? 12 : 0);
+    return { eu, ele };
+  };
+  const anos = temporadas.map(t => {
+    const p = pontos(t);
+    return { ano: t.ano, eu: Math.round(p.eu * 10) / 10, rival: Math.round(p.ele * 10) / 10,
+      resultado: p.eu > p.ele ? "voce" : p.eu < p.ele ? "rival" : "empate" };
+  });
+  return { anos, voce: anos.filter(x => x.resultado === "voce").length,
+    rival: anos.filter(x => x.resultado === "rival").length,
+    empates: anos.filter(x => x.resultado === "empate").length };
+}
+
 /* ---------- aposentadoria ---------- */
 export const podeAposentar = (c) => c.idade >= 33;
 export function aposentadoriaForcada(c) {

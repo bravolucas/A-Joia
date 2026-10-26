@@ -1,6 +1,6 @@
 import Icone from "./Icone.jsx";
 import CarreiraTecnico from "./CarreiraTecnico.jsx";
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, aceitarPropostaTecnico, passarAnoDesempregado, simularTemporadaTecnico, proximaTemporadaTecnico } from "./tecnico.js";
+import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, definirEstiloTecnico, tomarDecisaoTecnico, aceitarPropostaTecnico, passarAnoDesempregado, simularTemporadaTecnico, proximaTemporadaTecnico } from "./tecnico.js";
 import Lottie from "./Lottie.jsx";
 import { tocar, apito, torcida, somLigado, alternarSom } from "./som.js";
 import React, { useEffect, useRef, useState } from "react";
@@ -3521,6 +3521,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           onEstilo={(id) => setEstado((st) => ({ ...st, c: definirEstiloTecnico(st.c, id) }))}
           onDecisao={(id) => setEstado((st) => ({ ...st, c: tomarDecisaoTecnico(st.c, id) }))}
           onJogar={() => setEstado((st) => ({ ...st, c: simularTemporadaTecnico(st.c) }))}
+          onEscolherClubeInicial={(nome) => setEstado((st) => ({ ...st, c: iniciarNoClubeIdolo(st.c, nome) }))}
           onEsperar={() => setEstado((st) => ({ ...st, c: passarAnoDesempregado(st.c) }))}
           onAceitarProposta={(nome) => setEstado((st) => ({ ...st, c: proximaTemporadaTecnico(aceitarPropostaTecnico(st.c, nome)) }))}
           onAvancar={() => setEstado((st) => ({ ...st, c: proximaTemporadaTecnico(st.c) }))}

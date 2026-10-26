@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, gerarPropostasTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, gerarPropostasTecnico, salarioTecnico, passarAnoDesempregado, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -97,4 +97,24 @@ test('torcida e diretoria baixas aumentam pressão e OVR filtra clubes', () => {
   assert.ok(!gerarPropostasTecnico(iniciante).some(p => p.nome === 'Gigante Mundial'));
   const consagrado = { reputacao: 99, temporadas: Array(10).fill({}), titulos: 5, vitorias: 300, empates: 40, derrotas: 40, clube: 'Outro' };
   assert.ok(gerarPropostasTecnico(consagrado).some(p => p.nome === 'Gigante Mundial'));
+});
+
+test('ofertas dependem do sorteio e do OVR, sem garantir clubes grandes', () => {
+  const consagrado = { reputacao: 99, temporadas: Array(10).fill({ clube: 'Projeto Emergente' }), titulos: 5, vitorias: 300, empates: 40, derrotas: 40, clube: 'Outro' };
+  assert.equal(gerarPropostasTecnico(consagrado, () => 0.99).length, 0);
+  assert.ok(gerarPropostasTecnico(consagrado, () => 0).length > 0);
+  assert.ok(salarioTecnico({ ...consagrado, clube: 'Gigante Mundial' }) > salarioTecnico({ ...consagrado, clube: 'Clube do Interior' }));
+});
+test('desemprego avança o calendário e permite retornar após proposta', () => {
+  let c = iniciarCarreiraTecnico(atleta);
+  c = { ...c, tecnico: { ...c.tecnico, fase: 'resultado', demitido: true } };
+  const idade = c.idade;
+  c = passarAnoDesempregado(c, () => 0);
+  assert.equal(c.idade, idade + 1);
+  assert.equal(c.tecnico.desempregado, true);
+  assert.equal(c.tecnico.salario, 0);
+  assert.ok(c.tecnico.propostas.length > 0);
+  c = aceitarPropostaTecnico(c, c.tecnico.propostas[0].nome);
+  assert.equal(c.tecnico.desempregado, false);
+  assert.equal(proximaTemporadaTecnico(c).tecnico.fase, 'pretemporada');
 });

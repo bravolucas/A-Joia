@@ -450,8 +450,18 @@ export function tabelaClassificacaoTecnico(t, andamento) {
     const derrotas = jogos - vitorias - empates;
     linhas.push({ nome: rival.nome, jogos, pontos: vitorias * 3 + empates, vitorias, empates, derrotas, meuClube: false });
   }
-  linhas.sort((a, b) => b.pontos - a.pontos || b.vitorias - a.vitorias || a.nome.localeCompare(b.nome, 'pt-BR'));
-  return linhas.map((x, i) => ({ ...x, posicao: i + 1 }));
+  return ordenarClassificacaoTecnico(linhas);
+}
+export function zonaClassificacaoTecnico(posicao, total = 20) {
+  if (posicao === 1) return 'campeao';
+  if (posicao <= 4) return 'continental';
+  if (posicao > total - 4) return 'rebaixamento';
+  return 'meio';
+}
+export function ordenarClassificacaoTecnico(linhas) {
+  return [...linhas].sort((a, b) => b.pontos - a.pontos || b.vitorias - a.vitorias ||
+    b.saldoGols - a.saldoGols || a.nome.localeCompare(b.nome, 'pt-BR'))
+    .map((x, i, todos) => ({ ...x, posicao: i + 1, zona: zonaClassificacaoTecnico(i + 1, todos.length) }));
 }
 export const ETAPAS_TEMPORADA_TECNICO = [10, 19, 29, 38];
 export const OPCOES_REUNIAO_TECNICO = [
@@ -514,8 +524,7 @@ export function simularEtapaTecnico(c, rng = sorteio) {
     classificacao = simularRodadaRivaisTecnico(t, classificacao, confrontos[rodada]?.nome, confrontos[rodada]?.resultado, rng, rodada + 1);
   }
   classificacao = classificacao.map(x => x.meuClube ? { ...x, jogos: limite, pontos, vitorias: v, empates: e, derrotas: d } : x);
-  classificacao.sort((a, b) => b.pontos - a.pontos || b.vitorias - a.vitorias || a.nome.localeCompare(b.nome, 'pt-BR'));
-  andamento.classificacao = classificacao.map((x, i) => ({ ...x, posicao: i + 1 }));
+  andamento.classificacao = ordenarClassificacaoTecnico(classificacao);
   if (demitido) {
     const posicao = andamento.classificacao.find(x => x.meuClube)?.posicao || 18;
     const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivoTecnico(t).nome,

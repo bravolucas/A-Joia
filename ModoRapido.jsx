@@ -20,6 +20,7 @@ import {
   INVESTIMENTOS, comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
   chanceMomento, miniDaPosicao, ehPremioIndividual, RARIDADES, ganhosDaCarta, efeitosDaCarta, vagasDaLiga, ehSegundaDivisao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
   eventoDaJanela, segundoEvento, anoDeDecisao, eventoImpasse, valorAtual, comparaSalario, textoEmoji, efeitosDaDecisao, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, desafiosDaTemporada, resolverDesafio, desafioPendente, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
+  noticiasDaTemporada,
   copaPendente, opcoesCopa, jogarCopa,
 } from "./rapido.js";
 
@@ -1347,6 +1348,7 @@ function Delta({ v, fmt = (x) => x }) {
 }
 
 function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou, gaveta = false }) {
+  const noticias = noticiasDaTemporada(c, card);
   const forcada = aposentadoriaForcada(c);
   const [detalhes0, setDetalhes] = useState(false);
   const detalhes = gaveta || detalhes0;
@@ -1385,6 +1387,16 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
           <div className="rounded-xl bg-[#0E1512]/70 px-2.5 py-2"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">TORCIDA</div><div className="font-stat text-[19px] text-[#F2F5F3] leading-tight">{card.torcida}<Delta v={card.torcidaDelta} /></div></div>
           <div className="rounded-xl bg-[#0E1512]/70 px-2.5 py-2 min-w-0"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">VALOR</div><div className="font-stat text-[19px] text-[#F2F5F3] leading-tight truncate">{formatarValor(card.valor).replace(/\s/g, "")}</div>{card.valorAntes != null && card.valor !== card.valorAntes && <div className="font-stat text-[13px] leading-tight truncate"><Delta v={card.valor - card.valorAntes} fmt={(x) => formatarValor(x).replace(/€\s?/, "").replace(/\s/g, "")} /></div>}</div>
         </div>
+        {/* Central de notícias: manchetes baseadas nos dados simulados */}
+        {noticias.length > 0 && <section className="px-3 pt-3" aria-label="Notícias da temporada">
+          <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-2">📰 Na imprensa</div>
+          <div className="flex flex-col gap-1.5">
+            {noticias.map((noticia, i) => <div key={i} className="rounded-xl border border-white/5 bg-[#0E1512]/70 px-3 py-2">
+              <div className="text-[13px] font-bold text-[#F2F5F3]">{noticia.titulo}</div>
+              <div className="text-[12px] text-[#8FA39A]">{noticia.detalhe}</div>
+            </div>)}
+          </div>
+        </section>}
         {/* o time na temporada */}
         <div className="px-4 pt-3 pb-2">
           <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-0.5">O time na temporada</div>

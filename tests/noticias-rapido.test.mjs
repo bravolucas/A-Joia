@@ -1,0 +1,18 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import vm from "node:vm";
+const source = fs.readFileSync(new URL("../rapido.js", import.meta.url), "utf8");
+const start = source.indexOf("export function noticiasDaTemporada(");
+const end = source.indexOf("/* ---------- aposentadoria ---------- */", start);
+assert.ok(start >= 0 && end > start);
+const ctx = {};
+vm.runInNewContext(source.slice(start,end).replace("export function","function")+"\nglobalThis.noticiasDaTemporada = noticiasDaTemporada;",ctx);
+const noticias = ctx.noticiasDaTemporada;
+const c={nome:"Jogador"};
+const base={clube:"Clube A",ano:2030,titulos:[],bola:{pos:9,top:[]},jogos:30,nota:6.9,gols:8,assist:5,posLiga:7,ligaNome:"Liga A"};
+test("notícias reproduzíveis sem mutação",()=>{const before=JSON.stringify(base);assert.deepEqual(JSON.parse(JSON.stringify(noticias(c,base))),JSON.parse(JSON.stringify(noticias(c,base))));assert.equal(JSON.stringify(base),before);});
+test("campeão e Bola de Ouro ganham destaque",()=>{const x=noticias(c,{...base,titulos:[{tipo:"continental",nome:"Champions"}],bola:{pos:1}});assert.ok(x.some(n=>n.tipo==="conquista"));assert.ok(x.some(n=>n.tipo==="premio"));});
+test("rebaixamento não é descrito como sucesso",()=>{const x=noticias(c,{...base,rebaixado:true});assert.ok(x.some(n=>n.tipo==="alerta"));});
+test("notícias limitadas a quatro",()=>{const x=noticias(c,{...base,rebaixado:true,lesao:"Tornozelo",bola:{pos:1},titulos:[{tipo:"continental",nome:"Champions"}],nota:8});assert.ok(x.length<=4);});
+test("saves antigos e temporadas vazias",()=>{assert.equal(noticias(c,null).length,0);assert.ok(noticias(c,{...base,titulos:[],bola:null}).length>=1);assert.match(source,/export const VERSAO_RAPIDO = 1;/);});

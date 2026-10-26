@@ -138,11 +138,13 @@ export function historicoProfissionalTecnico(t = {}) {
 }
 export function painelEstabilidadeTecnico(t = {}) {
   const objetivo = objetivoTecnico(t);
+  const perfil = perfilClubeTecnico(t);
   const pressao = riscoDemissaoTecnico(t);
   const promessa = t.promessaContrato?.clube === t.clube ? t.promessaContrato : null;
   const ult = (t.temporadas || []).at(-1);
   return {
     objetivo: objetivo.nome,
+    perfil: perfil.perfil, expectativa: perfil.expectativa,
     posicaoMeta: objetivo.posicao,
     promessa: promessa ? { posicaoMaxima: promessa.posicaoMaxima, descricao: 'Terminar entre os 4 primeiros' } : null,
     torcida: limitar(t.torcida ?? 55, 0, 100),
@@ -164,10 +166,22 @@ export const OBJETIVOS_TECNICO = [
   { id: 'meio', nome: 'Terminar na metade de cima', posicao: 10 },
   { id: 'permanencia', nome: 'Evitar rebaixamento', posicao: 16 }
 ];
+export function perfilClubeTecnico(t = {}) {
+  const cadastro = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
+  const forca = cadastro?.elenco ?? t.elenco ?? 50;
+  const liga = cadastro?.liga || t.liga || null;
+  const segundaDivisao = !!liga && /(?:2|serieB)$/i.test(liga);
+  const perfil = forca >= 82 ? 'elite' : forca >= 69 ? 'competitivo' : forca >= 57 ? 'intermediario' : 'reconstrucao';
+  const expectativa = perfil === 'elite' ? 'Cobrança por títulos e desempenho imediato' :
+    perfil === 'competitivo' ? 'Buscar as primeiras posições' :
+    perfil === 'intermediario' ? 'Consolidar campanha competitiva' : 'Construir elenco e evitar crise';
+  return { perfil, forca, liga, segundaDivisao, expectativa };
+}
 export function objetivoTecnico(t) {
-  if ((t.reputacao || 0) >= 78 && (t.elenco || 0) >= 60) return OBJETIVOS_TECNICO[0];
-  if ((t.reputacao || 0) >= 58) return OBJETIVOS_TECNICO[1];
-  if ((t.reputacao || 0) >= 40) return OBJETIVOS_TECNICO[2];
+  const perfil = perfilClubeTecnico(t);
+  if (perfil.perfil === 'elite') return OBJETIVOS_TECNICO[0];
+  if (perfil.perfil === 'competitivo') return OBJETIVOS_TECNICO[1];
+  if (perfil.perfil === 'intermediario') return OBJETIVOS_TECNICO[2];
   return OBJETIVOS_TECNICO[3];
 }
 export function vinculosComoJogador(c) {
@@ -229,7 +243,7 @@ export function gerarPropostasTecnico(t, rng = sorteio) {
       });
       const chance = limitar(0.38 + (ovr - x.exigencia) / 160 + (mesmoPais ? 0.15 : -0.06)
         + (retorno ? 0.12 : 0) + bonusIdolo - (rival ? 0.30 : 0) + ((t.temporadas || []).length >= 4 ? 0.08 : 0), 0.06, 0.90);
-      return { ...x, chance, rival, retorno, objetivo: objetivoTecnico({ ...t, elenco: x.elenco }).nome };
+      return { ...x, chance, rival, retorno, objetivo: objetivoTecnico({ ...t, clube: x.nome, elenco: x.elenco }).nome };
     });
   // Sorteio por clube: mesmo um treinador consagrado pode terminar sem convites.
   const selecionados = elegiveis.filter(x => rng() < x.chance);

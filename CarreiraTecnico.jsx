@@ -1,5 +1,5 @@
 import React from 'react';
-import { ESTILOS_TECNICO, cartaAtualTecnico, objetivoTecnico, salarioTecnico, calcularOvrTecnico, riscoDemissaoTecnico, QUANTIDADE_DECISOES_TECNICO } from './tecnico.js';
+import { ESTILOS_TECNICO, ENTREVISTAS_TECNICO, cartaAtualTecnico, objetivoTecnico, salarioTecnico, calcularOvrTecnico, riscoDemissaoTecnico, QUANTIDADE_DECISOES_TECNICO } from './tecnico.js';
 
 export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAvancar, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado }) {
   const t = c.tecnico;
@@ -25,7 +25,7 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAva
         {indicador('Confiança da diretoria', t.diretoria ?? 60)}
         <p className="text-xs text-[#8FA39A]">Situação no cargo: <strong className="text-white">{risco.situacao}</strong> · Pressão {risco.pressao}/100</p>
       </div>
-      <p className="text-[#8FA39A] text-xs mt-1">{t.pais || "Mercado internacional"} · {t.clube ? `R$ ${salarioTecnico(t)} mil/mês` : "Sem contrato"}</p>
+      <p className="text-[#8FA39A] text-xs mt-1">{t.pais || "Mercado internacional"} · {t.clube ? `R$ ${t.salario ?? salarioTecnico(t)} mil/mês` : "Sem contrato"}</p>
       <div className="grid grid-cols-3 gap-2 mt-5">
         <div><strong className="block text-xl text-[#EBC557]">{t.reputacao}</strong><span className="text-xs text-[#8FA39A]">Reputação</span></div>
         <div><strong className="block text-xl text-white">{t.temporadas.length}</strong><span className="text-xs text-[#8FA39A]">Temporadas</span></div>
@@ -33,10 +33,11 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAva
       </div>
     </div>
     {t.temporadas.length === 0 && !t.clubeInicialEscolhido && (t.opcoesInicio || []).length > 0 && <section className="rp-painel p-4 flex flex-col gap-2"><h2 className="font-bold text-[#EBC557]">Comece onde você fez história</h2><p className="text-sm text-[#C9D3CE]">Sua trajetória como jogador abriu portas. Escolha um clube com vínculo afetivo para iniciar como técnico.</p>{t.opcoesInicio.map(v => <button key={v.clube} onClick={() => onEscolherClubeInicial(v.clube)} className="rp-opcao p-3 text-left"><strong className="block text-white">{v.clube} {v.idolatria ? '★ Ídolo' : ''}</strong><span className="text-sm text-[#8FA39A]">{v.temporadas} temporadas · {v.titulos} títulos · Afinidade {v.afinidade}/100</span></button>)}</section>}
+    {t.ultimaNegociacao && !t.ultimaNegociacao.aceita && <p role="status" className="rp-painel p-3 text-[#F0A99E] text-sm">{t.ultimaNegociacao.clube}: {t.ultimaNegociacao.motivo}</p>}
     {t.desempregado ? <section className="rp-painel p-4 flex flex-col gap-3">
       <h2 className="font-bold text-white">Mercado de treinadores</h2>
       <p className="text-sm text-[#C9D3CE]">{t.anosDesempregado || 0} ano(s) sem clube. Oportunidades dependem do OVR e da trajetória.</p>
-      {(t.propostas || []).map(p => <button key={p.nome} onClick={() => onAceitarProposta(p.nome)} className="rp-opcao p-3 text-left"><strong className="block text-white">{p.nome} · {p.pais}</strong><span className="text-sm text-[#8FA39A]">OVR mínimo {p.exigencia} · R$ {p.salario} mil/mês</span></button>)}
+      {(t.propostas || []).map(p => <div key={p.nome} className="rp-painel p-3"><strong className="block text-white">{p.nome} · {p.pais}</strong><span className="text-sm text-[#8FA39A]">OVR mínimo {p.exigencia} · R$ {p.salario} mil/mês</span><div className="flex flex-wrap gap-2 mt-2">{ENTREVISTAS_TECNICO.map(e => <button key={e.id} onClick={() => onAceitarProposta(p.nome, e.id)} className="rp-opcao p-2 text-xs">{e.nome}</button>)}</div></div>)}
       <button onClick={onEsperar} className="rp-btn rp-sec">Aguardar mais uma temporada</button>
     </section> : t.fase === 'pretemporada' ? <>
       <section className="rp-painel p-4">
@@ -68,10 +69,11 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAva
       {t.demitido && <p className="text-[#F0A99E] font-bold mt-3">Você foi demitido. Aceite uma proposta ou aguarde oportunidades.</p>}
       {(t.propostas || []).length > 0 && <div className="mt-4 flex flex-col gap-2">
         <h3 className="text-white font-bold">Propostas de trabalho</h3>
-        {t.propostas.map(p => <button key={p.nome} onClick={() => onAceitarProposta(p.nome)} className="rp-opcao p-3 text-left">
+        {t.propostas.map(p => <div key={p.nome} className="rp-painel p-3">
           <strong className="block text-white">{p.nome} · {p.pais}</strong>
           <span className="text-[#8FA39A] text-sm">OVR mínimo {p.exigencia} · R$ {p.salario} mil/mês · {p.objetivo}{p.rival ? ' · Rival do antigo clube' : ''}</span>
-        </button>)}
+          <div className="flex flex-wrap gap-2 mt-2">{ENTREVISTAS_TECNICO.map(e => <button key={e.id} onClick={() => onAceitarProposta(p.nome, e.id)} className="rp-opcao p-2 text-xs">{e.nome}</button>)}</div>
+        </div>)}
       </div>}
       {t.demitido && <button onClick={onEsperar} className="rp-btn rp-sec w-full mt-3">Ficar desempregado e aguardar propostas</button>}
       {!t.demitido && <button onClick={onAvancar} className="rp-btn rp-prim w-full mt-4">Permanecer e iniciar próxima temporada</button>}

@@ -46,6 +46,9 @@ export const DECISOES_TECNICO = [
   ] }
 ];
 export const QUANTIDADE_DECISOES_TECNICO = 4;
+export const LIMITE_TEMPORADAS_TECNICO = 30;
+export const carreiraTecnicoEncerrada = (t) => (t?.temporadas?.length || 0) >= LIMITE_TEMPORADAS_TECNICO;
+export const titulosConquistadosTecnico = (t) => (t?.temporadas || []).flatMap(a => a.campeao ? [{ ano: a.ano, clube: a.clube, nome: a.competicao || a.liga || 'Campeonato nacional', tipo: 'liga' }] : []);
 export const TODAS_CARTAS_TECNICO = [...DECISOES_TECNICO, ...EVENTOS_CONTEXTO_TECNICO];
 export function elegivelTecnico(carta, t) {
   switch (carta.contexto) {
@@ -580,6 +583,7 @@ export function simularEtapaTecnico(c, rng = sorteio) {
 export function simularTemporadaTecnico(c, rng = sorteio) {
   if (!c?.tecnico) throw new Error('Carreira técnica não iniciada.');
   if (c.tecnico.fase !== 'pretemporada') throw new Error('Conclua a temporada anterior antes de simular.');
+  if (carreiraTecnicoEncerrada(c.tecnico)) throw new Error('Limite de 30 temporadas como treinador atingido.');
   const t = c.tecnico;
   if ((t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) throw new Error('Tome as decisões da temporada antes de simular.');
   if (t.andamento?.jogos) throw new Error('Temporada em andamento: avance pelas etapas.');
@@ -653,6 +657,7 @@ export function proximaTemporadaTecnico(c) {
   if (!c?.tecnico || c.tecnico.fase !== 'resultado') throw new Error('Nenhum resultado pendente.');
   const t = c.tecnico;
   if (t.demitido || t.desempregado) throw new Error('Aceite uma proposta antes de começar a próxima temporada.');
+  if (carreiraTecnicoEncerrada(t)) throw new Error('Carreira de treinador encerrada após 30 temporadas.');
   const historicoCartas = [...(t.historicoCartas || []), ...(t.cartas || [])].slice(-32);
   const vencidos = (t.efeitosPendentes || []).filter(e => e.aplicarEm <= t.ano);
   const pendentes = (t.efeitosPendentes || []).filter(e => e.aplicarEm > t.ano);
@@ -664,4 +669,30 @@ export function proximaTemporadaTecnico(c) {
     diretoria: limitar(t.diretoria + soma('diretoria'), 0, 100),
     torcida: limitar((t.torcida ?? 55) + Math.round(soma('torcida') * 0.5), 0, 100) };
   return { ...c, tecnico: { ...proximo, cartas: sortearCartasTecnico(proximo) } };
+}
+
+/** Fluxo expresso: uma escolha visível por temporada, sem alterar saves antigos. */
+export function jogarTemporadaExpressaTecnico(c, opcaoId, rng = sorteio) {
+  if (!c?.tecnico || c.tecnico.fase !== 'pretemporada') throw new Error('Temporada indisponível.');
+  if (carreiraTecnicoEncerrada(c.tecnico)) throw new Error('Carreira de treinador encerrada.');
+  if (c.tecnico.temporadas.length === 0 && !c.tecnico.clubeInicialEscolhido && c.tecnico.opcoesInicio?.length) throw new Error('Escolha o clube inicial.');
+  let atual = c;
+  if ((atual.tecnico.decisoes?.length || 0) === 0) {
+    atual = tomarDecisaoTecnico(atual, opcaoId, rng);
+  }
+  // Saves da interface anterior podem ter decisões parcialmente concluídas.
+  while ((atual.tecnico.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) {
+    const carta = cartaAtualTecnico(atual.tecnico);
+    if (!carta?.opcoes?.length) throw new Error('Não foi possível preparar a temporada.');
+    atual = tomarDecisaoTecnico(atual, carta.opcoes[0].id, rng);
+  }
+  // Se a temporada antiga já começou, conclui suas etapas preservando o andamento.
+  if (atual.tecnico.andamento?.jogos) {
+    while (atual.tecnico.fase === 'pretemporada') {
+      if (atual.tecnico.reuniaoPendente) atual = reuniaoEmergenciaTecnico(atual, 'responsabilidade', rng);
+      atual = simularEtapaTecnico(atual, rng);
+    }
+    return atual;
+  }
+  return simularTemporadaTecnico(atual, rng);
 }

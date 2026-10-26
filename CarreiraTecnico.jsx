@@ -76,6 +76,15 @@ export default function CarreiraTecnico({ c, onEstilo, onDecisao, onReuniao, onJ
           <h3 className="text-[#EBC557] text-sm font-bold">Últimos confrontos</h3>
           <div className="flex flex-col gap-1 mt-2">{t.andamento.confrontos.slice(-5).reverse().map(j => <p key={j.rodada} className="text-[#C9D3CE] text-xs">Rodada {j.rodada} · {j.nome} ({j.casa ? 'casa' : 'fora'}) · <strong className={j.resultado === 'V' ? 'text-[#7FE3BC]' : j.resultado === 'D' ? 'text-[#F0A99E]' : 'text-white'}>{j.resultado === 'V' ? 'Vitória' : j.resultado === 'E' ? 'Empate' : 'Derrota'}</strong></p>)}</div>
         </div>}
+        {(t.andamento.classificacao || []).length > 0 && <div className="mt-3">
+          <h3 className="text-[#EBC557] text-sm font-bold">Classificação</h3>
+          <div className="overflow-x-auto mt-2"><table className="w-full text-xs text-[#C9D3CE]">
+            <thead><tr className="text-[#8FA39A]"><th className="text-left py-1">#</th><th className="text-left">Clube</th><th>PTS</th><th>J</th><th>V</th><th>E</th><th>D</th></tr></thead>
+            <tbody>{t.andamento.classificacao.map(x => <tr key={x.nome} className={x.meuClube ? 'text-[#EBC557] font-bold bg-white/5' : 'border-t border-white/5'}>
+              <td className="py-1">{x.posicao}</td><td>{x.nome}</td><td className="text-center">{x.pontos}</td><td className="text-center">{x.jogos}</td><td className="text-center">{x.vitorias}</td><td className="text-center">{x.empates}</td><td className="text-center">{x.derrotas}</td>
+            </tr>)}</tbody>
+          </table></div>
+        </div>}
         <h3 className="text-[#EBC557] text-sm font-bold mt-3">Avaliações da diretoria</h3>
         <div className="flex flex-col gap-2 mt-2">{t.andamento.avaliacoes.map(a => <p key={a.rodada} className="text-[#C9D3CE] text-xs">Rodada {a.rodada}: {a.situacao} · {a.aproveitamento}% de aproveitamento · Pressão {a.pressao}/100</p>)}</div>
       </section>}

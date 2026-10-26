@@ -417,6 +417,14 @@ test('carreira continua por duas temporadas sem perder histórico ou duplicar jo
     assert.equal(c.tecnico.fase, 'resultado');
     assert.equal(c.tecnico.temporadas.length, temporada + 1);
     assert.equal(c.tecnico.temporadas.at(-1).confrontos.length, 38);
+    const final = c.tecnico.temporadas.at(-1);
+    assert.equal(final.vitorias + final.empates + final.derrotas, 38);
+    assert.equal(final.pontos, final.vitorias * 3 + final.empates);
+    assert.equal(final.classificacao.find(x => x.meuClube).pontos, final.pontos);
+    assert.equal(final.classificacao.find(x => x.meuClube).saldoGols,
+      final.confrontos.reduce((n, jogo) => n + jogo.golsPro - jogo.golsContra, 0));
+    assert.equal(new Set(final.classificacao.map(x => x.posicao)).size, final.classificacao.length);
+    assert.ok(final.classificacao.every(x => x.jogos === 38));
     if (temporada === 0) {
       assert.equal(c.tecnico.demitido, false);
       c = proximaTemporadaTecnico(c);

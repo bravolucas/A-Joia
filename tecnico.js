@@ -83,16 +83,33 @@ export function tomarDecisaoTecnico(c, opcaoId, rng = sorteio) {
   if (!op) throw new Error('Opção inválida.');
   const riscoAtivado = !!op.risco && rng() < op.risco;
   const resultado = riscoAtivado ? 'A aposta trouxe consequências inesperadas.' : 'O plano foi recebido como esperado.';
-  const impacto = { elenco: (op.elenco || 0), moral: (op.moral || 0) + (riscoAtivado ? op.riscoMoral || 0 : 0), diretoria: (op.diretoria || 0) + (riscoAtivado ? op.riscoDiretoria || 0 : 0) };
+  const impacto = { elenco: (op.elenco || 0), torcida: (op.moral || 0) + (riscoAtivado ? (op.riscoMoral || 0) : 0), moral: (op.moral || 0) + (riscoAtivado ? op.riscoMoral || 0 : 0), diretoria: (op.diretoria || 0) + (riscoAtivado ? op.riscoDiretoria || 0 : 0) };
   // Uma fração do impacto permanece no início do próximo ano, para decisões acumulativas.
   const heranca = Object.fromEntries(Object.entries(impacto).map(([k, v]) => [k, Math.trunc(v * 0.4)]));
   return { ...c, tecnico: {
     ...t, elenco: limitar((t.elenco ?? 50) + (op.elenco || 0), 10, 95),
     moral: limitar((t.moral ?? 50) + (op.moral || 0) + (riscoAtivado ? op.riscoMoral || 0 : 0), 10, 95),
     diretoria: limitar((t.diretoria ?? 60) + (op.diretoria || 0) + (riscoAtivado ? op.riscoDiretoria || 0 : 0), 0, 100),
+    torcida: limitar((t.torcida ?? 55) + Math.round(impacto.torcida * 0.5), 0, 100),
     efeitosPendentes: [...(t.efeitosPendentes || []), { carta: carta.id, opcao: op.id, heranca, aplicarEm: t.ano + 1 }],
     decisoes: [...(t.decisoes || []), { carta: carta.id, opcao: op.id, nome: op.nome, resultado, riscoAtivado }]
   }};
+}
+export function calcularOvrTecnico(t) {
+  // OVR é habilidade profissional; aprovação e confiança são avaliações locais.
+  const temporadas = t.temporadas || [];
+  const experiencia = Math.min(12, temporadas.length * 2);
+  const titulos = Math.min(12, (t.titulos || 0) * 4);
+  const aproveitamento = (t.vitorias || 0) + (t.empates || 0) + (t.derrotas || 0) > 0
+    ? (3 * (t.vitorias || 0) + (t.empates || 0)) / (3 * ((t.vitorias || 0) + (t.empates || 0) + (t.derrotas || 0))) : 0.45;
+  const desempenho = Math.round((aproveitamento - 0.45) * 22);
+  return limitar(Math.round(30 + (t.reputacao || 25) * 0.36 + experiencia + titulos + desempenho), 25, 99);
+}
+export function riscoDemissaoTecnico(t) {
+  const torcida = t.torcida ?? 55;
+  const diretoria = t.diretoria ?? 60;
+  const pressao = limitar(Math.round((100 - diretoria) * 0.58 + (100 - torcida) * 0.42), 0, 100);
+  return { pressao, situacao: pressao >= 75 ? 'Crítica' : pressao >= 55 ? 'Instável' : pressao >= 35 ? 'Em observação' : 'Segura' };
 }
 export const OBJETIVOS_TECNICO = [
   { id: 'titulo', nome: 'Disputar o título', posicao: 2 },
@@ -114,8 +131,8 @@ export const CLUBES_CONVITES_TECNICO = [
   { nome: 'Gigante Mundial', exigencia: 88, elenco: 90 }
 ];
 export function gerarPropostasTecnico(t) {
-  const reputacao = t.reputacao || 25;
-  return CLUBES_CONVITES_TECNICO.filter(x => reputacao >= x.exigencia && x.nome !== t.clube)
+  const ovr = calcularOvrTecnico(t);
+  return CLUBES_CONVITES_TECNICO.filter(x => ovr >= x.exigencia && x.nome !== t.clube)
     .slice(-3).map(x => ({ ...x, objetivo: objetivoTecnico({ ...t, elenco: x.elenco }).nome }));
 }
 export function aceitarPropostaTecnico(c, clube) {
@@ -124,7 +141,7 @@ export function aceitarPropostaTecnico(c, clube) {
   const proposta = (t.propostas || []).find(x => x.nome === clube);
   if (!proposta) throw new Error('Proposta indisponível.');
   return { ...c, tecnico: { ...t, clube: proposta.nome, elenco: proposta.elenco,
-    moral: 50, diretoria: 65, demitido: false, propostas: [] } };
+    moral: 50, diretoria: 65, torcida: 55, demitido: false, propostas: [] } };
 }
 export function iniciarCarreiraTecnico(c) {
   if (!c?.aposentado) throw new Error('O jogador precisa se aposentar primeiro.');
@@ -134,7 +151,7 @@ export function iniciarCarreiraTecnico(c) {
   return { ...c, tecnico: {
     idadeInicio: c.idade, ano: c.ano, clube: c.clubeNome || 'Clube inicial',
     reputacao, estilo: 'equilibrado', temporadas: [], vitorias: 0, empates: 0,
-    derrotas: 0, titulos: 0, elenco: 50, moral: 50, diretoria: 60, decisoes: [], demitido: false, propostas: [], historicoCartas: [], cartas: sortearCartasTecnico({ reputacao, temporadas: [], diretoria: 60, moral: 50 }), fase: 'pretemporada'
+    derrotas: 0, titulos: 0, elenco: 50, moral: 50, diretoria: 60, torcida: 55, decisoes: [], demitido: false, propostas: [], historicoCartas: [], cartas: sortearCartasTecnico({ reputacao, temporadas: [], diretoria: 60, moral: 50 }), fase: 'pretemporada'
   }};
 }
 export function definirEstiloTecnico(c, estilo) {
@@ -164,14 +181,17 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   const cumpriuObjetivo = posicao <= objetivo.posicao;
   const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivo.nome, cumpriuObjetivo, estilo: t.estilo, decisoes: t.decisoes, vitorias, empates, derrotas, pontos, posicao, campeao };
   const novaConfianca = limitar(t.diretoria + (cumpriuObjetivo ? 8 : -14) + (posicao <= 4 ? 5 : posicao >= 15 ? -8 : 0), 0, 100);
-  const demitido = novaConfianca < 25;
+  const variacaoTorcida = campeao ? 18 : posicao <= 4 ? 10 : cumpriuObjetivo ? 5 : posicao >= 17 ? -23 : -12;
+  const novaTorcida = limitar((t.torcida ?? 55) + variacaoTorcida, 0, 100);
+  const situacaoCargo = riscoDemissaoTecnico({ ...t, diretoria: novaConfianca, torcida: novaTorcida });
+  const demitido = novaConfianca < 20 || (novaConfianca < 40 && novaTorcida < 35) || situacaoCargo.pressao >= 82;
   const propostas = gerarPropostasTecnico({ ...t, clube: demitido ? null : t.clube, reputacao: limitar(t.reputacao + (campeao ? 9 : cumpriuObjetivo ? 4 : -3), 10, 99) });
   return { ...c, idade: c.idade + 1, ano: c.ano + 1, tecnico: {
     ...t, ano: t.ano + 1, fase: 'resultado', temporadas: [...t.temporadas, temporada],
     vitorias: t.vitorias + vitorias, empates: t.empates + empates, derrotas: t.derrotas + derrotas,
     titulos: t.titulos + (campeao ? 1 : 0), demitido, propostas, objetivoAtual: objetivo.nome,
     reputacao: limitar(t.reputacao + (campeao ? 9 : posicao <= 4 ? 5 : posicao >= 15 ? -5 : 1), 10, 99),
-    diretoria: novaConfianca
+    diretoria: novaConfianca, torcida: novaTorcida
   }};
 }
 export function proximaTemporadaTecnico(c) {
@@ -186,6 +206,7 @@ export function proximaTemporadaTecnico(c) {
     efeitosPendentes: pendentes, efeitosRecebidos: vencidos,
     elenco: limitar(t.elenco + soma('elenco'), 10, 95),
     moral: limitar(t.moral + 2 + soma('moral'), 10, 95),
-    diretoria: limitar(t.diretoria + soma('diretoria'), 0, 100) };
+    diretoria: limitar(t.diretoria + soma('diretoria'), 0, 100),
+    torcida: limitar((t.torcida ?? 55) + Math.round(soma('torcida') * 0.5), 0, 100) };
   return { ...c, tecnico: { ...proximo, cartas: sortearCartasTecnico(proximo) } };
 }

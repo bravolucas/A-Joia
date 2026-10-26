@@ -1,9 +1,10 @@
 import React from 'react';
-import { ESTILOS_TECNICO } from './tecnico.js';
+import { ESTILOS_TECNICO, DECISOES_TECNICO } from './tecnico.js';
 
-export default function CarreiraTecnico({ c, onEstilo, onJogar, onAvancar, onSair, onLegado }) {
+export default function CarreiraTecnico({ c, onEstilo, onDecisao, onJogar, onAvancar, onSair, onLegado }) {
   const t = c.tecnico;
   const ultima = t.temporadas[t.temporadas.length - 1];
+  const decisao = DECISOES_TECNICO[t.decisoes?.length || 0];
   return <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-4 rp-entra">
     <div className="rp-painel p-5 text-center">
       <p className="text-[#EBC557] text-xs font-bold tracking-[.2em] uppercase">A JOIA · Segunda carreira</p>
@@ -24,7 +25,19 @@ export default function CarreiraTecnico({ c, onEstilo, onJogar, onAvancar, onSai
             <strong className="block text-white">{e.nome}</strong><span className="text-sm text-[#C9D3CE]">{e.descricao}</span>
           </button>)}</div>
       </section>
-      <button onClick={onJogar} className="rp-btn rp-ouro p-3">Simular temporada {t.ano}</button>
+      <section className="rp-painel p-4">
+        <h2 className="text-lg font-bold text-white">Decisões da temporada</h2>
+        <p className="text-sm text-[#8FA39A] mt-1">Elenco {t.elenco} · Moral {t.moral} · Diretoria {t.diretoria}</p>
+        {decisao ? <div className="mt-3 flex flex-col gap-2">
+          <h3 className="font-bold text-[#EBC557]">{decisao.titulo}</h3>
+          <p className="text-sm text-[#C9D3CE]">{decisao.texto}</p>
+          {decisao.opcoes.map(op => <button key={op.id} onClick={() => onDecisao(op.id)} className="rp-opcao p-3 text-left">
+            <strong className="block text-white">{op.nome}</strong>
+            <span className="text-sm text-[#8FA39A]">{op.detalhe}</span>
+          </button>)}
+        </div> : <p className="text-[#7FE3BC] mt-3">Decisões concluídas. Sua equipe está pronta.</p>}
+      </section>
+      <button disabled={!!decisao} onClick={onJogar} className="rp-btn rp-ouro p-3">Simular temporada {t.ano}</button>
     </> : <section className="rp-painel p-5">
       <p className="text-[#EBC557] uppercase tracking-wider text-xs">Fim de temporada · {ultima.ano}</p>
       <h2 className="text-2xl font-bold mt-2 text-white">{ultima.campeao ? '🏆 Campeão!' : `${ultima.posicao}º lugar`}</h2>

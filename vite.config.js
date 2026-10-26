@@ -10,6 +10,7 @@ export default defineConfig({
     react(),
     // instalar como app no celular/computador e abrir mesmo sem internet
     VitePWA({
+      selfDestroying: true,
       registerType: "autoUpdate",
       includeAssets: ["apple-touch-icon.png"],
       manifest: {

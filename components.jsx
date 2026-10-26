@@ -1569,7 +1569,7 @@ export function PenBolaFalta({ resultado }) {
   const noChao = !resultado;
   return (
     <>
-      {noChao && <div className="absolute rounded-full" style={{ width: 30, height: 30, left: alvo.x, top: alvo.y, transform: "translate(-50%,-50%)", backgroundImage: "radial-gradient(circle, rgba(57,255,136,0.5) 0%, rgba(57,255,136,0.15) 65%, transparent 100%)", animation: "miraPulsa 1.4s ease-in-out infinite" }} />}
+      {noChao && <div className="absolute rounded-full pen-bola-reduzida" style={{ width: 30, height: 30, left: alvo.x, top: alvo.y, transform: "translate(-50%,-50%)", backgroundImage: "radial-gradient(circle, rgba(57,255,136,0.5) 0%, rgba(57,255,136,0.15) 65%, transparent 100%)", animation: "miraPulsa 1.4s ease-in-out infinite" }} />}
       <div className="absolute rounded-full transition-all ease-in" style={{
         width: 20 * (noChao ? 1 : alvo.scale), height: 5.5 * (noChao ? 1 : alvo.scale), left: alvo.x,
         top: noChao ? alvo.y + 6 : alvo.y + 7 * alvo.scale, transform: "translate(-50%,-50%)",
@@ -1581,6 +1581,7 @@ export function PenBolaFalta({ resultado }) {
         background: "radial-gradient(circle at 32% 28%, #fff, #dcdcdc 55%, #a8a8a8)",
         boxShadow: resultado && resultado.gol ? "0 0 14px 3px rgba(57,255,136,0.85), inset 0 0 0 1px #222" : "inset 0 0 0 1px #222, 0 1.5px 3px rgba(0,0,0,0.5)",
       }}>
+        {resultado && <span aria-hidden="true" className="absolute inset-0 rounded-full pen-bola-reduzida" style={{ animation: "penBolaGiro 620ms ease-in both", background: "repeating-conic-gradient(from 20deg, transparent 0deg 45deg, rgba(20,20,20,.4) 46deg 62deg, transparent 63deg 120deg)", opacity: .4 }} />}
         {alvo.scale > 0.9 && <svg viewBox="0 0 100 100" className="w-full h-full"><polygon points="50,20 65,32 59,50 41,50 35,32" fill="#1a1a1a" opacity="0.85" /></svg>}
       </div>
     </>

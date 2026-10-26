@@ -1,7 +1,7 @@
 import { CLUBES } from '../data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -224,4 +224,21 @@ test('sequência desastrosa pode causar demissão antes da rodada 38', () => {
   assert.equal(c.tecnico.fase, 'resultado');
   assert.equal(c.tecnico.temporadas.at(-1).interrompida, true);
   assert.equal(c.tecnico.temporadas.at(-1).jogos, 10);
+});
+
+test('reunião de emergência bloqueia avanço e permite recuperar confiança', () => {
+  let c = iniciarCarreiraTecnico(atleta);
+  c = { ...c, tecnico: { ...c.tecnico, decisoes: Array(4).fill({ id: 'teste' }), diretoria: 48, torcida: 40 } };
+  c = simularEtapaTecnico(c, () => 0.99);
+  assert.equal(c.tecnico.reuniaoPendente, true);
+  assert.equal(c.tecnico.fase, 'pretemporada');
+  assert.throws(() => simularEtapaTecnico(c, () => 0.5));
+  assert.throws(() => reuniaoEmergenciaTecnico(c, 'invalida'));
+  const anterior = c.tecnico.diretoria;
+  c = reuniaoEmergenciaTecnico(c, 'responsabilidade');
+  assert.equal(c.tecnico.reuniaoPendente, false);
+  assert.equal(c.tecnico.diretoria, anterior + 12);
+  assert.equal(c.tecnico.reunioes.length, 1);
+  c = simularEtapaTecnico(c, () => 0.4);
+  assert.equal(c.tecnico.andamento.jogos, 19);
 });

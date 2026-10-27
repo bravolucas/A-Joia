@@ -92,8 +92,8 @@ function CampanhasTemporada({ torneios = [] }) {
 function LinhaTemporada({ a, ativa, aberta, onClick }) {
   const titulos = Array.isArray(a.titulosConquistados) ? a.titulosConquistados : a.campeao ? [competicaoTemporadaTecnico(a)] : [];
   return <div className={'border-b border-white/[.06] '+(ativa ? 'bg-white/[.035]' : '')}>
-    <button type="button" aria-expanded={aberta} onClick={onClick} className="w-full grid grid-cols-[3.3rem_minmax(0,1fr)_2.6rem_2.7rem] gap-2 items-center px-3 py-2 text-left hover:bg-white/[.04] transition">
-      <span className={'rounded-full text-[11px] font-black px-1.5 py-1 text-center '+(ativa ? 'bg-white text-[#111113]' : 'bg-[#27272A] text-[#D4D4D8]')}>{a.ano}</span>
+    <button type="button" aria-expanded={aberta} onClick={onClick} className="w-full grid grid-cols-[3.1rem_minmax(0,1fr)_2.4rem_2.5rem] gap-2 items-center px-2 py-1.5 text-left hover:bg-white/[.035] transition border-b border-white/[.025]">
+      <span className={'rounded-md text-[10px] font-black px-1.5 py-1 text-center '+(ativa ? 'bg-[#B7781B] text-white' : 'bg-[#232326] text-[#C9C9CE]')}>{a.ano}</span>
       <span className="flex items-center gap-2 min-w-0"><Escudo nome={a.clube} size={28} /><span className="min-w-0"><strong className="block text-white text-xs truncate">{a.clube}</strong><span className="block text-[10px] text-[#A1A1AA] truncate">{competicaoTemporadaTecnico(a)}</span>{titulos.length > 0 && <span className="block text-[9px] text-[#FACC15] truncate mt-0.5">🏆 {titulos.join(' · ')}</span>}</span></span>
       <span className="text-right text-[#D4D4D8] text-xs">{a.posicao}º</span><span className="text-right text-white text-xs font-bold">{a.pontos}</span>
     </button>
@@ -179,31 +179,36 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
   const titulosDestaque = titulos.at(-1);
   const temporadasCards = temporadasVisiveis;
 
-  return <main className="cp w-full max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6 rp-entra">
+  return <main className="cp w-full max-w-5xl mx-auto px-3 sm:px-4 py-3 sm:py-5 rp-entra">
     {eventoAtual?.tipo === 'titulo' && <PopUpTitulo temporada={ultima} titulo={eventoAtual.nome} indice={eventosUltima.slice(0, indiceEvento + 1).filter(x => x.tipo === 'titulo').length - 1} total={conquistasUltima.length} onFechar={() => setEventosVistos({ chave: chaveEvento, quantidade: indiceEvento + 1 })} />}
     {(eventoAtual?.tipo === 'rebaixado' || eventoAtual?.tipo === 'acesso') && <PopUpDivisao temporada={ultima} movimento={eventoAtual.movimento} onFechar={() => setEventosVistos({ chave: chaveEvento, quantidade: indiceEvento + 1 })} />}
 
-    <section className="cp-card overflow-hidden">
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(350px,430px)_minmax(0,1fr)]">
+    <section className="cp-card overflow-hidden border-white/[.09]">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(360px,420px)_minmax(0,1fr)]">
         <div className="min-w-0 border-b lg:border-b-0 lg:border-r border-white/[.08]">
-          <header className="px-4 sm:px-5 pt-4 pb-3">
-            <div className="flex items-start gap-3">
-              
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5 text-xs text-[#A1A1AA]"><Bandeira pais={t.pais || 'Brasil'} /><span className="font-bold uppercase tracking-wider">Treinador</span></div>
-                <h1 className="text-white text-xl font-black truncate mt-1">{c.nome}</h1>
-                <div className="flex items-center gap-1.5 text-sm text-[#D4D4D8] truncate mt-0.5"><Escudo nome={semClube ? 'Sem clube' : t.clube} size={21} /><span className="truncate">{semClube ? 'Sem clube' : t.clube}</span></div>
+          <header className="px-3.5 sm:px-4 pt-3.5 pb-3">
+            <div className="flex items-stretch gap-2">
+              <div className="w-[70px] min-h-[76px] shrink-0 rounded-2xl border border-amber-300/20 bg-gradient-to-b from-[#A96512] to-[#75420D] flex flex-col items-center justify-center shadow-inner shadow-black/20">
+                <span className="text-[8px] font-black uppercase tracking-[.14em] text-amber-100/75">Prestígio</span>
+                <strong className="text-[29px] leading-none font-black text-white mt-1">{t.reputacao ?? 40}</strong>
               </div>
-              <div className="shrink-0 text-right"><strong className="block text-white text-2xl leading-none">{idade}</strong><span className="text-[9px] uppercase tracking-wide text-[#A1A1AA]">idade</span><div className="text-xs font-bold text-[#FACC15] mt-2">R$ {salarioTecnico(t)} mil</div><span className="text-[9px] uppercase text-[#A1A1AA]">salário/mês</span></div>
+              <div className="min-w-0 flex-1 rounded-2xl border border-white/[.06] px-3 py-2.5 flex items-center gap-2.5" style={{ background: 'linear-gradient(110deg, #111b16, #171719 72%)' }}>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 text-[9px] text-[#A1A1AA]"><Bandeira pais={t.pais || 'Brasil'} /><span className="font-black uppercase tracking-[.16em]">Modo treinador</span></div>
+                  <h1 className="text-white text-lg sm:text-xl font-black leading-tight truncate mt-1">{c.nome}</h1>
+                  <div className="flex items-center gap-1.5 text-xs text-[#D4D4D8] truncate mt-1"><Escudo nome={semClube ? 'Sem clube' : t.clube} size={20} /><span className="truncate">{semClube ? 'Sem clube' : t.clube}</span></div>
+                </div>
+                <div className="shrink-0 border-l border-white/[.08] pl-2.5 text-right"><strong className="block text-white text-xl leading-none">{idade}</strong><span className="text-[8px] uppercase tracking-wide text-[#A1A1AA]">idade</span><div className="text-[10px] font-bold text-[#FACC15] mt-2">R$ {salarioTecnico(t)} mil</div><span className="text-[8px] uppercase text-[#A1A1AA]">por mês</span></div>
+              </div>
             </div>
-            <div className="grid grid-cols-3 gap-1 mt-3 pt-2 border-t border-white/[.07] text-center">
-              {[[historico.jogos, 'jogos'], [historico.vitorias, 'vitórias'], [titulos.length, 'títulos']].map(([valor, rotulo]) => <div key={rotulo}><strong className="block text-white text-base">{valor}</strong><span className="text-[9px] text-[#A1A1AA] uppercase tracking-wide">{rotulo}</span></div>)}
+            <div className="grid grid-cols-3 gap-1 mt-2.5 text-center">
+              {[[historico.jogos, 'jogos'], [historico.vitorias, 'vitórias'], [titulos.length, 'taças']].map(([valor, rotulo]) => <div key={rotulo} className="rounded-xl bg-[#101012] border border-white/[.045] py-1.5"><strong className="block text-white text-sm leading-tight">{valor}</strong><span className="text-[8px] text-[#A1A1AA] uppercase tracking-[.12em]">{rotulo}</span></div>)}
             </div>
-            <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-white/[.07] text-[10px] text-[#A1A1AA]"><span>Ano {t.ano} · {temporadas.length}/{LIMITE_TEMPORADAS_TECNICO}</span><span>Diretoria {t.diretoria ?? 60}%</span></div>
-            {titulosDestaque && <div className="flex items-center gap-2 mt-2 rounded-xl bg-[#FACC15]/[.07] px-2.5 py-2"><TacaCompeticao tipo={titulosDestaque.tipo} nome={titulosDestaque.nome} size={27} /><span className="min-w-0"><strong className="block text-[10px] text-[#FDE68A] truncate">{titulosDestaque.nome}</strong><span className="block text-[9px] text-[#A1A1AA]">último título · {titulosDestaque.ano}</span></span></div>}
+            <div className="flex items-center justify-between gap-2 mt-2 px-1 text-[9px] text-[#A1A1AA]"><span>Temporada {t.ano} · {temporadas.length}/{LIMITE_TEMPORADAS_TECNICO}</span><span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /><span>Diretoria {t.diretoria ?? 60}%</span></span></div>
+            {titulosDestaque && <div className="flex items-center gap-2 mt-2 rounded-xl border border-[#FACC15]/15 bg-[#FACC15]/[.055] px-2.5 py-1.5"><TacaCompeticao tipo={titulosDestaque.tipo} nome={titulosDestaque.nome} size={25} /><span className="min-w-0"><strong className="block text-[10px] text-[#FDE68A] truncate">{titulosDestaque.nome}</strong><span className="block text-[9px] text-[#A1A1AA]">última conquista · {titulosDestaque.ano}</span></span></div>}
           </header>
 
-          <section className="border-t border-white/[.08] px-4 sm:px-5 py-4" aria-live="polite">
+          <section className="border-t border-white/[.08] px-3.5 sm:px-4 py-3.5" aria-live="polite">
             {primeira ? <>
               <h2 className="text-white text-base font-bold">Oferta inicial</h2><p className="text-xs text-[#A1A1AA] mt-1">Escolha onde sua carreira como treinador começa. Seus vínculos como jogador vêm primeiro.</p>
               <div className="grid grid-cols-2 gap-2 mt-3">{t.opcoesInicio.map(op => <button key={op.clube} disabled={simulando} onClick={() => escolherClubeInicial(op.clube)} className="cp-card min-h-[124px] p-2.5 text-center hover:border-white/30 disabled:opacity-50 transition"><span className="block text-[9px] text-[#A1A1AA]">Começar no</span><strong className="block text-xs leading-tight text-white mt-1">{op.clube}</strong><span className="flex justify-center my-2"><Escudo nome={op.clube} size={42} /></span><span className="block text-[9px] text-[#A1A1AA]">{op.idolatria ? 'Clube do coração' : `Vínculo ${op.afinidade}/100`}</span></button>)}</div>
@@ -235,23 +240,23 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
         </div>
 
         <section className="min-w-0" aria-label="Trajetória como treinador">
-          <header className="px-3 sm:px-4 py-4 border-b border-white/[.08]">
-            <div className="flex items-start justify-between gap-3"><div><span className="text-[9px] uppercase tracking-[.18em] text-[#A1A1AA] font-black">Modo treinador · intenso</span><h2 className="text-white text-base font-bold mt-1">Trajetória</h2></div><span className="text-[10px] text-[#A1A1AA]">{temporadas.length}/{LIMITE_TEMPORADAS_TECNICO} temporadas</span></div>
-            <div className="grid grid-cols-[3.3rem_minmax(0,1fr)_2.6rem_2.7rem] gap-2 px-3 mt-3 text-[9px] font-black uppercase tracking-wider text-[#71717A]"><span>Ano</span><span>Clube / competição</span><span className="text-right">Pos.</span><span className="text-right">Pts.</span></div>
+          <header className="px-3.5 sm:px-4 pt-3.5 pb-2.5 border-b border-white/[.08] bg-[#101012]/70">
+            <div className="flex items-end justify-between gap-3"><div><span className="text-[8px] uppercase tracking-[.2em] text-[#8B8B92] font-black">Histórico da carreira</span><h2 className="text-white text-lg font-black leading-tight mt-0.5">Trajetória</h2></div><span className="rounded-full border border-white/[.08] bg-white/[.035] px-2 py-1 text-[9px] font-bold text-[#A1A1AA]">{temporadas.length}/{LIMITE_TEMPORADAS_TECNICO} anos</span></div>
+            <div className="grid grid-cols-[3.1rem_minmax(0,1fr)_2.4rem_2.5rem] gap-2 px-2 mt-3 text-[8px] font-black uppercase tracking-[.14em] text-[#77777E]"><span>Época</span><span>Clube / torneio</span><span className="text-right">Pos.</span><span className="text-right">Pts.</span></div>
           </header>
-          <div className="px-2 pb-2 max-h-[72vh] lg:max-h-[680px] overflow-y-auto">
+          <div className="px-1.5 pb-2 max-h-[72vh] lg:max-h-[680px] overflow-y-auto">
             {temporadasCards.map((a, visibleIndex) => {
               const i = mostrarTodas ? visibleIndex : temporadas.length - temporadasCards.length + visibleIndex;
               return <LinhaTemporada key={`${a.ano}-${i}`} a={a} ativa={aberta == null && i === temporadas.length - 1} aberta={String(aberta) === String(a.ano)} onClick={() => setAberta(String(aberta) === String(a.ano) ? null : a.ano)} />;
             })}
-            {t.fase === 'pretemporada' && <div ref={atualRef} className="grid grid-cols-[3.3rem_minmax(0,1fr)_2.6rem_2.7rem] gap-2 items-center px-3 py-2 border-b border-white/[.06] bg-white/[.035]">
-              <span className="rounded-full bg-white text-[#111113] text-[11px] font-black px-1.5 py-1 text-center">{t.ano}</span><span className="flex items-center gap-2 min-w-0"><Escudo nome={primeira ? 'Sem clube' : t.clube} size={28} /><span className="min-w-0"><strong className="block text-xs text-white truncate">{primeira ? 'Escolhendo clube' : t.clube}</strong><span className="block text-[9px] text-[#A1A1AA] truncate">{primeira ? 'Oferta inicial' : 'Temporada em andamento'}</span></span></span><span className="text-right text-xs text-[#A1A1AA]">—</span><span className="text-right text-xs text-[#A1A1AA]">—</span>
+            {t.fase === 'pretemporada' && <div ref={atualRef} className="grid grid-cols-[3.1rem_minmax(0,1fr)_2.4rem_2.5rem] gap-2 items-center px-2 py-1.5 border-b border-white/[.06] bg-[#B7781B]/[.06]">
+              <span className="rounded-md bg-[#B7781B] text-white text-[10px] font-black px-1.5 py-1 text-center">{t.ano}</span><span className="flex items-center gap-2 min-w-0"><Escudo nome={primeira ? 'Sem clube' : t.clube} size={25} /><span className="min-w-0"><strong className="block text-xs text-white truncate">{primeira ? 'Escolhendo clube' : t.clube}</strong><span className="block text-[9px] text-[#A1A1AA] truncate">{primeira ? 'Oferta inicial' : 'Temporada em andamento'}</span></span></span><span className="text-right text-xs text-[#A1A1AA]">—</span><span className="text-right text-xs text-[#A1A1AA]">—</span>
             </div>}
             {!temporadas.length && <div className="px-4 py-7 text-center text-xs text-[#71717A]">As temporadas concluídas aparecerão aqui.</div>}
             {temporadas.length > 12 && <button onClick={() => setMostrarTodas(v => !v)} className="w-full py-2 text-[10px] text-[#D4D4D8]">{mostrarTodas ? 'Mostrar as 12 mais recentes' : `Ver as ${temporadas.length} temporadas`}</button>}
             {temporadas.length > 0 && <div className="flex items-center justify-between px-3 py-2 text-[9px] text-[#71717A]"><span>{historico.vitorias}V · {historico.empates}E · {historico.derrotas}D</span><span>Até {LIMITE_TEMPORADAS_TECNICO} temporadas</span></div>}
           </div>
-          {titulos.length > 0 && <details className="border-t border-white/[.08] px-3 py-2.5"><summary className="cursor-pointer list-none flex items-center justify-between"><span className="text-xs font-bold text-[#FDE68A]">Vitrine de títulos</span><span className="text-[10px] text-[#A1A1AA]">{titulos.length} conquistas</span></summary><div className="grid grid-cols-2 gap-2 mt-3">{titulos.map((x, i) => <div key={`${x.ano}-${x.nome}-${i}`} className="cp-card flex items-center gap-2 p-2"><TacaCompeticao tipo={x.tipo} nome={x.nome} size={30} /><span className="min-w-0"><strong className="block text-[10px] text-[#FDE68A] truncate">{x.nome}</strong><span className="text-[9px] text-[#A1A1AA]">{x.ano} · {x.clube}</span></span></div>)}</div></details>}
+          {titulos.length > 0 && <details className="border-t border-white/[.08] px-3 py-2.5"><summary className="cursor-pointer list-none flex items-center justify-between"><span className="flex items-center gap-1.5 text-xs font-bold text-[#FDE68A]"><span aria-hidden="true">🏆</span>Vitrine de taças</span><span className="text-[9px] text-[#A1A1AA]">{titulos.length} títulos <span aria-hidden="true">⌄</span></span></summary><div className="grid grid-cols-2 gap-2 mt-3">{titulos.map((x, i) => <div key={`${x.ano}-${x.nome}-${i}`} className="cp-card flex items-center gap-2 p-2"><TacaCompeticao tipo={x.tipo} nome={x.nome} size={30} /><span className="min-w-0"><strong className="block text-[10px] text-[#FDE68A] truncate">{x.nome}</strong><span className="text-[9px] text-[#A1A1AA]">{x.ano} · {x.clube}</span></span></div>)}</div></details>}
         </section>
       </div>
       <footer className="flex items-center justify-between gap-3 border-t border-white/[.08] px-4 py-2 text-[10px]"><button onClick={onLegado} className="text-[#A1A1AA] hover:text-white">Ver legado como jogador</button><button onClick={onSair} className="text-[#A1A1AA] hover:text-white">Voltar ao menu</button></footer>

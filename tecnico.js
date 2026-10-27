@@ -635,7 +635,7 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
     ...(campeao ? [competicaoTemporadaTecnico(temporada)] : []),
     ...copas.filter((nome, indice) => {
       const continental = indice === 1;
-      const elegivel = !continental || posicao <= 6 || (t.temporadas?.at(-1)?.posicao ?? 20) <= 6;
+      const elegivel = !continental || (t.temporadas?.at(-1)?.posicao ?? 20) <= 6;
       const chance = continental ? 0.025 : 0.065;
       return elegivel && rng() < chance;
     })

@@ -87,6 +87,7 @@ export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAvancarESim
     </section>}
     {t.fase === 'resultado' && <section className="rp-painel p-5">
       <span className="text-[#D8B44A] text-xs font-bold uppercase">Fim da temporada {ultima?.ano}</span>
+      {ultima?.demitido && <div role="status" className="mt-3 rounded-xl border border-red-400/30 bg-red-950/30 p-3 text-left"><strong className="text-red-200 text-sm block">Fim de contrato · Demissão</strong><p className="text-red-100/80 text-xs mt-1">A diretoria decidiu encerrar seu trabalho. Analise as propostas disponíveis ou aguarde novas oportunidades.</p></div>}
       <h2 className="text-white text-2xl font-bold mt-2">{(ultima?.titulosConquistados?.length || ultima?.campeao) ? '🏆 Temporada com títulos!' : ultima?.posicao+'º lugar no campeonato'}</h2>
       <p className="text-[#C9D3CE] text-sm mt-2">{ultima?.clube} · {competicaoTemporadaTecnico(ultima)} · {ultima?.pontos} pontos</p>
       {ultima?.titulosConquistados?.length > 0 && <div className="mt-4 grid grid-cols-2 gap-2">{ultima.titulosConquistados.map(nome => <div key={nome} className="rounded-xl border border-[#D8B44A]/30 bg-[#D8B44A]/10 p-3 flex flex-col items-center gap-2 text-center"><TacaCompeticao tipo={competicaoDoTitulo(nome).tipo} nome={nome} size={60}/><strong className="text-[#F4D67A] text-xs">{nome}</strong></div>)}</div>}

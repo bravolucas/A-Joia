@@ -2,11 +2,6 @@ name: Auditoria geral de mecanicas e navegador
 on:
   push:
     branches: [audit/verificacao-geral-2026-10-26, feature/treinador-fluxo-expresso, fix/atualizacao-visivel-pages, feature/treinador-copero-ano-a-ano, feature/treinador-fidelidade-balanceamento-tacas]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
-  schedule:
-    - cron: '17 4 * * 1'
 jobs:
   testes:
     runs-on: ubuntu-latest

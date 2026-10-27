@@ -10,7 +10,7 @@ function Escudo({ nome, size = 42 }) {
   const src = escudoDe(nome);
   return src ? <img src={src} alt={nome} style={{width:size,height:size,objectFit:'contain'}} /> : <div className="rounded-full bg-white/10 flex items-center justify-center text-xl" style={{width:size,height:size}}>⚽</div>;
 }
-function PopUpTitulo({ temporada, onFechar }) {
+function PopUpTitulo({ temporada, titulo, indice, total, onFechar }) {
   const onFecharRef = useRef(onFechar);
   onFecharRef.current = onFechar;
   useEffect(() => {
@@ -20,16 +20,17 @@ function PopUpTitulo({ temporada, onFechar }) {
     const esc = e => { if(e.key === 'Escape') onFecharRef.current(); };
     document.addEventListener('keydown',esc);
     return () => { document.body.style.overflow = anterior; document.removeEventListener('keydown',esc); };
-  }, [temporada.ano]);
+  }, [temporada.ano, indice]);
   return createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-6" role="dialog" aria-modal="true" aria-label="Título conquistado" style={{background:'rgba(2,8,7,.94)'}}>
     <div className="w-full max-w-sm rounded-3xl border border-[#D8B44A]/50 text-center px-6 py-7 relative overflow-hidden" style={{background:'radial-gradient(ellipse at 50% 15%, #65521F 0%, #19231E 50%, #0D1512 100%)',boxShadow:'0 0 70px #D8B44A30'}}>
       <div className="text-[#EBC557] font-black tracking-[.22em] text-xs uppercase">A JOIA · Temporada {temporada.ano}</div>
       <h2 className="display text-4xl text-white mt-2">CAMPEÃO!</h2>
-      <div className="flex justify-center flex-wrap gap-4 my-6" style={{filter:'drop-shadow(0 0 24px #D8B44A80)'}}>{(temporada.titulosConquistados?.length ? temporada.titulosConquistados : [competicaoTemporadaTecnico(temporada)]).map(nome => <TacaCompeticao key={nome} tipo={competicaoDoTitulo(nome).tipo} nome={nome} size={temporada.titulosConquistados?.length > 1 ? 95 : 142}/>)}</div>
-      <div className="flex flex-col gap-2 items-center">{(temporada.titulosConquistados?.length ? temporada.titulosConquistados : [competicaoTemporadaTecnico(temporada)]).map(nome => <p key={nome} className="text-[#F4D67A] font-bold text-lg">🏆 {nome}</p>)}</div>
+      <div className="flex justify-center my-6" style={{filter:'drop-shadow(0 0 24px #D8B44A80)'}}><TacaCompeticao tipo={competicaoDoTitulo(titulo).tipo} nome={titulo} size={142}/></div>
+      <p className="text-[#F4D67A] font-bold text-xl">{titulo}</p>
+      {total > 1 && <p className="text-[#9BAEA3] text-xs mt-2">Conquista {indice + 1} de {total}</p>}
       <div className="flex items-center justify-center gap-3 mt-3"><Escudo nome={temporada.clube} size={35}/><span className="text-white font-bold text-lg">{temporada.clube}</span></div>
       <p className="text-[#B6C2BA] text-sm mt-3">{temporada.posicao}º na liga · {temporada.pontos} pontos · {temporada.vitorias} vitórias</p>
-      <button autoFocus onClick={onFechar} className="rp-btn rp-ouro w-full mt-7">Continuar carreira</button>
+      <button autoFocus onClick={onFechar} className="rp-btn rp-ouro w-full mt-7">{indice + 1 < total ? 'Próximo troféu' : 'Continuar carreira'}</button>
     </div>
   </div>,document.body);
 }
@@ -44,11 +45,12 @@ export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAvancarESim
   const carta = cartaAtualTecnico(t);
   const historico = historicoProfissionalTecnico(t);
   const titulos = titulosConquistadosTecnico(t);
-  const [tituloVisto, setTituloVisto] = useState(null);
+  const [titulosVistos, setTitulosVistos] = useState({ chave: null, quantidade: 0 });
   const [simulando, setSimulando] = useState(false);
   const conquistasUltima = ultima ? (Array.isArray(ultima.titulosConquistados) ? ultima.titulosConquistados : (ultima.campeao ? [competicaoTemporadaTecnico(ultima)] : [])) : [];
   const chaveTitulo = conquistasUltima.length ? String(ultima.ano)+'|'+ultima.clube : null;
-  const mostrarTitulo = t.fase === 'resultado' && chaveTitulo && tituloVisto !== chaveTitulo;
+  const indiceTitulo = titulosVistos.chave === chaveTitulo ? titulosVistos.quantidade : 0;
+  const mostrarTitulo = t.fase === 'resultado' && !!chaveTitulo && indiceTitulo < conquistasUltima.length;
   useEffect(() => { if (t.fase === 'resultado') setSimulando(false); }, [t.fase, temporadas.length]);
   const escolher = id => {
     if (simulando) return;
@@ -65,7 +67,7 @@ export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAvancarESim
     }
   };
   return <div className="max-w-xl mx-auto px-4 py-5 flex flex-col gap-4 rp-entra">
-    {mostrarTitulo && <PopUpTitulo temporada={ultima} onFechar={() => setTituloVisto(chaveTitulo)}/>}
+    {mostrarTitulo && <PopUpTitulo temporada={ultima} titulo={conquistasUltima[indiceTitulo]} indice={indiceTitulo} total={conquistasUltima.length} onFechar={() => setTitulosVistos({chave:chaveTitulo,quantidade:indiceTitulo+1})}/>}
     <header className="rp-painel p-5">
       <div className="text-center text-[#D8B44A] uppercase tracking-[.2em] text-[11px] font-bold">A JOIA · Modo Treinador</div>
       <div className="flex gap-4 items-center mt-4"><Escudo nome={t.clube} size={64}/><div className="min-w-0"><h1 className="display text-2xl text-white">{semClube ? 'Sem clube' : t.clube}</h1><p className="text-[#C9D3CE] text-sm">{c.nome} · {t.pais || 'Brasil'}</p></div></div>

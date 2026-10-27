@@ -47,16 +47,17 @@ function PopUpTitulo({ temporada, titulo, indice, total, onFechar }) {
   </div>, document.body);
 }
 
-function PopUpDivisao({ temporada, movimento, onFechar }) {
+function PopUpDivisao({ temporada, movimento, tipo, onFechar }) {
+  const tipoMovimento = tipo || movimento.tipo;
   useEffect(() => {
     const overflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    if (movimento.tipo === 'acesso') confetti({ particleCount: 90, spread: 70, origin: { y: .5 }, colors: ['#22C55E', '#FFFFFF', '#D8B44A'] });
+    if (tipoMovimento === 'acesso') confetti({ particleCount: 90, spread: 70, origin: { y: .5 }, colors: ['#22C55E', '#FFFFFF', '#D8B44A'] });
     const esc = e => { if (e.key === 'Escape') onFechar(); };
     document.addEventListener('keydown', esc);
     return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', esc); };
-  }, [temporada.ano, movimento.tipo]);
-  const acesso = movimento.tipo === 'acesso';
+  }, [temporada.ano, tipoMovimento]);
+  const acesso = tipoMovimento === 'acesso';
   const nomeDestino = competicaoTemporadaTecnico({ liga: movimento.para });
   return createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-6" role="dialog" aria-modal="true" aria-label={acesso ? 'Acesso de divisão' : 'Rebaixamento'} style={{ background: 'rgba(5,5,6,.88)', backdropFilter: 'blur(7px)' }}>
     <div className={'cp-card w-full max-w-sm text-center px-6 py-7 '+(acesso ? 'border-emerald-500/40' : 'border-red-500/40')} style={{ background: acesso ? 'radial-gradient(ellipse at 50% 10%, #173527, #161618 70%)' : 'radial-gradient(ellipse at 50% 10%, #3A2020, #161618 70%)' }}>
@@ -189,7 +190,7 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
 
   return <main className="cp min-h-screen w-full max-w-5xl mx-auto px-3 sm:px-4 py-3 sm:py-5 rp-entra text-[#F4F4F5]">
     {eventoAtual?.tipo === 'titulo' && <PopUpTitulo temporada={ultima} titulo={eventoAtual.nome} indice={eventosUltima.slice(0, indiceEvento + 1).filter(x => x.tipo === 'titulo').length - 1} total={conquistasUltima.length} onFechar={() => setEventosVistos({ chave: chaveEvento, quantidade: indiceEvento + 1 })} />}
-    {(eventoAtual?.tipo === 'rebaixado' || eventoAtual?.tipo === 'acesso') && <PopUpDivisao temporada={ultima} movimento={eventoAtual.movimento} onFechar={() => setEventosVistos({ chave: chaveEvento, quantidade: indiceEvento + 1 })} />}
+    {(eventoAtual?.tipo === 'rebaixado' || eventoAtual?.tipo === 'acesso') && <PopUpDivisao temporada={ultima} movimento={eventoAtual.movimento} tipo={eventoAtual.tipo} onFechar={() => setEventosVistos({ chave: chaveEvento, quantidade: indiceEvento + 1 })} />}
 
     <section className="cp-card overflow-hidden border-[#27272A] bg-[#111113]">
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(360px,420px)_minmax(0,1fr)]">

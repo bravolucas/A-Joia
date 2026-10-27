@@ -13,11 +13,11 @@ const METAIS = {
 };
 
 /* Taças: cada competição tem a sua, gerada em tacas.js a partir do nome. */
-export function TacaCompeticao({ tipo = "liga", size = 40, nome = null }) {
+export function TacaCompeticao({ tipo = "liga", size = 40, nome = null, preferirTaca = false }) {
   const uid = React.useId().replace(/[^a-zA-Z0-9]/g, "");
   // logo da competição, se a pessoa colocou o arquivo em arte/competicoes/
   const logo = nome ? logoCompeticao(nome) : null;
-  if (logo) return <img src={logo} alt="" aria-hidden="true" className="shrink-0 object-contain select-none" draggable="false" style={{ width: size, height: size * 1.2, filter: "drop-shadow(0 2px 6px rgba(0,0,0,.5))" }} />;
+  if (logo && !preferirTaca) return <img src={logo} alt="" aria-hidden="true" className="shrink-0 object-contain select-none" draggable="false" style={{ width: size, height: size * 1.2, filter: "drop-shadow(0 2px 6px rgba(0,0,0,.5))" }} />;
   const brilho = METAIS[metalDaTaca(tipo, nome) === "bronze" ? "bronze" : metalDaTaca(tipo, nome) === "ouro" ? "ouro" : "prata"][1];
   const sombra = { filter: `drop-shadow(0 ${Math.max(2, size / 20)}px ${Math.max(4, size / 7)}px rgba(0,0,0,.55)) drop-shadow(0 0 ${Math.max(4, size / 6)}px ${brilho}55)` };
   const html = svgDaTaca(tipo, nome).replaceAll("__ID__", `t${uid}`);

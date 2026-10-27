@@ -335,8 +335,8 @@ export function competicaoDoTitulo(texto = "") {
   if (/copa do mundo/.test(n)) tipo = "copaMundo";
   else if (/mundial/.test(n)) tipo = "mundial";
   else if (/copa américa|eurocopa|copa ouro|africana|copa da ásia|ofc/.test(n)) tipo = "continentalSelecao";
-  else if (/libertadores|champions|sul-americana|concacaf|europa league|conference/.test(n)) tipo = "continental";
   else if (/série b|serie b|championship|laliga 2|bundesliga 2|2\. bundesliga|ligue 2|portugal 2/.test(n)) tipo = "segunda";
+  else if (/libertadores|champions league|sul-americana|concacaf|europa league|conference/.test(n)) tipo = "continental";
   else if (/copa|cup|coppa|pokal|coupe|taça|supercopa|supertaça|shield|trophée/.test(n)) tipo = "copa";
   return { tipo, nome };
 }

@@ -92,9 +92,9 @@ function CampanhasTemporada({ torneios = [] }) {
 function LinhaTemporada({ a, ativa, aberta, onClick }) {
   const titulos = Array.isArray(a.titulosConquistados) ? a.titulosConquistados : a.campeao ? [competicaoTemporadaTecnico(a)] : [];
   return <div className={'border-b border-white/[.06] '+(ativa ? 'bg-white/[.035]' : '')}>
-    <button type="button" aria-expanded={aberta} onClick={onClick} className="w-full grid grid-cols-[2.8rem_minmax(0,1fr)_2.15rem_2.25rem] gap-1.5 items-center px-1.5 py-1 text-left hover:bg-white/[.035] transition border-b border-white/[.035] min-h-[34px]">
-      <span className={'rounded-md text-[9px] font-black px-1 py-1 text-center '+(ativa ? 'bg-[#EA7A22] text-white' : 'bg-[#232326] text-[#C9C9CE]')}>{a.ano}</span>
-      <span className="flex items-center gap-1.5 min-w-0"><Escudo nome={a.clube} size={22} /><strong className="min-w-0 flex-1 text-white text-[11px] font-semibold truncate">{a.clube}</strong>{titulos.length > 0 && <span className="shrink-0 text-[10px] text-[#FACC15]" title={titulos.join(' · ')} aria-label={titulos.join(' · ')}>🏆</span>}{a.acesso && <span className="shrink-0 text-[10px]" title="Acesso" aria-label="Acesso">⬆</span>}{a.rebaixado && <span className="shrink-0 text-[10px]" title="Rebaixamento" aria-label="Rebaixamento">⬇</span>}</span>
+    <button type="button" aria-expanded={aberta} onClick={onClick} className="w-full grid grid-cols-[2.8rem_minmax(0,1fr)_2.15rem_2.25rem] gap-1.5 items-center px-1.5 py-0.5 text-left hover:bg-white/[.035] transition border-b border-white/[.035] min-h-[29px]">
+      <span className={'rounded-md text-[8px] font-black px-1 py-[3px] text-center '+(ativa ? 'bg-[#EA7A22] text-white' : 'bg-[#232326] text-[#C9C9CE]')}>{a.ano}</span>
+      <span className="flex items-center gap-1.5 min-w-0"><Escudo nome={a.clube} size={18} /><strong className="min-w-0 flex-1 text-white text-[10px] font-semibold truncate">{a.clube}</strong>{titulos.length > 0 && <span className="shrink-0 text-[10px] text-[#FACC15]" title={titulos.join(' · ')} aria-label={titulos.join(' · ')}>🏆</span>}{a.acesso && <span className="shrink-0 text-[10px]" title="Acesso" aria-label="Acesso">⬆</span>}{a.rebaixado && <span className="shrink-0 text-[10px]" title="Rebaixamento" aria-label="Rebaixamento">⬇</span>}</span>
       <span className="text-right text-[#D4D4D8] text-[10px]">{a.posicao}º</span><span className="text-right text-white text-[10px] font-bold">{a.pontos}</span>
     </button>
     {aberta && <div className="px-2 pb-2.5 pl-[3.6rem] text-[10px] text-[#A1A1AA] bg-[#0D0D0F]/80">
@@ -118,7 +118,6 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
   const [eventosVistos, setEventosVistos] = useState({ chave: null, quantidade: 0 });
   const [simulando, setSimulando] = useState(false);
   const [aberta, setAberta] = useState(null);
-  const [mostrarTodas, setMostrarTodas] = useState(false);
   const [vitrineAberta, setVitrineAberta] = useState(false);
   const [erroProposta, setErroProposta] = useState(null);
   const atualRef = useRef(null);
@@ -133,7 +132,7 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
   const chaveEvento = eventosUltima.length ? `${temporadas.length}|${ultima.ano}|${ultima.clube}|${eventosUltima.map(x => x.nome || x.tipo).join('|')}` : null;
   const indiceEvento = eventosVistos.chave === chaveEvento ? eventosVistos.quantidade : 0;
   const eventoAtual = t.fase === 'resultado' && indiceEvento < eventosUltima.length ? eventosUltima[indiceEvento] : null;
-  const temporadasVisiveis = mostrarTodas ? temporadas : temporadas.slice(-12);
+  const temporadasVisiveis = temporadas;
 
   useEffect(() => {
     const fundoAnterior = document.body.style.backgroundColor;
@@ -259,14 +258,13 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
           </header>
           <div className="px-1.5 pb-2 max-h-[72vh] lg:max-h-[680px] overflow-y-auto">
             {temporadasCards.map((a, visibleIndex) => {
-              const i = mostrarTodas ? visibleIndex : temporadas.length - temporadasCards.length + visibleIndex;
+              const i = visibleIndex;
               return <LinhaTemporada key={`${a.ano}-${i}`} a={a} ativa={i === temporadas.length - 1 && (aberta == null || String(aberta) === String(a.ano))} aberta={String(aberta) === String(a.ano)} onClick={() => setAberta(String(aberta) === String(a.ano) ? null : a.ano)} />;
             })}
-            {t.fase === 'pretemporada' && <div ref={atualRef} className="grid grid-cols-[2.8rem_minmax(0,1fr)_2.15rem_2.25rem] gap-1.5 items-center px-1.5 py-1 border-b border-white/[.06] bg-[#EA7A22]/[.07] min-h-[34px]">
-              <span className="rounded-md bg-[#EA7A22] text-white text-[9px] font-black px-1 py-1 text-center">{t.ano}</span><span className="flex items-center gap-1.5 min-w-0"><Escudo nome={primeira ? 'Sem clube' : t.clube} size={22} /><strong className="min-w-0 text-[11px] font-semibold text-white truncate">{primeira ? 'Escolhendo clube' : t.clube}</strong></span><span className="text-right text-[10px] text-[#A1A1AA]">—</span><span className="text-right text-[10px] text-[#A1A1AA]">—</span>
+            {t.fase === 'pretemporada' && <div ref={atualRef} className="grid grid-cols-[2.8rem_minmax(0,1fr)_2.15rem_2.25rem] gap-1.5 items-center px-1.5 py-0.5 border-b border-white/[.06] bg-[#EA7A22]/[.07] min-h-[29px]">
+              <span className="rounded-md bg-[#EA7A22] text-white text-[8px] font-black px-1 py-[3px] text-center">{t.ano}</span><span className="flex items-center gap-1.5 min-w-0"><Escudo nome={primeira ? 'Sem clube' : t.clube} size={18} /><strong className="min-w-0 text-[10px] font-semibold text-white truncate">{primeira ? 'Escolhendo clube' : t.clube}</strong></span><span className="text-right text-[10px] text-[#A1A1AA]">—</span><span className="text-right text-[10px] text-[#A1A1AA]">—</span>
             </div>}
             {!temporadas.length && <div className="px-4 py-7 text-center text-xs text-[#71717A]">As temporadas concluídas aparecerão aqui.</div>}
-            {temporadas.length > 12 && <button onClick={() => setMostrarTodas(v => !v)} className="w-full py-2 text-[10px] text-[#D4D4D8]">{mostrarTodas ? 'Mostrar as 12 mais recentes' : `Ver as ${temporadas.length} temporadas`}</button>}
             {temporadas.length > 0 && <div className="flex items-center justify-between px-3 py-2 text-[9px] text-[#71717A]"><span>{historico.vitorias}V · {historico.empates}E · {historico.derrotas}D</span><span>Até {LIMITE_TEMPORADAS_TECNICO} temporadas</span></div>}
           </div>
         </section>

@@ -41,3 +41,15 @@ test('calendario do treinador aceita clube legado sem nome e preserva 38 rodadas
   assert.equal(calendario.length,38);
   assert.ok(calendario.every(jogo => jogo.nome && typeof jogo.casa === 'boolean'));
 });
+
+test('simulacao expressa suporta save antigo sem atributo de elenco', () => {
+  let c = criarJogador({nome:'Legado',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:9,ritmo:'equilibrado',codigo:'LEGADO'});
+  for(let i=0;i<18;i++){const r=jogarTemporada(c);c=fecharTemporada(r.c,r.card).c;}
+  c=iniciarCarreiraTecnico(aposentar(c));
+  if(c.tecnico.opcoesInicio?.length)c=iniciarNoClubeIdolo(c,c.tecnico.opcoesInicio[0].clube);
+  const carta=cartaAtualTecnico(c.tecnico);
+  c={...c,tecnico:{...c.tecnico,elenco:undefined}};
+  c=jogarTemporadaExpressaTecnico(c,carta.opcoes[0].id,()=>0.5);
+  assert.equal(c.tecnico.temporadas.length,1);
+  assert.equal(c.tecnico.temporadas[0].vitorias+c.tecnico.temporadas[0].empates+c.tecnico.temporadas[0].derrotas,38);
+});

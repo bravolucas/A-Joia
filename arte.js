@@ -43,7 +43,9 @@ const ALIASES_COMPETICOES = {
 };
 export const logoCompeticao = (nome) => {
   const chave = slug(nome);
-  return LOGOS[chave] || LOGOS[ALIASES_COMPETICOES[chave]] || null;
+  const canonica = ALIASES_COMPETICOES[chave] || chave;
+  const alternativas = Object.keys(ALIASES_COMPETICOES).filter(k => ALIASES_COMPETICOES[k] === canonica);
+  return LOGOS[chave] || LOGOS[canonica] || alternativas.map(k => LOGOS[k]).find(Boolean) || null;
 };
 const BANDEIRAS = porNome(import.meta.glob("./arte/bandeiras/*.svg", { eager: true, query: "?url", import: "default" }));
 /* bandeiras em SVG (pacote flag-icons, MIT): o emoji de bandeira não aparece no Windows */

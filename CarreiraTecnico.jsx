@@ -87,6 +87,7 @@ export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAvancarESim
       <span className="text-[#D8B44A] text-xs font-bold uppercase">Fim da temporada {ultima?.ano}</span>
       <h2 className="text-white text-2xl font-bold mt-2">{(ultima?.titulosConquistados?.length || ultima?.campeao) ? '🏆 Temporada com títulos!' : ultima?.posicao+'º lugar no campeonato'}</h2>
       <p className="text-[#C9D3CE] text-sm mt-2">{ultima?.clube} · {competicaoTemporadaTecnico(ultima)} · {ultima?.pontos} pontos</p>
+      {ultima?.titulosConquistados?.length > 0 && <div className="mt-4 grid grid-cols-2 gap-2">{ultima.titulosConquistados.map(nome => <div key={nome} className="rounded-xl border border-[#D8B44A]/30 bg-[#D8B44A]/10 p-3 flex flex-col items-center gap-2 text-center"><TacaCompeticao tipo={competicaoDoTitulo(nome).tipo} nome={nome} size={60}/><strong className="text-[#F4D67A] text-xs">{nome}</strong></div>)}</div>}
       <div className="grid grid-cols-3 gap-2 text-center mt-4">{[['Vitórias',ultima?.vitorias],['Empates',ultima?.empates],['Derrotas',ultima?.derrotas]].map(([nome,valor]) => <div key={nome} className="rounded-xl bg-white/5 p-3"><strong className="text-white text-xl block">{valor}</strong><span className="text-[#8FA39A] text-xs">{nome}</span></div>)}</div>
       {ultima?.classificacao?.length > 0 && <div className="mt-5 overflow-hidden rounded-xl border border-white/10">
         <div className="px-3 py-3 bg-white/5 text-white font-bold text-sm">Classificação final · {competicaoTemporadaTecnico(ultima)}</div>

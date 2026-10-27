@@ -93,15 +93,15 @@ test('OVR técnico independe da aprovação local e cresce com experiência', ()
   assert.equal(calcularOvrTecnico(base), calcularOvrTecnico({ ...base, torcida: 10, diretoria: 10 }));
   assert.ok(calcularOvrTecnico({ ...base, temporadas: Array(6).fill({}), titulos: 2 }) > calcularOvrTecnico(base));
 });
-test('torcida e diretoria baixas aumentam pressão e OVR filtra clubes', () => {
+test('torcida e diretoria alteram pressão; reputação define elegibilidade de propostas', () => {
   assert.ok(riscoDemissaoTecnico({ torcida: 10, diretoria: 15 }).pressao > riscoDemissaoTecnico({ torcida: 90, diretoria: 90 }).pressao);
   const iniciante = { reputacao: 25, temporadas: [], titulos: 0, clube: 'Outro' };
-  assert.ok(gerarPropostasTecnico(iniciante, () => 0).every(p => p.exigencia <= calcularOvrTecnico(iniciante)));
+  assert.ok(gerarPropostasTecnico(iniciante, () => 0).every(p => p.exigencia <= iniciante.reputacao));
   const consagrado = { reputacao: 99, temporadas: Array(10).fill({}), titulos: 5, vitorias: 300, empates: 40, derrotas: 40, clube: 'Outro' };
   assert.ok(gerarPropostasTecnico(consagrado, () => 0).every(p => CLUBES.some(clube => clube.nome === p.nome)));
 });
 
-test('ofertas dependem do sorteio e do OVR, sem garantir clubes grandes', () => {
+test('ofertas dependem de reputação e sorteio, sem garantir clubes grandes', () => {
   const consagrado = { reputacao: 99, temporadas: Array(10).fill({ clube: 'Projeto Emergente' }), titulos: 5, vitorias: 300, empates: 40, derrotas: 40, clube: 'Outro' };
   assert.equal(gerarPropostasTecnico(consagrado, () => 0.99).length, 0);
   assert.ok(gerarPropostasTecnico(consagrado, () => 0).length > 0);

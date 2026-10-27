@@ -70,5 +70,5 @@ test('a vitrine de treinador reúne títulos reais do histórico sem alterar o l
   const titulos = titulosConquistadosTecnico(tecnico);
   assert.deepEqual(titulos.map(t => t.nome), ['Brasileirão', 'Copa do Brasil', 'Brasileirão']);
   assert.deepEqual(titulos.map(t => t.ano), [2040, 2040, 2042]);
-  assert.equal(c.temporadas.length, 1);
+  assert.equal(c.temporadas.length, atleta.temporadas.length);
 });

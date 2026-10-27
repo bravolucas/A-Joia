@@ -45,6 +45,8 @@ const PAIS_POR_PALAVRA = [
 
 /* desenhos fixos para as competições internacionais (garante que nenhuma se repita) */
 const FIXAS = {
+  "Brasileirão": { familia: "taca", forma: 4, alca: 0, metal: "ouro", gema: "esmeralda", gemaFrente: false, tampa: false, degraus: 2, base: "preta", faixas: ["#009C3B", "#FFDF00"] },
+  "Brasileirão Série B": { familia: "taca", forma: 2, alca: 3, metal: "prata", gema: "esmeralda", tampa: false, degraus: 2, base: "preta", faixas: ["#009C3B", "#FFDF00"] },
   "Libertadores": { familia: "vaso", forma: 1, metal: "ouro", gema: "esmeralda", faixas: ["#12A876", "#E3B93B"] },
   "Copa Sul-Americana": { familia: "taca", forma: 4, alca: 5, metal: "prata", gema: "esmeralda", tampa: true },
   "Sul-Americana": { familia: "taca", forma: 4, alca: 5, metal: "prata", gema: "esmeralda", tampa: true },

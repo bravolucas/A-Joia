@@ -482,7 +482,8 @@ export function tabelaClassificacaoTecnico(t, andamento, rng = sorteio) {
     empates: andamento?.empates || 0, derrotas: andamento?.derrotas || 0, golsPro: andamento?.golsPro || 0, golsContra: andamento?.golsContra || 0, saldoGols: (andamento?.golsPro || 0) - (andamento?.golsContra || 0), meuClube: true }];
   for (const rival of rivais) {
     const forca = rival.elenco;
-    const expectativa = limitar(0.22 + (forca - 45) * 0.007, 0.16, 0.57);
+    // Rivais fortes precisam disputar o título com pontuações competitivas.
+    const expectativa = limitar(0.29 + (forca - 45) * 0.007, 0.21, 0.61);
     const empates = Math.min(jogos, Math.round(jogos * 0.24));
     const variacao = jogos >= 38 && t.simulacaoExpressa ? Math.round((rng() + rng() + rng() - 1.5) * 10) : 0;
     const vitorias = Math.max(0, Math.min(jogos - empates, Math.round(jogos * expectativa) + variacao));

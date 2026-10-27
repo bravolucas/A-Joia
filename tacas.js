@@ -86,6 +86,16 @@ function hash(txt) {
 /* parâmetros da taça de uma competição */
 export function desenhoDaTaca(tipo = "liga", nome = null) {
   if (nome && FIXAS[nome]) return { ...FIXAS[nome] };
+  // O motor do treinador usa nomes completos; resolva-os para a mesma taça
+  // fixa da competição, evitando gerar uma taça aleatória para cada alias.
+  const aliases = {
+    'Copa Libertadores': 'Libertadores',
+    'UEFA Champions League': 'Champions League',
+    'CONMEBOL Libertadores': 'Libertadores',
+    'Campeonato Brasileiro Série A': 'Brasileirão',
+    'Campeonato Brasileiro Série B': 'Brasileirão Série B'
+  };
+  if (nome && aliases[nome] && FIXAS[aliases[nome]]) return { ...FIXAS[aliases[nome]] };
   if (!nome) return { ...(PADRAO[tipo] || PADRAO.liga) };
   const h = hash(`${tipo}:${nome}`);
   const pega = (n, desloc) => Math.floor(h / desloc) % n;

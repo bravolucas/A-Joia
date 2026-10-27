@@ -477,9 +477,9 @@ export function tabelaClassificacaoTecnico(t, andamento, rng = sorteio) {
     empates: andamento?.empates || 0, derrotas: andamento?.derrotas || 0, golsPro: andamento?.golsPro || 0, golsContra: andamento?.golsContra || 0, saldoGols: (andamento?.golsPro || 0) - (andamento?.golsContra || 0), meuClube: true }];
   for (const rival of rivais) {
     const forca = rival.elenco;
-    const expectativa = limitar(0.27 + (forca - 60) * 0.007, 0.17, 0.58);
+    const expectativa = limitar(0.22 + (forca - 45) * 0.007, 0.16, 0.57);
     const empates = Math.min(jogos, Math.round(jogos * 0.24));
-    const variacao = jogos >= 38 ? Math.round((rng() + rng() + rng() - 1.5) * 10) : 0;
+    const variacao = jogos >= 38 && t.simulacaoExpressa ? Math.round((rng() + rng() + rng() - 1.5) * 10) : 0;
     const vitorias = Math.max(0, Math.min(jogos - empates, Math.round(jogos * expectativa) + variacao));
     const derrotas = jogos - vitorias - empates;
     linhas.push({ nome: rival.nome, jogos, pontos: vitorias * 3 + empates, vitorias, empates, derrotas, golsPro: 0, golsContra: 0, saldoGols: 0, meuClube: false });
@@ -607,7 +607,7 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
     else derrotas++;
   }
   const pontos = vitorias * 3 + empates;
-  const classificacao = tabelaClassificacaoTecnico(t, { jogos: 38, pontos, vitorias, empates, derrotas }, rng);
+  const classificacao = tabelaClassificacaoTecnico({ ...t, simulacaoExpressa: true }, { jogos: 38, pontos, vitorias, empates, derrotas }, rng);
   const posicao = classificacao.find(x => x.meuClube)?.posicao || 18;
   const campeao = posicao === 1;
   const objetivo = objetivoTecnico(t);

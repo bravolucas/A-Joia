@@ -682,6 +682,14 @@ export function proximaTemporadaTecnico(c) {
   return { ...c, tecnico: { ...proximo, cartas: sortearCartasTecnico(proximo) } };
 }
 
+/** Escolha interna imparcial para eventos não exibidos no fluxo expresso. */
+export function escolherOpcaoAutomaticaTecnico(opcoes, rng = sorteio) {
+  if (!Array.isArray(opcoes) || opcoes.length === 0) throw new Error('Evento sem alternativas.');
+  const valor = rng();
+  const indice = Math.min(opcoes.length - 1, Math.max(0, Math.floor(valor * opcoes.length)));
+  return opcoes[indice].id;
+}
+
 /** Fluxo expresso: uma escolha visível por temporada, sem alterar saves antigos. */
 export function jogarTemporadaExpressaTecnico(c, opcaoId, rng = sorteio) {
   if (!c?.tecnico || c.tecnico.fase !== 'pretemporada') throw new Error('Temporada indisponível.');
@@ -696,8 +704,7 @@ export function jogarTemporadaExpressaTecnico(c, opcaoId, rng = sorteio) {
     const carta = cartaAtualTecnico(atual.tecnico);
     if (!carta?.opcoes?.length) throw new Error('Não foi possível preparar a temporada.');
     // As decisões ocultas não devem favorecer sempre a primeira alternativa.
-    const indice = Math.min(carta.opcoes.length - 1, Math.max(0, Math.floor(rng() * carta.opcoes.length)));
-    atual = tomarDecisaoTecnico(atual, carta.opcoes[indice].id, rng);
+    atual = tomarDecisaoTecnico(atual, escolherOpcaoAutomaticaTecnico(carta.opcoes, rng), rng);
   }
   // Se a temporada antiga já começou, conclui suas etapas preservando o andamento.
   if (atual.tecnico.andamento?.jogos) {

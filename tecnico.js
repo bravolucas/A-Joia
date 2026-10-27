@@ -573,7 +573,7 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   andamento.classificacao = ordenarClassificacaoTecnico(classificacao);
   if (demitido) {
     const posicao = andamento.classificacao.find(x => x.meuClube)?.posicao || 18;
-    const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivoTecnico(t).nome,
+    const temporada = { ano: t.ano, clube: t.clube, liga: CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga || t.liga, objetivo: objetivoTecnico(t).nome,
       cumpriuObjetivo: false, posicao, pontos, vitorias: v, empates: e, derrotas: d,
       jogos: limite, interrompida: true, demitido: true, confrontos, classificacao: andamento.classificacao, avaliacoes: andamento.avaliacoes };
     const novo = { ...t, diretoria, torcida, demitido: true, reuniaoPendente: false, andamento: null,
@@ -617,7 +617,7 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   const idoloEmCasa = !!vinculoAtual?.idolatria;
   const cumpriuObjetivo = posicao <= objetivo.posicao;
   const promessaDescumprida = !!(t.promessaContrato && t.promessaContrato.clube === t.clube && posicao > t.promessaContrato.posicaoMaxima);
-  const temporada = { ano: t.ano, clube: t.clube, idoloEmCasa, objetivo: objetivo.nome, cumpriuObjetivo, promessaDescumprida, estilo: t.estilo, decisoes: t.decisoes, vitorias, empates, derrotas, pontos, posicao, campeao };
+  const temporada = { ano: t.ano, clube: t.clube, liga: CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga || t.liga, idoloEmCasa, objetivo: objetivo.nome, cumpriuObjetivo, promessaDescumprida, estilo: t.estilo, decisoes: t.decisoes, vitorias, empates, derrotas, pontos, posicao, campeao };
   const novaConfianca = limitar(t.diretoria + (cumpriuObjetivo ? 8 : -14) + (posicao <= 4 ? 5 : posicao >= 15 ? -8 : 0)
     + (idoloEmCasa && !cumpriuObjetivo ? -4 : 0) - (promessaDescumprida ? 12 : 0), 0, 100);
   const variacaoTorcida = (campeao ? 18 : posicao <= 4 ? 10 : cumpriuObjetivo ? 5 : posicao >= 17 ? -23 : -12)

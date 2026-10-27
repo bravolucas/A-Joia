@@ -33,7 +33,18 @@ const porNome = (g) => Object.fromEntries(Object.entries(g).map(([k, v]) => [k.s
 const ESCUDOS = porNome(import.meta.glob("./arte/escudos/*.{svg,png,webp}", { eager: true, query: "?url", import: "default" }));
 const LOGOS = porNome(import.meta.glob("./arte/competicoes/*.{svg,png,webp}", { eager: true, query: "?url", import: "default" }));
 export const escudoDe = (nome) => ESCUDOS[slug(nome)] || null;
-export const logoCompeticao = (nome) => LOGOS[slug(nome)] || null;
+// Aceita nomes alternativos usados pelo motor de treinador sem duplicar imagens.
+const ALIASES_COMPETICOES = {
+  'copa-libertadores': 'libertadores',
+  'conmebol-libertadores': 'libertadores',
+  'uefa-champions-league': 'champions-league',
+  'campeonato-brasileiro-serie-a': 'brasileirao',
+  'campeonato-brasileiro-serie-b': 'brasileirao-serie-b'
+};
+export const logoCompeticao = (nome) => {
+  const chave = slug(nome);
+  return LOGOS[chave] || LOGOS[ALIASES_COMPETICOES[chave]] || null;
+};
 const BANDEIRAS = porNome(import.meta.glob("./arte/bandeiras/*.svg", { eager: true, query: "?url", import: "default" }));
 /* bandeiras em SVG (pacote flag-icons, MIT): o emoji de bandeira não aparece no Windows */
 export const bandeiraDe = (nac) => BANDEIRAS[nac] || null;

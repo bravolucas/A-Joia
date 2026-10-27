@@ -82,7 +82,7 @@ function CampanhasTemporada({ torneios = [] }) {
         <span className={`text-[10px] font-bold ${torneio.faseUsuario === 'Campeão' ? 'text-[#FDE68A]' : 'text-[#A1A1AA]'}`}>{torneio.faseUsuario}</span>
       </summary>
       <div className="px-2 pb-2">{(torneio.jogosUsuario || []).map((jogo, jogoIdx) => <div key={`${jogo.fase}-${jogoIdx}`} className="flex items-center justify-between gap-2 border-t border-white/[.05] py-1 text-[9px] text-[#A1A1AA]">
-        <span className="min-w-0 flex-1 truncate">{jogo.fase || 'Partida'}</span>
+        <span className="min-w-0 flex-1 truncate">{jogo.fase || 'Partida'}{jogo.rodada ? ` · rodada ${jogo.rodada}` : ''}</span>
         <span className="shrink-0 truncate text-right">{jogo.casa} {jogo.golsCasa}–{jogo.golsFora} {jogo.fora}{jogo.penaltis ? ` · pênaltis: ${jogo.penaltis}` : ''}</span>
       </div>)}</div>
     </details>)}</div>

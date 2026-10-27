@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { criarJogador, jogarTemporada, fecharTemporada, aposentar } from '../rapido.js';
-import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, cartaAtualTecnico, tomarDecisaoTecnico, jogarTemporadaExpressaTecnico, proximaTemporadaTecnico, carreiraTecnicoEncerrada, LIMITE_TEMPORADAS_TECNICO, titulosConquistadosTecnico, calendarioAdversariosTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, cartaAtualTecnico, tomarDecisaoTecnico, jogarTemporadaExpressaTecnico, proximaTemporadaTecnico, carreiraTecnicoEncerrada, LIMITE_TEMPORADAS_TECNICO, titulosConquistadosTecnico, calendarioAdversariosTecnico, calendarioLigaTecnico } from '../tecnico.js';
 
 test('vitrine de titulos e encerramento obrigatorio apos 30 temporadas', () => {
   let c = criarJogador({ nome:'Trinta anos', nac:'BRA', posicao:'ATA', personalidade:'equilibrado', origem:'base', pe:'destro', numero:9, ritmo:'equilibrado', codigo:'TREINADOR30' });
@@ -74,4 +74,19 @@ test('inicio da carreira de treinador ignora pontuacao de legado invalida', () =
   c=iniciarCarreiraTecnico(c);
   assert.ok(Number.isFinite(c.tecnico.reputacao));
   assert.ok(c.tecnico.reputacao>=25 && c.tecnico.reputacao<=85);
+});
+
+test('calendario de liga completa tem turno e returno sem confrontos duplicados', () => {
+  const clube = 'Corinthians';
+  const calendario = calendarioLigaTecnico({clube});
+  assert.ok(calendario, 'Liga com 20 clubes deve produzir tabela completa');
+  assert.equal(calendario.length, 38);
+  const jogos = calendario.flat();
+  assert.equal(jogos.length, 380);
+  const confrontos = new Set(jogos.map(j => j.casa + '|' + j.fora));
+  assert.equal(confrontos.size, 380, 'Cada confronto com mando deve acontecer uma vez');
+  const rodadas = calendarioAdversariosTecnico({clube});
+  assert.equal(rodadas.length,38);
+  assert.equal(rodadas.filter(j => j.casa).length,19);
+  assert.equal(rodadas.filter(j => !j.casa).length,19);
 });

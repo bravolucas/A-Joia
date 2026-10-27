@@ -48,7 +48,13 @@ export const DECISOES_TECNICO = [
 export const QUANTIDADE_DECISOES_TECNICO = 4;
 export const LIMITE_TEMPORADAS_TECNICO = 30;
 export const carreiraTecnicoEncerrada = (t) => (t?.temporadas?.length || 0) >= LIMITE_TEMPORADAS_TECNICO;
-export const titulosConquistadosTecnico = (t) => (t?.temporadas || []).flatMap(a => a.campeao ? [{ ano: a.ano, clube: a.clube, nome: a.competicao || a.liga || 'Campeonato nacional', tipo: 'liga' }] : []);
+const NOMES_COMPETICOES_TECNICO = { brasileirao: 'Brasileirão Série A', serieB: 'Brasileirão Série B', argentina: 'Campeonato Argentino', portugal: 'Liga Portugal', portugal2: 'Liga Portugal 2', espanha: 'La Liga', espanha2: 'Segunda División', inglaterra: 'Premier League', inglaterra2: 'Championship', italia: 'Serie A Italiana', italia2: 'Serie B Italiana', alemanha: 'Bundesliga', alemanha2: '2. Bundesliga', franca: 'Ligue 1', franca2: 'Ligue 2' };
+export function competicaoTemporadaTecnico(a = {}) {
+  if (a.competicao) return a.competicao;
+  const liga = a.liga || CLUBES.find(clube => clube.nome === a.clube)?.liga;
+  return NOMES_COMPETICOES_TECNICO[liga] || (liga ? String(liga) : 'Campeonato nacional');
+}
+export const titulosConquistadosTecnico = (t) => (t?.temporadas || []).flatMap(a => a.campeao ? [{ ano: a.ano, clube: a.clube, nome: competicaoTemporadaTecnico(a), tipo: 'liga' }] : []);
 export const TODAS_CARTAS_TECNICO = [...DECISOES_TECNICO, ...EVENTOS_CONTEXTO_TECNICO];
 export function elegivelTecnico(carta, t) {
   switch (carta.contexto) {

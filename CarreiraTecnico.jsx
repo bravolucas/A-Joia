@@ -25,8 +25,8 @@ function PopUpTitulo({ temporada, onFechar }) {
     <div className="w-full max-w-sm rounded-3xl border border-[#D8B44A]/50 text-center px-6 py-7 relative overflow-hidden" style={{background:'radial-gradient(ellipse at 50% 15%, #65521F 0%, #19231E 50%, #0D1512 100%)',boxShadow:'0 0 70px #D8B44A30'}}>
       <div className="text-[#EBC557] font-black tracking-[.22em] text-xs uppercase">A JOIA · Temporada {temporada.ano}</div>
       <h2 className="display text-4xl text-white mt-2">CAMPEÃO!</h2>
-      <div className="flex justify-center my-6" style={{filter:'drop-shadow(0 0 24px #D8B44A80)'}}><TacaCompeticao preferirTaca tipo={competicaoDoTitulo(competicaoTemporadaTecnico(temporada)).tipo} nome={competicaoTemporadaTecnico(temporada)} size={142}/></div>
-      <p className="text-[#F4D67A] font-bold text-lg">{competicaoTemporadaTecnico(temporada)}</p>
+      <div className="flex justify-center my-6" style={{filter:'drop-shadow(0 0 24px #D8B44A80)'}}><TacaCompeticao tipo={competicaoDoTitulo(competicaoTemporadaTecnico(temporada)).tipo} nome={competicaoTemporadaTecnico(temporada)} size={142}/></div>
+      <div className="flex flex-col gap-2 items-center">{(temporada.titulosConquistados?.length ? temporada.titulosConquistados : [competicaoTemporadaTecnico(temporada)]).map(nome => <p key={nome} className="text-[#F4D67A] font-bold text-lg">🏆 {nome}</p>)}</div>
       <div className="flex items-center justify-center gap-3 mt-3"><Escudo nome={temporada.clube} size={35}/><span className="text-white font-bold text-lg">{temporada.clube}</span></div>
       <p className="text-[#B6C2BA] text-sm mt-3">{temporada.pontos} pontos · {temporada.vitorias} vitórias</p>
       <button autoFocus onClick={onFechar} className="rp-btn rp-ouro w-full mt-7">Continuar carreira</button>
@@ -34,7 +34,7 @@ function PopUpTitulo({ temporada, onFechar }) {
   </div>,document.body);
 }
 
-export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado }) {
+export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAvancarESimular, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado }) {
   const t = c.tecnico;
   const temporadas = t.temporadas || [];
   const ultima = temporadas.at(-1);
@@ -46,7 +46,8 @@ export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAceitarProp
   const titulos = titulosConquistadosTecnico(t);
   const [tituloVisto, setTituloVisto] = useState(null);
   const [simulando, setSimulando] = useState(false);
-  const chaveTitulo = ultima?.campeao ? String(ultima.ano)+'|'+ultima.clube : null;
+  const conquistasUltima = ultima ? (Array.isArray(ultima.titulosConquistados) ? ultima.titulosConquistados : (ultima.campeao ? [competicaoTemporadaTecnico(ultima)] : [])) : [];
+  const chaveTitulo = conquistasUltima.length ? String(ultima.ano)+'|'+ultima.clube : null;
   const mostrarTitulo = t.fase === 'resultado' && chaveTitulo && tituloVisto !== chaveTitulo;
   useEffect(() => { if (t.fase === 'resultado') setSimulando(false); }, [t.fase, temporadas.length]);
   const escolher = id => {
@@ -75,27 +76,35 @@ export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAceitarProp
       </div>
     </header>
     {primeira && <section className="rp-painel p-5"><h2 className="text-white font-bold text-xl">Escolha seu primeiro clube</h2><p className="text-[#8FA39A] text-sm my-2">A continuação da sua carreira como jogador começa aqui.</p><div className="flex flex-col gap-2 mt-3">{t.opcoesInicio.map(op => <button key={op.clube} onClick={() => onEscolherClubeInicial(op.clube)} className="rp-opcao p-3 flex items-center gap-3 text-left"><Escudo nome={op.clube}/><span><strong className="text-white block">{op.clube}</strong><span className="text-[#8FA39A] text-xs">{op.idolatria ? 'Seu clube de coração · ' : ''}Afinidade {op.afinidade}/100</span></span></button>)}</div></section>}
-    {t.fase === 'pretemporada' && !encerrada && !primeira && !semClube && <section className="rp-painel p-5">
-      <div className="flex items-center justify-between"><span className="text-[#D8B44A] text-xs uppercase font-bold">Temporada {t.ano}</span><span className="text-[#8FA39A] text-xs">1 decisão → 1 ano</span></div>
-      <h2 className="text-white font-bold text-xl mt-3">{carta?.titulo || 'Preparar a temporada'}</h2>
-      <p className="text-[#C9D3CE] text-sm mt-2">{carta?.texto || 'Escolha uma estratégia para a próxima temporada.'}</p>
-      <div className="flex flex-col gap-2 mt-4">{(carta?.opcoes || []).map((op,i) => <button key={op.id} disabled={simulando} onClick={() => escolher(op.id)} className="rp-opcao p-4 flex gap-3 text-left disabled:opacity-50"><span className="text-[#D8B44A] font-bold">{i+1}.</span><span><strong className="text-white block">{op.nome}</strong>{op.detalhe && <span className="text-[#8FA39A] text-xs">{op.detalhe}</span>}</span></button>)}</div>
-      {simulando && <p role="status" className="text-[#EBC557] text-sm mt-4 text-center">Simulando a temporada completa…</p>}
+    {t.fase === 'pretemporada' && !encerrada && !primeira && !semClube && <section className="rp-painel p-5 text-center">
+      <div className="text-[#D8B44A] text-xs uppercase font-bold tracking-[.2em]">Carreira de treinador · {t.ano}</div>
+      <div className="flex items-center justify-center gap-3 mt-5"><Escudo nome={t.clube} size={60}/><div className="text-left"><h2 className="text-white text-xl font-black">{t.clube}</h2><p className="text-[#8FA39A] text-sm">{competicaoTemporadaTecnico({clube:t.clube,liga:t.liga})}</p></div></div>
+      <p className="text-[#C9D3CE] text-sm mt-5">Simule o campeonato inteiro em um toque. Resultados, classificação e propostas aparecem ao final da temporada.</p>
+      <button disabled={simulando} onClick={() => escolher(null)} className="rp-btn rp-ouro w-full mt-6 text-lg disabled:opacity-50">{simulando ? 'Simulando campeonato…' : '▶ Simular temporada '+t.ano}</button>
+      {simulando && <p role="status" className="text-[#EBC557] text-sm mt-4">Calculando partidas e classificação…</p>}
     </section>}
     {t.fase === 'resultado' && <section className="rp-painel p-5">
       <span className="text-[#D8B44A] text-xs font-bold uppercase">Fim da temporada {ultima?.ano}</span>
-      <h2 className="text-white text-2xl font-bold mt-2">{ultima?.campeao ? '🏆 Campeão!' : ultima?.posicao+'º lugar no campeonato'}</h2>
+      <h2 className="text-white text-2xl font-bold mt-2">{(ultima?.titulosConquistados?.length || ultima?.campeao) ? '🏆 Temporada com títulos!' : ultima?.posicao+'º lugar no campeonato'}</h2>
       <p className="text-[#C9D3CE] text-sm mt-2">{ultima?.clube} · {competicaoTemporadaTecnico(ultima)} · {ultima?.pontos} pontos</p>
+      {ultima?.titulosConquistados?.length > 0 && <div className="mt-4 grid grid-cols-2 gap-2">{ultima.titulosConquistados.map(nome => <div key={nome} className="rounded-xl border border-[#D8B44A]/30 bg-[#D8B44A]/10 p-3 flex flex-col items-center gap-2 text-center"><TacaCompeticao tipo={competicaoDoTitulo(nome).tipo} nome={nome} size={60}/><strong className="text-[#F4D67A] text-xs">{nome}</strong></div>)}</div>}
       <div className="grid grid-cols-3 gap-2 text-center mt-4">{[['Vitórias',ultima?.vitorias],['Empates',ultima?.empates],['Derrotas',ultima?.derrotas]].map(([nome,valor]) => <div key={nome} className="rounded-xl bg-white/5 p-3"><strong className="text-white text-xl block">{valor}</strong><span className="text-[#8FA39A] text-xs">{nome}</span></div>)}</div>
+      {ultima?.classificacao?.length > 0 && <div className="mt-5 overflow-hidden rounded-xl border border-white/10">
+        <div className="px-3 py-3 bg-white/5 text-white font-bold text-sm">Classificação final · {competicaoTemporadaTecnico(ultima)}</div>
+        <div className="grid grid-cols-[2rem_1fr_2.2rem_2.2rem_2.2rem] gap-2 px-3 py-2 text-[10px] text-[#8FA39A] uppercase"><span>#</span><span>Clube</span><span className="text-right">J</span><span className="text-right">V</span><span className="text-right">Pts</span></div>
+        <div className="max-h-80 overflow-y-auto">{ultima.classificacao.map(linha => <div key={linha.nome} className={`grid grid-cols-[2rem_1fr_2.2rem_2.2rem_2.2rem] gap-2 items-center px-3 py-2 border-t border-white/5 text-xs ${linha.meuClube ? 'bg-[#D8B44A]/15 text-[#F4D67A] font-bold' : 'text-[#C9D3CE]'}`}>
+          <span>{linha.posicao}</span><span className="flex items-center gap-2 min-w-0"><Escudo nome={linha.nome} size={20}/><span className="truncate">{linha.nome}</span></span><span className="text-right">{linha.jogos}</span><span className="text-right">{linha.vitorias}</span><span className="text-right font-bold">{linha.pontos}</span>
+        </div>)}</div>
+      </div>}
       <p className="text-[#8FA39A] text-sm mt-3">Objetivo: {ultima?.objetivo} · {ultima?.cumpriuObjetivo ? 'Cumprido' : 'Não cumprido'}</p>
       {encerrada ? <div className="mt-5 rounded-xl border border-[#D8B44A]/40 p-4 text-center"><h3 className="text-[#EBC557] font-bold text-xl">Fim da carreira de treinador</h3><p className="text-[#C9D3CE] text-sm mt-2">30 temporadas completas. Confira todas as suas taças na vitrine abaixo.</p></div> : <>
         {t.ultimaNegociacao && !t.ultimaNegociacao.aceita && <p className="text-[#F0A99E] text-sm mt-3">{t.ultimaNegociacao.motivo}</p>}
         {(t.propostas || []).length > 0 && <div className="mt-5"><h3 className="text-white font-bold mb-2">Propostas para a próxima temporada</h3><div className="flex flex-col gap-2">{t.propostas.map(p => <button key={p.nome} onClick={() => onAceitarProposta(p.nome,'prudente')} className="rp-opcao p-3 flex items-center gap-3 text-left"><Escudo nome={p.nome}/><span><strong className="text-white block">{p.nome}</strong><span className="text-[#8FA39A] text-xs">{p.pais} · R$ {p.salario} mil/mês</span></span></button>)}</div></div>}
-        {!semClube ? <button onClick={onAvancar} className="rp-btn rp-ouro w-full mt-4">Continuar no {t.clube} → {t.ano}</button> : <button onClick={onEsperar} className="rp-btn rp-sec w-full mt-4">Aguardar propostas</button>}
+        {!semClube ? <button onClick={onAvancarESimular || onAvancar} className="rp-btn rp-ouro w-full mt-4">▶ Simular {t.ano} · {t.clube}</button> : <button onClick={onEsperar} className="rp-btn rp-sec w-full mt-4">Aguardar propostas</button>}
       </>}
     </section>}
-    <section className="rp-painel p-4"><h2 className="text-white font-bold text-lg">Histórico ano após ano</h2><div className="mt-3 flex flex-col gap-2">{[...temporadas].reverse().map((a,i) => <div key={a.ano+'-'+i} className="flex items-center gap-3 border-b border-white/10 py-2"><span className="text-[#D8B44A] font-bold text-sm w-12">{a.ano}</span><Escudo nome={a.clube} size={31}/><div className="flex-1 min-w-0"><p className="text-white text-sm font-bold truncate">{a.clube}</p><p className="text-[#8FA39A] text-xs">{a.posicao}º lugar · {a.pontos} pts</p></div>{a.campeao && <div title={competicaoTemporadaTecnico(a)}><TacaCompeticao preferirTaca tipo={competicaoDoTitulo(competicaoTemporadaTecnico(a)).tipo} nome={competicaoTemporadaTecnico(a)} size={37}/></div>}</div>)}</div>{temporadas.length===0 && <p className="text-[#8FA39A] text-sm">Sua primeira temporada aparecerá aqui.</p>}</section>
-    {(encerrada || titulos.length > 0) && <section className="rp-painel p-5"><h2 className="text-[#EBC557] text-xl font-bold">🏆 Vitrine de títulos</h2><p className="text-[#8FA39A] text-sm mt-1">{titulos.length} conquistas em {temporadas.length} temporadas · {historico.jogos} partidas</p><div className="grid grid-cols-3 gap-3 mt-5">{titulos.length ? titulos.map((titulo,i) => <div key={i} className="flex flex-col items-center text-center gap-2 rounded-xl bg-white/5 p-3"><TacaCompeticao preferirTaca tipo={titulo.tipo} nome={titulo.nome} size={57}/><strong className="text-white text-xs">{titulo.nome}</strong><span className="text-[#8FA39A] text-xs">{titulo.ano} · {titulo.clube}</span></div>) : <p className="text-[#8FA39A] text-sm col-span-3">Nenhum título conquistado.</p>}</div></section>}
+    <section className="rp-painel p-4"><h2 className="text-white font-bold text-lg">Histórico ano após ano</h2><div className="mt-3 flex flex-col gap-2">{[...temporadas].reverse().map((a,i) => <div key={a.ano+'-'+i} className="flex items-center gap-3 border-b border-white/10 py-2"><span className="text-[#D8B44A] font-bold text-sm w-12">{a.ano}</span><Escudo nome={a.clube} size={31}/><div className="flex-1 min-w-0"><p className="text-white text-sm font-bold truncate">{a.clube}</p><p className="text-[#8FA39A] text-xs">{a.posicao}º lugar · {a.pontos} pts</p>{a.classificacao?.length > 0 && <details className="mt-1"><summary className="text-[#D8B44A] text-xs cursor-pointer">Ver classificação de {a.ano}</summary><div className="mt-2 max-h-48 overflow-y-auto rounded-lg border border-white/10">{a.classificacao.map(l => <div key={l.nome} className={`flex gap-2 justify-between px-2 py-1 border-b border-white/5 text-[11px] ${l.meuClube ? 'text-[#F4D67A] font-bold' : 'text-[#C9D3CE]'}`}><span className="truncate">{l.posicao}º {l.nome}</span><span className="shrink-0">{l.pontos} pts</span></div>)}</div></details>}</div>{(Array.isArray(a.titulosConquistados) ? a.titulosConquistados : (a.campeao ? [competicaoTemporadaTecnico(a)] : [])).length > 0 && <div className="flex flex-col gap-1 shrink-0">{(Array.isArray(a.titulosConquistados) ? a.titulosConquistados : [competicaoTemporadaTecnico(a)]).map(nome => <div key={nome} className="flex items-center gap-1" title={nome}><TacaCompeticao tipo={competicaoDoTitulo(nome).tipo} nome={nome} size={28}/><span className="text-[#F4D67A] text-[10px] font-bold max-w-24 leading-tight">{nome}</span></div>)}</div>}</div>)}</div>{temporadas.length===0 && <p className="text-[#8FA39A] text-sm">Sua primeira temporada aparecerá aqui.</p>}</section>
+    {(encerrada || titulos.length > 0) && <section className="rp-painel p-5"><h2 className="text-[#EBC557] text-xl font-bold">🏆 Vitrine de títulos</h2><p className="text-[#8FA39A] text-sm mt-1">{titulos.length} conquistas em {temporadas.length} temporadas · {historico.jogos} partidas</p><div className="grid grid-cols-3 gap-3 mt-5">{titulos.length ? titulos.map((titulo,i) => <div key={i} className="flex flex-col items-center text-center gap-2 rounded-xl bg-white/5 p-3"><TacaCompeticao tipo={titulo.tipo} nome={titulo.nome} size={57}/><strong className="text-white text-xs">{titulo.nome}</strong><span className="text-[#8FA39A] text-xs">{titulo.ano} · {titulo.clube}</span></div>) : <p className="text-[#8FA39A] text-sm col-span-3">Nenhum título conquistado.</p>}</div></section>}
     <button onClick={onLegado} className="rp-btn rp-sec">Ver legado como jogador</button>
     <button onClick={onSair} className="text-[#8FA39A] text-sm py-2">Voltar ao menu · progresso salvo</button>
   </div>;

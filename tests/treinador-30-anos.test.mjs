@@ -18,7 +18,7 @@ test('vitrine de titulos e encerramento obrigatorio apos 30 temporadas', () => {
   }
   assert.equal(carreiraTecnicoEncerrada(c.tecnico),true);
   assert.equal(c.tecnico.temporadas.length,30);
-  assert.equal(titulosConquistadosTecnico(c.tecnico).length,c.tecnico.temporadas.filter(t=>t.campeao).length);
+  assert.equal(titulosConquistadosTecnico(c.tecnico).length,c.tecnico.temporadas.reduce((total,t)=>total+(t.titulosConquistados?.length ?? (t.campeao ? 1 : 0)),0));
   assert.throws(()=>proximaTemporadaTecnico(c),/30 temporadas/);
 });
 
@@ -100,4 +100,36 @@ test('clube legado fora da lista substitui um participante sem gerar liga de 21 
   const jogosClube = calendario.flat().filter(j=>j.casa===clube||j.fora===clube);
   assert.equal(jogosClube.length,38);
   assert.equal(jogosClube.filter(j=>j.casa===clube).length,19);
+});
+
+test('simulacao direta dispensa carta de pretemporada e preserva classificacao no save', () => {
+  let c = criarJogador({ nome:'Direto', nac:'BRA', posicao:'ATA', personalidade:'equilibrado', origem:'base', pe:'destro', numero:9, codigo:'DIRETO-TESTE' });
+  c = iniciarCarreiraTecnico(aposentar(c));
+  if (c.tecnico.opcoesInicio?.length) c = iniciarNoClubeIdolo(c, c.tecnico.opcoesInicio[0].clube);
+  c = jogarTemporadaExpressaTecnico(c, null, () => 0.43);
+  assert.equal(c.tecnico.fase, 'resultado');
+  assert.equal(c.tecnico.temporadas.length, 1);
+  const ultima = c.tecnico.temporadas[0];
+  assert.equal(ultima.vitorias + ultima.empates + ultima.derrotas, 38);
+  assert.equal(ultima.pontos, ultima.vitorias * 3 + ultima.empates);
+  assert.ok(Array.isArray(ultima.classificacao));
+  assert.equal(ultima.classificacao.filter(x => x.meuClube).length, 1);
+  assert.equal(ultima.classificacao.find(x => x.meuClube).posicao, ultima.posicao);
+  const restaurado = JSON.parse(JSON.stringify(c));
+  assert.deepEqual(restaurado.tecnico.temporadas[0].classificacao, ultima.classificacao);
+});
+
+test('duas temporadas consecutivas sem cartas visiveis preservam historico e jogador', () => {
+  let c = criarJogador({ nome:'Continuidade', nac:'BRA', posicao:'ATA', personalidade:'equilibrado', origem:'base', pe:'destro', numero:9, codigo:'FLUXO-DIRETO' });
+  c = iniciarCarreiraTecnico(aposentar(c));
+  if (c.tecnico.opcoesInicio?.length) c = iniciarNoClubeIdolo(c, c.tecnico.opcoesInicio[0].clube);
+  const carreiraJogador = JSON.stringify(c.temporadas);
+  c = jogarTemporadaExpressaTecnico(c, null, () => 0.43);
+  const primeira = JSON.parse(JSON.stringify(c.tecnico.temporadas[0]));
+  c = { ...c, tecnico: { ...c.tecnico, demitido: false, desempregado: false, diretoria: 95, torcida: 95 } };
+  c = jogarTemporadaExpressaTecnico(proximaTemporadaTecnico(c), null, () => 0.43);
+  assert.equal(c.tecnico.temporadas.length, 2);
+  assert.deepEqual(c.tecnico.temporadas[0], primeira);
+  assert.equal(c.tecnico.temporadas[1].ano, primeira.ano + 1);
+  assert.equal(JSON.stringify(c.temporadas), carreiraJogador);
 });

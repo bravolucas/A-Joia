@@ -206,6 +206,7 @@ test('temporada em etapas registra avaliações intermediárias e evita sorteio 
   let c = iniciarCarreiraTecnico(atleta);
   c = { ...c, tecnico: { ...c.tecnico, decisoes: Array(4).fill({ id: 'teste' }) } };
   for (const rodada of ETAPAS_TEMPORADA_TECNICO) {
+    if (c.tecnico.reuniaoPendente) c = reuniaoEmergenciaTecnico(c, 'responsabilidade', () => 0.4);
     c = simularEtapaTecnico(c, () => 0.4);
     if (rodada < 38) {
       assert.equal(c.tecnico.andamento.jogos, rodada);

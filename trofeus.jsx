@@ -13,7 +13,7 @@ const METAIS = {
 };
 
 /* Taças: cada competição tem a sua, gerada em tacas.js a partir do nome. */
-export function TacaCompeticao({ tipo = "liga", size = 40, nome = null, preferirTaca = false }) {
+export function TacaCompeticao({ tipo = "liga", size = 40, nome = null, preferirTaca = true }) {
   const uid = React.useId().replace(/[^a-zA-Z0-9]/g, "");
   // logo da competição, se a pessoa colocou o arquivo em arte/competicoes/
   const logo = nome ? logoCompeticao(nome) : null;

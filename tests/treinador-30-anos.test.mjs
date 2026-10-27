@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { criarJogador, jogarTemporada, fecharTemporada, aposentar } from '../rapido.js';
-import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, cartaAtualTecnico, tomarDecisaoTecnico, jogarTemporadaExpressaTecnico, proximaTemporadaTecnico, carreiraTecnicoEncerrada, LIMITE_TEMPORADAS_TECNICO, titulosConquistadosTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, cartaAtualTecnico, tomarDecisaoTecnico, jogarTemporadaExpressaTecnico, proximaTemporadaTecnico, carreiraTecnicoEncerrada, LIMITE_TEMPORADAS_TECNICO, titulosConquistadosTecnico, calendarioAdversariosTecnico } from '../tecnico.js';
 
 test('vitrine de titulos e encerramento obrigatorio apos 30 temporadas', () => {
   let c = criarJogador({ nome:'Trinta anos', nac:'BRA', posicao:'ATA', personalidade:'equilibrado', origem:'base', pe:'destro', numero:9, ritmo:'equilibrado', codigo:'TREINADOR30' });
@@ -34,4 +34,10 @@ test('save antigo: escolha visivel deve ser aplicada mesmo apos decisao parcial'
   c=jogarTemporadaExpressaTecnico(c,escolhida,()=>0.5);
   assert.equal(c.tecnico.temporadas.length,1);
   assert.equal(c.tecnico.temporadas[0].decisoes[1].opcao,escolhida);
+});
+
+test('calendario do treinador aceita clube legado sem nome e preserva 38 rodadas', () => {
+  const calendario = calendarioAdversariosTecnico({clube:null, liga:'brasileirao', elenco:50});
+  assert.equal(calendario.length,38);
+  assert.ok(calendario.every(jogo => jogo.nome && typeof jogo.casa === 'boolean'));
 });

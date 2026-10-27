@@ -28,7 +28,7 @@ function PopUpTitulo({ temporada, titulo, indice, total, onFechar }) {
   useEffect(() => {
     const overflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    confetti({ particleCount: 150, spread: 85, origin: { y: .48 }, colors: ['#D8B44A', '#FFF2BE', '#FFFFFF'] });
+    confetti({ particleCount: 150, spread: 85, origin: { y: .48 }, colors: ['#D8B44A', '#FFF2BE', '#FFFFFF'], zIndex: 90 });
     const esc = e => { if (e.key === 'Escape') fechar.current(); };
     document.addEventListener('keydown', esc);
     return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', esc); };
@@ -52,7 +52,7 @@ function PopUpDivisao({ temporada, movimento, tipo, onFechar }) {
   useEffect(() => {
     const overflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    if (tipoMovimento === 'acesso') confetti({ particleCount: 90, spread: 70, origin: { y: .5 }, colors: ['#22C55E', '#FFFFFF', '#D8B44A'] });
+    if (tipoMovimento === 'acesso') confetti({ particleCount: 90, spread: 70, origin: { y: .5 }, colors: ['#22C55E', '#FFFFFF', '#D8B44A'], zIndex: 90 });
     const esc = e => { if (e.key === 'Escape') onFechar(); };
     document.addEventListener('keydown', esc);
     return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', esc); };

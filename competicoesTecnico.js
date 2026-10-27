@@ -96,8 +96,9 @@ function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng) {
       const jogo = criarPartida(a, b, nomeUsuario, bonusTecnico, rng, true);
       jogos.push(jogo);
     }
-    const vencedores = jogos.map(j => rodada.find(c => c.nome === j.vencedor));
     const fase = nomesFase[Math.max(0, 4 - Math.ceil(Math.log2(rodada.length)))];
+    jogos.forEach(jogo => { if (!jogo.bye) jogo.fase = fase; });
+    const vencedores = jogos.map(j => rodada.find(c => c.nome === j.vencedor));
     fases.push({ fase, jogos });
     rodada = vencedores.filter(Boolean);
   }
@@ -140,7 +141,7 @@ export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forca
     const jogos = [];
     for (let i = 0; i < grupo.length; i++) for (let j = i + 1; j < grupo.length; j++) {
       for (const [casa, fora] of [[grupo[i], grupo[j]], [grupo[j], grupo[i]]]) {
-        const jogo = criarPartida(casa, fora, nomeUsuario, bonusTecnico, rng);
+        const jogo = { ...criarPartida(casa, fora, nomeUsuario, bonusTecnico, rng), fase: `Fase de grupos · Grupo ${String.fromCharCode(65 + indice)}` };
         jogos.push(jogo); registrarJogo(tabela, jogo);
       }
     }

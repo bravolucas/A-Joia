@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feature/treinador-fidelidade-balanceamento-tacas
+      - main
   pull_request:
     paths:
       - 'tecnico.js'
@@ -37,11 +38,11 @@ jobs:
       - run: npm install --no-save @playwright/test wait-on
       - run: npx playwright install --with-deps chromium
       - run: GITHUB_PAGES=true npm run build
-      - name: Verificar entrada em desktop e celular
+      - name: Verificar treinador, campeonatos e pop-ups em desktop e celular
         run: |
           GITHUB_PAGES=true npm run preview -- --host 127.0.0.1 --port 4173 &
           npx wait-on http://127.0.0.1:4173/A-Joia/
-          npx playwright test tests/browser-smoke.spec.mjs --reporter=line
+          npx playwright test tests/browser-smoke.spec.mjs tests/coach-responsive.spec.mjs --reporter=line
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { simularCopaNacionalTecnico, simularCopaContinentalTecnico } from '../competicoesTecnico.js';
 import { gerarPropostasTecnico, salarioTecnico } from '../tecnico.js';
-import { competicaoDoTitulo } from '../tacas.js';
+import { competicaoDoTitulo, desenhoDaTaca } from '../tacas.js';
 
 function rngSeed(seed) {
   return () => {
@@ -54,4 +54,13 @@ test('taças de ligas adicionadas usam o visual de copa', () => {
   assert.equal(competicaoDoTitulo('KNVB Beker').tipo, 'copa');
   assert.equal(competicaoDoTitulo('Türkiye Kupası').tipo, 'copa');
   assert.equal(competicaoDoTitulo('AFC Champions League Elite').tipo, 'continental');
+});
+
+test('Copa do Brasil tem taça própria dourada com cores brasileiras', () => {
+  assert.equal(competicaoDoTitulo('Copa do Brasil').tipo, 'copa');
+  const desenho = desenhoDaTaca('copa', 'Copa do Brasil');
+  assert.equal(desenho.metal, 'ouro');
+  assert.equal(desenho.tampa, true);
+  assert.equal(desenho.gema, 'rubi');
+  assert.deepEqual(desenho.faixas, ['#009C3B', '#FFDF00']);
 });

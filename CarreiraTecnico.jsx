@@ -89,7 +89,13 @@ export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAvancarESim
         <div className="grid grid-cols-3 gap-2 text-center">
           {[['Reputação',t.reputacao ?? 50],['Diretoria',(t.diretoria ?? 60)+'%'],['Torcida',(t.torcida ?? 55)+'%']].map(([nome,valor])=><div key={nome} className="rounded-xl border border-white/10 p-3"><strong className="text-white text-lg block">{valor}</strong><span className="text-[#8FA39A] text-[11px]">{nome}</span></div>)}
         </div>
-        <button disabled={simulando} onClick={() => escolher(null)} className="rp-btn rp-ouro w-full mt-5 text-lg disabled:opacity-50">{simulando ? 'Simulando…' : '▶ SIMULAR '+t.ano}</button>
+        {carta && <div className="mt-5 rounded-2xl border border-[#D8B44A]/30 bg-black/20 p-4 text-left">
+          <div className="text-[#D8B44A] text-[10px] font-black tracking-[.2em] uppercase">Decisão da temporada</div>
+          <h3 className="text-white font-bold text-lg mt-2">{carta.titulo}</h3>
+          <p className="text-[#9BAEA3] text-sm mt-1">{carta.texto}</p>
+          <div className="flex flex-col gap-2 mt-4">{carta.opcoes.map(op => <button key={op.id} disabled={simulando} onClick={() => escolher(op.id)} className="rp-opcao p-3 text-left disabled:opacity-50"><strong className="block text-white">{op.nome}</strong><span className="text-[#8FA39A] text-xs">{op.detalhe}</span></button>)}</div>
+        </div>}
+        <button disabled={simulando} onClick={() => escolher(null)} className="rp-btn rp-sec w-full mt-4 disabled:opacity-50">{simulando ? 'Simulando…' : 'Pular decisão · simular '+t.ano}</button>
         <p className="text-[#8FA39A] text-xs text-center mt-3">Uma temporada por toque · sem decisões de pré-temporada</p>
         {simulando && <p role="status" className="text-[#EBC557] text-sm mt-3 text-center">Calculando classificação e competições…</p>}
       </div>

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, jogarTemporadaExpressaTecnico, proximaTemporadaTecnico, carreiraTecnicoEncerrada, LIMITE_TEMPORADAS_TECNICO } from '../tecnico.js';
 import { desenhoDaTaca } from '../tacas.js';
 
-const atleta = { nome: 'Teste expresso', idade: 39, ano: 2040, clubeNome: 'Santos', aposentado: true, legado: { pontos: 600 }, temporadas: [{ ano: 2039, clube: 'Santos' }], totais: { gols: 150 } };
+const atleta = { nome: 'Teste expresso', idade: 39, ano: 2040, clubeNome: 'Santos', aposentado: true, legado: { pontos: 600 }, temporadas: [{ ano: 2037, clube: 'Santos' }, { ano: 2038, clube: 'Santos' }, { ano: 2039, clube: 'Santos' }], totais: { gols: 150 } };
 const sorteio = () => 0.5;
 
 test('simulação expressa preserva a carreira do jogador e não exige decisões', () => {
@@ -70,5 +70,5 @@ test('a vitrine de treinador reúne títulos reais do histórico sem alterar o l
   const titulos = titulosConquistadosTecnico(tecnico);
   assert.deepEqual(titulos.map(t => t.nome), ['Brasileirão', 'Copa do Brasil', 'Brasileirão']);
   assert.deepEqual(titulos.map(t => t.ano), [2040, 2040, 2042]);
-  assert.equal(c.temporadas.length, 1);
+  assert.equal(c.temporadas.length, atleta.temporadas.length);
 });

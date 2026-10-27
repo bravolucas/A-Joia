@@ -58,3 +58,17 @@ test('30 temporadas expressas acumulam histórico e encerram a carreira', () => 
   assert.equal(carreiraTecnicoEncerrada(c.tecnico), true);
   assert.throws(() => jogarTemporadaExpressaTecnico({ ...c, tecnico: { ...c.tecnico, fase: 'pretemporada' } }, null, sorteio), /encerrada/);
 });
+
+test('a vitrine de treinador reúne títulos reais do histórico sem alterar o legado de jogador', async () => {
+  const { titulosConquistadosTecnico } = await import('../tecnico.js');
+  const c = iniciarCarreiraTecnico(atleta);
+  const tecnico = { ...c.tecnico, temporadas: [
+    { ano: 2040, clube: 'Santos', liga: 'brasileirao', campeao: true, titulosConquistados: ['Brasileirão', 'Copa do Brasil'] },
+    { ano: 2041, clube: 'Santos', liga: 'brasileirao', campeao: false, titulosConquistados: [] },
+    { ano: 2042, clube: 'Santos', liga: 'brasileirao', campeao: true }
+  ] };
+  const titulos = titulosConquistadosTecnico(tecnico);
+  assert.deepEqual(titulos.map(t => t.nome), ['Brasileirão', 'Copa do Brasil', 'Brasileirão']);
+  assert.deepEqual(titulos.map(t => t.ano), [2040, 2040, 2042]);
+  assert.equal(c.temporadas.length, 1);
+});

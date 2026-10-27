@@ -70,7 +70,7 @@ export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAvancarESim
       <div className="text-center text-[#D8B44A] uppercase tracking-[.2em] text-[11px] font-bold">A JOIA · Modo Treinador</div>
       <div className="flex gap-4 items-center mt-4"><Escudo nome={t.clube} size={64}/><div className="min-w-0"><h1 className="display text-2xl text-white">{semClube ? 'Sem clube' : t.clube}</h1><p className="text-[#C9D3CE] text-sm">{c.nome} · {t.pais || 'Brasil'}</p></div></div>
       <div className="grid grid-cols-3 gap-2 mt-5 text-center border-t border-white/10 pt-4">
-        <div><strong className="text-white text-xl block">{t.ano}</strong><span className="text-[#8FA39A] text-xs">Próximo ano</span></div>
+        <div><strong className="text-white text-xl block">{t.ano}</strong><span className="text-[#8FA39A] text-xs">{t.fase === "resultado" ? "Ano encerrado" : "Temporada atual"}</span></div>
         <div><strong className="text-white text-xl block">{temporadas.length}/{LIMITE_TEMPORADAS_TECNICO}</strong><span className="text-[#8FA39A] text-xs">Temporadas</span></div>
         <div><strong className="text-[#D8B44A] text-xl block">{titulos.length}</strong><span className="text-[#8FA39A] text-xs">Títulos</span></div>
       </div>

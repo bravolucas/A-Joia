@@ -7,7 +7,7 @@ import { competicaoDoTitulo } from './tacas.js';
 import {
   historicoProfissionalTecnico, objetivoTecnico,
   LIMITE_TEMPORADAS_TECNICO, carreiraTecnicoEncerrada, titulosConquistadosTecnico,
-  competicaoTemporadaTecnico, calcularOvrTecnico, salarioTecnico,
+  competicaoTemporadaTecnico, salarioTecnico,
   OPCOES_REUNIAO_TECNICO
 } from './tecnico.js';
 
@@ -47,13 +47,37 @@ function PopUpTitulo({ temporada, titulo, indice, total, onFechar }) {
   </div>, document.body);
 }
 
-function LinhaTemporada({ a, ovr, ativa, aberta, onClick }) {
+function PopUpDivisao({ temporada, movimento, onFechar }) {
+  useEffect(() => {
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    if (movimento.tipo === 'acesso') confetti({ particleCount: 90, spread: 70, origin: { y: .5 }, colors: ['#22C55E', '#FFFFFF', '#D8B44A'] });
+    const esc = e => { if (e.key === 'Escape') onFechar(); };
+    document.addEventListener('keydown', esc);
+    return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', esc); };
+  }, [temporada.ano, movimento.tipo]);
+  const acesso = movimento.tipo === 'acesso';
+  const nomeDestino = competicaoTemporadaTecnico({ liga: movimento.para });
+  return createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-6" role="dialog" aria-modal="true" aria-label={acesso ? 'Acesso de divisão' : 'Rebaixamento'} style={{ background: 'rgba(5,5,6,.88)', backdropFilter: 'blur(7px)' }}>
+    <div className={'cp-card w-full max-w-sm text-center px-6 py-7 '+(acesso ? 'border-emerald-500/40' : 'border-red-500/40')} style={{ background: acesso ? 'radial-gradient(ellipse at 50% 10%, #173527, #161618 70%)' : 'radial-gradient(ellipse at 50% 10%, #3A2020, #161618 70%)' }}>
+      <div className={'font-black tracking-[.2em] text-xs uppercase '+(acesso ? 'text-emerald-300' : 'text-red-300')}>A JOIA · Temporada {temporada.ano}</div>
+      <div className="text-6xl my-4">{acesso ? '⬆️' : '⬇️'}</div>
+      <h2 className="text-3xl font-black text-white">{acesso ? 'ACESSO!' : 'REBAIXADO'}</h2>
+      <div className="flex items-center justify-center gap-3 mt-4"><Escudo nome={temporada.clube} size={34} /><span className="text-white font-bold">{temporada.clube}</span></div>
+      <p className={'text-base font-semibold mt-3 '+(acesso ? 'text-emerald-200' : 'text-red-200')}>{acesso ? 'Sobe para ' + nomeDestino : 'Cai para ' + nomeDestino}</p>
+      <p className="text-[#D4D4D8] text-sm mt-2">{temporada.posicao}º lugar · {temporada.pontos} pontos</p>
+      <button autoFocus onClick={onFechar} className="cp-pill cp-branca w-full mt-6">Continuar carreira</button>
+    </div>
+  </div>, document.body);
+}
+
+function LinhaTemporada({ a, ativa, aberta, onClick }) {
   const titulos = Array.isArray(a.titulosConquistados) ? a.titulosConquistados : a.campeao ? [competicaoTemporadaTecnico(a)] : [];
   return <div className={'border-b border-white/[.06] '+(ativa ? 'bg-white/[.035]' : '')}>
-    <button type="button" aria-expanded={aberta} onClick={onClick} className="w-full grid grid-cols-[3.3rem_minmax(0,1fr)_2.5rem_2.6rem_2.7rem] gap-2 items-center px-3 py-2 text-left hover:bg-white/[.04] transition">
+    <button type="button" aria-expanded={aberta} onClick={onClick} className="w-full grid grid-cols-[3.3rem_minmax(0,1fr)_2.6rem_2.7rem] gap-2 items-center px-3 py-2 text-left hover:bg-white/[.04] transition">
       <span className={'rounded-full text-[11px] font-black px-1.5 py-1 text-center '+(ativa ? 'bg-white text-[#111113]' : 'bg-[#27272A] text-[#D4D4D8]')}>{a.ano}</span>
       <span className="flex items-center gap-2 min-w-0"><Escudo nome={a.clube} size={28} /><span className="min-w-0"><strong className="block text-white text-xs truncate">{a.clube}</strong><span className="block text-[10px] text-[#A1A1AA] truncate">{competicaoTemporadaTecnico(a)}</span>{titulos.length > 0 && <span className="block text-[9px] text-[#FACC15] truncate mt-0.5">🏆 {titulos.join(' · ')}</span>}</span></span>
-      <span className="text-right text-[#FB923C] text-xs font-black">{ovr}</span><span className="text-right text-[#D4D4D8] text-xs">{a.posicao}º</span><span className="text-right text-white text-xs font-bold">{a.pontos}</span>
+      <span className="text-right text-[#D4D4D8] text-xs">{a.posicao}º</span><span className="text-right text-white text-xs font-bold">{a.pontos}</span>
     </button>
     {aberta && <div className="px-3 pb-3 pl-[4.25rem] text-[11px] text-[#A1A1AA]">
       <div>{a.vitorias}V · {a.empates}E · {a.derrotas}D · {a.pontos} pontos</div>
@@ -72,19 +96,23 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
   const encerrada = carreiraTecnicoEncerrada(t);
   const historico = historicoProfissionalTecnico(t);
   const titulos = titulosConquistadosTecnico(t);
-  const [titulosVistos, setTitulosVistos] = useState({ chave: null, quantidade: 0 });
+  const [eventosVistos, setEventosVistos] = useState({ chave: null, quantidade: 0 });
   const [simulando, setSimulando] = useState(false);
   const [aberta, setAberta] = useState(null);
   const [mostrarTodas, setMostrarTodas] = useState(false);
   const [erroProposta, setErroProposta] = useState(null);
   const atualRef = useRef(null);
-  const rating = calcularOvrTecnico(t);
   const idade = (t.idadeInicio || c.idade || 0) + temporadas.length;
   const objetivo = objetivoTecnico(t);
   const conquistasUltima = ultima ? (Array.isArray(ultima.titulosConquistados) ? ultima.titulosConquistados : ultima.campeao ? [competicaoTemporadaTecnico(ultima)] : []) : [];
-  const chaveTitulo = conquistasUltima.length ? `${temporadas.length}|${ultima.ano}|${ultima.clube}|${conquistasUltima.join('|')}` : null;
-  const indiceTitulo = titulosVistos.chave === chaveTitulo ? titulosVistos.quantidade : 0;
-  const mostrarTitulo = t.fase === 'resultado' && !!chaveTitulo && indiceTitulo < conquistasUltima.length;
+  const eventosUltima = [
+    ...conquistasUltima.map(nome => ({ tipo: 'titulo', nome })),
+    ...(ultima?.rebaixado ? [{ tipo: 'rebaixado', movimento: ultima.rebaixado }] : []),
+    ...(ultima?.acesso ? [{ tipo: 'acesso', movimento: ultima.acesso }] : [])
+  ];
+  const chaveEvento = eventosUltima.length ? `${temporadas.length}|${ultima.ano}|${ultima.clube}|${eventosUltima.map(x => x.nome || x.tipo).join('|')}` : null;
+  const indiceEvento = eventosVistos.chave === chaveEvento ? eventosVistos.quantidade : 0;
+  const eventoAtual = t.fase === 'resultado' && indiceEvento < eventosUltima.length ? eventosUltima[indiceEvento] : null;
   const temporadasVisiveis = mostrarTodas ? temporadas : temporadas.slice(-12);
 
   useEffect(() => {
@@ -133,14 +161,15 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
   const temporadasCards = temporadasVisiveis;
 
   return <main className="cp w-full max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6 rp-entra">
-    {mostrarTitulo && <PopUpTitulo temporada={ultima} titulo={conquistasUltima[indiceTitulo]} indice={indiceTitulo} total={conquistasUltima.length} onFechar={() => setTitulosVistos({ chave: chaveTitulo, quantidade: indiceTitulo + 1 })} />}
+    {eventoAtual?.tipo === 'titulo' && <PopUpTitulo temporada={ultima} titulo={eventoAtual.nome} indice={eventosUltima.slice(0, indiceEvento + 1).filter(x => x.tipo === 'titulo').length - 1} total={conquistasUltima.length} onFechar={() => setEventosVistos({ chave: chaveEvento, quantidade: indiceEvento + 1 })} />}
+    {(eventoAtual?.tipo === 'rebaixado' || eventoAtual?.tipo === 'acesso') && <PopUpDivisao temporada={ultima} movimento={eventoAtual.movimento} onFechar={() => setEventosVistos({ chave: chaveEvento, quantidade: indiceEvento + 1 })} />}
 
     <section className="cp-card overflow-hidden">
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(350px,430px)_minmax(0,1fr)]">
         <div className="min-w-0 border-b lg:border-b-0 lg:border-r border-white/[.08]">
           <header className="px-4 sm:px-5 pt-4 pb-3">
             <div className="flex items-start gap-3">
-              <div className="cp-ovr rounded-2xl w-[68px] h-[72px] flex flex-col items-center justify-center shrink-0"><span className="text-[9px] font-black tracking-widest">OVR</span><strong className="text-3xl leading-none">{rating}</strong></div>
+              
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 text-xs text-[#A1A1AA]"><Bandeira pais={t.pais || 'Brasil'} /><span className="font-bold uppercase tracking-wider">Treinador</span></div>
                 <h1 className="text-white text-xl font-black truncate mt-1">{c.nome}</h1>
@@ -161,12 +190,10 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
               <div className="grid grid-cols-2 gap-2 mt-3">{t.opcoesInicio.map(op => <button key={op.clube} disabled={simulando} onClick={() => escolherClubeInicial(op.clube)} className="cp-card min-h-[124px] p-2.5 text-center hover:border-white/30 disabled:opacity-50 transition"><span className="block text-[9px] text-[#A1A1AA]">Começar no</span><strong className="block text-xs leading-tight text-white mt-1">{op.clube}</strong><span className="flex justify-center my-2"><Escudo nome={op.clube} size={42} /></span><span className="block text-[9px] text-[#A1A1AA]">{op.idolatria ? 'Clube do coração' : `Vínculo ${op.afinidade}/100`}</span></button>)}</div>
               {simulando && <p role="status" className="text-[10px] text-[#A1A1AA] text-center mt-2">Simulando a temporada…</p>}
             </> : faseTemporada ? <>
-              <div className="flex items-center justify-between gap-2"><h2 className="text-white text-base font-bold">Temporada {t.ano}</h2><span className="rounded-full bg-[#27272A] px-2.5 py-1 text-[10px] text-[#D4D4D8]">Ritmo intenso</span></div>
-              <p className="text-xs text-[#A1A1AA] mt-1">{t.clube} · meta: {objetivo.nome} ({objetivo.posicao}º)</p>
-              <div className="grid grid-cols-3 gap-2 mt-3 text-center">{[['Elenco', t.elenco ?? 50], ['Torcida', t.torcida ?? 55], ['Diretoria', t.diretoria ?? 60]].map(([label, value]) => <div key={label} className="rounded-lg bg-[#0D0D0F] py-1.5"><strong className="block text-xs text-white">{value}</strong><span className="text-[9px] text-[#A1A1AA]">{label}</span></div>)}</div>
+              <h2 className="text-white text-base font-bold">Temporada {t.ano}</h2>
+              <p className="text-xs text-[#A1A1AA] mt-1">{t.clube} · {competicaoTemporadaTecnico({ clube: t.clube, liga: t.liga })}</p>
               <p className="text-xs text-[#A1A1AA] mt-4">Simule o ano e confira a campanha, os títulos e as propostas ao fim da temporada.</p>
               <button disabled={simulando} onClick={() => simular()} className="cp-pill cp-branca w-full mt-3">{simulando ? 'Simulando temporada…' : 'Simular temporada'}</button>
-              {simulando && <p role="status" className="text-[10px] text-[#A1A1AA] text-center mt-2">Calculando temporada…</p>}
               {simulando && <p role="status" className="text-[10px] text-[#A1A1AA] text-center mt-2">Calculando temporada…</p>}
             </> : t.reuniaoPendente ? <>
               <h2 className="text-white text-base font-bold">Conversa com a diretoria</h2><p className="text-xs text-[#A1A1AA] mt-1">Escolha sua resposta para continuar.</p><div className="grid gap-2 mt-3">{OPCOES_REUNIAO_TECNICO.map(op => <button key={op.id} onClick={() => { onReuniao?.(op.id); onJogar?.(); }} className="cp-card p-2.5 text-left hover:border-white/30"><strong className="block text-xs text-white">{op.nome}</strong><span className="text-[10px] text-[#A1A1AA]">{op.descricao}</span></button>)}</div>
@@ -174,7 +201,9 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
               {ultima && <><div className="flex items-center gap-2"><Escudo nome={ultima.clube} size={38} /><div className="min-w-0 flex-1"><h2 className="text-white text-base font-bold truncate">{ultima.clube}</h2><p className="text-[10px] text-[#A1A1AA]">Temporada {ultima.ano} · {competicaoTemporadaTecnico(ultima)}</p></div><div className="text-right"><strong className="block text-white text-2xl leading-none">{ultima.posicao}º</strong><span className="text-[9px] text-[#A1A1AA]">LUGAR</span></div></div>
                 <div className="grid grid-cols-4 gap-1.5 mt-3">{[['PTS', ultima.pontos], ['V', ultima.vitorias], ['E', ultima.empates], ['D', ultima.derrotas]].map(([label, value]) => <div key={label} className="rounded-lg bg-[#0D0D0F] py-1.5 text-center"><strong className="block text-sm text-white">{value}</strong><span className="text-[9px] text-[#A1A1AA]">{label}</span></div>)}</div>
                 <div className="mt-2 text-[10px] text-[#D4D4D8]">Meta: {ultima.objetivo} · <span className={ultima.cumpriuObjetivo ? 'text-emerald-300' : 'text-amber-300'}>{ultima.cumpriuObjetivo ? 'atingida' : 'não atingida'}</span></div>
-                {!!conquistasUltima.length && <div className="grid gap-1.5 mt-3">{conquistasUltima.map(nome => <div key={nome} className="flex items-center gap-2 rounded-xl bg-[#FACC15]/[.07] border border-[#FACC15]/20 p-2"><TacaCompeticao tipo={competicaoDoTitulo(nome).tipo} nome={nome} size={31} /><strong className="text-xs text-[#FDE68A]">{nome}</strong></div>)}</div>}</>}
+                {!!conquistasUltima.length && <div className="grid gap-1.5 mt-3">{conquistasUltima.map(nome => <div key={nome} className="flex items-center gap-2 rounded-xl bg-[#FACC15]/[.07] border border-[#FACC15]/20 p-2"><TacaCompeticao tipo={competicaoDoTitulo(nome).tipo} nome={nome} size={31} /><strong className="text-xs text-[#FDE68A]">{nome}</strong></div>)}</div>}
+                {ultima.rebaixado && <p className="mt-3 rounded-xl border border-red-500/25 bg-red-950/25 p-2 text-xs font-semibold text-red-200">Rebaixado · {competicaoTemporadaTecnico({ liga: ultima.rebaixado.para })}</p>}
+                {ultima.acesso && <p className="mt-3 rounded-xl border border-emerald-500/25 bg-emerald-950/25 p-2 text-xs font-semibold text-emerald-200">Acesso · {competicaoTemporadaTecnico({ liga: ultima.acesso.para })}</p>}</>}
               {semClube && <div className="mt-3 rounded-xl border border-red-400/20 bg-red-950/20 p-2.5"><strong className="text-xs text-red-200">{t.demitido ? 'Você foi demitido' : 'Sem clube'}</strong><p className="text-[10px] text-red-100/70 mt-1">{t.demitido ? 'Escolha uma proposta para continuar.' : 'Aguarde novos convites.'}</p></div>}
               {!!t.propostas?.length && <><h3 className="text-white text-xs font-bold mt-3">{semClube ? 'Propostas de trabalho' : 'Janela de transferências'}</h3><p className="text-[10px] text-[#A1A1AA] mt-1">Escolha uma proposta ou continue no clube.</p><div className="grid grid-cols-2 gap-2 mt-2">{t.propostas.map(p => <button key={p.nome} onClick={() => iniciarProposta(p.nome)} className="cp-card min-h-[112px] p-2 text-center hover:border-white/30 transition"><span className="block text-[9px] text-[#A1A1AA]">Assinar com</span><strong className="block text-xs text-white mt-0.5 truncate">{p.nome}</strong><span className="flex justify-center my-1.5"><Escudo nome={p.nome} size={36} /></span><span className="block text-[9px] text-[#A1A1AA] truncate">{p.pais} · meta {p.objetivo}</span></button>)}</div></>}
               {erroProposta && <p role="status" className="text-[10px] text-amber-200 mt-2">A proposta de {erroProposta} foi recusada. Escolha outra opção.</p>}
@@ -188,18 +217,15 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
         <section className="min-w-0" aria-label="Trajetória como treinador">
           <header className="px-3 sm:px-4 py-4 border-b border-white/[.08]">
             <div className="flex items-start justify-between gap-3"><div><span className="text-[9px] uppercase tracking-[.18em] text-[#A1A1AA] font-black">Modo treinador · intenso</span><h2 className="text-white text-base font-bold mt-1">Trajetória</h2></div><span className="text-[10px] text-[#A1A1AA]">{temporadas.length}/{LIMITE_TEMPORADAS_TECNICO} temporadas</span></div>
-            <div className="grid grid-cols-[3.3rem_minmax(0,1fr)_2.5rem_2.6rem_2.7rem] gap-2 px-3 mt-3 text-[9px] font-black uppercase tracking-wider text-[#71717A]"><span>Ano</span><span>Clube / competição</span><span className="text-right">OVR</span><span className="text-right">Pos.</span><span className="text-right">Pts.</span></div>
+            <div className="grid grid-cols-[3.3rem_minmax(0,1fr)_2.6rem_2.7rem] gap-2 px-3 mt-3 text-[9px] font-black uppercase tracking-wider text-[#71717A]"><span>Ano</span><span>Clube / competição</span><span className="text-right">Pos.</span><span className="text-right">Pts.</span></div>
           </header>
           <div className="px-2 pb-2 max-h-[72vh] lg:max-h-[680px] overflow-y-auto">
             {temporadasCards.map((a, visibleIndex) => {
               const i = mostrarTodas ? visibleIndex : temporadas.length - temporadasCards.length + visibleIndex;
-              const acumulado = temporadas.slice(0, i + 1);
-              const soma = k => acumulado.reduce((n, x) => n + (x[k] || 0), 0);
-              const ovr = calcularOvrTecnico({ ...t, temporadas: acumulado, vitorias: soma('vitorias'), empates: soma('empates'), derrotas: soma('derrotas'), titulos: acumulado.filter(x => x.campeao).length });
-              return <LinhaTemporada key={`${a.ano}-${i}`} a={a} ovr={ovr} ativa={aberta == null && i === temporadas.length - 1} aberta={String(aberta) === String(a.ano)} onClick={() => setAberta(String(aberta) === String(a.ano) ? null : a.ano)} />;
+              return <LinhaTemporada key={`${a.ano}-${i}`} a={a} ativa={aberta == null && i === temporadas.length - 1} aberta={String(aberta) === String(a.ano)} onClick={() => setAberta(String(aberta) === String(a.ano) ? null : a.ano)} />;
             })}
-            {t.fase === 'pretemporada' && <div ref={atualRef} className="grid grid-cols-[3.3rem_minmax(0,1fr)_2.5rem_2.6rem_2.7rem] gap-2 items-center px-3 py-2 border-b border-white/[.06] bg-white/[.035]">
-              <span className="rounded-full bg-white text-[#111113] text-[11px] font-black px-1.5 py-1 text-center">{t.ano}</span><span className="flex items-center gap-2 min-w-0"><Escudo nome={primeira ? 'Sem clube' : t.clube} size={28} /><span className="min-w-0"><strong className="block text-xs text-white truncate">{primeira ? 'Escolhendo clube' : t.clube}</strong><span className="block text-[9px] text-[#A1A1AA] truncate">{primeira ? 'Oferta inicial' : 'Temporada em andamento'}</span></span></span><span className="text-right text-[#FB923C] text-xs font-black">{rating}</span><span className="text-right text-xs text-[#A1A1AA]">—</span><span className="text-right text-xs text-[#A1A1AA]">—</span>
+            {t.fase === 'pretemporada' && <div ref={atualRef} className="grid grid-cols-[3.3rem_minmax(0,1fr)_2.6rem_2.7rem] gap-2 items-center px-3 py-2 border-b border-white/[.06] bg-white/[.035]">
+              <span className="rounded-full bg-white text-[#111113] text-[11px] font-black px-1.5 py-1 text-center">{t.ano}</span><span className="flex items-center gap-2 min-w-0"><Escudo nome={primeira ? 'Sem clube' : t.clube} size={28} /><span className="min-w-0"><strong className="block text-xs text-white truncate">{primeira ? 'Escolhendo clube' : t.clube}</strong><span className="block text-[9px] text-[#A1A1AA] truncate">{primeira ? 'Oferta inicial' : 'Temporada em andamento'}</span></span></span><span className="text-right text-xs text-[#A1A1AA]">—</span><span className="text-right text-xs text-[#A1A1AA]">—</span>
             </div>}
             {!temporadas.length && <div className="px-4 py-7 text-center text-xs text-[#71717A]">As temporadas concluídas aparecerão aqui.</div>}
             {temporadas.length > 12 && <button onClick={() => setMostrarTodas(v => !v)} className="w-full py-2 text-[10px] text-[#D4D4D8]">{mostrarTodas ? 'Mostrar as 12 mais recentes' : `Ver as ${temporadas.length} temporadas`}</button>}

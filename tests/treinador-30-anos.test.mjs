@@ -65,3 +65,13 @@ test('save legado sem contadores preserva estatisticas numericas apos temporada'
   for(const chave of ['reputacao','diretoria','vitorias','empates','derrotas','titulos']) assert.ok(Number.isFinite(c.tecnico[chave]),chave);
   assert.equal(c.tecnico.vitorias+c.tecnico.empates+c.tecnico.derrotas,38);
 });
+
+test('inicio da carreira de treinador ignora pontuacao de legado invalida', () => {
+  let c=criarJogador({nome:'Legado Invalido',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:9,ritmo:'equilibrado',codigo:'LEGADOINVALIDO'});
+  for(let i=0;i<18;i++){const r=jogarTemporada(c);c=fecharTemporada(r.c,r.card).c;}
+  c=aposentar(c);
+  c={...c,legado:{...(c.legado||{}),pontos:'valor invalido'}};
+  c=iniciarCarreiraTecnico(c);
+  assert.ok(Number.isFinite(c.tecnico.reputacao));
+  assert.ok(c.tecnico.reputacao>=25 && c.tecnico.reputacao<=85);
+});

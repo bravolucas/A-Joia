@@ -34,7 +34,7 @@ function PopUpTitulo({ temporada, onFechar }) {
   </div>,document.body);
 }
 
-export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado }) {
+export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAvancarESimular, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado }) {
   const t = c.tecnico;
   const temporadas = t.temporadas || [];
   const ultima = temporadas.at(-1);
@@ -98,7 +98,7 @@ export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAceitarProp
       {encerrada ? <div className="mt-5 rounded-xl border border-[#D8B44A]/40 p-4 text-center"><h3 className="text-[#EBC557] font-bold text-xl">Fim da carreira de treinador</h3><p className="text-[#C9D3CE] text-sm mt-2">30 temporadas completas. Confira todas as suas taças na vitrine abaixo.</p></div> : <>
         {t.ultimaNegociacao && !t.ultimaNegociacao.aceita && <p className="text-[#F0A99E] text-sm mt-3">{t.ultimaNegociacao.motivo}</p>}
         {(t.propostas || []).length > 0 && <div className="mt-5"><h3 className="text-white font-bold mb-2">Propostas para a próxima temporada</h3><div className="flex flex-col gap-2">{t.propostas.map(p => <button key={p.nome} onClick={() => onAceitarProposta(p.nome,'prudente')} className="rp-opcao p-3 flex items-center gap-3 text-left"><Escudo nome={p.nome}/><span><strong className="text-white block">{p.nome}</strong><span className="text-[#8FA39A] text-xs">{p.pais} · R$ {p.salario} mil/mês</span></span></button>)}</div></div>}
-        {!semClube ? <button onClick={onAvancar} className="rp-btn rp-ouro w-full mt-4">Continuar no {t.clube} → {t.ano}</button> : <button onClick={onEsperar} className="rp-btn rp-sec w-full mt-4">Aguardar propostas</button>}
+        {!semClube ? <button onClick={onAvancarESimular || onAvancar} className="rp-btn rp-ouro w-full mt-4">▶ Simular {t.ano} · {t.clube}</button> : <button onClick={onEsperar} className="rp-btn rp-sec w-full mt-4">Aguardar propostas</button>}
       </>}
     </section>}
     <section className="rp-painel p-4"><h2 className="text-white font-bold text-lg">Histórico ano após ano</h2><div className="mt-3 flex flex-col gap-2">{[...temporadas].reverse().map((a,i) => <div key={a.ano+'-'+i} className="flex items-center gap-3 border-b border-white/10 py-2"><span className="text-[#D8B44A] font-bold text-sm w-12">{a.ano}</span><Escudo nome={a.clube} size={31}/><div className="flex-1 min-w-0"><p className="text-white text-sm font-bold truncate">{a.clube}</p><p className="text-[#8FA39A] text-xs">{a.posicao}º lugar · {a.pontos} pts</p></div>{a.campeao && <div className="flex items-center gap-2 shrink-0" title={competicaoTemporadaTecnico(a)}><TacaCompeticao tipo={competicaoDoTitulo(competicaoTemporadaTecnico(a)).tipo} nome={competicaoTemporadaTecnico(a)} size={37}/><span className="text-[#F4D67A] text-[11px] font-bold max-w-24 leading-tight">{competicaoTemporadaTecnico(a)}</span></div>}</div>)}</div>{temporadas.length===0 && <p className="text-[#8FA39A] text-sm">Sua primeira temporada aparecerá aqui.</p>}</section>

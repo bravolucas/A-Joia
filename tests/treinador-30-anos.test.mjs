@@ -118,3 +118,18 @@ test('simulacao direta dispensa carta de pretemporada e preserva classificacao n
   const restaurado = JSON.parse(JSON.stringify(c));
   assert.deepEqual(restaurado.tecnico.temporadas[0].classificacao, ultima.classificacao);
 });
+
+test('duas temporadas consecutivas sem cartas visiveis preservam historico e jogador', () => {
+  let c = criarJogador({ nome:'Continuidade', nac:'BRA', posicao:'ATA', personalidade:'equilibrado', origem:'base', pe:'destro', numero:9, codigo:'FLUXO-DIRETO' });
+  c = iniciarCarreiraTecnico(aposentar(c));
+  if (c.tecnico.opcoesInicio?.length) c = iniciarNoClubeIdolo(c, c.tecnico.opcoesInicio[0].clube);
+  const carreiraJogador = JSON.stringify(c.temporadas);
+  c = jogarTemporadaExpressaTecnico(c, null, () => 0.43);
+  const primeira = JSON.parse(JSON.stringify(c.tecnico.temporadas[0]));
+  c = { ...c, tecnico: { ...c.tecnico, demitido: false, desempregado: false, diretoria: 95, torcida: 95 } };
+  c = jogarTemporadaExpressaTecnico(proximaTemporadaTecnico(c), null, () => 0.43);
+  assert.equal(c.tecnico.temporadas.length, 2);
+  assert.deepEqual(c.tecnico.temporadas[0], primeira);
+  assert.equal(c.tecnico.temporadas[1].ano, primeira.ano + 1);
+  assert.equal(JSON.stringify(c.temporadas), carreiraJogador);
+});

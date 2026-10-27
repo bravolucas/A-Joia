@@ -76,14 +76,21 @@ export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAvancarESim
       </div>
     </header>
     {primeira && <section className="rp-painel p-5"><h2 className="text-white font-bold text-xl">Escolha seu primeiro clube</h2><p className="text-[#8FA39A] text-sm my-2">A continuação da sua carreira como jogador começa aqui.</p><div className="flex flex-col gap-2 mt-3">{t.opcoesInicio.map(op => <button key={op.clube} onClick={() => onEscolherClubeInicial(op.clube)} className="rp-opcao p-3 flex items-center gap-3 text-left"><Escudo nome={op.clube}/><span><strong className="text-white block">{op.clube}</strong><span className="text-[#8FA39A] text-xs">{op.idolatria ? 'Seu clube de coração · ' : ''}Afinidade {op.afinidade}/100</span></span></button>)}</div></section>}
-    {t.fase === 'pretemporada' && !encerrada && !primeira && !semClube && <section className="rp-painel p-5 text-center">
-      <div className="text-[#D8B44A] text-xs uppercase font-bold tracking-[.2em]">Carreira de treinador · {t.ano}</div>
-      <div className="mt-4 flex justify-center gap-2 flex-wrap"><span className="rounded-full bg-white/10 px-3 py-1 text-[#C9D3CE] text-xs">Temporada {temporadas.length + 1} de {LIMITE_TEMPORADAS_TECNICO}</span><span className="rounded-full bg-[#D8B44A]/15 px-3 py-1 text-[#F4D67A] text-xs">Simulação expressa</span></div>
-      <div className="flex items-center justify-center gap-3 mt-5"><Escudo nome={t.clube} size={60}/><div className="text-left"><h2 className="text-white text-xl font-black">{t.clube}</h2><p className="text-[#8FA39A] text-sm">{competicaoTemporadaTecnico({clube:t.clube,liga:t.liga})}</p></div></div>
-      <div className="grid grid-cols-3 gap-2 mt-5 text-center"><div className="rounded-xl bg-white/5 p-3"><strong className="text-white text-lg block">{t.reputacao ?? 50}</strong><span className="text-[#8FA39A] text-[11px]">Reputação</span></div><div className="rounded-xl bg-white/5 p-3"><strong className="text-white text-lg block">{t.diretoria ?? 60}%</strong><span className="text-[#8FA39A] text-[11px]">Diretoria</span></div><div className="rounded-xl bg-white/5 p-3"><strong className="text-white text-lg block">{t.torcida ?? 55}%</strong><span className="text-[#8FA39A] text-[11px]">Torcida</span></div></div>
-      <p className="text-[#C9D3CE] text-sm mt-5">Simule o campeonato inteiro em um toque. Resultados, classificação e propostas aparecem ao final da temporada.</p>
-      <button disabled={simulando} onClick={() => escolher(null)} className="rp-btn rp-ouro w-full mt-6 text-lg disabled:opacity-50">{simulando ? 'Simulando campeonato…' : '▶ Simular temporada '+t.ano}</button>
-      {simulando && <p role="status" className="text-[#EBC557] text-sm mt-4">Calculando partidas e classificação…</p>}
+    {t.fase === 'pretemporada' && !encerrada && !primeira && !semClube && <section className="rp-painel overflow-hidden">
+      <div className="px-5 pt-6 pb-5 text-center" style={{background:'linear-gradient(180deg,#1C3028 0%,#111C18 100%)'}}>
+        <div className="text-[#D8B44A] text-[11px] font-black tracking-[.25em] uppercase">Carreira como treinador</div>
+        <h2 className="display text-4xl text-white mt-2">{t.ano}</h2>
+        <p className="text-[#9BAEA3] text-xs mt-1">TEMPORADA {temporadas.length + 1} / {LIMITE_TEMPORADAS_TECNICO}</p>
+        <div className="mt-6 flex items-center justify-center gap-4"><Escudo nome={t.clube} size={76}/><div className="text-left min-w-0"><strong className="text-white text-xl block">{t.clube}</strong><span className="text-[#D8B44A] text-sm">{competicaoTemporadaTecnico({clube:t.clube,liga:t.liga})}</span></div></div>
+      </div>
+      <div className="px-5 py-5">
+        <div className="grid grid-cols-3 gap-2 text-center">
+          {[['Reputação',t.reputacao ?? 50],['Diretoria',(t.diretoria ?? 60)+'%'],['Torcida',(t.torcida ?? 55)+'%']].map(([nome,valor])=><div key={nome} className="rounded-xl border border-white/10 p-3"><strong className="text-white text-lg block">{valor}</strong><span className="text-[#8FA39A] text-[11px]">{nome}</span></div>)}
+        </div>
+        <button disabled={simulando} onClick={() => escolher(null)} className="rp-btn rp-ouro w-full mt-5 text-lg disabled:opacity-50">{simulando ? 'Simulando…' : '▶ SIMULAR '+t.ano}</button>
+        <p className="text-[#8FA39A] text-xs text-center mt-3">Uma temporada por toque · sem decisões de pré-temporada</p>
+        {simulando && <p role="status" className="text-[#EBC557] text-sm mt-3 text-center">Calculando classificação e competições…</p>}
+      </div>
     </section>}
     {t.fase === 'resultado' && <section className="rp-painel p-5">
       <span className="text-[#D8B44A] text-xs font-bold uppercase">Fim da temporada {ultima?.ano}</span>

@@ -87,6 +87,13 @@ export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAceitarProp
       <h2 className="text-white text-2xl font-bold mt-2">{ultima?.campeao ? '🏆 Campeão!' : ultima?.posicao+'º lugar no campeonato'}</h2>
       <p className="text-[#C9D3CE] text-sm mt-2">{ultima?.clube} · {competicaoTemporadaTecnico(ultima)} · {ultima?.pontos} pontos</p>
       <div className="grid grid-cols-3 gap-2 text-center mt-4">{[['Vitórias',ultima?.vitorias],['Empates',ultima?.empates],['Derrotas',ultima?.derrotas]].map(([nome,valor]) => <div key={nome} className="rounded-xl bg-white/5 p-3"><strong className="text-white text-xl block">{valor}</strong><span className="text-[#8FA39A] text-xs">{nome}</span></div>)}</div>
+      {ultima?.classificacao?.length > 0 && <div className="mt-5 overflow-hidden rounded-xl border border-white/10">
+        <div className="px-3 py-3 bg-white/5 text-white font-bold text-sm">Classificação final · {competicaoTemporadaTecnico(ultima)}</div>
+        <div className="grid grid-cols-[2rem_1fr_2.2rem_2.2rem_2.2rem] gap-2 px-3 py-2 text-[10px] text-[#8FA39A] uppercase"><span>#</span><span>Clube</span><span className="text-right">J</span><span className="text-right">V</span><span className="text-right">Pts</span></div>
+        <div className="max-h-80 overflow-y-auto">{ultima.classificacao.map(linha => <div key={linha.nome} className={`grid grid-cols-[2rem_1fr_2.2rem_2.2rem_2.2rem] gap-2 items-center px-3 py-2 border-t border-white/5 text-xs ${linha.meuClube ? 'bg-[#D8B44A]/15 text-[#F4D67A] font-bold' : 'text-[#C9D3CE]'}`}>
+          <span>{linha.posicao}</span><span className="flex items-center gap-2 min-w-0"><Escudo nome={linha.nome} size={20}/><span className="truncate">{linha.nome}</span></span><span className="text-right">{linha.jogos}</span><span className="text-right">{linha.vitorias}</span><span className="text-right font-bold">{linha.pontos}</span>
+        </div>)}</div>
+      </div>}
       <p className="text-[#8FA39A] text-sm mt-3">Objetivo: {ultima?.objetivo} · {ultima?.cumpriuObjetivo ? 'Cumprido' : 'Não cumprido'}</p>
       {encerrada ? <div className="mt-5 rounded-xl border border-[#D8B44A]/40 p-4 text-center"><h3 className="text-[#EBC557] font-bold text-xl">Fim da carreira de treinador</h3><p className="text-[#C9D3CE] text-sm mt-2">30 temporadas completas. Confira todas as suas taças na vitrine abaixo.</p></div> : <>
         {t.ultimaNegociacao && !t.ultimaNegociacao.aceita && <p className="text-[#F0A99E] text-sm mt-3">{t.ultimaNegociacao.motivo}</p>}

@@ -695,7 +695,9 @@ export function jogarTemporadaExpressaTecnico(c, opcaoId, rng = sorteio) {
   while ((atual.tecnico.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) {
     const carta = cartaAtualTecnico(atual.tecnico);
     if (!carta?.opcoes?.length) throw new Error('Não foi possível preparar a temporada.');
-    atual = tomarDecisaoTecnico(atual, carta.opcoes[0].id, rng);
+    // As decisões ocultas não devem favorecer sempre a primeira alternativa.
+    const indice = Math.min(carta.opcoes.length - 1, Math.max(0, Math.floor(rng() * carta.opcoes.length)));
+    atual = tomarDecisaoTecnico(atual, carta.opcoes[indice].id, rng);
   }
   // Se a temporada antiga já começou, conclui suas etapas preservando o andamento.
   if (atual.tecnico.andamento?.jogos) {

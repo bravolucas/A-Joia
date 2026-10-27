@@ -50,7 +50,7 @@ export const DECISOES_TECNICO = [
 export const QUANTIDADE_DECISOES_TECNICO = 4;
 export const LIMITE_TEMPORADAS_TECNICO = 30;
 export const carreiraTecnicoEncerrada = (t) => (t?.temporadas?.length || 0) >= LIMITE_TEMPORADAS_TECNICO;
-const NOMES_COMPETICOES_TECNICO = { brasileirao: 'Brasileirão', serieB: 'Brasileirão Série B', argentina: 'Liga Profesional', portugal: 'Liga Portugal', portugal2: 'Liga Portugal 2', espanha: 'La Liga', espanha2: 'LaLiga 2', inglaterra: 'Premier League', inglaterra2: 'Championship', italia: 'Serie A', italia2: 'Serie B (Itália)', alemanha: 'Bundesliga', alemanha2: '2. Bundesliga', franca: 'Ligue 1', franca2: 'Ligue 2' };
+const NOMES_COMPETICOES_TECNICO = { brasileirao: 'Brasileirão', serieB: 'Brasileirão Série B', argentina: 'Liga Profesional', portugal: 'Liga Portugal', portugal2: 'Liga Portugal 2', espanha: 'La Liga', espanha2: 'LaLiga 2', inglaterra: 'Premier League', inglaterra2: 'Championship', italia: 'Serie A', italia2: 'Serie B (Itália)', alemanha: 'Bundesliga', alemanha2: '2. Bundesliga', franca: 'Ligue 1', franca2: 'Ligue 2', arabia: 'Saudi Pro League', holanda: 'Eredivisie', mls: 'MLS', turquia: 'Süper Lig', sulamericano: 'Campeonato Sul-Americano' };
 export function competicaoTemporadaTecnico(a = {}) {
   if (a.competicao) return a.competicao;
   const liga = a.liga || CLUBES.find(clube => clube.nome === a.clube)?.liga;
@@ -226,7 +226,7 @@ export function iniciarNoClubeIdolo(c, clube) {
   return { ...c, tecnico: { ...c.tecnico, clube, pais: dadosClube?.pais || c.tecnico.pais, liga: dadosClube?.liga || c.tecnico.liga, elenco: dadosClube?.elenco || c.tecnico.elenco, salario: dadosClube?.salario || c.tecnico.salario, torcida: limitar(55 + Math.round(opcao.afinidade * 0.35), 0, 100),
     diretoria: limitar(60 + Math.round(opcao.afinidade * 0.15), 0, 100), clubeInicialEscolhido: true, retornoIdolo: !!opcao.idolatria } };
 }
-const PAIS_LIGA_TECNICO = { brasileirao: 'Brasil', serieB: 'Brasil', argentina: 'Argentina', portugal: 'Portugal', portugal2: 'Portugal', espanha: 'Espanha', espanha2: 'Espanha', inglaterra: 'Inglaterra', inglaterra2: 'Inglaterra', italia: 'Itália', italia2: 'Itália', alemanha: 'Alemanha', alemanha2: 'Alemanha', franca: 'França', franca2: 'França', sulamericano: 'América do Sul' };
+const PAIS_LIGA_TECNICO = { brasileirao: 'Brasil', serieB: 'Brasil', argentina: 'Argentina', portugal: 'Portugal', portugal2: 'Portugal', espanha: 'Espanha', espanha2: 'Espanha', inglaterra: 'Inglaterra', inglaterra2: 'Inglaterra', italia: 'Itália', italia2: 'Itália', alemanha: 'Alemanha', alemanha2: 'Alemanha', franca: 'França', franca2: 'França', arabia: 'Arábia Saudita', holanda: 'Países Baixos', mls: 'Estados Unidos', turquia: 'Turquia', sulamericano: 'América do Sul' };
 export const CLUBES_CONVITES_TECNICO = CLUBES.map(x => ({
   nome: x.nome, pais: PAIS_LIGA_TECNICO[x.liga] || x.liga, liga: x.liga,
   exigencia: limitar(Math.round(25 + (x.forca - 45) * 1.12), 25, 94),
@@ -666,14 +666,16 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   const copasPorLiga = {
     brasileirao: 'Copa do Brasil', serieB: 'Copa do Brasil',
     argentina: 'Copa Argentina', portugal: 'Taça de Portugal', portugal2: 'Taça de Portugal',
+    arabia: "King's Cup", holanda: 'KNVB Beker', mls: 'MLS Cup', turquia: 'Türkiye Kupası',
     espanha: 'Copa del Rey', espanha2: 'Copa del Rey', inglaterra: 'FA Cup', inglaterra2: 'FA Cup',
     italia: 'Coppa Italia', italia2: 'Coppa Italia', alemanha: 'DFB-Pokal', franca: 'Coupe de France', franca2: 'Coupe de France'
   };
   const continentaisPorLiga = {
-    brasileirao: 'Copa Libertadores', serieB: null, argentina: 'Copa Libertadores',
+    brasileirao: 'Copa Libertadores', serieB: null, argentina: 'Copa Libertadores', sulamericano: 'Copa Libertadores',
     portugal: 'UEFA Champions League', portugal2: null, espanha: 'UEFA Champions League', espanha2: null,
     inglaterra: 'UEFA Champions League', inglaterra2: null, italia: 'UEFA Champions League', italia2: null,
-    alemanha: 'UEFA Champions League', franca: 'UEFA Champions League', franca2: null
+    alemanha: 'UEFA Champions League', franca: 'UEFA Champions League', franca2: null,
+    alemanha2: null, arabia: 'AFC Champions League Elite', holanda: 'UEFA Champions League', mls: 'CONCACAF Champions Cup', turquia: 'UEFA Champions League'
   };
   const bonusTecnico = ((t.moral ?? 50) - 50) * 0.06
     + (t.estilo === 'ofensivo' ? 1.5 : t.estilo === 'defensivo' ? 0.5 : 1);

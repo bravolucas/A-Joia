@@ -18,7 +18,7 @@ test('vitrine de titulos e encerramento obrigatorio apos 30 temporadas', () => {
   }
   assert.equal(carreiraTecnicoEncerrada(c.tecnico),true);
   assert.equal(c.tecnico.temporadas.length,30);
-  assert.equal(titulosConquistadosTecnico(c.tecnico).length,c.tecnico.temporadas.filter(t=>t.campeao).length);
+  assert.equal(titulosConquistadosTecnico(c.tecnico).length,c.tecnico.temporadas.reduce((total,t)=>total+(t.titulosConquistados?.length ?? (t.campeao ? 1 : 0)),0));
   assert.throws(()=>proximaTemporadaTecnico(c),/30 temporadas/);
 });
 

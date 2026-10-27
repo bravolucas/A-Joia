@@ -48,7 +48,7 @@ export const DECISOES_TECNICO = [
 export const QUANTIDADE_DECISOES_TECNICO = 4;
 export const LIMITE_TEMPORADAS_TECNICO = 30;
 export const carreiraTecnicoEncerrada = (t) => (t?.temporadas?.length || 0) >= LIMITE_TEMPORADAS_TECNICO;
-const NOMES_COMPETICOES_TECNICO = { brasileirao: 'Brasileirão Série A', serieB: 'Brasileirão Série B', argentina: 'Campeonato Argentino', portugal: 'Liga Portugal', portugal2: 'Liga Portugal 2', espanha: 'La Liga', espanha2: 'Segunda División', inglaterra: 'Premier League', inglaterra2: 'Championship', italia: 'Serie A Italiana', italia2: 'Serie B Italiana', alemanha: 'Bundesliga', alemanha2: '2. Bundesliga', franca: 'Ligue 1', franca2: 'Ligue 2' };
+const NOMES_COMPETICOES_TECNICO = { brasileirao: 'Brasileirão', serieB: 'Brasileirão Série B', argentina: 'Liga Profesional', portugal: 'Liga Portugal', portugal2: 'Liga Portugal 2', espanha: 'La Liga', espanha2: 'LaLiga 2', inglaterra: 'Premier League', inglaterra2: 'Championship', italia: 'Serie A', italia2: 'Serie B (Itália)', alemanha: 'Bundesliga', alemanha2: '2. Bundesliga', franca: 'Ligue 1', franca2: 'Ligue 2' };
 export function competicaoTemporadaTecnico(a = {}) {
   if (a.competicao) return a.competicao;
   const liga = a.liga || CLUBES.find(clube => clube.nome === a.clube)?.liga;
@@ -334,8 +334,8 @@ export function probabilidadesTecnico(t = {}) {
   const moral = limitar(t.moral ?? 50, 10, 95);
   const reputacao = limitar(t.reputacao ?? 40, 10, 99);
   const bonusEstilo = t.estilo === 'equilibrado' ? 0.015 : t.estilo === 'ofensivo' ? 0.025 : -0.015;
-  const vitoria = limitar(0.16 + (forca - 35) * 0.0075 + (moral - 50) * 0.0015 +
-    (reputacao - 50) * 0.001 + bonusEstilo, 0.16, 0.69);
+  const vitoria = limitar(0.23 + (forca - 60) * 0.004 + (moral - 50) * 0.0008 +
+    (reputacao - 50) * 0.00035 + bonusEstilo * 0.4, 0.15, 0.52);
   const empate = t.estilo === 'defensivo' ? 0.29 : t.estilo === 'ofensivo' ? 0.18 : 0.24;
   return { vitoria, empate: Math.min(empate, 0.94 - vitoria), derrota: Math.max(0.06, 1 - vitoria - empate) };
 }
@@ -382,9 +382,9 @@ export function calendarioAdversariosTecnico(t = {}) {
 }
 export function probabilidadesConfrontoTecnico(t, adversario) {
   const base = probabilidadesTecnico(t);
-  const diferenca = limitar(((t.elenco ?? 50) - (adversario?.forca ?? 50)) * 0.005, -0.24, 0.24);
+  const diferenca = limitar(((t.elenco ?? 50) - (adversario?.forca ?? 50)) * 0.008, -0.27, 0.27);
   const mando = adversario?.casa ? 0.035 : -0.035;
-  const vitoria = limitar(base.vitoria + diferenca + mando, 0.10, 0.78);
+  const vitoria = limitar(base.vitoria + diferenca + mando, 0.08, 0.65);
   const empate = Math.min(base.empate, 0.93 - vitoria);
   return { vitoria, empate, derrota: 1 - vitoria - empate };
 }
@@ -466,7 +466,7 @@ export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario,
   }
   return linhas;
 }
-export function tabelaClassificacaoTecnico(t, andamento) {
+export function tabelaClassificacaoTecnico(t, andamento, rng = sorteio) {
   const jogos = andamento?.jogos || 0;
   const clube = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
   const liga = clube?.liga || t.liga;
@@ -477,9 +477,10 @@ export function tabelaClassificacaoTecnico(t, andamento) {
     empates: andamento?.empates || 0, derrotas: andamento?.derrotas || 0, golsPro: andamento?.golsPro || 0, golsContra: andamento?.golsContra || 0, saldoGols: (andamento?.golsPro || 0) - (andamento?.golsContra || 0), meuClube: true }];
   for (const rival of rivais) {
     const forca = rival.elenco;
-    const expectativa = limitar(0.22 + (forca - 45) * 0.007, 0.16, 0.57);
+    const expectativa = limitar(0.27 + (forca - 60) * 0.007, 0.17, 0.58);
     const empates = Math.min(jogos, Math.round(jogos * 0.24));
-    const vitorias = Math.min(jogos - empates, Math.round(jogos * expectativa));
+    const variacao = jogos >= 38 ? Math.round((rng() + rng() + rng() - 1.5) * 10) : 0;
+    const vitorias = Math.max(0, Math.min(jogos - empates, Math.round(jogos * expectativa) + variacao));
     const derrotas = jogos - vitorias - empates;
     linhas.push({ nome: rival.nome, jogos, pontos: vitorias * 3 + empates, vitorias, empates, derrotas, golsPro: 0, golsContra: 0, saldoGols: 0, meuClube: false });
   }
@@ -593,16 +594,17 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   const t = c.tecnico;
   if ((t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) throw new Error('Tome as decisões da temporada antes de simular.');
   if (t.andamento?.jogos) throw new Error('Temporada em andamento: avance pelas etapas.');
-  const { vitoria: pVitoria, empate: pEmpate } = probabilidadesTecnico(t);
+  const calendario = calendarioAdversariosTecnico(t);
   let vitorias = 0, empates = 0, derrotas = 0;
-  for (let i = 0; i < 38; i++) {
+  for (const adversario of calendario) {
+    const { vitoria, empate } = probabilidadesConfrontoTecnico(t, adversario);
     const r = rng();
-    if (r < pVitoria) vitorias++;
-    else if (r < pVitoria + pEmpate) empates++;
+    if (r < vitoria) vitorias++;
+    else if (r < vitoria + empate) empates++;
     else derrotas++;
   }
   const pontos = vitorias * 3 + empates;
-  const classificacao = tabelaClassificacaoTecnico(t, { jogos: 38, pontos, vitorias, empates, derrotas });
+  const classificacao = tabelaClassificacaoTecnico(t, { jogos: 38, pontos, vitorias, empates, derrotas }, rng);
   const posicao = classificacao.find(x => x.meuClube)?.posicao || 18;
   const campeao = posicao === 1;
   const objetivo = objetivoTecnico(t);

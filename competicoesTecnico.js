@@ -119,8 +119,10 @@ export function simularCopaNacionalTecnico({ clubes, nomeUsuario, pais, forcaUsu
 }
 
 function regiaoContinental(pais) {
-  if (['Brasil', 'Argentina'].includes(pais)) return 'sul-america';
-  if (['Portugal', 'Espanha', 'Inglaterra', 'Itália', 'Alemanha', 'França'].includes(pais)) return 'europa';
+  if (['Brasil', 'Argentina', 'América do Sul'].includes(pais)) return 'sul-america';
+  if (['Portugal', 'Espanha', 'Inglaterra', 'Itália', 'Alemanha', 'França', 'Países Baixos', 'Turquia'].includes(pais)) return 'europa';
+  if (pais === 'Arábia Saudita') return 'asia';
+  if (pais === 'Estados Unidos') return 'concacaf';
   return null;
 }
 

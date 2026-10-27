@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import confetti from 'canvas-confetti';
 import { TacaCompeticao } from './trofeus.jsx';
 import { escudoDe } from './arte.js';
+import { competicaoDoTitulo } from './tacas.js';
 import { cartaAtualTecnico, historicoProfissionalTecnico, objetivoTecnico, LIMITE_TEMPORADAS_TECNICO, carreiraTecnicoEncerrada, titulosConquistadosTecnico, competicaoTemporadaTecnico } from './tecnico.js';
 
 function Escudo({ nome, size = 42 }) {
@@ -22,7 +23,7 @@ function PopUpTitulo({ temporada, onFechar }) {
     <div className="w-full max-w-sm rounded-3xl border border-[#D8B44A]/50 text-center px-6 py-7 relative overflow-hidden" style={{background:'radial-gradient(ellipse at 50% 15%, #65521F 0%, #19231E 50%, #0D1512 100%)',boxShadow:'0 0 70px #D8B44A30'}}>
       <div className="text-[#EBC557] font-black tracking-[.22em] text-xs uppercase">A JOIA · Temporada {temporada.ano}</div>
       <h2 className="display text-4xl text-white mt-2">CAMPEÃO!</h2>
-      <div className="flex justify-center my-6" style={{filter:'drop-shadow(0 0 24px #D8B44A80)'}}><TacaCompeticao preferirTaca tipo="liga" nome={competicaoTemporadaTecnico(temporada)} size={142}/></div>
+      <div className="flex justify-center my-6" style={{filter:'drop-shadow(0 0 24px #D8B44A80)'}}><TacaCompeticao preferirTaca tipo={competicaoDoTitulo(competicaoTemporadaTecnico(temporada)).tipo} nome={competicaoTemporadaTecnico(temporada)} size={142}/></div>
       <p className="text-[#F4D67A] font-bold text-lg">{competicaoTemporadaTecnico(temporada)}</p>
       <div className="flex items-center justify-center gap-3 mt-3"><Escudo nome={temporada.clube} size={35}/><span className="text-white font-bold text-lg">{temporada.clube}</span></div>
       <p className="text-[#B6C2BA] text-sm mt-3">{temporada.pontos} pontos · {temporada.vitorias} vitórias</p>
@@ -78,7 +79,7 @@ export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAceitarProp
         {!semClube ? <button onClick={onAvancar} className="rp-btn rp-ouro w-full mt-4">Continuar no {t.clube} → {t.ano}</button> : <button onClick={onEsperar} className="rp-btn rp-sec w-full mt-4">Aguardar propostas</button>}
       </>}
     </section>}
-    <section className="rp-painel p-4"><h2 className="text-white font-bold text-lg">Histórico ano após ano</h2><div className="mt-3 flex flex-col gap-2">{[...temporadas].reverse().map((a,i) => <div key={a.ano+'-'+i} className="flex items-center gap-3 border-b border-white/10 py-2"><span className="text-[#D8B44A] font-bold text-sm w-12">{a.ano}</span><Escudo nome={a.clube} size={31}/><div className="flex-1 min-w-0"><p className="text-white text-sm font-bold truncate">{a.clube}</p><p className="text-[#8FA39A] text-xs">{a.posicao}º lugar · {a.pontos} pts</p></div>{a.campeao && <div title={competicaoTemporadaTecnico(a)}><TacaCompeticao preferirTaca tipo="liga" nome={competicaoTemporadaTecnico(a)} size={37}/></div>}</div>)}</div>{temporadas.length===0 && <p className="text-[#8FA39A] text-sm">Sua primeira temporada aparecerá aqui.</p>}</section>
+    <section className="rp-painel p-4"><h2 className="text-white font-bold text-lg">Histórico ano após ano</h2><div className="mt-3 flex flex-col gap-2">{[...temporadas].reverse().map((a,i) => <div key={a.ano+'-'+i} className="flex items-center gap-3 border-b border-white/10 py-2"><span className="text-[#D8B44A] font-bold text-sm w-12">{a.ano}</span><Escudo nome={a.clube} size={31}/><div className="flex-1 min-w-0"><p className="text-white text-sm font-bold truncate">{a.clube}</p><p className="text-[#8FA39A] text-xs">{a.posicao}º lugar · {a.pontos} pts</p></div>{a.campeao && <div title={competicaoTemporadaTecnico(a)}><TacaCompeticao preferirTaca tipo={competicaoDoTitulo(competicaoTemporadaTecnico(a)).tipo} nome={competicaoTemporadaTecnico(a)} size={37}/></div>}</div>)}</div>{temporadas.length===0 && <p className="text-[#8FA39A] text-sm">Sua primeira temporada aparecerá aqui.</p>}</section>
     {(encerrada || titulos.length > 0) && <section className="rp-painel p-5"><h2 className="text-[#EBC557] text-xl font-bold">🏆 Vitrine de títulos</h2><p className="text-[#8FA39A] text-sm mt-1">{titulos.length} conquistas em {temporadas.length} temporadas · {historico.jogos} partidas</p><div className="grid grid-cols-3 gap-3 mt-5">{titulos.length ? titulos.map((titulo,i) => <div key={i} className="flex flex-col items-center text-center gap-2 rounded-xl bg-white/5 p-3"><TacaCompeticao preferirTaca tipo={titulo.tipo} nome={titulo.nome} size={57}/><strong className="text-white text-xs">{titulo.nome}</strong><span className="text-[#8FA39A] text-xs">{titulo.ano} · {titulo.clube}</span></div>) : <p className="text-[#8FA39A] text-sm col-span-3">Nenhum título conquistado.</p>}</div></section>}
     <button onClick={onLegado} className="rp-btn rp-sec">Ver legado como jogador</button>
     <button onClick={onSair} className="text-[#8FA39A] text-sm py-2">Voltar ao menu · progresso salvo</button>

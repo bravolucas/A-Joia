@@ -636,7 +636,8 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
     ...copas.filter((nome, indice) => {
       const continental = indice === 1;
       const elegivel = !continental || (t.temporadas?.at(-1)?.posicao ?? 20) <= 6;
-      const chance = continental ? 0.025 : 0.065;
+      const forca = limitar(((t.elenco ?? 50) - 50) / 100, -0.35, 0.45);
+      const chance = limitar((continental ? 0.025 : 0.065) * (1 + forca) * (posicao <= 4 ? 1.25 : 1), 0.005, continental ? 0.065 : 0.12);
       return elegivel && rng() < chance;
     })
   ];

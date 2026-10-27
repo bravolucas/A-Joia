@@ -704,7 +704,9 @@ export function jogarTemporadaExpressaTecnico(c, opcaoId, rng = sorteio) {
   // Respeita a escolha visível inclusive nos saves antigos que já possuem
   // uma ou mais decisões tomadas nesta temporada.
   if ((atual.tecnico.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) {
-    atual = tomarDecisaoTecnico(atual, opcaoId, rng);
+    const carta = cartaAtualTecnico(atual.tecnico);
+    const escolha = opcaoId ?? (carta?.opcoes?.length ? escolherOpcaoAutomaticaTecnico(carta.opcoes, rng) : null);
+    atual = tomarDecisaoTecnico(atual, escolha, rng);
   }
   // Saves da interface anterior podem ter decisões parcialmente concluídas.
   while ((atual.tecnico.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) {

@@ -54,3 +54,14 @@ test('treinador: competicao historica permanece vinculada a liga registrada', ()
   assert.equal(titulosConquistadosTecnico({temporadas:[titulo]})[0].nome, 'Serie A');
   assert.equal(competicaoTemporadaTecnico({...titulo, competicao:'Copa Especial'}), 'Copa Especial');
 });
+
+test('treinador: titulo de segunda divisao tem tipo de taca proprio', () => {
+  const temporadas = [
+    {ano:2050,clube:'Clube B',liga:'serieB',campeao:true},
+    {ano:2051,clube:'Clube C',liga:'inglaterra2',campeao:true},
+    {ano:2052,clube:'Clube D',liga:'italia2',campeao:true}
+  ];
+  const titulos = titulosConquistadosTecnico({temporadas});
+  assert.deepEqual(titulos.map(t=>t.tipo), ['segunda','segunda','segunda']);
+  assert.notEqual(svgDaTaca(titulos[0].tipo,titulos[0].nome),svgDaTaca('liga',titulos[0].nome));
+});

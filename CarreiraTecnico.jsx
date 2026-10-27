@@ -48,7 +48,7 @@ export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAvancarESim
   const [titulosVistos, setTitulosVistos] = useState({ chave: null, quantidade: 0 });
   const [simulando, setSimulando] = useState(false);
   const conquistasUltima = ultima ? (Array.isArray(ultima.titulosConquistados) ? ultima.titulosConquistados : (ultima.campeao ? [competicaoTemporadaTecnico(ultima)] : [])) : [];
-  const chaveTitulo = conquistasUltima.length ? String(ultima.ano)+'|'+ultima.clube : null;
+  const chaveTitulo = conquistasUltima.length ? String(temporadas.length)+'|'+String(ultima.ano)+'|'+ultima.clube+'|'+conquistasUltima.join('|') : null;
   const indiceTitulo = titulosVistos.chave === chaveTitulo ? titulosVistos.quantidade : 0;
   const mostrarTitulo = t.fase === 'resultado' && !!chaveTitulo && indiceTitulo < conquistasUltima.length;
   useEffect(() => { if (t.fase === 'resultado') setSimulando(false); }, [t.fase, temporadas.length]);

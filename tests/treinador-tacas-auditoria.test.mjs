@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { competicaoTemporadaTecnico, titulosConquistadosTecnico, LIMITE_TEMPORADAS_TECNICO } from '../tecnico.js';
+import { competicaoTemporadaTecnico, titulosConquistadosTecnico, LIMITE_TEMPORADAS_TECNICO, escolherOpcaoAutomaticaTecnico } from '../tecnico.js';
 import { competicaoDoTitulo, svgDaTaca } from '../tacas.js';
 
 // Auditoria isolada do modo treinador: nomes devem coincidir com os slugs
@@ -37,4 +37,13 @@ test('treinador: nomes de titulos mantem classificacao de liga', () => {
     const tipo = competicaoDoTitulo(nome).tipo;
     assert.ok(['liga','segunda'].includes(tipo), nome + ': ' + tipo);
   }
+});
+
+test('treinador: escolhas ocultas nao privilegiam a primeira alternativa', () => {
+  const opcoes = [{id:'a'}, {id:'b'}, {id:'c'}];
+  assert.equal(escolherOpcaoAutomaticaTecnico(opcoes, () => 0), 'a');
+  assert.equal(escolherOpcaoAutomaticaTecnico(opcoes, () => 0.5), 'b');
+  assert.equal(escolherOpcaoAutomaticaTecnico(opcoes, () => 0.999), 'c');
+  assert.equal(escolherOpcaoAutomaticaTecnico(opcoes, () => 1), 'c');
+  assert.throws(() => escolherOpcaoAutomaticaTecnico([], () => 0), /sem alternativas/);
 });

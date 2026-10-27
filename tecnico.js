@@ -367,10 +367,12 @@ export function calendarioLigaTecnico(t = {}) {
 export function calendarioAdversariosTecnico(t = {}) {
   const liga = calendarioLigaTecnico(t);
   if (liga) return liga.map((jogos, i) => {
-    const partida = jogos.find(j => j.casa === t.clube || j.fora === t.clube);
-    const nome = partida.casa === t.clube ? partida.fora : partida.casa;
+    const nomeMeuClube = t.clube || 'Meu clube';
+    const partida = jogos.find(j => j.casa === nomeMeuClube || j.fora === nomeMeuClube);
+    if (!partida) throw new Error('Calendário inconsistente: clube ausente da rodada.');
+    const nome = partida.casa === nomeMeuClube ? partida.fora : partida.casa;
     return { rodada: i + 1, nome, forca: CLUBES_CONVITES_TECNICO.find(x => x.nome === nome)?.elenco ?? 50,
-      casa: partida.casa === t.clube };
+      casa: partida.casa === nomeMeuClube };
   });
   const clube = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
   const candidatos = CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube && (!clube || x.liga === clube.liga))

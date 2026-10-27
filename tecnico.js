@@ -722,13 +722,18 @@ export function jogarTemporadaExpressaTecnico(c, opcaoId, rng = sorteio) {
   if (carreiraTecnicoEncerrada(c.tecnico)) throw new Error('Carreira de treinador encerrada.');
   if (c.tecnico.temporadas.length === 0 && !c.tecnico.clubeInicialEscolhido && c.tecnico.opcoesInicio?.length) throw new Error('Escolha o clube inicial.');
   let atual = c;
-  // A simulação rápida não sorteia escolhas ocultas nem concede bônus arbitrários.
-  // Registros neutros satisfazem a validação do motor legado sem alterar atributos.
+  // No ritmo intenso, uma decisão visível pode influenciar cada temporada.
+  // As etapas restantes são administrativas e resolvidas pela comissão.
+  if (opcaoId != null) {
+    const carta = cartaAtualTecnico(atual.tecnico);
+    if (!carta) throw new Error('Não há decisão disponível nesta temporada.');
+    atual = tomarDecisaoTecnico(atual, opcaoId, rng);
+  }
   const feitas = atual.tecnico.decisoes || [];
   if (feitas.length < QUANTIDADE_DECISOES_TECNICO) {
-    const restantes = Array.from({ length: QUANTIDADE_DECISOES_TECNICO - feitas.length }, (_, i) => ({
-      carta: 'simulacao_expressa', opcao: 'neutra', nome: 'Simulação automática',
-      resultado: 'Temporada simulada sem decisões de pré-temporada.',
+    const restantes = Array.from({ length: QUANTIDADE_DECISOES_TECNICO - feitas.length }, () => ({
+      carta: 'simulacao_expressa', opcao: 'neutra', nome: 'Comissão técnica',
+      resultado: 'Etapa administrativa resolvida pela comissão.',
       riscoAtivado: false
     }));
     atual = { ...atual, tecnico: { ...atual.tecnico, decisoes: [...feitas, ...restantes] } };

@@ -3525,7 +3525,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           onJogar={() => setEstado((st) => ({ ...st, c: simularEtapaTecnico(st.c) }))}
           onEscolherClubeInicial={(nome) => setEstado((st) => ({ ...st, c: iniciarNoClubeIdolo(st.c, nome) }))}
           onEsperar={() => setEstado((st) => ({ ...st, c: passarAnoDesempregado(st.c) }))}
-          onAceitarProposta={(nome, estrategia) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia); return { ...st, c: negociado.tecnico.ultimaNegociacao?.aceita ? proximaTemporadaTecnico(negociado) : negociado }; })}
+          onAceitarProposta={(nome, estrategia) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia); if (!negociado.tecnico.ultimaNegociacao?.aceita) return { ...st, c: negociado }; const proxima = proximaTemporadaTecnico(negociado); return { ...st, c: jogarTemporadaExpressaTecnico(proxima, null) }; })}
           onAvancar={() => setEstado((st) => ({ ...st, c: proximaTemporadaTecnico(st.c) }))}
           onAvancarESimular={() => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(proximaTemporadaTecnico(st.c), null) }))}
           onLegado={() => setEstado((st) => ({ ...st, etapa: "fim" }))}

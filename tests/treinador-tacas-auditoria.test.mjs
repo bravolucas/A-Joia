@@ -47,3 +47,10 @@ test('treinador: escolhas ocultas nao privilegiam a primeira alternativa', () =>
   assert.equal(escolherOpcaoAutomaticaTecnico(opcoes, () => 1), 'c');
   assert.throws(() => escolherOpcaoAutomaticaTecnico([], () => 0), /sem alternativas/);
 });
+
+test('treinador: competicao historica permanece vinculada a liga registrada', () => {
+  const titulo = { ano: 2048, clube: 'Clube Antigo', liga: 'italia', campeao: true };
+  assert.equal(competicaoTemporadaTecnico(titulo), 'Serie A');
+  assert.equal(titulosConquistadosTecnico({temporadas:[titulo]})[0].nome, 'Serie A');
+  assert.equal(competicaoTemporadaTecnico({...titulo, competicao:'Copa Especial'}), 'Copa Especial');
+});

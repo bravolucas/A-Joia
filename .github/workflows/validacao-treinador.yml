@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
-      - run: npm ci
+      # O repositorio ainda nao possui package-lock.json.
+      - run: npm install --no-package-lock --no-audit --no-fund
       - run: node --test tests/*.test.mjs
       - run: npm run build

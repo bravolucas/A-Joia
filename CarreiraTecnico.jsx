@@ -253,9 +253,9 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
         </div>
 
         <section className="min-w-0 bg-[#111113]" aria-label="Trajetória como treinador">
-          <header className="px-3.5 sm:px-4 pt-3.5 pb-2.5 border-b border-white/[.08] bg-[#101012]">
-            <div className="flex items-end justify-between gap-3"><div><span className="text-[8px] uppercase tracking-[.2em] text-[#8B8B92] font-black">Histórico da carreira</span><h2 className="text-white text-lg font-black leading-tight mt-0.5">Trajetória</h2></div><span className="rounded-full border border-white/[.08] bg-[#0B0B0D] px-2 py-1 text-[9px] font-bold text-[#A1A1AA]">{temporadas.length}/{LIMITE_TEMPORADAS_TECNICO} anos</span></div>
-            <div className="grid grid-cols-[2.8rem_minmax(0,1fr)_2.15rem_2.25rem] gap-1.5 px-1.5 mt-3 text-[8px] font-black uppercase tracking-[.14em] text-[#77777E]"><span>Ano</span><span>Clube</span><span className="text-right">Pos</span><span className="text-right">Pts</span></div>
+          <header className="px-3.5 sm:px-4 pt-3 pb-2 border-b border-white/[.08] bg-[#101012]">
+            <div className="flex items-center justify-between gap-3"><span className="text-[8px] uppercase tracking-[.18em] text-[#8B8B92] font-black">Histórico da carreira</span><span className="rounded-full border border-white/[.08] bg-[#0B0B0D] px-2 py-1 text-[9px] font-bold text-[#A1A1AA]">{temporadas.length}/{LIMITE_TEMPORADAS_TECNICO} anos</span></div>
+            <div className="grid grid-cols-[2.8rem_minmax(0,1fr)_2.15rem_2.25rem] gap-1.5 px-1.5 mt-2 text-[8px] font-black uppercase tracking-[.14em] text-[#77777E]"><span>Ano</span><span>Clube</span><span className="text-right">Pos</span><span className="text-right">Pts</span></div>
           </header>
           <div className="px-1.5 pb-2 max-h-[72vh] lg:max-h-[680px] overflow-y-auto">
             {temporadasCards.map((a, visibleIndex) => {

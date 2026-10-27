@@ -37,7 +37,7 @@ function PopUpTitulo({ temporada, titulo, indice, total, onFechar }) {
     <div className="cp-card w-full max-w-sm text-center px-6 py-7 border-[#CA8A04]/50" style={{ background: 'radial-gradient(ellipse at 50% 10%, #382F19, #161618 70%)' }}>
       <div className="text-[#FACC15] font-black tracking-[.2em] text-xs uppercase">A JOIA · Temporada {temporada.ano}</div>
       <h2 className="text-4xl font-black text-white mt-2">CAMPEÃO!</h2>
-      <div className="flex justify-center my-5"><TacaCompeticao tipo={competicaoDoTitulo(titulo).tipo} nome={titulo} size={136} /></div>
+      <div className="flex justify-center my-5"><TacaCompeticao tipo={competicaoDoTitulo(titulo).tipo} nome={titulo} size={136} preferirTaca /></div>
       <p className="text-[#FDE68A] font-bold text-xl">{titulo}</p>
       {total > 1 && <p className="text-[#A1A1AA] text-xs mt-2">Conquista {indice + 1} de {total}</p>}
       <div className="flex items-center justify-center gap-3 mt-3"><Escudo nome={temporada.clube} size={34} /><span className="text-white font-bold">{temporada.clube}</span></div>
@@ -78,7 +78,7 @@ function CampanhasTemporada({ torneios = [] }) {
     <h3 className="text-[10px] uppercase tracking-wider font-black text-[#A1A1AA] mb-1.5">Copas da temporada</h3>
     <div className="grid gap-1.5">{torneios.map((torneio, indice) => <details key={`${torneio.nome}-${indice}`} className="rounded-xl border border-white/[.07] bg-black/10">
       <summary className="cursor-pointer list-none flex items-center gap-2 p-2">
-        <TacaCompeticao tipo={torneio.tipo || competicaoDoTitulo(torneio.nome).tipo} nome={torneio.nome} size={28} />
+        <TacaCompeticao tipo={torneio.tipo || competicaoDoTitulo(torneio.nome).tipo} nome={torneio.nome} size={28} preferirTaca />
         <strong className="min-w-0 flex-1 truncate text-[11px] text-white">{torneio.nome}</strong>
         <span className={`text-[10px] font-bold ${torneio.faseUsuario === 'Campeão' ? 'text-[#FDE68A]' : 'text-[#A1A1AA]'}`}>{torneio.faseUsuario}</span>
       </summary>
@@ -214,11 +214,11 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
               {[[historico.jogos, 'jogos'], [historico.vitorias, 'vitórias'], [titulos.length, 'taças']].map(([valor, rotulo]) => <div key={rotulo} className="rounded-lg bg-[#0B0B0D] border border-white/[.045] py-1.5"><strong className="block text-white text-sm leading-tight">{valor}</strong><span className="text-[8px] text-[#A1A1AA] uppercase tracking-[.12em]">{rotulo}</span></div>)}
             </div>
             <button type="button" onClick={() => setVitrineAberta(v => !v)} aria-expanded={vitrineAberta} className="w-full flex items-center gap-2.5 mt-2 rounded-xl border border-white/[.06] bg-[#0D0D0F] px-2.5 py-1.5 text-left hover:border-white/[.14] transition">
-              {titulosDestaque ? <TacaCompeticao tipo={titulosDestaque.tipo} nome={titulosDestaque.nome} size={27} /> : <span className="w-[27px] text-center text-lg opacity-45" aria-hidden="true">🏆</span>}
+              {titulosDestaque ? <TacaCompeticao tipo={titulosDestaque.tipo} nome={titulosDestaque.nome} size={27} preferirTaca /> : <span className="w-[27px] text-center text-lg opacity-45" aria-hidden="true">🏆</span>}
               <span className="min-w-0 flex-1"><strong className={'block text-[9px] font-black uppercase tracking-[.14em] '+(titulos.length ? 'text-[#FDE68A]' : 'text-[#8B8B92]')}>Vitrine de taças</strong><span className="block text-[9px] text-[#A1A1AA] truncate">{titulosDestaque ? `${titulos.length} conquistas · última: ${titulosDestaque.nome} (${titulosDestaque.ano})` : 'Vitrine vazia'}</span></span>
               <span className="text-[10px] text-[#77777E]">{vitrineAberta ? '⌃' : '⌄'}</span>
             </button>
-            {vitrineAberta && <div className="grid grid-cols-2 gap-1.5 mt-1.5">{titulos.length ? titulos.map((x, i) => <div key={`${x.ano}-${x.nome}-${i}`} className="rounded-lg border border-white/[.06] bg-[#0B0B0D] flex items-center gap-1.5 p-1.5"><TacaCompeticao tipo={x.tipo} nome={x.nome} size={23} /><span className="min-w-0"><strong className="block text-[9px] text-[#FDE68A] truncate">{x.nome}</strong><span className="block text-[8px] text-[#8B8B92] truncate">{x.ano} · {x.clube}</span></span></div>) : <div className="col-span-2 rounded-lg bg-[#0B0B0D] px-2.5 py-3 text-center text-[9px] text-[#77777E]">As taças conquistadas aparecerão aqui.</div>}</div>}
+            {vitrineAberta && <div className="grid grid-cols-2 gap-1.5 mt-1.5">{titulos.length ? titulos.map((x, i) => <div key={`${x.ano}-${x.nome}-${i}`} className="rounded-lg border border-white/[.06] bg-[#0B0B0D] flex items-center gap-1.5 p-1.5"><TacaCompeticao tipo={x.tipo} nome={x.nome} size={23} preferirTaca /><span className="min-w-0"><strong className="block text-[9px] text-[#FDE68A] truncate">{x.nome}</strong><span className="block text-[8px] text-[#8B8B92] truncate">{x.ano} · {x.clube}</span></span></div>) : <div className="col-span-2 rounded-lg bg-[#0B0B0D] px-2.5 py-3 text-center text-[9px] text-[#77777E]">As taças conquistadas aparecerão aqui.</div>}</div>}
             <div className="flex items-center justify-between gap-2 mt-2 px-1 text-[9px] text-[#A1A1AA]"><span>Temporada {t.ano} · {temporadas.length}/{LIMITE_TEMPORADAS_TECNICO}</span><span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /><span>Diretoria {t.diretoria ?? 60}%</span></span></div>
           </header>
 

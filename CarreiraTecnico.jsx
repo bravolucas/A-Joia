@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import confetti from 'canvas-confetti';
 import { TacaCompeticao } from './trofeus.jsx';
@@ -11,11 +11,13 @@ function Escudo({ nome, size = 42 }) {
   return src ? <img src={src} alt={nome} style={{width:size,height:size,objectFit:'contain'}} /> : <div className="rounded-full bg-white/10 flex items-center justify-center text-xl" style={{width:size,height:size}}>⚽</div>;
 }
 function PopUpTitulo({ temporada, onFechar }) {
+  const onFecharRef = useRef(onFechar);
+  onFecharRef.current = onFechar;
   useEffect(() => {
     const anterior = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     confetti({particleCount:150,spread:85,origin:{y:.48},colors:['#D8B44A','#FFF2BE','#FFFFFF']});
-    const esc = e => { if(e.key === 'Escape') onFechar(); };
+    const esc = e => { if(e.key === 'Escape') onFecharRef.current(); };
     document.addEventListener('keydown',esc);
     return () => { document.body.style.overflow = anterior; document.removeEventListener('keydown',esc); };
   }, [temporada.ano]);

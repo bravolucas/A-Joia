@@ -49,7 +49,20 @@ export default function CarreiraTecnico({ c, onDecisao, onAvancar, onAceitarProp
   const chaveTitulo = ultima?.campeao ? String(ultima.ano)+'|'+ultima.clube : null;
   const mostrarTitulo = t.fase === 'resultado' && chaveTitulo && tituloVisto !== chaveTitulo;
   useEffect(() => { if (t.fase === 'resultado') setSimulando(false); }, [t.fase, temporadas.length]);
-  const escolher = id => { if(simulando) return; setSimulando(true); onDecisao(id); };
+  const escolher = id => {
+    if (simulando) return;
+    setSimulando(true);
+    try {
+      const resultado = onDecisao(id);
+      // Suporta callbacks sincronos e assincronos sem travar os botoes apos falhas.
+      if (resultado && typeof resultado.then === 'function') {
+        Promise.resolve(resultado).catch(() => setSimulando(false));
+      }
+    } catch (erro) {
+      setSimulando(false);
+      throw erro;
+    }
+  };
   return <div className="max-w-xl mx-auto px-4 py-5 flex flex-col gap-4 rp-entra">
     {mostrarTitulo && <PopUpTitulo temporada={ultima} onFechar={() => setTituloVisto(chaveTitulo)}/>}
     <header className="rp-painel p-5">

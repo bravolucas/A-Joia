@@ -1,5 +1,6 @@
 import { CLUBES, CLASSICOS } from './data.js';
 import { EVENTOS_CONTEXTO_TECNICO } from './eventosTecnico.js';
+import { competicaoDoTitulo } from './tacas.js';
 // Continuação da mesma carreira, sem alterar o histórico do atleta.
 export const ESTILOS_TECNICO = [
   { id: 'ofensivo', nome: 'Ofensivo', descricao: 'Mais gols e mais riscos.' },
@@ -54,7 +55,7 @@ export function competicaoTemporadaTecnico(a = {}) {
   const liga = a.liga || CLUBES.find(clube => clube.nome === a.clube)?.liga;
   return NOMES_COMPETICOES_TECNICO[liga] || (liga ? String(liga) : 'Campeonato nacional');
 }
-export const titulosConquistadosTecnico = (t) => (t?.temporadas || []).flatMap(a => a.campeao ? [{ ano: a.ano, clube: a.clube, nome: competicaoTemporadaTecnico(a), tipo: 'liga' }] : []);
+export const titulosConquistadosTecnico = (t) => (t?.temporadas || []).flatMap(a => a.campeao ? [{ ano: a.ano, clube: a.clube, nome: competicaoTemporadaTecnico(a), tipo: competicaoDoTitulo(competicaoTemporadaTecnico(a)).tipo }] : []);
 export const TODAS_CARTAS_TECNICO = [...DECISOES_TECNICO, ...EVENTOS_CONTEXTO_TECNICO];
 export function elegivelTecnico(carta, t) {
   switch (carta.contexto) {

@@ -90,3 +90,14 @@ test('calendario de liga completa tem turno e returno sem confrontos duplicados'
   assert.equal(rodadas.filter(j => j.casa).length,19);
   assert.equal(rodadas.filter(j => !j.casa).length,19);
 });
+
+test('clube legado fora da lista substitui um participante sem gerar liga de 21 clubes', () => {
+  const clube = 'Clube de Save Antigo';
+  const calendario = calendarioLigaTecnico({clube, liga:'brasileirao', elenco:55});
+  assert.ok(calendario, 'Clube legado deve integrar calendario de 20 participantes');
+  assert.equal(calendario.length,38);
+  assert.equal(calendario.flat().length,380);
+  const jogosClube = calendario.flat().filter(j=>j.casa===clube||j.fora===clube);
+  assert.equal(jogosClube.length,38);
+  assert.equal(jogosClube.filter(j=>j.casa===clube).length,19);
+});

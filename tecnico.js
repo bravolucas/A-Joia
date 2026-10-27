@@ -399,7 +399,8 @@ export function calendarioAdversariosTecnico(t = {}) {
       casa: partida.casa === nomeMeuClube };
   });
   const clube = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
-  const candidatos = CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube && (!clube || x.liga === clube.liga))
+  const ligaAtual = t.liga || clube?.liga;
+  const candidatos = CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube && (!ligaAtual || x.liga === ligaAtual))
     .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
   if (!candidatos.length) return Array.from({ length: 38 }, (_, i) => ({ rodada: i + 1, nome: 'Adversário', forca: 50, casa: i % 2 === 0 }));
   return Array.from({ length: 38 }, (_, i) => {
@@ -409,7 +410,7 @@ export function calendarioAdversariosTecnico(t = {}) {
 }
 export function probabilidadesConfrontoTecnico(t, adversario) {
   const diferenca = forcaClubeTecnico(t) - (adversario?.forca ?? 50);
-  const mando = adversario?.casa ? -0.035 : 0.035;
+  const mando = adversario?.casa ? 0.035 : -0.035;
   const vitoria = limitar(0.44 + diferenca * 0.008 + mando, 0.16, 0.72);
   const empate = limitar(0.27 - Math.abs(diferenca) * 0.002, 0.16, 0.27);
   return { vitoria, empate, derrota: 1 - vitoria - empate };

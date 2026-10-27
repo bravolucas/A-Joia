@@ -346,6 +346,8 @@ export function calendarioLigaTecnico(t = {}) {
   const participantes = CLUBES_CONVITES_TECNICO.filter(x => !liga || x.liga === liga)
     .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
   if (!participantes.some(x => x.nome === t.clube)) {
+    // Um clube de save antigo substitui um participante da liga; nao cria 21 times.
+    if (participantes.length === 20) participantes.pop();
     participantes.unshift({ nome: t.clube || 'Meu clube', elenco: t.elenco ?? 50 });
   }
   if (participantes.length !== 20) return null;

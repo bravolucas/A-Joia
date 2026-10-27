@@ -55,7 +55,7 @@ export function competicaoTemporadaTecnico(a = {}) {
   const liga = a.liga || CLUBES.find(clube => clube.nome === a.clube)?.liga;
   return NOMES_COMPETICOES_TECNICO[liga] || (liga ? String(liga) : 'Campeonato nacional');
 }
-export const titulosConquistadosTecnico = (t) => (t?.temporadas || []).flatMap(a => a.campeao ? [{ ano: a.ano, clube: a.clube, nome: competicaoTemporadaTecnico(a), tipo: competicaoDoTitulo(competicaoTemporadaTecnico(a)).tipo }] : []);
+export const titulosConquistadosTecnico = (t) => (t?.temporadas || []).flatMap(a => (Array.isArray(a.titulosConquistados) ? a.titulosConquistados : (a.campeao ? [competicaoTemporadaTecnico(a)] : [])).map(nome => ({ ano: a.ano, clube: a.clube, nome, tipo: competicaoDoTitulo(nome).tipo })));
 export const TODAS_CARTAS_TECNICO = [...DECISOES_TECNICO, ...EVENTOS_CONTEXTO_TECNICO];
 export function elegivelTecnico(carta, t) {
   switch (carta.contexto) {
@@ -623,6 +623,23 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   const cumpriuObjetivo = posicao <= objetivo.posicao;
   const promessaDescumprida = !!(t.promessaContrato && t.promessaContrato.clube === t.clube && posicao > t.promessaContrato.posicaoMaxima);
   const temporada = { ano: t.ano, clube: t.clube, ...(CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga || t.liga ? { liga: CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga || t.liga } : {}), idoloEmCasa, objetivo: objetivo.nome, cumpriuObjetivo, promessaDescumprida, estilo: t.estilo, decisoes: t.decisoes, vitorias, empates, derrotas, pontos, posicao, campeao, classificacao };
+  const copasPorLiga = {
+    brasileirao: ['Copa do Brasil', 'Copa Libertadores'], serieB: ['Copa do Brasil'],
+    argentina: ['Copa Argentina', 'Copa Libertadores'], portugal: ['Taça de Portugal', 'UEFA Champions League'],
+    espanha: ['Copa del Rey', 'UEFA Champions League'], inglaterra: ['FA Cup', 'UEFA Champions League'],
+    italia: ['Coppa Italia', 'UEFA Champions League'], alemanha: ['DFB-Pokal', 'UEFA Champions League'],
+    franca: ['Coupe de France', 'UEFA Champions League']
+  };
+  const copas = copasPorLiga[temporada.liga] || [];
+  temporada.titulosConquistados = [
+    ...(campeao ? [competicaoTemporadaTecnico(temporada)] : []),
+    ...copas.filter((nome, indice) => {
+      const continental = indice === 1;
+      const elegivel = !continental || posicao <= 6 || (t.temporadas?.at(-1)?.posicao ?? 20) <= 6;
+      const chance = continental ? 0.025 : 0.065;
+      return elegivel && rng() < chance;
+    })
+  ];
   const novaConfianca = limitar((t.diretoria ?? 60) + (cumpriuObjetivo ? 8 : -14) + (posicao <= 4 ? 5 : posicao >= 15 ? -8 : 0)
     + (idoloEmCasa && !cumpriuObjetivo ? -4 : 0) - (promessaDescumprida ? 12 : 0), 0, 100);
   const variacaoTorcida = (campeao ? 18 : posicao <= 4 ? 10 : cumpriuObjetivo ? 5 : posicao >= 17 ? -23 : -12)
@@ -635,7 +652,7 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   return { ...c, idade: c.idade + 1, ano: c.ano + 1, tecnico: {
     ...t, ano: t.ano + 1, fase: 'resultado', temporadas: [...t.temporadas, temporada],
     vitorias: (t.vitorias ?? 0) + vitorias, empates: (t.empates ?? 0) + empates, derrotas: (t.derrotas ?? 0) + derrotas,
-    titulos: (t.titulos ?? 0) + (campeao ? 1 : 0), demitido, propostas, promessaContrato: null, objetivoAtual: objetivo.nome,
+    titulos: (t.titulos ?? 0) + temporada.titulosConquistados.length, demitido, propostas, promessaContrato: null, objetivoAtual: objetivo.nome,
     reputacao: limitar((t.reputacao ?? 50) + (campeao ? 9 : posicao <= 4 ? 5 : posicao >= 15 ? -5 : 1), 10, 99),
     diretoria: novaConfianca, torcida: novaTorcida
   }};

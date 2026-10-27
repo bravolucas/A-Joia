@@ -37,3 +37,24 @@ test('nomes de taças do treinador usam desenhos específicos', () => {
   assert.deepEqual(desenhoDaTaca('liga', 'Campeonato Brasileiro Série A'), desenhoDaTaca('liga', 'Brasileirão'));
   assert.deepEqual(desenhoDaTaca('segunda', 'Campeonato Brasileiro Série B'), desenhoDaTaca('segunda', 'Brasileirão Série B'));
 });
+
+test('30 temporadas expressas acumulam histórico e encerram a carreira', () => {
+  let c = iniciarCarreiraTecnico(atleta);
+  c = iniciarNoClubeIdolo(c, c.tecnico.opcoesInicio[0].clube);
+  const anoInicial = c.tecnico.ano;
+  for (let i = 0; i < LIMITE_TEMPORADAS_TECNICO; i++) {
+    c = jogarTemporadaExpressaTecnico(c, null, () => 0.48);
+    assert.equal(c.tecnico.temporadas.length, i + 1);
+    assert.equal(c.tecnico.temporadas[i].ano, anoInicial + i);
+    assert.equal(c.tecnico.temporadas[i].vitorias + c.tecnico.temporadas[i].empates + c.tecnico.temporadas[i].derrotas, 38);
+    assert.equal(c.tecnico.temporadas[i].classificacao.find(x => x.meuClube).posicao, c.tecnico.temporadas[i].posicao);
+    if (i < LIMITE_TEMPORADAS_TECNICO - 1) {
+      // A demissão é desativada neste teste para isolar o limite de temporadas.
+      c = proximaTemporadaTecnico({ ...c, tecnico: { ...c.tecnico, demitido: false, desempregado: false } });
+    }
+  }
+  assert.equal(c.tecnico.ano, anoInicial + LIMITE_TEMPORADAS_TECNICO);
+  assert.equal(c.tecnico.temporadas.length, 30);
+  assert.equal(carreiraTecnicoEncerrada(c.tecnico), true);
+  assert.throws(() => jogarTemporadaExpressaTecnico({ ...c, tecnico: { ...c.tecnico, fase: 'pretemporada' } }, null, sorteio), /encerrada/);
+});

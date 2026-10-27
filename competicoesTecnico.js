@@ -97,9 +97,10 @@ function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng) {
       jogos.push(jogo);
     }
     const fase = nomesFase[Math.max(0, 4 - Math.ceil(Math.log2(rodada.length)))];
-    jogos.forEach(jogo => { if (!jogo.bye) jogo.fase = fase; });
+    const rodadaNumero = fases.length + 1;
+    jogos.forEach(jogo => { if (!jogo.bye) { jogo.fase = fase; jogo.rodada = rodadaNumero; } });
     const vencedores = jogos.map(j => rodada.find(c => c.nome === j.vencedor));
-    fases.push({ fase, jogos });
+    fases.push({ fase, rodada: rodadaNumero, jogos });
     rodada = vencedores.filter(Boolean);
   }
   const campeao = rodada[0]?.nome || null;
@@ -141,12 +142,16 @@ export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forca
   grupos.forEach((grupo, indice) => {
     const tabela = new Map(grupo.map(c => [c.nome, { ...c, pontos: 0, jogos: 0, vitorias: 0, empates: 0, derrotas: 0, golsPro: 0, golsContra: 0 }]));
     const jogos = [];
-    for (let i = 0; i < grupo.length; i++) for (let j = i + 1; j < grupo.length; j++) {
-      for (const [casa, fora] of [[grupo[i], grupo[j]], [grupo[j], grupo[i]]]) {
-        const jogo = { ...criarPartida(casa, fora, nomeUsuario, bonusTecnico, rng), fase: `Fase de grupos · Grupo ${String.fromCharCode(65 + indice)}` };
-        jogos.push(jogo); registrarJogo(tabela, jogo);
-      }
-    }
+    const rodadasGrupo = [
+      [[0, 3], [1, 2]], [[0, 2], [3, 1]], [[0, 1], [2, 3]],
+      [[3, 0], [2, 1]], [[2, 0], [1, 3]], [[1, 0], [3, 2]]
+    ];
+    rodadasGrupo.forEach((partidas, rodadaIdx) => partidas.forEach(([casaIdx, foraIdx]) => {
+      const casa = grupo[casaIdx], fora = grupo[foraIdx];
+      const jogo = { ...criarPartida(casa, fora, nomeUsuario, bonusTecnico, rng),
+        fase: `Fase de grupos · Grupo ${String.fromCharCode(65 + indice)}`, rodada: rodadaIdx + 1 };
+      jogos.push(jogo); registrarJogo(tabela, jogo);
+    }));
     const classificacao = classificarGrupo([...tabela.values()], jogos, rng);
     jogosGrupo.push({ grupo: String.fromCharCode(65 + indice), jogos, classificacao: classificacao.map(({ nome:n, pontos, golsPro, golsContra, vitorias }) => ({ nome:n, pontos, golsPro, golsContra, vitorias })) });
     classificados.push(...classificacao.slice(0, 2));

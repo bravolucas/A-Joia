@@ -313,7 +313,7 @@ export function iniciarCarreiraTecnico(c) {
   if (!c?.aposentado) throw new Error('O jogador precisa se aposentar primeiro.');
   if (c.tecnico) return c;
   const legado = c.legado?.pontos || 0;
-  const reputacao = limitar(Math.round(25 + legado / 22), 25, 85);
+  const reputacao = limitar(Math.round(25 + (Number.isFinite(legado) ? legado : 0) / 22), 25, 85);
   const vinculosJogador = vinculosComoJogador(c);
   const opcoesInicio = opcoesInicioTecnico(c);
   const clubeInicial = opcoesInicio[0]?.clube || c.clubeNome || 'Clube inicial';

@@ -93,7 +93,10 @@ export function desenhoDaTaca(tipo = "liga", nome = null) {
     'UEFA Champions League': 'Champions League',
     'CONMEBOL Libertadores': 'Libertadores',
     'Campeonato Brasileiro Série A': 'Brasileirão',
-    'Campeonato Brasileiro Série B': 'Brasileirão Série B',\n    'Serie B': 'Brasileirão Série B',\n    'Série B': 'Brasileirão Série B',\n    'Brasileirao Serie B': 'Brasileirão Série B'
+    'Campeonato Brasileiro Série B': 'Brasileirão Série B',
+    'Serie B': 'Brasileirão Série B',
+    'Série B': 'Brasileirão Série B',
+    'Brasileirao Serie B': 'Brasileirão Série B'
   };
   if (nome && aliases[nome] && FIXAS[aliases[nome]]) return { ...FIXAS[aliases[nome]] };
   if (!nome) return { ...(PADRAO[tipo] || PADRAO.liga) };

@@ -53,3 +53,15 @@ test('simulacao expressa suporta save antigo sem atributo de elenco', () => {
   assert.equal(c.tecnico.temporadas.length,1);
   assert.equal(c.tecnico.temporadas[0].vitorias+c.tecnico.temporadas[0].empates+c.tecnico.temporadas[0].derrotas,38);
 });
+
+test('save legado sem contadores preserva estatisticas numericas apos temporada', () => {
+  let c = criarJogador({nome:'Historico',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:9,ritmo:'equilibrado',codigo:'HISTORICO'});
+  for(let i=0;i<18;i++){const r=jogarTemporada(c);c=fecharTemporada(r.c,r.card).c;}
+  c=iniciarCarreiraTecnico(aposentar(c));
+  if(c.tecnico.opcoesInicio?.length)c=iniciarNoClubeIdolo(c,c.tecnico.opcoesInicio[0].clube);
+  c={...c,tecnico:{...c.tecnico,reputacao:undefined,diretoria:undefined,vitorias:undefined,empates:undefined,derrotas:undefined,titulos:undefined}};
+  const carta=cartaAtualTecnico(c.tecnico);
+  c=jogarTemporadaExpressaTecnico(c,carta.opcoes[0].id,()=>0.5);
+  for(const chave of ['reputacao','diretoria','vitorias','empates','derrotas','titulos']) assert.ok(Number.isFinite(c.tecnico[chave]),chave);
+  assert.equal(c.tecnico.vitorias+c.tecnico.empates+c.tecnico.derrotas,38);
+});

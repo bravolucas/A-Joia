@@ -65,3 +65,9 @@ test('treinador: titulo de segunda divisao tem tipo de taca proprio', () => {
   assert.deepEqual(titulos.map(t=>t.tipo), ['segunda','segunda','segunda']);
   assert.notEqual(svgDaTaca(titulos[0].tipo,titulos[0].nome),svgDaTaca('liga',titulos[0].nome));
 });
+
+test('Championship nao se confunde com Champions League', () => {
+  assert.equal(competicaoDoTitulo('Championship').tipo, 'segunda');
+  assert.equal(competicaoDoTitulo('Champions League').tipo, 'continental');
+  assert.equal(competicaoDoTitulo('UEFA Champions League').tipo, 'continental');
+});

@@ -106,7 +106,7 @@ for (const width of [390, 1366]) {
       await page.getByRole('button', { name: /Continuar · Teste responsivo técnico/ }).click();
       await expect(page.getByRole('dialog', { name: cenario.dialogo })).toBeVisible();
       await expect(page.getByRole('heading', { name: cenario.titulo })).toBeVisible();
-      if (cenario.id === 'titulo') await expect(page.locator('[role="dialog"] svg')).toBeVisible();
+      if (cenario.id === 'titulo') await expect(page.locator('[role="dialog"] img[src*="copa-do-brasil"]')).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
       expect(erros).toEqual([]);
       await page.screenshot({ path: `test-results/treinador-${cenario.id}-${width}.png`, fullPage: true });

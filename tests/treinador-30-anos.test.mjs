@@ -101,3 +101,20 @@ test('clube legado fora da lista substitui um participante sem gerar liga de 21 
   assert.equal(jogosClube.length,38);
   assert.equal(jogosClube.filter(j=>j.casa===clube).length,19);
 });
+
+test('simulacao direta dispensa carta de pretemporada e preserva classificacao no save', () => {
+  let c = criarJogador({ nome:'Direto', nac:'BRA', posicao:'ATA', personalidade:'equilibrado', origem:'base', pe:'destro', numero:9, codigo:'DIRETO-TESTE' });
+  c = iniciarCarreiraTecnico(aposentar(c));
+  if (c.tecnico.opcoesInicio?.length) c = iniciarNoClubeIdolo(c, c.tecnico.opcoesInicio[0].clube);
+  c = jogarTemporadaExpressaTecnico(c, null, () => 0.43);
+  assert.equal(c.tecnico.fase, 'resultado');
+  assert.equal(c.tecnico.temporadas.length, 1);
+  const ultima = c.tecnico.temporadas[0];
+  assert.equal(ultima.vitorias + ultima.empates + ultima.derrotas, 38);
+  assert.equal(ultima.pontos, ultima.vitorias * 3 + ultima.empates);
+  assert.ok(Array.isArray(ultima.classificacao));
+  assert.equal(ultima.classificacao.filter(x => x.meuClube).length, 1);
+  assert.equal(ultima.classificacao.find(x => x.meuClube).posicao, ultima.posicao);
+  const restaurado = JSON.parse(JSON.stringify(c));
+  assert.deepEqual(restaurado.tecnico.temporadas[0].classificacao, ultima.classificacao);
+});

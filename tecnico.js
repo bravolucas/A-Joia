@@ -334,8 +334,8 @@ export function probabilidadesTecnico(t = {}) {
   const moral = limitar(t.moral ?? 50, 10, 95);
   const reputacao = limitar(t.reputacao ?? 40, 10, 99);
   const bonusEstilo = t.estilo === 'equilibrado' ? 0.015 : t.estilo === 'ofensivo' ? 0.025 : -0.015;
-  const vitoria = limitar(0.23 + (forca - 60) * 0.004 + (moral - 50) * 0.0008 +
-    (reputacao - 50) * 0.00035 + bonusEstilo * 0.4, 0.15, 0.52);
+  const vitoria = limitar(0.16 + (forca - 35) * 0.0075 + (moral - 50) * 0.0015 +
+    (reputacao - 50) * 0.001 + bonusEstilo, 0.16, 0.69);
   const empate = t.estilo === 'defensivo' ? 0.29 : t.estilo === 'ofensivo' ? 0.18 : 0.24;
   return { vitoria, empate: Math.min(empate, 0.94 - vitoria), derrota: Math.max(0.06, 1 - vitoria - empate) };
 }
@@ -382,9 +382,9 @@ export function calendarioAdversariosTecnico(t = {}) {
 }
 export function probabilidadesConfrontoTecnico(t, adversario) {
   const base = probabilidadesTecnico(t);
-  const diferenca = limitar(((t.elenco ?? 50) - (adversario?.forca ?? 50)) * 0.008, -0.27, 0.27);
+  const diferenca = limitar(((t.elenco ?? 50) - (adversario?.forca ?? 50)) * 0.005, -0.24, 0.24);
   const mando = adversario?.casa ? 0.035 : -0.035;
-  const vitoria = limitar(base.vitoria + diferenca + mando, 0.08, 0.65);
+  const vitoria = limitar(base.vitoria + diferenca + mando, 0.10, 0.78);
   const empate = Math.min(base.empate, 0.93 - vitoria);
   return { vitoria, empate, derrota: 1 - vitoria - empate };
 }
@@ -596,8 +596,11 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   if (t.andamento?.jogos) throw new Error('Temporada em andamento: avance pelas etapas.');
   const calendario = calendarioAdversariosTecnico(t);
   let vitorias = 0, empates = 0, derrotas = 0;
-  for (const adversario of calendario) {
-    const { vitoria, empate } = probabilidadesConfrontoTecnico(t, adversario);
+  for (let rodada = 0; rodada < 38; rodada++) {
+    const adversario = calendario[rodada % calendario.length];
+    const base = probabilidadesConfrontoTecnico(t, adversario);
+    const vitoria = limitar(0.23 + (t.elenco - 60) * 0.004 + ((t.moral ?? 50) - 50) * 0.0008 + ((t.reputacao ?? 50) - 50) * 0.00035 + ((t.elenco ?? 50) - (adversario?.forca ?? 50)) * 0.008 + (adversario?.casa ? 0.035 : -0.035), 0.11, 0.52);
+    const empate = Math.min(base.empate, 0.95 - vitoria);
     const r = rng();
     if (r < vitoria) vitorias++;
     else if (r < vitoria + empate) empates++;

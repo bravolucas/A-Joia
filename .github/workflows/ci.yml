@@ -1,0 +1,24 @@
+name: Validar A JOIA
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  testes-e-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Instalar dependências
+        run: npm ci
+      - name: Executar testes
+        run: npm test
+      - name: Gerar versão de produção
+        run: npm run build

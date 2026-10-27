@@ -28,7 +28,7 @@ function PopUpTitulo({ temporada, onFechar }) {
       <div className="flex justify-center flex-wrap gap-4 my-6" style={{filter:'drop-shadow(0 0 24px #D8B44A80)'}}>{(temporada.titulosConquistados?.length ? temporada.titulosConquistados : [competicaoTemporadaTecnico(temporada)]).map(nome => <TacaCompeticao key={nome} tipo={competicaoDoTitulo(nome).tipo} nome={nome} size={temporada.titulosConquistados?.length > 1 ? 95 : 142}/>)}</div>
       <div className="flex flex-col gap-2 items-center">{(temporada.titulosConquistados?.length ? temporada.titulosConquistados : [competicaoTemporadaTecnico(temporada)]).map(nome => <p key={nome} className="text-[#F4D67A] font-bold text-lg">🏆 {nome}</p>)}</div>
       <div className="flex items-center justify-center gap-3 mt-3"><Escudo nome={temporada.clube} size={35}/><span className="text-white font-bold text-lg">{temporada.clube}</span></div>
-      <p className="text-[#B6C2BA] text-sm mt-3">{temporada.pontos} pontos · {temporada.vitorias} vitórias</p>
+      <p className="text-[#B6C2BA] text-sm mt-3">{temporada.posicao}º na liga · {temporada.pontos} pontos · {temporada.vitorias} vitórias</p>
       <button autoFocus onClick={onFechar} className="rp-btn rp-ouro w-full mt-7">Continuar carreira</button>
     </div>
   </div>,document.body);

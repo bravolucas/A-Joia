@@ -296,7 +296,7 @@ export function aceitarPropostaTecnico(c, clube) {
   if (!proposta) throw new Error('Proposta indisponível.');
   return { ...c, tecnico: { ...t, clube: proposta.nome, pais: proposta.pais, elenco: proposta.elenco,
     moral: 50, diretoria: proposta.rival ? 48 : 65, torcida: proposta.rival ? 35 : 55,
-    demitido: false, desempregado: false, promessaContrato: null, retornoIdolo: !!(t.vinculosJogador || []).find(v => v.clube === proposta.nome && v.idolatria), propostas: [], salario: proposta.salario } };
+    demitido: false, desempregado: false, anosDesempregado: 0, promessaContrato: null, retornoIdolo: !!(t.vinculosJogador || []).find(v => v.clube === proposta.nome && v.idolatria), propostas: [], salario: proposta.salario } };
 }
 export function passarAnoDesempregado(c, rng = sorteio) {
   if (!c?.tecnico || c.tecnico.fase !== 'resultado') throw new Error('Só é possível aguardar entre temporadas.');
@@ -635,7 +635,9 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
     ...(campeao ? [competicaoTemporadaTecnico(temporada)] : []),
     ...copas.filter((nome, indice) => {
       const continental = indice === 1;
-      const elegivel = !continental || (t.temporadas?.at(-1)?.posicao ?? 20) <= 6;
+      const anterior = t.temporadas?.at(-1);
+      // A vaga continental pertence ao clube, não ao histórico do treinador.
+      const elegivel = !continental || (anterior?.clube === t.clube && anterior?.liga === temporada.liga && anterior?.posicao <= 6);
       const forca = limitar(((t.elenco ?? 50) - 50) / 100, -0.35, 0.45);
       const chance = limitar((continental ? 0.025 : 0.065) * (1 + forca) * (posicao <= 4 ? 1.25 : 1), 0.005, continental ? 0.065 : 0.12);
       return elegivel && rng() < chance;

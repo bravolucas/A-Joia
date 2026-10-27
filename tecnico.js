@@ -715,27 +715,24 @@ export function escolherOpcaoAutomaticaTecnico(opcoes, rng = sorteio) {
   return opcoes[indice].id;
 }
 
-/** Fluxo expresso: uma escolha visível por temporada, sem alterar saves antigos. */
+/** Fluxo expresso sem decisões de pré-temporada. Mantém saves antigos compatíveis. */
 export function jogarTemporadaExpressaTecnico(c, opcaoId, rng = sorteio) {
   if (!c?.tecnico || c.tecnico.fase !== 'pretemporada') throw new Error('Temporada indisponível.');
   if (carreiraTecnicoEncerrada(c.tecnico)) throw new Error('Carreira de treinador encerrada.');
   if (c.tecnico.temporadas.length === 0 && !c.tecnico.clubeInicialEscolhido && c.tecnico.opcoesInicio?.length) throw new Error('Escolha o clube inicial.');
   let atual = c;
-  // Respeita a escolha visível inclusive nos saves antigos que já possuem
-  // uma ou mais decisões tomadas nesta temporada.
-  if ((atual.tecnico.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) {
-    const carta = cartaAtualTecnico(atual.tecnico);
-    const escolha = opcaoId ?? (carta?.opcoes?.length ? escolherOpcaoAutomaticaTecnico(carta.opcoes, rng) : null);
-    atual = tomarDecisaoTecnico(atual, escolha, rng);
+  // A simulação rápida não sorteia escolhas ocultas nem concede bônus arbitrários.
+  // Registros neutros satisfazem a validação do motor legado sem alterar atributos.
+  const feitas = atual.tecnico.decisoes || [];
+  if (feitas.length < QUANTIDADE_DECISOES_TECNICO) {
+    const restantes = Array.from({ length: QUANTIDADE_DECISOES_TECNICO - feitas.length }, (_, i) => ({
+      carta: 'simulacao_expressa', opcao: 'neutra', nome: 'Simulação automática',
+      resultado: 'Temporada simulada sem decisões de pré-temporada.',
+      riscoAtivado: false
+    }));
+    atual = { ...atual, tecnico: { ...atual.tecnico, decisoes: [...feitas, ...restantes] } };
   }
-  // Saves da interface anterior podem ter decisões parcialmente concluídas.
-  while ((atual.tecnico.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) {
-    const carta = cartaAtualTecnico(atual.tecnico);
-    if (!carta?.opcoes?.length) throw new Error('Não foi possível preparar a temporada.');
-    // As decisões ocultas não devem favorecer sempre a primeira alternativa.
-    atual = tomarDecisaoTecnico(atual, escolherOpcaoAutomaticaTecnico(carta.opcoes, rng), rng);
-  }
-  // Se a temporada antiga já começou, conclui suas etapas preservando o andamento.
+  // Saves antigos com rodadas em andamento são concluídos sem reiniciar resultados.
   if (atual.tecnico.andamento?.jogos) {
     while (atual.tecnico.fase === 'pretemporada') {
       if (atual.tecnico.reuniaoPendente) atual = reuniaoEmergenciaTecnico(atual, 'responsabilidade', rng);

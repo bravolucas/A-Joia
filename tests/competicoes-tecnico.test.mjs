@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { simularCopaNacionalTecnico, simularCopaContinentalTecnico } from '../competicoesTecnico.js';
 import { gerarPropostasTecnico, salarioTecnico } from '../tecnico.js';
+import { competicaoDoTitulo } from '../tacas.js';
 
 function rngSeed(seed) {
   return () => {
@@ -47,4 +48,10 @@ test('OVR e estatísticas históricas não alteram salário ou propostas do trei
   const experiente = { ...base, titulos: 9, vitorias: 500, empates: 80, derrotas: 30 };
   assert.equal(salarioTecnico(iniciante), salarioTecnico(experiente));
   assert.deepEqual(gerarPropostasTecnico(iniciante, rngSeed(43)), gerarPropostasTecnico(experiente, rngSeed(43)));
+});
+
+test('taças de ligas adicionadas usam o visual de copa', () => {
+  assert.equal(competicaoDoTitulo('KNVB Beker').tipo, 'copa');
+  assert.equal(competicaoDoTitulo('Türkiye Kupası').tipo, 'copa');
+  assert.equal(competicaoDoTitulo('AFC Champions League Elite').tipo, 'continental');
 });

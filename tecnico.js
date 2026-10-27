@@ -1,6 +1,7 @@
 import { CLUBES, CLASSICOS } from './data.js';
 import { EVENTOS_CONTEXTO_TECNICO } from './eventosTecnico.js';
 import { competicaoDoTitulo } from './tacas.js';
+import { simularCopaNacionalTecnico, simularCopaContinentalTecnico } from './competicoesTecnico.js';
 // Continuação da mesma carreira, sem alterar o histórico do atleta.
 export const ESTILOS_TECNICO = [
   { id: 'ofensivo', nome: 'Ofensivo', descricao: 'Mais gols e mais riscos.' },
@@ -234,14 +235,14 @@ export const CLUBES_CONVITES_TECNICO = CLUBES.map(x => ({
 export function salarioTecnico(t) {
   const clube = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
   const base = clube?.salario ?? 12;
-  return Math.round(base * (0.65 + calcularOvrTecnico(t) / 140));
+  return Math.round(base * (0.65 + limitar(t.reputacao ?? 40, 10, 99) / 140));
 }
 export function gerarPropostasTecnico(t, rng = sorteio) {
-  const ovr = calcularOvrTecnico(t);
+  const reputacao = limitar(t.reputacao ?? 40, 10, 99);
   const clubesPassados = new Set((t.temporadas || []).map(x => x.clube));
   const vinculosJogador = new Map((t.vinculosJogador || []).map(x => [x.clube, x]));
   const clubeAtual = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
-  const elegiveis = CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube && (ovr >= x.exigencia || (vinculosJogador.get(x.nome)?.idolatria && ovr >= x.exigencia - 16)))
+  const elegiveis = CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube && (reputacao >= x.exigencia || (vinculosJogador.get(x.nome)?.idolatria && reputacao >= x.exigencia - 16)))
     .map(x => {
       const mesmoPais = !!clubeAtual && x.pais === clubeAtual.pais;
       const retorno = clubesPassados.has(x.nome);
@@ -251,7 +252,7 @@ export function gerarPropostasTecnico(t, rng = sorteio) {
         const nomes = Array.isArray(derby) ? derby : [derby.a, derby.b, derby.casa, derby.fora, derby.clube1, derby.clube2];
         return nomes.includes(x.nome) && nomes.includes(t.clube);
       });
-      const chance = limitar(0.38 + (ovr - x.exigencia) / 160 + (mesmoPais ? 0.15 : -0.06)
+      const chance = limitar(0.38 + (reputacao - x.exigencia) / 160 + (mesmoPais ? 0.15 : -0.06)
         + (retorno ? 0.12 : 0) + bonusIdolo - (rival ? 0.30 : 0) + ((t.temporadas || []).length >= 4 ? 0.08 : 0), 0.06, 0.90);
       return { ...x, chance, rival, retorno, objetivo: objetivoTecnico({ ...t, clube: x.nome, elenco: x.elenco }).nome };
     });
@@ -274,8 +275,8 @@ export function negociarContratoTecnico(c, clube, estrategia = 'prudente', rng =
   const proposta = (t.propostas || []).find(p => p.nome === clube);
   const opcao = ENTREVISTAS_TECNICO.find(x => x.id === estrategia);
   if (!proposta || !opcao) throw new Error('Proposta ou estratégia inválida.');
-  const ovr = calcularOvrTecnico(t);
-  const risco = limitar(opcao.risco + Math.max(0, proposta.exigencia + opcao.exigenciaExtra - ovr) / 100, 0, 0.9);
+  const reputacao = limitar(t.reputacao ?? 40, 10, 99);
+  const risco = limitar(opcao.risco + Math.max(0, proposta.exigencia + opcao.exigenciaExtra - reputacao) / 100, 0, 0.9);
   if (rng() < risco) {
     return { ...c, tecnico: { ...t, propostas: t.propostas.filter(p => p.nome !== clube),
       ultimaNegociacao: { clube, estrategia, aceita: false, motivo: 'A diretoria recusou suas condições.' } } };
@@ -663,23 +664,42 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
     ...(movimento?.tipo === 'acesso' ? { acesso: { de: movimento.de, para: movimento.para } } : {})
   };
   const copasPorLiga = {
-    brasileirao: ['Copa do Brasil', 'Copa Libertadores'], serieB: ['Copa do Brasil'],
-    argentina: ['Copa Argentina', 'Copa Libertadores'], portugal: ['Taça de Portugal', 'UEFA Champions League'],
-    espanha: ['Copa del Rey', 'UEFA Champions League'], inglaterra: ['FA Cup', 'UEFA Champions League'],
-    italia: ['Coppa Italia', 'UEFA Champions League'], alemanha: ['DFB-Pokal', 'UEFA Champions League'],
-    franca: ['Coupe de France', 'UEFA Champions League']
+    brasileirao: 'Copa do Brasil', serieB: 'Copa do Brasil',
+    argentina: 'Copa Argentina', portugal: 'Taça de Portugal', portugal2: 'Taça de Portugal',
+    espanha: 'Copa del Rey', espanha2: 'Copa del Rey', inglaterra: 'FA Cup', inglaterra2: 'FA Cup',
+    italia: 'Coppa Italia', italia2: 'Coppa Italia', alemanha: 'DFB-Pokal', franca: 'Coupe de France', franca2: 'Coupe de France'
   };
-  const copas = copasPorLiga[ligaAtual] || [];
-  const forca = forcaClubeTecnico(t);
+  const continentaisPorLiga = {
+    brasileirao: 'Copa Libertadores', serieB: null, argentina: 'Copa Libertadores',
+    portugal: 'UEFA Champions League', portugal2: null, espanha: 'UEFA Champions League', espanha2: null,
+    inglaterra: 'UEFA Champions League', inglaterra2: null, italia: 'UEFA Champions League', italia2: null,
+    alemanha: 'UEFA Champions League', franca: 'UEFA Champions League', franca2: null
+  };
+  const bonusTecnico = ((t.moral ?? 50) - 50) * 0.06
+    + (t.estilo === 'ofensivo' ? 1.5 : t.estilo === 'defensivo' ? 0.5 : 1);
+  const torneios = [];
+  const copaNome = copasPorLiga[ligaAtual];
+  if (copaNome) torneios.push(simularCopaNacionalTecnico({
+    clubes: CLUBES_CONVITES_TECNICO, nomeUsuario: t.clube, pais: t.pais,
+    forcaUsuario: t.elenco ?? forcaClubeTecnico(t), nome: copaNome, bonusTecnico, rng
+  }));
+  const torneioAnterior = t.temporadas?.at(-1);
+  const vagaContinental = !/(?:2|serieB)$/i.test(ligaAtual || '') &&
+    (torneioAnterior
+      ? torneioAnterior.clube === t.clube && !/(?:2|serieB)$/i.test(torneioAnterior.liga || '') && torneioAnterior.posicao <= 6
+      : forcaClubeTecnico(t) >= 78);
+  const continentalNome = continentaisPorLiga[ligaAtual];
+  if (continentalNome && vagaContinental) {
+    const continental = simularCopaContinentalTecnico({
+      clubes: CLUBES_CONVITES_TECNICO, nomeUsuario: t.clube, pais: t.pais,
+      forcaUsuario: t.elenco ?? forcaClubeTecnico(t), nome: continentalNome, bonusTecnico, rng
+    });
+    if (continental) torneios.push(continental);
+  }
+  temporada.torneios = torneios;
   temporada.titulosConquistados = [
     ...(campeao ? [competicaoTemporadaTecnico(temporada)] : []),
-    ...copas.filter((nome, indice) => {
-      const continental = indice === 1;
-      const anterior = t.temporadas?.at(-1);
-      const elegivel = !continental || (anterior?.clube === t.clube && anterior?.liga === ligaAtual && anterior?.posicao <= 6);
-      const chance = limitar((continental ? 0.025 : 0.065) * (1 + (forca - 50) / 100) * (posicao <= 4 ? 1.25 : 1), 0.005, continental ? 0.065 : 0.12);
-      return elegivel && rng() < chance;
-    })
+    ...torneios.filter(x => x.campeao === t.clube).map(x => x.nome)
   ];
   const novaConfianca = limitar((t.diretoria ?? 60) + (cumpriuObjetivo ? 8 : -14) + (posicao <= 4 ? 5 : posicao >= 15 ? -8 : 0)
     + (idoloEmCasa && !cumpriuObjetivo ? -4 : 0) - (promessaDescumprida ? 12 : 0), 0, 100);

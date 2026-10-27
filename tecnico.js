@@ -696,7 +696,9 @@ export function jogarTemporadaExpressaTecnico(c, opcaoId, rng = sorteio) {
   if (carreiraTecnicoEncerrada(c.tecnico)) throw new Error('Carreira de treinador encerrada.');
   if (c.tecnico.temporadas.length === 0 && !c.tecnico.clubeInicialEscolhido && c.tecnico.opcoesInicio?.length) throw new Error('Escolha o clube inicial.');
   let atual = c;
-  if ((atual.tecnico.decisoes?.length || 0) === 0) {
+  // Respeita a escolha visível inclusive nos saves antigos que já possuem
+  // uma ou mais decisões tomadas nesta temporada.
+  if ((atual.tecnico.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) {
     atual = tomarDecisaoTecnico(atual, opcaoId, rng);
   }
   // Saves da interface anterior podem ter decisões parcialmente concluídas.

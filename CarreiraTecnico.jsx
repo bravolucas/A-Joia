@@ -17,11 +17,10 @@ function PopUpTitulo({ temporada, onFechar }) {
     const esc = e => { if(e.key === 'Escape') onFechar(); };
     document.addEventListener('keydown',esc);
     return () => { document.body.style.overflow = anterior; document.removeEventListener('keydown',esc); };
-  }, [temporada.ano, onFechar]);
+  }, [temporada.ano]);
   return createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-6" role="dialog" aria-modal="true" aria-label="Título conquistado" style={{background:'rgba(2,8,7,.94)'}}>
     <div className="w-full max-w-sm rounded-3xl border border-[#D8B44A]/50 text-center px-6 py-7 relative overflow-hidden" style={{background:'radial-gradient(ellipse at 50% 15%, #65521F 0%, #19231E 50%, #0D1512 100%)',boxShadow:'0 0 70px #D8B44A30'}}>
       <div className="text-[#EBC557] font-black tracking-[.22em] text-xs uppercase">A JOIA · Temporada {temporada.ano}</div>
-      <div className="text-5xl mt-3">🏆</div>
       <h2 className="display text-4xl text-white mt-2">CAMPEÃO!</h2>
       <div className="flex justify-center my-6" style={{filter:'drop-shadow(0 0 24px #D8B44A80)'}}><TacaCompeticao preferirTaca tipo="liga" nome={competicaoTemporadaTecnico(temporada)} size={142}/></div>
       <p className="text-[#F4D67A] font-bold text-lg">{competicaoTemporadaTecnico(temporada)}</p>

@@ -3526,6 +3526,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           onEsperar={() => setEstado((st) => ({ ...st, c: passarAnoDesempregado(st.c) }))}
           onAceitarProposta={(nome, estrategia) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia); return { ...st, c: negociado.tecnico.ultimaNegociacao?.aceita ? proximaTemporadaTecnico(negociado) : negociado }; })}
           onAvancar={() => setEstado((st) => ({ ...st, c: proximaTemporadaTecnico(st.c) }))}
+          onAvancarESimular={() => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(proximaTemporadaTecnico(st.c), null) }))}
           onLegado={() => setEstado((st) => ({ ...st, etapa: "fim" }))}
           onSair={onSair} />}
       </main>

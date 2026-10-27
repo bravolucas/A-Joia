@@ -602,7 +602,7 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   for (let rodada = 0; rodada < 38; rodada++) {
     const adversario = calendario[rodada % calendario.length];
     const base = probabilidadesConfrontoTecnico(t, adversario);
-    const vitoria = limitar(0.23 + (t.elenco - 60) * 0.004 + ((t.moral ?? 50) - 50) * 0.0008 + ((t.reputacao ?? 50) - 50) * 0.00035 + ((t.elenco ?? 50) - (adversario?.forca ?? 50)) * 0.008 + (adversario?.casa ? 0.035 : -0.035), 0.11, 0.52);
+    const vitoria = limitar(0.23 + ((t.elenco ?? 50) - 60) * 0.004 + ((t.moral ?? 50) - 50) * 0.0008 + ((t.reputacao ?? 50) - 50) * 0.00035 + ((t.elenco ?? 50) - (adversario?.forca ?? 50)) * 0.008 + (adversario?.casa ? 0.035 : -0.035), 0.11, 0.52);
     const empate = Math.min(base.empate, 0.95 - vitoria);
     const r = rng();
     if (r < vitoria) vitorias++;

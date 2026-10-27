@@ -296,7 +296,7 @@ export function aceitarPropostaTecnico(c, clube) {
   if (!proposta) throw new Error('Proposta indisponível.');
   return { ...c, tecnico: { ...t, clube: proposta.nome, pais: proposta.pais, elenco: proposta.elenco,
     moral: 50, diretoria: proposta.rival ? 48 : 65, torcida: proposta.rival ? 35 : 55,
-    demitido: false, desempregado: false, promessaContrato: null, retornoIdolo: !!(t.vinculosJogador || []).find(v => v.clube === proposta.nome && v.idolatria), propostas: [], salario: proposta.salario } };
+    demitido: false, desempregado: false, anosDesempregado: 0, promessaContrato: null, retornoIdolo: !!(t.vinculosJogador || []).find(v => v.clube === proposta.nome && v.idolatria), propostas: [], salario: proposta.salario } };
 }
 export function passarAnoDesempregado(c, rng = sorteio) {
   if (!c?.tecnico || c.tecnico.fase !== 'resultado') throw new Error('Só é possível aguardar entre temporadas.');

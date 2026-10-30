@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 15045)
+Total output lines: 909
+
 import { CLUBES, CLASSICOS } from './data.js';
 import { EVENTOS_CONTEXTO_TECNICO } from './eventosTecnico.js';
 import { competicaoDoTitulo } from './tacas.js';
@@ -410,85 +413,7 @@ export function calendarioLigaTecnico(t = {}) {
     // O clube do treinador substitui o participante mais fraco da nova divisão.
     if (participantes.length >= 2) {
       const maisFraco = participantes.reduce((menor, atual, indice, lista) => atual.elenco < lista[menor].elenco ? indice : menor, 0);
-      participantes.splice(maisFraco, 1);
-    }
-    participantes.unshift({ nome: t.clube || 'Meu clube', elenco: forcaClubeTecnico(t) });
-  }
-  if (participantes.length < 2) return null;
-  // Método de círculo: ligas ímpares recebem uma vaga de folga por rodada.
-  const times = [...participantes];
-  if (times.length % 2) times.push(null);
-  const tamanho = times.length;
-  const rodadas = [];
-  for (let r = 0; r < tamanho - 1; r++) {
-    const jogos = [];
-    for (let i = 0; i < tamanho / 2; i++) {
-      const a = times[i], b = times[tamanho - 1 - i];
-      if (!a || !b) continue;
-      const casa = (r + i) % 2 === 0 ? a : b;
-      const fora = casa === a ? b : a;
-      jogos.push({ casa: casa.nome, fora: fora.nome });
-    }
-    rodadas.push(jogos);
-    times.splice(1, 0, times.pop());
-  }
-  return [...rodadas, ...rodadas.map(jogos => jogos.map(j => ({ casa: j.fora, fora: j.casa })))];
-}
-export function calendarioAdversariosTecnico(t = {}) {
-  const liga = calendarioLigaTecnico(t);
-  if (liga) return liga.map((jogos, i) => {
-    const nomeMeuClube = t.clube || 'Meu clube';
-    const partida = jogos.find(j => j.casa === nomeMeuClube || j.fora === nomeMeuClube);
-    if (!partida) return { rodada: i + 1, nome: 'Folga', forca: 0, casa: false, folga: true };
-    const nome = partida.casa === nomeMeuClube ? partida.fora : partida.casa;
-    return { rodada: i + 1, nome, forca: CLUBES_CONVITES_TECNICO.find(x => x.nome === nome)?.elenco ?? 50,
-      casa: partida.casa === nomeMeuClube };
-  });
-  const clube = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
-  const ligaAtual = t.liga || clube?.liga;
-  const candidatos = CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube && (!ligaAtual || (t.ligasMundo?.[x.nome] || x.liga) === ligaAtual))
-    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
-  if (!candidatos.length) return Array.from({ length: 38 }, (_, i) => ({ rodada: i + 1, nome: 'Adversário', forca: 50, casa: i % 2 === 0 }));
-  return Array.from({ length: 38 }, (_, i) => {
-    const rival = candidatos[i % candidatos.length];
-    return { rodada: i + 1, nome: rival.nome, forca: rival.elenco, casa: i < 19 };
-  });
-}
-export function probabilidadesConfrontoTecnico(t, adversario) {
-  const diferenca = forcaClubeTecnico(t) - (adversario?.forca ?? 50);
-  const mando = adversario?.casa ? 0.035 : -0.035;
-  const vitoria = limitar(0.44 + diferenca * 0.008 + mando, 0.16, 0.72);
-  const empate = limitar(0.27 - Math.abs(diferenca) * 0.002, 0.16, 0.27);
-  return { vitoria, empate, derrota: 1 - vitoria - empate };
-}
-export function placarTecnico(resultado, rng = sorteio) {
-  if (resultado === 'E') { const gols = Math.floor(rng() * 3); return { pro: gols, contra: gols }; }
-  const vencedor = 1 + Math.floor(rng() * 3);
-  const perdedor = Math.floor(rng() * vencedor);
-  return resultado === 'V' ? { pro: vencedor, contra: perdedor } : { pro: perdedor, contra: vencedor };
-}
-export function registrarGolsTecnico(linha, pro, contra) {
-  linha.golsPro = (linha.golsPro || 0) + pro;
-  linha.golsContra = (linha.golsContra || 0) + contra;
-  linha.saldoGols = linha.golsPro - linha.golsContra;
-}
-export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario, resultado, rng = sorteio, rodada = 1, placarTreinador = null) {
-  const linhas = classificacaoAnterior.map(x => ({ ...x }));
-  const calendario = calendarioLigaTecnico(t);
-  const partidas = calendario?.[rodada - 1];
-  if (partidas) {
-    for (const partida of partidas) {
-      const casa = linhas.find(x => x.nome === partida.casa);
-      const fora = linhas.find(x => x.nome === partida.fora);
-      if (!casa || !fora) continue;
-      const envolveTreinador = casa.meuClube || fora.meuClube;
-      const forcaCasa = CLUBES_CONVITES_TECNICO.find(x => x.nome === casa.nome)?.elenco ?? t.elenco ?? 50;
-      const forcaFora = CLUBES_CONVITES_TECNICO.find(x => x.nome === fora.nome)?.elenco ?? t.elenco ?? 50;
-      const chanceCasa = limitar(0.42 + (forcaCasa - forcaFora) * 0.007, 0.16, 0.69);
-      const r = envolveTreinador ? null : rng();
-      const desfecho = envolveTreinador
-        ? (casa.meuClube ? resultado : resultado === 'V' ? 'D' : resultado === 'D' ? 'V' : 'E')
-        : r < chanceCasa ? 'V' : r < chanceCasa + 0.25 ? 'E' : 'D';
+      participantes.splice(ma…1045 tokens truncated… : r < chanceCasa ? 'V' : r < chanceCasa + 0.25 ? 'E' : 'D';
       if (envolveTreinador) {
         const rival = casa.meuClube ? fora : casa;
         const placar = placarTreinador || placarTecnico(resultado, rng);
@@ -768,16 +693,20 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   }));
   const torneioAnterior = t.temporadas?.at(-1);
   const continentalNome = continentaisPorLiga[ligaAtual];
+  const configuracaoContinental = t.regrasCompeticoes?.[continentalNome] || {};
+  const formatoContinental = configuracaoContinental.formato || {};
   const participantesQualificados = continentalNome ? classificarVagasContinentalTecnico({
     clubes: CLUBES_CONVITES_TECNICO,
     classificacoesMundo: torneioAnterior?.classificacoesMundo || {},
     pais: t.pais,
+    limite: formatoContinental.totalParticipantes ?? configuracaoContinental.qualificacao?.limite ?? 16,
+    regra: configuracaoContinental.qualificacao,
   }) : [];
   if (continentalNome && participantesQualificados.some(clube => clube.nome === t.clube)) {
     const continental = simularCopaContinentalTecnico({
       clubes: CLUBES_CONVITES_TECNICO, nomeUsuario: t.clube, pais: t.pais,
       forcaUsuario: t.elenco ?? forcaClubeTecnico(t), nome: continentalNome,
-      participantesQualificados, bonusTecnico, rng
+      participantesQualificados, bonusTecnico, formato: formatoContinental, rng
     });
     if (continental) torneios.push(continental);
   }

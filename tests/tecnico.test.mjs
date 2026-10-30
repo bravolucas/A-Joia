@@ -1,7 +1,7 @@
 import { CLUBES } from '../data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, perfilClubeTecnico, probabilidadesTecnico, calendarioAdversariosTecnico, calendarioLigaTecnico, probabilidadesConfrontoTecnico, tabelaClassificacaoTecnico, ordenarClassificacaoTecnico, zonaClassificacaoTecnico, placarTecnico, simularRodadaRivaisTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, perfilClubeTecnico, probabilidadesTecnico, calendarioAdversariosTecnico, calendarioLigaTecnico, probabilidadesConfrontoTecnico, tabelaClassificacaoTecnico, ordenarClassificacaoTecnico, zonaClassificacaoTecnico, placarTecnico, simularRodadaRivaisTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico, CLUBES_CONVITES_TECNICO } from '../tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -79,6 +79,33 @@ test('vaga continental só aparece na temporada seguinte quando o clube está cl
   proxima.tecnico.decisoes = Array(QUANTIDADE_DECISOES_TECNICO).fill({ carta: 'teste', opcao: 'neutra' });
   const segunda = simularTemporadaTecnico(proxima, () => 0.1);
   assert.ok(segunda.tecnico.temporadas[1].torneios.some(x => x.nome === 'Copa Libertadores' && x.tipo === 'continental'));
+});
+
+test('temporada aplica cotas e formato da competição configurados no save', () => {
+  const clube = CLUBES.find(x => x.liga === 'brasileirao');
+  const inicio = iniciarCarreiraTecnico({ ...atleta, clubeNome: clube.nome });
+  const comDecisoes = { ...inicio, tecnico: { ...inicio.tecnico,
+    decisoes: Array(QUANTIDADE_DECISOES_TECNICO).fill({ carta: 'teste', opcao: 'neutra' }) } };
+  const primeira = simularTemporadaTecnico(comDecisoes, () => 0.1);
+  const nomesExtras = [...new Set([
+    ...CLUBES.filter(x => x.liga === 'brasileirao').slice(0, 4).map(x => x.nome),
+    clube.nome
+  ])];
+  const proxima = proximaTemporadaTecnico(primeira);
+  proxima.tecnico.decisoes = Array(QUANTIDADE_DECISOES_TECNICO).fill({ carta: 'teste', opcao: 'neutra' });
+  proxima.tecnico.regrasCompeticoes = {
+    'Copa Libertadores': {
+      qualificacao: { vagasPorLiga: {}, participantesExtras: nomesExtras },
+      formato: { totalParticipantes: nomesExtras.length, grupos: 0 }
+    }
+  };
+
+  const segunda = simularTemporadaTecnico(proxima, () => 0.1);
+  const libertadores = segunda.tecnico.temporadas[1].torneios.find(x => x.nome === 'Copa Libertadores');
+  assert.equal(libertadores.participantes, nomesExtras.length);
+  assert.equal(libertadores.grupos.length, 0);
+  assert.ok(libertadores.fases.length > 0);
+  assert.ok(libertadores.fases.flatMap(f => f.jogos).some(j => j.casa === clube.nome || j.fora === clube.nome || j.bye === clube.nome));
 });
 
 test('sorteia quatro eventos diferentes por temporada', () => {

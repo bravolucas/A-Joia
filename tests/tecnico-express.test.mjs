@@ -48,6 +48,14 @@ test('30 temporadas expressas acumulam histórico e encerram a carreira', () => 
     assert.equal(c.tecnico.temporadas[i].ano, anoInicial + i);
     assert.equal(c.tecnico.temporadas[i].vitorias + c.tecnico.temporadas[i].empates + c.tecnico.temporadas[i].derrotas, 38);
     assert.equal(c.tecnico.temporadas[i].classificacao.find(x => x.meuClube).posicao, c.tecnico.temporadas[i].posicao);
+    const linhas = c.tecnico.temporadas[i].classificacao;
+    if (linhas.length === 20) {
+      assert.ok(linhas.every(x => x.jogos === 38), 'todos os clubes precisam completar 38 jogos');
+      assert.equal(linhas.reduce((total, x) => total + x.vitorias, 0),
+        linhas.reduce((total, x) => total + x.derrotas, 0), 'vitórias e derrotas da liga devem coincidir');
+      assert.equal(linhas.reduce((total, x) => total + x.golsPro, 0),
+        linhas.reduce((total, x) => total + x.golsContra, 0), 'gols marcados e sofridos devem coincidir');
+    }
     if (i < LIMITE_TEMPORADAS_TECNICO - 1) {
       // A demissão é desativada neste teste para isolar o limite de temporadas.
       c = proximaTemporadaTecnico({ ...c, tecnico: { ...c.tecnico, demitido: false, desempregado: false } });

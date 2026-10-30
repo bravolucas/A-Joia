@@ -110,6 +110,24 @@ function CampanhasTemporada({ torneios = [] }) {
     })}</div>
   </div>;
 }
+function ClassificacoesMundo({ classificacoes = {}, ligaAtual, clubeAtual }) {
+  const ligas = Object.entries(classificacoes)
+    .filter(([liga, dados]) => liga !== ligaAtual && dados?.classificacao?.length)
+    .sort((a, b) => competicaoTemporadaTecnico({ liga: a[0] }).localeCompare(competicaoTemporadaTecnico({ liga: b[0] }), 'pt-BR'));
+  if (!ligas.length) return null;
+  return <details className="mt-2 rounded-lg border border-white/[.07] bg-black/10">
+    <summary className="cursor-pointer px-2 py-1.5 text-[9px] font-bold text-[#D4D4D8]">Classificações das outras ligas ({ligas.length})</summary>
+    <div className="px-2 pb-2">
+      {ligas.map(([liga, dados]) => <details key={liga} className="mt-1 rounded-md border border-white/[.06] bg-black/15">
+        <summary className="cursor-pointer px-2 py-1.5 text-[9px] font-semibold text-[#A1A1AA]">{competicaoTemporadaTecnico({ liga })}</summary>
+        <div className="max-h-48 overflow-y-auto px-2 pb-1">
+          <div className="grid grid-cols-[1.5rem_minmax(0,1fr)_2rem_2rem_3rem] gap-1 border-b border-white/[.08] py-1 text-[8px] uppercase text-[#71717A]"><span>#</span><span>Clube</span><span className="text-right">J</span><span className="text-right">V</span><span className="text-right">Pts</span></div>
+          {dados.classificacao.map((clube, indice) => <div key={clube.nome} className={`grid grid-cols-[1.5rem_minmax(0,1fr)_2rem_2rem_3rem] gap-1 py-1 text-[9px] ${clube.nome === clubeAtual ? 'font-bold text-[#FDE68A]' : 'text-[#A1A1AA]'}`}><span>{clube.posicao || indice + 1}</span><span className="truncate">{clube.nome}</span><span className="text-right">{clube.jogos ?? '—'}</span><span className="text-right">{clube.vitorias ?? '—'}</span><span className="text-right">{clube.pontos ?? '—'}</span></div>)}
+        </div>
+      </details>)}
+    </div>
+  </details>;
+}
 function LinhaTemporada({ a, ativa, aberta, onClick }) {
   const titulos = Array.isArray(a.titulosConquistados) ? a.titulosConquistados : a.campeao ? [competicaoTemporadaTecnico(a)] : [];
   return <div className={'border-b border-white/[.06] '+(ativa ? 'bg-white/[.035]' : '')}>
@@ -123,6 +141,7 @@ function LinhaTemporada({ a, ativa, aberta, onClick }) {
       <div className="mt-1">Meta: {a.objetivo} · {a.cumpriuObjetivo ? 'atingida' : 'não atingida'}</div>
       <CampanhasTemporada torneios={a.torneios} />
       {a.classificacao?.length > 0 && <details className="mt-2"><summary className="cursor-pointer text-[#D4D4D8]">Ver classificação</summary><div className="mt-2 max-h-56 overflow-y-auto rounded-lg border border-white/[.07]">{a.classificacao.map(l => <div key={l.nome} className={'grid grid-cols-[2rem_1fr_2.5rem_3rem] gap-2 px-2 py-1 border-b border-white/[.05] last:border-0 '+(l.meuClube ? 'text-[#FACC15] font-bold' : 'text-[#A1A1AA]')}><span>{l.posicao}</span><span className="truncate">{l.nome}</span><span className="text-right">{l.vitorias}V</span><span className="text-right">{l.pontos} pts</span></div>)}</div></details>}
+      <ClassificacoesMundo classificacoes={a.classificacoesMundo} ligaAtual={a.liga} clubeAtual={a.clube} />
     </div>}
   </div>;
 }

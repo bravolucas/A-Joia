@@ -67,6 +67,20 @@ test('tabela mundial é salva nos fluxos expresso e por etapas sem substituir a 
   assert.ok(Object.keys(tabelaIntensa).length > 1);
 });
 
+test('vaga continental só aparece na temporada seguinte quando o clube está classificado na tabela anterior', () => {
+  const clube = CLUBES.find(x => x.liga === 'brasileirao');
+  const inicio = iniciarCarreiraTecnico({ ...atleta, clubeNome: clube.nome });
+  const comDecisoes = { ...inicio, tecnico: { ...inicio.tecnico,
+    decisoes: Array(QUANTIDADE_DECISOES_TECNICO).fill({ carta: 'teste', opcao: 'neutra' }) } };
+  const primeira = simularTemporadaTecnico(comDecisoes, () => 0.1);
+  assert.ok(!primeira.tecnico.temporadas[0].torneios.some(x => x.tipo === 'continental'));
+
+  const proxima = proximaTemporadaTecnico(primeira);
+  proxima.tecnico.decisoes = Array(QUANTIDADE_DECISOES_TECNICO).fill({ carta: 'teste', opcao: 'neutra' });
+  const segunda = simularTemporadaTecnico(proxima, () => 0.1);
+  assert.ok(segunda.tecnico.temporadas[1].torneios.some(x => x.nome === 'Copa Libertadores' && x.tipo === 'continental'));
+});
+
 test('sorteia quatro eventos diferentes por temporada', () => {
   const cartas = sortearCartasTecnico(() => 0.5);
   assert.equal(cartas.length, 4);

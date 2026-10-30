@@ -1,7 +1,7 @@
 import { CLUBES, CLASSICOS } from './data.js';
 import { EVENTOS_CONTEXTO_TECNICO } from './eventosTecnico.js';
 import { competicaoDoTitulo } from './tacas.js';
-import { simularCopaNacionalTecnico, simularCopaContinentalTecnico } from './competicoesTecnico.js';
+import { simularCopaNacionalTecnico, simularCopaContinentalTecnico, classificarVagasContinentalTecnico } from './competicoesTecnico.js';
 import { atualizarLigasMundoTecnico, simularClassificacoesMundoTecnico } from './classificacoesMundoTecnico.js';
 // Continuação da mesma carreira, sem alterar o histórico do atleta.
 export const ESTILOS_TECNICO = [
@@ -767,15 +767,17 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
     forcaUsuario: t.elenco ?? forcaClubeTecnico(t), nome: copaNome, bonusTecnico, rng
   }));
   const torneioAnterior = t.temporadas?.at(-1);
-  const vagaContinental = !/(?:2|serieB)$/i.test(ligaAtual || '') &&
-    (torneioAnterior
-      ? torneioAnterior.clube === t.clube && !/(?:2|serieB)$/i.test(torneioAnterior.liga || '') && torneioAnterior.posicao <= 6
-      : forcaClubeTecnico(t) >= 78);
   const continentalNome = continentaisPorLiga[ligaAtual];
-  if (continentalNome && vagaContinental) {
+  const participantesQualificados = continentalNome ? classificarVagasContinentalTecnico({
+    clubes: CLUBES_CONVITES_TECNICO,
+    classificacoesMundo: torneioAnterior?.classificacoesMundo || {},
+    pais: t.pais,
+  }) : [];
+  if (continentalNome && participantesQualificados.some(clube => clube.nome === t.clube)) {
     const continental = simularCopaContinentalTecnico({
       clubes: CLUBES_CONVITES_TECNICO, nomeUsuario: t.clube, pais: t.pais,
-      forcaUsuario: t.elenco ?? forcaClubeTecnico(t), nome: continentalNome, bonusTecnico, rng
+      forcaUsuario: t.elenco ?? forcaClubeTecnico(t), nome: continentalNome,
+      participantesQualificados, bonusTecnico, rng
     });
     if (continental) torneios.push(continental);
   }

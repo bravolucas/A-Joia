@@ -76,13 +76,59 @@ function classificarGrupo(clubes, jogos, rng) {
     b.golsPro - a.golsPro || lotes.get(a.nome) - lotes.get(b.nome));
 }
 
-function escolherParticipantes(clubes, nomeUsuario, limite = 16) {
-  const distintos = [...new Map(clubes.map(c => [c.nome, c])).values()];
-  const ordenados = distintos.sort((a, b) => forca(b) - forca(a) || a.nome.localeCompare(b.nome, 'pt-BR'));
-  const usuario = ordenados.find(c => c.nome === nomeUsuario);
-  const selecionados = ordenados.slice(0, limite);
-  if (usuario && !selecionados.some(c => c.nome === nomeUsuario)) selecionados[selecionados.length - 1] = usuario;
-  return selecionados.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+const LIGAS_PRIMEIRA_DIVISAO = new Set([
+  'brasileirao', 'argentina', 'sulamericano', 'portugal', 'espanha', 'inglaterra',
+  'italia', 'alemanha', 'franca', 'holanda', 'turquia', 'arabia', 'mls'
+]);
+
+function regiaoContinental(pais) {
+  if (['Brasil', 'Argentina', 'América do Sul'].includes(pais)) return 'sul-america';
+  if (['Portugal', 'Espanha', 'Inglaterra', 'Itália', 'Alemanha', 'França', 'Países Baixos', 'Turquia'].includes(pais)) return 'europa';
+  if (pais === 'Arábia Saudita') return 'asia';
+  if (pais === 'Estados Unidos') return 'concacaf';
+  return null;
+}
+
+/**
+ * Define a lista continental a partir da classificação doméstica encerrada.
+ * A distribuição é um critério provisório por posição entre as ligas modeladas;
+ * as vagas oficiais precisam ser fornecidas por configuração específica da edição.
+ * A lista disponível de clubes não contém todos os países de AFC/Concacaf;
+ * por isso, exige representantes de pelo menos dois países e não fabrica
+ * participantes de outras ligas.
+ */
+export function classificarVagasContinentalTecnico({ clubes = [], classificacoesMundo = {}, pais, limite = 16 }) {
+  const regiao = regiaoContinental(pais);
+  if (!regiao || !Number.isInteger(limite) || limite < 2) return [];
+  const clubesPorNome = new Map(clubes.filter(c => c?.nome).map(c => [c.nome, c]));
+  const candidatos = [];
+  const nomesIncluidos = new Set();
+  const paises = new Set();
+
+  for (const [liga, tabela] of Object.entries(classificacoesMundo || {})) {
+    if (!LIGAS_PRIMEIRA_DIVISAO.has(liga)) continue;
+    for (const [indice, linha] of (tabela?.classificacao || []).entries()) {
+      const clube = clubesPorNome.get(linha?.nome);
+      if (!clube || nomesIncluidos.has(clube.nome) || regiaoContinental(clube.pais) !== regiao) continue;
+      nomesIncluidos.add(clube.nome);
+      paises.add(clube.pais);
+      const jogos = Number(linha.jogos) || 0;
+      const golsPro = Number(linha.golsPro) || 0;
+      const golsContra = Number(linha.golsContra) || 0;
+      candidatos.push({
+        ...clube,
+        posicaoDomestica: Number(linha.posicao) || indice + 1,
+        aproveitamento: jogos ? (Number(linha.pontos) || 0) / (jogos * 3) : 0,
+        saldoPorJogo: jogos ? (golsPro - golsContra) / jogos : 0,
+      });
+    }
+  }
+
+  if (paises.size < 2) return [];
+  return candidatos.sort((a, b) => a.posicaoDomestica - b.posicaoDomestica ||
+    b.aproveitamento - a.aproveitamento || b.saldoPorJogo - a.saldoPorJogo ||
+    a.liga.localeCompare(b.liga, 'pt-BR') || a.nome.localeCompare(b.nome, 'pt-BR')
+  ).slice(0, limite).map(({ posicaoDomestica, aproveitamento, saldoPorJogo, ...clube }) => clube);
 }
 
 function nomeFaseEliminatoria(quantidadeClubes) {
@@ -141,21 +187,15 @@ export function simularCopaNacionalTecnico({ clubes, nomeUsuario, pais, forcaUsu
   return { nome, tipo: 'copa', participantes: participantes.length, ...jogarEliminatoria(participantes, nomeUsuario, bonusTecnico, rng) };
 }
 
-function regiaoContinental(pais) {
-  if (['Brasil', 'Argentina', 'América do Sul'].includes(pais)) return 'sul-america';
-  if (['Portugal', 'Espanha', 'Inglaterra', 'Itália', 'Alemanha', 'França', 'Países Baixos', 'Turquia'].includes(pais)) return 'europa';
-  if (pais === 'Arábia Saudita') return 'asia';
-  if (pais === 'Estados Unidos') return 'concacaf';
-  return null;
-}
-
-export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forcaUsuario, nome, bonusTecnico = 0, rng = sorteio }) {
-  const regiao = regiaoContinental(pais);
-  if (!regiao) return null;
-  const elegiveis = clubes.filter(c => regiaoContinental(c.pais) === regiao && !/(?:2|serieB)$/i.test(c.liga))
-    .map(c => c.nome === nomeUsuario ? { ...c, elenco: forcaUsuario } : c);
-  const participantes = escolherParticipantes(elegiveis, nomeUsuario, 16);
-  if (participantes.length !== 16 || !participantes.some(c => c.nome === nomeUsuario)) return null;
+export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forcaUsuario, nome, bonusTecnico = 0, participantesQualificados = [], rng = sorteio }) {
+  if (!Array.isArray(participantesQualificados) || participantesQualificados.length !== 16 ||
+      !participantesQualificados.some(c => c.nome === nomeUsuario)) return null;
+  const cadastro = new Map((clubes || []).map(c => [c.nome, c]));
+  const participantes = [...new Map(participantesQualificados.map(c => {
+    const cadastroClube = cadastro.get(c.nome) || c;
+    return [c.nome, { ...cadastroClube, ...c,
+      elenco: c.nome === nomeUsuario ? (forcaUsuario ?? c.elenco ?? c.forca) : (c.elenco ?? c.forca ?? cadastroClube.elenco) }];
+  })).values()];
 
   const sorteados = embaralhar(participantes, rng);
   const grupos = Array.from({ length: 4 }, (_, i) => sorteados.slice(i * 4, i * 4 + 4));

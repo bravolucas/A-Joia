@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { simularCopaNacionalTecnico, simularCopaContinentalTecnico } from '../competicoesTecnico.js';
+import { simularCopaNacionalTecnico, simularCopaContinentalTecnico, classificarVagasContinentalTecnico } from '../competicoesTecnico.js';
 import { gerarPropostasTecnico, salarioTecnico } from '../tecnico.js';
 import { competicaoDoTitulo, desenhoDaTaca } from '../tacas.js';
 
@@ -15,6 +15,16 @@ const clubes = [
   ...Array.from({ length: 20 }, (_, i) => ({ nome: `Brasil ${i}`, pais: 'Brasil', liga: 'brasileirao', elenco: 55 + i })),
   ...Array.from({ length: 20 }, (_, i) => ({ nome: `Argentina ${i}`, pais: 'Argentina', liga: 'argentina', elenco: 58 + i }))
 ];
+function classificacoesPorLiga(lista = clubes) {
+  const ligas = [...new Set(lista.map(c => c.liga))];
+  return Object.fromEntries(ligas.map(liga => {
+    const times = lista.filter(c => c.liga === liga).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+    return [liga, { classificacao: times.map((clube, indice) => ({
+      nome: clube.nome, posicao: indice + 1, jogos: 38, pontos: (times.length - indice) * 3,
+      vitorias: times.length - indice, golsPro: (times.length - indice) * 2, golsContra: indice,
+    })) }];
+  }));
+}
 
 test('copa nacional simula chave completa e registra placares do treinador', () => {
   const copa = simularCopaNacionalTecnico({
@@ -44,9 +54,14 @@ test('copa nacional não inclui à força clube ausente do cadastro', () => {
 });
 
 test('continental simula grupos, classificação e mata-mata até a final', () => {
+  const participantesQualificados = classificarVagasContinentalTecnico({
+    clubes, classificacoesMundo: classificacoesPorLiga(), pais: 'Brasil'
+  });
+  assert.equal(participantesQualificados.length, 16);
+  assert.ok(participantesQualificados.some(c => c.nome === 'Brasil 0'));
   const copa = simularCopaContinentalTecnico({
     clubes, nomeUsuario: 'Brasil 0', pais: 'Brasil', forcaUsuario: 62,
-    nome: 'Copa Libertadores', rng: rngSeed(29)
+    nome: 'Copa Libertadores', participantesQualificados, rng: rngSeed(29)
   });
   assert.equal(copa.grupos.length, 4);
   assert.ok(copa.grupos.every(g => g.jogos.length === 12 && g.classificacao.length === 4));
@@ -54,6 +69,27 @@ test('continental simula grupos, classificação e mata-mata até a final', () =
   assert.deepEqual(copa.fases.map(f => f.jogos.length), [4, 2, 1]);
   assert.ok(copa.campeao);
   assert.ok(copa.jogosUsuario.length >= 6);
+});
+
+test('vaga continental segue a classificação e não força a entrada do treinador pela força do elenco', () => {
+  const clubesComForcaAlta = clubes.map(c => c.nome === 'Brasil 19' ? { ...c, elenco: 99 } : c);
+  const qualificados = classificarVagasContinentalTecnico({
+    clubes: clubesComForcaAlta, classificacoesMundo: classificacoesPorLiga(clubesComForcaAlta), pais: 'Brasil'
+  });
+  assert.equal(qualificados.length, 16);
+  assert.ok(!qualificados.some(c => c.nome === 'Brasil 19'));
+  assert.equal(simularCopaContinentalTecnico({
+    clubes: clubesComForcaAlta, nomeUsuario: 'Brasil 19', pais: 'Brasil', forcaUsuario: 99,
+    nome: 'Copa Libertadores', participantesQualificados: qualificados, rng: rngSeed(61)
+  }), null);
+});
+
+test('não cria vagas continentais sem tabelas anteriores ou sem clubes de vários países', () => {
+  assert.deepEqual(classificarVagasContinentalTecnico({ clubes, pais: 'Brasil' }), []);
+  const apenasBrasil = clubes.filter(c => c.pais === 'Brasil');
+  assert.deepEqual(classificarVagasContinentalTecnico({
+    clubes: apenasBrasil, classificacoesMundo: classificacoesPorLiga(apenasBrasil), pais: 'Brasil'
+  }), []);
 });
 
 test('OVR e estatísticas históricas não alteram salário ou propostas do treinador', () => {

@@ -1,43 +1,26 @@
-# Logos de competição (opcional)
+# Taças e imagens de competições
 
-No lugar da taça desenhada, o jogo mostra o logo da competição se existir aqui um arquivo **.svg, .png ou .webp** com o nome abaixo. Sem arquivo, continua a taça do jogo.
+Esta pasta reúne imagens de taças e prêmios em WebP. Quando o nome do título
+conquistado corresponde a um arquivo, a vitrine do treinador e os componentes
+compartilhados exibem essa imagem. O nome do arquivo usa o formato slug, por
+exemplo `copa-do-brasil.webp` ou `champions-league.webp`.
 
-Atenção: logos de competições são marcas registradas. Usar só com autorização ou por sua conta e risco.
+As imagens disponíveis incluem Libertadores, Champions League, Champions Asiática,
+CONCACAF Champions, copas nacionais e ligas listadas nos arquivos desta pasta. Os
+nomes alternativos usados pelo jogo são resolvidos em `arte.js`.
 
-- 2. Bundesliga → `2-bundesliga`
-- Brasileirão → `brasileirao`
-- Brasileirão Série B → `brasileirao-serie-b`
-- Bundesliga → `bundesliga`
-- Champions Asiática → `champions-asiatica`
-- Champions League → `champions-league`
-- Championship → `championship`
-- Concacaf → `concacaf`
-- Copa Africana de Nações → `copa-africana-de-nacoes`
-- Copa América → `copa-america`
-- Copa Ouro → `copa-ouro`
-- Copa da França → `copa-da-franca`
-- Copa da Ásia → `copa-da-asia`
-- Copa das Nações da OFC → `copa-das-nacoes-da-ofc`
-- Copa do Brasil → `copa-do-brasil`
-- Copa do Mundo → `copa-do-mundo`
-- Copa do Rei → `copa-do-rei`
-- Coppa Italia → `coppa-italia`
-- DFB-Pokal → `dfb-pokal`
-- Eurocopa → `eurocopa`
-- FA Cup → `fa-cup`
-- King's Cup → `king-s-cup`
-- La Liga → `la-liga`
-- LaLiga 2 → `laliga-2`
-- Libertadores → `libertadores`
-- Liga Portugal → `liga-portugal`
-- Liga Portugal 2 → `liga-portugal-2`
-- Liga Saudita → `liga-saudita`
-- Ligue 1 → `ligue-1`
-- Ligue 2 → `ligue-2`
-- MLS → `mls`
-- Mundial de Clubes → `mundial-de-clubes`
-- Premier League → `premier-league`
-- Serie A → `serie-a`
-- Serie B (Itália) → `serie-b-italia`
-- Taça de Portugal → `taca-de-portugal`
-- US Open Cup → `us-open-cup`
+## Competições do treinador sem imagem própria
+
+O acervo não contém uma taça da King's Cup saudita nem da Copa da Turquia. Para
+essas competições, o jogo mostra a ilustração original do A JOIA, criada a partir
+do nome e do tipo do torneio. Não usamos a taça de outra competição como substituta.
+
+## Créditos e uso
+
+Parte das imagens foi adaptada do repositório [Football-Career](https://github.com/AugustoCesarSalgado/Football-Career),
+que declara licença MIT; a atribuição está em `CREDITOS.md`. Outras taças foram
+fornecidas pelo autor do A JOIA. Os nomes e marcas das competições pertencem às
+respectivas entidades; as imagens servem para identificar os torneios e não
+indicam afiliação ou endosso.
+
+Veja `CREDITOS.md` para a origem de cada grupo de arquivos.

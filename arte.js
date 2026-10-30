@@ -21,39 +21,19 @@ import festa from "./arte/festa.webp";
 import salaApresentacao from "./arte/sala-apresentacao.webp";
 // gramado em escala oficial (Kyogijo Stadiums, MIT)
 import campo from "./arte/campo.svg";
+import { slugCompeticao, resolverImagemCompeticao } from "./arteCompeticoes.js";
 
 export const ARTE = { refletores, coletiva, confete, estadioNoite, porDoSol, tunel, torcida, lesao, contrato, vestiario, fisio, aviao, treino, mansao, carro, protesto, casa, festa, salaApresentacao, campo };
 
-/* Escudos e logos de competição opcionais. O jogo não traz nenhum: quem quiser
-   usar imagens próprias coloca os arquivos em arte/escudos/ e arte/competicoes/
-   com o nome em formato de slug (ex.: "atletico-de-madrid.svg", "premier-league.png").
-   Ver os LEIA-ME de cada pasta. Sem arquivo, o jogo usa o brasão e a taça desenhados. */
-export const slug = (s) => (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+/* Escudos e imagens de taças. As imagens em arte/competicoes são taças recortadas;
+   os nomes históricos da API permanecem como logoCompeticao por compatibilidade.
+   Ver arte/competicoes/LEIA-ME.md para créditos e competições sem imagem. */
+export const slug = slugCompeticao;
 const porNome = (g) => Object.fromEntries(Object.entries(g).map(([k, v]) => [k.split("/").pop().replace(/\.\w+$/, ""), v]));
 const ESCUDOS = porNome(import.meta.glob("./arte/escudos/*.{svg,png,webp}", { eager: true, query: "?url", import: "default" }));
 const LOGOS = porNome(import.meta.glob("./arte/competicoes/*.{svg,png,webp}", { eager: true, query: "?url", import: "default" }));
 export const escudoDe = (nome) => ESCUDOS[slug(nome)] || null;
-// Aceita nomes alternativos usados pelo motor de treinador sem duplicar imagens.
-const ALIASES_COMPETICOES = {
-  'copa-libertadores': 'libertadores',
-  'conmebol-libertadores': 'libertadores',
-  'uefa-champions-league': 'champions-league',
-  'afc-champions-league-elite': 'champions-asiatica',
-  'concacaf-champions-cup': 'concacaf-champions',
-  'copa-del-rey': 'copa-do-rei',
-  'coupe-de-france': 'copa-da-franca',
-  'saudi-pro-league': 'liga-saudita',
-  'mls-cup': 'mls',
-  'super-lig': 'super-lig',
-  'campeonato-brasileiro-serie-a': 'brasileirao',
-  'campeonato-brasileiro-serie-b': 'brasileirao-serie-b'
-};
-export const logoCompeticao = (nome) => {
-  const chave = slug(nome);
-  const canonica = ALIASES_COMPETICOES[chave] || chave;
-  const alternativas = Object.keys(ALIASES_COMPETICOES).filter(k => ALIASES_COMPETICOES[k] === canonica);
-  return LOGOS[chave] || LOGOS[canonica] || alternativas.map(k => LOGOS[k]).find(Boolean) || null;
-};
+export const logoCompeticao = (nome) => resolverImagemCompeticao(nome, LOGOS);
 const BANDEIRAS = porNome(import.meta.glob("./arte/bandeiras/*.svg", { eager: true, query: "?url", import: "default" }));
 /* bandeiras em SVG (pacote flag-icons, MIT): o emoji de bandeira não aparece no Windows */
 export const bandeiraDe = (nac) => BANDEIRAS[nac] || null;

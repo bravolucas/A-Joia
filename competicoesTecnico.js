@@ -76,6 +76,38 @@ function classificarGrupo(clubes, jogos, rng) {
     b.golsPro - a.golsPro || lotes.get(a.nome) - lotes.get(b.nome));
 }
 
+function dividirEmGrupos(clubes, quantidade) {
+  const grupos = Array.from({ length: quantidade }, () => []);
+  clubes.forEach((clube, indice) => grupos[indice % quantidade].push(clube));
+  return grupos;
+}
+
+function calendarioDeGrupo(clubes, turnos) {
+  const participantes = [...clubes];
+  if (participantes.length % 2) participantes.push(null);
+  const tamanho = participantes.length;
+  const primeiraVolta = [];
+  for (let rodada = 0; rodada < tamanho - 1; rodada++) {
+    const partidas = [];
+    for (let indice = 0; indice < tamanho / 2; indice++) {
+      const primeiro = participantes[indice];
+      const segundo = participantes[tamanho - 1 - indice];
+      if (!primeiro || !segundo) continue;
+      const casa = (rodada + indice) % 2 === 0 ? primeiro : segundo;
+      partidas.push({ casa, fora: casa === primeiro ? segundo : primeiro });
+    }
+    primeiraVolta.push(partidas);
+    participantes.splice(1, 0, participantes.pop());
+  }
+  const calendario = [];
+  for (let turno = 0; turno < turnos; turno++) {
+    const jogos = turno % 2 === 0 ? primeiraVolta : primeiraVolta.map(partidas =>
+      partidas.map(jogo => ({ casa: jogo.fora, fora: jogo.casa })));
+    calendario.push(...jogos);
+  }
+  return calendario;
+}
+
 const LIGAS_PRIMEIRA_DIVISAO = new Set([
   'brasileirao', 'argentina', 'sulamericano', 'portugal', 'espanha', 'inglaterra',
   'italia', 'alemanha', 'franca', 'holanda', 'turquia', 'arabia', 'mls'
@@ -187,9 +219,17 @@ export function simularCopaNacionalTecnico({ clubes, nomeUsuario, pais, forcaUsu
   return { nome, tipo: 'copa', participantes: participantes.length, ...jogarEliminatoria(participantes, nomeUsuario, bonusTecnico, rng) };
 }
 
-export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forcaUsuario, nome, bonusTecnico = 0, participantesQualificados = [], rng = sorteio }) {
-  if (!Array.isArray(participantesQualificados) || participantesQualificados.length !== 16 ||
+export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forcaUsuario, nome, bonusTecnico = 0, participantesQualificados = [], formato = {}, rng = sorteio }) {
+  const totalParticipantes = formato.totalParticipantes ?? 16;
+  const quantidadeGrupos = formato.grupos ?? 4;
+  const classificadosPorGrupo = formato.classificadosPorGrupo ?? 2;
+  const turnos = formato.turnos ?? 2;
+  if (!Number.isInteger(totalParticipantes) || totalParticipantes < 2 ||
+      !Array.isArray(participantesQualificados) || participantesQualificados.length !== totalParticipantes ||
       !participantesQualificados.some(c => c.nome === nomeUsuario)) return null;
+  if (!Number.isInteger(quantidadeGrupos) || quantidadeGrupos < 0 ||
+      !Number.isInteger(turnos) || turnos < 1 ||
+      (quantidadeGrupos > 0 && (!Number.isInteger(classificadosPorGrupo) || classificadosPorGrupo < 1))) return null;
   const cadastro = new Map((clubes || []).map(c => [c.nome, c]));
   const participantes = [...new Map(participantesQualificados.map(c => {
     const cadastroClube = cadastro.get(c.nome) || c;
@@ -198,31 +238,28 @@ export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forca
   })).values()];
 
   const sorteados = embaralhar(participantes, rng);
-  const grupos = Array.from({ length: 4 }, (_, i) => sorteados.slice(i * 4, i * 4 + 4));
+  const grupos = quantidadeGrupos ? dividirEmGrupos(sorteados, quantidadeGrupos) : [];
+  if (grupos.some(grupo => grupo.length < 2)) return null;
   const jogosGrupo = [];
   const classificados = [];
+  if (!quantidadeGrupos) classificados.push(...participantes);
   grupos.forEach((grupo, indice) => {
     const tabela = new Map(grupo.map(c => [c.nome, { ...c, pontos: 0, jogos: 0, vitorias: 0, empates: 0, derrotas: 0, golsPro: 0, golsContra: 0 }]));
     const jogos = [];
-    const rodadasGrupo = [
-      [[0, 3], [1, 2]], [[0, 2], [3, 1]], [[0, 1], [2, 3]],
-      [[3, 0], [2, 1]], [[2, 0], [1, 3]], [[1, 0], [3, 2]]
-    ];
-    rodadasGrupo.forEach((partidas, rodadaIdx) => partidas.forEach(([casaIdx, foraIdx]) => {
-      const casa = grupo[casaIdx], fora = grupo[foraIdx];
+    const rodadasGrupo = calendarioDeGrupo(grupo, turnos);
+    rodadasGrupo.forEach((partidas, rodadaIdx) => partidas.forEach(({ casa, fora }) => {
       const jogo = { ...criarPartida(casa, fora, nomeUsuario, bonusTecnico, rng),
         fase: `Fase de grupos · Grupo ${String.fromCharCode(65 + indice)}`, rodada: rodadaIdx + 1 };
       jogos.push(jogo); registrarJogo(tabela, jogo);
     }));
     const classificacao = classificarGrupo([...tabela.values()], jogos, rng);
     jogosGrupo.push({ grupo: String.fromCharCode(65 + indice), jogos, classificacao: classificacao.map(({ nome:n, pontos, golsPro, golsContra, vitorias }) => ({ nome:n, pontos, golsPro, golsContra, vitorias })) });
-    classificados.push(...classificacao.slice(0, 2));
+    classificados.push(...classificacao.slice(0, classificadosPorGrupo));
   });
 
   const eliminatoria = jogarEliminatoria(classificados, nomeUsuario, bonusTecnico, rng);
-  const faseGrupoUsuario = jogosGrupo.find(g => g.classificacao.some(x => x.nome === nomeUsuario));
-  const passouGrupos = !!faseGrupoUsuario && faseGrupoUsuario.classificacao.findIndex(x => x.nome === nomeUsuario) < 2;
-  const faseUsuario = eliminatoria.faseUsuario === 'Não participou' ? (passouGrupos ? 'Eliminado na fase de grupos' : 'Eliminado na fase de grupos') : eliminatoria.faseUsuario;
+  const faseUsuario = eliminatoria.faseUsuario === 'Não participou' && grupos.length
+    ? 'Eliminado na fase de grupos' : eliminatoria.faseUsuario;
   return { nome, tipo: 'continental', participantes: participantes.length, grupos: jogosGrupo,
     fases: eliminatoria.fases, campeao: eliminatoria.campeao, faseUsuario,
     jogosUsuario: [...jogosGrupo.flatMap(g => g.jogos.filter(j => j.casa === nomeUsuario || j.fora === nomeUsuario)),

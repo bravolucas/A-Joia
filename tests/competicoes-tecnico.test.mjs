@@ -71,6 +71,44 @@ test('continental simula grupos, classificação e mata-mata até a final', () =
   assert.ok(copa.jogosUsuario.length >= 6);
 });
 
+test('formato continental aceita quantidade configurável de grupos e vagas no mata-mata', () => {
+  const participantes = classificarVagasContinentalTecnico({
+    clubes, classificacoesMundo: classificacoesPorLiga(), pais: 'Brasil'
+  }).slice(0, 12);
+  const copa = simularCopaContinentalTecnico({
+    clubes, nomeUsuario: 'Brasil 0', pais: 'Brasil', nome: 'Competição teste', participantesQualificados: participantes,
+    formato: { totalParticipantes: 12, grupos: 3, classificadosPorGrupo: 1, turnos: 2 }, rng: rngSeed(31)
+  });
+  assert.equal(copa.grupos.length, 3);
+  assert.ok(copa.grupos.every(g => g.classificacao.length === 4 && g.jogos.length === 12));
+  assert.deepEqual(copa.fases.map(f => f.jogos.length), [2, 1]);
+  assert.equal(copa.participantes, 12);
+});
+
+test('formato continental também suporta mata-mata direto', () => {
+  const participantes = classificarVagasContinentalTecnico({
+    clubes, classificacoesMundo: classificacoesPorLiga(), pais: 'Brasil'
+  });
+  const copa = simularCopaContinentalTecnico({
+    clubes, nomeUsuario: 'Brasil 0', pais: 'Brasil', nome: 'Chave teste', participantesQualificados: participantes,
+    formato: { totalParticipantes: 16, grupos: 0 }, rng: rngSeed(32)
+  });
+  assert.equal(copa.grupos.length, 0);
+  assert.deepEqual(copa.fases.map(f => f.jogos.length), [8, 4, 2, 1]);
+});
+
+test('formato continental gera calendário para grupos com número ímpar de clubes', () => {
+  const participantes = classificarVagasContinentalTecnico({
+    clubes, classificacoesMundo: classificacoesPorLiga(), pais: 'Brasil'
+  }).slice(0, 15);
+  const copa = simularCopaContinentalTecnico({
+    clubes, nomeUsuario: 'Brasil 0', pais: 'Brasil', nome: 'Grupos ímpares', participantesQualificados: participantes,
+    formato: { totalParticipantes: 15, grupos: 5, classificadosPorGrupo: 1, turnos: 1 }, rng: rngSeed(33)
+  });
+  assert.equal(copa.grupos.length, 5);
+  assert.ok(copa.grupos.every(g => g.classificacao.length === 3 && g.jogos.length === 3));
+});
+
 test('vaga continental segue a classificação e não força a entrada do treinador pela força do elenco', () => {
   const clubesComForcaAlta = clubes.map(c => c.nome === 'Brasil 19' ? { ...c, elenco: 99 } : c);
   const qualificados = classificarVagasContinentalTecnico({

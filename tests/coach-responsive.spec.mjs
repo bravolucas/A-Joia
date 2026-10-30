@@ -113,3 +113,49 @@ for (const width of [390, 1366]) {
     });
   }
 }
+
+test('campanhas de copa exibem grupos e todas as partidas do mata-mata', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const save = criarSave({
+    id: 'copas',
+    clube: 'Confiança',
+    liga: 'serieB',
+    temporada: {
+      posicao: 8,
+      pontos: 50,
+      vitorias: 14,
+      empates: 8,
+      derrotas: 16,
+      torneios: [{
+        nome: 'Copa Libertadores',
+        tipo: 'continental',
+        faseUsuario: 'Semifinal',
+        jogosUsuario: [{ fase: 'Fase de grupos · Grupo A', casa: 'Confiança', fora: 'River Plate', golsCasa: 2, golsFora: 1 }],
+        grupos: [{
+          grupo: 'A',
+          classificacao: [
+            { nome: 'Confiança', pontos: 13, golsPro: 12, golsContra: 4, vitorias: 4 },
+            { nome: 'River Plate', pontos: 10, golsPro: 9, golsContra: 6, vitorias: 3 }
+          ],
+          jogos: [{ fase: 'Fase de grupos · Grupo A', casa: 'Confiança', fora: 'River Plate', golsCasa: 2, golsFora: 1 }]
+        }],
+        fases: [{
+          fase: 'Semifinal',
+          rodada: 3,
+          jogos: [{ fase: 'Semifinal', rodada: 3, casa: 'Confiança', fora: 'Boca Juniors', golsCasa: 1, golsFora: 1, penaltis: 'Casa', vencedor: 'Confiança' }]
+        }]
+      }]
+    }
+  });
+  await page.goto('http://127.0.0.1:4173/A-Joia/');
+  await page.evaluate(value => localStorage.setItem('ajoia_rapido_v1', JSON.stringify(value)), save);
+  await page.reload();
+  await page.getByRole('button', { name: /Continuar · Teste responsivo técnico/ }).click();
+  await page.locator('summary').filter({ hasText: 'Copa Libertadores' }).click();
+  await expect(page.getByText('Grupo A · tabela e partidas')).toBeVisible();
+  await page.getByText('Grupo A · tabela e partidas').click();
+  await expect(page.getByText('River Plate', { exact: true }).first()).toBeVisible();
+  await page.locator('summary').filter({ hasText: 'Semifinal' }).last().click();
+  await expect(page.getByText('Boca Juniors', { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
+});

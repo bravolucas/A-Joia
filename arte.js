@@ -38,6 +38,13 @@ const ALIASES_COMPETICOES = {
   'copa-libertadores': 'libertadores',
   'conmebol-libertadores': 'libertadores',
   'uefa-champions-league': 'champions-league',
+  'afc-champions-league-elite': 'champions-asiatica',
+  'concacaf-champions-cup': 'concacaf-champions',
+  'copa-del-rey': 'copa-do-rei',
+  'coupe-de-france': 'copa-da-franca',
+  'saudi-pro-league': 'liga-saudita',
+  'mls-cup': 'mls',
+  'super-lig': 'super-lig',
   'campeonato-brasileiro-serie-a': 'brasileirao',
   'campeonato-brasileiro-serie-b': 'brasileirao-serie-b'
 };

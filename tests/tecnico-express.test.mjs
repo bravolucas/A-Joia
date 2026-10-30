@@ -73,7 +73,7 @@ test('a vitrine de treinador reúne títulos reais do histórico sem alterar o l
   const tecnico = { ...c.tecnico, temporadas: [
     { ano: 2040, clube: 'Santos', liga: 'brasileirao', campeao: true, titulosConquistados: ['Brasileirão', 'Copa do Brasil'] },
     { ano: 2041, clube: 'Santos', liga: 'brasileirao', campeao: false, titulosConquistados: [] },
-    { ano: 2042, clube: 'Santos', liga: 'brasileirao', campeao: true }
+    { ano: 2042, clube: 'Santos', liga: 'brasileirao', campeao: true, titulosConquistados: [] }
   ] };
   const titulos = titulosConquistadosTecnico(tecnico);
   assert.deepEqual(titulos.map(t => t.nome), ['Brasileirão', 'Copa do Brasil', 'Brasileirão']);
@@ -105,4 +105,15 @@ test('participantes persistidos são usados no calendário da mesma divisão', a
   const outraDivisao = calendarioLigaTecnico({ ...t, liga: 'serieB' });
   assert.ok(outraDivisao);
   assert.notDeepEqual([...new Set(outraDivisao[0].flatMap(j => [j.casa, j.fora]))].sort(), [...nomes].sort());
+});
+
+test('histórico por clube e geral contam taças de ligas e copas', async () => {
+  const { historicoProfissionalTecnico } = await import('../tecnico.js');
+  const historico = historicoProfissionalTecnico({ temporadas: [
+    { ano: 2040, clube: 'Santos', campeao: true, titulosConquistados: ['Brasileirão', 'Copa do Brasil'] },
+    { ano: 2041, clube: 'Santos', campeao: false, titulosConquistados: [] },
+    { ano: 2042, clube: 'Santos', campeao: true, titulosConquistados: [] }
+  ] });
+  assert.equal(historico.titulos, 3);
+  assert.equal(historico.clubes[0].titulos, 3);
 });

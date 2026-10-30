@@ -73,7 +73,7 @@ test('a vitrine de treinador reúne títulos reais do histórico sem alterar o l
   const tecnico = { ...c.tecnico, temporadas: [
     { ano: 2040, clube: 'Santos', liga: 'brasileirao', campeao: true, titulosConquistados: ['Brasileirão', 'Copa do Brasil'] },
     { ano: 2041, clube: 'Santos', liga: 'brasileirao', campeao: false, titulosConquistados: [] },
-    { ano: 2042, clube: 'Santos', liga: 'brasileirao', campeao: true }
+    { ano: 2042, clube: 'Santos', liga: 'brasileirao', campeao: true, titulosConquistados: [] }
   ] };
   const titulos = titulosConquistadosTecnico(tecnico);
   assert.deepEqual(titulos.map(t => t.nome), ['Brasileirão', 'Copa do Brasil', 'Brasileirão']);
@@ -112,7 +112,7 @@ test('histórico por clube e geral contam taças de ligas e copas', async () => 
   const historico = historicoProfissionalTecnico({ temporadas: [
     { ano: 2040, clube: 'Santos', campeao: true, titulosConquistados: ['Brasileirão', 'Copa do Brasil'] },
     { ano: 2041, clube: 'Santos', campeao: false, titulosConquistados: [] },
-    { ano: 2042, clube: 'Santos', campeao: true }
+    { ano: 2042, clube: 'Santos', campeao: true, titulosConquistados: [] }
   ] });
   assert.equal(historico.titulos, 3);
   assert.equal(historico.clubes[0].titulos, 3);

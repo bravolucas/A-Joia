@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { simularCopaNacionalTecnico, simularCopaContinentalTecnico, classificarVagasContinentalTecnico } from '../competicoesTecnico.js';
+import { simularCopaNacionalTecnico, simularCopaContinentalTecnico, classificarVagasContinentalTecnico, classificarVagasPorRegraTecnico } from '../competicoesTecnico.js';
 import { gerarPropostasTecnico, salarioTecnico } from '../tecnico.js';
 import { competicaoDoTitulo, desenhoDaTaca } from '../tacas.js';
 
@@ -120,6 +120,28 @@ test('vaga continental segue a classificação e não força a entrada do treina
     clubes: clubesComForcaAlta, nomeUsuario: 'Brasil 19', pais: 'Brasil', forcaUsuario: 99,
     nome: 'Copa Libertadores', participantesQualificados: qualificados, rng: rngSeed(61)
   }), null);
+});
+
+test('vagas configuradas seguem as posições indicadas por liga e aceitam participantes extras', () => {
+  const classificacoesMundo = classificacoesPorLiga();
+  const vagas = classificarVagasPorRegraTecnico({
+    clubes,
+    classificacoesMundo,
+    vagasPorLiga: { brasileirao: [1, 3], argentina: [2] },
+    participantesExtras: ['Brasil 1'],
+  });
+  assert.deepEqual(vagas.map(c => c.nome), ['Brasil 0', 'Brasil 10', 'Argentina 1', 'Brasil 1']);
+});
+
+test('vagas configuradas removem duplicatas, limitam participantes e não usam a força do elenco', () => {
+  const clubesComForcaAlterada = clubes.map(c => c.nome === 'Brasil 19' ? { ...c, elenco: 99 } : c);
+  const vagas = classificarVagasContinentalTecnico({
+    clubes: clubesComForcaAlterada,
+    classificacoesMundo: classificacoesPorLiga(),
+    pais: 'Brasil',
+    regra: { vagasPorLiga: { brasileirao: [1, 2], argentina: [1] }, participantesExtras: ['Brasil 0'], limite: 3 }
+  });
+  assert.deepEqual(vagas.map(c => c.nome), ['Brasil 0', 'Brasil 1', 'Argentina 0']);
 });
 
 test('não cria vagas continentais sem tabelas anteriores ou sem clubes de vários países', () => {

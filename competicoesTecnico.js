@@ -129,7 +129,47 @@ function regiaoContinental(pais) {
  * por isso, exige representantes de pelo menos dois países e não fabrica
  * participantes de outras ligas.
  */
-export function classificarVagasContinentalTecnico({ clubes = [], classificacoesMundo = {}, pais, limite = 16 }) {
+/**
+ * Aplica cotas explícitas de uma edição: posições finais por liga, na ordem
+ * declarada, e participantes extras informados pela regra da competição.
+ * Não calcula cotas por força do elenco nem infere vagas ausentes.
+ */
+export function classificarVagasPorRegraTecnico({ clubes = [], classificacoesMundo = {}, vagasPorLiga = {}, participantesExtras = [], limite }) {
+  const clubesPorNome = new Map(clubes.filter(c => c?.nome).map(c => [c.nome, c]));
+  const selecionados = [];
+  const nomesIncluidos = new Set();
+  const incluir = clube => {
+    if (!clube || nomesIncluidos.has(clube.nome)) return;
+    nomesIncluidos.add(clube.nome);
+    selecionados.push(clube);
+  };
+
+  for (const [liga, vagas] of Object.entries(vagasPorLiga || {})) {
+    const tabela = classificacoesMundo?.[liga]?.classificacao || [];
+    for (const posicao of (Array.isArray(vagas) ? vagas : [vagas])) {
+      if (!Number.isInteger(posicao) || posicao < 1) continue;
+      const linha = tabela.find((item, indice) => (Number(item?.posicao) || indice + 1) === posicao);
+      incluir(clubesPorNome.get(linha?.nome));
+    }
+  }
+
+  for (const participante of participantesExtras || []) {
+    incluir(clubesPorNome.get(typeof participante === 'string' ? participante : participante?.nome));
+  }
+
+  return Number.isInteger(limite) && limite >= 0 ? selecionados.slice(0, limite) : selecionados;
+}
+
+export function classificarVagasContinentalTecnico({ clubes = [], classificacoesMundo = {}, pais, limite = 16, regra = null }) {
+  if (regra?.vagasPorLiga) {
+    return classificarVagasPorRegraTecnico({
+      clubes,
+      classificacoesMundo,
+      vagasPorLiga: regra.vagasPorLiga,
+      participantesExtras: regra.participantesExtras,
+      limite: regra.limite ?? limite
+    });
+  }
   const regiao = regiaoContinental(pais);
   if (!regiao || !Number.isInteger(limite) || limite < 2) return [];
   const clubesPorNome = new Map(clubes.filter(c => c?.nome).map(c => [c.nome, c]));

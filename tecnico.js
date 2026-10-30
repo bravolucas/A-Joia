@@ -363,8 +363,15 @@ function movimentoDivisaoTecnico(liga, posicao, total) {
 export function calendarioLigaTecnico(t = {}) {
   const clube = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
   const liga = t.liga || clube?.liga;
-  const participantes = CLUBES_CONVITES_TECNICO.filter(x => !liga || x.liga === liga)
+  const clubesBase = CLUBES_CONVITES_TECNICO.filter(x => !liga || x.liga === liga)
     .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  // Congela a composição da liga durante a temporada; saves antigos continuam
+  // usando a lista original caso ainda não tenham um elenco de participantes.
+  const nomesPersistidos = t.participantesLiga?.liga === liga ? t.participantesLiga.nomes : null;
+  const participantes = Array.isArray(nomesPersistidos) && nomesPersistidos.length === 20
+    ? nomesPersistidos.map(nome => CLUBES_CONVITES_TECNICO.find(x => x.nome === nome) ||
+        { nome, elenco: nome === t.clube ? forcaClubeTecnico(t) : 50 })
+    : clubesBase.slice();
   if (!participantes.some(x => x.nome === t.clube)) {
     // O clube do treinador substitui o participante mais fraco da nova divisão.
     if (participantes.length === 20) {
@@ -633,6 +640,8 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   if ((t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) throw new Error('Tome as decisões da temporada antes de simular.');
   if (t.andamento?.jogos) throw new Error('Temporada em andamento: avance pelas etapas.');
   const ligaAtual = t.liga || CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga;
+  const participantesLiga = calendarioLigaTecnico({ ...t, liga: ligaAtual });
+  const nomesLiga = participantesLiga ? [...new Set(participantesLiga[0].flatMap(j => [j.casa, j.fora]))] : null;
   const calendario = calendarioAdversariosTecnico({ ...t, liga: ligaAtual });
   let vitorias = 0, empates = 0, derrotas = 0, golsPro = 0, golsContra = 0;
   let classificacao = tabelaClassificacaoTecnico({ ...t, liga: ligaAtual }, { jogos: 0 });
@@ -724,7 +733,10 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   const reputacaoNova = limitar((t.reputacao ?? 50) + (campeao ? 9 : cumpriuObjetivo ? 4 : -3), 10, 99);
   const propostas = gerarPropostasTecnico({ ...t, clube: demitido ? null : t.clube, liga: ligaSeguinte, reputacao: reputacaoNova }, rng);
   return { ...c, idade: c.idade + 1, ano: c.ano + 1, tecnico: {
-    ...t, ano: t.ano + 1, liga: ligaSeguinte, fase: 'resultado', temporadas: [...t.temporadas, temporada],
+    ...t, ano: t.ano + 1, liga: ligaSeguinte,
+    participantesLiga: ligaSeguinte === ligaAtual && nomesLiga
+      ? { liga: ligaAtual, nomes: nomesLiga } : null,
+    fase: 'resultado', temporadas: [...t.temporadas, temporada],
     vitorias: (t.vitorias ?? 0) + vitorias, empates: (t.empates ?? 0) + empates, derrotas: (t.derrotas ?? 0) + derrotas,
     titulos: (t.titulos ?? 0) + temporada.titulosConquistados.length, demitido, propostas,
     promessaContrato: null, objetivoAtual: objetivo.nome, reputacao: reputacaoNova,

@@ -72,6 +72,16 @@ function PopUpDivisao({ temporada, movimento, tipo, onFechar }) {
   </div>, document.body);
 }
 
+function PlacarCompeticao({ jogo }) {
+  if (jogo.bye) return <div className="flex items-center justify-between gap-2 border-t border-white/[.05] py-1 text-[9px] text-[#A1A1AA]"><span>{jogo.fase || 'Classificado direto'}</span><span>{jogo.bye} avança sem adversário</span></div>;
+  const placar = Number.isFinite(jogo.golsCasa) && Number.isFinite(jogo.golsFora) ? `${jogo.golsCasa}–${jogo.golsFora}` : '—';
+  return <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 border-t border-white/[.05] py-1 text-[9px] text-[#A1A1AA]">
+    <span className={jogo.vencedor === jogo.casa ? 'truncate text-right text-white font-semibold' : 'truncate text-right'}>{jogo.casa || '—'}</span>
+    <strong className="text-white tabular-nums">{placar}{jogo.penaltis ? <span className="block text-[8px] text-[#A1A1AA] font-normal">pênaltis</span> : null}</strong>
+    <span className={jogo.vencedor === jogo.fora ? 'truncate text-white font-semibold' : 'truncate'}>{jogo.fora || '—'}</span>
+  </div>;
+}
+
 function CampanhasTemporada({ torneios = [] }) {
   if (!torneios.length) return null;
   return <div className="mt-3">
@@ -82,14 +92,21 @@ function CampanhasTemporada({ torneios = [] }) {
         <strong className="min-w-0 flex-1 truncate text-[11px] text-white">{torneio.nome}</strong>
         <span className={`text-[10px] font-bold ${torneio.faseUsuario === 'Campeão' ? 'text-[#FDE68A]' : 'text-[#A1A1AA]'}`}>{torneio.faseUsuario}</span>
       </summary>
-      <div className="px-2 pb-2">{(torneio.jogosUsuario || []).map((jogo, jogoIdx) => <div key={`${jogo.fase}-${jogoIdx}`} className="flex items-center justify-between gap-2 border-t border-white/[.05] py-1 text-[9px] text-[#A1A1AA]">
-        <span className="min-w-0 flex-1 truncate">{jogo.fase || 'Partida'}{jogo.rodada ? ` · rodada ${jogo.rodada}` : ''}</span>
-        <span className="shrink-0 truncate text-right">{jogo.casa} {jogo.golsCasa}–{jogo.golsFora} {jogo.fora}{jogo.penaltis ? ` · pênaltis: ${jogo.penaltis}` : ''}</span>
-      </div>)}</div>
+      <div className="px-2 pb-2">
+        {torneio.grupos?.map(grupo => <details key={`grupo-${grupo.grupo}`} className="mt-1 rounded-lg border border-white/[.06] bg-black/15">
+          <summary className="cursor-pointer px-2 py-1.5 text-[9px] font-bold text-[#D4D4D8]">Grupo {grupo.grupo} · tabela e partidas</summary>
+          {grupo.classificacao?.length > 0 && <div className="overflow-x-auto px-2 pb-1"><div className="grid min-w-[250px] grid-cols-[1.5rem_minmax(6rem,1fr)_2rem_3.4rem_2rem] gap-1 border-b border-white/[.08] py-1 text-[8px] uppercase text-[#71717A]"><span>#</span><span>Clube</span><span className="text-right">Pts</span><span className="text-right">SG</span><span className="text-right">V</span></div>{grupo.classificacao.map((clube, posicao) => <div key={clube.nome} className={`grid min-w-[250px] grid-cols-[1.5rem_minmax(6rem,1fr)_2rem_3.4rem_2rem] gap-1 py-1 text-[9px] ${clube.nome === torneio.clube ? 'font-bold text-[#FDE68A]' : 'text-[#A1A1AA]'}`}><span>{posicao + 1}</span><span className="truncate">{clube.nome}</span><span className="text-right">{clube.pontos}</span><span className="text-right">{(clube.golsPro || 0) - (clube.golsContra || 0)}</span><span className="text-right">{clube.vitorias}</span></div>)}</div>}
+          <div className="px-2 pb-2">{(grupo.jogos || []).map((jogo, i) => <PlacarCompeticao key={`grupo-${grupo.grupo}-${i}`} jogo={jogo} />)}</div>
+        </details>)}
+        {torneio.fases?.map((fase, faseIdx) => <details key={`fase-${fase.rodada || faseIdx}-${fase.fase}`} className="mt-1 rounded-lg border border-white/[.06] bg-black/15">
+          <summary className="cursor-pointer px-2 py-1.5 text-[9px] font-bold text-[#D4D4D8]">{fase.fase || 'Mata-mata'}</summary>
+          <div className="px-2 pb-2">{(fase.jogos || []).map((jogo, jogoIdx) => <PlacarCompeticao key={`fase-${faseIdx}-${jogoIdx}`} jogo={jogo} />)}</div>
+        </details>)}
+        {!torneio.grupos?.length && !torneio.fases?.length && (torneio.jogosUsuario || []).map((jogo, jogoIdx) => <PlacarCompeticao key={`usuario-${jogoIdx}`} jogo={jogo} />)}
+      </div>
     </details>)}</div>
   </div>;
 }
-
 function LinhaTemporada({ a, ativa, aberta, onClick }) {
   const titulos = Array.isArray(a.titulosConquistados) ? a.titulosConquistados : a.campeao ? [competicaoTemporadaTecnico(a)] : [];
   return <div className={'border-b border-white/[.06] '+(ativa ? 'bg-white/[.035]' : '')}>

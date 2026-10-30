@@ -93,3 +93,16 @@ test('tabela de clube promovido usa os mesmos participantes do calendário', asy
   assert.equal(classificacao.length, 20);
   assert.deepEqual(classificacao.map(x => x.nome).sort(), nomesCalendario);
 });
+
+test('participantes persistidos são usados no calendário da mesma divisão', async () => {
+  const { calendarioLigaTecnico, CLUBES_CONVITES_TECNICO } = await import('../tecnico.js');
+  const clube = CLUBES_CONVITES_TECNICO.find(x => x.liga === 'brasileirao');
+  const nomes = CLUBES_CONVITES_TECNICO.filter(x => x.liga === 'brasileirao').slice(0, 20).map(x => x.nome);
+  assert.equal(nomes.length, 20);
+  const t = { clube: clube.nome, liga: 'brasileirao', participantesLiga: { liga: 'brasileirao', nomes } };
+  const calendario = calendarioLigaTecnico(t);
+  assert.deepEqual([...new Set(calendario[0].flatMap(j => [j.casa, j.fora]))].sort(), [...nomes].sort());
+  const outraDivisao = calendarioLigaTecnico({ ...t, liga: 'serieB' });
+  assert.ok(outraDivisao);
+  assert.notDeepEqual([...new Set(outraDivisao[0].flatMap(j => [j.casa, j.fora]))].sort(), [...nomes].sort());
+});

@@ -393,30 +393,38 @@ function movimentoDivisaoTecnico(liga, posicao, total) {
 export function calendarioLigaTecnico(t = {}) {
   const clube = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
   const liga = t.liga || clube?.liga;
+  // Carreiras antigas podem apontar para um clube removido sem guardar a liga.
+  // Nesse caso, mantenha o calendário de compatibilidade em vez de tratar o
+  // banco inteiro como uma divisão nacional.
+  if (!liga) return null;
   const clubesBase = CLUBES_CONVITES_TECNICO.filter(x => !liga || (t.ligasMundo?.[x.nome] || x.liga) === liga)
     .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
   // Congela a composição da liga durante a temporada; saves antigos continuam
   // usando a lista original caso ainda não tenham um elenco de participantes.
   const nomesPersistidos = !t.ligasMundo && t.participantesLiga && t.participantesLiga.liga === liga ? t.participantesLiga.nomes : null;
-  const participantes = Array.isArray(nomesPersistidos) && nomesPersistidos.length === 20
+  const participantes = Array.isArray(nomesPersistidos) && nomesPersistidos.length >= 2
     ? nomesPersistidos.map(nome => CLUBES_CONVITES_TECNICO.find(x => x.nome === nome) ||
         { nome, elenco: nome === t.clube ? forcaClubeTecnico(t) : 50 })
     : clubesBase.slice();
   if (!participantes.some(x => x.nome === t.clube)) {
     // O clube do treinador substitui o participante mais fraco da nova divisão.
-    if (participantes.length === 20) {
+    if (participantes.length >= 2) {
       const maisFraco = participantes.reduce((menor, atual, indice, lista) => atual.elenco < lista[menor].elenco ? indice : menor, 0);
       participantes.splice(maisFraco, 1);
     }
     participantes.unshift({ nome: t.clube || 'Meu clube', elenco: forcaClubeTecnico(t) });
   }
-  if (participantes.length !== 20) return null;
+  if (participantes.length < 2) return null;
+  // Método de círculo: ligas ímpares recebem uma vaga de folga por rodada.
   const times = [...participantes];
+  if (times.length % 2) times.push(null);
+  const tamanho = times.length;
   const rodadas = [];
-  for (let r = 0; r < 19; r++) {
+  for (let r = 0; r < tamanho - 1; r++) {
     const jogos = [];
-    for (let i = 0; i < 10; i++) {
-      const a = times[i], b = times[19 - i];
+    for (let i = 0; i < tamanho / 2; i++) {
+      const a = times[i], b = times[tamanho - 1 - i];
+      if (!a || !b) continue;
       const casa = (r + i) % 2 === 0 ? a : b;
       const fora = casa === a ? b : a;
       jogos.push({ casa: casa.nome, fora: fora.nome });
@@ -431,7 +439,7 @@ export function calendarioAdversariosTecnico(t = {}) {
   if (liga) return liga.map((jogos, i) => {
     const nomeMeuClube = t.clube || 'Meu clube';
     const partida = jogos.find(j => j.casa === nomeMeuClube || j.fora === nomeMeuClube);
-    if (!partida) throw new Error('Calendário inconsistente: clube ausente da rodada.');
+    if (!partida) return { rodada: i + 1, nome: 'Folga', forca: 0, casa: false, folga: true };
     const nome = partida.casa === nomeMeuClube ? partida.fora : partida.casa;
     return { rodada: i + 1, nome, forca: CLUBES_CONVITES_TECNICO.find(x => x.nome === nome)?.elenco ?? 50,
       casa: partida.casa === nomeMeuClube };
@@ -539,13 +547,14 @@ export function tabelaClassificacaoTecnico(t, andamento, rng = sorteio) {
   // Após acesso/rebaixamento, o clube do treinador pode substituir outro participante.
   const partidas = calendarioLigaTecnico(t);
   const nomesParticipantes = partidas
-    ? [...new Set(partidas[0].flatMap(jogo => [jogo.casa, jogo.fora]))]
+    ? [...new Set(partidas.flatMap(rodada => rodada.flatMap(jogo => [jogo.casa, jogo.fora])))]
     : null;
   const rivais = (nomesParticipantes
     ? nomesParticipantes.filter(nome => nome !== t.clube).map(nome =>
       CLUBES_CONVITES_TECNICO.find(x => x.nome === nome) || { nome, elenco: 50 })
     : CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube && (!liga || (t.ligasMundo?.[x.nome] || x.liga) === liga)))
-    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).slice(0, 19);
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+    .slice(0, nomesParticipantes ? undefined : 19);
   const pontos = andamento?.pontos || 0;
   const linhas = [{ nome: t.clube || 'Meu clube', jogos, pontos, vitorias: andamento?.vitorias || 0,
     empates: andamento?.empates || 0, derrotas: andamento?.derrotas || 0, golsPro: andamento?.golsPro || 0, golsContra: andamento?.golsContra || 0, saldoGols: (andamento?.golsPro || 0) - (andamento?.golsContra || 0), meuClube: true }];
@@ -554,7 +563,7 @@ export function tabelaClassificacaoTecnico(t, andamento, rng = sorteio) {
     // Rivais fortes precisam disputar o título com pontuações competitivas.
     const expectativa = limitar(0.29 + (forca - 45) * 0.007, 0.21, 0.61);
     const empates = Math.min(jogos, Math.round(jogos * 0.24));
-    const variacao = jogos >= 38 && t.simulacaoExpressa ? Math.round((rng() + rng() + rng() - 1.5) * 10) : 0;
+    const variacao = jogos >= 30 && t.simulacaoExpressa ? Math.round((rng() + rng() + rng() - 1.5) * 10) : 0;
     const vitorias = Math.max(0, Math.min(jogos - empates, Math.round(jogos * expectativa) + variacao));
     const derrotas = jogos - vitorias - empates;
     linhas.push({ nome: rival.nome, jogos, pontos: vitorias * 3 + empates, vitorias, empates, derrotas, golsPro: 0, golsContra: 0, saldoGols: 0, meuClube: false });
@@ -573,6 +582,13 @@ export function ordenarClassificacaoTecnico(linhas) {
     .map((x, i, todos) => ({ ...x, posicao: i + 1, zona: zonaClassificacaoTecnico(i + 1, todos.length) }));
 }
 export const ETAPAS_TEMPORADA_TECNICO = [10, 19, 29, 38];
+function etapasCalendarioTecnico(t, calendario) {
+  const total = calendario?.length || 38;
+  if (total === 38) return ETAPAS_TEMPORADA_TECNICO;
+  const etapas = [...new Set(ETAPAS_TEMPORADA_TECNICO.map(x => Math.max(1, Math.ceil(total * x / 38))))];
+  if (etapas.at(-1) !== total) etapas.push(total);
+  return etapas;
+}
 export const OPCOES_REUNIAO_TECNICO = [
   { id: 'responsabilidade', nome: 'Assumir responsabilidade', descricao: 'Confiança +12 · moral -4; compromete-se a reagir.' },
   { id: 'reforcos', nome: 'Exigir reforços', descricao: 'Elenco +5 · confiança -6 · torcida +3.' },
@@ -588,7 +604,7 @@ export function reuniaoEmergenciaTecnico(c, escolha, rng = sorteio) {
   if (escolha === 'defesa') { moral += 6; diretoria += rng() < 0.4 ? 5 : -9; }
   const nova = { ...t, diretoria: limitar(diretoria, 0, 100), torcida: limitar(torcida, 0, 100),
     moral: limitar(moral, 10, 95), elenco: limitar(elenco, 10, 95),
-    reuniaoPendente: false, reunioes: [...(t.reunioes || []), { ano: t.ano, rodada: t.andamento.jogos, escolha }] };
+    reuniaoPendente: false, reunioes: [...(t.reunioes || []), { ano: t.ano, rodada: t.andamento.rodadas ?? t.andamento.jogos, escolha }] };
   return { ...c, tecnico: nova };
 }
 export function simularEtapaTecnico(c, rng = sorteio) {
@@ -596,15 +612,21 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   if (!t || t.fase !== 'pretemporada') throw new Error('Etapa indisponível.');
   if ((t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) throw new Error('Conclua as decisões antes de jogar.');
   if (t.reuniaoPendente) throw new Error('Responda à reunião com a diretoria antes de avançar.');
-  const anterior = t.andamento || { jogos: 0, vitorias: 0, empates: 0, derrotas: 0, pontos: 0, avaliacoes: [] };
-  const limite = ETAPAS_TEMPORADA_TECNICO.find(n => n > anterior.jogos);
-  if (!limite) throw new Error('Temporada já concluída.');
+  const anterior = t.andamento || { jogos: 0, rodadas: 0, vitorias: 0, empates: 0, derrotas: 0, pontos: 0, avaliacoes: [] };
   const calendario = anterior.calendario || calendarioAdversariosTecnico(t);
+  const totalRodadas = calendario?.length || 38;
+  const rodadasAnteriores = anterior.rodadas ?? anterior.jogos;
+  const limite = etapasCalendarioTecnico(t, calendario).find(n => n > rodadasAnteriores);
+  if (!limite) throw new Error('Temporada já concluída.');
   // Copia cada partida para não alterar saves anteriores por referência.
   const confrontos = (anterior.confrontos || []).map(jogo => ({ ...jogo }));
   let v = anterior.vitorias, e = anterior.empates, d = anterior.derrotas;
-  for (let i = anterior.jogos; i < limite; i++) {
-    const adversario = calendario[i];
+  for (let i = rodadasAnteriores; i < limite; i++) {
+    const adversario = calendario?.[i] || { rodada: i + 1, nome: 'Adversário', forca: 50, casa: i % 2 === 0 };
+    if (adversario.folga) {
+      confrontos.push({ ...adversario });
+      continue;
+    }
     const { vitoria: pVitoria, empate: pEmpate } = probabilidadesConfrontoTecnico(t, adversario);
     const r = rng();
     const resultado = r < pVitoria ? 'V' : r < pVitoria + pEmpate ? 'E' : 'D';
@@ -613,7 +635,8 @@ export function simularEtapaTecnico(c, rng = sorteio) {
     confrontos.push({ ...adversario, resultado, golsPro: placar.pro, golsContra: placar.contra });
   }
   const pontos = v * 3 + e;
-  const aproveitamento = pontos / (limite * 3);
+  const jogosDisputados = confrontos.filter(j => !j.folga).length;
+  const aproveitamento = jogosDisputados ? pontos / (jogosDisputados * 3) : 0;
   const expectativa = objetivoTecnico(t).posicao;
   const ruim = aproveitamento < (expectativa <= 4 ? 0.44 : expectativa <= 8 ? 0.35 : 0.25);
   const otimo = aproveitamento > (expectativa <= 4 ? 0.72 : 0.62);
@@ -621,12 +644,12 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   const diretoria = limitar((t.diretoria ?? 60) + ajuste, 0, 100);
   const torcida = limitar((t.torcida ?? 55) + (otimo ? 7 : ruim ? -8 : 1), 0, 100);
   const pressao = riscoDemissaoTecnico({ ...t, diretoria, torcida }).pressao;
-  const demitido = (diretoria < 18 || pressao >= 85) && limite < 38;
-  const reuniaoPendente = !demitido && limite < 38 && (pressao >= 55 || diretoria <= 45);
+  const demitido = (diretoria < 18 || pressao >= 85) && limite < totalRodadas;
+  const reuniaoPendente = !demitido && limite < totalRodadas && (pressao >= 55 || diretoria <= 45);
   const avaliacao = { rodada: limite, pontos, aproveitamento: Math.round(aproveitamento * 100),
     situacao: demitido ? 'Demitido durante a temporada' : ruim ? 'Diretoria insatisfeita' : otimo ? 'Diretoria satisfeita' : 'Diretoria acompanha os resultados',
     diretoria, torcida, pressao };
-  const andamento = { jogos: limite, calendario, confrontos, vitorias: v, empates: e, derrotas: d, pontos,
+  const andamento = { jogos: jogosDisputados, rodadas: limite, calendario, confrontos, vitorias: v, empates: e, derrotas: d, pontos,
     avaliacoes: [...anterior.avaliacoes, avaliacao] };
   // Saves anteriores à introdução dos placares preservam resultados e recebem gols coerentes.
   for (const jogo of confrontos) {
@@ -639,18 +662,18 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   // Mantém os resultados dos rivais entre etapas; saves antigos iniciam pela tabela estimada.
   const base = anterior.classificacao || tabelaClassificacaoTecnico(t, { jogos: anterior.jogos, pontos: anterior.pontos, vitorias: anterior.vitorias, empates: anterior.empates, derrotas: anterior.derrotas });
   let classificacao = base;
-  for (let rodada = anterior.jogos; rodada < limite; rodada++) {
+  for (let rodada = rodadasAnteriores; rodada < limite; rodada++) {
     classificacao = simularRodadaRivaisTecnico(t, classificacao, confrontos[rodada]?.nome, confrontos[rodada]?.resultado, rng, rodada + 1, { pro: confrontos[rodada]?.golsPro, contra: confrontos[rodada]?.golsContra });
   }
   const golsPro = confrontos.reduce((n, j) => n + (j.golsPro || 0), 0);
   const golsContra = confrontos.reduce((n, j) => n + (j.golsContra || 0), 0);
-  classificacao = classificacao.map(x => x.meuClube ? { ...x, jogos: limite, pontos, vitorias: v, empates: e, derrotas: d, golsPro, golsContra, saldoGols: golsPro - golsContra } : x);
+  classificacao = classificacao.map(x => x.meuClube ? { ...x, jogos: jogosDisputados, pontos, vitorias: v, empates: e, derrotas: d, golsPro, golsContra, saldoGols: golsPro - golsContra } : x);
   andamento.classificacao = ordenarClassificacaoTecnico(classificacao);
   if (demitido) {
     const posicao = andamento.classificacao.find(x => x.meuClube)?.posicao || 18;
     const temporada = { ano: t.ano, clube: t.clube, ...(CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga || t.liga ? { liga: CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga || t.liga } : {}), objetivo: objetivoTecnico(t).nome,
       cumpriuObjetivo: false, posicao, pontos, vitorias: v, empates: e, derrotas: d,
-      jogos: limite, interrompida: true, demitido: true, confrontos, classificacao: andamento.classificacao, avaliacoes: andamento.avaliacoes };
+      jogos: jogosDisputados, interrompida: true, demitido: true, confrontos, classificacao: andamento.classificacao, avaliacoes: andamento.avaliacoes };
     const novo = { ...t, diretoria, torcida, demitido: true, reuniaoPendente: false, andamento: null,
       fase: 'resultado', temporadas: [...t.temporadas, temporada],
       vitorias: t.vitorias + v, empates: t.empates + e, derrotas: t.derrotas + d,
@@ -658,7 +681,7 @@ export function simularEtapaTecnico(c, rng = sorteio) {
       promessaContrato: null, ano: t.ano + 1 };
     return { ...c, idade: c.idade + 1, ano: c.ano + 1, tecnico: novo };
   }
-  if (limite < 38) return { ...c, tecnico: { ...t, diretoria, torcida, andamento, reuniaoPendente } };
+  if (limite < totalRodadas) return { ...c, tecnico: { ...t, diretoria, torcida, andamento, reuniaoPendente } };
   // Finalizar usando os resultados já disputados, sem sortear partidas novamente.
   return finalizarTemporadaTecnico(c, { ...andamento, diretoria, torcida }, rng);
 }
@@ -668,16 +691,21 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   if (carreiraTecnicoEncerrada(c.tecnico)) throw new Error('Limite de 30 temporadas como treinador atingido.');
   const t = c.tecnico;
   if ((t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) throw new Error('Tome as decisões da temporada antes de simular.');
-  if (t.andamento?.jogos) throw new Error('Temporada em andamento: avance pelas etapas.');
+  if (t.andamento?.rodadas || t.andamento?.jogos) throw new Error('Temporada em andamento: avance pelas etapas.');
   const ligaAtual = t.liga || CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga;
   const participantesLiga = calendarioLigaTecnico({ ...t, liga: ligaAtual });
-  const nomesLiga = participantesLiga ? [...new Set(participantesLiga[0].flatMap(j => [j.casa, j.fora]))] : null;
+  const nomesLiga = participantesLiga ? [...new Set(participantesLiga.flatMap(r => r.flatMap(j => [j.casa, j.fora])))] : null;
   const calendario = calendarioAdversariosTecnico({ ...t, liga: ligaAtual });
   let vitorias = 0, empates = 0, derrotas = 0, golsPro = 0, golsContra = 0;
   let classificacao = tabelaClassificacaoTecnico({ ...t, liga: ligaAtual }, { jogos: 0 });
   const confrontos = [];
-  for (let rodada = 0; rodada < 38; rodada++) {
-    const adversario = calendario[rodada % calendario.length];
+  for (let rodada = 0; rodada < calendario.length; rodada++) {
+    const adversario = calendario[rodada];
+    if (adversario.folga) {
+      confrontos.push({ ...adversario });
+      classificacao = simularRodadaRivaisTecnico({ ...t, liga: ligaAtual }, classificacao, null, null, rng, rodada + 1);
+      continue;
+    }
     const odds = probabilidadesConfrontoTecnico({ ...t, liga: ligaAtual }, adversario);
     const sorteioResultado = rng();
     const resultado = sorteioResultado < odds.vitoria ? 'V' : sorteioResultado < odds.vitoria + odds.empate ? 'E' : 'D';
@@ -691,10 +719,11 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
     classificacao = simularRodadaRivaisTecnico({ ...t, liga: ligaAtual }, classificacao, adversario.nome, resultado, rng, rodada + 1, placar);
   }
   const pontos = vitorias * 3 + empates;
+  const jogosDisputados = confrontos.filter(j => !j.folga).length;
   classificacao = ordenarClassificacaoTecnico(classificacao.map(x => x.meuClube
-    ? { ...x, jogos: 38, pontos, vitorias, empates, derrotas, golsPro, golsContra, saldoGols: golsPro - golsContra }
+    ? { ...x, jogos: jogosDisputados, pontos, vitorias, empates, derrotas, golsPro, golsContra, saldoGols: golsPro - golsContra }
     : x));
-  const posicao = classificacao.find(x => x.meuClube)?.posicao || 20;
+  const posicao = classificacao.find(x => x.meuClube)?.posicao || classificacao.length;
   const campeao = posicao === 1;
   const objetivo = objetivoTecnico({ ...t, liga: ligaAtual });
   const vinculoAtual = (t.vinculosJogador || []).find(v => v.clube === t.clube);
@@ -708,7 +737,7 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   const temporada = {
     ano: t.ano, clube: t.clube, liga: ligaAtual, idoloEmCasa,
     objetivo: objetivo.nome, cumpriuObjetivo, promessaDescumprida, estilo: t.estilo,
-    decisoes: t.decisoes, vitorias, empates, derrotas, pontos, posicao, campeao,
+    decisoes: t.decisoes, jogos: jogosDisputados, vitorias, empates, derrotas, pontos, posicao, campeao,
     classificacao, classificacoesMundo,
     ...(progressaoMundo.movimentos.length ? { movimentosMundo: progressaoMundo.movimentos } : {}),
     confrontos, golsPro, golsContra,
@@ -800,7 +829,7 @@ function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
     riscoDemissaoTecnico({ ...t, diretoria: novaConfianca, torcida: novaTorcida }).pressao >= 82;
   const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivo.nome, cumpriuObjetivo,
     promessaDescumprida, idoloEmCasa, estilo: t.estilo, decisoes: t.decisoes,
-    vitorias, empates, derrotas, pontos, posicao, campeao, classificacao, classificacoesMundo,
+    jogos: vitorias + empates + derrotas, vitorias, empates, derrotas, pontos, posicao, campeao, classificacao, classificacoesMundo,
     ...(progressaoMundo.movimentos.length ? { movimentosMundo: progressaoMundo.movimentos } : {}),
     confrontos: andamento.confrontos || [], avaliacoes: andamento.avaliacoes };
   temporada.demitido = demitido;
@@ -863,7 +892,7 @@ export function jogarTemporadaExpressaTecnico(c, opcaoId, rng = sorteio) {
     atual = { ...atual, tecnico: { ...atual.tecnico, decisoes: [...feitas, ...restantes] } };
   }
   // Saves antigos com rodadas em andamento são concluídos sem reiniciar resultados.
-  if (atual.tecnico.andamento?.jogos) {
+  if (atual.tecnico.andamento?.rodadas || atual.tecnico.andamento?.jogos) {
     while (atual.tecnico.fase === 'pretemporada') {
       if (atual.tecnico.reuniaoPendente) atual = reuniaoEmergenciaTecnico(atual, 'responsabilidade', rng);
       atual = simularEtapaTecnico(atual, rng);

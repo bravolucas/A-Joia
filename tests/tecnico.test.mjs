@@ -425,6 +425,50 @@ test('liga de 20 clubes possui 380 jogos únicos por turno e returno invertido',
     for (const j of calendario[r]) assert.ok(volta.some(v => v.casa === j.fora && v.fora === j.casa));
   }
 });
+test('calendário respeita o tamanho cadastrado e distribui folgas em liga ímpar', () => {
+  for (const liga of ['franca', 'sulamericano']) {
+    const clubesLiga = CLUBES.filter(x => x.liga === liga);
+    const clube = clubesLiga[0];
+    const calendario = calendarioLigaTecnico({ clube: clube.nome });
+    const esperado = clubesLiga.length % 2 ? clubesLiga.length * 2 : (clubesLiga.length - 1) * 2;
+    assert.equal(calendario.length, esperado, `${liga}: número de rodadas`);
+    const jogos = calendario.flat();
+    assert.equal(jogos.length, clubesLiga.length * (clubesLiga.length - 1));
+    const confrontos = new Set(jogos.map(j => [j.casa, j.fora].sort().join('|')));
+    assert.equal(confrontos.size, clubesLiga.length * (clubesLiga.length - 1) / 2);
+    const partidasDoClube = calendario.map(r => r.find(j => j.casa === clube.nome || j.fora === clube.nome));
+    assert.equal(partidasDoClube.filter(Boolean).length, (clubesLiga.length - 1) * 2);
+    assert.equal(partidasDoClube.filter(x => !x).length, clubesLiga.length % 2 ? 2 : 0);
+    const adversarios = calendarioAdversariosTecnico({ clube: clube.nome });
+    assert.equal(adversarios.filter(x => x.folga).length, clubesLiga.length % 2 ? 2 : 0);
+  }
+});
+test('temporada expressa disputa o número correto de jogos em liga com folga', () => {
+  const clube = CLUBES.find(x => x.liga === 'sulamericano');
+  const totalClubes = CLUBES.filter(x => x.liga === clube.liga).length;
+  let c = iniciarCarreiraTecnico(atleta);
+  c = { ...c, tecnico: { ...c.tecnico, clube: clube.nome, liga: clube.liga, elenco: clube.forca, decisoes: Array(4).fill({ id: 'teste' }) } };
+  const resultado = simularTemporadaTecnico(c, () => 0.4);
+  const campanha = resultado.tecnico.temporadas.at(-1);
+  const jogosEsperados = 2 * (totalClubes - 1);
+  assert.equal(campanha.jogos, jogosEsperados);
+  assert.equal(campanha.vitorias + campanha.empates + campanha.derrotas, jogosEsperados);
+  assert.equal(campanha.classificacao.length, totalClubes);
+  assert.ok(campanha.classificacao.every(x => x.jogos === jogosEsperados));
+});
+test('temporada por etapas termina na rodada certa em liga com folga', () => {
+  const clube = CLUBES.find(x => x.liga === 'sulamericano');
+  const totalClubes = CLUBES.filter(x => x.liga === clube.liga).length;
+  let c = iniciarCarreiraTecnico(atleta);
+  c = { ...c, tecnico: { ...c.tecnico, clube: clube.nome, liga: clube.liga, elenco: clube.forca,
+    diretoria: 95, torcida: 95, decisoes: Array(4).fill({ id: 'teste' }) } };
+  while (c.tecnico.fase === 'pretemporada') c = simularEtapaTecnico(c, () => 0.01);
+  const campanha = c.tecnico.temporadas.at(-1);
+  assert.equal(campanha.confrontos.length, totalClubes * 2);
+  assert.equal(campanha.jogos, 2 * (totalClubes - 1));
+  assert.equal(campanha.confrontos.filter(x => x.folga).length, 2);
+  assert.equal(campanha.vitorias + campanha.empates + campanha.derrotas, campanha.jogos);
+});
 
 test('desempate por vitórias e saldo de gols e marcação de zonas', () => {
   const tabela = ordenarClassificacaoTecnico([

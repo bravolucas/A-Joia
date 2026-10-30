@@ -54,14 +54,19 @@ test('simulação massiva: 80 carreiras, diferentes legados, estilos, resultados
       }
       if (c.tecnico.fase !== 'pretemporada') continue;
       c = preparar(c, rng);
+      let rodadasAnteriores = 0;
       for (const rodada of ETAPAS_TEMPORADA_TECNICO) {
         c = simularEtapaTecnico(c, rng);
-        assert.equal(c.tecnico.andamento?.jogos ?? c.tecnico.temporadas.at(-1)?.jogos ?? 38, rodada);
         const a = c.tecnico.andamento || { ...c.tecnico.temporadas.at(-1), jogos: c.tecnico.temporadas.at(-1)?.jogos ?? 38, confrontos: c.tecnico.temporadas.at(-1)?.confrontos || [] };
+        if (c.tecnico.andamento) {
+          assert.ok(a.rodadas > rodadasAnteriores);
+          assert.equal(a.confrontos.length, a.rodadas);
+          rodadasAnteriores = a.rodadas;
+        } else assert.ok(a.jogos <= a.confrontos.length);
         assert.equal(a.vitorias + a.empates + a.derrotas, a.jogos);
         assert.equal(a.pontos, 3 * a.vitorias + a.empates);
-        assert.equal(a.confrontos.length, a.jogos);
         for (const jogo of a.confrontos) {
+          if (jogo.folga) continue;
           assert.ok(Number.isInteger(jogo.golsPro) && jogo.golsPro >= 0);
           assert.ok(Number.isInteger(jogo.golsContra) && jogo.golsContra >= 0);
           assert.equal(jogo.resultado, jogo.golsPro > jogo.golsContra ? 'V' : jogo.golsPro === jogo.golsContra ? 'E' : 'D');

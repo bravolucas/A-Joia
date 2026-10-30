@@ -371,6 +371,23 @@ test('save antigo sem participantes persistidos preserva compatibilidade do cale
   assert.equal(calendarioLigaTecnico({}), null);
 });
 
+test('calendário usa acessos e rebaixamentos globais a partir da temporada seguinte', () => {
+  const principal = CLUBES.find(x => x.liga === 'brasileirao');
+  const rebaixado = CLUBES.find(x => x.liga === 'brasileirao' && x.nome !== principal.nome);
+  const promovido = CLUBES.find(x => x.liga === 'serieB');
+  assert.ok(principal && rebaixado && promovido);
+  const calendario = calendarioLigaTecnico({
+    clube: principal.nome,
+    liga: 'brasileirao',
+    ligasMundo: { [rebaixado.nome]: 'serieB', [promovido.nome]: 'brasileirao' },
+  });
+  const participantes = new Set(calendario.flatMap(rodada => rodada.flatMap(jogo => [jogo.casa, jogo.fora])));
+  assert.equal(participantes.size, 20);
+  assert.ok(participantes.has(principal.nome));
+  assert.ok(participantes.has(promovido.nome));
+  assert.equal(participantes.has(rebaixado.nome), false);
+});
+
 test('liga evolui por resultados dos rivais sem recalcular rodadas anteriores', () => {
   const clube = CLUBES.find(x => CLUBES.filter(y => y.liga === x.liga).length >= 20);
   if (!clube) return;

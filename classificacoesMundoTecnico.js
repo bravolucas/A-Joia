@@ -56,9 +56,8 @@ function ordenarTabela(linhas) {
   const jaClassificada = linhas.every(linha => Number.isFinite(linha.posicao));
   return [...linhas].sort((a, b) => jaClassificada ? a.posicao - b.posicao :
     b.pontos - a.pontos ||
-    b.saldoGols - a.saldoGols ||
-    b.golsPro - a.golsPro ||
     b.vitorias - a.vitorias ||
+    b.saldoGols - a.saldoGols ||
     a.nome.localeCompare(b.nome, 'pt-BR')
   ).map((linha, indice) => ({ ...linha, posicao: jaClassificada ? linha.posicao : indice + 1 }));
 }
@@ -91,7 +90,6 @@ function simularLiga(clubes, rng) {
     base.splice(1, 0, base.pop());
   }
 
-  // O returno repete os confrontos com mando invertido.
   const participantes = [...tabela.keys()].map(nome => porNome.get(nome));
   // O returno repete os confrontos com mando invertido.
   for (let i = 0; i < participantes.length; i++) {
@@ -112,6 +110,7 @@ function simularLiga(clubes, rng) {
  */
 export function simularClassificacoesMundoTecnico({
   clubes = [],
+  ligasMundo = {},
   ligaTreinador,
   clubeTreinador,
   forcaTreinador,
@@ -122,7 +121,7 @@ export function simularClassificacoesMundoTecnico({
   const porLiga = new Map();
   for (const clube of clubesUnicos) {
     if (clube.nome === clubeTreinador) continue;
-    const liga = clube.liga || 'sem-liga';
+    const liga = ligasMundo[clube.nome] || clube.liga || 'sem-liga';
     if (!porLiga.has(liga)) porLiga.set(liga, []);
     porLiga.get(liga).push(clube);
   }
@@ -156,4 +155,53 @@ export function simularClassificacoesMundoTecnico({
     resultado[liga] = { liga, origem: 'simulacao-global', classificacao: simularLiga(ordenados, rng) };
   }
   return resultado;
+}
+
+/** Aplica os acessos e rebaixamentos já usados pela carreira do treinador. */
+export function atualizarLigasMundoTecnico({
+  clubes = [],
+  classificacoesMundo = {},
+  ligasMundo = {},
+  clubeTreinador,
+  ligaTreinador,
+  divisoes = [],
+}) {
+  const atribuicoes = Object.fromEntries(clubes
+    .filter(clube => clube?.nome)
+    .map(clube => [clube.nome, ligasMundo[clube.nome] || clube.liga])
+    .filter(([, liga]) => !!liga));
+  for (const [nome, liga] of Object.entries(ligasMundo)) {
+    if (!atribuicoes[nome] && liga) atribuicoes[nome] = liga;
+  }
+  if (clubeTreinador && ligaTreinador) atribuicoes[clubeTreinador] = ligaTreinador;
+  const movimentos = [];
+
+  for (const divisao of divisoes) {
+    const tabelaCima = classificacoesMundo[divisao.cima]?.classificacao || [];
+    const tabelaBaixo = classificacoesMundo[divisao.baixo]?.classificacao || [];
+    const vagas = Math.max(0, Math.min(Number(divisao.vagas) || 0, tabelaCima.length, tabelaBaixo.length));
+    if (!vagas) continue;
+    const rebaixados = tabelaCima.slice(-vagas);
+    const promovidos = tabelaBaixo.slice(0, vagas);
+    for (let i = 0; i < vagas; i++) {
+      const rebaixado = rebaixados[i];
+      const promovido = promovidos[i];
+      if (!rebaixado?.nome || !promovido?.nome) continue;
+      atribuicoes[rebaixado.nome] = divisao.baixo;
+      atribuicoes[promovido.nome] = divisao.cima;
+      movimentos.push({
+        clube: rebaixado.nome,
+        tipo: 'rebaixamento',
+        de: divisao.cima,
+        para: divisao.baixo,
+      }, {
+        clube: promovido.nome,
+        tipo: 'acesso',
+        de: divisao.baixo,
+        para: divisao.cima,
+      });
+    }
+  }
+
+  return { ligasMundo: atribuicoes, movimentos };
 }

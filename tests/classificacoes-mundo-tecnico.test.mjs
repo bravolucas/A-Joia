@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { simularClassificacoesMundoTecnico } from '../classificacoesMundoTecnico.js';
+import { atualizarLigasMundoTecnico, simularClassificacoesMundoTecnico } from '../classificacoesMundoTecnico.js';
 
 function rngSeed(seed) {
   return () => {
@@ -58,4 +58,31 @@ test('simulações com a mesma semente produzem as mesmas tabelas', () => {
   const a = simularClassificacoesMundoTecnico({ clubes, rng: rngSeed(55) });
   const b = simularClassificacoesMundoTecnico({ clubes, rng: rngSeed(55) });
   assert.deepEqual(a, b);
+});
+
+test('acesso e rebaixamento movimentam clubes nas duas direções e preservam as demais divisões', () => {
+  const clubes = [
+    { nome: 'Topo 1', liga: 'principal' },
+    { nome: 'Topo 2', liga: 'principal' },
+    { nome: 'Base 1', liga: 'segunda' },
+    { nome: 'Base 2', liga: 'segunda' },
+    { nome: 'Fora', liga: 'outra' },
+  ];
+  const classificacoesMundo = {
+    principal: { classificacao: [{ nome: 'Topo 1', posicao: 1 }, { nome: 'Topo 2', posicao: 2 }] },
+    segunda: { classificacao: [{ nome: 'Base 1', posicao: 1 }, { nome: 'Base 2', posicao: 2 }] },
+  };
+  const progressao = atualizarLigasMundoTecnico({
+    clubes,
+    classificacoesMundo,
+    ligasMundo: { 'Clube legado': 'outra' },
+    divisoes: [{ cima: 'principal', baixo: 'segunda', vagas: 1 }],
+  });
+
+  assert.equal(progressao.ligasMundo['Topo 2'], 'segunda');
+  assert.equal(progressao.ligasMundo['Base 1'], 'principal');
+  assert.equal(progressao.ligasMundo['Topo 1'], 'principal');
+  assert.equal(progressao.ligasMundo.Fora, 'outra');
+  assert.equal(progressao.ligasMundo['Clube legado'], 'outra');
+  assert.deepEqual(progressao.movimentos.map(x => x.tipo).sort(), ['acesso', 'rebaixamento']);
 });

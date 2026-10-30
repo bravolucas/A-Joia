@@ -72,3 +72,16 @@ test('a vitrine de treinador reúne títulos reais do histórico sem alterar o l
   assert.deepEqual(titulos.map(t => t.ano), [2040, 2040, 2042]);
   assert.equal(c.temporadas.length, atleta.temporadas.length);
 });
+
+test('tabela de clube promovido usa os mesmos participantes do calendário', async () => {
+  const { CLUBES_CONVITES_TECNICO, calendarioLigaTecnico, tabelaClassificacaoTecnico } = await import('../tecnico.js');
+  const candidato = CLUBES_CONVITES_TECNICO.find(x => x.liga === 'serieB');
+  assert.ok(candidato, 'precisa existir um clube da Série B');
+  const t = { clube: candidato.nome, liga: 'brasileirao', elenco: candidato.elenco };
+  const calendario = calendarioLigaTecnico(t);
+  assert.ok(calendario, 'a divisão de destino precisa ter calendário completo');
+  const nomesCalendario = [...new Set(calendario[0].flatMap(j => [j.casa, j.fora]))].sort();
+  const classificacao = tabelaClassificacaoTecnico(t, { jogos: 0 });
+  assert.equal(classificacao.length, 20);
+  assert.deepEqual(classificacao.map(x => x.nome).sort(), nomesCalendario);
+});

@@ -117,6 +117,10 @@ export function calcularOvrTecnico(t) {
   const desempenho = Math.round((aproveitamento - 0.45) * 22);
   return limitar(Math.round(30 + (t.reputacao || 25) * 0.36 + experiencia + titulos + desempenho), 25, 99);
 }
+const contarTitulosTemporadaTecnico = temporada => Array.isArray(temporada?.titulosConquistados)
+  ? temporada.titulosConquistados.length
+  : temporada?.campeao ? 1 : 0;
+
 export function historicoProfissionalTecnico(t = {}) {
   const temporadas = t.temporadas || [];
   const clubes = [];
@@ -132,7 +136,7 @@ export function historicoProfissionalTecnico(t = {}) {
     registro.vitorias += temporada.vitorias || 0;
     registro.empates += temporada.empates || 0;
     registro.derrotas += temporada.derrotas || 0;
-    registro.titulos += temporada.campeao ? 1 : 0;
+    registro.titulos += contarTitulosTemporadaTecnico(temporada);
     registro.demissoes += temporada.interrompida || temporada.demitido ? 1 : 0;
     if (Number.isFinite(temporada.posicao)) registro.melhorPosicao = registro.melhorPosicao === null ? temporada.posicao : Math.min(registro.melhorPosicao, temporada.posicao);
     registro.anos.push(temporada.ano);
@@ -143,7 +147,7 @@ export function historicoProfissionalTecnico(t = {}) {
   const derrotas = temporadas.reduce((n, x) => n + (x.derrotas || 0), 0);
   return { clubes, temporadas: temporadas.length, jogos, vitorias, empates, derrotas,
     aproveitamento: jogos ? Math.round((vitorias * 3 + empates) / (jogos * 3) * 100) : 0,
-    titulos: temporadas.filter(x => x.campeao).length,
+    titulos: temporadas.reduce((total, temporada) => total + contarTitulosTemporadaTecnico(temporada), 0),
     demissoes: temporadas.filter(x => x.interrompida || x.demitido).length,
     reunioes: (t.reunioes || []).length };
 }

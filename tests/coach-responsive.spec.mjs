@@ -154,7 +154,8 @@ test('campanhas de copa exibem grupos e todas as partidas do mata-mata', async (
   await page.locator('summary').filter({ hasText: 'Copa Libertadores' }).click();
   await expect(page.getByText('Grupo A · tabela e partidas')).toBeVisible();
   await page.getByText('Grupo A · tabela e partidas').click();
-  await expect(page.getByText('River Plate', { exact: true })).toBeVisible();
-  await expect(page.getByText('Semifinal', { exact: true })).toBeVisible();
+  await expect(page.getByText('River Plate', { exact: true }).first()).toBeVisible();
+  await page.locator('summary').filter({ hasText: 'Semifinal' }).last().click();
+  await expect(page.getByText('Boca Juniors', { exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
 });

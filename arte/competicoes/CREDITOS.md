@@ -1,16 +1,19 @@
 # Créditos das taças
 
-As imagens de troféus desta pasta vêm do repositório público **Football-Career**
-(https://github.com/AugustoCesarSalgado/Football-Career, pasta `public/trophies`),
-distribuído sob licença MIT ("Career Sim contributors").
+Parte das imagens de taças desta pasta foi adaptada do repositório público
+**Football-Career** (https://github.com/AugustoCesarSalgado/Football-Career, pasta
+`public/trophies`). O repositório declara a licença MIT e atribui os direitos de
+autor a "Career Sim contributors". A atribuição é mantida aqui junto aos arquivos
+derivados.
 
 Foram recortadas (sem a margem transparente), reduzidas e convertidas para WebP, com o
 nome no formato que o jogo usa (ex.: `copa-do-brasil.webp`, `bola-de-ouro.webp`).
 
-Os troféus são marcas e obras de suas respectivas entidades organizadoras. Eles aparecem
-no A JOIA só para identificar as competições dentro da simulação; o jogo não é afiliado,
-patrocinado nem endossado por elas. Competição sem arquivo aqui usa a taça desenhada
-pelo jogo. Para remover uma imagem, basta apagar o arquivo.
+As imagens são usadas para identificar as competições no jogo. Os troféus, nomes e
+marcas também podem estar sujeitos a direitos das respectivas entidades organizadoras;
+o A JOIA não é afiliado, patrocinado nem endossado por elas. Competição sem arquivo
+correspondente usa uma silhueta original do jogo. Para remover uma imagem, basta
+apagar o arquivo.
 
 ## Taças enviadas pelo autor do jogo
 

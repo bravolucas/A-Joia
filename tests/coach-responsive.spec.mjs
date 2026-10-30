@@ -159,3 +159,25 @@ test('campanhas de copa exibem grupos e todas as partidas do mata-mata', async (
   await expect(page.getByText('Boca Juniors', { exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
 });
+
+test('popup de título usa a imagem da taça ligada ao nome da competição', async ({ page }) => {
+  const save = criarSave({
+    id: 'taça-continental',
+    clube: 'Confiança',
+    liga: 'serieB',
+    temporada: {
+      posicao: 8,
+      pontos: 50,
+      vitorias: 14,
+      empates: 8,
+      derrotas: 16,
+      titulosConquistados: ['UEFA Champions League']
+    }
+  });
+  await page.goto('http://127.0.0.1:4173/A-Joia/');
+  await page.evaluate(value => localStorage.setItem('ajoia_rapido_v1', JSON.stringify(value)), save);
+  await page.reload();
+  await page.getByRole('button', { name: /Continuar · Teste responsivo técnico/ }).click();
+  const dialog = page.getByRole('dialog', { name: 'Título conquistado' });
+  await expect(dialog.locator('img[src*="champions-league"]')).toBeVisible();
+});

@@ -2,9 +2,8 @@ import React from "react";
 import { logoCompeticao } from "./arte.js";
 import { svgDaTaca, metalDaTaca } from "./tacas.js";
 
-/* Taças do A JOIA: uma silhueta própria para cada tipo de competição, todas
-   desenhadas para o jogo (nenhuma reproduz troféu real). O facetado de gema
-   aparece em várias delas como assinatura da marca. */
+/* O acervo apresenta a taça da competição quando existe uma imagem licenciada.
+   As demais usam uma silhueta original do A JOIA, definida pelo tipo e nome. */
 
 const METAIS = {
   ouro: ["#FFF1B8", "#E3B93B", "#8E6F00"],
@@ -15,7 +14,7 @@ const METAIS = {
 /* Taças: cada competição tem a sua, gerada em tacas.js a partir do nome. */
 export function TacaCompeticao({ tipo = "liga", size = 40, nome = null, preferirTaca = false }) {
   const uid = React.useId().replace(/[^a-zA-Z0-9]/g, "");
-  // logo da competição, se a pessoa colocou o arquivo em arte/competicoes/
+  // Imagem da taça da competição; algumas são fornecidas pelo autor do jogo.
   const logo = nome ? logoCompeticao(nome) : null;
   if (logo && !preferirTaca) return <img src={logo} alt="" aria-hidden="true" className="shrink-0 object-contain select-none" draggable="false" style={{ width: size, height: size * 1.2, filter: "drop-shadow(0 2px 6px rgba(0,0,0,.5))" }} />;
   const brilho = METAIS[metalDaTaca(tipo, nome) === "bronze" ? "bronze" : metalDaTaca(tipo, nome) === "ouro" ? "ouro" : "prata"][1];

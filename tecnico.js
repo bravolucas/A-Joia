@@ -498,7 +498,16 @@ export function tabelaClassificacaoTecnico(t, andamento, rng = sorteio) {
   const jogos = andamento?.jogos || 0;
   const clube = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
   const liga = t.liga || clube?.liga;
-  const rivais = CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube && (!liga || x.liga === liga))
+  // A classificação precisa conter exatamente os clubes do calendário.
+  // Após acesso/rebaixamento, o clube do treinador pode substituir outro participante.
+  const partidas = calendarioLigaTecnico(t);
+  const nomesParticipantes = partidas
+    ? [...new Set(partidas[0].flatMap(jogo => [jogo.casa, jogo.fora]))]
+    : null;
+  const rivais = (nomesParticipantes
+    ? nomesParticipantes.filter(nome => nome !== t.clube).map(nome =>
+      CLUBES_CONVITES_TECNICO.find(x => x.nome === nome) || { nome, elenco: 50 })
+    : CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube && (!liga || x.liga === liga)))
     .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).slice(0, 19);
   const pontos = andamento?.pontos || 0;
   const linhas = [{ nome: t.clube || 'Meu clube', jogos, pontos, vitorias: andamento?.vitorias || 0,

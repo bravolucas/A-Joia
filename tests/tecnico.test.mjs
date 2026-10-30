@@ -334,6 +334,11 @@ test('posição da etapa corresponde à tabela e permanece no andamento', () => 
   assert.equal(tabela.find(x => x.meuClube).jogos, 10);
 });
 
+test('save antigo sem participantes persistidos preserva compatibilidade do calendário', () => {
+  assert.doesNotThrow(() => calendarioLigaTecnico({}));
+  assert.equal(calendarioLigaTecnico({}), null);
+});
+
 test('liga evolui por resultados dos rivais sem recalcular rodadas anteriores', () => {
   const clube = CLUBES.find(x => CLUBES.filter(y => y.liga === x.liga).length >= 20);
   if (!clube) return;

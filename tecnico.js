@@ -367,7 +367,7 @@ export function calendarioLigaTecnico(t = {}) {
     .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
   // Congela a composição da liga durante a temporada; saves antigos continuam
   // usando a lista original caso ainda não tenham um elenco de participantes.
-  const nomesPersistidos = t.participantesLiga?.liga === liga ? t.participantesLiga.nomes : null;
+  const nomesPersistidos = t.participantesLiga && t.participantesLiga.liga === liga ? t.participantesLiga.nomes : null;
   const participantes = Array.isArray(nomesPersistidos) && nomesPersistidos.length === 20
     ? nomesPersistidos.map(nome => CLUBES_CONVITES_TECNICO.find(x => x.nome === nome) ||
         { nome, elenco: nome === t.clube ? forcaClubeTecnico(t) : 50 })

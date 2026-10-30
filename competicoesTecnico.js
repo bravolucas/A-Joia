@@ -85,23 +85,43 @@ function escolherParticipantes(clubes, nomeUsuario, limite = 16) {
   return selecionados.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
 }
 
+function nomeFaseEliminatoria(quantidadeClubes) {
+  const nomes = {
+    2: 'Final',
+    4: 'Semifinal',
+    8: 'Quartas de final',
+    16: 'Oitavas de final',
+    32: '16 avos de final',
+    64: '32 avos de final',
+    128: '64 avos de final'
+  };
+  return nomes[quantidadeClubes] || `Fase preliminar · ${quantidadeClubes} clubes`;
+}
+
 function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng) {
   let rodada = embaralhar(clubes, rng), fases = [];
-  const nomesFase = ['Oitavas de final', 'Quartas de final', 'Semifinal', 'Final'];
   while (rodada.length > 1) {
-    const jogos = [];
-    for (let i = 0; i < rodada.length; i += 2) {
-      const a = rodada[i], b = rodada[i + 1];
-      if (!b) { jogos.push({ bye: a.nome, vencedor: a.nome }); continue; }
-      const jogo = criarPartida(a, b, nomeUsuario, bonusTecnico, rng, true);
-      jogos.push(jogo);
-    }
-    const fase = nomesFase[Math.max(0, 4 - Math.ceil(Math.log2(rodada.length)))];
+    const fase = nomeFaseEliminatoria(rodada.length);
     const rodadaNumero = fases.length + 1;
-    jogos.forEach(jogo => { if (!jogo.bye) { jogo.fase = fase; jogo.rodada = rodadaNumero; } });
-    const vencedores = jogos.map(j => rodada.find(c => c.nome === j.vencedor));
+    const tamanhoProximaChave = 2 ** Math.floor(Math.log2(rodada.length));
+    const classificadosDiretos = rodada.length === tamanhoProximaChave
+      ? []
+      : rodada.slice(0, 2 * tamanhoProximaChave - rodada.length);
+    const timesQueJogam = rodada.slice(classificadosDiretos.length);
+    const jogos = classificadosDiretos.map(clube => ({
+      bye: clube.nome, vencedor: clube.nome, fase, rodada: rodadaNumero
+    }));
+    for (let i = 0; i < timesQueJogam.length; i += 2) {
+      const casa = timesQueJogam[i], fora = timesQueJogam[i + 1];
+      if (!fora) {
+        jogos.push({ bye: casa.nome, vencedor: casa.nome, fase, rodada: rodadaNumero });
+        continue;
+      }
+      jogos.push({ ...criarPartida(casa, fora, nomeUsuario, bonusTecnico, rng, true), fase, rodada: rodadaNumero });
+    }
+    const vencedores = jogos.map(jogo => rodada.find(clube => clube.nome === jogo.vencedor)).filter(Boolean);
     fases.push({ fase, rodada: rodadaNumero, jogos });
-    rodada = vencedores.filter(Boolean);
+    rodada = vencedores;
   }
   const campeao = rodada[0]?.nome || null;
   const jornadaUsuario = fases.find(f => f.jogos.some(j => j.casa === nomeUsuario || j.fora === nomeUsuario || j.bye === nomeUsuario));
@@ -111,10 +131,12 @@ function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng) {
 }
 
 export function simularCopaNacionalTecnico({ clubes, nomeUsuario, pais, forcaUsuario, nome, bonusTecnico = 0, rng = sorteio }) {
-  const participantes = escolherParticipantes(clubes.filter(c => c.pais === pais).map(c =>
-    c.nome === nomeUsuario ? { ...c, elenco: forcaUsuario } : c), nomeUsuario, 16);
-  if (participantes.length < 8 || !participantes.some(c => c.nome === nomeUsuario)) {
-    return { nome, tipo: 'copa', campeao: null, faseUsuario: 'Não classificado', fases: [], jogosUsuario: [] };
+  // A copa usa todos os clubes cadastrados para o país. A força não corta a
+  // lista nem inclui o clube do treinador por fora; o elenco só afeta os placares.
+  const participantes = [...new Map(clubes.filter(c => c.pais === pais).map(c =>
+    [c.nome, c.nome === nomeUsuario ? { ...c, elenco: forcaUsuario } : c])).values()];
+  if (participantes.length < 2 || !participantes.some(c => c.nome === nomeUsuario)) {
+    return { nome, tipo: 'copa', participantes: 0, campeao: null, faseUsuario: 'Não classificado', fases: [], jogosUsuario: [] };
   }
   return { nome, tipo: 'copa', participantes: participantes.length, ...jogarEliminatoria(participantes, nomeUsuario, bonusTecnico, rng) };
 }

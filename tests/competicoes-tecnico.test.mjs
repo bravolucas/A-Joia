@@ -21,12 +21,26 @@ test('copa nacional simula chave completa e registra placares do treinador', () 
     clubes, nomeUsuario: 'Brasil 0', pais: 'Brasil', forcaUsuario: 62,
     nome: 'Copa do Brasil', rng: rngSeed(13)
   });
-  assert.equal(copa.participantes, 16);
-  assert.equal(copa.fases.length, 4);
-  assert.deepEqual(copa.fases.map(f => f.jogos.length), [8, 4, 2, 1]);
+  assert.equal(copa.participantes, 20);
+  assert.equal(copa.fases.length, 5);
+  assert.deepEqual(copa.fases.map(f => f.jogos.length), [16, 8, 4, 2, 1]);
+  assert.match(copa.fases[0].fase, /Fase preliminar/);
+  assert.deepEqual(copa.fases.slice(1).map(f => f.fase), ['Oitavas de final', 'Quartas de final', 'Semifinal', 'Final']);
+  const participantesNaChave = new Set(copa.fases[0].jogos.flatMap(j => [j.casa, j.fora, j.bye].filter(Boolean)));
+  assert.deepEqual([...participantesNaChave].sort(), clubes.filter(c => c.pais === 'Brasil').map(c => c.nome).sort());
   assert.ok(copa.campeao);
-  assert.ok(copa.jogosUsuario.length >= 1 && copa.jogosUsuario.length <= 4);
-  assert.ok(copa.jogosUsuario.every(j => Number.isFinite(j.golsCasa) && Number.isFinite(j.golsFora)));
+  assert.ok(copa.jogosUsuario.length >= 1 && copa.jogosUsuario.length <= 5);
+  assert.ok(copa.jogosUsuario.filter(j => !j.bye).every(j => Number.isFinite(j.golsCasa) && Number.isFinite(j.golsFora)));
+});
+
+test('copa nacional não inclui à força clube ausente do cadastro', () => {
+  const copa = simularCopaNacionalTecnico({
+    clubes, nomeUsuario: 'Clube não cadastrado', pais: 'Brasil', forcaUsuario: 95,
+    nome: 'Copa do Brasil', rng: rngSeed(71)
+  });
+  assert.equal(copa.participantes, 0);
+  assert.equal(copa.campeao, null);
+  assert.equal(copa.faseUsuario, 'Não classificado');
 });
 
 test('continental simula grupos, classificação e mata-mata até a final', () => {

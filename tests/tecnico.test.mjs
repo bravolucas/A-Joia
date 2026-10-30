@@ -35,6 +35,38 @@ test('tática, temporada, resultado e avanço são persistentes', () => {
   assert.equal(n.idade, 41);
 });
 
+test('tabela mundial é salva nos fluxos expresso e por etapas sem substituir a liga do treinador', () => {
+  const rngSeed = seed => () => {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+  const clube = CLUBES[0];
+  const inicio = iniciarCarreiraTecnico({ ...atleta, clubeNome: clube.nome });
+  const comDecisoes = { ...inicio, tecnico: { ...inicio.tecnico,
+    decisoes: Array(QUANTIDADE_DECISOES_TECNICO).fill({ carta: 'teste', opcao: 'neutra' }) } };
+
+  const expressa = simularTemporadaTecnico(comDecisoes, rngSeed(44));
+  const tabelaExpressa = expressa.tecnico.temporadas[0].classificacoesMundo;
+  const liga = clube.liga;
+  assert.ok(tabelaExpressa[liga]);
+  assert.equal(tabelaExpressa[liga].origem, 'temporada-treinador');
+  assert.deepEqual(tabelaExpressa[liga].classificacao,
+    expressa.tecnico.temporadas[0].classificacao.map((linha, indice) => ({
+      nome: linha.nome, jogos: linha.jogos, pontos: linha.pontos, vitorias: linha.vitorias,
+      empates: linha.empates, derrotas: linha.derrotas, golsPro: linha.golsPro,
+      golsContra: linha.golsContra, saldoGols: linha.saldoGols, posicao: indice + 1
+    })));
+  assert.ok(Object.keys(tabelaExpressa).length > 1);
+  assert.ok(Object.values(tabelaExpressa).filter(x => x.origem === 'simulacao-global')
+    .every(x => x.classificacao.every(linha => linha.jogos === (x.classificacao.length - 1) * 2)));
+
+  let intenso = comDecisoes;
+  for (let i = 0; i < 4; i++) intenso = simularEtapaTecnico(intenso, rngSeed(80 + i));
+  const tabelaIntensa = intenso.tecnico.temporadas[0].classificacoesMundo;
+  assert.equal(tabelaIntensa[liga].origem, 'temporada-treinador');
+  assert.ok(Object.keys(tabelaIntensa).length > 1);
+});
+
 test('sorteia quatro eventos diferentes por temporada', () => {
   const cartas = sortearCartasTecnico(() => 0.5);
   assert.equal(cartas.length, 4);

@@ -2,6 +2,7 @@ import { CLUBES, CLASSICOS } from './data.js';
 import { EVENTOS_CONTEXTO_TECNICO } from './eventosTecnico.js';
 import { competicaoDoTitulo } from './tacas.js';
 import { simularCopaNacionalTecnico, simularCopaContinentalTecnico } from './competicoesTecnico.js';
+import { simularClassificacoesMundoTecnico } from './classificacoesMundoTecnico.js';
 // Continuação da mesma carreira, sem alterar o histórico do atleta.
 export const ESTILOS_TECNICO = [
   { id: 'ofensivo', nome: 'Ofensivo', descricao: 'Mais gols e mais riscos.' },
@@ -348,6 +349,16 @@ export function probabilidadesTecnico(t = {}) {
 export function forcaClubeTecnico(t = {}) {
   return CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.elenco ?? t.elenco ?? 50;
 }
+function classificacoesMundoDaTemporada(t, liga, classificacao, rng) {
+  return simularClassificacoesMundoTecnico({
+    clubes: CLUBES_CONVITES_TECNICO,
+    ligaTreinador: liga,
+    clubeTreinador: t.clube,
+    forcaTreinador: t.elenco ?? forcaClubeTecnico(t),
+    classificacaoTreinador: classificacao,
+    rng,
+  });
+}
 const DIVISOES_TECNICO = [
   { baixo: 'serieB', cima: 'brasileirao', vagas: 4 },
   { baixo: 'inglaterra2', cima: 'inglaterra', vagas: 3 },
@@ -681,7 +692,8 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
     ano: t.ano, clube: t.clube, liga: ligaAtual, idoloEmCasa,
     objetivo: objetivo.nome, cumpriuObjetivo, promessaDescumprida, estilo: t.estilo,
     decisoes: t.decisoes, vitorias, empates, derrotas, pontos, posicao, campeao,
-    classificacao, confrontos, golsPro, golsContra,
+    classificacao, classificacoesMundo: classificacoesMundoDaTemporada({ ...t, liga: ligaAtual }, ligaAtual, classificacao, rng),
+    confrontos, golsPro, golsContra,
     ...(movimento?.tipo === 'rebaixado' ? { rebaixado: { de: movimento.de, para: movimento.para } } : {}),
     ...(movimento?.tipo === 'acesso' ? { acesso: { de: movimento.de, para: movimento.para } } : {})
   };
@@ -751,6 +763,8 @@ function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
   const t = c.tecnico;
   const { vitorias, empates, derrotas, pontos } = andamento;
   const classificacao = andamento.classificacao || tabelaClassificacaoTecnico(t, andamento);
+  const ligaAtual = t.liga || CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga;
+  const classificacoesMundo = classificacoesMundoDaTemporada(t, ligaAtual, classificacao, rng);
   const posicao = classificacao.find(x => x.meuClube)?.posicao || 18;
   const campeao = posicao === 1;
   const objetivo = objetivoTecnico(t);
@@ -765,7 +779,8 @@ function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
     riscoDemissaoTecnico({ ...t, diretoria: novaConfianca, torcida: novaTorcida }).pressao >= 82;
   const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivo.nome, cumpriuObjetivo,
     promessaDescumprida, idoloEmCasa, estilo: t.estilo, decisoes: t.decisoes,
-    vitorias, empates, derrotas, pontos, posicao, campeao, classificacao, confrontos: andamento.confrontos || [], avaliacoes: andamento.avaliacoes };
+    vitorias, empates, derrotas, pontos, posicao, campeao, classificacao, classificacoesMundo,
+    confrontos: andamento.confrontos || [], avaliacoes: andamento.avaliacoes };
   temporada.demitido = demitido;
   const proximo = { ...t, ano: t.ano + 1, fase: 'resultado', andamento: null,
     temporadas: [...t.temporadas, temporada], reuniaoPendente: false, vitorias: t.vitorias + vitorias,

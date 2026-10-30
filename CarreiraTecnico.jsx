@@ -106,7 +106,8 @@ function CampanhasTemporada({ torneios = [] }) {
         </details>)}
         {!torneio.grupos?.length && !torneio.fases?.length && (torneio.jogosUsuario || []).map((jogo, jogoIdx) => <PlacarCompeticao key={`usuario-${jogoIdx}`} jogo={jogo} />)}
       </div>
-    </details>)}</div>
+      </details>;
+    })}</div>
   </div>;
 }
 function LinhaTemporada({ a, ativa, aberta, onClick }) {

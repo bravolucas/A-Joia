@@ -106,7 +106,7 @@ function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng) {
     const tamanhoProximaChave = 2 ** Math.floor(Math.log2(rodada.length));
     const classificadosDiretos = rodada.length === tamanhoProximaChave
       ? []
-      : rodada.slice(0, rodada.length - tamanhoProximaChave / 2);
+      : rodada.slice(0, 2 * tamanhoProximaChave - rodada.length);
     const timesQueJogam = rodada.slice(classificadosDiretos.length);
     const jogos = classificadosDiretos.map(clube => ({
       bye: clube.nome, vencedor: clube.nome, fase, rodada: rodadaNumero

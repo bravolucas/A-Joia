@@ -56,7 +56,7 @@ export function competicaoTemporadaTecnico(a = {}) {
   const liga = a.liga || CLUBES.find(clube => clube.nome === a.clube)?.liga;
   return NOMES_COMPETICOES_TECNICO[liga] || (liga ? String(liga) : 'Campeonato nacional');
 }
-export const titulosConquistadosTecnico = (t) => (t?.temporadas || []).flatMap(a => (Array.isArray(a.titulosConquistados) ? a.titulosConquistados : (a.campeao ? [competicaoTemporadaTecnico(a)] : [])).map(nome => ({ ano: a.ano, clube: a.clube, nome, tipo: competicaoDoTitulo(nome).tipo })));
+export const titulosConquistadosTecnico = (t) => (t?.temporadas || []).flatMap(a => (Array.isArray(a.titulosConquistados) && a.titulosConquistados.length ? a.titulosConquistados : (a.campeao ? [competicaoTemporadaTecnico(a)] : [])).map(nome => ({ ano: a.ano, clube: a.clube, nome, tipo: competicaoDoTitulo(nome).tipo })));
 export const TODAS_CARTAS_TECNICO = [...DECISOES_TECNICO, ...EVENTOS_CONTEXTO_TECNICO];
 export function elegivelTecnico(carta, t) {
   switch (carta.contexto) {
@@ -117,7 +117,7 @@ export function calcularOvrTecnico(t) {
   const desempenho = Math.round((aproveitamento - 0.45) * 22);
   return limitar(Math.round(30 + (t.reputacao || 25) * 0.36 + experiencia + titulos + desempenho), 25, 99);
 }
-const contarTitulosTemporadaTecnico = temporada => Array.isArray(temporada?.titulosConquistados)
+const contarTitulosTemporadaTecnico = temporada => Array.isArray(temporada?.titulosConquistados) && temporada.titulosConquistados.length
   ? temporada.titulosConquistados.length
   : temporada?.campeao ? 1 : 0;
 

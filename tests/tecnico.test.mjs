@@ -456,6 +456,19 @@ test('temporada expressa disputa o número correto de jogos em liga com folga', 
   assert.equal(campanha.classificacao.length, totalClubes);
   assert.ok(campanha.classificacao.every(x => x.jogos === jogosEsperados));
 });
+test('temporada por etapas termina na rodada certa em liga com folga', () => {
+  const clube = CLUBES.find(x => x.liga === 'sulamericano');
+  const totalClubes = CLUBES.filter(x => x.liga === clube.liga).length;
+  let c = iniciarCarreiraTecnico(atleta);
+  c = { ...c, tecnico: { ...c.tecnico, clube: clube.nome, liga: clube.liga, elenco: clube.forca,
+    diretoria: 95, torcida: 95, decisoes: Array(4).fill({ id: 'teste' }) } };
+  while (c.tecnico.fase === 'pretemporada') c = simularEtapaTecnico(c, () => 0.01);
+  const campanha = c.tecnico.temporadas.at(-1);
+  assert.equal(campanha.confrontos.length, totalClubes * 2);
+  assert.equal(campanha.jogos, 2 * (totalClubes - 1));
+  assert.equal(campanha.confrontos.filter(x => x.folga).length, 2);
+  assert.equal(campanha.vitorias + campanha.empates + campanha.derrotas, campanha.jogos);
+});
 
 test('desempate por vitórias e saldo de gols e marcação de zonas', () => {
   const tabela = ordenarClassificacaoTecnico([

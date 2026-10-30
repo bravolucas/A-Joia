@@ -56,9 +56,8 @@ function ordenarTabela(linhas) {
   const jaClassificada = linhas.every(linha => Number.isFinite(linha.posicao));
   return [...linhas].sort((a, b) => jaClassificada ? a.posicao - b.posicao :
     b.pontos - a.pontos ||
-    b.saldoGols - a.saldoGols ||
-    b.golsPro - a.golsPro ||
     b.vitorias - a.vitorias ||
+    b.saldoGols - a.saldoGols ||
     a.nome.localeCompare(b.nome, 'pt-BR')
   ).map((linha, indice) => ({ ...linha, posicao: jaClassificada ? linha.posicao : indice + 1 }));
 }

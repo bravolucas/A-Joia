@@ -106,3 +106,14 @@ test('participantes persistidos são usados no calendário da mesma divisão', a
   assert.ok(outraDivisao);
   assert.notDeepEqual([...new Set(outraDivisao[0].flatMap(j => [j.casa, j.fora]))].sort(), [...nomes].sort());
 });
+
+test('histórico por clube e geral contam taças de ligas e copas', async () => {
+  const { historicoProfissionalTecnico } = await import('../tecnico.js');
+  const historico = historicoProfissionalTecnico({ temporadas: [
+    { ano: 2040, clube: 'Santos', campeao: true, titulosConquistados: ['Brasileirão', 'Copa do Brasil'] },
+    { ano: 2041, clube: 'Santos', campeao: false, titulosConquistados: [] },
+    { ano: 2042, clube: 'Santos', campeao: true }
+  ] });
+  assert.equal(historico.titulos, 3);
+  assert.equal(historico.clubes[0].titulos, 3);
+});

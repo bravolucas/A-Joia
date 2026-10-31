@@ -266,10 +266,15 @@ export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forca
   const turnos = formato.turnos ?? 2;
   if (!Number.isInteger(totalParticipantes) || totalParticipantes < 2 ||
       !Array.isArray(participantesQualificados) || participantesQualificados.length !== totalParticipantes ||
+      participantesQualificados.some(c => typeof c?.nome !== 'string' || !c.nome.trim()) ||
+      new Set(participantesQualificados.map(c => c.nome)).size !== totalParticipantes ||
       !participantesQualificados.some(c => c.nome === nomeUsuario)) return null;
   if (!Number.isInteger(quantidadeGrupos) || quantidadeGrupos < 0 ||
       !Number.isInteger(turnos) || turnos < 1 ||
-      (quantidadeGrupos > 0 && (!Number.isInteger(classificadosPorGrupo) || classificadosPorGrupo < 1))) return null;
+      (quantidadeGrupos > 0 && (!Number.isInteger(classificadosPorGrupo) || classificadosPorGrupo < 1 ||
+        quantidadeGrupos > Math.floor(totalParticipantes / 2) ||
+        classificadosPorGrupo > Math.floor(totalParticipantes / quantidadeGrupos) ||
+        quantidadeGrupos * classificadosPorGrupo < 2))) return null;
   const cadastro = new Map((clubes || []).map(c => [c.nome, c]));
   const participantes = [...new Map(participantesQualificados.map(c => {
     const cadastroClube = cadastro.get(c.nome) || c;

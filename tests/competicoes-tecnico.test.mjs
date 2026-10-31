@@ -174,3 +174,25 @@ test('Copa do Brasil tem taça própria dourada com cores brasileiras', () => {
   assert.equal(desenho.gema, 'rubi');
   assert.deepEqual(desenho.faixas, ['#009C3B', '#FFDF00']);
 });
+
+test('continental rejeita participantes duplicados ou inválidos antes de simular', () => {
+  const base = { clubes, nomeUsuario: 'Brasil 0', nome: 'Teste', formato: { totalParticipantes: 2, grupos: 0 },
+    rng: () => assert.fail('não deve simular uma lista inválida') };
+  for (const participantesQualificados of [
+    [clubes[0], clubes[0]], [clubes[0], null], [clubes[0], {}], [clubes[0], { nome: ' ' }]
+  ]) {
+    assert.equal(simularCopaContinentalTecnico({ ...base, participantesQualificados }), null);
+  }
+});
+
+test('continental rejeita vagas impossíveis e mata-mata com apenas um classificado', () => {
+  for (const formato of [
+    { totalParticipantes: 4, grupos: 1, classificadosPorGrupo: 1 },
+    { totalParticipantes: 4, grupos: 2, classificadosPorGrupo: 3 },
+    { totalParticipantes: 4, grupos: 3, classificadosPorGrupo: 1 }
+  ]) {
+    assert.equal(simularCopaContinentalTecnico({ clubes, nomeUsuario: 'Brasil 0', nome: 'Teste',
+      participantesQualificados: clubes.slice(0, 4), formato,
+      rng: () => assert.fail('não deve simular um formato inválido') }), null);
+  }
+});

@@ -147,6 +147,11 @@ test('campanhas de copa exibem grupos e todas as partidas do mata-mata', async (
               { etapa: 'Ida', casa: 'Confiança', fora: 'Boca Juniors', golsCasa: 3, golsFora: 0, vencedor: 'Confiança' },
               { etapa: 'Volta', casa: 'Boca Juniors', fora: 'Confiança', golsCasa: 2, golsFora: 0, vencedor: 'Boca Juniors' }
             ] }]
+        }, {
+          fase: 'Final', rodada: 4,
+          jogos: [{ casa: 'Confiança', fora: 'River Plate', golsCasa: 2, golsFora: 1,
+            campoNeutro: true, vencedor: 'Confiança',
+            prorrogacao: { placar90: { golsCasa: 1, golsFora: 1 }, golsCasa: 1, golsFora: 0 } }]
         }]
       }]
     }
@@ -164,6 +169,9 @@ test('campanhas de copa exibem grupos e todas as partidas do mata-mata', async (
   await expect(page.getByText('Ida', { exact: true })).toBeVisible();
   await expect(page.getByText('Volta', { exact: true })).toBeVisible();
   await expect(page.getByText('Classificado: Confiança', { exact: true })).toBeVisible();
+  await page.locator('summary').filter({ hasText: /^Final$/ }).click();
+  await expect(page.getByText('Campo neutro', { exact: true })).toBeVisible();
+  await expect(page.getByText('Após prorrogação · 90 min: 1–1', { exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
 });
 

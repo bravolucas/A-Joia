@@ -87,7 +87,7 @@ function PlacarCompeticao({ jogo }) {
   const placar = Number.isFinite(jogo.golsCasa) && Number.isFinite(jogo.golsFora) ? `${jogo.golsCasa}–${jogo.golsFora}` : '—';
   return <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 border-t border-white/[.05] py-1 text-[9px] text-[#A1A1AA]">
     <span className={jogo.vencedor === jogo.casa ? 'truncate text-right text-white font-semibold' : 'truncate text-right'}>{jogo.casa || '—'}</span>
-    <strong className="text-white tabular-nums">{placar}{jogo.penaltis ? <span className="block text-[8px] text-[#A1A1AA] font-normal">pênaltis</span> : null}</strong>
+    <strong className="text-white tabular-nums">{placar}{jogo.campoNeutro && <span className="block text-[8px] text-[#A1A1AA] font-normal">Campo neutro</span>}{jogo.prorrogacao && <span className="block text-[8px] text-[#A1A1AA] font-normal">Após prorrogação · 90 min: {jogo.prorrogacao.placar90.golsCasa}–{jogo.prorrogacao.placar90.golsFora}</span>}{jogo.penaltis ? <span className="block text-[8px] text-[#A1A1AA] font-normal">pênaltis</span> : null}</strong>
     <span className={jogo.vencedor === jogo.fora ? 'truncate text-white font-semibold' : 'truncate'}>{jogo.fora || '—'}</span>
   </div>;
 }

@@ -768,16 +768,20 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   }));
   const torneioAnterior = t.temporadas?.at(-1);
   const continentalNome = continentaisPorLiga[ligaAtual];
+  const configuracaoContinental = t.regrasCompeticoes?.[continentalNome] || {};
+  const formatoContinental = configuracaoContinental.formato || {};
   const participantesQualificados = continentalNome ? classificarVagasContinentalTecnico({
     clubes: CLUBES_CONVITES_TECNICO,
     classificacoesMundo: torneioAnterior?.classificacoesMundo || {},
     pais: t.pais,
+    limite: formatoContinental.totalParticipantes ?? configuracaoContinental.qualificacao?.limite ?? 16,
+    regra: configuracaoContinental.qualificacao,
   }) : [];
   if (continentalNome && participantesQualificados.some(clube => clube.nome === t.clube)) {
     const continental = simularCopaContinentalTecnico({
       clubes: CLUBES_CONVITES_TECNICO, nomeUsuario: t.clube, pais: t.pais,
       forcaUsuario: t.elenco ?? forcaClubeTecnico(t), nome: continentalNome,
-      participantesQualificados, bonusTecnico, rng
+      participantesQualificados, bonusTecnico, formato: formatoContinental, rng
     });
     if (continental) torneios.push(continental);
   }

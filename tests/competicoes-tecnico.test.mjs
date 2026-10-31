@@ -235,3 +235,37 @@ test('empate agregado decide nos pênaltis sem desempatar artificialmente a ida 
   assert.ok(final.partidas.every(j => j.vencedor === null && j.penaltis === null));
   assert.equal(copa.campeao, final.vencedor);
 });
+
+test('final da Libertadores é neutra e só disputa pênaltis após prorrogação empatada', () => {
+  const times = clubes.slice(0, 2).map(c => ({ ...c, elenco: 60 }));
+  const copa = simularCopaContinentalTecnico({ clubes: times, nomeUsuario: times[0].nome,
+    nome: 'Copa Libertadores', participantesQualificados: times, formato: { totalParticipantes: 2, grupos: 0 }, rng: () => 0.3 });
+  const final = copa.fases[0].jogos[0];
+  assert.equal(final.campoNeutro, true);
+  assert.deepEqual(final.prorrogacao.placar90, { golsCasa: 1, golsFora: 1 });
+  assert.equal(final.prorrogacao.golsCasa, 0);
+  assert.equal(final.prorrogacao.golsFora, 0);
+  assert.equal(final.golsCasa, 1);
+  assert.equal(final.golsFora, 1);
+  assert.ok(final.penaltis);
+  assert.equal(copa.campeao, final.vencedor);
+});
+
+test('final preserva os 90 minutos e soma a prorrogação sem fabricar empate', () => {
+  let decidiuNos90 = false, decidiuNaProrrogacao = false;
+  for (let seed = 1; seed <= 100; seed++) {
+    const copa = simularCopaContinentalTecnico({ clubes, nomeUsuario: clubes[0].nome, nome: 'Copa Libertadores',
+      participantesQualificados: clubes.slice(0, 2), formato: { totalParticipantes: 2, grupos: 0 }, rng: rngSeed(seed) });
+    const final = copa.fases[0].jogos[0];
+    if (final.prorrogacao) {
+      const p = final.prorrogacao;
+      assert.equal(p.placar90.golsCasa, p.placar90.golsFora);
+      assert.equal(final.golsCasa, p.placar90.golsCasa + p.golsCasa);
+      assert.equal(final.golsFora, p.placar90.golsFora + p.golsFora);
+      if (final.golsCasa !== final.golsFora) decidiuNaProrrogacao = true;
+    } else decidiuNos90 = true;
+    assert.equal(Boolean(final.penaltis), final.golsCasa === final.golsFora);
+    if (!final.penaltis) assert.equal(final.vencedor, final.golsCasa > final.golsFora ? final.casa : final.fora);
+  }
+  assert.ok(decidiuNos90 && decidiuNaProrrogacao);
+});

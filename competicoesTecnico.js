@@ -18,12 +18,23 @@ function poisson(media, rng) {
   return gols - 1;
 }
 
-function criarPartida(casa, fora, clubeUsuario, bonusTecnico, rng, desempatar = false) {
+function criarPartida(casa, fora, clubeUsuario, bonusTecnico, rng, desempatar = false, opcoes = {}) {
   const bonusCasa = casa.nome === clubeUsuario ? bonusTecnico : 0;
   const bonusFora = fora.nome === clubeUsuario ? bonusTecnico : 0;
   const diferenca = forca(casa) + bonusCasa - forca(fora) - bonusFora;
-  const golsCasa = poisson(limitar(1.35 + diferenca * 0.012, 0.3, 2.8), rng);
-  const golsFora = poisson(limitar(1.12 - diferenca * 0.009, 0.25, 2.4), rng);
+  const mediaCasa = opcoes.campoNeutro ? limitar(1.235 + diferenca * 0.0105, 0.275, 2.6)
+    : limitar(1.35 + diferenca * 0.012, 0.3, 2.8);
+  const mediaFora = opcoes.campoNeutro ? limitar(1.235 - diferenca * 0.0105, 0.275, 2.6)
+    : limitar(1.12 - diferenca * 0.009, 0.25, 2.4);
+  let golsCasa = poisson(mediaCasa, rng);
+  let golsFora = poisson(mediaFora, rng);
+  let prorrogacao = null;
+  if (desempatar && opcoes.prorrogacao && golsCasa === golsFora) {
+    prorrogacao = { golsCasa: poisson(mediaCasa / 3, rng), golsFora: poisson(mediaFora / 3, rng),
+      placar90: { golsCasa, golsFora } };
+    golsCasa += prorrogacao.golsCasa;
+    golsFora += prorrogacao.golsFora;
+  }
   let vencedor = golsCasa > golsFora ? casa : golsFora > golsCasa ? fora : null;
   let penaltis = null;
   if (desempatar && !vencedor) {
@@ -31,7 +42,8 @@ function criarPartida(casa, fora, clubeUsuario, bonusTecnico, rng, desempatar = 
     vencedor = rng() < chanceCasa ? casa : fora;
     penaltis = vencedor === casa ? 'Casa' : 'Fora';
   }
-  return { casa: casa.nome, fora: fora.nome, golsCasa, golsFora, vencedor: vencedor?.nome || null, penaltis };
+  return { casa: casa.nome, fora: fora.nome, golsCasa, golsFora, vencedor: vencedor?.nome || null, penaltis,
+    ...(opcoes.campoNeutro ? { campoNeutro: true } : {}), ...(prorrogacao ? { prorrogacao } : {}) };
 }
 
 function registrarJogo(tabela, jogo) {
@@ -255,7 +267,10 @@ function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng, formato = {})
       }
       const idaVolta = rodada.length === 2 ? formato.finalIdaVolta === true : formato.mataMataIdaVolta === true;
       const confronto = idaVolta ? criarConfrontoIdaVolta(casa, fora, nomeUsuario, bonusTecnico, rng)
-        : criarPartida(casa, fora, nomeUsuario, bonusTecnico, rng, true);
+        : criarPartida(casa, fora, nomeUsuario, bonusTecnico, rng, true, {
+          campoNeutro: rodada.length === 2 && formato.finalCampoNeutro === true,
+          prorrogacao: rodada.length === 2 && formato.finalProrrogacao === true
+        });
       jogos.push({ ...confronto, fase, rodada: rodadaNumero });
     }
     const vencedores = jogos.map(jogo => rodada.find(clube => clube.nome === jogo.vencedor)).filter(Boolean);
@@ -324,7 +339,8 @@ export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forca
   });
 
   const eliminatoria = jogarEliminatoria(classificados, nomeUsuario, bonusTecnico, rng, {
-    mataMataIdaVolta: nome === 'Copa Libertadores', ...formato
+    mataMataIdaVolta: nome === 'Copa Libertadores',
+    finalCampoNeutro: nome === 'Copa Libertadores', finalProrrogacao: nome === 'Copa Libertadores', ...formato
   });
   const faseUsuario = eliminatoria.faseUsuario === 'Não participou' && grupos.length
     ? 'Eliminado na fase de grupos' : eliminatoria.faseUsuario;

@@ -142,7 +142,11 @@ test('campanhas de copa exibem grupos e todas as partidas do mata-mata', async (
         fases: [{
           fase: 'Semifinal',
           rodada: 3,
-          jogos: [{ fase: 'Semifinal', rodada: 3, casa: 'Confiança', fora: 'Boca Juniors', golsCasa: 1, golsFora: 1, penaltis: 'Casa', vencedor: 'Confiança' }]
+          jogos: [{ fase: 'Semifinal', rodada: 3, casa: 'Confiança', fora: 'Boca Juniors', golsCasa: 3, golsFora: 2,
+            agregado: true, vencedor: 'Confiança', partidas: [
+              { etapa: 'Ida', casa: 'Confiança', fora: 'Boca Juniors', golsCasa: 3, golsFora: 0, vencedor: 'Confiança' },
+              { etapa: 'Volta', casa: 'Boca Juniors', fora: 'Confiança', golsCasa: 2, golsFora: 0, vencedor: 'Boca Juniors' }
+            ] }]
         }]
       }]
     }
@@ -156,7 +160,10 @@ test('campanhas de copa exibem grupos e todas as partidas do mata-mata', async (
   await page.getByText('Grupo A · tabela e partidas').click();
   await expect(page.getByText('River Plate', { exact: true }).first()).toBeVisible();
   await page.locator('summary').filter({ hasText: 'Semifinal' }).last().click();
-  await expect(page.getByText('Boca Juniors', { exact: true })).toBeVisible();
+  await expect(page.getByText('Boca Juniors', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('Ida', { exact: true })).toBeVisible();
+  await expect(page.getByText('Volta', { exact: true })).toBeVisible();
+  await expect(page.getByText('Classificado: Confiança', { exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
 });
 

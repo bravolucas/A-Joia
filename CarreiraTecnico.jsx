@@ -74,6 +74,16 @@ function PopUpDivisao({ temporada, movimento, tipo, onFechar }) {
 
 function PlacarCompeticao({ jogo }) {
   if (jogo.bye) return <div className="flex items-center justify-between gap-2 border-t border-white/[.05] py-1 text-[9px] text-[#A1A1AA]"><span>{jogo.fase || 'Classificado direto'}</span><span>{jogo.bye} avança sem adversário</span></div>;
+  if (jogo.agregado && jogo.partidas?.length) return <div className="border-t border-white/[.08] py-1">
+    {jogo.partidas.map((partida, indice) => <div key={indice}>
+      <div className="text-[8px] uppercase text-[#71717A] mt-1">{partida.etapa || (indice === 0 ? 'Ida' : 'Volta')}</div>
+      <PlacarCompeticao jogo={partida} />
+    </div>)}
+    <div className="text-[9px] text-[#D4D4D8] py-1">
+      Agregado: {jogo.casa} {jogo.golsCasa}–{jogo.golsFora} {jogo.fora}
+      <span className="block font-semibold text-white">Classificado: {jogo.vencedor}{jogo.penaltis ? ' · nos pênaltis' : ''}</span>
+    </div>
+  </div>;
   const placar = Number.isFinite(jogo.golsCasa) && Number.isFinite(jogo.golsFora) ? `${jogo.golsCasa}–${jogo.golsFora}` : '—';
   return <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 border-t border-white/[.05] py-1 text-[9px] text-[#A1A1AA]">
     <span className={jogo.vencedor === jogo.casa ? 'truncate text-right text-white font-semibold' : 'truncate text-right'}>{jogo.casa || '—'}</span>

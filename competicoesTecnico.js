@@ -216,7 +216,25 @@ function nomeFaseEliminatoria(quantidadeClubes) {
   return nomes[quantidadeClubes] || `Fase preliminar · ${quantidadeClubes} clubes`;
 }
 
-function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng) {
+function criarConfrontoIdaVolta(casa, fora, nomeUsuario, bonusTecnico, rng) {
+  const ida = criarPartida(casa, fora, nomeUsuario, bonusTecnico, rng);
+  const volta = criarPartida(fora, casa, nomeUsuario, bonusTecnico, rng);
+  const golsCasa = ida.golsCasa + volta.golsFora;
+  const golsFora = ida.golsFora + volta.golsCasa;
+  let vencedor = golsCasa > golsFora ? casa.nome : golsFora > golsCasa ? fora.nome : null;
+  let penaltis = null;
+  if (!vencedor) {
+    const diferenca = forca(casa) + (casa.nome === nomeUsuario ? bonusTecnico : 0)
+      - forca(fora) - (fora.nome === nomeUsuario ? bonusTecnico : 0);
+    vencedor = rng() < limitar(0.5 + diferenca * 0.003, 0.3, 0.7) ? casa.nome : fora.nome;
+    penaltis = vencedor === casa.nome ? 'Casa' : 'Fora';
+  }
+  // O vencedor pertence ao confronto; os resultados de cada partida permanecem intactos.
+  return { casa: casa.nome, fora: fora.nome, golsCasa, golsFora, vencedor, penaltis,
+    agregado: true, partidas: [{ ...ida, etapa: 'Ida' }, { ...volta, etapa: 'Volta' }] };
+}
+
+function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng, formato = {}) {
   let rodada = embaralhar(clubes, rng), fases = [];
   while (rodada.length > 1) {
     const fase = nomeFaseEliminatoria(rodada.length);
@@ -235,7 +253,10 @@ function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng) {
         jogos.push({ bye: casa.nome, vencedor: casa.nome, fase, rodada: rodadaNumero });
         continue;
       }
-      jogos.push({ ...criarPartida(casa, fora, nomeUsuario, bonusTecnico, rng, true), fase, rodada: rodadaNumero });
+      const idaVolta = rodada.length === 2 ? formato.finalIdaVolta === true : formato.mataMataIdaVolta === true;
+      const confronto = idaVolta ? criarConfrontoIdaVolta(casa, fora, nomeUsuario, bonusTecnico, rng)
+        : criarPartida(casa, fora, nomeUsuario, bonusTecnico, rng, true);
+      jogos.push({ ...confronto, fase, rodada: rodadaNumero });
     }
     const vencedores = jogos.map(jogo => rodada.find(clube => clube.nome === jogo.vencedor)).filter(Boolean);
     fases.push({ fase, rodada: rodadaNumero, jogos });
@@ -248,7 +269,7 @@ function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng) {
   return { campeao, fases, faseUsuario, jogosUsuario: fases.flatMap(f => f.jogos.filter(j => j.casa === nomeUsuario || j.fora === nomeUsuario || j.bye === nomeUsuario)) };
 }
 
-export function simularCopaNacionalTecnico({ clubes, nomeUsuario, pais, forcaUsuario, nome, bonusTecnico = 0, rng = sorteio }) {
+export function simularCopaNacionalTecnico({ clubes, nomeUsuario, pais, forcaUsuario, nome, bonusTecnico = 0, formato = {}, rng = sorteio }) {
   // A copa usa todos os clubes cadastrados para o país. A força não corta a
   // lista nem inclui o clube do treinador por fora; o elenco só afeta os placares.
   const participantes = [...new Map(clubes.filter(c => c.pais === pais).map(c =>
@@ -256,7 +277,7 @@ export function simularCopaNacionalTecnico({ clubes, nomeUsuario, pais, forcaUsu
   if (participantes.length < 2 || !participantes.some(c => c.nome === nomeUsuario)) {
     return { nome, tipo: 'copa', participantes: 0, campeao: null, faseUsuario: 'Não classificado', fases: [], jogosUsuario: [] };
   }
-  return { nome, tipo: 'copa', participantes: participantes.length, ...jogarEliminatoria(participantes, nomeUsuario, bonusTecnico, rng) };
+  return { nome, tipo: 'copa', participantes: participantes.length, ...jogarEliminatoria(participantes, nomeUsuario, bonusTecnico, rng, formato) };
 }
 
 export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forcaUsuario, nome, bonusTecnico = 0, participantesQualificados = [], formato = {}, rng = sorteio }) {
@@ -302,7 +323,9 @@ export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forca
     classificados.push(...classificacao.slice(0, classificadosPorGrupo));
   });
 
-  const eliminatoria = jogarEliminatoria(classificados, nomeUsuario, bonusTecnico, rng);
+  const eliminatoria = jogarEliminatoria(classificados, nomeUsuario, bonusTecnico, rng, {
+    mataMataIdaVolta: nome === 'Copa Libertadores', ...formato
+  });
   const faseUsuario = eliminatoria.faseUsuario === 'Não participou' && grupos.length
     ? 'Eliminado na fase de grupos' : eliminatoria.faseUsuario;
   return { nome, tipo: 'continental', participantes: participantes.length, grupos: jogosGrupo,

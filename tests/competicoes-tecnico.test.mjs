@@ -196,3 +196,42 @@ test('continental rejeita vagas impossíveis e mata-mata com apenas um classific
       rng: () => assert.fail('não deve simular um formato inválido') }), null);
   }
 });
+
+test('Libertadores usa ida e volta antes da final e preserva placares e agregado', () => {
+  let viuDerrotaComClassificacao = false;
+  for (let seed = 1; seed <= 30; seed++) {
+    const copa = simularCopaContinentalTecnico({ clubes, nomeUsuario: 'Brasil 0', nome: 'Copa Libertadores',
+      participantesQualificados: clubes.slice(0, 8), formato: { totalParticipantes: 8, grupos: 0 }, rng: rngSeed(seed) });
+    assert.equal(copa.fases.at(-1).jogos[0].agregado, undefined);
+    assert.equal(copa.campeao, copa.fases.at(-1).jogos[0].vencedor);
+    for (const fase of copa.fases.slice(0, -1)) for (const confronto of fase.jogos) {
+      const [ida, volta] = confronto.partidas;
+      assert.equal(ida.casa, volta.fora);
+      assert.equal(ida.fora, volta.casa);
+      assert.equal(confronto.golsCasa, ida.golsCasa + volta.golsFora);
+      assert.equal(confronto.golsFora, ida.golsFora + volta.golsCasa);
+      assert.equal(Boolean(confronto.penaltis), confronto.golsCasa === confronto.golsFora);
+      if (!confronto.penaltis) assert.equal(confronto.vencedor,
+        confronto.golsCasa > confronto.golsFora ? confronto.casa : confronto.fora);
+      assert.equal(ida.penaltis, null);
+      assert.equal(volta.penaltis, null);
+      if (confronto.vencedor === 'Brasil 0' && [ida, volta].some(j => j.vencedor && j.vencedor !== 'Brasil 0')) {
+        viuDerrotaComClassificacao = true;
+        assert.notEqual(copa.faseUsuario, fase.fase);
+      }
+    }
+    assert.deepEqual(JSON.parse(JSON.stringify(copa)), copa);
+  }
+  assert.ok(viuDerrotaComClassificacao);
+});
+
+test('empate agregado decide nos pênaltis sem desempatar artificialmente a ida ou volta', () => {
+  const copa = simularCopaNacionalTecnico({ clubes: clubes.slice(0, 2), nomeUsuario: 'Brasil 0', pais: 'Brasil',
+    nome: 'Copa teste', formato: { finalIdaVolta: true }, rng: () => 0 });
+  const final = copa.fases[0].jogos[0];
+  assert.equal(final.golsCasa, 0);
+  assert.equal(final.golsFora, 0);
+  assert.ok(final.penaltis);
+  assert.ok(final.partidas.every(j => j.vencedor === null && j.penaltis === null));
+  assert.equal(copa.campeao, final.vencedor);
+});

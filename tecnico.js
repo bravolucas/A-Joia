@@ -764,7 +764,8 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   const copaNome = copasPorLiga[ligaAtual];
   if (copaNome) torneios.push(simularCopaNacionalTecnico({
     clubes: CLUBES_CONVITES_TECNICO, nomeUsuario: t.clube, pais: t.pais,
-    forcaUsuario: t.elenco ?? forcaClubeTecnico(t), nome: copaNome, bonusTecnico, rng
+    forcaUsuario: t.elenco ?? forcaClubeTecnico(t), nome: copaNome, bonusTecnico,
+    formato: t.regrasCompeticoes?.[copaNome]?.formato || {}, rng
   }));
   const torneioAnterior = t.temporadas?.at(-1);
   const continentalNome = continentaisPorLiga[ligaAtual];

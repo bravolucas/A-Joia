@@ -519,7 +519,7 @@ function LinhaDoTempo({ c, total = 22 }) {
   );
 }
 
-function Cabecalho({ c, onSair, onEstante }) {
+function Cabecalho({ c, onSair, onEstante, treinador = false }) {
   const nTrofeus = c ? c.lista.length : 0;
   return (
     <header className="sticky top-0 z-30 bg-[#0E1512]/90 backdrop-blur border-b border-white/5">
@@ -535,7 +535,7 @@ function Cabecalho({ c, onSair, onEstante }) {
             <span className="font-stat text-[15px]">{nTrofeus}</span>
           </button>
         )}
-        {!c && <span className="ml-auto font-semibold text-xs uppercase tracking-[0.2em] text-[#8FA39A]">Modo Rápido</span>}
+        {!c && <span className="ml-auto font-semibold text-xs uppercase tracking-[0.2em] text-[#8FA39A]">{treinador ? 'Modo Treinador' : 'Modo Rápido'}</span>}
       </div>
       {c && <div className="max-w-xl mx-auto px-4 pb-2"><LinhaDoTempo c={c} /></div>}
     </header>
@@ -3468,15 +3468,15 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   }, [etapa, resultado, pausado, espera]);
   useEffect(() => { if (!selo) return undefined; const t = setTimeout(() => setSelo(null), 2500); return () => clearTimeout(t); }, [selo]);
 
-  const mostrarCabecalho = etapa !== "criacao" && etapa !== "fim";
+  const mostrarCabecalho = etapa !== "criacao" && etapa !== "fim" && etapa !== "tecnico";
   const painel = c && ["evento", "negociacao", "resumo", "coletiva", "traco"].includes(etapa);
   const ultimo = estado.ultimo;
   const torneio = c && c.idade >= 18 ? (anoDeCopa(c.ano) ? "Copa do Mundo" : anoDeContinentalSelecao(c.ano) ? nomeCopaContinental(c.nac) : null) : null;
   return (
-    <div className="rp">
+    <div className={etapa === "tecnico" ? "rp ct-root" : "rp"}>
       <style>{ESTILO_BASE}</style>
       {painel ? <CartaoCarreira c={c} onEstante={() => setEstanteAberta(true)} onFicha={() => setGaveta("ficha")} contadorPulsa={contadorPulsa} recorde={recorde} />
-        : <Cabecalho c={mostrarCabecalho ? c : null} onSair={onSair} onEstante={() => setEstanteAberta(true)} />}
+        : <Cabecalho treinador={etapa === "tecnico"} c={mostrarCabecalho ? c : null} onSair={onSair} onEstante={() => setEstanteAberta(true)} />}
       <main className="pb-10">
         {etapa === "criacao" && <TelaCriacao onCriar={criar} ritmoInicial={ritmoInicial} />}
         {etapa === "evento" && (
@@ -3520,12 +3520,12 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "tecnico" && <CarreiraTecnico c={c}
           onEstilo={(id) => setEstado((st) => ({ ...st, c: definirEstiloTecnico(st.c, id) }))}
           onDecisao={(id) => setEstado((st) => ({ ...st, c: id ? tomarDecisaoTecnico(st.c, id) : st.c }))}
-          onSimularTemporada={() => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(st.c, null) }))}
+          onSimularTemporada={(id) => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(st.c, id ?? null) }))}
           onReuniao={(id) => setEstado((st) => ({ ...st, c: reuniaoEmergenciaTecnico(st.c, id) }))}
           onJogar={() => setEstado((st) => ({ ...st, c: simularEtapaTecnico(st.c) }))}
           onEscolherClubeInicial={(nome) => setEstado((st) => ({ ...st, c: iniciarNoClubeIdolo(st.c, nome) }))}
           onEsperar={() => setEstado((st) => ({ ...st, c: passarAnoDesempregado(st.c) }))}
-          onAceitarProposta={(nome, estrategia) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia); if (!negociado.tecnico.ultimaNegociacao?.aceita) return { ...st, c: negociado }; const proxima = proximaTemporadaTecnico(negociado); return { ...st, c: jogarTemporadaExpressaTecnico(proxima, null) }; })}
+          onAceitarProposta={(nome, estrategia) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia); if (!negociado.tecnico.ultimaNegociacao?.aceita) return { ...st, c: negociado }; return { ...st, c: proximaTemporadaTecnico(negociado) }; })}
           onAvancar={() => setEstado((st) => ({ ...st, c: proximaTemporadaTecnico(st.c) }))}
           onAvancarESimular={() => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(proximaTemporadaTecnico(st.c), null) }))}
           onLegado={() => setEstado((st) => ({ ...st, etapa: "fim" }))}

@@ -1,13 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import './CarreiraTecnico.css';
 import confetti from 'canvas-confetti';
 import { TacaCompeticao } from './trofeus.jsx';
+import { NACIONALIDADES } from './data.js';
 import { escudoDe, bandeiraDe } from './arte.js';
 import { competicaoDoTitulo } from './tacas.js';
 import {
   historicoProfissionalTecnico, objetivoTecnico,
   LIMITE_TEMPORADAS_TECNICO, carreiraTecnicoEncerrada, titulosConquistadosTecnico,
-  competicaoTemporadaTecnico, salarioTecnico,
+  competicaoTemporadaTecnico, salarioTecnico, calcularOvrTecnico, cartaAtualTecnico,
   OPCOES_REUNIAO_TECNICO
 } from './tecnico.js';
 
@@ -18,58 +20,40 @@ function Escudo({ nome, size = 32 }) {
 }
 
 function Bandeira({ pais }) {
-  const src = bandeiraDe(pais);
+  const src = bandeiraDe(NACIONALIDADES.find(n => n.label === pais || n.id === pais)?.id || pais);
   return src ? <img src={src} alt={pais} className="w-5 h-4 rounded-sm object-cover" /> : <span aria-label={pais || 'País'}>🌎</span>;
 }
 
 function PopUpTitulo({ temporada, titulo, indice, total, onFechar }) {
-  const fechar = useRef(onFechar);
-  fechar.current = onFechar;
   useEffect(() => {
-    const overflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    confetti({ particleCount: 150, spread: 85, origin: { y: .48 }, colors: ['#D8B44A', '#FFF2BE', '#FFFFFF'], zIndex: 90 });
-    const esc = e => { if (e.key === 'Escape') fechar.current(); };
-    document.addEventListener('keydown', esc);
-    return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', esc); };
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) confetti({ particleCount: 120, spread: 80, origin: { y: .48 }, colors: ['#D8B44A', '#FFF2BE', '#FFFFFF'], zIndex: 120 });
   }, [temporada.ano, indice]);
-  return createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-6" role="dialog" aria-modal="true" aria-label="Título conquistado" style={{ background: 'rgba(5,5,6,.88)', backdropFilter: 'blur(7px)' }}>
-    <div className="cp-card w-full max-w-sm text-center px-6 py-7 border-[#CA8A04]/50" style={{ background: 'radial-gradient(ellipse at 50% 10%, #382F19, #161618 70%)' }}>
-      <div className="text-[#FACC15] font-black tracking-[.2em] text-xs uppercase">A JOIA · Temporada {temporada.ano}</div>
-      <h2 className="text-4xl font-black text-white mt-2">CAMPEÃO!</h2>
-      <div className="flex justify-center my-5"><TacaCompeticao tipo={competicaoDoTitulo(titulo).tipo} nome={titulo} size={136} /></div>
-      <p className="text-[#FDE68A] font-bold text-xl">{titulo}</p>
-      {total > 1 && <p className="text-[#A1A1AA] text-xs mt-2">Conquista {indice + 1} de {total}</p>}
-      <div className="flex items-center justify-center gap-3 mt-3"><Escudo nome={temporada.clube} size={34} /><span className="text-white font-bold">{temporada.clube}</span></div>
-      <p className="text-[#D4D4D8] text-sm mt-3">{temporada.posicao}º na liga · {temporada.pontos} pontos · {temporada.vitorias} vitórias</p>
-      <button autoFocus onClick={onFechar} className="cp-pill cp-branca w-full mt-6">{indice + 1 < total ? 'Próximo troféu' : 'Continuar carreira'}</button>
+  return <JanelaTreinador titulo="Título conquistado" onFechar={onFechar} classe="ct-celebration ct-celebration-gold">
+    <div className="ct-event-content ct-celebration-body">
+      <span className="ct-eyebrow">Temporada {temporada.ano}</span><h2>CAMPEÃO!</h2>
+      <div className="ct-event-trophy"><TacaCompeticao tipo={competicaoDoTitulo(titulo).tipo} nome={titulo} size={136} /></div>
+      <h3>{titulo}</h3>{total > 1 && <p>Conquista {indice + 1} de {total}</p>}
+      <div className="ct-event-club"><Escudo nome={temporada.clube} size={30} /><strong>{temporada.clube}</strong></div>
+      <p>{temporada.posicao}º na liga · {temporada.pontos} pontos · {temporada.vitorias} vitórias</p>
+      <button onClick={onFechar} className="ct-primary">{indice + 1 < total ? 'Próximo troféu' : 'Continuar carreira'}<span aria-hidden="true">→</span></button>
     </div>
-  </div>, document.body);
+  </JanelaTreinador>;
 }
 
 function PopUpDivisao({ temporada, movimento, tipo, onFechar }) {
-  const tipoMovimento = tipo || movimento.tipo;
+  const acesso = (tipo || movimento.tipo) === 'acesso';
   useEffect(() => {
-    const overflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    if (tipoMovimento === 'acesso') confetti({ particleCount: 90, spread: 70, origin: { y: .5 }, colors: ['#22C55E', '#FFFFFF', '#D8B44A'], zIndex: 90 });
-    const esc = e => { if (e.key === 'Escape') onFechar(); };
-    document.addEventListener('keydown', esc);
-    return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', esc); };
-  }, [temporada.ano, tipoMovimento]);
-  const acesso = tipoMovimento === 'acesso';
-  const nomeDestino = competicaoTemporadaTecnico({ liga: movimento.para });
-  return createPortal(<div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-6" role="dialog" aria-modal="true" aria-label={acesso ? 'Acesso de divisão' : 'Rebaixamento'} style={{ background: 'rgba(5,5,6,.88)', backdropFilter: 'blur(7px)' }}>
-    <div className={'cp-card w-full max-w-sm text-center px-6 py-7 '+(acesso ? 'border-emerald-500/40' : 'border-red-500/40')} style={{ background: acesso ? 'radial-gradient(ellipse at 50% 10%, #173527, #161618 70%)' : 'radial-gradient(ellipse at 50% 10%, #3A2020, #161618 70%)' }}>
-      <div className={'font-black tracking-[.2em] text-xs uppercase '+(acesso ? 'text-emerald-300' : 'text-red-300')}>A JOIA · Temporada {temporada.ano}</div>
-      <div className="text-6xl my-4">{acesso ? '⬆️' : '⬇️'}</div>
-      <h2 className="text-3xl font-black text-white">{acesso ? 'ACESSO!' : 'REBAIXADO'}</h2>
-      <div className="flex items-center justify-center gap-3 mt-4"><Escudo nome={temporada.clube} size={34} /><span className="text-white font-bold">{temporada.clube}</span></div>
-      <p className={'text-base font-semibold mt-3 '+(acesso ? 'text-emerald-200' : 'text-red-200')}>{acesso ? 'Sobe para ' + nomeDestino : 'Cai para ' + nomeDestino}</p>
-      <p className="text-[#D4D4D8] text-sm mt-2">{temporada.posicao}º lugar · {temporada.pontos} pontos</p>
-      <button autoFocus onClick={onFechar} className="cp-pill cp-branca w-full mt-6">Continuar carreira</button>
+    if (acesso && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) confetti({ particleCount: 90, spread: 70, origin: { y: .5 }, colors: ['#22C55E', '#FFFFFF', '#D8B44A'], zIndex: 120 });
+  }, [temporada.ano, acesso]);
+  return <JanelaTreinador titulo={acesso ? 'Acesso de divisão' : 'Rebaixamento'} onFechar={onFechar} classe={`ct-celebration ${acesso ? 'ct-celebration-green' : 'ct-celebration-red'}`}>
+    <div className="ct-event-content ct-celebration-body"><span className="ct-eyebrow">Temporada {temporada.ano}</span>
+      <span className="ct-movement" aria-hidden="true">{acesso ? '↗' : '↘'}</span><h2>{acesso ? 'ACESSO!' : 'REBAIXADO'}</h2>
+      <div className="ct-event-club"><Escudo nome={temporada.clube} size={38} /><strong>{temporada.clube}</strong></div>
+      <h3>{acesso ? 'Sobe para ' : 'Cai para '}{competicaoTemporadaTecnico({ liga: movimento.para })}</h3>
+      <p>{temporada.posicao}º lugar · {temporada.pontos} pontos</p>
+      <button onClick={onFechar} className="ct-primary">Continuar carreira<span aria-hidden="true">→</span></button>
     </div>
-  </div>, document.body);
+  </JanelaTreinador>;
 }
 
 function PlacarCompeticao({ jogo }) {
@@ -138,19 +122,58 @@ function ClassificacoesMundo({ classificacoes = {}, ligaAtual, clubeAtual }) {
     </div>
   </details>;
 }
-function LinhaTemporada({ a, ativa, aberta, onClick }) {
+function JanelaTreinador({ titulo, onFechar, children, classe = '' }) {
+  const painel = useRef(null);
+  const fechar = useRef(onFechar);
+  fechar.current = onFechar;
+  useEffect(() => {
+    const anterior = document.activeElement;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    painel.current?.querySelector('button')?.focus();
+    const teclado = e => {
+      if (e.key === 'Escape') fechar.current();
+      if (e.key !== 'Tab') return;
+      const itens = [...(painel.current?.querySelectorAll('button:not(:disabled), [href], input, summary, [tabindex="0"]') || [])];
+      const primeiro = itens[0], ultimo = itens.at(-1);
+      if (e.shiftKey && document.activeElement === primeiro) { e.preventDefault(); ultimo?.focus(); }
+      else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primeiro?.focus(); }
+    };
+    document.addEventListener('keydown', teclado);
+    return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', teclado); anterior?.focus(); };
+  }, []);
+  return createPortal(<div className="ct-overlay" onClick={onFechar}>
+    <section ref={painel} role="dialog" aria-modal="true" aria-label={titulo} className={`ct-modal ${classe}`} onClick={e => e.stopPropagation()}>
+      <header className="ct-modal-header"><h2>{titulo}</h2><button type="button" aria-label="Fechar janela" onClick={onFechar}>×</button></header>
+      {children}
+    </section>
+  </div>, document.body);
+}
+
+function CartaoClube({ nome, liga, pais, rotulo, detalhe, onClick, disabled, atual = false }) {
+  return <button type="button" className={`ct-offer ${atual ? 'ct-offer-stay' : ''}`} onClick={onClick} disabled={disabled}>
+    <span className="ct-offer-label">{rotulo}</span><strong>{nome}</strong>
+    <span className="ct-offer-crest"><Escudo nome={nome} size={64} /></span>
+    <span className="ct-offer-league">{competicaoTemporadaTecnico({ clube: nome, liga })}</span>
+    <span className="ct-offer-country"><Bandeira pais={pais} /><span>{pais || 'Brasil'}</span></span>
+    {detalhe && <span className="ct-offer-detail">{detalhe}</span>}
+  </button>;
+}
+
+function LinhaTemporada({ a, idade, ativa, aberta, onClick }) {
   const titulos = Array.isArray(a.titulosConquistados) ? a.titulosConquistados : a.campeao ? [competicaoTemporadaTecnico(a)] : [];
-  return <div className={'border-b border-white/[.06] '+(ativa ? 'bg-white/[.035]' : '')}>
-    <button type="button" aria-expanded={aberta} onClick={onClick} className="w-full grid grid-cols-[2.8rem_minmax(0,1fr)_2.15rem_2.25rem] gap-1.5 items-center px-1.5 py-0.5 text-left hover:bg-white/[.035] transition border-b border-white/[.035] min-h-[29px]">
-      <span className={'rounded-md text-[8px] font-black px-1 py-[3px] text-center '+(ativa ? 'bg-[#EA7A22] text-white' : 'bg-[#232326] text-[#C9C9CE]')}>{a.ano}</span>
-      <span className="flex items-center gap-1.5 min-w-0"><Escudo nome={a.clube} size={18} /><strong className="min-w-0 flex-1 text-white text-[10px] font-semibold truncate">{a.clube}</strong>{titulos.length > 0 && <span className="shrink-0 text-[10px] text-[#FACC15]" title={titulos.join(' · ')} aria-label={titulos.join(' · ')}>🏆</span>}{a.acesso && <span className="shrink-0 text-[10px]" title="Acesso" aria-label="Acesso">⬆</span>}{a.rebaixado && <span className="shrink-0 text-[10px]" title="Rebaixamento" aria-label="Rebaixamento">⬇</span>}</span>
-      <span className="text-right text-[#D4D4D8] text-[10px]">{a.posicao}º</span><span className="text-right text-white text-[10px] font-bold">{a.pontos}</span>
+  return <div className={`ct-season ${ativa ? 'ct-season-latest' : ''}`}>
+    <button type="button" aria-expanded={aberta} onClick={onClick} className="ct-timeline-row ct-season-button" aria-label={`Temporada ${a.ano}, ${a.clube}, ${a.posicao}º lugar`}>
+      <span className="ct-age">{idade}</span>
+      <span className="ct-season-club"><Escudo nome={a.clube} size={23} /><strong>{a.clube}</strong>{titulos.length > 0 && <span title={titulos.join(' · ')} aria-label={titulos.join(' · ')}>🏆</span>}{a.acesso && <span title="Acesso">↑</span>}{a.rebaixado && <span title="Rebaixamento">↓</span>}</span>
+      <span className="ct-position">{a.posicao}º</span><span className="ct-number">{a.pontos}</span><span className="ct-number">{a.vitorias}</span><span className="ct-number">{titulos.length}</span>
     </button>
-    {aberta && <div className="px-2 pb-2.5 pl-[3.6rem] text-[10px] text-[#A1A1AA] bg-[#0D0D0F]/80">
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 border-b border-white/[.05] py-1"><strong className="text-[#D4D4D8]">{competicaoTemporadaTecnico(a)}</strong><span>{a.vitorias}V · {a.empates}E · {a.derrotas}D · {a.pontos} pts</span></div>
-      <div className="mt-1">Meta: {a.objetivo} · {a.cumpriuObjetivo ? 'atingida' : 'não atingida'}</div>
+    {aberta && <div className="ct-season-details">
+      <div className="ct-detail-title"><strong>{competicaoTemporadaTecnico(a)}</strong><span>{a.ano}</span></div>
+      <p>{a.vitorias}V · {a.empates}E · {a.derrotas}D · {a.pontos} pontos</p>
+      <p>Meta: {a.objetivo} · <span className={a.cumpriuObjetivo ? 'ct-positive' : 'ct-warning'}>{a.cumpriuObjetivo ? 'atingida' : 'não atingida'}</span></p>
       <CampanhasTemporada torneios={a.torneios} />
-      {a.classificacao?.length > 0 && <details className="mt-2"><summary className="cursor-pointer text-[#D4D4D8]">Ver classificação</summary><div className="mt-2 max-h-56 overflow-y-auto rounded-lg border border-white/[.07]">{a.classificacao.map(l => <div key={l.nome} className={'grid grid-cols-[2rem_1fr_2.5rem_3rem] gap-2 px-2 py-1 border-b border-white/[.05] last:border-0 '+(l.meuClube ? 'text-[#FACC15] font-bold' : 'text-[#A1A1AA]')}><span>{l.posicao}</span><span className="truncate">{l.nome}</span><span className="text-right">{l.vitorias}V</span><span className="text-right">{l.pontos} pts</span></div>)}</div></details>}
+      {a.classificacao?.length > 0 && <details className="ct-league-details"><summary>Ver classificação</summary><div className="ct-standings">{a.classificacao.map(l => <div key={l.nome} className={l.meuClube ? 'ct-positive' : ''}><span>{l.posicao}</span><strong>{l.nome}</strong><span>{l.vitorias}V</span><span>{l.pontos} pts</span></div>)}</div></details>}
       <ClassificacoesMundo classificacoes={a.classificacoesMundo} ligaAtual={a.liga} clubeAtual={a.clube} />
     </div>}
   </div>;
@@ -169,157 +192,122 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
   const [simulando, setSimulando] = useState(false);
   const [aberta, setAberta] = useState(null);
   const [vitrineAberta, setVitrineAberta] = useState(false);
+  const [decisaoAberta, setDecisaoAberta] = useState(false);
+  const [avancoAutomatico, setAvancoAutomatico] = useState(false);
   const [erroProposta, setErroProposta] = useState(null);
+  const [erroSimulacao, setErroSimulacao] = useState(null);
+  const temporizador = useRef(null);
   const atualRef = useRef(null);
-  const idade = (t.idadeInicio || c.idade || 0) + temporadas.length;
+  const idadeInicio = t.idadeInicio || (c.idade - temporadas.length);
+  const idade = c.idade || idadeInicio + temporadas.length;
   const objetivo = objetivoTecnico(t);
+  const ovr = calcularOvrTecnico(t);
+  const carta = cartaAtualTecnico(t);
   const conquistasUltima = ultima ? (Array.isArray(ultima.titulosConquistados) ? ultima.titulosConquistados : ultima.campeao ? [competicaoTemporadaTecnico(ultima)] : []) : [];
   const eventosUltima = [
     ...conquistasUltima.map(nome => ({ tipo: 'titulo', nome })),
     ...(ultima?.rebaixado ? [{ tipo: 'rebaixado', movimento: ultima.rebaixado }] : []),
-    ...(ultima?.acesso ? [{ tipo: 'acesso', movimento: ultima.acesso }] : [])
+    ...(ultima?.acesso ? [{ tipo: 'acesso', movimento: ultima.acesso }] : []),
+    ...(ultima?.demitido ? [{ tipo: 'demissao' }] : [])
   ];
   const chaveEvento = eventosUltima.length ? `${temporadas.length}|${ultima.ano}|${ultima.clube}|${eventosUltima.map(x => x.nome || x.tipo).join('|')}` : null;
   const indiceEvento = eventosVistos.chave === chaveEvento ? eventosVistos.quantidade : 0;
-  const eventoAtual = t.fase === 'resultado' && indiceEvento < eventosUltima.length ? eventosUltima[indiceEvento] : null;
-  const temporadasVisiveis = temporadas;
+  const eventoAtual = !simulando && t.fase === 'resultado' && indiceEvento < eventosUltima.length ? eventosUltima[indiceEvento] : null;
+  const fecharEvento = () => setEventosVistos({ chave: chaveEvento, quantidade: indiceEvento + 1 });
 
   useEffect(() => {
     const fundoAnterior = document.body.style.backgroundColor;
-    document.body.style.backgroundColor = '#080809';
-    return () => { document.body.style.backgroundColor = fundoAnterior; };
+    document.body.style.backgroundColor = '#09090B';
+    return () => { document.body.style.backgroundColor = fundoAnterior; clearTimeout(temporizador.current); };
   }, []);
-
   useEffect(() => {
-    if (t.fase === 'resultado') setSimulando(false);
-    if (t.fase === 'resultado' && ultima) setAberta(String(ultima.ano));
-    else if (t.fase === 'pretemporada') setAberta(null);
+    if (t.fase === 'resultado') { setSimulando(false); setDecisaoAberta(false); }
     setErroProposta(t.ultimaNegociacao?.aceita === false ? t.ultimaNegociacao.clube : null);
-    if (aberta != null && !temporadas.some(a => String(a.ano) === String(aberta))) setAberta(null);
-  }, [t.fase, t.ano, temporadas.length, t.ultimaNegociacao?.clube, t.ultimaNegociacao?.aceita]);
+  }, [t.fase, temporadas.length, t.ultimaNegociacao]);
+  useEffect(() => {
+    atualRef.current?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+  }, [temporadas.length]);
 
-  const simular = id => {
-    if (simulando || primeira || encerrada) return;
-    setSimulando(true);
-    try {
-      onSimularTemporada?.();
-    } catch (erro) {
-      setSimulando(false);
-      throw erro;
-    }
-  };
-  const escolherClubeInicial = nome => {
+  const executar = acao => {
     if (simulando) return;
+    setErroSimulacao(null);
     setSimulando(true);
-    try {
-      onEscolherClubeInicial?.(nome);
-      onSimularTemporada?.();
-    } catch (erro) {
-      setSimulando(false);
-      throw erro;
-    }
+    temporizador.current = setTimeout(() => {
+      try { acao(); }
+      catch { setErroSimulacao('Não foi possível concluir a temporada. Tente novamente.'); }
+      finally { setSimulando(false); }
+    }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 650);
   };
+  const simular = opcao => {
+    if (primeira || encerrada || simulando) return;
+    setDecisaoAberta(false);
+    executar(() => onSimularTemporada?.(opcao));
+  };
+  const escolherClubeInicial = nome => executar(() => { onEscolherClubeInicial?.(nome); setAvancoAutomatico(true); });
   const continuar = () => {
     setErroProposta(null);
-    if (onAvancarESimular) onAvancarESimular();
-    else {
-      onAvancar?.();
-      onSimularTemporada?.();
-    }
+    executar(() => { if (onAvancar) { onAvancar(); setAvancoAutomatico(true); } else onAvancarESimular?.(); });
   };
-  const iniciarProposta = (nome, estrategia = 'prudente') => {
+  const iniciarProposta = nome => {
     setErroProposta(null);
-    onAceitarProposta?.(nome, estrategia);
+    executar(() => { onAceitarProposta?.(nome, 'prudente'); setAvancoAutomatico(true); });
   };
-
   const faseResultado = t.fase === 'resultado';
   const faseTemporada = t.fase === 'pretemporada' && !primeira && !encerrada && !t.reuniaoPendente;
-  const titulosDestaque = titulos.at(-1);
-  const temporadasCards = temporadasVisiveis;
+  const futuras = Math.max(0, LIMITE_TEMPORADAS_TECNICO - temporadas.length - (encerrada ? 0 : 1));
+  const cadencia = c.ritmo === 'intenso' ? 1 : c.ritmo === 'expresso' ? 3 : 2;
+  const mostrarDecisao = carta && temporadas.length % cadencia === 0;
+  const clubeAtual = primeira || semClube ? 'Sem clube' : t.clube;
+  useEffect(() => {
+    if (!avancoAutomatico || simulando) return;
+    setAvancoAutomatico(false);
+    if (!faseTemporada) return;
+    if (mostrarDecisao) setDecisaoAberta(true);
+    else simular();
+  }, [avancoAutomatico, simulando, faseTemporada, mostrarDecisao]);
 
-  return <main className="cp min-h-screen w-full max-w-5xl mx-auto px-3 sm:px-4 py-3 sm:py-5 rp-entra text-[#F4F4F5]">
-    {eventoAtual?.tipo === 'titulo' && <PopUpTitulo temporada={ultima} titulo={eventoAtual.nome} indice={eventosUltima.slice(0, indiceEvento + 1).filter(x => x.tipo === 'titulo').length - 1} total={conquistasUltima.length} onFechar={() => setEventosVistos({ chave: chaveEvento, quantidade: indiceEvento + 1 })} />}
-    {(eventoAtual?.tipo === 'rebaixado' || eventoAtual?.tipo === 'acesso') && <PopUpDivisao temporada={ultima} movimento={eventoAtual.movimento} tipo={eventoAtual.tipo} onFechar={() => setEventosVistos({ chave: chaveEvento, quantidade: indiceEvento + 1 })} />}
+  return <div className="ct" aria-label="Carreira de treinador">
+    {eventoAtual?.tipo === 'titulo' && <PopUpTitulo temporada={ultima} titulo={eventoAtual.nome} indice={eventosUltima.slice(0, indiceEvento + 1).filter(x => x.tipo === 'titulo').length - 1} total={conquistasUltima.length} onFechar={fecharEvento} />}
+    {(eventoAtual?.tipo === 'rebaixado' || eventoAtual?.tipo === 'acesso') && <PopUpDivisao temporada={ultima} movimento={eventoAtual.movimento} tipo={eventoAtual.tipo} onFechar={fecharEvento} />}
+    {eventoAtual?.tipo === 'demissao' && <JanelaTreinador titulo="Fim de ciclo" onFechar={fecharEvento}><div className="ct-event-content"><span className="ct-event-symbol">↗</span><h3>Você foi demitido</h3><p>A diretoria do {ultima.clube} decidiu encerrar seu trabalho. Sua carreira continua: confira os próximos convites.</p><button className="ct-primary" onClick={fecharEvento}>Ver propostas</button></div></JanelaTreinador>}
+    {vitrineAberta && <JanelaTreinador titulo="Conquistas como treinador" onFechar={() => setVitrineAberta(false)} classe="ct-trophy-modal"><div className="ct-trophy-grid">{titulos.length ? titulos.map((x, i) => <article key={`${x.ano}-${x.nome}-${i}`}><TacaCompeticao tipo={x.tipo} nome={x.nome} size={80} /><h3>{x.nome}</h3><p>{x.ano} · {x.clube}</p></article>) : <div className="ct-empty-trophies"><span>🏆</span><h3>Vitrine vazia</h3><p>As taças conquistadas na sua carreira aparecerão aqui.</p></div>}</div></JanelaTreinador>}
+    {decisaoAberta && carta && <JanelaTreinador titulo="Decisão de carreira" onFechar={() => setDecisaoAberta(false)}><div className="ct-event-content"><span className="ct-eyebrow">{t.clube} · {t.ano}</span><h3>{carta.titulo}</h3><p>{carta.texto}</p><div className="ct-decisions">{carta.opcoes.map(op => <button key={op.id} onClick={() => simular(op.id)}><strong>{op.nome}</strong><span>{op.detalhe}</span>{op.risco > 0 && <small>Risco: {Math.round(op.risco * 100)}%</small>}</button>)}</div></div></JanelaTreinador>}
 
-    <section className="cp-card overflow-hidden border-[#27272A] bg-[#111113]">
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(360px,420px)_minmax(0,1fr)]">
-        <div className="min-w-0 border-b lg:border-b-0 lg:border-r border-white/[.08]">
-          <header className="px-3.5 sm:px-4 pt-3.5 pb-3">
-            <div className="flex items-stretch gap-2">
-              <div className="w-[72px] min-h-[82px] shrink-0 rounded-[18px] border border-orange-300/20 bg-gradient-to-b from-[#FB923C] to-[#EA580C] flex flex-col items-center justify-center shadow-inner shadow-black/20">
-                <span className="text-[8px] font-black uppercase tracking-[.12em] text-orange-50/85">Prestígio</span>
-                <strong className="text-[31px] leading-none font-black text-white mt-1">{t.reputacao ?? 40}</strong>
-              </div>
-              <div className="min-w-0 flex-1 rounded-2xl border border-white/[.06] px-3 py-2.5 flex items-center gap-2.5" style={{ background: 'linear-gradient(110deg, #111b16, #171719 72%)' }}>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5 text-[9px] text-[#A1A1AA]"><Bandeira pais={t.pais || 'Brasil'} /><span className="font-black uppercase tracking-[.16em]">Modo treinador</span></div>
-                  <h1 className="text-white text-lg sm:text-xl font-black leading-tight truncate mt-1">{c.nome}</h1>
-                  <div className="flex items-center gap-1.5 text-xs text-[#D4D4D8] truncate mt-1"><Escudo nome={semClube ? 'Sem clube' : t.clube} size={20} /><span className="truncate">{semClube ? 'Sem clube' : t.clube}</span></div>
-                </div>
-                <div className="shrink-0 border-l border-white/[.08] pl-2.5 text-right"><strong className="block text-white text-xl leading-none">{idade}</strong><span className="text-[8px] uppercase tracking-wide text-[#A1A1AA]">idade</span><div className="text-[10px] font-bold text-[#FACC15] mt-2">R$ {salarioTecnico(t)} mil</div><span className="text-[8px] uppercase text-[#A1A1AA]">por mês</span></div>
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-1 mt-2.5 text-center">
-              {[[historico.jogos, 'jogos'], [historico.vitorias, 'vitórias'], [titulos.length, 'taças']].map(([valor, rotulo]) => <div key={rotulo} className="rounded-lg bg-[#0B0B0D] border border-white/[.045] py-1.5"><strong className="block text-white text-sm leading-tight">{valor}</strong><span className="text-[8px] text-[#A1A1AA] uppercase tracking-[.12em]">{rotulo}</span></div>)}
-            </div>
-            <button type="button" onClick={() => setVitrineAberta(v => !v)} aria-expanded={vitrineAberta} className="w-full flex items-center gap-2.5 mt-2 rounded-xl border border-white/[.06] bg-[#0D0D0F] px-2.5 py-1.5 text-left hover:border-white/[.14] transition">
-              {titulosDestaque ? <TacaCompeticao tipo={titulosDestaque.tipo} nome={titulosDestaque.nome} size={27} /> : <span className="w-[27px] text-center text-lg opacity-45" aria-hidden="true">🏆</span>}
-              <span className="min-w-0 flex-1"><strong className={'block text-[9px] font-black uppercase tracking-[.14em] '+(titulos.length ? 'text-[#FDE68A]' : 'text-[#8B8B92]')}>Vitrine de taças</strong><span className="block text-[9px] text-[#A1A1AA] truncate">{titulosDestaque ? `${titulos.length} conquistas · última: ${titulosDestaque.nome} (${titulosDestaque.ano})` : 'Vitrine vazia'}</span></span>
-              <span className="text-[10px] text-[#77777E]">{vitrineAberta ? '⌃' : '⌄'}</span>
-            </button>
-            {vitrineAberta && <div className="grid grid-cols-2 gap-1.5 mt-1.5">{titulos.length ? titulos.map((x, i) => <div key={`${x.ano}-${x.nome}-${i}`} className="rounded-lg border border-white/[.06] bg-[#0B0B0D] flex items-center gap-1.5 p-1.5"><TacaCompeticao tipo={x.tipo} nome={x.nome} size={23} /><span className="min-w-0"><strong className="block text-[9px] text-[#FDE68A] truncate">{x.nome}</strong><span className="block text-[8px] text-[#8B8B92] truncate">{x.ano} · {x.clube}</span></span></div>) : <div className="col-span-2 rounded-lg bg-[#0B0B0D] px-2.5 py-3 text-center text-[9px] text-[#77777E]">As taças conquistadas aparecerão aqui.</div>}</div>}
-            <div className="flex items-center justify-between gap-2 mt-2 px-1 text-[9px] text-[#A1A1AA]"><span>Temporada {t.ano} · {temporadas.length}/{LIMITE_TEMPORADAS_TECNICO}</span><span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /><span>Diretoria {t.diretoria ?? 60}%</span></span></div>
-          </header>
-
-          <section className="border-t border-white/[.08] px-3.5 sm:px-4 py-3.5" aria-live="polite">
-            {primeira ? <>
-              <h2 className="text-white text-base font-bold">Oferta inicial</h2><p className="text-xs text-[#A1A1AA] mt-1">Escolha onde sua carreira como treinador começa. Seus vínculos como jogador vêm primeiro.</p>
-              <div className="grid grid-cols-2 gap-2 mt-3">{t.opcoesInicio.map(op => <button key={op.clube} disabled={simulando} onClick={() => escolherClubeInicial(op.clube)} className="cp-card min-h-[124px] p-2.5 text-center hover:border-white/30 disabled:opacity-50 transition"><span className="block text-[9px] text-[#A1A1AA]">Começar no</span><strong className="block text-xs leading-tight text-white mt-1">{op.clube}</strong><span className="flex justify-center my-2"><Escudo nome={op.clube} size={42} /></span><span className="block text-[9px] text-[#A1A1AA]">{op.idolatria ? 'Clube do coração' : `Vínculo ${op.afinidade}/100`}</span></button>)}</div>
-              {simulando && <p role="status" className="text-[10px] text-[#A1A1AA] text-center mt-2">Simulando a temporada…</p>}
-            </> : faseTemporada ? <>
-              <h2 className="text-white text-base font-bold">Temporada {t.ano}</h2>
-              <p className="text-xs text-[#A1A1AA] mt-1">{t.clube} · {competicaoTemporadaTecnico({ clube: t.clube, liga: t.liga })}</p>
-              <p className="text-xs text-[#A1A1AA] mt-4">Simule o ano e confira a campanha, os títulos e as propostas ao fim da temporada.</p>
-              <button disabled={simulando} onClick={() => simular()} className="cp-pill cp-branca w-full mt-3">{simulando ? 'Simulando temporada…' : 'Simular temporada'}</button>
-              {simulando && <p role="status" className="text-[10px] text-[#A1A1AA] text-center mt-2">Calculando temporada…</p>}
-            </> : t.reuniaoPendente ? <>
-              <h2 className="text-white text-base font-bold">Conversa com a diretoria</h2><p className="text-xs text-[#A1A1AA] mt-1">Escolha sua resposta para continuar.</p><div className="grid gap-2 mt-3">{OPCOES_REUNIAO_TECNICO.map(op => <button key={op.id} onClick={() => { onReuniao?.(op.id); onJogar?.(); }} className="cp-card p-2.5 text-left hover:border-white/30"><strong className="block text-xs text-white">{op.nome}</strong><span className="text-[10px] text-[#A1A1AA]">{op.descricao}</span></button>)}</div>
-            </> : faseResultado ? <>
-              {ultima && <><div className="flex items-center gap-2"><Escudo nome={ultima.clube} size={38} /><div className="min-w-0 flex-1"><h2 className="text-white text-base font-bold truncate">{ultima.clube}</h2><p className="text-[10px] text-[#A1A1AA]">Temporada {ultima.ano} · {competicaoTemporadaTecnico(ultima)}</p></div><div className="text-right"><strong className="block text-white text-2xl leading-none">{ultima.posicao}º</strong><span className="text-[9px] text-[#A1A1AA]">LUGAR</span></div></div>
-                <div className="grid grid-cols-4 gap-1.5 mt-3">{[['PTS', ultima.pontos], ['V', ultima.vitorias], ['E', ultima.empates], ['D', ultima.derrotas]].map(([label, value]) => <div key={label} className="rounded-lg bg-[#0D0D0F] py-1.5 text-center"><strong className="block text-sm text-white">{value}</strong><span className="text-[9px] text-[#A1A1AA]">{label}</span></div>)}</div>
-                <div className="mt-2 text-[10px] text-[#D4D4D8]">Meta: {ultima.objetivo} · <span className={ultima.cumpriuObjetivo ? 'text-emerald-300' : 'text-amber-300'}>{ultima.cumpriuObjetivo ? 'atingida' : 'não atingida'}</span></div>
-                {!!conquistasUltima.length && <div className="flex items-center gap-2 mt-2 rounded-lg border border-[#FACC15]/20 bg-[#FACC15]/[.06] px-2 py-1.5"><span className="text-sm" aria-hidden="true">🏆</span><span className="min-w-0"><strong className="block text-[10px] text-[#FDE68A]">{conquistasUltima.length === 1 ? 'Campeão da temporada' : `${conquistasUltima.length} títulos conquistados`}</strong><span className="block text-[9px] text-[#A1A1AA] truncate">{conquistasUltima.join(' · ')}</span></span></div>}
-                {ultima.rebaixado && <p className="mt-3 rounded-xl border border-red-500/25 bg-red-950/25 p-2 text-xs font-semibold text-red-200">Rebaixado · {competicaoTemporadaTecnico({ liga: ultima.rebaixado.para })}</p>}
-                {ultima.acesso && <p className="mt-3 rounded-xl border border-emerald-500/25 bg-emerald-950/25 p-2 text-xs font-semibold text-emerald-200">Acesso · {competicaoTemporadaTecnico({ liga: ultima.acesso.para })}</p>}</>}
-              {semClube && <div className="mt-3 rounded-xl border border-red-400/20 bg-red-950/20 p-2.5"><strong className="text-xs text-red-200">{t.demitido ? 'Você foi demitido' : 'Sem clube'}</strong><p className="text-[10px] text-red-100/70 mt-1">{t.demitido ? 'Escolha uma proposta para continuar.' : 'Aguarde novos convites.'}</p></div>}
-              {!!t.propostas?.length && <><h3 className="text-white text-xs font-bold mt-3">{semClube ? 'Propostas de trabalho' : 'Janela de transferências'}</h3><p className="text-[10px] text-[#A1A1AA] mt-1">Escolha uma proposta ou continue no clube.</p><div className="grid grid-cols-2 gap-2 mt-2">{t.propostas.map(p => <button key={p.nome} onClick={() => iniciarProposta(p.nome)} className="cp-card min-h-[112px] p-2 text-center hover:border-white/30 transition"><span className="block text-[9px] text-[#A1A1AA]">Assinar com</span><strong className="block text-xs text-white mt-0.5 truncate">{p.nome}</strong><span className="flex justify-center my-1.5"><Escudo nome={p.nome} size={36} /></span><span className="block text-[9px] text-[#A1A1AA] truncate">{p.pais} · meta {p.objetivo}</span></button>)}</div></>}
-              {erroProposta && <p role="status" className="text-[10px] text-amber-200 mt-2">A proposta de {erroProposta} foi recusada. Escolha outra opção.</p>}
-              {semClube && !t.propostas?.length && <button onClick={onEsperar} className="cp-pill cp-contorno w-full mt-3">Aguardar propostas</button>}
-              {!encerrada && !semClube && <button onClick={continuar} className="cp-pill cp-branca w-full mt-3">Ficar no {t.clube}</button>}
-              {encerrada && <p className="text-center text-xs text-[#FDE68A] mt-3">Carreira encerrada após {LIMITE_TEMPORADAS_TECNICO} temporadas.</p>}
-            </> : <p className="text-xs text-[#A1A1AA]">Carreira indisponível.</p>}
-          </section>
-        </div>
-
-        <section className="min-w-0 bg-[#111113]" aria-label="Trajetória como treinador">
-          <header className="px-3.5 sm:px-4 pt-3 pb-2 border-b border-white/[.08] bg-[#101012]">
-            <div className="flex items-center justify-between gap-3"><span className="text-[8px] uppercase tracking-[.18em] text-[#8B8B92] font-black">Histórico da carreira</span><span className="rounded-full border border-white/[.08] bg-[#0B0B0D] px-2 py-1 text-[9px] font-bold text-[#A1A1AA]">{temporadas.length}/{LIMITE_TEMPORADAS_TECNICO} anos</span></div>
-            <div className="grid grid-cols-[2.8rem_minmax(0,1fr)_2.15rem_2.25rem] gap-1.5 px-1.5 mt-2 text-[8px] font-black uppercase tracking-[.14em] text-[#77777E]"><span>Ano</span><span>Clube</span><span className="text-right">Pos</span><span className="text-right">Pts</span></div>
-          </header>
-          <div className="px-1.5 pb-2 max-h-[72vh] lg:max-h-[680px] overflow-y-auto">
-            {temporadasCards.map((a, visibleIndex) => {
-              const i = visibleIndex;
-              return <LinhaTemporada key={`${a.ano}-${i}`} a={a} ativa={i === temporadas.length - 1 && (aberta == null || String(aberta) === String(a.ano))} aberta={String(aberta) === String(a.ano)} onClick={() => setAberta(String(aberta) === String(a.ano) ? null : a.ano)} />;
-            })}
-            {t.fase === 'pretemporada' && <div ref={atualRef} className="grid grid-cols-[2.8rem_minmax(0,1fr)_2.15rem_2.25rem] gap-1.5 items-center px-1.5 py-0.5 border-b border-white/[.06] bg-[#EA7A22]/[.07] min-h-[29px]">
-              <span className="rounded-md bg-[#EA7A22] text-white text-[8px] font-black px-1 py-[3px] text-center">{t.ano}</span><span className="flex items-center gap-1.5 min-w-0"><Escudo nome={primeira ? 'Sem clube' : t.clube} size={18} /><strong className="min-w-0 text-[10px] font-semibold text-white truncate">{primeira ? 'Escolhendo clube' : t.clube}</strong></span><span className="text-right text-[10px] text-[#A1A1AA]">—</span><span className="text-right text-[10px] text-[#A1A1AA]">—</span>
-            </div>}
-            {!temporadas.length && <div className="px-4 py-7 text-center text-xs text-[#71717A]">As temporadas concluídas aparecerão aqui.</div>}
-            {temporadas.length > 0 && <div className="flex items-center justify-between px-3 py-2 text-[9px] text-[#71717A]"><span>{historico.vitorias}V · {historico.empates}E · {historico.derrotas}D</span><span>Até {LIMITE_TEMPORADAS_TECNICO} temporadas</span></div>}
+    <div className="ct-board" aria-busy={simulando}>
+      <section className="ct-profile" aria-label="Ficha do treinador">
+        <header className="ct-identity">
+          <div className={`ct-rating ${ovr >= 80 ? 'ct-rating-gold' : ovr >= 70 ? 'ct-rating-silver' : ''}`}><span>OVR</span><strong>{ovr}</strong></div>
+          <div className="ct-person">
+            <div className="ct-badges"><span><Bandeira pais={c.nac || 'BRA'} />{c.nac || 'BRA'}</span><span className="ct-role">TREINADOR</span></div>
+            <h1>{c.nome}</h1><div className="ct-current-club"><Escudo nome={clubeAtual} size={22} /><strong>{clubeAtual}</strong></div>
           </div>
-        </section>
-      </div>
-      <footer className="flex items-center justify-between gap-3 border-t border-white/[.08] px-4 py-2 text-[10px]"><button onClick={onLegado} className="text-[#A1A1AA] hover:text-white">Ver legado como jogador</button><button onClick={onSair} className="text-[#A1A1AA] hover:text-white">Voltar ao menu</button></footer>
-    </section>
-  </main>;
+          <div className="ct-contract"><div><span>IDADE</span><strong>{idade}</strong></div><div><span>SALÁRIO</span><strong>R$ {semClube || primeira ? 0 : (t.salario ?? salarioTecnico(t))}<small>mil</small></strong></div></div>
+        </header>
+        <div className="ct-stats">{[[historico.jogos, 'JOGOS', '▣'], [historico.vitorias, 'VITÓRIAS', '✦'], [titulos.length, 'TÍTULOS', '♜']].map(([valor, rotulo, icone]) => <div key={rotulo}><span>{rotulo}</span><strong><i aria-hidden="true">{icone}</i>{valor}</strong></div>)}</div>
+        <button type="button" onClick={() => setVitrineAberta(true)} className="ct-trophy-shelf" aria-label="Ver conquistas como treinador">{titulos.length ? <><span className="ct-shelf-cups">{titulos.slice(-5).map((x, i) => <TacaCompeticao key={`${x.ano}-${i}`} tipo={x.tipo} nome={x.nome} size={38} />)}</span><span>{titulos.length} {titulos.length === 1 ? 'CONQUISTA' : 'CONQUISTAS'}<span aria-hidden="true"> ↗</span></span></> : <><span className="ct-shelf-empty" aria-hidden="true">🏆</span><span>VITRINE VAZIA</span></>}</button>
+        <div className="ct-actions" aria-live="polite">
+          {encerrada ? <><h2>Uma carreira para a história</h2><p>Carreira encerrada após {LIMITE_TEMPORADAS_TECNICO} temporadas. Reveja suas campanhas e conquistas.</p><div className="ct-career-total"><strong>{historico.aproveitamento}%</strong><span>de aproveitamento · {historico.clubes.length} clubes</span></div><button className="ct-primary" onClick={() => setVitrineAberta(true)}>Ver conquistas</button></>
+          : primeira ? <><h2>Oferta inicial</h2><p>Os primeiros clubes querem você no comando. Escolha onde sua carreira como treinador começa.</p><div className="ct-offers">{t.opcoesInicio.map(op => <CartaoClube key={op.clube} nome={op.clube} pais={t.pais} rotulo="Começar no" detalhe={op.idolatria ? 'Clube do coração' : 'Vínculo como jogador'} disabled={simulando} onClick={() => escolherClubeInicial(op.clube)} />)}</div></>
+          : t.reuniaoPendente ? <><h2>Conversa com a diretoria</h2><p>A pressão aumentou. Sua resposta define os próximos passos.</p><div className="ct-decisions">{OPCOES_REUNIAO_TECNICO.map(op => <button key={op.id} disabled={simulando} onClick={() => executar(() => { onReuniao?.(op.id); onJogar?.(); })}><strong>{op.nome}</strong><span>{op.descricao}</span></button>)}</div></>
+          : faseTemporada ? <><h2>Temporada {t.ano}</h2><p>O {t.clube} conta com você. Meta da temporada: {objetivo.nome.toLowerCase()}.</p><div className="ct-season-preview"><Escudo nome={t.clube} size={52} /><div><strong>{competicaoTemporadaTecnico({ clube: t.clube, liga: t.liga })}</strong><span>Diretoria {t.diretoria ?? 60}% · Torcida {t.torcida ?? 55}%</span></div></div><button disabled={simulando} className="ct-primary" onClick={() => mostrarDecisao ? setDecisaoAberta(true) : simular()}>{mostrarDecisao ? 'Tomar decisão e simular' : 'Simular temporada'}<span aria-hidden="true">→</span></button></>
+          : faseResultado ? <><h2>{semClube ? 'Propostas de trabalho' : 'Janela de transferências'}</h2><p>{semClube ? 'Um ciclo terminou. Escolha um novo projeto para continuar sua carreira.' : 'Chegaram ofertas depois da última temporada. Você pode aceitar uma ou ficar no clube.'}</p><div className="ct-offers">{t.propostas?.map(p => <CartaoClube key={p.nome} nome={p.nome} liga={p.liga} pais={p.pais} rotulo="Assinar com" disabled={simulando} onClick={() => iniciarProposta(p.nome)} />)}{!semClube && <CartaoClube nome={t.clube} liga={t.liga} pais={t.pais} rotulo="Ficar no" atual disabled={simulando} onClick={continuar} />}</div>{semClube && !t.propostas?.length && <button disabled={simulando} onClick={() => executar(() => onEsperar?.())} className="ct-primary">Aguardar propostas<span aria-hidden="true">→</span></button>}{ultima && <div className="ct-last-result"><span>Última temporada · {ultima.ano}</span><strong>{ultima.posicao}º lugar · {ultima.pontos} pontos</strong><span>{ultima.vitorias}V · {ultima.empates}E · {ultima.derrotas}D</span></div>}</>
+          : <p>Carreira indisponível.</p>}
+          {simulando && <div className="ct-simulating" role="status"><span className="ct-spinner" /><strong>Preparando a próxima temporada…</strong></div>}
+          {erroProposta && <p role="status" className="ct-warning">A proposta de {erroProposta} foi recusada. Escolha outra opção.</p>}
+          {erroSimulacao && <p role="alert" className="ct-warning">{erroSimulacao}</p>}
+        </div>
+      </section>
+
+      <section className="ct-timeline" aria-label="Trajetória como treinador">
+        <div className="ct-timeline-heading ct-timeline-row"><span>IDADE</span><span>CLUBE</span><span>POS</span><span>PTS</span><span>VIT</span><span>TAÇAS</span></div>
+        <div className="ct-timeline-body">
+          {temporadas.map((a, i) => <LinhaTemporada key={`${a.ano}-${i}`} a={a} idade={idadeInicio + i} ativa={i === temporadas.length - 1} aberta={aberta === i} onClick={() => setAberta(aberta === i ? null : i)} />)}
+          {!encerrada && <div ref={atualRef} className="ct-timeline-row ct-current-row"><span className="ct-age">{idade}</span><span className="ct-season-club"><span className="ct-unknown">?</span><strong>{simulando ? 'Simulando temporada…' : primeira || faseResultado ? 'Escolhendo clube…' : 'Decisão de carreira…'}</strong></span><span className="ct-position">—</span><span /><span /><span /></div>}
+          {Array.from({ length: futuras }, (_, i) => <div key={`futura-${i}`} className="ct-timeline-row ct-future" aria-hidden="true"><span>{idade + i + 1}</span><span /><span /><span /><span /><span /></div>)}
+        </div>
+        <footer className="ct-timeline-total"><Bandeira pais={t.pais || 'Brasil'} /><strong>{temporadas.length}/{LIMITE_TEMPORADAS_TECNICO} temporadas</strong><span>{historico.aproveitamento}% aproveitamento</span></footer>
+      </section>
+    </div>
+    <footer className="ct-footer"><button type="button" onClick={onLegado}>← Ver legado como jogador</button><button type="button" onClick={onSair}>Voltar ao início</button></footer>
+  </div>;
 }

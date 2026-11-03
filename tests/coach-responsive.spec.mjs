@@ -160,6 +160,7 @@ test('campanhas de copa exibem grupos e todas as partidas do mata-mata', async (
   await page.evaluate(value => localStorage.setItem('ajoia_rapido_v1', JSON.stringify(value)), save);
   await page.reload();
   await page.getByRole('button', { name: /Continuar · Teste responsivo técnico/ }).click();
+  await page.getByRole('button', { name: /^Temporada / }).first().click();
   await page.locator('summary').filter({ hasText: 'Copa Libertadores' }).click();
   await expect(page.getByText('Grupo A · tabela e partidas')).toBeVisible();
   await page.getByText('Grupo A · tabela e partidas').click();

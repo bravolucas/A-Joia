@@ -22,8 +22,10 @@ O módulo é independente e ainda não é importado pelo jogo:
 
 - `criarGestaoTecnico(t)`: cria uma gestão determinística por clube/ano, sem consumir `Math.random` da simulação. Tem 24 atletas fictícios: 3 goleiros, 8 defensores, 8 meias e 5 atacantes.
 - Cada jogador possui id, nome, setor, idade, qualidade, potencial, anos de contrato, salário mensal, valor e origem.
+- `atualizarGestaoAnual(g, ano)`: envelhece atletas, reduz contratos, encerra contratos vencidos e repõe os setores com jovens da base. Renova verba uma vez por ano; só é chamada automaticamente na pré-temporada, pois a simulação incrementa o ano antes da tela de resultado.
+- O aporte anual provisório é 70% do orçamento inicial, limitado ao saldo de duas vezes esse orçamento. Saldo já acumulado acima do limite é preservado. Não há renovação manual de contrato nem pagamento de salários debitado do orçamento de transferências.
 - `resumoGestaoTecnico(g)`: médias por setor, quantidade de atletas, folha mensal, teto, espaço salarial e saldo.
-- `gerarMercadoTecnico(t)`: três opções por setor, estáveis dentro da mesma janela.
+- `gerarMercadoTecnico(t)`: três opções por setor, estáveis dentro da mesma janela. Ofertas compradas/vendidas ficam indisponíveis até o próximo ano.
 - `contratarJogadorTecnico(c, id)`: valida janela, saldo, teto salarial, duplicidade e limite de 30 atletas; debita compra e registra movimento.
 - `venderJogadorTecnico(c, id)`: credita 80% do valor, libera folha, remove atleta e registra movimento; preserva mínimos por setor.
 - Valores são **R$ mil**; salários são **por mês**. Orçamento é destinado a transferências, distinto do teto salarial.
@@ -32,15 +34,15 @@ O módulo é independente e ainda não é importado pelo jogo:
 
 ## Verificação
 
-- `node tests/mercado-tecnico.test.mjs`: quatro testes passaram (geração estável, serialização, compras, vendas, restrições de janela e troca de clube).
-- `npm test`: 18 arquivos/suítes passaram, sem falhas. Log auxiliar da instância: `/tmp/continuidade-tests.log`.
+- `node tests/mercado-tecnico.test.mjs`: oito testes passaram (geração estável, serialização, compras, vendas, janela, troca de clube, virada anual, idempotência, recompra e preservação de saldo).
+- `npm test`: 18 arquivos/suítes passaram, sem falhas. Log auxiliar da instância: `/tmp/continuidade-tests-2.log`.
 - Não foi necessária alteração no build: o módulo ainda não é importado pela aplicação.
 
 ## Próximos passos concretos
 
 1. Revisar e balancear valores econômicos. Os números iniciais são provisórios.
-2. **Resolver a virada anual antes de integrar:** hoje uma gestão do mesmo clube é preservada mesmo se o ano avançar. Implementar envelhecimento, redução/renovação de contratos, reposição mínima, renovação do orçamento e idempotência por ano. Não recreditar verba ao recarregar o save.
-3. Garantir que candidatos vendidos não possam ser recomprados infinitamente pela mesma oferta na mesma janela. Tratar disponibilidade por janela e regras para saída/reentrada.
+2. Virada anual já implementada e testada neste segundo checkpoint. Antes da interface, decidir a renovação manual de contratos e revisar o balanceamento da reposição automática pela base.
+3. Bloqueio de recompra na mesma janela já implementado e testado. Preservar o histórico de movimentos na integração e nos saves.
 4. Decidir o vínculo entre qualidade por setor e força usada nas probabilidades. Atualmente `t.elenco` é numérico; não sobrescrevê-lo com a lista. Manter a lista em `t.gestao.elenco` e preservar saves antigos.
 5. Integrar inicialização na escolha do primeiro clube e na aceitação de proposta; preservar a passagem jogador → treinador.
 6. Integrar `contratarJogadorTecnico` e `venderJogadorTecnico` aos callbacks de `ModoRapido.jsx`, usando atualizações funcionais de `setEstado`.

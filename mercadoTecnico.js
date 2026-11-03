@@ -18,9 +18,41 @@ function jogador(rng,id,setor,forca){
   contrato:1+Math.floor(rng()*4),salario:Math.max(3,Math.round(qualidade**2/220)),
   valor:Math.max(100,Math.round(qualidade**3/180*(idade<24?1.2:idade>30?.7:1))),origem:'elenco'};
 }
+/** Aplica cada virada uma única vez. O ano processado acompanha o save. */
+export function atualizarGestaoAnual(gestao, anoAlvo){
+ const g=structuredClone(gestao);
+ if(!Number.isInteger(anoAlvo)||!Number.isInteger(g.ano)||anoAlvo<=g.ano)return g;
+ if(anoAlvo-g.ano>40)throw new Error('Intervalo de gestão inválido.');
+ for(let ano=g.ano+1;ano<=anoAlvo;ano++){
+  const expirados=g.elenco.filter(j=>j.contrato<=1);
+  const base=g.elenco.reduce((n,j)=>n+j.qualidade,0)/Math.max(1,g.elenco.length);
+  g.elenco=g.elenco.filter(j=>j.contrato>1).map(j=>{
+   const idade=j.idade+1;
+   const qualidade=limitar(j.qualidade+(idade<24?1:idade>32?-1:0),30,j.potencial);
+   return {...j,idade,qualidade,contrato:j.contrato-1,valor:Math.max(100,Math.round(j.valor*(idade>30?.94:1.02)))};
+  });
+  for(const j of expirados)g.movimentos.push({tipo:'fim-contrato',jogador:j.id,nome:j.nome,valor:0,ano});
+  const rng=gerador(`${g.clube}|${ano}|reposicao-v1`);
+  for(const setor of SETORES_ELENCO){
+   const faltam=Math.max(0,setor.quantidade-g.elenco.filter(j=>j.setor===setor.id).length);
+   for(let i=0;i<faltam;i++){
+    const jovem=jogador(rng,`${g.clube}:base:${ano}:${setor.id}:${i}`,setor.id,Math.max(30,base-7));
+    jovem.idade=18+Math.floor(rng()*3);jovem.contrato=3;jovem.origem='base';
+    jovem.potencial=Math.min(99,jovem.qualidade+10);g.elenco.push(jovem);
+    g.movimentos.push({tipo:'base',jogador:jovem.id,nome:jovem.nome,valor:0,ano});
+   }
+  }
+  const aporte=Math.round(g.orcamentoInicial*.7);
+  const saldo=g.saldo+Math.min(aporte,Math.max(0,g.orcamentoInicial*2-g.saldo));
+  g.movimentos.push({tipo:'verba',valor:saldo-g.saldo,ano});g.saldo=saldo;
+  g.tetoSalarial=Math.max(g.tetoSalarial,Math.ceil(g.elenco.reduce((n,j)=>n+j.salario,0)*1.25));
+  g.ano=ano;
+ }
+ return g;
+}
 export function criarGestaoTecnico(t){
  if(!t?.clube)throw new Error('Escolha um clube antes de administrar o elenco.');
- if(t.gestao?.versao===1&&t.gestao.clube===t.clube)return structuredClone(t.gestao);
+ if(t.gestao?.versao===1&&t.gestao.clube===t.clube)return t.fase==='pretemporada'?atualizarGestaoAnual(t.gestao,t.ano):structuredClone(t.gestao);
  const forca=limitar(Number(t.elenco)||CLUBES.find(c=>c.nome===t.clube)?.forca||50,30,95);
  const rng=gerador(`${t.clube}|${t.ano}|gestao-v1`);const elenco=[];
  for(const setor of SETORES_ELENCO)for(let i=0;i<setor.quantidade;i++)elenco.push(jogador(rng,`${t.clube}:${setor.id}:${i}`,setor.id,forca));
@@ -34,7 +66,7 @@ export function resumoGestaoTecnico(g){
 }
 export function gerarMercadoTecnico(t){
  const g=criarGestaoTecnico(t);const rng=gerador(`${g.clube}|${g.ano}|mercado-v1`);
- return SETORES_ELENCO.flatMap(s=>Array.from({length:3},(_,i)=>({...jogador(rng,`mercado:${g.clube}:${g.ano}:${s.id}:${i}`,s.id,Number(t.elenco)||50),origem:'mercado'})));
+ return SETORES_ELENCO.flatMap(s=>Array.from({length:3},(_,i)=>({...jogador(rng,`mercado:${g.clube}:${g.ano}:${s.id}:${i}`,s.id,Number(t.elenco)||50),origem:'mercado'}))).filter(j=>!g.movimentos.some(m=>m.ano===g.ano&&m.jogador===j.id&&(m.tipo==='compra'||m.tipo==='venda')));
 }
 function validarJanela(t){
  if(!t?.clube||t.demitido||t.desempregado)throw new Error('Você precisa estar empregado para administrar o elenco.');

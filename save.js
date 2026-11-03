@@ -1,3 +1,4 @@
+import { registrarMuseu } from './museu.js';
 /* ===================== SISTEMA DE SAVE =====================
    Guarda a carreira no navegador (localStorage) e permite exportar/importar
    como arquivo, pra não perder tudo se limpar os dados do navegador. */
@@ -54,6 +55,7 @@ function chave(slot) { return PREFIXO + slot; }
 export function salvarLocal(slot, save) {
   try {
     localStorage.setItem(chave(slot), JSON.stringify(save));
+    if (save.carreira || save.fim?.c) registrarMuseu({ ...(save.fim?.c || save.carreira), nome: save.nome || save.fim?.c?.nome || save.carreira?.nome }, { modo: "completo", temporadas: save.temporadas || [] });
     return { ok: true };
   } catch (e) {
     // o motivo mais comum é a cota do navegador estourar

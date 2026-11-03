@@ -1,3 +1,4 @@
+import { criarIdMuseu } from './museu.js';
 import React, { useState, useMemo, useEffect } from "react";
 import { ARTE } from "./arte.js";
 import { TacaCompeticao } from "./trofeus.jsx";
@@ -304,6 +305,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
     draftSlots.forEach((s) => { if (s.valor) attrsIni[s.attr] = clampR(attrsIni[s.attr] + s.valor, 40, 99); });
     const persona = PERSONALIDADES.find((p) => p.id === personalidade) || PERSONALIDADES[3];
     const c = {
+      museuId: criarIdMuseu(),
       attrs: attrsIni, attrsAnteriores: { ...attrsIni }, potencial: potencialFinal, posicao, personalidade, nacionalidade, clubeCoracao, pernaDominante, origem: origem?.id,
       idade: 16, clube: clubeEscolhido, forma: 0, anoNoClube: 0,
       gols: 0, assist: 0, melhorEmCampo: 0, titulos: 0, bolasDeOuro: 0, premiosIndividuais: 0, copasDoMundo: 0,

@@ -1,9 +1,11 @@
 import Icone from "./Icone.jsx";
-import React, { Suspense, lazy, useState } from "react";
+import React, { Suspense, lazy, useState, useEffect } from "react";
 import { ARTE } from "./arte.js";
 // o Modo Carreira é grande: só baixa quando a pessoa entra nele
+const Museu = lazy(() => import("./Museu.jsx"));
 const AJoiaGame = lazy(() => import("./AJoiaGame.jsx"));
 import ModoRapido, { ESTILO_BASE, BotaoSom } from "./ModoRapido.jsx";
+import { sincronizarMuseuDosSaves } from "./museu.js";
 import { Gema } from "./components.jsx";
 import { carregarRapido, RITMOS, ritmoDe } from "./rapido.js";
 
@@ -13,6 +15,8 @@ export default function App() {
   const [modo, setModo] = useState(null);
   const [ritmo, setRitmo] = useState("normal");
   const [nova, setNova] = useState(false);
+  useEffect(() => { if (!modo) sincronizarMuseuDosSaves(); }, [modo]);
+  if (modo === "museu") return <Suspense fallback={<div style={{ minHeight: '100vh', background: '#0b100e', color: '#c8d4cd', padding: 32 }}>Abrindo seu museu…</div>}><Museu onVoltar={() => setModo(null)} /></Suspense>;
 
   if (modo === "carreira") {
     return (
@@ -88,6 +92,12 @@ export default function App() {
             <button onClick={() => comecar(true)} className="rp-btn rp-ouro display text-[14px] tracking-wide flex items-center justify-center gap-2"><Gema size={22} /> Começar carreira</button>
           )}
         </div>
+
+        <button onClick={() => setModo("museu")} className="rp-painel flex items-center gap-3 px-4 py-3.5 text-left hover:border-[#D8B44A]/60 transition-colors" style={{ background: 'linear-gradient(115deg, #D8B44A12, #12A87608)', borderColor: '#D8B44A40' }}>
+          <span className="text-[28px]" aria-hidden="true">🏛️</span>
+          <span className="flex-1"><strong className="block text-[17px] text-[#F4DE9E]">Meu museu</strong><span className="block text-[13px] text-[#A6B6AB]">Taças, camisas e feitos de todas as carreiras</span></span>
+          <span className="text-[#EBC557]" aria-hidden="true">›</span>
+        </button>
 
         <button onClick={() => setModo("carreira")} className="rp-painel flex items-center gap-3 px-4 py-3.5 text-left hover:border-[#12A876]/60 transition-colors">
           <span className="w-11 h-11 rounded-xl shrink-0 border border-white/10" style={{ background: `url(${ARTE.estadioNoite}) center/cover` }} aria-hidden="true" />

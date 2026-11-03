@@ -1,3 +1,4 @@
+import { criarIdMuseu } from './museu.js';
 import Icone from "./Icone.jsx";
 import CarreiraTecnico from "./CarreiraTecnico.jsx";
 import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, definirEstiloTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico } from "./tecnico.js";
@@ -3332,7 +3333,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   useEffect(() => { window.scrollTo({ top: 0 }); }, [etapa]);
 
   // a primeira decisão é dentro do jogo: três clubes de base para escolher
-  const criar = (dados) => { const cc = criarJogador(dados); setEstado({ etapa: "evento", c: cc, evento: sortearEvento(cc, { somente: "base" }), resultado: null, fila: false }); };
+  const criar = (dados) => { const cc = criarJogador(dados); cc.museuId = criarIdMuseu(); setEstado({ etapa: "evento", c: cc, evento: sortearEvento(cc, { somente: "base" }), resultado: null, fila: false }); };
 
   // depois da temporada: estouros visuais e o caminho até a próxima ação
   const aposFechar = (antes, f) => {

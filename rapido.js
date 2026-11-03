@@ -1,3 +1,4 @@
+import { registrarMuseu } from './museu.js';
 /* ===================== MODO RÁPIDO — LÓGICA =====================
    Carreira inteira em 5 a 10 minutos: cada temporada vira uma tela
    (resumo → evento → decisão). Reaproveita os dados do Modo Carreira
@@ -3690,7 +3691,7 @@ export function registrarNoHall(c) {
 
 /* ---------- save próprio ---------- */
 export function salvarRapido(estado) {
-  try { localStorage.setItem(CHAVE_SAVE_RAPIDO, JSON.stringify({ v: VERSAO_RAPIDO, ...estado })); return true; } catch { return false; }
+  try { localStorage.setItem(CHAVE_SAVE_RAPIDO, JSON.stringify({ v: VERSAO_RAPIDO, ...estado })); if (estado.c) registrarMuseu(estado.c); return true; } catch { return false; }
 }
 export function carregarRapido() {
   try {

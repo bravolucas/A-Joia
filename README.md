@@ -78,3 +78,13 @@ A separação é por responsabilidade: `data.js` não depende de nada, `lib.js` 
 - Adaptação ao país e saudade de casa nas transferências
 - Narração dos lances decisivos
 - Biografia final gerada a partir dos marcos da carreira
+
+## Museu permanente
+
+O botão **Meu museu** no menu reúne taças, camisas comemorativas e 14 feitos de todas as carreiras. As conquistas do modo rápido, do treinador e do modo carreira completo são registradas nos saves e permanecem ao iniciar outra partida.
+
+- **Taças:** cada competição ocupa uma peça; títulos repetidos aumentam sua contagem.
+- **Camisas:** dispute ao menos uma temporada por um clube e alcance 75 de aprovação da torcida. Treinadores também podem desbloqueá-las.
+- **Feitos:** consulte cada peça bloqueada para ver seu objetivo, como marcar 100 gols ou conquistar um título como treinador.
+
+O museu aproveita os saves existentes neste navegador. Ele fica separado dos slots de carreira; use **Exportar coleção** para fazer backup e **Importar coleção** para recuperá-lo em outro navegador. Importar soma as conquistas, sem apagar a coleção atual nem duplicar o mesmo save. Limpar os dados do navegador também remove a coleção local.

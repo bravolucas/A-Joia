@@ -28,14 +28,20 @@ function PopUpTitulo({ temporada, titulo, indice, total, onFechar }) {
   useEffect(() => {
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) confetti({ particleCount: 120, spread: 80, origin: { y: .48 }, colors: ['#D8B44A', '#FFF2BE', '#FFFFFF'], zIndex: 120 });
   }, [temporada.ano, indice]);
-  return <JanelaTreinador titulo="Título conquistado" onFechar={onFechar} classe="ct-celebration ct-celebration-gold">
-    <div className="ct-event-content ct-celebration-body">
-      <span className="ct-eyebrow">Temporada {temporada.ano}</span><h2>CAMPEÃO!</h2>
-      <div className="ct-event-trophy"><TacaCompeticao tipo={competicaoDoTitulo(titulo).tipo} nome={titulo} size={136} /></div>
-      <h3>{titulo}</h3>{total > 1 && <p>Conquista {indice + 1} de {total}</p>}
-      <div className="ct-event-club"><Escudo nome={temporada.clube} size={30} /><strong>{temporada.clube}</strong></div>
-      <p>{temporada.posicao}º na liga · {temporada.pontos} pontos · {temporada.vitorias} vitórias</p>
-      <button onClick={onFechar} className="ct-primary">{indice + 1 < total ? 'Próximo troféu' : 'Continuar carreira'}<span aria-hidden="true">→</span></button>
+  const liga = titulo === competicaoTemporadaTecnico(temporada);
+  return <JanelaTreinador titulo="Título conquistado" onFechar={onFechar} classe="ct-celebration ct-champion">
+    <div className="ct-champion-hero">
+      <span className="ct-champion-season">TEMPORADA {temporada.ano}</span>
+      <h2>CAMPEÃO!</h2>
+      <div className="ct-champion-cup"><span className="ct-champion-halo" aria-hidden="true" /><TacaCompeticao tipo={competicaoDoTitulo(titulo).tipo} nome={titulo} size={184} /></div>
+      <span className="ct-champion-label">UMA NOVA TAÇA NA SUA HISTÓRIA</span>
+      <h3>{titulo}</h3>
+      <div className="ct-event-club"><Escudo nome={temporada.clube} size={28} /><strong>{temporada.clube}</strong></div>
+    </div>
+    <div className="ct-champion-footer">
+      {liga ? <div className="ct-champion-stats">{[[temporada.posicao + 'º', 'POSIÇÃO'], [temporada.pontos, 'PONTOS'], [temporada.vitorias, 'VITÓRIAS']].map(([valor, rotulo]) => <div key={rotulo}><strong>{valor}</strong><span>{rotulo}</span></div>)}</div> : <p className="ct-champion-message">O trabalho virou conquista. Mais um título para o legado do seu treinador.</p>}
+      {total > 1 && <div className="ct-champion-progress"><span>Conquista {indice + 1} de {total}</span><span className="ct-champion-dots" aria-hidden="true">{Array.from({ length: total }, (_, i) => <i key={i} className={i === indice ? 'ativa' : ''} />)}</span></div>}
+      <button onClick={onFechar} className="ct-primary ct-champion-continue">{indice + 1 < total ? 'Próximo troféu' : 'Continuar carreira'}<span aria-hidden="true">→</span></button>
     </div>
   </JanelaTreinador>;
 }

@@ -1,9 +1,7 @@
-# Animações (opcional)
+# Animações originais do A-Joia
 
-Coloque aqui arquivos Lottie (.json) com estes nomes e o jogo toca a animação no momento certo:
+- `gol.json`: partículas de celebração após gol ou defesa decisiva.
+- `taca.json`: brilho na comemoração de título, incluindo o modo treinador.
+- `contrato.json`: efeito de assinatura na apresentação do novo clube.
 
-- `gol.json` — quando você faz o gol no pênalti, na falta ou no último passe
-- `taca.json` — na festa de título
-- `contrato.json` — na apresentação de um reforço
-
-Sem arquivo, nada muda. Use só animações com licença que permita uso no jogo (por exemplo, as gratuitas do LottieFiles, sob a Lottie Simple License).
+São animações vetoriais próprias, com duração de 1,5 segundo e sem recursos externos. Recrie-as com `node scripts/gerar-animacoes.mjs`. O componente respeita a preferência de movimento reduzido e só carrega o player quando há animação para exibir.

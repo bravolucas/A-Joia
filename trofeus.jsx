@@ -16,9 +16,9 @@ export function TacaCompeticao({ tipo = "liga", size = 40, nome = null, preferir
   const uid = React.useId().replace(/[^a-zA-Z0-9]/g, "");
   // Imagem da taça da competição; algumas são fornecidas pelo autor do jogo.
   const logo = nome ? logoCompeticao(nome) : null;
-  if (logo && !preferirTaca) return <img src={logo} alt="" aria-hidden="true" className="shrink-0 object-contain select-none" draggable="false" style={{ width: size, height: size * 1.2, filter: "drop-shadow(0 2px 6px rgba(0,0,0,.5))" }} />;
+  if (logo && !preferirTaca) return <img src={logo} loading="lazy" decoding="async" alt="" aria-hidden="true" className="shrink-0 object-contain select-none vf-revelar" draggable="false" style={{ width: size, height: size * 1.2, filter: "drop-shadow(0 2px 6px rgba(0,0,0,.5))" }} />;
   const brilho = METAIS[metalDaTaca(tipo, nome) === "bronze" ? "bronze" : metalDaTaca(tipo, nome) === "ouro" ? "ouro" : "prata"][1];
   const sombra = { filter: `drop-shadow(0 ${Math.max(2, size / 20)}px ${Math.max(4, size / 7)}px rgba(0,0,0,.55)) drop-shadow(0 0 ${Math.max(4, size / 6)}px ${brilho}55)` };
   const html = svgDaTaca(tipo, nome).replaceAll("__ID__", `t${uid}`);
-  return <span aria-hidden="true" className="shrink-0 inline-block select-none" style={{ width: size, height: size * 1.2, ...sombra }} dangerouslySetInnerHTML={{ __html: html }} />;
+  return <span aria-hidden="true" className="shrink-0 inline-block select-none vf-cup-stage vf-revelar" style={{ width: size, height: size * 1.2, ...sombra }} dangerouslySetInnerHTML={{ __html: html }} />;
 }

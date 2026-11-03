@@ -54,3 +54,14 @@ export function torcida(dur = 2.4, forca = 0.18) {
   g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(forca, t0 + dur * 0.25); g.gain.setValueAtTime(forca, t0 + dur * 0.55); g.gain.linearRampToValueAtTime(0, t0 + dur);
   s.connect(f).connect(g).connect(a.destination); s.start(t0);
 }
+
+/* Impactos curtos sintetizados, sempre controlados pelo botão de som. */
+export function efeitoLance(tipo = 'chute') {
+  const a = audio(); if (!a) return;
+  const t = a.currentTime;
+  const ganho = a.createGain();
+  ganho.gain.setValueAtTime(0, t);ganho.gain.linearRampToValueAtTime(tipo === 'rede' ? .045 : .09, t + .008);ganho.gain.exponentialRampToValueAtTime(.001, t + (tipo === 'rede' ? .3 : .12));
+  ganho.connect(a.destination);
+  const o = a.createOscillator();o.type = tipo === 'rede' ? 'triangle' : 'sine';
+  o.frequency.setValueAtTime(tipo === 'rede' ? 350 : 160, t);o.frequency.exponentialRampToValueAtTime(tipo === 'rede' ? 80 : 45, t + .12);o.connect(ganho);o.start(t);o.stop(t + .32);
+}

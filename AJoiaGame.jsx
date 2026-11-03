@@ -4147,7 +4147,7 @@ function resolverTemporada(c, extraStats) {
           /* botões e itens de lista ganham respiro */
           .lista-cards > button{padding:0.85rem 1rem;}
         }
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;900&family=Oswald:wght@400;500;600;700&family=Unbounded:wght@700;900&display=swap');
+
         :root{
           --bg-graphite:#0E1512; --bg-panel:rgba(19,26,23,0.62); --border-glass:rgba(255,255,255,0.08);
           --neon-green:#1BC28A; --neon-cyan:#2E6FE0; --gold:#D8B44A;

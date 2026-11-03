@@ -1,3 +1,5 @@
+import { CamisaPremium, MedalhaFeito } from './VisualFutebol.jsx';
+import Icone from './Icone.jsx';
 import React, { useEffect, useRef, useState } from 'react';
 import { TACAS_MUSEU, CAMISAS_MUSEU, FEITOS_MUSEU, lerMuseu, sincronizarMuseuDosSaves, importarMuseu } from './museu.js';
 import { escudoDe } from './arte.js';
@@ -6,14 +8,11 @@ import './Museu.css';
 
 const ABAS = [{ id: 'tacas', nome: 'Taças', simbolo: '🏆', catalogo: TACAS_MUSEU }, { id: 'camisas', nome: 'Camisas', simbolo: '👕', catalogo: CAMISAS_MUSEU }, { id: 'feitos', nome: 'Feitos', simbolo: '✦', catalogo: FEITOS_MUSEU }];
 const quantidade = item => Object.values(item?.fontes || {}).reduce((s, f) => s + f.quantidade, 0);
-function Camisa({ item }) {
-  const escudo = escudoDe(item.nome);
-  return <span className="mu-shirt" style={{ '--shirt-color': item.cor || '#176b50' }}><svg viewBox="0 0 130 130" aria-hidden="true"><path d="M42 15 20 24 5 49 27 62 34 49 34 116 96 116 96 49 103 62 125 49 110 24 88 15Q65 31 42 15Z" fill="var(--shirt-color)" stroke="#ffffff35" strokeWidth="2" /><path d="M51 18Q65 38 79 18M36 28 36 99M94 28 94 99" fill="none" stroke="#ffffff25" strokeWidth="5" /></svg>{escudo && <img src={escudo} alt="" />}<span aria-hidden="true">10</span></span>;
-}
+function Camisa({ item }) { return <span className="mu-shirt"><CamisaPremium nome={item.nome} cor={item.cor || '#176b50'} numero={10}/></span>; }
 function Ilustracao({ aba, item }) {
   if (aba === 'tacas') return <TacaCompeticao nome={item.nome} tipo={item.tipo} size={86} />;
   if (aba === 'camisas') return <Camisa item={item} />;
-  return <span className="mu-feat" aria-hidden="true">{item.icone || '✦'}</span>;
+  return <MedalhaFeito id={item.id} />;
 }
 function Detalhe({ aba, item, conquista, onFechar }) {
   const dialogo = useRef(null);
@@ -39,6 +38,8 @@ export default function Museu({ onVoltar }) {
   const [aba, setAba] = useState('tacas');
   const [filtro, setFiltro] = useState('todos');
   const [busca, setBusca] = useState('');
+  const [limite, setLimite] = useState(48);
+  useEffect(() => setLimite(48), [aba, filtro, busca]);
   const [detalhe, setDetalhe] = useState(null);
   const [aviso, setAviso] = useState('');
   const arquivo = useRef(null);
@@ -77,12 +78,13 @@ export default function Museu({ onVoltar }) {
       const i = ABAS.findIndex(b => b.id === a.id);
       const proxima = ABAS[e.key === 'Home' ? 0 : e.key === 'End' ? 2 : (i + (e.key === 'ArrowRight' ? 1 : 2)) % 3].id;
       setAba(proxima); setDetalhe(null); document.getElementById(`mu-tab-${proxima}`)?.focus();
-    }} aria-controls="mu-panel" onClick={() => { setAba(a.id); setDetalhe(null); }}><span aria-hidden="true">{a.simbolo}</span><span>{a.nome}<small>{Object.keys(museu[a.id]).length} na coleção</small></span></button>)}</div>
+    }} aria-controls="mu-panel" onClick={() => { setAba(a.id); setDetalhe(null); }}><span aria-hidden="true"><Icone e={a.simbolo} size={23}/></span><span>{a.nome}<small>{Object.keys(museu[a.id]).length} na coleção</small></span></button>)}</div>
     <section role="tabpanel" id="mu-panel" aria-labelledby={`mu-tab-${aba}`} tabIndex={0}>
       <div className="mu-progress-heading"><h2>{ABAS.find(a => a.id === aba).nome} da sua história</h2><span>{desbloqueados} / {itens.length}</span></div><progress aria-label={`Progresso de ${aba}`} value={desbloqueados} max={itens.length || 1} />
       <div className="mu-toolbar"><label className="mu-search"><span className="sr-only">Buscar na coleção</span><input type="search" placeholder="Buscar na coleção…" value={busca} onChange={e => setBusca(e.target.value)} /></label><div className="mu-filters" aria-label="Filtrar coleção">{[['todos', 'Todos'], ['obtidos', 'Obtidos'], ['faltam', 'Faltam']].map(([id, nome]) => <button key={id} aria-pressed={filtro === id} onClick={() => setFiltro(id)}>{nome}</button>)}</div></div>
       {!desbloqueados && <div className="mu-intro"><strong>Uma coleção começa com uma história.</strong><p>{aba === 'tacas' ? 'Ganhe títulos como jogador ou treinador. As taças ficam aqui mesmo quando você começa outra carreira.' : aba === 'camisas' ? 'Dispute uma temporada pelo clube e alcance 75 de aprovação da torcida para eternizar sua camisa.' : 'Alcance os objetivos abaixo em suas carreiras e complete sua coleção de feitos.'}</p></div>}
-      <div className="mu-grid">{visiveis.map(item => { const registro = museu[aba][item.id]; return <button key={item.id} className={`mu-card ${registro ? 'mu-earned' : 'mu-unearned'}`} onClick={() => setDetalhe(item)} aria-label={`${item.nome}, ${registro ? 'desbloqueado' : 'bloqueado'}`}><span className="mu-card-top">{registro ? '◆ DESBLOQUEADO' : '◇ A CONQUISTAR'}{registro && aba === 'tacas' && <b>×{quantidade(registro)}</b>}</span><span className={`mu-art ${registro ? '' : 'mu-locked'}`}><Ilustracao aba={aba} item={item} /></span><strong>{item.nome}</strong><span className="mu-card-sub">{registro ? Object.values(registro.fontes)[0]?.atleta : aba === 'camisas' ? 'Torne-se ídolo do clube' : 'Ver como desbloquear'}</span></button>; })}</div>
+      <div className="mu-grid">{visiveis.slice(0, limite).map(item => { const registro = museu[aba][item.id]; return <button key={item.id} className={`mu-card ${registro ? 'mu-earned' : 'mu-unearned'}`} onClick={() => setDetalhe(item)} aria-label={`${item.nome}, ${registro ? 'desbloqueado' : 'bloqueado'}`}><span className="mu-card-top">{registro ? '◆ DESBLOQUEADO' : '◇ A CONQUISTAR'}{registro && aba === 'tacas' && <b>×{quantidade(registro)}</b>}</span><span className={`mu-art ${registro ? '' : 'mu-locked'}`}><Ilustracao aba={aba} item={item} /></span><strong>{item.nome}</strong><span className="mu-card-sub">{registro ? Object.values(registro.fontes)[0]?.atleta : aba === 'camisas' ? 'Torne-se ídolo do clube' : 'Ver como desbloquear'}</span></button>; })}</div>
+      {visiveis.length > limite && <button className="mu-button mu-more" onClick={() => setLimite(l => l + 48)}>Mostrar mais peças ({visiveis.length - limite} restantes)</button>}
       {!visiveis.length && <p className="mu-no-results">Nenhuma peça com esse filtro. Experimente outra busca.</p>}
     </section>
     <footer className="mu-footer"><div><strong>Sua história continua na próxima carreira.</strong><p>A coleção fica neste navegador, separada dos saves. Exporte um backup antes de limpar os dados ou trocar de dispositivo.</p></div><div className="mu-backup"><button className="mu-button" onClick={exportar}>Exportar coleção</button><button className="mu-button" onClick={() => arquivo.current?.click()}>Importar coleção</button><input ref={arquivo} type="file" accept="application/json,.json" onChange={importar} hidden /></div></footer>

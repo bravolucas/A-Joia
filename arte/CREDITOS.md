@@ -34,9 +34,7 @@ A licença do Adobe Stock permite uso em projetos, mas não a redistribuição d
 
 ## Taças
 
-Cada competição tem a sua taça, desenhada pelo próprio jogo em SVG (`tacas.js`): forma, alças, metal, gema e as cores
-da bandeira do país na base mudam conforme a competição. São desenhos originais do A JOIA e não reproduzem nenhum troféu
-real. As fotos de taças do Adobe Stock usadas antes foram aposentadas.
+O componente `TacaCompeticao` prioriza as imagens de `arte/competicoes/` quando disponíveis e usa os desenhos originais de `tacas.js` como alternativa. O acervo reúne imagens raster de origens creditadas e ilustrações vetoriais originais. Veja `arte/competicoes/CREDITOS.md` e `acervo.json` para identificar cada grupo.
 
 ## Outras fotos
 
@@ -69,3 +67,13 @@ real. As fotos de taças do Adobe Stock usadas antes foram aposentadas.
 ## Dados das ligas
 
 - **Elencos das ligas 2026/27** (quem subiu e quem caiu, Eredivisie, Süper Lig e Liga Profesional): conferidos nos dados públicos do [openfootball](https://github.com/openfootball) (domínio público, CC0). As forças dos clubes são estimativas do próprio jogo.
+
+## Direção visual 2026 — cenários originais
+
+Os cenários em `arte/cenarios/` foram criados para o A-Joia com a ferramenta de geração de imagens da sessão: estádio noturno, sala de imprensa, sala da diretoria e centro de treinamento. Não contêm texto ou marcas de clubes. Os originais PNG foram mantidos em `/workspace/generated_images`, e as matrizes WebP em `arte/originais/cenarios/`; as versões WebP de produção têm 1280 px e variantes móveis de 768 px. A exportação foi feita com ImageMagick, qualidade 82.
+
+Os componentes `VisualFutebol.jsx` (jogadores, retratos, camisas e medalhas) e as três animações em `arte/animacoes/` são desenhos originais criados em código para o A-Joia. Os retratos são fictícios e parametrizados; nomes, números, cores e escudos são aplicados pelo jogo.
+
+Fontes locais em `arte/fontes/`: Inter, Unbounded, Oswald, Playfair Display e Rajdhani, obtidas pelos pacotes Fontsource 5.3.0, sob SIL Open Font License. Os textos de licença acompanham os arquivos. Não é necessária conexão com Google Fonts.
+
+O impacto da bola e da rede é sintetizado por Web Audio em `som.js`, sem amostras externas, e respeita a preferência de som do usuário.

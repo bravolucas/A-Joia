@@ -1,3 +1,5 @@
+import { efeitoLance } from './som.js';
+import { JogadorCampo, RetratoApresentacao, CamisaPremium, useCenario } from './VisualFutebol.jsx';
 import { criarIdMuseu } from './museu.js';
 import Icone from "./Icone.jsx";
 import CarreiraTecnico from "./CarreiraTecnico.jsx";
@@ -37,7 +39,7 @@ export const ESTILO_BASE = `
 @keyframes rpPenFlash { 0% { opacity:0; } 28% { opacity:1; } 100% { opacity:0; } }
 @media (prefers-reduced-motion:reduce) { .rp-pen-acao, .rp-pen-flash { animation:none; } }
 
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Oswald:wght@500;600;700&family=Unbounded:wght@700;900&family=Playfair+Display:wght@800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 .rp{min-height:100vh;background:#0E1512;color:#E1E6E3;font-family:'Rajdhani',ui-sans-serif,system-ui,sans-serif;}
 .rp .display{font-family:'Unbounded',sans-serif;}
 .rp .font-stat{font-family:'bebas-neue','Oswald',sans-serif;letter-spacing:.02em;font-synthesis:none;}
@@ -840,6 +842,7 @@ function CabecalhoMomento({ c, momento }) {
   const mini = momento.mini || "penalti";
   return (
     <div className="text-center">
+      <div className="vf-matchbar"><span className="vf-match-club"><ClubDot club={clubeDe(c.clubeNome)} size={22}/><strong>{c.clubeNome}</strong></span><span className="vf-match-live"><i />LANCE DECISIVO</span></div>
       <span className="rp-chip" style={{ color: "#EBC557", background: "rgba(216,180,74,.14)" }}>
         {momento.total > 1 ? `Desafio ${momento.ordem} de ${momento.total}` : "Momento decisivo"} · {NOME_MINI[mini]}
       </span>
@@ -850,7 +853,7 @@ function CabecalhoMomento({ c, momento }) {
 }
 
 function PlacarMomento({ ok, texto }) {
-  useEffect(() => { if (ok) { torcida(2.6, 0.22); tocar("sobe", 0.5); } else tocar("desce", 0.5); }, [ok]);
+  useEffect(() => { if (ok) { efeitoLance("rede"); torcida(2.6, 0.22); tocar("sobe", 0.5); } else tocar("desce", 0.5); }, [ok]);
   return (
     <div className="relative">
       {ok && <Lottie nome="gol" className="absolute left-1/2 -translate-x-1/2 -top-24 w-48 h-48 pointer-events-none" />}
@@ -861,45 +864,9 @@ function PlacarMomento({ ok, texto }) {
 
 /* Cena do gol: estádio ao fundo, trave com rede em profundidade e um goleiro de verdade */
 const GZX = (col) => 70 + col * 80, GZY = (lin) => 66 + lin * 50;
-function Goleiro({ cor, mergulho }) {
-  // mergulho: null (pronto) | [col, lin]
-  const est = !!mergulho && !(mergulho[0] === 1 && mergulho[1] === 1);
-  return (
-    <g>
-      {/* sombra */}
-      <ellipse cx="150" cy="151" rx="15" ry="2.5" fill="rgba(0,0,0,.35)" />
-      {/* pernas */}
-      <path d="M142 122 L138 146 L145 146 L148 124 Z" fill="#1B1E24" />
-      <path d="M158 122 L162 146 L155 146 L152 124 Z" fill="#1B1E24" />
-      <rect x="137" y="131" width="8" height="12" rx="2" fill={cor} opacity=".85" />
-      <rect x="155" y="131" width="8" height="12" rx="2" fill={cor} opacity=".85" />
-      <path d="M135 145 h11 v4 h-13 z" fill="#0E1512" /><path d="M154 145 h11 l2 4 h-13 z" fill="#0E1512" />
-      {/* calção */}
-      <path d="M139 113 h22 l2 12 h-11 l-2 -4 l-2 4 h-11 z" fill="#1B1E24" />
-      {/* camisa */}
-      <path d="M138 92 q12 -5 24 0 l3 22 h-30 z" fill={cor} />
-      <path d="M138 92 q12 -5 24 0 l1 6 q-13 -4 -26 0 z" fill="#fff" opacity=".18" />
-      <text x="150" y="110" textAnchor="middle" fontSize="9" fontWeight="800" fill="#0E1512" opacity=".55">1</text>
-      {/* braços prontos (abertos, na altura da cintura) */}
-      <g className="rp-bracos" style={{ opacity: est ? 0 : 1 }}>
-        <path d="M139 94 q-10 6 -15 16" stroke={cor} strokeWidth="6" strokeLinecap="round" fill="none" />
-        <path d="M161 94 q10 6 15 16" stroke={cor} strokeWidth="6" strokeLinecap="round" fill="none" />
-        <circle cx="123" cy="112" r="4.6" fill="#F2F5F3" stroke="#0E1512" strokeWidth="1" /><circle cx="177" cy="112" r="4.6" fill="#F2F5F3" stroke="#0E1512" strokeWidth="1" />
-      </g>
-      {/* braços esticados (no mergulho, acima da cabeça) */}
-      <g className="rp-bracos" style={{ opacity: est ? 1 : 0 }}>
-        <path d="M141 92 L136 62" stroke={cor} strokeWidth="6" strokeLinecap="round" />
-        <path d="M159 92 L164 62" stroke={cor} strokeWidth="6" strokeLinecap="round" />
-        <circle cx="135.5" cy="58" r="5" fill="#F2F5F3" stroke="#0E1512" strokeWidth="1" /><circle cx="164.5" cy="58" r="5" fill="#F2F5F3" stroke="#0E1512" strokeWidth="1" />
-      </g>
-      {/* cabeça */}
-      <rect x="146.5" y="86" width="7" height="6" fill="#C99A78" />
-      <circle cx="150" cy="80" r="8" fill="#D8A988" />
-      <path d="M142 79 q1 -10 8 -10 q8 0 8 9 q-3 -4 -8 -4 q-5 0 -8 5 z" fill="#2A1C14" />
-    </g>
-  );
-}
+function Goleiro({ cor, mergulho }) { return <JogadorCampo x={150} y={148} escala={.85} cor={cor} numero={1} goleiro esticado={!!mergulho} />; }
 function CenaGol({ goleiro, res, bola, fora, podeEscolher, onZona }) {
+  const fotoEstadio = useCenario("estadio");
   const cor = goleiro ? "#EBC557" : "#B8F23A";
   const m = res?.goleiro || null;
   // mergulho: desloca e gira o corpo inteiro em torno dos pés
@@ -912,7 +879,7 @@ function CenaGol({ goleiro, res, bola, fora, podeEscolher, onZona }) {
   const gol = res && ((!goleiro && res.resultado === "gol") || (goleiro && res.resultado === "gol"));
   const salvou = res?.resultado === "defesa";
   return (
-    <svg viewBox="0 0 300 210" className="w-full rounded-xl" role="img" aria-label={goleiro ? "Gol: escolha para onde pular" : "Gol: escolha onde bater"}>
+    <svg viewBox="0 0 300 210" className="w-full rounded-xl" role="group" aria-label={goleiro ? "Gol: escolha para onde pular" : "Gol: escolha onde bater"}>
       <defs>
         <pattern id="rpMalha" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
           <path d="M0 0 V7 M0 0 H7" stroke="rgba(255,255,255,.38)" strokeWidth=".7" />
@@ -920,13 +887,13 @@ function CenaGol({ goleiro, res, bola, fora, podeEscolher, onZona }) {
         <pattern id="rpMalhaLado" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
           <path d="M0 0 V6 M0 0 H6" stroke="rgba(255,255,255,.22)" strokeWidth=".6" />
         </pattern>
-        <linearGradient id="rpGrama" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#1C5A38" /><stop offset="1" stopColor="#0F3A23" /></linearGradient>
+        <linearGradient id="rpGrama" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#23583c" /><stop offset="1" stopColor="#102f22" /></linearGradient>
         <linearGradient id="rpTrave" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#FFFFFF" /><stop offset=".6" stopColor="#E3E7E5" /><stop offset="1" stopColor="#9AA3A0" /></linearGradient>
         <radialGradient id="rpBola" cx=".35" cy=".3" r=".75"><stop offset="0" stopColor="#FFFFFF" /><stop offset=".7" stopColor="#E6E8E7" /><stop offset="1" stopColor="#9DA3A1" /></radialGradient>
         <filter id="rpDesfoque"><feGaussianBlur stdDeviation="1.6" /></filter>
       </defs>
       {/* estádio ao fundo */}
-      <image href={ARTE.estadioNoite} x="-20" y="-30" width="340" height="150" preserveAspectRatio="xMidYMid slice" opacity=".55" filter="url(#rpDesfoque)" />
+      <image href={fotoEstadio} x="0" y="0" width="300" height="210" preserveAspectRatio="xMidYMid slice" opacity=".9" />
       <rect x="0" y="0" width="300" height="120" fill="url(#rpGrama)" opacity=".0" />
       <rect x="0" y="100" width="300" height="110" fill="url(#rpGrama)" />
       {[0, 1, 2, 3, 4].map((k) => <rect key={k} x="0" y={112 + k * 22} width="300" height="11" fill="#fff" opacity=".035" />)}
@@ -954,8 +921,8 @@ function CenaGol({ goleiro, res, bola, fora, podeEscolher, onZona }) {
       </g>
       {/* zonas de escolha */}
       {podeEscolher && ZONAS.map(([col, lin], i) => (
-        <g key={i} onClick={() => onZona(i)} style={{ cursor: "pointer" }} role="button" aria-label={`${lin === 0 ? "Alto" : "Baixo"} ${["esquerda", "meio", "direita"][col]}`}>
-          <rect x={GZX(col) - 37} y={GZY(lin) - 23} width="74" height="46" rx="8" fill={goleiro ? "rgba(216,180,74,.12)" : "rgba(18,168,118,.12)"} stroke={goleiro ? "rgba(235,197,87,.75)" : "rgba(27,194,138,.7)"} strokeDasharray="4 4" />
+        <g key={i} onClick={() => onZona(i)} style={{ cursor: "pointer" }} role="button" tabIndex={0} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onZona(i); } }} aria-label={`${lin === 0 ? "Alto" : "Baixo"} ${["esquerda", "meio", "direita"][col]}`}>
+          <rect x={GZX(col) - 37} y={GZY(lin) - 26} width="74" height="52" rx="8" fill={goleiro ? "rgba(216,180,74,.12)" : "rgba(18,168,118,.12)"} stroke={goleiro ? "rgba(235,197,87,.75)" : "rgba(27,194,138,.7)"} strokeDasharray="4 4" />
           <circle cx={GZX(col)} cy={GZY(lin)} r="5" fill={goleiro ? "#EBC557" : "#1BC28A"} />
         </g>
       ))}
@@ -979,6 +946,7 @@ function TelaPenalti({ c, momento, onFim, goleiro = false }) {
 
   const chutar = (i) => {
     if (escolha != null) return;
+    efeitoLance("chute");
     const [col, lin] = ZONAS[i];
     const bonus = (c.tracos || []).includes("decisao") ? 0.12 : 0;
     if (goleiro) {
@@ -1019,7 +987,7 @@ function TelaPenalti({ c, momento, onFim, goleiro = false }) {
   return (
     <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
       <CabecalhoMomento c={c} momento={momento} />
-      <div className="rp-painel p-3 overflow-hidden" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
+      <div className="rp-painel vf-cena p-3 overflow-hidden" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
         <div className="relative">
           <div className="flex justify-between items-center px-2 pb-2 text-[11px] font-bold uppercase tracking-widest text-[#D5E6DC]">
             <span>⚽ {goleiro ? "Defesa decisiva" : "Cobrança decisiva"}</span>
@@ -1050,6 +1018,7 @@ function TelaFalta({ c, momento, onFim }) {
     if (res) return;
     const bonus = (c.tracos || []).includes("decisao") ? 8 : 0;
     // no Modo Rápido a falta decisiva é um pouco mais generosa que a do jogo completo
+    efeitoLance("chute");
     const gol = calcularSucessoFalta(c.attrs.finalizacao + bonus + 6, c.attrs.drible + bonus);
     setRes({ gol, zona, tipo: tipoResultadoFalta(gol, zona) });
   };
@@ -1061,7 +1030,7 @@ function TelaFalta({ c, momento, onFim }) {
   return (
     <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
       <CabecalhoMomento c={c} momento={momento} />
-      <div className="rp-painel p-3 overflow-hidden flex justify-center" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
+      <div className="rp-painel vf-cena p-3 overflow-hidden flex justify-center" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
         <FreeKickMini onPick={bater} resultado={res} />
       </div>
       <div className="text-center min-h-[64px]">
@@ -1083,7 +1052,7 @@ function TelaPasse({ c, momento, onFim }) {
   return (
     <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
       <CabecalhoMomento c={c} momento={momento} />
-      <div className="rp-painel p-3 overflow-hidden flex justify-center" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
+      <div className="rp-painel vf-cena p-3 overflow-hidden flex justify-center" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
         <PasseMini atributoPasse={c.attrs.passe + bonus + 6} onResultado={(r) => setRes(r)} />
       </div>
       <div className="text-center min-h-[64px]">
@@ -3182,6 +3151,7 @@ export function ApresentacaoGrande({ clube, nome, numero, posicao, idade, deOnde
   const luz = claro ? "#FFFFFF" : cor; // cor do contorno de luz nas silhuetas
   const sobrenome = (nome || "").trim().split(/\s+/).slice(-1)[0].toUpperCase();
   const estadio = ((clube?.nome || "").length + (numero || 0)) % 2 === 1;
+  const fotoCenario = useCenario(estadio ? "estadio" : "imprensa");
   const [pronto, setPronto] = useState(false);
   useEffect(() => { vibrar([30, 40, 30]); torcida(3.2, 0.12); setTimeout(() => tocar("vidro", 0.4), 400); setTimeout(() => tocar("vidro", 0.35), 1300); const t = setTimeout(() => setPronto(true), 2000); return () => clearTimeout(t); }, []);
   const fonteNome = sobrenome.length > 9 ? 12 : sobrenome.length > 6 ? 15 : 18;
@@ -3192,16 +3162,16 @@ export function ApresentacaoGrande({ clube, nome, numero, posicao, idade, deOnde
           {/* fundo */}
           {estadio ? (
             <>
-              <div className="absolute inset-0" style={{ background: `url(${ARTE.estadioNoite}) center 30%/cover`, filter: "saturate(1.1) brightness(.85)" }} aria-hidden="true" />
+              <div className="absolute inset-0" style={{ background: `url(${fotoCenario}) center 30%/cover`, filter: "saturate(1.1) brightness(.85)" }} aria-hidden="true" />
               <div className="absolute left-[-30%] right-[-30%] bottom-0 h-[42%]" style={{ background: `url(${ARTE.campo}) center 40%/100% auto no-repeat, #2E7D46`, transform: "perspective(240px) rotateX(48deg)", transformOrigin: "bottom", filter: "brightness(.8) saturate(1.1)" }} aria-hidden="true" />
-              <div className="absolute left-1/2 top-[26px] -translate-x-1/2 rounded-2xl px-4 py-2 flex items-center gap-3 border" style={{ background: "rgba(5,7,10,.6)", borderColor: `${luz}55`, boxShadow: `0 0 30px ${luz}33`, backdropFilter: "blur(6px)" }} aria-hidden="true">
+              <div className="absolute left-1/2 top-[26px] -translate-x-1/2 rounded-2xl px-4 py-2 flex items-center gap-3 border" style={{ background: "rgba(5,7,10,.6)", borderColor: `${luz}55`, boxShadow: `0 0 30px ${luz}33`, backdropFilter: "blur(6px)", width: "max-content", maxWidth: "calc(100% - 64px)", whiteSpace: "nowrap" }} aria-hidden="true">
                 <ClubDot club={clube} size={36} />
                 <span className="text-left leading-tight"><span className="block text-[10px] font-bold tracking-[0.3em] text-white/60">BEM-VINDO</span><span className="block text-[15px] font-black tracking-wide text-white">{sobrenome} {numero}</span></span>
               </div>
             </>
           ) : (
             <>
-              <div className="absolute inset-0" style={{ background: `url(${ARTE.salaApresentacao}) center 20%/cover`, filter: "grayscale(1) contrast(1.15) brightness(.8)" }} aria-hidden="true" />
+              <div className="absolute inset-0" style={{ background: `url(${fotoCenario}) center 20%/cover`, filter: "brightness(.8)" }} aria-hidden="true" />
               <div className="absolute inset-0" style={{ background: cor, mixBlendMode: claro ? "soft-light" : "color", opacity: claro ? 0.5 : 0.85 }} aria-hidden="true" />
               <div className="absolute inset-0" style={{ background: `radial-gradient(80% 60% at 50% 30%, ${cor}55, transparent 70%)` }} aria-hidden="true" />
               <div className="absolute inset-0 grid grid-cols-6 gap-y-5 px-2 pt-4 opacity-[.28] mix-blend-screen" aria-hidden="true" style={{ maskImage: "linear-gradient(180deg,#000 55%,transparent 85%)", WebkitMaskImage: "linear-gradient(180deg,#000 55%,transparent 85%)" }}>
@@ -3229,42 +3199,9 @@ export function ApresentacaoGrande({ clube, nome, numero, posicao, idade, deOnde
               <linearGradient id="apTecidoV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fff" stopOpacity=".12" /><stop offset=".4" stopColor="#fff" stopOpacity="0" /><stop offset="1" stopColor="#000" stopOpacity=".22" /></linearGradient>
               <filter id="apSombra" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#000" floodOpacity=".55" /></filter>
             </defs>
-            {/* dirigente (esquerda): terno, luz vindo da direita */}
-            <g className="ap-sobe" style={{ animationDelay: ".15s" }}>
-              <path d="M36 300 L42 202 Q45 176 70 167 L92 161 L114 167 Q137 176 140 202 L146 300 Z" fill="url(#apSil)" />
-              <path d="M36 300 L42 202 Q45 176 70 167 L92 161 L114 167 Q137 176 140 202 L146 300 Z" fill="none" stroke="url(#apAroE)" strokeWidth="2.2" />
-              <path d="M82 164 L92 190 L102 164 Z" fill="#D9DEE5" opacity=".85" />
-              <path d="M90 170 L94 170 L96 200 L92 207 L88 200 Z" fill={claro ? "#1E293B" : cor} />
-              <rect x="84" y="145" width="16" height="18" rx="6" fill="url(#apSil)" />
-              <ellipse cx="92" cy="127" rx="19" ry="22" fill="url(#apSil)" />
-              <path d="M110 118 Q112 140 100 148" fill="none" stroke={luz} strokeOpacity=".8" strokeWidth="2" />
-              <path d="M126 188 Q140 170 144 154 L154 158 Q150 184 134 204 Z" fill="url(#apSil)" />
-            </g>
-            {/* jogador (direita): agasalho, luz vindo da esquerda */}
-            <g className="ap-sobe" style={{ animationDelay: ".3s" }}>
-              <path d="M220 300 L226 198 Q230 172 255 163 L278 157 L301 163 Q324 172 328 198 L334 300 Z" fill="url(#apSil)" />
-              <path d="M220 300 L226 198 Q230 172 255 163 L278 157 L301 163 Q324 172 328 198 L334 300 Z" fill="none" stroke="url(#apAro)" strokeWidth="2.2" />
-              <path d="M262 161 L278 175 L294 161" fill="none" stroke={luz} strokeOpacity=".9" strokeWidth="2.5" />
-              <path d="M226 232 L334 232" stroke={luz} strokeOpacity=".35" strokeWidth="2" />
-              <rect x="270" y="139" width="17" height="20" rx="6" fill="url(#apSil)" />
-              <ellipse cx="278" cy="118" rx="20" ry="23" fill="url(#apSil)" />
-              <path d="M259 110 Q257 134 268 144" fill="none" stroke={luz} strokeOpacity=".8" strokeWidth="2" />
-              <path d="M236 186 Q222 170 218 154 L208 158 Q212 184 228 204 Z" fill="url(#apSil)" />
-            </g>
-            {/* a camisa, de costas */}
-            <g className="ap-camisa" style={{ animationDelay: ".75s" }} filter="url(#apSombra)">
-              <path id="apForma" d="M150 150 L168 140 Q181 151 194 140 L212 150 L231 177 L214 188 L210 180 L210 270 L152 270 L152 180 L148 188 L131 177 Z" fill={cor} />
-              <path d="M150 150 L168 140 Q181 151 194 140 L212 150 L231 177 L214 188 L210 180 L210 270 L152 270 L152 180 L148 188 L131 177 Z" fill="url(#apTecido)" />
-              <path d="M150 150 L168 140 Q181 151 194 140 L212 150 L231 177 L214 188 L210 180 L210 270 L152 270 L152 180 L148 188 L131 177 Z" fill="url(#apTecidoV)" stroke={claro ? "rgba(0,0,0,.25)" : "rgba(255,255,255,.28)"} strokeWidth="1.2" strokeLinejoin="round" />
-              <path d="M168 140 Q181 151 194 140" fill="none" stroke={tinta} strokeOpacity=".55" strokeWidth="3" />
-              <path d="M131 177 L148 188 M231 177 L214 188" stroke={tinta} strokeOpacity=".5" strokeWidth="3.5" />
-              <path d="M163 210 Q181 214 199 210 M160 246 Q181 252 202 246" stroke="#000" strokeOpacity=".08" strokeWidth="3" fill="none" />
-              <text x="181" y="177" textAnchor="middle" fontFamily="Inter, system-ui, sans-serif" fontWeight="900" fontSize={fonteNome} letterSpacing="1.5" fill={tinta} className="ap-texto" style={{ animationDelay: "1.35s" }}>{sobrenome}</text>
-              <text x="181" y="240" textAnchor="middle" fontFamily="Inter, system-ui, sans-serif" fontWeight="900" fontSize="54" fill={tinta} stroke={claro ? "none" : "rgba(0,0,0,.25)"} strokeWidth="1" className="ap-texto" style={{ animationDelay: "1.5s" }}>{numero}</text>
-              {/* as mãos nos ombros da camisa */}
-              <circle cx="150" cy="154" r="7.5" fill="#12161B" stroke={luz} strokeOpacity=".7" strokeWidth="1.2" />
-              <circle cx="212" cy="154" r="7.5" fill="#12161B" stroke={luz} strokeOpacity=".7" strokeWidth="1.2" />
-            </g>
+            <g className="ap-sobe" style={{animationDelay:'.15s'}}><RetratoApresentacao x={88} y={150} dirigente nome="Diretoria" /></g>
+            <g className="ap-sobe" style={{animationDelay:'.3s'}}><RetratoApresentacao x={278} y={145} cor={cor} nome={nome} /></g>
+            <g className="ap-camisa" style={{animationDelay:'.6s'}}><foreignObject x="121" y="137" width="124" height="151"><CamisaPremium nome={clube?.nome} cor={cor} numero={numero} sobrenome={sobrenome}/></foreignObject><ellipse cx="145" cy="162" rx="7" ry="5" fill="#bc8864"/><ellipse cx="220" cy="162" rx="7" ry="5" fill="#bc8864"/></g>
             {!estadio && (
               <g className="ap-sobe" style={{ animationDelay: ".05s" }}>
                 <rect x="0" y="270" width="360" height="30" fill="#07090C" />
@@ -3273,6 +3210,7 @@ export function ApresentacaoGrande({ clube, nome, numero, posicao, idade, deOnde
               </g>
             )}
           </svg>
+          <Lottie nome="contrato" className="vf-contrato-lottie" />
           <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-[0.18em] text-white bg-black/45" aria-hidden="true"><span className="w-1.5 h-1.5 rounded-full bg-[#FF3B3B] animate-pulse" />AO VIVO</div>
           <div className="absolute top-3 right-3"><button onClick={onConcluir} className="text-[13px] font-bold text-white/85 bg-black/45 rounded-full px-3 py-1.5">Pular</button></div>
         </div>

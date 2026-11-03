@@ -9,11 +9,9 @@ As imagens disponíveis incluem Libertadores, Champions League, Champions Asiát
 CONCACAF Champions, copas nacionais e ligas listadas nos arquivos desta pasta. Os
 nomes alternativos usados pelo jogo são resolvidos em `arte.js`.
 
-## Competições do treinador sem imagem própria
+## Cobertura do acervo
 
-O acervo não contém uma taça da King's Cup saudita nem da Copa da Turquia. Para
-essas competições, o jogo mostra a ilustração original do A JOIA, criada a partir
-do nome e do tipo do torneio. Não usamos a taça de outra competição como substituta.
+As 55 competições do catálogo do museu possuem agora um recurso correspondente, em WebP ou SVG original. Quando não há fotografia do torneio, a ilustração é própria do A-Joia; consulte `acervo.json` e os créditos. A busca reconhece os nomes alternativos usados nos modos jogador e treinador.
 
 ## Créditos e uso
 

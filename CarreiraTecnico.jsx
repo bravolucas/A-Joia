@@ -1,10 +1,11 @@
+import Lottie from './Lottie.jsx';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import './CarreiraTecnico.css';
 import confetti from 'canvas-confetti';
 import { TacaCompeticao } from './trofeus.jsx';
 import { NACIONALIDADES } from './data.js';
-import { escudoDe, bandeiraDe } from './arte.js';
+import { escudoDe, bandeiraDe, CENARIOS } from './arte.js';
 import { competicaoDoTitulo } from './tacas.js';
 import {
   historicoProfissionalTecnico, objetivoTecnico,
@@ -33,7 +34,7 @@ function PopUpTitulo({ temporada, titulo, indice, total, onFechar }) {
     <div className="ct-champion-hero">
       <span className="ct-champion-season">TEMPORADA {temporada.ano}</span>
       <h2>CAMPEÃO!</h2>
-      <div className="ct-champion-cup"><span className="ct-champion-halo" aria-hidden="true" /><TacaCompeticao tipo={competicaoDoTitulo(titulo).tipo} nome={titulo} size={184} /></div>
+      <div className="ct-champion-cup"><Lottie nome="taca" className="absolute inset-0 pointer-events-none" /><span className="ct-champion-halo" aria-hidden="true" /><TacaCompeticao tipo={competicaoDoTitulo(titulo).tipo} nome={titulo} size={184} /></div>
       <span className="ct-champion-label">UMA NOVA TAÇA NA SUA HISTÓRIA</span>
       <h3>{titulo}</h3>
       <div className="ct-event-club"><Escudo nome={temporada.clube} size={28} /><strong>{temporada.clube}</strong></div>
@@ -52,7 +53,7 @@ function PopUpDivisao({ temporada, movimento, tipo, onFechar }) {
     if (acesso && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) confetti({ particleCount: 90, spread: 70, origin: { y: .5 }, colors: ['#22C55E', '#FFFFFF', '#D8B44A'], zIndex: 120 });
   }, [temporada.ano, acesso]);
   return <JanelaTreinador titulo={acesso ? 'Acesso de divisão' : 'Rebaixamento'} onFechar={onFechar} classe={`ct-celebration ${acesso ? 'ct-celebration-green' : 'ct-celebration-red'}`}>
-    <div className="ct-event-content ct-celebration-body"><span className="ct-eyebrow">Temporada {temporada.ano}</span>
+    <div className="ct-event-content ct-celebration-body" style={{backgroundImage:`linear-gradient(#17171b66,#17171bf5 65%),url(${CENARIOS.estadioMobile})`,backgroundSize:"cover",backgroundPosition:"center"}}><span className="ct-eyebrow">Temporada {temporada.ano}</span>
       <span className="ct-movement" aria-hidden="true">{acesso ? '↗' : '↘'}</span><h2>{acesso ? 'ACESSO!' : 'REBAIXADO'}</h2>
       <div className="ct-event-club"><Escudo nome={temporada.clube} size={38} /><strong>{temporada.clube}</strong></div>
       <h3>{acesso ? 'Sobe para ' : 'Cai para '}{competicaoTemporadaTecnico({ liga: movimento.para })}</h3>
@@ -275,9 +276,9 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
   return <div className="ct" aria-label="Carreira de treinador">
     {eventoAtual?.tipo === 'titulo' && <PopUpTitulo temporada={ultima} titulo={eventoAtual.nome} indice={eventosUltima.slice(0, indiceEvento + 1).filter(x => x.tipo === 'titulo').length - 1} total={conquistasUltima.length} onFechar={fecharEvento} />}
     {(eventoAtual?.tipo === 'rebaixado' || eventoAtual?.tipo === 'acesso') && <PopUpDivisao temporada={ultima} movimento={eventoAtual.movimento} tipo={eventoAtual.tipo} onFechar={fecharEvento} />}
-    {eventoAtual?.tipo === 'demissao' && <JanelaTreinador titulo="Fim de ciclo" onFechar={fecharEvento}><div className="ct-event-content"><span className="ct-event-symbol">↗</span><h3>Você foi demitido</h3><p>A diretoria do {ultima.clube} decidiu encerrar seu trabalho. Sua carreira continua: confira os próximos convites.</p><button className="ct-primary" onClick={fecharEvento}>Ver propostas</button></div></JanelaTreinador>}
+    {eventoAtual?.tipo === 'demissao' && <JanelaTreinador titulo="Fim de ciclo" onFechar={fecharEvento}><div className="ct-event-content"><div className="vf-hero-diretoria" style={{backgroundImage:`url(${CENARIOS.diretoriaMobile})`}} /><span className="ct-event-symbol">↗</span><h3>Você foi demitido</h3><p>A diretoria do {ultima.clube} decidiu encerrar seu trabalho. Sua carreira continua: confira os próximos convites.</p><button className="ct-primary" onClick={fecharEvento}>Ver propostas</button></div></JanelaTreinador>}
     {vitrineAberta && <JanelaTreinador titulo="Conquistas como treinador" onFechar={() => setVitrineAberta(false)} classe="ct-trophy-modal"><div className="ct-trophy-grid">{titulos.length ? titulos.map((x, i) => <article key={`${x.ano}-${x.nome}-${i}`}><TacaCompeticao tipo={x.tipo} nome={x.nome} size={80} /><h3>{x.nome}</h3><p>{x.ano} · {x.clube}</p></article>) : <div className="ct-empty-trophies"><span>🏆</span><h3>Vitrine vazia</h3><p>As taças conquistadas na sua carreira aparecerão aqui.</p></div>}</div></JanelaTreinador>}
-    {decisaoAberta && carta && <JanelaTreinador titulo="Decisão de carreira" onFechar={() => setDecisaoAberta(false)}><div className="ct-event-content"><span className="ct-eyebrow">{t.clube} · {t.ano}</span><h3>{carta.titulo}</h3><p>{carta.texto}</p><div className="ct-decisions">{carta.opcoes.map(op => <button key={op.id} onClick={() => simular(op.id)}><strong>{op.nome}</strong><span>{op.detalhe}</span>{op.risco > 0 && <small>Risco: {Math.round(op.risco * 100)}%</small>}</button>)}</div></div></JanelaTreinador>}
+    {decisaoAberta && carta && <JanelaTreinador titulo="Decisão de carreira" onFechar={() => setDecisaoAberta(false)}><div className="ct-event-content"><div className="vf-hero-diretoria" style={{backgroundImage:`url(${carta.contexto === "inicio" ? CENARIOS.treinoMobile : CENARIOS.diretoriaMobile})`}} /><span className="ct-eyebrow">{t.clube} · {t.ano}</span><h3>{carta.titulo}</h3><p>{carta.texto}</p><div className="ct-decisions">{carta.opcoes.map(op => <button key={op.id} onClick={() => simular(op.id)}><strong>{op.nome}</strong><span>{op.detalhe}</span>{op.risco > 0 && <small>Risco: {Math.round(op.risco * 100)}%</small>}</button>)}</div></div></JanelaTreinador>}
 
     <div className="ct-board" aria-busy={simulando}>
       <section className="ct-profile" aria-label="Ficha do treinador">
@@ -294,7 +295,7 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
         <div className="ct-actions" aria-live="polite">
           {encerrada ? <><h2>Uma carreira para a história</h2><p>Carreira encerrada após {LIMITE_TEMPORADAS_TECNICO} temporadas. Reveja suas campanhas e conquistas.</p><div className="ct-career-total"><strong>{historico.aproveitamento}%</strong><span>de aproveitamento · {historico.clubes.length} clubes</span></div><button className="ct-primary" onClick={() => setVitrineAberta(true)}>Ver conquistas</button></>
           : primeira ? <><h2>Oferta inicial</h2><p>Os primeiros clubes querem você no comando. Escolha onde sua carreira como treinador começa.</p><div className="ct-offers">{t.opcoesInicio.map(op => <CartaoClube key={op.clube} nome={op.clube} pais={t.pais} rotulo="Começar no" detalhe={op.idolatria ? 'Clube do coração' : 'Vínculo como jogador'} disabled={simulando} onClick={() => escolherClubeInicial(op.clube)} />)}</div></>
-          : t.reuniaoPendente ? <><h2>Conversa com a diretoria</h2><p>A pressão aumentou. Sua resposta define os próximos passos.</p><div className="ct-decisions">{OPCOES_REUNIAO_TECNICO.map(op => <button key={op.id} disabled={simulando} onClick={() => executar(() => { onReuniao?.(op.id); onJogar?.(); })}><strong>{op.nome}</strong><span>{op.descricao}</span></button>)}</div></>
+          : t.reuniaoPendente ? <><div className="vf-hero-diretoria" style={{backgroundImage:`url(${CENARIOS.diretoriaMobile})`}} /><h2>Conversa com a diretoria</h2><p>A pressão aumentou. Sua resposta define os próximos passos.</p><div className="ct-decisions">{OPCOES_REUNIAO_TECNICO.map(op => <button key={op.id} disabled={simulando} onClick={() => executar(() => { onReuniao?.(op.id); onJogar?.(); })}><strong>{op.nome}</strong><span>{op.descricao}</span></button>)}</div></>
           : faseTemporada ? <><h2>Temporada {t.ano}</h2><p>O {t.clube} conta com você. Meta da temporada: {objetivo.nome.toLowerCase()}.</p><div className="ct-season-preview"><Escudo nome={t.clube} size={52} /><div><strong>{competicaoTemporadaTecnico({ clube: t.clube, liga: t.liga })}</strong><span>Diretoria {t.diretoria ?? 60}% · Torcida {t.torcida ?? 55}%</span></div></div><button disabled={simulando} className="ct-primary" onClick={() => mostrarDecisao ? setDecisaoAberta(true) : simular()}>{mostrarDecisao ? 'Tomar decisão e simular' : 'Simular temporada'}<span aria-hidden="true">→</span></button></>
           : faseResultado ? <><h2>{semClube ? 'Propostas de trabalho' : 'Janela de transferências'}</h2><p>{semClube ? 'Um ciclo terminou. Escolha um novo projeto para continuar sua carreira.' : 'Chegaram ofertas depois da última temporada. Você pode aceitar uma ou ficar no clube.'}</p><div className="ct-offers">{t.propostas?.map(p => <CartaoClube key={p.nome} nome={p.nome} liga={p.liga} pais={p.pais} rotulo="Assinar com" disabled={simulando} onClick={() => iniciarProposta(p.nome)} />)}{!semClube && <CartaoClube nome={t.clube} liga={t.liga} pais={t.pais} rotulo="Ficar no" atual disabled={simulando} onClick={continuar} />}</div>{semClube && !t.propostas?.length && <button disabled={simulando} onClick={() => executar(() => onEsperar?.())} className="ct-primary">Aguardar propostas<span aria-hidden="true">→</span></button>}{ultima && <div className="ct-last-result"><span>Última temporada · {ultima.ano}</span><strong>{ultima.posicao}º lugar · {ultima.pontos} pontos</strong><span>{ultima.vitorias}V · {ultima.empates}E · {ultima.derrotas}D</span></div>}</>
           : <p>Carreira indisponível.</p>}

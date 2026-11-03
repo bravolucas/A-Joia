@@ -1,3 +1,4 @@
+import { JogadorCampo, CampoPremium, SuperficieMini, RetratoApresentacao, CamisaPremium } from './VisualFutebol.jsx';
 import React, { useState, useMemo, useEffect } from "react";
 import { ARTE, escudoDe } from "./arte.js";
 import { TacaCompeticao } from "./trofeus.jsx";
@@ -435,15 +436,8 @@ function AnuncioClube({ clube, nome, numero, posicao, idade, grandeChegada, deOn
         <div className="absolute bottom-0 left-1/2 w-[70%] h-[80%] -translate-x-1/2 rounded-[50%] border border-white/10" />
       </div>
       {fase >= 3 && <div className="absolute inset-x-0 bottom-[5%] flex justify-center pointer-events-none" aria-hidden="true"
-        style={{ opacity: .24, animation: "ancSobe .85s ease-out both" }}>
-        <svg width="220" height="300" viewBox="0 0 220 300" fill="none">
-          <ellipse cx="110" cy="288" rx="75" ry="9" fill="#000" opacity=".5" />
-          <circle cx="110" cy="52" r="30" fill="#0A1712" stroke={cor} strokeWidth="2" />
-          <path d="M75 90 Q110 72 145 90 L165 183 L137 195 L127 280 L103 280 L110 190 L94 280 L69 280 L80 187 L55 183 Z" fill={cor} stroke="#fff" strokeOpacity=".65" strokeWidth="2" />
-          <path d="M76 96 L54 175 M145 96 L167 175" stroke="#0A1712" strokeWidth="20" strokeLinecap="round" />
-          <path d="M84 187 L75 279 M135 187 L127 279" stroke="#0A1712" strokeWidth="23" strokeLinecap="round" />
-          <text x="110" y="143" fill="white" textAnchor="middle" fontWeight="900" fontSize="34">{numero}</text>
-        </svg>
+        style={{ opacity: .68, animation: "ancSobe .85s ease-out both" }}>
+        <svg width="220" height="300" viewBox="0 0 220 300" fill="none"><ellipse cx="110" cy="285" rx="72" ry="9" fill="#000" opacity=".4"/><RetratoApresentacao x={110} y={115} cor={cor} nome={nome}/></svg>
       </div>}
       {/* varredura de abertura */}
       <div className="absolute inset-y-0 -left-[20%] w-[140%]" style={{ background: `linear-gradient(90deg, ${cor}, ${cor}dd)`, animation: fase === 0 ? "ancVarre .6s cubic-bezier(.7,0,.3,1) both" : "ancSai .5s cubic-bezier(.7,0,.3,1) both" }} />
@@ -1208,66 +1202,8 @@ export function CalendarioTemporadaPopup({ carreira, mesAtual, setMesAtual, onCl
   );
 }
 
-export function PenEstadio() {
-  return (
-    <svg width={PEN_W} height={PEN_H} viewBox={`0 0 ${PEN_W} ${PEN_H}`} className="absolute inset-0">
-      <defs>
-        <radialGradient id="penHolofote" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#fff6dc" stopOpacity="0.95" />
-          <stop offset="100%" stopColor="#fff6dc" stopOpacity="0" />
-        </radialGradient>
-        <linearGradient id="penCeu" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#030407" />
-          <stop offset="100%" stopColor="#1a1e28" />
-        </linearGradient>
-        <linearGradient id="penGrama" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#153d24" />
-          <stop offset="100%" stopColor="#1e7a3f" />
-        </linearGradient>
-        <pattern id="penTorcida" width="5" height="4" patternUnits="userSpaceOnUse">
-          <rect width="5" height="4" fill="#14161c" />
-          <circle cx="1.2" cy="1.5" r="0.9" fill="#454b5c" />
-          <circle cx="3.4" cy="2.8" r="0.8" fill="#2c3040" />
-          <circle cx="3.8" cy="0.8" r="0.6" fill="#5a6178" />
-        </pattern>
-        <pattern id="penRede" width="8" height="8" patternUnits="userSpaceOnUse">
-          <path d="M0 0 L8 8 M8 0 L0 8" stroke="rgba(255,255,255,0.42)" strokeWidth="0.7" />
-        </pattern>
-        <radialGradient id="penVinheta" cx="50%" cy="35%" r="75%">
-          <stop offset="60%" stopColor="#000" stopOpacity="0" />
-          <stop offset="100%" stopColor="#000" stopOpacity="0.55" />
-        </radialGradient>
-      </defs>
-      <rect x="0" y="0" width={PEN_W} height={PEN_H} fill="url(#penCeu)" />
-      <rect x="0" y="0" width={PEN_W} height={PEN_GOAL.y + PEN_GOAL.h + 6} fill="url(#penTorcida)" />
-      <rect x="0" y="0" width={PEN_W} height={PEN_GOAL.y + PEN_GOAL.h + 6} fill="#000" opacity="0.25" />
-      <circle cx={PEN_W * 0.12} cy="2" r="34" fill="url(#penHolofote)" />
-      <circle cx={PEN_W * 0.38} cy="-4" r="30" fill="url(#penHolofote)" />
-      <circle cx={PEN_W * 0.64} cy="-4" r="30" fill="url(#penHolofote)" />
-      <circle cx={PEN_W * 0.9} cy="2" r="34" fill="url(#penHolofote)" />
-      {Array.from({ length: 10 }).map((_, i) => (
-        <circle key={i} cx={(i + 0.5) * (PEN_W / 10)} cy={6} r="2.2" fill="#fff6dc" opacity="0.85" />
-      ))}
-      <rect x="0" y={PEN_GOAL.y + PEN_GOAL.h - 2} width={PEN_W} height="7" fill="#D8B44A" opacity="0.9" />
-      <rect x="0" y={PEN_GOAL.y + PEN_GOAL.h - 2} width={PEN_W} height="7" fill="url(#penTorcida)" opacity="0.15" />
-      <path d={`M -30,${PEN_H} L ${PEN_W + 30},${PEN_H} L ${PEN_W + 10},${PEN_GOAL.y + PEN_GOAL.h + 4} L -10,${PEN_GOAL.y + PEN_GOAL.h + 4} Z`} fill="url(#penGrama)" />
-      <path d={`M ${PEN_SPOT.x - 70} ${PEN_H} L ${PEN_GOAL.x - 6} ${PEN_GOAL.y + PEN_GOAL.h + 5}`} stroke="#f5f5f5" strokeOpacity="0.35" strokeWidth="1.6" fill="none" />
-      <path d={`M ${PEN_SPOT.x + 70} ${PEN_H} L ${PEN_GOAL.x + PEN_GOAL.w + 6} ${PEN_GOAL.y + PEN_GOAL.h + 5}`} stroke="#f5f5f5" strokeOpacity="0.35" strokeWidth="1.6" fill="none" />
-      <line x1={PEN_GOAL.x - 6} y1={PEN_GOAL.y + PEN_GOAL.h + 5} x2={PEN_GOAL.x + PEN_GOAL.w + 6} y2={PEN_GOAL.y + PEN_GOAL.h + 5} stroke="#f5f5f5" strokeOpacity="0.4" strokeWidth="1.6" />
-      <rect x={PEN_GOAL.x + 5} y={PEN_GOAL.y + 4} width={PEN_GOAL.w - 10} height={PEN_GOAL.h - 4} fill="url(#penRede)" opacity="0.92" />
-      <rect x={PEN_GOAL.x + 5} y={PEN_GOAL.y + 4} width={PEN_GOAL.w - 10} height={PEN_GOAL.h - 4} fill="#04050a" opacity="0.28" />
-      {[0.3, 0.55, 0.8].map((f, i) => (
-        <path key={i} d={`M ${PEN_GOAL.x + 6} ${PEN_GOAL.y + PEN_GOAL.h * f} Q ${PEN_GOAL.x + PEN_GOAL.w / 2} ${PEN_GOAL.y + PEN_GOAL.h * f + 10 + i * 3} ${PEN_GOAL.x + PEN_GOAL.w - 6} ${PEN_GOAL.y + PEN_GOAL.h * f}`} stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" fill="none" />
-      ))}
-      <path d={`M ${PEN_GOAL.x} ${PEN_GOAL.y + 2} L ${PEN_GOAL.x - 16} ${PEN_GOAL.y + 14} L ${PEN_GOAL.x - 16} ${PEN_GOAL.y + PEN_GOAL.h - 6} L ${PEN_GOAL.x} ${PEN_GOAL.y + PEN_GOAL.h - 2} Z`} fill="url(#penRede)" opacity="0.55" />
-      <path d={`M ${PEN_GOAL.x + PEN_GOAL.w} ${PEN_GOAL.y + 2} L ${PEN_GOAL.x + PEN_GOAL.w + 16} ${PEN_GOAL.y + 14} L ${PEN_GOAL.x + PEN_GOAL.w + 16} ${PEN_GOAL.y + PEN_GOAL.h - 6} L ${PEN_GOAL.x + PEN_GOAL.w} ${PEN_GOAL.y + PEN_GOAL.h - 2} Z`} fill="url(#penRede)" opacity="0.55" />
-      <rect x={PEN_GOAL.x - 5} y={PEN_GOAL.y} width="9" height={PEN_GOAL.h + 5} rx="2.5" fill="#f4f4f4" />
-      <rect x={PEN_GOAL.x + PEN_GOAL.w - 4} y={PEN_GOAL.y} width="9" height={PEN_GOAL.h + 5} rx="2.5" fill="#f4f4f4" />
-      <rect x={PEN_GOAL.x - 6} y={PEN_GOAL.y - 7} width={PEN_GOAL.w + 12} height="9" rx="2.5" fill="#f4f4f4" />
-      <rect x="0" y="0" width={PEN_W} height={PEN_H} fill="url(#penVinheta)" />
-    </svg>
-  );
-}
+export function PenEstadio() { return <CampoPremium largura={PEN_W} altura={PEN_H} gol={PEN_GOAL} />; }
+
 
 export function PenGoleiro({ zona }) {
   const kickerW = 52, kickerH = 76;
@@ -1277,35 +1213,7 @@ export function PenGoleiro({ zona }) {
   return (
     <div className="absolute" style={{ left: PEN_ZONE_X.meio, top: PEN_GOAL.y + PEN_GOAL.h - kickerH, width: kickerW, height: kickerH, transform: "translateX(-50%)" }}>
       <div key={zona} style={{ width: "100%", height: "100%", "--dx": `${dx}px`, "--rot": `${rotAlvo}deg`, animation: `${anim} 480ms ease-out forwards`, transformOrigin: "50% 92%" }}>
-        <svg width={kickerW} height={kickerH} viewBox="0 0 46 66" style={{ overflow: "visible" }}>
-          <defs>
-            <linearGradient id="penKitGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#1a2230" />
-              <stop offset="100%" stopColor="#0d1119" />
-            </linearGradient>
-            <linearGradient id="penKitAccent" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#22D3EE" />
-              <stop offset="100%" stopColor="#39FF88" />
-            </linearGradient>
-          </defs>
-          <ellipse cx="23" cy="64" rx="13" ry="2.4" fill="#000" opacity="0.32" />
-          <rect x="12" y="43" width="7.5" height="18" rx="3" fill="#12141a" />
-          <rect x="26.5" y="43" width="7.5" height="18" rx="3" fill="#12141a" />
-          <rect x="10.5" y="58" width="11" height="5" rx="2" fill="#050506" />
-          <rect x="24.5" y="58" width="11" height="5" rx="2" fill="#050506" />
-          <rect x="11" y="35" width="24" height="11" rx="4" fill="#181b22" />
-          <rect x="11" y="35" width="24" height="3" fill="url(#penKitAccent)" opacity="0.85" />
-          <rect x="8" y="14" width="30" height="24" rx="7" fill="url(#penKitGrad)" />
-          <path d="M 8 30 L 22 14 L 30 14 L 16 38 L 8 38 Z" fill="url(#penKitAccent)" opacity="0.9" />
-          <rect x="8" y="14" width="30" height="24" rx="7" fill="none" stroke="#22D3EE" strokeOpacity="0.3" strokeWidth="0.6" />
-          <rect x="21" y="14" width="4" height="24" fill="#000" opacity="0.15" />
-          <rect x="-6" y="17" width="14" height="8" rx="4" fill="url(#penKitGrad)" />
-          <rect x="38" y="17" width="14" height="8" rx="4" fill="url(#penKitGrad)" />
-          <circle cx="-7" cy="21" r="6.2" fill="#39FF88" stroke="#0a0a0a" strokeWidth="0.8" />
-          <circle cx="53" cy="21" r="6.2" fill="#39FF88" stroke="#0a0a0a" strokeWidth="0.8" />
-          <circle cx="23" cy="8.5" r="8.4" fill="#181b22" />
-          <circle cx="23" cy="8.5" r="8.4" fill="none" stroke="#22D3EE" strokeOpacity="0.25" strokeWidth="0.6" />
-        </svg>
+        <svg width={kickerW} height={kickerH} viewBox="-30 -88 60 90" style={{ overflow: "visible" }} aria-hidden="true"><JogadorCampo cor="#c6ae60" numero={1} goleiro esticado={zona !== 'meio'} /></svg>
       </div>
     </div>
   );
@@ -1451,19 +1359,17 @@ export function GoalMini({ onPick, resultado }) {
     return pick(outras);
   }, [resultado]);
   return (
-    <div className="mb-3">
-      <div className="relative mx-auto" style={{ width: PEN_W * 0.85, height: PEN_H * 0.85, maxWidth: "100%" }}>
-        <div className="absolute top-0 left-0 rounded-md overflow-hidden" style={{ width: PEN_W, height: PEN_H, transform: "scale(0.85)", transformOrigin: "top left" }}>
+    <div className="mb-3 w-full">
+      <SuperficieMini largura={PEN_W} altura={PEN_H}>
           <PenEstadio />
           <PenGoleiro zona={zonaGoleiro} />
           <PenBola resultado={resultado} />
           {resultado && resultado.gol && <PenEfeitoGol key={golKey} ativo />}
-        </div>
-      </div>
+      </SuperficieMini>
       <div className="mx-auto mt-2 flex justify-center gap-2 text-[10px] uppercase tracking-widest text-emerald-100/70" aria-live="polite">
         <span className="rounded-full border border-white/20 px-3 py-1">{resultado ? (resultado.gol ? "⚽ Bola na rede" : resultado.tipo || "Cobrança concluída") : "🎯 Escolha a direção"}</span>
       </div>
-      {!resultado && <div className="grid grid-cols-3 gap-1.5 mt-2 mx-auto" style={{ width: 220 }}>
+      {!resultado && <div className="vf-falta-alvos">
         <Button variant="ghost" onClick={() => onPick("esquerdo")}>Esq.</Button>
         <Button variant="ghost" onClick={() => onPick("meio")}>Meio</Button>
         <Button variant="ghost" onClick={() => onPick("direito")}>Dir.</Button>
@@ -1472,80 +1378,13 @@ export function GoalMini({ onPick, resultado }) {
   );
 }
 
-export function FaltaCampo() {
-  return (
-    <svg width={PEN_W} height={PEN_H} viewBox={`0 0 ${PEN_W} ${PEN_H}`} className="absolute inset-0">
-      <defs>
-        <linearGradient id="faltaCeu" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#0d1016" /><stop offset="100%" stopColor="#1c212b" />
-        </linearGradient>
-        <linearGradient id="faltaGrama" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#2f9a4e" /><stop offset="100%" stopColor="#248041" />
-        </linearGradient>
-        <pattern id="faltaFaixa" width="34" height="11" patternUnits="userSpaceOnUse">
-          <rect width="34" height="11" fill="#0a2a6b" />
-          <rect width="17" height="11" fill="#0e3488" />
-          <polygon points="2,8 4,3 6,8" fill="#f2c94c" />
-        </pattern>
-        <radialGradient id="faltaVinheta" cx="50%" cy="38%" r="80%">
-          <stop offset="60%" stopColor="#000" stopOpacity="0" /><stop offset="100%" stopColor="#000" stopOpacity="0.38" />
-        </radialGradient>
-      </defs>
-      <rect width={PEN_W} height={PEN_H} fill="url(#faltaCeu)" />
-      {/* arquibancada simples */}
-      <rect x="0" y="0" width={PEN_W} height="26" fill="#15181f" />
-      {Array.from({ length: 9 }).map((_, i) => <rect key={i} x={i * (PEN_W / 9)} y="0" width={PEN_W / 9 - 1.5} height="26" fill="#1e222c" opacity={i % 2 ? 0.5 : 0.8} />)}
-      {/* faixa de patrocínio */}
-      <rect x="0" y="26" width={PEN_W} height="11" fill="url(#faltaFaixa)" />
-      <text x="6" y="34.5" fill="#fff" fontSize="7" fontWeight="900" fontFamily="sans-serif">A JOIA</text>
-      <text x="60" y="34.5" fill="#f2c94c" fontSize="6.5" fontWeight="700" fontFamily="sans-serif">★ TEMPORADA ★</text>
-      <text x="150" y="34.5" fill="#fff" fontSize="7" fontWeight="900" fontFamily="sans-serif">A JOIA</text>
-      <text x="204" y="34.5" fill="#f2c94c" fontSize="6.5" fontWeight="700" fontFamily="sans-serif">★ TEMPORADA ★</text>
-      <text x="294" y="34.5" fill="#fff" fontSize="7" fontWeight="900" fontFamily="sans-serif">A JOIA</text>
-      {/* gramado */}
-      <rect x="0" y="37" width={PEN_W} height={PEN_H - 37} fill="url(#faltaGrama)" />
-      {Array.from({ length: 5 }).map((_, i) => <rect key={i} x="0" y={37 + i * 20} width={PEN_W} height="10" fill="#fff" opacity="0.025" />)}
-      <ellipse cx={PEN_W * 0.66} cy="110" rx="30" ry="10" fill="#fff" opacity="0.03" />
-      <ellipse cx={PEN_W * 0.22} cy="150" rx="24" ry="8" fill="#fff" opacity="0.03" />
-      {/* grande área */}
-      <rect x={FALTA_BOX.x} y={FALTA_BOX.y} width={FALTA_BOX.w} height={FALTA_BOX.h} fill="none" stroke="#f5f5f5" strokeOpacity="0.75" strokeWidth="1.2" />
-      <line x1={FALTA_GOAL.x - 4} y1={FALTA_GOAL.y + FALTA_GOAL.h} x2={FALTA_GOAL.x + FALTA_GOAL.w + 4} y2={FALTA_GOAL.y + FALTA_GOAL.h} stroke="#f5f5f5" strokeOpacity="0.75" strokeWidth="1.2" />
-      {/* arco do círculo central espiando debaixo */}
-      <path d={`M ${PEN_W * 0.34} ${PEN_H} Q ${PEN_W * 0.5} ${PEN_H - 46} ${PEN_W * 0.7} ${PEN_H}`} fill="none" stroke="#f5f5f5" strokeOpacity="0.6" strokeWidth="1.4" />
-      {/* trave */}
-      <rect x={FALTA_GOAL.x + 3} y={FALTA_GOAL.y + 2} width={FALTA_GOAL.w - 6} height={FALTA_GOAL.h - 2} fill="url(#penRede)" opacity="0.85" />
-      <rect x={FALTA_GOAL.x + 3} y={FALTA_GOAL.y + 2} width={FALTA_GOAL.w - 6} height={FALTA_GOAL.h - 2} fill="#04050a" opacity="0.22" />
-      <rect x={FALTA_GOAL.x - 2.5} y={FALTA_GOAL.y} width="4" height={FALTA_GOAL.h + 3} rx="1.5" fill="#f7f7f7" />
-      <rect x={FALTA_GOAL.x + FALTA_GOAL.w - 1.5} y={FALTA_GOAL.y} width="4" height={FALTA_GOAL.h + 3} rx="1.5" fill="#f7f7f7" />
-      <rect x={FALTA_GOAL.x - 3} y={FALTA_GOAL.y - 3.5} width={FALTA_GOAL.w + 6} height="4" rx="1.5" fill="#f7f7f7" />
-      <rect width={PEN_W} height={PEN_H} fill="url(#faltaVinheta)" />
-    </svg>
-  );
-}
+export function FaltaCampo() { return <CampoPremium largura={PEN_W} altura={PEN_H} gol={FALTA_GOAL} />; }
+
 
 export function FaltaJogadorBarreira() {
-  return (
-    <svg width="15" height="34" viewBox="0 0 15 34" style={{ overflow: "visible" }}>
-      <ellipse cx="7.5" cy="33.5" rx="6" ry="1.2" fill="#000" opacity="0.3" />
-      {/* pernas */}
-      <rect x="4" y="22" width="3.2" height="11" rx="1.4" fill="#101018" />
-      <rect x="7.8" y="22" width="3.2" height="11" rx="1.4" fill="#101018" />
-      {/* meião claro */}
-      <rect x="4" y="30" width="3.2" height="3" rx="1" fill="#e8e8e8" opacity="0.85" />
-      <rect x="7.8" y="30" width="3.2" height="3" rx="1" fill="#e8e8e8" opacity="0.85" />
-      {/* short */}
-      <rect x="3.4" y="19" width="8.2" height="5" rx="1.5" fill="#12183a" />
-      {/* tronco / camisa */}
-      <path d="M 3 20 L 2.4 11 Q 2.4 8 7.5 8 Q 12.6 8 12.6 11 L 12 20 Z" fill="#1f3f8f" />
-      <path d="M 3 20 L 2.4 11 Q 2.4 8 7.5 8 Q 12.6 8 12.6 11 L 12 20 Z" fill="none" stroke="#0d1f4d" strokeWidth="0.5" />
-      {/* braços cruzados na frente (proteção) */}
-      <rect x="2.6" y="13" width="9.8" height="2.6" rx="1.3" fill="#183072" />
-      {/* cabeça */}
-      <circle cx="7.5" cy="4.5" r="3.8" fill="#c98a5e" />
-      <path d="M 4 4 Q 7.5 0.5 11 4 L 11 3 Q 7.5 -0.5 4 3 Z" fill="#2a1c12" />
-    </svg>
-  );
+  return <svg width="19" height="38" viewBox="-22 -88 44 88" style={{overflow:'visible'}} aria-hidden="true"><JogadorCampo cor="#5b88a5" numero={4} escala={.94}/></svg>;
 }
+
 
 export function FaltaBoneco({ bateu, zonaAcerto }) {
   const pulou = bateu && zonaAcerto === "porCima";
@@ -1597,9 +1436,8 @@ export function FreeKickMini({ onPick, resultado }) {
     return pick(["esquerdo", "meio", "direito"]);
   }, [resultado]);
   return (
-    <div className="mb-3">
-      <div className="relative mx-auto" style={{ width: PEN_W * 0.85, height: PEN_H * 0.85, maxWidth: "100%" }}>
-        <div className="absolute top-0 left-0 rounded-md overflow-hidden" style={{ width: PEN_W, height: PEN_H, transform: "scale(0.85)", transformOrigin: "top left" }}>
+    <div className="mb-3 w-full">
+      <SuperficieMini largura={PEN_W} altura={PEN_H}>
           <FaltaCampo />
           <div style={{ position: "absolute", left: FALTA_GOAL.x + FALTA_GOAL.w / 2, top: FALTA_GOAL.y + FALTA_GOAL.h, transform: "scale(0.4)", transformOrigin: "0 0" }}>
             <div style={{ position: "relative", left: -PEN_ZONE_X.meio, top: -(PEN_GOAL.y + PEN_GOAL.h) }}>
@@ -1609,9 +1447,8 @@ export function FreeKickMini({ onPick, resultado }) {
           <FaltaBoneco bateu={!!resultado} zonaAcerto={resultado?.zona} />
           <PenBolaFalta resultado={resultado} />
           {resultado && resultado.gol && <PenEfeitoGol key={golKey} ativo />}
-        </div>
-      </div>
-      {!resultado && <div className="grid grid-cols-3 gap-1.5 mt-2 mx-auto" style={{ width: 220 }}>
+      </SuperficieMini>
+      {!resultado && <div className="vf-falta-alvos">
         <Button variant="ghost" onClick={() => onPick("cantoEsquerdo")}>Canto esq.</Button>
         <Button variant="ghost" onClick={() => onPick("porCima")}>Por cima</Button>
         <Button variant="ghost" onClick={() => onPick("cantoDireito")}>Canto dir.</Button>
@@ -1620,43 +1457,18 @@ export function FreeKickMini({ onPick, resultado }) {
   );
 }
 
-export function PasseCampo() {
-  return (
-    <svg width={PASSE_W} height={PASSE_H} viewBox={`0 0 ${PASSE_W} ${PASSE_H}`} className="absolute inset-0">
-      <defs>
-        <linearGradient id="passeGrama" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#12341f" /><stop offset="100%" stopColor="#1e7a3f" />
-        </linearGradient>
-        <radialGradient id="passeVinheta" cx="50%" cy="40%" r="75%">
-          <stop offset="55%" stopColor="#000" stopOpacity="0" /><stop offset="100%" stopColor="#000" stopOpacity="0.5" />
-        </radialGradient>
-      </defs>
-      <rect width={PASSE_W} height={PASSE_H} fill="url(#passeGrama)" />
-      {Array.from({ length: 6 }).map((_, i) => <rect key={i} x="0" y={i * (PASSE_H / 6)} width={PASSE_W} height={PASSE_H / 12} fill="#fff" opacity="0.03" />)}
-      <circle cx={PASSE_W / 2} cy={PASSE_H * 0.3} r="34" fill="none" stroke="#fff" strokeOpacity="0.25" strokeWidth="1.4" />
-      <line x1="0" y1={PASSE_H * 0.06} x2={PASSE_W} y2={PASSE_H * 0.06} stroke="#fff" strokeOpacity="0.25" strokeWidth="1.4" />
-      <rect width={PASSE_W} height={PASSE_H} fill="url(#passeVinheta)" />
-    </svg>
-  );
+export function PasseCampo() { return <CampoPremium largura={PASSE_W} altura={PASSE_H} passe />; }
+
+
+export function PassePersonagem({ x, y, tipo, selecionavel, destacado, onClick, numero = 7 }) {
+  const cor = tipo === "adversario" ? "#b64e48" : tipo === "voce" ? "#dfbf73" : "#6fa8a1";
+  const escala = 0.7 + (y / PASSE_H) * 0.3;
+  return <button type="button" onClick={selecionavel ? onClick : undefined} disabled={!selecionavel} aria-label={selecionavel ? `Passar para companheiro ${numero} em ${Math.round(x)}, ${Math.round(y)}` : tipo === 'voce' ? 'Seu jogador' : 'Adversário'} className="vf-passe-alvo" style={{left:x,top:y,zIndex:Math.round(y),transform:'translate(-50%,-70%)',filter:destacado?`drop-shadow(0 0 5px ${cor})`:undefined}}>
+    <svg width="50" height="56" viewBox="-34 -92 68 96" aria-hidden="true"><JogadorCampo cor={cor} numero={tipo==='voce'?10:tipo==='adversario'?4:numero} escala={escala}/></svg>
+    {selecionavel && <span style={{position:'absolute',top:-4,left:23,color:'#efdaa4',fontSize:10}} aria-hidden="true">◆</span>}
+  </button>;
 }
 
-export function PassePersonagem({ x, y, tipo, selecionavel, destacado, onClick }) {
-  const cor = tipo === "adversario" ? "#D6483F" : tipo === "voce" ? "#D8B44A" : "#5B8FEA";
-  const escala = 0.55 + (y / PASSE_H) * 0.55;
-  return (
-    <button onClick={selecionavel ? onClick : undefined} disabled={!selecionavel}
-      className="absolute" style={{ left: x, top: y, transform: `translate(-50%,-50%) scale(${escala})`, background: "none", border: "none", padding: 0, cursor: selecionavel ? "pointer" : "default" }}>
-      <svg width="26" height="34" viewBox="0 0 26 34" style={{ overflow: "visible", filter: destacado ? `drop-shadow(0 0 6px ${cor})` : "none" }}>
-        <ellipse cx="13" cy="33" rx="8" ry="1.6" fill="#000" opacity="0.3" />
-        <rect x="9" y="20" width="3.6" height="11" rx="1.6" fill="#12141a" />
-        <rect x="13.4" y="20" width="3.6" height="11" rx="1.6" fill="#12141a" />
-        <rect x="6" y="9" width="14" height="13" rx="4" fill={cor} opacity="0.92" />
-        <circle cx="13" cy="4.5" r="4.6" fill="#181b22" />
-      </svg>
-      {selecionavel && <div className="absolute left-1/2 -translate-x-1/2 -top-3 text-[8px] text-emerald-300">▼</div>}
-    </button>
-  );
-}
 
 export function PasseBola({ origem, alvo, resultado }) {
   const pos = !resultado ? origem : resultado.gol ? alvo : { x: resultado.ponto.cx, y: resultado.ponto.cy };
@@ -1680,20 +1492,18 @@ export function PasseMini({ atributoPasse, onResultado, cenaForcada, alvoForcado
     setTimeout(() => { setResultado(r); onResultado?.(r, companheiro, cena); }, 520);
   }
   return (
-    <div className="mb-3">
-      <div className="relative mx-auto rounded-md overflow-hidden" style={{ width: PASSE_W * 0.85, height: PASSE_H * 0.85, maxWidth: "100%" }}>
-        <div className="absolute top-0 left-0" style={{ width: PASSE_W, height: PASSE_H, transform: "scale(0.85)", transformOrigin: "top left" }}>
+    <div className="mb-3 w-full">
+      <SuperficieMini largura={PASSE_W} altura={PASSE_H}>
           <PasseCampo />
-          {cena.adversarios.map((a) => <PassePersonagem key={a.id} x={a.x} y={a.y} tipo="adversario" destacado={resultado && !resultado.gol && resultado.adversarioCulpado.id === a.id} />)}
-          {cena.companheiros.map((cp) => (
-            <PassePersonagem key={cp.id} x={cp.x} y={cp.y} tipo="companheiro" selecionavel={!alvo} selecionado={alvo?.id === cp.id}
+          {cena.adversarios.map((a) => <PassePersonagem key={a.id} x={a.x} y={a.y} tipo="adversario" destacado={resultado && !resultado.gol && resultado.adversarioCulpado?.id === a.id} />)}
+          {cena.companheiros.map((cp, i) => (
+            <PassePersonagem key={cp.id} x={cp.x} y={cp.y} numero={i+1} tipo="companheiro" selecionavel={!alvo} selecionado={alvo?.id === cp.id}
               destacado={resultado?.gol && alvo?.id === cp.id} onClick={() => escolher(cp)} />
           ))}
           <PassePersonagem x={PASSE_ORIGEM.x} y={PASSE_ORIGEM.y} tipo="voce" />
           {alvo && <PasseBola origem={PASSE_ORIGEM} alvo={alvo} resultado={resultado} />}
-        </div>
-      </div>
-      {!alvo && <p className="text-[10px] text-zinc-500 text-center mt-2">Clique num companheiro pra tentar o passe.</p>}
+      </SuperficieMini>
+      {!alvo && <><div className="vf-passe-opcoes">{cena.companheiros.map((cp,i)=><button key={cp.id} type="button" aria-label={`Passar para companheiro ${i+1}`} onClick={()=>escolher(cp)}><b>{i+1}</b><span>Passar</span></button>)}</div><p className="text-[10px] text-zinc-500 text-center mt-2">Toque no companheiro ou escolha seu número.</p></>}
     </div>
   );
 }

@@ -88,3 +88,9 @@ O botão **Meu museu** no menu reúne taças, camisas comemorativas e 14 feitos 
 - **Feitos:** consulte cada peça bloqueada para ver seu objetivo, como marcar 100 gols ou conquistar um título como treinador.
 
 O museu aproveita os saves existentes neste navegador. Ele fica separado dos slots de carreira; use **Exportar coleção** para fazer backup e **Importar coleção** para recuperá-lo em outro navegador. Importar soma as conquistas, sem apagar a coleção atual nem duplicar o mesmo save. Limpar os dados do navegador também remove a coleção local.
+
+## Acabamento visual
+
+Os quatro minigames compartilham cenários e personagens vetoriais próprios. Os alvos do pênalti funcionam com Enter/Espaço; falta e passe usam botões com foco e áreas de toque ampliadas. Efeitos respeitam movimento reduzido e a preferência de som. As fontes estão empacotadas para uso offline.
+
+`VisualFutebol.jsx` reúne os desenhos parametrizados; `arte/cenarios/` contém fundos com versões para celular. As taças e as fontes mantêm créditos e licenças em suas pastas. Animações podem ser recriadas com `node scripts/gerar-animacoes.mjs`. A reexportação opcional dos troféus usa `node scripts/atualizar-acervo.mjs /caminho/Football-Career`, com ImageMagick instalado.

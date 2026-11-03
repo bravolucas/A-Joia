@@ -5,3 +5,5 @@
 @media(prefers-reduced-motion:reduce){.mu-card{transition:none}.mu-card:hover{transform:none}}
 .mu-hero>div:first-child{min-width:0;flex:1}.mu-hero-total{flex:none}
 @media(max-width:480px){.mu-hero-total{width:82px}.mu-hero-total>span{width:auto}}
+.mu-art{position:relative;isolation:isolate;background:radial-gradient(ellipse at 50% 70%,#d8b56a10,transparent 68%)}.mu-art::after{content:'';position:absolute;z-index:-1;left:19%;right:19%;bottom:10px;height:6px;background:#0004;border-radius:50%;filter:blur(4px)}.mu-shirt{width:110px;height:115px}.mu-detail-art .mu-shirt{width:155px;height:164px}.mu-detail-art .vf-medalha{width:114px;height:134px}.mu-card.mu-earned{box-shadow:inset 0 1px #ecd79d15,0 8px 20px #0002}
+.mu-more{display:block;margin:22px auto 0;min-height:44px;padding-inline:24px}

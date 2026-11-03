@@ -7,6 +7,7 @@ export const slugCompeticao = (nome) => (nome || "")
   .replace(/^-+|-+$/g, "");
 
 const ALIASES = Object.freeze({
+  'concacaf': 'concacaf-champions',
   'copa-libertadores': 'libertadores',
   'conmebol-libertadores': 'libertadores',
   'uefa-champions-league': 'champions-league',

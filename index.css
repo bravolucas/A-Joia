@@ -1,3 +1,4 @@
+@import "./arte/fontes/fontes.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

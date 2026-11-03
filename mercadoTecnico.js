@@ -1,0 +1,60 @@
+/* Base de gestão do treinador. Valores em R$ mil; salários por mês.
+   Ainda não ligada à interface: a integração e o balanceamento vêm no próximo passo.
+   O gerador é próprio, para não consumir a aleatoriedade da simulação existente. */
+import { CLUBES } from './data.js';
+const limitar=(n,min,max)=>Math.max(min,Math.min(max,n));
+const NOMES=['André','Bruno','Caio','Daniel','Eduardo','Felipe','Gabriel','Henrique','Igor','João','Lucas','Matheus'];
+const SOBRENOMES=['Almeida','Barbosa','Costa','Dias','Esteves','Ferreira','Gomes','Lima','Mendes','Oliveira','Pereira','Silva'];
+export const SETORES_ELENCO = [{id:'GOL',nome:'Goleiros',quantidade:3},{id:'DEF',nome:'Defesa',quantidade:8},{id:'MEI',nome:'Meio-campo',quantidade:8},{id:'ATA',nome:'Ataque',quantidade:5}];
+function gerador(semente){
+ let n=2166136261;for(const c of String(semente))n=Math.imul(n^c.charCodeAt(0),16777619);
+ return ()=>{n=(Math.imul(n,1664525)+1013904223)>>>0;return n/4294967296;};
+}
+function jogador(rng,id,setor,forca){
+ const idade=18+Math.floor(rng()*17);
+ const qualidade=limitar(Math.round(forca-7+rng()*14),30,95);
+ return {id,nome:`${NOMES[Math.floor(rng()*NOMES.length)]} ${SOBRENOMES[Math.floor(rng()*SOBRENOMES.length)]}`,setor,idade,qualidade,
+  potencial:limitar(qualidade+Math.max(0,28-idade)+Math.floor(rng()*5),qualidade,99),
+  contrato:1+Math.floor(rng()*4),salario:Math.max(3,Math.round(qualidade**2/220)),
+  valor:Math.max(100,Math.round(qualidade**3/180*(idade<24?1.2:idade>30?.7:1))),origem:'elenco'};
+}
+export function criarGestaoTecnico(t){
+ if(!t?.clube)throw new Error('Escolha um clube antes de administrar o elenco.');
+ if(t.gestao?.versao===1&&t.gestao.clube===t.clube)return structuredClone(t.gestao);
+ const forca=limitar(Number(t.elenco)||CLUBES.find(c=>c.nome===t.clube)?.forca||50,30,95);
+ const rng=gerador(`${t.clube}|${t.ano}|gestao-v1`);const elenco=[];
+ for(const setor of SETORES_ELENCO)for(let i=0;i<setor.quantidade;i++)elenco.push(jogador(rng,`${t.clube}:${setor.id}:${i}`,setor.id,forca));
+ const folha=elenco.reduce((n,j)=>n+j.salario,0);
+ return {versao:1,clube:t.clube,ano:t.ano,orcamentoInicial:Math.round((forca-25)**2*8),saldo:Math.round((forca-25)**2*8),tetoSalarial:Math.ceil(folha*1.25),elenco,movimentos:[]};
+}
+export function resumoGestaoTecnico(g){
+ const setores=SETORES_ELENCO.map(s=>{const jogadores=g.elenco.filter(j=>j.setor===s.id);return {...s,jogadores:jogadores.length,media:jogadores.length?Math.round(jogadores.reduce((n,j)=>n+j.qualidade,0)/jogadores.length):0};});
+ const folha=g.elenco.reduce((n,j)=>n+j.salario,0);
+ return {setores,jogadores:g.elenco.length,folha,tetoSalarial:g.tetoSalarial,espacoSalarial:g.tetoSalarial-folha,saldo:g.saldo};
+}
+export function gerarMercadoTecnico(t){
+ const g=criarGestaoTecnico(t);const rng=gerador(`${g.clube}|${g.ano}|mercado-v1`);
+ return SETORES_ELENCO.flatMap(s=>Array.from({length:3},(_,i)=>({...jogador(rng,`mercado:${g.clube}:${g.ano}:${s.id}:${i}`,s.id,Number(t.elenco)||50),origem:'mercado'})));
+}
+function validarJanela(t){
+ if(!t?.clube||t.demitido||t.desempregado)throw new Error('Você precisa estar empregado para administrar o elenco.');
+ if(t.fase!=='pretemporada'||t.andamento?.jogos||t.andamento?.rodadas)throw new Error('Negociações disponíveis apenas antes do início da temporada.');
+ if((t.temporadas?.length||0)>=30)throw new Error('A carreira de treinador já foi encerrada.');
+}
+export function contratarJogadorTecnico(c,id){
+ const t=c?.tecnico;validarJanela(t);const g=criarGestaoTecnico(t);
+ if(g.elenco.some(j=>j.id===id))throw new Error('Esse jogador já está no elenco.');
+ const alvo=gerarMercadoTecnico(t).find(j=>j.id===id);if(!alvo)throw new Error('Jogador indisponível no mercado.');
+ if(g.elenco.length>=30)throw new Error('O elenco já tem 30 jogadores.');
+ if(g.saldo<alvo.valor)throw new Error('Orçamento insuficiente para esta contratação.');
+ if(resumoGestaoTecnico(g).folha+alvo.salario>g.tetoSalarial)throw new Error('A contratação ultrapassa o teto salarial.');
+ return {...c,tecnico:{...t,gestao:{...g,saldo:g.saldo-alvo.valor,elenco:[...g.elenco,{...alvo,contrato:3}],movimentos:[...g.movimentos,{tipo:'compra',jogador:id,nome:alvo.nome,valor:alvo.valor,ano:g.ano}]}}};
+}
+export function venderJogadorTecnico(c,id){
+ const t=c?.tecnico;validarJanela(t);const g=criarGestaoTecnico(t);const alvo=g.elenco.find(j=>j.id===id);
+ if(!alvo)throw new Error('Jogador não encontrado no elenco.');
+ const minimo={GOL:2,DEF:4,MEI:4,ATA:2};
+ if(g.elenco.filter(j=>j.setor===alvo.setor).length<=minimo[alvo.setor])throw new Error('A venda deixaria o setor sem jogadores suficientes.');
+ const valor=Math.round(alvo.valor*.8);
+ return {...c,tecnico:{...t,gestao:{...g,saldo:g.saldo+valor,elenco:g.elenco.filter(j=>j.id!==id),movimentos:[...g.movimentos,{tipo:'venda',jogador:id,nome:alvo.nome,valor,ano:g.ano}]}}};
+}

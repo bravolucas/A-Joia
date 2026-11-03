@@ -23,7 +23,16 @@ import salaApresentacao from "./arte/sala-apresentacao.webp";
 import campo from "./arte/campo.svg";
 import { slugCompeticao, resolverImagemCompeticao } from "./arteCompeticoes.js";
 
-export const ARTE = { refletores, coletiva, confete, estadioNoite, porDoSol, tunel, torcida, lesao, contrato, vestiario, fisio, aviao, treino, mansao, carro, protesto, casa, festa, salaApresentacao, campo };
+import estadioPremium from './arte/cenarios/estadio-premium.webp';
+import estadioPremiumMobile from './arte/cenarios/estadio-premium-mobile.webp';
+import imprensaPremium from './arte/cenarios/imprensa-premium.webp';
+import imprensaPremiumMobile from './arte/cenarios/imprensa-premium-mobile.webp';
+import diretoriaPremium from './arte/cenarios/diretoria-premium.webp';
+import diretoriaPremiumMobile from './arte/cenarios/diretoria-premium-mobile.webp';
+import treinoPremium from './arte/cenarios/treino-premium.webp';
+import treinoPremiumMobile from './arte/cenarios/treino-premium-mobile.webp';
+export const CENARIOS = { estadio: estadioPremium, estadioMobile: estadioPremiumMobile, imprensa: imprensaPremium, imprensaMobile: imprensaPremiumMobile, diretoria: diretoriaPremium, diretoriaMobile: diretoriaPremiumMobile, treino: treinoPremium, treinoMobile: treinoPremiumMobile };
+export const ARTE = { refletores, coletiva: imprensaPremium, confete, estadioNoite: estadioPremium, porDoSol, tunel, torcida, lesao, contrato, vestiario, fisio, aviao, treino: treinoPremium, mansao, carro, protesto, casa, festa, salaApresentacao: imprensaPremium, campo, diretoria: diretoriaPremium };
 
 /* Escudos e imagens de taças. As imagens em arte/competicoes são taças recortadas;
    os nomes históricos da API permanecem como logoCompeticao por compatibilidade.
@@ -32,7 +41,8 @@ export const slug = slugCompeticao;
 const porNome = (g) => Object.fromEntries(Object.entries(g).map(([k, v]) => [k.split("/").pop().replace(/\.\w+$/, ""), v]));
 const ESCUDOS = porNome(import.meta.glob("./arte/escudos/*.{svg,png,webp}", { eager: true, query: "?url", import: "default" }));
 const LOGOS = porNome(import.meta.glob("./arte/competicoes/*.{svg,png,webp}", { eager: true, query: "?url", import: "default" }));
-export const escudoDe = (nome) => ESCUDOS[slug(nome)] || null;
+const ALIASES_ESCUDOS = { kasimpasa: 'kas-mpasa', 'fc-koln': 'koln', 'hamburger-sv': 'hamburgo' };
+export const escudoDe = (nome) => ESCUDOS[ALIASES_ESCUDOS[slug(nome)] || slug(nome)] || null;
 export const logoCompeticao = (nome) => resolverImagemCompeticao(nome, LOGOS);
 const BANDEIRAS = porNome(import.meta.glob("./arte/bandeiras/*.svg", { eager: true, query: "?url", import: "default" }));
 /* bandeiras em SVG (pacote flag-icons, MIT): o emoji de bandeira não aparece no Windows */
@@ -41,6 +51,7 @@ export const temImagensOficiais = Object.keys(ESCUDOS).length + Object.keys(LOGO
 
 /* Foto de cabeçalho por evento do Modo Rápido (eventos sem foto ficam só com o ícone) */
 export const ARTE_EVENTO = {
+  idolo: estadioPremium, homenagem: estadioPremium, estatua: estadioPremium, demissao: diretoriaPremium, diretoria: diretoriaPremium,
   propostas: contrato, renovacao: contrato, fimContrato: contrato, livre: contrato, clausula: contrato, empresario: contrato, parceria: contrato,
   lesaoPre: fisio, voltaLesao: fisio, esgotamento: fisio, machucado: fisio, infiltracao: fisio, recuperacao: fisio, veterano: lesao,
   emprestimo: aviao, forcarSaida: aviao, voltarCasa: aviao, excursao: aviao, saudade: aviao, idiomaImprensa: aviao, naturalizacao: aviao,

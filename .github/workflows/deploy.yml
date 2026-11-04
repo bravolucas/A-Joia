@@ -10,6 +10,10 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
 jobs:
   construir:
     runs-on: ubuntu-latest
@@ -37,3 +41,5 @@ jobs:
     steps:
       - id: deploy
         uses: actions/deploy-pages@v4
+        with:
+          timeout: '1200000'

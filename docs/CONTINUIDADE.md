@@ -2,17 +2,13 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
-## Publicação enviada — aguardando execução do GitHub
+## Recuperação da publicação — 04/11/2026
 
-O treinador rápido e a vitrine agrupada foram integrados em `main` no commit **`9eeab44`**, por fast-forward a partir de `b8667e3`, sem conflitos. O mesmo commit está preservado na branch de continuidade. O GitHub iniciou os workflows, mas, na última consulta de 04/11/2026, todos permaneciam em **Queued**, sem erro nem solicitação de aprovação informados.
+A consulta atualizada (com `?check_suite_focus=true`) revelou que a publicação `41862065975` falhou: a construção e o artefato concluíram, mas `actions/deploy-pages@v4` atingiu o prazo padrão de dez minutos (`Timeout reached, aborting!`). As consultas anteriores mostravam um estado Queued desatualizado. A validação do treinador/navegador `41862065941` concluiu com sucesso.
 
-- Publicação: https://github.com/bravolucas/A-Joia/actions/runs/41862065975
-- Validação do treinador/navegador: https://github.com/bravolucas/A-Joia/actions/runs/41862065941
-- Validação geral: https://github.com/bravolucas/A-Joia/actions/runs/41862065920
+O jogo está em `main` desde `9eeab44`. Para recuperar a publicação autorizada, o workflow passa a aguardar vinte minutos e usa concorrência `github-pages` sem cancelar uma publicação em andamento. Isso permite nova tentativa sem alterar o jogo. Ainda é necessário confirmar sucesso do novo workflow; não afirmar que está publicado antes disso.
 
-Não afirmar que a versão nova já está no site até o workflow de publicação concluir com sucesso. Ao retomar, consultar essas execuções primeiro; **não repetir o push/deploy nem reaplicar as alterações** só porque o site ainda mostra a versão anterior. A espera observada é a fila externa do GitHub. Se surgir falha, ler o erro e corrigir a causa; as validações locais já passaram.
-
-O pacote inclui a vitrine com ×2/×3/×4 e o treinador de uma/duas decisões, sem administração de elenco, mercado ou comissão. A documentação abaixo descreve a implementação completa. Esta atualização de acompanhamento fica somente na branch de continuidade, sem novo deploy.
+A entrega inclui taças agrupadas com ×2/×3/×4 e treinador com uma/duas decisões, sem administração obrigatória de elenco, mercado ou comissão. Não reaplicar etapas antigas. Consultar execuções com uma query atualizada para evitar o HTML desatualizado observado.
 
 ## Revisão atual — treinador rápido e propostas coerentes
 

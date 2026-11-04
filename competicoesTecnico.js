@@ -1,3 +1,4 @@
+import { riscoEstiloTecnico } from './taticasTecnico.js';
 const limitar = (n, min, max) => Math.max(min, Math.min(max, n));
 const sorteio = () => Math.random();
 const forca = (clube) => Number(clube?.forca ?? clube?.elenco ?? 50);
@@ -18,14 +19,22 @@ function poisson(media, rng) {
   return gols - 1;
 }
 
+/** A tática pertence somente ao clube do usuário, inclusive quando visitante. */
+export function mediasPartidaCopaTecnico(casa,fora,clubeUsuario,bonusTecnico=0,campoNeutro=false){
+ const usuarioCasa=casa.nome===clubeUsuario,usuarioFora=fora.nome===clubeUsuario;
+ const tatica=usuarioCasa?casa.planoTatico:usuarioFora?fora.planoTatico:null;
+ const ajuste=limitar(Number(tatica?.ajuste)||0,-3,3);
+ const diferencaBase=forca(casa)+(usuarioCasa?bonusTecnico+ajuste:0)-forca(fora)-(usuarioFora?bonusTecnico+ajuste:0);
+ const diferencaUsuario=usuarioCasa?diferencaBase:-diferencaBase;
+ const risco=tatica?riscoEstiloTecnico(tatica.estilo,diferencaUsuario)/.008:0;
+ const diferenca=diferencaBase+(usuarioCasa?risco:usuarioFora?-risco:0);
+ const ritmo=tatica?.estilo==='ofensivo'?1.2:tatica?.estilo==='defensivo'?.8:1;
+ const mediaCasa=(campoNeutro?limitar(1.235+diferenca*.0105,.275,2.6):limitar(1.35+diferenca*.012,.3,2.8))*ritmo;
+ const mediaFora=(campoNeutro?limitar(1.235-diferenca*.0105,.275,2.6):limitar(1.12-diferenca*.009,.25,2.4))*ritmo;
+ return {mediaCasa,mediaFora,diferenca,...(tatica?{planoTatico:{estilo:tatica.estilo,formacao:tatica.formacao}}:{})};
+}
 function criarPartida(casa, fora, clubeUsuario, bonusTecnico, rng, desempatar = false, opcoes = {}) {
-  const bonusCasa = casa.nome === clubeUsuario ? bonusTecnico : 0;
-  const bonusFora = fora.nome === clubeUsuario ? bonusTecnico : 0;
-  const diferenca = forca(casa) + bonusCasa - forca(fora) - bonusFora;
-  const mediaCasa = opcoes.campoNeutro ? limitar(1.235 + diferenca * 0.0105, 0.275, 2.6)
-    : limitar(1.35 + diferenca * 0.012, 0.3, 2.8);
-  const mediaFora = opcoes.campoNeutro ? limitar(1.235 - diferenca * 0.0105, 0.275, 2.6)
-    : limitar(1.12 - diferenca * 0.009, 0.25, 2.4);
+  const {mediaCasa,mediaFora,diferenca,planoTatico}=mediasPartidaCopaTecnico(casa,fora,clubeUsuario,bonusTecnico,opcoes.campoNeutro);
   let golsCasa = poisson(mediaCasa, rng);
   let golsFora = poisson(mediaFora, rng);
   let prorrogacao = null;
@@ -43,7 +52,7 @@ function criarPartida(casa, fora, clubeUsuario, bonusTecnico, rng, desempatar = 
     penaltis = vencedor === casa ? 'Casa' : 'Fora';
   }
   return { casa: casa.nome, fora: fora.nome, golsCasa, golsFora, vencedor: vencedor?.nome || null, penaltis,
-    ...(opcoes.campoNeutro ? { campoNeutro: true } : {}), ...(prorrogacao ? { prorrogacao } : {}) };
+    ...(planoTatico ? { planoTatico } : {}), ...(opcoes.campoNeutro ? { campoNeutro: true } : {}), ...(prorrogacao ? { prorrogacao } : {}) };
 }
 
 function registrarJogo(tabela, jogo) {
@@ -236,14 +245,13 @@ function criarConfrontoIdaVolta(casa, fora, nomeUsuario, bonusTecnico, rng) {
   let vencedor = golsCasa > golsFora ? casa.nome : golsFora > golsCasa ? fora.nome : null;
   let penaltis = null;
   if (!vencedor) {
-    const diferenca = forca(casa) + (casa.nome === nomeUsuario ? bonusTecnico : 0)
-      - forca(fora) - (fora.nome === nomeUsuario ? bonusTecnico : 0);
+    const {diferenca}=mediasPartidaCopaTecnico(casa,fora,nomeUsuario,bonusTecnico,true);
     vencedor = rng() < limitar(0.5 + diferenca * 0.003, 0.3, 0.7) ? casa.nome : fora.nome;
     penaltis = vencedor === casa.nome ? 'Casa' : 'Fora';
   }
   // O vencedor pertence ao confronto; os resultados de cada partida permanecem intactos.
   return { casa: casa.nome, fora: fora.nome, golsCasa, golsFora, vencedor, penaltis,
-    agregado: true, partidas: [{ ...ida, etapa: 'Ida' }, { ...volta, etapa: 'Volta' }] };
+    ...(ida.planoTatico ? { planoTatico: ida.planoTatico } : {}), agregado: true, partidas: [{ ...ida, etapa: 'Ida' }, { ...volta, etapa: 'Volta' }] };
 }
 
 function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng, formato = {}) {
@@ -284,18 +292,18 @@ function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng, formato = {})
   return { campeao, fases, faseUsuario, jogosUsuario: fases.flatMap(f => f.jogos.filter(j => j.casa === nomeUsuario || j.fora === nomeUsuario || j.bye === nomeUsuario)) };
 }
 
-export function simularCopaNacionalTecnico({ clubes, nomeUsuario, pais, forcaUsuario, nome, bonusTecnico = 0, formato = {}, rng = sorteio }) {
+export function simularCopaNacionalTecnico({ clubes, nomeUsuario, pais, forcaUsuario, nome, bonusTecnico = 0, tatica = null, formato = {}, rng = sorteio }) {
   // A copa usa todos os clubes cadastrados para o país. A força não corta a
   // lista nem inclui o clube do treinador por fora; o elenco só afeta os placares.
   const participantes = [...new Map(clubes.filter(c => c.pais === pais).map(c =>
-    [c.nome, c.nome === nomeUsuario ? { ...c, elenco: forcaUsuario } : c])).values()];
+    [c.nome, c.nome === nomeUsuario ? { ...c, forca: forcaUsuario ?? forca(c), elenco: forcaUsuario ?? forca(c), ...(tatica ? {planoTatico:tatica} : {}) } : c])).values()];
   if (participantes.length < 2 || !participantes.some(c => c.nome === nomeUsuario)) {
     return { nome, tipo: 'copa', participantes: 0, campeao: null, faseUsuario: 'Não classificado', fases: [], jogosUsuario: [] };
   }
   return { nome, tipo: 'copa', participantes: participantes.length, ...jogarEliminatoria(participantes, nomeUsuario, bonusTecnico, rng, formato) };
 }
 
-export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forcaUsuario, nome, bonusTecnico = 0, participantesQualificados = [], formato = {}, rng = sorteio }) {
+export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forcaUsuario, nome, bonusTecnico = 0, tatica = null, participantesQualificados = [], formato = {}, rng = sorteio }) {
   const totalParticipantes = formato.totalParticipantes ?? 16;
   const quantidadeGrupos = formato.grupos ?? 4;
   const classificadosPorGrupo = formato.classificadosPorGrupo ?? 2;
@@ -315,6 +323,7 @@ export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forca
   const participantes = [...new Map(participantesQualificados.map(c => {
     const cadastroClube = cadastro.get(c.nome) || c;
     return [c.nome, { ...cadastroClube, ...c,
+      ...(c.nome===nomeUsuario?{forca:forcaUsuario ?? forca(c),...(tatica?{planoTatico:tatica}:{})}:{}),
       elenco: c.nome === nomeUsuario ? (forcaUsuario ?? c.elenco ?? c.forca) : (c.elenco ?? c.forca ?? cadastroClube.elenco) }];
   })).values()];
 

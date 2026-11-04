@@ -67,12 +67,28 @@ Fases posteriores aprovadas em princípio na conversa: tática com efeito real, 
 - O placar também acompanha o estilo: faixa de gols menor no defensivo e maior no ofensivo. Resultado V/E/D permanece coerente. Usado tanto na temporada expressa quanto na simulação por etapas.
 - Corrigido `forcaClubeTecnico`: o estado numérico `t.elenco` agora tem prioridade sobre o cadastro estático do clube. Antes, compras, vendas e evolução podiam não afetar os confrontos de clubes cadastrados.
 - Estilo e formação são registrados nos confrontos e no resumo anual; resultados já salvos não são recalculados.
-- **Limite de escopo:** a nova formação e o modelo contextual de estilo atuam na liga. Copas preservam seu modelo anterior e o bônus de estilo já existente; unificar a tática das copas é um próximo passo, antes de anunciar efeitos em todas as competições.
+- **Escopo inicial (já ampliado no checkpoint seguinte):** esta primeira etapa cobria a liga. As copas agora recebem a tática, conforme a seção seguinte.
 - Testes: novo arquivo `tests/taticas-tecnico.test.mjs` cobre adequação, compatibilidade, riscos, probabilidades, placares, força dinâmica e restrições de alteração. O navegador cobre escolha, recarga e registro na temporada em 390/1366 pixels.
 - Validação final desta etapa: **19 arquivos de testes de lógica, build de produção e 36 testes de navegador passaram**. Inclui 12 fluxos de treinador e as regressões de apresentação, museu e minigames. A tela foi conferida em 390 pixels.
 - Logs desta etapa: `/tmp/taticas-test.log`, `/tmp/taticas-build.log` e `/tmp/taticas-browser-final.log`. Capturas: `/tmp/taticas-390.png` e `/tmp/taticas-1366.png`.
 
-Prioridade ao retomar: conferir o checkpoint atual, integrar tática às copas preservando regulamentos e resultados anteriores; depois intervenções em partidas importantes e comissão técnica. Manter o site sem deploy até pedido do usuário.
+Prioridade ao retomar: conferir o checkpoint atual; as copas já foram integradas. Próxima evolução aprovada: intervenções em partidas importantes, depois comissão técnica. Manter o site sem deploy até pedido do usuário.
+
+## Checkpoint de táticas nas copas
+
+- `simularCopaNacionalTecnico` e `simularCopaContinentalTecnico` recebem o parâmetro opcional `tatica`, calculado por `perfilTaticoTecnico` na simulação da temporada. O objeto acompanha somente o clube do treinador.
+- `riscoEstiloTecnico` centraliza a vantagem contextual de estilo, compartilhada por liga e copas. Na liga mantém os coeficientes anteriores; nas copas é convertida para a escala de força antes do cálculo dos gols.
+- `mediasPartidaCopaTecnico` aplica ajuste de formação limitado a -3/+3 e ritmo ofensivo de 1,2 ou defensivo de 0,8 nas médias de gols dos dois lados. A vantagem contextual é calculada da perspectiva do usuário e invertida quando ele joga fora. Terceiros continuam usando o modelo anterior.
+- A mesma média rege os 90 minutos e a prorrogação. Ida/volta continuam independentes; agregado e pênaltis seguem as regras existentes. Campo neutro continua simétrico. Não foram alterados participantes, vagas nem formatos.
+- O bônus antigo por estilo nas copas foi substituído pelo modelo compartilhado, mantendo o bônus neutro de 1 e o efeito de moral. Isso evita aplicar dois bônus de estilo ao mesmo tempo.
+- A força do usuário agora sobrescreve tanto `forca` quanto `elenco` ao montar participantes. Corrige o caso em que um cadastro com campo `forca` ignorava o `forcaUsuario` informado.
+- Partidas do usuário registram `planoTatico: { estilo, formacao }`. Confrontos agregados e as duas partidas também carregam esse registro. Não se recalculam torneios antigos ao abrir ou recarregar o save.
+- A interface informa que o plano vale para liga e copas da temporada. Não houve novo fluxo nem mudança no layout.
+- Validação final: **19 arquivos de testes de lógica, build de produção e 36 testes de navegador passaram**.
+- Verificação de lógica: 22 testes no arquivo de competições, incluindo contexto/ritmo, neutralidade, ida/volta, grupos e compatibilidade. O equilibrado sem ajuste reproduz os placares antigos com a mesma semente, descontando somente os metadados novos.
+- O navegador verifica em celular e desktop que as partidas da copa recebem o plano escolhido e que recarregar o save preserva os torneios completos. Logs atuais: `/tmp/copas-unidade.log`, `/tmp/copas-test.log`, `/tmp/copas-build.log`, `/tmp/copas-browser.log`.
+
+Próximo passo: planejar uma intervenção em partida importante sem duplicar simulações ou resultados. Hoje o botão simula a temporada inteira; será necessário pausar em um ponto explícito, persistir o estado pendente e retomar com uma escolha única, preservando o ritmo escolhido pelo jogador e os saves existentes. Não abrir prompts obrigatórios para todas as partidas. Publicação segue pendente de pedido do usuário.
 
 ## Revisão econômica desta etapa
 

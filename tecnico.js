@@ -1,4 +1,4 @@
-import { FORMACOES_TECNICO, perfilTaticoTecnico } from './taticasTecnico.js';
+import { FORMACOES_TECNICO, perfilTaticoTecnico, riscoEstiloTecnico } from './taticasTecnico.js';
 import { CLUBES, CLASSICOS } from './data.js';
 import { EVENTOS_CONTEXTO_TECNICO } from './eventosTecnico.js';
 import { competicaoDoTitulo } from './tacas.js';
@@ -468,8 +468,7 @@ export function probabilidadesConfrontoTecnico(t, adversario) {
   const tatica=perfilTaticoTecnico(t);
   const diferenca = forcaClubeTecnico(t) + tatica.ajuste - (adversario?.forca ?? 50);
   const mando = adversario?.casa ? 0.035 : -0.035;
-  const contexto=Math.max(-1,Math.min(1,diferenca/20));
-  const risco=tatica.estilo==='ofensivo'?.025*contexto:tatica.estilo==='defensivo'?-.02*contexto:0;
+  const risco=riscoEstiloTecnico(tatica.estilo,diferenca);
   const vitoria = limitar(0.44 + diferenca * 0.008 + mando + risco, 0.16, 0.72);
   const empateBase=limitar(0.27-Math.abs(diferenca)*.002,0.16,0.27);
   const empate=Math.min(1-vitoria-.06,Math.max(.1,empateBase+(tatica.estilo==='defensivo'?.05:tatica.estilo==='ofensivo'?-.05:0)));
@@ -773,13 +772,13 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
     alemanha: 'UEFA Champions League', franca: 'UEFA Champions League', franca2: null,
     alemanha2: null, arabia: 'AFC Champions League Elite', holanda: 'UEFA Champions League', mls: 'CONCACAF Champions Cup', turquia: 'UEFA Champions League'
   };
-  const bonusTecnico = ((t.moral ?? 50) - 50) * 0.06
-    + (t.estilo === 'ofensivo' ? 1.5 : t.estilo === 'defensivo' ? 0.5 : 1);
+  const bonusTecnico = ((t.moral ?? 50) - 50) * 0.06 + 1;
+  const tatica=perfilTaticoTecnico(t);
   const torneios = [];
   const copaNome = copasPorLiga[ligaAtual];
   if (copaNome) torneios.push(simularCopaNacionalTecnico({
     clubes: CLUBES_CONVITES_TECNICO, nomeUsuario: t.clube, pais: t.pais,
-    forcaUsuario: t.elenco ?? forcaClubeTecnico(t), nome: copaNome, bonusTecnico,
+    forcaUsuario: t.elenco ?? forcaClubeTecnico(t), nome: copaNome, bonusTecnico, tatica,
     formato: t.regrasCompeticoes?.[copaNome]?.formato || {}, rng
   }));
   const torneioAnterior = t.temporadas?.at(-1);
@@ -797,7 +796,7 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
     const continental = simularCopaContinentalTecnico({
       clubes: CLUBES_CONVITES_TECNICO, nomeUsuario: t.clube, pais: t.pais,
       forcaUsuario: t.elenco ?? forcaClubeTecnico(t), nome: continentalNome,
-      participantesQualificados, bonusTecnico, formato: formatoContinental, rng
+      participantesQualificados, bonusTecnico, tatica, formato: formatoContinental, rng
     });
     if (continental) torneios.push(continental);
   }

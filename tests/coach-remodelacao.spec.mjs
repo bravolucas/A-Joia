@@ -207,5 +207,12 @@ for(const width of [390,1366]){
   const temporada=(await salvo(page)).tecnico.temporadas[0];
   expect(temporada.formacao).toBe('3-5-2');expect(temporada.estilo).toBe('defensivo');
   expect(temporada.confrontos.filter(j=>!j.folga).every(j=>j.formacao==='3-5-2'&&j.estilo==='defensivo')).toBe(true);
+  const copa=temporada.torneios.find(t=>t.tipo==='copa');
+  expect(copa).toBeTruthy();
+  const jogos=copa.jogosUsuario.filter(j=>!j.bye);
+  expect(jogos.length).toBeGreaterThan(0);
+  expect(jogos.every(j=>j.planoTatico?.formacao==='3-5-2'&&j.planoTatico?.estilo==='defensivo')).toBe(true);
+  await page.reload();await page.getByRole('button',{name:/Continuar · Treinador de teste/}).click();
+  expect((await salvo(page)).tecnico.temporadas[0].torneios).toEqual(temporada.torneios);
  });
 }

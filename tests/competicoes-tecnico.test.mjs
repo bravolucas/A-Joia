@@ -269,3 +269,61 @@ test('final preserva os 90 minutos e soma a prorrogação sem fabricar empate', 
   }
   assert.ok(decidiuNos90 && decidiuNaProrrogacao);
 });
+
+test('tática nas copas muda ritmo e risco apenas nas partidas do treinador',async()=>{
+ const {mediasPartidaCopaTecnico}=await import('../competicoesTecnico.js');
+ const usuario={nome:'Meu clube',elenco:80},rival={nome:'Rival',elenco:60};
+ const calcular=(estilo,casa=usuario,fora=rival,neutro=false)=>mediasPartidaCopaTecnico(
+  {...casa,...(casa.nome===usuario.nome?{planoTatico:{estilo,formacao:'4-3-3',ajuste:2}}:{})},
+  {...fora,...(fora.nome===usuario.nome?{planoTatico:{estilo,formacao:'4-3-3',ajuste:2}}:{})},usuario.nome,0,neutro);
+ const equilibrado=calcular('equilibrado'),ofensivo=calcular('ofensivo'),defensivo=calcular('defensivo');
+ assert.ok(ofensivo.mediaCasa+ofensivo.mediaFora>equilibrado.mediaCasa+equilibrado.mediaFora);
+ assert.ok(defensivo.mediaCasa+defensivo.mediaFora<equilibrado.mediaCasa+equilibrado.mediaFora);
+ assert.ok(ofensivo.mediaCasa/ofensivo.mediaFora>equilibrado.mediaCasa/equilibrado.mediaFora);
+ assert.ok(defensivo.mediaCasa/defensivo.mediaFora<equilibrado.mediaCasa/equilibrado.mediaFora);
+ const forte={...rival,elenco:95};
+ assert.ok(calcular('defensivo',usuario,forte).diferenca>calcular('equilibrado',usuario,forte).diferenca);
+ const casa=calcular('ofensivo',usuario,rival,true),fora=calcular('ofensivo',rival,usuario,true);
+ assert.equal(casa.mediaCasa,fora.mediaFora);assert.equal(casa.mediaFora,fora.mediaCasa);
+ assert.deepEqual(mediasPartidaCopaTecnico(rival,{nome:'Outro',elenco:60},usuario.nome),
+  mediasPartidaCopaTecnico({...rival,planoTatico:{estilo:'ofensivo',ajuste:3}},{nome:'Outro',elenco:60},usuario.nome));
+});
+test('copa nacional aplica formação e estilo à ida, volta e final sem mudar regulamento',()=>{
+ const opcoes={clubes:clubes.filter(c=>c.pais==='Brasil').slice(0,8),nomeUsuario:'Brasil 0',pais:'Brasil',forcaUsuario:90,
+  nome:'Copa de teste',formato:{mataMataIdaVolta:true,finalCampoNeutro:true,finalProrrogacao:true}};
+ const tatica={estilo:'defensivo',formacao:'3-5-2',ajuste:2};
+ const antes=structuredClone(opcoes);
+ const copa=simularCopaNacionalTecnico({...opcoes,tatica,rng:rngSeed(17)});
+ assert.deepEqual(opcoes,antes);assert.equal(copa.participantes,8);
+ assert.equal(copa.fases.length,3);
+ assert.ok(copa.jogosUsuario.length>0);
+ for(const fase of copa.fases)for(const jogo of fase.jogos){
+  const usuario=jogo.casa===opcoes.nomeUsuario||jogo.fora===opcoes.nomeUsuario;
+  assert.equal(!!jogo.planoTatico,usuario);
+  if(usuario)assert.deepEqual(jogo.planoTatico,{estilo:'defensivo',formacao:'3-5-2'});
+  if(jogo.agregado){
+   assert.equal(jogo.partidas.length,2);
+   assert.equal(jogo.golsCasa,jogo.partidas[0].golsCasa+jogo.partidas[1].golsFora);
+   assert.equal(jogo.golsFora,jogo.partidas[0].golsFora+jogo.partidas[1].golsCasa);
+   for(const partida of jogo.partidas)assert.equal(!!partida.planoTatico,usuario);
+  } else assert.equal(jogo.campoNeutro,true);
+ }
+});
+test('continental aplica tática nos grupos e mata-mata; equilibrado sem ajuste preserva placares',()=>{
+ const opcoes={clubes,nomeUsuario:'Brasil 0',pais:'Brasil',forcaUsuario:90,nome:'Copa Libertadores',
+  participantesQualificados:clubes.slice(0,16)};
+ const tatica={estilo:'ofensivo',formacao:'4-3-3',ajuste:3};
+ const copa=simularCopaContinentalTecnico({...opcoes,tatica,rng:rngSeed(31)});
+ assert.equal(copa.participantes,16);assert.equal(copa.grupos.length,4);
+ const jogos=[...copa.grupos.flatMap(g=>g.jogos),...copa.fases.flatMap(f=>f.jogos)];
+ for(const jogo of jogos){
+  const usuario=jogo.casa===opcoes.nomeUsuario||jogo.fora===opcoes.nomeUsuario;
+  assert.equal(!!jogo.planoTatico,usuario);
+  if(usuario)assert.deepEqual(jogo.planoTatico,{estilo:'ofensivo',formacao:'4-3-3'});
+ }
+ assert.ok(copa.jogosUsuario.length>=6);
+ const legado=simularCopaContinentalTecnico({...opcoes,rng:rngSeed(31)});
+ const neutro=simularCopaContinentalTecnico({...opcoes,tatica:{estilo:'equilibrado',formacao:'4-4-2',ajuste:0},rng:rngSeed(31)});
+ const semMetadados=x=>JSON.parse(JSON.stringify(x),(k,v)=>k==='planoTatico'?undefined:v);
+ assert.deepEqual(semMetadados(neutro),legado);
+});

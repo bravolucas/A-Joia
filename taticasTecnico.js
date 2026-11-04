@@ -19,3 +19,9 @@ export function perfilTaticoTecnico(t={}){
  }
  return {estilo,formacao:formacao.id,ajuste};
 }
+
+/** Vantagem contextual em probabilidade; compartilhada por liga e copas. */
+export function riscoEstiloTecnico(estilo,diferenca){
+ const contexto=Math.max(-1,Math.min(1,diferenca/20));
+ return estilo==='ofensivo'?.025*contexto:estilo==='defensivo'?-.02*contexto:0;
+}

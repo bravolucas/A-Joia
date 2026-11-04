@@ -2,6 +2,12 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Publicação confirmada — 04/11/2026
+
+O usuário autorizou publicar as alterações. `main` recebeu **`93416ea`** por fast-forward de `47f17bc`, sem conflitos. **GitHub Pages concluiu com sucesso**: https://github.com/bravolucas/A-Joia/actions/runs/41886776214 (1m23s). Validação geral também passou: https://github.com/bravolucas/A-Joia/actions/runs/41886776264 . Conferência do treinador/navegador também concluiu com sucesso: https://github.com/bravolucas/A-Joia/actions/runs/41886776170 .
+
+Publicado: apresentação com camisa e escudo sem o boneco, correções de bloqueio/altura/rolagem das janelas e agrupamento de taças com ×N e anos na galeria do jogador e seleção. Endereço: https://bravolucas.github.io/A-Joia/ . As indicações de “salva localmente/sem publicação” nas seções abaixo descrevem os checkpoints anteriores e foram superadas por este registro. Não reaplicar ou republicar automaticamente.
+
 ## Conquistas agrupadas na galeria do jogador
 
 O usuário apontou o cartão de clube do fim da carreira de jogador, que ainda repetia ícones e ocultava excedentes em “+N”. `GaleriaFim` agora usa `ConquistasJogador` nos cartões dos clubes e da seleção: mesma função de agrupamento canônico e mesmo componente de taça do treinador, uma taça por competição, multiplicador dourado ×N, nome e todos os anos em ordem decrescente. Nenhum título é ocultado por limite de seis ícones. Prêmios individuais permanecem na área própria. Os registros do save não são alterados.

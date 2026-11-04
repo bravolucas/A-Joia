@@ -1,3 +1,4 @@
+import DesafioTemporada from "./DesafioTemporada.jsx";
 import "./InterfaceJogo.css";
 import "./LayoutDesktop.css";
 import ConquistasJogador from "./ConquistasJogador.jsx";
@@ -28,7 +29,7 @@ import {
   iniciarNegociacao, ajustarNegociacao, fecharNegociacao, CAMPOS_NEGOCIACAO, fama_negociador,
   INVESTIMENTOS, comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
   chanceMomento, miniDaPosicao, ehPremioIndividual, RARIDADES, ganhosDaCarta, efeitosDaCarta, vagasDaLiga, ehSegundaDivisao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
-  eventoDaJanela, segundoEvento, anoDeDecisao, eventoImpasse, valorAtual, comparaSalario, textoEmoji, efeitosDaDecisao, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, desafiosDaTemporada, resolverDesafio, desafioPendente, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
+  eventoDaJanela, segundoEvento, anoDeDecisao, eventoImpasse, valorAtual, comparaSalario, textoEmoji, efeitosDaDecisao, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, resolverDesafio, desafioPendente, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
   noticiasDaTemporada, retrospectoRivalidade,
   copaPendente, opcoesCopa, jogarCopa,
 } from "./rapido.js";
@@ -2686,9 +2687,9 @@ function TelaCheia({ rotulo, cor = "#3F3F46", children, botao = "Continuar", onF
   return createPortal(
     <div className="cp fixed inset-0 z-[70] overflow-y-auto cp-surge janela-tela-cheia" role="dialog" aria-modal="true" aria-label={rotulo} data-pop=""
       style={{ background: `radial-gradient(130% 55% at 50% 0%, ${cor}55, #0B0B0C 62%), #0B0B0C` }}>
-      <div className="min-h-full max-w-md mx-auto px-4 pt-6 pb-5 flex flex-col">
+      <div className="janela-estrutura max-w-md mx-auto px-4 pt-6 pb-5 flex flex-col">
         <header className="janela-contexto">{rotulo}</header>
-        <div className={`flex-1 shrink-0 flex flex-col gap-3 ${centro ? "justify-center" : ""}`}>{children}</div>
+        <div className={`janela-conteudo flex-1 flex flex-col gap-3 ${centro ? "justify-center" : ""}`}>{children}</div>
         <button onClick={onFechar} className={`cp-pill cp-branca text-[16px] w-full mt-5 shrink-0 ${bloqueado ? "opacity-60" : ""}`}>{botao}</button>
       </div>
     </div>,
@@ -2969,37 +2970,8 @@ function PopupTemporada({ c, card, onFechar }) {
 }
 
 /* Desafio de OVR de toda temporada: três apostas com chances diferentes */
-const FAIXA_DESAFIO = { baixo: { txt: "Risco baixo", cor: "#4ADE80" }, medio: { txt: "Risco médio", cor: "#60A5FA" }, alto: { txt: "Tudo ou nada", cor: "#F87171" } };
-function DesafioOvr({ c, onEscolher }) {
-  const ops = desafiosDaTemporada(c);
-  return (
-    <div className="cp cp-card p-3 rp-entra" style={{ borderColor: "rgba(251,146,60,.45)" }}>
-      <div className="flex items-baseline justify-between px-1">
-        <div className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#FB923C]">Desafio da temporada {c.ano}</div>
-        <div className="text-[12px] text-[#A1A1AA]">OVR {ovrDe(c)}</div>
-      </div>
-      <p className="text-[14px] text-[#D4D4D8] px-1 mt-1">Escolha um desafio: ele pode aumentar ou derrubar seu OVR.</p>
-      <div className="flex flex-col gap-2 mt-2.5">
-        {ops.map((o) => {
-          const f = FAIXA_DESAFIO[o.faixa];
-          return (
-            <button key={o.id} onClick={() => { vibrar(15); tocar("clique"); onEscolher(o.id); }} className="text-left rounded-2xl bg-[#1C1C1F] border border-[#2A2A2E] hover:border-[#52525B] px-3 py-2.5 transition-colors" aria-label={`${o.nome}: ${o.chances.map((x) => `${Math.round(x.p * 100)}% ${x.d > 0 ? "+" : ""}${x.d}`).join(", ")}`}>
-              <div className="flex items-center gap-2.5">
-                <span className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${f.cor}14`, border: `1px solid ${f.cor}33` }}><Icone e={o.icone} size={22} cor={f.cor} /></span>
-                <span className="flex-1 min-w-0">
-                  <span className="block text-[15px] font-bold text-white leading-tight">{o.nome}</span>
-                  <span className="block text-[12px] text-[#A1A1AA] leading-tight truncate">{o.texto}</span>
-                </span>
-                <span className="text-[10px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-full shrink-0" style={{ color: f.cor, background: `${f.cor}1F` }}>{f.txt}</span>
-              </div>
-              <div className="mt-2"><BarraChances chances={o.chances} /></div>
-            </button>
-          );
-        })}
-      </div>
-      <button onClick={() => onEscolher(null)} className="w-full text-[13px] font-bold text-[#A1A1AA] min-h-[40px] mt-1">Não arriscar este ano</button>
-    </div>
-  );
+function DesafioOvr({ c, resultado, onEscolher, onContinuar }) {
+  return <DesafioTemporada c={c} resultado={resultado} onEscolher={id => { vibrar(15); tocar("clique"); onEscolher(id); }} onContinuar={onContinuar} />;
 }
 
 /* ---------- Copa do Mundo: tela própria, fase a fase ---------- */
@@ -3368,10 +3340,11 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     ? { ...s, evento: s.proximo, resultado: null, efeitos: null, proximo: null, manchete: null }
     : { ...s, evento: null, resultado: null, efeitos: null, manchete: null, auto: !anoDeDecisao(s.c) }));
   const desafiar = (id) => {
-    const r = resolverDesafio(c, id);
-    setEstado((st) => ({ ...st, c: r.c }));
-    if (r.res) setPopup({ icone: r.res.icone, foto: ARTE.treino, titulo: `Desafio da temporada ${c.ano}`, escolha: r.res.nome, texto: r.res.txt, efeitos: efeitosDaDecisao(c, r.c),
-      ovrAntes: r.res.ovrAntes, ovrDepois: r.res.ovrDepois, chances: r.res.chances, idx: r.res.idx, alvo: r.res.roll, k: Date.now() });
+    setEstado(st => {
+      if (!desafioPendente(st.c) || st.desafioResultado) return st;
+      const r = resolverDesafio(st.c, id);
+      return { ...st, c: r.c, desafioResultado: r.res ? { ...r.res, efeitos: efeitosDaDecisao(st.c, r.c) } : null };
+    });
   };
   const ajustarNeg = (campo, dir) => setEstado((st) => ({ ...st, neg: ajustarNegociacao(st.neg, campo, dir) }));
   const assinar = () => {
@@ -3433,7 +3406,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           <section className="rp-jornada" aria-label="Sua carreira e decisões">
             <TabelaCarreira c={c} />
             <div className="rp-proxima max-w-xl mx-auto px-3 pt-2.5 flex flex-col gap-2.5">
-              <header className="rp-proximo-passo"><span className="rp-etiqueta">Temporada {c.ano}</span><h1>{estado.forcada ? "Hora de encerrar o ciclo" : resultado ? "Decisão tomada" : evento ? "Sua próxima decisão" : estado.auto ? "Temporada em andamento" : "Prepare sua temporada"}</h1><p>{estado.forcada ? "Confira o aviso e veja o legado da sua carreira." : resultado ? "Confira o resultado da sua escolha antes de seguir." : evento ? "Compare as opções abaixo e escolha o próximo passo." : estado.auto ? "Acompanhe a simulação ou avance quando quiser." : "Escolha um treino abaixo para começar. O histórico fica disponível para consulta."}</p></header>
+              <header className="rp-proximo-passo"><span className="rp-etiqueta">Temporada {c.ano}</span><h1>{estado.forcada ? "Hora de encerrar o ciclo" : estado.desafioResultado ? "Resultado do desafio" : resultado ? "Decisão tomada" : evento ? "Sua próxima decisão" : desafioPendente(c) ? "Desafio da temporada" : estado.auto ? "Temporada em andamento" : "Prepare sua temporada"}</h1><p>{estado.forcada ? "Confira o aviso e veja o legado da sua carreira." : estado.desafioResultado ? "Veja o que mudou e siga para preparar a temporada." : resultado ? "Confira o resultado da sua escolha antes de seguir." : evento ? "Compare as opções abaixo e escolha o próximo passo." : desafioPendente(c) ? "Uma escolha, um resultado. Tudo acontece aqui." : estado.auto ? "Acompanhe a simulação ou avance quando quiser." : "Escolha um treino abaixo para começar. O histórico fica disponível para consulta."}</p></header>
               {ultimo && !evento && <ResumoCompacto c={c} card={ultimo} onDetalhes={() => setGaveta("resumo")} />}
               {estado.aviso && <div className="rp-painel px-4 py-2.5 text-[15px] text-[#F0A99E]" style={{ borderColor: "rgba(227,107,91,.35)" }}>{estado.aviso}</div>}
               {estado.forcada ? (
@@ -3446,8 +3419,8 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
                   <CartaoEvento key={`${evento.id}:${evento.texto}`} evento={evento} resultado={resultado} efeitos={estado.efeitos} onEscolher={escolherEvento} onPedirLiga={pedirLigaUI} onAvancar={avancar} espera={pausado ? 0 : espera} />
                   {resultado && estado.manchete && c.ultimaTransferencia && <RecorteJornal manchete={estado.manchete} transf={c.ultimaTransferencia} />}
                 </>
-              ) : desafioPendente(c) ? (
-                <DesafioOvr key={c.ano} c={c} onEscolher={desafiar} />
+              ) : estado.desafioResultado || desafioPendente(c) ? (
+                <DesafioOvr key={c.ano} c={c} resultado={estado.desafioResultado} onEscolher={desafiar} onContinuar={() => setEstado(st => ({ ...st, desafioResultado: null }))} />
               ) : estado.auto ? (
                 <AutoAvanco c={c} ms={ESPERA_AUTO} onAgora={() => jogar(null)} onPausar={() => setEstado((s) => ({ ...s, auto: false }))} />
               ) : (

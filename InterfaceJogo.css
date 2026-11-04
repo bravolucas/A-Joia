@@ -18,6 +18,9 @@
 .rp-proxima button:focus-visible,.popup-conteudo button:focus-visible,.janela-tela-cheia button:focus-visible{outline:2px solid #e6cc89;outline-offset:3px}
 .janela-contexto{padding:0 0 20px;color:#b5c0b9;font:600 11px/1.5 Inter,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid #ffffff12;margin-bottom:20px;flex-shrink:0}
 .popup-conteudo{border-radius:20px;scrollbar-width:thin;scrollbar-color:#626d65 transparent}
+.janela-tela-cheia .janela-estrutura{height:100%;height:100dvh;min-height:0}
+.janela-tela-cheia .janela-conteudo{min-height:0;overflow-y:auto;overscroll-behavior:contain;justify-content:flex-start;padding:4px 4px 12px;scrollbar-width:thin}
+.janela-tela-cheia .janela-estrutura>button{flex-shrink:0;margin-top:16px;min-height:52px}
 .ct-modal .ct-modal-header{position:sticky;top:0;z-index:2;background:#18181cf5;backdrop-filter:blur(8px);padding:16px 20px}
 .ct-modal .ct-modal-header h2{font-size:14px;line-height:1.4}
 .ct-modal .ct-modal-header button{width:44px;height:44px;flex-shrink:0;border-radius:50%;background:#ffffff08}

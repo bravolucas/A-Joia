@@ -2,6 +2,14 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Desafio com resultado integrado e avanço visível
+
+O usuário relatou resultado escondido e rejeitou o radar/sorteio de OVR da tela de resultado. `DesafioTemporada.jsx/css` substitui o desafio antigo por opções legíveis com risco e chances, resultado compacto no mesmo cartão (escolha, antes/depois, efeito real e impactos adicionais) e ação única “Continuar para o treino”. Não abre mais `PopupResultado` para esse desafio, nem usa o scanner. O resultado fica em `estado.desafioResultado`, junto ao save, para retomar após recarga. O handler só resolve quando `desafioPendente` e não existe resultado, evitando aplicação duplicada; continuar apenas limpa o resumo, sem simular outra temporada. As probabilidades e regras do motor foram preservadas.
+
+Foi corrigida também a estrutura comum `TelaCheia`: cabeçalho e botão fora da área rolável, conteúdo com `min-height:0` e rolagem própria dentro da altura dinâmica da tela. Assim o botão não fica abaixo de conteúdo extenso. Verificado no Chromium com vinte efeitos em 360×420, 390×640 e 1366×640.
+
+Todos os 26 arquivos de lógica, build e 46 testes de navegador passaram. A nova regressão `tests/desafio-temporada.spec.mjs` cobre celular/desktop, resultado inline, recarga, continuidade e ausência de reaplicação; incluída também no workflow de navegador. Capturas em `docs/desafio-integrado/`. Publicação em andamento; confirmar antes de informar sucesso.
+
 ## Organização visual — primeira rodada
 
 Usuário aprovou seguir com as sugestões de layout. Implementadas as três prioridades indicadas: foco na próxima ação do jogador, tratamento visual dos pop-ups e tipografia/espaçamento. `InterfaceJogo.css` e `ModoRapido.jsx`: orientação contextual por estado da jornada; ação antes do histórico no celular e ao lado no desktop; título/contador de temporadas na trajetória, última temporada destacada, anteriores discretas e controles de expansão preservados. Reduzidas sombras e variedade de fonte nos títulos das decisões. Pop-ups de tela cheia mostram contexto no topo; cabeçalho dos modais do treinador permanece acessível durante a rolagem, com fechamento de 44 px e texto mais legível. Nenhuma decisão ou regra de simulação foi alterada. Navegação lateral segue como segunda etapa.

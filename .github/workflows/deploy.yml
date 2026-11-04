@@ -40,6 +40,7 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url || steps.deploy_retry.outputs.page_url }}
     steps:
       - name: Liberar publicação interrompida do desafio
+        if: github.event.before == '8aa76590ba51e0b1d3aef6c88d57c7bad0eb156f'
         uses: actions/github-script@v7
         with:
           script: |
@@ -54,8 +55,14 @@ jobs:
             };
             let status = await read();
             core.notice(`Estado do deployment bloqueador: ${status}`);
-            if (!finished.has(status)) {
-              await github.request('POST /repos/{owner}/{repo}/pages/deployments/{deploymentId}/cancel', params);
+            if (!['succeed', 'success', 'finished', 'missing'].includes(status)) {
+              // Reenvia o cancelamento do bloqueador conhecido, mesmo se marcado cancelado.
+              try {
+                await github.request('POST /repos/{owner}/{repo}/pages/deployments/{deploymentId}/cancel', params);
+              } catch (error) {
+                if (!finished.has(status)) throw error;
+                core.warning(`O Pages já considera o deployment encerrado (HTTP ${error.status}).`);
+              }
               for (let i = 0; i < 12; i++) {
                 status = await read();
                 if (finished.has(status) || status === 'missing') break;

@@ -2,6 +2,14 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Prêmios individuais agrupados e retomada da publicação
+
+O usuário pediu continuar a publicação pendente e apontou repetição da Bola de Ouro na área “Prêmios” da galeria do jogador. Essa área agora usa `ConquistasJogador`, com os ícones próprios de Bola/Bota de Ouro e o mesmo agrupamento canônico, multiplicadores dourados e anos usados nas taças. São preservados os registros e os clubes; o agrupamento da galeria reúne o prêmio recebido em diferentes clubes. Não mistura Bola de Ouro com Bota de Ouro. Captura em `docs/premios-agrupados/celular.png`.
+
+Conferido em 390 e 1366 px com doze Bolas e quatro Botas: dois grupos, ×12/×4 e todos os anos. Testes de lógica, build e 46 casos de navegador passaram (`/tmp/premios-agrupados-tests.log`, `/tmp/premios-agrupados-build.log`, `/tmp/premios-agrupados-browser.log`).
+
+A publicação reúne esta correção com o desafio integrado pendente. A recuperação do bloqueador antigo no workflow foi limitada ao push cujo `before` é `8aa7659`; não será repetida em publicações futuras. Neste envio, reitera o cancelamento do identificador antigo mesmo marcado cancelado, aceitando erro de cancelamento somente se já estiver encerrado. Depois aguarda até 24 segundos e tenta a publicação, com uma única repetição. Confirmar resultado do novo run antes de informar sucesso; não afirmar que o bloqueio do Pages foi resolvido sem evidência.
+
 ## Publicação do desafio bloqueada no Pages — diagnóstico final
 
 Aplicação remodelada em `1dffd03`, atualmente em `main` junto às correções de workflow no commit **`8aa7659`**. **Ainda não publicada.** Último deploy: https://github.com/bravolucas/A-Joia/actions/runs/41896450475 . Build e validação geral passaram; todos os 46 casos de navegador passaram localmente e nos runs anteriores com o mesmo código da aplicação.

@@ -48,6 +48,7 @@ for (const width of [390, 1366]) {
     if (width > 900) expect(linha.x).toBeGreaterThan(ficha.x + ficha.width);
     else expect(linha.y).toBeGreaterThan(ficha.y);
     await page.getByRole('button', { name: /Começar no Confiança/ }).click();
+    await page.getByRole('button', { name: 'Tomar decisão e simular' }).click();
     const decisao = page.getByRole('dialog', { name: 'Decisão de carreira' });
     await expect(decisao).toBeVisible();
     await decisao.locator('.ct-decisions button').first().click();
@@ -72,6 +73,11 @@ test('trocar de clube simula a próxima temporada uma única vez', async ({ page
   await page.getByRole('button', { name: /Assinar com Flamengo/ }).click();
   await expect.poll(async () => (await salvo(page)).tecnico.clube).toBe('Flamengo');
 
+  await expect(page.getByRole('button', { name: 'Elenco e mercado', exact: true })).toBeVisible();
+  expect((await salvo(page)).tecnico.temporadas.length).toBe(1);
+  await page.getByRole('button', { name: /Tomar decisão e simular|Simular temporada/ }).click();
+  const decisao = page.getByRole('dialog', { name: 'Decisão de carreira' });
+  if (await decisao.count()) await decisao.locator('.ct-decisions button').first().click();
   await expect.poll(async () => (await salvo(page)).tecnico.temporadas.length).toBe(2);
   expect((await salvo(page)).tecnico.temporadas[1].clube).toBe('Flamengo');
 });
@@ -80,6 +86,11 @@ test('ficar no clube mantém o contrato e avança uma temporada por vez', async 
   await abrir(page, comResultado());
   await page.getByRole('button', { name: /Ficar no Confiança/ }).click();
 
+  await expect(page.getByRole('button', { name: 'Elenco e mercado', exact: true })).toBeVisible();
+  expect((await salvo(page)).tecnico.temporadas.length).toBe(1);
+  await page.getByRole('button', { name: /Tomar decisão e simular|Simular temporada/ }).click();
+  const decisao = page.getByRole('dialog', { name: 'Decisão de carreira' });
+  if (await decisao.count()) await decisao.locator('.ct-decisions button').first().click();
   await expect.poll(async () => (await salvo(page)).tecnico.temporadas.length).toBe(2);
   expect((await salvo(page)).tecnico.temporadas[1].clube).toBe('Confiança');
 });
@@ -109,3 +120,38 @@ test('encerramento e desemprego não oferecem continuação inválida', async ({
   await expect(page.getByRole('button', { name: 'Aguardar propostas' })).toBeVisible();
   await expect(page.getByRole('button', { name: /Ficar no/ })).toHaveCount(0);
 });
+
+for (const width of [390, 1366]) {
+ test(`gestão: compra, venda e persistência em ${width}px`, async ({ page }) => {
+  await page.setViewportSize({width,height:900});
+  await abrir(page, carreira());
+  await page.getByRole('button', {name:/Começar no Confiança/}).click();
+  const abrirGestao=()=>page.getByRole('button',{name:'Elenco e mercado',exact:true}).click();
+  await abrirGestao();
+  const janela=page.getByRole('dialog',{name:'Elenco e mercado'});
+  await janela.getByRole('button',{name:'Mercado',exact:true}).click();
+  const antes=await salvo(page);
+  await janela.getByRole('button',{name:/Contratar /}).and(page.locator(':enabled')).first().click();
+  await expect(janela.getByRole('status')).toHaveText('Contratação concluída.');
+  const comprado=await salvo(page);
+  expect(comprado.tecnico.gestao.elenco.length).toBe(25);
+  expect(comprado.tecnico.gestao.saldo).toBeLessThan(antes.tecnico.gestao.saldo);
+  const alvo=comprado.tecnico.gestao.elenco.at(-1);
+  await janela.getByRole('button',{name:/Elenco \(/}).click();
+  await janela.getByRole('button',{name:`Vender ${alvo.nome}`,exact:true}).last().click();
+  await janela.getByRole('button',{name:'Cancelar venda'}).click();
+  expect((await salvo(page)).tecnico.gestao.elenco.length).toBe(25);
+  await janela.getByRole('button',{name:`Vender ${alvo.nome}`,exact:true}).last().click();
+  await janela.getByRole('button',{name:'Confirmar venda',exact:true}).click();
+  await expect(janela.getByRole('status')).toHaveText('Venda concluída.');
+  const vendido=await salvo(page);
+  expect(vendido.tecnico.gestao.elenco.length).toBe(24);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:`/tmp/gestao-${width}.png`,fullPage:true});
+  await page.keyboard.press('Escape');
+  await page.reload();
+  await page.getByRole('button',{name:/Continuar · Treinador de teste/}).click();
+  await abrirGestao();
+  expect((await salvo(page)).tecnico.gestao).toEqual(vendido.tecnico.gestao);
+ });
+}

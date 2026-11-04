@@ -1,3 +1,4 @@
+import { prepararGestaoTecnico, negociarElencoTecnico } from './mercadoTecnico.js';
 import { efeitoLance } from './som.js';
 import { JogadorCampo, RetratoApresentacao, CamisaPremium, useCenario } from './VisualFutebol.jsx';
 import { criarIdMuseu } from './museu.js';
@@ -3269,6 +3270,13 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     else salvarRapido(estado);
   }, [estado, etapa]);
   useEffect(() => { window.scrollTo({ top: 0 }); }, [etapa]);
+  useEffect(() => {
+    const t = c?.tecnico;
+    if (etapa !== 'tecnico' || !t?.clube || t.fase !== 'pretemporada' || t.demitido || t.desempregado || (!t.clubeInicialEscolhido && t.opcoesInicio?.length)) return;
+    if (t.gestao?.versao === 1 && t.gestao.clube === t.clube && t.gestao.ano === t.ano) return;
+    setEstado(st => ({ ...st, c: prepararGestaoTecnico(st.c) }));
+  }, [etapa, c?.tecnico]);
+
 
   // a primeira decisão é dentro do jogo: três clubes de base para escolher
   const criar = (dados) => { const cc = criarJogador(dados); cc.museuId = criarIdMuseu(); setEstado({ etapa: "evento", c: cc, evento: sortearEvento(cc, { somente: "base" }), resultado: null, fila: false }); };
@@ -3457,15 +3465,16 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "traco" && <TelaTraco c={c} opcoes={(opcoesTraco || []).map(tracoDe).filter(Boolean)} onEscolher={escolherT} />}
         {etapa === "fim" && <FimDeCarreira c={c} onNova={nova} onSair={onSair} onComecarTecnico={comecarTecnico} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
         {etapa === "tecnico" && <CarreiraTecnico c={c}
+          onNegociarElenco={(tipo, id) => setEstado(st => ({ ...st, c: negociarElencoTecnico(st.c, tipo, id) }))}
           onEstilo={(id) => setEstado((st) => ({ ...st, c: definirEstiloTecnico(st.c, id) }))}
           onDecisao={(id) => setEstado((st) => ({ ...st, c: id ? tomarDecisaoTecnico(st.c, id) : st.c }))}
           onSimularTemporada={(id) => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(st.c, id ?? null) }))}
           onReuniao={(id) => setEstado((st) => ({ ...st, c: reuniaoEmergenciaTecnico(st.c, id) }))}
           onJogar={() => setEstado((st) => ({ ...st, c: simularEtapaTecnico(st.c) }))}
-          onEscolherClubeInicial={(nome) => setEstado((st) => ({ ...st, c: iniciarNoClubeIdolo(st.c, nome) }))}
+          onEscolherClubeInicial={(nome) => setEstado((st) => ({ ...st, c: prepararGestaoTecnico(iniciarNoClubeIdolo(st.c, nome)) }))}
           onEsperar={() => setEstado((st) => ({ ...st, c: passarAnoDesempregado(st.c) }))}
-          onAceitarProposta={(nome, estrategia) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia); if (!negociado.tecnico.ultimaNegociacao?.aceita) return { ...st, c: negociado }; return { ...st, c: proximaTemporadaTecnico(negociado) }; })}
-          onAvancar={() => setEstado((st) => ({ ...st, c: proximaTemporadaTecnico(st.c) }))}
+          onAceitarProposta={(nome, estrategia) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia); if (!negociado.tecnico.ultimaNegociacao?.aceita) return { ...st, c: negociado }; return { ...st, c: prepararGestaoTecnico(proximaTemporadaTecnico(negociado)) }; })}
+          onAvancar={() => setEstado((st) => ({ ...st, c: prepararGestaoTecnico(proximaTemporadaTecnico(st.c)) }))}
           onAvancarESimular={() => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(proximaTemporadaTecnico(st.c), null) }))}
           onLegado={() => setEstado((st) => ({ ...st, etapa: "fim" }))}
           onSair={onSair} />}

@@ -1,5 +1,4 @@
 /* Base de gestão do treinador. Valores em R$ mil; salários por mês.
-   Ainda não ligada à interface: a integração e o balanceamento vêm no próximo passo.
    O gerador é próprio, para não consumir a aleatoriedade da simulação existente. */
 import { CLUBES } from './data.js';
 const limitar=(n,min,max)=>Math.max(min,Math.min(max,n));
@@ -52,12 +51,15 @@ export function atualizarGestaoAnual(gestao, anoAlvo){
 }
 export function criarGestaoTecnico(t){
  if(!t?.clube)throw new Error('Escolha um clube antes de administrar o elenco.');
- if(t.gestao?.versao===1&&t.gestao.clube===t.clube)return t.fase==='pretemporada'?atualizarGestaoAnual(t.gestao,t.ano):structuredClone(t.gestao);
+ if(t.gestao?.versao===1&&t.gestao.clube===t.clube){
+  const g=t.fase==='pretemporada'?atualizarGestaoAnual(t.gestao,t.ano):structuredClone(t.gestao);
+  g.forcaMercado ??= Number(t.elenco)||50;return g;
+ }
  const forca=limitar(Number(t.elenco)||CLUBES.find(c=>c.nome===t.clube)?.forca||50,30,95);
  const rng=gerador(`${t.clube}|${t.ano}|gestao-v1`);const elenco=[];
  for(const setor of SETORES_ELENCO)for(let i=0;i<setor.quantidade;i++)elenco.push(jogador(rng,`${t.clube}:${setor.id}:${i}`,setor.id,forca));
  const folha=elenco.reduce((n,j)=>n+j.salario,0);
- return {versao:1,clube:t.clube,ano:t.ano,orcamentoInicial:Math.round((forca-25)**2*8),saldo:Math.round((forca-25)**2*8),tetoSalarial:Math.ceil(folha*1.25),elenco,movimentos:[]};
+ return {versao:1,clube:t.clube,ano:t.ano,forcaMercado:forca,orcamentoInicial:Math.round((forca-25)**2*8),saldo:Math.round((forca-25)**2*8),tetoSalarial:Math.ceil(folha*1.25),elenco,movimentos:[]};
 }
 export function resumoGestaoTecnico(g){
  const setores=SETORES_ELENCO.map(s=>{const jogadores=g.elenco.filter(j=>j.setor===s.id);return {...s,jogadores:jogadores.length,media:jogadores.length?Math.round(jogadores.reduce((n,j)=>n+j.qualidade,0)/jogadores.length):0};});
@@ -66,7 +68,7 @@ export function resumoGestaoTecnico(g){
 }
 export function gerarMercadoTecnico(t){
  const g=criarGestaoTecnico(t);const rng=gerador(`${g.clube}|${g.ano}|mercado-v1`);
- return SETORES_ELENCO.flatMap(s=>Array.from({length:3},(_,i)=>({...jogador(rng,`mercado:${g.clube}:${g.ano}:${s.id}:${i}`,s.id,Number(t.elenco)||50),origem:'mercado'}))).filter(j=>!g.movimentos.some(m=>m.ano===g.ano&&m.jogador===j.id&&(m.tipo==='compra'||m.tipo==='venda')));
+ return SETORES_ELENCO.flatMap(s=>Array.from({length:3},(_,i)=>({...jogador(rng,`mercado:${g.clube}:${g.ano}:${s.id}:${i}`,s.id,g.forcaMercado),origem:'mercado'}))).filter(j=>!g.movimentos.some(m=>m.ano===g.ano&&m.jogador===j.id&&(m.tipo==='compra'||m.tipo==='venda')));
 }
 function validarJanela(t){
  if(!t?.clube||t.demitido||t.desempregado)throw new Error('Você precisa estar empregado para administrar o elenco.');
@@ -89,4 +91,20 @@ export function venderJogadorTecnico(c,id){
  if(g.elenco.filter(j=>j.setor===alvo.setor).length<=minimo[alvo.setor])throw new Error('A venda deixaria o setor sem jogadores suficientes.');
  const valor=Math.round(alvo.valor*.8);
  return {...c,tecnico:{...t,gestao:{...g,saldo:g.saldo+valor,elenco:g.elenco.filter(j=>j.id!==id),movimentos:[...g.movimentos,{tipo:'venda',jogador:id,nome:alvo.nome,valor,ano:g.ano}]}}};
+}
+
+/** Materializa saves antigos sem recriar a gestão a cada acesso. */
+export function prepararGestaoTecnico(c){
+ const t=c?.tecnico;
+ if(!t?.clube||t.demitido||t.desempregado||t.fase!=='pretemporada')return c;
+ return {...c,tecnico:{...t,gestao:criarGestaoTecnico(t)}};
+}
+export function negociarElencoTecnico(c,tipo,id){
+ try {
+  if(!['compra','venda'].includes(tipo))throw new Error('Operação inválida.');
+  const novo=tipo==='compra'?contratarJogadorTecnico(c,id):venderJogadorTecnico(c,id);
+  const media=g=>g.elenco.reduce((n,j)=>n+j.qualidade,0)/g.elenco.length;
+  const delta=media(novo.tecnico.gestao)-media(criarGestaoTecnico(c.tecnico));
+  return {...novo,tecnico:{...novo.tecnico,elenco:limitar((Number(c.tecnico.elenco)||50)+delta,10,95),avisoGestao:{texto:tipo==='compra'?'Contratação concluída.':'Venda concluída.',erro:false}}};
+ } catch(erro){return {...c,tecnico:{...c.tecnico,avisoGestao:{texto:erro.message,erro:true}}};}
 }

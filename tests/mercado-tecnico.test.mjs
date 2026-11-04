@@ -69,3 +69,16 @@ test('limite de aporte preserva saldo acumulado com vendas',()=>{
  assert.equal(novo.saldo,g.saldo);
  assert.equal(novo.movimentos.find(m=>m.tipo==='verba').valor,0);
 });
+
+test('integração preserva força numérica, confirma transações e retorna erros seguros',async()=>{
+ const {prepararGestaoTecnico,negociarElencoTecnico}=await import('../mercadoTecnico.js');
+ const c=prepararGestaoTecnico(cenario()),antes=structuredClone(c);
+ const alvo=gerarMercadoTecnico(c.tecnico)[0];
+ const novo=negociarElencoTecnico(c,'compra',alvo.id);
+ assert.equal(typeof novo.tecnico.elenco,'number');assert.equal(novo.tecnico.avisoGestao.erro,false);
+ assert.deepEqual(c,antes);
+ assert.deepEqual(gerarMercadoTecnico(novo.tecnico),gerarMercadoTecnico(c.tecnico).filter(j=>j.id!==alvo.id));
+ const falha=negociarElencoTecnico(novo,'compra',alvo.id);
+ assert.equal(falha.tecnico.avisoGestao.erro,true);assert.deepEqual(falha.tecnico.gestao,novo.tecnico.gestao);
+ assert.deepEqual(prepararGestaoTecnico(c),c);
+});

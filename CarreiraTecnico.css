@@ -62,3 +62,22 @@
   .ct-champion-cup img { max-height: 145px; width: auto !important; }
   .ct-champion-footer { padding: 14px 20px 20px; }
 }
+
+.ct-management { padding: 20px; color: #a1a1aa; font-size: 13px; }
+.ct-management p { margin: 10px 0; }
+.ct-management-budget { display: grid; gap: 12px; margin: 18px 0; }
+.ct-management-budget span, .ct-management-list span { display: block; font-size: 11px; }
+.ct-management-budget strong { color: #fde68a; display: block; margin-top: 4px; }
+.ct-management-sectors, .ct-management-tools { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; align-items: center; }
+.ct-management-sectors span { padding: 6px; background: #18181b; border-radius: 5px; }
+.ct-management-tools .ct-primary { width: auto; padding: 8px 12px; }
+.ct-management-tools button[aria-pressed=false] { background: #27272a; color: white; }
+.ct-management-tools select { background: #18181b; color: white; padding: 8px; border: 1px solid #52525b; border-radius: 5px; }
+.ct-management-list { display: grid; gap: 8px; }
+.ct-management-list article { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; background: #18181b; border-radius: 8px; }
+.ct-management-list strong { color: white; }
+.ct-management-list .ct-primary { width: auto; padding: 8px; flex-shrink: 0; }
+.ct-management-confirm { padding: 12px; border: 1px solid #d8b44a; border-radius: 8px; margin: 12px 0; }
+.ct-management-confirm button { margin: 8px; }
+.ct-management-list article > div { min-width: 0; overflow-wrap: anywhere; }
+.ct-management-budget strong { overflow-wrap: anywhere; }

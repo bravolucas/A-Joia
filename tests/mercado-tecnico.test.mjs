@@ -123,3 +123,23 @@ test('virada reflete a evolução do elenco na força uma única vez, sem afetar
  assert.deepEqual(gerarMercadoTecnico(novo.tecnico),gerarMercadoTecnico(alvo.tecnico));
  assert.equal(c.tecnico.gestao.ano,2030);
 });
+
+test('reposição de 30 anos mantém o nível estrutural do clube sem créditos ou efeitos repetidos',async()=>{
+ const {prepararGestaoTecnico,negociarElencoTecnico}=await import('../mercadoTecnico.js');
+ for(const comissao of [false,true]){
+  let c=prepararGestaoTecnico(cenario());const inicial=c.tecnico.elenco;
+  for(let ano=1;ano<=30;ano++){
+   if(comissao)for(const cargo of ['auxiliar','preparador','olheiro'])c=negociarElencoTecnico(c,'comissao',cargo);
+   const antes=structuredClone(c);
+   const proximo=prepararGestaoTecnico({...c,tecnico:{...c.tecnico,ano:c.tecnico.ano+1}});
+   assert.deepEqual(c,antes);c=proximo;
+   const g=c.tecnico.gestao,r=resumoGestaoTecnico(g);
+   assert.equal(g.elenco.length,24);assert.equal(new Set(g.elenco.map(j=>j.id)).size,24);
+   assert.ok(g.saldo>=0);assert.ok(r.folha<=g.tetoSalarial);
+   assert.ok(g.elenco.every(j=>j.qualidade<=j.potencial));
+   assert.deepEqual(prepararGestaoTecnico(JSON.parse(JSON.stringify(c))),c);
+  }
+  assert.ok(c.tecnico.elenco>=inicial-10,'a base não deve colapsar por repor atletas com sua própria média decrescente');
+  assert.ok(c.tecnico.elenco<=inicial+5,'a comissão não deve gerar crescimento ilimitado sem reforços');
+ }
+});

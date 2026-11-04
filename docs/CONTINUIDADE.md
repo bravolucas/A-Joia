@@ -153,7 +153,17 @@ Os desafios históricos foram implementados no checkpoint abaixo. Manter o modo 
 - Verificação: **23 arquivos de testes de lógica, build de produção e regressão de 44 testes de navegador passaram**. Os dois testes específicos de desafios passaram novamente após o ajuste final de acesso ao último resultado.
 - Logs: `/tmp/desafios-test.log`, `/tmp/desafios-build.log`, `/tmp/desafios-browser.log`, `/tmp/desafios-browser-final.log`. Capturas: `/tmp/desafios-390.png` e `/tmp/desafios-1366.png`.
 
-O plano de funcionalidades desta sequência está implementado na branch de continuidade. Próxima etapa recomendada: revisão geral e balanceamento de campanhas longas, custos da comissão, reposição anual e dificuldade dos desafios. Publicação continua pendente de pedido explícito do usuário; push em main faria deploy automático.
+## Checkpoint de revisão e balanceamento
+
+- Auditoria persistida em `docs/AUDITORIA_GESTAO.md` e `docs/auditoria-gestao.json`. Script reproduzível: `node scripts/auditar-gestao.mjs`. A segunda execução reproduziu integralmente o JSON da primeira.
+- Corrigida a espiral de perda de qualidade da reposição: a geração da base agora usa o maior entre a média do elenco e a referência estrutural inicial `g.forcaMercado`, descontando os mesmos 7 pontos anteriores. Isso preserva a estrutura do clube sem aumentar automaticamente a força dos atletas existentes.
+- Em 30 anos sem gerir atletas, as forças iniciais 65/85 terminavam próximas de 34; depois do ajuste ficam em 61,2/81,2. Renovando os três cargos, ficam em 64,8/84,8. Não houve saldo negativo, quebra de teto, ids duplicados ou efeitos repetidos ao recarregar nas seis trajetórias testadas.
+- Custos e regras da comissão foram mantidos. A auditoria também executa três carreiras completas de 30 temporadas, incluindo demissão e mudança de clube, sem escrever nos saves do jogador.
+- Amostra de 100 sementes por desafio, sem reforços/decisões: Santos 51 conclusões, Leicester 13 e Flamengo 58. Flamengo mudou de Avançado para Acessível. As regras e objetivos dos desafios permanecem.
+- Validação final: **23 arquivos de testes de lógica, build de produção e 44 testes de navegador passaram**. A auditoria foi repetida após a última alteração de verificação e reproduziu os mesmos resultados.
+- Novo teste de regressão de gestão longa com e sem comissão protege contra colapso e crescimento ilimitado. Logs atuais: `/tmp/revisao-test.log`, `/tmp/revisao-build.log`, `/tmp/revisao-browser.log`.
+
+O plano de funcionalidades desta sequência e esta revisão estão implementados na branch de continuidade. Próximo passo: revisão do usuário e publicação quando solicitada. Não expandir automaticamente o escopo com novas funcionalidades. Publicação continua pendente de pedido explícito do usuário; push em main faria deploy automático.
 
 ## Revisão econômica desta etapa
 

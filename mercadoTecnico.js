@@ -30,6 +30,8 @@ export function atualizarGestaoAnual(gestao, anoAlvo){
   const observacao=equipe.some(p=>p.id==='olheiro')?2:0;
   const expirados=g.elenco.filter(j=>j.contrato<=1);
   const base=g.elenco.reduce((n,j)=>n+j.qualidade,0)/Math.max(1,g.elenco.length);
+  // A estrutura do clube sustenta a base mesmo após saídas de contrato.
+  const referenciaBase=Math.max(base,g.forcaMercado ?? base);
   g.elenco=g.elenco.filter(j=>j.contrato>1).map(j=>{
    const idade=j.idade+1;
    const qualidade=limitar(j.qualidade+(idade<24?1:idade>32?-1:0)+(idade<30?treino:0),30,j.potencial);
@@ -40,7 +42,7 @@ export function atualizarGestaoAnual(gestao, anoAlvo){
   for(const setor of SETORES_ELENCO){
    const faltam=Math.max(0,setor.quantidade-g.elenco.filter(j=>j.setor===setor.id).length);
    for(let i=0;i<faltam;i++){
-    const jovem=jogador(rng,`${g.clube}:base:${ano}:${setor.id}:${i}`,setor.id,Math.max(30,base-7));
+    const jovem=jogador(rng,`${g.clube}:base:${ano}:${setor.id}:${i}`,setor.id,Math.max(30,referenciaBase-7));
     jovem.idade=18+Math.floor(rng()*3);jovem.contrato=3;jovem.origem='base';
     jovem.qualidade=Math.min(95,jovem.qualidade+observacao);
     jovem.salario=Math.max(3,Math.round(jovem.qualidade**2/220));

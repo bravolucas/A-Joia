@@ -1,0 +1,266 @@
+{
+  "gestao": [
+    {
+      "forcaInicial": 40,
+      "comissao": false,
+      "custos": 0,
+      "marcos": [
+        {
+          "ano": 0,
+          "forca": 40,
+          "saldo": 1800,
+          "folha": 172
+        },
+        {
+          "ano": 5,
+          "forca": 36,
+          "saldo": 3600,
+          "folha": 133
+        },
+        {
+          "ano": 10,
+          "forca": 33.4,
+          "saldo": 3600,
+          "folha": 114
+        },
+        {
+          "ano": 20,
+          "forca": 35.1,
+          "saldo": 3600,
+          "folha": 125
+        },
+        {
+          "ano": 30,
+          "forca": 36.3,
+          "saldo": 3600,
+          "folha": 129
+        }
+      ]
+    },
+    {
+      "forcaInicial": 40,
+      "comissao": true,
+      "custos": 8340,
+      "marcos": [
+        {
+          "ano": 0,
+          "forca": 40,
+          "saldo": 1800,
+          "folha": 172
+        },
+        {
+          "ano": 5,
+          "forca": 39,
+          "saldo": 3600,
+          "folha": 150
+        },
+        {
+          "ano": 10,
+          "forca": 35.8,
+          "saldo": 3600,
+          "folha": 134
+        },
+        {
+          "ano": 20,
+          "forca": 38.1,
+          "saldo": 3600,
+          "folha": 142
+        },
+        {
+          "ano": 30,
+          "forca": 40,
+          "saldo": 3600,
+          "folha": 146
+        }
+      ]
+    },
+    {
+      "forcaInicial": 65,
+      "comissao": false,
+      "custos": 0,
+      "marcos": [
+        {
+          "ano": 0,
+          "forca": 65,
+          "saldo": 12800,
+          "folha": 454
+        },
+        {
+          "ano": 5,
+          "forca": 60.5,
+          "saldo": 25600,
+          "folha": 380
+        },
+        {
+          "ano": 10,
+          "forca": 57.4,
+          "saldo": 25600,
+          "folha": 346
+        },
+        {
+          "ano": 20,
+          "forca": 59.5,
+          "saldo": 25600,
+          "folha": 367
+        },
+        {
+          "ano": 30,
+          "forca": 61.2,
+          "saldo": 25600,
+          "folha": 379
+        }
+      ]
+    },
+    {
+      "forcaInicial": 65,
+      "comissao": true,
+      "custos": 21924,
+      "marcos": [
+        {
+          "ano": 0,
+          "forca": 65,
+          "saldo": 12800,
+          "folha": 454
+        },
+        {
+          "ano": 5,
+          "forca": 63.5,
+          "saldo": 25600,
+          "folha": 404
+        },
+        {
+          "ano": 10,
+          "forca": 59.8,
+          "saldo": 25600,
+          "folha": 374
+        },
+        {
+          "ano": 20,
+          "forca": 62.5,
+          "saldo": 25600,
+          "folha": 393
+        },
+        {
+          "ano": 30,
+          "forca": 64.8,
+          "saldo": 25600,
+          "folha": 404
+        }
+      ]
+    },
+    {
+      "forcaInicial": 85,
+      "comissao": false,
+      "custos": 0,
+      "marcos": [
+        {
+          "ano": 0,
+          "forca": 85,
+          "saldo": 28800,
+          "folha": 780
+        },
+        {
+          "ano": 5,
+          "forca": 80.5,
+          "saldo": 57600,
+          "folha": 683
+        },
+        {
+          "ano": 10,
+          "forca": 77.4,
+          "saldo": 57600,
+          "folha": 644
+        },
+        {
+          "ano": 20,
+          "forca": 79.5,
+          "saldo": 57600,
+          "folha": 665
+        },
+        {
+          "ano": 30,
+          "forca": 81.2,
+          "saldo": 57600,
+          "folha": 681
+        }
+      ]
+    },
+    {
+      "forcaInicial": 85,
+      "comissao": true,
+      "custos": 38556,
+      "marcos": [
+        {
+          "ano": 0,
+          "forca": 85,
+          "saldo": 28800,
+          "folha": 780
+        },
+        {
+          "ano": 5,
+          "forca": 83.5,
+          "saldo": 57600,
+          "folha": 716
+        },
+        {
+          "ano": 10,
+          "forca": 79.8,
+          "saldo": 57600,
+          "folha": 673
+        },
+        {
+          "ano": 20,
+          "forca": 82.5,
+          "saldo": 57600,
+          "folha": 698
+        },
+        {
+          "ano": 30,
+          "forca": 84.8,
+          "saldo": 57600,
+          "folha": 719
+        }
+      ]
+    }
+  ],
+  "desafios": [
+    {
+      "id": "santos-2002",
+      "tentativas": 100,
+      "sucessos": 51,
+      "posicaoMedia": 5.6
+    },
+    {
+      "id": "leicester-2016",
+      "tentativas": 100,
+      "sucessos": 13,
+      "posicaoMedia": 5.45
+    },
+    {
+      "id": "flamengo-2019",
+      "tentativas": 100,
+      "sucessos": 58,
+      "posicaoMedia": 1.93
+    }
+  ],
+  "carreiras": [
+    {
+      "inicio": "Santos",
+      "temporadas": 30,
+      "clubes": 3,
+      "anosSemClube": 0
+    },
+    {
+      "inicio": "Leicester City",
+      "temporadas": 30,
+      "clubes": 1,
+      "anosSemClube": 0
+    },
+    {
+      "inicio": "Flamengo",
+      "temporadas": 30,
+      "clubes": 1,
+      "anosSemClube": 0
+    }
+  ]
+}

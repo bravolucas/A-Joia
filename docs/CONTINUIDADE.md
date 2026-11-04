@@ -2,6 +2,16 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Estado atual — nova remodelação do mercado, ainda não publicada
+
+Após a publicação de `cc3d846`, o usuário considerou a compra/venda confusa, dispersa e pouco interativa, e pediu uma experiência mais fácil de jogar. A nova revisão substitui `GestaoTecnico.jsx` e acrescenta `GestaoTecnico.css`: três sugestões iniciais, cartões visuais, filtros por posição, comparação, previsão do impacto e confirmação antes de comprar/vender. A janela no desktop foi ampliada; dinheiro e salários ficam fixos no topo, pagamento e confirmação acompanham a rolagem. A lista fica oculta enquanto se avalia uma proposta, sem confirmações espalhadas por outras partes da tela.
+
+Relatório visual: `docs/MERCADO_REMODELADO.md`, com duas capturas versionadas. As regras econômicas e o formato do save foram preservados; a previsão usa as mesmas funções puras de negociação, sem efetivar o negócio. Comissão e renovação também usam a etapa guiada. Venda mostra receita e salário liberado, com bloqueio de setor insuficiente. O recibo de compra oferece acesso direto ao novo jogador no elenco.
+
+Validação: **23 arquivos de testes de lógica, build de produção e 50 testes de navegador passaram**. Os testes novos cobrem falta de dinheiro, teto salarial e venda que deixaria setor incompleto; os existentes passaram a exigir confirmação de compra e conferir o cancelamento sem débito e o retorno de foco. O desktop tem asserções de largura dos cartões e da janela; a confirmação precisa permanecer dentro da área visível.
+
+Logs locais: `/tmp/mercado-remodelado-test.log`, `/tmp/mercado-remodelado-build.log`, `/tmp/mercado-remodelado-completo-final.log`. Esta nova revisão deve ser avaliada pelo usuário antes de substituir a versão pública. A autorização anterior de publicação referia-se à entrega anterior, já concluída. Não publicar automaticamente esta remodelação.
+
 ## Estado atual — publicado
 
 Publicação autorizada pelo usuário em 04/11/2026 e concluída. `main` recebeu a entrega por fast-forward, de `03f27bf` para **`cc3d846`**, sem mudanças concorrentes. GitHub Pages confirmou sucesso no run `41837084515`; as validações gerais (`41837084694`) e do treinador/navegador (`41837084629`) também concluíram com sucesso.

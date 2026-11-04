@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import {criarGestaoTecnico,resumoGestaoTecnico} from '../mercadoTecnico.js';
 import { criarJogador, aposentar } from '../rapido.js';
 import { iniciarCarreiraTecnico, calcularOvrTecnico, CLUBES_CONVITES_TECNICO } from '../tecnico.js';
 
@@ -131,13 +132,28 @@ for (const width of [390, 1366]) {
   const janela=page.getByRole('dialog',{name:'Elenco e mercado'});
   await janela.getByRole('button',{name:'Mercado',exact:true}).click();
   const antes=await salvo(page);
+  await expect(janela.locator('.gm-cards article')).toHaveCount(3);
+  if(width>1000)expect((await janela.boundingBox()).width).toBeGreaterThan(900);
+  for(const card of await janela.locator('.gm-cards article').all())expect((await card.boundingBox()).width).toBeGreaterThan(200);
+  await page.screenshot({path:`/tmp/mercado-home-${width}.png`,fullPage:false});
   await janela.getByRole('button',{name:/Contratar /}).and(page.locator(':enabled')).first().click();
+  expect((await salvo(page)).tecnico.gestao).toEqual(antes.tecnico.gestao);
+  await expect(janela.getByRole('group',{name:'Contratar jogador'})).toContainText('Como fica o seu time');
+  const confirmarBox=await janela.getByRole('button',{name:'Confirmar contratação',exact:true}).boundingBox();
+  const areaBox=await janela.locator('.gm-content').boundingBox();
+  expect(confirmarBox.y+confirmarBox.height).toBeLessThanOrEqual(areaBox.y+areaBox.height+1);
+  await page.screenshot({path:`/tmp/mercado-proposta-${width}.png`,fullPage:false});
+  await janela.getByRole('button',{name:'Cancelar contratação',exact:true}).click();
+  expect((await salvo(page)).tecnico.gestao).toEqual(antes.tecnico.gestao);
+  await expect(janela.getByRole('button',{name:/Contratar /}).first()).toBeFocused();
+  await janela.getByRole('button',{name:/Contratar /}).first().click();
+  await janela.getByRole('button',{name:'Confirmar contratação',exact:true}).click();
   await expect(janela.getByRole('status')).toHaveText('Contratação concluída.');
   const comprado=await salvo(page);
   expect(comprado.tecnico.gestao.elenco.length).toBe(25);
   expect(comprado.tecnico.gestao.saldo).toBeLessThan(antes.tecnico.gestao.saldo);
   const alvo=comprado.tecnico.gestao.elenco.at(-1);
-  await janela.getByRole('button',{name:/Elenco \(/}).click();
+  await janela.getByRole('button',{name:'Ver no elenco →',exact:true}).click();
   await janela.getByRole('button',{name:`Vender ${alvo.nome}`,exact:true}).last().click();
   await janela.getByRole('button',{name:'Cancelar venda'}).click();
   expect((await salvo(page)).tecnico.gestao.elenco.length).toBe(25);
@@ -166,8 +182,11 @@ for (const width of [390,1366]) {
   const antes=await salvo(page),g=antes.tecnico.gestao;
   const alvo=g.elenco.find(j=>j.contrato===1);
   expect(alvo).toBeTruthy();
+  await janela.getByRole('button',{name:/Elenco \(/}).click();
+  const setores={GOL:'Goleiros',DEF:'Defesa',MEI:'Meio-campo',ATA:'Ataque'};
+  await janela.getByRole('button',{name:`Filtrar ${setores[alvo.setor]}`,exact:true}).click();
   const jogador=janela.locator('article').filter({has:page.getByRole('button',{name:`Renovar contrato de ${alvo.nome}`,exact:true})}).first();
-  await expect(jogador.getByText('Vence ao fim da temporada')).toBeVisible();
+  await expect(jogador.getByText('Contrato vencendo')).toBeVisible();
   await jogador.getByRole('button',{name:/Renovar contrato/}).click();
   const proposta=janela.getByRole('group',{name:'Confirmar renovação'});
   await expect(proposta).toContainText('Luvas:');
@@ -298,5 +317,42 @@ for(const width of [390,1366]){
   await page.reload();await page.getByRole('button',{name:/Continuar · Treinador de teste/}).click();
   await expect(page.getByText(/Legado: vínculo de ídolo rompido com Santos/)).toBeVisible();
   expect((await salvo(page)).tecnico.rupturasIdolo).toEqual(novo.tecnico.rupturasIdolo);
+ });
+}
+
+for(const width of [390,1366]){
+ test(`mercado guiado: explica falta de dinheiro e protege setor em ${width}px`,async({page})=>{
+  await page.setViewportSize({width,height:900});const c=carreira();c.tecnico.clubeInicialEscolhido=true;
+  c.tecnico.gestao=criarGestaoTecnico(c.tecnico);c.tecnico.gestao.saldo=0;
+  await abrir(page,c);await page.getByRole('button',{name:'Elenco e mercado',exact:true}).click();
+  const janela=page.getByRole('dialog',{name:'Elenco e mercado'});
+  await janela.getByRole('button',{name:/Contratar /}).first().click();
+  await expect(janela.getByText('Orçamento insuficiente para esta contratação.')).toBeVisible();
+  await expect(janela.getByRole('button',{name:'Confirmar contratação',exact:true})).toBeDisabled();
+  expect((await salvo(page)).tecnico.gestao.saldo).toBe(0);
+  await janela.getByRole('button',{name:'Cancelar contratação',exact:true}).click();
+  await janela.getByRole('button',{name:/Elenco \(/}).click();
+  await expect(janela.locator('.gm-cards article')).toHaveCount(3);
+  await janela.getByRole('button',{name:/Vender /}).first().click();
+  const antes=await salvo(page);
+  await expect(janela.getByRole('group',{name:'Confirmar venda'})).toContainText('Salários livres depois');
+  expect((await salvo(page)).tecnico.gestao).toEqual(antes.tecnico.gestao);
+  await janela.getByRole('button',{name:'Confirmar venda',exact:true}).click();
+  await expect(janela.getByRole('status')).toHaveText('Venda concluída.');
+  const vendido=await salvo(page);expect(vendido.tecnico.gestao.saldo).toBeGreaterThan(0);
+  await janela.getByRole('button',{name:/Vender /}).first().click();
+  await expect(janela.getByText('A venda deixaria o setor sem jogadores suficientes.')).toBeVisible();
+  await expect(janela.getByRole('button',{name:'Confirmar venda',exact:true})).toBeDisabled();
+  expect((await salvo(page)).tecnico.gestao).toEqual(vendido.tecnico.gestao);
+ });
+ test(`mercado guiado: explica limite salarial em ${width}px`,async({page})=>{
+  await page.setViewportSize({width,height:900});const c=carreira();c.tecnico.clubeInicialEscolhido=true;
+  c.tecnico.gestao=criarGestaoTecnico(c.tecnico);c.tecnico.gestao.tetoSalarial=resumoGestaoTecnico(c.tecnico.gestao).folha;
+  await abrir(page,c);await page.getByRole('button',{name:'Elenco e mercado',exact:true}).click();
+  const janela=page.getByRole('dialog',{name:'Elenco e mercado'});
+  await janela.getByRole('button',{name:/Contratar /}).first().click();
+  await expect(janela.getByText('A contratação ultrapassa o teto salarial.')).toBeVisible();
+  await expect(janela.getByRole('button',{name:'Confirmar contratação',exact:true})).toBeDisabled();
+  expect((await salvo(page)).tecnico.gestao).toEqual(c.tecnico.gestao);
  });
 }

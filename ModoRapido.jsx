@@ -1,3 +1,4 @@
+import "./LayoutDesktop.css";
 import ConquistasJogador from "./ConquistasJogador.jsx";
 import { bloquearRolagem } from "./bloqueioRolagem.js";
 import { efeitoLance } from './som.js';
@@ -3419,14 +3420,14 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const ultimo = estado.ultimo;
   const torneio = c && c.idade >= 18 ? (anoDeCopa(c.ano) ? "Copa do Mundo" : anoDeContinentalSelecao(c.ano) ? nomeCopaContinental(c.nac) : null) : null;
   return (
-    <div className={etapa === "tecnico" ? "rp ct-root" : "rp"}>
+    <div className={etapa === "tecnico" ? "rp ct-root" : "rp rp-jogador"}>
       <style>{ESTILO_BASE}</style>
       {painel ? <CartaoCarreira c={c} onEstante={() => setEstanteAberta(true)} onFicha={() => setGaveta("ficha")} contadorPulsa={contadorPulsa} recorde={recorde} />
         : <Cabecalho treinador={etapa === "tecnico"} c={mostrarCabecalho ? c : null} onSair={onSair} onEstante={() => setEstanteAberta(true)} />}
       <main className="pb-10">
         {etapa === "criacao" && <TelaCriacao onCriar={criar} ritmoInicial={ritmoInicial} />}
         {etapa === "evento" && (
-          <>
+          <section className="rp-jornada" aria-label="Sua carreira e decisões">
             <TabelaCarreira c={c} />
             <div className="max-w-xl mx-auto px-3 pt-2.5 flex flex-col gap-2.5">
               {ultimo && !evento && <ResumoCompacto c={c} card={ultimo} onDetalhes={() => setGaveta("resumo")} />}
@@ -3453,7 +3454,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
                 <button onClick={encerrar} className="text-[14px] font-bold text-[#8FA39A] min-h-[40px]">Pendurar as chuteiras aos {c.idade - 1}</button>
               )}
             </div>
-          </>
+          </section>
         )}
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}
         {etapa === "copa" && card?.copa && <TelaCopa key={`${card.copa.etapa}:${card.copa.fase}`} c={c} card={card} onAvancar={avancarCopa} />}

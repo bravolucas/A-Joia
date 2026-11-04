@@ -1,3 +1,4 @@
+import "./LayoutDesktop.css";
 import Icone from "./Icone.jsx";
 import React, { Suspense, lazy, useState, useEffect } from "react";
 import { ARTE } from "./arte.js";
@@ -37,10 +38,10 @@ export default function App() {
   return (
     <div className="rp min-h-screen" style={{ background: "radial-gradient(120% 60% at 50% -10%, #12352A 0%, #0E1512 55%, #0A0F0D 100%)" }}>
       <style>{ESTILO_BASE}</style>
-      <main className="max-w-md mx-auto px-4 pt-6 pb-10 flex flex-col gap-5">
+      <main className="inicio-main max-w-md mx-auto px-4 pt-6 pb-10 flex flex-col gap-5">
         <div className="flex justify-end -mb-3"><BotaoSom compacto /></div>
         {/* marca: a gema no centro, a foto ao fundo */}
-        <section className="relative rounded-[28px] overflow-hidden border border-[#D8B44A]/25 rp-entra" aria-label="A JOIA">
+        <section className="inicio-hero relative rounded-[28px] overflow-hidden border border-[#D8B44A]/25 rp-entra" aria-label="A JOIA">
           <div className="absolute inset-0" style={{ background: `url(${ARTE.porDoSol}) center 55%/cover` }} aria-hidden="true" />
           <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(14,21,18,.35), rgba(14,21,18,.82) 60%, #0E1512), radial-gradient(60% 45% at 50% 38%, rgba(216,180,74,.28), transparent 70%)" }} aria-hidden="true" />
           <div className="relative flex flex-col items-center text-center px-5 pt-8 pb-6">
@@ -57,7 +58,7 @@ export default function App() {
         </section>
 
         {/* ritmo: três cartões com a linha da carreira (◆ dourado = ano de decisão) */}
-        <section aria-label="Ritmo da carreira">
+        <section className="inicio-ritmo" aria-label="Ritmo da carreira">
           <div className="flex items-baseline justify-between px-1 mb-2">
             <h2 className="text-[13px] font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Escolha o seu ritmo</h2>
             <span className="text-[12px] text-[#8FA39A]"><span className="text-[#EBC557]">◆</span> ano de decisão</span>

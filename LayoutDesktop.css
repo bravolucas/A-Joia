@@ -1,0 +1,24 @@
+/* O celular mantém o fluxo vertical; o computador ganha áreas de trabalho. */
+@media (min-width: 1024px) {
+  .rp .inicio-main{max-width:1160px;display:grid;grid-template-columns:1.1fr 1fr;gap:20px 36px;align-items:start;padding-top:28px}
+  .inicio-main>div:first-child{grid-column:1/-1}
+  .inicio-hero{grid-column:1;grid-row:2/7;align-self:stretch;display:flex;align-items:center;justify-content:center;min-height:590px}
+  .inicio-hero>div.relative{width:100%;padding:48px 24px}
+  .inicio-ritmo,.inicio-main>button,.inicio-main>div:not(:first-child){grid-column:2}
+  .inicio-main>p{grid-column:1/-1;max-width:860px;justify-self:center;margin-top:16px}
+  .rp-jogador>header>div{max-width:1160px}
+  .rp-jornada{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);align-items:start;gap:24px;max-width:1160px;margin:24px auto;padding:0 16px}
+  .rp-jornada>div{max-width:none;width:100%;padding:0;margin:0;min-width:0}
+  .rp-jogador>main>div.max-w-xl{max-width:1000px;padding-top:28px}
+  .janela-tela-cheia>div{max-width:900px;padding-left:40px;padding-right:40px}
+  .janela-tela-cheia>div>button{max-width:560px;align-self:center}
+  .anuncio-transferencia .anuncio-conteudo{width:min(100%,1060px);display:grid;grid-template-columns:1fr 1fr;gap:28px 60px;align-content:center;padding:64px 48px}
+  .anuncio-cabecalho{grid-column:1/-1}
+  .anuncio-transferencia .anuncio-clube{font-size:32px}
+  .anuncio-transferencia .anuncio-clube>span{max-width:600px}
+  .anuncio-camisa-palco{grid-column:1;grid-row:2/4;align-self:center}
+  .anuncio-transferencia .anuncio-camisa{width:330px}
+  .anuncio-transferencia .anuncio-numero-fundo{font-size:310px}
+  .anuncio-identidade{grid-column:2;grid-row:2;align-self:end}
+  .anuncio-termos{grid-column:2;grid-row:3;align-self:start;margin-top:0}
+}

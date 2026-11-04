@@ -8,7 +8,7 @@ O usuário relatou resultado escondido e rejeitou o radar/sorteio de OVR da tela
 
 Foi corrigida também a estrutura comum `TelaCheia`: cabeçalho e botão fora da área rolável, conteúdo com `min-height:0` e rolagem própria dentro da altura dinâmica da tela. Assim o botão não fica abaixo de conteúdo extenso. Verificado no Chromium com vinte efeitos em 360×420, 390×640 e 1366×640.
 
-Todos os 26 arquivos de lógica, build e 46 testes de navegador passaram. A nova regressão `tests/desafio-temporada.spec.mjs` cobre celular/desktop, resultado inline, recarga, continuidade e ausência de reaplicação; incluída também no workflow de navegador. Capturas em `docs/desafio-integrado/`. Publicação em andamento; confirmar antes de informar sucesso.
+Todos os 26 arquivos de lógica, build e 46 testes de navegador passaram. A nova regressão `tests/desafio-temporada.spec.mjs` cobre celular/desktop, resultado inline, recarga, continuidade e ausência de reaplicação; incluída também no workflow de navegador. Capturas em `docs/desafio-integrado/`. Entrega enviada em `1dffd03`. Pages falhou por timeout: https://github.com/bravolucas/A-Joia/actions/runs/41893625961 . O log confirmou que o máximo aceito é dez minutos e que `1200000` era reduzido a `600000` pelo serviço. Removida essa configuração ineficaz; o workflow agora faz no máximo uma segunda tentativa se a primeira falhar, e propaga erro se ela também falhar. A URL do ambiente usa a tentativa bem-sucedida. Validação geral `41893625951` e treinador/navegador `41893625969` concluíram com sucesso. Nova tentativa após a correção do workflow; confirmar antes de informar publicação concluída.
 
 ## Organização visual — primeira rodada
 

@@ -1,6 +1,6 @@
 # Entrega para revisão — modo treinador
 
-Todo o pacote está na branch `checkpoint/treinador-elenco-orcamento`. A versão pública continua sem estas mudanças: a branch não foi mesclada em main e não houve deploy nesta sequência.
+Pacote publicado em 04/11/2026, após autorização do usuário. A aplicação em main é o commit `cc3d846`; o deploy do GitHub Pages e as validações automáticas concluíram com sucesso. Endereço: https://bravolucas.github.io/A-Joia/. A branch de continuidade preserva o histórico e esta atualização de documentação.
 
 ## O que está pronto
 
@@ -37,4 +37,4 @@ A idolatria rompida não é reconciliada automaticamente nesta versão. Contrato
 - Testes de lógica e build de produção aprovados na revisão de código anterior; não houve alteração do código da aplicação depois daquela validação.
 - A validação final de navegador inclui 46 cenários em celular e desktop. O resultado final está registrado no relatório de continuidade.
 
-O escopo combinado está concluído. O próximo passo é publicar quando o usuário solicitar, preservando a versão mais recente de main e resolvendo eventuais mudanças concorrentes antes de mesclar. Push em main aciona GitHub Pages automaticamente.
+O escopo combinado está concluído e publicado. Para futuras alterações, partir da versão mais recente de main. Push em main aciona GitHub Pages automaticamente.

@@ -2,6 +2,14 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Estado atual — publicado
+
+Publicação autorizada pelo usuário em 04/11/2026 e concluída. `main` recebeu a entrega por fast-forward, de `03f27bf` para **`cc3d846`**, sem mudanças concorrentes. GitHub Pages confirmou sucesso no run `41837084515`; as validações gerais (`41837084694`) e do treinador/navegador (`41837084629`) também concluíram com sucesso.
+
+Endereço: https://bravolucas.github.io/A-Joia/ . O acesso direto ao domínio retornou 403 neste ambiente; a confirmação do deploy veio do workflow oficial do GitHub Pages. Não confundir isso com falha de publicação.
+
+Os trechos abaixo sobre publicação pendente descrevem checkpoints anteriores e foram superados por esta autorização. A atualização de documentação posterior fica apenas na branch de continuidade; a aplicação publicada é `cc3d846`. Não reaplicar o pacote. Retomar futuras alterações a partir da versão publicada mais recente.
+
 ## Pedido atual e limite de escopo
 
 O usuário aprovou seguir com elenco + orçamento + mercado como próxima evolução do treinador. Informou que restava aproximadamente 3% do limite e pediu para fazer e salvar o progresso, incluindo um relatório interno para retomar quando o limite renovar. Elenco, mercado, renovação de contratos, plano tático, intervenção opcional e comissão técnica já estão integrados à interface na branch de continuidade. Ainda há balanceamento de campanhas longas a fazer. Não publicar no site sem instrução do usuário.

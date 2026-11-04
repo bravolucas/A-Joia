@@ -2,6 +2,14 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Publicação concluída — desafio integrado e prêmios agrupados
+
+Em 04/11/2026, após novo pedido do usuário para concluir a publicação, o Pages liberou o envio e **publicou com sucesso o commit `9e9ec9b`**: https://github.com/bravolucas/A-Joia/actions/runs/41928736293 . Validação geral `41928736376` e treinador/navegador `41928736465` também concluíram com sucesso. Endereço: https://bravolucas.github.io/A-Joia/ . O pacote público inclui desafio com resultado no mesmo cartão, continuidade salva, avanço visível nos pop-ups e Bola/Bota de Ouro agrupadas com ×N e anos.
+
+Foi tentada uma recuperação que ampliaria permanentemente `deployments: write`, mas a revisão automática a rejeitou; o comando não executou. A alternativa aplicada usou apenas `deployments: read` para diagnóstico e a publicação já autorizada. O sucesso foi confirmado sem acrescentar permissão de escrita em deployments. Não atribuir a liberação a uma inativação de registros: ela não ocorreu.
+
+As seções abaixo que dizem “não publicado” registram tentativas anteriores e foram superadas por esta confirmação. Não repetir deploys nem reaplicar correções antigas. O diagnóstico temporário foi retirado na branch de continuidade para a próxima alteração autorizada; a retirada e este relatório não precisam gerar outra publicação, pois a aplicação pública já contém todas as mudanças solicitadas.
+
 ## Última tentativa — prêmios corrigidos, Pages ainda bloqueado
 
 A pedido do usuário, os prêmios agrupados e o desafio integrado foram enviados a `main` no commit **`6895318`**. Validação geral `41897749520` e treinador/navegador `41897749525`: **sucesso**. Build também passou. Publicação `41897749603`: **falha por bloqueio externo persistente** (https://github.com/bravolucas/A-Joia/actions/runs/41897749603).

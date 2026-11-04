@@ -47,21 +47,22 @@ jobs:
             const deploymentId = '1dffd03bc6c52e92463c19b83858b553a48dc136';
             const params = { ...context.repo, deploymentId };
             const route = 'GET /repos/{owner}/{repo}/pages/deployments/{deploymentId}';
-            const active = new Set(['queued', 'waiting', 'building', 'built', 'started', 'updating_pages', 'deployment_in_progress', 'syncing_files']);
+            const finished = new Set(['succeed', 'success', 'finished', 'cancelled', 'canceled', 'deployment_cancelled']);
             const read = async () => {
               try { return (await github.request(route, params)).data.status; }
               catch (error) { if (error.status === 404) return 'missing'; throw error; }
             };
             let status = await read();
-            core.info(`Deployment interrompido: ${status}`);
-            if (active.has(status)) {
+            core.notice(`Estado do deployment bloqueador: ${status}`);
+            if (!finished.has(status)) {
               await github.request('POST /repos/{owner}/{repo}/pages/deployments/{deploymentId}/cancel', params);
               for (let i = 0; i < 12; i++) {
                 status = await read();
-                if (!active.has(status)) break;
+                if (finished.has(status) || status === 'missing') break;
                 await new Promise(resolve => setTimeout(resolve, 2000));
               }
-              if (active.has(status)) throw new Error('O Pages ainda não liberou o deployment interrompido.');
+              core.notice(`Estado após cancelamento: ${status}`);
+              if (!finished.has(status) && status !== 'missing') throw new Error('O Pages ainda não liberou o deployment interrompido.');
             }
       - id: deploy
         continue-on-error: true

@@ -2,6 +2,14 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Animação do desafio restaurada no cartão integrado
+
+O usuário corrigiu a direção da remodelação: simplificar/modernizar a animação, sem excluí-la. Agora o resultado integrado revela uma faixa compacta de probabilidades com indicador móvel que desacelera sobre a faixa sorteada, destaque da chance selecionada e contagem do OVR antes/depois. Revelação em 1,8 segundo, com botão “Revelar resultado” para finalizar imediatamente; depois o mesmo botão continua para o treino. Texto/efeitos mantêm o espaço reservado para não deslocar a composição. Movimento reduzido mostra o resultado imediatamente.
+
+O resultado continua calculado uma única vez pelo motor. `animacaoInicio`, salvo junto de `desafioResultado`, permite retomar a apresentação pelo tempo transcorrido: recarregar após a conclusão não reinicia nem reaplica o sorteio. Saves antigos sem timestamp continuam mostrando o resultado já concluído. Não altera chances, atributos, evolução ou efeitos econômicos.
+
+Conferência visual no celular e 48 testes de navegador passaram, incluindo animação com relógio controlado, movimento do indicador, contagem final, recarga e revelação imediata. Testes de lógica e build passaram. Capturas em `docs/desafio-animado/`; logs `/tmp/desafio-animado-tests.log`, `/tmp/desafio-animado-build.log`, `/tmp/desafio-animado-browser-final.log`. A primeira execução de navegador falhou porque a prévia local havia encerrado entre sessões; após reabrir a prévia, a suíte completa passou. Publicação desta revisão em andamento; confirmar o run antes de informar sucesso.
+
 ## Publicação concluída — desafio integrado e prêmios agrupados
 
 Em 04/11/2026, após novo pedido do usuário para concluir a publicação, o Pages liberou o envio e **publicou com sucesso o commit `9e9ec9b`**: https://github.com/bravolucas/A-Joia/actions/runs/41928736293 . Validação geral `41928736376` e treinador/navegador `41928736465` também concluíram com sucesso. Endereço: https://bravolucas.github.io/A-Joia/ . O pacote público inclui desafio com resultado no mesmo cartão, continuidade salva, avanço visível nos pop-ups e Bola/Bota de Ouro agrupadas com ×N e anos.

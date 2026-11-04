@@ -23,3 +23,19 @@
 .dt-efeitos{list-style:none;padding:0;margin:12px 0 20px;display:flex;flex-wrap:wrap;gap:8px}.dt-efeitos li{font-size:12px;padding:8px 12px;border-radius:8px;background:#ffffff08;color:#d8e1db}
 .dt-footer>button{display:flex;justify-content:center;gap:12px;align-items:center;min-height:52px;width:100%;border-radius:12px;background:linear-gradient(100deg,#d8b44a,#f5d77a);color:#211b0e;font-size:13px;font-weight:750}
 .dt-footer>p{font-size:10px;text-align:center;color:#9eada2;line-height:1.5;margin:10px 0 0}
+.dt-sorteio{padding:12px;border:1px solid #ffffff13;border-radius:12px;background:#101713;margin-top:16px}
+.dt-sorteio-titulo{display:flex;justify-content:space-between;gap:8px;font-size:10px;line-height:1.5;color:#d0d9d2}
+.dt-sorteio-titulo>span:last-child{color:#a6b4aa;text-align:right}
+.dt-trilho{position:relative;margin:17px 0 13px}
+.dt-faixas{display:flex;height:9px;border-radius:6px;overflow:hidden;gap:2px}
+.dt-faixa-ganho{background:#659c7b}.dt-faixa-perda{background:#8f605a}.dt-faixa-neutra{background:#717b73}
+.dt-indicador{position:absolute;top:-5px;width:2px;height:19px;background:#f5df9b;transform:translateX(-50%);box-shadow:0 0 0 2px #101713}
+.dt-indicador::before{content:'';position:absolute;width:6px;height:6px;left:-2px;top:-3px;background:#f5df9b;transform:rotate(45deg)}
+.dt-sorteio-legenda{display:flex;flex-wrap:wrap;gap:6px}
+.dt-sorteio-legenda>span{display:flex;gap:8px;padding:5px 7px;font-size:9px;line-height:1.4;color:#b8c3ba;background:#ffffff06;border-radius:5px}
+.dt-sorteio-legenda .dt-faixa-escolhida{background:#e0c886;color:#211d12}
+.dt-revelado{border-color:#d7bd764d}
+.dt-revelado .dt-faixa-escolhida,.dt-evolucao-final>b{animation:dtResultado .45s ease-out both}
+.dt-detalhes>p{font-size:13px;line-height:1.6;color:#b2beb7;margin:0 0 14px}
+@keyframes dtResultado{from{opacity:.4;transform:translateY(4px) scale(.96)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.dt *{animation:none!important;transition:none!important}}

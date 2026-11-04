@@ -3340,10 +3340,11 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     ? { ...s, evento: s.proximo, resultado: null, efeitos: null, proximo: null, manchete: null }
     : { ...s, evento: null, resultado: null, efeitos: null, manchete: null, auto: !anoDeDecisao(s.c) }));
   const desafiar = (id) => {
+    const animacaoInicio = Date.now();
     setEstado(st => {
       if (!desafioPendente(st.c) || st.desafioResultado) return st;
       const r = resolverDesafio(st.c, id);
-      return { ...st, c: r.c, desafioResultado: r.res ? { ...r.res, efeitos: efeitosDaDecisao(st.c, r.c) } : null };
+      return { ...st, c: r.c, desafioResultado: r.res ? { ...r.res, animacaoInicio, efeitos: efeitosDaDecisao(st.c, r.c) } : null };
     });
   };
   const ajustarNeg = (campo, dir) => setEstado((st) => ({ ...st, neg: ajustarNegociacao(st.neg, campo, dir) }));

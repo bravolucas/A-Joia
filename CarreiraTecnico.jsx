@@ -190,7 +190,7 @@ function LinhaTemporada({ a, idade, ativa, aberta, onClick }) {
   </div>;
 }
 
-export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAvancarESimular, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado, onReuniao, onJogar, onNegociarElenco, onEstilo, onFormacao, onAcompanhamento, onIntervir }) {
+export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAvancarESimular, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado, onReuniao, onJogar, onNegociarElenco, onEstilo, onFormacao, onAcompanhamento, onIntervir, rotuloLegado = '← Ver legado como jogador' }) {
   const t = c.tecnico;
   const temporadas = t.temporadas || [];
   const ultima = temporadas.at(-1);
@@ -320,6 +320,6 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
         <footer className="ct-timeline-total"><Bandeira pais={t.pais || 'Brasil'} /><strong>{temporadas.length}/{LIMITE_TEMPORADAS_TECNICO} temporadas</strong><span>{historico.aproveitamento}% aproveitamento</span></footer>
       </section>
     </div>
-    <footer className="ct-footer"><button type="button" onClick={onLegado}>← Ver legado como jogador</button><button type="button" onClick={onSair}>Voltar ao início</button></footer>
+    <footer className="ct-footer"><button type="button" onClick={onLegado}>{rotuloLegado}</button><button type="button" onClick={onSair}>Voltar ao início</button></footer>
   </div>;
 }

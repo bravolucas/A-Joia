@@ -135,7 +135,25 @@ A idolatria com consequências foi integrada no checkpoint abaixo. Próximo pont
 - Validação: **22 arquivos de testes de lógica, build de produção e 42 testes de navegador passaram**. Testes incluem rival de um clube anterior, entrada recusada, retorno ao próprio clube, remoção do bônus em convites, preservação do histórico, cancelamento e recarga em 390/1366 pixels.
 - Logs: `/tmp/idolatria-test.log`, `/tmp/idolatria-build.log`, `/tmp/idolatria-browser.log`. Capturas: `/tmp/idolatria-390.png` e `/tmp/idolatria-1366.png`.
 
-Próximo passo: desafios históricos. Fazer desafios com situações e objetivos claros, preservando a carreira principal e a coleção existente; evitar criar partidas ou conquistas retroativas como se fossem fatos reais. Confirmar no código como iniciar uma carreira independente e registrar progresso sem substituir o save atual. Não publicar automaticamente.
+Os desafios históricos foram implementados no checkpoint abaixo. Manter o modo independente da carreira principal. Não publicar automaticamente.
+
+## Checkpoint de desafios históricos
+
+- Novo acesso **Desafios históricos** no menu principal; módulo carregado sob demanda.
+- Três missões de uma temporada: Santos 2002 (elenco jovem, terminar entre os quatro primeiros), Leicester 2016 (conquistar a liga com orçamento curto) e Flamengo 2019 (conquistar a liga).
+- A tela explica que são missões inspiradas em campanhas reais, com elencos fictícios e calendário da simulação. Não são reconstruções dos adversários, atletas, regulamentos ou resultados históricos. Leicester é colocado na liga inglesa principal via `ligasMundo`; com o cadastro atual, o calendário pode ter 21 participantes e 40 jogos, conforme o motor existente. Não anunciar uma reprodução exata da Premier League 2015/16.
+- `desafiosHistoricos.js` define catálogo, estado, início, avaliação e persistência independente em **`ajoia_desafios_v1`**. Não usa `salvarRapido`, não registra no museu e não escreve no save da carreira principal.
+- O cenário inicial usa o treinador e a gestão existentes, sem precisar criar uma carreira de jogador. Clube, ano, orçamento e força vêm da missão. Santos recebe atletas de 18–22 anos e potencial ajustado para representar a proposta de base.
+- `DesafiosHistoricos.jsx` reutiliza `CarreiraTecnico` com tática, elenco, contratos, comissão e intervenção opcional. Os callbacks atualizam exclusivamente o save de desafios. O resultado encerra a tentativa, sem propostas ou avanço para outro ano.
+- Galeria própria registra conclusões por desafio, melhor posição, maior pontuação e contagem de tentativas. Repetir ou falhar não apaga conclusões anteriores. Resultados não são inseridos como taças reais no museu.
+- Só uma tentativa pode ficar ativa. É possível sair para o menu e retomar, ou encerrá-la após confirmação. Após concluir, pode repetir, escolher outra missão ou reabrir o último resultado após recarregar.
+- `CarreiraTecnico` aceita um rótulo opcional no botão de retorno, evitando mostrar um legado de jogador inexistente dentro dos desafios.
+- Testes de lógica cobrem as três missões, uma temporada por tentativa, objetivos, contagem única, serialização, save independente, recuperação de JSON inválido e preservação de conquistas anteriores.
+- Navegador cobre início, tática, recarga, retomada, resultado e acesso ao último resultado em 390/1366 pixels, comparando os saves principal e do museu. O CI passou a incluir `tests/desafios-historicos.spec.mjs`.
+- Verificação: **23 arquivos de testes de lógica, build de produção e regressão de 44 testes de navegador passaram**. Os dois testes específicos de desafios passaram novamente após o ajuste final de acesso ao último resultado.
+- Logs: `/tmp/desafios-test.log`, `/tmp/desafios-build.log`, `/tmp/desafios-browser.log`, `/tmp/desafios-browser-final.log`. Capturas: `/tmp/desafios-390.png` e `/tmp/desafios-1366.png`.
+
+O plano de funcionalidades desta sequência está implementado na branch de continuidade. Próxima etapa recomendada: revisão geral e balanceamento de campanhas longas, custos da comissão, reposição anual e dificuldade dos desafios. Publicação continua pendente de pedido explícito do usuário; push em main faria deploy automático.
 
 ## Revisão econômica desta etapa
 

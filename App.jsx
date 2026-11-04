@@ -2,6 +2,7 @@ import Icone from "./Icone.jsx";
 import React, { Suspense, lazy, useState, useEffect } from "react";
 import { ARTE } from "./arte.js";
 // o Modo Carreira é grande: só baixa quando a pessoa entra nele
+const DesafiosHistoricos = lazy(() => import("./DesafiosHistoricos.jsx"));
 const Museu = lazy(() => import("./Museu.jsx"));
 const AJoiaGame = lazy(() => import("./AJoiaGame.jsx"));
 import ModoRapido, { ESTILO_BASE, BotaoSom } from "./ModoRapido.jsx";
@@ -16,6 +17,7 @@ export default function App() {
   const [ritmo, setRitmo] = useState("normal");
   const [nova, setNova] = useState(false);
   useEffect(() => { if (!modo) sincronizarMuseuDosSaves(); }, [modo]);
+  if (modo === "desafios") return <Suspense fallback={<div>Carregando desafios…</div>}><DesafiosHistoricos onVoltar={() => setModo(null)} /></Suspense>;
   if (modo === "museu") return <Suspense fallback={<div style={{ minHeight: '100vh', background: '#0b100e', color: '#c8d4cd', padding: 32 }}>Abrindo seu museu…</div>}><Museu onVoltar={() => setModo(null)} /></Suspense>;
 
   if (modo === "carreira") {
@@ -92,6 +94,8 @@ export default function App() {
             <button onClick={() => comecar(true)} className="rp-btn rp-ouro display text-[14px] tracking-wide flex items-center justify-center gap-2"><Gema size={22} /> Começar carreira</button>
           )}
         </div>
+
+        <button onClick={() => setModo("desafios")} className="rp-painel p-4 text-left"><strong className="block text-[17px] text-[#F4DE9E]">Desafios históricos</strong><span className="block text-sm text-[#A6B6AB]">Missões de uma temporada inspiradas em campanhas marcantes</span></button>
 
         <button onClick={() => setModo("museu")} className="rp-painel flex items-center gap-3 px-4 py-3.5 text-left hover:border-[#D8B44A]/60 transition-colors" style={{ background: 'linear-gradient(115deg, #D8B44A12, #12A87608)', borderColor: '#D8B44A40' }}>
           <span className="text-[28px]" aria-hidden="true">🏛️</span>

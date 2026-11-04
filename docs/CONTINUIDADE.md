@@ -4,7 +4,7 @@ Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
 ## Pedido atual e limite de escopo
 
-O usuário aprovou seguir com elenco + orçamento + mercado como próxima evolução do treinador. Informou que restava aproximadamente 3% do limite e pediu para fazer e salvar o progresso, incluindo um relatório interno para retomar quando o limite renovar. A base já foi integrada à interface nos checkpoints de integração e contratos; ainda há balanceamento e evolução de contratos a fazer. Não publicar no site sem instrução do usuário.
+O usuário aprovou seguir com elenco + orçamento + mercado como próxima evolução do treinador. Informou que restava aproximadamente 3% do limite e pediu para fazer e salvar o progresso, incluindo um relatório interno para retomar quando o limite renovar. Elenco, mercado, renovação de contratos e plano tático já estão integrados à interface na branch de continuidade. Ainda há balanceamento de campanhas longas a fazer. Não publicar no site sem instrução do usuário.
 
 ## Estado publicado e preservação
 
@@ -37,7 +37,7 @@ A gestão agora é acessível em **Elenco e mercado**, durante a pré-temporada:
 - `GestaoTecnico.jsx` mostra orçamento, folha/teto, setores/OVR, filtro por setor, elenco e mercado. Vendas exigem confirmação e podem ser canceladas. Compras sem saldo, folha ou vaga ficam desabilitadas; regras também são validadas no módulo.
 - A janela reutiliza o modal com Escape, foco preso (agora inclui select) e restauração do foco. O save existente persiste a gestão, sem alterar as chaves do museu.
 
-## Verificação
+## Verificação da etapa anterior — contratos
 
 - `node tests/mercado-tecnico.test.mjs`: 12 testes de geração, transações, janela, renovação, virada anual, persistência/idempotência, integração, estabilidade das ofertas e aplicação única da força anual.
 - `npm test`: 18 arquivos/suítes passaram. Log local: `/tmp/renovacao-test.log`.
@@ -56,7 +56,23 @@ A gestão agora é acessível em **Elenco e mercado**, durante a pré-temporada:
 4. Avaliar apresentação de histórico de movimentações e jogadores que estão no último ano de contrato.
 5. Não mesclar/publicar automaticamente: o site permanece na versão visual anterior; toda a gestão está na branch de continuidade.
 
-Fases posteriores aprovadas em princípio na conversa: tática com efeito real, intervenções em partidas importantes, comissão técnica; depois idolatria com consequências e desafios históricos. A prioridade imediata é finalizar elenco + orçamento + mercado.
+Fases posteriores aprovadas em princípio na conversa: tática com efeito real, intervenções em partidas importantes, comissão técnica; depois idolatria com consequências e desafios históricos. Elenco, mercado e contratos estão integrados; a etapa atual acrescenta táticas à liga e a próxima deve unificar as copas.
+
+## Checkpoint de táticas
+
+- `taticasTecnico.js`: formações 4-3-3, 4-4-2 (padrão) e 3-5-2. Seleciona os melhores atletas por setor para cada formação e compara a qualidade do onze com o 4-4-2; ajuste limitado a -3/+3 de força. Vagas sem jogador contam como zero. Se não houver gestão ou pertencer a outro clube, o ajuste é zero.
+- `definirFormacaoTecnico` e `definirEstiloTecnico`: alterações permitidas antes do início da temporada, com bloqueios para desemprego, andamento e carreira encerrada. As escolhas usam os saves existentes; ausência de formação assume 4-4-2.
+- `CarreiraTecnico.jsx`: controles de formação e estilo com descrição dos efeitos na pré-temporada. Permanecem desabilitados em saves com partidas já disputadas.
+- A probabilidade de confronto da **liga** agora aplica formação e estilo. Ofensivo reduz empates e favorece equipes superiores, com risco adicional quando inferiores; defensivo aumenta empates, ajuda contra superiores e reduz a chance de vitória contra inferiores. Os limites de probabilidade são preservados.
+- O placar também acompanha o estilo: faixa de gols menor no defensivo e maior no ofensivo. Resultado V/E/D permanece coerente. Usado tanto na temporada expressa quanto na simulação por etapas.
+- Corrigido `forcaClubeTecnico`: o estado numérico `t.elenco` agora tem prioridade sobre o cadastro estático do clube. Antes, compras, vendas e evolução podiam não afetar os confrontos de clubes cadastrados.
+- Estilo e formação são registrados nos confrontos e no resumo anual; resultados já salvos não são recalculados.
+- **Limite de escopo:** a nova formação e o modelo contextual de estilo atuam na liga. Copas preservam seu modelo anterior e o bônus de estilo já existente; unificar a tática das copas é um próximo passo, antes de anunciar efeitos em todas as competições.
+- Testes: novo arquivo `tests/taticas-tecnico.test.mjs` cobre adequação, compatibilidade, riscos, probabilidades, placares, força dinâmica e restrições de alteração. O navegador cobre escolha, recarga e registro na temporada em 390/1366 pixels.
+- Validação final desta etapa: **19 arquivos de testes de lógica, build de produção e 36 testes de navegador passaram**. Inclui 12 fluxos de treinador e as regressões de apresentação, museu e minigames. A tela foi conferida em 390 pixels.
+- Logs desta etapa: `/tmp/taticas-test.log`, `/tmp/taticas-build.log` e `/tmp/taticas-browser-final.log`. Capturas: `/tmp/taticas-390.png` e `/tmp/taticas-1366.png`.
+
+Prioridade ao retomar: conferir o checkpoint atual, integrar tática às copas preservando regulamentos e resultados anteriores; depois intervenções em partidas importantes e comissão técnica. Manter o site sem deploy até pedido do usuário.
 
 ## Revisão econômica desta etapa
 

@@ -1,3 +1,4 @@
+import { FORMACOES_TECNICO, perfilTaticoTecnico } from './taticasTecnico.js';
 import { CLUBES, CLASSICOS } from './data.js';
 import { EVENTOS_CONTEXTO_TECNICO } from './eventosTecnico.js';
 import { competicaoDoTitulo } from './tacas.js';
@@ -5,9 +6,9 @@ import { simularCopaNacionalTecnico, simularCopaContinentalTecnico, classificarV
 import { atualizarLigasMundoTecnico, simularClassificacoesMundoTecnico } from './classificacoesMundoTecnico.js';
 // Continuação da mesma carreira, sem alterar o histórico do atleta.
 export const ESTILOS_TECNICO = [
-  { id: 'ofensivo', nome: 'Ofensivo', descricao: 'Mais gols e mais riscos.' },
+  { id: 'ofensivo', nome: 'Ofensivo', descricao: 'Mais gols e menos empates. Favorece equipes superiores, mas expõe as mais fracas.' },
   { id: 'equilibrado', nome: 'Equilibrado', descricao: 'Consistência ao longo da temporada.' },
-  { id: 'defensivo', nome: 'Defensivo', descricao: 'Defesa sólida e jogos disputados.' },
+  { id: 'defensivo', nome: 'Defensivo', descricao: 'Menos gols e mais empates. Ajuda a resistir a rivais superiores, mas reduz a vantagem contra os mais fracos.' },
 ];
 const limitar = (n, min, max) => Math.max(min, Math.min(max, n));
 const sorteio = () => Math.random();
@@ -338,7 +339,16 @@ export function iniciarCarreiraTecnico(c) {
 export function definirEstiloTecnico(c, estilo) {
   if (!ESTILOS_TECNICO.some(x => x.id === estilo)) throw new Error('Estilo inválido.');
   if (!c?.tecnico) throw new Error('Carreira técnica não iniciada.');
+  validarMudancaTatica(c.tecnico);
   return { ...c, tecnico: { ...c.tecnico, estilo } };
+}
+function validarMudancaTatica(t){
+ if(!t||t.fase!=='pretemporada'||t.demitido||t.desempregado||t.andamento?.jogos||t.andamento?.rodadas||carreiraTecnicoEncerrada(t))throw new Error('Altere a tática antes do início da temporada, enquanto estiver empregado.');
+}
+export function definirFormacaoTecnico(c,formacao){
+ if(!FORMACOES_TECNICO.some(f=>f.id===formacao))throw new Error('Formação inválida.');
+ validarMudancaTatica(c?.tecnico);
+ return {...c,tecnico:{...c.tecnico,formacao}};
 }
 export function probabilidadesTecnico(t = {}) {
   const forca = limitar(t.elenco ?? 50, 10, 95);
@@ -351,7 +361,7 @@ export function probabilidadesTecnico(t = {}) {
   return { vitoria, empate: Math.min(empate, 0.94 - vitoria), derrota: Math.max(0.06, 1 - vitoria - empate) };
 }
 export function forcaClubeTecnico(t = {}) {
-  return CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.elenco ?? t.elenco ?? 50;
+  return t.elenco ?? CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.elenco ?? 50;
 }
 function classificacoesMundoDaTemporada(t, liga, classificacao, rng) {
   return simularClassificacoesMundoTecnico({
@@ -455,15 +465,20 @@ export function calendarioAdversariosTecnico(t = {}) {
   });
 }
 export function probabilidadesConfrontoTecnico(t, adversario) {
-  const diferenca = forcaClubeTecnico(t) - (adversario?.forca ?? 50);
+  const tatica=perfilTaticoTecnico(t);
+  const diferenca = forcaClubeTecnico(t) + tatica.ajuste - (adversario?.forca ?? 50);
   const mando = adversario?.casa ? 0.035 : -0.035;
-  const vitoria = limitar(0.44 + diferenca * 0.008 + mando, 0.16, 0.72);
-  const empate = limitar(0.27 - Math.abs(diferenca) * 0.002, 0.16, 0.27);
+  const contexto=Math.max(-1,Math.min(1,diferenca/20));
+  const risco=tatica.estilo==='ofensivo'?.025*contexto:tatica.estilo==='defensivo'?-.02*contexto:0;
+  const vitoria = limitar(0.44 + diferenca * 0.008 + mando + risco, 0.16, 0.72);
+  const empateBase=limitar(0.27-Math.abs(diferenca)*.002,0.16,0.27);
+  const empate=Math.min(1-vitoria-.06,Math.max(.1,empateBase+(tatica.estilo==='defensivo'?.05:tatica.estilo==='ofensivo'?-.05:0)));
   return { vitoria, empate, derrota: 1 - vitoria - empate };
 }
-export function placarTecnico(resultado, rng = sorteio) {
-  if (resultado === 'E') { const gols = Math.floor(rng() * 3); return { pro: gols, contra: gols }; }
-  const vencedor = 1 + Math.floor(rng() * 3);
+
+export function placarTecnico(resultado, rng = sorteio, estilo = 'equilibrado') {
+  if (resultado === 'E') { const gols = Math.floor(rng() * (estilo === 'defensivo' ? 2 : estilo === 'ofensivo' ? 4 : 3)); return { pro: gols, contra: gols }; }
+  const vencedor = 1 + Math.floor(rng() * (estilo === 'defensivo' ? 2 : estilo === 'ofensivo' ? 4 : 3));
   const perdedor = Math.floor(rng() * vencedor);
   return resultado === 'V' ? { pro: vencedor, contra: perdedor } : { pro: perdedor, contra: vencedor };
 }
@@ -631,8 +646,8 @@ export function simularEtapaTecnico(c, rng = sorteio) {
     const r = rng();
     const resultado = r < pVitoria ? 'V' : r < pVitoria + pEmpate ? 'E' : 'D';
     if (resultado === 'V') v++; else if (resultado === 'E') e++; else d++;
-    const placar = placarTecnico(resultado, rng);
-    confrontos.push({ ...adversario, resultado, golsPro: placar.pro, golsContra: placar.contra });
+    const placar = placarTecnico(resultado, rng, t.estilo);
+    confrontos.push({ ...adversario, estilo: perfilTaticoTecnico(t).estilo, formacao: perfilTaticoTecnico(t).formacao, resultado, golsPro: placar.pro, golsContra: placar.contra });
   }
   const pontos = v * 3 + e;
   const jogosDisputados = confrontos.filter(j => !j.folga).length;
@@ -712,10 +727,10 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
     if (resultado === 'V') vitorias++;
     else if (resultado === 'E') empates++;
     else derrotas++;
-    const placar = placarTecnico(resultado, rng);
+    const placar = placarTecnico(resultado, rng, t.estilo);
     golsPro += placar.pro;
     golsContra += placar.contra;
-    confrontos.push({ ...adversario, resultado, golsPro: placar.pro, golsContra: placar.contra });
+    confrontos.push({ ...adversario, estilo: perfilTaticoTecnico(t).estilo, formacao: perfilTaticoTecnico(t).formacao, resultado, golsPro: placar.pro, golsContra: placar.contra });
     classificacao = simularRodadaRivaisTecnico({ ...t, liga: ligaAtual }, classificacao, adversario.nome, resultado, rng, rodada + 1, placar);
   }
   const pontos = vitorias * 3 + empates;
@@ -736,7 +751,7 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   const progressaoMundo = atualizarLigasMundoDaTemporada({ ...t, liga: ligaAtual }, ligaAtual, classificacoesMundo);
   const temporada = {
     ano: t.ano, clube: t.clube, liga: ligaAtual, idoloEmCasa,
-    objetivo: objetivo.nome, cumpriuObjetivo, promessaDescumprida, estilo: t.estilo,
+    objetivo: objetivo.nome, cumpriuObjetivo, promessaDescumprida, estilo: t.estilo, formacao: perfilTaticoTecnico(t).formacao,
     decisoes: t.decisoes, jogos: jogosDisputados, vitorias, empates, derrotas, pontos, posicao, campeao,
     classificacao, classificacoesMundo,
     ...(progressaoMundo.movimentos.length ? { movimentosMundo: progressaoMundo.movimentos } : {}),
@@ -835,7 +850,7 @@ function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
   const demitido = novaConfianca < 20 || (novaConfianca < 40 && novaTorcida < 35) ||
     riscoDemissaoTecnico({ ...t, diretoria: novaConfianca, torcida: novaTorcida }).pressao >= 82;
   const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivo.nome, cumpriuObjetivo,
-    promessaDescumprida, idoloEmCasa, estilo: t.estilo, decisoes: t.decisoes,
+    promessaDescumprida, idoloEmCasa, estilo: t.estilo, formacao: perfilTaticoTecnico(t).formacao, decisoes: t.decisoes,
     jogos: vitorias + empates + derrotas, vitorias, empates, derrotas, pontos, posicao, campeao, classificacao, classificacoesMundo,
     ...(progressaoMundo.movimentos.length ? { movimentosMundo: progressaoMundo.movimentos } : {}),
     confrontos: andamento.confrontos || [], avaliacoes: andamento.avaliacoes };

@@ -4,7 +4,7 @@ import { JogadorCampo, RetratoApresentacao, CamisaPremium, useCenario } from './
 import { criarIdMuseu } from './museu.js';
 import Icone from "./Icone.jsx";
 import CarreiraTecnico from "./CarreiraTecnico.jsx";
-import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, definirEstiloTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico } from "./tecnico.js";
+import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, definirFormacaoTecnico, definirEstiloTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico } from "./tecnico.js";
 import Lottie from "./Lottie.jsx";
 import { tocar, apito, torcida, somLigado, alternarSom } from "./som.js";
 import React, { useEffect, useRef, useState } from "react";
@@ -3466,6 +3466,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "fim" && <FimDeCarreira c={c} onNova={nova} onSair={onSair} onComecarTecnico={comecarTecnico} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
         {etapa === "tecnico" && <CarreiraTecnico c={c}
           onNegociarElenco={(tipo, id) => setEstado(st => ({ ...st, c: negociarElencoTecnico(st.c, tipo, id) }))}
+          onFormacao={(id) => setEstado(st => ({ ...st, c: definirFormacaoTecnico(st.c, id) }))}
           onEstilo={(id) => setEstado((st) => ({ ...st, c: definirEstiloTecnico(st.c, id) }))}
           onDecisao={(id) => setEstado((st) => ({ ...st, c: id ? tomarDecisaoTecnico(st.c, id) : st.c }))}
           onSimularTemporada={(id) => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(st.c, id ?? null) }))}

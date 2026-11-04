@@ -188,3 +188,24 @@ for (const width of [390,1366]) {
   await page.screenshot({path:`/tmp/renovacao-${width}.png`,fullPage:true});
  });
 }
+
+for(const width of [390,1366]){
+ test(`tática: escolhas persistem e entram na temporada em ${width}px`,async({page})=>{
+  await page.setViewportSize({width,height:900});await abrir(page,carreira());
+  await page.getByRole('button',{name:/Começar no Confiança/}).click();
+  await page.getByLabel('Formação',{exact:true}).selectOption('3-5-2');
+  await page.getByLabel('Estilo',{exact:true}).selectOption('defensivo');
+  await page.reload();await page.getByRole('button',{name:/Continuar · Treinador de teste/}).click();
+  await expect(page.getByLabel('Formação',{exact:true})).toHaveValue('3-5-2');
+  await expect(page.getByLabel('Estilo',{exact:true})).toHaveValue('defensivo');
+  await page.screenshot({path:`/tmp/taticas-${width}.png`,fullPage:true});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.getByRole('button',{name:/Tomar decisão e simular|Simular temporada/}).click();
+  const decisao=page.getByRole('dialog',{name:'Decisão de carreira'});
+  if(await decisao.count())await decisao.locator('.ct-decisions button').first().click();
+  await expect.poll(async()=>(await salvo(page)).tecnico.temporadas.length).toBe(1);
+  const temporada=(await salvo(page)).tecnico.temporadas[0];
+  expect(temporada.formacao).toBe('3-5-2');expect(temporada.estilo).toBe('defensivo');
+  expect(temporada.confrontos.filter(j=>!j.folga).every(j=>j.formacao==='3-5-2'&&j.estilo==='defensivo')).toBe(true);
+ });
+}

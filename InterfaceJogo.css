@@ -1,0 +1,30 @@
+.rp-jornada{display:flex;flex-direction:column;gap:20px}
+.rp-jornada>.rp-proxima{order:0;width:100%}
+.rp-jornada>.rp-historico{order:1;width:100%}
+.rp-proximo-passo{padding:16px 4px 10px;text-align:left;font-family:Inter,system-ui,sans-serif}
+.rp-etiqueta{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#d9be77;font-weight:700;margin-bottom:8px}
+.rp-proximo-passo h1{font-size:clamp(22px,3vw,28px);font-weight:750;line-height:1.2;color:#f2f5f3;margin:0;letter-spacing:-.04em}
+.rp-proximo-passo p{font-size:13px;color:#aab8b0;line-height:1.6;margin:10px 0 0;max-width:55ch}
+.rp-historico-titulo{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0 16px}
+.rp-historico-titulo h2{margin:0;font-size:13px;font-weight:650;color:#d3ddd6}
+.rp-historico-titulo>span{font-size:10px;color:#9ba69f}
+.rp-historico .rp-historico-linha{background:#ffffff02;color:#a8b0ac}
+.rp-historico .rp-historico-atual{background:#bda05c12;border-left:2px solid #bda05c}
+.rp-historico .rp-historico-linha:not(.rp-historico-atual){opacity:.8}
+.rp-proxima .rp-painel{box-shadow:0 6px 20px #0002;border-color:#ffffff14}
+.rp-proxima .display{font-family:Inter,system-ui,sans-serif;font-weight:700;letter-spacing:-.01em}
+.rp-proxima p{line-height:1.6}
+.rp-proxima .rp-opcao{box-shadow:none}
+.rp-proxima button:focus-visible,.popup-conteudo button:focus-visible,.janela-tela-cheia button:focus-visible{outline:2px solid #e6cc89;outline-offset:3px}
+.janela-contexto{padding:0 0 20px;color:#b5c0b9;font:600 11px/1.5 Inter,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid #ffffff12;margin-bottom:20px;flex-shrink:0}
+.popup-conteudo{border-radius:20px;scrollbar-width:thin;scrollbar-color:#626d65 transparent}
+.ct-modal .ct-modal-header{position:sticky;top:0;z-index:2;background:#18181cf5;backdrop-filter:blur(8px);padding:16px 20px}
+.ct-modal .ct-modal-header h2{font-size:14px;line-height:1.4}
+.ct-modal .ct-modal-header button{width:44px;height:44px;flex-shrink:0;border-radius:50%;background:#ffffff08}
+.ct-modal .ct-event-content>p,.ct-modal .ct-quick-decision>p{line-height:1.65}
+@media(min-width:1024px){
+ .rp-jornada{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:32px}
+ .rp-jornada>.rp-historico{order:0;margin-top:16px}
+ .rp-jornada>.rp-proxima{order:1}
+ .rp-proximo-passo{padding-top:12px;padding-bottom:14px}
+}

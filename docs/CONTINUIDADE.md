@@ -2,6 +2,12 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Organização visual — primeira rodada
+
+Usuário aprovou seguir com as sugestões de layout. Implementadas as três prioridades indicadas: foco na próxima ação do jogador, tratamento visual dos pop-ups e tipografia/espaçamento. `InterfaceJogo.css` e `ModoRapido.jsx`: orientação contextual por estado da jornada; ação antes do histórico no celular e ao lado no desktop; título/contador de temporadas na trajetória, última temporada destacada, anteriores discretas e controles de expansão preservados. Reduzidas sombras e variedade de fonte nos títulos das decisões. Pop-ups de tela cheia mostram contexto no topo; cabeçalho dos modais do treinador permanece acessível durante a rolagem, com fechamento de 44 px e texto mais legível. Nenhuma decisão ou regra de simulação foi alterada. Navegação lateral segue como segunda etapa.
+
+Conferência em 390 e 1366 px, incluindo posição relativa de decisão/histórico e ausência de transbordamento. Os 44 testes de navegador, todos os 26 arquivos de testes e o build passaram (`/tmp/interface-browser.log`, `/tmp/interface-tests.log`, `/tmp/interface-build.log`). Capturas em `docs/interface-jogo/`. Publicação em andamento; confirmar o workflow antes de informar sucesso.
+
 ## Ajuste de desktop após publicação
 
 O usuário relatou que a tela no computador parecia a de um celular. O menu ainda usava `max-w-md` (448 px), e as principais telas do jogador `max-w-xl` (576 px). Agora `LayoutDesktop.css`, a partir de 1024 px, organiza o menu em duas colunas até 1160 px, a jornada do jogador com histórico e decisões lado a lado e cabeçalho alinhado. Telas auxiliares do jogador usam até 1000 px e pop-ups de tela cheia até 900 px. O anúncio com camisa usa duas colunas até 1060 px, com camisa de 330 px e dados ao lado. Os limites continuam controlados em monitores grandes. Celulares mantêm o fluxo vertical. Treinador já possuía painel próprio amplo.

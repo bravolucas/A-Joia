@@ -1,3 +1,4 @@
+import "./InterfaceJogo.css";
 import "./LayoutDesktop.css";
 import ConquistasJogador from "./ConquistasJogador.jsx";
 import { bloquearRolagem } from "./bloqueioRolagem.js";
@@ -418,8 +419,9 @@ function TabelaCarreira({ c, proxima = true, compacta = true }) {
   const futuras = proxima && !c.aposentado ? [c.idade, c.idade + 1].filter((a) => a <= 39) : [];
   const temClube = ts.length > 0 || c.flags?.baseEscolhida;
   return (
-    <div className="max-w-xl mx-auto px-3 pt-2 cp">
+    <div className="rp-historico max-w-xl mx-auto px-3 pt-2 cp">
       <div className="cp-card px-3 py-2">
+        <div className="rp-historico-titulo"><h2>Sua trajetória</h2><span>{ts.length} {ts.length === 1 ? "temporada" : "temporadas"}</span></div>
         <div className={`${grid} text-[10px] font-semibold uppercase tracking-wide text-[#71717A] pb-1.5`}>
           <span>Idade</span><span>Clube</span><span className="text-center">OVR</span>
           <span className="flex justify-end" title="Jogos"><IcoJogos /></span><span className="flex justify-end" title="Gols"><IcoGol /></span><span className="flex justify-end" title="Assistências"><IcoAssist /></span>
@@ -432,7 +434,7 @@ function TabelaCarreira({ c, proxima = true, compacta = true }) {
             const tit = s.titulos.filter((t) => !ehPremioIndividual(t.tipo)).length;
             const ultima = i === ts.length - 1;
             return (
-              <div key={i} className={`${grid} rounded-xl py-1 ${ultima ? "rp-linha-nova bg-white/[.04]" : ""}`}>
+              <div key={i} className={`${grid} rp-historico-linha rounded-xl py-1 ${ultima ? "rp-linha-nova rp-historico-atual bg-white/[.04]" : ""}`}>
                 <span className="w-[30px] h-[26px] rounded-lg bg-[#27272A] flex items-center justify-center text-[13px] font-bold text-[#E4E4E7]">{s.idade}</span>
                 <span className="flex items-center gap-1.5 min-w-0">
                   <ClubDot club={clubeDe(s.clube)} size={18} />
@@ -2685,6 +2687,7 @@ function TelaCheia({ rotulo, cor = "#3F3F46", children, botao = "Continuar", onF
     <div className="cp fixed inset-0 z-[70] overflow-y-auto cp-surge janela-tela-cheia" role="dialog" aria-modal="true" aria-label={rotulo} data-pop=""
       style={{ background: `radial-gradient(130% 55% at 50% 0%, ${cor}55, #0B0B0C 62%), #0B0B0C` }}>
       <div className="min-h-full max-w-md mx-auto px-4 pt-6 pb-5 flex flex-col">
+        <header className="janela-contexto">{rotulo}</header>
         <div className={`flex-1 shrink-0 flex flex-col gap-3 ${centro ? "justify-center" : ""}`}>{children}</div>
         <button onClick={onFechar} className={`cp-pill cp-branca text-[16px] w-full mt-5 shrink-0 ${bloqueado ? "opacity-60" : ""}`}>{botao}</button>
       </div>
@@ -3429,7 +3432,8 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "evento" && (
           <section className="rp-jornada" aria-label="Sua carreira e decisões">
             <TabelaCarreira c={c} />
-            <div className="max-w-xl mx-auto px-3 pt-2.5 flex flex-col gap-2.5">
+            <div className="rp-proxima max-w-xl mx-auto px-3 pt-2.5 flex flex-col gap-2.5">
+              <header className="rp-proximo-passo"><span className="rp-etiqueta">Temporada {c.ano}</span><h1>{estado.forcada ? "Hora de encerrar o ciclo" : resultado ? "Decisão tomada" : evento ? "Sua próxima decisão" : estado.auto ? "Temporada em andamento" : "Prepare sua temporada"}</h1><p>{estado.forcada ? "Confira o aviso e veja o legado da sua carreira." : resultado ? "Confira o resultado da sua escolha antes de seguir." : evento ? "Compare as opções abaixo e escolha o próximo passo." : estado.auto ? "Acompanhe a simulação ou avance quando quiser." : "Escolha um treino abaixo para começar. O histórico fica disponível para consulta."}</p></header>
               {ultimo && !evento && <ResumoCompacto c={c} card={ultimo} onDetalhes={() => setGaveta("resumo")} />}
               {estado.aviso && <div className="rp-painel px-4 py-2.5 text-[15px] text-[#F0A99E]" style={{ borderColor: "rgba(227,107,91,.35)" }}>{estado.aviso}</div>}
               {estado.forcada ? (

@@ -2,6 +2,14 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Última tentativa — prêmios corrigidos, Pages ainda bloqueado
+
+A pedido do usuário, os prêmios agrupados e o desafio integrado foram enviados a `main` no commit **`6895318`**. Validação geral `41897749520` e treinador/navegador `41897749525`: **sucesso**. Build também passou. Publicação `41897749603`: **falha por bloqueio externo persistente** (https://github.com/bravolucas/A-Joia/actions/runs/41897749603).
+
+Nesta tentativa, o cancelamento explícito do deployment antigo foi reenviado e aceito: as anotações do runner confirmam `Estado do deployment bloqueador: deployment_cancelled` e `Estado após cancelamento: deployment_cancelled`, sem erro de autorização/cancelamento. Mesmo assim, as duas tentativas de criar uma publicação receberam HTTP 400 exigindo cancelar o mesmo `1dffd03...`. Assim, não se trata de ausência de autorização ou de falha no cancelamento: o Pages mantém uma inconsistência entre o estado cancelado e o bloqueio de novas publicações.
+
+**Não afirmar publicação concluída. Não gerar novos commits apenas para repetir essa sequência.** A versão pública anterior permanece `d9287b9`; `6895318` contém todas as melhorias posteriores e está preservado no checkpoint. Para retomar a publicação, o bloqueio do serviço GitHub Pages precisa ser liberado (aguardar normalização ou solicitar investigação ao GitHub com os runs acima). A recuperação direcionada não executa em novos pushes, pois foi limitada ao `before` de `8aa7659`. A documentação/capturas permitem revisar o desafio e os prêmios prontos enquanto o host não publica.
+
 ## Prêmios individuais agrupados e retomada da publicação
 
 O usuário pediu continuar a publicação pendente e apontou repetição da Bola de Ouro na área “Prêmios” da galeria do jogador. Essa área agora usa `ConquistasJogador`, com os ícones próprios de Bola/Bota de Ouro e o mesmo agrupamento canônico, multiplicadores dourados e anos usados nas taças. São preservados os registros e os clubes; o agrupamento da galeria reúne o prêmio recebido em diferentes clubes. Não mistura Bola de Ouro com Bota de Ouro. Captura em `docs/premios-agrupados/celular.png`.

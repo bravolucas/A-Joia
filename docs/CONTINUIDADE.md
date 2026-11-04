@@ -120,7 +120,22 @@ A comissão técnica descrita abaixo já foi integrada. Preservar a intervençã
 - Validação final: **21 arquivos de testes de lógica, build de produção e 40 testes de navegador passaram**. A interface foi conferida em 390 pixels; compra, cancelamento e recarga foram verificados em celular e desktop.
 - Logs: `/tmp/comissao-test.log`, `/tmp/comissao-build.log`, `/tmp/comissao-browser.log`. Capturas: `/tmp/comissao-390.png` e `/tmp/comissao-1366.png`.
 
-Próximo ponto do plano aprovado: **idolatria com consequências**, depois desafios históricos. Revisar primeiro os vínculos, idolatria e efeitos já existentes em `tecnico.js`/`rapido.js`, para ampliar o sistema sem duplicar conquistas do museu nem benefícios atuais. Continuar salvando na branch de checkpoint e manter o site sem deploy até pedido explícito.
+A idolatria com consequências foi integrada no checkpoint abaixo. Próximo ponto do plano aprovado: desafios históricos. Continuar salvando na branch de checkpoint e manter o site sem deploy até pedido explícito.
+
+## Checkpoint de idolatria com consequências
+
+- Ambiente recuperado após a falha de inicialização; checkout confirmado no commit anterior `eb8964f` antes das novas alterações.
+- `idolatriaTecnico.js` centraliza vínculo ativo, riscos ao aceitar um clube e registro de rupturas. Usa rivalidades cadastradas em `CLASSICOS`, e compara o destino com **todos** os clubes onde o treinador mantém idolatria como ex-jogador, mesmo que o clube atual seja outro.
+- Propostas de rivais recebem uma indicação no cartão e abrem **Decisão de legado** antes da negociação. O usuário pode cancelar sem modificar o save ou confirmar a transferência. O modal informa as consequências antes da assinatura.
+- Ao aceitar a proposta, registra `t.rupturasIdolo` com clube afetado, rival e ano. Só vínculos ainda ativos são registrados; um vínculo já rompido não gera outra entrada. Rejeição da negociação não rompe nada.
+- O clube novo recebe a mesma base de diretoria/torcida já usada para chegadas de rivais (48/35, antes dos ajustes da entrevista). Não é aplicada uma segunda penalidade se a proposta já era marcada como rival.
+- O vínculo histórico continua intacto em `t.vinculosJogador`: afinidade passada e idolatria como jogador não são apagadas. A ruptura somente remove os benefícios atuais de ídolo: bônus e exigência reduzida nos convites de retorno, sinalização de retorno de ídolo e regras especiais de apoio/cobrança na simulação. Não altera as conquistas nem o museu.
+- Retornar ao próprio clube não é rivalidade e mantém o status se não houver ruptura anterior. A ruptura é persistente nesta carreira; não há reconciliação automática implementada.
+- Perfil mostra status ativo ou clubes com vínculo rompido. Convites de retorno indicam quando os benefícios de ídolo foram perdidos. Usa o mesmo save e não muda as chaves da coleção.
+- Validação: **22 arquivos de testes de lógica, build de produção e 42 testes de navegador passaram**. Testes incluem rival de um clube anterior, entrada recusada, retorno ao próprio clube, remoção do bônus em convites, preservação do histórico, cancelamento e recarga em 390/1366 pixels.
+- Logs: `/tmp/idolatria-test.log`, `/tmp/idolatria-build.log`, `/tmp/idolatria-browser.log`. Capturas: `/tmp/idolatria-390.png` e `/tmp/idolatria-1366.png`.
+
+Próximo passo: desafios históricos. Fazer desafios com situações e objetivos claros, preservando a carreira principal e a coleção existente; evitar criar partidas ou conquistas retroativas como se fossem fatos reais. Confirmar no código como iniciar uma carreira independente e registrar progresso sem substituir o save atual. Não publicar automaticamente.
 
 ## Revisão econômica desta etapa
 

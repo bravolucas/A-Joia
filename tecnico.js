@@ -1,3 +1,4 @@
+import { vinculoAtivoTecnico, riscosIdolatriaTecnico, registrarRupturasTecnico } from './idolatriaTecnico.js';
 import { FORMACOES_TECNICO, perfilTaticoTecnico, riscoEstiloTecnico } from './taticasTecnico.js';
 import { CLUBES, CLASSICOS } from './data.js';
 import { EVENTOS_CONTEXTO_TECNICO } from './eventosTecnico.js';
@@ -246,7 +247,7 @@ export function salarioTecnico(t) {
 export function gerarPropostasTecnico(t, rng = sorteio) {
   const reputacao = limitar(t.reputacao ?? 40, 10, 99);
   const clubesPassados = new Set((t.temporadas || []).map(x => x.clube));
-  const vinculosJogador = new Map((t.vinculosJogador || []).map(x => [x.clube, x]));
+  const vinculosJogador = new Map((t.vinculosJogador || []).map(x => [x.clube, vinculoAtivoTecnico(t,x.clube)]));
   const clubesMundo = CLUBES_CONVITES_TECNICO.map(x => ({
     ...x,
     liga: x.nome === t.clube ? (t.liga || t.ligasMundo?.[x.nome] || x.liga) : (t.ligasMundo?.[x.nome] || x.liga),
@@ -257,7 +258,8 @@ export function gerarPropostasTecnico(t, rng = sorteio) {
       const mesmoPais = !!clubeAtual && x.pais === clubeAtual.pais;
       const retorno = clubesPassados.has(x.nome);
       const vinculo = vinculosJogador.get(x.nome);
-      const bonusIdolo = vinculo?.idolatria ? 0.32 : (vinculo?.temporadas || 0) >= 3 ? 0.17 : 0;
+      const rompido=(t.rupturasIdolo||[]).some(r=>r.clube===x.nome);
+      const bonusIdolo = rompido?0:vinculo?.idolatria ? 0.32 : (vinculo?.temporadas || 0) >= 3 ? 0.17 : 0;
       const rival = (CLASSICOS || []).some(derby => {
         const nomes = Array.isArray(derby) ? derby : [derby.a, derby.b, derby.casa, derby.fora, derby.clube1, derby.clube2];
         return nomes.includes(x.nome) && nomes.includes(t.clube);
@@ -305,9 +307,10 @@ export function aceitarPropostaTecnico(c, clube) {
   if (!t || (t.fase !== 'resultado' && !t.desempregado)) throw new Error('Propostas só podem ser aceitas entre temporadas.');
   const proposta = (t.propostas || []).find(x => x.nome === clube);
   if (!proposta) throw new Error('Proposta indisponível.');
-  return { ...c, tecnico: { ...t, clube: proposta.nome, pais: proposta.pais, liga: proposta.liga, elenco: proposta.elenco,
-    moral: 50, diretoria: proposta.rival ? 48 : 65, torcida: proposta.rival ? 35 : 55,
-    demitido: false, desempregado: false, anosDesempregado: 0, promessaContrato: null, retornoIdolo: !!(t.vinculosJogador || []).find(v => v.clube === proposta.nome && v.idolatria), propostas: [], salario: proposta.salario } };
+  const ruptura=riscosIdolatriaTecnico(t,proposta.nome).length>0;
+  return { ...c, tecnico: { ...t, rupturasIdolo:registrarRupturasTecnico(t,proposta.nome), clube: proposta.nome, pais: proposta.pais, liga: proposta.liga, elenco: proposta.elenco,
+    moral: 50, diretoria: proposta.rival || ruptura ? 48 : 65, torcida: proposta.rival || ruptura ? 35 : 55,
+    demitido: false, desempregado: false, anosDesempregado: 0, promessaContrato: null, retornoIdolo: !!vinculoAtivoTecnico(t,proposta.nome)?.idolatria, propostas: [], salario: proposta.salario } };
 }
 export function passarAnoDesempregado(c, rng = sorteio) {
   if (!c?.tecnico || c.tecnico.fase !== 'resultado') throw new Error('Só é possível aguardar entre temporadas.');
@@ -768,7 +771,7 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   const posicao = classificacao.find(x => x.meuClube)?.posicao || classificacao.length;
   const campeao = posicao === 1;
   const objetivo = objetivoTecnico({ ...t, liga: ligaAtual });
-  const vinculoAtual = (t.vinculosJogador || []).find(v => v.clube === t.clube);
+  const vinculoAtual = vinculoAtivoTecnico(t,t.clube);
   const idoloEmCasa = !!vinculoAtual?.idolatria;
   const cumpriuObjetivo = posicao <= objetivo.posicao;
   const promessaDescumprida = !!(t.promessaContrato && t.promessaContrato.clube === t.clube && posicao > t.promessaContrato.posicaoMaxima);
@@ -867,7 +870,7 @@ function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
   const posicao = classificacao.find(x => x.meuClube)?.posicao || 18;
   const campeao = posicao === 1;
   const objetivo = objetivoTecnico(t);
-  const idoloEmCasa = !!(t.vinculosJogador || []).find(v => v.clube === t.clube && v.idolatria);
+  const idoloEmCasa = !!vinculoAtivoTecnico(t,t.clube)?.idolatria;
   const cumpriuObjetivo = posicao <= objetivo.posicao;
   const promessaDescumprida = !!(t.promessaContrato?.clube === t.clube && posicao > t.promessaContrato.posicaoMaxima);
   const novaConfianca = limitar(andamento.diretoria + (cumpriuObjetivo ? 8 : -14) + (posicao <= 4 ? 5 : posicao >= 15 ? -8 : 0)

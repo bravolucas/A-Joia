@@ -276,3 +276,27 @@ for(const width of [390,1366]){
   await page.screenshot({path:`/tmp/comissao-${width}.png`,fullPage:true});
  });
 }
+
+for(const width of [390,1366]){
+ test(`idolatria: aviso, cancelamento e vínculo persistente em ${width}px`,async({page})=>{
+  await page.setViewportSize({width,height:900});const c=comResultado();
+  c.tecnico.vinculosJogador=[{clube:'Santos',idolatria:true,afinidade:95,temporadas:5}];
+  c.tecnico.propostas=[{...CLUBES_CONVITES_TECNICO.find(p=>p.nome==='Palmeiras')}];
+  await abrir(page,c);const antes=await salvo(page);
+  await page.getByRole('button',{name:/Assinar com Palmeiras/}).click();
+  const aviso=page.getByRole('dialog',{name:'Decisão de legado'});
+  await expect(aviso).toContainText('Santos');
+  await aviso.getByRole('button',{name:'Manter meu legado'}).click();
+  expect((await salvo(page)).tecnico).toEqual(antes.tecnico);
+  await page.getByRole('button',{name:/Assinar com Palmeiras/}).click();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:`/tmp/idolatria-${width}.png`,fullPage:true});
+  await aviso.getByRole('button',{name:'Confirmar transferência'}).click();
+  await expect.poll(async()=>(await salvo(page)).tecnico.clube).toBe('Palmeiras');
+  const novo=await salvo(page);expect(novo.tecnico.rupturasIdolo.map(r=>r.clube)).toEqual(['Santos']);
+  expect(novo.temporadas).toEqual(antes.temporadas);
+  await page.reload();await page.getByRole('button',{name:/Continuar · Treinador de teste/}).click();
+  await expect(page.getByText(/Legado: vínculo de ídolo rompido com Santos/)).toBeVisible();
+  expect((await salvo(page)).tecnico.rupturasIdolo).toEqual(novo.tecnico.rupturasIdolo);
+ });
+}

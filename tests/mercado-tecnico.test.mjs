@@ -82,3 +82,44 @@ test('integração preserva força numérica, confirma transações e retorna er
  assert.equal(falha.tecnico.avisoGestao.erro,true);assert.deepEqual(falha.tecnico.gestao,novo.tecnico.gestao);
  assert.deepEqual(prepararGestaoTecnico(c),c);
 });
+
+test('renovação cobra luvas, ajusta folha e preserva atleta na virada anual',async()=>{
+ const {renovarJogadorTecnico,propostaRenovacaoTecnico,prepararGestaoTecnico}=await import('../mercadoTecnico.js');
+ const c=prepararGestaoTecnico(cenario()),antes=structuredClone(c);
+ const alvo=c.tecnico.gestao.elenco.find(j=>j.contrato===1),p=propostaRenovacaoTecnico(alvo);
+ const novo=renovarJogadorTecnico(c,alvo.id),g=novo.tecnico.gestao;
+ assert.deepEqual(c,antes);
+ assert.equal(g.saldo,c.tecnico.gestao.saldo-p.luvas);
+ assert.equal(g.elenco.find(j=>j.id===alvo.id).contrato,3);
+ assert.equal(resumoGestaoTecnico(g).folha,resumoGestaoTecnico(c.tecnico.gestao).folha-alvo.salario+p.salario);
+ const reload=prepararGestaoTecnico(JSON.parse(JSON.stringify(novo)));
+ assert.deepEqual(reload,novo);
+ const anual=prepararGestaoTecnico({...reload,tecnico:{...reload.tecnico,ano:2031}});
+ assert.equal(anual.tecnico.gestao.elenco.find(j=>j.id===alvo.id).contrato,2);
+ assert.equal(anual.tecnico.gestao.elenco.find(j=>j.id===alvo.id).salario,p.salario);
+ assert.equal(anual.tecnico.gestao.movimentos.filter(m=>m.tipo==='renovacao').length,1);
+});
+test('renovação recusa prazo longo, repetição, falta de verba, teto e janela fechada',async()=>{
+ const {renovarJogadorTecnico,prepararGestaoTecnico}=await import('../mercadoTecnico.js');
+ const c=prepararGestaoTecnico(cenario()),g=c.tecnico.gestao;
+ const alvo=g.elenco.find(j=>j.contrato===1);
+ assert.throws(()=>renovarJogadorTecnico(c,g.elenco.find(j=>j.contrato>=3).id),/últimos dois/);
+ assert.throws(()=>renovarJogadorTecnico(c,'inexistente'),/não encontrado/);
+ for(const [patch,erro] of [[{saldo:0},/Orçamento/],[{tetoSalarial:resumoGestaoTecnico(g).folha},/teto salarial/],[{movimentos:[{tipo:'renovacao',ano:g.ano,jogador:alvo.id}]},/já foi renovado/]]){
+  assert.throws(()=>renovarJogadorTecnico({...c,tecnico:{...c.tecnico,gestao:{...g,...patch}}},alvo.id),erro);
+ }
+ assert.throws(()=>renovarJogadorTecnico({...c,tecnico:{...c.tecnico,fase:'resultado'}},alvo.id),/antes do início/);
+ assert.throws(()=>renovarJogadorTecnico({...c,tecnico:{...c.tecnico,desempregado:true}},alvo.id),/empregado/);
+});
+
+test('virada reflete a evolução do elenco na força uma única vez, sem afetar ofertas',async()=>{
+ const {prepararGestaoTecnico}=await import('../mercadoTecnico.js');
+ const c=prepararGestaoTecnico(cenario()),g=c.tecnico.gestao;
+ const media=g=>g.elenco.reduce((n,j)=>n+j.qualidade,0)/g.elenco.length;
+ const alvo={...c,tecnico:{...c.tecnico,ano:2031}};
+ const novo=prepararGestaoTecnico(alvo);
+ assert.ok(Math.abs(novo.tecnico.elenco-(c.tecnico.elenco+media(novo.tecnico.gestao)-media(g)))<1e-10);
+ assert.deepEqual(prepararGestaoTecnico(JSON.parse(JSON.stringify(novo))),novo);
+ assert.deepEqual(gerarMercadoTecnico(novo.tecnico),gerarMercadoTecnico(alvo.tecnico));
+ assert.equal(c.tecnico.gestao.ano,2030);
+});

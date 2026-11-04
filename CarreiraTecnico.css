@@ -81,3 +81,5 @@
 .ct-management-confirm button { margin: 8px; }
 .ct-management-list article > div { min-width: 0; overflow-wrap: anywhere; }
 .ct-management-budget strong { overflow-wrap: anywhere; }
+.ct-management-player-actions { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+.ct-management-list .ct-contract-expiring { color: #fbbf24; font-weight: 600; }

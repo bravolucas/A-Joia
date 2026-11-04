@@ -155,3 +155,36 @@ for (const width of [390, 1366]) {
   expect((await salvo(page)).tecnico.gestao).toEqual(vendido.tecnico.gestao);
  });
 }
+
+for (const width of [390,1366]) {
+ test(`renovação: proposta, cancelamento e recarga em ${width}px`,async({page})=>{
+  await page.setViewportSize({width,height:900});
+  await abrir(page,carreira());
+  await page.getByRole('button',{name:/Começar no Confiança/}).click();
+  await page.getByRole('button',{name:'Elenco e mercado',exact:true}).click();
+  const janela=page.getByRole('dialog',{name:'Elenco e mercado'});
+  const antes=await salvo(page),g=antes.tecnico.gestao;
+  const alvo=g.elenco.find(j=>j.contrato===1);
+  expect(alvo).toBeTruthy();
+  const jogador=janela.locator('article').filter({has:page.getByRole('button',{name:`Renovar contrato de ${alvo.nome}`,exact:true})}).first();
+  await expect(jogador.getByText('Vence ao fim da temporada')).toBeVisible();
+  await jogador.getByRole('button',{name:/Renovar contrato/}).click();
+  const proposta=janela.getByRole('group',{name:'Confirmar renovação'});
+  await expect(proposta).toContainText('Luvas:');
+  await proposta.getByRole('button',{name:'Cancelar renovação'}).click();
+  expect((await salvo(page)).tecnico.gestao).toEqual(g);
+  await jogador.getByRole('button',{name:/Renovar contrato/}).click();
+  await proposta.getByRole('button',{name:'Confirmar renovação',exact:true}).click();
+  await expect(janela.getByRole('status')).toHaveText('Contrato renovado.');
+  const renovado=await salvo(page),j=renovado.tecnico.gestao.elenco.find(j=>j.id===alvo.id);
+  expect(j.contrato).toBe(3);expect(j.salario).toBe(Math.ceil(alvo.salario*1.1));
+  expect(renovado.tecnico.gestao.saldo).toBe(g.saldo-j.salario*2);
+  expect(renovado.tecnico.elenco).toBe(antes.tecnico.elenco);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.reload();
+  await page.getByRole('button',{name:/Continuar · Treinador de teste/}).click();
+  await page.getByRole('button',{name:'Elenco e mercado',exact:true}).click();
+  expect((await salvo(page)).tecnico.gestao).toEqual(renovado.tecnico.gestao);
+  await page.screenshot({path:`/tmp/renovacao-${width}.png`,fullPage:true});
+ });
+}

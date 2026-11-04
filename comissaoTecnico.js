@@ -13,5 +13,5 @@ export function propostaComissaoTecnico(g,id){
 }
 export function bonusAuxiliarTecnico(t){
  const g=t?.gestao;
- return g&&g.clube===t.clube&&g.ano===t.ano&&comissaoAtivaGestao(g).some(p=>p.id==='auxiliar')?1:0;
+ return !t?.modoTreinadorRapido&&g&&g.clube===t.clube&&g.ano===t.ano&&comissaoAtivaGestao(g).some(p=>p.id==='auxiliar')?1:0;
 }

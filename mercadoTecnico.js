@@ -140,7 +140,7 @@ export function contratarComissaoTecnico(c,id){
 /** Materializa saves antigos sem recriar a gestão a cada acesso. */
 export function prepararGestaoTecnico(c){
  const t=c?.tecnico;
- if(!t?.clube||t.demitido||t.desempregado||t.fase!=='pretemporada')return c;
+ if(!t?.clube||t.modoTreinadorRapido||t.demitido||t.desempregado||t.fase!=='pretemporada')return c;
  const gestao=criarGestaoTecnico(t);
  const virada=t.gestao?.versao===1&&t.gestao.clube===t.clube&&gestao.ano>t.gestao.ano;
  const delta=virada?mediaElenco(gestao)-mediaElenco(t.gestao):0;

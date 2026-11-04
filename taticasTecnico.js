@@ -8,7 +8,7 @@ export const FORMACOES_TECNICO = [
 export function perfilTaticoTecnico(t={}){
  const formacao=FORMACOES_TECNICO.find(f=>f.id===t.formacao)||FORMACOES_TECNICO[1];
  const estilo=['ofensivo','defensivo'].includes(t.estilo)?t.estilo:'equilibrado';
- const elenco=t.gestao&&t.gestao.clube===t.clube?t.gestao.elenco:[];
+ const elenco=!t.modoTreinadorRapido&&t.gestao&&t.gestao.clube===t.clube?t.gestao.elenco:[];
  let ajuste=0;
  if(elenco?.length){
   const qualidade=pesos=>Object.entries(pesos).reduce((total,[setor,vagas])=>{

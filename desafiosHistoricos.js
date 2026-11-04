@@ -11,7 +11,7 @@ export function iniciarDesafioHistorico(estado,id){
  const d=DESAFIOS_HISTORICOS.find(d=>d.id===id);if(!d)throw new Error('Desafio inválido.');
  if(estado.ativo&&!estado.ativo.contabilizado)throw new Error('Conclua ou encerre a tentativa atual.');
  let c=iniciarCarreiraTecnico({nome:'Treinador de desafios',idade:40,ano:d.ano,nac:'BRA',ritmo:'expresso',aposentado:true,clubeNome:d.clube,temporadas:[],totais:{},legado:{pontos:880}});
- c={...c,tecnico:{...c.tecnico,clube:d.clube,pais:d.pais,liga:d.liga,elenco:d.forca,reputacao:65,clubeInicialEscolhido:true,opcoesInicio:[],ligasMundo:{[d.clube]:d.liga},diretoria:85,torcida:75}};
+ c={...c,tecnico:{...c.tecnico,clube:d.clube,pais:d.pais,liga:d.liga,elenco:d.forca,verbaRapida:d.orcamento,reputacao:65,clubeInicialEscolhido:true,opcoesInicio:[],ligasMundo:{[d.clube]:d.liga},diretoria:85,torcida:75}};
  c=prepararGestaoTecnico(c);c.tecnico.gestao.saldo=d.orcamento;c.tecnico.gestao.orcamentoInicial=d.orcamento;
  if(d.id==='santos-2002')c.tecnico.gestao.elenco=c.tecnico.gestao.elenco.map((j,i)=>({...j,idade:18+i%5,potencial:Math.min(99,Math.max(j.potencial,j.qualidade+10)),valor:Math.round(j.qualidade**3/180*1.2)}));
  return {...estado,ativo:{id,c,contabilizado:false},tentativas:{...estado.tentativas,[id]:(estado.tentativas[id]||0)+1}};

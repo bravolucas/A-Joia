@@ -2,6 +2,20 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Revisão atual — treinador rápido e propostas coerentes
+
+O usuário rejeitou a administração de elenco/comissão, pediu apenas uma ou duas decisões por pré-temporada com variações e ofertas de clubes mais coerentes, usando o COPERO como referência. Esta orientação substitui os objetivos antigos de construir telas de gestão. Não reintroduzir mercado/folha/comissão como etapas obrigatórias.
+
+Implementação e capturas: `docs/TREINADOR_RAPIDO.md`. `pretemporadaRapida.js` contém dez famílias de cartas, níveis, nomes fictícios, investimento, impactos e efeitos futuros. `escolherPretemporadaRapidaTecnico` aplica a escolha e simula ao concluir o máximo de uma/duas cartas. O estado intermediário é serializável e idempotente. Os efeitos futuros são vinculados ao clube; o saldo de projeto e os limites de força são preservados.
+
+O fluxo normal não chama a preparação anual da gestão nem mostra seus controles. O flag `modoTreinadorRapido` faz a simulação ignorar o elenco/comissão antigos, mantendo os registros armazenados. As funções antigas foram preservadas para compatibilidade; saves já em andamento ou intervenção continuam até o resultado sem novos sorteios do trecho concluído.
+
+As propostas agora filtram saltos de nível e países pela trajetória, classificam projetos por compatibilidade e explicam o interesse. A campanha recém-concluída e o clube de referência são enviados corretamente, inclusive em demissão. `atualizarPropostasCoerentesTecnico` atualiza ofertas legadas uma única vez; ofertas vazias não são reabertas por recarga.
+
+Validação: **25 arquivos de testes de lógica, build de produção e 44 testes de navegador passaram**. Duas carreiras rápidas completaram 30 temporadas com recarga entre escolhas, limite de decisões e finanças válidas. Os cenários de interface de administração retirados foram substituídos pelos do fluxo rápido. A vitrine de taças agrupadas do checkpoint anterior está incluída e validada.
+
+Logs: `/tmp/treinador-rapido-test.log`, `/tmp/treinador-rapido-unidade-final.log`, `/tmp/treinador-rapido-build.log`, `/tmp/treinador-rapido-validacao-final.log`. Seguir a orientação anterior do usuário de concluir até a publicação, conferindo main e o deploy antes de confirmar o resultado. As seções antigas abaixo são histórico, não instruções para restaurar a gestão.
+
 ## Estado atual — vitrine de conquistas agrupada, ainda não publicada
 
 O usuário pediu que as conquistas ficassem no formato de uma taça por competição com ×2/×3/×4, aprovou a proposta e autorizou implementar. A ficha e a janela de conquistas do treinador agora usam o agrupamento. Detalhes e capturas: `docs/VITRINE_AGRUPADA.md`.

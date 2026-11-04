@@ -23,7 +23,7 @@ function poisson(media, rng) {
 export function mediasPartidaCopaTecnico(casa,fora,clubeUsuario,bonusTecnico=0,campoNeutro=false){
  const usuarioCasa=casa.nome===clubeUsuario,usuarioFora=fora.nome===clubeUsuario;
  const tatica=usuarioCasa?casa.planoTatico:usuarioFora?fora.planoTatico:null;
- const ajuste=limitar(Number(tatica?.ajuste)||0,-3,3);
+ const ajuste=limitar(Number(tatica?.ajuste)||0,-3,4);
  const diferencaBase=forca(casa)+(usuarioCasa?bonusTecnico+ajuste:0)-forca(fora)-(usuarioFora?bonusTecnico+ajuste:0);
  const diferencaUsuario=usuarioCasa?diferencaBase:-diferencaBase;
  const risco=tatica?riscoEstiloTecnico(tatica.estilo,diferencaUsuario)/.008:0;

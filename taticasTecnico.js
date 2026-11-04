@@ -1,3 +1,4 @@
+import { bonusAuxiliarTecnico } from './comissaoTecnico.js';
 // As formações redistribuem o peso dos setores, sem somar força gratuitamente.
 export const FORMACOES_TECNICO = [
  {id:'4-3-3',nome:'4-3-3',descricao:'Valoriza o ataque e dá menos peso ao meio-campo.',pesos:{GOL:1,DEF:4,MEI:3,ATA:3}},
@@ -17,7 +18,7 @@ export function perfilTaticoTecnico(t={}){
   },0)/11;
   ajuste=Math.max(-3,Math.min(3,qualidade(formacao.pesos)-qualidade(FORMACOES_TECNICO[1].pesos)));
  }
- return {estilo,formacao:formacao.id,ajuste};
+ return {estilo,formacao:formacao.id,ajuste:ajuste+bonusAuxiliarTecnico(t)};
 }
 
 /** Vantagem contextual em probabilidade; compartilhada por liga e copas. */

@@ -1,3 +1,4 @@
+import { comissaoAtivaGestao, propostaComissaoTecnico } from './comissaoTecnico.js';
 /* Base de gestão do treinador. Valores em R$ mil; salários por mês.
    O gerador é próprio, para não consumir a aleatoriedade da simulação existente. */
 import { CLUBES } from './data.js';
@@ -24,11 +25,14 @@ export function atualizarGestaoAnual(gestao, anoAlvo){
  if(!Number.isInteger(anoAlvo)||!Number.isInteger(g.ano)||anoAlvo<=g.ano)return g;
  if(anoAlvo-g.ano>40)throw new Error('Intervalo de gestão inválido.');
  for(let ano=g.ano+1;ano<=anoAlvo;ano++){
+  const equipe=comissaoAtivaGestao(g);
+  const treino=equipe.some(p=>p.id==='preparador')?1:0;
+  const observacao=equipe.some(p=>p.id==='olheiro')?2:0;
   const expirados=g.elenco.filter(j=>j.contrato<=1);
   const base=g.elenco.reduce((n,j)=>n+j.qualidade,0)/Math.max(1,g.elenco.length);
   g.elenco=g.elenco.filter(j=>j.contrato>1).map(j=>{
    const idade=j.idade+1;
-   const qualidade=limitar(j.qualidade+(idade<24?1:idade>32?-1:0),30,j.potencial);
+   const qualidade=limitar(j.qualidade+(idade<24?1:idade>32?-1:0)+(idade<30?treino:0),30,j.potencial);
    return {...j,idade,qualidade,contrato:j.contrato-1,valor:Math.max(100,Math.round(j.valor*(idade>30?.94:1.02)))};
   });
   for(const j of expirados)g.movimentos.push({tipo:'fim-contrato',jogador:j.id,nome:j.nome,valor:0,ano});
@@ -38,6 +42,9 @@ export function atualizarGestaoAnual(gestao, anoAlvo){
    for(let i=0;i<faltam;i++){
     const jovem=jogador(rng,`${g.clube}:base:${ano}:${setor.id}:${i}`,setor.id,Math.max(30,base-7));
     jovem.idade=18+Math.floor(rng()*3);jovem.contrato=3;jovem.origem='base';
+    jovem.qualidade=Math.min(95,jovem.qualidade+observacao);
+    jovem.salario=Math.max(3,Math.round(jovem.qualidade**2/220));
+    jovem.valor=Math.max(100,Math.round(jovem.qualidade**3/180*1.2));
     jovem.potencial=Math.min(99,jovem.qualidade+10);g.elenco.push(jovem);
     g.movimentos.push({tipo:'base',jogador:jovem.id,nome:jovem.nome,valor:0,ano});
    }
@@ -46,6 +53,8 @@ export function atualizarGestaoAnual(gestao, anoAlvo){
   const saldo=g.saldo+Math.min(aporte,Math.max(0,g.orcamentoInicial*2-g.saldo));
   g.movimentos.push({tipo:'verba',valor:saldo-g.saldo,ano});g.saldo=saldo;
   g.tetoSalarial=Math.max(g.tetoSalarial,Math.ceil(g.elenco.reduce((n,j)=>n+j.salario,0)*1.25));
+  for(const p of equipe)g.movimentos.push({tipo:'fim-comissao',cargo:p.id,valor:0,ano});
+  if(g.comissao)g.comissao=[];
   g.ano=ano;
  }
  return g;
@@ -64,8 +73,10 @@ export function criarGestaoTecnico(t){
 }
 export function resumoGestaoTecnico(g){
  const setores=SETORES_ELENCO.map(s=>{const jogadores=g.elenco.filter(j=>j.setor===s.id);return {...s,jogadores:jogadores.length,media:jogadores.length?Math.round(jogadores.reduce((n,j)=>n+j.qualidade,0)/jogadores.length):0};});
- const folha=g.elenco.reduce((n,j)=>n+j.salario,0);
- return {setores,jogadores:g.elenco.length,folha,tetoSalarial:g.tetoSalarial,espacoSalarial:g.tetoSalarial-folha,saldo:g.saldo};
+ const folhaJogadores=g.elenco.reduce((n,j)=>n+j.salario,0);
+ const folhaComissao=comissaoAtivaGestao(g).reduce((n,p)=>n+p.salario,0);
+ const folha=folhaJogadores+folhaComissao;
+ return {folhaJogadores,folhaComissao,setores,jogadores:g.elenco.length,folha,tetoSalarial:g.tetoSalarial,espacoSalarial:g.tetoSalarial-folha,saldo:g.saldo};
 }
 export function gerarMercadoTecnico(t){
  const g=criarGestaoTecnico(t);const rng=gerador(`${g.clube}|${g.ano}|mercado-v1`);
@@ -113,6 +124,17 @@ export function renovarJogadorTecnico(c,id){
   movimentos:[...g.movimentos,{tipo:'renovacao',jogador:id,nome:alvo.nome,valor:proposta.luvas,salario:proposta.salario,ano:g.ano}]}}};
 }
 
+export function contratarComissaoTecnico(c,id){
+ const t=c?.tecnico;validarJanela(t);const g=criarGestaoTecnico(t);
+ const ativos=comissaoAtivaGestao(g),proposta=propostaComissaoTecnico(g,id);
+ if(ativos.some(p=>p.id===id))throw new Error('Este cargo já está contratado nesta temporada.');
+ if(g.saldo<proposta.custo)throw new Error('Orçamento insuficiente para o contrato da comissão.');
+ if(resumoGestaoTecnico(g).folha+proposta.salario>g.tetoSalarial)throw new Error('A contratação ultrapassa o teto salarial.');
+ return {...c,tecnico:{...t,gestao:{...g,saldo:g.saldo-proposta.custo,
+  comissao:[...ativos,{id,ano:g.ano,salario:proposta.salario,custo:proposta.custo}],
+  movimentos:[...g.movimentos,{tipo:'comissao',cargo:id,nome:proposta.nome,valor:proposta.custo,ano:g.ano}]}}};
+}
+
 /** Materializa saves antigos sem recriar a gestão a cada acesso. */
 export function prepararGestaoTecnico(c){
  const t=c?.tecnico;
@@ -124,9 +146,9 @@ export function prepararGestaoTecnico(c){
 }
 export function negociarElencoTecnico(c,tipo,id){
  try {
-  if(!['compra','venda','renovacao'].includes(tipo))throw new Error('Operação inválida.');
-  const novo=tipo==='compra'?contratarJogadorTecnico(c,id):tipo==='venda'?venderJogadorTecnico(c,id):renovarJogadorTecnico(c,id);
+  if(!['compra','venda','renovacao','comissao'].includes(tipo))throw new Error('Operação inválida.');
+  const novo=tipo==='compra'?contratarJogadorTecnico(c,id):tipo==='venda'?venderJogadorTecnico(c,id):tipo==='comissao'?contratarComissaoTecnico(c,id):renovarJogadorTecnico(c,id);
   const delta=mediaElenco(novo.tecnico.gestao)-mediaElenco(criarGestaoTecnico(c.tecnico));
-  return {...novo,tecnico:{...novo.tecnico,elenco:limitar((Number(c.tecnico.elenco)||50)+delta,10,95),avisoGestao:{texto:tipo==='compra'?'Contratação concluída.':tipo==='venda'?'Venda concluída.':'Contrato renovado.',erro:false}}};
+  return {...novo,tecnico:{...novo.tecnico,elenco:limitar((Number(c.tecnico.elenco)||50)+delta,10,95),avisoGestao:{texto:tipo==='compra'?'Contratação concluída.':tipo==='venda'?'Venda concluída.':tipo==='comissao'?'Comissão contratada.':'Contrato renovado.',erro:false}}};
  } catch(erro){return {...c,tecnico:{...c.tecnico,avisoGestao:{texto:erro.message,erro:true}}};}
 }

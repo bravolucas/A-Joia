@@ -246,3 +246,33 @@ for(const width of [390,1366]){
   expect((await salvo(page)).tecnico.temporadas).toEqual(fim.tecnico.temporadas);
  });
 }
+
+for(const width of [390,1366]){
+ test(`comissão: custos, cancelamento e save em ${width}px`,async({page})=>{
+  await page.setViewportSize({width,height:900});await abrir(page,carreira());
+  await page.getByRole('button',{name:/Começar no Confiança/}).click();
+  await page.getByRole('button',{name:'Elenco e mercado',exact:true}).click();
+  const janela=page.getByRole('dialog',{name:'Elenco e mercado'});
+  await janela.getByRole('button',{name:'Comissão técnica',exact:true}).click();
+  const antes=await salvo(page),g=antes.tecnico.gestao;
+  await janela.getByRole('button',{name:'Contratar Auxiliar técnico',exact:true}).click();
+  const confirmar=janela.getByRole('group',{name:'Confirmar comissão'});
+  await expect(confirmar).toContainText('Pagamento agora:');
+  await confirmar.getByRole('button',{name:'Cancelar contratação'}).click();
+  expect((await salvo(page)).tecnico.gestao).toEqual(g);
+  await janela.getByRole('button',{name:'Contratar Auxiliar técnico',exact:true}).click();
+  await confirmar.getByRole('button',{name:'Confirmar contratação'}).click();
+  await expect(janela.getByRole('status')).toHaveText('Comissão contratada.');
+  const depois=await salvo(page),contrato=depois.tecnico.gestao.comissao[0];
+  expect(depois.tecnico.gestao.saldo).toBe(g.saldo-contrato.custo);
+  expect(contrato.custo).toBe(contrato.salario*12);
+  await expect(janela.getByRole('button',{name:'Contratar Auxiliar técnico',exact:true})).toBeDisabled();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.reload();await page.getByRole('button',{name:/Continuar · Treinador de teste/}).click();
+  await page.getByRole('button',{name:'Elenco e mercado',exact:true}).click();
+  await janela.getByRole('button',{name:'Comissão técnica',exact:true}).click();
+  expect((await salvo(page)).tecnico.gestao).toEqual(depois.tecnico.gestao);
+  await expect(janela.getByRole('button',{name:'Contratar Auxiliar técnico',exact:true})).toBeDisabled();
+  await page.screenshot({path:`/tmp/comissao-${width}.png`,fullPage:true});
+ });
+}

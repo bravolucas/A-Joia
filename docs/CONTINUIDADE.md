@@ -4,7 +4,7 @@ Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
 ## Pedido atual e limite de escopo
 
-O usuário aprovou seguir com elenco + orçamento + mercado como próxima evolução do treinador. Informou que restava aproximadamente 3% do limite e pediu para fazer e salvar o progresso, incluindo um relatório interno para retomar quando o limite renovar. Elenco, mercado, renovação de contratos, plano tático e intervenção opcional já estão integrados à interface na branch de continuidade. Ainda há balanceamento de campanhas longas a fazer. Não publicar no site sem instrução do usuário.
+O usuário aprovou seguir com elenco + orçamento + mercado como próxima evolução do treinador. Informou que restava aproximadamente 3% do limite e pediu para fazer e salvar o progresso, incluindo um relatório interno para retomar quando o limite renovar. Elenco, mercado, renovação de contratos, plano tático, intervenção opcional e comissão técnica já estão integrados à interface na branch de continuidade. Ainda há balanceamento de campanhas longas a fazer. Não publicar no site sem instrução do usuário.
 
 ## Estado publicado e preservação
 
@@ -72,7 +72,7 @@ Fases posteriores aprovadas em princípio na conversa: tática com efeito real, 
 - Validação final desta etapa: **19 arquivos de testes de lógica, build de produção e 36 testes de navegador passaram**. Inclui 12 fluxos de treinador e as regressões de apresentação, museu e minigames. A tela foi conferida em 390 pixels.
 - Logs desta etapa: `/tmp/taticas-test.log`, `/tmp/taticas-build.log` e `/tmp/taticas-browser-final.log`. Capturas: `/tmp/taticas-390.png` e `/tmp/taticas-1366.png`.
 
-Prioridade ao retomar: conferir o checkpoint atual; as copas já foram integradas. A intervenção opcional já está implementada; a próxima evolução aprovada é a comissão técnica. Manter o site sem deploy até pedido do usuário.
+Prioridade ao retomar: conferir o checkpoint atual; as copas já foram integradas. A intervenção opcional já está implementada; a comissão técnica também já foi integrada no checkpoint seguinte. Manter o site sem deploy até pedido do usuário.
 
 ## Checkpoint de táticas nas copas
 
@@ -102,7 +102,25 @@ Prioridade ao retomar: conferir o checkpoint atual; as copas já foram integrada
 - Navegador em 390/1366 pixels: habilitar, iniciar temporada, pausar, recarregar, reencontrar a mesma pendência, decidir, preservar os jogos anteriores, concluir uma única temporada e recarregar o resultado completo.
 - Logs: `/tmp/intervencao-test.log`, `/tmp/intervencao-build.log`, `/tmp/intervencao-browser.log`. Capturas: `/tmp/intervencao-390.png` e `/tmp/intervencao-1366.png`.
 
-Próximo passo aprovado: comissão técnica. Definir efeitos e custos claros e integrar ao orçamento/teto sem duplicar cobranças ao recarregar. Preservar a intervenção opcional, resultados já salvos, o museu e o visual aprovado. Publicação continua pendente de pedido do usuário.
+A comissão técnica descrita abaixo já foi integrada. Preservar a intervenção opcional, resultados já salvos, o museu e o visual aprovado. Publicação continua pendente de pedido do usuário.
+
+## Checkpoint de comissão técnica
+
+- Nova aba **Comissão técnica** na janela de elenco e mercado. São contratos de um ano, sem renovação automática e sem rescisão durante a temporada. Há uma vaga por cargo.
+- `comissaoTecnico.js`: catálogo, proposta e consulta da equipe ativa. Custo mensal calculado sobre a folha dos atletas no momento da contratação, mínimo R$ 2 mil. Os valores aceitos são congelados no contrato.
+- Auxiliar técnico: salário de 6% da folha dos atletas, +1 de força efetiva em partidas da liga e copas. O bônus é temporário e não altera permanentemente `t.elenco`. Combina com a formação (máximo +3 de formação e +1 do auxiliar); as copas aceitam o total +4.
+- Preparador de desenvolvimento: 5% da folha dos atletas. Na virada, +1 de qualidade para atletas retidos com menos de 30 anos após envelhecer, sem exceder o potencial. O ganho entra na evolução anual já usada para atualizar a força do elenco.
+- Olheiro da base: 4% da folha dos atletas. Na virada, +2 de qualidade nos jovens promovidos para repor vagas, limitado a 95. Potencial, salário e valor dos jovens acompanham a qualidade resultante; o valor usa a idade jovem efetiva, corrigindo o cálculo anterior feito antes de definir a idade da base.
+- **Cobrança:** os 12 salários são debitados antecipadamente do orçamento de transferências. A parcela mensal também ocupa espaço no teto salarial. Não há segundo débito mensal nem nova cobrança ao recarregar.
+- `resumoGestaoTecnico` agora separa `folhaJogadores` e `folhaComissao`; `folha` passa a ser a soma. Assim, compras, renovações de atletas e novas contratações de comissão respeitam o mesmo teto. Sem comissão, o comportamento anterior permanece.
+- `contratarComissaoTecnico` valida janela, vínculo, 30 temporadas, cargo, orçamento, teto e duplicidade. Usa `t.gestao.comissao` com id, ano, salário e custo; registra movimento financeiro. `negociarElencoTecnico` aceita a operação `comissao` e retorna aviso seguro para a interface.
+- Na virada, os especialistas atuam uma única vez e os contratos são encerrados (movimento `fim-comissao`). Não seguem para outro clube. A opção de contratar novamente aparece no novo ano, com nova confirmação; não existe renovação automática.
+- A confirmação exibe efeito, pagamento imediato, espaço na folha e prazo. Cancelamento não altera o save; após contratar, o cargo fica indisponível até o ano seguinte. A interface mostra o custo aceito e a composição da folha.
+- Testes novos: custo/folha, serialização, não mutação, duplicidade, orçamento, teto compartilhado com atletas, janela fechada, limite de carreira, bônus do auxiliar na liga/copas, limite de ano/clube, evolução e expiração sem cobrança automática.
+- Validação final: **21 arquivos de testes de lógica, build de produção e 40 testes de navegador passaram**. A interface foi conferida em 390 pixels; compra, cancelamento e recarga foram verificados em celular e desktop.
+- Logs: `/tmp/comissao-test.log`, `/tmp/comissao-build.log`, `/tmp/comissao-browser.log`. Capturas: `/tmp/comissao-390.png` e `/tmp/comissao-1366.png`.
+
+Próximo ponto do plano aprovado: **idolatria com consequências**, depois desafios históricos. Revisar primeiro os vínculos, idolatria e efeitos já existentes em `tecnico.js`/`rapido.js`, para ampliar o sistema sem duplicar conquistas do museu nem benefícios atuais. Continuar salvando na branch de checkpoint e manter o site sem deploy até pedido explícito.
 
 ## Revisão econômica desta etapa
 

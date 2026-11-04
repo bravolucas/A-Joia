@@ -208,3 +208,10 @@ Push em main aciona GitHub Pages automaticamente. Para preservar checkpoints sem
 - Os quatro testes específicos de desafios passaram, incluindo os dois anteriores de isolamento dos saves e acesso ao último resultado. Log: `/tmp/retomada-desafios-browser.log`.
 - Não foram necessárias mudanças no código da aplicação nesta verificação. O build e os 23 arquivos de testes de lógica permanecem os da revisão anterior; a regressão geral anterior de 44 casos está registrada acima.
 - O CI existente já inclui este arquivo, passando a ter 46 cenários de navegador disponíveis. Próximo passo continua sendo revisão do usuário e publicação quando solicitada, sem novas funcionalidades automáticas.
+
+
+## Fechamento da entrega
+
+- Execução final completa: **46 testes de navegador passaram**, em 32,7 segundos, contra o build já aprovado e sem alterações posteriores no código da aplicação. Log local: `/tmp/entrega-final-browser.log`.
+- Documento de revisão: `docs/ENTREGA_TREINADOR.md`, com funcionalidades, roteiro para o usuário, limites de escopo e referências da auditoria.
+- O escopo combinado está concluído. Não repetir verificações ou inventar novas funcionalidades apenas para preencher outra rodada de trabalho. Se o usuário pedir publicação, atualizar as referências remotas e conferir mudanças concorrentes antes de mesclar a branch em main e acompanhar o deploy. Sem pedido de publicação, manter a branch preservada.

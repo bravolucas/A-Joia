@@ -199,3 +199,12 @@ Para navegador local: `GITHUB_PAGES=true npm run preview -- --host 127.0.0.1 --p
 Acesso GitHub usa o proxy HTTPS existente. Em sandbox com isolamento de rede pode ser necessário o fluxo de execução com permissão ampliada; preservar proxy e TLS. `gh`/API já recusaram acesso, mas Git e páginas públicas do GitHub funcionam. Não pedir token apenas porque a CLI não está autenticada.
 
 Push em main aciona GitHub Pages automaticamente. Para preservar checkpoints sem deploy, usar a branch indicada. Não confundir publicação do ambiente na nuvem com deploy do jogo.
+
+
+## Verificação final de retomada e encerramento
+
+- Acrescentados dois cenários de navegador (390/1366 pixels) que combinam desafio histórico e intervenção: pausar, voltar ao catálogo, cancelar encerramento, recarregar, retomar a mesma decisão e concluir uma única campanha.
+- O mesmo fluxo inicia outra missão e confirma o encerramento, verificando que a tentativa ativa é liberada, a contagem permanece correta e as conquistas anteriores são preservadas.
+- Os quatro testes específicos de desafios passaram, incluindo os dois anteriores de isolamento dos saves e acesso ao último resultado. Log: `/tmp/retomada-desafios-browser.log`.
+- Não foram necessárias mudanças no código da aplicação nesta verificação. O build e os 23 arquivos de testes de lógica permanecem os da revisão anterior; a regressão geral anterior de 44 casos está registrada acima.
+- O CI existente já inclui este arquivo, passando a ter 46 cenários de navegador disponíveis. Próximo passo continua sendo revisão do usuário e publicação quando solicitada, sem novas funcionalidades automáticas.

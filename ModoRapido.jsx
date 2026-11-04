@@ -4,7 +4,7 @@ import { JogadorCampo, RetratoApresentacao, CamisaPremium, useCenario } from './
 import { criarIdMuseu } from './museu.js';
 import Icone from "./Icone.jsx";
 import CarreiraTecnico from "./CarreiraTecnico.jsx";
-import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, definirFormacaoTecnico, definirEstiloTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico } from "./tecnico.js";
+import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, definirAcompanhamentoTecnico, responderIntervencaoTecnico, definirFormacaoTecnico, definirEstiloTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico } from "./tecnico.js";
 import Lottie from "./Lottie.jsx";
 import { tocar, apito, torcida, somLigado, alternarSom } from "./som.js";
 import React, { useEffect, useRef, useState } from "react";
@@ -3465,6 +3465,8 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "traco" && <TelaTraco c={c} opcoes={(opcoesTraco || []).map(tracoDe).filter(Boolean)} onEscolher={escolherT} />}
         {etapa === "fim" && <FimDeCarreira c={c} onNova={nova} onSair={onSair} onComecarTecnico={comecarTecnico} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
         {etapa === "tecnico" && <CarreiraTecnico c={c}
+          onAcompanhamento={(ativo) => setEstado(st => ({ ...st, c: definirAcompanhamentoTecnico(st.c, ativo) }))}
+          onIntervir={(chave, escolha) => setEstado(st => ({ ...st, c: responderIntervencaoTecnico(st.c, chave, escolha) }))}
           onNegociarElenco={(tipo, id) => setEstado(st => ({ ...st, c: negociarElencoTecnico(st.c, tipo, id) }))}
           onFormacao={(id) => setEstado(st => ({ ...st, c: definirFormacaoTecnico(st.c, id) }))}
           onEstilo={(id) => setEstado((st) => ({ ...st, c: definirEstiloTecnico(st.c, id) }))}

@@ -216,3 +216,33 @@ for(const width of [390,1366]){
   expect((await salvo(page)).tecnico.temporadas[0].torneios).toEqual(temporada.torneios);
  });
 }
+
+for(const width of [390,1366]){
+ test(`intervenção: pausa, recarga e conclusão única em ${width}px`,async({page})=>{
+  await page.setViewportSize({width,height:900});await abrir(page,carreira());
+  await page.getByRole('button',{name:/Começar no Confiança/}).click();
+  const acompanhar=page.getByRole('checkbox',{name:'Acompanhar jogo importante'});
+  await expect(acompanhar).not.toBeChecked();await acompanhar.check();
+  await page.getByRole('button',{name:/Tomar decisão e simular|Simular temporada/}).click();
+  const decisao=page.getByRole('dialog',{name:'Decisão de carreira'});
+  if(await decisao.count())await decisao.locator('.ct-decisions button').first().click();
+  await expect(page.getByRole('heading',{name:'Jogo importante',exact:true})).toBeVisible();
+  const pausado=await salvo(page),p=pausado.tecnico.intervencaoPendente;
+  expect(pausado.tecnico.temporadas.length).toBe(0);expect(p.jogos).toBeGreaterThan(0);
+  await page.reload();await page.getByRole('button',{name:/Continuar · Treinador de teste/}).click();
+  await expect(page.getByRole('heading',{name:'Jogo importante',exact:true})).toBeVisible();
+  expect((await salvo(page)).tecnico.temporadaPausada).toEqual(pausado.tecnico.temporadaPausada);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:`/tmp/intervencao-${width}.png`,fullPage:true});
+  await page.getByRole('button',{name:/Buscar a vitória/}).click();
+  await expect.poll(async()=>(await salvo(page)).tecnico.temporadas.length).toBe(1);
+  const fim=await salvo(page),temporada=fim.tecnico.temporadas[0];
+  expect(fim.tecnico.ano).toBe(pausado.tecnico.ano+1);expect(fim.idade).toBe(pausado.idade+1);
+  expect(temporada.confrontos.slice(0,pausado.tecnico.temporadaPausada.indice)).toEqual(pausado.tecnico.temporadaPausada.confrontos);
+  expect(temporada.confrontos.filter(j=>j.intervencao).length).toBe(1);
+  expect(temporada.confrontos.find(j=>j.intervencao).estilo).toBe('ofensivo');
+  expect(temporada.jogos).toBe(38);expect(fim.tecnico.intervencaoPendente).toBe(null);
+  await page.reload();await page.getByRole('button',{name:/Continuar · Treinador de teste/}).click();
+  expect((await salvo(page)).tecnico.temporadas).toEqual(fim.tecnico.temporadas);
+ });
+}

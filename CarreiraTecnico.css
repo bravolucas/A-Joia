@@ -89,3 +89,5 @@
 .ct-tactics select { background: #18181b; color: white; padding: 8px; border: 1px solid #52525b; border-radius: 6px; }
 .ct-tactics p, .ct-tactics small { display: block; margin: 8px 0 14px; color: #a1a1aa; font-size: 11px; line-height: 1.5; }
 .ct-tactics select:focus-visible { outline: 2px solid #34d399; outline-offset: 3px; }
+.ct-follow-match { padding-bottom: 8px; }
+.ct-follow-match input { width: 18px; height: 18px; accent-color: #d8b44a; flex-shrink: 0; }

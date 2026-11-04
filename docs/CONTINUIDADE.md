@@ -4,7 +4,7 @@ Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
 ## Pedido atual e limite de escopo
 
-O usuário aprovou seguir com elenco + orçamento + mercado como próxima evolução do treinador. Informou que restava aproximadamente 3% do limite e pediu para fazer e salvar o progresso, incluindo um relatório interno para retomar quando o limite renovar. Elenco, mercado, renovação de contratos e plano tático já estão integrados à interface na branch de continuidade. Ainda há balanceamento de campanhas longas a fazer. Não publicar no site sem instrução do usuário.
+O usuário aprovou seguir com elenco + orçamento + mercado como próxima evolução do treinador. Informou que restava aproximadamente 3% do limite e pediu para fazer e salvar o progresso, incluindo um relatório interno para retomar quando o limite renovar. Elenco, mercado, renovação de contratos, plano tático e intervenção opcional já estão integrados à interface na branch de continuidade. Ainda há balanceamento de campanhas longas a fazer. Não publicar no site sem instrução do usuário.
 
 ## Estado publicado e preservação
 
@@ -72,7 +72,7 @@ Fases posteriores aprovadas em princípio na conversa: tática com efeito real, 
 - Validação final desta etapa: **19 arquivos de testes de lógica, build de produção e 36 testes de navegador passaram**. Inclui 12 fluxos de treinador e as regressões de apresentação, museu e minigames. A tela foi conferida em 390 pixels.
 - Logs desta etapa: `/tmp/taticas-test.log`, `/tmp/taticas-build.log` e `/tmp/taticas-browser-final.log`. Capturas: `/tmp/taticas-390.png` e `/tmp/taticas-1366.png`.
 
-Prioridade ao retomar: conferir o checkpoint atual; as copas já foram integradas. Próxima evolução aprovada: intervenções em partidas importantes, depois comissão técnica. Manter o site sem deploy até pedido do usuário.
+Prioridade ao retomar: conferir o checkpoint atual; as copas já foram integradas. A intervenção opcional já está implementada; a próxima evolução aprovada é a comissão técnica. Manter o site sem deploy até pedido do usuário.
 
 ## Checkpoint de táticas nas copas
 
@@ -88,7 +88,21 @@ Prioridade ao retomar: conferir o checkpoint atual; as copas já foram integrada
 - Verificação de lógica: 22 testes no arquivo de competições, incluindo contexto/ritmo, neutralidade, ida/volta, grupos e compatibilidade. O equilibrado sem ajuste reproduz os placares antigos com a mesma semente, descontando somente os metadados novos.
 - O navegador verifica em celular e desktop que as partidas da copa recebem o plano escolhido e que recarregar o save preserva os torneios completos. Logs atuais: `/tmp/copas-unidade.log`, `/tmp/copas-test.log`, `/tmp/copas-build.log`, `/tmp/copas-browser.log`.
 
-Próximo passo: planejar uma intervenção em partida importante sem duplicar simulações ou resultados. Hoje o botão simula a temporada inteira; será necessário pausar em um ponto explícito, persistir o estado pendente e retomar com uma escolha única, preservando o ritmo escolhido pelo jogador e os saves existentes. Não abrir prompts obrigatórios para todas as partidas. Publicação segue pendente de pedido do usuário.
+## Checkpoint de intervenção opcional
+
+- Pré-temporada: checkbox **Acompanhar jogo importante**, desativado por padrão. O fluxo rápido continua sem pausas quando a opção não está marcada. A preferência permanece para os anos seguintes.
+- Quando ativado, `simularTemporadaTecnico` pausa antes do adversário de maior força na segunda metade da liga (desempate pela rodada mais próxima). É uma intervenção antes da partida, não no intervalo, e ocorre uma vez por temporada.
+- Nova fase `intervencao`, com `intervencaoPendente` (chave, adversário, rodada, jogos e pontos) e `temporadaPausada` (ano, clube, índice, calendário, classificação, confrontos e contadores de gols/resultados).
+- O snapshot é serializável e salvo pelo mecanismo existente. Ano, idade, troféus e temporadas concluídas não avançam durante a pausa. Elenco e tática da temporada ficam indisponíveis enquanto o jogo está pendente.
+- `responderIntervencaoTecnico(c, chave, escolha, rng)` valida a chave da decisão e retoma o mesmo laço a partir do índice pendente. Callbacks repetidos ou antigos retornam o estado atual, sem simular de novo. A retomada preserva todos os confrontos anteriores e a classificação parcial; somente a parte restante é sorteada.
+- Opções: **Manter o plano**, **Buscar a vitória** (ofensivo) e **Proteger a equipe** (defensivo). O estilo temporário vale somente para o confronto selecionado. A formação e o estilo habitual são restaurados nas partidas seguintes e nas copas.
+- O confronto registra `intervencao`; o detalhe da temporada mostra a escolha, adversário e placar. Ao terminar, os dois campos de pendência são limpos e idade/ano avançam uma única vez.
+- A simulação antiga por etapas continua compatível. Esta primeira intervenção integra o fluxo atual de temporada expressa; não adiciona pausas aos saves antigos já em `andamento` por etapas.
+- Verificação: **20 arquivos de testes de lógica, build de produção e 38 testes de navegador passaram**. O teste de lógica compara a campanha completa com a versão pausada/retomada usando a mesma sequência aleatória: ao manter o plano, todos os resultados coincidem, descontando somente o registro da intervenção. Também verifica não mutação, serialização, estilos temporários, chave inválida e cliques repetidos.
+- Navegador em 390/1366 pixels: habilitar, iniciar temporada, pausar, recarregar, reencontrar a mesma pendência, decidir, preservar os jogos anteriores, concluir uma única temporada e recarregar o resultado completo.
+- Logs: `/tmp/intervencao-test.log`, `/tmp/intervencao-build.log`, `/tmp/intervencao-browser.log`. Capturas: `/tmp/intervencao-390.png` e `/tmp/intervencao-1366.png`.
+
+Próximo passo aprovado: comissão técnica. Definir efeitos e custos claros e integrar ao orçamento/teto sem duplicar cobranças ao recarregar. Preservar a intervenção opcional, resultados já salvos, o museu e o visual aprovado. Publicação continua pendente de pedido do usuário.
 
 ## Revisão econômica desta etapa
 

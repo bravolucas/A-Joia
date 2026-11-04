@@ -2,6 +2,14 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Publicação do desafio bloqueada no Pages — diagnóstico final
+
+Aplicação remodelada em `1dffd03`, atualmente em `main` junto às correções de workflow no commit **`8aa7659`**. **Ainda não publicada.** Último deploy: https://github.com/bravolucas/A-Joia/actions/runs/41896450475 . Build e validação geral passaram; todos os 46 casos de navegador passaram localmente e nos runs anteriores com o mesmo código da aplicação.
+
+A tentativa original `41893625961` expirou em dez minutos. A API do Pages informa agora **`deployment_cancelled`** para `1dffd03bc6c52e92463c19b83858b553a48dc136`, mas a criação de um novo deployment continua recebendo HTTP 400: “due to in progress deployment. Please cancel 1dffd03... first or wait for it to complete”. Essa inconsistência foi confirmada publicamente pela anotação “Estado do deployment bloqueador: deployment_cancelled” no run `41896450475`. O problema está no bloqueio mantido pelo Pages após o cancelamento, não no build ou no jogo.
+
+**Não continuar enviando commits apenas para repetir deploys.** A recuperação está limitada ao deployment específico e não cancela versões de outros commits. O retry é limitado a uma segunda tentativa; o workflow falha corretamente se ambas forem recusadas. Para retomar, verificar primeiro se o Pages liberou o bloqueio; se persistir mesmo com o estado cancelado, será necessário resolver a inconsistência no GitHub Pages antes de republicar. A versão pública anterior continua sendo `d9287b9` (organização visual). As capturas em `docs/desafio-integrado/` permitem revisar o novo desafio mesmo antes da publicação.
+
 ## Desafio com resultado integrado e avanço visível
 
 O usuário relatou resultado escondido e rejeitou o radar/sorteio de OVR da tela de resultado. `DesafioTemporada.jsx/css` substitui o desafio antigo por opções legíveis com risco e chances, resultado compacto no mesmo cartão (escolha, antes/depois, efeito real e impactos adicionais) e ação única “Continuar para o treino”. Não abre mais `PopupResultado` para esse desafio, nem usa o scanner. O resultado fica em `estado.desafioResultado`, junto ao save, para retomar após recarga. O handler só resolve quando `desafioPendente` e não existe resultado, evitando aplicação duplicada; continuar apenas limpa o resumo, sem simular outra temporada. As probabilidades e regras do motor foram preservadas.

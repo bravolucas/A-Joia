@@ -1,3 +1,4 @@
+import ConquistasJogador from "./ConquistasJogador.jsx";
 import { bloquearRolagem } from "./bloqueioRolagem.js";
 import { efeitoLance } from './som.js';
 import { JogadorCampo, RetratoApresentacao, CamisaPremium, useCenario } from './VisualFutebol.jsx';
@@ -2392,7 +2393,7 @@ function GaleriaFim({ c }) {
           </div>
           <LinhaJGA j={sel.jogos || 0} g={sel.gols || 0} a={sel.assist || 0} />
           <div className="flex-1 flex flex-wrap items-center justify-center gap-1.5 min-h-[40px]">
-            {titSel.length ? titSel.map((t, i) => <IconeTitulo key={i} tipo={t.tipo} nome={t.nome} size={36} />) : <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">Vitrine vazia</span>}
+            <ConquistasJogador titulos={titSel.filter(t => !ehPremioIndividual(t.tipo))} />
           </div>
         </div>
         {/* prêmios e conquistas */}
@@ -2421,10 +2422,7 @@ function GaleriaFim({ c }) {
               <div className="relative text-[15px] font-extrabold text-white text-center leading-tight mt-1.5 line-clamp-1" style={{ textShadow: "0 1px 6px rgba(0,0,0,.65)" }}>{k.nome}</div>
               <div className="relative text-[10px] font-semibold text-white/70 mb-1.5" style={{ textShadow: "0 1px 4px rgba(0,0,0,.6)" }}>{k.temporadas} {k.temporadas > 1 ? "temporadas" : "temporada"}</div>
               <div className="relative w-full"><LinhaJGA j={k.jogos} g={k.gols} a={k.assist} /></div>
-              <div className="relative flex flex-wrap justify-center items-end gap-1 mt-2 min-h-[34px]">
-                {tits.slice(0, 6).map((t, x) => <IconeTitulo key={x} tipo={t.tipo} nome={t.nome} size={30} />)}
-                {tits.length > 6 && <span className="text-[12px] font-black text-[#FDE047]">+{tits.length - 6}</span>}
-              </div>
+              <ConquistasJogador titulos={tits} />
             </div>
           );
         })}

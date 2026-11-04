@@ -1,0 +1,8 @@
+.cj-conquistas{position:relative;list-style:none;padding:0;margin:8px 0 0;width:100%;display:flex;flex-direction:column;gap:6px;font-family:Inter,system-ui,sans-serif}
+.cj-conquistas li{display:flex;align-items:center;gap:10px;min-width:0;padding:8px 7px;background:#090b10a6;border:1px solid #ffffff12;border-radius:11px;text-align:left}
+.cj-taca{position:relative;display:flex;align-items:center;justify-content:center;flex:none;width:47px;min-height:46px;margin-right:3px}
+.cj-taca b{position:absolute;right:-5px;bottom:0;font-size:10px;line-height:1;padding:3px 4px;color:#211b0e;background:linear-gradient(#f7e1a5,#d8b76a);border:1px solid #ffeec3;border-radius:5px;box-shadow:0 2px 7px #0008;font-weight:800}
+.cj-info{min-width:0;display:flex;flex-direction:column;gap:4px}
+.cj-info strong{font-size:10px;line-height:1.4;color:#f4e6c9;overflow-wrap:anywhere}
+.cj-info>span{font-size:9px;line-height:1.6;color:#cbd1d1;overflow-wrap:anywhere}
+.cj-vazia{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#ffffff75;margin:10px 0;position:relative}

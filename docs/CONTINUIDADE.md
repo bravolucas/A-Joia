@@ -2,6 +2,12 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Conquistas agrupadas na galeria do jogador
+
+O usuário apontou o cartão de clube do fim da carreira de jogador, que ainda repetia ícones e ocultava excedentes em “+N”. `GaleriaFim` agora usa `ConquistasJogador` nos cartões dos clubes e da seleção: mesma função de agrupamento canônico e mesmo componente de taça do treinador, uma taça por competição, multiplicador dourado ×N, nome e todos os anos em ordem decrescente. Nenhum título é ocultado por limite de seis ícones. Prêmios individuais permanecem na área própria. Os registros do save não são alterados.
+
+Captura: `docs/conquistas-jogador/celular.png`. Validado no Chromium com a tela real `ModoRapido` e save de fim de carreira, em 390 e 1366 px: seis registros distribuídos entre clube/seleção, Bundesliga ×3 com os três anos e três grupos no cartão do Bayern, sem transbordamento horizontal. Todos os 26 arquivos de testes e build passaram (`/tmp/tacas-jogador-tests.log`, `/tmp/tacas-jogador-build.log`). Prévia temporária removida. Revisão salva localmente, ainda sem nova publicação.
+
 ## Correção de rolagem e altura das janelas
 
 Após o anúncio com camisa, o usuário relatou informações escondidas e dificuldade de subir/descer a página. `TelaCheia` e `JanelaTreinador` manipulavam `body.style.overflow` separadamente, com risco de restaurar um `hidden` antigo ao fechar janelas sobrepostas. Agora usam `bloqueioRolagem.js`, que conta bloqueios e restaura o valor original apenas quando a última janela fecha. Testes cobrem ambas as ordens de fechamento, liberação duplicada e reabertura.

@@ -1,3 +1,5 @@
+import {agruparConquistasTecnico} from './conquistasTecnico.js';
+import VitrineConquistas,{ResumoConquistas} from './VitrineConquistas.jsx';
 import { riscosIdolatriaTecnico, vinculoAtivoTecnico } from './idolatriaTecnico.js';
 import { FORMACOES_TECNICO, perfilTaticoTecnico } from './taticasTecnico.js';
 import Lottie from './Lottie.jsx';
@@ -134,10 +136,11 @@ function ClassificacoesMundo({ classificacoes = {}, ligaAtual, clubeAtual }) {
 }
 function JanelaTreinador({ titulo, onFechar, children, classe = '' }) {
   const painel = useRef(null);
+  const focoAnterior = useRef(document.activeElement);
   const fechar = useRef(onFechar);
   fechar.current = onFechar;
   useEffect(() => {
-    const anterior = document.activeElement;
+    const anterior = focoAnterior.current;
     const overflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     painel.current?.querySelector('button')?.focus();
@@ -199,6 +202,9 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
   const encerrada = carreiraTecnicoEncerrada(t);
   const historico = historicoProfissionalTecnico(t);
   const titulos = titulosConquistadosTecnico(t);
+  const gruposConquistas = agruparConquistasTecnico(titulos);
+  const [conquistaSelecionada,setConquistaSelecionada] = useState(null);
+  const abrirConquistas=id=>{setConquistaSelecionada(id);setVitrineAberta(true);};
   const [eventosVistos, setEventosVistos] = useState({ chave: null, quantidade: 0 });
   const [simulando, setSimulando] = useState(false);
   const [aberta, setAberta] = useState(null);
@@ -279,7 +285,7 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
     {eventoAtual?.tipo === 'titulo' && <PopUpTitulo temporada={ultima} titulo={eventoAtual.nome} indice={eventosUltima.slice(0, indiceEvento + 1).filter(x => x.tipo === 'titulo').length - 1} total={conquistasUltima.length} onFechar={fecharEvento} />}
     {(eventoAtual?.tipo === 'rebaixado' || eventoAtual?.tipo === 'acesso') && <PopUpDivisao temporada={ultima} movimento={eventoAtual.movimento} tipo={eventoAtual.tipo} onFechar={fecharEvento} />}
     {eventoAtual?.tipo === 'demissao' && <JanelaTreinador titulo="Fim de ciclo" onFechar={fecharEvento}><div className="ct-event-content"><div className="vf-hero-diretoria" style={{backgroundImage:`url(${CENARIOS.diretoriaMobile})`}} /><span className="ct-event-symbol">↗</span><h3>Você foi demitido</h3><p>A diretoria do {ultima.clube} decidiu encerrar seu trabalho. Sua carreira continua: confira os próximos convites.</p><button className="ct-primary" onClick={fecharEvento}>Ver propostas</button></div></JanelaTreinador>}
-    {vitrineAberta && <JanelaTreinador titulo="Conquistas como treinador" onFechar={() => setVitrineAberta(false)} classe="ct-trophy-modal"><div className="ct-trophy-grid">{titulos.length ? titulos.map((x, i) => <article key={`${x.ano}-${x.nome}-${i}`}><TacaCompeticao tipo={x.tipo} nome={x.nome} size={80} /><h3>{x.nome}</h3><p>{x.ano} · {x.clube}</p></article>) : <div className="ct-empty-trophies"><span>🏆</span><h3>Vitrine vazia</h3><p>As taças conquistadas na sua carreira aparecerão aqui.</p></div>}</div></JanelaTreinador>}
+    {vitrineAberta && <JanelaTreinador titulo="Conquistas como treinador" onFechar={() => setVitrineAberta(false)} classe="ct-trophy-modal"><VitrineConquistas grupos={gruposConquistas} total={titulos.length} selecionada={conquistaSelecionada} onSelecionar={setConquistaSelecionada}/></JanelaTreinador>}
     {decisaoAberta && carta && <JanelaTreinador titulo="Decisão de carreira" onFechar={() => setDecisaoAberta(false)}><div className="ct-event-content"><div className="vf-hero-diretoria" style={{backgroundImage:`url(${carta.contexto === "inicio" ? CENARIOS.treinoMobile : CENARIOS.diretoriaMobile})`}} /><span className="ct-eyebrow">{t.clube} · {t.ano}</span><h3>{carta.titulo}</h3><p>{carta.texto}</p><div className="ct-decisions">{carta.opcoes.map(op => <button key={op.id} onClick={() => simular(op.id)}><strong>{op.nome}</strong><span>{op.detalhe}</span>{op.risco > 0 && <small>Risco: {Math.round(op.risco * 100)}%</small>}</button>)}</div></div></JanelaTreinador>}
 
     <div className="ct-board" aria-busy={simulando}>
@@ -293,11 +299,11 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
           <div className="ct-contract"><div><span>IDADE</span><strong>{idade}</strong></div><div><span>SALÁRIO</span><strong>R$ {semClube || primeira ? 0 : (t.salario ?? salarioTecnico(t))}<small>mil</small></strong></div></div>
         </header>
         <div className="ct-stats">{[[historico.jogos, 'JOGOS', '▣'], [historico.vitorias, 'VITÓRIAS', '✦'], [titulos.length, 'TÍTULOS', '♜']].map(([valor, rotulo, icone]) => <div key={rotulo}><span>{rotulo}</span><strong><i aria-hidden="true">{icone}</i>{valor}</strong></div>)}</div>
-        <button type="button" onClick={() => setVitrineAberta(true)} className="ct-trophy-shelf" aria-label="Ver conquistas como treinador">{titulos.length ? <><span className="ct-shelf-cups">{titulos.slice(-5).map((x, i) => <TacaCompeticao key={`${x.ano}-${i}`} tipo={x.tipo} nome={x.nome} size={38} />)}</span><span>{titulos.length} {titulos.length === 1 ? 'CONQUISTA' : 'CONQUISTAS'}<span aria-hidden="true"> ↗</span></span></> : <><span className="ct-shelf-empty" aria-hidden="true">🏆</span><span>VITRINE VAZIA</span></>}</button>
+        <ResumoConquistas grupos={gruposConquistas} total={titulos.length} onAbrir={abrirConquistas}/>
         {!primeira && vinculoAtivoTecnico(t,t.clube)?.idolatria && <p className="ct-warning">Ídolo da torcida · Mais apoio nos retornos, mas maior cobrança por resultados.</p>}
         {(t.rupturasIdolo||[]).length>0 && <p className="ct-warning">Legado: vínculo de ídolo rompido com {t.rupturasIdolo.map(r=>r.clube).join(', ')} após assinar com um rival.</p>}
         <div className="ct-actions" aria-live="polite">
-          {encerrada ? <><h2>Uma carreira para a história</h2><p>Carreira encerrada após {LIMITE_TEMPORADAS_TECNICO} temporadas. Reveja suas campanhas e conquistas.</p><div className="ct-career-total"><strong>{historico.aproveitamento}%</strong><span>de aproveitamento · {historico.clubes.length} clubes</span></div><button className="ct-primary" onClick={() => setVitrineAberta(true)}>Ver conquistas</button></>
+          {encerrada ? <><h2>Uma carreira para a história</h2><p>Carreira encerrada após {LIMITE_TEMPORADAS_TECNICO} temporadas. Reveja suas campanhas e conquistas.</p><div className="ct-career-total"><strong>{historico.aproveitamento}%</strong><span>de aproveitamento · {historico.clubes.length} clubes</span></div><button className="ct-primary" onClick={() => abrirConquistas(null)}>Ver conquistas</button></>
           : primeira ? <><h2>Oferta inicial</h2><p>Os primeiros clubes querem você no comando. Escolha onde sua carreira como treinador começa.</p><div className="ct-offers">{t.opcoesInicio.map(op => <CartaoClube key={op.clube} nome={op.clube} pais={t.pais} rotulo="Começar no" detalhe={op.idolatria ? 'Clube do coração' : 'Vínculo como jogador'} disabled={simulando} onClick={() => escolherClubeInicial(op.clube)} />)}</div></>
           : t.reuniaoPendente ? <><div className="vf-hero-diretoria" style={{backgroundImage:`url(${CENARIOS.diretoriaMobile})`}} /><h2>Conversa com a diretoria</h2><p>A pressão aumentou. Sua resposta define os próximos passos.</p><div className="ct-decisions">{OPCOES_REUNIAO_TECNICO.map(op => <button key={op.id} disabled={simulando} onClick={() => executar(() => { onReuniao?.(op.id); onJogar?.(); })}><strong>{op.nome}</strong><span>{op.descricao}</span></button>)}</div></>
           : t.fase === 'intervencao' && t.intervencaoPendente ? <><h2>Jogo importante</h2><p>Rodada {t.intervencaoPendente.rodada} · {t.intervencaoPendente.jogos} jogos disputados · {t.intervencaoPendente.pontos} pontos</p><div className="ct-season-preview"><Escudo nome={t.intervencaoPendente.adversario.nome} size={52} /><div><strong>{t.intervencaoPendente.adversario.nome}</strong><span>{t.intervencaoPendente.adversario.casa ? 'Em casa' : 'Fora de casa'} · Força {t.intervencaoPendente.adversario.forca}</span></div></div><p>Escolha o plano para esta partida. Depois dela, a temporada continua com a sua tática habitual.</p><div className="ct-decisions">{INTERVENCOES_TECNICO.map(op => <button key={op.id} disabled={simulando} onClick={() => executar(() => onIntervir?.(t.intervencaoPendente.chave, op.id))}><strong>{op.nome}</strong><span>{op.descricao}</span></button>)}</div></>

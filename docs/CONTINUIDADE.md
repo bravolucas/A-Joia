@@ -2,6 +2,19 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Estado atual — vitrine de conquistas agrupada, ainda não publicada
+
+O usuário pediu que as conquistas ficassem no formato de uma taça por competição com ×2/×3/×4, aprovou a proposta e autorizou implementar. A ficha e a janela de conquistas do treinador agora usam o agrupamento. Detalhes e capturas: `docs/VITRINE_AGRUPADA.md`.
+
+- `conquistasTecnico.js`: agrupamento puro, com quantidade e histórico de todos os títulos; preserva o input e distingue competições por identidade e tipo. A chave usa aliases de `arteCompeticoes.js`, compartilhados com as imagens. Nomes curtos são usados apenas nos cartões.
+- `VitrineConquistas.jsx`/`.css`: prévia de até seis competições na ficha, grade completa de três colunas no celular, contadores dourados e detalhe por toque com anos, clubes e contagem por clube. As taças existentes são mantidas em quadros de tamanho uniforme.
+- `CarreiraTecnico.jsx`: integra os componentes e mantém os totais originais, a lista por temporada e as celebrações. A janela registra o foco de origem antes dos efeitos dos filhos, corrigindo a devolução do foco ao fechar o histórico.
+- Sem alteração de saves ou migração de títulos; o museu permanente não foi modificado nesta etapa.
+- Validação final: **24 arquivos de testes de lógica, build de produção e 52 testes de navegador passaram**. Inclui agrupamento de nomes equivalentes, compatibilidade com saves antigos, grade no celular, histórico por clube/ano, teclado, foco e recarga.
+- Logs locais: `/tmp/vitrine-test.log`, `/tmp/vitrine-build.log`, `/tmp/vitrine-browser-final.log`. Duas capturas de revisão estão versionadas em `docs/vitrine-agrupada/`.
+
+A aplicação publicada continua sendo `b8667e3`. Esta nova vitrine deve ser publicada quando o usuário solicitar; a autorização atual foi para implementar a proposta. Não reaplicar as etapas anteriores nem alterar outras telas de conquistas automaticamente.
+
 ## Estado atual — mercado remodelado publicado
 
 O usuário autorizou continuar até a publicação. Em 04/11/2026, `main` recebeu o commit **`b8667e3`** por fast-forward a partir de `cc3d846`, sem conflitos. Deploy concluído no GitHub Pages: run `41850209869`. Validação geral `41850210195` e validação do treinador/navegador `41850210037`: sucesso.

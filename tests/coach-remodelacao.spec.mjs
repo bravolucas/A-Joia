@@ -356,3 +356,39 @@ for(const width of [390,1366]){
   expect((await salvo(page)).tecnico.gestao).toEqual(c.tecnico.gestao);
  });
 }
+
+for(const width of [390,1366]){
+ test(`vitrine agrupada: contadores, histórico e save em ${width}px`,async({page})=>{
+  await page.setViewportSize({width,height:900});const c=comResultado();
+  const grupos=[['Brasileirão','Copa do Brasil','Copa Libertadores'],['Brasileirão','Copa do Brasil','Copa Libertadores'],['Brasileirão','Copa do Brasil'],['Brasileirão']];
+  c.tecnico={...c.tecnico,fase:'pretemporada',ano:2034,temporadas:grupos.map((titulos,i)=>({ano:2030+i,clube:i<2?'Santos':'Flamengo',liga:'brasileirao',posicao:1,pontos:80,vitorias:24,empates:8,derrotas:6,titulosConquistados:titulos}))};
+  await abrir(page,c);const salvoAntes=await salvo(page);
+  const vitrine=page.getByRole('region',{name:'Vitrine de conquistas'});
+  await expect(vitrine.locator('.vc-compact button')).toHaveCount(3);
+  await expect(vitrine.locator('.vc-shelf-header')).toContainText('9 títulos');
+  await expect(vitrine.locator('.vc-shelf-header')).toContainText('3 competições');
+  const brasileirao=vitrine.getByRole('button',{name:/^Brasileirão, 4 títulos/});
+  await expect(brasileirao).toContainText('×4');
+  await vitrine.screenshot({path:`/tmp/vitrine-ficha-${width}.png`});
+  await brasileirao.click();
+  const janela=page.getByRole('dialog',{name:'Conquistas como treinador'});
+  const historico=janela.getByRole('region',{name:'Histórico de Brasileirão'});
+  await expect(historico.locator('li')).toHaveCount(4);
+  await expect(historico.locator('li').first()).toContainText('2033');
+  await expect(historico.locator('.vc-clubs')).toContainText('Santos×2');
+  await expect(historico.locator('.vc-clubs')).toContainText('Flamengo×2');
+  await janela.getByRole('button',{name:'← Todas as conquistas'}).click();
+  await expect(janela.locator('.vc-grid>button')).toHaveCount(3);
+  await expect(janela.getByRole('button',{name:/^Brasileirão, 4 títulos/})).toBeFocused();
+  await page.screenshot({path:`/tmp/vitrine-conquistas-${width}.png`,fullPage:false});
+  const cards=await janela.locator('.vc-grid>button').evaluateAll(els=>els.map(e=>({x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y})));
+  expect(Math.max(...cards.map(c=>c.y))-Math.min(...cards.map(c=>c.y))).toBeLessThan(2);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await janela.getByRole('button',{name:/^Copa Libertadores, 2 títulos/}).click();
+  await expect(janela.getByRole('region',{name:'Histórico de Copa Libertadores'}).locator('li')).toHaveCount(2);
+  await page.keyboard.press('Escape');await expect(brasileirao).toBeFocused();
+  expect((await salvo(page)).tecnico.temporadas).toEqual(salvoAntes.tecnico.temporadas);
+  await page.reload();await page.getByRole('button',{name:/Continuar · Treinador de teste/}).click();
+  await expect(page.getByRole('region',{name:'Vitrine de conquistas'}).getByRole('button',{name:/^Brasileirão, 4 títulos/})).toContainText('×4');
+ });
+}

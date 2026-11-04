@@ -24,9 +24,12 @@ const ALIASES = Object.freeze({
   'campeonato-brasileiro-serie-b': 'brasileirao-serie-b'
 });
 
+// Identidade compartilhada por imagens e agrupamento da vitrine.
+export const chaveCompeticao = nome => ALIASES[slugCompeticao(nome)] || slugCompeticao(nome);
+
 export function resolverImagemCompeticao(nome, arquivos = {}) {
   const chave = slugCompeticao(nome);
-  const canonica = ALIASES[chave] || chave;
+  const canonica = chaveCompeticao(nome);
   const alternativas = Object.keys(ALIASES).filter(k => ALIASES[k] === canonica);
   return arquivos[chave] || arquivos[canonica] || alternativas.map(k => arquivos[k]).find(Boolean) || null;
 }

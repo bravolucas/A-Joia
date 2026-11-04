@@ -2,6 +2,18 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Publicação enviada — aguardando execução do GitHub
+
+O treinador rápido e a vitrine agrupada foram integrados em `main` no commit **`9eeab44`**, por fast-forward a partir de `b8667e3`, sem conflitos. O mesmo commit está preservado na branch de continuidade. O GitHub iniciou os workflows, mas, na última consulta de 04/11/2026, todos permaneciam em **Queued**, sem erro nem solicitação de aprovação informados.
+
+- Publicação: https://github.com/bravolucas/A-Joia/actions/runs/41862065975
+- Validação do treinador/navegador: https://github.com/bravolucas/A-Joia/actions/runs/41862065941
+- Validação geral: https://github.com/bravolucas/A-Joia/actions/runs/41862065920
+
+Não afirmar que a versão nova já está no site até o workflow de publicação concluir com sucesso. Ao retomar, consultar essas execuções primeiro; **não repetir o push/deploy nem reaplicar as alterações** só porque o site ainda mostra a versão anterior. A espera observada é a fila externa do GitHub. Se surgir falha, ler o erro e corrigir a causa; as validações locais já passaram.
+
+O pacote inclui a vitrine com ×2/×3/×4 e o treinador de uma/duas decisões, sem administração de elenco, mercado ou comissão. A documentação abaixo descreve a implementação completa. Esta atualização de acompanhamento fica somente na branch de continuidade, sem novo deploy.
+
 ## Revisão atual — treinador rápido e propostas coerentes
 
 O usuário rejeitou a administração de elenco/comissão, pediu apenas uma ou duas decisões por pré-temporada com variações e ofertas de clubes mais coerentes, usando o COPERO como referência. Esta orientação substitui os objetivos antigos de construir telas de gestão. Não reintroduzir mercado/folha/comissão como etapas obrigatórias.

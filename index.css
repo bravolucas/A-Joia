@@ -6,6 +6,14 @@
 html, body, #root { min-height: 100%; }
 body { background: #0E1512; color: #E1E6E3; margin: 0; }
 
+/* A área útil muda quando as barras do navegador e o teclado aparecem. */
+.popup-overlay { padding-top: max(16px, env(safe-area-inset-top)); padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+.popup-conteudo { max-height: calc(100vh - 48px); max-height: calc(100dvh - max(32px, env(safe-area-inset-top)) - max(32px, env(safe-area-inset-bottom))); overscroll-behavior-y: contain; }
+.janela-tela-cheia { overflow-x: hidden; overscroll-behavior-y: contain; }
+.janela-tela-cheia > div { padding-top: max(24px, env(safe-area-inset-top)); padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+.ct-overlay { padding-top: max(16px, env(safe-area-inset-top)); padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+.ct-overlay .ct-modal { max-height: calc(100dvh - max(32px, env(safe-area-inset-top)) - max(32px, env(safe-area-inset-bottom))); overscroll-behavior-y: contain; }
+
 /* Contraste AA: os cinzas de texto mais apagados ficavam abaixo de 4.5:1 no fundo escuro */
 .text-zinc-500 { color: #85908A; }
 .text-zinc-600 { color: #7A847F; }

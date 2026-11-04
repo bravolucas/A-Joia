@@ -1,3 +1,4 @@
+import { bloquearRolagem } from "./bloqueioRolagem.js";
 import {cartaPretemporadaRapida,formatarVerbaRapida} from './pretemporadaRapida.js';
 import {agruparConquistasTecnico} from './conquistasTecnico.js';
 import VitrineConquistas,{ResumoConquistas} from './VitrineConquistas.jsx';
@@ -140,8 +141,7 @@ function JanelaTreinador({ titulo, onFechar, children, classe = '' }) {
   fechar.current = onFechar;
   useEffect(() => {
     const anterior = focoAnterior.current;
-    const overflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    const liberarRolagem = bloquearRolagem(document.body);
     painel.current?.querySelector('button')?.focus();
     const teclado = e => {
       if (e.key === 'Escape') fechar.current();
@@ -152,7 +152,7 @@ function JanelaTreinador({ titulo, onFechar, children, classe = '' }) {
       else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primeiro?.focus(); }
     };
     document.addEventListener('keydown', teclado);
-    return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', teclado); anterior?.focus(); };
+    return () => { liberarRolagem(); document.removeEventListener('keydown', teclado); anterior?.focus(); };
   }, []);
   return createPortal(<div className="ct-overlay" onClick={onFechar}>
     <section ref={painel} role="dialog" aria-modal="true" aria-label={titulo} className={`ct-modal ${classe}`} onClick={e => e.stopPropagation()}>

@@ -2,6 +2,14 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Correção de rolagem e altura das janelas
+
+Após o anúncio com camisa, o usuário relatou informações escondidas e dificuldade de subir/descer a página. `TelaCheia` e `JanelaTreinador` manipulavam `body.style.overflow` separadamente, com risco de restaurar um `hidden` antigo ao fechar janelas sobrepostas. Agora usam `bloqueioRolagem.js`, que conta bloqueios e restaura o valor original apenas quando a última janela fecha. Testes cobrem ambas as ordens de fechamento, liberação duplicada e reabertura.
+
+`PopupOverlay` usa altura dinâmica (`dvh`) e margens de área segura, com fallback `vh`; janelas do treinador também descontam as margens. O botão de `TelaCheia` acompanha o conteúdo, sem ficar sobre as informações, e seus blocos não encolhem para caber à força. O histórico do treinador permite passar a rolagem para a página ao atingir as extremidades, removendo `overscroll-behavior:contain` dessa lista.
+
+Conferência Chromium do `PopupOverlay` real: topo e última ação acessíveis nas duas direções, redimensionando a mesma janela para 360×640, 360×420 e 360×740. Todos os 26 arquivos de testes e o build passaram (`/tmp/rolagem-tests.log`, `/tmp/rolagem-build.log`). Prévia temporária removida. Revisão salva localmente, sem publicação nova.
+
 ## Apresentação de contratação — camisa e escudo
 
 Pedido seguinte do usuário: substituir o boneco da tela de anúncio por uma combinação de camisa em destaque e anúncio oficial do clube. Implementado em `AnuncioClube` (`components.jsx`) com estilos em `AnuncioClube.css`: camisa vetorial existente com nome/número, escudo de 64 px, número decorativo ao fundo, nome do jogador e origem, termos em bloco separado e botão “Vestir a camisa”. A composição usa fluxo vertical com rolagem em telas menores, sem personagem sobreposto. Não altera economia nem os dados de transferência. A apresentação especial `ApresentacaoGrande` é outra tela e não foi alterada nesta revisão.

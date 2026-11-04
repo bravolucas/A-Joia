@@ -1,3 +1,4 @@
+import { bloquearRolagem } from "./bloqueioRolagem.js";
 import { efeitoLance } from './som.js';
 import { JogadorCampo, RetratoApresentacao, CamisaPremium, useCenario } from './VisualFutebol.jsx';
 import { criarIdMuseu } from './museu.js';
@@ -2680,13 +2681,13 @@ function useContagem(de, para, atraso = 350, dur = 900) {
   return v;
 }
 function TelaCheia({ rotulo, cor = "#3F3F46", children, botao = "Continuar", onFechar, bloqueado = false, centro = true }) {
-  useEffect(() => { document.body.style.overflow = "hidden"; return () => { document.body.style.overflow = ""; }; }, []);
+  useEffect(() => bloquearRolagem(document.body), []);
   return createPortal(
-    <div className="cp fixed inset-0 z-[70] overflow-y-auto cp-surge" role="dialog" aria-modal="true" aria-label={rotulo} data-pop=""
+    <div className="cp fixed inset-0 z-[70] overflow-y-auto cp-surge janela-tela-cheia" role="dialog" aria-modal="true" aria-label={rotulo} data-pop=""
       style={{ background: `radial-gradient(130% 55% at 50% 0%, ${cor}55, #0B0B0C 62%), #0B0B0C` }}>
       <div className="min-h-full max-w-md mx-auto px-4 pt-6 pb-5 flex flex-col">
-        <div className={`flex-1 flex flex-col gap-3 ${centro ? "justify-center" : ""}`}>{children}</div>
-        <button onClick={onFechar} className={`cp-pill cp-branca text-[16px] w-full mt-5 sticky bottom-4 ${bloqueado ? "opacity-60" : ""}`}>{botao}</button>
+        <div className={`flex-1 shrink-0 flex flex-col gap-3 ${centro ? "justify-center" : ""}`}>{children}</div>
+        <button onClick={onFechar} className={`cp-pill cp-branca text-[16px] w-full mt-5 shrink-0 ${bloqueado ? "opacity-60" : ""}`}>{botao}</button>
       </div>
     </div>,
     document.body,

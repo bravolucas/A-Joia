@@ -960,8 +960,8 @@ export function LeitorNoticia({ noticia: nt, nome, clube, onClose }) {
 
 export function PopupOverlay({ children, onClose, largo = false }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]" onClick={onClose}>
-      <div className={`w-full max-h-[88vh] overflow-y-auto animate-[popIn_0.25s_ease-out] ${largo ? "popup-largo" : "max-w-md"}`} onClick={(e) => e.stopPropagation()}>
+    <div className="popup-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]" onClick={onClose}>
+      <div className={`popup-conteudo w-full overflow-y-auto animate-[popIn_0.25s_ease-out] ${largo ? "popup-largo" : "max-w-md"}`} onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
     </div>

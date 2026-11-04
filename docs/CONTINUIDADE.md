@@ -4,6 +4,14 @@ Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
 ## Recuperação da publicação — 04/11/2026
 
+A recuperação foi enviada em **`47f17bc`**, para `main` e checkpoint. Execuções:
+
+- Pages: https://github.com/bravolucas/A-Joia/actions/runs/41877485074
+- Treinador/navegador: https://github.com/bravolucas/A-Joia/actions/runs/41877485167
+- Validação geral: https://github.com/bravolucas/A-Joia/actions/runs/41877485142
+
+Na consulta inicial, o novo artefato já existia e o job de publicação havia iniciado às 17:26 UTC; o resumo ainda mostrava Queued. Aguardar conclusão desta execução antes de reenviar qualquer publicação.
+
 A consulta atualizada (com `?check_suite_focus=true`) revelou que a publicação `41862065975` falhou: a construção e o artefato concluíram, mas `actions/deploy-pages@v4` atingiu o prazo padrão de dez minutos (`Timeout reached, aborting!`). As consultas anteriores mostravam um estado Queued desatualizado. A validação do treinador/navegador `41862065941` concluiu com sucesso.
 
 O jogo está em `main` desde `9eeab44`. Para recuperar a publicação autorizada, o workflow passa a aguardar vinte minutos e usa concorrência `github-pages` sem cancelar uma publicação em andamento. Isso permite nova tentativa sem alterar o jogo. Ainda é necessário confirmar sucesso do novo workflow; não afirmar que está publicado antes disso.

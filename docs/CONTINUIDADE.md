@@ -2,6 +2,14 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Estado atual — mercado remodelado publicado
+
+O usuário autorizou continuar até a publicação. Em 04/11/2026, `main` recebeu o commit **`b8667e3`** por fast-forward a partir de `cc3d846`, sem conflitos. Deploy concluído no GitHub Pages: run `41850209869`. Validação geral `41850210195` e validação do treinador/navegador `41850210037`: sucesso.
+
+A compra/venda também passou em dois testes locais adicionais com animações habilitadas, em celular e desktop (`/tmp/mercado-movimento-normal.log`). Endereço: https://bravolucas.github.io/A-Joia/ . A confirmação do deploy veio do workflow oficial, pois o acesso direto ao domínio retornou 403 neste ambiente na publicação anterior.
+
+As seções abaixo que indicam remodelação não publicada descrevem o checkpoint anterior à autorização e foram superadas por este registro. Esta atualização documental fica na branch de continuidade, sem novo deploy; a aplicação publicada é `b8667e3`. Não reaplicar nem republicar automaticamente. Novas alterações devem partir da versão publicada mais recente.
+
 ## Estado atual — nova remodelação do mercado, ainda não publicada
 
 Após a publicação de `cc3d846`, o usuário considerou a compra/venda confusa, dispersa e pouco interativa, e pediu uma experiência mais fácil de jogar. A nova revisão substitui `GestaoTecnico.jsx` e acrescenta `GestaoTecnico.css`: três sugestões iniciais, cartões visuais, filtros por posição, comparação, previsão do impacto e confirmação antes de comprar/vender. A janela no desktop foi ampliada; dinheiro e salários ficam fixos no topo, pagamento e confirmação acompanham a rolagem. A lista fica oculta enquanto se avalia uma proposta, sem confirmações espalhadas por outras partes da tela.

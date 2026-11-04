@@ -1,6 +1,6 @@
 # Mercado guiado — proposta implementada
 
-Remodelação solicitada após o usuário considerar o mercado pouco interativo e as informações confusas. Esta revisão está na branch de continuidade e ainda não foi publicada.
+Remodelação solicitada após o usuário considerar o mercado pouco interativo e as informações confusas. Publicada em 04/11/2026 no commit `b8667e3`, após autorização do usuário. O deploy do GitHub Pages e as duas validações automáticas concluíram com sucesso. Endereço: https://bravolucas.github.io/A-Joia/.
 
 ## Fluxo de jogo
 

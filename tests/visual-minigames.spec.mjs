@@ -52,8 +52,11 @@ test('animação de título carrega e reage à preferência de movimento reduzid
  await page.reload();await page.getByRole('button',{name:/Continuar · Visual Efeito/}).click();
  const janela=page.getByRole('dialog',{name:'Título conquistado'});
  await expect(janela.locator('.ct-champion-cup > div svg')).toBeVisible();
+ const centro=async()=>{const palco=await janela.locator('.ct-champion-cup').boundingBox(),taca=await janela.locator('.ct-champion-cup > img, .ct-champion-cup > .vf-cup-stage').boundingBox();return Math.abs(palco.x+palco.width/2-taca.x-taca.width/2);};
+ await expect.poll(centro).toBeLessThan(2);
  await page.emulateMedia({reducedMotion:'reduce'});
  await expect(janela.locator('.ct-champion-cup > div svg')).toHaveCount(0);
+ await expect.poll(centro).toBeLessThan(2);
  await expect(janela.getByRole('heading',{name:'CAMPEÃO!'})).toBeVisible();
  expect(erros).toEqual([]);
 });

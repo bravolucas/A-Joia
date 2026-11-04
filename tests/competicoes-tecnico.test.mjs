@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { simularCopaNacionalTecnico, simularCopaContinentalTecnico, classificarVagasContinentalTecnico, classificarVagasPorRegraTecnico } from '../competicoesTecnico.js';
-import { gerarPropostasTecnico, salarioTecnico } from '../tecnico.js';
+import { gerarPropostasTecnico, salarioTecnico, calcularOvrTecnico } from '../tecnico.js';
 import { competicaoDoTitulo, desenhoDaTaca } from '../tacas.js';
 
 function rngSeed(seed) {
@@ -152,12 +152,12 @@ test('não cria vagas continentais sem tabelas anteriores ou sem clubes de vári
   }), []);
 });
 
-test('OVR e estatísticas históricas não alteram salário ou propostas do treinador', () => {
+test('salário é preservado e propostas respeitam o patamar profissional', () => {
   const base = { clube: 'Santos', reputacao: 70, temporadas: Array(3).fill({ clube: 'Santos' }), vinculosJogador: [] };
   const iniciante = { ...base, titulos: 0, vitorias: 0, empates: 0, derrotas: 0 };
   const experiente = { ...base, titulos: 9, vitorias: 500, empates: 80, derrotas: 30 };
   assert.equal(salarioTecnico(iniciante), salarioTecnico(experiente));
-  assert.deepEqual(gerarPropostasTecnico(iniciante, rngSeed(43)), gerarPropostasTecnico(experiente, rngSeed(43)));
+  for(const t of [iniciante,experiente]){const ofertas=gerarPropostasTecnico(t,rngSeed(43));assert.ok(ofertas.length);assert.ok(ofertas.every(p=>p.elenco<=calcularOvrTecnico(t)+18));}
 });
 
 test('taças de ligas adicionadas usam o visual de copa', () => {

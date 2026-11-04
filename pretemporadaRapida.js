@@ -6,19 +6,19 @@ const dinheiro=formatarVerbaRapida;
 export const verbaPretemporada=t=>t.verbaRapida??limitar((!t.modoTreinadorRapido&&t.gestao?.clube===t.clube?t.gestao.saldo:undefined)??Math.round(((t.elenco||50)-25)**2*2),500,5000);
 export const renovarVerbaPretemporada=t=>{const saldo=verbaPretemporada(t);return saldo+Math.min(350,Math.max(0,6000-saldo));};
 const rivalDe=t=>{const clubes=[...new Set(CLASSICOS.filter(par=>Array.isArray(par)&&par.includes(t.clube)).flat().filter(n=>n!==t.clube))];return clubes[hash(`${t.clube}|${t.ano}|rival`)%clubes.length];};
-const ids=['craque-jovem','esquema','venda-base','rival','veterano','preparacao','capitao','diretoria','emprestimo','renovacao'];
+const ids=['craque-jovem','esquema','venda-base','rival','veterano','preparacao','capitao','diretoria','emprestimo','renovacao','olheiro','bola-parada','recuperacao','calendario','dupla','estrela','torcida','analista'];
 export function planoPretemporadaRapida(t,quantidade=1){
- if(t.planoRapido?.ano===t.ano&&t.planoRapido.clube===t.clube)return t.planoRapido;
+ if(t.planoRapido?.ano===t.ano&&t.planoRapido.clube===t.clube)return {...t.planoRapido,cartas:t.planoRapido.cartas.slice(0,1),respostas:t.planoRapido.respostas.slice(0,1)};
  const recentes=new Set((t.historicoRapido||[]).slice(-4));
  const elegiveis=ids.filter(id=>(id!=='rival'||rivalDe(t))&&!recentes.has(id));
  const ordem=elegiveis.sort((a,b)=>hash(`${t.clube}|${t.ano}|${a}`)-hash(`${t.clube}|${t.ano}|${b}`));
- return {ano:t.ano,clube:t.clube,cartas:ordem.slice(0,limitar(quantidade,1,2)),respostas:[]};
+ return {ano:t.ano,clube:t.clube,cartas:ordem.slice(0,1),respostas:[]};
 }
 export function cartaPretemporadaRapida(t,quantidade=1){
  const plano=planoPretemporadaRapida(t,quantidade),indice=plano.respostas.length,id=plano.cartas[indice];
  if(!id)return null;
  const nivel=limitar(Math.round(t.elenco||50),30,90),craque=Math.min(95,nivel+10),jovem=Math.min(90,nivel+2),custo=Math.round(craque*craque/6),rival=rivalDe(t);
- const nomes=['Diego Moura','Caio Andrade','Rafael Tavares','Bruno Sales','Lucas Freitas','André Rocha'];
+ const nomes=['Diego Moura','Caio Andrade','Rafael Tavares','Bruno Sales','Lucas Freitas','André Rocha','Miguel Torres','Daniel Costa','Pedro Bastos','Gabriel Reis','Tomás Vieira','Mateo Silva'];
  const jogador=nomes[hash(`${t.clube}|${t.ano}|jogador`)%nomes.length];
  const op=(id,nome,descricao,efeitos={},custo=0,futuro={})=>({id,nome,descricao,efeitos,custo,futuro});
  const manter=op('manter','Manter o grupo','Sem gasto. Moral +2.',{moral:2});
@@ -32,6 +32,14 @@ export function cartaPretemporadaRapida(t,quantidade=1){
   capitao:{titulo:'Quem lidera o vestiário?',texto:'Um jovem está ganhando espaço, mas o capitão ainda tem influência.',opcoes:[op('jovem','Renovar a liderança','Time +2, moral −2. Dê espaço à nova geração.',{elenco:2,moral:-2}),op('lider','Confiar no capitão','Moral +5 e diretoria +2.',{moral:5,diretoria:2})]},
   diretoria:{titulo:'Mais verba ou mais autonomia?',texto:'A diretoria quer definir a relação com você neste ano.',opcoes:[op('verba','Pedir investimento','Verba +R$ 700 mil. Diretoria −5: a cobrança aumenta.',{diretoria:-5},-700),op('autonomia','Trabalhar com o que tem','Diretoria +5 e moral +2. Sem gasto.',{diretoria:5,moral:2})]},
   emprestimo:{titulo:'Um reforço por empréstimo',texto:'Você pode trazer um jogador de 24 anos por uma temporada.',opcoes:[op('emprestar',`${jogador} · nível ${Math.min(95,nivel+6)}`,'Time +3 agora. O reforço sai no próximo ano: time −3.',{elenco:3},350,{elenco:-3}),manter]},
+  olheiro:{titulo:'Uma descoberta fora dos holofotes',texto:'Seu olheiro encontrou um atacante de uma liga menor. Vale investir?',opcoes:[op('aposta',`${jogador} · nível ${jovem}`,'Time +2 e +2 no próximo ano.',{elenco:2},220,{elenco:2}),op('observar','Observar por mais um ano','Sem gasto. Diretoria +3.',{diretoria:3}),manter]},
+  'bola-parada':{titulo:'Uma arma para os jogos fechados',texto:'A comissão oferece um trabalho específico para decidir nos detalhes.',opcoes:[op('treinar','Especializar as bolas paradas','Time +2, moral +1.',{elenco:2,moral:1},180),op('rotina','Priorizar o jogo coletivo','Moral +4. Sem custo.',{moral:4})]},
+  recuperacao:{titulo:'O elenco voltou desgastado',texto:'Escolha como equilibrar recuperação e preparação.',opcoes:[op('cuidar','Investir em recuperação','Time +2 e moral +4.',{elenco:2,moral:4},240),op('descansar','Dar mais dias de descanso','Moral +5, time −1.',{moral:5,elenco:-1}),op('cobrar','Manter a intensidade','Time +2, moral −3.',{elenco:2,moral:-3})]},
+  calendario:{titulo:'Seu clube foi convidado para uma excursão',texto:'Amistosos podem gerar receita, mas a viagem altera a preparação.',opcoes:[op('viajar','Aceitar a excursão','Verba +R$ 450 mil. Moral −3.',{moral:-3},-450),op('ficar','Preparar em casa','Time +2. Sem custo.',{elenco:2})]},
+  dupla:{titulo:'Uma dupla pode mudar o ataque',texto:'Um reforço experiente quer jogar ao lado do seu jovem destaque.',opcoes:[op('dupla',`Contratar ${jogador} · nível ${Math.min(95,nivel+6)}`,'Time +3 e moral +2.',{elenco:3,moral:2},320),op('garoto','Montar o ataque em torno do garoto','Time +1 agora e +2 no próximo ano.',{elenco:1},0,{elenco:2})]},
+  estrela:{titulo:'O destaque pede mais protagonismo',texto:'Seu principal jogador quer ser o centro do projeto.',opcoes:[op('protagonista','Dar liberdade ao craque','Time +3, moral −2.',{elenco:3,moral:-2}),op('coletivo','Todos têm o mesmo papel','Moral +5, diretoria +2.',{moral:5,diretoria:2})]},
+  torcida:{titulo:'A torcida quer uma resposta',texto:'Como aproximar o grupo das arquibancadas antes da estreia?',opcoes:[op('aberto','Abrir os treinos para a torcida','Torcida +7 e moral +2.',{torcida:7,moral:2}),op('fechado','Preservar a preparação','Time +2 e torcida −2.',{elenco:2,torcida:-2})]},
+  analista:{titulo:'Um novo olhar para os adversários',texto:'Um analista oferece um plano personalizado para a liga.',opcoes:[op('analise','Contratar o estudo','Time +3 e diretoria +2.',{elenco:3,diretoria:2},260),op('experiencia','Confiar na própria experiência','Moral +3. Sem gasto.',{moral:3})]},
   renovacao:{titulo:'Seu destaque quer ficar',texto:'O principal jogador pede uma decisão sobre seu futuro.',opcoes:[op('renovar',`Renovar · nível ${Math.min(95,nivel+5)}`,'Moral +4 e time +2.',{moral:4,elenco:2},300),op('negociar','Negociar a saída','Verba +R$ 800 mil. Time −3 e moral −2.',{elenco:-3,moral:-2},-800)]}
  };
  const carta=cartas[id];

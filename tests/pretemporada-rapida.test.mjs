@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import {planoPretemporadaRapida,cartaPretemporadaRapida,aplicarPretemporadaRapida} from '../pretemporadaRapida.js';
 import {iniciarCarreiraTecnico,escolherPretemporadaRapidaTecnico,proximaTemporadaTecnico,gerarPropostasTecnico,CLUBES_CONVITES_TECNICO} from '../tecnico.js';
 const carreira=(ritmo='normal')=>{const c=iniciarCarreiraTecnico({nome:'Teste rápido',idade:40,ano:2030,aposentado:true,clubeNome:'Santos',temporadas:[],totais:{},legado:{pontos:600}});return {...c,ritmo,tecnico:{...c.tecnico,clubeInicialEscolhido:true,elenco:70,verbaRapida:3000}};};
-test('uma escolha simula a temporada; intenso exige no máximo duas, sem duplicação',()=>{
+test('uma escolha simula a temporada; todos os ritmos têm uma decisão, sem duplicação',()=>{
  for(const ritmo of ['normal','expresso','intenso']){
   let c=carreira(ritmo),chaveAntiga;
-  for(let n=0;n<(ritmo==='intenso'?2:1);n++){
-   const carta=cartaPretemporadaRapida(c.tecnico,ritmo==='intenso'?2:1);assert.ok(carta);assert.ok(carta.total<=2);
+  for(let n=0;n<1;n++){
+   const carta=cartaPretemporadaRapida(c.tecnico,ritmo==='intenso'?2:1);assert.ok(carta);assert.equal(carta.total,1);
    const antes=structuredClone(c),op=carta.opcoes.find(o=>o.custo<=carta.verba);
    const novo=escolherPretemporadaRapidaTecnico(c,carta.chave,op.id,()=>.4);assert.deepEqual(c,antes);
    assert.equal(escolherPretemporadaRapidaTecnico(novo,carta.chave,op.id,()=>.4),novo);
@@ -74,10 +74,10 @@ test('aporte não confisca receita de venda e as dez variações aparecem ao lon
  assert.equal(renovarVerbaPretemporada({verbaRapida:100}),450);
  let t={clube:'Santos',ano:2030,historicoRapido:[]};const vistas=new Set();
  for(let i=0;i<30;i++){const plano=planoPretemporadaRapida(t,1);vistas.add(plano.cartas[0]);t={...t,ano:t.ano+1,historicoRapido:[...t.historicoRapido,plano.cartas[0]]};}
- assert.equal(vistas.size,10);
+ assert.ok(vistas.size>=14);
 });
 
-test('carreiras rápidas de 30 temporadas preservam limites, recarga e até duas decisões',async()=>{
+test('carreiras rápidas de 30 temporadas preservam limites, recarga e uma decisão por temporada',async()=>{
  const {negociarContratoTecnico,passarAnoDesempregado}=await import('../tecnico.js');
  for(const ritmo of ['normal','intenso']){
   let c=carreira(ritmo),n=73,passos=0;const rng=()=>((n=(Math.imul(n,1664525)+1013904223)>>>0)/4294967296);
@@ -90,7 +90,7 @@ test('carreiras rápidas de 30 temporadas preservam limites, recarga e até duas
     }
     c=proximaTemporadaTecnico(c);
    }
-   const antes=c.tecnico.temporadas.length,q=ritmo==='intenso'?2:1;
+   const antes=c.tecnico.temporadas.length,q=1;
    for(let i=0;i<q;i++){
     const carta=cartaPretemporadaRapida(c.tecnico,q),opcoes=carta.opcoes.filter(o=>o.custo<=carta.verba);
     const op=opcoes[Math.floor(rng()*opcoes.length)];

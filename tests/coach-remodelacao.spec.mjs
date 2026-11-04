@@ -12,7 +12,7 @@ function carreira() {
 }
 function comResultado() {
   const c = carreira();
-  c.tecnico = { ...c.tecnico, clubeInicialEscolhido: true, fase: 'resultado', ano: c.tecnico.ano + 1,
+  c.tecnico = { ...c.tecnico, clubeInicialEscolhido: true, propostasCoerentesVersao:2, fase: 'resultado', ano: c.tecnico.ano + 1,
     temporadas: [{ ano: c.tecnico.ano, clube: 'Confiança', liga: 'serieB', posicao: 8, pontos: 50, vitorias: 14, empates: 8, derrotas: 16, objetivo: 'Evitar rebaixamento', cumpriuObjetivo: true, titulosConquistados: [] }],
     propostas: [{ ...CLUBES_CONVITES_TECNICO.find(x => x.nome === 'Flamengo'), objetivo: 'Disputar o título',motivo:'Projeto compatível no seu país',coerencia:50 }] };
   c.idade++;
@@ -183,7 +183,7 @@ for(const width of [390,1366]){
 }
 
 for(const width of [390,1366]){
- test(`treinador rápido: duas escolhas, recarga e simulação única em ${width}px`,async({page})=>{
+ test(`treinador rápido: uma escolha, recarga e simulação única em ${width}px`,async({page})=>{
   await page.setViewportSize({width,height:900});const c=carreira();c.ritmo='intenso';c.tecnico.clubeInicialEscolhido=true;
   c.tecnico.planoRapido={ano:c.tecnico.ano,clube:c.tecnico.clube,cartas:['craque-jovem','esquema'],respostas:[]};
   await abrir(page,c);
@@ -195,20 +195,15 @@ for(const width of [390,1366]){
   await page.screenshot({path:`/tmp/treinador-rapido-painel-${width}.png`,fullPage:false});
   await inicio.click();
   const janela=page.getByRole('dialog',{name:'Decisão de pré-temporada'});
-  await expect(janela).toContainText('ESCOLHA 1 DE 2');
+  await expect(janela).toContainText('ESCOLHA 1 DE 1');
   await expect(janela).toContainText('potencial');
   await page.screenshot({path:`/tmp/pretemporada-rapida-${width}.png`,fullPage:false});
   await janela.getByRole('button',{name:/Aposta jovem/}).click();
-  await expect(janela).toContainText('ESCOLHA 2 DE 2');
-  const parcial=await salvo(page);expect(parcial.tecnico.temporadas.length).toBe(0);expect(parcial.tecnico.planoRapido.respostas.length).toBe(1);
-  await page.reload();await page.getByRole('button',{name:/Continuar · Treinador de teste/}).click();
-  await page.getByRole('button',{name:'Começar temporada',exact:true}).click();
-  await expect(janela).toContainText('ESCOLHA 2 DE 2');
-  await janela.getByRole('button',{name:/3-5-2 · proteger/}).click();
   await expect.poll(async()=>(await salvo(page)).tecnico.temporadas.length).toBe(1);
-  const fim=await salvo(page);expect(fim.tecnico.planoRapido.respostas.length).toBe(2);expect(fim.tecnico.estilo).toBe('defensivo');
+  await page.reload();await page.getByRole('button',{name:/Continuar · Treinador de teste/}).click();
+  const fim=await salvo(page);expect(fim.tecnico.planoRapido.respostas.length).toBe(1);
   expect(fim.tecnico.ano).toBe(c.tecnico.ano+1);expect(fim.tecnico.elenco).toBe(c.tecnico.elenco+2);
-  expect(fim.tecnico.temporadas[0].decisoes.filter(d=>d.carta!=='simulacao_expressa').length).toBe(2);
+  expect(fim.tecnico.temporadas[0].decisoes.filter(d=>d.carta!=='simulacao_expressa').length).toBe(1);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  });
 }

@@ -2,6 +2,18 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Treinador — decisão única, variedade, ofertas e salário/loja
+
+Pedido do usuário: apenas uma decisão de pré-temporada em todos os ritmos; mais variações; centralizar a taça no campeão; ofertas de outras ligas compatíveis com OVR/momento; salário para gastar em melhorias. Implementado:
+
+- Pré-temporada: sempre uma carta, inclusive intenso. Dezoito famílias (oito novas) e doze nomes fictícios; escolhas com efeitos/custos reais e opção gratuita. Planos antigos de duas cartas preservam a primeira: se ela já foi respondida, a retomada simula sem pedir outra escolha nem reaplicar efeitos.
+- Taça: a camada Lottie estava participando do flex e empurrando o troféu para o lado. Agora é absoluta; a taça e o halo ficam no centro, com animações preservadas. Teste verifica o centro com animação ativa e movimento reduzido.
+- Ofertas: mantém reputação e limite de salto pelo clube/campanha, acrescenta teto por OVR e abre o exterior gradualmente (boa campanha após duas temporadas, ou trajetória consolidada). Prioriza três ligas e países diferentes quando há candidatos elegíveis, sem forçar clube incompatível. Há penalidade para repetição de ligas recentemente ofertadas. Cartões mostram força do time e salário mensal. Propostas antigas são migradas uma vez para versão 2; novas propostas já são marcadas como atuais e não são sorteadas novamente ao abrir/recarregar.
+- Economia: `lojaTecnico.js` guarda carteira pessoal, pagamentos e compras no save do treinador. Salário em R$ mil/mês, pago uma vez ao encerrar campanha, normalmente doze meses; campanhas antigas interrompidas por demissão pagam meses proporcionais às rodadas. Desemprego não paga. Saves antigos sem carteira iniciam em zero, sem inventar contratos/salários retroativos. Carteira preservada ao trocar de clube; verba do clube permanece separada.
+- Loja opcional na carreira normal: preparação especial (+3 força, R$ 300 mil), análise (+2 força, R$ 200 mil), curso (+1 OVR permanente, R$ 600 mil). Confirmação com saldo restante, falta de saldo, limites e duplicações tratados. Um exemplar por item/ano, cursos limitados a +5 por carreira e OVR 99. Força vale só no ano/clube comprado, é limitada a 99, entra na liga e nas copas e não altera a força base permanentemente. A decisão de pré-temporada exibe a força com o bônus. Sem compras após iniciar jogos ou encerrar carreira. Os desafios históricos continuam sem loja para não criar economia sem continuidade numa missão de uma temporada.
+
+Validação: 27 arquivos de lógica e build passaram; 50 casos de navegador passaram. Cobertura nova para salário, proporcionalidade, desemprego, saldo/recarga, confirmação/cancelamento, duplicação, limites, expiração por clube/ano, decisão única e diversidade coerente de ligas. Fluxo de 30 temporadas segue coberto. Logs `/tmp/tecnico-publicacao-tests.log`, `/tmp/tecnico-publicacao-build.log`, `/tmp/tecnico-publicacao-browser.log`. Capturas em `docs/treinador-evolucao/`; loja usa carteira de teste com R$ 3 mi para demonstrar o catálogo. A publicação desta revisão ainda deve ser confirmada.
+
 ## Animação do desafio restaurada no cartão integrado
 
 O usuário corrigiu a direção da remodelação: simplificar/modernizar a animação, sem excluí-la. Agora o resultado integrado revela uma faixa compacta de probabilidades com indicador móvel que desacelera sobre a faixa sorteada, destaque da chance selecionada e contagem do OVR antes/depois. Revelação em 1,8 segundo, com botão “Revelar resultado” para finalizar imediatamente; depois o mesmo botão continua para o treino. Texto/efeitos mantêm o espaço reservado para não deslocar a composição. Movimento reduzido mostra o resultado imediatamente.

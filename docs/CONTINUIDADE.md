@@ -2,6 +2,12 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Apresentação de contratação — camisa e escudo
+
+Pedido seguinte do usuário: substituir o boneco da tela de anúncio por uma combinação de camisa em destaque e anúncio oficial do clube. Implementado em `AnuncioClube` (`components.jsx`) com estilos em `AnuncioClube.css`: camisa vetorial existente com nome/número, escudo de 64 px, número decorativo ao fundo, nome do jogador e origem, termos em bloco separado e botão “Vestir a camisa”. A composição usa fluxo vertical com rolagem em telas menores, sem personagem sobreposto. Não altera economia nem os dados de transferência. A apresentação especial `ApresentacaoGrande` é outra tela e não foi alterada nesta revisão.
+
+Prévia: `docs/apresentacao-camisa/celular.png`. Conferência Chromium em 390×844, 360×640 e 1366×900, botão/callback e ausência de transbordamento da página; conferido também nome longo em tela pequena. Build de produção e os 178 testes de lógica passaram. Removida uma asserção antiga que exigia o SVG do boneco descartado. Esta revisão está salva localmente e ainda não foi enviada a `main`.
+
 ## Recuperação da publicação — 04/11/2026
 
 A recuperação foi enviada em **`47f17bc`**, para `main` e checkpoint. Execuções:

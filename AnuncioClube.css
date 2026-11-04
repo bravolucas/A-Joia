@@ -1,0 +1,23 @@
+.anuncio-transferencia{overflow-y:auto;overflow-x:hidden;isolation:isolate;color:#fff}
+.anuncio-conteudo{position:relative;width:min(100%,480px);min-height:100%;margin:auto;padding:56px 24px max(24px,env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px}
+.anuncio-cabecalho,.anuncio-camisa-palco,.anuncio-identidade,.anuncio-termos{transition:opacity .4s ease;width:100%}
+.anuncio-oficial{font:700 10px Inter,sans-serif;letter-spacing:.25em;color:#e6cc84}
+.anuncio-clube{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px;font-size:25px;font-weight:800;line-height:1.1}
+.anuncio-clube>span{max-width:260px;overflow-wrap:anywhere;text-align:left}
+.anuncio-camisa-palco{position:relative;display:grid;place-items:center;min-height:224px;background:radial-gradient(ellipse at center,color-mix(in srgb,var(--cor-clube) 30%,transparent),transparent 68%)}
+.anuncio-numero-fundo{position:absolute;inset:0;display:grid;place-items:center;font:800 clamp(170px,46vw,230px)/1 Oswald,sans-serif;color:transparent;-webkit-text-stroke:1px #ffffff24;letter-spacing:-.04em;user-select:none}
+.anuncio-camisa{position:relative;width:210px;filter:drop-shadow(0 18px 18px #0009) drop-shadow(0 0 20px #ffffff12)}
+.anuncio-camisa .vf-camisa{display:block;width:100%;height:auto;max-height:none}
+.anuncio-edicao{position:relative;font:600 9px Inter,sans-serif;letter-spacing:.28em;color:#ffffff66;margin-top:4px}
+.anuncio-identidade h2{font:800 clamp(24px,6vw,34px)/1.15 Unbounded,sans-serif;text-transform:uppercase;overflow-wrap:anywhere;margin:0}
+.anuncio-identidade p{font-size:15px;color:#c3cec8;margin:8px 0 0}
+.anuncio-origem{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;color:#d2dcd6;font-size:14px;margin-top:12px}
+.anuncio-termos{margin-top:auto}
+.anuncio-dados{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:#ffffff12;border:1px solid #ffffff12;border-radius:16px;overflow:hidden;margin:0 0 16px}
+.anuncio-dados>div{background:#0a1714e8;padding:12px 8px;min-width:0}
+.anuncio-dados dt{font:600 9px Inter,sans-serif;text-transform:uppercase;letter-spacing:.12em;color:#9cafa5;margin-bottom:5px}
+.anuncio-dados dd{margin:0;font-size:16px;font-weight:700;overflow-wrap:anywhere}
+.anuncio-confirmar{width:100%;min-height:54px;border-radius:16px;background:linear-gradient(100deg,#d8b44a,#f5d77a);color:#1a1405;font:700 15px Unbounded,sans-serif;padding:12px}
+.anuncio-confirmar:focus-visible{outline:3px solid #fff;outline-offset:4px}
+@media(min-height:800px){.anuncio-conteudo{gap:22px;padding-top:64px}.anuncio-camisa{width:240px}}
+@media(prefers-reduced-motion:reduce){.anuncio-varredura{display:none}.anuncio-transferencia *{animation:none!important;transition:none!important}}

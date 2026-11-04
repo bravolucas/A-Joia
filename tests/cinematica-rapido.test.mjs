@@ -9,7 +9,6 @@ test('anúncio do novo clube preserva opção de pular e conclusão', () => {
   assert.match(componentes, /function AnuncioClube\(/);
   assert.match(componentes, /onClick=\{onConcluir\}/);
   assert.match(componentes, /<ApresentacaoNovoClube|export function ApresentacaoNovoClube/);
-  assert.match(componentes, /aria-hidden="true"[\s\S]{0,500}viewBox="0 0 220 300"/);
 });
 
 test('pênalti mantém seleção das zonas e cálculo original', () => {

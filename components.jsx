@@ -1,4 +1,5 @@
-import { JogadorCampo, CampoPremium, SuperficieMini, RetratoApresentacao, CamisaPremium } from './VisualFutebol.jsx';
+import "./AnuncioClube.css";
+import { JogadorCampo, CampoPremium, SuperficieMini, CamisaPremium } from './VisualFutebol.jsx';
 import React, { useState, useMemo, useEffect } from "react";
 import { ARTE, escudoDe } from "./arte.js";
 import { TacaCompeticao } from "./trofeus.jsx";
@@ -413,11 +414,9 @@ function AnuncioClube({ clube, nome, numero, posicao, idade, grandeChegada, deOn
     return () => clearTimeout(t);
   }, [fase, curto, onConcluir]);
   const cor = clube.cor || "#12A876";
-  const primeiro = (nome || "").split(" ")[0];
-  const resto = (nome || "").split(" ").slice(1).join(" ");
   const fmt = (k) => (k >= 1000 ? `€ ${(k / 1000).toFixed(k >= 100000 ? 0 : 1).replace(".0", "")} mi` : `€ ${Math.round(k)} mil`);
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden" style={{ background: "#07100C", fontFamily: "'Rajdhani',sans-serif" }} role="dialog" aria-label={`Anúncio: ${nome} no ${clube.nome}`}>
+    <div className="anuncio-transferencia fixed inset-0 z-50" style={{ background: "#07100C", fontFamily: "'Rajdhani',sans-serif" }} role="dialog" aria-label={`Anúncio: ${nome} no ${clube.nome}`}>
       <style>{ESTILO_ANUNCIO}</style>
       {/* fundo: luz de estádio, faixas na cor do clube e flashes */}
       <div className="absolute inset-0" style={{ backgroundImage: `url(${ARTE.refletores})`, backgroundSize: "cover", backgroundPosition: "18% 30%", opacity: 0.55, filter: "saturate(.6)" }} />
@@ -428,73 +427,39 @@ function AnuncioClube({ clube, nome, numero, posicao, idade, grandeChegada, deOn
       <div className="absolute -top-24 right-[8%] w-56 h-56 rounded-full blur-3xl" style={{ background: "#fff", animation: "ancLuz 3s ease-in-out infinite .8s" }} />
       {fase >= 2 && flashes.map((f, i) => <div key={i} className="absolute w-24 h-24 rounded-full blur-2xl bg-white" style={{ left: `${f.x}%`, top: `${f.y}%`, opacity: 0, animation: `ancFlash ${f.t}s ${f.d}s infinite` }} />)}
 
-      {/* Camada cinematográfica: gramado, luzes de estádio e silhueta do novo reforço.
-          SVG inline evita imagens externas e mantém o anúncio leve e offline. */}
-      <div className="absolute inset-x-0 bottom-0 h-[46%] pointer-events-none" aria-hidden="true"
-        style={{ background: "linear-gradient(0deg, #07100C 2%, #143F29 40%, transparent 100%)", opacity: fase >= 2 ? .65 : .25, transition: "opacity 900ms" }}>
-        <div className="absolute bottom-[19%] left-[-15%] w-[130%] h-px bg-white/20" style={{ transform: "perspective(120px) rotateX(50deg)" }} />
-        <div className="absolute bottom-0 left-1/2 w-[70%] h-[80%] -translate-x-1/2 rounded-[50%] border border-white/10" />
-      </div>
-      {fase >= 3 && <div className="absolute inset-x-0 bottom-[5%] flex justify-center pointer-events-none" aria-hidden="true"
-        style={{ opacity: .68, animation: "ancSobe .85s ease-out both" }}>
-        <svg width="220" height="300" viewBox="0 0 220 300" fill="none"><ellipse cx="110" cy="285" rx="72" ry="9" fill="#000" opacity=".4"/><RetratoApresentacao x={110} y={115} cor={cor} nome={nome}/></svg>
-      </div>}
       {/* varredura de abertura */}
-      <div className="absolute inset-y-0 -left-[20%] w-[140%]" style={{ background: `linear-gradient(90deg, ${cor}, ${cor}dd)`, animation: fase === 0 ? "ancVarre .6s cubic-bezier(.7,0,.3,1) both" : "ancSai .5s cubic-bezier(.7,0,.3,1) both" }} />
+      <div className="anuncio-varredura absolute inset-y-0 -left-[20%] w-[140%]" style={{ background: `linear-gradient(90deg, ${cor}, ${cor}dd)`, animation: fase === 0 ? "ancVarre .6s cubic-bezier(.7,0,.3,1) both" : "ancSai .5s cubic-bezier(.7,0,.3,1) both" }} />
 
       <button onClick={onConcluir} className="absolute top-4 right-4 z-10 min-h-[44px] px-4 rounded-full text-[14px] font-bold text-white/80 bg-black/30 backdrop-blur">Pular</button>
 
-      <div className="relative h-full max-w-md mx-auto flex flex-col items-center justify-center px-6 text-center">
-        {fase >= 1 && (
-          <div className="font-black text-white" style={{ fontFamily: "'Unbounded',sans-serif", fontSize: 30, animation: "ancCarimbo .55s cubic-bezier(.2,.8,.2,1) both", textShadow: `0 0 30px ${cor}` }}>
-            OFICIAL
-          </div>
-        )}
-        {fase >= 1 && <div className="mt-1 text-[13px] font-bold uppercase tracking-[0.35em] text-white/70" style={{ animation: "ancSobe .5s .15s both" }}>{grandeChegada ? "Reforço de peso" : "Novo contratado"}</div>}
+      <div className="anuncio-conteudo">
+        <header className="anuncio-cabecalho" style={{ opacity: fase >= 1 ? 1 : 0 }}>
+          <span className="anuncio-oficial">CONTRATAÇÃO OFICIAL</span>
+          <div className="anuncio-clube"><Brasao club={clube} size={64} /><span>{clube.nome}</span></div>
+        </header>
 
-        {fase >= 2 && (
-          <div className="relative mt-6" style={{ animation: "ancBrasao .7s cubic-bezier(.2,.8,.2,1) both" }}>
-            <div className="absolute inset-0 rounded-full" style={{ boxShadow: `0 0 0 3px ${cor}`, animation: "ancAnel 1.4s ease-out infinite" }} />
-            <div style={{ filter: `drop-shadow(0 10px 40px ${cor}aa)` }}><Brasao club={clube} size={112} /></div>
+        <div className="anuncio-camisa-palco" style={{ opacity: fase >= 2 ? 1 : 0, '--cor-clube': cor }}>
+          <span className="anuncio-numero-fundo" aria-hidden="true">{numero}</span>
+          <div className="anuncio-camisa" role="img" aria-label={`Camisa do ${clube.nome}, ${nome}, número ${numero}`}>
+            <CamisaPremium nome={clube.nome} cor={cor} numero={numero} sobrenome={(nome || "").trim().split(/\s+/).slice(-1)[0].toUpperCase()} />
           </div>
-        )}
+          <span className="anuncio-edicao">SUA NOVA CAMISA</span>
+        </div>
 
-        {fase >= 3 && (
-          <div className="relative mt-6 w-full">
-            <div className="absolute inset-x-0 -top-8 font-black leading-none select-none" aria-hidden="true"
-              style={{ fontFamily: "'Unbounded',sans-serif", fontSize: 150, color: "transparent", WebkitTextStroke: `2px ${cor}`, animation: "ancNumero .6s both" }}>{numero}</div>
-            <div className="relative" style={{ animation: "ancSobe .5s both" }}>
-              <div className="text-[18px] font-semibold uppercase tracking-[0.3em] text-white/70">{primeiro}</div>
-              <div className="font-black text-white leading-tight" style={{ fontFamily: "'Unbounded',sans-serif", fontSize: resto.length > 12 ? 26 : 34 }}>{(resto || primeiro).toUpperCase()}</div>
-              <div className="mt-2 text-[16px] text-white/75">{posicao} · {idade} anos · camisa {numero}</div>
-            </div>
-            {deOnde && (
-              <div className="mt-4 flex items-center justify-center gap-3 text-[15px] font-semibold text-white/85" style={{ animation: "ancSobe .5s .2s both" }}>
-                <span className="flex items-center gap-1.5"><Brasao club={deOnde} size={20} />{deOnde.nome}</span>
-                <span className="text-white/50">→</span>
-                <span className="flex items-center gap-1.5"><Brasao club={clube} size={20} />{clube.nome}</span>
-              </div>
-            )}
-          </div>
-        )}
+        <section className="anuncio-identidade" style={{ opacity: fase >= 3 ? 1 : 0 }}>
+          <h2>{nome}</h2>
+          <p>{posicao} · {idade} anos · camisa {numero}</p>
+          {deOnde && <div className="anuncio-origem"><Brasao club={deOnde} size={20} /><span>{deOnde.nome}</span><span aria-hidden="true">→</span><Brasao club={clube} size={20} /><span>{clube.nome}</span></div>}
+        </section>
 
-        {fase >= 4 && (
-          <div className="w-full mt-6" style={{ animation: "ancSobe .5s both" }}>
-            {contrato && (
-              <div className={`grid ${valor != null ? "grid-cols-2" : "grid-cols-3"} gap-2 mb-4`}>
-                {[...(valor != null ? [["TRANSFERÊNCIA", valor ? fmt(valor) : "Sem custo"]] : []), ["SALÁRIO", `${fmt(contrato.salario)}/ano`], ["CONTRATO", `${contrato.anos} anos`], ["CLÁUSULA", fmt(contrato.multa)]].map(([k, v]) => (
-                  <div key={k} className="rounded-xl bg-white/8 border border-white/10 py-2 px-1">
-                    <div className="text-[10px] font-bold tracking-widest text-white/55">{k}</div>
-                    <div className="text-[14px] font-bold text-white">{v}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-            <button onClick={onConcluir} className="w-full min-h-[54px] rounded-2xl font-bold text-[16px]" style={{ background: "linear-gradient(90deg,#D8B44A,#F5D77A)", color: "#1A1405", fontFamily: "'Unbounded',sans-serif" }}>
-              Vestir a camisa
-            </button>
-          </div>
-        )}
+        <div className="anuncio-termos" style={{ opacity: fase >= 4 ? 1 : 0 }}>
+          {contrato && <dl className="anuncio-dados">
+            {[...(valor != null ? [["Transferência", valor ? fmt(valor) : "Sem custo"]] : []), ["Salário", `${fmt(contrato.salario)}/ano`], ["Contrato", `${contrato.anos} anos`], ["Cláusula", fmt(contrato.multa)]].map(([k, v]) => (
+              <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
+            ))}
+          </dl>}
+          <button onClick={onConcluir} disabled={fase < 4} className="anuncio-confirmar">Vestir a camisa</button>
+        </div>
       </div>
     </div>
   );

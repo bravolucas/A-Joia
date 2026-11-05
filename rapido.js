@@ -8,7 +8,7 @@ import { registrarMuseu } from './museu.js';
    lê ou grava o save do Modo Carreira. */
 
 import {
-  CLUBES, LIGAS, POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS, AFINIDADE_MERCADO, CLASSICOS, ORIGENS, CAMINHOS_POS_CARREIRA, LENDAS,
+  CONFEDERACAO_POR_NACAO, CLUBES, LIGAS, POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS, AFINIDADE_MERCADO, CLASSICOS, ORIGENS, CAMINHOS_POS_CARREIRA, LENDAS,
 } from "./data.js";
 import {
   rand, pick, clampR, clamp, poisson, calcOVR, evoluirAtributos,
@@ -1192,7 +1192,7 @@ function jogarCopaBase(c, card0, opId) {
       texto += ` ${k.fase === 4 ? "Na final" : k.fase === 3 ? "Na semifinal" : `Nas ${FASES_COPA[k.fase].toLowerCase()}`}: ${k.adversario.label}.`;
       if (k.fase === 4 && k.titular) {
         const mini = miniDaPosicao(c.posicao);
-        const m = { tipo: "selecao", titulo: `Final da Copa do Mundo ${k.ano} · contra ${k.adversario.label}`, mini, ordem: 1, total: 1 };
+        const m = { tipo: "selecao", titulo: `Final da Copa do Mundo ${k.ano} · contra ${k.adversario.label}`, mini, adversario:{tipo:"selecao",id:k.adversario.id,nome:k.adversario.label}, ordem: 1, total: 1 };
         m.texto = textoDoMomento(mini, m, c);
         card.pendente = m; card.filaMomentos = [];
       }
@@ -1395,7 +1395,7 @@ function jogarTemporadaBase(c0) {
   }
 
   const mini = miniDaPosicao(c.posicao);
-  momentos.forEach((m, i) => { m.mini = mini; m.texto = textoDoMomento(mini, m, c); m.ordem = i + 1; m.total = momentos.length; });
+  momentos.forEach((m, i) => { m.mini = mini; Object.assign(m,contextoMomento(c,m)); m.texto = textoDoMomento(mini, m, c); m.ordem = i + 1; m.total = momentos.length; });
   card.momentos = [];
   card.pendente = momentos[0] || null;
   card.filaMomentos = momentos.slice(1);
@@ -1428,6 +1428,20 @@ const SITUACAO_TABELA = {
 };
 
 /* ---------- momento decisivo: cada posição decide do seu jeito ---------- */
+export function contextoMomento(c,m){
+ const clube=clubeDe(c.emprestimo?.destino||c.clubeNome),selecao=m.tipo==='selecao';
+ const historico=selecao?NACIONALIDADES.find(x=>m.titulo?.endsWith(`contra ${x.label}`)):null;
+ const adversario=m.adversario||(historico?{tipo:'selecao',id:historico.id,nome:historico.label}:null)||comSemente(c.codigo,`confronto:${c.ano}:${m.tipo}:${m.titulo}`,()=>{
+ if(selecao){const conf=CONFEDERACAO_POR_NACAO[c.nac];let pool=NACIONALIDADES.filter(x=>x.id!==c.nac&&(!conf||CONFEDERACAO_POR_NACAO[x.id]===conf));if(!pool.length)pool=NACIONALIDADES.filter(x=>x.id!==c.nac);const x=pick(pool);return {tipo:'selecao',id:x.id,nome:x.label};}
+ const liga=ligaDe(clube.liga);const pool=clubesJogaveis().filter(x=>x.nome!==clube.nome&&(m.tipo==='continental'?ligaDe(x.liga).continental===liga.continental&&!ehSegundaDivisao(x.liga):m.tipo==='copa'?COPA_POR_LIGA[x.liga]===COPA_POR_LIGA[clube.liga]:x.liga===clube.liga));
+ const x=pool.length?pick(pool):null;return x?{tipo:'clube',nome:x.nome}:null;
+ });
+ const mini=m.mini||miniDaPosicao(c.posicao);
+ const fase=['liga','acesso','permanencia'].includes(m.tipo)?'Última rodada':'Final';
+ const situacao=mini==='defesa'?'Pênalti contra. Você é a última barreira.':mini==='penalti'?'A bola está na marca. A próxima cobrança pode decidir.':mini==='falta'?'Falta perigosa. A chance está nos seus pés.':'Último lance. Encontre o passe que pode decidir.';
+ return {adversario,contexto:{fase,situacao}};
+}
+
 export function miniDaPosicao(pos) {
   if (pos === "GOL") return "defesa";
   if (["MEI", "PD", "PE"].includes(pos)) return "falta";

@@ -1,3 +1,9 @@
+## Contexto dos lances e adversário
+
+CabecalhoMomento exibe confronto com dois escudos/bandeiras, fase e descrição do lance. Clube de empréstimo e seleção corretos. Novos momentos guardam adversário gerado deterministicamente entre elegíveis da mesma liga/continental; finais da Copa usam o adversário real da chave. Saves antigos com título contra X preservam a seleção já indicada; demais contextos antigos usam derivação estável, sem alterar sorteios esportivos. Não há novo placar/minuto fabricado; o texto de situação existente é preservado. Dados do adversário acompanham o momento salvo e seu histórico.
+
+Build, 29 arquivos de lógica, três testes específicos e 12 casos browser passaram. Teste visual exige nomes de ambos os lados em quatro minigames/duas larguras. Logs `/tmp/contexto-lance-*`.
+
 ## Empréstimos unificados ao mercado
 
 Removidos componente/painel EmprestimosJogador e sua chamada na jornada. Pedido acessível pela ficha, abrindo evento emprestimo no mesmo CartaoEvento das transferências. Seletor de 1/2 temporadas filtra ofertas: três clubes visíveis, sem duplicar cada prazo. Eventos de empréstimo antigos em grade também usam lista padrão. Lógica de vínculo, duração e retorno preservada. Informação de empréstimo ativo na ficha. Teste atualizado verifica ausência de painel antigo, pedido na ficha, três ofertas, aceite e persistência. 29 arquivos de lógica e 12 casos browser passaram; build final concluído. Captura `/tmp/emprestimos-unificados-390.png`.

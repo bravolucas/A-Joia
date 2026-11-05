@@ -15,6 +15,8 @@ for(const width of [390,1366])for(const mini of ['penalti','defesa','falta','pas
  page.on('pageerror',e=>erros.push(e.message));page.on('response',r=>{if(r.url().includes('/assets/')&&r.status()>=400)recursos.push(r.url())});
  await abrir(page,mini);
  await expect(page.locator('.vf-matchbar')).toBeVisible();
+ await expect(page.locator('.vf-confronto .vf-match-club strong')).toHaveCount(2);
+ await expect(page.locator('.vf-adversario strong')).not.toBeEmpty();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  const imagens=page.locator('.vf-cena image');expect(await imagens.count()).toBeGreaterThan(0);
  await page.screenshot({path:`/tmp/ajoia-visual-${mini}-${width}.png`,fullPage:true});

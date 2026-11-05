@@ -1,3 +1,4 @@
+import {contextoMomento} from './rapido.js';
 import PrimeiroClube from './PrimeiroClube.jsx';
 import TelaCriacao from './CriacaoCarreira.jsx';
 import LojaJogador from "./LojaJogador.jsx";
@@ -707,9 +708,11 @@ const NOME_MINI = { penalti: "Pênalti decisivo", falta: "Falta decisiva", passe
 
 function CabecalhoMomento({ c, momento }) {
   const mini = momento.mini || "penalti";
+  const contexto=contextoMomento(c,momento),adv=contexto.adversario,selecao=adv?.tipo==='selecao';
   return (
     <div className="text-center">
-      <div className="vf-matchbar"><span className="vf-match-club"><ClubDot club={clubeDe(c.emprestimo?.destino||c.clubeNome)} size={22}/><strong>{c.emprestimo?.destino||c.clubeNome}</strong></span><span className="vf-match-live"><i />LANCE DECISIVO</span></div>
+      <div className="vf-matchbar vf-confronto" aria-label="Confronto da decisão"><span className="vf-match-club">{selecao?<Bandeira nac={c.nac} size={30}/>:<ClubDot club={clubeDe(c.emprestimo?.destino||c.clubeNome)} size={32}/>}<strong>{selecao?nacDe(c.nac).label:c.emprestimo?.destino||c.clubeNome}</strong></span><span className="vf-versus">VS<small>{contexto.contexto.fase}</small></span><span className="vf-match-club vf-adversario">{adv&&<>{selecao?<Bandeira nac={adv.id} size={30}/>:<ClubDot club={clubeDe(adv.nome)} size={32}/>}<strong>{adv.nome}</strong></>}</span></div>
+      <p className="vf-contexto-lance">{contexto.contexto.situacao}</p>
       <span className="rp-chip" style={{ color: "#EBC557", background: "rgba(216,180,74,.14)" }}>
         {momento.total > 1 ? `Desafio ${momento.ordem} de ${momento.total}` : "Momento decisivo"} · {NOME_MINI[mini]}
       </span>

@@ -1,6 +1,8 @@
 import React,{useEffect,useId,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import Icone from './Icone.jsx';
+import {ARTE} from './arte.js';
+import vestiarioLoja from './arte/loja/vestiario-premium.webp';
 import {CATALOGO_LOJA_JOGADOR,formatarValor} from './rapido.js';
 import {impedimentoLojaJogador,upsAtivosJogador,upJogadorDe} from './lojaJogador.js';
 import {bloquearRolagem} from './bloqueioRolagem.js';
@@ -8,6 +10,16 @@ import './LojaJogador.css';
 
 const categorias=['Todos','UPs temporários','Treino','Saúde','Carreira','Estilo de vida','Meus itens'];
 const normalizar=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
+const beneficios={psicologo:'+3 mental/ano · quedas pela metade',personal:'20% menos risco de lesão',nutri:'12% menos declínio',fisio:'Trata lesão crônica · −10% risco',imagem:'+3 fama por ano',analista:'+0,08 na nota média',ct:'+8% na evolução',instituto:'+2 torcida/ano · legado social',origem:'+20 torcida no clube de origem',carro:'+4 fama',mansao:'+6 fama',iate:'+8 fama',equipamento:'+3% na evolução',finalizador:'+4% nos gols',criador:'+5% nas assistências','treino-goleiro':'Até +2 p.p. em defesas','bola-parada-pro':'Mais precisão em pênaltis e faltas','recuperacao-pro':'5% menos risco de lesão','media-training':'+1 fama e mental por ano','projeto-social':'+1 torcida/ano · legado social'};
+function fotoItem(i){
+ if(i.id==='psicologo'||i.id==='up-cabeca')return ARTE.vestiario;
+ if(i.id==='carro')return ARTE.carro;
+ if(i.id==='mansao'||i.id==='iate')return ARTE.mansao;
+ if(i.categoria==='Saúde'||/fisio|fisico|recuperacao|cabeca/.test(i.id))return ARTE.fisio;
+ if(i.categoria==='Carreira'||/vitrine/.test(i.id))return ARTE.coletiva;
+ if(/social|origem|instituto/.test(i.id))return ARTE.torcida;
+ return ARTE.treino;
+}
 function rotuloBloqueio(motivo){
  if(motivo==='Saldo insuficiente')return 'Sem saldo';
  if(motivo==='Exclusivo para goleiros')return 'Para goleiros';
@@ -49,7 +61,7 @@ export default function LojaJogador({c,etapa,onComprar,onFechar}){
  };
  return createPortal(<div className="lj-overlay" onClick={onFechar}>
   <section className="lj" role="dialog" aria-modal="true" aria-labelledby={titulo} ref={painel} onClick={e=>e.stopPropagation()}>
-   <header className="lj-header"><h2 id={titulo}>Loja do jogador</h2><div className="lj-wallet"><span>Seu saldo</span><strong key={c.patrimonio}>{formatarValor(c.patrimonio||0)}</strong></div><button onClick={onFechar} aria-label="Fechar loja">×</button></header>
+   <header className="lj-header" style={{'--lj-hero':`url(${vestiarioLoja})`}}><div className="lj-identidade"><span className="lj-eyebrow">A JOIA / PERFORMANCE CLUB</span><h2 id={titulo}>Loja do jogador</h2><p>Seu talento. Seu próximo nível.</p></div><div className="lj-wallet"><span>Seu saldo</span><strong key={c.patrimonio}>{formatarValor(c.patrimonio||0)}</strong></div><button onClick={onFechar} aria-label="Fechar loja">×</button></header>
    <div className="lj-filtros">
     <label><span className="sr-only">Buscar melhoria</span><input type="search" placeholder="O que você quer melhorar?" value={busca} onChange={e=>setBusca(e.target.value)}/></label>
     <div className="lj-categorias" aria-label="Categorias da loja">{categorias.map(nome=><button key={nome} aria-pressed={categoria===nome} onClick={()=>setCategoria(nome)}>{nome}</button>)}</div>
@@ -62,8 +74,8 @@ export default function LojaJogador({c,etapa,onComprar,onFechar}){
      const tem=comprado(i),motivo=impedimento(i),duracao=ativo(i),adquirido=tem?(i.temporario?'Ativo':'Adquirido'):null;
      const tempo=duracao?`${duracao.fim-c.ano} ${duracao.fim-c.ano===1?'temporada restante':'temporadas restantes'}`:i.temporario?`${i.duracao} ${i.duracao===1?'temporada':'temporadas'}`:'Permanente';
      return <article key={i.id} className={`${tem?'lj-item-adquirido':''} ${ultimaCompra===i.id?'lj-item-novo':''}`}>
-      <span className="lj-icone" aria-hidden="true"><Icone e={i.icone} size={24}/></span>
-      <div className="lj-info"><h3>{i.nome}</h3><p>{i.desc}</p><span className={`lj-duracao ${i.temporario?'lj-temporario':''}`}>{tempo}</span>{i.luxo&&<small>Manutenção {formatarValor(Math.round(i.custo*.06))}/ano</small>}</div>
+      <div className="lj-arte" aria-hidden="true"><img src={fotoItem(i)} alt="" loading="lazy"/><span className="lj-icone"><Icone e={i.icone} size={22}/></span></div>
+      <div className="lj-info"><span className="lj-tipo">{i.temporario?'IMPULSO':i.categoria}</span><h3>{i.nome}</h3><p title={i.desc}>{beneficios[i.id]||i.desc}</p><span className={`lj-duracao ${i.temporario?'lj-temporario':''}`}>{tempo}</span>{i.luxo&&<small>Manutenção {formatarValor(Math.round(i.custo*.06))}/ano</small>}</div>
       <button className="lj-comprar" disabled={!!motivo} onClick={()=>comprar(i)} title={motivo||`Comprar ${i.nome}`} aria-label={tem?`${adquirido}: ${i.nome}`:motivo?`${motivo}: ${i.nome}`:`Comprar ${i.nome} por ${formatarValor(i.custo)}`}>
        {tem?<><span aria-hidden="true">✓</span><span>{adquirido}</span></>:<><span>{motivo?rotuloBloqueio(motivo):'Comprar'}</span><strong>{formatarValor(i.custo)}</strong></>}
       </button>

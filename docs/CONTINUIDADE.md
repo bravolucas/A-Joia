@@ -1,3 +1,7 @@
+## Loja — nova direção visual (novembro de 2026)
+
+Cabeçalho com arte original de vestiário, cartões ilustrados por categoria, ícones dourados, benefícios resumidos e saldo em destaque. Mantidos os 34 itens, UPs, compras em um toque, saves, foco/Escape e área rolável. Arte WebP de 80 KiB. Auditoria e próximos passos em `docs/DIRECAO-VISUAL.md`. Validação: 28 arquivos de lógica passaram; build de produção concluído; suíte de navegador com 51/52 passando na primeira execução (uma navegação coincidiu com a reconstrução de dist). Repetição após build estável: os 12 casos de loja e minigames passaram, incluindo o caso afetado. Capturas finais em `docs/loja-visual/`. Logs em `/tmp/loja-arte-*.log`. Publicação em acompanhamento.
+
 # Continuidade interna — treinador, elenco e mercado
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.

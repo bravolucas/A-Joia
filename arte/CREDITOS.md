@@ -77,3 +77,7 @@ Os componentes `VisualFutebol.jsx` (jogadores, retratos, camisas e medalhas) e a
 Fontes locais em `arte/fontes/`: Inter, Unbounded, Oswald, Playfair Display e Rajdhani, obtidas pelos pacotes Fontsource 5.3.0, sob SIL Open Font License. Os textos de licença acompanham os arquivos. Não é necessária conexão com Google Fonts.
 
 O impacto da bola e da rede é sintetizado por Web Audio em `som.js`, sem amostras externas, e respeita a preferência de som do usuário.
+
+## Loja do jogador — novembro de 2026
+
+`loja/vestiario-premium.webp`: arte original gerada com OpenAI Image Generation para o A JOIA, sem marcas, otimizada em WebP (cerca de 80 KiB). Canva e Adobe não foram usados nesta atualização. Os cartões reutilizam as fotos já creditadas acima.

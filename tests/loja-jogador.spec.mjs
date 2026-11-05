@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 import {criarJogador} from '../rapido.js';
-for(const width of [390,1366])test(`loja do jogador: catálogo, confirmação, UP e recarga em ${width}px`,async({page})=>{
+for(const width of [390,1366])test(`loja do jogador: compra direta, UP e recarga em ${width}px`,async({page})=>{
  await page.setViewportSize({width,height:844});
  const c={...criarJogador({nome:'Jogador da loja',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,ritmo:'normal',codigo:'LOJA-ROBUSTA'}),patrimonio:10000};
  const salvo=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('ajoia_rapido_v1')).c);
@@ -10,14 +10,16 @@ for(const width of [390,1366])test(`loja do jogador: catálogo, confirmação, U
  await expect(loja.locator('article')).toHaveCount(34);
  await loja.getByRole('button',{name:'UPs temporários',exact:true}).click();await expect(loja.locator('article')).toHaveCount(14);
  const item=nome=>loja.locator('article').filter({has:page.getByRole('heading',{name:nome,exact:true})});
- await item('UP de finalização').getByRole('button',{name:'Ver melhoria'}).click();await expect(loja.getByRole('button',{name:'Confirmar compra'})).toBeFocused();
- await loja.getByRole('button',{name:'Cancelar',exact:true}).click();expect((await salvo()).patrimonio).toBe(10000);
- await item('UP de finalização').getByRole('button',{name:'Ver melhoria'}).click();await loja.getByRole('button',{name:'Confirmar compra'}).click();
- expect((await salvo()).patrimonio).toBe(9880);await expect(loja.getByRole('region',{name:'UPs ativos'})).toContainText('1 temporada restante');
+ await expect(loja.getByRole('button',{name:'Confirmar compra'})).toHaveCount(0);
+ const antes=await item('UP de finalização').boundingBox();
+ await item('UP de finalização').getByRole('button',{name:/^Comprar/}).dblclick();
+ await expect(loja.getByRole('status')).toContainText('ativado por 1 temporada');
+ const depois=await item('UP de finalização').boundingBox();expect(Math.abs(depois.y-antes.y)).toBeLessThan(2);
+ expect((await salvo()).patrimonio).toBe(9880);await expect(item('UP de finalização')).toContainText('1 temporada restante');
  await expect(item('UP de finalização').getByRole('button')).toBeDisabled();
- await abrir();expect((await salvo()).upsTemporarios).toHaveLength(1);await expect(loja.getByRole('region',{name:'UPs ativos'})).toContainText('1 temporada restante');
+ await abrir();expect((await salvo()).upsTemporarios).toHaveLength(1);await expect(item('UP de finalização')).toContainText('1 temporada restante');
  await loja.getByRole('searchbox',{name:'Buscar melhoria'}).fill('Equipamento profissional');await expect(loja.locator('article')).toHaveCount(1);
- await item('Equipamento profissional').getByRole('button',{name:'Ver melhoria'}).click();await loja.getByRole('button',{name:'Confirmar compra'}).click();
+ await item('Equipamento profissional').getByRole('button',{name:/^Comprar/}).click();
  const fim=await salvo();expect(fim.patrimonio).toBe(9380);expect(fim.investimentos).toContain('equipamento');expect(fim.attrs).toEqual(c.attrs);
  await page.keyboard.press('Escape');await expect(loja).toHaveCount(0);expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);

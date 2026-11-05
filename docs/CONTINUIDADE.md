@@ -2,6 +2,14 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Loja do jogador — visual compacto e compra direta
+
+O usuário aprovou o catálogo, mas rejeitou o visual e pediu compra em um único botão, sem confirmação. `LojaJogador.jsx/css` agora apresenta linhas compactas com ícone, nome, efeito, duração e botão Comprar/preço; duas colunas no desktop e uma no celular. Removida a tela de detalhes/confirmar/cancelar. O clique compra e permanece no catálogo, atualiza o saldo e muda o botão para Ativo/Adquirido, com retorno visual discreto e mensagem em área de altura fixa, sem empurrar os itens. A duração restante aparece no próprio UP adquirido. O contador de UPs e a busca permanecem, e o filtro de adquiridos foi integrado às categorias como Meus itens, eliminando uma barra de filtros separada. Busca aceita acentos ou texto sem acentuação.
+
+Não foram alterados preços, catálogo de 34 itens, limites de UPs, efeitos, patrimônio ou regras de compra. A loja do treinador é outro componente e não foi alterada nesta revisão. A preferência de compra direta refere-se à loja do jogador aqui remodelada; não reintroduzir confirmação automaticamente.
+
+Validação: os 28 arquivos de lógica, build e 52 casos de navegador passaram. A regressão da loja agora verifica compra direta com toque duplo (um único débito), ausência de Confirmar compra, posição estável do item, duração/recarga, aquisição permanente e retorno da rolagem após fechar. Após o ajuste de contraste do estado adquirido, build e os dois casos da loja foram repetidos e passaram. Logs `/tmp/loja-direta-tests.log`, `/tmp/loja-direta-build-final.log`, `/tmp/loja-direta-browser.log`, `/tmp/loja-direta-ui-final.log`. Prévias em `docs/loja-compra-direta/` com saldo de teste. Publicação desta revisão em andamento; confirmar sucesso antes de informar concluída.
+
 ## Loja robusta do jogador no modo rápido
 
 Pedido do usuário: ampliar a loja do jogador, com muitas opções e UPs temporários. `LojaJogador.jsx/css` substitui o painel antigo de patrimônio por catálogo de 34 itens (20 permanentes, sendo oito novos, e 14 UPs). Categorias Treino, Saúde, Carreira, Estilo de vida e UPs temporários; busca, filtros disponíveis/adquiridos, saldo, confirmação com saldo restante e área de UPs ativos/duração. Layout em três colunas no desktop e uma no celular, cabeçalho e confirmação fora da área rolável, Escape/foco/bloqueio de rolagem compartilhado. Novo atalho na jornada e entradas de ficha renomeadas para loja/patrimônio.

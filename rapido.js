@@ -24,7 +24,7 @@ export const IDADES_TRACO = [19, 24, 29];
 /* prêmios individuais não contam como título de time */
 export const ehPremioIndividual = (tipo) => tipo === "bolaOuro" || tipo === "botaOuro";
 const ATTRS = ["velocidade", "finalizacao", "passe", "drible", "defesa", "fisico"];
-const DEFENSIVAS = ["GOL", "ZAG", "LD", "LE", "VOL"];
+const DEFENSIVAS = ["GOL", "ZAG", "LD", "LE", "VOL", "ALE", "ALD"];
 const rnd = () => Math.random();
 const chance = (p) => rnd() < p;
 const clone = (x) => JSON.parse(JSON.stringify(x));
@@ -167,7 +167,7 @@ export function clubeInicial(nacId, grande = false) {
 export const TRACOS_RAPIDO = [
   { id: "finalizador", nome: "Finalizador Clínico", icone: "🎯", desc: "+15% de gols por temporada.", golsMult: 1.15, posicoes: ["MEI", "PD", "PE", "SA", "ATA", "MC"] },
   { id: "maestro", nome: "Maestro", icone: "🎼", desc: "+20% de assistências e +1 de passe agora.", assistMult: 1.2, ganho: { passe: 1 } },
-  { id: "muralha", nome: "Muralha", icone: "🛡️", desc: "Notas mais altas e o time sofre menos: mais chance de título.", notaBonus: 0.25, forcaTime: 1.5, posicoes: ["GOL", "ZAG", "LD", "LE", "VOL", "MC"] },
+  { id: "muralha", nome: "Muralha", icone: "🛡️", desc: "Notas mais altas e o time sofre menos: mais chance de título.", notaBonus: 0.25, forcaTime: 1.5, posicoes: ["GOL", "ZAG", "LD", "LE", "VOL", "ALE", "ALD", "MC"] },
   { id: "fenomeno", nome: "Fenômeno Físico", icone: "💪", desc: "Metade do risco de lesão e declínio físico mais lento.", lesaoMult: 0.5, declinio: 0.85, ganho: { fisico: 2 } },
   { id: "decisao", nome: "Jogador de Decisão", icone: "🔥", desc: "Mais chance em finais e pênaltis decisivos.", mataMata: 0.05, penalti: 0.12 },
   { id: "lider", nome: "Líder Nato", icone: "🎖️", desc: "O time joga mais por você: +2 de força do clube e torcida cresce.", forcaTime: 2, torcidaAno: 3 },
@@ -220,7 +220,7 @@ export const PES = [
   { id: "ambidestro", nome: "Ambidestro", icone: "🔁", desc: "Chuta com as duas: +6% de gols e assistências, mas −1 em todo o teto." },
 ];
 export const peDe = (id) => PES.find((p) => p.id === id) || PES[0];
-export const NUMERO_PADRAO = { GOL: 1, ZAG: 4, LD: 2, LE: 6, VOL: 5, MC: 8, MEI: 10, PD: 7, PE: 11, SA: 10, ATA: 9 };
+export const NUMERO_PADRAO = { GOL: 1, ZAG: 4, LD: 2, LE: 6, ME: 11, MD: 7, ALE: 6, ALD: 2, VOL: 5, MC: 8, MEI: 10, PD: 7, PE: 11, SA: 10, ATA: 9 };
 export const numeroDe = (c) => c.numero || NUMERO_PADRAO[c.posicao] || 8;
 export const RITMOS = [
   { id: "intenso", nome: "Intenso", icone: "🔥", desc: "Uma decisão por temporada, imersão total" },
@@ -1414,7 +1414,7 @@ const SITUACAO_TABELA = {
 export function miniDaPosicao(pos) {
   if (pos === "GOL") return "defesa";
   if (["MEI", "PD", "PE"].includes(pos)) return "falta";
-  if (["MC", "VOL", "LD", "LE"].includes(pos)) return "passe";
+  if (["MC", "VOL", "LD", "LE", "ME", "MD", "ALE", "ALD"].includes(pos)) return "passe";
   return "penalti";
 }
 const TEXTO_MINI = {
@@ -2504,7 +2504,7 @@ const RISCOS = {
 };
 
 /* ---------- eventos novos ---------- */
-const NUMEROS_POR_POS = { GOL: 1, ZAG: 4, LD: 2, LE: 6, VOL: 5, MC: 8, MEI: 10, PD: 7, PE: 11, SA: 9, ATA: 9 };
+const NUMEROS_POR_POS = { GOL: 1, ZAG: 4, LD: 2, LE: 6, ME: 11, MD: 7, ALE: 6, ALD: 2, VOL: 5, MC: 8, MEI: 10, PD: 7, PE: 11, SA: 9, ATA: 9 };
 export const EVENTOS_EXTRAS = [
   {
     id: "fimContrato", icone: "📄",
@@ -3053,7 +3053,7 @@ export const EVENTOS_CAMPO = [
     titulo: () => "Treino extra depois do expediente",
     texto: () => "O auxiliar técnico se ofereceu para ficar uma hora a mais com você todo dia.",
     opcoes: (c) => {
-      const foco = c.posicao === "GOL" ? "defesa" : DEFENSIVAS.includes(c.posicao) ? "defesa" : c.posicao === "MEI" || c.posicao === "MC" ? "passe" : "finalizacao";
+      const foco = c.posicao === "GOL" ? "defesa" : DEFENSIVAS.includes(c.posicao) ? "defesa" : ["MEI", "MC", "ME", "MD"].includes(c.posicao) ? "passe" : "finalizacao";
       return [
         { id: "aceitar", label: "Aceitar a hora extra", dica: `+1 de ${foco} agora e no teto · cansa`,
           efeito: (c) => { c.attrs[foco] = clampR(c.attrs[foco] + 1, 40, 99); c.potencial[foco] = clampR(c.potencial[foco] + 1, 40, 99); mexerMoral(c, -2); return "Cem chutes por dia, chuva ou sol. Dá para ver a diferença."; } },
@@ -3187,7 +3187,7 @@ export function efeitosDaDecisao(a, d) {
   return out;
 }
 const seguro = (id, label, dica, efeito = () => "Sem mudanças.") => ({ id, label, dica, risco: "seguro", efeito });
-const nomeAtrib = (c) => (c.posicao === "GOL" ? "reflexo" : DEFENSIVAS.includes(c.posicao) ? "marcação" : ["MC", "MEI"].includes(c.posicao) ? "passe" : "finalização");
+const nomeAtrib = (c) => (c.posicao === "GOL" ? "reflexo" : DEFENSIVAS.includes(c.posicao) ? "marcação" : ["MC", "MEI", "ME", "MD"].includes(c.posicao) ? "passe" : "finalização");
 
 export const EVENTOS_APOSTA = [
   { id: "dieta", icone: "🥗", peso: () => 1.4,

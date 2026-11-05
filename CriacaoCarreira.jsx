@@ -7,7 +7,7 @@ import inicio from './arte/criacao/inicio.webp';
 import bairro from './arte/criacao/bairro.webp';
 import './CriacaoCarreira.css';
 const titulos=['Sua primeira camisa','De onde vem o seu futebol?','Onde você decide o jogo?','Toda joia tem uma origem','Qual é o seu jeito de jogar?'];
-const pontos={GOL:[50,91],ZAG:[50,76],LD:[86,70],LE:[14,70],VOL:[50,61],MC:[50,49],MEI:[50,37],PD:[86,26],PE:[14,26],SA:[50,24],ATA:[50,12]};
+const pontos={ME:[22,46],MD:[78,46],ALE:[13,58],ALD:[87,58],GOL:[50,91],ZAG:[50,76],LD:[86,70],LE:[14,70],VOL:[50,61],MC:[50,49],MEI:[50,37],PD:[86,26],PE:[14,26],SA:[50,24],ATA:[50,12]};
 const sortear=(todos,anteriores=[])=>{let pool=todos.filter(x=>!anteriores.includes(x.id));if(pool.length<3)pool=todos;return [...pool].map(x=>({x,r:Math.random()})).sort((a,b)=>a.r-b.r).slice(0,3).map(v=>v.x);};
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 function fotoOrigem(id){return ['base','prodigio','escolar'].includes(id)?ARTE.treino:['herdeiro','goleiros','futsal'].includes(id)?inicio:bairro;}

@@ -239,6 +239,11 @@ export const POSICOES = [
   { id: "PE", label: "Ponta esquerda", pesos: { velocidade: 2.8, drible: 2.4, finalizacao: 1.6, passe: 1.2, fisico: 0.8, defesa: 0.3 }, golBase: 0.4, assistBase: 0.3 },
   { id: "SA", label: "Segundo atacante", pesos: { finalizacao: 2.4, drible: 2.0, passe: 1.8, velocidade: 1.6, fisico: 0.9, defesa: 0.2 }, golBase: 0.52, assistBase: 0.28 },
   { id: "ATA", label: "Centroavante", pesos: { finalizacao: 3.2, fisico: 1.8, velocidade: 1.6, drible: 1.2, passe: 0.7, defesa: 0.1 }, golBase: 0.74, assistBase: 0.14 },
+  {id:'ME',label:'Meia esquerdo',pesos:{passe:2.3,drible:2,velocidade:1.9,fisico:1.2,defesa:.8,finalizacao:1.2},golBase:.26,assistBase:.34},
+  {id:'MD',label:'Meia direito',pesos:{passe:2.3,drible:2,velocidade:1.9,fisico:1.2,defesa:.8,finalizacao:1.2},golBase:.26,assistBase:.34},
+  {id:'ALE',label:'Ala esquerdo',pesos:{velocidade:2.5,passe:1.9,fisico:1.8,defesa:1.5,drible:1.5,finalizacao:.7},golBase:.12,assistBase:.28},
+  {id:'ALD',label:'Ala direito',pesos:{velocidade:2.5,passe:1.9,fisico:1.8,defesa:1.5,drible:1.5,finalizacao:.7},golBase:.12,assistBase:.28},
+
 ];
 
 export const NACIONALIDADES = [

@@ -1,3 +1,7 @@
+## Novas posições no campo
+
+ME/MD (meias abertos), ALE/ALD (alas) incluídos no catálogo com pesos de atributos e produção próprios. Campo: meias em x22/78 y46; alas x13/87 y58, à frente dos laterais. Números padrão e minigame de passe ligados; alas tratados como defensivos e meias como criadores nos eventos. Build, 28 testes de lógica, fluxo de criação em 390/1366 e criação/simulação de uma temporada nas quatro posições passaram.
+
 ## Cartas com escolha imediata
 
 Origem avança ao perfil no primeiro clique; perfil inicia a carreira no primeiro clique. Botão Avançar removido dessas duas telas. Rerolls e Voltar preservados. Build e dois testes de fluxo em 390/1366 px passaram.

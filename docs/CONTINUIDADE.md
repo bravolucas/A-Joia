@@ -2,7 +2,7 @@
 
 DesafioTemporada remodelado com fotos, faixa de probabilidade, risco e botão direto; resultado animado preservado. Novo painel EmprestimosJogador antes da simulação permite pedir saída por 1/2 anos e escolher entre três clubes. Prazo real, clube de origem preservado, contrato precisa cobrir duração, retorno no fechamento correto, saves antigos compatíveis. Ofertas automáticas ampliadas e números de anos explícitos. Sem propostas definitivas enquanto emprestado. Cabeçalho dos minigames passa a mostrar clube de destino.
 
-Referências, limites e validação em `docs/escolhas-emprestimos/REFERENCIAS.md`; 195 testes de lógica e 12 browser passaram. Novos testes cobrem empréstimos em UI e lógica; incluídos no CI. Publicação em acompanhamento.
+Referências, limites e validação em `docs/escolhas-emprestimos/REFERENCIAS.md`; 195 testes de lógica e 12 browser passaram. Novos testes cobrem empréstimos em UI e lógica; incluídos no CI. Publicado em `5ba9c36`, Pages https://github.com/bravolucas/A-Joia/actions/runs/42119842105 . Validações `42119842173` e `42119842115` passaram. Confirmação documental apenas no checkpoint.
 
 ## Tipografia e 100 propostas de imersão
 

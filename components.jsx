@@ -1347,7 +1347,7 @@ export function FaltaCampo() { return <CampoPremium largura={PEN_W} altura={PEN_
 
 
 export function FaltaJogadorBarreira() {
-  return <svg width="19" height="38" viewBox="-22 -88 44 88" style={{overflow:'visible'}} aria-hidden="true"><JogadorCampo cor="#5b88a5" numero={4} escala={.94}/></svg>;
+  return <svg width="19" height="38" viewBox="-22 -88 44 88" style={{overflow:'visible'}} aria-hidden="true"><JogadorCampo adversario cor="#5b88a5" numero={4} escala={.94}/></svg>;
 }
 
 
@@ -1426,10 +1426,10 @@ export function PasseCampo() { return <CampoPremium largura={PASSE_W} altura={PA
 
 
 export function PassePersonagem({ x, y, tipo, selecionavel, destacado, onClick, numero = 7 }) {
-  const cor = tipo === "adversario" ? "#b64e48" : tipo === "voce" ? "#dfbf73" : "#6fa8a1";
+  const cor = tipo === "adversario" ? "#638fb7" : tipo === "voce" ? "#dfbf73" : "#6fa8a1";
   const escala = 0.7 + (y / PASSE_H) * 0.3;
   return <button type="button" onClick={selecionavel ? onClick : undefined} disabled={!selecionavel} aria-label={selecionavel ? `Passar para companheiro ${numero} em ${Math.round(x)}, ${Math.round(y)}` : tipo === 'voce' ? 'Seu jogador' : 'Adversário'} className="vf-passe-alvo" style={{left:x,top:y,zIndex:Math.round(y),transform:'translate(-50%,-70%)',filter:destacado?`drop-shadow(0 0 5px ${cor})`:undefined}}>
-    <svg width="50" height="56" viewBox="-34 -92 68 96" aria-hidden="true"><JogadorCampo cor={cor} numero={tipo==='voce'?10:tipo==='adversario'?4:numero} escala={escala}/></svg>
+    <svg width="50" height="56" viewBox="-34 -92 68 96" aria-hidden="true"><JogadorCampo adversario={tipo==='adversario'} cor={cor} numero={tipo==='voce'?10:tipo==='adversario'?4:numero} escala={escala}/></svg>
     {selecionavel && <span style={{position:'absolute',top:-4,left:23,color:'#efdaa4',fontSize:10}} aria-hidden="true">◆</span>}
   </button>;
 }

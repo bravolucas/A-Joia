@@ -1,23 +1,19 @@
 import React, { useId, useEffect, useRef, useState } from 'react';
 import { escudoDe, CENARIOS } from './arte.js';
 
-// Desenhos originais parametrizados: a mesma linguagem visual nos quatro minigames.
-export function JogadorCampo({ x = 0, y = 0, escala = 1, cor = '#e1bf71', numero = 10, goleiro = false, esticado = false, pele = '#bd8663' }) {
-  const id = useId().replace(/:/g, '');
+import goleiroReal from './arte/personagens/goleiro.webp';
+import jogadorReal from './arte/personagens/jogador.webp';
+import adversarioReal from './arte/personagens/adversario.webp';
+import apresentacaoReal from './arte/personagens/apresentacao.webp';
+import dirigenteReal from './arte/personagens/dirigente.webp';
+
+// Recortes fotográficos originais; coordenadas e animações dos minigames preservadas.
+export function JogadorCampo({ x=0, y=0, escala=1, numero=10, goleiro=false, adversario=false }) {
+  const foto=goleiro?goleiroReal:adversario?adversarioReal:jogadorReal;
   return <g transform={`translate(${x} ${y}) scale(${escala})`} className="vf-atleta" aria-hidden="true">
-    <defs><linearGradient id={`kit${id}`}><stop stopColor="#fff" stopOpacity=".3"/><stop offset=".32" stopColor={cor}/><stop offset=".65" stopColor={cor}/><stop offset="1" stopColor="#07100c" stopOpacity=".8"/></linearGradient></defs>
-    <ellipse cx="0" cy="1" rx="19" ry="3.5" fill="#000" opacity=".38"/>
-    <path d="M-10-27-13-5-6-5-3-26M3-26 6-5 13-5 10-27" fill={pele}/>
-    <path d="M-13-15-13-5-6-5-5-15M5-15 6-5 13-5 13-15" fill={cor}/>
-    <path d="M-14-6-18-2Q-20 2-12 2H-5V-5ZM5-5V2H13Q20 2 18-2L14-6Z" fill="#10191b" stroke="#ffffff50" strokeWidth=".7"/>
-    <path d="M-14-35H14L13-23 3-22 0-28-3-22-13-23Z" fill="#142126"/>
-    <path d="M-13-57Q0-64 13-57L17-35Q0-30-17-35Z" fill={`url(#kit${id})`} stroke="#ffffff38" strokeWidth=".7"/>
-    <path d="M-6-59Q0-52 6-59M-12-46 12-46" fill="none" stroke="#ffffff55" strokeWidth="1.3"/>
-    <path d={esticado ? 'M-12-55-20-79M12-55 20-79' : 'M-13-54-25-40M13-54 25-40'} stroke={cor} strokeWidth="8" strokeLinecap="round"/>
-    <circle cx={esticado ? -20 : -25} cy={esticado ? -81 : -38} r={goleiro ? 5.5 : 3.6} fill={goleiro ? '#e9e8d7' : pele}/><circle cx={esticado ? 20 : 25} cy={esticado ? -81 : -38} r={goleiro ? 5.5 : 3.6} fill={goleiro ? '#e9e8d7' : pele}/>
-    <rect x="-4" y="-66" width="8" height="9" rx="3" fill={pele}/><ellipse cx="0" cy="-72" rx="9" ry="11" fill={pele}/>
-    <path d="M-9-73Q-10-88 1-85Q12-85 9-72L5-78-6-77Z" fill="#241c17"/><path d="M-4-69H-2M3-69H5" stroke="#382a21" strokeWidth="1.5"/>
-    <text x="0" y="-39" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="12" fontWeight="800" fill="#fff" stroke="#0003" strokeWidth=".3">{numero}</text>
+    <ellipse cx="0" cy="1" rx="17" ry="3" fill="#000" opacity=".3"/>
+    <image href={foto} x="-30" y="-88" width="60" height="90" preserveAspectRatio="xMidYMax meet"/>
+    {!goleiro&&<g><circle cx="17" cy="-55" r="6" fill={adversario?'#28435e':'#103e2c'} stroke="#e2d1a0" strokeWidth=".6"/><text x="17" y="-52.5" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="7" fontWeight="800" fill="#fff4d1">{numero}</text></g>}
   </g>;
 }
 
@@ -57,17 +53,9 @@ export function MedalhaFeito({ id, className = '' }) {
   </svg>;
 }
 
-export function RetratoApresentacao({ x=0, y=0, cor='#214c3b', dirigente=false, nome='' }) {
-  const soma=[...nome].reduce((n,c)=>n+c.charCodeAt(0),0);
-  const pele=dirigente?'#b68768':['#c28b68','#8b5c43','#dfac87','#a87552'][soma%4];
+export function RetratoApresentacao({ x=0, y=0, dirigente=false }) {
   return <g transform={`translate(${x} ${y})`} aria-hidden="true">
-    <path d="M-58 160-52 60Q-45 28-19 22H19Q45 28 52 60L58 160Z" fill={dirigente?'#19282a':cor} stroke="#c7debd55" strokeWidth="1.5"/>
-    <path d="M-43 64-26 155M43 64 26 155" stroke="#0004" strokeWidth="5"/>
-    {dirigente?<><path d="M-16 25 0 61 16 25" fill="#e5e7df"/><path d="M-4 38H4L7 82 0 90-7 82Z" fill="#a18a52"/><path d="M-22 24-34 56-9 73M22 24 34 56 9 73" fill="none" stroke="#ffffff30" strokeWidth="2"/></>:<path d="M-17 24Q0 46 17 24M-51 77H51" fill="none" stroke="#e6c77a88" strokeWidth="3"/>}
-    <rect x="-8" y="8" width="16" height="24" rx="6" fill={pele}/><ellipse cy="-12" rx="22" ry="29" fill={pele}/>
-    <path d="M-22-13Q-28-48 2-45Q28-44 22-12L14-29Q0-21-12-28Z" fill={dirigente?'#85877b':'#28241d'}/>
-    <path d="M-12-11H-5M5-11H12" stroke="#332c25" strokeWidth="2" strokeLinecap="round"/><path d="M-6 3Q0 7 6 3" stroke="#714e3e" strokeWidth="1.7" fill="none"/>
-    <path d="M-19-2Q-16 16-6 17" stroke="#ffffff25" strokeWidth="2" fill="none"/>
+    <image className="vf-retrato-real" href={dirigente?dirigenteReal:apresentacaoReal} x="-70" y="-46" width="140" height="206" preserveAspectRatio="xMidYMax meet"/>
   </g>;
 }
 

@@ -1064,7 +1064,7 @@ function TelaPasse({ c, momento, onFim }) {
         <PasseMini atributoPasse={c.attrs.passe + bonus + 6} onResultado={(r) => setRes(r)} />
       </div>
       <div className="text-center min-h-[64px]">
-        {!res && <p className="text-[17px] text-[#C9D3CE]">Você é o jogador dourado. Toque num companheiro livre, longe dos adversários de vermelho. Passe <span className="font-stat">{c.attrs.passe}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "passe") * 100)}%</span></p>}
+        {!res && <p className="text-[17px] text-[#C9D3CE]">Você controla o jogador com a bola. Toque num companheiro de verde, longe dos adversários de azul. Passe <span className="font-stat">{c.attrs.passe}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "passe") * 100)}%</span></p>}
         {res && <PlacarMomento ok={res.gol} texto={res.gol ? "ASSISTÊNCIA! GOL!" : "INTERCEPTADO!"} />}
       </div>
     </div>
@@ -3146,7 +3146,7 @@ export function ApresentacaoGrande({ clube, nome, numero, posicao, idade, deOnde
             </defs>
             <g className="ap-sobe" style={{animationDelay:'.15s'}}><RetratoApresentacao x={88} y={150} dirigente nome="Diretoria" /></g>
             <g className="ap-sobe" style={{animationDelay:'.3s'}}><RetratoApresentacao x={278} y={145} cor={cor} nome={nome} /></g>
-            <g className="ap-camisa" style={{animationDelay:'.6s'}}><foreignObject x="121" y="137" width="124" height="151"><CamisaPremium nome={clube?.nome} cor={cor} numero={numero} sobrenome={sobrenome}/></foreignObject><ellipse cx="145" cy="162" rx="7" ry="5" fill="#bc8864"/><ellipse cx="220" cy="162" rx="7" ry="5" fill="#bc8864"/></g>
+            <g className="ap-camisa" style={{animationDelay:'.6s'}}><foreignObject x="121" y="137" width="124" height="151"><CamisaPremium nome={clube?.nome} cor={cor} numero={numero} sobrenome={sobrenome}/></foreignObject></g>
             {!estadio && (
               <g className="ap-sobe" style={{ animationDelay: ".05s" }}>
                 <rect x="0" y="270" width="360" height="30" fill="#07090C" />

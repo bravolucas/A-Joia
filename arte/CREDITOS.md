@@ -85,3 +85,7 @@ O impacto da bola e da rede é sintetizado por Web Audio em `som.js`, sem amostr
 ## Preparação do jogador — novembro de 2026
 
 `cenarios/equipamentos-premium.webp`, `cenarios/recuperacao-premium.webp` e `cenarios/mental-premium.webp`: três artes originais geradas com OpenAI Image Generation para o A JOIA, sem marcas ou pessoas. Conversão WebP, qualidade 80; aproximadamente 133–145 KiB cada. Aplicadas à loja e a eventos de treino, saúde e concentração. Originais mantidos no workspace de geração. Canva e Adobe não utilizados nesta atualização. Gramado, luz e sombra dos minigames são vetores SVG do próprio projeto.
+
+## Personagens realistas — novembro de 2026
+
+`personagens/{goleiro,jogador,adversario,apresentacao,dirigente}.webp`: cinco personagens fictícios originais gerados com OpenAI Image Generation, em WebP com transparência preservada. Sem marcas. Substituem os desenhos de pessoas nos minigames e na apresentação grande. Uniformes dos sprites são fixos (verde e azul); a camisa central da apresentação continua dinâmica por clube, nome e número. As imagens são estáticas; animações de deslocamento e mergulho continuam no código. Originais PNG mantidos no workspace de geração.

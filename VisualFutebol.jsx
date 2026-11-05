@@ -92,12 +92,14 @@ export function SuperficieMini({ children, largura=320, altura=210 }) {
 export function CampoPremium({ largura=320, altura=210, gol, passe=false }) {
   const foto=useCenario('estadio');const id=useId().replace(/:/g,'');
   return <svg width={largura} height={altura} viewBox={`0 0 ${largura} ${altura}`} className="absolute inset-0" aria-hidden="true">
-    <defs><linearGradient id={`grama${id}`} x2="0" y2="1"><stop stopColor="#285e3b"/><stop offset="1" stopColor="#0b2d20"/></linearGradient><pattern id={`rede${id}`} width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 0H5V5" stroke="#dce9d380" strokeWidth=".55" fill="none"/></pattern></defs>
+    <defs><linearGradient id={`grama${id}`} x2="0" y2="1"><stop stopColor="#285e3b"/><stop offset="1" stopColor="#0b2d20"/></linearGradient><radialGradient id={`luz${id}`} cx="50%" cy="0%" r="90%"><stop stopColor="#fff3c0" stopOpacity=".16"/><stop offset="1" stopColor="#06150d" stopOpacity=".3"/></radialGradient><pattern id={`relva${id}`} width="12" height="9" patternUnits="userSpaceOnUse"><path d="M2 8 3 4M7 5 8 1M10 9 11 6" stroke="#b5d292" strokeOpacity=".12" strokeWidth=".6"/></pattern><pattern id={`rede${id}`} width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 0H5V5" stroke="#dce9d380" strokeWidth=".55" fill="none"/></pattern></defs>
     <image href={foto} width={largura} height={altura} preserveAspectRatio="xMidYMid slice"/>
     <rect y={passe?0:altura*.48} width={largura} height={passe?altura:altura*.52} fill={`url(#grama${id})`} opacity={passe ? .92 : .7}/>
+    <rect y={passe?0:altura*.48} width={largura} height={passe?altura:altura*.52} fill={`url(#relva${id})`}/>
+    <rect width={largura} height={altura} fill={`url(#luz${id})`}/>
     {Array.from({length:7},(_,i)=><rect key={i} x="0" y={altura*.46+i*altura*.09} width={largura} height={altura*.045} fill="#fff" opacity=".025"/>)}
     {passe?<><rect x="16" y="16" width={largura-32} height={altura-32} rx="2" fill="none" stroke="#e0edce55"/><circle cx={largura/2} cy={altura*.3} r="35" fill="none" stroke="#e0edce55"/><path d={`M16 ${altura*.3}H${largura-16}`} stroke="#e0edce44"/></>:<path d={`M20 ${altura-12}H${largura-20}L${largura*.76} ${altura*.68}H${largura*.24}Z`} fill="none" stroke="#e0edce88"/>}
-    {gol&&<g><path d={`M${gol.x-5} ${gol.y-5}H${gol.x+gol.w+5}V${gol.y+gol.h}H${gol.x-5}Z`} fill="#06100d80" stroke="#a7b6a955"/>
+    {gol&&<g><ellipse cx={gol.x+gol.w/2} cy={gol.y+gol.h+3} rx={gol.w*.57} ry="5" fill="#031009" opacity=".4"/><path d={`M${gol.x-5} ${gol.y-5}H${gol.x+gol.w+5}V${gol.y+gol.h}H${gol.x-5}Z`} fill="#06100d80" stroke="#a7b6a955"/>
       <rect x={gol.x} y={gol.y} width={gol.w} height={gol.h} fill={`url(#rede${id})`}/><path d={`M${gol.x} ${gol.y+gol.h}V${gol.y}H${gol.x+gol.w}V${gol.y+gol.h}`} fill="none" stroke="#f1f3df" strokeWidth={gol.w>200?4:2.5} strokeLinejoin="round"/>
       <path d={`M${gol.x+2} ${gol.y+3}H${gol.x+gol.w-2}`} stroke="#b4c7af" strokeWidth="1"/>
     </g>}

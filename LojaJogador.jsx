@@ -12,12 +12,13 @@ const categorias=['Todos','UPs temporários','Treino','Saúde','Carreira','Estil
 const normalizar=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
 const beneficios={psicologo:'+3 mental/ano · quedas pela metade',personal:'20% menos risco de lesão',nutri:'12% menos declínio',fisio:'Trata lesão crônica · −10% risco',imagem:'+3 fama por ano',analista:'+0,08 na nota média',ct:'+8% na evolução',instituto:'+2 torcida/ano · legado social',origem:'+20 torcida no clube de origem',carro:'+4 fama',mansao:'+6 fama',iate:'+8 fama',equipamento:'+3% na evolução',finalizador:'+4% nos gols',criador:'+5% nas assistências','treino-goleiro':'Até +2 p.p. em defesas','bola-parada-pro':'Mais precisão em pênaltis e faltas','recuperacao-pro':'5% menos risco de lesão','media-training':'+1 fama e mental por ano','projeto-social':'+1 torcida/ano · legado social'};
 function fotoItem(i){
- if(i.id==='psicologo'||i.id==='up-cabeca')return ARTE.vestiario;
+ if(i.id==='psicologo'||i.id==='up-cabeca')return ARTE.mental;
  if(i.id==='carro')return ARTE.carro;
  if(i.id==='mansao'||i.id==='iate')return ARTE.mansao;
+ if(/social|origem|instituto/.test(i.id))return ARTE.torcida;
+ if(i.id==='equipamento'||i.id==='bola-parada-pro'||/^up-(gols|assist|penalti|falta|passe|defesa)$/.test(i.id))return ARTE.equipamentos;
  if(i.categoria==='Saúde'||/fisio|fisico|recuperacao|cabeca/.test(i.id))return ARTE.fisio;
  if(i.categoria==='Carreira'||/vitrine/.test(i.id))return ARTE.coletiva;
- if(/social|origem|instituto/.test(i.id))return ARTE.torcida;
  return ARTE.treino;
 }
 function rotuloBloqueio(motivo){

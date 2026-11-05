@@ -81,3 +81,7 @@ O impacto da bola e da rede é sintetizado por Web Audio em `som.js`, sem amostr
 ## Loja do jogador — novembro de 2026
 
 `loja/vestiario-premium.webp`: arte original gerada com OpenAI Image Generation para o A JOIA, sem marcas, otimizada em WebP (cerca de 80 KiB). Canva e Adobe não foram usados nesta atualização. Os cartões reutilizam as fotos já creditadas acima.
+
+## Preparação do jogador — novembro de 2026
+
+`cenarios/equipamentos-premium.webp`, `cenarios/recuperacao-premium.webp` e `cenarios/mental-premium.webp`: três artes originais geradas com OpenAI Image Generation para o A JOIA, sem marcas ou pessoas. Conversão WebP, qualidade 80; aproximadamente 133–145 KiB cada. Aplicadas à loja e a eventos de treino, saúde e concentração. Originais mantidos no workspace de geração. Canva e Adobe não utilizados nesta atualização. Gramado, luz e sombra dos minigames são vetores SVG do próprio projeto.

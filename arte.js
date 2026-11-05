@@ -31,8 +31,11 @@ import diretoriaPremium from './arte/cenarios/diretoria-premium.webp';
 import diretoriaPremiumMobile from './arte/cenarios/diretoria-premium-mobile.webp';
 import treinoPremium from './arte/cenarios/treino-premium.webp';
 import treinoPremiumMobile from './arte/cenarios/treino-premium-mobile.webp';
+import equipamentosPremium from './arte/cenarios/equipamentos-premium.webp';
+import recuperacaoPremium from './arte/cenarios/recuperacao-premium.webp';
+import mentalPremium from './arte/cenarios/mental-premium.webp';
 export const CENARIOS = { estadio: estadioPremium, estadioMobile: estadioPremiumMobile, imprensa: imprensaPremium, imprensaMobile: imprensaPremiumMobile, diretoria: diretoriaPremium, diretoriaMobile: diretoriaPremiumMobile, treino: treinoPremium, treinoMobile: treinoPremiumMobile };
-export const ARTE = { refletores, coletiva: imprensaPremium, confete, estadioNoite: estadioPremium, porDoSol, tunel, torcida, lesao, contrato, vestiario, fisio, aviao, treino: treinoPremium, mansao, carro, protesto, casa, festa, salaApresentacao: imprensaPremium, campo, diretoria: diretoriaPremium };
+export const ARTE = { refletores, coletiva: imprensaPremium, confete, estadioNoite: estadioPremium, porDoSol, tunel, torcida, lesao, contrato, vestiario, fisio: recuperacaoPremium, mental: mentalPremium, equipamentos: equipamentosPremium, aviao, treino: treinoPremium, mansao, carro, protesto, casa, festa, salaApresentacao: imprensaPremium, campo, diretoria: diretoriaPremium };
 
 /* Escudos e imagens de taças. As imagens em arte/competicoes são taças recortadas;
    os nomes históricos da API permanecem como logoCompeticao por compatibilidade.
@@ -53,10 +56,10 @@ export const temImagensOficiais = Object.keys(ESCUDOS).length + Object.keys(LOGO
 export const ARTE_EVENTO = {
   idolo: estadioPremium, homenagem: estadioPremium, estatua: estadioPremium, demissao: diretoriaPremium, diretoria: diretoriaPremium,
   propostas: contrato, renovacao: contrato, fimContrato: contrato, livre: contrato, clausula: contrato, empresario: contrato, parceria: contrato,
-  lesaoPre: fisio, voltaLesao: fisio, esgotamento: fisio, machucado: fisio, infiltracao: fisio, recuperacao: fisio, veterano: lesao,
+  lesaoPre: recuperacaoPremium, voltaLesao: recuperacaoPremium, esgotamento: mentalPremium, machucado: recuperacaoPremium, infiltracao: recuperacaoPremium, recuperacao: recuperacaoPremium, veterano: lesao,
   emprestimo: aviao, forcarSaida: aviao, voltarCasa: aviao, excursao: aviao, saudade: aviao, idiomaImprensa: aviao, naturalizacao: aviao,
-  pretemporada: treino, novoTecnico: treino, treinoExtra: treino, academia: treino, intertemporada: treino, concentracao: treino, especialista: treino,
-  novaPosicao: treino, garotoBase: treino, video: treino, batedor: treino, olheiros: treino,
+  pretemporada: treinoPremium, novoTecnico: treinoPremium, treinoExtra: equipamentosPremium, academia: equipamentosPremium, intertemporada: treinoPremium, concentracao: mentalPremium, especialista: equipamentosPremium,
+  novaPosicao: treinoPremium, garotoBase: treinoPremium, video: mentalPremium, batedor: equipamentosPremium, olheiros: treinoPremium,
   vestiario, capitao: vestiario, mentor: vestiario, jovemMentor: vestiario, camisa10: vestiario, expulsao: vestiario, traicao: vestiario,
   noitada: festa, polemica: festa, romance: festa, videogame: festa,
   organizada: protesto, odioRedes: protesto, salarioAtrasado: protesto,

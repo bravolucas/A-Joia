@@ -1,3 +1,9 @@
+## Primeiro clube — propostas e assinatura
+
+`PrimeiroClube.jsx/css` substitui cartão genérico do evento base por tela exclusiva de três propostas; mantém os mesmos clubes sorteados/persistidos pelo evento, origem e país. Sem loja/histórico antes da assinatura. Arte original de jovem assinando no CT; após clique, contrato com escudo/nome, assinatura SVG desenhada, carimbo e camisa dinâmica. Cena 4,2s; botão Entrar no clube pula; movimento reduzido mostra resultado estático por 700ms. Trava de seleção/finalização impede duplicação, timer limpo no unmount. O efeito existente só é aplicado ao concluir a cena; antes disso recarregar preserva propostas sem aplicar contrato. Depois de concluído save mantém clube/baseEscolhida.
+
+Build, 28 testes de lógica e quatro casos browser passaram. Fluxo em 390/1366 verifica escolha, animação ativa, pular, persistência e recarga sem repetir evento. Capturas em `docs/primeiro-clube/`, logs `/tmp/primeiro-clube-*.log`. Publicação em acompanhamento.
+
 ## Novas posições no campo
 
 ME/MD (meias abertos), ALE/ALD (alas) incluídos no catálogo com pesos de atributos e produção próprios. Campo: meias em x22/78 y46; alas x13/87 y58, à frente dos laterais. Números padrão e minigame de passe ligados; alas tratados como defensivos e meias como criadores nos eventos. Build, 28 testes de lógica, fluxo de criação em 390/1366 e criação/simulação de uma temporada nas quatro posições passaram.

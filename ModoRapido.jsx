@@ -1,3 +1,4 @@
+import PrimeiroClube from './PrimeiroClube.jsx';
 import TelaCriacao from './CriacaoCarreira.jsx';
 import LojaJogador from "./LojaJogador.jsx";
 import {comprarUpJogador,upJogadorDe,upsAtivosJogador} from "./lojaJogador.js";
@@ -1519,8 +1520,9 @@ function TelaTraco({ c, opcoes, onEscolher }) {
 }
 
 /* ---------- evento + preparação da próxima temporada ---------- */
-function CartaoEvento({ evento, resultado, efeitos, onEscolher, onPedirLiga, onAvancar, espera = 0 }) {
+function CartaoEvento({ jogador, evento, resultado, efeitos, onEscolher, onPedirLiga, onAvancar, espera = 0 }) {
   const [ligas, setLigas] = useState(false);
+  if(evento.id==='base'&&!resultado)return <PrimeiroClube evento={evento} jogador={jogador} onEscolher={onEscolher}/>;
   return (
     <div className="rp-painel overflow-hidden rp-entra">
       <div className="relative px-4 pt-3.5 pb-2.5 flex items-start gap-3" style={{ background: ARTE_EVENTO[evento.id]
@@ -1783,7 +1785,7 @@ function TelaEvento({ c, evento, resultado, efeitos, temMais, aviso, manchete, o
   return (
     <div className="max-w-xl mx-auto px-4 py-5 flex flex-col gap-4 rp-entra">
       {aviso && <div className="rp-painel px-4 py-3 text-[16px] text-[#F0A99E]" style={{ borderColor: "rgba(227,107,91,.35)" }}>{aviso}</div>}
-      {evento && <CartaoEvento key={`${evento.id}:${evento.texto}`} evento={evento} resultado={resultado} efeitos={efeitos} onEscolher={onEscolher} onPedirLiga={onPedirLiga} />}
+      {evento && <CartaoEvento jogador={c} key={`${evento.id}:${evento.texto}`} evento={evento} resultado={resultado} efeitos={efeitos} onEscolher={onEscolher} onPedirLiga={onPedirLiga} />}
       {resultado && manchete && c.ultimaTransferencia && <RecorteJornal manchete={manchete} transf={c.ultimaTransferencia} />}
       {pronto && temMais && <button onClick={onProximo} className="rp-btn rp-prim display text-sm">Ver próxima notícia</button>}
       {pronto && !temMais && (
@@ -3225,8 +3227,9 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   }, [etapa, resultado, pausado, espera]);
   useEffect(() => { if (!selo) return undefined; const t = setTimeout(() => setSelo(null), 2500); return () => clearTimeout(t); }, [selo]);
 
-  const mostrarCabecalho = etapa !== "criacao" && etapa !== "fim" && etapa !== "tecnico";
-  const painel = c && ["evento", "negociacao", "resumo", "coletiva", "traco"].includes(etapa);
+  const primeiroClube = etapa === 'evento' && evento?.id === 'base' && !resultado;
+  const mostrarCabecalho = !primeiroClube && etapa !== "criacao" && etapa !== "fim" && etapa !== "tecnico";
+  const painel = !primeiroClube && c && ["evento", "negociacao", "resumo", "coletiva", "traco"].includes(etapa);
   const ultimo = estado.ultimo;
   const torneio = c && c.idade >= 18 ? (anoDeCopa(c.ano) ? "Copa do Mundo" : anoDeContinentalSelecao(c.ano) ? nomeCopaContinental(c.nac) : null) : null;
   return (
@@ -3236,7 +3239,8 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         : <Cabecalho treinador={etapa === "tecnico"} c={mostrarCabecalho ? c : null} onSair={onSair} onEstante={() => setEstanteAberta(true)} />}
       <main className="pb-10">
         {etapa === "criacao" && <TelaCriacao onCriar={criar} ritmoInicial={ritmoInicial} />}
-        {etapa === "evento" && (
+        {primeiroClube&&<div className="pc-tela"><PrimeiroClube evento={evento} jogador={c} onEscolher={escolherEvento}/></div>}
+        {etapa === "evento" && !primeiroClube && (
           <section className="rp-jornada" aria-label="Sua carreira e decisões">
             <TabelaCarreira c={c} />
             <div className="rp-proxima max-w-xl mx-auto px-3 pt-2.5 flex flex-col gap-2.5">
@@ -3251,7 +3255,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
                 </div>
               ) : evento ? (
                 <>
-                  <CartaoEvento key={`${evento.id}:${evento.texto}`} evento={evento} resultado={resultado} efeitos={estado.efeitos} onEscolher={escolherEvento} onPedirLiga={pedirLigaUI} onAvancar={avancar} espera={pausado ? 0 : espera} />
+                  <CartaoEvento jogador={c} key={`${evento.id}:${evento.texto}`} evento={evento} resultado={resultado} efeitos={estado.efeitos} onEscolher={escolherEvento} onPedirLiga={pedirLigaUI} onAvancar={avancar} espera={pausado ? 0 : espera} />
                   {resultado && estado.manchete && c.ultimaTransferencia && <RecorteJornal manchete={estado.manchete} transf={c.ultimaTransferencia} />}
                 </>
               ) : estado.desafioResultado || desafioPendente(c) ? (

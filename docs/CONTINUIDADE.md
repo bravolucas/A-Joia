@@ -1,3 +1,7 @@
+## Cartas com escolha imediata
+
+Origem avança ao perfil no primeiro clique; perfil inicia a carreira no primeiro clique. Botão Avançar removido dessas duas telas. Rerolls e Voltar preservados. Build e dois testes de fluxo em 390/1366 px passaram.
+
 ## Alinhamento do campo de criação
 
 ATA, SA, MEI e MC centralizados em x=50%, na ordem vertical 12/24/37/49%. Build e fluxo de criação em 390/1366 px conferidos.

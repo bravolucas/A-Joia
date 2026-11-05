@@ -1,0 +1,24 @@
+import {test,expect} from '@playwright/test';
+import {criarJogador} from '../rapido.js';
+for(const width of [390,1366])test(`loja do jogador: catálogo, confirmação, UP e recarga em ${width}px`,async({page})=>{
+ await page.setViewportSize({width,height:844});
+ const c={...criarJogador({nome:'Jogador da loja',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,ritmo:'normal',codigo:'LOJA-ROBUSTA'}),patrimonio:10000};
+ const salvo=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('ajoia_rapido_v1')).c);
+ const abrir=async()=>{await page.reload();await page.getByRole('button',{name:/Continuar · Jogador da loja/}).click();await page.getByRole('button',{name:/Loja do jogador/}).click();};
+ await page.goto('http://127.0.0.1:4173/A-Joia/');await page.evaluate(c=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,etapa:'evento',c})),c);await abrir();
+ const loja=page.getByRole('dialog',{name:'Loja do jogador'});
+ await expect(loja.locator('article')).toHaveCount(34);
+ await loja.getByRole('button',{name:'UPs temporários',exact:true}).click();await expect(loja.locator('article')).toHaveCount(14);
+ const item=nome=>loja.locator('article').filter({has:page.getByRole('heading',{name:nome,exact:true})});
+ await item('UP de finalização').getByRole('button',{name:'Ver melhoria'}).click();await expect(loja.getByRole('button',{name:'Confirmar compra'})).toBeFocused();
+ await loja.getByRole('button',{name:'Cancelar',exact:true}).click();expect((await salvo()).patrimonio).toBe(10000);
+ await item('UP de finalização').getByRole('button',{name:'Ver melhoria'}).click();await loja.getByRole('button',{name:'Confirmar compra'}).click();
+ expect((await salvo()).patrimonio).toBe(9880);await expect(loja.getByRole('region',{name:'UPs ativos'})).toContainText('1 temporada restante');
+ await expect(item('UP de finalização').getByRole('button')).toBeDisabled();
+ await abrir();expect((await salvo()).upsTemporarios).toHaveLength(1);await expect(loja.getByRole('region',{name:'UPs ativos'})).toContainText('1 temporada restante');
+ await loja.getByRole('searchbox',{name:'Buscar melhoria'}).fill('Equipamento profissional');await expect(loja.locator('article')).toHaveCount(1);
+ await item('Equipamento profissional').getByRole('button',{name:'Ver melhoria'}).click();await loja.getByRole('button',{name:'Confirmar compra'}).click();
+ const fim=await salvo();expect(fim.patrimonio).toBe(9380);expect(fim.investimentos).toContain('equipamento');expect(fim.attrs).toEqual(c.attrs);
+ await page.keyboard.press('Escape');await expect(loja).toHaveCount(0);expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});

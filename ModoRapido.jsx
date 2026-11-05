@@ -1,3 +1,5 @@
+import LojaJogador from "./LojaJogador.jsx";
+import {comprarUpJogador,upJogadorDe,upsAtivosJogador} from "./lojaJogador.js";
 import DesafioTemporada from "./DesafioTemporada.jsx";
 import "./InterfaceJogo.css";
 import "./LayoutDesktop.css";
@@ -27,8 +29,8 @@ import {
   nomeCopaContinental, chancePenalti, ORIGENS_RAPIDO, origemDe, FOCOS, focoDe, definirFoco,
   opcoesPretemporada, escolherPretemporada, textoCarta,
   iniciarNegociacao, ajustarNegociacao, fecharNegociacao, CAMPOS_NEGOCIACAO, fama_negociador,
-  INVESTIMENTOS, comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
-  chanceMomento, miniDaPosicao, ehPremioIndividual, RARIDADES, ganhosDaCarta, efeitosDaCarta, vagasDaLiga, ehSegundaDivisao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
+  comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
+  bonusPrecisaoLoja, chanceMomento, miniDaPosicao, ehPremioIndividual, RARIDADES, ganhosDaCarta, efeitosDaCarta, vagasDaLiga, ehSegundaDivisao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
   eventoDaJanela, segundoEvento, anoDeDecisao, eventoImpasse, valorAtual, comparaSalario, textoEmoji, efeitosDaDecisao, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, resolverDesafio, desafioPendente, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
   noticiasDaTemporada, retrospectoRivalidade,
   copaPendente, opcoesCopa, jogarCopa,
@@ -954,7 +956,7 @@ function TelaPenalti({ c, momento, onFim, goleiro = false }) {
     if (escolha != null) return;
     efeitoLance("chute");
     const [col, lin] = ZONAS[i];
-    const bonus = (c.tracos || []).includes("decisao") ? 0.12 : 0;
+    const bonus = ((c.tracos || []).includes("decisao") ? 0.12 : 0) + bonusPrecisaoLoja(c,goleiro?"defesa":"penalti");
     if (goleiro) {
       // você escolhe para onde pular; o batedor escolhe o canto dele
       const k = Math.random() < 0.15 ? 4 : [0, 2, 3, 5, 1][Math.floor(Math.random() * 5)];
@@ -1022,7 +1024,7 @@ function TelaFalta({ c, momento, onFim }) {
   const [res, setRes] = useState(null);
   const bater = (zona) => {
     if (res) return;
-    const bonus = (c.tracos || []).includes("decisao") ? 8 : 0;
+    const bonus = ((c.tracos || []).includes("decisao") ? 8 : 0) + bonusPrecisaoLoja(c,"falta")*145;
     // no Modo Rápido a falta decisiva é um pouco mais generosa que a do jogo completo
     efeitoLance("chute");
     const gol = calcularSucessoFalta(c.attrs.finalizacao + bonus + 6, c.attrs.drible + bonus);
@@ -1049,7 +1051,7 @@ function TelaFalta({ c, momento, onFim }) {
 
 function TelaPasse({ c, momento, onFim }) {
   const [res, setRes] = useState(null);
-  const bonus = (c.tracos || []).includes("decisao") ? 8 : 0;
+  const bonus = ((c.tracos || []).includes("decisao") ? 8 : 0) + bonusPrecisaoLoja(c,"passe")*130;
   useEffect(() => {
     if (!res) return undefined;
     const t = setTimeout(() => onFim(res.gol), 2200);
@@ -1931,8 +1933,8 @@ function TelaEvento({ c, evento, resultado, efeitos, temMais, aviso, manchete, o
           <Ficha c={c} semTopo />
           <button onClick={onPatrimonio} className="rp-painel px-4 py-3 flex items-center gap-3 text-left hover:border-[#D8B44A]/50">
             <span className="text-2xl">💼</span>
-            <span className="flex-1"><span className="block text-[13px] font-bold uppercase tracking-[0.15em] text-[#8FA39A]">Patrimônio</span><span className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</span></span>
-            <span className="text-[15px] font-bold text-[#EBC557]">Investir →</span>
+            <span className="flex-1"><span className="block text-[13px] font-bold uppercase tracking-[0.15em] text-[#8FA39A]">Loja e patrimônio</span><span className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</span></span>
+            <span className="text-[15px] font-bold text-[#EBC557]">Ver loja →</span>
           </button>
           <SeletorPretemporada key={c.ano} c={c} onEscolher={onPretemporada} />
           <SeletorFoco c={c} onFoco={onFoco} />
@@ -2013,39 +2015,7 @@ function TelaNegociacao({ c, n, onAjustar, onAssinar, onSair }) {
 }
 
 /* ---------- patrimônio e investimentos ---------- */
-function Patrimonio({ c, onComprar, onFechar }) {
-  return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center" onClick={onFechar}>
-      <div className="w-full max-w-xl max-h-[85vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-[#121916] border border-white/10 p-5 rp-entra" onClick={(e) => e.stopPropagation()}>
-        <div className="-mx-5 -mt-5 mb-3 h-28 rounded-t-3xl" style={{ background: `linear-gradient(180deg, rgba(18,25,22,.1), #121916), url(${(c.patrimonio || 0) >= 20000 ? ARTE.mansao : ARTE.carro}) center/cover` }} aria-hidden="true" />
-        <div className="flex items-center justify-between">
-          <h2 className="display text-base text-[#F2F5F3]">Patrimônio</h2>
-          <button onClick={onFechar} className="min-h-[44px] px-3 text-[15px] font-bold text-[#8FA39A]">Fechar</button>
-        </div>
-        <div className="font-stat text-3xl text-[#EBC557] mt-1">{formatarValor(c.patrimonio || 0)}</div>
-        <p className="text-[14px] text-[#8FA39A]">Ganhou {formatarValor(c.ganhosTotais || 0)} na carreira. Investimentos são permanentes; luxos custam 6% ao ano de manutenção.</p>
-        <div className="flex flex-col gap-2 mt-4">
-          {INVESTIMENTOS.map((inv) => {
-            const tem = (c.investimentos || []).includes(inv.id);
-            const pode = !tem && (c.patrimonio || 0) >= inv.custo;
-            return (
-              <div key={inv.id} className={`rounded-2xl border p-3 flex items-center gap-3 ${tem ? "border-[#12A876]/50 bg-[#12A876]/8" : "border-white/8 bg-[#0E1512]"}`}>
-                <span className="text-2xl w-10 text-center"><Icone e={inv.icone} /></span>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[16px] font-bold text-[#F2F5F3]">{inv.nome} {inv.luxo && <span className="rp-chip ml-1" style={{ color: "#F0A99E", background: "rgba(227,107,91,.14)" }}>Luxo</span>}</div>
-                  <div className="text-[13px] text-[#8FA39A] leading-snug">{inv.desc}</div>
-                </div>
-                {tem ? <span className="text-[13px] font-bold text-[#7FE3BC]">Seu</span> : (
-                  <button disabled={!pode} onClick={() => onComprar(inv.id)} className="rp-btn rp-prim !min-h-[44px] px-3 text-[13px] whitespace-nowrap">{formatarValor(inv.custo)}</button>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
+function Patrimonio(props) { return <LojaJogador {...props} />; }
 
 /* ---------- fim de carreira ---------- */
 /* ===== Artes do fim de carreira: imagens no lugar de emojis ===== */
@@ -3366,7 +3336,12 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     if (r.evento) setEstado((st) => ({ ...st, c: r.c, evento: r.evento, aviso: null }));
     else setEstado((st) => ({ ...st, c: r.c, evento: { ...st.evento, opcoes: st.evento.opcoes.filter((o) => !o.escolherLiga) }, aviso: `O empresário ligou para clubes da ${nome}, mas ninguém fez proposta agora.` }));
   };
-  const comprar = (id) => { const r = comprarInvestimento(c, id); if (r.ok) setEstado((st) => ({ ...st, c: r.c })); };
+  const comprar = (id) => {
+    if(!['evento','negociacao','resumo','coletiva','traco'].includes(etapa))throw new Error('Compre entre temporadas.');
+    const r=upJogadorDe(id)?comprarUpJogador(c,id):comprarInvestimento(c,id);
+    if(!r.ok)throw new Error(r.motivo||'Compra indisponível.');
+    setEstado(st=>st.c===c?{...st,c:r.c}:st);
+  };
   const mudarFoco = (id) => setEstado((s) => ({ ...s, c: definirFoco(s.c, id) }));
   const encerrar = () => {
     const cc = aposentar(c);
@@ -3408,6 +3383,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
             <TabelaCarreira c={c} />
             <div className="rp-proxima max-w-xl mx-auto px-3 pt-2.5 flex flex-col gap-2.5">
               <header className="rp-proximo-passo"><span className="rp-etiqueta">Temporada {c.ano}</span><h1>{estado.forcada ? "Hora de encerrar o ciclo" : estado.desafioResultado ? "Resultado do desafio" : resultado ? "Decisão tomada" : evento ? "Sua próxima decisão" : desafioPendente(c) ? "Desafio da temporada" : estado.auto ? "Temporada em andamento" : "Prepare sua temporada"}</h1><p>{estado.forcada ? "Confira o aviso e veja o legado da sua carreira." : estado.desafioResultado ? "Veja o que mudou e siga para preparar a temporada." : resultado ? "Confira o resultado da sua escolha antes de seguir." : evento ? "Compare as opções abaixo e escolha o próximo passo." : desafioPendente(c) ? "Uma escolha, um resultado. Tudo acontece aqui." : estado.auto ? "Acompanhe a simulação ou avance quando quiser." : "Escolha um treino abaixo para começar. O histórico fica disponível para consulta."}</p></header>
+              <button className="lj-atalho" onClick={()=>setPatrimonioAberto(true)}><span>Loja do jogador<small>{upsAtivosJogador(c).length} UPs ativos · melhorias permanentes e temporárias</small></span><strong>{formatarValor(c.patrimonio||0)} →</strong></button>
               {ultimo && !evento && <ResumoCompacto c={c} card={ultimo} onDetalhes={() => setGaveta("resumo")} />}
               {estado.aviso && <div className="rp-painel px-4 py-2.5 text-[15px] text-[#F0A99E]" style={{ borderColor: "rgba(227,107,91,.35)" }}>{estado.aviso}</div>}
               {estado.forcada ? (
@@ -3465,8 +3441,8 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           <SeletorFoco c={c} onFoco={mudarFoco} />
           <button onClick={() => setPatrimonioAberto(true)} className="rp-painel px-4 py-3 flex items-center gap-3 text-left hover:border-[#D8B44A]/50">
             <span className="text-2xl">💼</span>
-            <span className="flex-1"><span className="block text-[13px] font-bold uppercase tracking-[0.15em] text-[#8FA39A]">Patrimônio</span><span className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</span></span>
-            <span className="text-[15px] font-bold text-[#EBC557]">Investir →</span>
+            <span className="flex-1"><span className="block text-[13px] font-bold uppercase tracking-[0.15em] text-[#8FA39A]">Loja e patrimônio</span><span className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</span></span>
+            <span className="text-[15px] font-bold text-[#EBC557]">Ver loja →</span>
           </button>
           <BotaoSom />
           <button onClick={onSair} className="rp-btn rp-sec text-[15px]">Voltar ao menu (o jogo fica salvo)</button>
@@ -3478,7 +3454,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         </Gaveta>
       )}
       {estanteAberta && c && <Estante c={c} onFechar={() => setEstanteAberta(false)} />}
-      {patrimonioAberto && c && <Patrimonio c={c} onComprar={comprar} onFechar={() => setPatrimonioAberto(false)} />}
+      {patrimonioAberto && c && <Patrimonio c={c} etapa={etapa} onComprar={comprar} onFechar={() => setPatrimonioAberto(false)} />}
       {apresentacao && !apresentacao.curto && (
         <ApresentacaoGrande clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade}
           deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={() => setApresentacao(null)} />

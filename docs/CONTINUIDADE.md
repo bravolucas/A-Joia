@@ -2,6 +2,16 @@
 
 Atualizado em 04/11/2026. Ler este documento antes de retomar o desenvolvimento.
 
+## Loja robusta do jogador no modo rápido
+
+Pedido do usuário: ampliar a loja do jogador, com muitas opções e UPs temporários. `LojaJogador.jsx/css` substitui o painel antigo de patrimônio por catálogo de 34 itens (20 permanentes, sendo oito novos, e 14 UPs). Categorias Treino, Saúde, Carreira, Estilo de vida e UPs temporários; busca, filtros disponíveis/adquiridos, saldo, confirmação com saldo restante e área de UPs ativos/duração. Layout em três colunas no desktop e uma no celular, cabeçalho e confirmação fora da área rolável, Escape/foco/bloqueio de rolagem compartilhado. Novo atalho na jornada e entradas de ficha renomeadas para loja/patrimônio.
+
+UPs: gols, assistências, nota, proteção física, participação, evolução, pênaltis, faltas, passes, reflexos de goleiro, estado mental, fama e ciclos de três temporadas (evolução e preparação). Até três ativos e bloqueio de família sobreposta. Guardados como `upsTemporarios` com ano inicial/final exclusivo; a validade depende do ano da carreira, não de recargas. Podem ser renovados após expirar. Compras apenas entre campanhas; `lojaAnoEmCurso` marca a simulação iniciada. Itens respeitam posição (goleiro/linha), saldo e aposentadoria. O patrimônio existente em euros e os investimentos anteriores são preservados; manutenção de luxos continua em 6%/ano.
+
+Efeitos entram no mesmo pipeline de investimentos: produção de gols/assistências, nota, minutos, risco de lesão, evolução, declínio, moral/fama/torcida e chances dos minigames. A precisão também foi conectada aos controles humanos de pênalti/defesa/falta/passe. UPs não são acrescentados ao inventário permanente nem modificam atributos ao comprar. Os treinos/evolução naturais conquistados durante um UP de evolução permanecem, conforme descrição; expira o multiplicador. Os oito permanentes novos são equipamento, finalização, criação, goleiros, bolas paradas, recuperação, media training e projeto social.
+
+Validação: 28 arquivos de lógica, build de produção e 52 casos de navegador passaram. Novos testes cobrem compra/duplicação/saldo/posição, limite de três/famílias, duração de um/três anos, recarga, expiração real no fechamento, renovação e efeito efetivo em gols e precisão. A simulação de referência de gols usa atributos suficientes para produzir gols positivos. Fluxo de catálogo/compra/recarga/cancelamento e permanentes conferido em 390/1366 px. Após ajustes finais de rótulos, os dois casos da loja e o teste de efeitos foram repetidos e passaram. A prévia local foi reaberta antes da execução válida; uma execução sem servidor foi interrompida. Logs `/tmp/loja-jogador-tests-final.log`, `/tmp/loja-jogador-browser-final.log`, `/tmp/loja-jogador-ui-final.log`, `/tmp/loja-jogador-efeitos.log`, `/tmp/loja-jogador-build-publicacao.log`. Capturas em `docs/loja-jogador/` usam saldo de teste de € 10 mi. Publicação desta revisão em andamento; confirmar o run antes de informar sucesso.
+
 ## Treinador — decisão única, variedade, ofertas e salário/loja
 
 Pedido do usuário: apenas uma decisão de pré-temporada em todos os ritmos; mais variações; centralizar a taça no campeão; ofertas de outras ligas compatíveis com OVR/momento; salário para gastar em melhorias. Implementado:

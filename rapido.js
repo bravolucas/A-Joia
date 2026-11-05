@@ -1,3 +1,4 @@
+import {MELHORIAS_JOGADOR,UPS_JOGADOR,upsAtivosJogador,upJogadorDe,impedimentoLojaJogador} from "./lojaJogador.js";
 import { registrarMuseu } from './museu.js';
 /* ===================== MODO RÁPIDO — LÓGICA =====================
    Carreira inteira em 5 a 10 minutos: cada temporada vira uma tela
@@ -644,12 +645,17 @@ export const INVESTIMENTOS = [
   { id: "mansao", nome: "Mansão com piscina", icone: "🏡", custo: 9000, desc: "+6 de fama. Luxo: custa manutenção e incomoda torcida de clube pequeno.", luxo: true, fama: 6 },
   { id: "iate", nome: "Iate", icone: "🛥️", custo: 25000, desc: "+8 de fama. Luxo de verdade — e polêmica.", luxo: true, fama: 8 },
 ];
+INVESTIMENTOS.push(...MELHORIAS_JOGADOR);
+const CATEGORIAS_INV={psicologo:"Saúde",personal:"Saúde",nutri:"Saúde",fisio:"Saúde",imagem:"Carreira",analista:"Treino",ct:"Treino",instituto:"Carreira",origem:"Carreira",carro:"Estilo de vida",mansao:"Estilo de vida",iate:"Estilo de vida"};
+export const CATALOGO_LOJA_JOGADOR=[...INVESTIMENTOS.map(i=>({...i,categoria:i.categoria||CATEGORIAS_INV[i.id]})),...UPS_JOGADOR];
 export const investimentoDe = (id) => INVESTIMENTOS.find((i) => i.id === id);
-const efeitosInv = (c) => (c.investimentos || []).map(investimentoDe).filter(Boolean);
+const efeitosInv = (c) => [...(c.investimentos || []).map(investimentoDe).filter(Boolean),...upsAtivosJogador(c).map(x=>upJogadorDe(x.id))];
 const multInv = (c, k) => efeitosInv(c).reduce((m, i) => m * (i[k] ?? 1), 1);
 const somaInv = (c, k) => efeitosInv(c).reduce((s, i) => s + (i[k] ?? 0), 0);
 
 export function comprarInvestimento(c0, id) {
+  const item=investimentoDe(id),motivo=impedimentoLojaJogador(c0,item);
+  if(motivo)return {c:c0,ok:false,motivo};
   const c = clone(c0);
   const inv = investimentoDe(id);
   if (!inv || (c.investimentos || []).includes(id) || c.patrimonio < inv.custo) return { c, ok: false };
@@ -1203,6 +1209,7 @@ function efeitoFoco(c) {
 export function jogarTemporada(c0) { sincronizarLigas(c0); return comSemente(c0.codigo, `jogar:${c0.ano}`, () => jogarTemporadaBase(c0)); }
 function jogarTemporadaBase(c0) {
   const c = clone(c0);
+  c.lojaAnoEmCurso=c.ano;
   c.mod = c.mod || {};
   const mod = c.mod;
   const fx = efeitoFoco(c);
@@ -1251,7 +1258,7 @@ function jogarTemporadaBase(c0) {
   // a arquibancada pesa: ídolo joga embalado, desafeto joga pressionado
   const torcidaAqui = c.torcida?.[clubeNome] ?? 30;
   const efTorcida = torcidaAqui >= 75 ? 0.12 : torcidaAqui >= 60 ? 0.05 : torcidaAqui <= 20 ? -0.15 : torcidaAqui <= 35 ? -0.05 : 0;
-  let share = clampR((st.share + (mod.shareAdd || 0)) * (mod.shareMult ?? 1) * (fx.shareMult ?? 1) * (moral < 25 ? 0.9 : 1), 0.04, 1);
+  let share = clampR((st.share + (mod.shareAdd || 0) + somaInv(c,"shareAdd")) * (mod.shareMult ?? 1) * (fx.shareMult ?? 1) * (moral < 25 ? 0.9 : 1), 0.04, 1);
 
   // lesão durante a temporada
   const corpoPronto = c.origem === "tardio" && c.idade <= 21 ? 0.5 : 1;
@@ -1264,9 +1271,9 @@ function jogarTemporadaBase(c0) {
 
   const jogos = clampR(Math.round(48 * share * (0.9 + rnd() * 0.15)), 0, 52);
   const nivel = Math.pow(Math.max(0.25, (ovr - 55) / 35), 1.55) * (1.25 - liga.mult * 0.45);
-  const gm = multTraco(c, "golsMult") * (fx.golsMult ?? 1) * (mod.golsMult ?? 1) * (c.pe === "ambidestro" ? 1.06 : 1);
+  const gm = multInv(c,"golsMult") * multTraco(c, "golsMult") * (fx.golsMult ?? 1) * (mod.golsMult ?? 1) * (c.pe === "ambidestro" ? 1.06 : 1);
   const gols = c.posicao === "GOL" ? 0 : Math.round(poisson(pos.golBase * nivel * jogos) * gm);
-  const assist = Math.round(poisson(pos.assistBase * nivel * jogos * (c.posicao === "GOL" ? 0.1 : 1)) * multTraco(c, "assistMult") * (fx.golsMult ?? 1) * (mod.assistMult ?? 1) * (c.pe === "ambidestro" ? 1.06 : 1));
+  const assist = Math.round(poisson(pos.assistBase * nivel * jogos * (c.posicao === "GOL" ? 0.1 : 1)) * multInv(c,"assistMult") * multTraco(c, "assistMult") * (fx.golsMult ?? 1) * (mod.assistMult ?? 1) * (c.pe === "ambidestro" ? 1.06 : 1));
   // quem não faz gol também precisa de nota alta quando joga bem
   const defBonus = c.posicao === "GOL" ? 0.4 : DEFENSIVAS.includes(c.posicao) ? 0.25 : 0;
   // a nota compara com o que se espera da idade: um garoto de 17 com OVR 60 está bem, não mal
@@ -1464,12 +1471,13 @@ export const ACAO_MINI = {
 };
 
 /* Chance base de converter o pênalti decisivo — usada pela simulação automática */
+export const bonusPrecisaoLoja=(c,mini)=>Math.min(.08,somaInv(c,mini));
 export function chancePenalti(c) {
-  return clampR(0.62 + (c.attrs.finalizacao - 65) * 0.006 + somaTraco(c, "penalti") + (c.bonusDesafio || 0), 0.45, 0.92);
+  return clampR(0.62 + (c.attrs.finalizacao - 65) * 0.006 + somaTraco(c, "penalti") + (c.bonusDesafio || 0) + bonusPrecisaoLoja(c,"penalti"), 0.45, 0.92);
 }
 /* Chance estimada de cada minigame (simulação automática e dica na tela) */
 export function chanceMomento(c, mini = miniDaPosicao(c.posicao)) {
-  const dec = somaTraco(c, "penalti") + (c.bonusDesafio || 0);
+  const dec = somaTraco(c, "penalti") + (c.bonusDesafio || 0) + bonusPrecisaoLoja(c,mini);
   if (mini === "falta") return clampR(((c.attrs.finalizacao * 0.65 + c.attrs.drible * 0.35) / 145 + 0.18) * 1.15 + dec, 0.3, 0.8);
   if (mini === "passe") return clampR(c.attrs.passe / 130 + 0.3 + dec, 0.4, 0.88);
   if (mini === "defesa") return clampR(0.38 + (c.attrs.defesa - 65) * 0.006 + dec, 0.25, 0.65);

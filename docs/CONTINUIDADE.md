@@ -1,3 +1,7 @@
+## Empréstimos unificados ao mercado
+
+Removidos componente/painel EmprestimosJogador e sua chamada na jornada. Pedido acessível pela ficha, abrindo evento emprestimo no mesmo CartaoEvento das transferências. Seletor de 1/2 temporadas filtra ofertas: três clubes visíveis, sem duplicar cada prazo. Eventos de empréstimo antigos em grade também usam lista padrão. Lógica de vínculo, duração e retorno preservada. Informação de empréstimo ativo na ficha. Teste atualizado verifica ausência de painel antigo, pedido na ficha, três ofertas, aceite e persistência. 29 arquivos de lógica e 12 casos browser passaram; build final concluído. Captura `/tmp/emprestimos-unificados-390.png`.
+
 ## Goleiro — pose real de mergulho
 
 Novo recorte transparente `goleiro-mergulho.webp`. JogadorCampo respeita esticado e direcao, troca pose em pé por voo horizontal, espelhado à esquerda. Removida rotação que tombava a foto em pé em CenaGol e PenGoleiro; deslocamento animado preservado. Defesas no meio mantêm a pose frontal; imagem de ação pré-carregada. Dois testes novos verificam estado inicial, troca e espelhamento; adicionados ao CI. Suite visual de 12 casos conferida após reabrir servidor local. Capturas em `/tmp/goleiro-mergulho-{esquerda,direita}.png`.

@@ -1,4 +1,3 @@
-import EmprestimosJogador from './EmprestimosJogador.jsx';
 import PrimeiroClube from './PrimeiroClube.jsx';
 import TelaCriacao from './CriacaoCarreira.jsx';
 import LojaJogador from "./LojaJogador.jsx";
@@ -1522,6 +1521,8 @@ function TelaTraco({ c, opcoes, onEscolher }) {
 /* ---------- evento + preparação da próxima temporada ---------- */
 function CartaoEvento({ jogador, evento, resultado, efeitos, onEscolher, onPedirLiga, onAvancar, espera = 0 }) {
   const [ligas, setLigas] = useState(false);
+  const [prazoEmprestimo,setPrazoEmprestimo]=useState(1);
+  const opcoesVisiveis=evento.id==='emprestimo'?evento.opcoes.filter(o=>!o.oferta||(o.oferta.emprestimoAnos??1)===prazoEmprestimo):evento.opcoes;
   if(evento.id==='base'&&!resultado)return <PrimeiroClube evento={evento} jogador={jogador} onEscolher={onEscolher}/>;
   return (
     <div className="rp-painel overflow-hidden rp-entra">
@@ -1534,7 +1535,7 @@ function CartaoEvento({ jogador, evento, resultado, efeitos, onEscolher, onPedir
           <p className="text-[15px] text-[#C9D3CE] mt-1 leading-snug line-clamp-3">{evento.texto}</p>
         </div>
       </div>
-      {!resultado && evento.grade && (
+      {!resultado && evento.grade && evento.id!=='emprestimo' && (
         <div className="p-3 pt-0 flex flex-col gap-2">
           {/* clubes lado a lado com o escudo grande (como no Copero) */}
           <div className="grid grid-cols-3 gap-2">
@@ -1558,9 +1559,10 @@ function CartaoEvento({ jogador, evento, resultado, efeitos, onEscolher, onPedir
           ))}
         </div>
       )}
-      {!resultado && !evento.grade && (
+      {!resultado&&evento.id==='emprestimo'&&<div className="px-4 py-2 flex gap-2" role="group" aria-label="Duração do empréstimo">{[1,2].filter(anos=>evento.opcoes.some(o=>o.oferta?.emprestimoAnos===anos||(anos===1&&o.oferta&&!o.oferta.emprestimoAnos))).map(anos=><button key={anos} aria-pressed={prazoEmprestimo===anos} onClick={()=>setPrazoEmprestimo(anos)} className={`rp-opcao px-4 py-2 ${prazoEmprestimo===anos?'sel':''}`}>{anos} {anos===1?'temporada':'temporadas'}</button>)}</div>}
+      {!resultado && (!evento.grade||evento.id==='emprestimo') && (
         <div className="flex flex-col gap-2 p-4 pt-1">
-          {evento.opcoes.map((o) => {
+          {opcoesVisiveis.map((o) => {
             const r = RISCO[o.risco] || RISCO.seguro;
             if (o.escolherLiga) {
               return (
@@ -3138,6 +3140,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const responder = (tom) => { const r = responderColetiva(c, estado.coletiva, tom); setEstado((st) => ({ ...st, c: r.c, resposta: r.resultado })); };
 
   // proposta: tocar assina direto (contrato que o clube oferece); "negociar" abre a mesa
+  const pedirEmprestimo=()=>{const proposta=sortearEvento(c,{somente:'emprestimo'});setGaveta(null);setEstado(s=>({...s,etapa:'evento',evento:proposta,resultado:null,efeitos:null,auto:false}));};
   const escolherEvento = (opId, direto = false) => {
     const op = evento.opcoes.find((o) => o.id === opId);
     if (op?.negociar && direto) {
@@ -3246,7 +3249,6 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
             <div className="rp-proxima max-w-xl mx-auto px-3 pt-2.5 flex flex-col gap-2.5">
               <header className="rp-proximo-passo"><span className="rp-etiqueta">Temporada {c.ano}</span><h1>{estado.forcada ? "Hora de encerrar o ciclo" : estado.desafioResultado ? "Resultado do desafio" : resultado ? "Decisão tomada" : evento ? "Sua próxima decisão" : desafioPendente(c) ? "Desafio da temporada" : estado.auto ? "Temporada em andamento" : "Prepare sua temporada"}</h1><p>{estado.forcada ? "Confira o aviso e veja o legado da sua carreira." : estado.desafioResultado ? "Veja o que mudou e siga para preparar a temporada." : resultado ? "Confira o resultado da sua escolha antes de seguir." : evento ? "Compare as opções abaixo e escolha o próximo passo." : desafioPendente(c) ? "Uma escolha, um resultado. Tudo acontece aqui." : estado.auto ? "Acompanhe a simulação ou avance quando quiser." : "Escolha um treino abaixo para começar. O histórico fica disponível para consulta."}</p></header>
               <button className="lj-atalho" onClick={()=>setPatrimonioAberto(true)}><span>Loja do jogador<small>{upsAtivosJogador(c).length} UPs ativos · melhorias permanentes e temporárias</small></span><strong>{formatarValor(c.patrimonio||0)} →</strong></button>
-              {!evento&&!estado.auto&&!resultado&&!estado.forcada&&<EmprestimosJogador key={c.ano} c={c} onAceitar={novo=>setEstado(s=>s.c===c?{...s,c:novo}:s)}/>}
               {ultimo && !evento && <ResumoCompacto c={c} card={ultimo} onDetalhes={() => setGaveta("resumo")} />}
               {estado.aviso && <div className="rp-painel px-4 py-2.5 text-[15px] text-[#F0A99E]" style={{ borderColor: "rgba(227,107,91,.35)" }}>{estado.aviso}</div>}
               {estado.forcada ? (
@@ -3302,6 +3304,8 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         <Gaveta titulo={c.nome} onFechar={() => setGaveta(null)}>
           <Ficha c={c} />
           <SeletorFoco c={c} onFoco={mudarFoco} />
+          {etapa==='evento'&&!evento&&!estado.auto&&!resultado&&!c.emprestimo&&c.flags.baseEscolhida&&(c.contrato?.restantes??0)>0&&c.lojaAnoEmCurso!==c.ano&&<button className="rp-opcao px-4 py-3 text-left" onClick={pedirEmprestimo}>Pedir propostas por empréstimo</button>}
+          {c.emprestimo&&<p className="text-sm text-[#C9D3CE]">Empréstimo no {c.emprestimo.destino} · {c.emprestimo.restantes??1} temporada(s) restante(s). Retorno ao {c.clubeNome}.</p>}
           <button onClick={() => setPatrimonioAberto(true)} className="rp-painel px-4 py-3 flex items-center gap-3 text-left hover:border-[#D8B44A]/50">
             <span className="text-2xl">💼</span>
             <span className="flex-1"><span className="block text-[13px] font-bold uppercase tracking-[0.15em] text-[#8FA39A]">Loja e patrimônio</span><span className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</span></span>

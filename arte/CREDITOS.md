@@ -97,3 +97,7 @@ O impacto da bola e da rede é sintetizado por Web Audio em `som.js`, sem amostr
 ## Primeiro contrato da base
 
 `criacao/primeiro-contrato.webp`: arte original gerada com OpenAI Image Generation. Jovem fictício assinando contrato no CT, com família ao fundo; sem marcas ou clubes reais na fotografia. Escudos e camisa aplicados dinamicamente pelo jogo. Assinatura decorativa, carimbo e movimentos em SVG/CSS.
+
+## Goleiro em mergulho
+
+`personagens/goleiro-mergulho.webp`: nova pose de ação gerada com OpenAI Image Generation a partir do goleiro fictício existente. Transparência preservada. Espelhamento em SVG para defesa à esquerda; pose de espera mantida antes da cobrança.

@@ -1,6 +1,7 @@
 import React, { useId, useEffect, useRef, useState } from 'react';
 import { escudoDe, CENARIOS } from './arte.js';
 
+import goleiroMergulho from './arte/personagens/goleiro-mergulho.webp';
 import goleiroReal from './arte/personagens/goleiro.webp';
 import jogadorReal from './arte/personagens/jogador.webp';
 import adversarioReal from './arte/personagens/adversario.webp';
@@ -8,11 +9,13 @@ import apresentacaoReal from './arte/personagens/apresentacao.webp';
 import dirigenteReal from './arte/personagens/dirigente.webp';
 
 // Recortes fotográficos originais; coordenadas e animações dos minigames preservadas.
-export function JogadorCampo({ x=0, y=0, escala=1, numero=10, goleiro=false, adversario=false }) {
-  const foto=goleiro?goleiroReal:adversario?adversarioReal:jogadorReal;
+export function JogadorCampo({ x=0, y=0, escala=1, numero=10, goleiro=false, adversario=false, esticado=false, direcao=1 }) {
+  useEffect(()=>{if(goleiro){const imagem=new Image();imagem.src=goleiroMergulho;}},[goleiro]);
+  const voando=goleiro&&esticado;
+  const foto=goleiro?(voando?goleiroMergulho:goleiroReal):adversario?adversarioReal:jogadorReal;
   return <g transform={`translate(${x} ${y}) scale(${escala})`} className="vf-atleta" aria-hidden="true">
-    <ellipse cx="0" cy="1" rx="17" ry="3" fill="#000" opacity=".3"/>
-    <image href={foto} x="-30" y="-88" width="60" height="90" preserveAspectRatio="xMidYMax meet"/>
+    {!voando&&<ellipse cx="0" cy="1" rx="17" ry="3" fill="#000" opacity=".3"/>}
+    <image data-pose={voando?'mergulho':'espera'} href={foto} x={voando?-56:-30} y={voando?-68:-88} width={voando?112:60} height={voando?65:90} transform={voando&&direcao<0?'scale(-1 1)':undefined} preserveAspectRatio="xMidYMax meet"/>
     {!goleiro&&<g><circle cx="17" cy="-55" r="6" fill={adversario?'#28435e':'#103e2c'} stroke="#e2d1a0" strokeWidth=".6"/><text x="17" y="-52.5" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="7" fontWeight="800" fill="#fff4d1">{numero}</text></g>}
   </g>;
 }

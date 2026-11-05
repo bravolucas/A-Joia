@@ -732,16 +732,15 @@ function PlacarMomento({ ok, texto }) {
 
 /* Cena do gol: estádio ao fundo, trave com rede em profundidade e um goleiro de verdade */
 const GZX = (col) => 70 + col * 80, GZY = (lin) => 66 + lin * 50;
-function Goleiro({ cor, mergulho }) { return <JogadorCampo x={150} y={148} escala={.85} cor={cor} numero={1} goleiro esticado={!!mergulho} />; }
+function Goleiro({ cor, mergulho }) { return <JogadorCampo x={150} y={148} escala={.85} cor={cor} numero={1} goleiro esticado={!!mergulho&&mergulho[0]!==1} direcao={mergulho?.[0]===0?-1:1} />; }
 function CenaGol({ goleiro, res, bola, fora, podeEscolher, onZona }) {
   const fotoEstadio = useCenario("estadio");
   const cor = goleiro ? "#EBC557" : "#B8F23A";
   const m = res?.goleiro || null;
-  // mergulho: desloca e gira o corpo inteiro em torno dos pés
+  // Mergulho usa recorte próprio e deslocamento; não gira a pose de espera.
   const dx = m ? (m[0] - 1) * 50 : 0;
   const alto = m && m[1] === 0;
   const dy = !m ? 0 : m[0] === 1 ? (alto ? -22 : 0) : alto ? -40 : -8;
-  const rot = !m ? 0 : m[0] === 1 ? 0 : (m[0] === 0 ? -1 : 1) * (alto ? 58 : 74);
   const bx = bola ? GZX(bola[0]) + (fora ? (bola[0] - 1) * 46 : 0) : 150;
   const by = bola ? GZY(bola[1]) - (fora ? 48 : 0) : 192;
   const gol = res && ((!goleiro && res.resultado === "gol") || (goleiro && res.resultado === "gol"));
@@ -784,7 +783,7 @@ function CenaGol({ goleiro, res, bola, fora, podeEscolher, onZona }) {
       <rect x="269" y="30" width="5" height="121" rx="1.5" fill="url(#rpTrave)" />
       <rect x="31" y="35" width="238" height="3" fill="rgba(0,0,0,.25)" />
       {/* goleiro */}
-      <g className="rp-goleiro" style={{ transform: `translate(${dx}px, ${dy}px) rotate(${rot}deg)`, transformOrigin: "150px 150px" }}>
+      <g className="rp-goleiro" style={{ transform: `translate(${dx}px, ${dy}px) rotate(0deg)`, transformOrigin: "150px 150px" }}>
         <Goleiro cor={cor} mergulho={m} />
       </g>
       {/* zonas de escolha */}

@@ -1173,12 +1173,12 @@ export function PenEstadio() { return <CampoPremium largura={PEN_W} altura={PEN_
 export function PenGoleiro({ zona }) {
   const kickerW = 52, kickerH = 76;
   const dx = { esquerdo: PEN_ZONE_X.esquerdo - PEN_ZONE_X.meio, meio: 0, direito: PEN_ZONE_X.direito - PEN_ZONE_X.meio }[zona] ?? 0;
-  const rotAlvo = { esquerdo: -36, meio: 0, direito: 36 }[zona] ?? 0;
+  const rotAlvo = 0;
   const anim = zona === "meio" ? "ficaMeio" : "pulaLado";
   return (
     <div className="absolute" style={{ left: PEN_ZONE_X.meio, top: PEN_GOAL.y + PEN_GOAL.h - kickerH, width: kickerW, height: kickerH, transform: "translateX(-50%)" }}>
       <div key={zona} style={{ width: "100%", height: "100%", "--dx": `${dx}px`, "--rot": `${rotAlvo}deg`, animation: `${anim} 480ms ease-out forwards`, transformOrigin: "50% 92%" }}>
-        <svg width={kickerW} height={kickerH} viewBox="-30 -88 60 90" style={{ overflow: "visible" }} aria-hidden="true"><JogadorCampo cor="#c6ae60" numero={1} goleiro esticado={zona !== 'meio'} /></svg>
+        <svg width={kickerW} height={kickerH} viewBox="-30 -88 60 90" style={{ overflow: "visible" }} aria-hidden="true"><JogadorCampo cor="#c6ae60" numero={1} goleiro esticado={!!zona&&zona!=='meio'} direcao={zona==='esquerdo'?-1:1} /></svg>
       </div>
     </div>
   );

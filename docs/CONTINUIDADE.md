@@ -1,3 +1,7 @@
+## Goleiro — pose real de mergulho
+
+Novo recorte transparente `goleiro-mergulho.webp`. JogadorCampo respeita esticado e direcao, troca pose em pé por voo horizontal, espelhado à esquerda. Removida rotação que tombava a foto em pé em CenaGol e PenGoleiro; deslocamento animado preservado. Defesas no meio mantêm a pose frontal; imagem de ação pré-carregada. Dois testes novos verificam estado inicial, troca e espelhamento; adicionados ao CI. Suite visual de 12 casos conferida após reabrir servidor local. Capturas em `/tmp/goleiro-mergulho-{esquerda,direita}.png`.
+
 ## Escolhas modernas e empréstimos de 1–2 anos
 
 DesafioTemporada remodelado com fotos, faixa de probabilidade, risco e botão direto; resultado animado preservado. Novo painel EmprestimosJogador antes da simulação permite pedir saída por 1/2 anos e escolher entre três clubes. Prazo real, clube de origem preservado, contrato precisa cobrir duração, retorno no fechamento correto, saves antigos compatíveis. Ofertas automáticas ampliadas e números de anos explícitos. Sem propostas definitivas enquanto emprestado. Cabeçalho dos minigames passa a mostrar clube de destino.

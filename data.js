@@ -304,6 +304,13 @@ export const PERSONALIDADES = [
     picoFim: 29, declinioApartir: 33, declinioTaxa: 0.45, taxaCresc: 0.9, risco: 0.7 },
   { id: "festeiro", label: "Talento indisciplinado", desc: "Potencial altíssimo e evolução rápida, mas propenso a lesão e queda mais cedo.", cor: "#a855f7", icone: "🎉",
     picoFim: 25, declinioApartir: 28, declinioTaxa: 1.8, taxaCresc: 1.5, risco: 1.6, famaMult: 1.3 },
+  {id:'estudioso',label:'Estudioso do jogo',desc:'Evolução paciente, auge longo e menos risco físico.',icone:'📖',cor:'#12a876',picoFim:30,declinioApartir:33,declinioTaxa:.7,taxaCresc:.85,risco:.85},
+  {id:'destemido',label:'Destemido',desc:'Cresce rápido, mas se expõe mais a lesões.',icone:'🔥',cor:'#ee9458',picoFim:27,declinioApartir:30,declinioTaxa:1.1,taxaCresc:1.3,risco:1.25},
+  {id:'disciplinado',label:'Disciplina de ferro',desc:'Progresso constante, menos lesões e carreira duradoura.',icone:'🎯',cor:'#12a876',picoFim:29,declinioApartir:33,declinioTaxa:.65,taxaCresc:.95,risco:.8},
+  {id:'carismatico',label:'Ídolo nato',desc:'A fama cresce mais; evolução técnica um pouco mais lenta.',icone:'⭐',cor:'#d9ba70',picoFim:28,declinioApartir:31,declinioTaxa:.95,taxaCresc:.9,risco:1,famaMult:1.4},
+  {id:'resiliente',label:'Especialista em recomeços',desc:'Começa devagar, mas sustenta o auge até mais tarde.',icone:'🌱',cor:'#81b598',picoFim:31,declinioApartir:35,declinioTaxa:.6,taxaCresc:.7,risco:.9},
+  {id:'intenso',label:'Intensidade máxima',desc:'Arranque forte e muita exposição: o auge passa cedo.',icone:'⚡',cor:'#e6a654',picoFim:25,declinioApartir:29,declinioTaxa:1.4,taxaCresc:1.4,risco:1.35},
+
 ];
 
 export const PAPEIS_TATICOS = [

@@ -1,3 +1,9 @@
+## Criação em cinco capítulos
+
+`CriacaoCarreira.jsx/css` substitui TelaCriacao antiga: identidade (nome letra a letra no SVG, número e pé), país com sorteio e bandeira animada, posição num campo com sorteio, três cartas de origem e três de personalidade. Cada baralho tem três rerolls independentes, sem repetição entre rodadas adjacentes; voltar preserva escolhas/contadores. Seleção anterior é limpa ao rerrolar. Doze origens e doze perfis; novas origens usam bias de atributos existente e novos perfis usam curvas/risco/fama reais. Carreira do Dia usa fluxo direto após identidade. Duas artes novas originais de início de carreira, sem copiar PES. Animações de dobra/embrulho e bandeira, foco por capítulo e movimento reduzido. Código opcional mantido na identidade.
+
+Build, 28 arquivos de lógica e quatro casos de navegador passaram; novo teste cobre cinco telas, rerolls, voltar, overflow e início real em 390/1366 px. Teste incluído no CI. Logs `/tmp/wizard-*.log`. Limites de reroll são da sessão de criação; recarregar reinicia o formulário. Publicação em acompanhamento.
+
 ## Criação do atleta — nova primeira impressão
 
 Tela remodelada com cabeçalho de estreia, prévia de camisa dinâmica (nome e número), cenário de estádio existente, resumo de posição/origem/perfil, progresso 0–4 e indicação do que falta. Desktop em duas colunas com prévia fixa; celular com cartão compacto. Preservados modos livre/dia, todas as opções, código e validação. Build, 28 testes de lógica, dois smoke tests e verificação interativa em 390/1366 px passaram (nome/número, modo do dia, botão e overflow).

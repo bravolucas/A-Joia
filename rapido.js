@@ -138,6 +138,14 @@ export const ORIGENS_RAPIDO = ORIGENS.map((o) => ({
     prodigio: "Teto mais alto: +1 de potencial em tudo, além do perfil equilibrado.",
   }[o.id] || o.perk,
 }));
+ORIGENS_RAPIDO.push(
+ {id:'praia',nome:'Futebol de areia',icone:'☀️',desc:'A areia ensinou equilíbrio e improviso.',perk:'Mais drible e físico na formação.',bias:{drible:8,fisico:8}},
+ {id:'escolar',nome:'Destaque da escola',icone:'📚',desc:'Dos jogos do colégio para a primeira peneira.',perk:'Mais passe e velocidade na formação.',bias:{passe:8,velocidade:8}},
+ {id:'interior',nome:'Joia do interior',icone:'🌾',desc:'Uma viagem de ônibus e uma chance de mudar tudo.',perk:'Mais físico e finalização na formação.',bias:{fisico:8,finalizacao:8}},
+ {id:'rua',nome:'Rei da rua',icone:'⚽',desc:'Entre chinelos como traves, aprendeu a inventar.',perk:'Drible acima da média na formação.',bias:{drible:14,passe:4}},
+ {id:'projeto',nome:'Projeto social',icone:'🤝',desc:'Um treinador voluntário enxergou o seu talento.',perk:'Mais passe e defesa na formação.',bias:{passe:8,defesa:8}},
+ {id:'goleiros',nome:'Escola de goleiros',icone:'🧤',desc:'Luvas emprestadas, treino sério e coragem.',perk:'Mais defesa e físico na formação.',bias:{defesa:12,fisico:4}}
+);
 export const origemDe = (id) => ORIGENS_RAPIDO.find((o) => o.id === id);
 
 export function clubeInicial(nacId, grande = false) {

@@ -89,3 +89,7 @@ O impacto da bola e da rede é sintetizado por Web Audio em `som.js`, sem amostr
 ## Personagens realistas — novembro de 2026
 
 `personagens/{goleiro,jogador,adversario,apresentacao,dirigente}.webp`: cinco personagens fictícios originais gerados com OpenAI Image Generation, em WebP com transparência preservada. Sem marcas. Substituem os desenhos de pessoas nos minigames e na apresentação grande. Uniformes dos sprites são fixos (verde e azul); a camisa central da apresentação continua dinâmica por clube, nome e número. As imagens são estáticas; animações de deslocamento e mergulho continuam no código. Originais PNG mantidos no workspace de geração.
+
+## Criação por capítulos
+
+`criacao/inicio.webp` e `criacao/bairro.webp`: artes originais geradas com OpenAI, vestiário de início de carreira e campo de bairro. Sem uso de capturas ou marcas de PES. Camisa/nome são SVG dinâmico; caixa de presente e bandeira animadas em CSS. Cartas combinam essas imagens com cenários já creditados de treino, imprensa e preparação mental.

@@ -17,7 +17,7 @@ export function JogadorCampo({ x=0, y=0, escala=1, numero=10, goleiro=false, adv
   </g>;
 }
 
-export function CamisaPremium({ nome, cor = '#147356', numero = 10, sobrenome, className = '' }) {
+export function CamisaPremium({ nome, cor = '#147356', numero = 10, sobrenome, soletrar=false, className = '' }) {
   const id=useId().replace(/:/g,'');
   const escudo=escudoDe(nome);
   const hex=cor.replace('#','');const expandido=hex.length===3?hex.split('').map(c=>c+c).join(''):hex;
@@ -33,7 +33,7 @@ export function CamisaPremium({ nome, cor = '#147356', numero = 10, sobrenome, c
     <g clipPath={`url(#corte${id})`}><path d="M0 0H180V190H0Z" fill={cor}/><path d="M0 0H180V190H0Z" fill={`url(#tecido${id})`}/><path d="M0 0H180V190H0Z" fill={`url(#fios${id})`}/><path d="M43 40 49 163M137 40 131 163M50 149Q90 158 130 149" fill="none" stroke="#000" strokeOpacity=".17" strokeWidth="3"/><path d="M48 42 58 62M132 42 122 62" stroke="#fff" strokeOpacity=".18" strokeWidth="4"/></g>
     <path d="M58 16Q90 45 122 16L115 14Q90 31 65 14ZM10 66 36 80M144 80 170 66" fill="none" stroke="#eed99e" strokeWidth="4"/>
     {escudo && !sobrenome && <image href={escudo} x="106" y="48" width="22" height="25"/>}
-    {sobrenome && <text x="90" y="65" textAnchor="middle" fill={tinta} stroke={claro?"#ffffff33":"#0003"} strokeWidth=".5" fontFamily="Inter, sans-serif" fontSize="12" fontWeight="800" textLength={Math.min(92,sobrenome.length*8)} lengthAdjust="spacingAndGlyphs">{sobrenome}</text>}
+    {sobrenome && <text x="90" y="65" textAnchor="middle" fill={tinta} stroke={claro?"#ffffff33":"#0003"} strokeWidth=".5" fontFamily="Inter, sans-serif" fontSize="12" fontWeight="800" textLength={Math.min(92,sobrenome.length*8)} lengthAdjust="spacingAndGlyphs">{soletrar?[...sobrenome].map((letra,i)=><tspan key={`${i}-${letra}`} style={{animation:'ccTinta .3s ease both'}}>{letra}</tspan>):sobrenome}</text>}
     <text x="90" y="133" textAnchor="middle" fontFamily="Oswald, sans-serif" fontWeight="700" fontSize="57" fill={tinta} stroke={claro?"#ffffff33":"#0004"} strokeWidth="1">{numero}</text>
   </svg>;
 }

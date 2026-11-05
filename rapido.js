@@ -230,6 +230,23 @@ export const RITMOS = [
 export const ritmoDe = (id) => RITMOS.find((r) => r.id === id) || RITMOS[1];
 
 /* Três clubes de base possíveis para a pessoa escolher onde começar */
+export function ofertasEmprestimo(c){
+ if(c.emprestimo||c.aposentado||!c.flags?.baseEscolhida||c.contrato?.restantes<1||c.lojaAnoEmCurso===c.ano)return [];
+ return comSemente(c.codigo,`emprestimos:${c.ano}:${c.clubeNome}`,()=>{
+ const ovr=ovrDe(c),atual=clubeDe(c.clubeNome),pool=clubesJogaveis().filter(x=>x.nome!==c.clubeNome&&x.forca>=ovr-12&&x.forca<=ovr+5);
+ const locais=pool.filter(x=>x.liga===atual.liga),out=[];
+ if(locais.length)out.push(pick(locais));
+ const restantes=pool.filter(x=>!out.some(d=>d.nome===x.nome));
+ while(out.length<3&&restantes.length){const diversos=restantes.filter(x=>!out.some(d=>d.liga===x.liga)),x=pick(diversos.length?diversos:restantes);out.push(x);restantes.splice(restantes.indexOf(x),1);}
+ return out;
+ });
+}
+export function iniciarEmprestimo(c,destino,duracao=1){
+ if(![1,2].includes(duracao))throw new Error('Escolha uma ou duas temporadas.');
+ if((c.contrato?.restantes??0)<duracao)throw new Error('O contrato atual precisa cobrir todo o empréstimo.');
+ if(!ofertasEmprestimo(c).some(x=>x.nome===destino))throw new Error('Esta oferta de empréstimo não está disponível.');
+ const novo=clone(c);novo.emprestimo={destino,origem:c.clubeNome,duracao,restantes:duracao,inicio:c.ano};novo.torcida[destino]=novo.torcida[destino]??35;return novo;
+}
 export function opcoesClubeInicial(nac, origem) {
   const vistos = new Set(), out = [];
   for (let i = 0; i < 30 && out.length < 3; i++) {
@@ -1823,7 +1840,11 @@ function fecharTemporadaBase(c0, card0) {
 
   if (c.flags.blindado > 0) c.flags.blindado -= 1;
   c.flags.impasse = null;
-  if (c.emprestimo) { card.destaques.push(`Fim do empréstimo: volta ao ${c.clubeNome}`); c.emprestimo = null; }
+  if(c.emprestimo){
+ c.emprestimo.restantes=Math.max(0,(c.emprestimo.restantes??1)-1);
+ if(c.emprestimo.restantes===0){card.destaques.push(`Fim do empréstimo: volta ao ${c.clubeNome}`);c.emprestimo=null;}
+ else card.destaques.push(`Empréstimo no ${c.emprestimo.destino}: ${c.emprestimo.restantes} temporada restante`);
+ }
   c.mod = {};
   // o trio deste ano não volta igual no próximo
   c.pretemporadaVistas = opcoesPretemporada(antes).map((k) => k.id);
@@ -1999,6 +2020,7 @@ function pesoMercadoRapido(c, atual, destino, ovr, opts) {
   return Math.max(0.0001, peso * (0.7 + ruido / 1000 * 0.6));
 }
 export function gerarOfertas(c, n, opts = {}) {
+  if(c.emprestimo)return [];
   const ovr = ovrDe(c);
   const atual = clubeDe(c.clubeNome);
   const emp = EMPRESARIOS.find((e) => e.id === c.empresario) || EMPRESARIOS[0];
@@ -2329,26 +2351,15 @@ export const EVENTOS = [
   },
   {
     id: "emprestimo", icone: "🔁",
-    peso: (c) => (c.idade <= 22 && ["Reserva", "Fora dos planos", "Base"].includes(statusNoClube(c).label) ? 3 : 0),
-    preparar: (c) => {
-      const ovr = ovrDe(c);
-      const op = clubesJogaveis().filter((x) => x.nome !== c.clubeNome && x.forca <= ovr + 1 && x.forca >= ovr - 7);
-      // três clubes, de preferência de ligas diferentes (como no Copero)
-      const destinos = [];
-      const pool = [...op];
-      while (destinos.length < 3 && pool.length) {
-        const x = pool.splice(rand(0, pool.length - 1), 1)[0];
-        if (!destinos.some((d) => d.liga === x.liga) || pool.length < 3) destinos.push(x);
-      }
-      return { destinos };
-    },
+    peso: (c) => (!c.emprestimo&&c.idade<=28&&c.contrato?.restantes>=1 ? (["Reserva","Fora dos planos","Base"].includes(statusNoClube(c).label)?6:1.5):0),
+    preparar: (c) => ({destinos:ofertasEmprestimo(c)}),
     grade: true,
     titulo: () => "Oferta de empréstimo",
     texto: (c, ctx) => (ctx.destinos.length ? "Seu clube quer que você ganhe minutos em outro time. Escolha onde seguir seu desenvolvimento." : "Um clube menor quer você por uma temporada."),
     opcoes: (c, ctx) => [
-      ...ctx.destinos.map((d) => ({ id: `ir:${d.nome}`, label: `Ir por empréstimo para o ${d.nome}`, dica: `${ligaDe(d.liga).nome} · joga muito por um ano e volta`,
-        oferta: { clube: d.nome, forca: d.forca, cor: d.cor, ligaId: d.liga, ligaNome: ligaDe(d.liga).nome, status: "Titular" }, risco: "seguro",
-        efeito: (c) => { c.emprestimo = { destino: d.nome }; c.torcida[d.nome] = c.torcida[d.nome] ?? 35; return r(`Um ano no ${d.nome} para ganhar casca.`); } })),
+      ...ctx.destinos.flatMap(d=>[1,2].filter(anos=>anos<=(c.contrato?.restantes??0)).map(anos=>({id:`ir:${d.nome}:${anos}`,label:`Empréstimo ao ${d.nome} por ${anos} ${anos===1?'temporada':'temporadas'}`,dica:`${ligaDe(d.liga).nome} · retorno ao clube de origem`,
+      oferta:{clube:d.nome,forca:d.forca,cor:d.cor,ligaId:d.liga,ligaNome:`${ligaDe(d.liga).nome} · ${anos} ${anos===1?'temporada':'temporadas'}`,status:'Disputar espaço'},risco:'seguro',
+      efeito:c=>{Object.assign(c,iniciarEmprestimo(c,d.nome,anos));return r(`Empréstimo de ${anos} ${anos===1?'temporada':'temporadas'} no ${d.nome}.`);}}))),
       { id: "ficar", label: "Ficar e brigar pela posição", dica: "Pode ganhar espaço — ou não",
         efeito: (c) => { if (chance(0.35)) { c.mod.shareAdd = (c.mod.shareAdd || 0) + 0.25; return r("Você ficou, treinou como nunca e roubou a vaga."); } return r("Você ficou. O banco continua seu lugar mais frequente."); } },
     ],

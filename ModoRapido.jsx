@@ -1,3 +1,4 @@
+import EmprestimosJogador from './EmprestimosJogador.jsx';
 import PrimeiroClube from './PrimeiroClube.jsx';
 import TelaCriacao from './CriacaoCarreira.jsx';
 import LojaJogador from "./LojaJogador.jsx";
@@ -709,7 +710,7 @@ function CabecalhoMomento({ c, momento }) {
   const mini = momento.mini || "penalti";
   return (
     <div className="text-center">
-      <div className="vf-matchbar"><span className="vf-match-club"><ClubDot club={clubeDe(c.clubeNome)} size={22}/><strong>{c.clubeNome}</strong></span><span className="vf-match-live"><i />LANCE DECISIVO</span></div>
+      <div className="vf-matchbar"><span className="vf-match-club"><ClubDot club={clubeDe(c.emprestimo?.destino||c.clubeNome)} size={22}/><strong>{c.emprestimo?.destino||c.clubeNome}</strong></span><span className="vf-match-live"><i />LANCE DECISIVO</span></div>
       <span className="rp-chip" style={{ color: "#EBC557", background: "rgba(216,180,74,.14)" }}>
         {momento.total > 1 ? `Desafio ${momento.ordem} de ${momento.total}` : "Momento decisivo"} · {NOME_MINI[mini]}
       </span>
@@ -3246,6 +3247,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
             <div className="rp-proxima max-w-xl mx-auto px-3 pt-2.5 flex flex-col gap-2.5">
               <header className="rp-proximo-passo"><span className="rp-etiqueta">Temporada {c.ano}</span><h1>{estado.forcada ? "Hora de encerrar o ciclo" : estado.desafioResultado ? "Resultado do desafio" : resultado ? "Decisão tomada" : evento ? "Sua próxima decisão" : desafioPendente(c) ? "Desafio da temporada" : estado.auto ? "Temporada em andamento" : "Prepare sua temporada"}</h1><p>{estado.forcada ? "Confira o aviso e veja o legado da sua carreira." : estado.desafioResultado ? "Veja o que mudou e siga para preparar a temporada." : resultado ? "Confira o resultado da sua escolha antes de seguir." : evento ? "Compare as opções abaixo e escolha o próximo passo." : desafioPendente(c) ? "Uma escolha, um resultado. Tudo acontece aqui." : estado.auto ? "Acompanhe a simulação ou avance quando quiser." : "Escolha um treino abaixo para começar. O histórico fica disponível para consulta."}</p></header>
               <button className="lj-atalho" onClick={()=>setPatrimonioAberto(true)}><span>Loja do jogador<small>{upsAtivosJogador(c).length} UPs ativos · melhorias permanentes e temporárias</small></span><strong>{formatarValor(c.patrimonio||0)} →</strong></button>
+              {!evento&&!estado.auto&&!resultado&&!estado.forcada&&<EmprestimosJogador key={c.ano} c={c} onAceitar={novo=>setEstado(s=>s.c===c?{...s,c:novo}:s)}/>}
               {ultimo && !evento && <ResumoCompacto c={c} card={ultimo} onDetalhes={() => setGaveta("resumo")} />}
               {estado.aviso && <div className="rp-painel px-4 py-2.5 text-[15px] text-[#F0A99E]" style={{ borderColor: "rgba(227,107,91,.35)" }}>{estado.aviso}</div>}
               {estado.forcada ? (

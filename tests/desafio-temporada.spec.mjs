@@ -9,6 +9,7 @@ for (const width of [390, 1366]) test(`desafio e resultado no mesmo painel, com 
   await page.evaluate(c => localStorage.setItem('ajoia_rapido_v1', JSON.stringify({ v: 1, etapa: 'evento', c })), c);
   await page.reload(); await page.getByRole('button', { name: /Continuar · Desafio Visual/ }).click();
   const desafio = page.getByRole('region', { name: 'Desafio da temporada 2027' });
+  await page.screenshot({path:`/tmp/escolhas-novas-${width}.png`,fullPage:true});
   await desafio.getByRole('button', { name: `Escolher ${desafiosDaTemporada(c)[0].nome}`, exact: true }).click();
   await expect(desafio.getByRole('status')).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);

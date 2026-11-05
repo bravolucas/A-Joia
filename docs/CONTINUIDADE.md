@@ -1,6 +1,6 @@
 ## Tipografia e 100 propostas de imersão
 
-Tipografia: Inter para corpo/controles, Oswald para títulos/display/estatísticas; Rajdhani e Unbounded removidas dos estilos de uso em AJoiaGame e ModoRapido (arquivos locais preservados). Fontes locais existentes, sem nova dependência externa. Build e quatro casos de navegador passaram; ajuste final aplica Oswald aos h1/h2 do modo rápido. Cem propostas detalhadas em `docs/planejamento/100-melhorias-imersao.md`, numeradas e divididas em dez temas, com funcionamento, impacto hipotético, tipo, complexidade e nota /10. Referências conhecidas declaradas, sem pesquisa web nova. Não implementar as cem automaticamente.
+Tipografia: Inter para corpo/controles, Oswald para títulos/display/estatísticas; Rajdhani e Unbounded removidas dos estilos de uso em AJoiaGame e ModoRapido (arquivos locais preservados). Fontes locais existentes, sem nova dependência externa. Build e quatro casos de navegador passaram; ajuste final aplica Oswald aos h1/h2 do modo rápido. Cem propostas detalhadas em `docs/planejamento/100-melhorias-imersao.md`, numeradas e divididas em dez temas, com funcionamento, impacto hipotético, tipo, complexidade e nota /10. Referências conhecidas declaradas, sem pesquisa web nova. Não implementar as cem automaticamente. Publicado em `1aeda96`: Pages `42104384215` e validações `42104384293`/`42104384162` passaram. Documento integral com 100 itens conferido.
 
 ## Primeiro clube — propostas e assinatura
 

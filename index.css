@@ -17,3 +17,7 @@ body { background: #0E1512; color: #E1E6E3; margin: 0; }
 /* Contraste AA: os cinzas de texto mais apagados ficavam abaixo de 4.5:1 no fundo escuro */
 .text-zinc-500 { color: #85908A; }
 .text-zinc-600 { color: #7A847F; }
+
+/* Tipografia editorial esportiva: leitura clara e títulos com identidade. */
+body{font-family:Inter,system-ui,sans-serif;line-height:1.5}button,input,select,textarea{font-family:inherit}.rp .display{font-family:Oswald,Inter,sans-serif;letter-spacing:.015em;font-weight:600}.rp .font-sport{font-family:Inter,system-ui,sans-serif}.rp .font-stat{font-family:Oswald,Inter,sans-serif;font-variant-numeric:tabular-nums}
+.rp h1,.rp h2{font-family:Oswald,Inter,system-ui,sans-serif!important;letter-spacing:.01em}

@@ -4152,10 +4152,10 @@ function resolverTemporada(c, extraStats) {
           --bg-graphite:#0E1512; --bg-panel:rgba(19,26,23,0.62); --border-glass:rgba(255,255,255,0.08);
           --neon-green:#1BC28A; --neon-cyan:#2E6FE0; --gold:#D8B44A;
         }
-        .display{font-family:'Unbounded',sans-serif;}
-        .font-sport{font-family:'Rajdhani',sans-serif;}
+        .display{font-family:'Oswald',sans-serif;}
+        .font-sport{font-family:'Inter',sans-serif;}
         .font-stat{font-family:'bebas-neue','Oswald',sans-serif;letter-spacing:.02em;font-synthesis:none;}
-        body,.font-sans{font-family:'Rajdhani',ui-sans-serif,system-ui,sans-serif;}
+        body,.font-sans{font-family:'Inter',ui-sans-serif,system-ui,sans-serif;}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         @keyframes popIn{0%{opacity:0;transform:scale(0.95) translateY(8px)}100%{opacity:1;transform:scale(1) translateY(0)}}
         @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}

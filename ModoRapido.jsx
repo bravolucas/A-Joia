@@ -49,10 +49,10 @@ export const ESTILO_BASE = `
 @media (prefers-reduced-motion:reduce) { .rp-pen-acao, .rp-pen-flash { animation:none; } }
 
 
-.rp{min-height:100vh;background:#0E1512;color:#E1E6E3;font-family:'Rajdhani',ui-sans-serif,system-ui,sans-serif;}
-.rp .display{font-family:'Unbounded',sans-serif;}
+.rp{min-height:100vh;background:#0E1512;color:#E1E6E3;font-family:'Inter',ui-sans-serif,system-ui,sans-serif;}
+.rp .display{font-family:'Oswald',sans-serif;}
 .rp .font-stat{font-family:'bebas-neue','Oswald',sans-serif;letter-spacing:.02em;font-synthesis:none;}
-.font-sport{font-family:'Rajdhani',sans-serif;}
+.font-sport{font-family:'Inter',sans-serif;}
 .rp-painel{background:rgba(19,26,23,0.72);border:1px solid rgba(255,255,255,0.08);border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,0.35);}
 .rp-btn{transition:transform .2s ease,box-shadow .2s ease,background .2s ease;border-radius:14px;font-weight:700;min-height:52px;}
 .rp-btn:hover{transform:translateY(-1px);} .rp-btn:active{transform:scale(.98);}

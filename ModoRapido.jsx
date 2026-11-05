@@ -1,3 +1,4 @@
+import "./CriacaoAtleta.css";
 import LojaJogador from "./LojaJogador.jsx";
 import {comprarUpJogador,upJogadorDe,upsAtivosJogador} from "./lojaJogador.js";
 import DesafioTemporada from "./DesafioTemporada.jsx";
@@ -726,10 +727,12 @@ function TelaCriacao({ onCriar, ritmoInicial = "normal" }) {
   };
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-6 rp-entra">
+    <div className="ca-criacao rp-entra">
+      <header className="ca-abertura"><span>A SUA HISTÓRIA COMEÇA AQUI</span><h1>Do primeiro treino<br/>à próxima grande conquista.</h1><p>Escolha seu estilo. Decida seu futuro. Viva cada temporada.</p><div className="ca-etapas"><span>01 · Crie seu atleta</span><span>02 · Faça escolhas</span><span>03 · Entre para a história</span></div></header>
+      <div className="ca-layout"><aside className="ca-previa" aria-label="Prévia do atleta" style={{'--ca-cenario':`url(${ARTE.estadioNoite})`}}><div className="ca-cartao"><span className="ca-selo">NOVA PROMESSA · 16 ANOS</span><div className="ca-camisa"><CamisaPremium cor="#136c50" numero={doDia?NUMERO_PADRAO[doDia.posicao]:numero||NUMERO_PADRAO[posicao]||10} sobrenome={nome.trim().split(/\s+/).slice(-1)[0].toUpperCase()||'SEU NOME'}/></div><h2>{nome.trim()||'A próxima joia'}</h2><p>{nacDe(doDia?.nac||nac).label} · {doDia?posicaoDe(doDia.posicao).label:posicao?posicaoDe(posicao).label:'Qual é a sua posição?'}</p><div className="ca-detalhes"><span><small>ORIGEM</small>{origemDe(doDia?.origem||origem)?.nome||'Você escolhe'}</span><span><small>PERFIL</small>{(doDia?.personalidade||personalidade)?personaDe(doDia?.personalidade||personalidade).label:'Sua personalidade'}</span></div><div className="ca-progresso"><span>{[nome.trim().length>=2,!!(doDia||posicao),!!(doDia||origem),!!(doDia||personalidade)].filter(Boolean).length}/4 escolhas prontas</span><progress aria-label="Progresso da criação" max="4" value={[nome.trim().length>=2,!!(doDia||posicao),!!(doDia||origem),!!(doDia||personalidade)].filter(Boolean).length}/></div></div><p className="ca-legenda">Seu talento abre portas.<br/>Suas decisões fazem a carreira.</p></aside><div className="ca-formulario">
       <div>
         <h1 className="display text-xl text-[#F2F5F3]">Crie seu atleta</h1>
-        <p className="text-[17px] text-[#8FA39A] mt-1">Você começa aos 16 anos. Cada temporada é uma tela, e cada escolha fica na sua história.</p>
+        <p className="text-[17px] text-[#8FA39A] mt-1">Comece aos 16 anos. Escolha quem você quer ser dentro e fora de campo.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-2" role="tablist">
@@ -742,7 +745,7 @@ function TelaCriacao({ onCriar, ritmoInicial = "normal" }) {
       </div>
 
       <Secao titulo="Nome">
-        <input value={nome} onChange={(e) => setNome(e.target.value.slice(0, 24))} placeholder="Como a torcida vai te chamar"
+        <input value={nome} onChange={(e) => setNome(e.target.value.slice(0, 24))} aria-label="Nome do atleta" autoComplete="nickname" placeholder="Como a torcida vai te chamar"
           className="rp-painel px-4 min-h-[52px] text-lg text-[#F2F5F3] placeholder:text-[#7F918A] outline-none focus:border-[#12A876]" />
       </Secao>
 
@@ -837,7 +840,9 @@ function TelaCriacao({ onCriar, ritmoInicial = "normal" }) {
         {gerando ? "Montando o mundo do futebol…" : doDia ? "Jogar a Carreira do Dia" : "Começar carreira"}
       </button>
 
+      {!pronto&&<p className="ca-faltam">Para entrar em campo: {[nome.trim().length<2?'digite seu nome':null,!doDia&&!posicao?'escolha a posição':null,!doDia&&!origem?'escolha a origem':null,!doDia&&!personalidade?'escolha a personalidade':null].filter(Boolean).join(' · ')}.</p>}
       <MelhoresCarreiras />
+      </div></div>
     </div>
   );
 }

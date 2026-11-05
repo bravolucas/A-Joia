@@ -1,3 +1,7 @@
+## Criação do atleta — nova primeira impressão
+
+Tela remodelada com cabeçalho de estreia, prévia de camisa dinâmica (nome e número), cenário de estádio existente, resumo de posição/origem/perfil, progresso 0–4 e indicação do que falta. Desktop em duas colunas com prévia fixa; celular com cartão compacto. Preservados modos livre/dia, todas as opções, código e validação. Build, 28 testes de lógica, dois smoke tests e verificação interativa em 390/1366 px passaram (nome/número, modo do dia, botão e overflow).
+
 ## Personagens realistas — novembro de 2026
 
 Cinco recortes fotográficos fictícios substituem os vetores humanos em `JogadorCampo` e `RetratoApresentacao`: goleiro, jogador, adversário azul, atleta de apresentação e dirigente. Aplicação compartilhada cobre pênaltis, defesa, barreira da falta, passe e apresentação grande. Uniformes dos sprites fixos; personalização de camisa/nome/número do clube preservada na apresentação, marcadores numéricos dos jogadores mantidos. Removidas mãos vetoriais flutuantes da apresentação. Animações de deslocamento, alvos, teclado, movimento reduzido e resultados preservados. Cinco WebP transparentes em `arte/personagens/`, cerca de 96–168 KiB cada. Sem mudança de saves ou economia.

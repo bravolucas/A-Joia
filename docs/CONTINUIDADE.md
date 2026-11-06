@@ -4,7 +4,7 @@ Catálogo ampliado de 24 para 60 (36 novos), seis famílias, elegibilidade por p
 
 Novo `TreinosPretemporada.jsx/css` no lugar do seletor antigo: fotos por tema, ganhos/efeitos explícitos, raridade, entrada rápida e um clique para jogar. Som de carta respeita configuração existente; movimento reduzido mostra opções imediatamente. Técnico não alterado. Referência: guia oficial El Ídolo, seção Las cartas; adapte 3 cartas e troca ao nosso ritmo, sem anúncios. Imagens reutilizam acervo local já creditado.
 
-206 testes de lógica e 21 browser passaram. Novos testes: 12 temporadas em seis posições, famílias distintas, exclusão de duas temporadas, troca idempotente, recarga, histórico efetivo e jogar com um toque em 390/1366 px. Primeiro teste UI foi corrigido para inspecionar o registro da temporada fechada (pretemporada é limpa no fechamento), sem mudar o comportamento do jogo. Build e diff check passaram. Capturas em `docs/pretemporada-remodelada/`, logs `/tmp/treinos-*`.
+206 testes de lógica e 21 browser passaram. Novos testes: 12 temporadas em seis posições, famílias distintas, exclusão de duas temporadas, troca idempotente, recarga, histórico efetivo e jogar com um toque em 390/1366 px. Primeiro teste UI foi corrigido para inspecionar o registro da temporada fechada (pretemporada é limpa no fechamento), sem mudar o comportamento do jogo. Build e diff check passaram. Capturas em `docs/pretemporada-remodelada/`, logs `/tmp/treinos-*`. Publicado em `76fdec2`: Pages https://github.com/bravolucas/A-Joia/actions/runs/42145981590 . Validação geral `42145981704` e navegador `42145981585` passaram. Confirmação documental apenas no checkpoint, sem novo deploy.
 
 ## Lote de imersão: minigames, mérito, cosméticos, idolatria e OVR
 

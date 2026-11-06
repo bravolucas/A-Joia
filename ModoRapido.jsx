@@ -183,7 +183,7 @@ function agruparTitulos(lista) {
     lista.filter((x) => x.tipo === tipo).forEach((x) => {
       const nome = x.nome || ROTULO_TIPO[tipo];
       const g = grupos.find((y) => y.tipo === tipo && y.nome === nome);
-      if (g) g.n += 1; else grupos.push({ tipo, nome, n: 1 });
+      if (g) { g.n += 1; if(x.ano!=null&&!g.anos.includes(x.ano))g.anos.push(x.ano); } else grupos.push({ tipo, nome, n: 1, anos: x.ano!=null?[x.ano]:[] });
     });
   });
   return grupos;
@@ -1482,7 +1482,7 @@ function TelaColetiva({ c, coletiva, resposta, onResponder, onSeguir }) {
 function TelaTraco({ c, opcoes, onEscolher }) {
   const marco = IDADES_TRACO.indexOf(c.idade) + 1;
   return (
-    <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-4 rp-entra">
+    <div className="rp-tracos max-w-xl mx-auto px-4 py-6 flex flex-col gap-4 rp-entra">
       <div>
         <span className="rp-chip" style={{ color: "#EBC557", background: "rgba(216,180,74,.14)" }}>Marco {marco} de 3 · {c.idade} anos</span>
         <h2 className="display text-lg text-[#F2F5F3] mt-3">Que jogador você quer ser?</h2>
@@ -2047,7 +2047,7 @@ function PosCarreira({ c, onEscolher }) {
     return <div className="rp-painel p-4"><div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Depois da bola</div><div className="display text-base mt-2" style={{ color: pc.cor }}>{pc.nome}</div><p className="text-[16px] text-[#C9D3CE] mt-1">{pc.epilogo}</p></div>;
   }
   return (
-    <div className="rp-painel p-4">
+    <div className="rp-poscarreira rp-painel p-4">
       <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">E agora? O que vem depois da bola</div>
       <p className="text-[14px] text-[#8FA39A] mt-1">Cada caminho vira uma segunda carreira. O que você fez em campo pesa na chance de dar certo.</p>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-2 mt-3">
@@ -2287,7 +2287,7 @@ function TelaFim({ c, onNova, onSair, onPosCarreira, onComecarTecnico }) {
     setTimeout(() => setImagem("pronto"), 2500);
   };
   return (
-    <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
+    <div className="rp-legado-completo max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
       <div className="text-center -mx-4 -mt-6 px-4 pt-16 pb-6 flex flex-col items-center" style={{ background: `linear-gradient(180deg, rgba(14,21,18,.15) 0%, rgba(14,21,18,.6) 55%, #0E1512 100%), url(${fotoDoNivel(L.nivel)}) center 60%/cover` }}>
         <EmblemaLegado c={c} L={L} size={104} />
         <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#E1E6E3] mt-4">Fim de carreira · {c.idade - 1} anos</div>
@@ -2352,7 +2352,7 @@ function TelaFim({ c, onNova, onSair, onPosCarreira, onComecarTecnico }) {
             {porTipo.map((g) => (
               <div key={g.tipo + g.nome} className="rounded-2xl bg-[#0E1512] border border-white/5 p-3 flex items-center gap-3">
                 <IconeTitulo tipo={g.tipo} nome={g.nome} size={34} />
-                <div><div className="font-stat text-xl text-[#F2F5F3] leading-none">{g.n}</div><div className="text-[13px] text-[#C9D3CE] leading-tight">{g.nome}</div></div>
+                <div><div className="font-stat text-xl text-[#F2F5F3] leading-none">×{g.n}</div><div className="text-[13px] text-[#C9D3CE] leading-tight">{g.nome}</div><small className="rp-anos-titulo">{[...g.anos].sort((a,b)=>a-b).join(" · ")}</small></div>
               </div>
             ))}
           </div>

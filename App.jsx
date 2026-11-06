@@ -86,6 +86,7 @@ export default function App() {
         </section>
 
         <div className="flex flex-col gap-2">
+          {salvo?.etapa === "fim" && <button onClick={() => comecar(false)} className="rp-btn rp-prim text-[17px]">Rever legado · {salvo.c.nome}</button>}
           {emAndamento ? (
             <>
               <button onClick={() => comecar(false)} className="rp-btn rp-prim text-[17px] flex items-center justify-center gap-2"><Gema size={20} /> Continuar · {salvo.c.nome}, {salvo.c.idade} anos</button>

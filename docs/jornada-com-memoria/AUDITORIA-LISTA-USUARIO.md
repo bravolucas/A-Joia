@@ -60,7 +60,11 @@ Esta tabela corresponde aos **50 itens selecionados** na mensagem extensa do usu
 ## O que ainda falta
 
 - **67:** completar referências históricas reais de clubes e ligas, com fontes e escopos comparáveis, e atualizar os recortes mundiais além de 2022. Os recordes do universo observado são um recurso distinto e estão identificados como simulação.
-- **98:** terminar a auditoria visual manual de telas raras/legadas e do modo completo. Os 119 cenários de navegador desta rodada cobrem os fluxos principais, não todo estado possível do jogo.
+- **98:** terminar a auditoria visual manual das demais telas raras/legadas e do modo completo. Traços, coletiva e legado completo foram revisados nesta continuação em 320 e 1366 px. Os 119 cenários de navegador desta rodada cobrem os fluxos principais, não todo estado possível do jogo.
 - **Refinamentos de base:** ampliar variedade dos ecos e do rival e melhorar a fluidez das cenas de quatro poses/comemorações. A base existe; isso não deve ser descrito como animação corporal contínua ou vídeo.
 
 **Elenco continental deixou de ser pendência nesta etapa.** O escopo é a seleção do atleta e suas campanhas, não simular elencos individuais de todas as seleções do planeta a cada partida.
+
+## Continuação: legado e partidas em Copas
+
+Referência adicional: Messi, 26 partidas, derivada do CSV de aparições masculinas **1970–2022**. Comparação usa apenas jogos registrados em Copas; ausência de dados antigos aparece como contagem parcial. Não é uma atualização dos recordes até 2026. Sala de troféus do legado completo agora mostra ×quantidade e anos; acesso “Rever legado” preserva a carreira encerrada na tela inicial. Item 67 e 98 continuam parciais pelos limites acima.

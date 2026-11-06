@@ -1,3 +1,9 @@
+## Continuação — legado, telas raras e partidas históricas
+
+Traços em três cartas no desktop; legado em duas colunas com pós-carreira em área própria; sala de troféus do legado com ×quantidade/anos. Tela inicial agora tem **Rever legado** para carreiras encerradas. Nova referência de Messi, 26 partidas em Copas, CSV masculino 1970–2022: contagem só dos jogos registrados, com aviso para saves parciais. Fonte/licença em `dados/CREDITOS-COPAS.md`; relatório/capturas em `docs/revisao-legado-e-marcas/`.
+
+Build, 38 arquivos de lógica e **40 cenários de navegador** passaram. Logs `/tmp/continuidade-visual-build.log`, `/tmp/continuidade-visual-unit.log`, `/tmp/continuidade-visual-browser-entrega.log`. Sete cenários novos incluídos no CI. Primeira execução sem prévia foi descartada; fixtures incompletos dos testes novos corrigidos para usar o motor real. Auditoria dos 50 itens atualizada; 67/98 seguem parciais. Publicação desta continuação em acompanhamento. Documentos do usuário não rastreados preservados.
+
 ## Complemento — rever copas já conquistadas
 
 Corrigida a condição que ainda escondia o botão de replay para títulos comuns: detalhes da temporada → Rever conquistas agora abre também Copa do Brasil e demais taças. Replay retorna à tela anterior sem duplicar temporada ou recompensa. Resumo identifica a copa vencida como Campeão mesmo quando o registro da fase conserva Final. Build e 32 cenários de navegador passaram (14 de fechamento, 12 de jornada, 6 de OVR); logs `/tmp/titulos-rever-build.log` e `/tmp/titulos-rever-browser.log`. Complemento publicado em `d559372`: Pages https://github.com/bravolucas/A-Joia/actions/runs/42268433833 concluiu com sucesso; validação de navegador `42268433803` e geral `42268433786` também passaram. Confirmação documental salva somente na branch de checkpoint, sem novo deploy.

@@ -1,6 +1,6 @@
 ## Lote de imersão: minigames, mérito, cosméticos, idolatria e OVR
 
-Implementados quatro novos lances, rotação por posição/antirrepetição, bônus histórico de superação no legado, visuais permanentes por conquistas, progressão de idolatria e revelação de OVR por cartas/bola. Detalhes, limites e referências em `docs/imersao-modo-rapido/IMPLEMENTACAO.md`. 203 testes de lógica, 35 browser e repetição de 15 relevantes passaram. Corrigida na validação a ordem de inicialização da força do time. Não mexer nos DOCX/relatório El Ídolo não rastreados deste workspace. Mais oito ideias registradas como propostas, sem implementação automática.
+Implementados quatro novos lances, rotação por posição/antirrepetição, bônus histórico de superação no legado, visuais permanentes por conquistas, progressão de idolatria e revelação de OVR por cartas/bola. Detalhes, limites e referências em `docs/imersao-modo-rapido/IMPLEMENTACAO.md`. 203 testes de lógica, 35 browser e repetição de 15 relevantes passaram. Corrigida na validação a ordem de inicialização da força do time. Não mexer nos DOCX/relatório El Ídolo não rastreados deste workspace. Mais oito ideias registradas como propostas, sem implementação automática. Publicado em `604516e`: Pages https://github.com/bravolucas/A-Joia/actions/runs/42143167152 . Validação geral `42143167360` e navegador `42143167129` passaram. Confirmação documental apenas no checkpoint, sem novo deploy.
 
 ## Contexto dos lances e adversário
 

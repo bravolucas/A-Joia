@@ -2776,7 +2776,7 @@ function TelaCopa({ c, card, onAvancar }) {
   const r = jogada?.res;
   const corTela = !r ? "#3F3F46" : !revelado ? "#3F3F46" : r.venceu ? (jogada.card.copa.campeao ? "#CA8A04" : "#16A34A") : "#DC2626";
   return (
-    <div className="cp px-4 pt-4 flex flex-col gap-3 max-w-md mx-auto">
+    <div className="cp cp-torneio px-4 pt-4 flex flex-col gap-3 max-w-md mx-auto">
       {/* cabeçalho da Copa */}
       <section className="relative rounded-[22px] overflow-hidden border border-[#D8B44A]/35 rp-entra" style={{ background: "radial-gradient(120% 90% at 85% 0%, rgba(216,180,74,.28), transparent 60%), linear-gradient(160deg, #0F2A20, #0B0B0C 70%)" }}>
         <div className="absolute inset-0 opacity-[.18]" style={{ background: `url(${ARTE.torcida}) center/cover`, mixBlendMode: "luminosity" }} aria-hidden="true" />

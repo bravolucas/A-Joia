@@ -4,7 +4,7 @@ Resultado do desafio de OVR agora ocupa a altura disponível após o cabeçalho,
 
 FluxoResultados.css concentra ajustes responsivos de consequências, entrevistas, criação, primeiro contrato, apresentação de transferência e celebração do treinador. Minigames novos trocam os controles por Continuar no mesmo espaço; pênalti, defesa, falta e passe permitem antecipar o avanço automático com Continuar, preservando animações e os timers existentes. Cenários compactos em telas baixas. Janelas de sorteio mostram o botão de pular como ativo.
 
-Build e 32 arquivos de testes de lógica passaram. Navegador: 24 casos principais + 29 casos extras + 6 verificações de celebração em 640 px passaram. Testes de geometria exigem botões dentro do viewport: OVR em 320×568, 390/1366×640; entrevistas em 320/1366×568; oito minigames em 390/1366×640 e celebrações em 390/1366×640. Os primeiros checks detectaram overflow nos minigames, corrigido antes de publicar. Logs /tmp/fluxo-*. Documentos não rastreados do usuário preservados.
+Build e 32 arquivos de testes de lógica passaram. Navegador: 24 casos principais + 29 casos extras + 6 verificações de celebração em 640 px passaram. Testes de geometria exigem botões dentro do viewport: OVR em 320×568, 390/1366×640; entrevistas em 320/1366×568; oito minigames em 390/1366×640 e celebrações em 390/1366×640. Os primeiros checks detectaram overflow nos minigames, corrigido antes de publicar. Logs /tmp/fluxo-*. Documentos não rastreados do usuário preservados. Publicado em fe04ee2: Pages https://github.com/bravolucas/A-Joia/actions/runs/42148127428 . Validação geral 42148127292 e navegador 42148127303 passaram. Confirmação documental apenas no checkpoint, sem novo deploy.
 
 ## Pré-temporada remodelada — 60 treinos
 

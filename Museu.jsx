@@ -1,3 +1,4 @@
+import Personalizacao from './Personalizacao.jsx';
 import { CamisaPremium, MedalhaFeito } from './VisualFutebol.jsx';
 import Icone from './Icone.jsx';
 import React, { useEffect, useRef, useState } from 'react';
@@ -72,6 +73,7 @@ export default function Museu({ onVoltar }) {
   return <main className="mu">
     <header className="mu-top"><button onClick={onVoltar} className="mu-back">← Voltar ao menu</button><span>A JOIA · COLEÇÃO PERMANENTE</span></header>
     <section className="mu-hero"><div><span className="mu-eyebrow">O FUTEBOL PASSA. A HISTÓRIA FICA.</span><h1>Seu museu.</h1><p>Cada carreira escreve um capítulo. Aqui, todas as suas conquistas se encontram.</p></div><div className="mu-hero-total"><strong>{total}</strong><span>PEÇAS NA COLEÇÃO</span></div></section>
+    <Personalizacao/>
     <div className="mu-categories" role="tablist" aria-label="Categorias do museu">{ABAS.map(a => <button key={a.id} role="tab" id={`mu-tab-${a.id}`} aria-selected={aba === a.id} tabIndex={aba === a.id ? 0 : -1} onKeyDown={e => {
       if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
       e.preventDefault();

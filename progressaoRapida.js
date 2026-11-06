@@ -1,0 +1,7 @@
+export function idolatria(valor=0){const pontos=Math.max(0,Math.min(100,Number(valor)||0));const niveis=[{min:0,nome:'Chegando'},{min:25,nome:'Acolhido'},{min:50,nome:'Referência'},{min:75,nome:'Ídolo'},{min:95,nome:'Lenda'}];const idx=niveis.findLastIndex(n=>pontos>=n.min),atual=niveis[idx],proximo=niveis[idx+1];return{pontos,atual:atual.nome,proximo:proximo?.nome||null,faltam:proximo?Math.ceil(proximo.min-pontos):0,progresso:proximo?(pontos-atual.min)/(proximo.min-atual.min):1};}
+export const multiplicadorMerito=forca=>forca<=65?1.6:forca<=74?1.35:forca<=81?1.15:1;
+const pesos={liga:9,copa:4,continental:18,mundial:8,segunda:2};
+export function bonusSuperacao(temporadas=[]){return temporadas.reduce((total,t)=>{if(!Number.isFinite(t.forcaClube))return total;const extra=multiplicadorMerito(t.forcaClube)-1;return total+Math.round((t.titulos||[]).reduce((n,v)=>n+(pesos[v.tipo]||0),0)*extra);},0);}
+export const MINIS_NOVOS=['cruzamento','interceptacao','cabeceio','reflexo'];
+export const baseMini=mini=>({cruzamento:'passe',interceptacao:'passe',cabeceio:'penalti',reflexo:'defesa'})[mini]||mini;
+export const poolMinis=pos=>pos==='GOL'?['defesa','reflexo']:['ZAG','VOL'].includes(pos)?['passe','interceptacao','cabeceio']:['LD','LE','ALE','ALD','PE','PD','ME','MD'].includes(pos)?['passe','cruzamento','falta']:['MC','MEI'].includes(pos)?['passe','falta','interceptacao']:['penalti','cabeceio','cruzamento'];

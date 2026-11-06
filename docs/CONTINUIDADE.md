@@ -1,3 +1,7 @@
+## Lote de imersão: minigames, mérito, cosméticos, idolatria e OVR
+
+Implementados quatro novos lances, rotação por posição/antirrepetição, bônus histórico de superação no legado, visuais permanentes por conquistas, progressão de idolatria e revelação de OVR por cartas/bola. Detalhes, limites e referências em `docs/imersao-modo-rapido/IMPLEMENTACAO.md`. 203 testes de lógica, 35 browser e repetição de 15 relevantes passaram. Corrigida na validação a ordem de inicialização da força do time. Não mexer nos DOCX/relatório El Ídolo não rastreados deste workspace. Mais oito ideias registradas como propostas, sem implementação automática.
+
 ## Contexto dos lances e adversário
 
 CabecalhoMomento exibe confronto com dois escudos/bandeiras, fase e descrição do lance. Clube de empréstimo e seleção corretos. Novos momentos guardam adversário gerado deterministicamente entre elegíveis da mesma liga/continental; finais da Copa usam o adversário real da chave. Saves antigos com título contra X preservam a seleção já indicada; demais contextos antigos usam derivação estável, sem alterar sorteios esportivos. Não há novo placar/minuto fabricado; o texto de situação existente é preservado. Dados do adversário acompanham o momento salvo e seu histórico.

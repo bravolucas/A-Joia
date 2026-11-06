@@ -1,3 +1,4 @@
+import Personalizacao from './Personalizacao.jsx';
 import React,{useEffect,useId,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import Icone from './Icone.jsx';
@@ -69,7 +70,7 @@ export default function LojaJogador({c,etapa,onComprar,onFechar}){
     <div className="lj-resumo"><span>UPs ativos <b>{ativos.length}/3</b></span><span>{lista.length} {lista.length===1?'opção':'opções'}</span></div>
     <p role="status" className={`lj-feedback ${aviso?.erro?'lj-feedback-erro':''}`} title={aviso?.texto}>{aviso?.texto||''}</p>
    </div>
-   <div className="lj-content">
+   <div className="lj-content"><Personalizacao/>
     {!entreTemporadas&&<p className="lj-aviso">As compras abrem entre temporadas.</p>}
     <div className="lj-grid">{lista.map(i=>{
      const tem=comprado(i),motivo=impedimento(i),duracao=ativo(i),adquirido=tem?(i.temporario?'Ativo':'Adquirido'):null;

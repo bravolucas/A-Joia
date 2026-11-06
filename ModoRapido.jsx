@@ -1,3 +1,7 @@
+import Idolatria from './Idolatria.jsx';
+import Personalizacao from './Personalizacao.jsx';
+import LancesCriativos from './LancesCriativos.jsx';
+import {MINIS_NOVOS,bonusSuperacao} from './progressaoRapida.js';
 import {contextoMomento} from './rapido.js';
 import PrimeiroClube from './PrimeiroClube.jsx';
 import TelaCriacao from './CriacaoCarreira.jsx';
@@ -389,6 +393,7 @@ function CartaoCarreira({ c, onEstante, onFicha, contadorPulsa, recorde }) {
           </button>
         </div>
       </div>
+      {!semClube&&<Idolatria c={c} compacto/>}
     </header>
   );
 }
@@ -704,7 +709,7 @@ function MelhoresCarreiras() {
 
 /* ---------- momento decisivo: pênalti, falta, passe ou defesa ---------- */
 const ZONAS = [[0, 0], [1, 0], [2, 0], [0, 1], [1, 1], [2, 1]]; // [coluna, linha]
-const NOME_MINI = { penalti: "Pênalti decisivo", falta: "Falta decisiva", passe: "Último lance", defesa: "Pênalti contra" };
+const NOME_MINI = { cruzamento:"Cruzamento decisivo",interceptacao:"Interceptação",cabeceio:"Cabeceio decisivo",reflexo:"Defesa de reflexo", penalti: "Pênalti decisivo", falta: "Falta decisiva", passe: "Último lance", defesa: "Pênalti contra" };
 
 function CabecalhoMomento({ c, momento }) {
   const mini = momento.mini || "penalti";
@@ -934,6 +939,7 @@ function TelaPasse({ c, momento, onFim }) {
 
 function TelaMomento({ c, momento, onFim }) {
   const mini = momento.mini || "penalti";
+  if(MINIS_NOVOS.includes(mini))return <LancesCriativos c={c} momento={momento} tipo={mini} onFim={onFim} cabecalho={<CabecalhoMomento c={c} momento={momento}/>}/>;
   if (mini === "falta") return <TelaFalta c={c} momento={momento} onFim={onFim} />;
   if (mini === "passe") return <TelaPasse c={c} momento={momento} onFim={onFim} />;
   return <TelaPenalti c={c} momento={momento} onFim={onFim} goleiro={mini === "defesa"} />;
@@ -961,7 +967,7 @@ function SlideTitulo({ c, card, titulo }) {
           {pelaSelecao ? <span>{nacDe(c.nac).label}</span> : <><ClubDot club={clubeDe(card.clube)} size={20} /><span>{card.clube}</span></>}
           <span className="text-[#8FA39A]">· {card.ano}</span>
         </div>
-        <div className="mt-3 rp-chip" style={{ color: "#EBC557", background: "rgba(216,180,74,.16)" }}>{contagem}</div>
+        <div className="mt-3 rp-chip" style={{ color: "#EBC557", background: "rgba(216,180,74,.16)" }}>{contagem}</div>{!pelaSelecao&&bonusSuperacao([card])>0&&<p className="mt-2 text-sm text-[#EBC557]">Conquista de superação · mérito extra no legado</p>}
       </div>
     </div>
   );
@@ -2322,7 +2328,7 @@ function TelaFim({ c, onNova, onSair, onPosCarreira, onComecarTecnico }) {
     else clubes.push({ nome: s.clube, de: s.ano, ate: s.ano, jogos: s.jogos, gols: s.gols, emp: s.emprestado, titulos: s.titulos.filter((x) => !ehPremioIndividual(x.tipo) && x.tipo !== "copaMundo" && x.tipo !== "continentalSelecao").length });
   });
   const proximo = NIVEIS_LEGADO.find((n) => n.min > L.pontos);
-  const rotulos = { numeros: "Números em campo", titulos: "Títulos por clubes", selecao: "Seleção", premios: "Prêmios individuais", auge: "Auge técnico", torcida: "Idolatria e legado", rival: "Duelo com o rival" };
+  const rotulos = { superacao:"Superação com clubes menores", numeros: "Números em campo", titulos: "Títulos por clubes", selecao: "Seleção", premios: "Prêmios individuais", auge: "Auge técnico", torcida: "Idolatria e legado", rival: "Duelo com o rival" };
   const porTipo = agruparTitulos(c.lista);
   const copiar = async () => {
     try { await navigator.clipboard.writeText(textoCompartilhar(c)); setCopiado(true); setTimeout(() => setCopiado(false), 2000); } catch { setCopiado(false); }
@@ -3306,6 +3312,8 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
       {gaveta === "ficha" && c && (
         <Gaveta titulo={c.nome} onFechar={() => setGaveta(null)}>
           <Ficha c={c} />
+          <Idolatria c={c}/>
+          <Personalizacao/>
           <SeletorFoco c={c} onFoco={mudarFoco} />
           {etapa==='evento'&&!evento&&!estado.auto&&!resultado&&!c.emprestimo&&c.flags.baseEscolhida&&(c.contrato?.restantes??0)>0&&c.lojaAnoEmCurso!==c.ano&&<button className="rp-opcao px-4 py-3 text-left" onClick={pedirEmprestimo}>Pedir propostas por empréstimo</button>}
           {c.emprestimo&&<p className="text-sm text-[#C9D3CE]">Empréstimo no {c.emprestimo.destino} · {c.emprestimo.restantes??1} temporada(s) restante(s). Retorno ao {c.clubeNome}.</p>}

@@ -42,8 +42,8 @@ function RevelacaoDesafio({ resultado, progresso }) {
   const posicao = progresso >= 1 ? alvo : ((300 + alvo) * (1 - (1 - progresso) ** 3)) % 100;
   return <div className={`dt-sorteio ${progresso >= 1 ? 'dt-revelado' : ''}`}>
     <div className="dt-sorteio-titulo"><span role="status">{progresso < 1 ? 'Revelando resultado…' : 'Resultado confirmado'}</span><span>{progresso < 1 ? 'Acompanhe a indicação' : `${Math.round(chances[idx].p * 100)}% de chance`}</span></div>
-    <div className="dt-trilho" aria-hidden="true"><div className="dt-faixas">{chances.map((c,i) => <span key={i} style={{ flex: c.p }} className={c.d > 0 ? 'dt-faixa-ganho' : c.d < 0 ? 'dt-faixa-perda' : 'dt-faixa-neutra'} />)}</div><span className="dt-indicador" style={{ left: `${posicao}%` }} /></div>
-    <div className="dt-sorteio-legenda">{chances.map((c,i) => <span key={i} className={progresso >= 1 && i === idx ? 'dt-faixa-escolhida' : ''}>{pontos(c.d)} OVR <b>{Math.round(c.p * 100)}%</b></span>)}</div>
+    <div className="dt-arena-revelacao"><div className="dt-indicador dt-bola-revelacao" aria-hidden="true" style={{transform:`rotate(${progresso*720}deg) scale(${1+Math.sin(progresso*Math.PI)*.12})`}}><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="27" fill="#efe4c8"/><path d="m30 15 14 10-5 17H21l-5-17Z" fill="#173626"/><path d="m30 3 0 12M4 22l12 3M13 51l8-9M47 51l-8-9M56 22l-12 3" stroke="#173626" strokeWidth="3"/></svg></div><div className="dt-cartas-resultado">{chances.map((c,i)=>{const ativo=progresso>=1?i===idx:i===Math.floor(posicao/100*chances.length);return <div key={i} className={`dt-carta-resultado ${ativo?'dt-carta-ativa':''} ${progresso>=1&&i===idx?'dt-carta-confirmada':''} ${c.d<0?'dt-carta-perda':''}`}><small>{progresso>=1&&i===idx?'SEU RESULTADO':c.d>0?'EVOLUÇÃO':c.d<0?'RISCO':'ESTÁVEL'}</small><strong>{pontos(c.d)}</strong><span>OVR</span><b>{Math.round(c.p*100)}% de chance</b></div>;})}</div></div>
+    <div className="dt-sorteio-legenda">{chances.map((c,i) => <span key={i} className={progresso>=1&&i===idx?'dt-faixa-escolhida':''}>{pontos(c.d)} OVR <b>{Math.round(c.p*100)}%</b></span>)}</div>
   </div>;
 }
 
@@ -64,7 +64,7 @@ export default function DesafioTemporada({ c, resultado, onEscolher, onContinuar
       <div className="dt-resultado">
         <span className="dt-etapa">SUA ESCOLHA</span><h2>{resultado.nome}</h2>
         <RevelacaoDesafio resultado={resultado} progresso={progresso} />
-        <div className={`dt-evolucao ${!animando ? 'dt-evolucao-final' : ''}`}><div><span>Antes</span><strong>{resultado.ovrAntes}</strong></div><span aria-hidden="true">→</span><div><span>{animando ? 'Evolução' : 'Agora'}</span><strong data-testid="desafio-ovr-atual" aria-live="off">{nivel}</strong></div><b className={resultado.d < 0 ? 'dt-perda' : ''}>{animando ? '…' : `${pontos(resultado.d)} OVR`}</b></div>
+        <div className={`dt-evolucao ${!animando ? 'dt-evolucao-final' : ''}`}><div><span>Antes</span><strong>{resultado.ovrAntes}</strong></div><span className="dt-transicao" aria-hidden="true"><i/><i/><i/></span><div><span>{animando ? 'Evolução' : 'Agora'}</span><strong data-testid="desafio-ovr-atual" aria-live="off">{nivel}</strong></div><b className={resultado.d < 0 ? 'dt-perda' : ''}>{animando ? '…' : `${pontos(resultado.d)} OVR`}</b></div>
         <div className="dt-detalhes" style={{ visibility: animando ? 'hidden' : 'visible' }} aria-hidden={animando}>
           <p>{resultado.txt}</p>
           {resultado.efeitos?.length > 0 && <ul className="dt-efeitos">{resultado.efeitos.filter(e => !/OVR$/.test(e.txt)).map(e => <li key={e.txt}>{e.txt}</li>)}</ul>}

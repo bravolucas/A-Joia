@@ -1,3 +1,4 @@
+import {bonusSuperacao,baseMini,poolMinis} from './progressaoRapida.js';
 import {MELHORIAS_JOGADOR,UPS_JOGADOR,upsAtivosJogador,upJogadorDe,impedimentoLojaJogador} from "./lojaJogador.js";
 import { registrarMuseu } from './museu.js';
 /* ===================== MODO RÁPIDO — LÓGICA =====================
@@ -1191,7 +1192,7 @@ function jogarCopaBase(c, card0, opId) {
       k.enfrentados.push(k.adversario.id);
       texto += ` ${k.fase === 4 ? "Na final" : k.fase === 3 ? "Na semifinal" : `Nas ${FASES_COPA[k.fase].toLowerCase()}`}: ${k.adversario.label}.`;
       if (k.fase === 4 && k.titular) {
-        const mini = miniDaPosicao(c.posicao);
+        const mini = miniParaMomento(c,{tipo:'selecao'});
         const m = { tipo: "selecao", titulo: `Final da Copa do Mundo ${k.ano} · contra ${k.adversario.label}`, mini, adversario:{tipo:"selecao",id:k.adversario.id,nome:k.adversario.label}, ordem: 1, total: 1 };
         m.texto = textoDoMomento(mini, m, c);
         card.pendente = m; card.filaMomentos = [];
@@ -1309,7 +1310,7 @@ function jogarTemporadaBase(c0) {
     + (c.formaNivel || 0) * 0.12 + (share - 0.6) * 0.5 - 0.25 + (rnd() + rnd() - 1) * 0.8 * (fx.notaRuido || 1), 5.2, 9.7).toFixed(2);
 
   const card = {
-    idx: c.temporadas.length, ano: c.ano, idade: c.idade, clube: clube.nome, cor: clube.cor, ligaId: clube.liga, ligaNome: liga.nome,
+    idx: c.temporadas.length, ano: c.ano, idade: c.idade, forcaClube:clube.forca, clube: clube.nome, cor: clube.cor, ligaId: clube.liga, ligaNome: liga.nome,
     emprestado: !!c.emprestimo, ovr, ovrAntes, pretemporada: preInfo ? { ...preInfo, deltaOvr: ovr - ovrAntes } : null,
     status: st.label, foco: c.foco, jogos, gols, assist, nota, lesao: lesao?.nome || null, share,
     titulos: [], destaques: [],
@@ -1317,6 +1318,7 @@ function jogarTemporadaBase(c0) {
   if (jogos > 0 && efTorcida >= 0.12) card.destaques.push("A arquibancada te empurrou o ano inteiro: jogar em casa virou vantagem");
   else if (jogos > 0 && efTorcida <= -0.15) card.destaques.push("Vaia a cada toque errado: a própria torcida pesou contra você");
   const forcaTimeExtra = (fx.forcaTime || 0) * share;
+  card.forcaClube=clampR(clube.forca+forcaTimeExtra,0,99);
 
   // Desafios da temporada: cada título disputado na bola vira um minigame seu,
   // em ordem cronológica (liga e copa em maio, finais continentais, seleção no meio do ano).
@@ -1394,8 +1396,7 @@ function jogarTemporadaBase(c0) {
     }
   }
 
-  const mini = miniDaPosicao(c.posicao);
-  momentos.forEach((m, i) => { m.mini = mini; Object.assign(m,contextoMomento(c,m)); m.texto = textoDoMomento(mini, m, c); m.ordem = i + 1; m.total = momentos.length; });
+  momentos.forEach((m, i) => { m.mini = miniParaMomento(c,m,momentos.slice(0,i).map(x=>x.mini)); Object.assign(m,contextoMomento(c,m)); m.texto = textoDoMomento(m.mini, m, c); m.ordem = i + 1; m.total = momentos.length; });
   card.momentos = [];
   card.pendente = momentos[0] || null;
   card.filaMomentos = momentos.slice(1);
@@ -1438,10 +1439,16 @@ export function contextoMomento(c,m){
  });
  const mini=m.mini||miniDaPosicao(c.posicao);
  const fase=['liga','acesso','permanencia'].includes(m.tipo)?'Última rodada':'Final';
- const situacao=mini==='defesa'?'Pênalti contra. Você é a última barreira.':mini==='penalti'?'A bola está na marca. A próxima cobrança pode decidir.':mini==='falta'?'Falta perigosa. A chance está nos seus pés.':'Último lance. Encontre o passe que pode decidir.';
+ const situacao=({cruzamento:'Cruzamento na área. Ache o companheiro livre.',interceptacao:'Último ataque rival. Leia o passe e intercepte.',cabeceio:'A bola vem pelo alto. Encontre o tempo do cabeceio.',reflexo:'Chute à queima-roupa. Reaja para salvar.'})[mini]||(mini==='defesa'?'Pênalti contra. Você é a última barreira.':mini==='penalti'?'A bola está na marca. A próxima cobrança pode decidir.':mini==='falta'?'Falta perigosa. A chance está nos seus pés.':'Último lance. Encontre o passe que pode decidir.');
  return {adversario,contexto:{fase,situacao}};
 }
 
+export function miniParaMomento(c,m,usados=[]){
+ return comSemente(c.codigo,`minigame:${c.ano}:${m.tipo}:${m.titulo||''}`,()=>{
+ const historico=(c.temporadas||[]).flatMap(t=>t.momentos||[]).map(x=>x.mini),pool=poolMinis(c.posicao),ultimo=usados.at(-1)||historico.at(-1);
+ const ineditos=pool.filter(x=>!historico.includes(x)&&!usados.includes(x));const diferentes=pool.filter(x=>x!==ultimo);return pick(ineditos.length?ineditos:diferentes.length?diferentes:pool);
+ });
+}
 export function miniDaPosicao(pos) {
   if (pos === "GOL") return "defesa";
   if (["MEI", "PD", "PE"].includes(pos)) return "falta";
@@ -1495,6 +1502,8 @@ const CENA_MOMENTO = {
   },
 };
 function textoDoMomento(mini, m, c) {
+ const novo={cruzamento:'O ponta levanta a cabeça. Encontre quem entra livre na área.',interceptacao:'O adversário prepara o último passe. Leia a jogada e corte o caminho.',cabeceio:'A bola vem pelo alto. Ataque o cruzamento no tempo certo.',reflexo:'Chute à queima-roupa. Leia a direção e reaja.'}[mini];if(novo)return novo;
+
   const cena = CENA_MOMENTO[m.tipo]?.[mini] || TEXTO_MINI[mini](c, m.tipo);
   const sit = SITUACAO_TABELA[m.tipo]?.[m.ladoCerto ? 0 : 1];
   return sit ? `${sit} ${cena}` : cena;
@@ -1503,6 +1512,7 @@ function textoDoMomento(mini, m, c) {
 const PESO_MOMENTO = { selecao: 3, continental: 3, mundial: 3, liga: 2, copa: 2, acesso: 2, permanencia: 2, ligaConfirmacao: 1 };
 
 export const ACAO_MINI = {
+ cruzamento:{ok:'Cruzamento perfeito para o gol decisivo',erro:'O cruzamento foi cortado'},interceptacao:{ok:'Interceptou o ataque decisivo',erro:'O adversário encontrou o passe'},cabeceio:{ok:'Cabeceio decisivo para o gol',erro:'Não alcançou o cruzamento'},reflexo:{ok:'Defesa de reflexo decisiva',erro:'Não alcançou o chute'},
   penalti: { ok: "Pênalti decisivo convertido", erro: "Perdeu o pênalti decisivo" },
   falta: { ok: "Gol de falta no último minuto", erro: "A falta decisiva não entrou" },
   passe: { ok: "Assistência decisiva no último lance", erro: "O passe decisivo foi interceptado" },
@@ -1516,6 +1526,7 @@ export function chancePenalti(c) {
 }
 /* Chance estimada de cada minigame (simulação automática e dica na tela) */
 export function chanceMomento(c, mini = miniDaPosicao(c.posicao)) {
+  mini=baseMini(mini);
   const dec = somaTraco(c, "penalti") + (c.bonusDesafio || 0) + bonusPrecisaoLoja(c,mini);
   if (mini === "falta") return clampR(((c.attrs.finalizacao * 0.65 + c.attrs.drible * 0.35) / 145 + 0.18) * 1.15 + dec, 0.3, 0.8);
   if (mini === "passe") return clampR(c.attrs.passe / 130 + 0.3 + dec, 0.4, 0.88);
@@ -1570,7 +1581,7 @@ export function aplicarMomento(card0, acertou) {
       const k = card.copa, mini = m.mini || "penalti";
       const naMarca = mini === "penalti" || mini === "defesa";
       const [gp, gc] = placarCopa(naMarca ? "E" : acertou ? "V" : "D");
-      const eu = { gols: acertou && mini === "falta" ? 1 : 0, assist: acertou && mini === "passe" ? 1 : 0 };
+      const eu = { gols: acertou && ["falta","cabeceio"].includes(mini) ? 1 : 0, assist: acertou && ["passe","cruzamento"].includes(mini) ? 1 : 0 };
       k.gols += eu.gols; k.assist += eu.assist;
       if (acertou) k.craque += 1;
       k.jogos.push({ fase: 4, adv: k.adversario, gp, gc, res: acertou ? "V" : "D", penaltis: naMarca, ...eu });
@@ -1960,6 +1971,7 @@ export function calcularLegado(c) {
     selecao: (t.copaMundo || 0) * 45 + (t.continentalSelecao || 0) * 18 + c.selecao.convocacoes * 4,
     premios: (t.bolaOuro || 0) * 55 + c.top3Bola * 10 + (t.botaOuro || 0) * 20,
     auge: Math.max(0, c.picoOvr - 74) * 6,
+    superacao:bonusSuperacao(c.temporadas),
     torcida: idolos * 12 + (c.flags.social ? 8 : 0) + (c.flags.mentorJovem ? 6 : 0) + (c.flags.benfeitor ? 10 : 0),
   };
   // duelo de geração: vencer o rival no fim vale um bônus pequeno

@@ -39,3 +39,6 @@
 @media(prefers-reduced-motion:reduce){.rp-tracos>button:hover{transform:none}}
 
 @media(min-width:1024px){.rp-legado-completo>.rp-poscarreira{grid-column:1/-1}.rp-poscarreira>div.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rp-poscarreira .rp-opcao{height:100%;align-items:flex-start}}
+
+.rp-poscarreira .rp-opcao>span:last-child>span:first-child{flex-wrap:wrap;gap:7px}.rp-poscarreira .truncate{white-space:normal;overflow:visible;text-overflow:clip}.rp-poscarreira .rp-opcao .ml-auto{margin-left:0}
+.rp-sala-trofeus>div.grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr))}

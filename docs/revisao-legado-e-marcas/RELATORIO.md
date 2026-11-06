@@ -14,6 +14,8 @@ Build e 38 arquivos de testes de lógica passaram. Três novos casos de domínio
 
 Primeira execução de navegador iniciou sem prévia ativa e foi descartada. Prévia reiniciada e conferida antes da rodada válida. Novos testes de legado inicialmente usaram saves artificiais incompletos; corrigidos para criar temporadas e aposentadoria pelo motor real, sem alterar o produto para acomodar esses fixtures.
 
+Regressão de 40 cenários passou. Conferência das capturas levou a mais dois ajustes: nomes de pós-carreira sem corte e cartões de taça com largura mínima adaptativa. Build e os sete cenários novos revalidados com sucesso após esse acabamento.
+
 Resultado final da regressão e publicação registrados no topo de `docs/CONTINUIDADE.md`.
 
 ## Limites e próximos pontos

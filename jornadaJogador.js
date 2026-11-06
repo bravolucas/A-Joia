@@ -1,3 +1,4 @@
+import {narrarEco,noticiaRival} from './narrativasContinuas.js';
 import {compararMarcasCopas} from './recordesHistoricos.js';
 import {consolidarElencoCopa} from './elencoSelecao.js';
 import {CLUBES,LIGAS} from './data.js';
@@ -176,14 +177,14 @@ export function fecharJornada(c,card){
 
  for(const marca of compararMarcasCopas(c,card))for(const [etapa,ano]of [['igualou',marca.anoIgualou],['superou',marca.anoSuperou]]){
   if(ano==null)continue;
-  const m=memorizar(c,'marca-historica',`${etapa==='igualou'?'Igualou':'Superou'} uma marca de ${marca.atleta}`,`${marca.nome}: referência histórica de ${marca.valor}, na base 1930–2022. Feito da sua carreira simulada.`,{id:`marca:${marca.id}:${etapa}`,ano,clube:'Seleção'});
+  const m=memorizar(c,'marca-historica',`${etapa==='igualou'?'Igualou':'Superou'} uma marca de ${marca.atleta}`,`${marca.nome}: referência histórica de ${marca.valor}, na base ${marca.periodo||'1930–2022'}. Feito da sua carreira simulada.`,{id:`marca:${marca.id}:${etapa}`,ano,clube:'Seleção'});
   if(m&&ano===card.ano)n.memorias.push(m);
  }
 
  const due=j.ecos.filter(e=>e.ano<=card.ano);
  if(due.length){const e=due[0],mesmo=e.clube===card.clube,bonus=e.eixo==='vinculo'&&mesmo?2:e.eixo==='preparo'?1:0;
   if(bonus)c.moral=clamp((c.moral??65)+bonus);
-  const detalhe=`A escolha “${e.escolha}”, feita em ${e.origem}, voltou à conversa${mesmo?' no mesmo clube':''}.${bonus?` +${bonus} moral.`:' Sua trajetória guarda essa decisão.'}`;
+  const detalhe=`${narrarEco(e,card)}${bonus?` +${bonus} moral.`:""}`;
   n.noticias.push({tipo:'eco',titulo:`O eco de ${e.titulo}`,detalhe});memorizar(c,'eco','Uma escolha deixou marcas',detalhe,{id:`eco:${e.id}`,ano:card.ano,clube:card.clube});j.ecos=j.ecos.filter(x=>x.id!==e.id);
  }
  const funcao=IDENTIDADES_POSICAO[card.posicao||c.posicao]||IDENTIDADES_POSICAO.MC;
@@ -211,11 +212,11 @@ export function fecharJornada(c,card){
  for(const campo of ['gols','assist','nota']){const anteriores=(c.temporadas||[]).filter(t=>t.clube===card.clube);if(anteriores.length>=2&&card[campo]>Math.max(...anteriores.map(t=>t[campo]||0))){n.noticias.push({tipo:'recorde',titulo:`Sua melhor marca de ${campo==='assist'?'assistências':campo} no ${card.clube}`,detalhe:`${card[campo]} em ${card.ano}. Marca pessoal nesta carreira, não recorde histórico do clube.`});break;}}
  const repetiuLiga=(c.temporadas||[]).filter(t=>t.ligaId===card.ligaId);
  if(repetiuLiga.length>=3&&card.assist>Math.max(...repetiuLiga.map(t=>t.assist||0)))n.noticias.push({tipo:'recorde',titulo:'Sua melhor temporada de criação nesta liga',detalhe:`${card.assist} assistências · marca pessoal registrada.`});
- if(card.rival){const r=card.rival;const m={ano:card.ano,clube:r.clube,premio:r.bola&&r.bola<=20?r.bola:null,transferencia:r.mudou||null,gols:r.gols||0,assist:r.assist||0};j.rivalMemorias=[...j.rivalMemorias,m].slice(-8);}
+ if(card.rival){const noticia=noticiaRival(c,card,j.rivalMemorias);if(noticia)n.noticias.push(noticia);const r=card.rival;const m={ano:card.ano,clube:r.clube,premio:r.bola&&r.bola<=20?r.bola:null,transferencia:r.mudou||null,gols:r.gols||0,assist:r.assist||0};j.rivalMemorias=[...j.rivalMemorias,m].slice(-8);}
  for(const m of momentos){
   const nome=m.adversario?.nome;if(!nome)continue;
   if((c.temporadas||[]).some(t=>t.clube===nome))n.noticias.push({tipo:'reencontro',titulo:`Contra o antigo ${nome}`,detalhe:`${m.acertou?'Você decidiu o lance.':'A oportunidade escapou.'} ${memoriaTorcida(c,nome)}`});
-  if(c.rival?.clube===nome)j.rivalMemorias=[...j.rivalMemorias,{ano:card.ano,clube:nome,confronto:true,acertou:m.acertou}].slice(-8);
+  if((card.rival?.clube||c.rival?.clube)===nome){const anterior=[...j.rivalMemorias].reverse().find(x=>x.confronto&&x.ano<card.ano);if(anterior&&typeof anterior.acertou==='boolean'&&typeof m.acertou==='boolean')n.noticias.push({tipo:'rival',titulo:`Outro capítulo contra ${c.rival?.nome||'seu rival'}`,detalhe:`Em ${anterior.ano}, ${anterior.acertou?'você decidiu o lance':'sua oportunidade escapou'}. Agora, contra o ${nome}, ${m.acertou?'você aproveitou a chance':'o lance não deu certo'}.`});j.rivalMemorias=[...j.rivalMemorias,{ano:card.ano,clube:nome,confronto:true,acertou:m.acertou}].slice(-8);}
  }
  if(j.mentor){
   if(!j.mentor.promovido&&(c.temporadas||[]).length>=10){const origem=clubeDe(j.mentor.clube),pool=CLUBES.filter(x=>x.nome!==origem.nome&&Math.abs(x.forca-origem.forca)<=8);j.mentor.clubeAtual=pool[hash(c.codigo+':mentor')%pool.length]?.nome||j.mentor.clube;j.mentor.promovido=card.ano;j.mentor.funcao='Treinador principal';memorizar(c,'mentor',`${j.mentor.nome} assume um novo projeto`,`Seu orientador foi registrado como treinador do ${j.mentor.clubeAtual}.`,{id:'mentor:promocao',ano:card.ano});}

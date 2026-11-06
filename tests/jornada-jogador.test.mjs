@@ -135,3 +135,10 @@ test('novas filosofias e dilemas ocupam uma única decisão e efeitos futuros fi
  let t={clube:'Santos',ano:2040,elenco:70,moral:60,torcida:60,diretoria:60,fase:'pretemporada',verbaRapida:5000,temporadas:[],planoRapido:{ano:2040,clube:'Santos',cartas:['filosofia'],respostas:[]}};
  const c={...atleta(),tecnico:t},carta=cartaPretemporadaRapida(t);assert.equal(carta.total,1);const n=aplicarPretemporadaRapida(c,carta.chave,'transicao');assert.equal(n.tecnico.filosofia,'transicao');assert.equal(n.tecnico.estilo,'ofensivo');assert.equal(n.tecnico.efeitosPendentes[0].clube,'Santos');assert.equal(planoPretemporadaRapida(n.tecnico).respostas.length,1);
 });
+
+test('rival retoma lance anterior sem duplicar notícia ou memória ao fechar novamente',()=>{
+ const c=atleta();c.rival={...c.rival,nome:'Rival Registrado',clube:'Porto'};iniciarJornada(c).rivalMemorias=[{ano:2038,clube:'Santos',premio:10},{ano:2039,clube:'Porto',confronto:true,acertou:false}];
+ const k=card(c,{rival:{clube:'Porto',bola:5,gols:10,assist:4},momentos:[{mini:'penalti',adversario:{nome:'Porto'},acertou:true}]});fecharJornada(c,k);
+ assert.ok(k.jornada.noticias.some(n=>n.tipo==='rival'&&n.detalhe.includes('oportunidade escapou')&&n.detalhe.includes('aproveitou a chance')));
+ const noticias=JSON.stringify(k.jornada.noticias),memorias=JSON.stringify(c.jornada.rivalMemorias);fecharJornada(c,k);assert.equal(JSON.stringify(k.jornada.noticias),noticias);assert.equal(JSON.stringify(c.jornada.rivalMemorias),memorias);
+});

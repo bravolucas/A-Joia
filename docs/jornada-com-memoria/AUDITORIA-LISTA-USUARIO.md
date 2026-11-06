@@ -68,3 +68,7 @@ Esta tabela corresponde aos **50 itens selecionados** na mensagem extensa do usu
 ## Continuação: legado e partidas em Copas
 
 Referência adicional: Messi, 26 partidas, derivada do CSV de aparições masculinas **1970–2022**. Comparação usa apenas jogos registrados em Copas; ausência de dados antigos aparece como contagem parcial. Não é uma atualização dos recordes até 2026. Sala de troféus do legado completo agora mostra ×quantidade e anos; acesso “Rever legado” preserva a carreira encerrada na tela inicial. Item 67 e 98 continuam parciais pelos limites acima.
+
+## Continuação: variedade narrativa e rival
+
+Itens 12/31 ampliados: ecos distinguem vínculo, preparo, pressão e trajetória conforme clube/jogos/títulos registrados; escolha, ano e clube originais são citados. Rival registra mudanças de clube, evolução nos prêmios e reencontros com o resultado do lance anterior. Histórico antigo sem resultado não presume erro. Mantidos limite de um eco anual e bônus existentes, sem novos cliques obrigatórios. Detalhes em `docs/ecos-e-rival/RELATORIO.md`. Ainda cabem novas histórias e refinamentos das cenas; 67/98 continuam parciais.

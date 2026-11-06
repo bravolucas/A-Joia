@@ -1,3 +1,4 @@
+import {descreverMemoriaRival} from './narrativasContinuas.js';
 import {CLUBES} from './data.js';
 import React,{useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
@@ -45,7 +46,7 @@ export function PainelJornada({c,onAcao,caminho,interesses=[]}){
  {caminho&&<div className="jr-selecao"><h3>Caminho para a seleção</h3>{j.elencoSelecao&&<button className="jr-consultar" onClick={()=>M('selecao')}>Ver os 26 convocados e estatísticas →</button>}<p>{caminho.elegivel?caminho.rotulo:'A convocação exige elegibilidade e pelo menos 18 anos.'}</p><meter min="40" max="99" low={caminho.corte-4} high={caminho.corte} optimum="99" value={caminho.ovr}/><small>Seu OVR {caminho.ovr} · referência {caminho.corte}. {caminho.aviso}</small>{j.geracao?.length>0&&<p>Sua geração na seleção: {j.geracao.filter(p=>c.ano-p.nascimento<=37).map(p=>`${p.nome} · ${p.posicao||'Jogador'} (${c.ano-p.nascimento})`).join(' / ')}<small>Vínculos da sua geração. O elenco tem escalações e estatísticas separadas para Copas do Mundo e torneios continentais da seleção.</small></p>}</div>}
  {!!j.duplas?.length&&<div className="jr-vinculos"><h3>Duplas que ficam na memória</h3>{j.duplas.map(d=><p key={d.id}><strong>{d.nome}</strong> · {d.aposentado?'Aposentado':d.clube}<small>{d.temporadas} temporada(s) juntos · {d.reencontros} reencontro(s) · personagem fictício{d.clube===(c.emprestimo?.destino||c.clubeNome)&&d.conexao>=2?' · até +0,06 na nota por entrosamento':''}</small></p>)}</div>}
  {j.mentor&&<p className="jr-lembranca">Primeiro orientador: {j.mentor.nome} · {j.mentor.clube} · personagem fictício</p>}
- {!!j.rivalMemorias?.length&&<details><summary>Seu rival tem história</summary>{j.rivalMemorias.slice(-3).map((m,i)=><p key={i}>{m.ano} · {m.clube}{m.premio?` · ${m.premio}º na Bola de Ouro`:m.confronto?' · confronto registrado':''}</p>)}</details>}
+ {!!j.rivalMemorias?.length&&<details><summary>Seu rival tem história</summary>{j.rivalMemorias.slice(-3).map((m,i)=><p key={i}>{descreverMemoriaRival(m)}</p>)}</details>}
  {!!j.relatoriosEmprestimo?.length&&<details><summary>Como foram seus empréstimos</summary>{j.relatoriosEmprestimo.map((r,i)=><p key={i}>{r.clube}: {r.jogos} jogos em {r.temporadas} temporada(s){r.esperados?` · projeção ${r.esperados.join('–')}`:''}. Retorno ao {r.origem}.</p>)}</details>}
  {!!interesses.length&&<div className="jr-interesses"><h3>No radar</h3>{interesses.map(x=><p key={x.clube}>{x.clube}<small>{x.liga} · {x.texto}</small></p>)}</div>}
  </details>
@@ -63,7 +64,7 @@ export function PainelJornada({c,onAcao,caminho,interesses=[]}){
 }
 export function EcosDaTemporada({card,compacto=false}){
  const j=card?.jornada;if(!j)return null;
- const mensagem=j.mensagens?.[0],memoria=j.memorias?.[0],eco=j.noticias?.find(n=>['eco','reencontro','dupla','recorde'].includes(n.tipo));
+ const mensagem=j.mensagens?.[0],memoria=j.memorias?.[0],eco=j.noticias?.find(n=>['eco','reencontro','dupla','recorde','rival'].includes(n.tipo));
  if(!mensagem&&!memoria&&!eco)return null;
  return <aside className={`jr-ecos ${compacto?'jr-ecos-compacto':''}`} aria-label="A história desta temporada">{mensagem&&<p><small>DE {mensagem.de}{mensagem.ficticio?' · personagem fictício':''}</small>“{mensagem.texto}”</p>}{(!compacto||!mensagem)&&(memoria||eco)&&<article><strong>{memoria?.titulo||eco.titulo}</strong><span>{memoria?.texto||eco.detalhe}</span></article>}</aside>;
 }

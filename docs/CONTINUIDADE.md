@@ -1,3 +1,9 @@
+## Continuação — ecos variados e rival com memória
+
+Ecos adaptados ao clube atual, participação e títulos registrados, citando decisão/ano/clube original. Notícias do rival usam mudança real de clube, evolução na Bola de Ouro e lance anterior em reencontros; histórico antigo sem resultado não presume erro. Mesmo limite de um eco anual e bônus anteriores, sem novos cliques. Referência histórica na memória usa o recorte específico de cada marca. Relatório `docs/ecos-e-rival/RELATORIO.md`; auditoria dos 50 itens atualizada, 67/98 seguem parciais.
+
+Build e 39 arquivos de lógica passaram. Regressão inicial de 33 cenários de navegador passou; depois da compatibilidade com confronto antigo sem resultado, build/lógica passaram novamente e os 13 testes da jornada (incluindo memória do rival no celular) passaram. Logs `/tmp/ecos-rival-build-final.log`, `/tmp/ecos-rival-unit-entrega.log`, `/tmp/ecos-rival-browser.log`, `/tmp/ecos-rival-browser-entrega.log`. Um seletor amplo do teste novo foi corrigido para apontar só ao detalhe do rival. Publicação desta continuação em acompanhamento. Documentos não rastreados do usuário preservados.
+
 ## Continuação — legado, telas raras e partidas históricas
 
 Traços em três cartas no desktop; legado em duas colunas com pós-carreira em área própria; sala de troféus do legado com ×quantidade/anos. Tela inicial agora tem **Rever legado** para carreiras encerradas. Nova referência de Messi, 26 partidas em Copas, CSV masculino 1970–2022: contagem só dos jogos registrados, com aviso para saves parciais. Fonte/licença em `dados/CREDITOS-COPAS.md`; relatório/capturas em `docs/revisao-legado-e-marcas/`.

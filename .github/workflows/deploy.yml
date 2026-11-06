@@ -33,6 +33,7 @@ jobs:
           path: ./dist
 
   publicar:
+    timeout-minutes: 35
     needs: construir
     runs-on: ubuntu-latest
     environment:
@@ -42,6 +43,8 @@ jobs:
       - id: deploy
         continue-on-error: true
         uses: actions/deploy-pages@v4
+        with:
+          timeout: '1200000'
       - id: deploy_retry
         name: Repetir publicação após falha
         if: steps.deploy.outcome == 'failure'

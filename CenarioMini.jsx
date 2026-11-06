@@ -3,7 +3,7 @@ import estadio from './arte/cenarios/estadio-premium.webp';
 
 // O gol e as linhas partem da mesma linha de fundo. A arquibancada nunca
 // participa das coordenadas jogáveis, independentemente do tamanho da trave.
-export function GeometriaCampo({largura=320, altura=210, gol, passe=false}) {
+export function GeometriaCampo({largura=320, altura=210, gol, passe=false, impacto=false}) {
   const id=useId().replace(/:/g,'');
   const base=gol ? gol.y+gol.h : 90;
   const horizonte=passe?0:Math.max(15,base*.38);
@@ -44,7 +44,7 @@ export function GeometriaCampo({largura=320, altura=210, gol, passe=false}) {
     {gol&&<g className="arena-gol" data-base={base}>
       <path d={`M${gol.x} ${base} ${gol.x+profundidade} ${base-profundidade/2}H${gol.x+gol.w-profundidade}L${gol.x+gol.w} ${base}Z`} fill="#04140d" opacity=".3"/>
       <rect x={gol.x+profundidade} y={gol.y+profundidade*.6} width={gol.w-profundidade*2} height={gol.h-profundidade} fill="#0a211b" fillOpacity=".42"/>
-      <rect x={gol.x+profundidade} y={gol.y+profundidade*.6} width={gol.w-profundidade*2} height={gol.h-profundidade} fill={`url(#malha-${id})`}/>
+      <rect className={impacto?'arena-rede-impacto':undefined} x={gol.x+profundidade} y={gol.y+profundidade*.6} width={gol.w-profundidade*2} height={gol.h-profundidade} fill={`url(#malha-${id})`}/>
       <path d={`M${gol.x} ${gol.y} ${gol.x+profundidade} ${gol.y+profundidade*.6}V${base-profundidade/2}L${gol.x} ${base}ZM${gol.x+gol.w} ${gol.y} ${gol.x+gol.w-profundidade} ${gol.y+profundidade*.6}V${base-profundidade/2}L${gol.x+gol.w} ${base}ZM${gol.x} ${gol.y}H${gol.x+gol.w}L${gol.x+gol.w-profundidade} ${gol.y+profundidade*.6}H${gol.x+profundidade}Z`} fill={`url(#malha-${id})`} stroke="#c8dbca" strokeWidth=".4"/>
       <path d={`M${gol.x} ${base}V${gol.y}H${gol.x+gol.w}V${base}`} fill="none" stroke="#061b16" strokeOpacity=".45" strokeWidth={gol.w>200?5:3.5} transform="translate(1 1)"/>
       <path d={`M${gol.x} ${base}V${gol.y}H${gol.x+gol.w}V${base}`} fill="none" stroke="#f0f5e9" strokeWidth={gol.w>200?3.2:2} strokeLinejoin="round"/>

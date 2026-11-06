@@ -53,7 +53,8 @@ export default function LojaJogador({c,etapa,onComprar,onFechar}){
  const ativo=i=>ativos.find(x=>x.id===i.id);
  const comprado=i=>i.temporario?!!ativo(i):(c.investimentos||[]).includes(i.id);
  const impedimento=i=>impedimentoLojaJogador(c,i,!entreTemporadas);
- const lista=CATALOGO_LOJA_JOGADOR.filter(i=>(categoria==='Todos'||categoria==='Meus itens'&&comprado(i)||i.categoria===categoria)&&normalizar(`${i.nome} ${i.desc}`).includes(normalizar(busca)));
+ const recomendar=CATALOGO_LOJA_JOGADOR.filter(i=>!impedimento(i)&&i.custo<=(c.patrimonio||0)).sort((a,b)=>{const score=i=>(i.temporario?2:0)+(c.posicao==='GOL'&&/goleiro|defesa|reflex/.test(i.id)?5:0)+(['ME','MD','ALE','ALD','MC','MEI'].includes(c.posicao)&&/assist|passe|criador/.test(i.id)?4:0)+(c.idade>=30&&/fisio|recuper|nutri/.test(i.id)?4:0)+(c.idade<24&&/evolucao|ct|equipamento/.test(i.id)?3:0);return score(b)-score(a)||a.custo-b.custo;}).slice(0,3).map(i=>i.id);
+ const lista=CATALOGO_LOJA_JOGADOR.filter(i=>(categoria==='Todos'||categoria==='Meus itens'&&comprado(i)||i.categoria===categoria)&&normalizar(`${i.nome} ${i.desc}`).includes(normalizar(busca))).sort((a,b)=>categoria==='Todos'?(recomendar.includes(b.id)?1:0)-(recomendar.includes(a.id)?1:0):0);
  const comprar=i=>{
   try{
    onComprar(i.id);
@@ -77,7 +78,7 @@ export default function LojaJogador({c,etapa,onComprar,onFechar}){
      const tempo=duracao?`${duracao.fim-c.ano} ${duracao.fim-c.ano===1?'temporada restante':'temporadas restantes'}`:i.temporario?`${i.duracao} ${i.duracao===1?'temporada':'temporadas'}`:'Permanente';
      return <article key={i.id} className={`${tem?'lj-item-adquirido':''} ${ultimaCompra===i.id?'lj-item-novo':''}`}>
       <div className="lj-arte" aria-hidden="true"><img src={fotoItem(i)} alt="" loading="lazy"/><span className="lj-icone"><Icone e={i.icone} size={22}/></span></div>
-      <div className="lj-info"><span className="lj-tipo">{i.temporario?'IMPULSO':i.categoria}</span><h3>{i.nome}</h3><p title={i.desc}>{beneficios[i.id]||i.desc}</p><span className={`lj-duracao ${i.temporario?'lj-temporario':''}`}>{tempo}</span>{i.luxo&&<small>Manutenção {formatarValor(Math.round(i.custo*.06))}/ano</small>}</div>
+      <div className="lj-info"><span className="lj-tipo">{recomendar.includes(i.id)?'PARA SEU MOMENTO · ':''}{i.temporario?'IMPULSO':i.categoria}</span><h3>{i.nome}</h3><p title={i.desc}>{beneficios[i.id]||i.desc}</p><span className={`lj-duracao ${i.temporario?'lj-temporario':''}`}>{tempo}</span><small>{i.somenteGoleiro?'Exclusivo para goleiros':i.somenteLinha?'Para jogadores de linha':'Compatível com sua posição'}</small>{i.luxo&&<small>Manutenção {formatarValor(Math.round(i.custo*.06))}/ano</small>}</div>
       <button className="lj-comprar" disabled={!!motivo} onClick={()=>comprar(i)} title={motivo||`Comprar ${i.nome}`} aria-label={tem?`${adquirido}: ${i.nome}`:motivo?`${motivo}: ${i.nome}`:`Comprar ${i.nome} por ${formatarValor(i.custo)}`}>
        {tem?<><span aria-hidden="true">✓</span><span>{adquirido}</span></>:<><span>{motivo?rotuloBloqueio(motivo):'Comprar'}</span><strong>{formatarValor(i.custo)}</strong></>}
       </button>

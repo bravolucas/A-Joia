@@ -1,7 +1,7 @@
 import {BolaTrajeto} from './CenarioMini.jsx';
 import "./AnuncioClube.css";
 import { JogadorCampo, CampoPremium, SuperficieMini, CamisaPremium } from './VisualFutebol.jsx';
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { ARTE, escudoDe } from "./arte.js";
 import { TacaCompeticao } from "./trofeus.jsx";
 import { ANO_INICIO, ATTR_SLOTS, CLUBES, CONDICOES_CLIMA, DIAS_SEMANA_ABREV, DIAS_SEMANA_LABEL, FALTA_BONECO_POS, FALTA_BOX, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, LANCES_POR_POSICAO, MESES_LABEL, NUM_ATTRS, PASSE_H, PASSE_ORIGEM, PASSE_W, PEN_GOAL, PEN_H, PEN_SPOT, PEN_W, PEN_ZONE_X, POS_GRUPO, TIPOS_NOTICIA } from "./data.js";
@@ -1214,12 +1214,14 @@ export function PenBola({ resultado }) {
   );
 }
 
-export function PenEfeitoGol({ ativo }) {
+export function PenEfeitoGol({ ativo, atraso=0 }) {
+  const [visivel,V]=useState(ativo&&!atraso);
+  useEffect(()=>{if(!ativo){V(false);return;}const espera=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:atraso;if(!espera){V(true);return;}const t=setTimeout(()=>V(true),espera);return()=>clearTimeout(t);},[ativo,atraso]);
   const confetes = useMemo(() => Array.from({ length: 16 }, (_, i) => ({
     id: i, x: 30 + Math.random() * (PEN_W - 60), delay: Math.random() * 0.25,
     cor: pick(["#39FF88", "#22D3EE", "#D8B44A", "#fff"]),
   })), []);
-  if (!ativo) return null;
+  if (!ativo||!visivel) return null;
   return (
     <>
       <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 50% 45%, rgba(57,255,136,0.55) 0%, transparent 60%)", animation: "flashGol 700ms ease-out forwards" }} />
@@ -1344,7 +1346,7 @@ export function GoalMini({ onPick, resultado }) {
   );
 }
 
-export function FaltaCampo() { return <CampoPremium largura={PEN_W} altura={PEN_H} gol={FALTA_GOAL} />; }
+export function FaltaCampo({resultado}) { return <CampoPremium largura={PEN_W} altura={PEN_H} gol={FALTA_GOAL} impacto={resultado?.gol} />; }
 
 
 export function FaltaJogadorBarreira() {
@@ -1389,7 +1391,7 @@ export function FreeKickMini({ onPick, resultado }) {
   return (
     <div className="vf-mini-canvas">
       <SuperficieMini largura={PEN_W} altura={PEN_H}>
-          <FaltaCampo />
+          <FaltaCampo resultado={resultado}/>
           {!resultado&&alvoMira&&<svg width={PEN_W} height={PEN_H} className="arena-mira absolute inset-0" aria-hidden="true"><path d={`M${FALTA_SPOT.x} ${FALTA_SPOT.y}Q${alvoMira.x} 110 ${alvoMira.x} ${alvoMira.y}`} stroke="#f0d98b" strokeWidth="1" strokeDasharray="3 4" fill="none" opacity=".6"/><circle cx={FALTA_ZONE_X[mira]} cy={alvoMira.y} r="8" fill="#edd99c33" stroke="#f3dfaa" strokeWidth="1.1"/><circle cx={FALTA_ZONE_X[mira]} cy={alvoMira.y} r="2" fill="#fff1c7"/></svg>}
           <div style={{ position: "absolute", left: FALTA_GOAL.x + FALTA_GOAL.w / 2, top: FALTA_GOAL.y + FALTA_GOAL.h, transform: "scale(0.4)", transformOrigin: "0 0" }}>
             <div style={{ position: "relative", left: -PEN_ZONE_X.meio, top: -(PEN_GOAL.y + PEN_GOAL.h) }}>
@@ -1398,7 +1400,7 @@ export function FreeKickMini({ onPick, resultado }) {
           </div>
           <FaltaBoneco bateu={!!resultado} zonaAcerto={resultado?.zona} />
           <PenBolaFalta resultado={resultado} />
-          {resultado && resultado.gol && <PenEfeitoGol key={golKey} ativo />}
+          {resultado && resultado.gol && <PenEfeitoGol key={golKey} ativo atraso={720} />}
       </SuperficieMini>
       <div className="vf-falta-alvos">{!resultado ? opcoes.map(o=><button key={o.id} type="button" onPointerEnter={()=>setMira(o.id)} onPointerLeave={()=>setMira(null)} onFocus={()=>setMira(o.id)} onBlur={()=>setMira(null)} onClick={()=>onPick(o.id)}>{o.nome}</button>):<span className="vf-replay-legenda">{opcoes.find(o=>o.id===resultado.zona)?.nome} · replay da cobrança</span>}</div>
     </div>
@@ -1420,24 +1422,23 @@ export function PassePersonagem({ x, y, tipo, selecionavel, destacado, onClick, 
 
 export function PasseBola({ origem, alvo, resultado }) {
   const pos = !resultado ? origem : resultado.gol ? alvo : { x: resultado.ponto.cx, y: resultado.ponto.cy };
-  return (
-    <div className="absolute rounded-full transition-all ease-out" style={{
-      width: 10, height: 10, left: pos.x, top: pos.y, transform: "translate(-50%,-50%)", transitionDuration: "520ms",
-      background: "radial-gradient(circle at 32% 28%, #fff, #dcdcdc 55%, #a8a8a8)", boxShadow: "inset 0 0 0 1px #222, 0 1px 3px rgba(0,0,0,0.5)",
-    }} />
-  );
+  return <svg className="arena-voo-bola absolute inset-0" width={PASSE_W} height={PASSE_H} viewBox={`0 0 ${PASSE_W} ${PASSE_H}`} aria-hidden="true"><BolaTrajeto origem={origem} destino={pos} ativo={!!resultado} elevacao={2} raio={5}/></svg>;
 }
 
 export function PasseMini({ atributoPasse, onResultado, cenaForcada, alvoForcado, resultadoForcado }) {
+  const timer=useRef(null),trava=useRef(false);
+  useEffect(()=>()=>clearTimeout(timer.current),[]);
   const cena = useMemo(() => cenaForcada || gerarCenaPasse(), []);
   const [alvo, setAlvo] = useState(alvoForcado || null);
   const [resultado, setResultado] = useState(resultadoForcado || null);
   useEffect(() => { if (alvoForcado) setAlvo(alvoForcado); if (resultadoForcado) setResultado(resultadoForcado); }, [alvoForcado, resultadoForcado]);
   function escolher(companheiro) {
-    if (resultadoForcado || alvo) return;
+    if (resultadoForcado || alvo || trava.current) return;
+    trava.current=true;
     setAlvo(companheiro);
     const r = calcularSucessoPasse(atributoPasse, PASSE_ORIGEM, companheiro, cena.adversarios);
-    setTimeout(() => { setResultado(r); onResultado?.(r, companheiro, cena); }, 520);
+    setResultado(r);
+    timer.current=setTimeout(() => { onResultado?.(r, companheiro, cena); }, window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:720);
   }
   return (
     <div className="vf-mini-canvas">
@@ -1449,7 +1450,7 @@ export function PasseMini({ atributoPasse, onResultado, cenaForcada, alvoForcado
               destacado={resultado?.gol && alvo?.id === cp.id} onClick={() => escolher(cp)} />
           ))}
           <PassePersonagem x={PASSE_ORIGEM.x} y={PASSE_ORIGEM.y} tipo="voce" />
-          {alvo && <PasseBola origem={PASSE_ORIGEM} alvo={alvo} resultado={resultado} />}
+          <PasseBola origem={PASSE_ORIGEM} alvo={alvo||PASSE_ORIGEM} resultado={resultado} />
       </SuperficieMini>
       <div className="vf-passe-opcoes">{!alvo ? cena.companheiros.map((cp,i)=><button key={cp.id} type="button" aria-label={`Passar para companheiro ${i+1}`} onClick={()=>escolher(cp)}><b>{i+1}</b><span>Passar</span></button>):<span className="vf-replay-legenda">Passe para o companheiro {cena.companheiros.findIndex(cp=>cp.id===alvo.id)+1} · replay do lance</span>}</div>
     </div>

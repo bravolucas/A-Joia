@@ -1,3 +1,4 @@
+import {legadoNarrativo} from './jornadaJogador.js';
 import {bonusForcaLoja,creditarSalarioTecnico,comprarItemLojaTecnico} from "./lojaTecnico.js";
 import {aplicarPretemporadaRapida,planoPretemporadaRapida,renovarVerbaPretemporada} from './pretemporadaRapida.js';
 import { vinculoAtivoTecnico, riscosIdolatriaTecnico, registrarRupturasTecnico } from './idolatriaTecnico.js';
@@ -357,6 +358,7 @@ export function iniciarCarreiraTecnico(c) {
   const afinidadeInicial = opcoesInicio[0]?.afinidade || 0;
   return { ...c, tecnico: {
     idadeInicio: c.idade, ano: c.ano, clube: clubeInicial, vinculosJogador, opcoesInicio, clubeInicialEscolhido: false,
+    herancaJogador:{rotulos:legadoNarrativo(c),reputacaoInicial:reputacao,explicacao:'Seu legado de jogador orienta a reputação inicial. Afinidade pode abrir portas, mas o nível esportivo continua limitando os convites.'},
     reputacao, pais: dadosClubeInicial?.pais || 'Brasil', salario: dadosClubeInicial?.salario || 12, desempregado: false, anosDesempregado: 0, estilo: 'equilibrado', temporadas: [], vitorias: 0, empates: 0,
     derrotas: 0, titulos: 0, elenco: dadosClubeInicial?.elenco || 50, moral: 50, diretoria: limitar(60 + Math.round(afinidadeInicial * 0.15), 0, 100), torcida: limitar(55 + Math.round(afinidadeInicial * 0.35), 0, 100), decisoes: [], demitido: false, propostas: [], historicoCartas: [], cartas: sortearCartasTecnico({ reputacao, temporadas: [], diretoria: 60, moral: 50 }), fase: 'pretemporada'
   }};
@@ -868,6 +870,9 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   const situacaoCargo = riscoDemissaoTecnico({ ...t, diretoria: novaConfianca, torcida: novaTorcida });
   const demitido = novaConfianca < 20 || (novaConfianca < 40 && novaTorcida < 35) || situacaoCargo.pressao >= 82;
   temporada.demitido = demitido;
+  const mentor=c.jornada?.mentor;
+  if(mentor?.promovido&&c.idade<49&&(temporada.confrontos||[]).some(j=>j.nome===mentor.clubeAtual))temporada.reencontroMentor={nome:mentor.nome,clube:mentor.clubeAtual,texto:'Seu primeiro orientador está registrado no banco adversário. Duas trajetórias se encontram.',ficticio:true};
+  temporada.filosofia=t.filosofia||null;
   const reputacaoNova = limitar((t.reputacao ?? 50) + (campeao ? 9 : cumpriuObjetivo ? 4 : -3), 10, 99);
   const propostas = gerarPropostasTecnico({ ...t, clube: demitido ? null : t.clube,clubeReferencia:t.clube,temporadas:[...t.temporadas,temporada],titulos:(t.titulos||0)+temporada.titulosConquistados.length, liga: ligaSeguinte,
     ligasMundo: progressaoMundo.ligasMundo, reputacao: reputacaoNova }, rng);

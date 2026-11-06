@@ -44,7 +44,7 @@ export function CamisaPremium({ nome, cor = '#147356', numero = 10, sobrenome, s
 
 export function MedalhaFeito({ id, className = '' }) {
   const uid=useId().replace(/:/g,'');
-  const mapa={'primeira-taca':'taça','dez-tacas':'10','triplice':'3','cem-gols':'100','quinhentos-gols':'500','cem-assistencias':'100','quinhentos-jogos':'500','vinte-temporadas':'20','bola-ouro':'★','campeao-mundo':'mundo','idolo':'♥','cinco-clubes':'5','treinador-campeao':'prancheta','trinta-treinador':'30'};
+  const mapa={'memoria-contrato':'16','memoria-estreia':'JOGO','primeiro-gol':'GOL','primeira-assistencia':'PAS','primeira-defesa':'DEF','primeira-recuperacao':'INT','primeiro-cruzamento':'CRZ','memoria-convocacao':'PAÍS','memoria-estreia-selecao':'EST','jogador-reinventado':'⇄','dupla-marcante':'2','assinatura-tecnica':'★','lider-vestiario':'CAP','primeira-taca':'taça','dez-tacas':'10','triplice':'3','cem-gols':'100','quinhentos-gols':'500','cem-assistencias':'100','quinhentos-jogos':'500','vinte-temporadas':'20','bola-ouro':'★','campeao-mundo':'mundo','idolo':'♥','cinco-clubes':'5','treinador-campeao':'prancheta','trinta-treinador':'30'};
   const simbolo=mapa[id]||'◆';
   return <svg viewBox="0 0 120 140" className={`vf-medalha ${className}`} aria-hidden="true">
     <defs><linearGradient id={`ouro${uid}`} x2="1" y2="1"><stop stopColor="#fff2b3"/><stop offset=".35" stopColor="#bd8b36"/><stop offset=".52" stopColor="#f2d785"/><stop offset="1" stopColor="#6d491c"/></linearGradient></defs>
@@ -81,6 +81,6 @@ export function SuperficieMini({ children, largura=320, altura=210 }) {
   },[largura,altura]);
   return <div ref={ref} className="vf-superficie" style={{position:'relative',width:'100%',maxWidth:480,aspectRatio:`${largura}/${altura}`,margin:'0 auto',overflow:'hidden',borderRadius:14}}><div className="arena-coordenadas" style={{position:'absolute',left:'50%',top:'50%',width:largura,height:altura,transform:`translate(-50%,-50%) scale(${escala})`,transformOrigin:'center'}}>{children}</div></div>;
 }
-export function CampoPremium({ largura=320, altura=210, gol, passe=false }) {
-  return <svg width={largura} height={altura} viewBox={`0 0 ${largura} ${altura}`} className="absolute inset-0 arena-svg" aria-hidden="true"><GeometriaCampo largura={largura} altura={altura} gol={gol} passe={passe}/></svg>;
+export function CampoPremium({ largura=320, altura=210, gol, passe=false, impacto=false }) {
+  return <svg width={largura} height={altura} viewBox={`0 0 ${largura} ${altura}`} className="absolute inset-0 arena-svg" aria-hidden="true"><GeometriaCampo largura={largura} altura={altura} gol={gol} passe={passe} impacto={impacto}/></svg>;
 }

@@ -1,4 +1,7 @@
-import {GeometriaCampo,QuadroMini} from './CenarioMini.jsx';
+import {FasesTemporada,PainelJornada,EcosDaTemporada,ProjetoOferta,CenasClube,AlbumJornada,PrimeiraSelecao} from './JornadaUI.jsx';
+import {mudarPosicao,reinventarVeterano} from './posicoesCarreira.js';
+import {ativarAssinatura,definirPreferenciaMercado,legadoNarrativo,projetoOferta,cenaDespedida} from './jornadaJogador.js';
+import {GeometriaCampo,QuadroMini,BolaTrajeto} from './CenarioMini.jsx';
 import TreinosPretemporada from './TreinosPretemporada.jsx';
 import {trocarTreinos} from './rapido.js';
 import Idolatria from './Idolatria.jsx';
@@ -42,7 +45,7 @@ import {
   comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
   bonusPrecisaoLoja, chanceMomento, miniDaPosicao, ehPremioIndividual, vagasDaLiga, ehSegundaDivisao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
   eventoDaJanela, segundoEvento, anoDeDecisao, eventoImpasse, valorAtual, comparaSalario, textoEmoji, efeitosDaDecisao, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, resolverDesafio, desafioPendente, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
-  noticiasDaTemporada, retrospectoRivalidade,
+  noticiasDaTemporada, retrospectoRivalidade, caminhoSelecao, interesseMercado,
   copaPendente, opcoesCopa, jogarCopa,
 } from "./rapido.js";
 
@@ -350,7 +353,7 @@ function CamisaMini({ cor = "#12A876", nome = "", numero = 9, size = 44 }) {
     </svg>
   );
 }
-function CartaoCarreira({ c, onEstante, onFicha, contadorPulsa, recorde }) {
+function CartaoCarreira({ c, onEstante, onFicha, contadorPulsa, recorde, etapa }) {
   const ovr = ovrDe(c);
   const [mostrado, delta] = useOvrAnimado(ovr);
   useEffect(() => { if (delta?.d > 0) vibrar(25); }, [delta?.k]);
@@ -397,7 +400,7 @@ function CartaoCarreira({ c, onEstante, onFicha, contadorPulsa, recorde }) {
         </div>
       </div>
       {!semClube&&<Idolatria c={c} compacto/>}
-    </header>
+    <FasesTemporada etapa={etapa}/></header>
   );
 }
 
@@ -541,7 +544,7 @@ function LinhaDoTempo({ c, total = 22 }) {
   );
 }
 
-function Cabecalho({ c, onSair, onEstante, treinador = false }) {
+function Cabecalho({ c, onSair, onEstante, treinador = false, etapa }) {
   const nTrofeus = c ? c.lista.length : 0;
   return (
     <header className="sticky top-0 z-30 bg-[#0E1512]/90 backdrop-blur border-b border-white/5">
@@ -560,7 +563,7 @@ function Cabecalho({ c, onSair, onEstante, treinador = false }) {
         {!c && <span className="ml-auto font-semibold text-xs uppercase tracking-[0.2em] text-[#8FA39A]">{treinador ? 'Modo Treinador' : 'Modo Rápido'}</span>}
       </div>
       {c && <div className="max-w-xl mx-auto px-4 pb-2"><LinhaDoTempo c={c} /></div>}
-    </header>
+    <FasesTemporada etapa={etapa}/></header>
   );
 }
 
@@ -720,7 +723,7 @@ function CabecalhoMomento({ c, momento }) {
   return (
     <div className="vf-cabecalho-momento text-center">
       <div className="vf-matchbar vf-confronto" aria-label="Confronto da decisão"><span className="vf-match-club">{selecao?<Bandeira nac={c.nac} size={30}/>:<ClubDot club={clubeDe(c.emprestimo?.destino||c.clubeNome)} size={32}/>}<strong>{selecao?nacDe(c.nac).label:c.emprestimo?.destino||c.clubeNome}</strong></span><span className="vf-versus">VS<small>{contexto.contexto.fase}</small></span><span className="vf-match-club vf-adversario">{adv&&<>{selecao?<Bandeira nac={adv.id} size={30}/>:<ClubDot club={clubeDe(adv.nome)} size={32}/>}<strong>{adv.nome}</strong></>}</span></div>
-      <p className="vf-contexto-lance">{contexto.contexto.situacao}</p>
+      <p className="vf-contexto-lance">{momento.lance?`${momento.lance.disputa?`Pênaltis · ${momento.lance.gp}–${momento.lance.gc} no jogo`:`${momento.lance.minuto}′ · ${momento.lance.gp}–${momento.lance.gc}`} · `:''}{contexto.contexto.situacao}</p>
       <span className="rp-chip" style={{ color: "#EBC557", background: "rgba(216,180,74,.14)" }}>
         {momento.total > 1 ? `Desafio ${momento.ordem} de ${momento.total}` : "Momento decisivo"} · {NOME_MINI[mini]}
       </span>
@@ -730,14 +733,11 @@ function CabecalhoMomento({ c, momento }) {
   );
 }
 
-function PlacarMomento({ ok, texto }) {
-  useEffect(() => { if (ok) { efeitoLance("rede"); torcida(2.6, 0.22); tocar("sobe", 0.5); } else tocar("desce", 0.5); }, [ok]);
-  return (
-    <div className="relative">
-      {ok && <Lottie nome="gol" className="absolute left-1/2 -translate-x-1/2 -top-24 w-48 h-48 pointer-events-none" />}
-      <div className={`display text-3xl rp-sobe ${ok ? "text-[#1BC28A]" : "text-[#E36B5B]"}`}>{texto}</div>
-    </div>
-  );
+function PlacarMomento({ ok, texto, atraso = 0 }) {
+  const espera=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:atraso;
+  const [visivel,V]=useState(espera===0);
+  useEffect(() => {const mostrar=()=>{V(true);if(ok){efeitoLance("rede");torcida(2.6,.22);tocar("sobe",.5);}else tocar("desce",.5);};if(!espera){mostrar();return;}const timer=setTimeout(mostrar,espera);return()=>clearTimeout(timer);}, [ok,espera]);
+  return <div className="relative" style={{visibility:visivel?'visible':'hidden'}}>{ok&&visivel&&<Lottie nome="gol" className="absolute left-1/2 -translate-x-1/2 -top-24 w-48 h-48 pointer-events-none"/>}<div className={`display text-3xl rp-sobe ${ok?'text-[#1BC28A]':'text-[#E36B5B]'}`}>{texto}</div></div>;
 }
 
 /* Cena do gol: estádio ao fundo, trave com rede em profundidade e um goleiro de verdade */
@@ -768,7 +768,7 @@ function CenaGol({ goleiro, res, bola, fora, podeEscolher, onZona }) {
         <radialGradient id="rpBola" cx=".35" cy=".3" r=".75"><stop offset="0" stopColor="#FFFFFF" /><stop offset=".7" stopColor="#E6E8E7" /><stop offset="1" stopColor="#9DA3A1" /></radialGradient>
         <filter id="rpDesfoque"><feGaussianBlur stdDeviation="1.6" /></filter>
       </defs>
-      <GeometriaCampo largura={300} altura={210} gol={{x:29,y:40,w:242,h:86}}/>
+      <GeometriaCampo largura={300} altura={210} gol={{x:29,y:40,w:242,h:86}} impacto={gol}/>
       {/* balanço da rede no gol */}
       {gol && bola && !fora && <ellipse className="rp-rede" cx={bx} cy={by} rx="24" ry="18" fill="url(#rpMalha)" stroke="rgba(255,255,255,.55)" strokeWidth=".8" />}
       {/* goleiro */}
@@ -784,13 +784,7 @@ function CenaGol({ goleiro, res, bola, fora, podeEscolher, onZona }) {
       ))}
       {/* faísca da defesa */}
       {salvou && bola && <circle className="rp-faisca" cx={bx} cy={by} r="10" fill="none" stroke="#F5D77A" strokeWidth="2.5" />}
-      {/* bola */}
-      <g className="rp-bola" style={{ transform: bola ? `translate(${bx - 150}px, ${by - 192}px) scale(.62)` : "none", transformOrigin: "150px 192px", opacity: fora && res ? 0.85 : 1 }}>
-        <ellipse cx="150" cy="200" rx="7" ry="2" fill="rgba(0,0,0,.35)" style={{ opacity: bola ? 0 : 1 }} />
-        <circle cx="150" cy="192" r="7.5" fill="url(#rpBola)" stroke="#2A2F2D" strokeWidth=".8" />
-        <path d="M150 188.5 l3 2.2 -1.1 3.5 h-3.8 l-1.1 -3.5 z" fill="#1B1E24" />
-        <path d="M143.6 190 l2 1.2 M156.4 190 l-2 1.2 M147 197.8 l1.4 -2 M153 197.8 l-1.4 -2" stroke="#1B1E24" strokeWidth="1" />
-      </g>
+      <BolaTrajeto origem={{x:150,y:192}} destino={{x:bx,y:by}} ativo={!!bola} curva={bola?(bx<150?-5:5):0} elevacao={12} raio={7.5}/>
     </svg>
   );
 }
@@ -862,7 +856,7 @@ function TelaPenalti({ c, momento, onFim, goleiro = false }) {
         {!res && (goleiro
           ? <p className="text-[17px] text-[#C9D3CE]">Toque no canto para onde vai pular. Defesa <span className="font-stat">{c.attrs.defesa}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "defesa") * 100)}%</span></p>
           : <p className="text-[17px] text-[#C9D3CE]">Toque no canto onde vai bater. Finalização <span className="font-stat">{c.attrs.finalizacao}</span> · chance estimada <span className="font-stat">{Math.round(chancePenalti(c) * 100)}%</span></p>)}
-        {res && <><PlacarMomento ok={res.ok} texto={textoRes} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.ok)}>Continuar →</button></>}
+        {res && <><PlacarMomento ok={res.ok} texto={textoRes} atraso={720} />{res.ok&&<small className="jr-celebracao" data-celebracao={!goleiro&&!c.totais.gols&&momento.ordem===1?'estreia':c.temporadas.some(t=>t.clube===contextoMomento(c,momento).adversario?.nome)?'reencontro':'titulo'}>{!goleiro&&!c.totais.gols&&momento.ordem===1?'Sua primeira rede em uma decisão!':c.temporadas.some(t=>t.clube===contextoMomento(c,momento).adversario?.nome)?'Uma decisão contra o antigo clube.':'Um lance que vale história.'}</small>}<button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.ok)}>Continuar →</button></>}
       </div>
     </QuadroMini>
   );
@@ -891,7 +885,7 @@ function TelaFalta({ c, momento, onFim }) {
       </div>
       <div className="mini-feedback text-center min-h-[64px]">
         {!res && <p className="text-[17px] text-[#C9D3CE]">Escolha onde colocar a bola. Finalização <span className="font-stat">{c.attrs.finalizacao}</span> · drible <span className="font-stat">{c.attrs.drible}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "falta") * 100)}%</span></p>}
-        {res && <><PlacarMomento ok={res.gol} texto={res.gol ? "GOLAÇO DE FALTA!" : res.tipo === "Barreira" ? "NA BARREIRA!" : res.tipo === "Trave" ? "NA TRAVE!" : res.tipo === "Defesa" ? "DEFENDEU!" : "PRA FORA!"} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.gol)}>Continuar →</button></>}
+        {res && <><PlacarMomento atraso={720} ok={res.gol} texto={res.gol ? "GOLAÇO DE FALTA!" : res.tipo === "Barreira" ? "NA BARREIRA!" : res.tipo === "Trave" ? "NA TRAVE!" : res.tipo === "Defesa" ? "DEFENDEU!" : "PRA FORA!"} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.gol)}>Continuar →</button></>}
       </div>
     </QuadroMini>
   );
@@ -1227,6 +1221,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
   return (
     <div className="max-w-xl mx-auto px-3 py-3 flex flex-col gap-3 rp-entra">
       {!gaveta && voar && pequenas.length > 0 && <TacasVoando titulos={pequenas} onPousou={onPousou} />}
+      <EcosDaTemporada card={card}/>
       <div className="rp-painel overflow-hidden">
         <div className="px-4 pt-3 pb-2 flex items-center gap-3" style={{ background: `linear-gradient(120deg, ${card.cor}44, transparent 75%)` }}>
           <ClubDot club={clubeDe(card.clube)} size={36} />
@@ -1592,7 +1587,7 @@ function CartaoEvento({ jogador, evento, resultado, efeitos, onEscolher, onPedir
                       {o.oferta && <ClubDot club={clubeDe(o.oferta.clube)} size={22} />}
                       <span className="font-bold text-[16px] text-[#F2F5F3] truncate">{o.oferta ? o.oferta.clube : o.label}</span>
                     </div>
-                    {o.dica && <div className="text-[13px] text-[#8FA39A] mt-0.5 line-clamp-2">{o.dica}</div>}
+                    {o.dica && <div className="text-[13px] text-[#8FA39A] mt-0.5 line-clamp-2">{o.dica}</div>}{o.oferta&&<ProjetoOferta c={jogador} nome={o.oferta.clube} projeto={o.oferta.projeto||projetoOferta(jogador,o.oferta.clube)}/>}
                   </button>
                   <button onClick={() => onEscolher(o.id, false)} className="shrink-0 px-3 border-l border-white/10 text-[12px] font-bold text-[#7FE3BC] hover:bg-white/5" aria-label={`Negociar com o ${o.oferta?.clube || ""}`}>negociar</button>
                 </div>
@@ -1605,6 +1600,7 @@ function CartaoEvento({ jogador, evento, resultado, efeitos, onEscolher, onPedir
                   <span className="font-bold text-[16px] text-[#F2F5F3] flex-1">{o.label}</span>
                   {!o.chances && o.risco && o.risco !== "seguro" && <span className="rp-chip shrink-0" style={{ color: r.cor, background: r.bg }}>{r.label}</span>}
                 </div>
+                {o.oferta&&<ProjetoOferta c={jogador} nome={o.oferta.clube} projeto={o.oferta.projeto||projetoOferta(jogador,o.oferta.clube)}/>}
                 {o.dica && o.oferta && <div className="text-[13px] text-[#8FA39A] mt-0.5">{o.dica}</div>}
                 {o.chances && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
@@ -2317,6 +2313,7 @@ function TelaFim({ c, onNova, onSair, onPosCarreira, onComecarTecnico }) {
         </div>
       )}
       <div ref={cartaRef} className="mx-auto w-full max-w-[364px] p-3 rounded-[32px]" style={{ background: "#0E1512" }}><CartaFinal c={c} /></div>
+      <section className="jr-legado">{legadoNarrativo(c).map(l=><p key={l.nome}><strong>{l.nome}</strong><small>{l.motivo}</small></p>)}<details><summary>Montar meu álbum de momentos</summary><AlbumJornada c={c}/></details></section>
       <div className="grid grid-cols-2 gap-2">
         <button onClick={baixarCarta} disabled={imagem === "gerando"} className="rp-btn rp-ouro display text-xs">
           {imagem === "gerando" ? "Gerando…" : imagem === "ok" ? "Imagem pronta!" : imagem === "erro" ? "Não deu, tente de novo" : "Baixar carta (PNG)"}
@@ -2738,7 +2735,7 @@ function PopupTemporada({ c, card, onFechar }) {
           {card.artilharia && card.artilharia.pontos >= card.artilharia.alvo * 0.7 && !card.titulos.some((t) => t.tipo === "botaOuro") && <span className="flex items-center gap-1.5"><BotaDourada size={16} /> Bota de Ouro: {card.artilharia.pontos}/{card.artilharia.alvo}</span>}
         </div>
       )}
-    </TelaCheia>
+    <EcosDaTemporada card={card} compacto/></TelaCheia>
   );
 }
 
@@ -3003,6 +3000,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const [estado, setEstado] = useState(() => (comecarDoZero ? null : carregarRapido()) || { etapa: "criacao" });
   const [estanteAberta, setEstanteAberta] = useState(false);
   const [apresentacao, setApresentacao] = useState(null);
+  const [apresentacaoSelecao,setApresentacaoSelecao]=useState(null);
   const [patrimonioAberto, setPatrimonioAberto] = useState(false);
   const [contadorPulsa, setContadorPulsa] = useState(0);
   const [gaveta, setGaveta] = useState(null);
@@ -3031,9 +3029,11 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
 
   // depois da temporada: estouros visuais e o caminho até a próxima ação
   const aposFechar = (antes, f) => {
+    if(f.card.jornada?.memorias?.some(m=>m.id==='primeiro:convocacao'||m.id==='primeiro:estreia-selecao'))setApresentacaoSelecao({c:f.c,estreia:f.card.jornada.memorias.some(m=>m.id==='primeiro:estreia-selecao')});
     if (f.card.ovrDepois > (antes.picoOvr || 0) && antes.temporadas.length > 0) setRecorde(Date.now());
     if (f.card.ovrDepois >= 90 && f.card.ovrDepois > (antes.picoOvr || 0)) setTimeout(() => festejar("estrelas", ["#FB923C", "#FFFFFF", "#EBC557"]), 2600);
     if (f.card.titulos.length) vibrar([30, 60, 30]);
+    if(antes.emprestimo&&!f.c.emprestimo){const m=f.c.jornada?.ultimaMudanca;setApresentacao({c:f.c,mudanca:m,clube:clubeDe(f.c.clubeNome),curto:true,deOnde:clubeDe(m?.de),contrato:f.c.contrato,valor:0});}
     if (temFestaGrande(f.card)) setEstado({ etapa: "festa", c: f.c, card: f.card, ultimo: f.card, voar: true });
     else { setPopTemp(f.card); posTemporada(f.c, f.card); }
   };
@@ -3081,6 +3081,12 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const responder = (tom) => { const r = responderColetiva(c, estado.coletiva, tom); setEstado((st) => ({ ...st, c: r.c, resposta: r.resultado })); };
 
   // proposta: tocar assina direto (contrato que o clube oferece); "negociar" abre a mesa
+  const acaoJornada=(tipo,valor)=>{
+    if(tipo==='retorno'){const ev=sortearEvento(c,{somente:'voltarCasa'});if(!ev)throw new Error('O retorno exige condições esportivas e uma relação preservada com o clube.');setEstado(st=>({...st,evento:ev,resultado:null,auto:false}));return;}
+    const fn={posicao:mudarPosicao,veterano:reinventarVeterano,assinatura:ativarAssinatura,preferencia:definirPreferenciaMercado}[tipo];
+    if(!fn) return;
+    const novo=fn(c,valor);setEstado(st=>({...st,c:novo,...(tipo==='posicao'&&st.evento?{evento:sortearEvento(novo,{somente:st.evento.id}),auto:false}:{})}));
+  };
   const pedirEmprestimo=()=>{const proposta=sortearEvento(c,{somente:'emprestimo'});setGaveta(null);setEstado(s=>({...s,etapa:'evento',evento:proposta,resultado:null,efeitos:null,auto:false}));};
   const escolherEvento = (opId, direto = false) => {
     const op = evento.opcoes.find((o) => o.id === opId);
@@ -3094,13 +3100,15 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const aplicarEscolha = (cBase, opId, extra) => {
     const r = resolverEvento(cBase, evento, opId, extra);
     const extraEv = eventoImpasse(r.c) || (fila ? segundoEvento(r.c, evento.id) : null);
-    const mudou = r.c.clubeNome !== c.clubeNome && evento.id !== "base";
+    const mudou = (r.c.emprestimo?.destino||r.c.clubeNome) !== (c.emprestimo?.destino||c.clubeNome) && evento.id !== "base";
     // o resultado vira um aviso curto no topo e o jogo segue (próxima notícia ou cartas de treino)
-    setEstado((st) => ({ ...st, etapa: "evento", c: r.c, evento: extraEv, resultado: null, efeitos: null, proximo: null, fila: false, manchete: null, aviso: null, auto: !extraEv && !anoDeDecisao(r.c) }));
+    setEstado((st) => ({ ...st, etapa: "evento", c: r.c, evento: extraEv, resultado: null, efeitos: null, proximo: null, fila: false, manchete: null, aviso: null, auto: !mudou && !extraEv && !anoDeDecisao(r.c) }));
     if (mudou) {
-      const clube = clubeDe(r.c.clubeNome);
+      const clube = clubeDe(r.c.emprestimo?.destino||r.c.clubeNome);
       const grande = clube.forca > clubeDe(c.clubeNome).forca + 3;
-      setApresentacao({ clube, grande, curto: !(grande && clube.forca >= 84), deOnde: clubeDe(c.clubeNome), contrato: r.c.contrato, valor: r.c.ultimaTransferencia?.valor ?? null });
+      setApresentacao({ c:r.c,mudanca:r.c.jornada?.ultimaMudanca,clube, grande, curto: !(grande && clube.forca >= 84), deOnde: clubeDe(c.clubeNome), contrato: r.c.contrato, valor: r.c.ultimaTransferencia?.valor ?? null });
+    } else if(evento.id==='base'){
+      setApresentacao({c:r.c,clube:clubeDe(r.c.clubeNome),curto:true,mudanca:{somentePrimeiroDia:true,para:r.c.clubeNome,primeiroDia:{objetivo:'Conquistar sua primeira oportunidade'}}});
     } else if (evento.id !== "base") {
       const op = evento.opcoes.find((o) => o.id === opId);
       const idx = op?.chances ? op.chances.findIndex((x) => x.txt === r.resultado) : -1;
@@ -3151,6 +3159,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     const cc = aposentar(c);
     cc.hall = registrarNoHall(cc);
     setEstado({ etapa: "fim", c: cc });
+    const t={ano:c.ano,de:c.emprestimo?.destino||c.clubeNome,para:c.clubeNome,tipo:'aposentadoria',valor:0,encerramento:true};t.cena=cenaDespedida(cc,t);setApresentacao({c:cc,clube:clubeDe(t.de),curto:true,mudanca:t});
   };
   const nova = () => setEstado({ etapa: "criacao" });
   const comecarTecnico = () => setEstado((st) => ({ ...st, etapa: "tecnico", c: iniciarCarreiraTecnico(st.c) }));
@@ -3179,8 +3188,8 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   return (
     <div className={etapa === "tecnico" ? "rp ct-root" : "rp rp-jogador"}>
       <style>{ESTILO_BASE}</style>
-      {painel ? <CartaoCarreira c={c} onEstante={() => setEstanteAberta(true)} onFicha={() => setGaveta("ficha")} contadorPulsa={contadorPulsa} recorde={recorde} />
-        : <Cabecalho treinador={etapa === "tecnico"} c={mostrarCabecalho ? c : null} onSair={onSair} onEstante={() => setEstanteAberta(true)} />}
+      {painel ? <CartaoCarreira c={c} etapa={etapa} onEstante={() => setEstanteAberta(true)} onFicha={() => setGaveta("ficha")} contadorPulsa={contadorPulsa} recorde={recorde} />
+        : <Cabecalho etapa={etapa} treinador={etapa === "tecnico"} c={mostrarCabecalho ? c : null} onSair={onSair} onEstante={() => setEstanteAberta(true)} />}
       <main className="pb-10">
         {etapa === "criacao" && <TelaCriacao onCriar={criar} ritmoInicial={ritmoInicial} />}
         {primeiroClube&&<div className="pc-tela"><PrimeiroClube evento={evento} jogador={c} onEscolher={escolherEvento}/></div>}
@@ -3190,7 +3199,8 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
             <div className="rp-proxima max-w-xl mx-auto px-3 pt-2.5 flex flex-col gap-2.5">
               <header className="rp-proximo-passo"><span className="rp-etiqueta">Temporada {c.ano}</span><h1>{estado.forcada ? "Hora de encerrar o ciclo" : estado.desafioResultado ? "Resultado do desafio" : resultado ? "Decisão tomada" : evento ? "Sua próxima decisão" : desafioPendente(c) ? "Desafio da temporada" : estado.auto ? "Temporada em andamento" : "Prepare sua temporada"}</h1><p>{estado.forcada ? "Confira o aviso e veja o legado da sua carreira." : estado.desafioResultado ? "Veja o que mudou e siga para preparar a temporada." : resultado ? "Confira o resultado da sua escolha antes de seguir." : evento ? "Compare as opções abaixo e escolha o próximo passo." : desafioPendente(c) ? "Uma escolha, um resultado. Tudo acontece aqui." : estado.auto ? "Acompanhe a simulação ou avance quando quiser." : "Escolha um treino abaixo para começar. O histórico fica disponível para consulta."}</p></header>
               <button className="lj-atalho" onClick={()=>setPatrimonioAberto(true)}><span>Loja do jogador<small>{upsAtivosJogador(c).length} UPs ativos · melhorias permanentes e temporárias</small></span><strong>{formatarValor(c.patrimonio||0)} →</strong></button>
-              {ultimo && !evento && <ResumoCompacto c={c} card={ultimo} onDetalhes={() => setGaveta("resumo")} />}
+              {ultimo && !evento && <><ResumoCompacto c={c} card={ultimo} onDetalhes={() => setGaveta("resumo")} /><EcosDaTemporada card={ultimo}/></>}
+              {!estado.desafioResultado&&<PainelJornada c={c} onAcao={acaoJornada} caminho={caminhoSelecao(c)} interesses={interesseMercado(c)}/>}
               {estado.aviso && <div className="rp-painel px-4 py-2.5 text-[15px] text-[#F0A99E]" style={{ borderColor: "rgba(227,107,91,.35)" }}>{estado.aviso}</div>}
               {estado.forcada ? (
                 <div className="rp-painel p-4 flex flex-col gap-3 rp-entra">
@@ -3265,15 +3275,9 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
       )}
       {estanteAberta && c && <Estante c={c} onFechar={() => setEstanteAberta(false)} />}
       {patrimonioAberto && c && <Patrimonio c={c} etapa={etapa} onComprar={comprar} onFechar={() => setPatrimonioAberto(false)} />}
-      {apresentacao && !apresentacao.curto && (
-        <ApresentacaoGrande clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade}
-          deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={() => setApresentacao(null)} />
-      )}
-      {apresentacao && apresentacao.curto && (
-        <ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label}
-          idade={c.idade} grandeChegada={apresentacao.grande} curto={apresentacao.curto} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={() => setApresentacao(null)} />
-      )}
+      {apresentacao && <CenasClube c={apresentacao.c||c} mudanca={apresentacao.mudanca} onFim={()=>setApresentacao(null)}>{fechar=>apresentacao.curto?<ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} grandeChegada={apresentacao.grande} curto={apresentacao.curto} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>:<ApresentacaoGrande clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>}</CenasClube>}
       {popTemp && c && <PopupTemporada key={popTemp.ano} c={c} card={popTemp} onFechar={() => { if (popTemp.titulos.length) { setContadorPulsa((x) => x + 1); vibrar(20); } setPopTemp(null); }} />}
+      {apresentacaoSelecao&&!apresentacao&&!popTemp&&!popup&&<PrimeiraSelecao c={apresentacaoSelecao.c} estreia={apresentacaoSelecao.estreia} onFim={()=>setApresentacaoSelecao(null)}/>}
       {popup && !popTemp && <PopupResultado key={popup.k} info={popup} onFechar={() => setPopup(null)} />}
     </div>
   );

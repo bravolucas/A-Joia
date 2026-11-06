@@ -2,20 +2,20 @@ import Personalizacao from './Personalizacao.jsx';
 import { CamisaPremium, MedalhaFeito } from './VisualFutebol.jsx';
 import Icone from './Icone.jsx';
 import React, { useEffect, useRef, useState } from 'react';
-import { TACAS_MUSEU, CAMISAS_MUSEU, FEITOS_MUSEU, lerMuseu, sincronizarMuseuDosSaves, importarMuseu } from './museu.js';
+import { TACAS_MUSEU, CAMISAS_MUSEU, FEITOS_MUSEU, lerMuseu, sincronizarMuseuDosSaves, importarMuseu, progressoFeitoMuseu } from './museu.js';
 import { escudoDe } from './arte.js';
 import { TacaCompeticao } from './trofeus.jsx';
 import './Museu.css';
 
 const ABAS = [{ id: 'tacas', nome: 'Taças', simbolo: '🏆', catalogo: TACAS_MUSEU }, { id: 'camisas', nome: 'Camisas', simbolo: '👕', catalogo: CAMISAS_MUSEU }, { id: 'feitos', nome: 'Feitos', simbolo: '✦', catalogo: FEITOS_MUSEU }];
 const quantidade = item => Object.values(item?.fontes || {}).reduce((s, f) => s + f.quantidade, 0);
-function Camisa({ item }) { return <span className="mu-shirt"><CamisaPremium nome={item.nome} cor={item.cor || '#176b50'} numero={10}/></span>; }
+function Camisa({ item }) { return <span className="mu-shirt"><CamisaPremium nome={item.nome} cor={item.cor || '#176b50'} numero={item.numero||10}/></span>; }
 function Ilustracao({ aba, item }) {
   if (aba === 'tacas') return <TacaCompeticao nome={item.nome} tipo={item.tipo} size={86} />;
   if (aba === 'camisas') return <Camisa item={item} />;
   return <MedalhaFeito id={item.id} />;
 }
-function Detalhe({ aba, item, conquista, onFechar }) {
+function Detalhe({ aba, item, conquista, progresso, onFechar }) {
   const dialogo = useRef(null);
   useEffect(() => {
     const anterior = document.activeElement;
@@ -25,16 +25,18 @@ function Detalhe({ aba, item, conquista, onFechar }) {
   }, []);
   return <dialog ref={dialogo} className="mu-dialog" aria-labelledby="mu-detail-title" onCancel={e => { e.preventDefault(); onFechar(); }} onClick={e => { if (e.target === e.currentTarget) onFechar(); }}>
     <button className="mu-close" onClick={onFechar} aria-label="Fechar detalhes">×</button>
-    <div className={`mu-detail-art ${conquista ? '' : 'mu-locked'}`}><Ilustracao aba={aba} item={item} /></div>
+    <div className={`mu-detail-art ${conquista ? '' : 'mu-locked'}`}><Ilustracao aba={aba} item={{...item,numero:Object.values(conquista?.fontes||{}).find(f=>f.historia?.numeros?.length)?.historia.numeros.at(-1)||10}} /></div>
     <span className="mu-eyebrow">{conquista ? 'FAZ PARTE DA SUA HISTÓRIA' : 'SEU PRÓXIMO OBJETIVO'}</span>
     <h2 id="mu-detail-title">{item.nome}</h2><p>{item.descricao || `Conquiste ${item.nome} em uma carreira.`}</p>
+    {!conquista&&progresso&&<p className="mu-progress-detail">Progresso nesta carreira: {progresso.atual}/{progresso.meta}<progress value={progresso.atual} max={progresso.meta}/></p>}
     {aba === 'camisas' && <p className="mu-small">Camisa comemorativa do A-Joia, com as cores e o escudo do clube.</p>}
-    {conquista ? <><div className="mu-detail-count"><strong>{quantidade(conquista)}</strong><span>{aba === 'tacas' ? 'títulos registrados' : aba === 'camisas' ? 'registros de idolatria' : 'carreiras que alcançaram este marco'}</span></div><h3>Quem escreveu essa história</h3><ul className="mu-sources">{Object.entries(conquista.fontes).map(([id, f]) => <li key={id}><span><strong>{f.atleta}</strong><small>{f.papel}{f.clube ? ` · ${f.clube}` : ''}{f.ano ? ` · ${f.ano}` : ''}</small></span>{aba === 'tacas' && <b>×{f.quantidade}</b>}</li>)}</ul></> : <div className="mu-locked-hint">Ainda não desbloqueado. A próxima carreira pode mudar isso.</div>}
+    {conquista ? <><div className="mu-detail-count"><strong>{quantidade(conquista)}</strong><span>{aba === 'tacas' ? 'títulos registrados' : aba === 'camisas' ? 'registros de idolatria' : 'carreiras que alcançaram este marco'}</span></div><h3>Quem escreveu essa história</h3><ul className="mu-sources">{Object.entries(conquista.fontes).map(([id, f]) => <li key={id}><span><strong>{f.atleta}</strong><small>{f.papel}{f.clube ? ` · ${f.clube}` : ''}{f.ano ? ` · ${f.ano}` : ''}</small>{f.historia&&<small>{f.historia.anos?.join(', ')}{f.historia.numeros?.length?` · Camisa ${f.historia.numeros.join('/')}`:''}<br/>{f.historia.feito}</small>}</span>{aba === 'tacas' && <b>×{f.quantidade}</b>}</li>)}</ul></> : <div className="mu-locked-hint">Ainda não desbloqueado. A próxima carreira pode mudar isso.</div>}
     <button className="mu-button mu-primary" onClick={onFechar}>Voltar à coleção</button>
   </dialog>;
 }
 
 export default function Museu({ onVoltar }) {
+  const [carreiraAtual]=useState(()=>{try{return JSON.parse(localStorage.getItem('ajoia_rapido_v1'))?.c||null;}catch{return null;}});
   const [museu, setMuseu] = useState(() => lerMuseu());
   const [aba, setAba] = useState('tacas');
   const [filtro, setFiltro] = useState('todos');
@@ -91,6 +93,6 @@ export default function Museu({ onVoltar }) {
     </section>
     <footer className="mu-footer"><div><strong>Sua história continua na próxima carreira.</strong><p>A coleção fica neste navegador, separada dos saves. Exporte um backup antes de limpar os dados ou trocar de dispositivo.</p></div><div className="mu-backup"><button className="mu-button" onClick={exportar}>Exportar coleção</button><button className="mu-button" onClick={() => arquivo.current?.click()}>Importar coleção</button><input ref={arquivo} type="file" accept="application/json,.json" onChange={importar} hidden /></div></footer>
     {aviso && <p role="status" className="mu-notice">{aviso}</p>}
-    {detalhe && <Detalhe key={detalhe.id} aba={aba} item={detalhe} conquista={museu[aba][detalhe.id]} onFechar={() => setDetalhe(null)} />}
+    {detalhe && <Detalhe key={detalhe.id} aba={aba} item={detalhe} conquista={museu[aba][detalhe.id]} progresso={progressoFeitoMuseu(carreiraAtual,detalhe.id)} onFechar={() => setDetalhe(null)} />}
   </main>;
 }

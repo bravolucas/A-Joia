@@ -6,12 +6,12 @@ const dinheiro=formatarVerbaRapida;
 export const verbaPretemporada=t=>t.verbaRapida??limitar((!t.modoTreinadorRapido&&t.gestao?.clube===t.clube?t.gestao.saldo:undefined)??Math.round(((t.elenco||50)-25)**2*2),500,5000);
 export const renovarVerbaPretemporada=t=>{const saldo=verbaPretemporada(t);return saldo+Math.min(350,Math.max(0,6000-saldo));};
 const rivalDe=t=>{const clubes=[...new Set(CLASSICOS.filter(par=>Array.isArray(par)&&par.includes(t.clube)).flat().filter(n=>n!==t.clube))];return clubes[hash(`${t.clube}|${t.ano}|rival`)%clubes.length];};
-const ids=['craque-jovem','esquema','venda-base','rival','veterano','preparacao','capitao','diretoria','emprestimo','renovacao','olheiro','bola-parada','recuperacao','calendario','dupla','estrela','torcida','analista'];
+const ids=['filosofia','sucessor','pressao-jovem','transicao-projeto','posse-base','identidade-local','craque-jovem','esquema','venda-base','rival','veterano','preparacao','capitao','diretoria','emprestimo','renovacao','olheiro','bola-parada','recuperacao','calendario','dupla','estrela','torcida','analista'];
 export function planoPretemporadaRapida(t,quantidade=1){
  if(t.planoRapido?.ano===t.ano&&t.planoRapido.clube===t.clube)return {...t.planoRapido,cartas:t.planoRapido.cartas.slice(0,1),respostas:t.planoRapido.respostas.slice(0,1)};
  const recentes=new Set((t.historicoRapido||[]).slice(-4));
  const elegiveis=ids.filter(id=>(id!=='rival'||rivalDe(t))&&!recentes.has(id));
- const ordem=elegiveis.sort((a,b)=>hash(`${t.clube}|${t.ano}|${a}`)-hash(`${t.clube}|${t.ano}|${b}`));
+ const ordem=elegiveis.sort((a,b)=>hash(`${t.clube}|${t.ano}|${t.filosofia||''}|${a}`)-hash(`${t.clube}|${t.ano}|${t.filosofia||''}|${b}`));
  return {ano:t.ano,clube:t.clube,cartas:ordem.slice(0,1),respostas:[]};
 }
 export function cartaPretemporadaRapida(t,quantidade=1){
@@ -23,6 +23,13 @@ export function cartaPretemporadaRapida(t,quantidade=1){
  const op=(id,nome,descricao,efeitos={},custo=0,futuro={})=>({id,nome,descricao,efeitos,custo,futuro});
  const manter=op('manter','Manter o grupo','Sem gasto. Moral +2.',{moral:2});
  const cartas={
+  filosofia:{titulo:'Uma filosofia para o próximo ciclo',texto:'Uma escolha muda a identidade do trabalho, sem administrar o elenco.',opcoes:[{...op('posse','Posse e construção','Time +2. Moral −1: o grupo precisa se adaptar.',{elenco:2,moral:-1}),filosofia:'posse',estilo:'equilibrado'},{...op('transicao','Transição rápida','Time +3 agora e −1 no próximo ano. Menos controle, mais ataques.',{elenco:3},0,{elenco:-1}),filosofia:'transicao',estilo:'ofensivo'},{...op('pressao','Pressão coordenada','Time +2 e moral −2 agora; +2 no próximo ano.',{elenco:2,moral:-2},200,{elenco:2}),filosofia:'pressao',estilo:'ofensivo'}]},
+  sucessor:{titulo:'Preparar quem vem depois',texto:'O veterano ainda decide, mas o jovem precisa de espaço.',opcoes:[op('agora','Seguir com o veterano','Time +3 agora e −2 no próximo ano.',{elenco:3},150,{elenco:-2}),op('futuro','Formar o sucessor','Time −1 agora e +4 no próximo ano.',{elenco:-1},0,{elenco:4}),manter]},
+  'pressao-jovem':{titulo:'A intensidade tem um preço',texto:'O elenco jovem pode pressionar mais, se aceitar o desgaste.',opcoes:[op('pressionar','Apertar a saída rival','Time +4, moral −4 agora. Time −1 no próximo ano.',{elenco:4,moral:-4},250,{elenco:-1}),op('dosar','Dosar a energia','Time +1 e moral +4.',{elenco:1,moral:4}),manter]},
+  'transicao-projeto':{titulo:'Mudar a forma de atacar',texto:'Paciência para construir ou chegada rápida à área?',opcoes:[{...op('vertical','Buscar jogo vertical','Time +3 e moral −2.',{elenco:3,moral:-2},100),filosofia:'transicao',estilo:'ofensivo'},{...op('construir','Construir com paciência','Time +1 agora e +2 no próximo ano.',{elenco:1},100,{elenco:2}),filosofia:'posse',estilo:'equilibrado'},manter]},
+  'posse-base':{titulo:'Aprender com a bola',texto:'Os jovens podem assumir a construção, com risco no começo.',opcoes:[op('ensinar','Aceitar o período de aprendizado','Time −2 e moral +3 agora. Time +5 no próximo ano.',{elenco:-2,moral:3},250,{elenco:5}),op('simples','Jogar simples por enquanto','Time +2 agora. Sem promessa de crescimento futuro.',{elenco:2},100),manter]},
+  'identidade-local':{titulo:'A torcida pede identificação',texto:'Uma promessa local ou experiência de fora?',opcoes:[op('local','Valorizar a base do clube','Torcida +5 e time +1 agora; +2 no próximo ano.',{torcida:5,elenco:1},150,{elenco:2}),op('experiencia','Trazer experiência imediata','Time +4 e torcida −2. Custa mais, resolve agora.',{elenco:4,torcida:-2},500),manter]},
+
   'craque-jovem':{titulo:'Um craque agora ou uma promessa?',texto:'A diretoria libera uma contratação. Qual é sua aposta?',opcoes:[op('craque',`${jogador} · nível ${craque}`,`Craque de 29 anos. Time +5 agora.`,{elenco:5},custo),op('jovem',`Aposta jovem · nível ${jovem}`,`19 anos, potencial ${Math.min(99,jovem+12)}. Time +2 agora e +3 no próximo ano.`,{elenco:2},Math.round(custo*.4),{elenco:3}),manter]},
   esquema:{titulo:'Qual será a cara do time?',texto:'Escolha o plano que será usado na temporada.',opcoes:[{...op('atacar','4-3-3 · atacar','Mais gols, menos empates e maior risco contra times fortes.'),formacao:'4-3-3',estilo:'ofensivo'},{...op('proteger','3-5-2 · proteger','Menos gols e mais empates. Ajuda a resistir a adversários superiores.'),formacao:'3-5-2',estilo:'defensivo'},{...op('equilibrar','4-4-2 · equilíbrio','Mantenha um time equilibrado, sem custo.'),formacao:'4-4-2',estilo:'equilibrado'}]},
   'venda-base':{titulo:'Uma oferta pelo garoto da base',texto:'Um clube quer levar sua promessa de 19 anos. Vender fortalece o caixa, mas reduz as opções em campo.',opcoes:[op('vender',`Vender por ${dinheiro(900)}`,'Verba +R$ 900 mil. Time −3 nesta temporada.',{elenco:-3},-900),op('segurar',`Segurar o garoto · nível ${jovem}`,'Time +1 agora e +2 no próximo ano.',{elenco:1},0,{elenco:2})]},
@@ -58,7 +65,7 @@ export function aplicarPretemporadaRapida(c,chave,opcaoId,quantidade=1){
  const plano=planoPretemporadaRapida(t,quantidade),resposta={carta:carta.id,opcao:op.id,nome:op.nome,resultado:op.descricao,impacto:{...op.efeitos},custo:op.custo};
  const novo={...t,modoTreinadorRapido:true,acompanharJogo:false,verbaRapida:carta.verba-op.custo,planoRapido:{...plano,respostas:[...plano.respostas,resposta]},historicoRapido:[...(t.historicoRapido||[]),carta.id].slice(-12),decisoes:[...(t.decisoes||[]),resposta]};
  for(const [atributo,valor] of Object.entries(op.efeitos))novo[atributo]=limitar((t[atributo]??50)+valor,atributo==='elenco'?10:0,atributo==='elenco'?95:100);
- if(op.estilo)novo.estilo=op.estilo;if(op.formacao)novo.formacao=op.formacao;
+ if(op.filosofia)novo.filosofia=op.filosofia;if(op.estilo)novo.estilo=op.estilo;if(op.formacao)novo.formacao=op.formacao;
  if(Object.keys(op.futuro).length)novo.efeitosPendentes=[...(t.efeitosPendentes||[]),{carta:carta.id,opcao:op.id,heranca:op.futuro,clube:t.clube,aplicarEm:t.ano+1}];
  return {...c,tecnico:novo};
 }

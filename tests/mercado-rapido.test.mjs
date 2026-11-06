@@ -2,13 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
+import {pesoProjeto} from "../jornadaJogador.js";
 
 const source = fs.readFileSync(new URL("../rapido.js", import.meta.url), "utf8");
 const begin = source.indexOf("const LIGAS_ELITE_EUROPA_RAPIDO");
 const end = source.indexOf("export function gerarOfertas", begin);
 assert.ok(begin >= 0 && end > begin, "Mercado rápido deve estar presente");
 const snippet = source.slice(begin, end) + "\n globalThis.pesoMercadoRapido = pesoMercadoRapido;";
-const context = { hashTexto(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; }, afinidade: () => 1 };
+const context = { pesoProjeto, hashTexto(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; }, afinidade: () => 1 };
 vm.runInNewContext(snippet, context);
 const peso = context.pesoMercadoRapido;
 const base = { idade: 27, nac: "brasil", codigo: "ABC123", ano: 2035, temporadas: [{ jogos: 30, nota: 7.5 }] };

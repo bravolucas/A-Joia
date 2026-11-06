@@ -1,0 +1,82 @@
+import {CLUBES} from './data.js';
+import React,{useEffect,useRef,useState} from 'react';
+import {createPortal} from 'react-dom';
+import {ASSINATURAS} from './jornadaJogador.js';
+import {memoriaTorcida,legadoNarrativo} from './jornadaJogador.js';
+import {IDENTIDADES_POSICAO,posicoesCompativeis,sugestaoVeterano} from './posicoesCarreira.js';
+import {upsAtivosJogador,upJogadorDe} from './lojaJogador.js';
+import {ARTE,escudoDe,bandeiraDe} from './arte.js';
+import {CamisaPremium} from './VisualFutebol.jsx';
+import {TacaCompeticao} from './trofeus.jsx';
+import {bloquearRolagem} from './bloqueioRolagem.js';
+import './JornadaUI.css';
+import despedidas from './arte/jornada/despedidas.webp';
+
+export function FasesTemporada({etapa}){
+ if(!etapa||['criacao','fim','tecnico'].includes(etapa))return null;
+ const idx=['momento','copa'].includes(etapa)?1:['festa','resumo','coletiva','traco'].includes(etapa)?2:0;
+ return <nav className="jr-fases" aria-label="Fases da temporada">{['Preparação','Campanha','Fechamento'].map((v,i)=><span key={v} aria-current={idx===i?'step':undefined} className={i===idx?'jr-atual':i<idx?'jr-passou':''}><b>{i+1}</b>{v}{i<2&&<i aria-hidden="true">→</i>}</span>)}</nav>;
+}
+function Janela({titulo,onFechar,children}){
+ const ref=useRef(null);
+ useEffect(()=>{const anterior=document.activeElement,el=ref.current;el.showModal();const liberar=bloquearRolagem(document.body);return()=>{el.close();liberar();anterior?.focus({preventScroll:true});};},[]);
+ return createPortal(<dialog className="jr-modal" aria-label={titulo} ref={ref} onCancel={e=>{e.preventDefault();onFechar();}}><header><h2>{titulo}</h2><button onClick={onFechar} aria-label="Fechar jornada">×</button></header><div className="jr-modal-corpo">{children}</div></dialog>,document.body);
+}
+export function AlbumJornada({c}){
+ const todos=[...Object.values(c.jornada?.primeiros||{}),...(c.jornada?.memorias||[])].filter((m,i,a)=>m?.id&&a.findIndex(v=>v?.id===m.id)===i);
+ const [ids,S]=useState(()=>todos.slice(0,3).map(m=>m.id)),[aviso,V]=useState('');const ref=useRef(null);
+ const exportar=async()=>{try{V('Preparando álbum…');const {toPng}=await import('html-to-image');const url=await toPng(ref.current,{pixelRatio:2,cacheBust:false,backgroundColor:'#10241a'});const a=document.createElement('a');a.href=url;a.download='a-joia-meus-momentos.png';a.click();V('Álbum pronto.');}catch{V('Não foi possível exportar. Tente novamente.');}};
+ return <section className="jr-album"><p>Escolha até três momentos reais para guardar em uma imagem.</p><div className="jr-selecionar">{todos.map(m=><label key={m.id}><input type="checkbox" checked={ids.includes(m.id)} disabled={!ids.includes(m.id)&&ids.length>=3} onChange={()=>S(v=>v.includes(m.id)?v.filter(x=>x!==m.id):[...v,m.id])}/><span>{m.titulo}<small>{m.ano} · {m.clube}</small></span></label>)}</div><div ref={ref} className="jr-poster"><span>A JOIA · ÁLBUM DE CARREIRA</span><h2>{c.nome}</h2><p>{legadoNarrativo(c).map(x=>x.nome).join(' · ')}</p>{todos.filter(m=>ids.includes(m.id)).map(m=><article key={m.id}><b>{m.ano}</b><div><h3>{m.titulo}</h3><p>{m.clube} · {m.texto}</p></div></article>)}</div><button className="jr-acao" disabled={!ids.length} onClick={exportar}>Salvar meus três momentos</button><p role="status">{aviso}</p></section>;
+}
+export function PainelJornada({c,onAcao,caminho,interesses=[]}){
+ const [modal,M]=useState(null),[aviso,V]=useState('');
+ const j=c.jornada||{},pos=IDENTIDADES_POSICAO[c.posicao]||IDENTIDADES_POSICAO.MC,possiveis=posicoesCompativeis(c),sug=sugestaoVeterano(c),adap=j.adaptacao,ups=upsAtivosJogador(c);
+ const agir=(tipo,valor)=>{try{onAcao(tipo,valor);V('Seu novo caminho foi salvo.');M(null);}catch(e){V(e.message);}};
+ return <section className="jr-painel" aria-label="Caminhos da carreira"><details><summary><span><b>{c.posicao} · {pos.nome}</b><small>{j.capitao?.clube===(c.emprestimo?.destino||c.clubeNome)?'Capitão · ':''}{j.transicao?.restantes>0?`Nova função · ${j.transicao.restantes} temporada(s) de adaptação`:adap?.restantes>0?`Adaptação ao clube · ${adap.restantes} temporada(s)`:'Sua posição, vínculos e próximos passos'}</small></span><i>+</i></summary><p>{pos.descricao}</p><p className="jr-lembranca">{memoriaTorcida(c)}</p>{adap?.restantes>0&&<p>Adaptação: −0,08 na nota e −2,5 p.p. na participação durante {adap.restantes} temporada(s). Idioma: {adap.idioma}.{adap.reuniao?` ${adap.reuniao} ajuda no entrosamento.`:''}</p>}
+ {sug&&<p className="jr-conselho">O treinador vê um caminho em <strong>{sug.destino}</strong>: {sug.motivo}</p>}
+ <div className="jr-botoes"><button onClick={()=>M('posicao')} disabled={!possiveis.length||c.lojaAnoEmCurso===c.ano}>Mudar de posição</button>{c.idade>=30&&<button onClick={()=>M('veterano')}>Reinventar meu jogo</button>}<button onClick={()=>M('assinatura')}>Assinatura técnica</button><button onClick={()=>M('album')}>Meu álbum</button>{c.idade>=30&&c.primeiroClube!==c.clubeNome&&!c.emprestimo&&<button onClick={()=>agir('retorno')}>Sondar volta ao clube formador</button>}</div>
+ <h3>Seu empresário</h3><p>{({iniciante:'Vantagem: baixo custo. Limite: alcance curto de mercado.',agressivo:'Vantagem: mais propostas e alcance. Limite: comissão maior e desgaste com o clube.',cauteloso:'Vantagem: contratos mais longos. Limite: menos propostas e multas maiores.',midiatico:'Vantagem: exposição e patrocínios. Limite: comissão maior e pressão de imagem.'})[c.empresario]||'Consulte o perfil do seu empresário.'}</p><h3>Prioridade nas próximas ofertas</h3><div className="jr-prioridades">{[['jogar','Ter espaço'],['titulos','Disputar títulos'],['salario','Ganhar mais']].map(([id,n])=><button key={id} aria-pressed={(j.preferencia||'jogar')===id} onClick={()=>agir('preferencia',id)}>{n}</button>)}</div>
+ {caminho&&<div className="jr-selecao"><h3>Caminho para a seleção</h3><p>{caminho.elegivel?caminho.rotulo:'A convocação exige elegibilidade e pelo menos 18 anos.'}</p><meter min="40" max="99" low={caminho.corte-4} high={caminho.corte} optimum="99" value={caminho.ovr}/><small>Seu OVR {caminho.ovr} · referência {caminho.corte}. {caminho.aviso}</small>{j.geracao?.length>0&&<p>Sua geração na seleção: {j.geracao.filter(p=>c.ano-p.nascimento<=37).map(p=>`${p.nome} (${c.ano-p.nascimento})`).join(' · ')}<small>Companheiros fictícios com continuidade entre ciclos.</small></p>}</div>}
+ {!!j.duplas?.length&&<div className="jr-vinculos"><h3>Duplas que ficam na memória</h3>{j.duplas.map(d=><p key={d.id}><strong>{d.nome}</strong> · {d.aposentado?'Aposentado':d.clube}<small>{d.temporadas} temporada(s) juntos · {d.reencontros} reencontro(s) · personagem fictício{d.clube===(c.emprestimo?.destino||c.clubeNome)&&d.conexao>=2?' · até +0,06 na nota por entrosamento':''}</small></p>)}</div>}
+ {j.mentor&&<p className="jr-lembranca">Primeiro orientador: {j.mentor.nome} · {j.mentor.clube} · personagem fictício</p>}
+ {!!j.rivalMemorias?.length&&<details><summary>Seu rival tem história</summary>{j.rivalMemorias.slice(-3).map((m,i)=><p key={i}>{m.ano} · {m.clube}{m.premio?` · ${m.premio}º na Bola de Ouro`:m.confronto?' · confronto registrado':''}</p>)}</details>}
+ {!!j.relatoriosEmprestimo?.length&&<details><summary>Como foram seus empréstimos</summary>{j.relatoriosEmprestimo.map((r,i)=><p key={i}>{r.clube}: {r.jogos} jogos em {r.temporadas} temporada(s){r.esperados?` · projeção ${r.esperados.join('–')}`:''}. Retorno ao {r.origem}.</p>)}</details>}
+ {!!interesses.length&&<div className="jr-interesses"><h3>No radar</h3>{interesses.map(x=><p key={x.clube}>{x.clube}<small>{x.liga} · {x.texto}</small></p>)}</div>}
+ </details>
+ {!!ups.length&&<div className="jr-ups" aria-label="Impulsos ativos na temporada">{ups.map(u=><span key={u.id}><b>{upJogadorDe(u.id)?.nome||u.id}</b>{Math.max(0,u.fim-c.ano)} temporada(s) restante(s)<small>{upJogadorDe(u.id)?.desc}</small></span>)}</div>}
+ {aviso&&<p role="status">{aviso}</p>}
+ {modal==='posicao'&&<Janela titulo="Mudar de posição de verdade" onFechar={()=>M(null)}><p>Pesos de OVR, produção e desafios passam a seguir a nova função. Os valores abaixo são referências com seus atributos atuais; idade, fase e treino ainda influenciam.</p>{possiveis.map(p=><button className="jr-escolha" key={p.destino} onClick={()=>agir('posicao',p.destino)}><strong>{p.origem} → {p.destino} · {p.nome}</strong><p>{p.motivo}</p><span>OVR agora {p.ovrAntes} → {p.ovrInicio} na adaptação</span><small>−{p.penalidade} OVR temporários por {p.duracao} temporada(s). Referência após adaptação: {p.ovrAdaptado}. Com 20 jogos no período, até +1 {p.ganho}, respeitando o teto.</small><b>Assumir esta função →</b></button>)}</Janela>}
+ {modal==='veterano'&&<Janela titulo="Um veterano pode se reinventar" onFechar={()=>M(null)}><p>Troca permanente, disponível a partir dos 30 anos. Novo ajuste só após três temporadas; ganhos respeitam seu potencial.</p>{[['leitura','Leitura e passe','−2 velocidade · até +2 passe'],['posicionamento','Chegar antes pela leitura','−2 velocidade · até +2 defesa'],['mentor','Orientar o grupo','−2 velocidade · até +1 passe e +1 defesa · pequena influência no grupo']].filter(([id])=>c.posicao!=='GOL'||id!=='mentor').map(([id,n,d])=><button className="jr-escolha" key={id} onClick={()=>agir('veterano',id)}><strong>{n}</strong><p>{d}</p><b>Adotar este estilo →</b></button>)}</Janela>}
+ {modal==='assinatura'&&<Janela titulo="Sua assinatura técnica" onFechar={()=>M(null)}><p>Conquiste repetindo comportamentos em temporadas distintas. Somente uma fica ativa.</p>{ASSINATURAS.map(s=>{const n=j.assinaturas?.[s.id]?.anos?.length||0;return <button className="jr-escolha" key={s.id} disabled={n<s.meta||c.lojaAnoEmCurso===c.ano} onClick={()=>agir('assinatura',s.id)}><strong>{s.nome} {j.assinaturaAtiva===s.id?'· Ativa':''}</strong><p>{s.descricao}</p><span>{Math.min(n,s.meta)}/{s.meta} temporadas · {s.efeito}</span><b>{n<s.meta?'Em desenvolvimento':'Ativar assinatura →'}</b></button>;})}</Janela>}
+ {modal==='album'&&<Janela titulo="Seu álbum de momentos" onFechar={()=>M(null)}><AlbumJornada c={c}/></Janela>}
+ </section>;
+}
+export function EcosDaTemporada({card,compacto=false}){
+ const j=card?.jornada;if(!j)return null;
+ const mensagem=j.mensagens?.[0],memoria=j.memorias?.[0],eco=j.noticias?.find(n=>['eco','reencontro','dupla','recorde'].includes(n.tipo));
+ if(!mensagem&&!memoria&&!eco)return null;
+ return <aside className={`jr-ecos ${compacto?'jr-ecos-compacto':''}`} aria-label="A história desta temporada">{mensagem&&<p><small>DE {mensagem.de}{mensagem.ficticio?' · personagem fictício':''}</small>“{mensagem.texto}”</p>}{(!compacto||!mensagem)&&(memoria||eco)&&<article><strong>{memoria?.titulo||eco.titulo}</strong><span>{memoria?.texto||eco.detalhe}</span></article>}</aside>;
+}
+export function ProjetoOferta({c,nome,projeto}){
+ if(!projeto)return null;
+ return <div className="jr-projeto"><b>{projeto.papel}</b><span>{projeto.jogos.join('–')} jogos projetados · clube força {projeto.forca}{projeto.forcaLiga?` · nível da liga ${projeto.forcaLiga}`:''}</span>{projeto.salario!=null&&<span>€ {projeto.salario>=1000?`${(projeto.salario/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})} mi`:`${projeto.salario} mil`}/ano{projeto.anos?` · ${projeto.anos} temporada(s)`:''}</span>}{projeto.retorno&&<small>{projeto.retorno}</small>}<small>{projeto.mensagem}</small>{c?.jornada?.duplas?.some(d=>d.clube===nome&&!d.aposentado)&&<em>Você reencontra uma dupla conhecida neste clube.</em>}</div>;
+}
+export function CenasClube({c,mudanca,onFim,children}){
+ const raiz=useRef(null);
+ const [fase,F]=useState(mudanca?.somentePrimeiroDia?2:mudanca?.cena?0:1);
+ const sairDaCena=()=>mudanca?.encerramento?onFim():F(1);
+ useEffect(()=>{if(fase===1)return;const btn=raiz.current?.querySelector('button');btn?.focus({preventScroll:true});const teclado=e=>{if(e.key==='Escape'){e.preventDefault();fase===2?onFim():sairDaCena();}if(e.key==='Tab'){e.preventDefault();btn?.focus();}};document.addEventListener('keydown',teclado);return()=>document.removeEventListener('keydown',teclado);},[fase]);
+ useEffect(()=>fase!==1?bloquearRolagem(document.body):undefined,[fase]);
+ useEffect(()=>{if(fase===1)return;const r=window.matchMedia('(prefers-reduced-motion: reduce)').matches;const t=setTimeout(()=>fase===0?sairDaCena():onFim(),r?450:2200);return()=>clearTimeout(t);},[fase,onFim]);
+ if(fase===1)return children(()=>F(2));
+ const cena=mudanca?.cena,primeiroDia=fase===2,nome=primeiroDia?mudanca?.para:cena?.clube;
+ const tile=primeiroDia?4:({base:0,estadio:1,homenagem:1,ruptura:2,imprensa:3,vestiario:4,emprestimo:5,retornoEmprestimo:5,aposentadoria:1,ascensao:5})[cena?.tipo]??4;
+ return createPortal(<div ref={raiz} className={`jr-cinema jr-atlas jr-cena-${primeiroDia?'vestiario':cena?.tipo||'vestiario'}`} role="dialog" aria-modal="true" aria-label={primeiroDia?'Primeiro dia no clube':'Despedida do clube'}><div className="jr-cinema-arte"><img src={despedidas} alt="" style={{left:`-${tile%3*100}%`,top:`-${Math.floor(tile/3)*100}%`}}/></div><div className="jr-cinema-conteudo"><span>{primeiroDia?'UM NOVO CAPÍTULO':`FIM DE UM CICLO · ${mudanca?.ano}`}</span>{escudoDe(nome)&&<img src={escudoDe(nome)} alt=""/>}<h2>{primeiroDia?mudanca?.tipo==='casa'?'De volta a casa':mudanca?.tipo==='retornoEmprestimo'?'De volta do empréstimo':'Seu primeiro dia':cena?.titulo}</h2><h3>{nome}</h3><p>{primeiroDia?`O armário já tem seu nome. Camisa ${c.numero||10} · ${mudanca?.primeiroDia?.objetivo||'Conquistar seu espaço'}.`:cena?.texto}</p>{!primeiroDia&&cena?.titulos?.length>0&&<div className="jr-cinema-tacas">{cena.titulos.slice(0,8).map((t,i)=><span key={i}><TacaCompeticao nome={t.nome} tipo={t.tipo} size={42}/><small>{t.ano}</small></span>)}<b>{cena.titulos.length} títulos nesta passagem</b></div>}{primeiroDia&&<div className="jr-cinema-camisa"><CamisaPremium nome={nome} cor={CLUBES.find(x=>x.nome===nome)?.cor} numero={c.numero||10} sobrenome={c.nome.toUpperCase().split(' ').at(-1)}/></div>}{primeiroDia&&<div className="jr-resumo-mudanca" aria-label="Resumo da mudança"><span>De<strong>{mudanca.de||'Base do clube'}</strong></span><span>Para<strong>{nome}</strong></span><span>Papel<strong>{mudanca.projeto?.papel||'Buscar a estreia'}</strong></span><span>Contrato<strong>{mudanca.anos||c.contrato?.anos||1} temporada(s) · € {Math.round(c.contrato?.salario||0)} mil/ano</strong></span></div>}<button onClick={()=>primeiroDia?onFim():sairDaCena()}>{primeiroDia?'Entrar na temporada':mudanca?.encerramento?'Ver meu legado':'Seguir para o novo clube'} →</button><small>A cena avança sozinha. Você pode seguir agora.</small></div></div>,document.body);
+}
+
+export function PrimeiraSelecao({c,estreia,onFim}){
+ const ref=useRef(null);
+ useEffect(()=>{const liberar=bloquearRolagem(document.body);ref.current?.focus();const tempo=window.matchMedia('(prefers-reduced-motion: reduce)').matches?500:2400;const t=setTimeout(onFim,tempo);return()=>{clearTimeout(t);liberar();};},[onFim]);
+ const cor=({BRA:'#ecd34c',ARG:'#96cce0',ENG:'#f0f0e6',ALE:'#e8e8e3',POR:'#a62932',FRA:'#244cb2',ESP:'#b52d38',ITA:'#275aae'})[c.nac]||'#266b4a';
+ return createPortal(<div className="jr-cinema jr-internacional" role="dialog" aria-modal="true" aria-label="Sua primeira convocação"><div className="jr-cinema-arte"/><div className="jr-cinema-conteudo"><span>A CAMISA DO SEU PAÍS</span><img src={bandeiraDe(c.nac)} alt={c.nac}/><h2>{estreia?'Convocação e estreia internacional':'Sua primeira convocação'}</h2><p>O nome da família na camisa. Uma memória que fica na carreira e no museu.</p><div className="jr-selecao-camisa"><CamisaPremium cor={cor} sobrenome={c.nome.toUpperCase().split(' ').at(-1)} numero={c.numero||10}/></div><button ref={ref} onClick={onFim}>Seguir minha história →</button><small>A apresentação avança sozinha.</small></div></div>,document.body);
+}

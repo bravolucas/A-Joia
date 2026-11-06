@@ -1,3 +1,5 @@
+import {iniciarJornada,memorizar,registrarEscolhaJornada,registrarTransferenciaJornada,prepararJornada,fecharJornada,pesoProjeto,projetoOferta,legadoNarrativo} from './jornadaJogador.js';
+import {penalidadePosicao,posicoesCompativeis,mudarPosicao,sugestaoVeterano} from './posicoesCarreira.js';
 import {NOVOS_TREINOS,grupoTreino} from './catalogoTreinos.js';
 import {bonusSuperacao,baseMini,poolMinis} from './progressaoRapida.js';
 import {MELHORIAS_JOGADOR,UPS_JOGADOR,upsAtivosJogador,upJogadorDe,impedimentoLojaJogador} from "./lojaJogador.js";
@@ -105,7 +107,7 @@ export function vagasDaLiga(ligaId) {
   const p = PIRAMIDE.find((x) => x.baixo === ligaId || x.cima === ligaId);
   return p ? p.vagas : 0;
 }
-export const ovrDe = (c) => calcOVR({ ...c.attrs, fintas: 3, pernaRuim: 3 }, c.posicao);
+export const ovrDe = (c) => Math.max(40,calcOVR({ ...c.attrs, fintas: 3, pernaRuim: 3 }, c.posicao)-penalidadePosicao(c));
 
 /* Seleções mais citadas primeiro na tela de criação */
 export const NACS_DESTAQUE = ["BRA", "ARG", "POR", "ESP", "FRA", "ENG", "ITA", "ALE", "URU", "COL", "HOL", "BEL", "MEX", "EUA", "JAP", "MAR"];
@@ -212,6 +214,7 @@ export function criarJogador(dados) {
   const c = comSemente(codigo, "criar", () => criarJogadorBase(dados));
   c.codigo = codigo;
   c.diario = ehCodigoDiario(codigo);
+  iniciarJornada(c);
   return c;
 }
 
@@ -247,7 +250,9 @@ export function iniciarEmprestimo(c,destino,duracao=1){
  if(![1,2].includes(duracao))throw new Error('Escolha uma ou duas temporadas.');
  if((c.contrato?.restantes??0)<duracao)throw new Error('O contrato atual precisa cobrir todo o empréstimo.');
  if(!ofertasEmprestimo(c).some(x=>x.nome===destino))throw new Error('Esta oferta de empréstimo não está disponível.');
- const novo=clone(c);novo.emprestimo={destino,origem:c.clubeNome,duracao,restantes:duracao,inicio:c.ano};novo.torcida[destino]=novo.torcida[destino]??35;return novo;
+ const novo=clone(c);novo.emprestimo={destino,origem:c.clubeNome,duracao,restantes:duracao,inicio:c.ano};novo.torcida[destino]=novo.torcida[destino]??35;
+ const projeto=projetoOferta({...c,_ovrProjeto:ovrDe(c)},destino);novo.emprestimo.projeto={...projeto,salario:c.contrato.salario,anos:duracao,jogos:projeto.jogos.map(n=>n*duracao),retorno:`Retorno ao ${c.clubeNome} ao fim do vínculo; espaço depende da evolução.`};novo.emprestimo.ovrInicio=ovrDe(c);
+ const t={ano:c.ano,de:c.clubeNome,para:destino,tipo:'emprestimo',valor:0,anos:duracao};registrarTransferenciaJornada(novo,t);novo.jornada.ultimaMudanca=t;return novo;
 }
 export function opcoesClubeInicial(nac, origem) {
   const vistos = new Set(), out = [];
@@ -1195,7 +1200,7 @@ function jogarCopaBase(c, card0, opId) {
         const mini = miniParaMomento(c,{tipo:'selecao'});
         const m = { tipo: "selecao", titulo: `Final da Copa do Mundo ${k.ano} · contra ${k.adversario.label}`, mini, adversario:{tipo:"selecao",id:k.adversario.id,nome:k.adversario.label}, ordem: 1, total: 1 };
         m.texto = textoDoMomento(mini, m, c);
-        card.pendente = m; card.filaMomentos = [];
+        m.lance={minuto:89,gp:0,gc:0,simulado:true,disputa:["penalti","defesa"].includes(m.mini)};card.pendente = m; card.filaMomentos = [];
       }
     }
   } else {
@@ -1237,6 +1242,7 @@ function jogarTemporadaBase(c0) {
   const c = clone(c0);
   c.lojaAnoEmCurso=c.ano;
   c.mod = c.mod || {};
+  prepararJornada(c);
   const mod = c.mod;
   const fx = efeitoFoco(c);
   const persona = personaDe(c.personalidade);
@@ -1310,7 +1316,7 @@ function jogarTemporadaBase(c0) {
     + (c.formaNivel || 0) * 0.12 + (share - 0.6) * 0.5 - 0.25 + (rnd() + rnd() - 1) * 0.8 * (fx.notaRuido || 1), 5.2, 9.7).toFixed(2);
 
   const card = {
-    idx: c.temporadas.length, ano: c.ano, idade: c.idade, forcaClube:clube.forca, clube: clube.nome, cor: clube.cor, ligaId: clube.liga, ligaNome: liga.nome,
+    idx: c.temporadas.length, ano: c.ano, idade: c.idade, posicao:c.posicao, numero:numeroDe(c), forcaClube:clube.forca, clube: clube.nome, cor: clube.cor, ligaId: clube.liga, ligaNome: liga.nome,
     emprestado: !!c.emprestimo, ovr, ovrAntes, pretemporada: preInfo ? { ...preInfo, deltaOvr: ovr - ovrAntes } : null,
     status: st.label, foco: c.foco, jogos, gols, assist, nota, lesao: lesao?.nome || null, share,
     titulos: [], destaques: [],
@@ -1396,7 +1402,7 @@ function jogarTemporadaBase(c0) {
     }
   }
 
-  momentos.forEach((m, i) => { m.mini = miniParaMomento(c,m,momentos.slice(0,i).map(x=>x.mini)); Object.assign(m,contextoMomento(c,m)); m.texto = textoDoMomento(m.mini, m, c); m.ordem = i + 1; m.total = momentos.length; });
+  momentos.forEach((m, i) => { m.mini = miniParaMomento(c,m,momentos.slice(0,i).map(x=>x.mini)); Object.assign(m,contextoMomento(c,m)); m.texto = textoDoMomento(m.mini, m, c); m.lance={minuto:84+hashTexto(c.codigo+':'+c.ano+':'+i)%7,gp:0,gc:0,simulado:true,disputa:['penalti','defesa'].includes(m.mini)}; m.ordem = i + 1; m.total = momentos.length; });
   card.momentos = [];
   card.pendente = momentos[0] || null;
   card.filaMomentos = momentos.slice(1);
@@ -1580,7 +1586,7 @@ export function aplicarMomento(card0, acertou) {
     if (card.copa && !card.copa.fim) {
       const k = card.copa, mini = m.mini || "penalti";
       const naMarca = mini === "penalti" || mini === "defesa";
-      const [gp, gc] = placarCopa(naMarca ? "E" : acertou ? "V" : "D");
+      const [gp, gc] = m.lance ? (naMarca?[m.lance.gp,m.lance.gc]:acertou?[1,0]:[0,1]) : placarCopa(naMarca ? "E" : acertou ? "V" : "D");
       const eu = { gols: acertou && ["falta","cabeceio"].includes(mini) ? 1 : 0, assist: acertou && ["passe","cruzamento"].includes(mini) ? 1 : 0 };
       k.gols += eu.gols; k.assist += eu.assist;
       if (acertou) k.craque += 1;
@@ -1590,7 +1596,7 @@ export function aplicarMomento(card0, acertou) {
     if (acertou) { t.campeao = true; t.resultado = "Campeão"; card.titulos.push({ tipo: t.tipo, nome: t.nome }); card.destaques.push(`${acao.ok}: a ${t.nome} é do seu país`); }
     else { t.resultado = "Vice-campeão"; card.destaques.push(`${acao.erro} na final da ${t.nome}`); }
   }
-  card.momentos = [...(card.momentos || []), { tipo: m.tipo, mini: m.mini || "penalti", acertou, titulo: m.titulo }];
+  card.momentos = [...(card.momentos || []), { tipo: m.tipo, mini: m.mini || "penalti", acertou, titulo: m.titulo, adversario:m.adversario||null, contexto:m.contexto||null, lance:m.lance||null }];
   card.momento = { tipo: m.tipo, mini: m.mini || "penalti", acertou };
   // próximo desafio da fila, se houver
   const fila = card.filaMomentos || [];
@@ -1646,7 +1652,7 @@ function detectarMarcos(antes, c, card) {
 }
 
 /* Fecha a temporada: títulos, Bola de Ouro, torcida, evolução, idade e mundo. */
-export function fecharTemporada(c0, card0) { sincronizarLigas(c0); if (copaPendente(card0)) card0 = resolverCopaAuto(c0, card0); return comSemente(c0.codigo, `fechar:${c0.ano}`, () => fecharTemporadaBase(c0, card0)); }
+export function fecharTemporada(c0, card0) { const concluida=(c0.temporadas||[]).find(t=>t.ano===card0.ano);if(concluida)return {c:c0,card:concluida};sincronizarLigas(c0); if (copaPendente(card0)) card0 = resolverCopaAuto(c0, card0); return comSemente(c0.codigo, `fechar:${c0.ano}`, () => fecharTemporadaBase(c0, card0)); }
 function fecharTemporadaBase(c0, card0) {
   const antes = c0;
   const c = clone(c0);
@@ -1863,11 +1869,13 @@ function fecharTemporadaBase(c0, card0) {
   card.marcos = [...detectarMarcos(antes, c, card), ...novosMarcos];
   c.marcos = [...(c.marcos || []), ...card.marcos];
 
+  fecharJornada(c,card);
+  card.ovrDepois=ovrDe(c);c.picoOvr=Math.max(c.picoOvr,card.ovrDepois);card.moral=c.moral;
   if (c.flags.blindado > 0) c.flags.blindado -= 1;
   c.flags.impasse = null;
   if(c.emprestimo){
  c.emprestimo.restantes=Math.max(0,(c.emprestimo.restantes??1)-1);
- if(c.emprestimo.restantes===0){card.destaques.push(`Fim do empréstimo: volta ao ${c.clubeNome}`);c.emprestimo=null;}
+ if(c.emprestimo.restantes===0){card.destaques.push(`Fim do empréstimo: volta ao ${c.clubeNome}`);const volta={ano:c.ano+1,de:c.emprestimo.destino,para:c.clubeNome,tipo:'retornoEmprestimo',valor:0,anos:c.contrato.restantes};registrarTransferenciaJornada(c,volta);c.jornada.ultimaMudanca=volta;c.emprestimo=null;}
  else card.destaques.push(`Empréstimo no ${c.emprestimo.destino}: ${c.emprestimo.restantes} temporada restante`);
  }
   c.mod = {};
@@ -1883,7 +1891,7 @@ function fecharTemporadaBase(c0, card0) {
    O mesmo card sempre gera as mesmas notícias, inclusive em saves antigos. */
 export function noticiasDaTemporada(c, card) {
   if (!card) return [];
-  const noticias = [];
+  const noticias = [...(card.jornada?.noticias||[])].slice(0,2);
   const add = (tipo, titulo, detalhe) => {
     if (noticias.length < 4) noticias.push({ tipo, titulo, detalhe });
   };
@@ -1948,6 +1956,8 @@ export function aposentar(c0) {
   const c = clone(c0);
   c.aposentado = true;
   c.lenda = lendaParecida(c.picoAttrs || c.attrs, c.posicao);
+  c.legadoNarrativo=legadoNarrativo(c);
+  memorizar(c,"despedida","O último capítulo em campo",`Aposentadoria após ${c.temporadas.length} temporadas.`,{id:"fim:carreira"});
   c.legado = calcularLegado(c);
   return c;
 }
@@ -2035,7 +2045,7 @@ function pesoMercadoRapido(c, atual, destino, ovr, opts) {
     } else if (!europaAtual && europaDestino && idade <= 29) {
       peso *= 1.35;
     }
-    if (LIGAS_BRASIL_RAPIDO.has(destino.liga) && c.nac === "brasil" && idade >= 32) peso *= 1.7;
+    if (LIGAS_BRASIL_RAPIDO.has(destino.liga) && ["brasil","BRA"].includes(c.nac) && idade >= 32) peso *= 1.7;
     if (destino.liga === "arabia" && idade < 30) peso *= 0.45;
   } else {
     // Pedido explícito: não aplicar bloqueio regional nem penalidade de auge.
@@ -2044,7 +2054,7 @@ function pesoMercadoRapido(c, atual, destino, ovr, opts) {
   // Pequena variação por clube, estável dentro da mesma carreira e ano:
   // impede que o topo do ranking seja sempre o mesmo sem quebrar o código-semente.
   const ruido = hashTexto(`${c.codigo || ""}|${c.ano}|${destino.nome}|mercado`) % 1000;
-  return Math.max(0.0001, peso * (0.7 + ruido / 1000 * 0.6));
+  return Math.max(0.0001, peso * pesoProjeto({...c,_ovrProjeto:ovr},destino) * (0.7 + ruido / 1000 * 0.6));
 }
 export function gerarOfertas(c, n, opts = {}) {
   if(c.emprestimo)return [];
@@ -2072,7 +2082,7 @@ export function gerarOfertas(c, n, opts = {}) {
   }
   return escolhidas.sort((a, b) => b.forca - a.forca).map((x) => ({
     clube: x.nome, forca: x.forca, cor: x.cor, ligaId: x.liga, ligaNome: ligaDe(x.liga).nome,
-    status: statusPorDiff(ovr - x.forca, c.idade).label,
+    status: statusPorDiff(ovr - x.forca, c.idade).label, projeto:{...projetoOferta({...c,_ovrProjeto:ovr},x.nome),salario:contratoPadrao(c,x.nome).salario,anos:contratoPadrao(c,x.nome).anos},
   }));
 }
 
@@ -2155,6 +2165,7 @@ export function transferir(c, clubeNome, { torcidaInicial = 30, contrato = null,
   t.manchete.despedida = despedidaDe(c, t, torcidaDe, saida);
   c.transferencias = [...(c.transferencias || []), t];
   c.ultimaTransferencia = t;
+  registrarTransferenciaJornada(c,t,saida);c.jornada.ultimaMudanca=t;
   if (pago >= 20000 && pago > maiorAntes) {
     c.marcos = [...(c.marcos || []), { id: `transf:${c.ano}`, icone: "💸", titulo: maiorAntes < 20000 ? "Primeira grande transferência" : "Transferência mais cara da carreira", texto: `${formatarValor(pago)} do ${deOnde} para o ${clubeNome}.`, ano: c.ano }];
   }
@@ -2173,6 +2184,10 @@ function rivalDoClube(nome) {
 const r = (texto) => texto;
 
 export const EVENTOS = [
+  {id:'reinvencao',icone:'🔄',peso:c=>posicoesCompativeis(c).length&&c.idade>=20?c.idade>=30?3:1:0,
+   preparar:c=>({posicoes:posicoesCompativeis(c).slice(0,3)}),titulo:c=>c.idade>=30?'O treinador propõe uma reinvenção':'Uma nova função de verdade',texto:()=> 'A posição muda de fato: pesos de OVR, produção e desafios. A adaptação tem prazo e penalidade explícitos.',
+   opcoes:(c,ctx)=>[...ctx.posicoes.map(p=>({id:'pos:'+p.destino,label:`Jogar como ${p.destino}`,dica:`${p.motivo} OVR ${p.ovrAntes} → ${p.ovrInicio} durante ${p.duracao} temporada(s); referência após adaptação ${p.ovrAdaptado}.`,efeito:c=>{Object.assign(c,mudarPosicao(c,p.destino));return `Você agora é ${p.destino}. Adaptação por ${p.duracao} temporada(s), com −${p.penalidade} OVR temporários.`;}})),{id:'manter',label:'Manter minha posição',dica:'Sem adaptação ou mudança de atributos.',efeito:()=> 'Você segue na função que conhece.'}]},
+
   {
     id: "propostas", icone: "📨",
     peso: (c, ctx) => {
@@ -2342,7 +2357,7 @@ export const EVENTOS = [
   },
   {
     id: "capitao", icone: "🎖️",
-    peso: (c) => (c.idade >= 24 && ["Titular", "Estrela do time"].includes(statusNoClube(c).label) && (c.torcida[c.clubeNome] ?? 0) >= 50 ? 1.8 : 0),
+    peso: (c) => (c.idade >= 24 && (c.temporadas || []).filter(t => t.clube === c.clubeNome).length >= 3 && c.moral >= 50 && ["Titular", "Estrela do time"].includes(statusNoClube(c).label) && (c.torcida[c.clubeNome] ?? 0) >= 60 && c.jornada?.capitao?.clube !== c.clubeNome ? 1.8 : 0),
     titulo: () => "A braçadeira é sua?",
     texto: () => "O capitão se aposentou e o técnico quer você no lugar dele.",
     opcoes: () => [
@@ -2422,7 +2437,7 @@ export const EVENTOS = [
   },
   {
     id: "voltarCasa", icone: "🏠",
-    peso: (c) => (c.idade >= 30 && c.primeiroClube !== c.clubeNome && !(c.flags.traidor || []).includes(c.primeiroClube) ? 2 : 0),
+    peso: (c) => (c.idade >= 30 && ovrDe(c)>=clubeDe(c.primeiroClube).forca-12 && c.primeiroClube !== c.clubeNome && !(c.flags.traidor || []).includes(c.primeiroClube) ? 2 : 0),
     titulo: (c) => `O ${c.primeiroClube} quer você de volta`,
     texto: () => "O clube que te revelou sonha com o seu retorno. O nível é menor, mas é a sua casa.",
     opcoes: (c) => [
@@ -3252,12 +3267,7 @@ export const EVENTOS_APOSTA = [
       aposta("ganhar", "Topar o programa de força", [{ p: 0.5, d: 3, txt: "Mais forte nas divididas e sem perder velocidade. +3 OVR." }, { p: 0.5, d: -3, txt: "Ficou pesado e lento. −3 OVR." }]),
       seguro("leve", "Manter o corpo como está", "Sem mudanças"),
     ] },
-  { id: "novaPosicao", icone: "🔄", peso: (c) => (c.idade >= 20 && c.idade <= 29 && c.posicao !== "GOL" ? 0.9 : 0),
-    titulo: () => "Teste em outra função", texto: () => "O técnico quer te testar numa função nova, mais perto da área adversária. Pode virar arma secreta ou te deixar perdido.",
-    opcoes: () => [
-      aposta("aceitar", "Aceitar o teste", [{ p: 0.35, d: 4, txt: "Encaixou como luva. O técnico achou um jogador novo. +4 OVR." }, { p: 0.65, d: -2, txt: "Você ficou perdido em campo por meses. −2 OVR." }]),
-      seguro("recusar", "Ficar na sua posição", "Sem mudanças"),
-    ] },
+  { id:'novaPosicao',icone:'🔄',peso:c=>c.idade>=20&&posicoesCompativeis(c).length?1:0,titulo:()=> 'Teste em outra função',texto:()=> 'Uma mudança real e compatível, com adaptação temporária.',opcoes:c=>{const p=posicoesCompativeis(c)[0];return [{id:'aceitar',label:p?`Mudar para ${p.destino}`:'Nenhuma troca disponível',dica:p?`${p.duracao} temporada(s) de adaptação · −${p.penalidade} OVR temporários`:'Continue na função atual',efeito:c=>{if(!p)return 'Você segue na função atual.';Object.assign(c,mudarPosicao(c,p.destino));return `Nova posição: ${p.destino}. Adaptação iniciada.`;}},{id:'recusar',label:'Ficar na minha posição',dica:'Sem mudanças',efeito:()=> 'Você mantém sua função.'}];}},
   { id: "intertemporada", icone: "🏔️", peso: () => 1,
     titulo: () => "Intertemporada na altitude", texto: () => "Três semanas treinando a 2.500 metros. Os pulmões agradecem — se o corpo aguentar.",
     opcoes: () => [
@@ -3312,6 +3322,8 @@ export const EVENTOS_APOSTA = [
    faixa "baixo": perde pouco e quase sempre ganha 1; "medio": moeda no ar; "alto": tudo ou nada.
    O valor esperado fica perto de zero (o risco alto é levemente negativo) para não inflar o OVR da carreira. */
 export const DESAFIOS_OVR = [
+  ...[['corredor-me','baixo',['ME','MD'],'Leitura entre lateral e ponta','Treinar apoio, cobertura e passe entre os corredores.'],['ala-cruzador','medio',['ALE','ALD','LE','LD'],'Cruzamento depois da ultrapassagem','Encontrar o atacante sem abandonar a recomposição.'],['inversao-meia','alto',['ME','MD','MC','MEI'],'Mudar o lado do ataque','Tentar passes verticais e inversões mais difíceis.'],['zaga-saida','baixo',['ZAG','VOL'],'Saída sem entregar a bola','Treinar antecipação e o primeiro passe sob pressão.'],['goleiro-leitura','medio',['GOL'],'Ler o cobrador sem adivinhar','Estudar postura, bola e tempo de reação.'],['ponta-dentro','medio',['PE','PD'],'Por fora ou por dentro','Variar drible, cruzamento e finalização.']].map(([id,faixa,posicoes,nome,texto])=>({id,faixa,posicoes,nome,texto,icone:'⚽',chances:faixa==='baixo'?[{p:.7,d:1,txt:'A repetição deixou a função mais natural.'},{p:.3,d:-2,txt:'Foi preciso reaprender o tempo da jogada.'}]:faixa==='medio'?[{p:.5,d:2,txt:'Seu papel ganhou uma arma nova.'},{p:.5,d:-2,txt:'O ajuste ainda não encaixou nesta temporada.'}]:[{p:.25,d:4,txt:'Você encontrou soluções difíceis com consistência.'},{p:.75,d:-2,txt:'O risco técnico custou estabilidade.'}]})),
+
   { id: "treinoExtra", faixa: "baixo", icone: "🏃", nome: "Treino depois do treino", texto: "Ficar mais uma hora no CT todo dia.",
     chances: [{ p: 0.75, d: 1, txt: "A repetição virou automático em campo." }, { p: 0.25, d: -3, txt: "Sobrecarga: uma fisgada te tirou da pré-temporada." }] },
   { id: "estudoVideo", faixa: "baixo", icone: "📺", nome: "Estudo de vídeo", texto: "Horas revendo seus jogos com o analista.",
@@ -3349,7 +3361,7 @@ const chancesDoDesafio = (c, x) => x.chances.map((o) => ({ ...o, d: o.d > 0 && c
 export const desafioPendente = (c) => !!c && !c.aposentado && !!c.flags?.baseEscolhida && c.desafioAno !== c.ano;
 export function desafiosDaTemporada(c) {
   return comSemente(c.codigo, `desafio:${c.ano}`, () => ["baixo", "medio", "alto"].map((f) => {
-    const x = pick(DESAFIOS_OVR.filter((y) => y.faixa === f));
+    const x = pick(DESAFIOS_OVR.filter((y) => y.faixa === f&&(!y.posicoes||y.posicoes.includes(c.posicao))));
     return { id: x.id, faixa: f, icone: x.icone, nome: x.nome, texto: x.texto, chances: chancesDoDesafio(c, x) };
   }));
 }
@@ -3369,6 +3381,7 @@ export function resolverDesafio(c0, id) {
     mexerNivel(c, chances[idx].d, c.idade >= 23 ? true : chances[idx].d > 0 ? "metade" : false);
     const depois = ovrDe(c);
     c.desafios = [...(c.desafios || []), { ano: c.ano, id, d: depois - antes }];
+    registrarEscolhaJornada(c,{id:`desafio:${x.id}`,titulo:x.nome},{id:"treinar",label:x.nome},chances[idx].txt);
     return { c, res: { id, icone: x.icone, nome: x.nome, chances, idx, roll: r, d: depois - antes, txt: chances[idx].txt, ovrAntes: antes, ovrDepois: depois } };
   });
 }
@@ -3453,7 +3466,10 @@ function resolverEventoBase(c0, evento, opcaoId, extra = null) {
   c.mod = c.mod || {};
   const def = TODOS_EVENTOS().find((e) => e.id === evento.id);
   const op = def ? opcoesCompletas(def, c, evento.ctx).find((o) => o.id === opcaoId) : null;
+  const escolhaId=`${c.ano}:${evento.id}:${opcaoId}`;
+  if(c.jornada?.resolvidas?.[escolhaId])return {c,resultado:c.jornada.resolvidas[escolhaId]};
   const resultado = op ? op.efeito(c, extra) : "";
+  if(op){registrarEscolhaJornada(c,evento,op,resultado);c.jornada.resolvidas={...(c.jornada.resolvidas||{}),[escolhaId]:resultado||"Decisão registrada."};}
   c.flags.historicoEventos = [...(c.flags.historicoEventos || []), evento.id].slice(-8);
   const ultima = c.temporadas[c.temporadas.length - 1];
   if (ultima) ultima.decisao = { evento: evento.titulo, escolha: op?.label || "", resultado };
@@ -3489,6 +3505,7 @@ export const CADENCIA = { intenso: 1, normal: 2, expresso: 3 };
 export const anoDeDecisao = (c) => (c.temporadas.length || 0) % (CADENCIA[c.ritmo] || 2) === 0;
 export function eventoDaJanela(c) {
   if (!anoDeDecisao(c)) return sortearEvento(c, { somente: "fimContrato" });
+  if(sugestaoVeterano(c)&&c.ano%3===0&&c.contrato?.restantes>0)return sortearEvento(c,{somente:'reinvencao'});
   const ev = sortearEvento(c, { excluir: ["propostas"] });
   const forcado = ev && (EVENTOS_IMPORTANTES.includes(ev.id) || ev.id === "fimContrato");
   // decisão de risco (estilo Copero) em boa parte das janelas: ~45% no Normal e no Intenso,
@@ -3762,6 +3779,7 @@ export function carregarRapido() {
     s.c.moral = s.c.moral ?? 65; s.c.transferencias = s.c.transferencias || []; s.c.ligaAlvo = s.c.ligaAlvo || null; s.c.ritmo = s.c.ritmo || "normal"; s.c.pe = s.c.pe || "destro";
     s.c.titulos = { liga: 0, copa: 0, continental: 0, mundial: 0, copaMundo: 0, continentalSelecao: 0, bolaOuro: 0, botaOuro: 0, segunda: 0, ...(s.c.titulos || {}) };
     if (!s.c.mundo?.jogadores) s.c.mundo = mundoCompacto();
+    iniciarJornada(s.c);
     s.c.ligas = s.c.ligas || {};
     sincronizarLigas(s.c);
     return s;
@@ -3821,3 +3839,6 @@ function simularCarreiraAutomaticaBase(dados, escolher, escolherFoco) {
   if (!c.aposentado) c = aposentar(c);
   return c;
 }
+
+export function caminhoSelecao(c){const forca=forcaSelecao(c),corte=forca-6+(c.flags?.selecaoFria||0)*2-(c.foco==='vitrine'?2:0),ovr=ovrDe(c);return{forca,corte,ovr,elegivel:c.idade>=18&&!c.flags?.semSelecao,distancia:Math.max(0,corte-ovr),rotulo:ovr>=corte?'Na disputa pela convocação':ovr>=corte-4?'Perto da lista':'Construindo espaço',aviso:'Referência do torneio. Forma, momento e decisão da seleção ainda contam.'};}
+export function interesseMercado(c){if(c.idade<18||c.emprestimo)return [];return comSemente(c.codigo,`observacao:${c.ano}`,()=>gerarOfertas(c,2)).map(x=>({clube:x.clube,liga:x.ligaNome,texto:'Em observação · interesse não garante proposta'}));}

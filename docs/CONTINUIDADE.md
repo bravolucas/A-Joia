@@ -1,3 +1,11 @@
+## Pesquisa ampliada Phaser/PixiJS — propostas para o jogo inteiro
+
+Usuário pediu aprofundar a busca além dos minigames. Pesquisa entregue em `docs/planejamento/phaser-pixi-jogo-inteiro.md`; manifesto de 24 fontes de código consultadas, URLs e SHA-256 em `docs/planejamento/phaser-pixi-fontes.json`. Índice Phaser tem 2.486 exemplos; 24 selecionados foram lidos (9 Phaser, 15 Pixi). Conferidas licenças MIT dos núcleos. Fontes não foram executadas nem incorporadas ao produto; assets não foram baixados para o jogo. API GitHub bloqueada, navegação feita por diretórios HTML e raw permitidos.
+
+24 propostas distinguem recursos já existentes de acréscimos. Primeiro lote sugerido: retrospectiva breve com fatos reais, compra/UPs com retorno visual, novidades do museu, prévia visual da escolha única do técnico e menu contextual, apoiados em carregamento/transições consistentes. Manter React/HTML como base; usar padrões simples sem engine adicional e avaliar Pixi sob demanda em cenas específicas. Phaser fica como opção para módulo futuro com cenas/física, não para migrar todo o app. Personagens com animação completa exigem novas poses; PerspectiveMesh não cria 3D real. Exportação PNG já existe; replay exato exige mais dados do que card.momentos registra hoje.
+
+Escopo desta etapa: investigação e planejamento. Não implementar as 24 propostas automaticamente nem descrever como entregues. Nenhuma mudança no jogo publicado nesta etapa; commit apenas documental no checkpoint. Conferidos os 24 itens, fontes e IDs de referência; testes de produto não repetidos porque não houve alteração de código. Documentos não rastreados anteriores preservados.
+
 ## Minigames: campo e câmera coerentes
 
 Revisão após crítica do usuário à falta (gol sobre arquibancada) e à qualidade geral. Busca documentada em `docs/minigames-arena/REFERENCIAS.md`: Phaser, PixiJS, Soccer.js, Penalty Night, Penalty Goal, FreeKick3 e alternativas Kenney. Nenhum código/asset externo copiado; créditos do acervo existente preservados. Não introduzida engine ou dependência. Capturas finais na mesma pasta.

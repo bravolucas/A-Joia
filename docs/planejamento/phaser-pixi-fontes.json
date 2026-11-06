@@ -1,0 +1,218 @@
+[
+  {
+    "origem": "phaser",
+    "path": "scenes/transition test 2.js",
+    "url": "https://raw.githubusercontent.com/phaserjs/examples/master/public/src/scenes/transition%20test%202.js",
+    "sha256": "0671b536d2a1ccf2b16648d87d35eee71fb41b94eeabcee64505423687c856fe",
+    "id": "S01",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/phaserjs/examples/blob/master/public/src/scenes/transition%20test%202.js"
+  },
+  {
+    "origem": "phaser",
+    "path": "time/timeline/run timed events.js",
+    "url": "https://raw.githubusercontent.com/phaserjs/examples/master/public/src/time/timeline/run%20timed%20events.js",
+    "sha256": "9a6b91ba5cb9a2da465594ca07c1b977bb4acc93d108e471ebf08dfd9ba39d89",
+    "id": "S02",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/phaserjs/examples/blob/master/public/src/time/timeline/run%20timed%20events.js"
+  },
+  {
+    "origem": "phaser",
+    "path": "tweens/counter tween.js",
+    "url": "https://raw.githubusercontent.com/phaserjs/examples/master/public/src/tweens/counter%20tween.js",
+    "sha256": "6a87b77b62a487e7487ec1ae07451d9e5c5ba76b6b5f0036de7bb449f2acc36a",
+    "id": "S03",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/phaserjs/examples/blob/master/public/src/tweens/counter%20tween.js"
+  },
+  {
+    "origem": "phaser",
+    "path": "tweens/stagger showcase.js",
+    "url": "https://raw.githubusercontent.com/phaserjs/examples/master/public/src/tweens/stagger%20showcase.js",
+    "sha256": "20b288152b20d937ebb87fff66b7feefbbb89684f5e922dce09d23a712b1e425",
+    "id": "S04",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/phaserjs/examples/blob/master/public/src/tweens/stagger%20showcase.js"
+  },
+  {
+    "origem": "phaser",
+    "path": "input/pointer/cards.js",
+    "url": "https://raw.githubusercontent.com/phaserjs/examples/master/public/src/input/pointer/cards.js",
+    "sha256": "177fc20bcb79450f0d580c0333e4d144cef60aea0d7bbdd5cc645cf8f7f8d8d8",
+    "id": "S05",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/phaserjs/examples/blob/master/public/src/input/pointer/cards.js"
+  },
+  {
+    "origem": "phaser",
+    "path": "scalemanager/fit with auto center.js",
+    "url": "https://raw.githubusercontent.com/phaserjs/examples/master/public/src/scalemanager/fit%20with%20auto%20center.js",
+    "sha256": "414240459b09a38b6e2ed9182a2878f6d277d6c706f00d44168cfddaf7f341a0",
+    "id": "S06",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/phaserjs/examples/blob/master/public/src/scalemanager/fit%20with%20auto%20center.js"
+  },
+  {
+    "origem": "phaser",
+    "path": "loader/loader events/load progress.js",
+    "url": "https://raw.githubusercontent.com/phaserjs/examples/master/public/src/loader/loader%20events/load%20progress.js",
+    "sha256": "585ef48be5311b5eea5e7e2b49ceb9a86b6efd1d93bc67dc78b0bb2337f5e147",
+    "id": "S07",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/phaserjs/examples/blob/master/public/src/loader/loader%20events/load%20progress.js"
+  },
+  {
+    "origem": "phaser",
+    "path": "game objects/nine slice/progress bar.js",
+    "url": "https://raw.githubusercontent.com/phaserjs/examples/master/public/src/game%20objects/nine%20slice/progress%20bar.js",
+    "sha256": "410f5528b51130e903889ff1a9ffdb3d35f79ecfcd6f56fe9a539a428c83bdb0",
+    "id": "S08",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/phaserjs/examples/blob/master/public/src/game%20objects/nine%20slice/progress%20bar.js"
+  },
+  {
+    "origem": "phaser",
+    "path": "filters/custom shine filter with progress control.js",
+    "url": "https://raw.githubusercontent.com/phaserjs/examples/master/public/src/filters/custom%20shine%20filter%20with%20progress%20control.js",
+    "sha256": "2bfc5ac7eff2e1274dfabbd894668ffec3a88f7a2bc368fb8ca3322dcefbfce9",
+    "id": "S09",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/phaserjs/examples/blob/master/public/src/filters/custom%20shine%20filter%20with%20progress%20control.js"
+  },
+  {
+    "origem": "pixi",
+    "path": "mesh_perspective_3d.js",
+    "url": "https://raw.githubusercontent.com/pixijs/pixijs.com/main/docs/examples/mesh_perspective_3d.js",
+    "sha256": "c5f33f610a8faa299b502dc02248f9f41a0c32606d6a48518214332a969140bd",
+    "id": "S10",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/pixijs/pixijs.com/blob/main/docs/examples/mesh_perspective_3d.js"
+  },
+  {
+    "origem": "pixi",
+    "path": "filters_displacement_interactive.js",
+    "url": "https://raw.githubusercontent.com/pixijs/pixijs.com/main/docs/examples/filters_displacement_interactive.js",
+    "sha256": "2f95aadd649a80df53990be1a620b46fc29bfcdfc62057ced25d1fcae5c82e15",
+    "id": "S11",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/pixijs/pixijs.com/blob/main/docs/examples/filters_displacement_interactive.js"
+  },
+  {
+    "origem": "pixi",
+    "path": "graphics_mask_animation.js",
+    "url": "https://raw.githubusercontent.com/pixijs/pixijs.com/main/docs/examples/graphics_mask_animation.js",
+    "sha256": "ed8dfbda4e2a0bf913d7082658c9f28343b7f2839e75169081b0ce3e0dc5ba7a",
+    "id": "S12",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/pixijs/pixijs.com/blob/main/docs/examples/graphics_mask_animation.js"
+  },
+  {
+    "origem": "pixi",
+    "path": "assets_background-loading.js",
+    "url": "https://raw.githubusercontent.com/pixijs/pixijs.com/main/docs/examples/assets_background-loading.js",
+    "sha256": "e6f20699c09cc8b09dfc6a28007319cdbd3f09d5c9d69fe80d9abbc930382115",
+    "id": "S13",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/pixijs/pixijs.com/blob/main/docs/examples/assets_background-loading.js"
+  },
+  {
+    "origem": "pixi",
+    "path": "assets_manifest_bundles.js",
+    "url": "https://raw.githubusercontent.com/pixijs/pixijs.com/main/docs/examples/assets_manifest_bundles.js",
+    "sha256": "cd362d050d9fa9ffd4be6b24b435291790fba9fa12381bcb5f079a63bde68be7",
+    "id": "S14",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/pixijs/pixijs.com/blob/main/docs/examples/assets_manifest_bundles.js"
+  },
+  {
+    "origem": "pixi",
+    "path": "events_custom-hitarea.js",
+    "url": "https://raw.githubusercontent.com/pixijs/pixijs.com/main/docs/examples/events_custom-hitarea.js",
+    "sha256": "5d46c9e39fc4353a629b8d7e00300a4bd3f2965268157846d0e7d054387f90b3",
+    "id": "S15",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/pixijs/pixijs.com/blob/main/docs/examples/events_custom-hitarea.js"
+  },
+  {
+    "origem": "pixi",
+    "path": "nine-slice-sprite_basic.js",
+    "url": "https://raw.githubusercontent.com/pixijs/pixijs.com/main/docs/examples/nine-slice-sprite_basic.js",
+    "sha256": "c832d81cbadd1125ecf5e6cd30eaae5e0da937aa0aabd49f1dd3269e0c1f8931",
+    "id": "S16",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/pixijs/pixijs.com/blob/main/docs/examples/nine-slice-sprite_basic.js"
+  },
+  {
+    "origem": "pixi",
+    "path": "rendering_render-texture_scratch-card.js",
+    "url": "https://raw.githubusercontent.com/pixijs/pixijs.com/main/docs/examples/rendering_render-texture_scratch-card.js",
+    "sha256": "04848fd08ccd1682e3dea74c441f529632a5be2a3dddae288e8b38e9c27d5b6b",
+    "id": "S17",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/pixijs/pixijs.com/blob/main/docs/examples/rendering_render-texture_scratch-card.js"
+  },
+  {
+    "origem": "pixi",
+    "path": "misc_screen-shot.js",
+    "url": "https://raw.githubusercontent.com/pixijs/pixijs.com/main/docs/examples/misc_screen-shot.js",
+    "sha256": "c23839ce7e12d78c434a809a3a10d3ea47e70efbc0b74a677cb1f21b2370dbef",
+    "id": "S18",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/pixijs/pixijs.com/blob/main/docs/examples/misc_screen-shot.js"
+  },
+  {
+    "origem": "pixi",
+    "path": "container_cache-as-texture_optimization.js",
+    "url": "https://raw.githubusercontent.com/pixijs/pixijs.com/main/docs/examples/container_cache-as-texture_optimization.js",
+    "sha256": "e419f669175b2ce8823ab8879fe27fb29c153a7252c7b14b3ba015b473197a1f",
+    "id": "S19",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/pixijs/pixijs.com/blob/main/docs/examples/container_cache-as-texture_optimization.js"
+  },
+  {
+    "origem": "pixi",
+    "path": "animated-sprite_spritesheet.js",
+    "url": "https://raw.githubusercontent.com/pixijs/pixijs.com/main/docs/examples/animated-sprite_spritesheet.js",
+    "sha256": "fab0ccfb1c9b16d59666802aee26de5b6717ffc3e7281dee2a67b77928e4d1d3",
+    "id": "S20",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/pixijs/pixijs.com/blob/main/docs/examples/animated-sprite_spritesheet.js"
+  },
+  {
+    "origem": "pixi",
+    "path": "rendering_render-group.js",
+    "url": "https://raw.githubusercontent.com/pixijs/pixijs.com/main/docs/examples/rendering_render-group.js",
+    "sha256": "d48aecb46604f0174f994162702f1b83be4803ab2acc539dcacb74811440516d",
+    "id": "S21",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/pixijs/pixijs.com/blob/main/docs/examples/rendering_render-group.js"
+  },
+  {
+    "origem": "pixi",
+    "path": "particle-container_basic.js",
+    "url": "https://raw.githubusercontent.com/pixijs/pixijs.com/main/docs/examples/particle-container_basic.js",
+    "sha256": "35c822dd3d3ea1b5c10a8740ffd21b4715a3622832e60582bd963665ba810dfd",
+    "id": "S22",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/pixijs/pixijs.com/blob/main/docs/examples/particle-container_basic.js"
+  },
+  {
+    "origem": "pixi",
+    "path": "text_split-text.js",
+    "url": "https://raw.githubusercontent.com/pixijs/pixijs.com/main/docs/examples/text_split-text.js",
+    "sha256": "e7a4921efb37c749ee1c0e376832ffcf3f8e8eafaba51353c3e0528b23ec0c2d",
+    "id": "S23",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/pixijs/pixijs.com/blob/main/docs/examples/text_split-text.js"
+  },
+  {
+    "origem": "pixi",
+    "path": "mesh_rope_textured.js",
+    "url": "https://raw.githubusercontent.com/pixijs/pixijs.com/main/docs/examples/mesh_rope_textured.js",
+    "sha256": "fd417ab9d7a0ded9c330b5aa5c7f9face959c4950b7a6ea2d22d785d68bf9875",
+    "id": "S24",
+    "consultadoEm": "2026-11-06",
+    "pagina": "https://github.com/pixijs/pixijs.com/blob/main/docs/examples/mesh_rope_textured.js"
+  }
+]

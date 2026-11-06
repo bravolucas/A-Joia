@@ -1213,7 +1213,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
   const delta = card.ovrDepois - (card.ovrAntes ?? card.ovr);
   const bola = card.bola;
   const sel = card.selecao;
-  const temFesta = temFestaGrande(card);
+  const temFesta = card.titulos.length > 0;
   const pequenas = card.titulos.filter((t) => !TIPOS_GRANDES.includes(t.tipo));
   const vagas = vagasDaLiga(card.ligaId);
   const ligaRes = `${card.posLiga}º de ${card.totalLiga}`;
@@ -1260,7 +1260,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
           <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-0.5">O time na temporada</div>
           <LinhaTime icone={<TacaCompeticao tipo={ehSegundaDivisao(card.ligaId) ? "segunda" : "liga"} nome={card.ligaNome} size={18} />} nome={card.ligaNome}
             resultado={card.acesso ? `${ligaRes} · acesso!` : card.rebaixado ? `${ligaRes} · rebaixado` : vagas && ehSegundaDivisao(card.ligaId) && card.posLiga <= vagas ? `${ligaRes} · acesso` : ligaRes} destaque={card.acesso ? "ouro" : corLiga} />
-          {card.copaNac && <LinhaTime icone={<TacaCompeticao tipo="copa" nome={card.copaNac.nome} size={18} />} nome={card.copaNac.nome} resultado={card.copaNac.fase} destaque={card.copaNac.fase === "Campeão" ? "ouro" : null} />}
+          {card.copaNac && <LinhaTime icone={<TacaCompeticao tipo="copa" nome={card.copaNac.nome} size={18} />} nome={card.copaNac.nome} resultado={card.titulos.some(t=>t.tipo==="copa"&&t.nome===card.copaNac.nome)?"Campeão":card.copaNac.fase} destaque={card.titulos.some(t=>t.tipo==="copa"&&t.nome===card.copaNac.nome)||card.copaNac.fase === "Campeão" ? "ouro" : null} />}
           {card.continental && <LinhaTime icone={<TacaCompeticao tipo="continental" nome={card.continental.nome} size={18} />} nome={card.continental.nome} resultado={contRes} destaque={contRes === "Campeão" ? "ouro" : null} />}
           {card.mundialRes && <LinhaTime icone={<TacaCompeticao tipo="mundial" nome="Mundial de Clubes" size={18} />} nome="Mundial de Clubes" resultado={card.mundialRes} destaque={card.mundialRes === "Campeão" ? "ouro" : null} />}
           {sel && <LinhaTime icone={<Bandeira nac={c.nac} size={18} />} nome={`${sel.nome} (seleção)`} resultado={sel.convocado ? (sel.campeao ? "Campeão" : sel.resultado) : "Fora da lista"} destaque={sel.campeao ? "ouro" : null} />}
@@ -1270,7 +1270,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
           <div className="mx-3 mb-3 rounded-2xl p-3 border border-[#D8B44A]/40" style={{ background: "linear-gradient(135deg, rgba(216,180,74,.18), rgba(19,26,23,.85) 60%)" }}>
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#EBC557]">Conquistas</span>
-              {temFesta && <button onClick={onRever} className="text-[13px] font-bold text-[#EBC557] min-h-[36px] px-2">Rever festa</button>}
+              {temFesta && <button onClick={onRever} className="text-[13px] font-bold text-[#EBC557] min-h-[36px] px-2">Rever conquistas</button>}
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-2 mt-1">
               {card.titulos.map((t, i) => (
@@ -3128,7 +3128,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "copa" && card?.copa && <TelaCopa key={`${card.copa.etapa}:${card.copa.fase}`} c={c} card={card} onAvancar={avancarCopa} />}
         {etapa === "momento" && <TelaMomento key={`${card.ano}:${(card.momentos || []).length}`} c={c} momento={card.pendente} onReacao={tipo=>setEstado(st=>({...st,c:reagirReencontro(st.c,{...st.card.pendente,adversario:contextoMomento(st.c,st.card.pendente).adversario},tipo)}))} onFim={fimMomento} />}
         {etapa === "festa" && <TelaFesta c={c} card={card} onFim={() => { if (estado.retorno) setEstado({ ...estado.retorno, voar: false }); else setEstado({etapa:"fechamento",c,card,ultimo:card,auto:false}); }} />}
-        {etapa === "resumo" && <TelaResumo c={c} card={card} voar={!!estado.voar} onPousou={() => setContadorPulsa((x) => x + 1)} onContinuar={continuar} onAposentar={encerrar} onRever={() => setEstado({ etapa: "festa", c, card, voar: false })} />}
+        {etapa === "resumo" && <TelaResumo c={c} card={card} voar={!!estado.voar} onPousou={() => setContadorPulsa((x) => x + 1)} onContinuar={continuar} onAposentar={encerrar} onRever={() => setEstado({etapa:"fechamento",c,card,retorno:estado,auto:false})} />}
         {etapa === "coletiva" && estado.coletiva && <TelaColetiva c={c} coletiva={estado.coletiva} resposta={estado.resposta} onResponder={responder} onSeguir={() => abrirJanela(c, estado.ultimo, false)} />}
         {etapa === "traco" && <TelaTraco c={c} opcoes={(opcoesTraco || []).map(tracoDe).filter(Boolean)} onEscolher={escolherT} />}
         {etapa === "fim" && <FimDeCarreira c={c} onNova={nova} onSair={onSair} onComecarTecnico={comecarTecnico} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}

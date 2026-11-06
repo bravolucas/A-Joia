@@ -1,3 +1,7 @@
+## Complemento — rever copas já conquistadas
+
+Corrigida a condição que ainda escondia o botão de replay para títulos comuns: detalhes da temporada → Rever conquistas agora abre também Copa do Brasil e demais taças. Replay retorna à tela anterior sem duplicar temporada ou recompensa. Resumo identifica a copa vencida como Campeão mesmo quando o registro da fase conserva Final. Build e 32 cenários de navegador passaram (14 de fechamento, 12 de jornada, 6 de OVR); logs `/tmp/titulos-rever-build.log` e `/tmp/titulos-rever-browser.log`. Publicação deste complemento em acompanhamento; entrega anterior já publicada conforme registro abaixo.
+
 ## Fechamento persistido, celebração de copas e continuação dos itens
 
 Usuário ganhou Copa do Brasil sem resumo/celebração. Fluxo refeito: toda temporada fechada vira etapa salva `fechamento`; a próxima etapa só abre após confirmação. `FechamentoTemporada.jsx/css` reúne taça animada, nome, contagem/anos, estatísticas, evolução e campanha opcional, com um botão e rodapé acessível. Recarga retoma; revisões antigas de copas comuns não ficam vazias; rever/avançar não concede prêmio de novo. O backend já registra a temporada antes da apresentação; não dizer que o calendário numérico só muda ao fechar a janela.

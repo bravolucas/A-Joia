@@ -22,3 +22,7 @@ A situação exata dos 50 itens selecionados está em `docs/jornada-com-memoria/
 ## Validação
 
 37 arquivos de lógica e 119 cenários de navegador passaram. Novos testes exercitam a Copa do Brasil ganha de fato, resumo persistido após recarga, transição única, replay legado sem duplicação, múltiplas taças/anos, temporada sem título, movimento reduzido, elenco continental, recordes e três posturas que podem enganar. Fluxo de título testado em 320×568, 390×640 e 1366×640. Testes de domínio cobrem 60 campanhas continentais em quatro seleções, minutos/placares, goleiro, estatísticas separadas, autoria de recordes após transferência, aposentados, capitania e metas. Capturas nesta pasta; logs e publicação em `docs/CONTINUIDADE.md`.
+
+
+### Complemento de replay
+O acesso pelos detalhes agora mostra **Rever conquistas** para qualquer título, incluindo Copa do Brasil; o replay restaura a etapa anterior sem novas recompensas. Copa vencida aparece como Campeão no resumo. Build e 32 testes direcionados de navegador passaram após o ajuste (14 fechamento, 12 jornada, 6 OVR).

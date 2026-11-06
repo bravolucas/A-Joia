@@ -619,8 +619,8 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
       // perfil de reputação: pedido folgado bem-sucedido reforça fama de ganancioso;
       // pedido generoso (o oposto) puxa pro lado comedido — devagar, com o tempo
       setCarreira((cc) => ({ ...cc, reputacaoNegociacao: clampR((cc.reputacaoNegociacao ?? 0) + (desgastante && aceitou ? 3 : !desgastante ? -2 : 0), -100, 100) }));
-      if (!aceitou) return { ...n, paciencia, colapsou, pedidosRestantes: n.pedidosRestantes - 1 };
-      return { ...n, termos: { ...n.termos, [campo]: novoValor }, paciencia, colapsou, pedidosRestantes: n.pedidosRestantes - 1 };
+      if (!aceitou) return { ...n, paciencia, colapsou, pedidosRestantes: n.pedidosRestantes - 1, ultimoPedido: {campo, aceitou:false} };
+      return { ...n, termos: { ...n.termos, [campo]: novoValor }, paciencia, colapsou, pedidosRestantes: n.pedidosRestantes - 1, ultimoPedido: {campo, aceitou:true} };
     });
   }
   function mudarFuncaoNegociacao(funcaoId) {
@@ -4536,13 +4536,13 @@ function resolverTemporada(c, extraStats) {
 
         {stage === "carreira" && carreira && (
           <div className="grid gap-4">
-            <div className="grid grid-cols-4 sm:flex gap-1 border-b border-white/10 sm:overflow-x-auto glass rounded-t-md px-1">
+            <nav aria-label="Áreas da carreira" className="completo-abas grid grid-cols-4 sm:flex gap-1 border-b border-white/10 sm:overflow-x-auto glass rounded-t-md px-1">
               {[["carreira", "🏟️ Carreira"], ["inbox", `📬 Notícias${(carreira.inbox || []).filter((x) => !x.lida).length ? ` (${(carreira.inbox || []).filter((x) => !x.lida).length})` : ""}`], ["estatisticas", "📊 Estatísticas"], ["mundo", "🌍 Mundo"], ["legado", "🏆 Legado"], ["vidaprivada", "🛍️ Vida Privada"], ["midia", "📱 Mídia & Redes"]].map(([id, label]) => (
-                <button key={id} onClick={() => setAba(id)} className={`hud-btn flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 px-1 sm:px-3 py-2 sm:py-2.5 text-[10px] sm:text-xs leading-tight text-center font-sport font-semibold uppercase tracking-wide sm:tracking-widest border-b-2 sm:whitespace-nowrap ${aba === id ? "tab-active" : "border-transparent text-zinc-500 hover:text-zinc-200"}`}>
+                <button key={id} aria-current={aba === id ? "page" : undefined} onClick={() => setAba(id)} className={`hud-btn flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 px-1 sm:px-3 py-2 sm:py-2.5 text-[10px] sm:text-xs leading-tight text-center font-sport font-semibold uppercase tracking-wide sm:tracking-widest border-b-2 sm:whitespace-nowrap ${aba === id ? "tab-active" : "border-transparent text-zinc-500 hover:text-zinc-200"}`}>
                   <span aria-hidden="true" className="text-sm sm:text-xs">{label.split(" ")[0]}</span><span>{label.split(" ").slice(1).join(" ")}</span>
                 </button>
               ))}
-            </div>
+            </nav>
 
             <div key={aba} className="animate-[stageEnter_0.3s_ease-out] grid gap-4">
             {aba === "carreira" && (
@@ -5955,8 +5955,8 @@ function resolverTemporada(c, extraStats) {
                 )}
 
                 {negociacaoContrato && (
-                  <PopupOverlay>
-                    <Card padded={false} className="border-amber-500/40 overflow-hidden">
+                  <PopupOverlay titulo="Negociar contrato">
+                    <Card padded={false} className="negociacao-completa border-amber-500/40 overflow-hidden">
                       <div className="p-4 border-b border-zinc-800 text-center" style={{ background: "radial-gradient(circle at 25% 15%, rgba(216,180,74,0.25) 0%, transparent 55%), linear-gradient(180deg,#1c1608 0%,#0d0a04 100%)" }}>
                         <div className="text-[9px] text-amber-400 uppercase tracking-widest mb-1 font-bold">📄 Folha de contrato</div>
                         <div className="flex items-center justify-center gap-1.5"><ClubDot club={negociacaoContrato.clube} size={20} /><span className="text-sm font-bold">{negociacaoContrato.clube.nome}</span></div>
@@ -5969,6 +5969,7 @@ function resolverTemporada(c, extraStats) {
                             <div className="h-full rounded-full transition-all" style={{ width: `${negociacaoContrato.paciencia}%`, background: negociacaoContrato.paciencia > 50 ? "#12A876" : negociacaoContrato.paciencia > 20 ? "#D8B44A" : "#D6483F" }} />
                           </div>
                         </div>
+                        {negociacaoContrato.ultimoPedido && <p role="status" className="contrato-retorno" data-aceito={negociacaoContrato.ultimoPedido.aceitou}>{negociacaoContrato.ultimoPedido.aceitou?"Pedido aceito. O valor foi atualizado.":"Pedido recusado. O valor anterior foi mantido."}</p>}
                         <div className="grid gap-1.5 mb-3">
                           {[
                             ["salario", "💰 Salário anual", `$${formatarDinheiro(negociacaoContrato.termos.salario)}`],
@@ -5979,12 +5980,12 @@ function resolverTemporada(c, extraStats) {
                             ["metaGols", "🎯 Meta de gols na temporada", `${negociacaoContrato.termos.metaGols} gols`],
                             ["bonusMeta", "💵 Bônus por bater a meta", `$${formatarDinheiro(negociacaoContrato.termos.bonusMeta)}`],
                           ].map(([campo, label, valorTxt]) => (
-                            <div key={campo} className="flex items-center justify-between bg-zinc-950/40 rounded-sm px-3 py-2">
+                            <div key={campo} className="contrato-termo flex items-center justify-between bg-zinc-950/40 rounded-sm px-3 py-2">
                               <span className="text-[11px] text-zinc-400">{label}</span>
-                              <div className="flex items-center gap-2">
-                                <button disabled={negociacaoContrato.pedidosRestantes <= 0 || negociacaoContrato.colapsou} onClick={() => ajustarTermoNegociacao(campo, -1)} className="w-6 h-6 rounded-sm border border-zinc-700 text-xs disabled:opacity-30 hover:border-emerald-400">−</button>
+                              <div role="group" aria-label={label} className="contrato-ajustes flex items-center gap-2">
+                                <button aria-label={`Reduzir ${label}`} disabled={negociacaoContrato.pedidosRestantes <= 0 || negociacaoContrato.colapsou} onClick={() => ajustarTermoNegociacao(campo, -1)} className="w-6 h-6 rounded-sm border border-zinc-700 text-xs disabled:opacity-30 hover:border-emerald-400">−</button>
                                 <span className="text-[11px] font-bold text-zinc-100 w-24 text-center">{valorTxt}</span>
-                                <button disabled={negociacaoContrato.pedidosRestantes <= 0 || negociacaoContrato.colapsou} onClick={() => ajustarTermoNegociacao(campo, 1)} className="w-6 h-6 rounded-sm border border-zinc-700 text-xs disabled:opacity-30 hover:border-emerald-400">+</button>
+                                <button aria-label={`Aumentar ${label}`} disabled={negociacaoContrato.pedidosRestantes <= 0 || negociacaoContrato.colapsou} onClick={() => ajustarTermoNegociacao(campo, 1)} className="w-6 h-6 rounded-sm border border-zinc-700 text-xs disabled:opacity-30 hover:border-emerald-400">+</button>
                               </div>
                             </div>
                           ))}
@@ -6006,7 +6007,7 @@ function resolverTemporada(c, extraStats) {
                           </div>
                         )}
                         <p className="text-[10px] text-zinc-500 mb-3">{negociacaoContrato.colapsou ? "😤 A diretoria encerrou a conversa — sem acordo dessa vez." : `Pedidos restantes: ${negociacaoContrato.pedidosRestantes}`}</p>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="contrato-acoes grid grid-cols-2 gap-2">
                           <Button variant="ghost" onClick={sairDaNegociacao}>{negociacaoContrato.colapsou ? "Fechar" : "Recusar e sair"}</Button>
                           {!negociacaoContrato.colapsou && <Button variant="gold" onClick={fecharNegociacaoContrato}>Fechar negócio</Button>}
                         </div>

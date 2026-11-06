@@ -76,3 +76,7 @@ Itens 12/31 ampliados: ecos distinguem vínculo, preparo, pressão e trajetória
 ## Continuação: janelas do modo completo
 
 Item 98 avançou com a janela compartilhada do modo completo: diálogo nativo, fundo inativo, foco, Escape condicional, rolagem e área útil. Gerenciador de saves revisado em 320/390/1366 px, textos de 12 px, alvos de 44 px e importação por teclado. Auditoria ainda parcial; não afirmar que todas as competições e telas antigas foram revisadas. Relatório em `docs/janelas-modo-completo/RELATORIO.md`.
+
+## Continuação: campanha e contrato do modo completo
+
+Item 98: navegação das abas e negociação de renovação revisadas em 320/390/1366 px. Controle de 44 px, aceite/recusa explícitos e ações de sair/assinar visíveis durante a rolagem. Abas Estatísticas, Mundo, Legado e Notícias verificadas com carreira e mundo gerado pelo motor. Fases raras de competições e outras janelas de mercado continuam pendentes; relatório `docs/campanha-e-contrato/RELATORIO.md`.

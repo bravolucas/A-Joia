@@ -1,3 +1,9 @@
+## Continuação — campanha e negociação do modo completo
+
+Abas da campanha com indicação de área atual, alvos de 48 px, nomes sem quebra de palavra e três colunas no celular estreito. Folha de contrato: termos legíveis, controles de 44 px com nomes acessíveis, resposta explícita de aceite/recusa e ações de sair/fechar negócio sempre visíveis. Regras de negociação preservadas; novo metadado apenas para informar a última tentativa.
+
+Build, **39 arquivos de testes de lógica** e **7 cenários de navegador** passaram. Os três casos novos verificam campanha/contrato e abas de Estatísticas/Mundo/Legado/Notícias em 320/390/1366 px; quatro anteriores verificam a janela e saves. Aceite/recusa usam sorteio controlado somente no contexto do teste. Logs `/tmp/completo-campanha-build-final.log`, `/tmp/completo-campanha-unit.log`, `/tmp/completo-campanha-final.log`. Fixture corrigido para usar mundo e posição coerentes, conforme relatório `docs/campanha-e-contrato/RELATORIO.md`. Capturas salvas junto ao relatório. Auditoria atualizada; item 98 segue parcial, sem afirmar revisão de todas as fases de competição. Publicação desta continuação em acompanhamento. Documentos não rastreados do usuário preservados.
+
 ## Continuação — janelas do modo completo
 
 PopupOverlay migrado para diálogo nativo: fundo inativo, bloqueio compartilhado de rolagem, foco devolvido, Escape/fundo somente quando há fechamento permitido. Botão de fechar de 44 px sempre visível nas janelas dispensáveis. Saves: texto de 12 px, alvos de 44 px, cartões arredondados, orientação dos cinco espaços e importação pelo teclado. Formato e regras do save preservados. Relatório/capturas em `docs/janelas-modo-completo/`; auditoria item 98 atualizada, ainda parcial.

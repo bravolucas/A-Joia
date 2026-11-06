@@ -1,6 +1,6 @@
-import {FasesTemporada,PainelJornada,EcosDaTemporada,ProjetoOferta,CenasClube,AlbumJornada,PrimeiraSelecao} from './JornadaUI.jsx';
+import {FasesTemporada,PainelJornada,EcosDaTemporada,ProjetoOferta,CenasClube,AlbumJornada,PrimeiraSelecao,CelebracaoLance,ReacaoAntigoClube} from './JornadaUI.jsx';
 import {mudarPosicao,reinventarVeterano} from './posicoesCarreira.js';
-import {ativarAssinatura,definirPreferenciaMercado,legadoNarrativo,projetoOferta,cenaDespedida} from './jornadaJogador.js';
+import {ativarAssinatura,definirPreferenciaMercado,legadoNarrativo,projetoOferta,cenaDespedida,reagirReencontro,celebracaoMomento} from './jornadaJogador.js';
 import {GeometriaCampo,QuadroMini,BolaTrajeto} from './CenarioMini.jsx';
 import TreinosPretemporada from './TreinosPretemporada.jsx';
 import {trocarTreinos} from './rapido.js';
@@ -717,11 +717,12 @@ function MelhoresCarreiras() {
 const ZONAS = [[0, 0], [1, 0], [2, 0], [0, 1], [1, 1], [2, 1]]; // [coluna, linha]
 const NOME_MINI = { cruzamento:"Cruzamento decisivo",interceptacao:"Interceptação",cabeceio:"Cabeceio decisivo",reflexo:"Defesa de reflexo", penalti: "Pênalti decisivo", falta: "Falta decisiva", passe: "Último lance", defesa: "Pênalti contra" };
 
-function CabecalhoMomento({ c, momento }) {
+function CabecalhoMomento({ c, momento, onReacao }) {
   const mini = momento.mini || "penalti";
   const contexto=contextoMomento(c,momento),adv=contexto.adversario,selecao=adv?.tipo==='selecao';
   return (
     <div className="vf-cabecalho-momento text-center">
+      <ReacaoAntigoClube c={c} momento={{...momento,adversario:adv}} onReacao={onReacao}/>
       <div className="vf-matchbar vf-confronto" aria-label="Confronto da decisão"><span className="vf-match-club">{selecao?<Bandeira nac={c.nac} size={30}/>:<ClubDot club={clubeDe(c.emprestimo?.destino||c.clubeNome)} size={32}/>}<strong>{selecao?nacDe(c.nac).label:c.emprestimo?.destino||c.clubeNome}</strong></span><span className="vf-versus">VS<small>{contexto.contexto.fase}</small></span><span className="vf-match-club vf-adversario">{adv&&<>{selecao?<Bandeira nac={adv.id} size={30}/>:<ClubDot club={clubeDe(adv.nome)} size={32}/>}<strong>{adv.nome}</strong></>}</span></div>
       <p className="vf-contexto-lance">{momento.lance?`${momento.lance.disputa?`Pênaltis · ${momento.lance.gp}–${momento.lance.gc} no jogo`:`${momento.lance.minuto}′ · ${momento.lance.gp}–${momento.lance.gc}`} · `:''}{contexto.contexto.situacao}</p>
       <span className="rp-chip" style={{ color: "#EBC557", background: "rgba(216,180,74,.14)" }}>
@@ -733,11 +734,11 @@ function CabecalhoMomento({ c, momento }) {
   );
 }
 
-function PlacarMomento({ ok, texto, atraso = 0 }) {
+function PlacarMomento({ ok, texto, atraso = 0, c, momento }) {
   const espera=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:atraso;
   const [visivel,V]=useState(espera===0);
   useEffect(() => {const mostrar=()=>{V(true);if(ok){efeitoLance("rede");torcida(2.6,.22);tocar("sobe",.5);}else tocar("desce",.5);};if(!espera){mostrar();return;}const timer=setTimeout(mostrar,espera);return()=>clearTimeout(timer);}, [ok,espera]);
-  return <div className="relative" style={{visibility:visivel?'visible':'hidden'}}>{ok&&visivel&&<Lottie nome="gol" className="absolute left-1/2 -translate-x-1/2 -top-24 w-48 h-48 pointer-events-none"/>}<div className={`display text-3xl rp-sobe ${ok?'text-[#1BC28A]':'text-[#E36B5B]'}`}>{texto}</div></div>;
+  return <div className="relative" style={{visibility:visivel?'visible':'hidden'}}>{ok&&visivel&&(!c||["titulo","estreia","decisao"].includes(celebracaoMomento(c,{...momento,adversario:contextoMomento(c,momento).adversario}).tipo))&&<Lottie nome="gol" className="absolute left-1/2 -translate-x-1/2 -top-24 w-48 h-48 pointer-events-none"/>}<div className={`display text-3xl rp-sobe ${ok?'text-[#1BC28A]':'text-[#E36B5B]'}`}>{texto}</div>{ok&&visivel&&c&&<CelebracaoLance c={c} momento={{...momento,adversario:contextoMomento(c,momento).adversario}}/>}</div>;
 }
 
 /* Cena do gol: estádio ao fundo, trave com rede em profundidade e um goleiro de verdade */
@@ -790,7 +791,7 @@ function CenaGol({ goleiro, res, bola, fora, podeEscolher, onZona }) {
 }
 
 /* Pênalti (você bate) e defesa (você é o goleiro) usam o mesmo gol */
-function TelaPenalti({ c, momento, onFim, goleiro = false }) {
+function TelaPenalti({ c, momento, onReacao, onFim, goleiro = false }) {
   const [escolha, setEscolha] = useState(null);
   const [res, setRes] = useState(null);
 
@@ -836,7 +837,7 @@ function TelaPenalti({ c, momento, onFim, goleiro = false }) {
 
   return (
     <QuadroMini className="mini-fluxo">
-      <CabecalhoMomento c={c} momento={momento} />
+      <CabecalhoMomento c={c} momento={momento} onReacao={onReacao} />
       <div className="rp-painel vf-cena vf-cena-penalti p-3 overflow-hidden" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
         <div className="relative">
           <div className="flex justify-between items-center px-2 pb-2 text-[11px] font-bold uppercase tracking-widest text-[#D5E6DC]">
@@ -856,13 +857,13 @@ function TelaPenalti({ c, momento, onFim, goleiro = false }) {
         {!res && (goleiro
           ? <p className="text-[17px] text-[#C9D3CE]">Toque no canto para onde vai pular. Defesa <span className="font-stat">{c.attrs.defesa}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "defesa") * 100)}%</span></p>
           : <p className="text-[17px] text-[#C9D3CE]">Toque no canto onde vai bater. Finalização <span className="font-stat">{c.attrs.finalizacao}</span> · chance estimada <span className="font-stat">{Math.round(chancePenalti(c) * 100)}%</span></p>)}
-        {res && <><PlacarMomento ok={res.ok} texto={textoRes} atraso={720} />{res.ok&&<small className="jr-celebracao" data-celebracao={!goleiro&&!c.totais.gols&&momento.ordem===1?'estreia':c.temporadas.some(t=>t.clube===contextoMomento(c,momento).adversario?.nome)?'reencontro':'titulo'}>{!goleiro&&!c.totais.gols&&momento.ordem===1?'Sua primeira rede em uma decisão!':c.temporadas.some(t=>t.clube===contextoMomento(c,momento).adversario?.nome)?'Uma decisão contra o antigo clube.':'Um lance que vale história.'}</small>}<button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.ok)}>Continuar →</button></>}
+        {res && <><PlacarMomento c={c} momento={momento} ok={res.ok} texto={textoRes} atraso={720} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.ok)}>Continuar →</button></>}
       </div>
     </QuadroMini>
   );
 }
 
-function TelaFalta({ c, momento, onFim }) {
+function TelaFalta({ c, momento, onReacao, onFim }) {
   const [res, setRes] = useState(null);
   const bater = (zona) => {
     if (res) return;
@@ -879,19 +880,19 @@ function TelaFalta({ c, momento, onFim }) {
   }, [res, onFim]);
   return (
     <QuadroMini className="mini-fluxo">
-      <CabecalhoMomento c={c} momento={momento} />
+      <CabecalhoMomento c={c} momento={momento} onReacao={onReacao} />
       <div className="rp-painel vf-cena p-3 overflow-hidden flex justify-center" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
         <FreeKickMini onPick={bater} resultado={res} />
       </div>
       <div className="mini-feedback text-center min-h-[64px]">
         {!res && <p className="text-[17px] text-[#C9D3CE]">Escolha onde colocar a bola. Finalização <span className="font-stat">{c.attrs.finalizacao}</span> · drible <span className="font-stat">{c.attrs.drible}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "falta") * 100)}%</span></p>}
-        {res && <><PlacarMomento atraso={720} ok={res.gol} texto={res.gol ? "GOLAÇO DE FALTA!" : res.tipo === "Barreira" ? "NA BARREIRA!" : res.tipo === "Trave" ? "NA TRAVE!" : res.tipo === "Defesa" ? "DEFENDEU!" : "PRA FORA!"} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.gol)}>Continuar →</button></>}
+        {res && <><PlacarMomento c={c} momento={momento} atraso={720} ok={res.gol} texto={res.gol ? "GOLAÇO DE FALTA!" : res.tipo === "Barreira" ? "NA BARREIRA!" : res.tipo === "Trave" ? "NA TRAVE!" : res.tipo === "Defesa" ? "DEFENDEU!" : "PRA FORA!"} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.gol)}>Continuar →</button></>}
       </div>
     </QuadroMini>
   );
 }
 
-function TelaPasse({ c, momento, onFim }) {
+function TelaPasse({ c, momento, onReacao, onFim }) {
   const [res, setRes] = useState(null);
   const bonus = ((c.tracos || []).includes("decisao") ? 8 : 0) + bonusPrecisaoLoja(c,"passe")*130;
   useEffect(() => {
@@ -901,24 +902,24 @@ function TelaPasse({ c, momento, onFim }) {
   }, [res, onFim]);
   return (
     <QuadroMini className="mini-fluxo">
-      <CabecalhoMomento c={c} momento={momento} />
+      <CabecalhoMomento c={c} momento={momento} onReacao={onReacao} />
       <div className="rp-painel vf-cena p-3 overflow-hidden flex justify-center" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
         <PasseMini atributoPasse={c.attrs.passe + bonus + 6} onResultado={(r) => setRes(r)} />
       </div>
       <div className="mini-feedback text-center min-h-[64px]">
         {!res && <p className="text-[17px] text-[#C9D3CE]">Você controla o jogador com a bola. Toque num companheiro de verde, longe dos adversários de azul. Passe <span className="font-stat">{c.attrs.passe}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "passe") * 100)}%</span></p>}
-        {res && <><PlacarMomento ok={res.gol} texto={res.gol ? "ASSISTÊNCIA! GOL!" : "INTERCEPTADO!"} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.gol)}>Continuar →</button></>}
+        {res && <><PlacarMomento c={c} momento={momento} ok={res.gol} texto={res.gol ? "ASSISTÊNCIA! GOL!" : "INTERCEPTADO!"} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.gol)}>Continuar →</button></>}
       </div>
     </QuadroMini>
   );
 }
 
-function TelaMomento({ c, momento, onFim }) {
+function TelaMomento({ c, momento, onReacao, onFim }) {
   const mini = momento.mini || "penalti";
-  if(MINIS_NOVOS.includes(mini))return <LancesCriativos c={c} momento={momento} tipo={mini} onFim={onFim} cabecalho={<CabecalhoMomento c={c} momento={momento}/>}/>;
-  if (mini === "falta") return <TelaFalta c={c} momento={momento} onFim={onFim} />;
-  if (mini === "passe") return <TelaPasse c={c} momento={momento} onFim={onFim} />;
-  return <TelaPenalti c={c} momento={momento} onFim={onFim} goleiro={mini === "defesa"} />;
+  if(MINIS_NOVOS.includes(mini))return <LancesCriativos c={c} momento={momento} tipo={mini} onFim={onFim} cabecalho={<CabecalhoMomento c={c} momento={momento} onReacao={onReacao}/>}/>;
+  if (mini === "falta") return <TelaFalta c={c} momento={momento} onReacao={onReacao} onFim={onFim} />;
+  if (mini === "passe") return <TelaPasse c={c} momento={momento} onReacao={onReacao} onFim={onFim} />;
+  return <TelaPenalti c={c} momento={momento} onReacao={onReacao} onFim={onFim} goleiro={mini === "defesa"} />;
 }
 
 /* ---------- celebração: uma tela por conquista ---------- */
@@ -3228,7 +3229,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         )}
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}
         {etapa === "copa" && card?.copa && <TelaCopa key={`${card.copa.etapa}:${card.copa.fase}`} c={c} card={card} onAvancar={avancarCopa} />}
-        {etapa === "momento" && <TelaMomento key={`${card.ano}:${(card.momentos || []).length}`} c={c} momento={card.pendente} onFim={fimMomento} />}
+        {etapa === "momento" && <TelaMomento key={`${card.ano}:${(card.momentos || []).length}`} c={c} momento={card.pendente} onReacao={tipo=>setEstado(st=>({...st,c:reagirReencontro(st.c,{...st.card.pendente,adversario:contextoMomento(st.c,st.card.pendente).adversario},tipo)}))} onFim={fimMomento} />}
         {etapa === "festa" && <TelaFesta c={c} card={card} onFim={() => { if (estado.retorno) setEstado({ ...estado.retorno, voar: false }); else { setPopTemp(card); posTemporada(c, card); } }} />}
         {etapa === "resumo" && <TelaResumo c={c} card={card} voar={!!estado.voar} onPousou={() => setContadorPulsa((x) => x + 1)} onContinuar={continuar} onAposentar={encerrar} onRever={() => setEstado({ etapa: "festa", c, card, voar: false })} />}
         {etapa === "coletiva" && estado.coletiva && <TelaColetiva c={c} coletiva={estado.coletiva} resposta={estado.resposta} onResponder={responder} onSeguir={() => abrirJanela(c, estado.ultimo, false)} />}

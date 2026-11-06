@@ -22,7 +22,7 @@ export const ASSINATURAS=[
 export function iniciarJornada(c){
  if(!c.jornada||typeof c.jornada!=='object')c.jornada={};
  const j=c.jornada;j.versao=1;j.posicaoInicial=j.posicaoInicial||c.posicao;
- for(const k of ['memorias','ecos','duplas','rivalMemorias','relatoriosEmprestimo','interesses'])if(!Array.isArray(j[k]))j[k]=[];
+ for(const k of ['memorias','ecos','duplas','rivalMemorias','relatoriosEmprestimo','interesses','reacoesReencontro'])if(!Array.isArray(j[k]))j[k]=[];
  j.duplas=j.duplas.filter(d=>d&&typeof d==='object'&&d.clube).map(d=>({...d,rota:Array.isArray(d.rota)&&d.rota.length?d.rota:[{ano:c.ano,clube:d.clube}],temporadas:numero(d.temporadas),conexao:clamp(numero(d.conexao),0,4),reencontros:numero(d.reencontros),nascimento:Number.isFinite(d.nascimento)?d.nascimento:c.ano-c.idade+1}));
  j.idiomas=Array.isArray(j.idiomas)?j.idiomas:[idiomaClube(c.primeiroClube||c.clubeNome)];
  j.assinaturas=j.assinaturas&&typeof j.assinaturas==='object'?j.assinaturas:{};
@@ -111,7 +111,8 @@ export function registrarTransferenciaJornada(c,t,saida){
  t.projeto=projetoOferta(c,t.para);
  t.primeiroDia={numero:c.numero,objetivo:`Conquistar espaço como ${IDENTIDADES_POSICAO[c.posicao]?.nome||c.posicao}`,clube:t.para};
  if(conhecidos.length){
-  const dupla=conhecidos[0];dupla.reencontros=(dupla.reencontros||0)+1;dupla.ultimoReencontro=c.ano;
+  const dupla=conhecidos[0];
+  t.reencontro={nome:dupla.nome,temporadas:dupla.temporadas,conexao:dupla.conexao,moral:5,torcida:3};dupla.reencontros=(dupla.reencontros||0)+1;dupla.ultimoReencontro=c.ano;
   c.moral=clamp((c.moral??65)+5);c.torcida[t.para]=clamp((c.torcida[t.para]??30)+3);
   memorizar(c,'dupla',`Reencontro com ${dupla.nome}`,`A parceria registrada volta no ${t.para}: +5 moral e +3 torcida. Entrosamento ajuda na adaptação.`,{id:`reencontro:${id}`,ficticio:true});
  }
@@ -140,12 +141,25 @@ function atualizarDuplas(c,card){
  }
  for(const d of j.duplas){
   if(d.aposentado)continue;
-  if(card.ano-d.nascimento>=38){d.aposentado=true;continue;}
+  if(card.ano-d.nascimento>=38){d.aposentado=true;const texto=`${d.nome} pendurou as chuteiras. ${d.temporadas} temporada(s) juntos ficam na memória.`;card.jornada.noticias.push({tipo:'dupla',titulo:'Um parceiro se despede',detalhe:texto});memorizar(c,'dupla','A despedida de uma dupla',texto,{id:`dupla:aposentadoria:${d.id}`,ano:card.ano,ficticio:true});continue;}
   if(d.clube===atual&&card.jogos>=10){d.conexao=Math.min(4,d.conexao+1);d.temporadas++;if(d.temporadas===2)card.jornada.noticias.push({tipo:'dupla',titulo:`Uma dupla com ${d.nome}`,detalhe:'A parceria recorrente rende entrosamento, com bônus limitado a +0,06 na nota.'});}
+  if(d.clube===atual&&d.temporadas>=2&&card.titulos?.some(semPremio)){
+   const titulo=card.titulos.find(semPremio),texto=`Você e ${d.nome} dividiram ${titulo.nome} em ${card.ano}, pelo ${atual}.`;
+   memorizar(c,'dupla','Uma taça em parceria',texto,{id:`dupla:titulo:${d.id}:${card.ano}`,ano:card.ano,clube:atual,ficticio:true});
+   card.jornada.noticias.push({tipo:'dupla',titulo:'Uma taça em parceria',detalhe:texto});
+  }
+  if(d.clube!==atual&&(card.momentos||[]).some(m=>m.adversario?.nome===d.clube)){
+   const texto=`${d.nome} estava no ${d.clube}, adversário desta decisão. A parceria de ${d.temporadas} temporada(s) agora cruza o outro lado do campo.`;
+   memorizar(c,'dupla','Amigos, agora adversários',texto,{id:`dupla:adversario:${d.id}:${card.ano}`,ano:card.ano,ficticio:true});card.jornada.noticias.push({tipo:'dupla',titulo:'Amigos, agora adversários',detalhe:texto});
+  }
   // Trajetória própria e determinística; um reencontro não teleporta o companheiro.
   if(card.ano-d.rota[0].ano>=2&&hash(c.codigo+d.id+card.ano)%4===0){
    const atualDados=clubeDe(d.clube),pool=CLUBES.filter(x=>x.nome!==d.clube&&Math.abs(x.forca-atualDados.forca)<=8);
-   if(pool.length){d.clube=pool[hash(d.id+card.ano)%pool.length].nome;d.rota=[...d.rota,{ano:card.ano+1,clube:d.clube}].slice(-8);}
+   if(pool.length){const de=d.clube;d.clube=pool[hash(d.id+card.ano)%pool.length].nome;d.rota=[...d.rota,{ano:card.ano+1,clube:d.clube}].slice(-8);
+    const texto=`${d.nome}: ${de} → ${d.clube} para a próxima temporada.`;card.jornada.noticias.push({tipo:'dupla',titulo:de===atual?'A dupla segue outro caminho':d.clube===atual?'Um rosto conhecido chega':'Notícia de um parceiro',detalhe:texto});
+    memorizar(c,'dupla','O caminho de um parceiro',texto,{id:`dupla:mudanca:${d.id}:${card.ano}`,ano:card.ano,ficticio:true});
+    if(d.clube===atual){d.reencontros++;d.ultimoReencontro=card.ano+1;c.moral=clamp((c.moral??65)+5);c.torcida[atual]=clamp((c.torcida[atual]??30)+3);card.jornada.noticias.push({tipo:'reencontro',titulo:`${d.nome} vem jogar com você`,detalhe:'O parceiro chega para a próxima temporada: +5 moral e +3 torcida, uma única vez.'});}
+   }
   }
  }
 }
@@ -170,8 +184,7 @@ export function fecharJornada(c,card){
  if(card.selecao?.convocado||card.copa?.convocado){
   primeiro(c,'convocacao','A primeira convocação',`Sua primeira lista registrada pela seleção.`,card);
   if((card.selecao?.jogos||0)>0)primeiro(c,'estreia-selecao','Estreia internacional','A camisa do país entrou na sua história.',card);
-  if(!j.geracao||j.geracaoNac!==c.nac){j.geracaoNac=c.nac;j.geracao=[0,1,2].map(i=>({id:`selecao:${c.nac}:${i}`,nome:NOMES[hash(c.codigo+c.nac+i)%NOMES.length],nascimento:card.ano-card.idade+i-1,ficticio:true}));}
-  n.geracao=(j.geracao||[]).filter(p=>card.ano-p.nascimento<=37).map(p=>({...p,idade:card.ano-p.nascimento}));
+  n.geracao=atualizarGeracaoSelecao(c,card.ano);
  }
  const contrib={cruzador:['LD','LE','ALE','ALD','ME','MD','PE','PD'].includes(card.posicao||c.posicao)&&card.assist>=3||momentos.some(m=>m.mini==='cruzamento'&&m.acertou),vertical:card.assist>=5||momentos.some(m=>m.mini==='passe'&&m.acertou),antecipador:['ZAG','VOL'].includes(card.posicao||c.posicao)&&card.nota>=7||momentos.some(m=>m.mini==='interceptacao'&&m.acertou),decisivo:card.gols>=10||momentos.some(m=>['penalti','falta'].includes(m.mini)&&m.acertou),paredao:(card.posicao||c.posicao)==='GOL'&&(card.nota>=7||momentos.some(m=>['defesa','reflexo'].includes(m.mini)&&m.acertou)),aereo:momentos.some(m=>m.mini==='cabeceio'&&m.acertou)};
  for(const s of ASSINATURAS){if(!contrib[s.id])continue;const a=j.assinaturas[s.id]||{anos:[]};if(!a.anos.includes(card.ano))a.anos=[...a.anos,card.ano];j.assinaturas[s.id]=a;if(a.anos.length===s.meta){n.assinaturas.push(s.nome);if(!j.assinaturaAtiva)j.assinaturaAtiva=s.id;memorizar(c,'assinatura',s.nome,'Uma marca técnica conquistada em três temporadas distintas.',{ano:card.ano,id:`assinatura:${s.id}`});}}
@@ -214,4 +227,50 @@ export function legadoNarrativo(c){
  if(c.jornada?.trocas?.length)labels.push({nome:'Jogador reinventado',motivo:`${c.jornada.trocas.length} mudança(s) de posição real(is).`});
  if(ts.length>=15)labels.push({nome:'Longevidade',motivo:`${ts.length} temporadas como jogador.`});
  return labels.length?labels:[{nome:'Uma história própria',motivo:`${ts.length} temporada(s) e escolhas que ficaram na memória.`}];
+}
+
+
+// Núcleo narrativo por função: não substitui nem inventa estatísticas do motor da seleção.
+export function atualizarGeracaoSelecao(c,ano=c.ano){
+ const j=iniciarJornada(c),funcoes=['GOL','LD','ZAG','ZAG','LE','VOL','MC','MEI','PD','PE','ATA'];
+ if(j.geracaoNac!==c.nac){j.geracao=[];j.geracaoNac=c.nac;j.exGeracao=[];}
+ const antigos=Array.isArray(j.geracao)?j.geracao:[],saidas=antigos.filter(p=>ano-p.nascimento>37);
+ j.exGeracao=[...(j.exGeracao||[]),...saidas.map(p=>({...p,saida:ano}))].slice(-22);
+ const ativos=antigos.filter(p=>ano-p.nascimento<=37&&ano-p.nascimento>=18).slice(0,11);
+ const usados=new Set(ativos.map(p=>p.slot).filter(Number.isInteger));
+ ativos.forEach(p=>{if(!Number.isInteger(p.slot)){p.slot=funcoes.findIndex((_,i)=>!usados.has(i));usados.add(p.slot);}p.posicao=funcoes[p.slot];});
+ for(let i=0;i<11;i++)if(!usados.has(i)){
+  const seed=hash(`${c.codigo}:${c.nac}:${ano}:${i}`),nomes=['Caio','Mateo','André','Davi','Rafael','Gabriel','Nicolas','Bruno','Iago','Samuel','Leo','Daniel'],sobrenomes=['Nunes','Duarte','Lemos','Monteiro','Vidal','Costa','Reis','Azevedo','Pires','Mendes','Ramos','Alves'];
+  let nome=`${nomes[seed%nomes.length]} ${sobrenomes[(seed>>>8)%sobrenomes.length]}`;
+  if(ativos.some(p=>p.nome===nome))nome+=` ${sobrenomes[i]}`;
+  ativos.push({id:`selecao:${c.nac}:${ano}:${i}`,slot:i,posicao:funcoes[i],nome,nascimento:ano-(saidas.length?18+seed%6:20+seed%12),desde:ano,ficticio:true});
+ }
+ j.geracao=ativos.sort((a,b)=>a.slot-b.slot);
+ return j.geracao.map(p=>({...p,idade:ano-p.nascimento}));
+}
+export function contextoReencontro(c,momento){
+ const nome=momento?.adversario?.nome;
+ if(!nome||momento.adversario.tipo==='selecao')return null;
+ const passagens=(c.temporadas||[]).filter(t=>t.clube===nome);
+ if(!passagens.length)return null;
+ const id=`${c.ano}:${nome}`,reacao=c.jornada?.reacoesReencontro?.find(r=>r.id===id);
+ return {id,clube:nome,temporadas:passagens.length,lembranca:memoriaTorcida(c,nome),reacao};
+}
+export function reagirReencontro(c,momento,tipo){
+ const contexto=contextoReencontro(c,momento);if(!contexto||contexto.reacao||!['respeito','foco'].includes(tipo))return c;
+ const novo=copiar(c),j=iniciarJornada(novo);
+ const texto=tipo==='respeito'?`Você reconheceu a antiga torcida do ${contexto.clube}. +2 de carinho com esse clube.`:'Você concentrou a energia no clube atual. +2 moral.';
+ if(tipo==='respeito'){novo.torcida=novo.torcida||{};novo.torcida[contexto.clube]=clamp((novo.torcida[contexto.clube]??30)+2);}else novo.moral=clamp((novo.moral??65)+2);
+ j.reacoesReencontro=[...j.reacoesReencontro,{id:contexto.id,ano:c.ano,clube:contexto.clube,tipo,texto}].slice(-30);
+ memorizar(novo,'reencontro','Reencontro com o antigo clube',texto,{id:`reacao:${contexto.id}`,clube:contexto.clube});return novo;
+}
+export function celebracaoMomento(c,momento){
+ const adv=momento?.adversario?.nome,mini=momento?.mini;
+ if(adv&&(c.temporadas||[]).some(t=>t.clube===adv))return{tipo:'reencontro',titulo:'Respeito pela história',texto:'Um lance decisivo diante do antigo clube.'};
+ if(['defesa','reflexo'].includes(mini))return{tipo:'defesa',titulo:'Mãos que decidem',texto:'A defesa também escreve uma carreira.'};
+ if(['interceptacao'].includes(mini))return{tipo:'defesa',titulo:'Leitura que decide',texto:'Você protegeu o time no lance decisivo.'};
+ if(['passe','cruzamento'].includes(mini))return{tipo:'parceria',titulo:'O gol começou no seu passe',texto:'Uma decisão construída em equipe.'};
+ if(!c.totais?.gols&&(momento?.ordem||1)===1)return{tipo:'estreia',titulo:'A primeira rede',texto:'O começo de uma história de gols.'};
+ if(momento?.tipo&&['liga','copa','continental','mundial'].includes(momento.tipo))return{tipo:'titulo',titulo:'Um lance pela taça',texto:'A decisão ganhou a sua marca.'};
+ return{tipo:'decisao',titulo:'Seu momento',texto:'Você fez a diferença.'};
 }

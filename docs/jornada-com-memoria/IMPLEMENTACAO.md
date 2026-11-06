@@ -80,3 +80,22 @@ Recordes são marcas pessoais nesta carreira. Não se inventam rankings históri
 ## Validação
 
 Testes de domínio cobrem compatibilidade, mudança efetiva, atributos/potencial, adaptação, assinaturas, reencontros, idempotência, museu e empréstimos. Testes reais no Chromium cobrem troca em celular/desktop, preferências, UPs, álbum PNG, museu e sequência de transferência. Regressões abrangem criação, OVR, loja, empréstimos, minigames e técnico. Resultado final e publicação registrados em `docs/CONTINUIDADE.md`.
+
+## Continuação: aprofundamento e pendências explícitas
+
+- Taças na despedida são agrupadas por competição com ×N e anos, reutilizando a mesma normalização da vitrine.
+- Despedidas/chegada ganharam três atos, câmera suave e atmosferas distintas (homenagem, CT, chuva, coletiva, viagem). A ação permanece disponível; movimento reduzido elimina efeitos. **Ainda são artes estáticas com animação de composição, sem movimento corporal de abraço/aplausos/caminhada.**
+- Celebrações têm emblemas e sequências diferentes para primeiro gol, título, defesa/interceptação, passe/cruzamento e respeito ao ex-clube. O efeito de gol foi retirado dos contextos de defesa e reencontro.
+- Duplas registram taças juntas, encontros como adversários, rota, transferências e aposentadoria. Um painel opcional mostra conexão, lembranças e clubes. A chegada mostra o parceiro que já estava no destino; o bônus segue idempotente. Quando o parceiro chega por trajetória própria ao clube do jogador, também existe notícia e bônus limitado.
+- Núcleo narrativo da seleção ampliado para onze funções, preservando personagens existentes e substituindo os maiores de 37 anos por jovens. **Não é um elenco completo com estatísticas individuais integrado ao motor de todas as partidas.**
+- Contra ex-clube há reação opcional: reconhecer a torcida (+2 carinho no clube antigo) ou focar no atual (+2 moral), uma vez por clube/ano. Não é necessário escolher para jogar.
+- Continuidade visual ganhou foco visível e regras de leitura em superfícies compartilhadas; novas cenas e resultados foram testados em telas pequenas. **A revisão manual de todas as telas antigas permanece parcial.**
+
+### O que ainda falta do pedido original
+
+1. Animação corporal própria para abraços, caminhada e aplausos; requer poses/recortes animáveis ou clipes novos. As atmosferas não são apresentadas como esse tipo de animação.
+2. Recordes históricos reais de clubes/ligas/mundo com fonte, cobertura e atualização definidas. O jogo continua mostrando apenas marcas pessoais verificáveis nos saves.
+3. Elenco internacional completo com renovação e estatísticas individuais participando da simulação; nesta etapa o núcleo é narrativo.
+4. Auditoria visual manual de todas as telas legadas/pop-ups; os ajustes compartilhados não equivalem a essa cobertura completa.
+
+As interações de dupla e celebrações estão funcionais nesta versão e podem receber repertório adicional sem ser descritas como pendência bloqueadora.

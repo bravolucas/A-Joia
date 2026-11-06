@@ -1,0 +1,42 @@
+// Opções complementares; efeitos utilizam o mesmo pipeline de temporada.
+export const NOVOS_TREINOS=[
+{id:'rondoCurto',nome:'Rondo de um toque',desc:'Receber, pensar e soltar antes da pressão chegar.',grupo:'tecnica',raridade:'comum',ganhos:{passe:2,drible:1}},
+{id:'passeVertical',nome:'Passe que quebra linhas',desc:'Encontre o espaço entre meio e defesa.',grupo:'leitura',raridade:'comum',ganhos:{passe:2},assist:1.05},
+{id:'conducaoCurta',nome:'Bola colada no pé',desc:'Condução curta em corredores apertados.',grupo:'tecnica',raridade:'comum',ganhos:{drible:2,velocidade:1}},
+{id:'arranqueFreio',nome:'Arranca, freia e sai',desc:'Mude de direção sem perder o controle.',grupo:'fisico',raridade:'comum',ganhos:{velocidade:2,drible:1}},
+{id:'dueloOmbro',nome:'Corpo a corpo',desc:'Proteja a bola e sustente o contato.',grupo:'fisico',raridade:'comum',ganhos:{fisico:2,defesa:1}},
+{id:'linhaCompacta',nome:'Linha compacta',desc:'Coberturas e distâncias com o setor defensivo.',grupo:'leitura',raridade:'comum',ganhos:{defesa:2,passe:1}},
+{id:'sonoMonitorado',nome:'Recuperação monitorada',desc:'Carga medida e noites de descanso respeitadas.',grupo:'recuperacao',raridade:'comum',ganhos:{},lesao:-.035,moral:4},
+{id:'tornozeloForte',nome:'Base firme',desc:'Estabilidade para mudanças rápidas de direção.',grupo:'recuperacao',raridade:'comum',ganhos:{fisico:1},lesao:-.025},
+{id:'respiracao',nome:'Respira e decide',desc:'Treine a calma antes do lance que pesa.',grupo:'mental',raridade:'comum',ganhos:{},moral:8,desafio:.025},
+{id:'diarioTreino',nome:'Diário de evolução',desc:'Metas pequenas, rotina consistente e cabeça leve.',grupo:'mental',raridade:'comum',ganhos:{},moral:5,nota:.08},
+{id:'treinoAberto',nome:'Portões abertos',desc:'A torcida acompanha o trabalho da semana.',grupo:'vitrine',raridade:'comum',ganhos:{},torcida:4,moral:3},
+{id:'amistosoRegional',nome:'Teste contra os vizinhos',desc:'Um amistoso para mostrar serviço e ganhar ritmo.',grupo:'vitrine',raridade:'comum',ganhos:{},fama:3,minutos:.025},
+{id:'finalizaCruzado',nome:'Chute cruzado',desc:'Abra o corpo e busque o canto oposto.',grupo:'tecnica',raridade:'comum',posicoes:['ATA','SA','PD','PE','MEI','ME','MD'],ganhos:{finalizacao:2},gols:1.04},
+{id:'cruzaMedida',nome:'Cruzamento na medida',desc:'Encontre quem chega por trás da defesa.',grupo:'tecnica',raridade:'comum',posicoes:['ALE','ALD','LE','LD','ME','MD','PE','PD'],ganhos:{passe:2},assist:1.07},
+{id:'cortaLinha',nome:'Antes do último passe',desc:'Antecipe a bola sem abandonar sua zona.',grupo:'leitura',raridade:'comum',posicoes:['VOL','ZAG','MC','ALE','ALD','LE','LD'],ganhos:{defesa:2,velocidade:1}},
+{id:'goleiroRebote',nome:'Segunda defesa',desc:'Reaja ao rebote depois da primeira intervenção.',grupo:'tecnica',raridade:'comum',posicoes:['GOL'],ganhos:{finalizacao:2,drible:1}},
+{id:'goleiroRecuo',nome:'Recuo sob pressão',desc:'Domine com calma e devolva pelo lado livre.',grupo:'leitura',raridade:'comum',posicoes:['GOL'],ganhos:{passe:2,defesa:1}},
+{id:'goleiroMobilidade',nome:'Mobilidade entre as traves',desc:'Quadril solto e base preparada para o voo.',grupo:'recuperacao',raridade:'comum',posicoes:['GOL'],ganhos:{drible:1},lesao:-.03},
+{id:'videoIndividual',nome:'Seu jogo em câmera lenta',desc:'Um analista separou os detalhes que ninguém viu.',grupo:'leitura',raridade:'rara',ganhos:{passe:1,defesa:1},nota:.14},
+{id:'duplaSetor',nome:'Parceria de setor',desc:'Movimentos combinados até o passe sair natural.',grupo:'leitura',raridade:'rara',ganhos:{passe:1},assist:1.15,minutos:.03},
+{id:'sprintRepetido',nome:'A última arrancada',desc:'Repita sprints para ainda chegar inteiro no fim.',grupo:'fisico',raridade:'rara',ganhos:{velocidade:2,fisico:1},minutos:.035},
+{id:'potenciaControlada',nome:'Força com controle',desc:'Ganhe potência sem transformar cada sessão em desgaste.',grupo:'fisico',raridade:'rara',ganhos:{fisico:2},lesao:-.025},
+{id:'fisiologia',nome:'Carga sob medida',desc:'Preparação ajustada ao que o corpo tolera.',grupo:'recuperacao',raridade:'rara',ganhos:{fisico:1},lesao:-.045,moral:4},
+{id:'yogaAtleta',nome:'Equilíbrio de atleta',desc:'Mobilidade, estabilidade e descanso ativo.',grupo:'recuperacao',raridade:'rara',ganhos:{drible:1,fisico:1},lesao:-.03},
+{id:'pressaoTreinada',nome:'Pressão vira rotina',desc:'Simule o estádio cheio sem deixar o controle escapar.',grupo:'mental',raridade:'rara',ganhos:{},desafio:.05,moral:8},
+{id:'liderExemplo',nome:'Liderança pelo exemplo',desc:'O grupo percebe quem chega primeiro para trabalhar.',grupo:'mental',raridade:'rara',ganhos:{},moral:6,torcida:4,nota:.08},
+{id:'torneioVeraneio',nome:'Copa de verão',desc:'Adversários de fora e novos olhares na arquibancada.',grupo:'vitrine',raridade:'rara',ganhos:{},fama:6,minutos:.04},
+{id:'documentarioBase',nome:'A história por trás da camisa',desc:'Conte de onde veio e aproxime-se de quem torce.',grupo:'vitrine',raridade:'rara',ganhos:{},fama:5,torcida:5},
+{id:'clinicaCriacao',nome:'Clínica de criação',desc:'Um especialista trabalha seu último passe.',grupo:'tecnica',raridade:'rara',posicoes:['MC','MEI','ME','MD','PD','PE','ALE','ALD'],ganhos:{passe:3},assist:1.1},
+{id:'goleiroUmContraUm',nome:'Fechar o ângulo',desc:'Espere o atacante e diminua o espaço do chute.',grupo:'tecnica',raridade:'rara',posicoes:['GOL'],ganhos:{defesa:2,finalizacao:1},nota:.1},
+{id:'academiaElite',nome:'Laboratório técnico',desc:'Uma semana inteira com uma equipe de especialistas.',grupo:'tecnica',raridade:'epica',minIdade:20,ganhos:{},principal:3,segundo:1},
+{id:'leituraElite',nome:'Enxergar antes de acontecer',desc:'Antecipação e decisão treinadas em cenários reais.',grupo:'leitura',raridade:'epica',minIdade:20,ganhos:{passe:2,defesa:2},nota:.12},
+{id:'fisicoElite',nome:'Motor de temporada',desc:'Preparação física com carga e recuperação integradas.',grupo:'fisico',raridade:'epica',minIdade:20,ganhos:{fisico:2,velocidade:1},minutos:.05},
+{id:'recuperacaoElite',nome:'Renovação de veterano',desc:'Menos desgaste para continuar competindo bem.',grupo:'recuperacao',raridade:'epica',minIdade:29,ganhos:{},lesao:-.05,declinio:.75},
+{id:'mentalElite',nome:'Cabeça de decisão',desc:'Calma para sustentar o jogo quando tudo pesa.',grupo:'mental',raridade:'epica',minIdade:20,ganhos:{},moral:12,desafio:.07},
+{id:'embaixador',nome:'A voz da arquibancada',desc:'O clube apresenta você como rosto do projeto.',grupo:'vitrine',raridade:'epica',minIdade:22,ganhos:{},torcida:8,fama:7}
+].map(c=>({icone:'⚽',...c}));
+const grupos={finalizacao:'tecnica',explosao:'fisico',visao:'leitura',tecnica:'tecnica',marcacao:'leitura',musculacao:'fisico',bolaParada:'tecnica',cabeca:'mental',resistencia:'fisico',aereo:'tecnica',estudo:'leitura',ferias:'recuperacao',particular:'tecnica',pulmao:'recuperacao',mira:'tecnica',garcom:'leitura',velocista:'fisico',liderVest:'mental',vitrine:'vitrine',pernaRuim:'tecnica',lenda:'tecnica',longevidade:'recuperacao',salto:'tecnica'};
+export const grupoTreino=c=>c.grupo||grupos[c.id]||'tecnica';
+export const GRUPOS_TREINO={tecnica:'Técnica',leitura:'Leitura de jogo',fisico:'Físico',recuperacao:'Recuperação',mental:'Mental',vitrine:'Carreira e torcida'};

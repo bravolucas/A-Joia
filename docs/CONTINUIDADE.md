@@ -1,3 +1,11 @@
+## Pré-temporada remodelada — 60 treinos
+
+Catálogo ampliado de 24 para 60 (36 novos), seis famílias, elegibilidade por posição/idade nas novas cartas e três objetivos distintos por oferta. Corrigido sorteio antigo que relaxava bloqueio de repetição após 20 tentativas. Histórico das duas temporadas anteriores excluído; trio escolhido e oferecido mantido ao fechar. Sorteio estável por código/ano/rodada, com uma troca gratuita por temporada, persistida no save, sem ganho de raridade garantido ou alteração de atributos ao trocar. Compatibilidade com IDs e treino já selecionado nos saves antigos.
+
+Novo `TreinosPretemporada.jsx/css` no lugar do seletor antigo: fotos por tema, ganhos/efeitos explícitos, raridade, entrada rápida e um clique para jogar. Som de carta respeita configuração existente; movimento reduzido mostra opções imediatamente. Técnico não alterado. Referência: guia oficial El Ídolo, seção Las cartas; adapte 3 cartas e troca ao nosso ritmo, sem anúncios. Imagens reutilizam acervo local já creditado.
+
+206 testes de lógica e 21 browser passaram. Novos testes: 12 temporadas em seis posições, famílias distintas, exclusão de duas temporadas, troca idempotente, recarga, histórico efetivo e jogar com um toque em 390/1366 px. Primeiro teste UI foi corrigido para inspecionar o registro da temporada fechada (pretemporada é limpa no fechamento), sem mudar o comportamento do jogo. Build e diff check passaram. Capturas em `docs/pretemporada-remodelada/`, logs `/tmp/treinos-*`.
+
 ## Lote de imersão: minigames, mérito, cosméticos, idolatria e OVR
 
 Implementados quatro novos lances, rotação por posição/antirrepetição, bônus histórico de superação no legado, visuais permanentes por conquistas, progressão de idolatria e revelação de OVR por cartas/bola. Detalhes, limites e referências em `docs/imersao-modo-rapido/IMPLEMENTACAO.md`. 203 testes de lógica, 35 browser e repetição de 15 relevantes passaram. Corrigida na validação a ordem de inicialização da força do time. Não mexer nos DOCX/relatório El Ídolo não rastreados deste workspace. Mais oito ideias registradas como propostas, sem implementação automática. Publicado em `604516e`: Pages https://github.com/bravolucas/A-Joia/actions/runs/42143167152 . Validação geral `42143167360` e navegador `42143167129` passaram. Confirmação documental apenas no checkpoint, sem novo deploy.

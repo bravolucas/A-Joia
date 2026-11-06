@@ -1,3 +1,4 @@
+import {NOVOS_TREINOS,grupoTreino} from './catalogoTreinos.js';
 import {bonusSuperacao,baseMini,poolMinis} from './progressaoRapida.js';
 import {MELHORIAS_JOGADOR,UPS_JOGADOR,upsAtivosJogador,upJogadorDe,impedimentoLojaJogador} from "./lojaJogador.js";
 import { registrarMuseu } from './museu.js';
@@ -431,6 +432,7 @@ export const CARTAS_PRETEMPORADA = [
   { id: "corpoNovo", raridade: "epica", icone: "🧬", nome: "Corpo novo", desc: "Nutrição, sono e fisiologia de ponta: o tempo para.", ganhos: { fisico: 2, velocidade: 1 }, lesao: -0.05, declinio: 0.4 },
   { id: "salto", raridade: "epica", icone: "🚀", nome: "Salto de qualidade", desc: "Tudo clicou de uma vez.", ganhos: {}, principal: 3, segundo: 2 },
 ];
+CARTAS_PRETEMPORADA.push(...NOVOS_TREINOS);
 export const cartaDe = (id) => CARTAS_PRETEMPORADA.find((x) => x.id === id) || null;
 export const textoCarta = (carta, posicao) => (posicao === "GOL" && carta.gol ? { ...carta, ...carta.gol, ganhos: carta.gol.ganhos || carta.ganhos } : carta);
 /* atributos que a carta vai mexer para esta posição (os dinâmicos viram números) */
@@ -461,20 +463,18 @@ export function efeitosDaCarta(carta, posicao) {
   return out;
 }
 function opcoesPretemporadaBase(c) {
-  // sorteio de verdade: raridade primeiro, depois a carta; sem repetir o trio do ano passado
-  const passado = new Set(c.pretemporadaVistas || []);
-  const tot = Object.values(RARIDADES).reduce((a, r) => a + r.peso, 0);
-  const out = [];
-  for (let k = 0; k < 40 && out.length < 3; k++) {
-    let r = rnd() * tot, rar = "comum";
-    for (const [id, x] of Object.entries(RARIDADES)) { if ((r -= x.peso) <= 0) { rar = id; break; } }
-    const pool = CARTAS_PRETEMPORADA.filter((x) => x.raridade === rar && !out.includes(x) && (k > 20 || !passado.has(x.id)));
-    if (pool.length) out.push(pick(pool));
-  }
-  return out;
+ const recentes=new Set([...(c.pretemporadaVistas||[]),...(c.historicoPretemporada||[]).slice(-2).flatMap(x=>x.cartas||[]),...(c.pretemporadaTroca?.ano===c.ano?c.pretemporadaTroca.anteriores||[]:[])]);
+ const elegiveis=CARTAS_PRETEMPORADA.filter(x=>(!x.posicoes||x.posicoes.includes(c.posicao))&&(!x.minIdade||c.idade>=x.minIdade));
+ const pool=elegiveis.filter(x=>!recentes.has(x.id));
+ const out=[];const usada=c.pretemporada?.ano===c.ano?cartaDe(c.pretemporada.id):null;
+ while(out.length<3){const ids=new Set(out.map(x=>x.id)),grupos=new Set(out.map(grupoTreino));let disponiveis=pool.filter(x=>!ids.has(x.id)&&!grupos.has(grupoTreino(x)));
+ if(!disponiveis.length)disponiveis=pool.filter(x=>!ids.has(x.id));if(!disponiveis.length)disponiveis=elegiveis.filter(x=>!ids.has(x.id));if(!disponiveis.length)break;
+ const raridades=Object.entries(RARIDADES).filter(([id])=>disponiveis.some(x=>x.raridade===id));let r=rnd()*raridades.reduce((n,[,v])=>n+v.peso,0),rar=raridades[0][0];for(const[id,v]of raridades){r-=v.peso;if(r<=0){rar=id;break;}}out.push(pick(disponiveis.filter(x=>x.raridade===rar)));
+ }return usada&&!out.some(x=>x.id===usada.id)?[usada,...out].slice(0,3):out;
 }
-export function opcoesPretemporada(c) { return comSemente(c.codigo, `pretemp:${c.ano}`, () => opcoesPretemporadaBase(c)); }
-export function escolherPretemporada(c0, id) { const c = clone(c0); c.pretemporada = { ano: c.ano, id }; return c; }
+export function opcoesPretemporada(c){const rodada=c.pretemporadaTroca?.ano===c.ano?c.pretemporadaTroca.rodada||0:0;return comSemente(c.codigo,`pretemp:${c.ano}:${rodada}`,()=>opcoesPretemporadaBase(c));}
+export function trocarTreinos(c){if(c.lojaAnoEmCurso===c.ano||c.pretemporada?.ano===c.ano||c.pretemporadaTroca?.ano===c.ano)return c;const novo=clone(c);novo.pretemporadaTroca={ano:c.ano,rodada:1,anteriores:opcoesPretemporada(c).map(x=>x.id)};return novo;}
+export function escolherPretemporada(c0,id){if(!cartaDe(id))throw new Error('Treino indisponível.');const c=clone(c0);c.pretemporada={ano:c.ano,id};return c;}
 
 /* Fase: bônus (ou ônus) temporário nos atributos que mais pesam na posição, até o
    OVR andar "nivel" pontos. Pode passar do teto de potencial, porque é passageira:
@@ -1873,6 +1873,7 @@ function fecharTemporadaBase(c0, card0) {
   c.mod = {};
   // o trio deste ano não volta igual no próximo
   c.pretemporadaVistas = opcoesPretemporada(antes).map((k) => k.id);
+  c.historicoPretemporada=[...(antes.historicoPretemporada||[]),{ano:antes.ano,cartas:c.pretemporadaVistas,escolhida:antes.pretemporada?.id||null}].slice(-3);
   c.idade += 1; c.ano += 1;
   c.temporadas.push(card);
   return { c, card };

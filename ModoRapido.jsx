@@ -1,3 +1,5 @@
+import TreinosPretemporada from './TreinosPretemporada.jsx';
+import {trocarTreinos} from './rapido.js';
 import Idolatria from './Idolatria.jsx';
 import Personalizacao from './Personalizacao.jsx';
 import LancesCriativos from './LancesCriativos.jsx';
@@ -34,10 +36,10 @@ import {
   calcularLegado, NIVEIS_LEGADO, statusNoClube, valorMercado, formatarValor, ovrDe, clubeDe, ligaDe, posicaoDe, nacDe, personaDe,
   textoCompartilhar, salvarRapido, carregarRapido, apagarRapido, NACS_DESTAQUE, IDADES_TRACO, anoDeCopa, anoDeContinentalSelecao,
   nomeCopaContinental, chancePenalti, ORIGENS_RAPIDO, origemDe, FOCOS, focoDe, definirFoco,
-  opcoesPretemporada, escolherPretemporada, textoCarta,
+  escolherPretemporada,
   iniciarNegociacao, ajustarNegociacao, fecharNegociacao, CAMPOS_NEGOCIACAO, fama_negociador,
   comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
-  bonusPrecisaoLoja, chanceMomento, miniDaPosicao, ehPremioIndividual, RARIDADES, ganhosDaCarta, efeitosDaCarta, vagasDaLiga, ehSegundaDivisao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
+  bonusPrecisaoLoja, chanceMomento, miniDaPosicao, ehPremioIndividual, vagasDaLiga, ehSegundaDivisao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
   eventoDaJanela, segundoEvento, anoDeDecisao, eventoImpasse, valorAtual, comparaSalario, textoEmoji, efeitosDaDecisao, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, resolverDesafio, desafioPendente, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
   noticiasDaTemporada, retrospectoRivalidade,
   copaPendente, opcoesCopa, jogarCopa,
@@ -1667,66 +1669,7 @@ function SeletorFoco({ c, onFoco }) {
 }
 
 /* Pré-temporada (estilo El Ídolo): 3 cartas de treino, você escolhe em que melhora */
-const NOME_ATTR = { velocidade: "VEL", finalizacao: "FIN", passe: "PAS", drible: "DRI", defesa: "DEF", fisico: "FIS" };
-const NOME_ATTR_GOL = { finalizacao: "REF", drible: "ELA", defesa: "POS" };
-function SeletorPretemporada({ c, onEscolher, onJogar, dica }) {
-  const cartas = opcoesPretemporada(c);
-  const escolhida = c.pretemporada?.ano === c.ano ? c.pretemporada.id : null;
-  const rot = (a) => (c.posicao === "GOL" && NOME_ATTR_GOL[a]) || NOME_ATTR[a] || a;
-  // as cartas chegam viradas e se revelam uma a uma (só na primeira vez do ano)
-  const [reveladas, setReveladas] = useState(escolhida ? 3 : 0);
-  useEffect(() => {
-    if (reveladas >= 3) return undefined;
-    const t = setTimeout(() => setReveladas((x) => x + 1), reveladas === 0 ? 450 : 380);
-    return () => clearTimeout(t);
-  }, [reveladas]);
-  return (
-    <div className="rp-painel p-3" style={escolhida ? undefined : { borderColor: "rgba(216,180,74,.45)" }}>
-      <div className="flex items-baseline justify-between px-1">
-        <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Treino da pré-temporada</div>
-        {onJogar && <div className="text-[12px] font-bold text-[#7FE3BC]">toque para jogar {c.ano}</div>}
-      </div>
-      <div className="grid grid-cols-3 gap-2 mt-2.5">
-        {cartas.map((k0, idx) => {
-          const k = textoCarta(k0, c.posicao);
-          const rar = RARIDADES[k0.raridade] || RARIDADES.comum;
-          const ganhos = ganhosDaCarta(k0, c.posicao);
-          const efeitos = efeitosDaCarta(k0, c.posicao);
-          const sel = escolhida === k.id;
-          const virada = idx >= reveladas;
-          return (
-            <div key={k.id} className="rp-flip">
-              <div className={`rp-flip-in ${virada ? "virada" : ""}`}>
-                <button onClick={() => { if (virada) return; if (onJogar) { vibrar(15); tocar("carta", 0.6); onJogar(k.id); } else onEscolher(k.id); }} aria-pressed={sel} disabled={virada} aria-label={`${k.nome}, carta ${rar.nome.toLowerCase()}`}
-                  className={`rp-face rp-opcao w-full px-1.5 pt-0 pb-2 text-center min-h-[168px] flex flex-col items-center overflow-hidden ${sel ? "sel" : ""}`}
-                  style={{ borderColor: sel ? undefined : `${rar.cor}88`, boxShadow: k0.raridade === "epica" && !virada ? `0 0 18px ${rar.cor}55` : undefined }}>
-                  <div className="w-full text-[10px] font-bold tracking-[0.15em] uppercase py-0.5" style={{ background: `${rar.cor}30`, color: rar.cor }}>{rar.nome}</div>
-                  <div className="leading-none mt-2"><Icone e={k.icone} size={30} cor={rar.cor} /></div>
-                  <div className="text-[13px] font-bold text-[#F2F5F3] mt-1 leading-tight">{k.nome}</div>
-                  <div className="flex flex-wrap justify-center gap-x-1.5 mt-1">
-                    {Object.entries(ganhos).map(([a, g]) => (
-                      <span key={a} className="font-stat text-[13px]" style={{ color: g > 0 ? "#1BC28A" : "#E36B5B" }}>{g > 0 ? "+" : ""}{g} {rot(a)}</span>
-                    ))}
-                  </div>
-                  <div className="mt-auto flex flex-col gap-0.5 pt-1">
-                    {efeitos.slice(0, 3).map((e) => <span key={e} className="text-[11px] leading-tight text-[#EBC557]">{e}</span>)}
-                  </div>
-                </button>
-                <div className="rp-verso rounded-[16px] flex items-center justify-center" aria-hidden="true"
-                  style={{ background: "repeating-linear-gradient(45deg, #13201A 0 8px, #0F1A15 8px 16px)", border: "1px solid rgba(216,180,74,.35)" }}>
-                  <Gema size={40} />
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      {(dica || !onJogar) && <p className="text-[13px] text-[#8FA39A] mt-2 px-1">
-        {dica || (escolhida ? textoCarta(cartas.find((k) => k.id === escolhida) || cartas[0], c.posicao).desc : reveladas < 3 ? "Revelando os treinos…" : "Sem treino escolhido, a temporada começa sem bônus.")}
-      </p>}
-    </div>
-  );
-}
+const SeletorPretemporada=TreinosPretemporada;
 
 /* Primeira vez: três dicas curtas antes da primeira temporada */
 const CHAVE_DICAS = "ajoia_rapido_dicas_v1";
@@ -3275,7 +3218,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
               ) : estado.auto ? (
                 <AutoAvanco c={c} ms={ESPERA_AUTO} onAgora={() => jogar(null)} onPausar={() => setEstado((s) => ({ ...s, auto: false }))} />
               ) : (
-                <SeletorPretemporada key={c.ano} c={c} onJogar={jogar}
+                <SeletorPretemporada key={c.ano} c={c} onJogar={jogar} onTrocar={()=>setEstado(s=>({...s,c:trocarTreinos(s.c)}))}
                   dica={c.temporadas.length === 0 ? "Cada carta é um treino diferente. Escolha uma e a temporada começa." : torneio ? `🌎 Ano de ${torneio}: jogue bem para ser convocado.` : null} />
               )}
               {!evento && !estado.forcada && podeAposentar(c) && (

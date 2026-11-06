@@ -1,3 +1,9 @@
+## Continuação — janelas do modo completo
+
+PopupOverlay migrado para diálogo nativo: fundo inativo, bloqueio compartilhado de rolagem, foco devolvido, Escape/fundo somente quando há fechamento permitido. Botão de fechar de 44 px sempre visível nas janelas dispensáveis. Saves: texto de 12 px, alvos de 44 px, cartões arredondados, orientação dos cinco espaços e importação pelo teclado. Formato e regras do save preservados. Relatório/capturas em `docs/janelas-modo-completo/`; auditoria item 98 atualizada, ainda parcial.
+
+Build e regressão ampla de **132 cenários de navegador** passaram (`/tmp/completo-janelas-regressao.log`). Após incluir fechar sempre visível, build e quatro cenários específicos passaram novamente (`/tmp/completo-janelas-build-entrega.log`, `/tmp/completo-janelas-acabamento.log`). CI inclui os novos casos e os arquivos compartilhados. Primeira rodada sem prévia descartada; teste de Tab admite foco na interface do próprio navegador, mas não nos controles do fundo. Testes de listagem não afirmam validar parsing/importação de uma carreira completa; validam abrir o seletor de arquivos. Publicação desta continuação em acompanhamento. Documentos não rastreados do usuário preservados.
+
 ## Continuação — ecos variados e rival com memória
 
 Ecos adaptados ao clube atual, participação e títulos registrados, citando decisão/ano/clube original. Notícias do rival usam mudança real de clube, evolução na Bola de Ouro e lance anterior em reencontros; histórico antigo sem resultado não presume erro. Mesmo limite de um eco anual e bônus anteriores, sem novos cliques. Referência histórica na memória usa o recorte específico de cada marca. Relatório `docs/ecos-e-rival/RELATORIO.md`; auditoria dos 50 itens atualizada, 67/98 seguem parciais.

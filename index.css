@@ -27,3 +27,15 @@ body{font-family:Inter,system-ui,sans-serif;line-height:1.5}button,input,select,
 :where(.popup-conteudo,.ct-modal,.jr-modal,.rp-gaveta) :where(h2,h3){text-wrap:balance}
 :where(.popup-conteudo,.ct-modal,.jr-modal) :where(input,select,textarea){font-family:Inter,system-ui,sans-serif;font-size:max(16px,1em)}
 @media(prefers-reduced-motion:reduce){:where(.rp,.ct-shell,.popup-conteudo,.jr-modal){scroll-behavior:auto}}
+
+/* A janela antiga passa a compartilhar foco, rolagem e área segura. */
+dialog.popup-overlay{width:100%;height:100%;height:100dvh;max-width:none;max-height:none;margin:0;border:0;color:inherit;overflow:hidden}
+dialog.popup-overlay::backdrop{background:transparent}
+dialog.popup-overlay .popup-conteudo{min-width:0;overflow-x:hidden;scrollbar-gutter:stable}
+@media(prefers-reduced-motion:reduce){dialog.popup-overlay,dialog.popup-overlay .popup-conteudo{animation:none!important}}
+
+.popup-conteudo :where(.display,.font-stat){font-family:Oswald,Inter,system-ui,sans-serif;font-variant-numeric:tabular-nums}.popup-conteudo .font-sport{font-family:Inter,system-ui,sans-serif}
+
+.saves-completos{border-radius:20px!important}.saves-completos [class*="text-["]{font-size:12px}.saves-completos button,.saves-completos label[role="button"]{min-height:44px;border-radius:9px;line-height:1.35}.saves-completos label[role="button"]{display:flex;align-items:center;justify-content:center}.saves-completos .flex{flex-wrap:wrap}.saves-completos .border-dashed,.saves-completos .grid>div{border-radius:12px}.saves-completos label[role="button"]:focus-visible{outline:2px solid #ead18c;outline-offset:3px}
+
+.popup-fechar{position:absolute;right:max(16px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));width:44px;height:44px;border:1px solid #ffffff30;border-radius:50%;background:#17221f;color:#edf3ee;font:400 28px/1 Inter,system-ui,sans-serif;z-index:2}.popup-fechar:focus-visible{outline:2px solid #ead18c;outline-offset:2px}dialog.popup-dispensavel{padding-top:max(68px,calc(env(safe-area-inset-top) + 56px))}.popup-dispensavel .popup-conteudo{max-height:calc(100dvh - max(68px,calc(env(safe-area-inset-top) + 56px)) - max(16px,env(safe-area-inset-bottom)))}

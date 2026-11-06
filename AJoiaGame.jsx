@@ -8058,10 +8058,10 @@ function resolverTemporada(c, extraStats) {
         )}
 
         {savesAberto && (
-          <PopupOverlay onClose={() => setSavesAberto(false)}>
-            <Card className="border-emerald-500/40">
+          <PopupOverlay titulo="Carreiras salvas" onClose={() => setSavesAberto(false)}>
+            <Card className="saves-completos border-emerald-500/40">
               <div className="text-[10px] text-emerald-400 uppercase tracking-widest mb-1">💾 Carreiras salvas</div>
-              <p className="text-[10px] text-zinc-600 mb-3">O jogo salva sozinho no fim de cada temporada. Use os espaços 1, 2 e 3 pra guardar momentos específicos.</p>
+              <p className="text-[10px] text-zinc-600 mb-3">O jogo salva sozinho no fim de cada temporada. Use os cinco espaços para guardar momentos específicos.</p>
               <div className="grid gap-1.5 mb-3">
                 {listarSaves().map(({ slot, existe, resumo, label }) => (
                   <div key={slot} className={`border rounded-sm p-2.5 ${existe ? "border-zinc-700" : "border-zinc-800 border-dashed"}`}>
@@ -8107,7 +8107,7 @@ function resolverTemporada(c, extraStats) {
                 <p className="text-[9px] text-zinc-600 mb-2">O save fica guardado no navegador. Se limpar os dados dele, some. Baixe um arquivo pra não perder.</p>
                 <div className="flex gap-1.5">
                   <button onClick={() => { if (carreira || fim) baixarSave(estadoAtualParaSave()); }} disabled={!carreira && !fim} className="flex-1 text-[10px] text-zinc-300 border border-zinc-700 rounded-sm py-1.5 hover:border-emerald-500 disabled:opacity-40">⬇️ Baixar carreira</button>
-                  <label className="flex-1 text-[10px] text-zinc-300 border border-zinc-700 rounded-sm py-1.5 hover:border-emerald-500 cursor-pointer text-center">
+                  <label role="button" tabIndex={0} onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();e.currentTarget.querySelector("input")?.click();}}} className="flex-1 text-[10px] text-zinc-300 border border-zinc-700 rounded-sm py-1.5 hover:border-emerald-500 cursor-pointer text-center">
                     ⬆️ Carregar arquivo
                     <input type="file" accept="application/json,.json" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importarSaveDeArquivo(f); e.target.value = ""; }} />
                   </label>

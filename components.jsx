@@ -1,3 +1,5 @@
+import {createPortal} from 'react-dom';
+import {bloquearRolagem} from './bloqueioRolagem.js';
 import {BolaTrajeto} from './CenarioMini.jsx';
 import "./AnuncioClube.css";
 import { JogadorCampo, CampoPremium, SuperficieMini, CamisaPremium } from './VisualFutebol.jsx';
@@ -959,13 +961,23 @@ export function LeitorNoticia({ noticia: nt, nome, clube, onClose }) {
   );
 }
 
-export function PopupOverlay({ children, onClose, largo = false }) {
-  return (
-    <div className="popup-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]" onClick={onClose}>
-      <div className={`popup-conteudo w-full overflow-y-auto animate-[popIn_0.25s_ease-out] ${largo ? "popup-largo" : "max-w-md"}`} onClick={(e) => e.stopPropagation()}>
+export function PopupOverlay({ children, onClose, largo = false, titulo = "Detalhes da carreira" }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current, anterior = document.activeElement;
+    el.showModal();
+    const liberar = bloquearRolagem(document.body);
+    return () => { el.close(); liberar(); if (anterior?.isConnected) anterior.focus({preventScroll:true}); };
+  }, []);
+  return createPortal(
+    <dialog ref={ref} aria-label={titulo} className={`popup-overlay ${onClose?"popup-dispensavel":""} fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]`}
+      onCancel={e => { e.preventDefault(); onClose?.(); }}
+      onClick={e => { if (e.target === e.currentTarget) onClose?.(); }}>
+      {onClose && <button className="popup-fechar" aria-label="Fechar janela" onClick={onClose}>×</button>}
+      <div className={`popup-conteudo w-full overflow-y-auto animate-[popIn_0.25s_ease-out] ${largo ? "popup-largo" : "max-w-md"}`}>
         {children}
       </div>
-    </div>
+    </dialog>, document.body
   );
 }
 

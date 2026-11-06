@@ -72,3 +72,7 @@ Referência adicional: Messi, 26 partidas, derivada do CSV de aparições mascul
 ## Continuação: variedade narrativa e rival
 
 Itens 12/31 ampliados: ecos distinguem vínculo, preparo, pressão e trajetória conforme clube/jogos/títulos registrados; escolha, ano e clube originais são citados. Rival registra mudanças de clube, evolução nos prêmios e reencontros com o resultado do lance anterior. Histórico antigo sem resultado não presume erro. Mantidos limite de um eco anual e bônus existentes, sem novos cliques obrigatórios. Detalhes em `docs/ecos-e-rival/RELATORIO.md`. Ainda cabem novas histórias e refinamentos das cenas; 67/98 continuam parciais.
+
+## Continuação: janelas do modo completo
+
+Item 98 avançou com a janela compartilhada do modo completo: diálogo nativo, fundo inativo, foco, Escape condicional, rolagem e área útil. Gerenciador de saves revisado em 320/390/1366 px, textos de 12 px, alvos de 44 px e importação por teclado. Auditoria ainda parcial; não afirmar que todas as competições e telas antigas foram revisadas. Relatório em `docs/janelas-modo-completo/RELATORIO.md`.

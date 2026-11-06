@@ -1,9 +1,10 @@
+import {BolaTrajeto} from './CenarioMini.jsx';
 import "./AnuncioClube.css";
 import { JogadorCampo, CampoPremium, SuperficieMini, CamisaPremium } from './VisualFutebol.jsx';
 import React, { useState, useMemo, useEffect } from "react";
 import { ARTE, escudoDe } from "./arte.js";
 import { TacaCompeticao } from "./trofeus.jsx";
-import { ANO_INICIO, ATTR_SLOTS, CLUBES, CONDICOES_CLIMA, DIAS_SEMANA_ABREV, DIAS_SEMANA_LABEL, FALTA_BONECO_POS, FALTA_BOX, FALTA_GOAL, FALTA_SPOT, LANCES_POR_POSICAO, MESES_LABEL, NUM_ATTRS, PASSE_H, PASSE_ORIGEM, PASSE_W, PEN_GOAL, PEN_H, PEN_SPOT, PEN_W, PEN_ZONE_X, POS_GRUPO, TIPOS_NOTICIA } from "./data.js";
+import { ANO_INICIO, ATTR_SLOTS, CLUBES, CONDICOES_CLIMA, DIAS_SEMANA_ABREV, DIAS_SEMANA_LABEL, FALTA_BONECO_POS, FALTA_BOX, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, LANCES_POR_POSICAO, MESES_LABEL, NUM_ATTRS, PASSE_H, PASSE_ORIGEM, PASSE_W, PEN_GOAL, PEN_H, PEN_SPOT, PEN_W, PEN_ZONE_X, POS_GRUPO, TIPOS_NOTICIA } from "./data.js";
 import { calcularSucessoPasse, clamp, diaNaJanela, diasNoMes, distribuirRodadasNaJanela, estimarRodadasLiga, faltaAlvoBola, formatarDinheiro, gerarCenaPasse, janelasPorLiga, janelasSelecao, labelAtributoGoleiro, nacDe, penAlvoBola, pick, primeiroDiaSemanaMes, rand, tierInfo } from "./lib.js";
 
 export function Card({ children, className = "", accent, padded = true, id, style }) {
@@ -1370,29 +1371,14 @@ export function FaltaBoneco({ bateu, zonaAcerto }) {
 
 export function PenBolaFalta({ resultado }) {
   const alvo = faltaAlvoBola(resultado);
-  const noChao = !resultado;
-  return (
-    <>
-      {noChao && <div className="absolute rounded-full pen-bola-reduzida" style={{ width: 30, height: 30, left: alvo.x, top: alvo.y, transform: "translate(-50%,-50%)", backgroundImage: "radial-gradient(circle, rgba(57,255,136,0.5) 0%, rgba(57,255,136,0.15) 65%, transparent 100%)", animation: "miraPulsa 1.4s ease-in-out infinite" }} />}
-      <div className="absolute rounded-full transition-all ease-in" style={{
-        width: 20 * (noChao ? 1 : alvo.scale), height: 5.5 * (noChao ? 1 : alvo.scale), left: alvo.x,
-        top: noChao ? alvo.y + 6 : alvo.y + 7 * alvo.scale, transform: "translate(-50%,-50%)",
-        background: "radial-gradient(closest-side, rgba(0,0,0,0.45), transparent)",
-        opacity: noChao ? 1 : clamp(1 - (FALTA_SPOT.y - alvo.y) / 150, 0.05, 1), transitionDuration: "620ms",
-      }} />
-      <div className="absolute rounded-full transition-all ease-in" style={{
-        width: 11 * (noChao ? 1.2 : alvo.scale) + 4, height: 11 * (noChao ? 1.2 : alvo.scale) + 4, left: alvo.x, top: alvo.y, transform: "translate(-50%,-50%)", transitionDuration: "620ms",
-        background: "radial-gradient(circle at 32% 28%, #fff, #dcdcdc 55%, #a8a8a8)",
-        boxShadow: resultado && resultado.gol ? "0 0 14px 3px rgba(57,255,136,0.85), inset 0 0 0 1px #222" : "inset 0 0 0 1px #222, 0 1.5px 3px rgba(0,0,0,0.5)",
-      }}>
-        {resultado && <span aria-hidden="true" className="absolute inset-0 rounded-full pen-bola-reduzida" style={{ animation: "penBolaGiro 620ms ease-in both", background: "repeating-conic-gradient(from 20deg, transparent 0deg 45deg, rgba(20,20,20,.4) 46deg 62deg, transparent 63deg 120deg)", opacity: .4 }} />}
-        {alvo.scale > 0.9 && <svg viewBox="0 0 100 100" className="w-full h-full"><polygon points="50,20 65,32 59,50 41,50 35,32" fill="#1a1a1a" opacity="0.85" /></svg>}
-      </div>
-    </>
-  );
+  const curva = resultado?.tipo === 'Barreira' ? 0 : resultado?.zona === 'cantoEsquerdo' ? -28 : resultado?.zona === 'cantoDireito' ? 25 : 0;
+  return <svg width={PEN_W} height={PEN_H} viewBox={`0 0 ${PEN_W} ${PEN_H}`} className="arena-voo-bola absolute inset-0" aria-hidden="true"><BolaTrajeto origem={FALTA_SPOT} destino={alvo} ativo={!!resultado} curva={curva} elevacao={resultado?.tipo==='Barreira'?10:26} raio={7}/></svg>;
 }
 
 export function FreeKickMini({ onPick, resultado }) {
+  const [mira,setMira]=useState(null);
+  const alvoMira=mira?faltaAlvoBola({zona:mira,gol:true}):null;
+  const opcoes=[{id:"cantoEsquerdo",nome:"Canto esq."},{id:"porCima",nome:"Por cima"},{id:"cantoDireito",nome:"Canto dir."}];
   const [golKey, setGolKey] = useState(0);
   useEffect(() => { if (resultado && resultado.gol) setGolKey((k) => k + 1); }, [resultado]);
   const zonaGoleiro = useMemo(() => {
@@ -1401,9 +1387,10 @@ export function FreeKickMini({ onPick, resultado }) {
     return pick(["esquerdo", "meio", "direito"]);
   }, [resultado]);
   return (
-    <div className="mb-3 w-full">
+    <div className="vf-mini-canvas">
       <SuperficieMini largura={PEN_W} altura={PEN_H}>
           <FaltaCampo />
+          {!resultado&&alvoMira&&<svg width={PEN_W} height={PEN_H} className="arena-mira absolute inset-0" aria-hidden="true"><path d={`M${FALTA_SPOT.x} ${FALTA_SPOT.y}Q${alvoMira.x} 110 ${alvoMira.x} ${alvoMira.y}`} stroke="#f0d98b" strokeWidth="1" strokeDasharray="3 4" fill="none" opacity=".6"/><circle cx={FALTA_ZONE_X[mira]} cy={alvoMira.y} r="8" fill="#edd99c33" stroke="#f3dfaa" strokeWidth="1.1"/><circle cx={FALTA_ZONE_X[mira]} cy={alvoMira.y} r="2" fill="#fff1c7"/></svg>}
           <div style={{ position: "absolute", left: FALTA_GOAL.x + FALTA_GOAL.w / 2, top: FALTA_GOAL.y + FALTA_GOAL.h, transform: "scale(0.4)", transformOrigin: "0 0" }}>
             <div style={{ position: "relative", left: -PEN_ZONE_X.meio, top: -(PEN_GOAL.y + PEN_GOAL.h) }}>
               <PenGoleiro zona={zonaGoleiro} />
@@ -1413,11 +1400,7 @@ export function FreeKickMini({ onPick, resultado }) {
           <PenBolaFalta resultado={resultado} />
           {resultado && resultado.gol && <PenEfeitoGol key={golKey} ativo />}
       </SuperficieMini>
-      {!resultado && <div className="vf-falta-alvos">
-        <Button variant="ghost" onClick={() => onPick("cantoEsquerdo")}>Canto esq.</Button>
-        <Button variant="ghost" onClick={() => onPick("porCima")}>Por cima</Button>
-        <Button variant="ghost" onClick={() => onPick("cantoDireito")}>Canto dir.</Button>
-      </div>}
+      <div className="vf-falta-alvos">{!resultado ? opcoes.map(o=><button key={o.id} type="button" onPointerEnter={()=>setMira(o.id)} onPointerLeave={()=>setMira(null)} onFocus={()=>setMira(o.id)} onBlur={()=>setMira(null)} onClick={()=>onPick(o.id)}>{o.nome}</button>):<span className="vf-replay-legenda">{opcoes.find(o=>o.id===resultado.zona)?.nome} · replay da cobrança</span>}</div>
     </div>
   );
 }
@@ -1429,8 +1412,8 @@ export function PassePersonagem({ x, y, tipo, selecionavel, destacado, onClick, 
   const cor = tipo === "adversario" ? "#638fb7" : tipo === "voce" ? "#dfbf73" : "#6fa8a1";
   const escala = 0.7 + (y / PASSE_H) * 0.3;
   return <button type="button" onClick={selecionavel ? onClick : undefined} disabled={!selecionavel} aria-label={selecionavel ? `Passar para companheiro ${numero} em ${Math.round(x)}, ${Math.round(y)}` : tipo === 'voce' ? 'Seu jogador' : 'Adversário'} className="vf-passe-alvo" style={{left:x,top:y,zIndex:Math.round(y),transform:'translate(-50%,-70%)',filter:destacado?`drop-shadow(0 0 5px ${cor})`:undefined}}>
-    <svg width="50" height="56" viewBox="-34 -92 68 96" aria-hidden="true"><JogadorCampo adversario={tipo==='adversario'} cor={cor} numero={tipo==='voce'?10:tipo==='adversario'?4:numero} escala={escala}/></svg>
-    {selecionavel && <span style={{position:'absolute',top:-4,left:23,color:'#efdaa4',fontSize:10}} aria-hidden="true">◆</span>}
+    <svg width="50" height="56" viewBox="-34 -92 68 96" aria-hidden="true"><JogadorCampo adversario={tipo==='adversario'} exibirNumero={false} cor={cor} numero={tipo==='voce'?10:tipo==='adversario'?4:numero} escala={escala}/></svg>
+    {tipo==='companheiro' && <span className="vf-passe-numero" aria-hidden="true">{numero}</span>}
   </button>;
 }
 
@@ -1457,7 +1440,7 @@ export function PasseMini({ atributoPasse, onResultado, cenaForcada, alvoForcado
     setTimeout(() => { setResultado(r); onResultado?.(r, companheiro, cena); }, 520);
   }
   return (
-    <div className="mb-3 w-full">
+    <div className="vf-mini-canvas">
       <SuperficieMini largura={PASSE_W} altura={PASSE_H}>
           <PasseCampo />
           {cena.adversarios.map((a) => <PassePersonagem key={a.id} x={a.x} y={a.y} tipo="adversario" destacado={resultado && !resultado.gol && resultado.adversarioCulpado?.id === a.id} />)}
@@ -1468,7 +1451,7 @@ export function PasseMini({ atributoPasse, onResultado, cenaForcada, alvoForcado
           <PassePersonagem x={PASSE_ORIGEM.x} y={PASSE_ORIGEM.y} tipo="voce" />
           {alvo && <PasseBola origem={PASSE_ORIGEM} alvo={alvo} resultado={resultado} />}
       </SuperficieMini>
-      {!alvo && <><div className="vf-passe-opcoes">{cena.companheiros.map((cp,i)=><button key={cp.id} type="button" aria-label={`Passar para companheiro ${i+1}`} onClick={()=>escolher(cp)}><b>{i+1}</b><span>Passar</span></button>)}</div><p className="text-[10px] text-zinc-500 text-center mt-2">Toque no companheiro ou escolha seu número.</p></>}
+      <div className="vf-passe-opcoes">{!alvo ? cena.companheiros.map((cp,i)=><button key={cp.id} type="button" aria-label={`Passar para companheiro ${i+1}`} onClick={()=>escolher(cp)}><b>{i+1}</b><span>Passar</span></button>):<span className="vf-replay-legenda">Passe para o companheiro {cena.companheiros.findIndex(cp=>cp.id===alvo.id)+1} · replay do lance</span>}</div>
     </div>
   );
 }

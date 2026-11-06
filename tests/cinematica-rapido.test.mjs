@@ -18,14 +18,8 @@ test('pênalti mantém seleção das zonas e cálculo original', () => {
   assert.match(rapido, /rp-pen-acao/);
 });
 
-test('falta mantém três direções e callback', () => {
-  assert.match(componentes, /export function FreeKickMini\(/);
-  for (const zona of ['cantoEsquerdo', 'porCima', 'cantoDireito']) {
-    assert.ok(componentes.includes('onPick("' + zona + '")'), 'direção ausente: ' + zona);
-  }
-  assert.match(rapido, /calcularSucessoFalta\(/);
-  assert.match(componentes, /penBolaGiro/);
-});
+// As três direções da falta são exercitadas no navegador em
+// arena-minigames.spec.mjs, incluindo foco, escolha e callback real.
 
 test('animações da bola respeitam movimento reduzido', () => {
   assert.match(componentes, /prefers-reduced-motion:reduce/);

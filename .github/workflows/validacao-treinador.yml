@@ -42,7 +42,7 @@ jobs:
         run: |
           GITHUB_PAGES=true npm run preview -- --host 127.0.0.1 --port 4173 &
           npx wait-on http://127.0.0.1:4173/A-Joia/
-          npx playwright test tests/browser-smoke.spec.mjs tests/treinos-variedade.spec.mjs tests/imersao-rapida.spec.mjs tests/criacao-carreira.spec.mjs tests/emprestimos-jogador.spec.mjs tests/coach-responsive.spec.mjs tests/coach-remodelacao.spec.mjs tests/museu.spec.mjs tests/visual-minigames.spec.mjs tests/goleiro-mergulho.spec.mjs tests/desafios-historicos.spec.mjs tests/desafio-temporada.spec.mjs tests/coach-economia.spec.mjs tests/loja-jogador.spec.mjs --reporter=line
+          npx playwright test tests/arena-minigames.spec.mjs tests/browser-smoke.spec.mjs tests/treinos-variedade.spec.mjs tests/imersao-rapida.spec.mjs tests/criacao-carreira.spec.mjs tests/emprestimos-jogador.spec.mjs tests/coach-responsive.spec.mjs tests/coach-remodelacao.spec.mjs tests/museu.spec.mjs tests/visual-minigames.spec.mjs tests/goleiro-mergulho.spec.mjs tests/desafios-historicos.spec.mjs tests/desafio-temporada.spec.mjs tests/coach-economia.spec.mjs tests/loja-jogador.spec.mjs --reporter=line
       - uses: actions/upload-artifact@v4
         if: always()
         with:

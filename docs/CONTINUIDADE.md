@@ -1,3 +1,13 @@
+## Minigames: campo e câmera coerentes
+
+Revisão após crítica do usuário à falta (gol sobre arquibancada) e à qualidade geral. Busca documentada em `docs/minigames-arena/REFERENCIAS.md`: Phaser, PixiJS, Soccer.js, Penalty Night, Penalty Goal, FreeKick3 e alternativas Kenney. Nenhum código/asset externo copiado; créditos do acervo existente preservados. Não introduzida engine ou dependência. Capturas finais na mesma pasta.
+
+`CenarioMini.jsx` concentra geometria do gramado/gol/linhas e trajetória curva da bola. O horizonte acompanha a base da trave; foto local do estádio e gramado amostrados separadamente. Corrigida causa concreta: base da falta y=76 ficava acima do início do piso (~101). Gol do pênalti e goleiro receberam proporções compatíveis. Passe/cruzamento/interceptação têm leitura tática, sem arquibancada sob os atletas.
+
+`QuadroMini` mede cabeçalho; `ArenaMini.css` distribui área disponível. `SuperficieMini` escala todo o sistema de coordenadas pela menor dimensão disponível. Limites que encolhiam SVGs individualmente removidos de `FluxoResultados.css`. Falta tem prévia do alvo por hover/foco e curva/sombra/giro animados; cruzamento também usa trajetória. Resultado dos quatro jogos novos é faixa inferior, preservando a cena. Controles e continuar permanecem dentro da tela. Fórmulas de chance e recompensas preservadas. Passe passa a distribuir os mesmos dois a quatro companheiros/adversários em corredores e profundidades distintos, evitando sobreposição; números correspondem aos botões. A geometria usada pelo cálculo esportivo acompanha a cena, sem posições visuais falsas.
+
+Build e 33 arquivos de lógica passaram, incluindo espaçamento da cena do passe nos extremos do sorteio. Navegador final: 57 casos passaram, incluindo 19 novos (oito jogos × duas telas, curva, prévia e três direções pelo teclado), além de regressões de criação, empréstimos, loja, OVR, pré-temporada, goleiro e smoke. As primeiras execuções sem servidor foram descartadas; preview reiniciado antes dos resultados válidos. Logs `/tmp/arena-*`. Testes novos incluídos no CI; a checagem antiga da falta baseada em strings JSX foi substituída por interação real no navegador. Documentos não rastreados do usuário preservados.
+
 ## Escolhas e consequências na mesma tela
 
 Resultado do desafio de OVR agora ocupa a altura disponível após o cabeçalho, medido por ResizeObserver. Trajetória, loja e contexto repetido saem dessa etapa; animação, OVR, efeitos e ação ficam no mesmo painel. “Pular animação” revela o resultado já salvo, no mesmo botão que depois vira “Continuar para o treino”; não sorteia novamente. Em alturas extremas, conteúdo central pode rolar, mas o rodapé permanece acessível.

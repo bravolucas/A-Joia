@@ -2107,11 +2107,13 @@ export function tipoResultadoFalta(gol, zona) {
 export function gerarCenaPasse() {
   const nCompanheiros = rand(2, 4);
   const nAdversarios = rand(2, 4);
+  // Corredores distintos e duas linhas de profundidade: ninguém nasce
+  // sobre outro atleta, e a leitura visual coincide com o cálculo do passe.
   const companheiros = Array.from({ length: nCompanheiros }, (_, i) => ({
-    id: `c${i}`, x: 34 + Math.random() * (PASSE_W - 68), y: 34 + Math.random() * 92,
+    id: `c${i}`, x: 34 + (i + .5) * (PASSE_W - 68) / nCompanheiros, y: 48 + Math.random() * 48,
   }));
   const adversarios = Array.from({ length: nAdversarios }, (_, i) => ({
-    id: `a${i}`, x: 28 + Math.random() * (PASSE_W - 56), y: 46 + Math.random() * 100,
+    id: `a${i}`, x: 40 + i * (PASSE_W - 80) / (nAdversarios - 1), y: 136 + Math.random() * 16,
   }));
   return { companheiros, adversarios };
 }

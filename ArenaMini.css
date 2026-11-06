@@ -1,0 +1,52 @@
+/* Uma cena tem uma câmera e um único sistema de coordenadas. O quadro se
+   adapta ao viewport inteiro, sem redimensionar SVGs internos separadamente. */
+.arena-quadro{box-sizing:border-box;width:100%;max-width:960px;margin:0 auto;height:calc(100dvh - var(--mini-cabecalho,80px));min-height:0;padding:14px 20px max(12px,env(safe-area-inset-bottom));gap:10px}
+.arena-quadro.mini-fluxo{display:grid;grid-template-rows:auto minmax(0,1fr) 96px}
+.arena-quadro.lc{display:grid;grid-template-rows:auto minmax(0,1fr)}
+.arena-quadro .vf-cabecalho-momento{text-align:center;min-width:0}
+.arena-quadro .vf-confronto{padding:8px 14px;margin-bottom:7px;border-color:#c8d5b521;background:#13251d;gap:16px}
+.arena-quadro .vf-confronto .vf-match-club{flex-direction:row;gap:8px;text-align:left;justify-content:flex-start}
+.arena-quadro .vf-confronto .vf-adversario{justify-content:flex-end;text-align:right;flex-direction:row-reverse}
+.arena-quadro .vf-confronto .vf-match-club strong{font-size:12px;line-height:1.25}
+.arena-quadro .vf-versus{font-size:17px}.arena-quadro .vf-versus small{font-size:7px;margin-top:3px}
+.arena-quadro .vf-contexto-lance{font-size:11px;line-height:1.4;margin:0 0 7px;color:#adc2b0}
+.arena-quadro .vf-cabecalho-momento .rp-chip{font-size:9px;line-height:1.5;padding:3px 8px}
+.arena-quadro .vf-cabecalho-momento h2{font:700 19px/1.2 Inter,system-ui,sans-serif;margin:6px 0 0;color:#edf1e7}
+.arena-quadro .vf-legenda-momento{display:none}
+.arena-quadro .vf-cena{min-height:0;margin:0;padding:0!important;border:1px solid #b9cfa02b!important;border-radius:18px!important;background:#0b2019!important;box-shadow:0 12px 35px #0003}
+.arena-quadro .vf-cena svg{max-height:none!important;margin:0;display:block}
+.arena-quadro .vf-superficie{height:100%;min-height:0;max-width:none!important;aspect-ratio:auto!important;border-radius:0!important;background:radial-gradient(ellipse at center,#244d34,#0a1d17)}
+.arena-quadro .vf-cena-penalti>div{display:flex;flex-direction:column;height:100%;min-height:0}
+.arena-quadro .vf-cena-penalti>div>div:first-child{padding:10px 14px;font-size:9px;flex:none;background:#0f261e;border-bottom:1px solid #ffffff0a}
+.arena-quadro .vf-cena-penalti>div>div:last-child{padding:7px 14px;font-size:8px;flex:none;background:#0d241b;border-top:1px solid #ffffff0a}
+.arena-quadro .rp-pen-cena{min-height:0;flex:1;border-radius:0;animation:none!important}
+.arena-quadro .vf-mini-canvas{display:grid;grid-template-rows:minmax(0,1fr) 58px;width:100%;height:100%;min-height:0;margin:0}
+.arena-quadro .vf-falta-alvos,.arena-quadro .vf-passe-opcoes{min-height:58px;align-items:center;margin:0;padding:5px 10px;gap:8px;background:#10281e;border-top:1px solid #ffffff0d}
+.arena-quadro .vf-falta-alvos button,.arena-quadro .vf-passe-opcoes button{flex:1;min-height:44px;min-width:0;padding:8px 7px;font:650 11px/1.3 Inter,system-ui,sans-serif;border:1px solid #b9c99655;border-radius:10px;color:#e8e7cd;background:#243e2c;text-transform:none;letter-spacing:0;transition:background .15s,transform .15s}
+.arena-quadro .vf-falta-alvos button:hover,.arena-quadro .vf-passe-opcoes button:hover{background:#3e5735;transform:translateY(-1px)}
+.arena-quadro .mini-feedback{display:flex;flex-direction:column;justify-content:center;gap:7px;min-height:0}
+.arena-quadro .mini-feedback>p{font:400 12px/1.55 Inter,system-ui,sans-serif;color:#b9c9bb;margin:0}
+.arena-quadro .mini-feedback .display{font:800 23px/1.1 Inter,system-ui,sans-serif}
+.arena-quadro .mini-continuar{margin:0;min-height:46px;background:linear-gradient(110deg,#d6b46b,#f2dda1);color:#14251a;border-radius:11px;font-size:13px}
+.arena-voo-bola{pointer-events:none}.arena-bola{pointer-events:none}.arena-coordenadas{isolation:isolate}
+.arena-quadro.lc .lc-jogo{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:0;min-height:0;padding:0;border-radius:18px;border-color:#b9cfa02b;background:#0c2319}
+.arena-quadro.lc .lc-jogo>header{padding:11px 14px 0;flex-direction:row;align-items:center;gap:10px}
+.arena-quadro.lc .lc-jogo>header>span{font-size:7px;letter-spacing:.1em;color:#a5bb9e}.arena-quadro.lc .lc-jogo>header>b{font-size:12px}
+.arena-quadro.lc .lc-dica{margin:0;padding:7px 14px 10px;font-size:11px;line-height:1.45}
+.arena-quadro.lc .lc-gramado{min-height:0;border-radius:0;background:radial-gradient(ellipse,#234e34,#0a1e17)}
+.arena-quadro.lc .lc-gramado>svg{display:block;width:100%;height:100%;max-height:none!important}
+.arena-quadro.lc .lc-impacto{inset:auto 12px 10px;padding:10px 12px;gap:3px;border:1px solid #8dba8c55;border-radius:10px;background:#0b201df0;backdrop-filter:blur(6px);pointer-events:none;animation:arenaResultado .8s ease both}
+.arena-quadro.lc .lc-impacto strong{font:800 16px/1.2 Inter,system-ui,sans-serif;color:#bee3b9}.arena-quadro.lc .lc-perdeu .lc-impacto strong{color:#e9b19f}.arena-quadro.lc .lc-impacto span{font-size:10px}
+.arena-quadro.lc .lc-controles{display:flex;flex-direction:column;justify-content:center;min-height:76px;padding:10px 12px;background:#10281e;border-top:1px solid #ffffff0d}
+.arena-quadro.lc .lc-opcoes{margin:0}.arena-quadro.lc .lc-opcoes button{min-height:48px;font-size:11px;border-color:#b9c99655;background:#243e2c}
+.arena-quadro.lc .lc-continuar,.arena-quadro.lc .lc-saltar{margin:0;min-height:48px;font-size:13px}
+.arena-quadro.lc .lc-tempo{margin:0 0 8px;height:14px;flex:none}.arena-quadro.lc .lc-ajuda{margin:5px 0 0;font-size:9px}
+@keyframes arenaResultado{0%,70%{opacity:0;transform:translateY(5px)}100%{opacity:1;transform:none}}
+@media(min-width:900px){.arena-quadro{padding-left:40px;padding-right:40px}.arena-quadro .vf-confronto{max-width:620px;margin-left:auto;margin-right:auto}.arena-quadro .vf-cabecalho-momento h2{font-size:22px}.arena-quadro.lc .lc-controles{padding-left:20%;padding-right:20%}.arena-quadro .mini-feedback>p{max-width:600px;margin:auto}.arena-quadro .mini-continuar{max-width:480px;align-self:center}.arena-quadro .vf-falta-alvos,.arena-quadro .vf-passe-opcoes{padding-left:18%;padding-right:18%}}
+@media(max-width:430px){.arena-quadro{padding:9px 12px max(10px,env(safe-area-inset-bottom));gap:8px}.arena-quadro .vf-confronto{padding:7px 9px;gap:7px}.arena-quadro .vf-confronto .vf-match-club{gap:5px}.arena-quadro .vf-confronto .vf-match-club strong{font-size:10px}.arena-quadro .vf-confronto .vf-match-club img{max-width:27px;max-height:27px}.arena-quadro .vf-cabecalho-momento h2{font-size:17px}.arena-quadro .vf-contexto-lance{font-size:10px;margin-bottom:5px}.arena-quadro.lc .lc-jogo>header{padding-top:9px}.arena-quadro.lc .lc-jogo>header>b{font-size:11px}.arena-quadro.lc .lc-opcoes button{font-size:10px}}
+@media(max-height:600px){.arena-quadro{padding-top:6px;padding-bottom:7px;gap:6px}.arena-quadro.mini-fluxo{grid-template-rows:auto minmax(0,1fr) 84px}.arena-quadro .vf-confronto{padding-top:5px;padding-bottom:5px;margin-bottom:4px}.arena-quadro .vf-cabecalho-momento h2{font-size:15px;margin-top:4px}.arena-quadro .vf-contexto-lance{font-size:9px;line-height:1.3;margin-bottom:3px}.arena-quadro .vf-cabecalho-momento .rp-chip{font-size:8px}.arena-quadro .mini-feedback .display{font-size:19px}.arena-quadro.lc .lc-dica{font-size:10px;padding-bottom:7px}.arena-quadro.lc .lc-controles{min-height:68px;padding-top:7px;padding-bottom:7px}}
+@media(prefers-reduced-motion:reduce){.arena-quadro *{animation:none!important;transition:none!important}}
+
+.arena-mira{pointer-events:none}.vf-replay-legenda{display:block;text-align:center;align-self:center;width:100%;font:500 10px/1.4 Inter,system-ui,sans-serif;letter-spacing:.02em;color:#aebfa9}.arena-quadro .vf-falta-alvos button:focus-visible,.arena-quadro .vf-passe-opcoes button:focus-visible{outline:2px solid #f0d99e;outline-offset:2px}
+
+.arena-quadro .vf-passe-alvo:not(:disabled)::after{border-color:transparent;background:none}.arena-quadro .vf-passe-alvo:not(:disabled):hover::after,.arena-quadro .vf-passe-alvo:focus-visible::after{border-color:#f3db94;background:#e8d29818}.vf-passe-numero{position:absolute;left:50%;bottom:-3px;transform:translateX(-50%);display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#f1d693;color:#12271b;font:800 11px Inter,system-ui,sans-serif;box-shadow:0 2px 4px #0007;border:1px solid #fff0c5}

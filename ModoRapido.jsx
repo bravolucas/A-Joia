@@ -1,3 +1,4 @@
+import {GeometriaCampo,QuadroMini} from './CenarioMini.jsx';
 import TreinosPretemporada from './TreinosPretemporada.jsx';
 import {trocarTreinos} from './rapido.js';
 import Idolatria from './Idolatria.jsx';
@@ -15,7 +16,7 @@ import "./LayoutDesktop.css";
 import ConquistasJogador from "./ConquistasJogador.jsx";
 import { bloquearRolagem } from "./bloqueioRolagem.js";
 import { efeitoLance } from './som.js';
-import { JogadorCampo, RetratoApresentacao, CamisaPremium, useCenario } from './VisualFutebol.jsx';
+import { JogadorCampo, RetratoApresentacao, CamisaPremium, SuperficieMini, useCenario } from './VisualFutebol.jsx';
 import { criarIdMuseu } from './museu.js';
 import Icone from "./Icone.jsx";
 import CarreiraTecnico from "./CarreiraTecnico.jsx";
@@ -717,14 +718,14 @@ function CabecalhoMomento({ c, momento }) {
   const mini = momento.mini || "penalti";
   const contexto=contextoMomento(c,momento),adv=contexto.adversario,selecao=adv?.tipo==='selecao';
   return (
-    <div className="text-center">
+    <div className="vf-cabecalho-momento text-center">
       <div className="vf-matchbar vf-confronto" aria-label="Confronto da decisão"><span className="vf-match-club">{selecao?<Bandeira nac={c.nac} size={30}/>:<ClubDot club={clubeDe(c.emprestimo?.destino||c.clubeNome)} size={32}/>}<strong>{selecao?nacDe(c.nac).label:c.emprestimo?.destino||c.clubeNome}</strong></span><span className="vf-versus">VS<small>{contexto.contexto.fase}</small></span><span className="vf-match-club vf-adversario">{adv&&<>{selecao?<Bandeira nac={adv.id} size={30}/>:<ClubDot club={clubeDe(adv.nome)} size={32}/>}<strong>{adv.nome}</strong></>}</span></div>
       <p className="vf-contexto-lance">{contexto.contexto.situacao}</p>
       <span className="rp-chip" style={{ color: "#EBC557", background: "rgba(216,180,74,.14)" }}>
         {momento.total > 1 ? `Desafio ${momento.ordem} de ${momento.total}` : "Momento decisivo"} · {NOME_MINI[mini]}
       </span>
       <h2 className="display text-lg text-[#F2F5F3] mt-3">{momento.titulo}</h2>
-      <p className="text-[17px] text-[#8FA39A] mt-1">{momento.texto}</p>
+      <p className="vf-legenda-momento text-[17px] text-[#8FA39A] mt-1">{momento.texto}</p>
     </div>
   );
 }
@@ -740,10 +741,9 @@ function PlacarMomento({ ok, texto }) {
 }
 
 /* Cena do gol: estádio ao fundo, trave com rede em profundidade e um goleiro de verdade */
-const GZX = (col) => 70 + col * 80, GZY = (lin) => 66 + lin * 50;
-function Goleiro({ cor, mergulho }) { return <JogadorCampo x={150} y={148} escala={.85} cor={cor} numero={1} goleiro esticado={!!mergulho&&mergulho[0]!==1} direcao={mergulho?.[0]===0?-1:1} />; }
+const GZX = (col) => 70 + col * 80, GZY = (lin) => 60 + lin * 46;
+function Goleiro({ cor, mergulho }) { return <JogadorCampo x={150} y={124} escala={.7} cor={cor} numero={1} goleiro esticado={!!mergulho&&mergulho[0]!==1} direcao={mergulho?.[0]===0?-1:1} />; }
 function CenaGol({ goleiro, res, bola, fora, podeEscolher, onZona }) {
-  const fotoEstadio = useCenario("estadio");
   const cor = goleiro ? "#EBC557" : "#B8F23A";
   const m = res?.goleiro || null;
   // Mergulho usa recorte próprio e deslocamento; não gira a pose de espera.
@@ -768,29 +768,9 @@ function CenaGol({ goleiro, res, bola, fora, podeEscolher, onZona }) {
         <radialGradient id="rpBola" cx=".35" cy=".3" r=".75"><stop offset="0" stopColor="#FFFFFF" /><stop offset=".7" stopColor="#E6E8E7" /><stop offset="1" stopColor="#9DA3A1" /></radialGradient>
         <filter id="rpDesfoque"><feGaussianBlur stdDeviation="1.6" /></filter>
       </defs>
-      {/* estádio ao fundo */}
-      <image href={fotoEstadio} x="0" y="0" width="300" height="210" preserveAspectRatio="xMidYMid slice" opacity=".9" />
-      <rect x="0" y="0" width="300" height="120" fill="url(#rpGrama)" opacity=".0" />
-      <rect x="0" y="100" width="300" height="110" fill="url(#rpGrama)" />
-      {[0, 1, 2, 3, 4].map((k) => <rect key={k} x="0" y={112 + k * 22} width="300" height="11" fill="#fff" opacity=".035" />)}
-      {/* linhas do campo */}
-      <path d="M0 150 H300" stroke="rgba(255,255,255,.75)" strokeWidth="1.4" />
-      <path d="M62 150 L50 170 H250 L238 150" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="1.2" />
-      <ellipse cx="150" cy="196" rx="3.2" ry="1.4" fill="rgba(255,255,255,.8)" />
-      {/* rede: fundo, laterais e teto, com profundidade */}
-      <rect x="46" y="44" width="208" height="102" fill="rgba(7,16,12,.55)" />
-      <rect x="46" y="44" width="208" height="102" fill="url(#rpMalha)" />
-      <path d="M30 34 L46 44 L46 146 L30 150 Z" fill="url(#rpMalhaLado)" stroke="rgba(255,255,255,.3)" strokeWidth=".6" />
-      <path d="M270 34 L254 44 L254 146 L270 150 Z" fill="url(#rpMalhaLado)" stroke="rgba(255,255,255,.3)" strokeWidth=".6" />
-      <path d="M30 34 L270 34 L254 44 L46 44 Z" fill="url(#rpMalhaLado)" stroke="rgba(255,255,255,.3)" strokeWidth=".6" />
-      <path d="M46 146 L30 150 M254 146 L270 150" stroke="rgba(255,255,255,.35)" />
+      <GeometriaCampo largura={300} altura={210} gol={{x:29,y:40,w:242,h:86}}/>
       {/* balanço da rede no gol */}
       {gol && bola && !fora && <ellipse className="rp-rede" cx={bx} cy={by} rx="24" ry="18" fill="url(#rpMalha)" stroke="rgba(255,255,255,.55)" strokeWidth=".8" />}
-      {/* trave */}
-      <rect x="26" y="30" width="248" height="5" rx="1.5" fill="url(#rpTrave)" />
-      <rect x="26" y="30" width="5" height="121" rx="1.5" fill="url(#rpTrave)" />
-      <rect x="269" y="30" width="5" height="121" rx="1.5" fill="url(#rpTrave)" />
-      <rect x="31" y="35" width="238" height="3" fill="rgba(0,0,0,.25)" />
       {/* goleiro */}
       <g className="rp-goleiro" style={{ transform: `translate(${dx}px, ${dy}px) rotate(0deg)`, transformOrigin: "150px 150px" }}>
         <Goleiro cor={cor} mergulho={m} />
@@ -861,30 +841,30 @@ function TelaPenalti({ c, momento, onFim, goleiro = false }) {
     : (res.resultado === "gol" ? "GOOOL!" : res.resultado === "defesa" ? "DEFENDEU!" : "PRA FORA!");
 
   return (
-    <div className="mini-fluxo max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
+    <QuadroMini className="mini-fluxo">
       <CabecalhoMomento c={c} momento={momento} />
-      <div className="rp-painel vf-cena p-3 overflow-hidden" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
+      <div className="rp-painel vf-cena vf-cena-penalti p-3 overflow-hidden" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
         <div className="relative">
           <div className="flex justify-between items-center px-2 pb-2 text-[11px] font-bold uppercase tracking-widest text-[#D5E6DC]">
             <span>⚽ {goleiro ? "Defesa decisiva" : "Cobrança decisiva"}</span>
             <span className="text-[#EBC557]">{res ? (res.ok ? "LANCE VENCIDO" : "LANCE PERDIDO") : "ESCOLHA O CANTO"}</span>
           </div>
           <div className={res ? "rp-pen-cena rp-pen-acao" : "rp-pen-cena"}>
-            <CenaGol goleiro={goleiro} res={res} bola={bola} fora={fora} podeEscolher={escolha == null} onZona={chutar} />
+            <SuperficieMini largura={300} altura={210}><CenaGol goleiro={goleiro} res={res} bola={bola} fora={fora} podeEscolher={escolha == null} onZona={chutar} /></SuperficieMini>
             {res && <div className="absolute inset-0 pointer-events-none rp-pen-flash" style={{ background: res.ok ? "radial-gradient(circle at 50% 30%, rgba(27,194,138,.24), transparent 65%)" : "radial-gradient(circle at 50% 30%, rgba(227,107,91,.22), transparent 65%)" }} />}
           </div>
           <div className="flex items-center justify-between text-[11px] text-[#8FA39A] px-2 pt-2">
-            <span>VISÃO DO BATEDOR</span><span>{res ? "REPLAY DO LANCE" : "TOQUE NO GOL"}</span>
+            <span>{goleiro ? "VISÃO DO GOLEIRO" : "VISÃO DO BATEDOR"}</span><span>{res ? "REPLAY DO LANCE" : "TOQUE NO GOL"}</span>
           </div>
         </div>
       </div>
-      <div className="text-center min-h-[64px]">
+      <div className="mini-feedback text-center min-h-[64px]">
         {!res && (goleiro
           ? <p className="text-[17px] text-[#C9D3CE]">Toque no canto para onde vai pular. Defesa <span className="font-stat">{c.attrs.defesa}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "defesa") * 100)}%</span></p>
           : <p className="text-[17px] text-[#C9D3CE]">Toque no canto onde vai bater. Finalização <span className="font-stat">{c.attrs.finalizacao}</span> · chance estimada <span className="font-stat">{Math.round(chancePenalti(c) * 100)}%</span></p>)}
         {res && <><PlacarMomento ok={res.ok} texto={textoRes} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.ok)}>Continuar →</button></>}
       </div>
-    </div>
+    </QuadroMini>
   );
 }
 
@@ -904,16 +884,16 @@ function TelaFalta({ c, momento, onFim }) {
     return () => clearTimeout(t);
   }, [res, onFim]);
   return (
-    <div className="mini-fluxo max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
+    <QuadroMini className="mini-fluxo">
       <CabecalhoMomento c={c} momento={momento} />
       <div className="rp-painel vf-cena p-3 overflow-hidden flex justify-center" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
         <FreeKickMini onPick={bater} resultado={res} />
       </div>
-      <div className="text-center min-h-[64px]">
+      <div className="mini-feedback text-center min-h-[64px]">
         {!res && <p className="text-[17px] text-[#C9D3CE]">Escolha onde colocar a bola. Finalização <span className="font-stat">{c.attrs.finalizacao}</span> · drible <span className="font-stat">{c.attrs.drible}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "falta") * 100)}%</span></p>}
         {res && <><PlacarMomento ok={res.gol} texto={res.gol ? "GOLAÇO DE FALTA!" : res.tipo === "Barreira" ? "NA BARREIRA!" : res.tipo === "Trave" ? "NA TRAVE!" : res.tipo === "Defesa" ? "DEFENDEU!" : "PRA FORA!"} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.gol)}>Continuar →</button></>}
       </div>
-    </div>
+    </QuadroMini>
   );
 }
 
@@ -926,16 +906,16 @@ function TelaPasse({ c, momento, onFim }) {
     return () => clearTimeout(t);
   }, [res, onFim]);
   return (
-    <div className="mini-fluxo max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
+    <QuadroMini className="mini-fluxo">
       <CabecalhoMomento c={c} momento={momento} />
       <div className="rp-painel vf-cena p-3 overflow-hidden flex justify-center" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
         <PasseMini atributoPasse={c.attrs.passe + bonus + 6} onResultado={(r) => setRes(r)} />
       </div>
-      <div className="text-center min-h-[64px]">
+      <div className="mini-feedback text-center min-h-[64px]">
         {!res && <p className="text-[17px] text-[#C9D3CE]">Você controla o jogador com a bola. Toque num companheiro de verde, longe dos adversários de azul. Passe <span className="font-stat">{c.attrs.passe}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "passe") * 100)}%</span></p>}
         {res && <><PlacarMomento ok={res.gol} texto={res.gol ? "ASSISTÊNCIA! GOL!" : "INTERCEPTADO!"} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.gol)}>Continuar →</button></>}
       </div>
-    </div>
+    </QuadroMini>
   );
 }
 

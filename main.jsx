@@ -6,6 +6,7 @@ import LimiteDeErro from "./LimiteDeErro.jsx";
 import "./index.css";
 import "./VisualFutebol.css";
 import "./FluxoResultados.css";
+import "./ArenaMini.css";
 
 aplicarVisualSalvo();
 ReactDOM.createRoot(document.getElementById("root")).render(

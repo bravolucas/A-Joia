@@ -1,6 +1,6 @@
 ## Complemento — rever copas já conquistadas
 
-Corrigida a condição que ainda escondia o botão de replay para títulos comuns: detalhes da temporada → Rever conquistas agora abre também Copa do Brasil e demais taças. Replay retorna à tela anterior sem duplicar temporada ou recompensa. Resumo identifica a copa vencida como Campeão mesmo quando o registro da fase conserva Final. Build e 32 cenários de navegador passaram (14 de fechamento, 12 de jornada, 6 de OVR); logs `/tmp/titulos-rever-build.log` e `/tmp/titulos-rever-browser.log`. Publicação deste complemento em acompanhamento; entrega anterior já publicada conforme registro abaixo.
+Corrigida a condição que ainda escondia o botão de replay para títulos comuns: detalhes da temporada → Rever conquistas agora abre também Copa do Brasil e demais taças. Replay retorna à tela anterior sem duplicar temporada ou recompensa. Resumo identifica a copa vencida como Campeão mesmo quando o registro da fase conserva Final. Build e 32 cenários de navegador passaram (14 de fechamento, 12 de jornada, 6 de OVR); logs `/tmp/titulos-rever-build.log` e `/tmp/titulos-rever-browser.log`. Complemento publicado em `d559372`: Pages https://github.com/bravolucas/A-Joia/actions/runs/42268433833 concluiu com sucesso; validação de navegador `42268433803` e geral `42268433786` também passaram. Confirmação documental salva somente na branch de checkpoint, sem novo deploy.
 
 ## Fechamento persistido, celebração de copas e continuação dos itens
 

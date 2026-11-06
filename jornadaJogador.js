@@ -1,3 +1,5 @@
+import {compararMarcasCopas} from './recordesHistoricos.js';
+import {consolidarElencoCopa} from './elencoSelecao.js';
 import {CLUBES,LIGAS} from './data.js';
 import {calcOVR} from './lib.js';
 import {IDENTIDADES_POSICAO,fecharAdaptacaoPosicao,penalidadePosicao} from './posicoesCarreira.js';
@@ -165,8 +167,15 @@ function atualizarDuplas(c,card){
 }
 export function fecharJornada(c,card){
  const j=iniciarJornada(c);if(j.fechado===card.ano)return;
+ consolidarElencoCopa(c,card);
  j.fechado=card.ano;card.jornada={noticias:[],mensagens:[],memorias:[],assinaturas:[]};
  const n=card.jornada;
+ for(const marca of compararMarcasCopas(c,card))for(const [etapa,ano]of [['igualou',marca.anoIgualou],['superou',marca.anoSuperou]]){
+  if(ano==null)continue;
+  const m=memorizar(c,'marca-historica',`${etapa==='igualou'?'Igualou':'Superou'} uma marca de ${marca.atleta}`,`${marca.nome}: referência histórica de ${marca.valor}, na base 1930–2022. Feito da sua carreira simulada.`,{id:`marca:${marca.id}:${etapa}`,ano,clube:'Seleção'});
+  if(m&&ano===card.ano)n.memorias.push(m);
+ }
+
  const due=j.ecos.filter(e=>e.ano<=card.ano);
  if(due.length){const e=due[0],mesmo=e.clube===card.clube,bonus=e.eixo==='vinculo'&&mesmo?2:e.eixo==='preparo'?1:0;
   if(bonus)c.moral=clamp((c.moral??65)+bonus);

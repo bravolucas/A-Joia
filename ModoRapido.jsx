@@ -1,4 +1,4 @@
-import {FasesTemporada,PainelJornada,EcosDaTemporada,ProjetoOferta,CenasClube,AlbumJornada,PrimeiraSelecao,CelebracaoLance,ReacaoAntigoClube} from './JornadaUI.jsx';
+import {FasesTemporada,PainelJornada,EcosDaTemporada,ProjetoOferta,CenasClube,AlbumJornada,PrimeiraSelecao,CelebracaoLance,ReacaoAntigoClube,ConsultaElencoCopa} from './JornadaUI.jsx';
 import {mudarPosicao,reinventarVeterano} from './posicoesCarreira.js';
 import {ativarAssinatura,definirPreferenciaMercado,legadoNarrativo,projetoOferta,cenaDespedida,reagirReencontro,celebracaoMomento} from './jornadaJogador.js';
 import {GeometriaCampo,QuadroMini,BolaTrajeto} from './CenarioMini.jsx';
@@ -1425,22 +1425,9 @@ function ResumoCompacto({ c, card, onDetalhes }) {
 
 /* Gaveta que sobe de baixo (ficha, foco, patrimônio; ou o resumo completo) */
 function Gaveta({ titulo, onFechar, children }) {
-  useEffect(() => {
-    const esc = (e) => { if (e.key === "Escape") onFechar(); };
-    window.addEventListener("keydown", esc);
-    return () => window.removeEventListener("keydown", esc);
-  }, [onFechar]);
-  return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/60" onClick={onFechar} role="dialog" aria-label={titulo}>
-      <div className="w-full max-w-xl max-h-[86vh] overflow-y-auto rounded-t-[24px] bg-[#111A16] border-t border-white/10 rp-sobe" onClick={(e) => e.stopPropagation()}>
-        <div className="sticky top-0 bg-[#111A16]/95 backdrop-blur px-4 py-3 flex items-center justify-between border-b border-white/5 z-10">
-          <span className="display text-[13px] text-[#F2F5F3]">{titulo}</span>
-          <button onClick={onFechar} className="min-h-[40px] px-3 text-[14px] font-bold text-[#8FA39A]">Fechar</button>
-        </div>
-        <div className="p-3 flex flex-col gap-3">{children}</div>
-      </div>
-    </div>
-  );
+ const ref=useRef(null);
+ useEffect(()=>{const el=ref.current,anterior=document.activeElement;el.showModal();const liberar=bloquearRolagem(document.body);return()=>{el.close();liberar();anterior?.focus({preventScroll:true});};},[]);
+ return createPortal(<dialog ref={ref} className="jr-gaveta" aria-label={titulo} onCancel={e=>{e.preventDefault();onFechar();}} onClick={e=>{if(e.target===e.currentTarget)onFechar();}}><div className="jr-gaveta-painel"><header><h2>{titulo}</h2><button onClick={onFechar}>Fechar</button></header><div className="jr-gaveta-corpo">{children}</div></div></dialog>,document.body);
 }
 
 /* ---------- traço de carreira ---------- */
@@ -2808,6 +2795,7 @@ function TelaCopa({ c, card, onAvancar }) {
         </div>
       </section>
 
+      {k.convocado&&<ConsultaElencoCopa elenco={jogada?.card?.copa?.elenco||k.elenco}/>}
       {/* caminho até a taça */}
       <div className="grid grid-cols-5 gap-1" aria-label="Fases da Copa">
         {CURTO_FASE.map((f, i) => {
@@ -3260,7 +3248,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           <SeletorFoco c={c} onFoco={mudarFoco} />
           {etapa==='evento'&&!evento&&!estado.auto&&!resultado&&!c.emprestimo&&c.flags.baseEscolhida&&(c.contrato?.restantes??0)>0&&c.lojaAnoEmCurso!==c.ano&&<button className="rp-opcao px-4 py-3 text-left" onClick={pedirEmprestimo}>Pedir propostas por empréstimo</button>}
           {c.emprestimo&&<p className="text-sm text-[#C9D3CE]">Empréstimo no {c.emprestimo.destino} · {c.emprestimo.restantes??1} temporada(s) restante(s). Retorno ao {c.clubeNome}.</p>}
-          <button onClick={() => setPatrimonioAberto(true)} className="rp-painel px-4 py-3 flex items-center gap-3 text-left hover:border-[#D8B44A]/50">
+          <button onClick={() => { setGaveta(null); setPatrimonioAberto(true); }} className="rp-painel px-4 py-3 flex items-center gap-3 text-left hover:border-[#D8B44A]/50">
             <span className="text-2xl">💼</span>
             <span className="flex-1"><span className="block text-[13px] font-bold uppercase tracking-[0.15em] text-[#8FA39A]">Loja e patrimônio</span><span className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</span></span>
             <span className="text-[15px] font-bold text-[#EBC557]">Ver loja →</span>

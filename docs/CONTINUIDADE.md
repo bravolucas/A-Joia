@@ -1,3 +1,11 @@
+## Copa com elenco individual e gestos corporais
+
+Continuação solicitada pelo usuário. Atlas original com quatro poses para abraço/aplauso/caminhada, cenário original de vestiário; personagem fictício sem personalização facial. Movimento reduzido mantém pose estática. Copa do Mundo com 26 convocados, renovação, escalação, reservas, minutos, gols/assistências por placar, persistência e influência máxima de ±1,5 na força. Torneios continentais ainda não usam esse elenco individual. Ficha/gaveta usa diálogo nativo e fecha ao abrir loja; Copa em desktop ganha duas colunas.
+
+Duas referências históricas de Copas masculinas (Klose 16; Fontaine 13 numa edição), calculadas com filtro correto e dados até 2022; fonte/licença em `dados/CREDITOS-COPAS.md`, progresso e dois feitos no museu. Não chamar de ranking mundial atualizado de 2026. Arte e fontes em `arte/jornada/CREDITOS.md`. Documento completo e pendências atuais em `docs/jornada-com-memoria/ETAPA-COPA-E-GESTOS.md`; relatórios antigos abaixo são históricos.
+
+Validação: 36 arquivos de lógica passaram; nove casos novos de domínio e nove de navegador. Rodada ampla de 100 cenários de navegador passou. Após ajuste da migração do núcleo antigo e ano das conquistas, 25 cenários de jornada/museu foram revalidados e passaram; build e diff check passaram. Primeira rodada de testes novos teve erro no próprio evaluate (variável externa não passada), corrigido sem relaxar as verificações de poses. Logs `/tmp/copa-gestos-unit-publicacao.log`, `/tmp/copa-gestos-build-publicacao.log`, `/tmp/copa-gestos-browser-final.log` e `/tmp/copa-gestos-browser-publicacao.log`; capturas em `docs/jornada-com-memoria/copa-e-gestos/`. Publicação aguardando workflows. Documentos anteriores não rastreados preservados.
+
 ## Continuação da jornada — profundidade e auditoria de pendências
 
 Três atos visuais em cenas, atmosferas contextuais e comemorações próprias; histórias de parceiros com títulos, confrontos, rota e aposentadoria; reencontro explícito na chegada; onze funções narrativas da seleção com renovação; reação opcional diante do ex-clube com efeito limitado e persistido. Compra/decisão anual não ganhou confirmação ou clique obrigatório.

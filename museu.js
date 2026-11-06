@@ -1,3 +1,4 @@
+import {compararMarcasCopas} from './recordesHistoricos.js';
 import { CLUBES, LIGAS, COMPS_PAIS, ESTADUAIS } from './data.js';
 import { competicaoDoTitulo } from './tacas.js';
 import { slugCompeticao } from './arteCompeticoes.js';
@@ -21,6 +22,8 @@ export function competenciaMuseu(valor) {
 }
 
 export const FEITOS_MUSEU = [
+ {id:'marca-klose',nome:'Na marca de Klose',descricao:'Marque 16 gols em Copas masculinas na sua carreira. Referência histórica até 2022.',icone:'✦'},
+ {id:'marca-fontaine',nome:'Na marca de Fontaine',descricao:'Marque 13 gols em uma edição da Copa masculina. Referência histórica de 1958, base até 2022.',icone:'✦'},
   ...[['memoria-contrato','O primeiro contrato','Assine seu primeiro contrato de base.'],['memoria-estreia','O começo em campo','Dispute sua primeira temporada com jogos registrados.'],['primeiro-gol','A primeira rede','Marque seu primeiro gol registrado.'],['primeira-assistencia','A primeira criação','Dê sua primeira assistência registrada.'],['primeira-defesa','Mãos que decidem','Vença uma defesa decisiva como goleiro.'],['primeira-recuperacao','Antes do último passe','Vença uma interceptação decisiva.'],['primeiro-cruzamento','O corredor é seu','Decida um cruzamento.'],['memoria-convocacao','A lista chegou','Receba sua primeira convocação registrada.'],['memoria-estreia-selecao','A camisa do país','Dispute sua primeira partida registrada pela seleção.'],['jogador-reinventado','Uma nova função','Mude de posição e inicie uma adaptação real.'],['dupla-marcante','Quem jogou ao seu lado','Dispute duas temporadas com uma dupla registrada.'],['assinatura-tecnica','Uma marca só sua','Conquiste uma assinatura em três temporadas diferentes.'],['lider-vestiario','A braçadeira merecida','Torne-se capitão pela trajetória e confiança.']].map(([id,nome,descricao])=>({id,nome,descricao,icone:'✦'})),
 
   { id: 'primeira-taca', nome: 'O primeiro brilho', descricao: 'Conquiste seu primeiro título como jogador ou treinador.', icone: '🏆' },
@@ -108,10 +111,11 @@ export function extrairConquistasMuseu(c, { modo = 'rapido', temporadas = [] } =
     'cinco-clubes': new Set(jogadas.map(t => t.clube).filter(Boolean)).size >= 5,
     'treinador-campeao': tacasTecnico.length > 0, 'trinta-treinador': (tecnico?.temporadas?.length || 0) >= 30,
   };
+  const marcas=compararMarcasCopas(c);feitos['marca-klose']=marcas[0].atual>=16;feitos['marca-fontaine']=marcas[1].atual>=13;
   const primeiros=c.jornada?.primeiros||{};
   Object.assign(feitos,{'memoria-contrato':!!primeiros.contrato,'memoria-estreia':!!primeiros.estreia,'primeiro-gol':!!primeiros['primeiro-gol'],'primeira-assistencia':!!primeiros['primeira-assistencia'],'primeira-defesa':!!primeiros['primeira-defesa'],'primeira-recuperacao':!!primeiros['primeira-recuperacao'],'primeiro-cruzamento':!!primeiros['primeiro-cruzamento'],'memoria-convocacao':!!primeiros.convocacao,'memoria-estreia-selecao':!!primeiros['estreia-selecao'],'jogador-reinventado':!!c.jornada?.trocas?.length,'dupla-marcante':c.jornada?.duplas?.some(d=>d.temporadas>=2),'assinatura-tecnica':Object.values(c.jornada?.assinaturas||{}).some(a=>a.anos?.length>=3),'lider-vestiario':c.jornada?.memorias?.some(m=>m.tipo==='capitao')});
   for (const f of FEITOS_MUSEU) if (feitos[f.id]) {
-    const chave={'memoria-contrato':'contrato','memoria-estreia':'estreia','memoria-convocacao':'convocacao','memoria-estreia-selecao':'estreia-selecao'}[f.id]||f.id,m=primeiros[chave];
+    const chave={'memoria-contrato':'contrato','memoria-estreia':'estreia','memoria-convocacao':'convocacao','memoria-estreia-selecao':'estreia-selecao'}[f.id]||f.id,marca=f.id==='marca-klose'?marcas[0]:f.id==='marca-fontaine'?marcas[1]:null,m=primeiros[chave]||(marca?{ano:marca.anoIgualou,clube:'Seleção',texto:`${marca.nome}: igualou a referência histórica de ${marca.valor} gols (base até 2022).`}:null);
     adicionar('feitos', {...f,...(m?{ano:m.ano,clube:m.clube,historia:{anos:[m.ano],numeros:[m.numero].filter(Number.isFinite),posicoes:[m.posicao].filter(Boolean),feito:m.texto}}:{})});
   }
   return registros;
@@ -186,6 +190,7 @@ export function sincronizarMuseuDosSaves(storage = armazenamentoMuseu()) {
 export function progressoFeitoMuseu(c,id){
  if(!c)return null;
  const titulo=(c.lista||[]).filter(t=>!['bolaOuro','botaOuro'].includes(t.tipo)).length;
- const mapas={'primeira-taca':[titulo,1],'dez-tacas':[titulo,10],'cem-gols':[c.totais?.gols||0,100],'quinhentos-gols':[c.totais?.gols||0,500],'cem-assistencias':[c.totais?.assist||0,100],'quinhentos-jogos':[c.totais?.jogos||0,500],'vinte-temporadas':[c.temporadas?.length||0,20],'cinco-clubes':[new Set((c.temporadas||[]).map(t=>t.clube)).size,5],'dupla-marcante':[Math.max(0,...(c.jornada?.duplas||[]).map(d=>d.temporadas)),2],'assinatura-tecnica':[Math.max(0,...Object.values(c.jornada?.assinaturas||{}).map(a=>a.anos?.length||0)),3],'jogador-reinventado':[c.jornada?.trocas?.length||0,1]};
+ const marcas=compararMarcasCopas(c);
+ const mapas={'marca-klose':[marcas[0].atual,16],'marca-fontaine':[marcas[1].atual,13],'primeira-taca':[titulo,1],'dez-tacas':[titulo,10],'cem-gols':[c.totais?.gols||0,100],'quinhentos-gols':[c.totais?.gols||0,500],'cem-assistencias':[c.totais?.assist||0,100],'quinhentos-jogos':[c.totais?.jogos||0,500],'vinte-temporadas':[c.temporadas?.length||0,20],'cinco-clubes':[new Set((c.temporadas||[]).map(t=>t.clube)).size,5],'dupla-marcante':[Math.max(0,...(c.jornada?.duplas||[]).map(d=>d.temporadas)),2],'assinatura-tecnica':[Math.max(0,...Object.values(c.jornada?.assinaturas||{}).map(a=>a.anos?.length||0)),3],'jogador-reinventado':[c.jornada?.trocas?.length||0,1]};
  const p=mapas[id];return p?{atual:Math.min(p[0],p[1]),meta:p[1]}:null;
 }

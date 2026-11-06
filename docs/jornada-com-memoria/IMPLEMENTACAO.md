@@ -99,3 +99,7 @@ Testes de domínio cobrem compatibilidade, mudança efetiva, atributos/potencial
 4. Auditoria visual manual de todas as telas legadas/pop-ups; os ajustes compartilhados não equivalem a essa cobertura completa.
 
 As interações de dupla e celebrações estão funcionais nesta versão e podem receber repertório adicional sem ser descritas como pendência bloqueadora.
+
+## Atualização posterior — Copa e gestos
+
+A lista de pendências anterior é histórica. A continuação em [ETAPA-COPA-E-GESTOS.md](ETAPA-COPA-E-GESTOS.md) entrega abraço/aplauso/caminhada por quatro poses, elenco individual de 26 atletas nas Copas do Mundo, duas referências históricas verificadas até 2022 e revisão de ficha/gaveta/Copa/chegada. Permanecem: torneios continentais com elenco individual, histórico de clubes/ligas e recorte mundial atualizado, e auditoria visual exaustiva das telas legadas/raras. Não descrever a Copa como integração de todos os torneios internacionais.

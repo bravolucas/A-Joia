@@ -1,3 +1,4 @@
+import {prepararElencoCopa,forcaElencoCopa,registrarJogoElenco} from './elencoSelecao.js';
 import {iniciarJornada,memorizar,registrarEscolhaJornada,registrarTransferenciaJornada,prepararJornada,fecharJornada,pesoProjeto,projetoOferta,legadoNarrativo} from './jornadaJogador.js';
 import {penalidadePosicao,posicoesCompativeis,mudarPosicao,sugestaoVeterano} from './posicoesCarreira.js';
 import {NOVOS_TREINOS,grupoTreino} from './catalogoTreinos.js';
@@ -1040,7 +1041,7 @@ function sortearSelecoes(nac, n, [min, max], evitar = []) {
   return out.map((x) => ({ id: x.id, label: x.label, forca: x.forcaSelecao }));
 }
 /* força do seu país em campo: um titular acima do nível da seleção puxa o time */
-const forcaNaCopa = (k) => k.fs + (k.titular ? clampR((k.ovr - k.fs) * 0.25, -2, 3) : 0);
+const forcaNaCopa = (k) => k.fs + forcaElencoCopa(k.elenco,k.fs) + (k.titular ? clampR((k.ovr - k.fs) * 0.25, -2, 3) : 0);
 const chanceJogoCopa = (k, adv, extra = 0) => clampR(0.4 + (forcaNaCopa(k) - adv.forca) * 0.03 + extra, 0.1, 0.85);
 function placarCopa(res) {
   const a = poisson(1.4), b = poisson(1.0);
@@ -1078,6 +1079,7 @@ function iniciarCopa(c, ovr) {
     etapa: dentro ? "grupos" : "convocacao", fase: 0, arenga: true, convocado: dentro, bolha,
     jogos: [], gols: 0, assist: 0, craque: 0, efeitos: { moral: 0, fama: 0, fria: 0 }, fim: false,
   };
+  copa.elenco=prepararElencoCopa(c,c.ano);
   copa.grupo = [...sortearSelecoes(c.nac, 1, [85, 93]), ...sortearSelecoes(c.nac, 1, [76, 84]), ...sortearSelecoes(c.nac, 1, [62, 77])];
   copa.enfrentados = copa.grupo.map((x) => x.id);
   return { selecao, copa };
@@ -1161,6 +1163,7 @@ function jogarCopaBase(c, card0, opId) {
       k.gols += eu.gols; k.assist += eu.assist;
       return { fase: 0, adv, gp, gc, res, ...eu };
     });
+    jogos.forEach(jogo=>registrarJogoElenco(k.elenco,jogo,{titular:k.titular,ano:k.ano}));
     k.jogos.push(...jogos);
     const passa = pts >= 6 || (pts >= 4 && chance(0.85)) || (pts === 3 && chance(0.35));
     const pos = pts >= 7 ? 1 : passa ? (pts >= 6 && chance(0.6) ? 1 : 2) : pts >= 3 ? 3 : 4;
@@ -1182,6 +1185,7 @@ function jogarCopaBase(c, card0, opId) {
   const eu = k.titular || op.id === "decidir" ? participacaoCopa(c, { ...k, titular: true }, gp, decidiu) : { gols: 0, assist: 0 };
   k.gols += eu.gols; k.assist += eu.assist;
   const jogo = { fase: k.fase, adv, gp, gc, res: venceu ? "V" : "D", penaltis, ...eu };
+  registrarJogoElenco(k.elenco,jogo,{titular:k.titular,ano:k.ano});
   k.jogos.push(jogo);
   const fase = FASES_COPA[k.fase];
   const placarTxt = `${gp} x ${gc}${penaltis ? " (pên.)" : ""}`;
@@ -1591,6 +1595,7 @@ export function aplicarMomento(card0, acertou) {
       k.gols += eu.gols; k.assist += eu.assist;
       if (acertou) k.craque += 1;
       k.jogos.push({ fase: 4, adv: k.adversario, gp, gc, res: acertou ? "V" : "D", penaltis: naMarca, ...eu });
+      registrarJogoElenco(k.elenco,k.jogos.at(-1),{titular:k.titular,ano:k.ano});
       finalizarCopa(card, acertou);
     }
     if (acertou) { t.campeao = true; t.resultado = "Campeão"; card.titulos.push({ tipo: t.tipo, nome: t.nome }); card.destaques.push(`${acao.ok}: a ${t.nome} é do seu país`); }

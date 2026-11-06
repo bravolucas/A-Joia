@@ -55,10 +55,13 @@ export default function DesafioTemporada({ c, resultado, onEscolher, onContinuar
   const nivel = resultado ? Math.round(resultado.ovrAntes + (resultado.ovrDepois - resultado.ovrAntes) * (1 - (1 - contagem) ** 3)) : 0;
   useEffect(() => {
     if (!resultado) return;
-    raiz.current?.focus({ preventScroll: true });
-    raiz.current?.scrollIntoView({ block: 'start' });
+    const el=raiz.current,cabecalho=el?.closest('.rp')?.querySelector(':scope > header');
+    const ajustar=()=>el?.style.setProperty('--altura-cabecalho',`${cabecalho?.getBoundingClientRect().height||0}px`);
+    ajustar();const obs=new ResizeObserver(ajustar);if(cabecalho)obs.observe(cabecalho);
+    el?.focus({preventScroll:true});window.scrollTo({top:0,behavior:'instant'});
+    return()=>obs.disconnect();
   }, [resultado]);
-  return <section ref={raiz} tabIndex={-1} className="dt" aria-label={`Desafio da temporada ${c.ano}`}>
+  return <section ref={raiz} tabIndex={-1} className={`dt ${resultado?'dt-em-resultado':''}`} aria-label={`Desafio da temporada ${c.ano}`}>
     <header className="dt-header"><span>DESAFIO DA TEMPORADA</span><span>{resultado ? (animando ? 'Revelando…' : 'Concluído') : `Nível atual ${ovrDe(c)}`}</span></header>
     {resultado ? <>
       <div className="dt-resultado">
@@ -70,7 +73,7 @@ export default function DesafioTemporada({ c, resultado, onEscolher, onContinuar
           {resultado.efeitos?.length > 0 && <ul className="dt-efeitos">{resultado.efeitos.filter(e => !/OVR$/.test(e.txt)).map(e => <li key={e.txt}>{e.txt}</li>)}</ul>}
         </div>
       </div>
-      <footer className="dt-footer"><button onClick={animando ? revelar : onContinuar}>{animando ? 'Revelar resultado' : 'Continuar para o treino'} <span aria-hidden="true">→</span></button><p>{animando ? 'Você pode acompanhar a animação ou revelar agora.' : 'O resultado já foi salvo. Agora prepare a temporada.'}</p></footer>
+      <footer className="dt-footer"><button onClick={animando ? revelar : onContinuar}>{animando ? 'Pular animação' : 'Continuar para o treino'} <span aria-hidden="true">→</span></button><p>{animando ? 'Você pode acompanhar a animação ou revelar agora.' : 'O resultado já foi salvo. Agora prepare a temporada.'}</p></footer>
     </> : <>
       <h2>Como você quer evoluir?</h2><p className="dt-intro">Escolha uma abordagem. Compare as chances de ganhar ou perder pontos de nível.</p>
       <div className="dt-opcoes">{desafiosDaTemporada(c).map((o,ordem) => <button key={o.id} onClick={() => onEscolher(o.id)} aria-label={`Escolher ${o.nome}`}>

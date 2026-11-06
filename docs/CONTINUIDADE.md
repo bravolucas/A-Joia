@@ -1,3 +1,11 @@
+## Escolhas e consequências na mesma tela
+
+Resultado do desafio de OVR agora ocupa a altura disponível após o cabeçalho, medido por ResizeObserver. Trajetória, loja e contexto repetido saem dessa etapa; animação, OVR, efeitos e ação ficam no mesmo painel. “Pular animação” revela o resultado já salvo, no mesmo botão que depois vira “Continuar para o treino”; não sorteia novamente. Em alturas extremas, conteúdo central pode rolar, mas o rodapé permanece acessível.
+
+FluxoResultados.css concentra ajustes responsivos de consequências, entrevistas, criação, primeiro contrato, apresentação de transferência e celebração do treinador. Minigames novos trocam os controles por Continuar no mesmo espaço; pênalti, defesa, falta e passe permitem antecipar o avanço automático com Continuar, preservando animações e os timers existentes. Cenários compactos em telas baixas. Janelas de sorteio mostram o botão de pular como ativo.
+
+Build e 32 arquivos de testes de lógica passaram. Navegador: 24 casos principais + 29 casos extras + 6 verificações de celebração em 640 px passaram. Testes de geometria exigem botões dentro do viewport: OVR em 320×568, 390/1366×640; entrevistas em 320/1366×568; oito minigames em 390/1366×640 e celebrações em 390/1366×640. Os primeiros checks detectaram overflow nos minigames, corrigido antes de publicar. Logs /tmp/fluxo-*. Documentos não rastreados do usuário preservados.
+
 ## Pré-temporada remodelada — 60 treinos
 
 Catálogo ampliado de 24 para 60 (36 novos), seis famílias, elegibilidade por posição/idade nas novas cartas e três objetivos distintos por oferta. Corrigido sorteio antigo que relaxava bloqueio de repetição após 20 tentativas. Histórico das duas temporadas anteriores excluído; trio escolhido e oferecido mantido ao fechar. Sorteio estável por código/ano/rodada, com uma troca gratuita por temporada, persistida no save, sem ganho de raridade garantido ou alteração de atributos ao trocar. Compatibilidade com IDs e treino já selecionado nos saves antigos.

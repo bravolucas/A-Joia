@@ -861,7 +861,7 @@ function TelaPenalti({ c, momento, onFim, goleiro = false }) {
     : (res.resultado === "gol" ? "GOOOL!" : res.resultado === "defesa" ? "DEFENDEU!" : "PRA FORA!");
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
+    <div className="mini-fluxo max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
       <CabecalhoMomento c={c} momento={momento} />
       <div className="rp-painel vf-cena p-3 overflow-hidden" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
         <div className="relative">
@@ -882,7 +882,7 @@ function TelaPenalti({ c, momento, onFim, goleiro = false }) {
         {!res && (goleiro
           ? <p className="text-[17px] text-[#C9D3CE]">Toque no canto para onde vai pular. Defesa <span className="font-stat">{c.attrs.defesa}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "defesa") * 100)}%</span></p>
           : <p className="text-[17px] text-[#C9D3CE]">Toque no canto onde vai bater. Finalização <span className="font-stat">{c.attrs.finalizacao}</span> · chance estimada <span className="font-stat">{Math.round(chancePenalti(c) * 100)}%</span></p>)}
-        {res && <PlacarMomento ok={res.ok} texto={textoRes} />}
+        {res && <><PlacarMomento ok={res.ok} texto={textoRes} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.ok)}>Continuar →</button></>}
       </div>
     </div>
   );
@@ -904,14 +904,14 @@ function TelaFalta({ c, momento, onFim }) {
     return () => clearTimeout(t);
   }, [res, onFim]);
   return (
-    <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
+    <div className="mini-fluxo max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
       <CabecalhoMomento c={c} momento={momento} />
       <div className="rp-painel vf-cena p-3 overflow-hidden flex justify-center" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
         <FreeKickMini onPick={bater} resultado={res} />
       </div>
       <div className="text-center min-h-[64px]">
         {!res && <p className="text-[17px] text-[#C9D3CE]">Escolha onde colocar a bola. Finalização <span className="font-stat">{c.attrs.finalizacao}</span> · drible <span className="font-stat">{c.attrs.drible}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "falta") * 100)}%</span></p>}
-        {res && <PlacarMomento ok={res.gol} texto={res.gol ? "GOLAÇO DE FALTA!" : res.tipo === "Barreira" ? "NA BARREIRA!" : res.tipo === "Trave" ? "NA TRAVE!" : res.tipo === "Defesa" ? "DEFENDEU!" : "PRA FORA!"} />}
+        {res && <><PlacarMomento ok={res.gol} texto={res.gol ? "GOLAÇO DE FALTA!" : res.tipo === "Barreira" ? "NA BARREIRA!" : res.tipo === "Trave" ? "NA TRAVE!" : res.tipo === "Defesa" ? "DEFENDEU!" : "PRA FORA!"} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.gol)}>Continuar →</button></>}
       </div>
     </div>
   );
@@ -926,14 +926,14 @@ function TelaPasse({ c, momento, onFim }) {
     return () => clearTimeout(t);
   }, [res, onFim]);
   return (
-    <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
+    <div className="mini-fluxo max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
       <CabecalhoMomento c={c} momento={momento} />
       <div className="rp-painel vf-cena p-3 overflow-hidden flex justify-center" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
         <PasseMini atributoPasse={c.attrs.passe + bonus + 6} onResultado={(r) => setRes(r)} />
       </div>
       <div className="text-center min-h-[64px]">
         {!res && <p className="text-[17px] text-[#C9D3CE]">Você controla o jogador com a bola. Toque num companheiro de verde, longe dos adversários de azul. Passe <span className="font-stat">{c.attrs.passe}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "passe") * 100)}%</span></p>}
-        {res && <PlacarMomento ok={res.gol} texto={res.gol ? "ASSISTÊNCIA! GOL!" : "INTERCEPTADO!"} />}
+        {res && <><PlacarMomento ok={res.gol} texto={res.gol ? "ASSISTÊNCIA! GOL!" : "INTERCEPTADO!"} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.gol)}>Continuar →</button></>}
       </div>
     </div>
   );
@@ -1470,8 +1470,17 @@ function Gaveta({ titulo, onFechar, children }) {
 /* ---------- traço de carreira ---------- */
 /* ---------- coletiva de imprensa ---------- */
 function TelaColetiva({ c, coletiva, resposta, onResponder, onSeguir }) {
+  const raiz = useRef(null);
+  useEffect(() => {
+    if (!resposta) return;
+    const el = raiz.current, header = el?.closest('.rp')?.querySelector(':scope > header');
+    const ajustar = () => el?.style.setProperty('--altura-cabecalho', `${header?.getBoundingClientRect().height || 100}px`);
+    ajustar(); const observer = new ResizeObserver(ajustar); if (header) observer.observe(header);
+    window.scrollTo({top:0,behavior:'instant'});
+    return () => observer.disconnect();
+  }, [resposta]);
   return (
-    <div className="max-w-xl mx-auto px-4 py-5 flex flex-col gap-4 rp-entra">
+    <div ref={raiz} className={`fluxo-coletiva max-w-xl mx-auto px-4 py-5 flex flex-col gap-4 rp-entra ${resposta?'fluxo-coletiva-resultado':''}`}>
       <div className="rp-painel overflow-hidden">
         <div aria-hidden="true" className="h-36 -mb-16" style={{ background: `linear-gradient(180deg, rgba(19,26,23,0) 0%, rgba(19,26,23,.75) 60%, rgba(19,26,23,1) 100%), url(${ARTE.coletiva}) center 45%/cover` }} />
         <div className="relative px-5 pb-4">
@@ -1536,7 +1545,7 @@ function CartaoEvento({ jogador, evento, resultado, efeitos, onEscolher, onPedir
   const opcoesVisiveis=evento.id==='emprestimo'?evento.opcoes.filter(o=>!o.oferta||(o.oferta.emprestimoAnos??1)===prazoEmprestimo):evento.opcoes;
   if(evento.id==='base'&&!resultado)return <PrimeiroClube evento={evento} jogador={jogador} onEscolher={onEscolher}/>;
   return (
-    <div className="rp-painel overflow-hidden rp-entra">
+    <div className={`rp-evento rp-painel overflow-hidden rp-entra ${resultado?'rp-evento-resultado':''}`}>
       <div className="relative px-4 pt-3.5 pb-2.5 flex items-start gap-3" style={{ background: ARTE_EVENTO[evento.id]
         ? `linear-gradient(90deg, rgba(14,21,18,.97) 0%, rgba(14,21,18,.88) 50%, rgba(14,21,18,.55) 100%), url(${ARTE_EVENTO[evento.id]}) right center/cover`
         : evento.vida ? "linear-gradient(135deg, rgba(140,110,230,.18), transparent 70%)" : "linear-gradient(135deg, rgba(18,168,118,.14), transparent 70%)" }}>
@@ -2474,7 +2483,7 @@ function TelaCheia({ rotulo, cor = "#3F3F46", children, botao = "Continuar", onF
       <div className="janela-estrutura max-w-md mx-auto px-4 pt-6 pb-5 flex flex-col">
         <header className="janela-contexto">{rotulo}</header>
         <div className={`janela-conteudo flex-1 flex flex-col gap-3 ${centro ? "justify-center" : ""}`}>{children}</div>
-        <button onClick={onFechar} className={`cp-pill cp-branca text-[16px] w-full mt-5 shrink-0 ${bloqueado ? "opacity-60" : ""}`}>{botao}</button>
+        <button onClick={onFechar} className={`cp-pill cp-branca text-[16px] w-full mt-5 shrink-0 ${bloqueado ? "cp-pular" : ""}`}>{botao}</button>
       </div>
     </div>,
     document.body,
@@ -2915,7 +2924,7 @@ export function ApresentacaoGrande({ clube, nome, numero, posicao, idade, deOnde
   useEffect(() => { vibrar([30, 40, 30]); torcida(3.2, 0.12); setTimeout(() => tocar("vidro", 0.4), 400); setTimeout(() => tocar("vidro", 0.35), 1300); const t = setTimeout(() => setPronto(true), 2000); return () => clearTimeout(t); }, []);
   const fonteNome = sobrenome.length > 9 ? 12 : sobrenome.length > 6 ? 15 : 18;
   return createPortal(
-    <div className="cp fixed inset-0 z-[72] overflow-y-auto" role="dialog" aria-modal="true" aria-label={`Apresentação no ${clube?.nome}`} style={{ background: "#05070A" }}>
+    <div className="cp apresentacao-grande fixed inset-0 z-[72] overflow-y-auto" role="dialog" aria-modal="true" aria-label={`Apresentação no ${clube?.nome}`} style={{ background: "#05070A" }}>
       <div className="min-h-full max-w-md mx-auto flex flex-col">
         <div className="relative h-[460px] overflow-hidden shrink-0">
           {/* fundo */}

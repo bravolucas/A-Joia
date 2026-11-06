@@ -11,7 +11,7 @@ async function abrir(page,mini){
  await expect(page.getByText('A decisão está nos seus pés',{exact:true})).toBeVisible();
 }
 for(const width of [390,1366])for(const mini of ['penalti','defesa','falta','passe'])test(`${mini}: imagem, controles e resultado em ${width}px`,async({page})=>{
- await page.setViewportSize({width,height:900});const erros=[];const recursos=[];
+ await page.setViewportSize({width,height:640});const erros=[];const recursos=[];
  page.on('pageerror',e=>erros.push(e.message));page.on('response',r=>{if(r.url().includes('/assets/')&&r.status()>=400)recursos.push(r.url())});
  await abrir(page,mini);
  await expect(page.locator('.vf-matchbar')).toBeVisible();
@@ -30,6 +30,7 @@ for(const width of [390,1366])for(const mini of ['penalti','defesa','falta','pas
   const b=page.getByRole('button',{name:/Passar para companheiro/}).first();expect((await b.boundingBox()).width).toBeGreaterThanOrEqual(44);await page.getByRole('button',{name:'Passar para companheiro 1',exact:true}).click();
   await expect(page.getByText(/ASSISTÊNCIA! GOL!|INTERCEPTADO!/)).toBeVisible();
  }
+ const continuar=page.getByRole('button',{name:'Continuar →',exact:true});await expect(continuar).toBeVisible();const box=await continuar.boundingBox();expect(box.y+box.height).toBeLessThanOrEqual(page.viewportSize().height);
  expect(erros).toEqual([]);expect(recursos).toEqual([]);
 });
 

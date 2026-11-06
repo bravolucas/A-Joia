@@ -95,7 +95,7 @@ function criarSave(cenario) {
 for (const width of [390, 1366]) {
   for (const cenario of cenarios) {
     test(`pop-up de ${cenario.id} no treinador em ${width}px`, async ({ page }) => {
-      await page.setViewportSize({ width, height: 844 });
+      await page.setViewportSize({ width, height: 640 });
       const erros = [];
       page.on('pageerror', erro => erros.push(erro.message));
       await page.goto('http://127.0.0.1:4173/A-Joia/');
@@ -108,6 +108,9 @@ for (const width of [390, 1366]) {
       await expect(page.getByRole('heading', { name: cenario.titulo })).toBeVisible();
       if (cenario.id === 'titulo') await expect(page.locator('[role="dialog"] img[src*="copa-do-brasil"]')).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
+      const seguir = page.getByRole('dialog', {name:cenario.dialogo}).getByRole('button',{name:/Continuar carreira|Próximo troféu/});
+      const limites = await seguir.boundingBox();
+      expect(limites.y + limites.height).toBeLessThanOrEqual(640);
       expect(erros).toEqual([]);
       await page.screenshot({ path: `test-results/treinador-${cenario.id}-${width}.png`, fullPage: true });
     });

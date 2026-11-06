@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { criarJogador, desafiosDaTemporada } from '../rapido.js';
+import { criarJogador, desafiosDaTemporada, jogarTemporada, gerarColetiva } from '../rapido.js';
 
-for (const width of [390, 1366]) test(`desafio e resultado no mesmo painel, com retomada em ${width}px`, async ({ page }) => {
-  await page.setViewportSize({ width, height: 640 });
+for (const width of [320, 390, 1366]) test(`desafio e resultado no mesmo painel, com retomada em ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: width === 320 ? 568 : 640 });
   const c = criarJogador({ nome: 'Desafio Visual', nac: 'BRA', posicao: 'ATA', personalidade: 'equilibrado', origem: 'base', pe: 'destro', numero: 10, ritmo: 'normal', codigo: 'DESAFIO-PAINEL' });
   c.flags.baseEscolhida = true; c.clubeNome = 'Santos'; c.ano = 2027;
   await page.goto('http://127.0.0.1:4173/A-Joia/');
@@ -12,6 +12,12 @@ for (const width of [390, 1366]) test(`desafio e resultado no mesmo painel, com 
   await page.screenshot({path:`/tmp/escolhas-novas-${width}.png`,fullPage:true});
   await desafio.getByRole('button', { name: `Escolher ${desafiosDaTemporada(c)[0].nome}`, exact: true }).click();
   await expect(desafio.getByRole('status')).toBeVisible();
+  const acao = desafio.locator('.dt-footer button');
+  await expect(acao).toBeVisible();
+  const limites = await acao.boundingBox();
+  expect(limites.y).toBeGreaterThanOrEqual(0);
+  expect(limites.y + limites.height).toBeLessThanOrEqual(page.viewportSize().height);
+
   await expect(page.getByRole('dialog')).toHaveCount(0);
   const salvo = await page.evaluate(() => JSON.parse(localStorage.getItem('ajoia_rapido_v1')));
   expect(salvo.c.desafios).toHaveLength(1);
@@ -58,11 +64,23 @@ test('animação revela o resultado salvo e não reinicia após recarga', async 
 
 test('revelar imediatamente mantém o mesmo resultado e aguarda continuar', async ({ page }) => {
   const salvo = await abrirAnimacao(page);
-  await page.getByRole('button', { name: 'Revelar resultado', exact: true }).click();
+  await page.getByRole('button', { name: 'Pular animação', exact: true }).click();
   await expect(page.getByRole('status')).toHaveText('Resultado confirmado');
   await expect(page.getByRole('button', { name: 'Continuar para o treino' })).toBeVisible();
   await expect(page.getByTestId('desafio-ovr-atual')).toHaveText(String(salvo.desafioResultado.ovrDepois));
   const depois = await page.evaluate(() => JSON.parse(localStorage.getItem('ajoia_rapido_v1')));
   expect(depois.c.desafios).toEqual(salvo.c.desafios);
   expect(depois.c.attrs).toEqual(salvo.c.attrs);
+});
+
+for (const width of [320, 1366]) test(`entrevista mantém consequência e continuar visíveis em ${width}px`, async ({page}) => {
+  await page.setViewportSize({width,height:568});
+  const c = criarJogador({nome:'Entrevista Visual',nac:'BRA',posicao:'ATA',personalidade:'ascensao',origem:'base',pe:'destro',numero:10,ritmo:'normal',codigo:'ENTREVISTA'});
+  const {card}=jogarTemporada(c), coletiva=gerarColetiva(c,card);
+  await page.goto('http://127.0.0.1:4173/A-Joia/');
+  await page.evaluate(s=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify(s)),{v:1,etapa:'coletiva',c,card,ultimo:card,coletiva});
+  await page.reload();await page.getByRole('button',{name:/Continuar · Entrevista Visual/}).click();
+  await page.locator('.fluxo-coletiva .rp-opcao').last().click();
+  const botao=page.locator('.fluxo-coletiva').getByRole('button',{name:'Continuar',exact:true});
+  await expect(botao).toBeVisible();const box=await botao.boundingBox();expect(box.y).toBeGreaterThanOrEqual(0);expect(box.y+box.height).toBeLessThanOrEqual(568);
 });

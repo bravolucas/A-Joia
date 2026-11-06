@@ -1,4 +1,6 @@
-import {prepararElencoCopa,forcaElencoCopa,registrarJogoElenco} from './elencoSelecao.js';
+import {atualizarRecordesUniverso} from './recordesUniverso.js';
+import {registrarCampanhaContinental,registrarFinalContinental} from './torneioContinental.js';
+import {prepararElencoCopa,prepararElencoSelecao,forcaElencoCopa,registrarJogoElenco} from './elencoSelecao.js';
 import {iniciarJornada,memorizar,registrarEscolhaJornada,registrarTransferenciaJornada,prepararJornada,fecharJornada,pesoProjeto,projetoOferta,legadoNarrativo} from './jornadaJogador.js';
 import {penalidadePosicao,posicoesCompativeis,mudarPosicao,sugestaoVeterano} from './posicoesCarreira.js';
 import {NOVOS_TREINOS,grupoTreino} from './catalogoTreinos.js';
@@ -1008,20 +1010,21 @@ function simularTorneioSelecao(c, ovr, { nome, tipo }) {
   if (c.idade < 18 || c.flags.semSelecao) return null;
   const convocado = ovr >= corte ? chance(0.92) : ovr >= corte - 4 ? chance(0.35) : false;
   if (!convocado) return { ano: c.ano, nome, tipo, convocado: false, resultado: "Fora da convocação" };
+  const elenco=prepararElencoSelecao(c,c.ano,tipo,nome),forca=fs+forcaElencoCopa(elenco,fs);
   const titular = ovr >= fs - 2;
   const bonus = titular ? (ovr - fs) * 0.01 + 0.03 + somaTraco(c, "mataMata") : 0;
   const fases = ["Fase de grupos", "Oitavas", "Quartas", "Semifinal", "Final"];
-  const out = { ano: c.ano, nome, tipo, convocado: true, titular, fase: 0, resultado: "Eliminado na fase de grupos", gols: 0 };
+  const out = { ano: c.ano, nome, tipo, convocado: true, titular, fase: 0, resultado: "Eliminado na fase de grupos", gols: 0,elenco };
   const lance = titular ? posicaoDe(c.posicao).golBase * 0.9 : posicaoDe(c.posicao).golBase * 0.3;
   const baseGrupo = tipo === "copaMundo" ? 75 : 70;
   const baseMata = tipo === "copaMundo" ? 82 : 78;
   out.gols += poisson(lance * 3);
-  if (!chance(clampR(0.55 + (fs - baseGrupo) * 0.025 + bonus, 0.2, 0.95))) return out;
+  if (!chance(clampR(0.55 + (forca - baseGrupo) * 0.025 + bonus, 0.2, 0.95))) return out;
   for (let f = 1; f <= 3; f++) {
     out.gols += poisson(lance);
-    if (!chance(mataMata(fs, baseMata, bonus))) { out.fase = f; out.resultado = f === 3 ? "Eliminado na semifinal" : `Eliminado nas ${fases[f].toLowerCase()}`; return out; }
+    if (!chance(mataMata(forca, baseMata, bonus))) { out.fase = f; out.resultado = f === 3 ? "Eliminado na semifinal" : `Eliminado nas ${fases[f].toLowerCase()}`; return out; }
   }
-  out.fase = 4; out.final = true; out.chanceFinal = mataMata(fs, baseMata, bonus); out.resultado = "Final";
+  out.fase = 4; out.final = true; out.chanceFinal = mataMata(forca, baseMata, bonus); out.resultado = "Final";
   return out;
 }
 
@@ -1403,10 +1406,11 @@ function jogarTemporadaBase(c0) {
         else if (chance(t.chanceFinal)) { t.campeao = true; t.resultado = "Campeão"; card.titulos.push({ tipo: t.tipo, nome: t.nome }); }
         else t.resultado = "Vice-campeão";
       }
+      registrarCampanhaContinental(c,t);
     }
   }
 
-  momentos.forEach((m, i) => { m.mini = miniParaMomento(c,m,momentos.slice(0,i).map(x=>x.mini)); Object.assign(m,contextoMomento(c,m)); m.texto = textoDoMomento(m.mini, m, c); m.lance={minuto:84+hashTexto(c.codigo+':'+c.ano+':'+i)%7,gp:0,gc:0,simulado:true,disputa:['penalti','defesa'].includes(m.mini)}; m.ordem = i + 1; m.total = momentos.length; });
+  momentos.forEach((m, i) => { if(m.tipo==='selecao'&&card.selecao?.finalAdversario)m.adversario=card.selecao.finalAdversario; m.mini = miniParaMomento(c,m,momentos.slice(0,i).map(x=>x.mini)); Object.assign(m,contextoMomento(c,m)); m.texto = textoDoMomento(m.mini, m, c); m.lance={minuto:84+hashTexto(c.codigo+':'+c.ano+':'+i)%7,gp:0,gc:0,simulado:true,disputa:['penalti','defesa'].includes(m.mini)}; m.ordem = i + 1; m.total = momentos.length; });
   card.momentos = [];
   card.pendente = momentos[0] || null;
   card.filaMomentos = momentos.slice(1);
@@ -1598,6 +1602,7 @@ export function aplicarMomento(card0, acertou) {
       registrarJogoElenco(k.elenco,k.jogos.at(-1),{titular:k.titular,ano:k.ano});
       finalizarCopa(card, acertou);
     }
+    if(!card.copa)registrarFinalContinental(t,m,acertou);
     if (acertou) { t.campeao = true; t.resultado = "Campeão"; card.titulos.push({ tipo: t.tipo, nome: t.nome }); card.destaques.push(`${acao.ok}: a ${t.nome} é do seu país`); }
     else { t.resultado = "Vice-campeão"; card.destaques.push(`${acao.erro} na final da ${t.nome}`); }
   }
@@ -1667,6 +1672,7 @@ function fecharTemporadaBase(c0, card0) {
 
   // mundo real anda junto e a Bola de Ouro sai do ranking contra ele
   c.mundo = simularTemporadaMundo(c.mundo);
+  atualizarRecordesUniverso(c,card,antes.mundo);
   const PESO_BOLA = { copaMundo: 3, continental: 2, continentalSelecao: 2, mundial: 1, segunda: 0 };
   const pesoTit = card.titulos.reduce((s, t) => s + (PESO_BOLA[t.tipo] ?? 1), 0);
   const meuCard = { clube: card.clube, posicao: c.posicao, ovr: card.ovr, gols: card.gols, assist: card.assist, nota: card.nota || 6, ligaMult: ligaDe(card.ligaId).mult };
@@ -2367,9 +2373,9 @@ export const EVENTOS = [
     texto: () => "O capitão se aposentou e o técnico quer você no lugar dele.",
     opcoes: () => [
       { id: "aceitar", label: "Aceitar a braçadeira", dica: "Torcida sobe · mais pressão nas suas notas",
-        efeito: (c) => { c.torcida[c.clubeNome] = clampR((c.torcida[c.clubeNome] ?? 30) + 10, 0, 100); c.mod.notaBonus = (c.mod.notaBonus || 0) + (chance(0.7) ? 0.15 : -0.2); return r("Capitão. A faixa pesa — e você gosta disso."); } },
+        efeito: (c) => { iniciarJornada(c).capitao={clube:c.clubeNome,desde:c.ano};memorizar(c,"capitao","A braçadeira pela trajetória","Você aceitou liderar o clube que já conhece sua história.",{id:`capitao:${c.clubeNome}`}); c.torcida[c.clubeNome] = clampR((c.torcida[c.clubeNome] ?? 30) + 10, 0, 100); c.mod.notaBonus = (c.mod.notaBonus || 0) + (chance(0.7) ? 0.15 : -0.2); return r("Capitão. A faixa pesa — e você gosta disso."); } },
       { id: "recusar", label: "Prefiro só jogar", dica: "Sem mudanças",
-        efeito: () => r("Você agradeceu e indicou um companheiro.") },
+        efeito: (c) => { iniciarJornada(c).recusaCapitania={clube:c.clubeNome,ano:c.ano};return r("Você agradeceu e indicou um companheiro."); } },
     ],
   },
   {
@@ -3785,6 +3791,7 @@ export function carregarRapido() {
     s.c.titulos = { liga: 0, copa: 0, continental: 0, mundial: 0, copaMundo: 0, continentalSelecao: 0, bolaOuro: 0, botaOuro: 0, segunda: 0, ...(s.c.titulos || {}) };
     if (!s.c.mundo?.jogadores) s.c.mundo = mundoCompacto();
     iniciarJornada(s.c);
+    if(s.etapa==='festa'&&s.card&&(s.c.temporadas||[]).some(t=>t.ano===s.card.ano))s.etapa='fechamento';
     s.c.ligas = s.c.ligas || {};
     sincronizarLigas(s.c);
     return s;

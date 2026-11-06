@@ -1,3 +1,4 @@
+import FechamentoTemporada from './FechamentoTemporada.jsx';
 import {FasesTemporada,PainelJornada,EcosDaTemporada,ProjetoOferta,CenasClube,AlbumJornada,PrimeiraSelecao,CelebracaoLance,ReacaoAntigoClube,ConsultaElencoCopa} from './JornadaUI.jsx';
 import {mudarPosicao,reinventarVeterano} from './posicoesCarreira.js';
 import {ativarAssinatura,definirPreferenciaMercado,legadoNarrativo,projetoOferta,cenaDespedida,reagirReencontro,celebracaoMomento} from './jornadaJogador.js';
@@ -992,8 +993,7 @@ function SlideBolaDeOuro({ c, card }) {
   );
 }
 
-/* Taças grandes ganham festa em tela cheia; as outras voam até o contador no resumo */
-// festa em tela cheia só para Copa do Mundo e Bola de Ouro; o resto vira o pop-up da taça
+/* Compatibilidade de festas legadas; novas temporadas usam FechamentoTemporada para todas as conquistas. */
 const TIPOS_GRANDES = ["copaMundo", "bolaOuro"];
 export const temFestaGrande = (card) => card.titulos.some((t) => TIPOS_GRANDES.includes(t.tipo));
 function TelaFesta({ c, card, onFim }) {
@@ -2631,100 +2631,9 @@ export function PopupResultado({ info, onFechar }) {
 }
 
 /* Fim de temporada: tudo o que aconteceu numa tela só */
-function PopupTemporada({ c, card, onFechar }) {
-  useEffect(() => {
-    apito(3);
-    if (card.titulos.length) { setTimeout(() => { torcida(2.8, 0.2); tocar("conquista", 0.5); }, 600); }
-    if (card.titulos.length) setTimeout(() => festejar(card.titulos.length > 1 ? "chuva" : "titulo", [clubeDe(card.clube)?.cor || "#EBC557", "#EBC557", "#FFFFFF"]), 600);
-    else if (card.acesso) setTimeout(() => festejar("titulo", ["#22C55E", "#FFFFFF", "#EBC557"]), 500);
-  }, []);
-  const delta = card.ovrDepois - (card.ovrAntes ?? card.ovr);
-  const corNota = card.nota >= 7.5 ? "#4ADE80" : card.nota >= 6.6 ? "#FACC15" : "#F87171";
-  const clube = clubeDe(card.clube);
-  const contRes = card.continental ? (card.titulos.some((t) => t.tipo === "continental") ? "Campeão" : card.continental.faseNome) : null;
-  const vagas = vagasDaLiga(card.ligaId);
-  const ligaRes = card.posLiga === 1 ? "Campeão" : `${card.posLiga}º de ${card.totalLiga}`;
-  const linhas = [
-    { tipo: ehSegundaDivisao(card.ligaId) ? "segunda" : "liga", nome: card.ligaNome, res: ligaRes, ouro: card.posLiga === 1, extra: card.acesso || (vagas && ehSegundaDivisao(card.ligaId) && card.posLiga <= vagas) ? "acesso" : card.rebaixado ? "rebaixado" : null },
-    card.copaNac && { tipo: "copa", nome: card.copaNac.nome, res: card.copaNac.fase, ouro: card.copaNac.fase === "Campeão" },
-    card.continental && { tipo: "continental", nome: card.continental.nome, res: contRes, ouro: contRes === "Campeão" },
-    card.mundialRes && { tipo: "mundial", nome: "Mundial de Clubes", res: card.mundialRes, ouro: card.mundialRes === "Campeão" },
-    card.selecao && { band: c.nac, nome: card.selecao.nome, res: card.selecao.convocado ? (card.selecao.campeao ? "Campeão" : card.selecao.resultado) : "Fora da lista", ouro: !!card.selecao.campeao },
-  ].filter(Boolean);
-  const idolo = (card.marcos || []).find((m) => m.id?.startsWith("idolo:"));
-  const faixa = card.acesso ? { txt: `ACESSO! O ${card.clube} sobe em ${card.ano + 1}`, cor: "#22C55E" }
-    : card.rebaixado ? { txt: `Rebaixado: o ${card.clube} cai em ${card.ano + 1}`, cor: "#EF4444" }
-    : idolo ? { txt: `Ídolo do ${card.clube}!`, cor: "#FACC15" } : null;
-  const n = (v, cls) => <span className={cls}>{v}</span>;
-  return (
-    <TelaCheia rotulo={`Fim da temporada ${card.ano}`} cor={card.titulos.length ? "#CA8A04" : clube?.cor || "#3F3F46"} onFechar={onFechar}>
-      <div className="flex items-center gap-3 pt-2">
-        <span className="relative shrink-0"><AvatarJogador clube={clube} size={64} numero={numeroDe(c)} /><span className="absolute -right-1 bottom-0"><ClubDot club={clube} size={26} /></span></span>
-        <div className="min-w-0 flex-1">
-          <div className="text-[12px] font-bold uppercase tracking-[0.2em] text-[#A1A1AA]">Fim da temporada {card.ano}</div>
-          <div className="text-[24px] font-extrabold text-white leading-tight truncate">{card.clube}{card.emprestado ? " (empr.)" : ""}</div>
-          <div className="text-[14px] text-[#A1A1AA] truncate">{card.idade} anos · {card.status}{card.lesao ? ` · 🩹 ${card.lesao}` : ""}</div>
-        </div>
-      </div>
-      {faixa && <div className="cp-pop rounded-2xl px-4 py-2.5 text-center text-[16px] font-extrabold" style={{ color: faixa.cor, background: `${faixa.cor}1A`, border: `1px solid ${faixa.cor}66` }}>{faixa.txt}</div>}
-      {/* nota e OVR */}
-      <div className="grid grid-cols-[0.8fr_1.2fr] gap-2">
-        <div className="cp-card p-3 flex flex-col items-center justify-center">
-          <div className="text-[11px] font-bold tracking-[0.18em] text-[#A1A1AA]">NOTA</div>
-          <div className="cp-pop text-[46px] font-black leading-none mt-1" style={{ color: corNota, animationDelay: ".15s" }}>{card.nota ? card.nota.toFixed(1) : "—"}</div>
-        </div>
-        <div className="cp-card p-3 flex items-center justify-center"><OvrAntesDepois de={card.ovrAntes ?? card.ovr} para={card.ovrDepois} atraso={450} /></div>
-      </div>
-      {/* números do jogador */}
-      <div className="grid grid-cols-3 gap-2">
-        {[[<IcoJogos s={20} key="j" />, card.jogos, "Jogos"], [<IcoGol s={20} key="g" />, card.gols, "Gols"], [<IcoAssist s={20} key="a" />, card.assist, "Assist."]].map(([ico, v, l], i) => (
-          <div key={l} className="cp-card py-3 flex flex-col items-center cp-surge" style={{ animationDelay: `${0.1 + i * 0.08}s` }}>
-            <span className="text-[#A1A1AA]">{ico}</span>
-            {n(v, "text-[30px] font-black text-white leading-none mt-1.5")}
-            <span className="text-[12px] font-semibold text-[#A1A1AA] mt-1">{l}</span>
-          </div>
-        ))}
-      </div>
-      {/* campanha do time */}
-      <div className="cp-card px-3.5 py-2">
-        <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#A1A1AA] py-1">Campanha</div>
-        {linhas.map((x, i) => (
-          <div key={i} className="flex items-center gap-3 py-2 border-t border-white/[.06] first:border-0 cp-surge" style={{ animationDelay: `${0.25 + i * 0.08}s` }}>
-            <span className="w-7 flex justify-center shrink-0">{x.band ? <Bandeira nac={x.band} size={24} /> : <TacaCompeticao tipo={x.tipo} nome={x.nome} size={24} />}</span>
-            <span className="flex-1 min-w-0 text-[15px] font-semibold text-[#E4E4E7] truncate">{x.nome}</span>
-            {x.extra && <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded-md text-white shrink-0" style={{ background: x.extra === "acesso" ? "#16A34A" : "#DC2626" }}>{x.extra}</span>}
-            <span className={`text-[14px] font-bold px-2.5 py-1 rounded-full shrink-0 ${x.ouro ? "text-[#1A1405]" : "text-[#E4E4E7] bg-[#27272A]"}`} style={x.ouro ? { background: "linear-gradient(90deg,#EAB308,#FDE047)" } : undefined}>{x.ouro ? "🏆 Campeão" : x.res}</span>
-          </div>
-        ))}
-      </div>
-      {/* taças */}
-      {card.titulos.length > 0 && (
-        <div className="rounded-[20px] p-3 border border-[#CA8A04]/50" style={{ background: "linear-gradient(160deg, rgba(234,179,8,.16), #161618 65%)" }}>
-          <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#FACC15] mb-2">{card.titulos.length > 1 ? `${card.titulos.length} conquistas` : "Conquista"}</div>
-          <div className="flex flex-wrap justify-center gap-y-3">
-            {card.titulos.map((t, i) => (
-              <div key={i} className="w-1/3 px-1 flex flex-col items-center text-center rp-sobe" style={{ animationDelay: `${0.4 + i * 0.15}s` }}>
-                <IconeTitulo tipo={t.tipo} nome={t.nome} size={56} />
-                <div className="text-[12px] font-bold text-[#FDE68A] leading-tight mt-1 line-clamp-2">{t.nome}</div>
-                <div className="text-[10px] text-[#A1A1AA]">{t.n > 1 ? `${t.n}º da carreira` : "1º da carreira"}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      {/* torcida, valor e prêmios */}
-      <div className="grid grid-cols-2 gap-2">
-        <div className="cp-card px-3 py-2.5"><div className="text-[11px] font-bold tracking-[0.15em] text-[#A1A1AA]">TORCIDA</div><div className="text-[20px] font-extrabold text-white leading-tight">{card.torcida}<Delta v={card.torcidaDelta} /></div></div>
-        <div className="cp-card px-3 py-2.5 min-w-0"><div className="text-[11px] font-bold tracking-[0.15em] text-[#A1A1AA]">VALOR</div><div className="text-[20px] font-extrabold text-white leading-tight truncate">{formatarValor(card.valor).replace(/\s/g, "")}{card.valorAntes != null && card.valor !== card.valorAntes && <span className="text-[13px]"><Delta v={card.valor - card.valorAntes} fmt={(x) => formatarValor(x).replace(/€\s?/, "").replace(/\s/g, "")} /></span>}</div></div>
-      </div>
-      {(card.bola?.pos <= 10 || delta !== 0) && (
-        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[13px] text-[#A1A1AA]">
-          {card.bola?.pos <= 10 && <span className="flex items-center gap-1.5"><BolaDourada size={16} /> Bola de Ouro: <b className="text-[#FACC15]">{card.bola.pos}º</b></span>}
-          {card.artilharia && card.artilharia.pontos >= card.artilharia.alvo * 0.7 && !card.titulos.some((t) => t.tipo === "botaOuro") && <span className="flex items-center gap-1.5"><BotaDourada size={16} /> Bota de Ouro: {card.artilharia.pontos}/{card.artilharia.alvo}</span>}
-        </div>
-      )}
-    <EcosDaTemporada card={card} compacto/></TelaCheia>
-  );
+function PopupTemporada({c,card,onFechar}){
+ useEffect(()=>{apito(3);if(!card.titulos?.length)return;const timer=setTimeout(()=>{torcida(2.8,.2);tocar("conquista",.5);if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches)festejar(card.titulos.length>1?'chuva':'titulo',['#EBC557','#FFFFFF']);},400);return()=>clearTimeout(timer);},[card.ano]);
+ return <FechamentoTemporada c={c} card={card} onContinuar={onFechar}/>;
 }
 
 /* Desafio de OVR de toda temporada: três apostas com chances diferentes */
@@ -2984,7 +2893,7 @@ function AutoAvanco({ c, ms, onAgora, onPausar }) {
 }
 
 export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: comecarDoZero = false }) {
-  // fluxo: criação → oferta de base → [cartas de treino = jogar] → (desafio) → (festa) → painel com o resumo curto
+  // fluxo: criação → oferta de base → treino → lances/Copa → fechamento salvo → próxima ação
   //        → (traço) → (coletiva) → decisão/mercado nos anos de decisão; nos outros, a temporada rola sozinha
   const [estado, setEstado] = useState(() => (comecarDoZero ? null : carregarRapido()) || { etapa: "criacao" });
   const [estanteAberta, setEstanteAberta] = useState(false);
@@ -2996,7 +2905,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const [recorde, setRecorde] = useState(0);
   const [selo, setSelo] = useState(null);
   const [popup, setPopup] = useState(null); // resultado de decisão ou desafio
-  const [popTemp, setPopTemp] = useState(null); // fim de temporada
+  const fechou=useRef(null);
   const { etapa, c, card, evento, resultado, opcoesTraco, fila } = estado;
 
   useEffect(() => {
@@ -3018,13 +2927,13 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
 
   // depois da temporada: estouros visuais e o caminho até a próxima ação
   const aposFechar = (antes, f) => {
+    const chave=`${f.c.museuId||f.c.codigo}:${f.card.ano}`;if(fechou.current===chave)return;fechou.current=chave;
     if(f.card.jornada?.memorias?.some(m=>m.id==='primeiro:convocacao'||m.id==='primeiro:estreia-selecao'))setApresentacaoSelecao({c:f.c,estreia:f.card.jornada.memorias.some(m=>m.id==='primeiro:estreia-selecao')});
     if (f.card.ovrDepois > (antes.picoOvr || 0) && antes.temporadas.length > 0) setRecorde(Date.now());
     if (f.card.ovrDepois >= 90 && f.card.ovrDepois > (antes.picoOvr || 0)) setTimeout(() => festejar("estrelas", ["#FB923C", "#FFFFFF", "#EBC557"]), 2600);
     if (f.card.titulos.length) vibrar([30, 60, 30]);
     if(antes.emprestimo&&!f.c.emprestimo){const m=f.c.jornada?.ultimaMudanca;setApresentacao({c:f.c,mudanca:m,clube:clubeDe(f.c.clubeNome),curto:true,deOnde:clubeDe(m?.de),contrato:f.c.contrato,valor:0});}
-    if (temFestaGrande(f.card)) setEstado({ etapa: "festa", c: f.c, card: f.card, ultimo: f.card, voar: true });
-    else { setPopTemp(f.card); posTemporada(f.c, f.card); }
+    setEstado({etapa:"fechamento",c:f.c,card:f.card,ultimo:f.card,auto:false});
   };
   const posTemporada = (cc, k) => {
     const forcada = aposentadoriaForcada(cc);
@@ -3154,7 +3063,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const comecarTecnico = () => setEstado((st) => ({ ...st, etapa: "tecnico", c: iniciarCarreiraTecnico(st.c) }));
 
   // pausas automáticas: qualquer gaveta ou cena aberta segura o relógio
-  const pausado = !!gaveta || estanteAberta || patrimonioAberto || !!apresentacao || !!popup || !!popTemp;
+  const pausado = !!gaveta || estanteAberta || patrimonioAberto || !!apresentacao || !!popup || etapa==="fechamento" || !!apresentacaoSelecao;
   const ESPERA_AUTO = 1900;
   const espera = estado.manchete ? 4600 : 2800;
   useEffect(() => {
@@ -3218,7 +3127,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}
         {etapa === "copa" && card?.copa && <TelaCopa key={`${card.copa.etapa}:${card.copa.fase}`} c={c} card={card} onAvancar={avancarCopa} />}
         {etapa === "momento" && <TelaMomento key={`${card.ano}:${(card.momentos || []).length}`} c={c} momento={card.pendente} onReacao={tipo=>setEstado(st=>({...st,c:reagirReencontro(st.c,{...st.card.pendente,adversario:contextoMomento(st.c,st.card.pendente).adversario},tipo)}))} onFim={fimMomento} />}
-        {etapa === "festa" && <TelaFesta c={c} card={card} onFim={() => { if (estado.retorno) setEstado({ ...estado.retorno, voar: false }); else { setPopTemp(card); posTemporada(c, card); } }} />}
+        {etapa === "festa" && <TelaFesta c={c} card={card} onFim={() => { if (estado.retorno) setEstado({ ...estado.retorno, voar: false }); else setEstado({etapa:"fechamento",c,card,ultimo:card,auto:false}); }} />}
         {etapa === "resumo" && <TelaResumo c={c} card={card} voar={!!estado.voar} onPousou={() => setContadorPulsa((x) => x + 1)} onContinuar={continuar} onAposentar={encerrar} onRever={() => setEstado({ etapa: "festa", c, card, voar: false })} />}
         {etapa === "coletiva" && estado.coletiva && <TelaColetiva c={c} coletiva={estado.coletiva} resposta={estado.resposta} onResponder={responder} onSeguir={() => abrirJanela(c, estado.ultimo, false)} />}
         {etapa === "traco" && <TelaTraco c={c} opcoes={(opcoesTraco || []).map(tracoDe).filter(Boolean)} onEscolher={escolherT} />}
@@ -3259,15 +3168,15 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
       )}
       {gaveta === "resumo" && ultimo && (
         <Gaveta titulo={`Temporada ${ultimo.ano}`} onFechar={() => setGaveta(null)}>
-          <TelaResumo c={c} card={ultimo} gaveta onRever={() => { setGaveta(null); setEstado((st) => ({ etapa: "festa", c: st.c, card: ultimo, retorno: st })); }} />
+          <TelaResumo c={c} card={ultimo} gaveta onRever={() => { setGaveta(null); setEstado((st) => ({ etapa: "fechamento", c: st.c, card: ultimo, retorno: st,auto:false })); }} />
         </Gaveta>
       )}
       {estanteAberta && c && <Estante c={c} onFechar={() => setEstanteAberta(false)} />}
       {patrimonioAberto && c && <Patrimonio c={c} etapa={etapa} onComprar={comprar} onFechar={() => setPatrimonioAberto(false)} />}
       {apresentacao && <CenasClube c={apresentacao.c||c} mudanca={apresentacao.mudanca} onFim={()=>setApresentacao(null)}>{fechar=>apresentacao.curto?<ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} grandeChegada={apresentacao.grande} curto={apresentacao.curto} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>:<ApresentacaoGrande clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>}</CenasClube>}
-      {popTemp && c && <PopupTemporada key={popTemp.ano} c={c} card={popTemp} onFechar={() => { if (popTemp.titulos.length) { setContadorPulsa((x) => x + 1); vibrar(20); } setPopTemp(null); }} />}
-      {apresentacaoSelecao&&!apresentacao&&!popTemp&&!popup&&<PrimeiraSelecao c={apresentacaoSelecao.c} estreia={apresentacaoSelecao.estreia} onFim={()=>setApresentacaoSelecao(null)}/>}
-      {popup && !popTemp && <PopupResultado key={popup.k} info={popup} onFechar={() => setPopup(null)} />}
+      {etapa==="fechamento"&&card&&c&&!apresentacao&&<PopupTemporada key={card.ano} c={c} card={card} onFechar={()=>{if(estado.retorno){setEstado(estado.retorno);return;}if(card.titulos.length){setContadorPulsa(x=>x+1);vibrar(20);}posTemporada(c,card);}}/>}
+      {apresentacaoSelecao&&!apresentacao&&etapa!=="fechamento"&&!popup&&<PrimeiraSelecao c={apresentacaoSelecao.c} estreia={apresentacaoSelecao.estreia} onFim={()=>setApresentacaoSelecao(null)}/>}
+      {popup && etapa!=="fechamento" && <PopupResultado key={popup.k} info={popup} onFechar={() => setPopup(null)} />}
     </div>
   );
 }

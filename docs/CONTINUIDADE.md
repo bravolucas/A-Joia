@@ -1,3 +1,11 @@
+## Fechamento persistido, celebração de copas e continuação dos itens
+
+Usuário ganhou Copa do Brasil sem resumo/celebração. Fluxo refeito: toda temporada fechada vira etapa salva `fechamento`; a próxima etapa só abre após confirmação. `FechamentoTemporada.jsx/css` reúne taça animada, nome, contagem/anos, estatísticas, evolução e campanha opcional, com um botão e rodapé acessível. Recarga retoma; revisões antigas de copas comuns não ficam vazias; rever/avançar não concede prêmio de novo. O backend já registra a temporada antes da apresentação; não dizer que o calendário numérico só muda ao fechar a janela.
+
+Avanços adicionais: elenco continental com estatísticas separadas das Copas; recordes observados por clube/liga/universo (simulados, não históricos reais); três poses/pistas imperfeitas do cobrador no reflexo; álbum com imagens locais; progresso booleano do museu; recusa de capitania respeitada. Auditoria completa dos 50 itens em `docs/jornada-com-memoria/AUDITORIA-LISTA-USUARIO.md`; escopo e detalhes em `docs/fechamento-e-continuidade/RELATORIO.md`. Pendências reais: fontes históricas abrangentes do item 67 e revisão visual manual exaustiva do 98; bases narrativas/gestos ainda admitem refinamento.
+
+Build, 37 arquivos de lógica e 119 cenários de navegador passaram. Logs `/tmp/titulos-continental-unit-final.log`, `/tmp/titulos-continental-build-publicacao.log` e `/tmp/titulos-continental-browser-publicacao.log`. Prévia local conferida antes dos testes. Validações de título em 320×568/390×640/1366×640, recarga, múltiplas taças, replay e avanço único. Publicação a confirmar. Documentos não rastreados anteriores preservados.
+
 ## Correção urgente — OVR e trajetória no computador
 
 Usuário mostrou o OVR fora do cartão e trajetória comprimida. Causa: regra desktop da Copa em `JornadaUI.css` atingia toda `.rp .cp`, classe compartilhada pelo cartão de OVR e histórico. A regra foi restringida à nova classe `cp-torneio`, aplicada somente à tela da Copa. Não houve mudança no cálculo de OVR.

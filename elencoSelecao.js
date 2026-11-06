@@ -28,10 +28,11 @@ export function atualizarElencoSelecao(c,ano=c.ano){
   let novo=p?{...p}:criar(c,ano,i,posicao,fs,nomes);
   if(!p){let tentativa=0;while(usados.has(novo.id))novo=criar(c,ano,i+26*(++tentativa),posicao,fs,nomes);}
   if(p&&e.ano<ano){const anos=ano-Math.max(e.ano,p.desde||e.ano);const idade=ano-p.nascimento;novo.ovr=limitar(Math.round((p.ovr||fs)+(idade<=25?Math.min(3,anos):idade>=32?-Math.min(5,anos):0)),45,94);}
-  usados.add(novo.id);nomes.add(novo.nome);novo.estatisticas={...vazio(),...novo.estatisticas};jogadores.push(novo);
+  usados.add(novo.id);nomes.add(novo.nome);novo.estatisticas={...vazio(),...novo.estatisticas};novo.estatisticasContinentais={...vazio(),...novo.estatisticasContinentais};jogadores.push(novo);
  }
  // Mudanças reais de posição podem alterar a distribuição sem retirar todo o núcleo.
  e.jogadores=jogadores;e.ano=ano;e.usuario={...e.usuario,id:'usuario',nome:c.nome,posicao:c.posicao,ovr:Math.max(40,calcOVR(c.attrs,c.posicao)-penalidadePosicao(c)),nascimento:ano-c.idade,estatisticas:{...vazio(),...e.usuario?.estatisticas}};
+ e.usuario.estatisticasContinentais={...vazio(),...e.usuario.estatisticasContinentais};
  const numero=Number.isInteger(c.numero)&&c.numero>=1&&c.numero<=26?c.numero:10;e.usuario.numero=numero;
  const numeros=Array.from({length:26},(_,i)=>i+1).filter(n=>n!==numero);e.jogadores.forEach((p,i)=>p.numero=numeros[i]);
  c.jornada.elencoSelecao=e;return e;
@@ -45,12 +46,13 @@ function escolherXI(e,titular){
  if(titular&&!escolhidos.some(p=>p.id==='usuario'))escolhidos[10]=e.usuario;
  return escolhidos;
 }
-export function prepararElencoCopa(c,ano=c.ano){const e=clone(atualizarElencoSelecao(clone(c),ano));e.processados=(e.processados||[]).filter(id=>id.startsWith(`${ano}:`));return e;}
+export function prepararElencoSelecao(c,ano=c.ano,tipo='copaMundo',nome='Copa do Mundo'){const e=clone(atualizarElencoSelecao(clone(c),ano));e.escopo=tipo;e.ultimoTorneio={tipo,nome,ano};e.processados=(e.processados||[]).filter(id=>id.startsWith(`${ano}:`));return e;}
+export function prepararElencoCopa(c,ano=c.ano){return prepararElencoSelecao(c,ano);}
 export function forcaElencoCopa(e,fs){if(!e)return 0;const xi=escolherXI(e,false);return limitar((xi.reduce((n,p)=>n+p.ovr,0)/11-fs)*.3,-1.5,1.5);}
 /** Distribui somente gols do placar registrado; cobranças de desempate ficam fora. */
 export function registrarJogoElenco(e,jogo,{titular=true,ano=e?.ano}={}){
  if(!e||!jogo||!Number.isInteger(jogo.gp)||jogo.gp<0)return;
- const id=`${ano}:${jogo.fase}:${jogo.adv?.id||jogo.adv?.nome}`;if(e.processados.includes(id))return;
+ const legado=`${ano}:${jogo.fase}:${jogo.adv?.id||jogo.adv?.nome}`,id=`${ano}:${e.escopo||'copaMundo'}:${jogo.fase}:${jogo.adv?.id||jogo.adv?.nome}`;if(e.processados.includes(id)||((e.escopo||'copaMundo')==='copaMundo'&&e.processados.includes(legado)))return;
  e.processados=[...e.processados,id];
  const xi=escolherXI(e,titular),linhas=xi.map(p=>({id:p.id,nome:p.nome,posicao:p.posicao,minutos:90,gols:0,assist:0,titular:true}));
  if(!titular){const grupo=grupoSelecao(e.usuario.posicao),sai=[...linhas].reverse().find(p=>grupoSelecao(p.posicao)===grupo)||linhas.at(-1);sai.minutos=60;linhas.push({id:'usuario',nome:e.usuario.nome,posicao:e.usuario.posicao,minutos:30,gols:0,assist:0,titular:false});}
@@ -70,13 +72,13 @@ export function registrarJogoElenco(e,jogo,{titular=true,ano=e?.ano}={}){
  for(const p of linhas){
   p.gols=gols.filter(g=>g.marcadorId===p.id).length;p.assist=gols.filter(g=>g.assistenteId===p.id).length;
   p.nota=Math.round(limitar(6+(jogo.res==='V'?.5:jogo.res==='D'?-.5:0)+p.gols*.6+p.assist*.3+(p.posicao==='GOL'&&jogo.gc===0?.4:0),4,10)*10)/10;
-  const atleta=p.id==='usuario'?e.usuario:e.jogadores.find(a=>a.id===p.id),s=atleta.estatisticas;
+  const atleta=p.id==='usuario'?e.usuario:e.jogadores.find(a=>a.id===p.id),chave=e.escopo==='continentalSelecao'?'estatisticasContinentais':'estatisticas',s=atleta[chave]||(atleta[chave]=vazio());
   s.jogos++;s.minutos+=p.minutos;s.gols+=p.gols;s.assist+=p.assist;s.notas+=p.nota;if(p.posicao==='GOL'&&jogo.gc===0&&p.minutos>=60)s.semSofrer++;
  }
  jogo.elenco={jogadores:linhas,gols};
 }
 export function consolidarElencoCopa(c,card){
- const e=card?.copa?.elenco;if(!e||!card.copa.fim||!card.copa.convocado)return;
+ const torneio=card?.copa||card?.selecao,e=torneio?.elenco;if(!e||!torneio.convocado||(card.copa&&!card.copa.fim)||(!card.copa&&torneio.resultado==='Final'))return;
  c.jornada=c.jornada||{};if((c.jornada.elencoSelecao?.ano||0)>e.ano)return;
  c.jornada.elencoSelecao=clone(e);
 }

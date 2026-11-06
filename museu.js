@@ -192,5 +192,6 @@ export function progressoFeitoMuseu(c,id){
  const titulo=(c.lista||[]).filter(t=>!['bolaOuro','botaOuro'].includes(t.tipo)).length;
  const marcas=compararMarcasCopas(c);
  const mapas={'marca-klose':[marcas[0].atual,16],'marca-fontaine':[marcas[1].atual,13],'primeira-taca':[titulo,1],'dez-tacas':[titulo,10],'cem-gols':[c.totais?.gols||0,100],'quinhentos-gols':[c.totais?.gols||0,500],'cem-assistencias':[c.totais?.assist||0,100],'quinhentos-jogos':[c.totais?.jogos||0,500],'vinte-temporadas':[c.temporadas?.length||0,20],'cinco-clubes':[new Set((c.temporadas||[]).map(t=>t.clube)).size,5],'dupla-marcante':[Math.max(0,...(c.jornada?.duplas||[]).map(d=>d.temporadas)),2],'assinatura-tecnica':[Math.max(0,...Object.values(c.jornada?.assinaturas||{}).map(a=>a.anos?.length||0)),3],'jogador-reinventado':[c.jornada?.trocas?.length||0,1]};
- const p=mapas[id];return p?{atual:Math.min(p[0],p[1]),meta:p[1]}:null;
+ const p=mapas[id];if(p)return{atual:Math.min(p[0],p[1]),meta:p[1]};
+ return FEITOS_MUSEU.some(f=>f.id===id)?{atual:extrairConquistasMuseu(c).some(r=>r.categoria==='feitos'&&r.id===id)?1:0,meta:1}:null;
 }

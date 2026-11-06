@@ -170,6 +170,10 @@ export function fecharJornada(c,card){
  consolidarElencoCopa(c,card);
  j.fechado=card.ano;card.jornada={noticias:[],mensagens:[],memorias:[],assinaturas:[]};
  const n=card.jornada;
+ const recordes=card.recordesUniverso||[];
+ for(const r of recordes){const m=memorizar(c,'recorde-observado',r.titulo,r.texto,{id:`recorde:${r.escopo}:${r.metrica}:${card.ano}:${card.clube}`,ano:card.ano,clube:card.clube});if(m)n.memorias.push(m);}
+ if(recordes.length)n.noticias.push({tipo:'recorde',titulo:recordes[0].titulo,detalhe:recordes[0].texto});
+
  for(const marca of compararMarcasCopas(c,card))for(const [etapa,ano]of [['igualou',marca.anoIgualou],['superou',marca.anoSuperou]]){
   if(ano==null)continue;
   const m=memorizar(c,'marca-historica',`${etapa==='igualou'?'Igualou':'Superou'} uma marca de ${marca.atleta}`,`${marca.nome}: referência histórica de ${marca.valor}, na base 1930–2022. Feito da sua carreira simulada.`,{id:`marca:${marca.id}:${etapa}`,ano,clube:'Seleção'});
@@ -199,7 +203,7 @@ export function fecharJornada(c,card){
  for(const s of ASSINATURAS){if(!contrib[s.id])continue;const a=j.assinaturas[s.id]||{anos:[]};if(!a.anos.includes(card.ano))a.anos=[...a.anos,card.ano];j.assinaturas[s.id]=a;if(a.anos.length===s.meta){n.assinaturas.push(s.nome);if(!j.assinaturaAtiva)j.assinaturaAtiva=s.id;memorizar(c,'assinatura',s.nome,'Uma marca técnica conquistada em três temporadas distintas.',{ano:card.ano,id:`assinatura:${s.id}`});}}
  atualizarDuplas(c,card);
  const anosNoClube=(c.temporadas||[]).filter(a=>a.clube===card.clube).length+1;
- if(anosNoClube>=3&&c.idade>=24&&(c.moral??65)>=50&&(c.torcida?.[card.clube]??0)>=60&&card.jogos>=20){
+ if(!(j.recusaCapitania?.ano===card.ano&&j.recusaCapitania?.clube===card.clube)&&anosNoClube>=3&&c.idade>=24&&(c.moral??65)>=50&&(c.torcida?.[card.clube]??0)>=60&&card.jogos>=20){
   const antes=j.capitao;j.capitao={clube:card.clube,desde:antes?.clube===card.clube?antes.desde:card.ano};
   if(antes?.clube!==card.clube){const m=memorizar(c,'capitao','A braçadeira pela trajetória',`${anosNoClube} temporadas e confiança da torcida fizeram de você uma referência.`,{id:`capitao:${card.clube}`,ano:card.ano,clube:card.clube});if(m)n.memorias.push(m);}
  }

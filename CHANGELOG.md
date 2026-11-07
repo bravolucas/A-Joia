@@ -4,6 +4,17 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## ⚽ Jogador: equilíbrio e memória
+
+- Teto suave de potencial: o auge típico fica perto de 85; passar de 92 exige teto alto e boas escolhas
+- Fidelidade: do 4º ano seguido no clube em diante, torcida +3 por temporada e mais chance de capitania
+- Clássico como lance jogável raro contra o maior rival do clube, com peso maior na torcida
+- Cerimônia da Bola de Ouro sempre que você fica entre os três: pódio revelado do 3º ao 1º
+- Museu: uma camisa para cada clube defendido, com anos e números; com 75 de torcida vira camisa de ídolo
+- Do campo ao banco: o rival de geração vira técnico rival e um ex-parceiro (ou o mentor) vira seu auxiliar
+
+---
+
 ## 📋 Treinador: pendências finalizadas
 
 - Estreia no clube do coração grande vem com contrato de um ano: sem a meta, não renova. Também dá para começar num projeto menor; o clube do coração convida depois de um bom trabalho

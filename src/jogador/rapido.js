@@ -111,6 +111,10 @@ export function vagasDaLiga(ligaId) {
   const p = PIRAMIDE.find((x) => x.baixo === ligaId || x.cima === ligaId);
   return p ? p.vagas : 0;
 }
+export const TETO_SUAVE = 85;
+export const ANOS_FIDELIDADE = 4;
+/** Temporadas seguidas (sem empréstimo) no clube, contando de trás para frente. */
+export function anosSeguidosNoClube(c, clube) { let n = 0; for (const t of [...(c.temporadas || [])].reverse()) { if (t.clube !== clube || t.emprestado) break; n++; } return n; }
 export const ovrDe = (c) => Math.max(40,calcOVR({ ...c.attrs, fintas: 3, pernaRuim: 3 }, c.posicao)-penalidadePosicao(c));
 
 /* Seleções mais citadas primeiro na tela de criação */
@@ -1353,6 +1357,9 @@ function jogarTemporadaBase(c0) {
   const decisaoBruta = emCampo ? decisaoNaTabela(clube, tab) : null;
   const decisaoLiga = decisaoBruta?.tipo === "liga" && chance(0.5) ? decisaoBruta : null;
   if (decisaoLiga) momentos.push(decisaoLiga);
+  // Clássico: nem todo ano o lance decisivo cai no seu pé contra o maior rival. Vale mais para a torcida.
+  const rivalClassico = emCampo && !c.emprestimo ? CLASSICOS.find((p) => p.includes(clube.nome))?.find((x) => x !== clube.nome) : null;
+  if (rivalClassico && chance(0.4)) momentos.push({ tipo: "classico", titulo: `Clássico contra o ${rivalClassico}`, adversario: { tipo: "clube", nome: rivalClassico } });
   if (tab.pos === 1 && decisaoLiga?.tipo !== "liga") {
     card.titulos.push({ tipo: ehSegundaDivisao(clube.liga) ? "segunda" : "liga", nome: liga.nome });
     card.destaques.push(`Título do ${liga.nome} com ${tab.pontos && tab.pontos[1] != null && tab.pontos[0] - tab.pontos[1] < 3.2 ? "emoção até o fim" : "folga na tabela"}`);
@@ -1459,7 +1466,7 @@ export function contextoMomento(c,m){
  const x=pool.length?pick(pool):null;return x?{tipo:'clube',nome:x.nome}:null;
  });
  const mini=m.mini||miniDaPosicao(c.posicao);
- const fase=['liga','acesso','permanencia'].includes(m.tipo)?'Última rodada':'Final';
+ const fase=m.tipo==='classico'?'Clássico':['liga','acesso','permanencia'].includes(m.tipo)?'Última rodada':'Final';
  const situacao=({cruzamento:'Cruzamento na área. Ache o companheiro livre.',interceptacao:'Último ataque rival. Leia o passe e intercepte.',cabeceio:'A bola vem pelo alto. Encontre o tempo do cabeceio.',reflexo:'Chute à queima-roupa. Reaja para salvar.'})[mini]||(mini==='defesa'?'Pênalti contra. Você é a última barreira.':mini==='penalti'?'A bola está na marca. A próxima cobrança pode decidir.':mini==='falta'?'Falta perigosa. A chance está nos seus pés.':'Último lance. Encontre o passe que pode decidir.');
  return {adversario,contexto:{fase,situacao}};
 }
@@ -1530,7 +1537,7 @@ function textoDoMomento(mini, m, c) {
   return sit ? `${sit} ${cena}` : cena;
 }
 /* Peso emocional de cada desafio: final de seleção ou continental mexe mais que copa */
-const PESO_MOMENTO = { selecao: 3, continental: 3, mundial: 3, liga: 2, copa: 2, acesso: 2, permanencia: 2, ligaConfirmacao: 1 };
+const PESO_MOMENTO = { classico: 3, selecao: 3, continental: 3, mundial: 3, liga: 2, copa: 2, acesso: 2, permanencia: 2, ligaConfirmacao: 1 };
 
 export const ACAO_MINI = {
  cruzamento:{ok:'Cruzamento perfeito para o gol decisivo',erro:'O cruzamento foi cortado'},interceptacao:{ok:'Interceptou o ataque decisivo',erro:'O adversário encontrou o passe'},cabeceio:{ok:'Cabeceio decisivo para o gol',erro:'Não alcançou o cruzamento'},reflexo:{ok:'Defesa de reflexo decisiva',erro:'Não alcançou o chute'},
@@ -1563,6 +1570,9 @@ export function aplicarMomento(card0, acertou) {
   if (m.tipo === "continental") {
     if (acertou) { card.titulos.push({ tipo: "continental", nome: card.continental.nome }); card.continental.faseNome = "Campeão"; card.destaques.push(`${acao.ok} na final da ${card.continental.nome}`); }
     else { card.continental.faseNome = "Vice-campeão"; card.destaques.push(`${acao.erro} na final da ${card.continental.nome}`); }
+  } else if (m.tipo === "classico") {
+    card.classico = { rival: m.adversario?.nome, acertou };
+    card.destaques.push(acertou ? `⚔️ ${acao.ok} no clássico contra o ${m.adversario?.nome}: a cidade é sua` : `⚔️ ${acao.erro} no clássico contra o ${m.adversario?.nome}. A semana vai ser longa`);
   } else if (m.tipo === "ligaConfirmacao") {
     card.destaques.push(acertou ? `${acao.ok} no jogo da festa do ${m.ligaNome}` : `A festa do ${m.ligaNome} veio sem o seu gol, mas a taça já era de vocês`);
   } else if (m.tipo === "mundial") {
@@ -1739,9 +1749,17 @@ function fecharTemporadaBase(c0, card0) {
   if (ostentacao) card.destaques.push("Seu padrão de vida destoa do clube: a torcida estranha a ostentação");
   const delta = ((card.nota ? (card.nota - 6.6) * 9 : -4) + nTit * 7 + (card.jogos >= 30 ? 3 : 0) + somaTraco(c, "torcidaAno") + somaInv(c, "torcidaAno") - ostentacao - (c.foco === "vitrine" ? 3 : 0)) * (card.nota >= 6.6 ? multTraco(c, "torcidaMult") : 1);
   c.torcida[tc] = clampR(Math.round(tAntes + delta), 0, 100);
+  // Fidelidade: a partir do 4º ano seguido no clube, a torcida reconhece quem ficou.
+  const seguidos = anosSeguidosNoClube(c, tc) + (card.emprestado ? 0 : 1);
+  if (!card.emprestado && seguidos >= ANOS_FIDELIDADE) {
+    c.torcida[tc] = clampR(c.torcida[tc] + 3, 0, 100);
+    card.fidelidade = seguidos;
+    card.destaques.push(`💚 Fidelidade: ${seguidos}º ano seguido no ${tc}. A torcida reconhece quem ficou (+3)`);
+  }
   card.torcida = c.torcida[tc];
   card.torcidaDelta = c.torcida[tc] - tAntes;
   const novosMarcos = [];
+  if (seguidos === ANOS_FIDELIDADE && !card.emprestado) novosMarcos.push({ id: `fidelidade:${tc}`, icone: "🏠", titulo: `Em casa no ${tc}`, texto: `${ANOS_FIDELIDADE} temporadas seguidas: a camisa já é sua. A torcida apoia mais e a braçadeira fica mais perto.`, ano: card.ano });
   if (c.torcida[tc] >= 75 && tAntes < 75 && !card.emprestado) {
     novosMarcos.push({ id: `idolo:${tc}`, icone: "💚", titulo: `Ídolo do ${tc}`, texto: "A arquibancada canta o seu nome.", ano: card.ano });
     if (!c.apelidos.some((a) => a.clube === tc)) {
@@ -1802,7 +1820,9 @@ function fecharTemporadaBase(c0, card0) {
   // o garoto tem vantagem: quanto mais jovem, mais rápido anda na direção do teto
   const ritmoJovem = c.idade <= 19 ? 1.12 : c.idade <= 22 ? 1.04 : 1;
   const personaCurva = { ...persona, picoFim: (persona.picoFim ?? 28) + 2, declinioApartir: (persona.declinioApartir ?? 31) + 2 };
-  const novos = evoluirAtributos({ ...c.attrs, fintas: 3, pernaRuim: 3 }, { ...c.potencial, fintas: 3, pernaRuim: 3 }, c.idade, personaCurva, null, reduc, fatorDes * ritmoJovem, 1 + nTit * 0.05);
+  // Teto suave: acima de 85 o potencial rende cada vez menos; passar de 92 exige teto alto e boas escolhas.
+  const potEfetivo = Object.fromEntries(Object.entries(c.potencial || {}).map(([a, p]) => [a, p > TETO_SUAVE ? Math.round(TETO_SUAVE + (p - TETO_SUAVE) * 0.55) : p]));
+  const novos = evoluirAtributos({ ...c.attrs, fintas: 3, pernaRuim: 3 }, { ...potEfetivo, fintas: 3, pernaRuim: 3 }, c.idade, personaCurva, null, reduc, fatorDes * ritmoJovem, 1 + nTit * 0.05);
   ATTRS.forEach((a) => { c.attrs[a] = novos[a]; });
   if (c.flags.cronica) { c.attrs.velocidade = clampR(c.attrs.velocidade - 1, 40, 99); c.attrs.fisico = clampR(c.attrs.fisico - 1, 40, 99); }
 
@@ -2375,7 +2395,7 @@ export const EVENTOS = [
   },
   {
     id: "capitao", icone: "🎖️",
-    peso: (c) => (c.idade >= 24 && (c.temporadas || []).filter(t => t.clube === c.clubeNome).length >= 3 && c.moral >= 50 && ["Titular", "Estrela do time"].includes(statusNoClube(c).label) && (c.torcida[c.clubeNome] ?? 0) >= 60 && c.jornada?.capitao?.clube !== c.clubeNome ? 1.8 : 0),
+    peso: (c) => (c.idade >= 24 && (c.temporadas || []).filter(t => t.clube === c.clubeNome).length >= 3 && c.moral >= 50 && ["Titular", "Estrela do time"].includes(statusNoClube(c).label) && (c.torcida[c.clubeNome] ?? 0) >= 60 && c.jornada?.capitao?.clube !== c.clubeNome ? (anosSeguidosNoClube(c, c.clubeNome) >= ANOS_FIDELIDADE ? 2.8 : 1.8) : 0),
     titulo: () => "A braçadeira é sua?",
     texto: () => "O capitão se aposentou e o técnico quer você no lugar dele.",
     opcoes: () => [

@@ -138,6 +138,9 @@ export function definirRivalTecnico(t, clubesLiga) {
   if (atual && clubesLiga.some(x => x.nome === atual.clube) && atual.clube !== t.clube) return atual;
   const outro = clubesLiga.filter(x => x.nome !== t.clube).sort((a, b) => b.elenco - a.elenco || a.nome.localeCompare(b.nome))[0];
   if (!outro) return null;
+  // O rival dos tempos de jogador também virou técnico: o duelo continua no banco.
+  const antigo = t.memoriaJogador?.rival?.nome;
+  if (antigo) return { nome: antigo, clube: outro.nome, desde: t.ano, v: 0, e: 0, d: 0, titulosDele: 0, rivalDeGeracao: true };
   return { nome: NOMES_RIVAIS[hashTecnico(outro.nome) % NOMES_RIVAIS.length], clube: outro.nome, desde: t.ano, v: 0, e: 0, d: 0, titulosDele: 0 };
 }
 export function atualizarRivalTecnico(rival, temporada) {

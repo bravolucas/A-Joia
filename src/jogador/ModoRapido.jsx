@@ -994,6 +994,18 @@ function SlideBolaDeOuro({ c, card }) {
   );
 }
 
+/* Cerimônia da Bola de Ouro: quando você fica entre os três, o pódio é revelado do 3º ao 1º. */
+function TelaBolaDeOuro({ c, card, onFim }) {
+  const [pronto, setPronto] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setPronto(true), 3200); return () => clearTimeout(t); }, []);
+  return (
+    <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-4" aria-label={`Cerimônia da Bola de Ouro ${card.ano}`}>
+      <SlideBolaDeOuro c={c} card={card} />
+      <button onClick={onFim} className="rp-btn rp-ouro display text-sm">{pronto ? "Ver a temporada" : "Pular cerimônia"}</button>
+    </div>
+  );
+}
+
 /* Compatibilidade de festas legadas; novas temporadas usam FechamentoTemporada para todas as conquistas. */
 const TIPOS_GRANDES = ["copaMundo", "bolaOuro"];
 export const temFestaGrande = (card) => card.titulos.some((t) => TIPOS_GRANDES.includes(t.tipo));
@@ -2943,6 +2955,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     if (f.card.ovrDepois >= 90 && f.card.ovrDepois > (antes.picoOvr || 0)) setTimeout(() => festejar("estrelas", ["#FB923C", "#FFFFFF", "#EBC557"]), 2600);
     if (f.card.titulos.length) vibrar([30, 60, 30]);
     if(antes.emprestimo&&!f.c.emprestimo){const m=f.c.jornada?.ultimaMudanca;setApresentacao({c:f.c,mudanca:m,clube:clubeDe(f.c.clubeNome),curto:true,deOnde:clubeDe(m?.de),contrato:f.c.contrato,valor:0});}
+    if (f.card.bola?.pos <= 3 && f.card.bola.top?.some(r => r.voce)) return setEstado({etapa:"bolaOuro",c:f.c,card:f.card,ultimo:f.card,auto:false});
     setEstado({etapa:"fechamento",c:f.c,card:f.card,ultimo:f.card,auto:false});
   };
   const posTemporada = (cc, k) => {
@@ -3137,6 +3150,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}
         {etapa === "copa" && card?.copa && <TelaCopa key={`${card.copa.etapa}:${card.copa.fase}:${card.copa.jogos.length}`} c={c} card={card} jogadaSalva={estado.copaJogada} onRegistrar={jogada=>setEstado(st=>({...st,copaJogada:jogada,auto:false}))} onAvancar={avancarCopa} />}
         {etapa === "momento" && <TelaMomento key={`${card.ano}:${(card.momentos || []).length}`} c={c} momento={card.pendente} onReacao={tipo=>setEstado(st=>({...st,c:reagirReencontro(st.c,{...st.card.pendente,adversario:contextoMomento(st.c,st.card.pendente).adversario},tipo)}))} onFim={fimMomento} />}
+        {etapa === "bolaOuro" && <TelaBolaDeOuro c={c} card={card} onFim={() => setEstado({etapa:"fechamento",c,card,ultimo:card,auto:false})} />}
         {etapa === "festa" && <TelaFesta c={c} card={card} onFim={() => { if (estado.retorno) setEstado({ ...estado.retorno, voar: false }); else setEstado({etapa:"fechamento",c,card,ultimo:card,auto:false}); }} />}
         {etapa === "resumo" && <TelaResumo c={c} card={card} voar={!!estado.voar} onPousou={() => setContadorPulsa((x) => x + 1)} onContinuar={continuar} onAposentar={encerrar} onRever={() => setEstado({etapa:"fechamento",c,card,retorno:estado,auto:false})} />}
         {etapa === "coletiva" && estado.coletiva && <TelaColetiva c={c} coletiva={estado.coletiva} resposta={estado.resposta} onResponder={responder} onSeguir={() => abrirJanela(c, estado.ultimo, false)} />}

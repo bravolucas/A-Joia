@@ -4,6 +4,32 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 📋 Modo treinador: mais difícil, mais coerente e com momentos de decisão
+
+**Equilíbrio**
+- Os bônus das cartas valem para a temporada: no ano seguinte a força volta para perto da base do clube (fica 30% do ganho, no máximo +5)
+- Diretoria, torcida e moral esquecem parte do passado a cada ano; errar a meta por muito custa mais que errar por pouco
+- A meta segue o tamanho do elenco na liga (o mais forte cobra "Ser campeão"); na estreia, até clube grande cobra só vaga continental
+- Título nacional dá +16 de reputação (Série B/segundas divisões +8), copa continental +12, copa nacional +5
+- Quem acaba de ser campeão é visto acima da reputação acumulada e não recebe convite muito abaixo do seu nível
+- Nas simulações, clube mais forte da liga ganha cerca de 50% das ligas (antes 80–90%); um time médio como o Bahia, ~15% (antes 52%)
+
+**Momentos**
+- **Finais jogáveis**: em cada final de copa você escolhe pressão, jogo controlado ou fechar e contra-atacar; a chance aparece antes e o resultado é revelado na barra
+- **Parada da temporada**: no ritmo normal, uma parada no meio da liga (duas no intenso, nenhuma no expresso) com a tabela parcial; se o time vai mal, vira reunião de emergência
+- **Seleção**: em ano de Copa, com boa reputação, a seleção do seu país convida você para a Copa do Mundo (grupo + mata-mata, final decidida por você); depois você volta ao clube
+- **Personagens**: os jogadores contratados nas cartas ficam no elenco, evoluem, são vendidos, voltam de empréstimo e se aposentam, com notícias a cada ano
+- **Técnico rival**: um treinador fictício do clube mais forte da sua liga, com retrospecto de confrontos e títulos dele
+- **Demissão e ano sem clube**: tela com posição, diretoria e torcida; sem clube, você escolhe curso, comentarista de TV, estágio no exterior ou esperar
+- **Metas de carreira**: campeão em três países, tríplice coroa, do acesso ao título, campeão do mundo e outras, com progresso no perfil
+
+**Informação**
+- Previsão da temporada no painel ("Favorito ao título", "Luta contra o rebaixamento"…) com força, posição do elenco e média da liga
+- Resumo do ano depois de jogar: top 5, meta, copas, paradas, finais, duelo com o rival e metas cumpridas
+- O texto da herança de jogador aparece só na primeira temporada
+
+---
+
 ## ⚖️ OVR mais contido e clube grande mais exigente
 
 - **OVR sobe mais devagar**: o pico típico de uma carreira caiu de 92 para 89, e aos 21 anos o OVR mediano foi de 83 para 81

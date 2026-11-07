@@ -25,7 +25,7 @@ import { JogadorCampo, RetratoApresentacao, CamisaPremium, SuperficieMini, useCe
 import { criarIdMuseu } from '../museu/museu.js';
 import Icone from "../comum/Icone.jsx";
 import CarreiraTecnico from "../treinador/CarreiraTecnico.jsx";
-import { comprarMelhoriaTecnico, iniciarCarreiraTecnico, iniciarNoClubeIdolo, atualizarPropostasCoerentesTecnico, escolherPretemporadaRapidaTecnico, responderIntervencaoTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico } from "../treinador/tecnico.js";
+import { responderParadaTecnico, resolverFinalTecnico, responderConviteSelecaoTecnico, comprarMelhoriaTecnico, iniciarCarreiraTecnico, iniciarNoClubeIdolo, atualizarPropostasCoerentesTecnico, escolherPretemporadaRapidaTecnico, responderIntervencaoTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico } from "../treinador/tecnico.js";
 import Lottie from "../comum/Lottie.jsx";
 import { tocar, apito, torcida, somLigado, alternarSom } from "../comum/som.js";
 import React, { useEffect, useRef, useState } from "react";
@@ -3144,17 +3144,20 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "fim" && <FimDeCarreira c={c} onNova={nova} onSair={onSair} onComecarTecnico={comecarTecnico} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
         {etapa === "tecnico" && <CarreiraTecnico c={c}
           onComprarMelhoria={id=>{const novo=comprarMelhoriaTecnico(c,id);setEstado(st=>st.c===c?{...st,c:novo}:st);}}
-          onEscolhaRapida={(chave,op) => setEstado(st => ({...st,c:escolherPretemporadaRapidaTecnico(st.c,chave,op)}))}
+          onEscolhaRapida={(chave,op) => setEstado(st => ({...st,c:escolherPretemporadaRapidaTecnico(st.c,chave,op,undefined,{interativo:true})}))}
+          onParada={(chave, op) => setEstado(st => ({ ...st, c: responderParadaTecnico(st.c, chave, op) }))}
+          onFinal={(nome, op) => setEstado(st => ({ ...st, c: resolverFinalTecnico(st.c, nome, op) }))}
+          onConviteSelecao={aceitar => setEstado(st => ({ ...st, c: responderConviteSelecaoTecnico(st.c, aceitar, { interativo: true }) }))}
           onIntervir={(chave, escolha) => setEstado(st => ({ ...st, c: responderIntervencaoTecnico(st.c, chave, escolha) }))}
           onDecisao={(id) => setEstado((st) => ({ ...st, c: id ? tomarDecisaoTecnico(st.c, id) : st.c }))}
-          onSimularTemporada={(id) => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(st.c, id ?? null) }))}
+          onSimularTemporada={(id) => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(st.c, id ?? null, undefined, { interativo: true }) }))}
           onReuniao={(id) => setEstado((st) => ({ ...st, c: reuniaoEmergenciaTecnico(st.c, id) }))}
           onJogar={() => setEstado((st) => ({ ...st, c: simularEtapaTecnico(st.c) }))}
           onEscolherClubeInicial={(nome) => setEstado((st) => ({ ...st, c: iniciarNoClubeIdolo(st.c, nome) }))}
-          onEsperar={() => setEstado((st) => ({ ...st, c: passarAnoDesempregado(st.c) }))}
+          onEsperar={(escolha) => setEstado((st) => ({ ...st, c: passarAnoDesempregado(st.c, undefined, escolha) }))}
           onAceitarProposta={(nome, estrategia) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia); if (!negociado.tecnico.ultimaNegociacao?.aceita) return { ...st, c: negociado }; return { ...st, c: proximaTemporadaTecnico(negociado) }; })}
           onAvancar={() => setEstado((st) => ({ ...st, c: proximaTemporadaTecnico(st.c) }))}
-          onAvancarESimular={() => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(proximaTemporadaTecnico(st.c), null) }))}
+          onAvancarESimular={() => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(proximaTemporadaTecnico(st.c), null, undefined, { interativo: true }) }))}
           onLegado={() => setEstado((st) => ({ ...st, etapa: "fim" }))}
           onSair={onSair} />}
       </main>

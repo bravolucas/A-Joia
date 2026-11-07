@@ -46,3 +46,14 @@ Página e módulo público do [simulador de carreira do COPERO](https://copero.c
 ## Validação
 
 25 arquivos de testes de lógica, build de produção e 44 testes de navegador passaram. Os testes administrativos antigos foram retirados da suíte de interface porque essas telas deixaram o fluxo; os testes das funções legadas continuam. Há cobertura nova para limite de escolhas, gratuidade quando não há verba, recarga entre escolhas, efeitos futuros, orçamento, convites contextualizados e duas carreiras completas de 30 temporadas. A vitrine agrupada de conquistas também passou na regressão.
+
+## Revisão de novembro de 2026 — equilíbrio e momentos
+
+Pedido do usuário após a leitura do modo: corrigir a facilidade (Flamengo campeão em 15 de 16 anos), as propostas incoerentes (Série B depois de título) e trazer mais emoção sem voltar à gestão de elenco.
+
+- **Equilíbrio** (`tecnico.js`): força volta para perto da base a cada ano (`proximaTemporadaTecnico`), vantagem embutida do usuário igualada à dos rivais (`probabilidadesConfrontoTecnico`), metas por posição do elenco na liga (`rankingForcaLigaTecnico`, `objetivoTecnico`), reputação proporcional ao título e propostas com piso de nível após boa campanha (`gerarPropostasTecnico`).
+- **Momentos** (`momentosTecnico.js` + `MomentosTecnico.jsx`): finais (`resolverFinalTecnico`), paradas (`responderParadaTecnico`), Copa com a seleção (`responderConviteSelecaoTecnico`), ano sem clube (`passarAnoDesempregado(c, rng, escolha)`), personagens, técnico rival e metas (`metasDoTecnico`).
+- As pausas só acontecem quando a tela passa `{ interativo: true }`; testes, desafios históricos e chamadas antigas continuam simulando a temporada inteira de uma vez.
+- Finais em aberto são decididas como "jogo controlado" se o jogo avançar sem passar pela tela (saves antigos, atalhos).
+
+Validação: 270 testes de lógica, 172 cenários de navegador (7 novos em `tests/treinador-momentos.spec.mjs`), 240 carreiras simuladas e 6 carreiras de 30 anos passando por todas as paradas, finais e Copas.

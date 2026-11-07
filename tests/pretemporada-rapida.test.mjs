@@ -30,7 +30,8 @@ test('variações estáveis, dinheiro e efeitos futuros são aplicados uma vez n
  assert.equal(proximo.tecnico.elenco,75);
  assert.equal(proximo.tecnico.efeitosPendentes.length,0);
  const outro=proximaTemporadaTecnico({...novo,tecnico:{...novo.tecnico,clube:'Flamengo',fase:'resultado',ano:2031}});
- assert.equal(outro.tecnico.elenco,72);
+ // Em outro clube o efeito futuro do Santos não vale; a força volta para perto da base do Flamengo (86).
+ assert.equal(outro.tecnico.elenco,86+Math.round((72-86)*0.3));
  const pobre={...jovem,tecnico:{...jovem.tecnico,verbaRapida:0}};
  assert.throws(()=>aplicarPretemporadaRapida(pobre,carta.chave,'craque'),/Verba/);
 });

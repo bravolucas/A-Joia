@@ -8,6 +8,10 @@ import { EVENTOS_CONTEXTO_TECNICO } from './eventosTecnico.js';
 import { competicaoDoTitulo } from '../comum/tacas.js';
 import { simularCopaNacionalTecnico, simularCopaContinentalTecnico, classificarVagasContinentalTecnico } from './competicoesTecnico.js';
 import { atualizarLigasMundoTecnico, simularClassificacoesMundoTecnico } from './classificacoesMundoTecnico.js';
+import { FINAIS_TECNICO, chanceFinalTecnico, finalDoUsuarioTecnico, aplicarResultadoFinalTecnico, paradasDoRitmoTecnico, OPCOES_PARADA_TECNICO,
+  ANO_SEM_CLUBE_TECNICO, evoluirPersonagensTecnico, definirRivalTecnico, atualizarRivalTecnico, conviteSelecaoTecnico, simularCopaSelecaoTecnico,
+  metasCarreiraTecnico, registrarMetasTecnico, geradorTecnico } from './momentosTecnico.js';
+export { FINAIS_TECNICO, chanceFinalTecnico, OPCOES_PARADA_TECNICO, ANO_SEM_CLUBE_TECNICO } from './momentosTecnico.js';
 // Continuação da mesma carreira, sem alterar o histórico do atleta.
 export const ESTILOS_TECNICO = [
   { id: 'ofensivo', nome: 'Ofensivo', descricao: 'Mais gols e menos empates. Favorece equipes superiores, mas expõe as mais fracas.' },
@@ -105,7 +109,7 @@ export function tomarDecisaoTecnico(c, opcaoId, rng = sorteio) {
   // Uma fração do impacto permanece no início do próximo ano, para decisões acumulativas.
   const heranca = Object.fromEntries(Object.entries(impacto).map(([k, v]) => [k, Math.trunc(v * 0.4)]));
   return { ...c, tecnico: {
-    ...t, elenco: limitar((t.elenco ?? 50) + (op.elenco || 0), 10, 95),
+    ...t, elenco: limitar((t.elenco ?? 50) + (op.elenco || 0), 10, 99),
     moral: limitar((t.moral ?? 50) + (op.moral || 0) + (riscoAtivado ? op.riscoMoral || 0 : 0), 10, 95),
     diretoria: limitar((t.diretoria ?? 60) + (op.diretoria || 0) + (riscoAtivado ? op.riscoDiretoria || 0 : 0), 0, 100),
     torcida: limitar((t.torcida ?? 55) + Math.round(impacto.torcida * 0.5), 0, 100),
@@ -182,6 +186,7 @@ export function riscoDemissaoTecnico(t) {
   return { pressao, situacao: pressao >= 75 ? 'Crítica' : pressao >= 55 ? 'Instável' : pressao >= 35 ? 'Em observação' : 'Segura' };
 }
 export const OBJETIVOS_TECNICO = [
+  { id: 'campeao', nome: 'Ser campeão', posicao: 1 },
   { id: 'titulo', nome: 'Disputar o título', posicao: 2 },
   { id: 'continental', nome: 'Conquistar vaga continental', posicao: 6 },
   { id: 'meio', nome: 'Terminar na metade de cima', posicao: 10 },
@@ -198,12 +203,32 @@ export function perfilClubeTecnico(t = {}) {
     perfil === 'intermediario' ? 'Consolidar campanha competitiva' : 'Construir elenco e evitar crise';
   return { perfil, forca, liga, segundaDivisao, expectativa };
 }
+/** Posição do clube na liga pela força-base do elenco (1 = mais forte). */
+export function rankingForcaLigaTecnico(t = {}) {
+  const perfil = perfilClubeTecnico(t);
+  if (!perfil.liga) return { rank: null, total: 1, forcas: [] };
+  const rivais = CLUBES_CONVITES_TECNICO.filter(x => x.nome !== t.clube && (t.ligasMundo?.[x.nome] || x.liga) === perfil.liga).map(x => x.elenco);
+  return { rank: rivais.filter(f => f > perfil.forca).length + 1, total: rivais.length + 1, forcas: rivais };
+}
 export function objetivoTecnico(t) {
   const perfil = perfilClubeTecnico(t);
-  if (perfil.perfil === 'elite') return OBJETIVOS_TECNICO[0];
-  if (perfil.perfil === 'competitivo') return OBJETIVOS_TECNICO[1];
-  if (perfil.perfil === 'intermediario') return OBJETIVOS_TECNICO[2];
-  return OBJETIVOS_TECNICO[3];
+  let i = perfil.perfil === 'elite' ? 1 : perfil.perfil === 'competitivo' ? 2 : perfil.perfil === 'intermediario' ? 3 : 4;
+  // Com a liga conhecida, a meta segue o tamanho do elenco entre os rivais (a mesma régua da previsão).
+  const { rank, total } = rankingForcaLigaTecnico(t);
+  if (rank) i = rank === 1 && perfil.perfil === 'elite' ? 0 : rank <= 3 ? 1 : rank <= Math.ceil(total * 0.3) ? 2 : rank <= Math.ceil(total * 0.65) ? 3 : 4;
+  // Estreia como treinador: a diretoria dá tempo ao novato, mesmo num clube grande.
+  if (!(t.temporadas?.length) && i < 2) i = 2;
+  return OBJETIVOS_TECNICO[i];
+}
+/** Previsão para a temporada: força atual comparada às forças-base dos rivais da liga. */
+export function previsaoTemporadaTecnico(t = {}) {
+  const { forcas } = rankingForcaLigaTecnico(t);
+  const forca = Math.round(forcaClubeTecnico(t));
+  const total = forcas.length + 1, rank = forcas.filter(f => f > forca).length + 1;
+  const media = forcas.length ? Math.round(forcas.reduce((n, f) => n + f, 0) / forcas.length) : forca;
+  const rotulo = rank === 1 ? 'Favorito ao título' : rank <= 3 ? 'Candidato ao título' : rank <= Math.ceil(total * 0.3) ? 'Briga por vaga continental'
+    : rank <= Math.ceil(total * 0.65) ? 'Meio de tabela' : 'Luta contra o rebaixamento';
+  return { rank, total, forca, media, rotulo, tom: rank <= 3 ? 'alto' : rank <= Math.ceil(total * 0.65) ? 'medio' : 'baixo' };
 }
 export function vinculosComoJogador(c) {
   const porClube = new Map();
@@ -242,6 +267,9 @@ export const CLUBES_CONVITES_TECNICO = CLUBES.map(x => ({
   exigencia: limitar(Math.round(25 + (x.forca - 45) * 1.12), 25, 94),
   elenco: x.forca, salario: Math.max(5, Math.round(x.forca * x.forca / 85))
 }));
+/** Metas da carreira com o país de cada clube e o tipo de cada taça. */
+export const metasDoTecnico = t => metasCarreiraTecnico(t, nome => CLUBES_CONVITES_TECNICO.find(x => x.nome === nome)?.pais, nome => competicaoDoTitulo(nome).tipo);
+const comMetas = t => ({ ...t, metasConcluidas: registrarMetasTecnico(t, metasDoTecnico(t), t.temporadas?.at(-1)?.ano ?? t.ano) });
 export function salarioTecnico(t) {
   const clube = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube);
   const base = clube?.salario ?? 12;
@@ -258,13 +286,18 @@ export function gerarPropostasTecnico(t, rng = sorteio) {
   const clubeAtual = clubesMundo.find(x => x.nome === t.clube);
   const referencia=clubesMundo.find(c=>c.nome===(t.clube||t.clubeReferencia))||clubesMundo.find(c=>c.nome===t.temporadas?.at(-1)?.clube);
   const anterior=t.temporadas?.at(-1),boa=!!(anterior?.cumpriuObjetivo||anterior?.campeao||anterior?.posicao<=4);
+  // Quem acabou de ser campeão é visto acima da reputação acumulada e não recebe convites muito abaixo do seu nível.
+  const campeaoAnt=!!(anterior?.campeao||(anterior?.titulosConquistados||[]).length);
+  const repEfetiva=reputacao+(campeaoAnt?15:boa?6:0);
+  const pisoNivel=t.clube&&!t.desempregado?(campeaoAnt?8:boa?14:99):99;
   const nivel=referencia?.elenco??t.elenco??50,pais=referencia?.pais||t.pais;
   const tetoNivel=nivel+(anterior?.campeao?14:boa?10:anterior?.posicao>=15?0:6)+(reputacao>=85&&(t.temporadas?.length||0)>=4?Math.min(20,5+(t.titulos||0)*2):0);
   const ovr=calcularOvrTecnico(t);
-  const internacional=((t.temporadas?.length||0)>=2&&ovr>=55&&reputacao>=55&&boa)||((t.temporadas?.length||0)>=3&&ovr>=60&&reputacao>=65);
+  const internacional=((t.temporadas?.length||0)>=2&&ovr>=55&&reputacao>=55&&boa)||((t.temporadas?.length||0)>=3&&ovr>=60&&reputacao>=65)||!!t.estagioExterior;
   const tetoOvr=ovr+18+(boa?6:0);
-  const elegiveis = clubesMundo.filter(x => x.nome !== t.clube && (reputacao >= x.exigencia || (vinculosJogador.get(x.nome)?.idolatria && reputacao >= x.exigencia - 16)))
+  const elegiveis = clubesMundo.filter(x => x.nome !== t.clube && (repEfetiva >= x.exigencia || (vinculosJogador.get(x.nome)?.idolatria && repEfetiva >= x.exigencia - 16)))
     .filter(x=>(!referencia||x.elenco<=Math.min(tetoNivel,tetoOvr)||vinculosJogador.get(x.nome)?.idolatria)&&(!pais||x.pais===pais||internacional||vinculosJogador.get(x.nome)?.idolatria))
+    .filter(x=>!referencia||x.elenco>=nivel-pisoNivel||vinculosJogador.get(x.nome)?.idolatria)
     .map(x => {
       const mesmoPais = !!clubeAtual && x.pais === clubeAtual.pais;
       const retorno = clubesPassados.has(x.nome);
@@ -275,7 +308,7 @@ export function gerarPropostasTecnico(t, rng = sorteio) {
         const nomes = Array.isArray(derby) ? derby : [derby.a, derby.b, derby.casa, derby.fora, derby.clube1, derby.clube2];
         return nomes.includes(x.nome) && nomes.includes(t.clube);
       });
-      const chance = limitar(0.38 + (reputacao - x.exigencia) / 160 + (mesmoPais ? 0.15 : -0.06)
+      const chance = limitar(0.38 + (repEfetiva - x.exigencia) / 160 + (mesmoPais ? 0.15 : -0.06)
         + (retorno ? 0.12 : 0) + bonusIdolo - (rival ? 0.30 : 0) + ((t.temporadas || []).length >= 4 ? 0.08 : 0), 0.06, 0.90);
       const motivo=vinculo?.idolatria?'Retorno de ídolo':retorno?'Clube que conhece seu trabalho':x.elenco>nivel+3&&boa?'Interesse pela boa campanha':x.pais===pais&&x.elenco<nivel-4?'Projeto de reconstrução no seu país':x.pais===pais?'Projeto compatível no seu país':`Projeto internacional compatível com OVR ${ovr}${boa?' e sua boa campanha':''}`;
       const coerencia=(x.pais===pais?40:0)+(x.liga===(t.liga||referencia?.liga)?12:0)+Math.max(0,20-Math.abs(x.elenco-(nivel+(boa?4:0)))*1.2)+(vinculo?.idolatria?30:0)+(retorno?10:0)+(pais==='Brasil'&&x.pais==='Portugal'?10:0)-(rival?15:0);
@@ -305,6 +338,7 @@ export const ENTREVISTAS_TECNICO = [
   { id: 'ambicioso', nome: 'Prometer grandes resultados (+10%)', multiplicador: 1.1, bonusDiretoria: 10, bonusTorcida: 6, exigenciaExtra: 2, risco: 0.12 }
 ];
 export function negociarContratoTecnico(c, clube, estrategia = 'prudente', rng = sorteio) {
+  c = concluirFinaisPendentesTecnico(c);
   const t = c?.tecnico;
   if (!t || (t.fase !== 'resultado' && !t.desempregado)) throw new Error('Negociação indisponível nesta fase.');
   const proposta = (t.propostas || []).find(p => p.nome === clube);
@@ -326,6 +360,7 @@ export function negociarContratoTecnico(c, clube, estrategia = 'prudente', rng =
     ultimaNegociacao: { clube, estrategia, aceita: true } } };
 }
 export function aceitarPropostaTecnico(c, clube) {
+  c = concluirFinaisPendentesTecnico(c);
   const t = c.tecnico;
   if (!t || (t.fase !== 'resultado' && !t.desempregado)) throw new Error('Propostas só podem ser aceitas entre temporadas.');
   const proposta = (t.propostas || []).find(x => x.nome === clube);
@@ -333,14 +368,21 @@ export function aceitarPropostaTecnico(c, clube) {
   const ruptura=riscosIdolatriaTecnico(t,proposta.nome).length>0;
   return { ...c, tecnico: { ...t, ...(t.modoTreinadorRapido?{verbaRapida:undefined,planoRapido:null}:{}), rupturasIdolo:registrarRupturasTecnico(t,proposta.nome), clube: proposta.nome, pais: proposta.pais, liga: proposta.liga, elenco: proposta.elenco,
     moral: 50, diretoria: proposta.rival || ruptura ? 48 : 65, torcida: proposta.rival || ruptura ? 35 : 55,
-    demitido: false, desempregado: false, anosDesempregado: 0, promessaContrato: null, retornoIdolo: !!vinculoAtivoTecnico(t,proposta.nome)?.idolatria, propostas: [], salario: proposta.salario } };
+    demitido: false, desempregado: false, anosDesempregado: 0, estagioExterior: false, promessaContrato: null, retornoIdolo: !!vinculoAtivoTecnico(t,proposta.nome)?.idolatria, propostas: [], salario: proposta.salario } };
 }
-export function passarAnoDesempregado(c, rng = sorteio) {
+export function passarAnoDesempregado(c, rng = sorteio, escolha = 'esperar') {
   if (!c?.tecnico || c.tecnico.fase !== 'resultado') throw new Error('Só é possível aguardar entre temporadas.');
+  c = concluirFinaisPendentesTecnico(c);
   const t = c.tecnico;
   if (!t.demitido && !t.desempregado) throw new Error('O treinador ainda tem contrato.');
+  const op = ANO_SEM_CLUBE_TECNICO.find(x => x.id === escolha) || ANO_SEM_CLUBE_TECNICO.at(-1);
+  const carteira = t.carteiraTecnico || { saldo: 0, pagamentos: [], compras: [] };
+  const extras = op.id === 'curso' ? { formacaoLoja: Math.min(5, (t.formacaoLoja || 0) + 1), reputacao: limitar(t.reputacao - 1, 10, 99) }
+    : op.id === 'comentarista' ? { reputacao: limitar(t.reputacao + 3, 10, 99), carteiraTecnico: { ...carteira, saldo: carteira.saldo + 480, pagamentos: [...carteira.pagamentos, { chave: `${t.ano}|TV`, ano: t.ano, clube: 'TV', valor: 480, meses: 12 }] } }
+    : op.id === 'estagio' ? { reputacao: limitar(t.reputacao + 1, 10, 99), estagioExterior: true }
+    : { reputacao: limitar(t.reputacao - 2, 10, 99) };
   const proximo = { ...t, ano: t.ano + 1, desempregado: true, demitido: false, clube: null,
-    pais: null, salario: 0, propostas: [], reputacao: limitar(t.reputacao - 2, 10, 99),
+    pais: null, salario: 0, propostas: [], ...extras, anoSabatico: [...(t.anoSabatico || []), { ano: t.ano, escolha: op.id, nome: op.nome }],
     anosDesempregado: (t.anosDesempregado || 0) + 1 };
   return { ...c, idade: c.idade + 1, ano: c.ano + 1, tecnico: {
     ...proximo, propostasCoerentesVersao:2, propostas: gerarPropostasTecnico(proximo, rng)
@@ -388,7 +430,7 @@ export function probabilidadesTecnico(t = {}) {
   return { vitoria, empate: Math.min(empate, 0.94 - vitoria), derrota: Math.max(0.06, 1 - vitoria - empate) };
 }
 export function forcaClubeTecnico(t = {}) {
-  return limitar((t.elenco ?? CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.elenco ?? 50) + bonusForcaLoja(t),10,99);
+  return limitar((t.elenco ?? CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.elenco ?? 50) + bonusForcaLoja(t) + (t.ajusteTurno?.forca || 0),10,99);
 }
 function classificacoesMundoDaTemporada(t, liga, classificacao, rng) {
   return simularClassificacoesMundoTecnico({
@@ -497,7 +539,7 @@ export function probabilidadesConfrontoTecnico(t, adversario) {
   const mando = adversario?.casa ? 0.035 : -0.035;
   const risco=riscoEstiloTecnico(tatica.estilo,diferenca);
   const bonusMoral=limitar(((t.moral??50)-50)*.001,-.025,.025);
-  const vitoria = limitar(0.44 + diferenca * 0.008 + mando + risco + bonusMoral, 0.16, 0.72);
+  const vitoria = limitar(0.40 + diferenca * 0.0065 + mando + risco + bonusMoral, 0.16, 0.70);
   const empateBase=limitar(0.27-Math.abs(diferenca)*.002,0.16,0.27);
   const empate=Math.min(1-vitoria-.06,Math.max(.1,empateBase+(tatica.estilo==='defensivo'?.05:tatica.estilo==='ofensivo'?-.05:0)));
   return { vitoria, empate, derrota: 1 - vitoria - empate };
@@ -744,7 +786,7 @@ export function responderIntervencaoTecnico(c,chave,escolha,rng=sorteio){
  if(!t.temporadaPausada||t.temporadaPausada.ano!==t.ano||t.temporadaPausada.clube!==t.clube)throw new Error('Temporada pendente incompatível.');
  return simularTemporadaTecnico({...c,tecnico:{...t,fase:'pretemporada',temporadaPausada:{...t.temporadaPausada,escolha}}},rng);
 }
-export function simularTemporadaTecnico(c, rng = sorteio) {
+export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   if (!c?.tecnico) throw new Error('Carreira técnica não iniciada.');
   if (c.tecnico.fase !== 'pretemporada') throw new Error('Conclua a temporada anterior antes de simular.');
   if (carreiraTecnicoEncerrada(c.tecnico)) throw new Error('Limite de 30 temporadas como treinador atingido.');
@@ -761,6 +803,10 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   let classificacao = pausa?structuredClone(pausa.classificacao):tabelaClassificacaoTecnico({ ...t, liga: ligaAtual }, { jogos: 0 });
   const confrontos = pausa?structuredClone(pausa.confrontos):[];
   const chaveJogo=calendario.map((j,i)=>({...j,indice:i})).filter(j=>!j.folga&&j.indice>=Math.floor(calendario.length/2)).sort((a,b)=>b.forca-a.forca||a.indice-b.indice)[0];
+  // Paradas da temporada (só na tela do jogo): metade no ritmo normal, dois terços no intenso, nenhuma no expresso.
+  const paradas = opcoes.interativo ? paradasDoRitmoTecnico(c.ritmo, calendario.length) : [];
+  const clubesLiga = CLUBES_CONVITES_TECNICO.filter(x => (t.ligasMundo?.[x.nome] || x.liga) === ligaAtual);
+  const rivalInicial = definirRivalTecnico(t, clubesLiga);
   for (let rodada = pausa?.indice ?? 0; rodada < calendario.length; rodada++) {
     const adversario = calendario[rodada];
     if (adversario.folga) {
@@ -768,12 +814,25 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
       classificacao = simularRodadaRivaisTecnico({ ...t, liga: ligaAtual }, classificacao, null, null, rng, rodada + 1);
       continue;
     }
+    if (paradas.includes(rodada) && !(pausa?.paradasFeitas || []).includes(rodada)) {
+      const jogosAte = confrontos.filter(j => !j.folga).length, pontosAte = vitorias * 3 + empates;
+      const tabela = ordenarClassificacaoTecnico(classificacao.map(x => x.meuClube ? { ...x, jogos: jogosAte, pontos: pontosAte, vitorias, empates, derrotas, golsPro, golsContra, saldoGols: golsPro - golsContra } : x));
+      const minha = tabela.find(x => x.meuClube);
+      const objetivoAtual = objetivoTecnico({ ...t, liga: ligaAtual });
+      const crise = (minha?.posicao || tabela.length) > objetivoAtual.posicao + 3 || riscoDemissaoTecnico(t).pressao >= 55;
+      const chave = `${t.clube}|${t.ano}|parada|${rodada}`;
+      return { ...c, tecnico: { ...t, fase: 'parada',
+        paradaPendente: { chave, rodada, total: calendario.length, jogos: jogosAte, pontos: pontosAte, vitorias, empates, derrotas, golsPro, golsContra,
+          posicao: minha?.posicao || tabela.length, objetivo: objetivoAtual.nome, objetivoPosicao: objetivoAtual.posicao, crise, tabela: tabela.slice(0, 5), minha },
+        temporadaPausada: { tipo: 'parada', ano: t.ano, clube: t.clube, indice: rodada, calendario: structuredClone(calendario), confrontos, classificacao, vitorias, empates, derrotas, golsPro, golsContra,
+          paradasFeitas: [...(pausa?.paradasFeitas || []), rodada] } } };
+    }
     if(t.acompanharJogo&&!pausa&&rodada===chaveJogo?.indice){
       const chave=`${t.clube}|${t.ano}|${rodada}`;
       return {...c,tecnico:{...t,fase:'intervencao',intervencaoPendente:{chave,adversario,rodada:rodada+1,pontos:vitorias*3+empates,jogos:confrontos.filter(j=>!j.folga).length},
         temporadaPausada:{ano:t.ano,clube:t.clube,indice:rodada,calendario:structuredClone(calendario),confrontos,classificacao,vitorias,empates,derrotas,golsPro,golsContra}}};
     }
-    const intervencao=pausa&&rodada===pausa.indice?pausa.escolha:null;
+    const intervencao=pausa&&pausa.tipo!=='parada'&&rodada===pausa.indice?pausa.escolha:null;
     const estiloJogo=intervencao==='atacar'?'ofensivo':intervencao==='proteger'?'defensivo':t.estilo;
     const planoJogo={...t,liga:ligaAtual,estilo:estiloJogo};
     const odds = probabilidadesConfrontoTecnico(planoJogo, adversario);
@@ -810,7 +869,7 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
     decisoes: t.decisoes, jogos: jogosDisputados, vitorias, empates, derrotas, pontos, posicao, campeao,
     classificacao, classificacoesMundo,
     ...(progressaoMundo.movimentos.length ? { movimentosMundo: progressaoMundo.movimentos } : {}),
-    confrontos, golsPro, golsContra,
+    confrontos, golsPro, golsContra, paradas: t.paradasTemporada || [],
     ...(movimento?.tipo === 'rebaixado' ? { rebaixado: { de: movimento.de, para: movimento.para } } : {}),
     ...(movimento?.tipo === 'acesso' ? { acesso: { de: movimento.de, para: movimento.para } } : {})
   };
@@ -857,11 +916,19 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
     if (continental) torneios.push(continental);
   }
   temporada.torneios = torneios;
+  // Finais em que o clube chegou viram decisão do treinador na tela; até lá, a taça fica em aberto.
+  const finaisPendentes = opcoes.interativo ? torneios.map(x => finalDoUsuarioTecnico(x, t.clube)).filter(Boolean).map(f => ({ ...f, ano: t.ano,
+    forcaUsuario: Math.round(forcaClubeTecnico(t)), forcaAdv: CLUBES_CONVITES_TECNICO.find(x => x.nome === f.adversario)?.elenco ?? 70, dado: rng() })) : [];
+  for (const x of torneios) if (finaisPendentes.some(f => f.nome === x.nome)) { x.finalPendente = true; x.faseUsuario = 'Final'; x.campeao = null; }
   temporada.titulosConquistados = [
     ...(campeao ? [competicaoTemporadaTecnico(temporada)] : []),
     ...torneios.filter(x => x.campeao === t.clube).map(x => x.nome)
   ];
-  const novaConfianca = limitar((t.diretoria ?? 60) + (cumpriuObjetivo ? 8 : -14) + (posicao <= 4 ? 5 : posicao >= 15 ? -8 : 0)
+  const rivalTecnico = atualizarRivalTecnico(rivalInicial, temporada);
+  if (rivalTecnico?.ultimo) temporada.rival = { nome: rivalTecnico.nome, clube: rivalTecnico.clube, ...rivalTecnico.ultimo };
+  // Errar a meta por pouco custa menos do que desabar na tabela.
+  const custoMeta = cumpriuObjetivo ? 8 : -Math.min(24, 8 + 3 * (posicao - objetivo.posicao));
+  const novaConfianca = limitar((t.diretoria ?? 60) + custoMeta + (posicao <= 4 ? 5 : posicao >= 15 ? -8 : 0)
     + (idoloEmCasa && !cumpriuObjetivo ? -4 : 0) - (promessaDescumprida ? 12 : 0), 0, 100);
   const variacaoTorcida = (campeao ? 18 : posicao <= 4 ? 10 : cumpriuObjetivo ? 5 : posicao >= 17 ? -23 : -12)
     + (idoloEmCasa && !cumpriuObjetivo ? -9 : idoloEmCasa && cumpriuObjetivo ? 4 : 0) - (promessaDescumprida ? 7 : 0)
@@ -873,11 +940,15 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
   const mentor=c.jornada?.mentor;
   if(mentor?.promovido&&c.idade<49&&(temporada.confrontos||[]).some(j=>j.nome===mentor.clubeAtual))temporada.reencontroMentor={nome:mentor.nome,clube:mentor.clubeAtual,texto:'Seu primeiro orientador está registrado no banco adversário. Duas trajetórias se encontram.',ficticio:true};
   temporada.filosofia=t.filosofia||null;
-  const reputacaoNova = limitar((t.reputacao ?? 50) + (campeao ? 9 : cumpriuObjetivo ? 4 : -3), 10, 99);
+  const primeiraDivisao = !/(?:2|serieB)$/i.test(ligaAtual || '');
+  const reputacaoNova = limitar((t.reputacao ?? 50) + (campeao ? (primeiraDivisao ? 16 : 8) : cumpriuObjetivo ? 4 : -3)
+    + torneios.filter(x => x.campeao === t.clube).reduce((n, x) => n + (x.tipo === 'continental' ? 12 : 5), 0), 10, 99);
   const propostas = gerarPropostasTecnico({ ...t, clube: demitido ? null : t.clube,clubeReferencia:t.clube,temporadas:[...t.temporadas,temporada],titulos:(t.titulos||0)+temporada.titulosConquistados.length, liga: ligaSeguinte,
     ligasMundo: progressaoMundo.ligasMundo, reputacao: reputacaoNova }, rng);
-  return { ...c, idade: c.idade + 1, ano: c.ano + 1, tecnico: {
+  const conviteSelecao = conviteSelecaoTecnico(c, { ...t, reputacao: reputacaoNova, temporadas: [...t.temporadas, temporada] }, calcularOvrTecnico(t));
+  return { ...c, idade: c.idade + 1, ano: c.ano + 1, tecnico: comMetas({
     ...t, carteiraTecnico:creditarSalarioTecnico(t,t.ano,t.salario??salarioTecnico(t)), ano: t.ano + 1, liga: ligaSeguinte,
+    finaisPendentes, conviteSelecao, rivalTecnico, temporadaPausada: null, paradaPendente: null, ultimaFinal: null,
     ligasMundo: progressaoMundo.ligasMundo,
     participantesLiga: ligaSeguinte === ligaAtual && nomesLiga
       ? { liga: ligaAtual, nomes: nomesLiga } : null,
@@ -886,7 +957,75 @@ export function simularTemporadaTecnico(c, rng = sorteio) {
     titulos: (t.titulos ?? 0) + temporada.titulosConquistados.length, demitido, propostas,
     promessaContrato: null, objetivoAtual: objetivo.nome, reputacao: reputacaoNova,
     diretoria: novaConfianca, torcida: novaTorcida
-  }};
+  })};
+}
+
+/** Resposta à parada da temporada: aplica o efeito e continua de onde parou. */
+export function responderParadaTecnico(c, chave, escolha, rng = sorteio) {
+  const t = c?.tecnico, p = t?.paradaPendente;
+  if (t?.fase !== 'parada' || !p || p.chave !== chave) return c;
+  const op = OPCOES_PARADA_TECNICO[p.crise ? 'crise' : 'normal'].find(o => o.id === escolha);
+  if (!op) throw new Error('Escolha inválida.');
+  const deuCerto = op.aposta ? geradorTecnico(chave)() < 0.4 : null;
+  const diretoria = (op.diretoria || 0) + (op.aposta ? (deuCerto ? 5 : -9) : 0);
+  const registro = { rodada: p.rodada, total: p.total, posicao: p.posicao, pontos: p.pontos, escolha: op.id, nome: op.nome, crise: p.crise, ...(op.aposta ? { apostaDeuCerto: deuCerto } : {}) };
+  const novo = { ...t, fase: 'pretemporada', paradaPendente: null,
+    ajusteTurno: { forca: limitar((t.ajusteTurno?.forca || 0) + (op.forca || 0), -4, 6) },
+    moral: limitar((t.moral ?? 50) + (op.moral || 0), 10, 95), diretoria: limitar((t.diretoria ?? 60) + diretoria, 0, 100),
+    paradasTemporada: [...(t.paradasTemporada || []), registro], temporadaPausada: { ...t.temporadaPausada, escolha: op.id } };
+  return simularTemporadaTecnico({ ...c, tecnico: novo }, rng, { interativo: true });
+}
+
+/** Final decidida pelo treinador: a escolha muda a chance; o sorteio já está guardado no save. */
+export function resolverFinalTecnico(c, nome, opcaoId) {
+  const t = c?.tecnico, f = (t?.finaisPendentes || []).find(x => x.nome === nome);
+  if (!f) return c;
+  const op = FINAIS_TECNICO.find(o => o.id === opcaoId) || FINAIS_TECNICO[1];
+  const chance = chanceFinalTecnico(f, op.id, t.moral);
+  const venceu = f.dado < chance;
+  const temporadas = [...t.temporadas];
+  const idx = temporadas.map((a, i) => ({ a, i })).filter(({ a }) => a.ano === f.ano && (a.torneios || []).some(x => x.nome === f.nome)).at(-1)?.i ?? temporadas.length - 1;
+  const a = { ...temporadas[idx] };
+  let placar = '';
+  a.torneios = (a.torneios || []).map(x => { if (x.nome !== f.nome) return x; const r = aplicarResultadoFinalTecnico(x, f, venceu, geradorTecnico(`${f.ano}|${f.nome}|${f.lado}|placar`)); placar = r.placar; return r.torneio; });
+  if (venceu) a.titulosConquistados = [...(a.titulosConquistados || []), f.nome];
+  a.finais = [...(a.finais || []), { nome: f.nome, tipo: f.tipo, adversario: f.adversario, lado: f.lado, escolha: op.id, escolhaNome: op.nome, chance, venceu, placar }];
+  temporadas[idx] = a;
+  const restantes = t.finaisPendentes.filter(x => x.nome !== nome);
+  const ganho = venceu ? (f.tipo === 'continental' ? 12 : f.tipo === 'copaMundo' ? 15 : 5) : 1;
+  const novo = { ...t, temporadas, finaisPendentes: restantes, titulos: (t.titulos || 0) + (venceu ? 1 : 0),
+    reputacao: limitar((t.reputacao ?? 40) + ganho, 10, 99), torcida: f.tipo === 'copaMundo' ? t.torcida : limitar((t.torcida ?? 55) + (venceu ? 6 : -3), 0, 100),
+    ultimaFinal: { nome: f.nome, tipo: f.tipo, adversario: f.adversario, lado: f.lado, escolha: op.nome, chance, venceu, placar, ano: f.ano, dado: f.dado } };
+  if (!restantes.length && !novo.desempregado) novo.propostas = gerarPropostasTecnico({ ...novo, clube: novo.demitido ? null : novo.clube, clubeReferencia: a.clube }, geradorTecnico(`${f.ano}|${a.clube}|propostas-final`));
+  return { ...c, tecnico: comMetas(novo) };
+}
+/** Saves antigos ou atalhos: finais ainda abertas são decididas com o jogo controlado. */
+export function concluirFinaisPendentesTecnico(c) {
+  let atual = c;
+  for (const f of c?.tecnico?.finaisPendentes || []) atual = resolverFinalTecnico(atual, f.nome, 'controlar');
+  return atual;
+}
+
+/** Convite para comandar a seleção na Copa do Mundo, entre uma temporada e outra. */
+export function responderConviteSelecaoTecnico(c, aceitar, opcoes = {}) {
+  const t = c?.tecnico, conv = t?.conviteSelecao;
+  if (!conv || conv.status !== 'pendente' || t.fase !== 'resultado') return c;
+  if (!aceitar) return { ...c, tecnico: { ...t, conviteSelecao: { ...conv, status: 'recusado' } } };
+  const copa = simularCopaSelecaoTecnico(conv, calcularOvrTecnico(t), `${conv.ano}|${conv.nac}|${c.nome}`);
+  const final = opcoes.interativo ? finalDoUsuarioTecnico(copa, conv.selecao) : null;
+  const pendente = final ? [{ ...final, tipo: 'copaMundo', ano: conv.ano, forcaUsuario: copa.forcas?.[conv.selecao] ?? conv.forca, forcaAdv: copa.forcas?.[final.adversario] ?? 85,
+    dado: geradorTecnico(`${conv.ano}|${conv.nac}|final`)() }] : [];
+  if (final) { copa.finalPendente = true; copa.faseUsuario = 'Final'; copa.campeao = null; }
+  const temporadas = [...t.temporadas];
+  const a = { ...temporadas.at(-1) };
+  const campeao = copa.campeao === conv.selecao;
+  a.torneios = [...(a.torneios || []), copa];
+  if (campeao) a.titulosConquistados = [...(a.titulosConquistados || []), 'Copa do Mundo'];
+  temporadas[temporadas.length - 1] = a;
+  const avancou = ['Campeão', 'Final'].includes(copa.faseUsuario) || /semifinal|quartas/.test(copa.faseUsuario);
+  return { ...c, tecnico: comMetas({ ...t, temporadas, conviteSelecao: { ...conv, status: 'aceito', faseUsuario: copa.faseUsuario },
+    finaisPendentes: [...(t.finaisPendentes || []), ...pendente], titulos: (t.titulos || 0) + (campeao ? 1 : 0),
+    reputacao: limitar((t.reputacao ?? 40) + (campeao ? 15 : avancou ? 3 : -2), 10, 99) }) };
 }
 function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
   const t = c.tecnico;
@@ -926,6 +1065,7 @@ function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
 }
 export function proximaTemporadaTecnico(c) {
   if (!c?.tecnico || c.tecnico.fase !== 'resultado') throw new Error('Nenhum resultado pendente.');
+  c = concluirFinaisPendentesTecnico(c);
   const t = c.tecnico;
   if (t.demitido || t.desempregado) throw new Error('Aceite uma proposta antes de começar a próxima temporada.');
   if (carreiraTecnicoEncerrada(t)) throw new Error('Carreira de treinador encerrada após 30 temporadas.');
@@ -933,12 +1073,23 @@ export function proximaTemporadaTecnico(c) {
   const vencidos = (t.efeitosPendentes || []).filter(e => e.aplicarEm <= t.ano&&(!e.clube||e.clube===t.clube));
   const pendentes = (t.efeitosPendentes || []).filter(e => e.aplicarEm > t.ano);
   const soma = (atributo) => vencidos.reduce((acc, e) => acc + (e.heranca?.[atributo] || 0), 0);
+  // Os bônus de uma temporada não se acumulam para sempre: a força volta para perto
+  // da base do clube (35% do ganho fica, de −6 a +8) e diretoria, torcida e moral
+  // esquecem parte do passado — o título de ontem não garante o emprego amanhã.
+  const base = CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.elenco ?? t.elenco ?? 50;
+  const herdado = limitar(Math.round(((t.elenco ?? base) - base) * 0.3), -6, 5);
   const proximo = { ...t, ...(t.modoTreinadorRapido?{verbaRapida:renovarVerbaPretemporada(t)}:{}), historicoCartas, decisoes: [], andamento: null, reuniaoPendente: false, fase: 'pretemporada', ultimaNegociacao: null,
-    efeitosPendentes: pendentes, efeitosRecebidos: vencidos,
-    elenco: limitar(t.elenco + soma('elenco'), 10, 95),
-    moral: limitar(t.moral + 2 + soma('moral'), 10, 95),
-    diretoria: limitar(t.diretoria + soma('diretoria'), 0, 100),
-    torcida: limitar((t.torcida ?? 55) + Math.round(soma('torcida') * 0.5), 0, 100) };
+    efeitosPendentes: pendentes, efeitosRecebidos: vencidos, ajusteTurno: null, paradasTemporada: [], conviteSelecao: null,
+    elenco: limitar(base + herdado + soma('elenco'), 10, 99),
+    moral: limitar(Math.round(55 + ((t.moral ?? 50) - 55) * 0.7) + 2 + soma('moral'), 10, 95),
+    diretoria: limitar(Math.round(60 + ((t.diretoria ?? 60) - 60) * 0.75) + soma('diretoria'), 0, 100),
+    torcida: limitar(Math.round(55 + ((t.torcida ?? 55) - 55) * 0.85) + Math.round(soma('torcida') * 0.5), 0, 100) };
+  // Os jogadores fictícios contratados envelhecem, evoluem, são vendidos ou se aposentam.
+  const ano = evoluirPersonagensTecnico(proximo);
+  proximo.personagens = ano.personagens;
+  proximo.noticiasElenco = ano.noticias;
+  if (ano.bonusForca) proximo.elenco = limitar(proximo.elenco + ano.bonusForca, 10, 99);
+  if (ano.verba && proximo.verbaRapida != null) proximo.verbaRapida += ano.verba;
   return { ...c, tecnico: { ...proximo, cartas: sortearCartasTecnico(proximo) } };
 }
 
@@ -951,14 +1102,14 @@ export function escolherOpcaoAutomaticaTecnico(opcoes, rng = sorteio) {
 }
 
 /** Fluxo expresso sem decisões de pré-temporada. Mantém saves antigos compatíveis. */
-export function escolherPretemporadaRapidaTecnico(c,chave,opcaoId,rng=sorteio){
+export function escolherPretemporadaRapidaTecnico(c,chave,opcaoId,rng=sorteio,opcoes={}){
  if(!c?.tecnico||c.tecnico.fase!=='pretemporada'||carreiraTecnicoEncerrada(c.tecnico))return c;
  const atual=aplicarPretemporadaRapida(c,chave,opcaoId,1);
  if(atual===c)return c;
  const plano=planoPretemporadaRapida(atual.tecnico,1);
- return plano.respostas.length===plano.cartas.length?jogarTemporadaExpressaTecnico(atual,null,rng):atual;
+ return plano.respostas.length===plano.cartas.length?jogarTemporadaExpressaTecnico(atual,null,rng,opcoes):atual;
 }
-export function jogarTemporadaExpressaTecnico(c, opcaoId, rng = sorteio) {
+export function jogarTemporadaExpressaTecnico(c, opcaoId, rng = sorteio, opcoes = {}) {
   if (!c?.tecnico || c.tecnico.fase !== 'pretemporada') throw new Error('Temporada indisponível.');
   if (carreiraTecnicoEncerrada(c.tecnico)) throw new Error('Carreira de treinador encerrada.');
   if (c.tecnico.temporadas.length === 0 && !c.tecnico.clubeInicialEscolhido && c.tecnico.opcoesInicio?.length) throw new Error('Escolha o clube inicial.');
@@ -987,7 +1138,7 @@ export function jogarTemporadaExpressaTecnico(c, opcaoId, rng = sorteio) {
     }
     return atual;
   }
-  return simularTemporadaTecnico(atual, rng);
+  return simularTemporadaTecnico(atual, rng, opcoes);
 }
 
 export function comprarMelhoriaTecnico(c,id){

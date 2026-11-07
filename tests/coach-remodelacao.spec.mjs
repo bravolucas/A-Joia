@@ -34,7 +34,7 @@ async function concluirMomentos(page) {
     if (await final.count()) { await final.locator('.ct-decisions button').first().click(); continue; }
     const resultado = page.getByRole('dialog', { name: 'Resultado da final' });
     if (await resultado.count()) { const agora = resultado.getByRole('button', { name: 'Ver agora' }); if (await agora.count()) await agora.click(); await resultado.getByRole('button', { name: /Continuar/ }).click(); continue; }
-    const parada = page.getByRole('heading', { name: /Parada na rodada|Reunião de emergência/ });
+    const parada = page.getByRole('heading', { name: /Parada na rodada|Reunião de emergência|Clássico contra/ });
     if (await parada.count()) { await page.locator('.ct-actions .ct-decisions button:enabled').first().click(); await page.locator('.ct-simulating').waitFor({ state: 'detached', timeout: 10000 }); continue; }
     if (i >= 2) return;
   }

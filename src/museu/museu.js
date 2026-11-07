@@ -2,6 +2,7 @@ import {compararMarcasCopas} from '../jogador/recordesHistoricos.js';
 import { CLUBES, LIGAS, COMPS_PAIS, ESTADUAIS } from '../dados/data.js';
 import { competicaoDoTitulo } from '../comum/tacas.js';
 import { slugCompeticao } from '../comum/arteCompeticoes.js';
+import { metasCarreiraTecnico } from '../treinador/momentosTecnico.js';
 
 export const CHAVE_MUSEU = 'ajoia_museu_v1';
 const COPAS_MUSEU = { brasileirao: 'Copa do Brasil', serieB: 'Copa do Brasil', ...Object.fromEntries(Object.entries(COMPS_PAIS).map(([id, comp]) => [id, comp.copa])) };
@@ -40,6 +41,8 @@ export const FEITOS_MUSEU = [
   { id: 'cinco-clubes', nome: 'Passaporte carimbado', descricao: 'Dispute temporadas por 5 clubes em uma carreira de jogador.', icone: '✈️' },
   { id: 'treinador-campeao', nome: 'Glória à beira do campo', descricao: 'Conquiste um título como treinador.', icone: '📋' },
   { id: 'trinta-treinador', nome: 'Uma era no comando', descricao: 'Complete 30 temporadas como treinador.', icone: '🎖️' },
+  // Metas da carreira de treinador também ficam no museu.
+  ...metasCarreiraTecnico().map(m => ({ id: `tecnico-${m.id}`, nome: `${m.nome} · técnico`, descricao: `Como treinador: ${m.descricao}`, icone: '📋' })),
 ];
 
 const nomesCatalogo = [...Object.values(LIGAS).filter(x => !x.naoJogavel).map(x => x.nome), ...Object.values(COMPS_PAIS).flatMap(Object.values), ...Object.values(ESTADUAIS).map(x => x.nome), 'Copa do Brasil', 'Copa do Mundo', 'Mundial de Clubes', 'Libertadores', 'Copa Sul-Americana', 'Copa América', 'Eurocopa', 'Copa Ouro', 'Copa Africana de Nações', 'Copa da Ásia', 'Copa das Nações da OFC'];
@@ -117,6 +120,10 @@ export function extrairConquistasMuseu(c, { modo = 'rapido', temporadas = [] } =
   for (const f of FEITOS_MUSEU) if (feitos[f.id]) {
     const chave={'memoria-contrato':'contrato','memoria-estreia':'estreia','memoria-convocacao':'convocacao','memoria-estreia-selecao':'estreia-selecao'}[f.id]||f.id,marca=f.id==='marca-klose'?marcas[0]:f.id==='marca-fontaine'?marcas[1]:null,m=primeiros[chave]||(marca?{ano:marca.anoIgualou,clube:'Seleção',texto:`${marca.nome}: igualou a referência histórica de ${marca.valor} gols (base até 2022).`}:null);
     adicionar('feitos', {...f,...(m?{ano:m.ano,clube:m.clube,historia:{anos:[m.ano],numeros:[m.numero].filter(Number.isFinite),posicoes:[m.posicao].filter(Boolean),feito:m.texto}}:{})});
+  }
+  for (const [id, ano] of Object.entries(tecnico?.metasConcluidas || {})) {
+    const f = FEITOS_MUSEU.find(x => x.id === `tecnico-${id}`);
+    if (f) adicionar('feitos', { ...f, ...(Number.isFinite(ano) ? { ano } : {}) }, 1, 'Treinador');
   }
   return registros;
 }

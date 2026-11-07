@@ -74,3 +74,24 @@
 .mt-forecast-tag{font-size:11px;font-weight:800;border:0!important;background:none!important;padding:0!important}
 .mt-forecast-tag.mt-forecast-alto{color:#86efac}.mt-forecast-tag.mt-forecast-medio{color:#fde68a}.mt-forecast-tag.mt-forecast-baixo{color:#fca5a5}
 .mt-ball{display:flex;justify-content:center;margin-top:10px}
+.mt-cups .mt-path{border:1px solid #2c2c33;border-radius:10px;padding:2px 8px}
+.mt-path summary{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:8px;font-size:12px;cursor:pointer;list-style:none;padding:4px 0}
+.mt-path summary::-webkit-details-marker{display:none}
+.mt-path summary strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mt-path summary span{color:#a1a1aa;font-size:11px}
+.mt-path summary::after{content:'▾';color:#71717a;font-size:10px;grid-column:3;justify-self:end;margin-left:6px}
+.mt-path[open] summary::after{content:'▴'}
+.mt-path summary{grid-template-columns:28px minmax(0,1fr) auto auto}
+.mt-path .mt-games{margin:4px 0 8px}
+.mt-path .mt-games>div{grid-template-columns:minmax(0,6.5rem) 20px auto 20px minmax(0,1fr)}
+.mt-derby{margin:12px 0}
+.mt-legacy-body{padding:0 12px 12px}
+.mt-legacy-total{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.mt-legacy-total strong{font-size:24px;color:#fde68a}.mt-legacy-total span{font-size:11px;color:#a1a1aa}
+.mt-legacy-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.mt-legacy-cols section{background:#ffffff06;border:1px solid #2c2c33;border-radius:10px;padding:10px}
+.mt-legacy-cols h4{margin:0;font-size:12px;font-weight:800;color:#e4e4e7}
+.mt-legacy-cols p{margin:2px 0 8px;font-size:11px;color:#a1a1aa}
+.mt-legacy-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px}
+.mt-legacy-grid div{text-align:center;background:#232329;border-radius:8px;padding:6px 4px}
+.mt-legacy-grid strong{display:block;font-size:15px;color:#f4f4f5}.mt-legacy-grid span{font-size:9.5px;color:#a1a1aa;text-transform:uppercase}

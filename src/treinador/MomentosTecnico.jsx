@@ -72,6 +72,7 @@ export function PopUpResultadoFinal({ uf, onFechar }) {
 
 /* ---------- Parada da temporada ---------- */
 export function PainelParada({ p, onEscolher, ocupado }) {
+  if (p.tipo === 'rival') return <PainelClassico p={p} onEscolher={onEscolher} ocupado={ocupado} />;
   const ops = OPCOES_PARADA_TECNICO[p.crise ? 'crise' : 'normal'];
   return <>
     {p.crise && <div className="vf-hero-diretoria" style={{ backgroundImage: `url(${CENARIOS.diretoriaMobile})` }} />}
@@ -83,6 +84,35 @@ export function PainelParada({ p, onEscolher, ocupado }) {
     </div>
     <div className="ct-decisions">{ops.map(op => <button key={op.id} disabled={ocupado} onClick={() => onEscolher(op.id)}><strong>{op.nome}</strong><span>{op.descricao}</span></button>)}</div>
   </>;
+}
+
+/* ---------- Clássico contra o técnico rival ---------- */
+function PainelClassico({ p, onEscolher, ocupado }) {
+  const r = p.rival;
+  return <>
+    <span className="mt-eyebrow">RODADA {p.rodada} · CLÁSSICO</span>
+    <h2>Clássico contra {r.nome}</h2>
+    <p>{p.casa ? 'Em casa' : 'Fora de casa'} contra o {r.clube}. O técnico rival {r.v + r.e + r.d ? `tem ${r.d}V ${r.e}E ${r.v}D contra você` : 'nunca enfrentou você'}. A torcida só fala desse jogo.</p>
+    <div className="mt-versus mt-derby">
+      <div><Escudo nome={p.minha?.nome} size={44} /><strong>{p.minha?.nome}</strong><span>{p.posicao}º · força {p.forca}</span></div>
+      <b>x</b>
+      <div><Escudo nome={r.clube} size={44} /><strong>{r.clube}</strong><span>{r.posicao ? `${r.posicao}º · ` : ''}força {p.forcaAdv}</span></div>
+    </div>
+    <div className="ct-decisions">{OPCOES_PARADA_TECNICO.rival.map(op => <button key={op.id} disabled={ocupado} onClick={() => onEscolher(op.id)}><strong>{op.nome}</strong><span>{op.descricao}</span></button>)}</div>
+  </>;
+}
+const textoClassico = k => `${k.resultado === 'V' ? 'vitória' : k.resultado === 'D' ? 'derrota' : 'empate'} por ${k.golsPro} x ${k.golsContra}`;
+
+/* ---------- Caminho nas copas ---------- */
+function CaminhoCopa({ torneio: x, lado }) {
+  const jogos = (x.jogosUsuario || []).filter(j => !j.bye);
+  return <details className="mt-path">
+    <summary><TacaCompeticao tipo={x.tipo === 'copaMundo' ? 'copaMundo' : x.tipo || competicaoDoTitulo(x.nome).tipo} nome={x.nome} size={26} /><strong>{x.nome}</strong><span className={x.faseUsuario === 'Campeão' ? 'mt-v' : ''}>{x.faseUsuario}</span></summary>
+    {jogos.length ? <div className="mt-games">{jogos.map((j, i) => {
+      const adv = j.casa === lado ? j.fora : j.casa;
+      return <div key={i}><span>{(j.fase || `Jogo ${i + 1}`).replace('Fase de grupos · ', '')}</span><Escudo nome={j.casa} size={20} /><strong>{j.golsCasa ?? '–'} x {j.golsFora ?? '–'}</strong><Escudo nome={j.fora} size={20} /><em className={j.vencedor === lado ? 'mt-v' : j.vencedor ? 'mt-d' : ''}>{adv}{j.penaltis ? ' · pên.' : ''}</em></div>;
+    })}</div> : <p className="mt-note">Sem jogos registrados.</p>}
+  </details>;
 }
 
 /* ---------- Seleção ---------- */
@@ -123,7 +153,10 @@ export function PopUpResumo({ temporada: a, metasNovas = [], rival, onFechar }) 
       <p className={a.cumpriuObjetivo ? 'ct-positive' : 'ct-warning'}>Meta: {a.objetivo} · {a.cumpriuObjetivo ? 'cumprida' : 'não cumprida'}</p>
       <div className="mt-table">{top.map(l => <div key={l.nome} className={l.meuClube ? 'mt-me' : ''}><span>{l.posicao}</span><strong>{l.nome}</strong><span>{l.pontos} pts</span></div>)}
         {minha && minha.posicao > top.length && <div className="mt-me"><span>{minha.posicao}</span><strong>{minha.nome}</strong><span>{minha.pontos} pts</span></div>}</div>
-      {(a.torneios || []).length > 0 && <div className="mt-cups">{a.torneios.map(x => <div key={x.nome}><TacaCompeticao tipo={x.tipo === 'copaMundo' ? 'copaMundo' : x.tipo || competicaoDoTitulo(x.nome).tipo} nome={x.nome} size={26} /><strong>{x.nome}</strong><span className={x.faseUsuario === 'Campeão' ? 'mt-v' : ''}>{x.faseUsuario}</span></div>)}</div>}
+      {a.contratoCurto === 'renovado' && <p className="mt-note">✍️ Contrato de um ano cumprido: a diretoria renovou com você.</p>}
+      {(a.torneios || []).length > 0 && <div className="mt-cups" aria-label="Caminho nas copas">{a.torneios.map(x => <CaminhoCopa key={x.nome} torneio={x} lado={x.tipo === 'copaMundo' ? x.selecao : a.clube} />)}</div>}
+      {a.classico && <p className="mt-note">⚔️ Clássico contra {a.classico.rival} ({a.classico.clube}): {textoClassico(a.classico)}.</p>}
+      {a.cobrancaGigante && <p className="mt-note">{a.cobrancaGigante === 'jejum' ? '🔥 Segundo ano sem título: a cobrança no clube grande ficou pesada.' : '👀 Em clube grande, só o título conta. A diretoria cobra.'}</p>}
       {(a.paradas || []).length > 0 && <p className="mt-note">Paradas: {a.paradas.map(p => `rodada ${p.rodada} — ${p.nome}${p.apostaDeuCerto === false ? ' (a diretoria não comprou)' : ''}`).join(' · ')}</p>}
       {(a.finais || []).length > 0 && <p className="mt-note">Finais: {a.finais.map(f => `${f.nome}: ${f.venceu ? 'título' : 'vice'} (${f.escolhaNome})`).join(' · ')}</p>}
       {a.rival && <p className="mt-note">Duelo com {a.rival.nome} ({a.rival.clube}): {a.rival.v}V {a.rival.e}E {a.rival.d}D{a.rival.campeao ? ' · ele foi campeão' : ''}{rival ? ` · no total ${rival.v}V ${rival.e}E ${rival.d}D` : ''}</p>}
@@ -142,7 +175,7 @@ export function PopUpDemissao({ temporada: a, t, onFechar }) {
       <h3>Você foi demitido</h3>
       <div className="ct-event-club"><Escudo nome={a.clube} size={30} /><strong>{a.clube}</strong></div>
       <div className="mt-fired-stats">{[[`${a.posicao}º`, 'posição'], [`${t.diretoria ?? 0}%`, 'diretoria'], [`${t.torcida ?? 0}%`, 'torcida']].map(([v, r]) => <div key={r}><strong>{v}</strong><span>{r}</span></div>)}</div>
-      <p>Meta: {a.objetivo}. {a.cumpriuObjetivo ? 'A meta veio, mas a relação desgastou.' : 'O resultado ficou longe do combinado e a diretoria decidiu encerrar o trabalho.'} A carreira continua: há propostas, e você também pode tirar um ano para se preparar.</p>
+      <p>Meta: {a.objetivo}. {a.contratoCurto === 'encerrado' ? 'O contrato de um ano terminou sem a meta e não foi renovado.' : a.cumpriuObjetivo ? 'A meta veio, mas a relação desgastou.' : 'O resultado ficou longe do combinado e a diretoria decidiu encerrar o trabalho.'} A carreira continua: há propostas, e você também pode tirar um ano para se preparar.</p>
       <button className="ct-primary" onClick={onFechar}>Seguir em frente<span aria-hidden="true">→</span></button>
     </div>
   </JanelaTreinador>;
@@ -181,3 +214,23 @@ export function MetasCarreira({ metas, concluidas = {} }) {
     <ul>{metas.map(m => <li key={m.id} className={m.feito ? 'feita' : ''}><span aria-hidden="true">{m.feito ? '🏅' : '○'}</span><div><strong>{m.nome}</strong><small>{m.descricao}{m.progresso && !m.feito ? ` · ${m.progresso}` : ''}{concluidas[m.id] ? ` · ${concluidas[m.id]}` : ''}</small></div></li>)}</ul>
   </details>;
 }
+
+/* ---------- Legado completo: jogador + treinador ---------- */
+export function LegadoCompleto({ legado: l, aberto = false }) {
+  if (!l) return null;
+  const linhas = (pares) => pares.map(([v, r]) => <div key={r}><strong>{v}</strong><span>{r}</span></div>);
+  return <details className="mt-goals mt-legacy" open={aberto}>
+    <summary>{l.nivel.icone} Legado completo · {l.nivel.nome}</summary>
+    <div className="mt-legacy-body">
+      <div className="mt-legacy-total"><strong>{l.total}</strong><span>pontos de legado{l.proximo ? ` · faltam ${l.proximo.min - l.total} para “${l.proximo.nome}”` : ''}</span></div>
+      <div className="mt-legacy-cols">
+        <section aria-label="Como jogador"><h4>⚽ Jogador · {l.jogador.pontos} pts</h4>{l.jogador.nivel && <p>{l.jogador.nivel}</p>}
+          <div className="mt-legacy-grid">{linhas([[l.jogador.temporadas, 'temporadas'], [l.jogador.gols, 'gols'], [l.jogador.titulos, 'títulos'], [l.jogador.clubes, 'clubes'], ...(l.jogador.bolaOuro ? [[l.jogador.bolaOuro, 'Bola de Ouro']] : [])])}</div></section>
+        <section aria-label="Como treinador"><h4>📋 Treinador · {l.treinador.pontos} pts</h4><p>{l.treinador.metas}/{l.treinador.totalMetas} metas da carreira</p>
+          <div className="mt-legacy-grid">{linhas([[l.treinador.temporadas, 'temporadas'], [l.treinador.vitorias, 'vitórias'], [l.treinador.titulos, 'títulos'], [l.treinador.clubes, 'clubes']])}</div></section>
+      </div>
+      {l.clubesDuasEras.length > 0 && <p className="mt-note">💚 Nas duas eras: {l.clubesDuasEras.join(', ')}.</p>}
+    </div>
+  </details>;
+}
+

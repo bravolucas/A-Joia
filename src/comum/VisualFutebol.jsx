@@ -45,7 +45,7 @@ export function CamisaPremium({ nome, cor = '#147356', numero = 10, sobrenome, s
 export function MedalhaFeito({ id, className = '' }) {
   const uid=useId().replace(/:/g,'');
   const mapa={'memoria-contrato':'16','memoria-estreia':'JOGO','primeiro-gol':'GOL','primeira-assistencia':'PAS','primeira-defesa':'DEF','primeira-recuperacao':'INT','primeiro-cruzamento':'CRZ','memoria-convocacao':'PAÍS','memoria-estreia-selecao':'EST','jogador-reinventado':'⇄','dupla-marcante':'2','assinatura-tecnica':'★','lider-vestiario':'CAP','primeira-taca':'taça','dez-tacas':'10','triplice':'3','cem-gols':'100','quinhentos-gols':'500','cem-assistencias':'100','quinhentos-jogos':'500','vinte-temporadas':'20','bola-ouro':'★','campeao-mundo':'mundo','idolo':'♥','cinco-clubes':'5','treinador-campeao':'prancheta','trinta-treinador':'30'};
-  const simbolo=mapa[id]||'◆';
+  const simbolo=mapa[id]||(String(id).startsWith('tecnico-')?'TÉC':'◆');
   return <svg viewBox="0 0 120 140" className={`vf-medalha ${className}`} aria-hidden="true">
     <defs><linearGradient id={`ouro${uid}`} x2="1" y2="1"><stop stopColor="#fff2b3"/><stop offset=".35" stopColor="#bd8b36"/><stop offset=".52" stopColor="#f2d785"/><stop offset="1" stopColor="#6d491c"/></linearGradient></defs>
     <path d="M35 5 55 5 75 44 53 50ZM66 5H86L66 50 44 44Z" fill="#1f7555" stroke="#c9b06d"/>

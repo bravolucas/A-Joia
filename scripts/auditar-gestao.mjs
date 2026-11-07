@@ -1,8 +1,8 @@
 // Auditoria reproduzível, sem ler ou escrever saves. Execute: node scripts/auditar-gestao.mjs
 import assert from 'node:assert/strict';
-import {prepararGestaoTecnico,negociarElencoTecnico,resumoGestaoTecnico} from '../mercadoTecnico.js';
-import {DESAFIOS_HISTORICOS,iniciarDesafioHistorico,estadoInicialDesafios} from '../desafiosHistoricos.js';
-import {jogarTemporadaExpressaTecnico,proximaTemporadaTecnico,negociarContratoTecnico,passarAnoDesempregado} from '../tecnico.js';
+import {prepararGestaoTecnico,negociarElencoTecnico,resumoGestaoTecnico} from '../src/treinador/mercadoTecnico.js';
+import {DESAFIOS_HISTORICOS,iniciarDesafioHistorico,estadoInicialDesafios} from '../src/desafios/desafiosHistoricos.js';
+import {jogarTemporadaExpressaTecnico,proximaTemporadaTecnico,negociarContratoTecnico,passarAnoDesempregado} from '../src/treinador/tecnico.js';
 const seed=n=>()=>((n=(Math.imul(n,1664525)+1013904223)>>>0)/4294967296);
 const resultado={gestao:[],desafios:[],carreiras:[]};
 for(const forca of [40,65,85])for(const comissao of [false,true]){

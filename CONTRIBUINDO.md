@@ -4,18 +4,20 @@
 
 Quer mudar | Vá em
 --- | ---
-Clubes, ligas, jogadores, itens da loja | `src/data.js`
-Como a temporada é simulada | `src/lib.js` (`simularTemporada`)
-Regras de mercado e transferências | `src/lib.js` (`scoreInteresseClube`, `valorDeMercado`)
-Mundo de jogadores rivais | `src/lib.js` (`gerarMundoJogadores`, `simularTemporadaMundo`)
-Lesões e desgaste | `src/lib.js` (`TIPOS_LESAO`, `sortearLesao`)
-Minigames (pênalti, falta, passe) | `src/components.jsx`
-Telas, abas e popups | `src/AJoiaGame.jsx`
-Cores, fontes e layout responsivo | bloco `<style>` dentro de `AJoiaGame.jsx`
+Clubes, ligas, jogadores, itens da loja | `src/dados/data.js`
+Como a temporada é simulada | `src/comum/lib.js` (`simularTemporada`)
+Regras de mercado e transferências | `src/comum/lib.js` (`scoreInteresseClube`, `valorDeMercado`)
+Mundo de jogadores rivais | `src/comum/lib.js` (`gerarMundoJogadores`, `simularTemporadaMundo`)
+Lesões e desgaste | `src/comum/lib.js` (`TIPOS_LESAO`, `sortearLesao`)
+Minigames (pênalti, falta, passe) | `src/comum/components.jsx` e `src/jogador/LancesCriativos.jsx`
+Carreira do jogador (modo principal) | `src/jogador/ModoRapido.jsx` (telas) e `src/jogador/rapido.js` (regras)
+Carreira de treinador | `src/treinador/`
+Modo Carreira completo (jogo a jogo) | `src/completo/AJoiaGame.jsx`
+Cores, fontes e layout responsivo | `src/index.css` e os `.css` ao lado de cada tela
 
 ## Adicionando um clube
 
-Em `src/data.js`, no array `CLUBES`:
+Em `src/dados/data.js`, no array `CLUBES`:
 
 ```js
 { nome: "Nome do Clube", forca: 75, liga: "brasileirao", estado: "SP", cor: "#FF0000" }
@@ -27,10 +29,11 @@ salários e dificuldade das competições.
 ## Testando antes de commitar
 
 ```bash
+npm test
 npm run build
 ```
 
-Se compilar sem erro, a sintaxe e os imports estão certos. Vale abrir com `npm run dev`
+Se os testes passarem e compilar sem erro, a sintaxe e os imports estão certos. Vale abrir com `npm run dev`
 e jogar uma temporada inteira, porque erro de lógica só aparece rodando.
 
 ## Um aviso sobre escopo

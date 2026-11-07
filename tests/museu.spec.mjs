@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
-import { criarJogador } from '../rapido.js';
-import { museuVazio, extrairConquistasMuseu, mesclarMuseu, CHAVE_MUSEU } from '../museu.js';
+import { criarJogador } from '../src/jogador/rapido.js';
+import { museuVazio, extrairConquistasMuseu, mesclarMuseu, CHAVE_MUSEU } from '../src/museu/museu.js';
 const base = 'http://127.0.0.1:4173/A-Joia/';
 function cenario() {
  const c=criarJogador({nome:'Lucas do Museu',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,ritmo:'normal',codigo:'MUSEU-TESTE'});

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {perfilTaticoTecnico} from '../taticasTecnico.js';
-import {definirEstiloTecnico,definirFormacaoTecnico,probabilidadesConfrontoTecnico,placarTecnico,forcaClubeTecnico} from '../tecnico.js';
+import {perfilTaticoTecnico} from '../src/treinador/taticasTecnico.js';
+import {definirEstiloTecnico,definirFormacaoTecnico,probabilidadesConfrontoTecnico,placarTecnico,forcaClubeTecnico} from '../src/treinador/tecnico.js';
 const estado=()=>({tecnico:{clube:'Santos',elenco:65,fase:'pretemporada',temporadas:[]}});
 test('formações valorizam os setores e mantêm compatibilidade sem gestão',()=>{
  assert.deepEqual(perfilTaticoTecnico({}),{estilo:'equilibrado',formacao:'4-4-2',ajuste:0});

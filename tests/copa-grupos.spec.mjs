@@ -1,4 +1,4 @@
-import{test,expect}from'@playwright/test';import{criarJogador,jogarTemporada,aplicarMomento,jogarCopa}from'../rapido.js';
+import{test,expect}from'@playwright/test';import{criarJogador,jogarTemporada,aplicarMomento,jogarCopa}from'../src/jogador/rapido.js';
 const base='http://127.0.0.1:4173/A-Joia/';
 function inicio(){const c=criarJogador({nome:'Copa Rodadas',nac:'BRA',posicao:'MD',personalidade:'ascensao',origem:'base',pe:'destro',numero:8,ritmo:'normal',codigo:'UI-GRUPOS'});c.idade=25;c.ano=2030;c.desafioAno=c.ano;c.flags.baseEscolhida=true;for(const a of Object.keys(c.attrs)){c.attrs[a]=93;c.potencial[a]=96;}let r=jogarTemporada(c);while(r.card.pendente)r.card=aplicarMomento(r.card,true);return r;}
 async function abrir(page,s){await page.goto(base);await page.evaluate(s=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,etapa:'copa',auto:false,...s})),s);await page.reload();await page.getByRole('button',{name:/Continuar · Copa Rodadas/}).click();}

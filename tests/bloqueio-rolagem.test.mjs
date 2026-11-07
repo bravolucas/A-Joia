@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { bloquearRolagem } from '../bloqueioRolagem.js';
+import { bloquearRolagem } from '../src/comum/bloqueioRolagem.js';
 
 for (const ordem of [[0, 1], [1, 0]]) {
   test(`janelas sobrepostas liberam a página na ordem ${ordem}`, () => {

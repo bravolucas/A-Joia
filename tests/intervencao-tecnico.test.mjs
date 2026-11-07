@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {iniciarCarreiraTecnico,iniciarNoClubeIdolo,definirAcompanhamentoTecnico,jogarTemporadaExpressaTecnico,responderIntervencaoTecnico,definirEstiloTecnico} from '../tecnico.js';
+import {iniciarCarreiraTecnico,iniciarNoClubeIdolo,definirAcompanhamentoTecnico,jogarTemporadaExpressaTecnico,responderIntervencaoTecnico,definirEstiloTecnico} from '../src/treinador/tecnico.js';
 const seed=n=>()=>((n=(Math.imul(n,1664525)+1013904223)>>>0)/4294967296);
 function carreira(){
  let c=iniciarCarreiraTecnico({nome:'Teste',idade:40,ano:2040,clubeNome:'Santos',aposentado:true,legado:{pontos:600},temporadas:[{clube:'Santos',ano:2037},{clube:'Santos',ano:2038},{clube:'Santos',ano:2039}],totais:{gols:100}});

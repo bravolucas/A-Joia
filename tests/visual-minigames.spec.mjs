@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import { criarJogador,jogarTemporada } from '../rapido.js';
+import { criarJogador,jogarTemporada } from '../src/jogador/rapido.js';
 const base='http://127.0.0.1:4173/A-Joia/';
 async function abrir(page,mini){
  const c=criarJogador({nome:'Visual Teste',nac:'BRA',posicao:mini==='defesa'?'GOL':'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,ritmo:'normal',codigo:'VISUAL-TESTE'});
@@ -48,7 +48,7 @@ test('animação de título carrega e reage à preferência de movimento reduzid
  await page.emulateMedia({reducedMotion:'no-preference'});
  const c=criarJogador({nome:'Visual Efeito',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,ritmo:'normal',codigo:'EFEITO'});
  c.aposentado=true;c.idade=40;
- const {iniciarCarreiraTecnico}=await import('../tecnico.js');const carreira=iniciarCarreiraTecnico(c);
+ const {iniciarCarreiraTecnico}=await import('../src/treinador/tecnico.js');const carreira=iniciarCarreiraTecnico(c);
  carreira.tecnico={...carreira.tecnico,fase:'resultado',clubeInicialEscolhido:true,temporadas:[{ano:2026,clube:'Santos',liga:'brasileirao',posicao:1,pontos:80,vitorias:24,empates:8,derrotas:6,titulosConquistados:['Brasileirão'],campeao:true}],propostas:[]};
  const erros=[];page.on('pageerror',e=>erros.push(e.message));
  await page.goto(base);await page.evaluate(c=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,etapa:'tecnico',c})),carreira);

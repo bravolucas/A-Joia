@@ -1,5 +1,5 @@
 import{test,expect}from'@playwright/test';
-import{criarJogador,opcoesDeTraco,jogarTemporada,gerarColetiva,fecharTemporada,aposentar}from'../rapido.js';
+import{criarJogador,opcoesDeTraco,jogarTemporada,gerarColetiva,fecharTemporada,aposentar}from'../src/jogador/rapido.js';
 const base='http://127.0.0.1:4173/A-Joia/';
 function jogador(){const c=criarJogador({nome:'Revisão de Legado',nac:'BRA',posicao:'MD',personalidade:'ascensao',origem:'base',pe:'destro',numero:8,ritmo:'normal',codigo:'TELAS-LEGADAS'});c.flags.baseEscolhida=true;c.idade=19;c.ano=2030;c.desafioAno=c.ano;return c;}
 async function abrir(page,s){await page.goto(base);await page.evaluate(s=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,auto:false,...s})),s);await page.reload();await page.getByRole('button',{name:s.etapa==='fim'?/Rever legado · Revisão de Legado/:/Continuar · Revisão de Legado/}).click();}

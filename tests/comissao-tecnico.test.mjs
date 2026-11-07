@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {criarGestaoTecnico,prepararGestaoTecnico,contratarComissaoTecnico,resumoGestaoTecnico,contratarJogadorTecnico,gerarMercadoTecnico} from '../mercadoTecnico.js';
-import {propostaComissaoTecnico,comissaoAtivaGestao} from '../comissaoTecnico.js';
-import {perfilTaticoTecnico} from '../taticasTecnico.js';
-import {probabilidadesConfrontoTecnico} from '../tecnico.js';
-import {mediasPartidaCopaTecnico} from '../competicoesTecnico.js';
+import {criarGestaoTecnico,prepararGestaoTecnico,contratarComissaoTecnico,resumoGestaoTecnico,contratarJogadorTecnico,gerarMercadoTecnico} from '../src/treinador/mercadoTecnico.js';
+import {propostaComissaoTecnico,comissaoAtivaGestao} from '../src/treinador/comissaoTecnico.js';
+import {perfilTaticoTecnico} from '../src/treinador/taticasTecnico.js';
+import {probabilidadesConfrontoTecnico} from '../src/treinador/tecnico.js';
+import {mediasPartidaCopaTecnico} from '../src/treinador/competicoesTecnico.js';
 const carreira=()=>prepararGestaoTecnico({tecnico:{clube:'Santos',ano:2030,elenco:65,fase:'pretemporada',temporadas:[]}});
 test('comissão cobra uma vez, ocupa folha e persiste sem mutar o save',()=>{
  const c=carreira(),antes=structuredClone(c),p=propostaComissaoTecnico(c.tecnico.gestao,'auxiliar');

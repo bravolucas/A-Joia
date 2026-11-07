@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, jogarTemporadaExpressaTecnico, proximaTemporadaTecnico, carreiraTecnicoEncerrada, LIMITE_TEMPORADAS_TECNICO } from '../tecnico.js';
-import { desenhoDaTaca } from '../tacas.js';
+import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, jogarTemporadaExpressaTecnico, proximaTemporadaTecnico, carreiraTecnicoEncerrada, LIMITE_TEMPORADAS_TECNICO } from '../src/treinador/tecnico.js';
+import { desenhoDaTaca } from '../src/comum/tacas.js';
 
 const atleta = { nome: 'Teste expresso', idade: 39, ano: 2040, clubeNome: 'Santos', aposentado: true, legado: { pontos: 600 }, temporadas: [{ ano: 2037, clube: 'Santos' }, { ano: 2038, clube: 'Santos' }, { ano: 2039, clube: 'Santos' }], totais: { gols: 150 } };
 const sorteio = () => 0.5;
@@ -68,7 +68,7 @@ test('30 temporadas expressas acumulam histórico e encerram a carreira', () => 
 });
 
 test('a vitrine de treinador reúne títulos reais do histórico sem alterar o legado de jogador', async () => {
-  const { titulosConquistadosTecnico } = await import('../tecnico.js');
+  const { titulosConquistadosTecnico } = await import('../src/treinador/tecnico.js');
   const c = iniciarCarreiraTecnico(atleta);
   const tecnico = { ...c.tecnico, temporadas: [
     { ano: 2040, clube: 'Santos', liga: 'brasileirao', campeao: true, titulosConquistados: ['Brasileirão', 'Copa do Brasil'] },
@@ -82,7 +82,7 @@ test('a vitrine de treinador reúne títulos reais do histórico sem alterar o l
 });
 
 test('tabela de clube promovido usa os mesmos participantes do calendário', async () => {
-  const { CLUBES_CONVITES_TECNICO, calendarioLigaTecnico, tabelaClassificacaoTecnico } = await import('../tecnico.js');
+  const { CLUBES_CONVITES_TECNICO, calendarioLigaTecnico, tabelaClassificacaoTecnico } = await import('../src/treinador/tecnico.js');
   const candidato = CLUBES_CONVITES_TECNICO.find(x => x.liga === 'serieB');
   assert.ok(candidato, 'precisa existir um clube da Série B');
   const t = { clube: candidato.nome, liga: 'brasileirao', elenco: candidato.elenco };
@@ -95,7 +95,7 @@ test('tabela de clube promovido usa os mesmos participantes do calendário', asy
 });
 
 test('participantes persistidos são usados no calendário da mesma divisão', async () => {
-  const { calendarioLigaTecnico, CLUBES_CONVITES_TECNICO } = await import('../tecnico.js');
+  const { calendarioLigaTecnico, CLUBES_CONVITES_TECNICO } = await import('../src/treinador/tecnico.js');
   const clube = CLUBES_CONVITES_TECNICO.find(x => x.liga === 'brasileirao');
   const nomes = CLUBES_CONVITES_TECNICO.filter(x => x.liga === 'brasileirao').slice(0, 20).map(x => x.nome);
   assert.equal(nomes.length, 20);
@@ -108,7 +108,7 @@ test('participantes persistidos são usados no calendário da mesma divisão', a
 });
 
 test('histórico por clube e geral contam taças de ligas e copas', async () => {
-  const { historicoProfissionalTecnico } = await import('../tecnico.js');
+  const { historicoProfissionalTecnico } = await import('../src/treinador/tecnico.js');
   const historico = historicoProfissionalTecnico({ temporadas: [
     { ano: 2040, clube: 'Santos', campeao: true, titulosConquistados: ['Brasileirão', 'Copa do Brasil'] },
     { ano: 2041, clube: 'Santos', campeao: false, titulosConquistados: [] },

@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {carteiraTecnico,creditarSalarioTecnico,bonusForcaLoja} from '../lojaTecnico.js';
-import {iniciarCarreiraTecnico,comprarMelhoriaTecnico,calcularOvrTecnico,forcaClubeTecnico,escolherPretemporadaRapidaTecnico,gerarPropostasTecnico,proximaTemporadaTecnico,passarAnoDesempregado,simularEtapaTecnico} from '../tecnico.js';
-import {cartaPretemporadaRapida,aplicarPretemporadaRapida} from '../pretemporadaRapida.js';
+import {carteiraTecnico,creditarSalarioTecnico,bonusForcaLoja} from '../src/treinador/lojaTecnico.js';
+import {iniciarCarreiraTecnico,comprarMelhoriaTecnico,calcularOvrTecnico,forcaClubeTecnico,escolherPretemporadaRapidaTecnico,gerarPropostasTecnico,proximaTemporadaTecnico,passarAnoDesempregado,simularEtapaTecnico} from '../src/treinador/tecnico.js';
+import {cartaPretemporadaRapida,aplicarPretemporadaRapida} from '../src/treinador/pretemporadaRapida.js';
 const base=()=>{
   const c=iniciarCarreiraTecnico({nome:'Teste',idade:40,ano:2030,aposentado:true,clubeNome:'Santos',temporadas:[],totais:{},legado:{pontos:600}});
   return {...c,ritmo:'intenso',tecnico:{...c.tecnico,clubeInicialEscolhido:true,elenco:70,salario:100,verbaRapida:3000,carteiraTecnico:{saldo:3000,pagamentos:[],compras:[]}}};

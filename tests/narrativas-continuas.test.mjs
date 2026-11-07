@@ -1,4 +1,4 @@
-import test from'node:test';import assert from'node:assert/strict';import{narrarEco,noticiaRival,descreverMemoriaRival}from'../narrativasContinuas.js';
+import test from'node:test';import assert from'node:assert/strict';import{narrarEco,noticiaRival,descreverMemoriaRival}from'../src/jogador/narrativasContinuas.js';
 const e={id:'a',origem:2030,escolha:'Ficar',clube:'Santos',eixo:'vinculo'},k={ano:2032,clube:'Santos',jogos:30,titulos:[]};
 test('ecos citam decisão e clube originais e distinguem mudança de camisa',()=>{const casa=narrarEco(e,k),fora=narrarEco(e,{...k,clube:'Porto'});assert.match(casa,/2030.*Ficar.*Santos/);assert.notEqual(casa,fora);assert.equal(casa,narrarEco(e,k));});
 test('preparo diferencia participação sem inventar lesão ou garantir causalidade',()=>{const x={...e,eixo:'preparo'};assert.notEqual(narrarEco(x,k),narrarEco(x,{...k,jogos:5}));assert.doesNotMatch(narrarEco(x,k),/curou|garantiu|lesão/);});

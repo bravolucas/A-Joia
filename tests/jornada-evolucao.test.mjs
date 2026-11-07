@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {criarJogador} from '../rapido.js';
-import {atualizarGeracaoSelecao,reagirReencontro,contextoReencontro,celebracaoMomento,fecharJornada,registrarTransferenciaJornada} from '../jornadaJogador.js';
+import {criarJogador} from '../src/jogador/rapido.js';
+import {atualizarGeracaoSelecao,reagirReencontro,contextoReencontro,celebracaoMomento,fecharJornada,registrarTransferenciaJornada} from '../src/jogador/jornadaJogador.js';
 const atleta=()=>{const c=criarJogador({nome:'Memória',nac:'BRA',posicao:'MC',personalidade:'ascensao',origem:'base',pe:'destro',codigo:'EVOLUCAO'});c.ano=2040;c.idade=30;c.clubeNome='Santos';c.torcida={Santos:70,Milan:60};return c;};
 const card=c=>({ano:c.ano,idade:c.idade,posicao:c.posicao,clube:c.clubeNome,jogos:30,gols:4,assist:8,nota:7.4,titulos:[],momentos:[],destaques:[],ovrDepois:76});
 test('seleção mantém onze funções, preserva nomes e substitui somente quem envelheceu',()=>{

@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CHAVE_MUSEU, museuVazio, extrairConquistasMuseu, mesclarMuseu, registrarMuseu, lerMuseu, importarMuseu, sincronizarMuseuDosSaves, competenciaMuseu } from '../museu.js';
-import { salvarRapido, apagarRapido } from '../rapido.js';
-import { salvarLocal } from '../save.js';
+import { CHAVE_MUSEU, museuVazio, extrairConquistasMuseu, mesclarMuseu, registrarMuseu, lerMuseu, importarMuseu, sincronizarMuseuDosSaves, competenciaMuseu } from '../src/museu/museu.js';
+import { salvarRapido, apagarRapido } from '../src/jogador/rapido.js';
+import { salvarLocal } from '../src/completo/save.js';
 
 const storage = () => { const dados = new Map(); return { getItem: k => dados.get(k) ?? null, setItem: (k,v) => dados.set(k,String(v)), removeItem: k => dados.delete(k) }; };
 const carreira = () => ({ museuId: 'carreira-1', nome: 'Lucas', codigo: 'MUSEU', nac: 'BRA', lista: [{ nome: 'Brasileirão', tipo: 'liga', ano: 2026, clube: 'Santos' }], temporadas: [{ clube: 'Santos', ano: 2026 }], torcida: { Santos: 80, Flamengo: 99 }, totais: { gols: 100, assist: 10, jogos: 150 }, titulos: { liga: 1 } });

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {DESAFIOS_HISTORICOS,CHAVE_DESAFIOS,estadoInicialDesafios,iniciarDesafioHistorico,atualizarDesafioHistorico,carregarDesafiosHistoricos,salvarDesafiosHistoricos} from '../desafiosHistoricos.js';
-import {jogarTemporadaExpressaTecnico} from '../tecnico.js';
+import {DESAFIOS_HISTORICOS,CHAVE_DESAFIOS,estadoInicialDesafios,iniciarDesafioHistorico,atualizarDesafioHistorico,carregarDesafiosHistoricos,salvarDesafiosHistoricos} from '../src/desafios/desafiosHistoricos.js';
+import {jogarTemporadaExpressaTecnico} from '../src/treinador/tecnico.js';
 test('missões usam uma temporada e preservam catálogo e estado anterior',()=>{
  const base=estadoInicialDesafios(),antes=structuredClone(base),catalogo=structuredClone(DESAFIOS_HISTORICOS);
  for(const d of DESAFIOS_HISTORICOS){

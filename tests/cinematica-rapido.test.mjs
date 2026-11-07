@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const componentes = readFileSync(new URL('../components.jsx', import.meta.url), 'utf8');
-const rapido = readFileSync(new URL('../ModoRapido.jsx', import.meta.url), 'utf8');
+const componentes = readFileSync(new URL('../src/comum/components.jsx', import.meta.url), 'utf8');
+const rapido = readFileSync(new URL('../src/jogador/ModoRapido.jsx', import.meta.url), 'utf8');
 
 test('anúncio do novo clube preserva opção de pular e conclusão', () => {
   assert.match(componentes, /function AnuncioClube\(/);

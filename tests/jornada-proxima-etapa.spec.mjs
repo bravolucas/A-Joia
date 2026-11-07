@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {criarJogador,jogarTemporada,aplicarMomento,jogarCopa,opcoesCopa,sortearEvento} from '../rapido.js';
+import {criarJogador,jogarTemporada,aplicarMomento,jogarCopa,opcoesCopa,sortearEvento} from '../src/jogador/rapido.js';
 const base='http://127.0.0.1:4173/A-Joia/';
 function atleta(){const c=criarJogador({nome:'Lucas Copa',nac:'BRA',posicao:'ATA',personalidade:'ascensao',origem:'base',pe:'destro',numero:11,ritmo:'normal',codigo:'UI-COPA'});c.idade=25;c.ano=2030;c.clubeNome='Santos';c.primeiroClube='Santos';c.flags.baseEscolhida=true;c.desafioAno=c.ano;c.patrimonio=5000;c.torcida.Santos=80;for(const a of Object.keys(c.attrs)){c.attrs[a]=92;c.potencial[a]=95;}return c;}
 async function abrir(page,c,extra={}){await page.goto(base);await page.evaluate(s=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify(s)),{v:1,etapa:'evento',c,...extra});await page.reload();await page.getByRole('button',{name:/Continuar · Lucas Copa/}).click();}

@@ -4,13 +4,13 @@ import {
   criarJogador, jogarTemporada, fecharTemporada, aposentar,
   aposentadoriaForcada, podeAposentar, noticiasDaTemporada,
   retrospectoRivalidade, ovrDe
-} from '../rapido.js';
+} from '../src/jogador/rapido.js';
 import {
   iniciarCarreiraTecnico, iniciarNoClubeIdolo, cartaAtualTecnico,
   tomarDecisaoTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico,
   proximaTemporadaTecnico, QUANTIDADE_DECISOES_TECNICO,
   ETAPAS_TEMPORADA_TECNICO, historicoProfissionalTecnico
-} from '../tecnico.js';
+} from '../src/treinador/tecnico.js';
 
 const posicoes = ['GOL','ZAG','LD','LE','VOL','MC','MEI','PD','PE','SA','ATA'];
 const perfis = ['equilibrado','festeiro','disciplinado'];

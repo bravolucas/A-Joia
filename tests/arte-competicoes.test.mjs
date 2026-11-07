@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolverImagemCompeticao, slugCompeticao } from '../arteCompeticoes.js';
+import { resolverImagemCompeticao, slugCompeticao } from '../src/comum/arteCompeticoes.js';
 
 const imagens = {
   libertadores: '/arte/competicoes/libertadores.webp',

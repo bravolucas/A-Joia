@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import {criarGestaoTecnico,resumoGestaoTecnico} from '../mercadoTecnico.js';
-import { criarJogador, aposentar } from '../rapido.js';
-import { iniciarCarreiraTecnico, jogarTemporadaExpressaTecnico, calcularOvrTecnico, CLUBES_CONVITES_TECNICO } from '../tecnico.js';
+import {criarGestaoTecnico,resumoGestaoTecnico} from '../src/treinador/mercadoTecnico.js';
+import { criarJogador, aposentar } from '../src/jogador/rapido.js';
+import { iniciarCarreiraTecnico, jogarTemporadaExpressaTecnico, calcularOvrTecnico, CLUBES_CONVITES_TECNICO } from '../src/treinador/tecnico.js';
 
 function carreira() {
   const jogador = aposentar({ ...criarJogador({ nome: 'Treinador de teste', nac: 'BRA', posicao: 'ATA', personalidade: 'equilibrado', origem: 'base', pe: 'destro', numero: 10, ritmo: 'equilibrado', codigo: 'COACH-REMODELACAO' }), idade: 40 });

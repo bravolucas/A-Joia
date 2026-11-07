@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {criarJogador,jogarTemporada,aplicarMomento} from '../rapido.js';
+import {criarJogador,jogarTemporada,aplicarMomento} from '../src/jogador/rapido.js';
 const base='http://127.0.0.1:4173/A-Joia/';
 function jogador(){const c=criarJogador({nome:'Lucas Layout',nac:'BRA',posicao:'ATA',personalidade:'ascensao',origem:'base',pe:'destro',numero:10,ritmo:'normal',codigo:'LAYOUT-OVR'});c.clubeNome='Ponte Preta';c.primeiroClube='Ponte Preta';c.flags.baseEscolhida=true;c.desafioAno=c.ano;for(const a of Object.keys(c.attrs))c.attrs[a]=54;return c;}
 async function abrir(page,c,extra={}){await page.goto(base);await page.evaluate(s=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify(s)),{v:1,etapa:'evento',c,auto:false,...extra});await page.reload();await page.getByRole('button',{name:/Continuar · Lucas Layout/}).click();}

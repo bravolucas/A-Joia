@@ -1,6 +1,6 @@
 import{test,expect}from'@playwright/test';
-import{criarJogador,sortearEvento,ovrDe}from'../rapido.js';
-import{registrarMuseu}from'../museu.js';
+import{criarJogador,sortearEvento,ovrDe}from'../src/jogador/rapido.js';
+import{registrarMuseu}from'../src/museu/museu.js';
 const base='http://127.0.0.1:4173/A-Joia/';
 function jogador(){const c=criarJogador({nome:'Jornada UI',nac:'BRA',posicao:'ATA',personalidade:'ascensao',origem:'base',pe:'destro',numero:9,ritmo:'normal',codigo:'JORNADA-UI'});c.idade=30;c.ano=2040;c.desafioAno=c.ano;c.flags.baseEscolhida=true;c.clubeNome='Santos';c.primeiroClube='Santos';c.torcida.Santos=85;c.patrimonio=5000;for(const k of Object.keys(c.attrs)){c.attrs[k]=76;c.potencial[k]=90;}c.contrato={clube:'Santos',anos:3,restantes:3,salario:1000,multa:30000};return c;}
 async function abrir(page,c,extras={}){await page.goto(base);await page.evaluate(s=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify(s)),{v:1,etapa:'evento',c,auto:false,...extras});await page.reload();await page.getByRole('button',{name:/Continuar · Jornada UI/}).click();}

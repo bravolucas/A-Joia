@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { simularCopaNacionalTecnico, simularCopaContinentalTecnico, classificarVagasContinentalTecnico, classificarVagasPorRegraTecnico } from '../competicoesTecnico.js';
-import { gerarPropostasTecnico, salarioTecnico, calcularOvrTecnico } from '../tecnico.js';
-import { competicaoDoTitulo, desenhoDaTaca } from '../tacas.js';
+import { simularCopaNacionalTecnico, simularCopaContinentalTecnico, classificarVagasContinentalTecnico, classificarVagasPorRegraTecnico } from '../src/treinador/competicoesTecnico.js';
+import { gerarPropostasTecnico, salarioTecnico, calcularOvrTecnico } from '../src/treinador/tecnico.js';
+import { competicaoDoTitulo, desenhoDaTaca } from '../src/comum/tacas.js';
 
 function rngSeed(seed) {
   return () => {
@@ -271,7 +271,7 @@ test('final preserva os 90 minutos e soma a prorrogação sem fabricar empate', 
 });
 
 test('tática nas copas muda ritmo e risco apenas nas partidas do treinador',async()=>{
- const {mediasPartidaCopaTecnico}=await import('../competicoesTecnico.js');
+ const {mediasPartidaCopaTecnico}=await import('../src/treinador/competicoesTecnico.js');
  const usuario={nome:'Meu clube',elenco:80},rival={nome:'Rival',elenco:60};
  const calcular=(estilo,casa=usuario,fora=rival,neutro=false)=>mediasPartidaCopaTecnico(
   {...casa,...(casa.nome===usuario.nome?{planoTatico:{estilo,formacao:'4-3-3',ajuste:2}}:{})},

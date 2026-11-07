@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
-import {criarJogador,aposentar} from '../rapido.js';
-import {iniciarCarreiraTecnico} from '../tecnico.js';
+import {criarJogador,aposentar} from '../src/jogador/rapido.js';
+import {iniciarCarreiraTecnico} from '../src/treinador/tecnico.js';
 for(const width of [390,1366])test(`loja: confirmação, saldo e salário sem duplicação em ${width}px`,async({page})=>{
   await page.setViewportSize({width,height:900});
   const c=iniciarCarreiraTecnico(aposentar({...criarJogador({nome:'Treinador da loja',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,ritmo:'intenso',codigo:'ECONOMIA'}),idade:40}));

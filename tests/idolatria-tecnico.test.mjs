@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {aceitarPropostaTecnico,negociarContratoTecnico,gerarPropostasTecnico} from '../tecnico.js';
-import {riscosIdolatriaTecnico,vinculoAtivoTecnico} from '../idolatriaTecnico.js';
+import {aceitarPropostaTecnico,negociarContratoTecnico,gerarPropostasTecnico} from '../src/treinador/tecnico.js';
+import {riscosIdolatriaTecnico,vinculoAtivoTecnico} from '../src/treinador/idolatriaTecnico.js';
 const proposta=nome=>({nome,pais:'Brasil',liga:'brasileirao',elenco:70,salario:30,exigencia:50});
 const carreira=()=>({torcida:{Santos:95},temporadas:[{clube:'Santos',titulos:['Brasileirão']}],tecnico:{clube:'Flamengo',ano:2030,fase:'resultado',reputacao:60,temporadas:[],vinculosJogador:[{clube:'Santos',idolatria:true,afinidade:95,temporadas:5}],propostas:[proposta('Palmeiras'),proposta('Santos')]}});
 test('assinar rival de um antigo ídolo rompe benefícios sem apagar história',()=>{

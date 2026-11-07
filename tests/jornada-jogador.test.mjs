@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {criarJogador,jogarTemporada,fecharTemporada,aplicarMomento,ovrDe,transferir,gerarOfertas,comSemente,sortearEvento,resolverEvento,caminhoSelecao,aposentar,iniciarEmprestimo,ofertasEmprestimo} from '../rapido.js';
-import {posicoesCompativeis,mudarPosicao,reinventarVeterano,fecharAdaptacaoPosicao} from '../posicoesCarreira.js';
-import {iniciarJornada,fecharJornada,registrarEscolhaJornada,prepararJornada,ativarAssinatura,registrarTransferenciaJornada,cenaDespedida,memoriaTorcida,definirPreferenciaMercado,projetoOferta,legadoNarrativo} from '../jornadaJogador.js';
-import {extrairConquistasMuseu,mesclarMuseu,museuVazio,validarMuseu,progressoFeitoMuseu} from '../museu.js';
-import {iniciarCarreiraTecnico} from '../tecnico.js';
-import {planoPretemporadaRapida,cartaPretemporadaRapida,aplicarPretemporadaRapida} from '../pretemporadaRapida.js';
+import {criarJogador,jogarTemporada,fecharTemporada,aplicarMomento,ovrDe,transferir,gerarOfertas,comSemente,sortearEvento,resolverEvento,caminhoSelecao,aposentar,iniciarEmprestimo,ofertasEmprestimo} from '../src/jogador/rapido.js';
+import {posicoesCompativeis,mudarPosicao,reinventarVeterano,fecharAdaptacaoPosicao} from '../src/jogador/posicoesCarreira.js';
+import {iniciarJornada,fecharJornada,registrarEscolhaJornada,prepararJornada,ativarAssinatura,registrarTransferenciaJornada,cenaDespedida,memoriaTorcida,definirPreferenciaMercado,projetoOferta,legadoNarrativo} from '../src/jogador/jornadaJogador.js';
+import {extrairConquistasMuseu,mesclarMuseu,museuVazio,validarMuseu,progressoFeitoMuseu} from '../src/museu/museu.js';
+import {iniciarCarreiraTecnico} from '../src/treinador/tecnico.js';
+import {planoPretemporadaRapida,cartaPretemporadaRapida,aplicarPretemporadaRapida} from '../src/treinador/pretemporadaRapida.js';
 
 const copia=x=>JSON.parse(JSON.stringify(x));
 function atleta(posicao='ATA'){

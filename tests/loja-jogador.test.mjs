@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {criarJogador,CATALOGO_LOJA_JOGADOR,comprarInvestimento,jogarTemporada,fecharTemporada,chanceMomento,chancePenalti} from '../rapido.js';
-import {comprarUpJogador,upsAtivosJogador} from '../lojaJogador.js';
+import {criarJogador,CATALOGO_LOJA_JOGADOR,comprarInvestimento,jogarTemporada,fecharTemporada,chanceMomento,chancePenalti} from '../src/jogador/rapido.js';
+import {comprarUpJogador,upsAtivosJogador} from '../src/jogador/lojaJogador.js';
 const base=()=>({...criarJogador({nome:'Loja',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,ritmo:'normal',codigo:'LOJA-UP'}),patrimonio:50000});
 test('catálogo tem 34 opções únicas, incluindo 14 UPs e 20 permanentes',()=>{
  assert.equal(CATALOGO_LOJA_JOGADOR.length,34);assert.equal(new Set(CATALOGO_LOJA_JOGADOR.map(x=>x.id)).size,34);

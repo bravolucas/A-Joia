@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { atualizarLigasMundoTecnico, simularClassificacoesMundoTecnico } from '../classificacoesMundoTecnico.js';
+import { atualizarLigasMundoTecnico, simularClassificacoesMundoTecnico } from '../src/treinador/classificacoesMundoTecnico.js';
 
 function rngSeed(seed) {
   return () => {

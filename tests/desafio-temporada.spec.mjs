@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { criarJogador, desafiosDaTemporada, jogarTemporada, gerarColetiva } from '../rapido.js';
+import { criarJogador, desafiosDaTemporada, jogarTemporada, gerarColetiva } from '../src/jogador/rapido.js';
 
 for (const width of [320, 390, 1366]) test(`desafio e resultado no mesmo painel, com retomada em ${width}px`, async ({ page }) => {
   await page.setViewportSize({ width, height: width === 320 ? 568 : 640 });

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {planoPretemporadaRapida,cartaPretemporadaRapida,aplicarPretemporadaRapida} from '../pretemporadaRapida.js';
-import {iniciarCarreiraTecnico,escolherPretemporadaRapidaTecnico,proximaTemporadaTecnico,gerarPropostasTecnico,CLUBES_CONVITES_TECNICO} from '../tecnico.js';
+import {planoPretemporadaRapida,cartaPretemporadaRapida,aplicarPretemporadaRapida} from '../src/treinador/pretemporadaRapida.js';
+import {iniciarCarreiraTecnico,escolherPretemporadaRapidaTecnico,proximaTemporadaTecnico,gerarPropostasTecnico,CLUBES_CONVITES_TECNICO} from '../src/treinador/tecnico.js';
 const carreira=(ritmo='normal')=>{const c=iniciarCarreiraTecnico({nome:'Teste rápido',idade:40,ano:2030,aposentado:true,clubeNome:'Santos',temporadas:[],totais:{},legado:{pontos:600}});return {...c,ritmo,tecnico:{...c.tecnico,clubeInicialEscolhido:true,elenco:70,verbaRapida:3000}};};
 test('uma escolha simula a temporada; todos os ritmos têm uma decisão, sem duplicação',()=>{
  for(const ritmo of ['normal','expresso','intenso']){
@@ -57,7 +57,7 @@ test('convites respeitam o patamar local e explicam o interesse',()=>{
 });
 
 test('moral afeta confrontos; convites legados são migrados uma única vez',async()=>{
- const {probabilidadesConfrontoTecnico,atualizarPropostasCoerentesTecnico}=await import('../tecnico.js');
+ const {probabilidadesConfrontoTecnico,atualizarPropostasCoerentesTecnico}=await import('../src/treinador/tecnico.js');
  const t=carreira().tecnico;
  assert.ok(probabilidadesConfrontoTecnico({...t,moral:80},{forca:70,casa:true}).vitoria>probabilidadesConfrontoTecnico({...t,moral:30},{forca:70,casa:true}).vitoria);
  const c={...carreira(),tecnico:{...t,fase:'resultado',propostas:[{nome:'Real Madrid'}]}};
@@ -69,7 +69,7 @@ test('moral afeta confrontos; convites legados são migrados uma única vez',asy
 });
 
 test('aporte não confisca receita de venda e as dez variações aparecem ao longo da carreira',async()=>{
- const {renovarVerbaPretemporada}=await import('../pretemporadaRapida.js');
+ const {renovarVerbaPretemporada}=await import('../src/treinador/pretemporadaRapida.js');
  assert.equal(renovarVerbaPretemporada({verbaRapida:6900}),6900);
  assert.equal(renovarVerbaPretemporada({verbaRapida:100}),450);
  let t={clube:'Santos',ano:2030,historicoRapido:[]};const vistas=new Set();
@@ -78,7 +78,7 @@ test('aporte não confisca receita de venda e as dez variações aparecem ao lon
 });
 
 test('carreiras rápidas de 30 temporadas preservam limites, recarga e uma decisão por temporada',async()=>{
- const {negociarContratoTecnico,passarAnoDesempregado}=await import('../tecnico.js');
+ const {negociarContratoTecnico,passarAnoDesempregado}=await import('../src/treinador/tecnico.js');
  for(const ritmo of ['normal','intenso']){
   let c=carreira(ritmo),n=73,passos=0;const rng=()=>((n=(Math.imul(n,1664525)+1013904223)>>>0)/4294967296);
   while(c.tecnico.temporadas.length<30&&passos++<150){

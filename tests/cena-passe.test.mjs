@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {gerarCenaPasse} from '../lib.js';
+import {gerarCenaPasse} from '../src/comum/lib.js';
 
 test('cenas de passe mantêm companheiros e adversários separados, inclusive nos extremos do sorteio',()=>{
   const original=Math.random;

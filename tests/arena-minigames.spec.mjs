@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {criarJogador,jogarTemporada} from '../rapido.js';
+import {criarJogador,jogarTemporada} from '../src/jogador/rapido.js';
 
 async function abrir(page,mini){
   const c=criarJogador({nome:'Arena Visual',nac:'BRA',posicao:['defesa','reflexo'].includes(mini)?'GOL':'ATA',personalidade:'ascensao',origem:'base',pe:'destro',numero:9,ritmo:'normal',codigo:`ARENA-${mini}`});

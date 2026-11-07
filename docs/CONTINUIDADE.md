@@ -4,7 +4,7 @@ Histórico de temporadas do modo completo protegido contra clube visual e artilh
 
 Build, **41 arquivos de lógica** e **153 cenários de navegador** passaram. Três casos novos de normalização e seis de histórico em 320/1366 px (sem posição, ATA e GOL com posição atual diferente). Logs `/tmp/resumos-completo-unit.log`, `/tmp/resumos-completo-build-entrega.log`, `/tmp/resumos-completo-regressao.log`. Teste inicial corrigido para abrir Estatísticas, onde fica a lista; a prévia foi iniciada após health-check interromper tentativa sem servidor. Seis testes específicos passaram antes do acabamento de cabeçalho; suíte ampla passou depois dele.
 
-Relatório e capturas em `docs/resumos-completo/RELATORIO.md`; auditoria dos 50 itens atualizada, 67/98 continuam parciais. Sem preenchimento retroativo de posição, fonte histórica nova ou apuração nova de prêmios de torneio. Publicação desta continuação em acompanhamento. Documentos não rastreados do usuário preservados.
+Relatório e capturas em `docs/resumos-completo/RELATORIO.md`; auditoria dos 50 itens atualizada, 67/98 continuam parciais. Sem preenchimento retroativo de posição, fonte histórica nova ou apuração nova de prêmios de torneio. Publicado em `56def11`: Pages https://github.com/bravolucas/A-Joia/actions/runs/42321370641 concluiu com sucesso; geral `42321370631` e navegador `42321370672` também passaram. Confirmação documental salva apenas no checkpoint, sem novo deploy. Documentos não rastreados do usuário preservados.
 
 ## Continuação — mercado e empréstimos do modo completo
 

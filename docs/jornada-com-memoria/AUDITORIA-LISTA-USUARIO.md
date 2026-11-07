@@ -80,3 +80,7 @@ Item 98 avançou com a janela compartilhada do modo completo: diálogo nativo, f
 ## Continuação: campanha e contrato do modo completo
 
 Item 98: navegação das abas e negociação de renovação revisadas em 320/390/1366 px. Controle de 44 px, aceite/recusa explícitos e ações de sair/assinar visíveis durante a rolagem. Abas Estatísticas, Mundo, Legado e Notícias verificadas com carreira e mundo gerado pelo motor. Fases raras de competições e outras janelas de mercado continuam pendentes; relatório `docs/campanha-e-contrato/RELATORIO.md`.
+
+## Continuação: Copa por partida
+
+Fase de grupos do modo rápido remodelada: três decisões, placar individual, classificação calculada pelos seis jogos do grupo e resultado salvo antes de continuar. Adversário e rodada aparecem antes da escolha. Revisão do fluxo de Copa avança o item 98; formato simplificado do jogo e compatibilidade descritos em `docs/copa-grupos-por-partida/RELATORIO.md`. Pendências anteriores continuam explícitas.

@@ -1,3 +1,11 @@
+## Copa do Mundo — uma escolha por partida do grupo
+
+Pedido atual: modo rápido resolve três jogos de grupo de uma vez. Alterado para três rodadas com escolhas do mata-mata, adversário, placar, empate próprio e discurso único. Resultado salvo em `copaJogada` antes de Continuar; recarga retoma sem novo sorteio ou estatísticas duplicadas. Tabela opcional por seis jogos (três seus + três entre rivais), dois classificados, pontos/saldo/gols/sorteio fixo. Sorteio de novos grupos evita seleções repetidas. Mata-mata anterior preservado; tabela antiga sem resultados dos rivais não é inventada. Mantido formato simplificado de quatro seleções/dois classificados rumo às oitavas, sem alegar regulamento oficial de 2026. Modo completo já tinha sequência de três partidas e não foi remodelado aqui.
+
+Build, **40 arquivos de testes de lógica** e regressão ampla de **139 cenários de navegador** passaram. Após o acabamento das probabilidades, movimento reduzido e círculo completo em tela baixa, build e **14 cenários direcionados** passaram. Logs `/tmp/copa-grupos-unit-entrega.log`, `/tmp/copa-grupos-browser-entrega.log`, `/tmp/copa-grupos-build-publicacao.log`, `/tmp/copa-grupos-browser-publicacao-final.log`. Health-check interrompeu a primeira tentativa sem prévia; prévia reiniciada antes da execução válida. Dois testes antigos de elenco foram atualizados de 270 para 90 minutos por clique, conforme a nova partida individual. CI inclui cinco casos novos de navegador e cinco casos de lógica, incluindo 60 campanhas verificadas.
+
+Relatório/capturas: `docs/copa-grupos-por-partida/RELATORIO.md`. Auditoria dos 50 itens atualizada; recordes históricos de clubes/ligas, demais telas raras e refinamentos corporais continuam pendentes. Publicação desta continuação em acompanhamento. Documentos não rastreados do usuário preservados.
+
 ## Continuação — campanha e negociação do modo completo
 
 Abas da campanha com indicação de área atual, alvos de 48 px, nomes sem quebra de palavra e três colunas no celular estreito. Folha de contrato: termos legíveis, controles de 44 px com nomes acessíveis, resposta explícita de aceite/recusa e ações de sair/fechar negócio sempre visíveis. Regras de negociação preservadas; novo metadado apenas para informar a última tentativa.

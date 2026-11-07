@@ -4,6 +4,17 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## 📋 Treinador: pendências finalizadas
+
+- Estreia no clube do coração grande vem com contrato de um ano: sem a meta, não renova. Também dá para começar num projeto menor; o clube do coração convida depois de um bom trabalho
+- Cartas de pré-temporada que perderiam o efeito pelo teto (força 99, moral/torcida 100) dão lugar a outra
+- Dificuldade: gigantes ganham a liga em cerca de 35–45% das vezes e podem cair após dois anos sem título
+- Resumo do ano mostra o caminho em cada copa, jogo a jogo
+- Clássico contra o técnico rival vira um momento próprio, com três escolhas
+- Metas da carreira de treinador entram no museu; novo painel "Legado completo" junta jogador e treinador
+
+---
+
 ## ⚽ Bola em 3D no modo treinador
 
 - Uma bola de futebol em pseudo-3D (Zdog) gira enquanto a temporada é simulada e enquanto a final é decidida

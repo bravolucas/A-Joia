@@ -11,13 +11,36 @@ const ids=['filosofia','sucessor','pressao-jovem','transicao-projeto','posse-bas
 export function planoPretemporadaRapida(t,quantidade=1){
  if(t.planoRapido?.ano===t.ano&&t.planoRapido.clube===t.clube)return {...t.planoRapido,cartas:t.planoRapido.cartas.slice(0,1),respostas:t.planoRapido.respostas.slice(0,1)};
  const recentes=new Set((t.historicoRapido||[]).slice(-4));
- const elegiveis=ids.filter(id=>(id!=='rival'||rivalDe(t))&&!recentes.has(id));
+ const possiveis=ids.filter(id=>(id!=='rival'||rivalDe(t))&&!recentes.has(id));
+ // Cartas cujo ganho seria quase todo cortado pelo teto dão lugar a outra.
+ const cartas=cartasDe(t),uteis=possiveis.filter(id=>!cartaNoLimiteRapida(t,cartas[id]));
+ const elegiveis=uteis.length?uteis:possiveis;
  const ordem=elegiveis.sort((a,b)=>hash(`${t.clube}|${t.ano}|${t.filosofia||''}|${a}`)-hash(`${t.clube}|${t.ano}|${t.filosofia||''}|${b}`));
  return {ano:t.ano,clube:t.clube,cartas:ordem.slice(0,1),respostas:[]};
 }
 export function cartaPretemporadaRapida(t,quantidade=1){
  const plano=planoPretemporadaRapida(t,quantidade),indice=plano.respostas.length,id=plano.cartas[indice];
  if(!id)return null;
+ const carta=cartasDe(t)[id];
+ const opcoes=carta.opcoes.map(o=>({...o,descricao:o.descricao.replace(/([Tt]ime|[Mm]oral|[Tt]orcida|[Dd]iretoria) \+(\d+)/g,(texto,nome,numero)=>{
+  const atributo=/time/i.test(nome)?'elenco':nome.toLowerCase();
+  const teto=atributo==='elenco'?99:100,valor=Math.min(Number(numero),Math.max(0,teto-(t[atributo]??50)));
+  return `${nome} +${valor}${valor<Number(numero)?` (limite ${teto})`:''}`;
+ })}));
+ return {...carta,opcoes,id,chave:`${t.clube}|${t.ano}|${indice}|${id}`,indice:indice+1,total:plano.cartas.length,verba:verbaPretemporada(t)};
+}
+/** Uma carta "bate no teto" quando metade ou mais das opções perderia pelo menos metade do ganho por causa dos limites. */
+const tetoDe=a=>a==='elenco'?99:100;
+export function cartaNoLimiteRapida(t,carta){
+ const desperdicadas=carta.opcoes.filter(o=>{
+  const positivos=Object.entries(o.efeitos||{}).filter(([,v])=>v>0);
+  if(!positivos.length)return false;
+  const pedido=positivos.reduce((n,[,v])=>n+v,0),usado=positivos.reduce((n,[a,v])=>n+Math.min(v,Math.max(0,tetoDe(a)-(t[a]??50))),0);
+  return usado*2<pedido;
+ });
+ return desperdicadas.length*2>=carta.opcoes.length;
+}
+function cartasDe(t){
  const nivel=limitar(Math.round(t.elenco||50),30,90),craque=Math.min(95,nivel+10),jovem=Math.min(90,nivel+2),custo=Math.round(craque*craque/6),rival=rivalDe(t);
  const nomes=['Diego Moura','Caio Andrade','Rafael Tavares','Bruno Sales','Lucas Freitas','André Rocha','Miguel Torres','Daniel Costa','Pedro Bastos','Gabriel Reis','Tomás Vieira','Mateo Silva'];
  const jogador=nomes[hash(`${t.clube}|${t.ano}|jogador`)%nomes.length];
@@ -51,13 +74,7 @@ export function cartaPretemporadaRapida(t,quantidade=1){
   analista:{titulo:'Um novo olhar para os adversários',texto:'Um analista oferece um plano personalizado para a liga.',opcoes:[op('analise','Contratar o estudo','Time +3 e diretoria +2.',{elenco:3,diretoria:2},260),op('experiencia','Confiar na própria experiência','Moral +3. Sem gasto.',{moral:3})]},
   renovacao:{titulo:'Seu destaque quer ficar',texto:destaque?`${destaque.nome}, nível ${destaque.nivel} e ${destaque.idade} anos, pede uma decisão sobre o futuro.`:'O principal jogador pede uma decisão sobre seu futuro.',opcoes:[op('renovar',`Renovar · nível ${Math.min(95,nivel+5)}`,'Moral +4 e time +2.',{moral:4,elenco:2},300),op('negociar','Negociar a saída','Verba +R$ 800 mil. Time −3 e moral −2.',{elenco:-3,moral:-2},-800)]}
  };
- const carta=cartas[id];
- const opcoes=carta.opcoes.map(o=>({...o,descricao:o.descricao.replace(/([Tt]ime|[Mm]oral|[Tt]orcida|[Dd]iretoria) \+(\d+)/g,(texto,nome,numero)=>{
-  const atributo=/time/i.test(nome)?'elenco':nome.toLowerCase();
-  const teto=atributo==='elenco'?99:100,valor=Math.min(Number(numero),Math.max(0,teto-(t[atributo]??50)));
-  return `${nome} +${valor}${valor<Number(numero)?` (limite ${teto})`:''}`;
- })}));
- return {...carta,opcoes,id,chave:`${t.clube}|${t.ano}|${indice}|${id}`,indice:indice+1,total:plano.cartas.length,verba:verbaPretemporada(t)};
+ return cartas;
 }
 export function aplicarPretemporadaRapida(c,chave,opcaoId,quantidade=1){
  const t=c?.tecnico;if(!t||t.fase!=='pretemporada'||t.demitido||t.desempregado)throw new Error('Pré-temporada indisponível.');

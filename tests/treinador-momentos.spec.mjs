@@ -39,6 +39,16 @@ for (const width of [390, 1366]) {
     expect(await semRolagemLateral(page)).toBe(true);
     await page.screenshot({ path: `test-results/treinador-parada-${width}.png`, fullPage: true });
     await page.locator('.ct-actions .ct-decisions button:enabled').first().click();
+    // Depois da parada pode vir o clássico contra o técnico rival.
+    for (let i = 0; i < 3; i++) {
+      await page.locator('.ct-simulating').waitFor({ state: 'detached', timeout: 10000 });
+      const classico = page.getByRole('heading', { name: /Clássico contra/ });
+      if (!(await classico.count())) break;
+      await expect(page.locator('.mt-derby')).toBeVisible();
+      expect(await semRolagemLateral(page)).toBe(true);
+      await page.screenshot({ path: `test-results/treinador-classico-${width}.png`, fullPage: true });
+      await page.locator('.ct-actions .ct-decisions button:enabled').first().click();
+    }
     await expect.poll(async () => (await salvo(page)).tecnico.fase).not.toBe('parada');
     const fim = await salvo(page);
     expect(fim.tecnico.temporadas[0].paradas).toHaveLength(1);
@@ -110,9 +120,27 @@ test('ano sem clube: comentarista rende reputação e saldo', async ({ page }) =
 
 test('metas da carreira aparecem com progresso', async ({ page }) => {
   await abrir(page, comResultado());
-  const metas = page.locator('details.mt-goals');
+  const metas = page.locator('details.mt-goals:not(.mt-legacy)');
   await expect(metas).toContainText('Metas da carreira');
   await metas.locator('summary').click();
   await expect(metas).toContainText('Missão salvar');
   await expect(metas).toContainText('Cem vitórias');
+});
+
+test('legado completo junta jogador e treinador', async ({ page }) => {
+  const c = comResultado();
+  const a = c.tecnico.temporadas[0];
+  a.classico = { rodada: 30, rival: 'Paulo Viana', clube: 'Sport', escolha: 'atacar', resultado: 'V', golsPro: 2, golsContra: 1 };
+  a.torneios = [{ nome: 'Copa do Brasil', tipo: 'copa', participantes: 32, campeao: 'Flamengo', faseUsuario: 'Eliminado: quartas de final', fases: [],
+    jogosUsuario: [{ casa: 'Confiança', fora: 'Remo', golsCasa: 2, golsFora: 0, vencedor: 'Confiança', fase: 'Oitavas de final' }, { casa: 'Flamengo', fora: 'Confiança', golsCasa: 3, golsFora: 1, vencedor: 'Flamengo', fase: 'Quartas de final' }] }];
+  await page.goto('http://127.0.0.1:4173/A-Joia/');
+  await page.evaluate(c => { localStorage.setItem('ajoia_rapido_v1', JSON.stringify({ v: 1, etapa: 'tecnico', c })); }, c);
+  await page.reload();
+  await page.getByRole('button', { name: /Continuar · Treinador momentos/ }).click();
+  const legado = page.locator('details.mt-legacy');
+  await expect(legado).toContainText('Legado completo');
+  await legado.locator('summary').click();
+  await expect(legado).toContainText('Treinador');
+  await expect(legado).toContainText('Jogador');
+  expect(await semRolagemLateral(page)).toBe(true);
 });

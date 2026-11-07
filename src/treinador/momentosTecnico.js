@@ -66,6 +66,12 @@ export const OPCOES_PARADA_TECNICO = {
     { id: 'reforcos', nome: 'Pedir reforços', descricao: 'Time +3 até o fim. Diretoria −5.', forca: 3, diretoria: -5 },
     { id: 'defender', nome: 'Defender o trabalho', descricao: 'Moral +6. A diretoria pode comprar a ideia… ou não.', moral: 6, aposta: true },
   ],
+  // Clássico contra o técnico rival: vale para este jogo; vencer anima a torcida (+5), perder pesa (−5).
+  rival: [
+    { id: 'atacar', nome: 'Ir para cima', descricao: 'Estilo ofensivo neste jogo: mais gols e mais riscos.' },
+    { id: 'proteger', nome: 'Jogo de xadrez', descricao: 'Estilo defensivo: mais empates, menos sustos.' },
+    { id: 'provocar', nome: 'Provocar na coletiva', descricao: 'Moral +5 antes do jogo. Se perder, a torcida cobra em dobro (−10).', moral: 5 },
+  ],
 };
 
 /* ---------- Ano sem clube ---------- */

@@ -4,6 +4,13 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## ⚽ Bola em 3D no modo treinador
+
+- Uma bola de futebol em pseudo-3D (Zdog) gira enquanto a temporada é simulada e enquanto a final é decidida
+- Com "reduzir movimento" ligado no aparelho, a bola aparece parada
+
+---
+
 ## 📋 Modo treinador: mais difícil, mais coerente e com momentos de decisão
 
 **Equilíbrio**

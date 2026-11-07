@@ -4,7 +4,7 @@ Pedido atual: modo rápido resolve três jogos de grupo de uma vez. Alterado par
 
 Build, **40 arquivos de testes de lógica** e regressão ampla de **139 cenários de navegador** passaram. Após o acabamento das probabilidades, movimento reduzido e círculo completo em tela baixa, build e **14 cenários direcionados** passaram. Logs `/tmp/copa-grupos-unit-entrega.log`, `/tmp/copa-grupos-browser-entrega.log`, `/tmp/copa-grupos-build-publicacao.log`, `/tmp/copa-grupos-browser-publicacao-final.log`. Health-check interrompeu a primeira tentativa sem prévia; prévia reiniciada antes da execução válida. Dois testes antigos de elenco foram atualizados de 270 para 90 minutos por clique, conforme a nova partida individual. CI inclui cinco casos novos de navegador e cinco casos de lógica, incluindo 60 campanhas verificadas.
 
-Relatório/capturas: `docs/copa-grupos-por-partida/RELATORIO.md`. Auditoria dos 50 itens atualizada; recordes históricos de clubes/ligas, demais telas raras e refinamentos corporais continuam pendentes. Publicação desta continuação em acompanhamento. Documentos não rastreados do usuário preservados.
+Relatório/capturas: `docs/copa-grupos-por-partida/RELATORIO.md`. Auditoria dos 50 itens atualizada; recordes históricos de clubes/ligas, demais telas raras e refinamentos corporais continuam pendentes. Publicado em `c490ad1`: Pages https://github.com/bravolucas/A-Joia/actions/runs/42316733489 concluiu com sucesso; geral `42316733521` e navegador `42316733558` também passaram. Confirmação documental salva apenas no checkpoint, sem novo deploy. Documentos não rastreados do usuário preservados.
 
 ## Continuação — campanha e negociação do modo completo
 

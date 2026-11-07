@@ -73,3 +73,4 @@
 .mt-goals li.feita strong{color:#fde68a}
 .mt-forecast-tag{font-size:11px;font-weight:800;border:0!important;background:none!important;padding:0!important}
 .mt-forecast-tag.mt-forecast-alto{color:#86efac}.mt-forecast-tag.mt-forecast-medio{color:#fde68a}.mt-forecast-tag.mt-forecast-baixo{color:#fca5a5}
+.mt-ball{display:flex;justify-content:center;margin-top:10px}

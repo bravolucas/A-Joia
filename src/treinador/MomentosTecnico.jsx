@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import confetti from 'canvas-confetti';
 import { Escudo, Bandeira, JanelaTreinador } from './uiTreinador.jsx';
 import { TacaCompeticao } from '../comum/trofeus.jsx';
+import Bola3D from '../comum/Bola3D.jsx';
 import { CENARIOS } from '../comum/arte.js';
 import { competicaoDoTitulo } from '../comum/tacas.js';
 import { FINAIS_TECNICO, chanceFinalTecnico, OPCOES_PARADA_TECNICO, ANO_SEM_CLUBE_TECNICO } from './momentosTecnico.js';
@@ -64,7 +65,7 @@ export function PopUpResultadoFinal({ uf, onFechar }) {
         <p className="mt-score">{uf.lado} {uf.placar} {uf.adversario}</p>
         <p>{uf.venceu ? 'A estratégia funcionou e a taça vai para a sua galeria.' : 'Faltou pouco. A campanha fica na história mesmo sem a taça.'}</p>
         <button className="ct-primary" onClick={onFechar}>Continuar<span aria-hidden="true">→</span></button>
-      </> : <><h3 className="mt-wait">Decidindo…</h3><button className="ct-primary" onClick={() => setRevelado(true)}>Ver agora</button></>}
+      </> : <><div className="mt-ball"><Bola3D size={84} /></div><h3 className="mt-wait">Decidindo…</h3><button className="ct-primary" onClick={() => setRevelado(true)}>Ver agora</button></>}
     </div>
   </JanelaTreinador>;
 }

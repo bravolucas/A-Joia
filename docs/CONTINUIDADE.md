@@ -1,3 +1,11 @@
+## Continuação — históricos incompletos e resumos de competição
+
+Histórico de temporadas do modo completo protegido contra clube visual e artilharia ausentes. Normalização recupera identificação do clube sem alterar o registro original. Próximos registros guardam posição; resumo usa a função daquele ano e não a atual, sem inventar posição para saves antigos. Tabela acessível separa clube/seleção e mostra J/G/A/CS/nota, com legenda e dados opcionais ausentes em “—”. Classificação ausente é explicitada; xG só aparece se registrado. Mantidos títulos, prêmios registrados, metas, finanças e informações do treinador. Resultado de competição deixa de anunciar artilheiro sorteado/melhor jogador não apurado; celebrações e animações permanecem.
+
+Build, **41 arquivos de lógica** e **153 cenários de navegador** passaram. Três casos novos de normalização e seis de histórico em 320/1366 px (sem posição, ATA e GOL com posição atual diferente). Logs `/tmp/resumos-completo-unit.log`, `/tmp/resumos-completo-build-entrega.log`, `/tmp/resumos-completo-regressao.log`. Teste inicial corrigido para abrir Estatísticas, onde fica a lista; a prévia foi iniciada após health-check interromper tentativa sem servidor. Seis testes específicos passaram antes do acabamento de cabeçalho; suíte ampla passou depois dele.
+
+Relatório e capturas em `docs/resumos-completo/RELATORIO.md`; auditoria dos 50 itens atualizada, 67/98 continuam parciais. Sem preenchimento retroativo de posição, fonte histórica nova ou apuração nova de prêmios de torneio. Publicação desta continuação em acompanhamento. Documentos não rastreados do usuário preservados.
+
 ## Continuação — mercado e empréstimos do modo completo
 
 Ofertas em cartões comparáveis com modalidade, duração, liga, força, base salarial e torcida separadas. Prévia de salário inclui o multiplicador do empresário, como a folha de negociação. Duração de empréstimo explícita na escolha e na negociação, separada do prazo dos termos contratuais. Origem do passe e retorno/eventual compra explicados sem garantir resultado. Rodapé acessível diz “Ficar no clube e jogar” quando a ação simula a temporada. Campanha mostra clube atual, origem e prazo restante/encerrado do empréstimo. Busca vazia recebe mensagem. Sem mudança nas regras de contrato, empréstimo, compra ou retorno.

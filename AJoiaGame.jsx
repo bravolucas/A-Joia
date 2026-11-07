@@ -1,3 +1,4 @@
+import TabelaCompeticoesTemporada from './TabelaCompeticoesTemporada.jsx';
 import { criarIdMuseu } from './museu.js';
 import React, { useState, useMemo, useEffect } from "react";
 import { ARTE } from "./arte.js";
@@ -2494,7 +2495,7 @@ function resolverTemporada(c, extraStats) {
 
     const registro = {
       idade: c.idade, temporadaLabel: temporadaLabel(c.idade, ANO_INICIO), clube: c.clube.nome, clubeObj: c.clube,
-      ...card, copa, premios, titulosLista, torcidaFim: getTorcida(c, c.clube.nome), famaFim: c.fama, salario, expectativa, bateuMeta,
+      ...card, posicao:c.posicao, copa, premios, titulosLista, torcidaFim: getTorcida(c, c.clube.nome), famaFim: c.fama, salario, expectativa, bateuMeta,
       jogosLista: jogosLista.length ? jogosLista : card.jogosLista,
       porCompeticao: dividirPorCompeticao(c, card),
       selecaoTemporada: c.selecaoTemporadaAtual || statsSelecao(c, card),
@@ -5661,10 +5662,7 @@ function resolverTemporada(c, extraStats) {
                           <div className="text-[9px] text-zinc-500 uppercase tracking-widest font-sport mb-1">📰 Edição especial · {competicaoResultado.nomeCompeticao}</div>
                           <div className={`display font-bold text-lg leading-tight mb-2 ${competicaoResultado.venceu ? "text-amber-400" : "text-zinc-400"}`}>{competicaoResultado.titulo}</div>
                           <p className="text-xs text-zinc-400 mb-3">{competicaoResultado.texto}</p>
-                          <div className="grid grid-cols-2 gap-2 text-[10px] mb-4 border-t border-b border-white/10 py-2">
-                            <div><div className="text-zinc-500 uppercase tracking-widest">Artilheiro do torneio</div><div className="font-bold text-zinc-200">{pick(RIVAIS_PREMIO)}</div></div>
-                            <div><div className="text-zinc-500 uppercase tracking-widest">Melhor jogador</div><div className="font-bold text-zinc-200">{competicaoResultado.venceu ? (nome || "Você") : carreira.rivalPosicao}</div></div>
-                          </div>
+
                           <Button onClick={avancarFilaCompeticoes}>Continuar</Button>
                         </div>
                       </Card>
@@ -8365,26 +8363,27 @@ function resolverTemporada(c, extraStats) {
         })()}
 
         {popupTemporada && (
-          <PopupOverlay onClose={() => setPopupTemporada(null)}>
-            <Card className="border-emerald-500/40">
-              <div className="flex items-center gap-1.5 mb-2"><ClubDot club={popupTemporada.clubeObj} size={20} /><span className="text-[10px] text-emerald-400 uppercase tracking-widest">Temporada {popupTemporada.temporadaLabel} · {popupTemporada.clube}</span></div>
-              <div className="grid grid-cols-4 gap-2 text-center mb-3">
+          <PopupOverlay largo titulo={`Temporada ${popupTemporada.temporadaLabel}`} onClose={() => setPopupTemporada(null)}>
+            <Card className="resumo-temporada-completo border-emerald-500/40">
+              <div className="resumo-cabecalho flex items-center gap-1.5 mb-2"><ClubDot club={popupTemporada.clubeObj} size={20} /><span className="text-[10px] text-emerald-400 uppercase tracking-widest">Temporada {popupTemporada.temporadaLabel} · {popupTemporada.clube}</span></div>
+              <p className="resumo-posicao">{popupTemporada.posicao?`Posição nesta temporada: ${popupTemporada.posicao}`:"Posição histórica não registrada"}{!popupTemporada.posicao&&popupTemporada.cleanSheets>0?` · ${popupTemporada.cleanSheets} jogos sem sofrer gol registrados`:""}</p>
+              <div className="resumo-indicadores grid grid-cols-4 gap-2 text-center mb-3">
                 <div><div className="font-mono text-lg font-bold">{popupTemporada.jogos}</div><div className="text-[9px] text-zinc-500 uppercase">Jogos</div></div>
-                <div><div className="font-mono text-lg font-bold">{posicao === "GOL" ? popupTemporada.cleanSheets : popupTemporada.gols}</div><div className="text-[9px] text-zinc-500 uppercase">{posicao === "GOL" ? "CS" : "Gols"}</div></div>
+                <div><div className="font-mono text-lg font-bold">{popupTemporada.posicao === "GOL" ? popupTemporada.cleanSheets : popupTemporada.gols}</div><div className="text-[9px] text-zinc-500 uppercase">{popupTemporada.posicao === "GOL" ? "CS" : "Gols"}</div></div>
                 <div><div className="font-mono text-lg font-bold">{popupTemporada.assist}</div><div className="text-[9px] text-zinc-500 uppercase">Assist.</div></div>
                 <div><div className="font-mono text-lg font-bold">{popupTemporada.nota}</div><div className="text-[9px] text-zinc-500 uppercase">Nota</div></div>
               </div>
               <div className="text-xs text-zinc-300 space-y-1.5 border-t border-zinc-800 pt-3">
-                <div className="flex items-center gap-1.5"><TrophyIcon tipo={popupTemporada.campeaoLiga ? "ouro" : "liga"} size={14} />{popupTemporada.ligaNome}: <strong>{popupTemporada.posLiga}º lugar</strong>{popupTemporada.campeaoLiga ? " — CAMPEÃO" : ""}</div>
+                <div className="flex items-center gap-1.5"><TrophyIcon tipo={popupTemporada.campeaoLiga ? "ouro" : "liga"} size={14} />{popupTemporada.ligaNome}: <strong>{Number.isFinite(popupTemporada.posLiga)?`${popupTemporada.posLiga}º lugar`:"Posição não registrada"}</strong>{popupTemporada.campeaoLiga ? " — CAMPEÃO" : ""}</div>
                 {popupTemporada.continental && <div className="flex items-center gap-1.5"><TrophyIcon tipo={popupTemporada.continental.titulo ? "ouro" : "prata"} size={14} />{popupTemporada.continental.nome}: <strong>{popupTemporada.continental.resultado}</strong>{popupTemporada.continental.adversario ? ` (x ${popupTemporada.continental.adversario}, ${popupTemporada.continental.placar})` : ""}</div>}
                 {popupTemporada.copaNacional && <div className="flex items-center gap-1.5"><TrophyIcon tipo="bronze" size={14} />Copa Nacional: <strong>{popupTemporada.copaNacional.resultado}</strong>{popupTemporada.copaNacional.adversario ? ` (x ${popupTemporada.copaNacional.adversario}, ${popupTemporada.copaNacional.placar})` : ""}</div>}
                 {popupTemporada.estadual && <div className="flex items-center gap-1.5"><TrophyIcon tipo={popupTemporada.estadual.titulo ? "ouro" : "bronze"} size={14} />{popupTemporada.estadual.nome}: <strong>{popupTemporada.estadual.resultado}</strong>{popupTemporada.estadual.adversario ? ` (x ${popupTemporada.estadual.adversario}, ${popupTemporada.estadual.placar})` : ""}</div>}
                 {popupTemporada.copinhaCarreira && <div className="flex items-center gap-1.5"><TrophyIcon tipo={popupTemporada.copinhaCarreira.titulo ? "ouro" : "bronze"} size={14} />{popupTemporada.copinhaCarreira.nome}: <strong>{popupTemporada.copinhaCarreira.resultado}</strong>{popupTemporada.copinhaCarreira.adversario ? ` (x ${popupTemporada.copinhaCarreira.adversario}, ${popupTemporada.copinhaCarreira.placar})` : ""}</div>}
                 {popupTemporada.copa && <div className="flex items-center gap-1.5"><TrophyIcon tipo={popupTemporada.copa.titulo ? "ouro" : "prata"} size={14} />Copa do Mundo: <strong>{popupTemporada.copa.resultado}</strong>{popupTemporada.copa.adversario ? ` (x ${popupTemporada.copa.adversario}, ${popupTemporada.copa.placar})` : ""}</div>}
-                <div>⚽ Artilheiro da liga: <strong>{popupTemporada.artilheiro.nome}</strong> ({popupTemporada.artilheiro.gols} gols)</div>
-                {posicao !== "GOL" && <div>📊 xG esperado: <strong>{popupTemporada.xG}</strong> (fez {popupTemporada.gols}) · nota média da posição: <strong>{popupTemporada.notaMediaPosicao}</strong></div>}
+                {popupTemporada.artilheiro?.nome?<div>⚽ Artilheiro da liga: <strong>{popupTemporada.artilheiro.nome}</strong> ({popupTemporada.artilheiro.gols??"—"} gols)</div>:<div className="text-zinc-500">Artilharia não registrada nesta temporada.</div>}
+                {popupTemporada.posicao !== "GOL" && Number.isFinite(popupTemporada.xG) && <div>📊 xG esperado: <strong>{popupTemporada.xG}</strong> (fez {popupTemporada.gols}) · nota média da posição: <strong>{popupTemporada.notaMediaPosicao??"—"}</strong></div>}
                 {popupTemporada.passesTentados > 0 && <div>🎯 Passes: <strong>{popupTemporada.passesCompletos}/{popupTemporada.passesTentados}</strong> ({popupTemporada.passeCerto}%){popupTemporada.desarmesTentados > 0 ? ` · Desarmes: ${popupTemporada.desarmesCerteiros}/${popupTemporada.desarmesTentados}` : ""}</div>}
-                {popupTemporada.expectativa && <div className={popupTemporada.bateuMeta ? "text-emerald-400" : "text-red-400"}>{popupTemporada.bateuMeta ? "✓" : "✗"} Meta: {posicao === "GOL" ? `${popupTemporada.expectativa.cleanSheets} jogos sem sofrer gol` : `${popupTemporada.expectativa.gols}g / ${popupTemporada.expectativa.assist}a`}</div>}
+                {popupTemporada.expectativa && <div className={popupTemporada.bateuMeta ? "text-emerald-400" : "text-red-400"}>{popupTemporada.bateuMeta ? "✓" : "✗"} Meta: {popupTemporada.posicao === "GOL" ? `${popupTemporada.expectativa.cleanSheets} jogos sem sofrer gol` : `${popupTemporada.expectativa.gols}g / ${popupTemporada.expectativa.assist}a`}</div>}
                 {popupTemporada.premios.length === 0 ? <div className="text-zinc-500">Nenhum prêmio individual anunciado.</div> : popupTemporada.premios.map((p, i) => <div key={i} className={p.doJogador ? "text-amber-400 font-bold" : ""}>🏅 {p.nome}: <strong>{p.vencedor}</strong></div>)}
                 {popupTemporada.resultadoPromessa && (
                   <div className={`flex items-start gap-1.5 ${popupTemporada.resultadoPromessa.cumpriu ? "text-emerald-400" : popupTemporada.resultadoPromessa.culpaDoTecnico ? "text-amber-400" : "text-red-400"}`}>
@@ -8406,37 +8405,7 @@ function resolverTemporada(c, extraStats) {
                 )}
                 <div>💰 Salário da temporada: ${formatarDinheiro(popupTemporada.salario)}</div>
               </div>
-              {(popupTemporada.porCompeticao?.length > 0 || popupTemporada.selecaoTemporada) && (
-                <div className="border-t border-zinc-800 pt-3 mt-3">
-                  <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2">📊 Números por competição</div>
-                  <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-x-2 gap-y-1 text-[10px] items-center">
-                    <span className="text-zinc-600 uppercase text-[8px]">Competição</span>
-                    <span className="text-zinc-600 uppercase text-[8px] text-right">J</span>
-                    <span className="text-zinc-600 uppercase text-[8px] text-right">{posicao === "GOL" ? "CS" : "G"}</span>
-                    <span className="text-zinc-600 uppercase text-[8px] text-right">A</span>
-                    <span className="text-zinc-600 uppercase text-[8px] text-right">Nota</span>
-                    {(popupTemporada.porCompeticao || []).map((k) => (
-                      <React.Fragment key={k.id}>
-                        <span style={{ color: k.cor }}>{k.icone} {k.nome}</span>
-                        <span className="font-mono text-right text-zinc-300">{k.jogos}</span>
-                        <span className="font-mono text-right text-zinc-300">{posicao === "GOL" ? k.cleanSheets : k.gols}</span>
-                        <span className="font-mono text-right text-zinc-300">{k.assist}</span>
-                        <span className="font-mono text-right text-zinc-400">{k.nota}</span>
-                      </React.Fragment>
-                    ))}
-                    {popupTemporada.selecaoTemporada && (
-                      <React.Fragment>
-                        <span className="col-span-5 border-t border-zinc-800/70 mt-1 pt-1 text-[8px] uppercase tracking-widest text-zinc-600">Seleção (à parte dos números de clube)</span>
-                        <span style={{ color: popupTemporada.selecaoTemporada.cor }}>{popupTemporada.selecaoTemporada.icone} {popupTemporada.selecaoTemporada.nome}</span>
-                        <span className="font-mono text-right text-zinc-300">{popupTemporada.selecaoTemporada.jogos}</span>
-                        <span className="font-mono text-right text-zinc-300">{posicao === "GOL" ? popupTemporada.selecaoTemporada.cleanSheets : popupTemporada.selecaoTemporada.gols}</span>
-                        <span className="font-mono text-right text-zinc-300">{popupTemporada.selecaoTemporada.assist}</span>
-                        <span className="font-mono text-right text-zinc-400">{popupTemporada.selecaoTemporada.nota}</span>
-                      </React.Fragment>
-                    )}
-                  </div>
-                </div>
-              )}
+              {(popupTemporada.porCompeticao?.length>0||popupTemporada.selecaoTemporada)&&<TabelaCompeticoesTemporada temporada={popupTemporada}/>}
               <div className="mt-4"><Button onClick={() => setPopupTemporada(null)}>Fechar</Button></div>
             </Card>
           </PopupOverlay>

@@ -88,3 +88,7 @@ Fase de grupos do modo rápido remodelada: três decisões, placar individual, c
 ## Continuação: vitrine e empréstimos do modo completo
 
 Item 98 avançou na leitura de ofertas: modalidade/duração, salário inicial coerente com a negociação, origem do passe, resumo de prazo ativo/encerrado e ações visíveis. Retorno esportivo/compra não foram reimplementados nesta etapa. Relatório `docs/mercado-completo/RELATORIO.md`; revisão dos estados raros continua parcial.
+
+## Continuação: históricos incompletos e competição
+
+Item 98: resumos históricos do modo completo revisados em 320/1366 px, com compatibilidade de clube/artilharia ausentes e tabela separando clube/seleção. Posição guardada nas próximas temporadas e usada no histórico; saves sem esse campo não recebem posição inventada. Anúncios sorteados de artilheiro/melhor jogador foram retirados do resultado da competição sem retirar celebrações. Relatório `docs/resumos-completo/RELATORIO.md`. Item 67 e demais estados raros continuam pendentes.

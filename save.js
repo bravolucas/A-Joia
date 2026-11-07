@@ -1,3 +1,4 @@
+import {CLUBES} from './data.js';
 import { registrarMuseu } from './museu.js';
 /* ===================== SISTEMA DE SAVE =====================
    Guarda a carreira no navegador (localStorage) e permite exportar/importar
@@ -184,6 +185,7 @@ export function normalizarTemporada(t) {
   Object.entries(PADRAO_TEMPORADA).forEach(([k, v]) => {
     if (Array.isArray(v) && !Array.isArray(out[k])) out[k] = [];
   });
+  if(!out.clubeObj?.nome)out.clubeObj={...(CLUBES.find(c=>c.nome===out.clube)||{nome:out.clube||"Clube",cor:"#12A876"})};
   return out;
 }
 

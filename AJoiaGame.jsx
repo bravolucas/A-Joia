@@ -4560,6 +4560,7 @@ function resolverTemporada(c, extraStats) {
                   ))}
                 </div>
 
+                {carreira.emprestimo&&<section className="emprestimo-vinculo" aria-label="Seu empréstimo"><strong>Empréstimo em andamento</strong><p>Você joga no {carreira.clube.nome}. Passe vinculado ao {carreira.clubeOrigemEmprestimo?.nome||"clube de origem"}.</p><span>{(carreira.emprestimoAnosRestantes??1)>0?`${carreira.emprestimoAnosRestantes??1} ${(carreira.emprestimoAnosRestantes??1)===1?"temporada restante":"temporadas restantes"}`:"Prazo encerrado · retorno ou compra em decisão"}</span></section>}
                 <Card className="span-full">
                   <div className="flex items-center gap-3">
                     <button onClick={() => setJogadorCardAberto(true)} className={`shrink-0 w-16 h-16 flex flex-col items-center justify-center hover:brightness-110 transition-all ${ovrAtual >= 93 ? "glow-anim" : ""}`} style={{ background: ovrHexGradiente(ovrAtual), clipPath: "polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)" }}>
@@ -5955,7 +5956,7 @@ function resolverTemporada(c, extraStats) {
                 )}
 
                 {negociacaoContrato && (
-                  <PopupOverlay titulo="Negociar contrato">
+                  <PopupOverlay titulo={negociacaoContrato.opTransfer?.tipo==="emprestimo"?"Negociar empréstimo":"Negociar contrato"}>
                     <Card padded={false} className="negociacao-completa border-amber-500/40 overflow-hidden">
                       <div className="p-4 border-b border-zinc-800 text-center" style={{ background: "radial-gradient(circle at 25% 15%, rgba(216,180,74,0.25) 0%, transparent 55%), linear-gradient(180deg,#1c1608 0%,#0d0a04 100%)" }}>
                         <div className="text-[9px] text-amber-400 uppercase tracking-widest mb-1 font-bold">📄 Folha de contrato</div>
@@ -5963,6 +5964,7 @@ function resolverTemporada(c, extraStats) {
                         <div className="text-[10px] text-zinc-500 mt-0.5">Negociado por {negociacaoContrato.empNome}</div>
                       </div>
                       <div className="p-4">
+                        {negociacaoContrato.opTransfer?.tipo==="emprestimo"&&<section className="mercado-contexto" aria-label="Resumo do empréstimo"><strong>Empréstimo de {negociacaoContrato.opTransfer.duracao||1} {(negociacaoContrato.opTransfer.duracao||1)===1?"temporada":"temporadas"}</strong><p>Origem do passe: {carreira.clube.nome}. Destino: {negociacaoContrato.clube.nome}.</p><small>O prazo do empréstimo é fixo; os termos abaixo compõem o contrato negociado.</small></section>}
                         <div className="mb-3">
                           <div className="flex justify-between text-[10px] text-zinc-500 mb-1"><span>Disposição da diretoria</span><span>{Math.round(negociacaoContrato.paciencia)}%</span></div>
                           <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
@@ -5973,7 +5975,7 @@ function resolverTemporada(c, extraStats) {
                         <div className="grid gap-1.5 mb-3">
                           {[
                             ["salario", "💰 Salário anual", `$${formatarDinheiro(negociacaoContrato.termos.salario)}`],
-                            ["anos", "📅 Duração", `${negociacaoContrato.termos.anos} ano(s)`],
+                            ["anos", negociacaoContrato.opTransfer?.tipo==="emprestimo"?"📅 Prazo do contrato negociado":"📅 Duração", `${negociacaoContrato.termos.anos} ano(s)`],
                             ["multa", "🔒 Cláusula de saída", `$${formatarDinheiro(negociacaoContrato.termos.multa)}`],
                             ["bonusGol", "⚽ Bônus por gol", `$${formatarDinheiro(negociacaoContrato.termos.bonusGol)}`],
                             ["bonusTitulo", "🏆 Bônus por título", `$${formatarDinheiro(negociacaoContrato.termos.bonusTitulo)}`],
@@ -6156,8 +6158,8 @@ function resolverTemporada(c, extraStats) {
                 )}
 
                 {janela && (
-                  <PopupOverlay>
-                    <Card>
+                  <PopupOverlay largo titulo="Mercado de transferências">
+                    <Card className="mercado-completo">
                       {janela.tipo === "empresario" && (
                         <>
                           <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-3">💼 Reunião com o empresário</div>
@@ -6228,9 +6230,9 @@ function resolverTemporada(c, extraStats) {
                       {janela.tipo === "duracaoEmprestimo" && (
                         <>
                           <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-2">Empréstimo — por quanto tempo?</div>
-                          <div className="grid grid-cols-2 gap-2 mb-2">
-                            <Button variant="ghost" onClick={() => escolherDuracaoEmprestimo(1)}>1 temporada</Button>
-                            <Button variant="ghost" onClick={() => escolherDuracaoEmprestimo(2)}>2 temporadas</Button>
+                          <p className="mercado-vinculo mb-3">Escolha o prazo para buscar clubes. Você ainda poderá comparar as propostas antes de assinar.</p>
+                          <div className="mercado-duracoes grid grid-cols-2 gap-2 mb-2">
+                            {[1,2].map(anos=><button key={anos} onClick={()=>escolherDuracaoEmprestimo(anos)}><strong>{anos} {anos===1?"temporada":"temporadas"}</strong><span>{anos===1?"Um ciclo para buscar espaço e voltar.":"Mais tempo para desenvolver sua passagem."}</span></button>)}
                           </div>
                           <Button variant="ghost" onClick={() => setJanela({ tipo: "empresario" })}>← Voltar</Button>
                         </>
@@ -6286,16 +6288,21 @@ function resolverTemporada(c, extraStats) {
                       {(janela.tipo === "mercado" || janela.tipo === "emprestimo" || janela.tipo === "tentadora" || janela.tipo === "aposentadoria" || janela.tipo === "coracao" || janela.tipo === "sair" || janela.tipo === "rescisao") && (
                         <>
                           <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-2">{janela.tipo === "tentadora" ? "Proposta tentadora" : janela.tipo === "coracao" ? "Clube do coração" : janela.tipo === "emprestimo" ? "Propostas de empréstimo" : janela.tipo === "aposentadoria" ? "Fim de carreira" : janela.tipo === "sair" ? "Propostas após pedido de saída" : janela.tipo === "rescisao" ? "Propostas após rescisão" : "Propostas de mercado"}</div>
-                          <div className="grid gap-2 mb-2">
+                          {!janela.opcoes.length&&<p role="status" className="mercado-vinculo">Nenhuma proposta compatível nesta busca. Você pode voltar ao empresário ou ficar no clube.</p>}
+                          <div className="mercado-propostas lista-cards grid gap-2 mb-2">
                             {janela.opcoes.map((op, i) => {
-                              const sal = salarioClube(op.clube, ovrAtual) * (op.salarioMult || 1);
+                              const empOferta=carreira.empresario?empresarioPorId(carreira.empresario.id):EMPRESARIOS[0];
+                              const sal = Math.round(salarioClube(op.clube, ovrAtual) * (op.salarioMult || 1) * (empOferta.salarioMult??1));
                               const nivelInt = op.interesse == null ? null : op.interesse >= 1.4 ? { l: "Prioridade máxima", c: "#12A876" } : op.interesse >= 0.8 ? { l: "Interesse forte", c: "#D8B44A" } : op.interesse >= 0.35 ? { l: "Sondagem", c: "#a1a1aa" } : { l: "Interesse discreto", c: "#71717a" };
                               return (
-                                <button key={i} onClick={() => escolherOfertaTransferencia(op)} className="text-left p-3 border border-zinc-800 rounded-sm hover:border-emerald-500 flex items-center gap-3">
+                                <button key={op.clube.nome} aria-label={`Ver proposta ${op.tipo==="emprestimo"?"de empréstimo":"de transferência"} do ${op.clube.nome}`} onClick={() => escolherOfertaTransferencia(op)} className="mercado-oferta text-left p-3 border border-zinc-800 rounded-sm hover:border-emerald-500 flex items-start gap-3">
                                   <ClubDot club={op.clube} size={24} />
                                   <div className="flex-1">
                                     <div className="text-sm font-bold flex items-center gap-2">{op.clube.nome} {op.tentadora && <span className="text-[9px] bg-amber-400 text-zinc-950 px-1.5 py-0.5 rounded-sm">{op.salarioMult}x salário</span>}</div>
-                                    <div className="text-[10px] text-zinc-500">{LIGAS[op.clube.liga].nome} · força {op.clube.forca} · salário ${formatarDinheiro(sal)}{op.tipo === "emprestimo" ? ` · empréstimo (${op.duracao}a)` : ""}</div>
+                                    <span className="mercado-modalidade">{op.tipo==="emprestimo"?`Empréstimo · ${op.duracao||1} ${(op.duracao||1)===1?"temporada":"temporadas"}`:"Transferência definitiva"}</span>
+                                    <div className="mercado-liga">{LIGAS[op.clube.liga].nome} · força {op.clube.forca}</div>
+                                    <div className="mercado-salario"><small>Base anual para negociar</small><strong>${formatarDinheiro(sal)}</strong></div>
+                                    {op.tipo==="emprestimo"&&<p className="mercado-vinculo">Passe vinculado ao {carreira.clube.nome}. Ao fim: retorno ou eventual proposta de compra.</p>}
                                     {op.tipo !== "emprestimo" && (() => {
                                       const vMeu = valorDeMercado(carreira, ovrAtual, ultima);
                                       // clube que te quer muito paga acima do valor de mercado
@@ -6308,8 +6315,8 @@ function resolverTemporada(c, extraStats) {
                               );
                             })}
                           </div>
-                          {janela.tipo !== "aposentadoria" && <Button variant="ghost" onClick={() => setJanela({ tipo: "empresario" })}>← Voltar</Button>}
-                          <div className="mt-2"><Button variant="ghost" onClick={() => jogarTemporada(null)}>Recusar e ficar no {carreira.clube.nome}</Button></div>
+                          <div className="mercado-acoes">{janela.tipo !== "aposentadoria" && <Button variant="ghost" onClick={() => setJanela({ tipo: "empresario" })}>← Voltar às buscas</Button>}
+                          <Button variant="ghost" onClick={() => jogarTemporada(null)}>Ficar no {carreira.clube.nome} e jogar</Button></div>
                           {janela.tipo === "aposentadoria" && <div className="mt-2"><Button variant="ghost" onClick={() => setPendingAposentadoria({ nivel: veredito(carreira, janela.temporadasSnapshot), c: carreira })}>🚪 Pendurar as chuteiras (encerrar carreira)</Button></div>}
                         </>
                       )}

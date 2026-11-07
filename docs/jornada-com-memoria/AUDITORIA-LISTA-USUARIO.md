@@ -84,3 +84,7 @@ Item 98: navegação das abas e negociação de renovação revisadas em 320/390
 ## Continuação: Copa por partida
 
 Fase de grupos do modo rápido remodelada: três decisões, placar individual, classificação calculada pelos seis jogos do grupo e resultado salvo antes de continuar. Adversário e rodada aparecem antes da escolha. Revisão do fluxo de Copa avança o item 98; formato simplificado do jogo e compatibilidade descritos em `docs/copa-grupos-por-partida/RELATORIO.md`. Pendências anteriores continuam explícitas.
+
+## Continuação: vitrine e empréstimos do modo completo
+
+Item 98 avançou na leitura de ofertas: modalidade/duração, salário inicial coerente com a negociação, origem do passe, resumo de prazo ativo/encerrado e ações visíveis. Retorno esportivo/compra não foram reimplementados nesta etapa. Relatório `docs/mercado-completo/RELATORIO.md`; revisão dos estados raros continua parcial.

@@ -92,7 +92,7 @@ function PainelClassico({ p, onEscolher, ocupado }) {
   return <>
     <span className="mt-eyebrow">RODADA {p.rodada} · CLÁSSICO</span>
     <h2>Clássico contra {r.nome}</h2>
-    <p>{p.casa ? 'Em casa' : 'Fora de casa'} contra o {r.clube}. O técnico rival {r.v + r.e + r.d ? `tem ${r.d}V ${r.e}E ${r.v}D contra você` : 'nunca enfrentou você'}. A torcida só fala desse jogo.</p>
+    <p>{p.casa ? 'Em casa' : 'Fora de casa'} contra o {r.clube}.{r.rivalDeGeracao ? ' A rivalidade vem dos tempos de jogador.' : ''} O técnico rival {r.v + r.e + r.d ? `tem ${r.d}V ${r.e}E ${r.v}D contra você` : 'nunca enfrentou você'}. A torcida só fala desse jogo.</p>
     <div className="mt-versus mt-derby">
       <div><Escudo nome={p.minha?.nome} size={44} /><strong>{p.minha?.nome}</strong><span>{p.posicao}º · força {p.forca}</span></div>
       <b>x</b>
@@ -198,7 +198,7 @@ export function PrevisaoTemporada({ prev }) {
 }
 export function RivalTecnico({ rival }) {
   if (!rival) return null;
-  return <p className="mt-rival"><Escudo nome={rival.clube} size={18} /><span>Rival: <strong>{rival.nome}</strong> ({rival.clube}) · {rival.v}V {rival.e}E {rival.d}D{rival.titulosDele ? ` · ${rival.titulosDele} título${rival.titulosDele > 1 ? 's' : ''} dele` : ''}</span></p>;
+  return <p className="mt-rival"><Escudo nome={rival.clube} size={18} /><span>Rival: <strong>{rival.nome}</strong> ({rival.clube}) · {rival.v}V {rival.e}E {rival.d}D{rival.titulosDele ? ` · ${rival.titulosDele} título${rival.titulosDele > 1 ? 's' : ''} dele` : ''}{rival.rivalDeGeracao ? ' · rival desde os tempos de jogador' : ''}</span></p>;
 }
 export function NoticiasElenco({ noticias = [], destaque }) {
   if (!noticias.length && !destaque) return null;

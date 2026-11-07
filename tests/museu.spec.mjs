@@ -70,5 +70,5 @@ test('coleção vazia mostra objetivos e permite navegar pelas abas com teclado'
  await expect(page.getByRole('tab',{name:/Camisas/})).toHaveAttribute('aria-selected','true');
  await page.getByRole('searchbox').fill('Santos');
  await page.getByRole('button',{name:'Santos, bloqueado',exact:true}).click();
- await expect(page.getByRole('dialog').getByText(/Chegue a 75 de aprovação/)).toBeVisible();
+ await expect(page.getByRole('dialog').getByText(/vira camisa de ídolo/)).toBeVisible();
 });

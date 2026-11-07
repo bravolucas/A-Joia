@@ -267,6 +267,14 @@ export function opcoesInicioTecnico(c) {
   return opcoes;
 }
 export const CONTRATO_CURTO_ELENCO = 80;
+/** O que a carreira de jogador deixa para o banco: o rival de geração vira técnico rival e um ex-parceiro vira auxiliar. */
+export function memoriaJogadorTecnico(c) {
+  const duplas = (c?.jornada?.duplas || []).filter(d => d?.nome).sort((a, b) => (b.conexao || 0) - (a.conexao || 0) || (b.temporadas || 0) - (a.temporadas || 0));
+  const parceiro = duplas[0];
+  const mentor = c?.jornada?.mentor;
+  const auxiliar = parceiro ? { nome: parceiro.nome, clube: parceiro.clube, origem: 'dupla' } : mentor?.nome ? { nome: mentor.nome, clube: mentor.clube || mentor.clubeAtual || null, origem: 'mentor' } : null;
+  return { rival: c?.rival?.nome ? { nome: c.rival.nome } : null, auxiliar };
+}
 export function iniciarNoClubeIdolo(c, clube) {
   if (!c?.tecnico || c.tecnico.temporadas.length || c.tecnico.fase !== 'pretemporada') throw new Error('Escolha disponível somente no início da carreira.');
   const opcao = (c.tecnico.opcoesInicio || []).find(x => x.clube === clube);
@@ -447,11 +455,12 @@ export function iniciarCarreiraTecnico(c) {
   const clubeInicial = opcoesInicio[0]?.clube || c.clubeNome || 'Clube inicial';
   const dadosClubeInicial = CLUBES_CONVITES_TECNICO.find(x => x.nome === clubeInicial);
   const afinidadeInicial = opcoesInicio[0]?.afinidade || 0;
+  const memoriaJogador = memoriaJogadorTecnico(c);
   return { ...c, tecnico: {
-    idadeInicio: c.idade, ano: c.ano, clube: clubeInicial, vinculosJogador, opcoesInicio, clubeInicialEscolhido: false,
+    idadeInicio: c.idade, ano: c.ano, clube: clubeInicial, vinculosJogador, opcoesInicio, clubeInicialEscolhido: false, memoriaJogador,
     herancaJogador:{rotulos:legadoNarrativo(c),reputacaoInicial:reputacao,explicacao:'Seu legado de jogador orienta a reputação inicial. Afinidade pode abrir portas, mas o nível esportivo continua limitando os convites.'},
     reputacao, pais: dadosClubeInicial?.pais || 'Brasil', salario: dadosClubeInicial?.salario || 12, desempregado: false, anosDesempregado: 0, estilo: 'equilibrado', temporadas: [], vitorias: 0, empates: 0,
-    derrotas: 0, titulos: 0, elenco: dadosClubeInicial?.elenco || 50, moral: 50, diretoria: limitar(60 + Math.round(afinidadeInicial * 0.15), 0, 100), torcida: limitar(55 + Math.round(afinidadeInicial * 0.35), 0, 100), decisoes: [], demitido: false, propostas: [], historicoCartas: [], cartas: sortearCartasTecnico({ reputacao, temporadas: [], diretoria: 60, moral: 50 }), fase: 'pretemporada'
+    derrotas: 0, titulos: 0, elenco: dadosClubeInicial?.elenco || 50, moral: memoriaJogador.auxiliar ? 53 : 50, diretoria: limitar(60 + Math.round(afinidadeInicial * 0.15), 0, 100), torcida: limitar(55 + Math.round(afinidadeInicial * 0.35), 0, 100), decisoes: [], demitido: false, propostas: [], historicoCartas: [], cartas: sortearCartasTecnico({ reputacao, temporadas: [], diretoria: 60, moral: 50 }), fase: 'pretemporada'
   }};
 }
 export function definirEstiloTecnico(c, estilo) {
@@ -890,7 +899,7 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
       const chave = `${t.clube}|${t.ano}|classico|${rodada}`;
       return { ...c, tecnico: { ...t, fase: 'parada',
         paradaPendente: { chave, tipo: 'rival', rodada: rodada + 1, total: calendario.length, jogos: jogosAte, pontos: pontosAte, posicao: minha?.posicao || tabela.length,
-          rival: { nome: rivalInicial.nome, clube: rivalInicial.clube, v: rivalInicial.v, e: rivalInicial.e, d: rivalInicial.d, posicao: dele?.posicao, pontos: dele?.pontos },
+          rival: { nome: rivalInicial.nome, clube: rivalInicial.clube, rivalDeGeracao: !!rivalInicial.rivalDeGeracao, v: rivalInicial.v, e: rivalInicial.e, d: rivalInicial.d, posicao: dele?.posicao, pontos: dele?.pontos },
           casa: !!adversario.casa, forca: Math.round(forcaClubeTecnico(t)), forcaAdv: adversario.forca, tabela: tabela.slice(0, 5), minha },
         temporadaPausada: { tipo: 'rival', ano: t.ano, clube: t.clube, indice: rodada, calendario: structuredClone(calendario), confrontos, classificacao, vitorias, empates, derrotas, golsPro, golsContra,
           paradasFeitas: [...(pausa?.paradasFeitas || [])], ...(classico ? { classico } : {}), classicoFeito: true } } };

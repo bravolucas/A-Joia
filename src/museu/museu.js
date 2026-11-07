@@ -47,7 +47,7 @@ export const FEITOS_MUSEU = [
 
 const nomesCatalogo = [...Object.values(LIGAS).filter(x => !x.naoJogavel).map(x => x.nome), ...Object.values(COMPS_PAIS).flatMap(Object.values), ...Object.values(ESTADUAIS).map(x => x.nome), 'Copa do Brasil', 'Copa do Mundo', 'Mundial de Clubes', 'Libertadores', 'Copa Sul-Americana', 'Copa América', 'Eurocopa', 'Copa Ouro', 'Copa Africana de Nações', 'Copa da Ásia', 'Copa das Nações da OFC'];
 export const TACAS_MUSEU = [...new Map(nomesCatalogo.filter(x => typeof x === 'string').map(nome => { const c = competenciaMuseu(nome); return [c.id, { ...c, descricao: `Conquiste a competição ${c.nome} como jogador ou treinador.` }]; })).values()];
-export const CAMISAS_MUSEU = CLUBES.map(c => ({ id: `camisa-${slugCompeticao(c.nome)}`, nome: c.nome, cor: c.cor || '#12A876', descricao: `Chegue a 75 de aprovação da torcida do ${c.nome}, após disputar ao menos uma temporada pelo clube.` }));
+export const CAMISAS_MUSEU = CLUBES.map(c => ({ id: `camisa-${slugCompeticao(c.nome)}`, nome: c.nome, cor: c.cor || '#12A876', descricao: `Dispute ao menos uma temporada pelo ${c.nome}. Com 75 de aprovação da torcida, ela vira camisa de ídolo.` }));
 
 // A identidade acompanha o save: abrir outro slot ou importar a mesma carreira
 // não conta suas taças de novo. Saves antigos têm uma identidade determinística.
@@ -94,13 +94,17 @@ export function extrairConquistasMuseu(c, { modo = 'rapido', temporadas = [] } =
   const jogadas = modo === 'rapido' ? c.temporadas || [] : temporadas;
   const torcida = { ...(modo === 'rapido' ? c.torcida || {} : c.torcidaPorClube || {}) };
   for (const temporada of jogadas) if (typeof temporada.clube === 'string' && numero(temporada.torcidaFim) >= 75) torcida[temporada.clube] = Math.max(numero(torcida[temporada.clube]), numero(temporada.torcidaFim));
-  for (const [clube, valor] of Object.entries(torcida)) {
-    const disputou = jogadas.some(t => t.clube === clube || t.clube?.nome === clube);
-    if (numero(valor) >= 75 && disputou) {
-      const passagem=jogadas.filter(t=>t.clube===clube),ganhou=tacas.filter(t=>t.clube===clube);
-      const historia={anos:passagem.map(t=>t.ano).filter(Number.isFinite),numeros:[...new Set(passagem.map(t=>t.numero).filter(Number.isFinite))],posicoes:[...new Set(passagem.map(t=>t.posicao).filter(Boolean))],feito:ganhou.length?`${ganhou[0].nome} ${ganhou[0].ano} · ${ganhou.length} título(s) pela carreira`:'A identificação com a torcida eternizou esta camisa.'};
-      adicionar('camisas', { id: `camisa-${slugCompeticao(clube)}`, nome: clube, clube, historia });
-    }
+  // Uma camisa para cada clube defendido, com anos, números e posições; com 75 de torcida ela vira camisa de ídolo.
+  let algumIdolo = false;
+  const clubesJogados = [...new Set(jogadas.map(t => typeof t.clube === 'string' ? t.clube : t.clube?.nome).filter(Boolean))];
+  for (const clube of clubesJogados) {
+    const idolo = numero(torcida[clube]) >= 75;
+    if (idolo) algumIdolo = true;
+    const passagem = jogadas.filter(t => t.clube === clube || t.clube?.nome === clube), ganhou = tacas.filter(t => t.clube === clube);
+    const anosP = passagem.map(t => t.ano).filter(Number.isFinite);
+    const historia = { anos: anosP, numeros: [...new Set(passagem.map(t => t.numero).filter(Number.isFinite))], posicoes: [...new Set(passagem.map(t => t.posicao).filter(Boolean))],
+      feito: `${idolo ? 'Ídolo da torcida · ' : ''}${passagem.length} temporada${passagem.length === 1 ? '' : 's'}${ganhou.length ? ` · ${ganhou.length} título(s), o primeiro: ${ganhou[0].nome}${ganhou[0].ano ? ` ${ganhou[0].ano}` : ''}` : ''}`, idolo };
+    adicionar('camisas', { id: `camisa-${slugCompeticao(clube)}`, nome: clube, clube, historia });
   }
   if (numero(tecnico?.torcida) >= 75 && tecnico.temporadas?.some(t => t.clube === tecnico.clube)) adicionar('camisas', { id: `camisa-${slugCompeticao(tecnico.clube)}`, nome: tecnico.clube, clube: tecnico.clube }, 1, 'Treinador');
   const total = tacas.length + tacasTecnico.length;
@@ -110,7 +114,7 @@ export function extrairConquistasMuseu(c, { modo = 'rapido', temporadas = [] } =
     'cem-gols': numero(c.totais?.gols ?? c.gols) >= 100, 'quinhentos-gols': numero(c.totais?.gols ?? c.gols) >= 500,
     'cem-assistencias': numero(c.totais?.assist ?? c.assist) >= 100, 'quinhentos-jogos': numero(c.totais?.jogos ?? c.jogos ?? jogadas.reduce((n, t) => n + numero(t.jogos), 0)) >= 500,
     'vinte-temporadas': jogadas.length >= 20, 'bola-ouro': numero(c.titulos?.bolaOuro ?? c.bolasDeOuro) > 0,
-    'campeao-mundo': tacas.some(t => competenciaMuseu(t.nome).tipo === 'copaMundo'), idolo: registros.some(r => r.categoria === 'camisas'),
+    'campeao-mundo': tacas.some(t => competenciaMuseu(t.nome).tipo === 'copaMundo'), idolo: algumIdolo || (numero(tecnico?.torcida) >= 75 && !!tecnico.temporadas?.some(t => t.clube === tecnico.clube)),
     'cinco-clubes': new Set(jogadas.map(t => t.clube).filter(Boolean)).size >= 5,
     'treinador-campeao': tacasTecnico.length > 0, 'trinta-treinador': (tecnico?.temporadas?.length || 0) >= 30,
   };
@@ -128,8 +132,8 @@ export function extrairConquistasMuseu(c, { modo = 'rapido', temporadas = [] } =
   return registros;
 }
 
-function historiaSegura(h){if(!h||typeof h!=='object')return undefined;return{anos:(Array.isArray(h.anos)?h.anos:[]).filter(Number.isFinite).slice(0,60),numeros:(Array.isArray(h.numeros)?h.numeros:[]).filter(n=>Number.isInteger(n)&&n>=1&&n<=99).slice(0,30),posicoes:(Array.isArray(h.posicoes)?h.posicoes:[]).filter(x=>typeof x==='string').map(texto).slice(0,15),feito:texto(h.feito)};}
-function unirHistorias(a,b){const x=historiaSegura(a),y=historiaSegura(b);if(!x)return y;if(!y)return x;return{anos:[...new Set([...x.anos,...y.anos])].sort((a,b)=>a-b).slice(-60),numeros:[...new Set([...x.numeros,...y.numeros])].slice(0,30),posicoes:[...new Set([...x.posicoes,...y.posicoes])].slice(0,15),feito:Math.max(...y.anos,0)>=Math.max(...x.anos,0)?y.feito||x.feito:x.feito};}
+function historiaSegura(h){if(!h||typeof h!=='object')return undefined;return{anos:(Array.isArray(h.anos)?h.anos:[]).filter(Number.isFinite).slice(0,60),numeros:(Array.isArray(h.numeros)?h.numeros:[]).filter(n=>Number.isInteger(n)&&n>=1&&n<=99).slice(0,30),posicoes:(Array.isArray(h.posicoes)?h.posicoes:[]).filter(x=>typeof x==='string').map(texto).slice(0,15),feito:texto(h.feito),...(h.idolo===true?{idolo:true}:{})};}
+function unirHistorias(a,b){const x=historiaSegura(a),y=historiaSegura(b);if(!x)return y;if(!y)return x;return{anos:[...new Set([...x.anos,...y.anos])].sort((a,b)=>a-b).slice(-60),numeros:[...new Set([...x.numeros,...y.numeros])].slice(0,30),posicoes:[...new Set([...x.posicoes,...y.posicoes])].slice(0,15),feito:Math.max(...y.anos,0)>=Math.max(...x.anos,0)?y.feito||x.feito:x.feito,...(x.idolo||y.idolo?{idolo:true}:{})};}
 export function validarMuseu(dados) {
   if (!dados || dados.versao !== 1 || !CATEGORIAS.every(k => dados[k] && typeof dados[k] === 'object' && !Array.isArray(dados[k]))) throw new Error('Esse arquivo não é uma coleção válida do A-Joia.');
   const seguro = museuVazio();

@@ -34,7 +34,7 @@ async function abrirAnimacao(page) {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   const agora = new Date('2026-11-04T23:00:00Z');
   await page.clock.install({ time: agora });
-  await page.clock.pauseAt(new Date(agora.getTime() + 100));
+  await page.clock.pauseAt(new Date(agora.getTime() + 5000)); // folga: sob carga, +100 ms já podia ter passado
   const c = criarJogador({ nome: 'Desafio Animado', nac: 'BRA', posicao: 'ATA', personalidade: 'equilibrado', origem: 'base', pe: 'destro', numero: 10, ritmo: 'normal', codigo: 'DESAFIO-ANIMADO' });
   c.flags.baseEscolhida = true; c.clubeNome = 'Santos'; c.ano = 2027;
   await page.goto('http://127.0.0.1:4173/A-Joia/');

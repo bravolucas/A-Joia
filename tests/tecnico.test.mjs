@@ -148,7 +148,11 @@ test('consequências de decisões atravessam temporadas e não duplicam', () => 
 test('objetivos seguem força do clube, sem exigir reputação elevada', () => {
   assert.equal(objetivoTecnico({ reputacao: 30, elenco: 45 }).id, 'permanencia');
   assert.equal(objetivoTecnico({ reputacao: 90, elenco: 80 }).id, 'continental');
-  assert.equal(objetivoTecnico({ reputacao: 20, elenco: 85 }).id, 'titulo');
+  assert.equal(objetivoTecnico({ reputacao: 20, elenco: 85, temporadas: [{}] }).id, 'titulo');
+  // Na estreia, até um clube grande cobra só a vaga continental.
+  assert.equal(objetivoTecnico({ reputacao: 20, elenco: 85 }).id, 'continental');
+  // O clube mais forte da liga cobra o título.
+  assert.equal(objetivoTecnico({ clube: 'Flamengo', liga: 'brasileirao', temporadas: [{}] }).id, 'campeao');
 });
 test('demissão exige mudança de clube, preservando o histórico', () => {
   let c = iniciarCarreiraTecnico(atleta);

@@ -43,3 +43,17 @@ test('conquista da seleção usa a bandeira e o país, com números internaciona
 test('a Copa do Brasil já ganha pode ser revista pelos detalhes da temporada',async({page})=>{
  const r=final(),f=fecharTemporada(r.c,aplicarMomento(r.card,true));f.c.desafioAno=f.c.ano;await abrir(page,{etapa:'evento',c:f.c,ultimo:f.card,auto:false});await page.getByRole('button',{name:/detalhes/}).click();const detalhes=page.getByRole('dialog',{name:'Temporada 2027'});await expect(detalhes.getByRole('button',{name:'Rever conquistas',exact:true})).toBeVisible();await detalhes.getByRole('button',{name:'Rever conquistas',exact:true}).click();const festa=page.getByRole('dialog',{name:'Fim da temporada 2027'});await expect(festa).toContainText('Copa do Brasil');await festa.getByRole('button',{name:/Continuar carreira/}).click();await expect(festa).toHaveCount(0);const s=await page.evaluate(()=>JSON.parse(localStorage.getItem('ajoia_rapido_v1')));expect(s.etapa).toBe('evento');expect(s.c.lista.filter(t=>t.nome==='Copa do Brasil')).toHaveLength(1);expect(s.c.temporadas).toHaveLength(1);
 });
+
+for(const [width,height]of[[390,844],[1366,760]])test(`resumo mostra liga, copas e tabela sem precisar abrir nada em ${width}px`,async({page})=>{
+ await page.setViewportSize({width,height});await page.emulateMedia({reducedMotion:'reduce'});
+ const r=final();r.card.pendente=null;r.card.titulos=[];const f=fecharTemporada(r.c,r.card);f.card.titulos=[];
+ f.card.copaNac={nome:'Copa do Brasil',fase:'Quartas de final'};f.card.continental={nome:'Libertadores',faseNome:'Semifinal'};
+ await abrir(page,{etapa:'fechamento',...f});
+ const popup=page.getByRole('dialog',{name:'Fim da temporada 2027'});
+ const campanha=popup.getByLabel('Campanha nas competições');
+ await expect(campanha).toContainText(f.card.ligaNome);await expect(campanha).toContainText(`${f.card.posLiga}º`);
+ await expect(campanha).toContainText('Caiu: quartas de final');await expect(campanha).toContainText('Caiu: semifinal');
+ await expect(popup.getByLabel(/Classificação final/)).toContainText('Santos');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:`test-results/fechamento-informativo-${width}.png`,fullPage:false});
+});

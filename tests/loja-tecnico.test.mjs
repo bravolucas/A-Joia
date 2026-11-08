@@ -10,7 +10,7 @@ const base=()=>{
 test('salário anual entra uma vez, não consome verba e desemprego não paga',()=>{
   const c=base(),carta=cartaPretemporadaRapida(c.tecnico),op=carta.opcoes.find(o=>o.custo<=carta.verba);
   const fim=escolherPretemporadaRapidaTecnico(c,carta.chave,op.id,()=>.4);
-  assert.equal(fim.tecnico.propostasCoerentesVersao,2);
+  assert.equal(fim.tecnico.propostasCoerentesVersao,3);
   assert.equal(carteiraTecnico(fim.tecnico).saldo,4200);
   assert.equal(carteiraTecnico(fim.tecnico).pagamentos[0].valor,1200);
   assert.equal(creditarSalarioTecnico({...fim.tecnico,clube:c.tecnico.clube},2030,100),fim.tecnico.carteiraTecnico);
@@ -52,7 +52,7 @@ test('save antigo com primeira decisão concluída não recebe uma segunda',()=>
 });
 test('treinador experiente recebe ligas diferentes sem saltar para superclubes',()=>{
   const t={...base().tecnico,reputacao:85,elenco:70,temporadas:Array(5).fill({clube:'Santos',posicao:3,cumpriuObjetivo:true}),vitorias:100,empates:30,derrotas:30};
-  const ofertas=gerarPropostasTecnico(t,()=>0);
+  const ofertas=gerarPropostasTecnico(t,()=>0).filter(p=>p.tipo!=='selecao');
   assert.equal(ofertas.length,3);assert.equal(new Set(ofertas.map(p=>p.liga)).size,3);
   assert.ok(ofertas.some(p=>p.pais!=='Brasil'));
   assert.ok(ofertas.every(p=>p.elenco<=84&&p.motivo));

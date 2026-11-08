@@ -1,3 +1,4 @@
+import {geradorTecnico} from '../src/treinador/momentosTecnico.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {aceitarPropostaTecnico,negociarContratoTecnico,gerarPropostasTecnico} from '../src/treinador/tecnico.js';
@@ -27,7 +28,7 @@ test('proposta recusada ou projeto sem rivalidade não rompe idolatria',()=>{
  assert.equal(recusado.tecnico.rupturasIdolo,undefined);
 });
 test('rompimento remove vantagem nos convites de retorno',()=>{
- const t={...carreira().tecnico,reputacao:90,titulos:3,temporadas:Array(4).fill({clube:'Flamengo'})},rompido={...t,rupturasIdolo:[{clube:'Santos',rival:'Palmeiras',ano:2030}]};
- function convite(t){for(let n=1;n<500;n++){let s=n;const rng=()=>((s=(Math.imul(s,1664525)+1013904223)>>>0)/4294967296);const p=gerarPropostasTecnico(t,rng).find(p=>p.nome==='Santos');if(p)return p;}}
+ const t={...carreira().tecnico,reputacao:75,titulos:3,vitorias:120,empates:30,derrotas:20,temporadas:Array(4).fill({clube:'Flamengo'})},rompido={...t,rupturasIdolo:[{clube:'Santos',rival:'Palmeiras',ano:2030}]};
+ function convite(t){for(let n=1;n<1000;n++){const p=gerarPropostasTecnico(t,geradorTecnico('idolatria-'+n)).find(p=>p.nome==='Santos');if(p)return p;}}
  const a=convite(t),b=convite(rompido);assert.ok(a&&b);assert.ok(a.chance>b.chance);
 });

@@ -45,7 +45,7 @@ export function aplicarResultadoFinalTecnico(torneio, final, venceu, rng) {
   }) });
   const placar = penaltis ? `${gv} x ${gp} (pênaltis)` : `${venceu ? gv : gp} x ${venceu ? gp : gv}`;
   return { torneio: { ...torneio, fases, campeao: vencedorNome, faseUsuario: venceu ? 'Campeão' : 'Final', finalPendente: false,
-    jogosUsuario: fases.flatMap(f => f.jogos.filter(j => j.casa === final.lado || j.fora === final.lado || j.bye === final.lado)) }, placar, penaltis };
+    jogosUsuario: [...(torneio.grupos || []).flatMap(g=>(g.jogos||[]).filter(j=>j.casa===final.lado||j.fora===final.lado)), ...fases.flatMap(f => f.jogos.filter(j => j.casa === final.lado || j.fora === final.lado || j.bye === final.lado))] }, placar, penaltis };
 }
 
 /* ---------- Parada no meio da temporada ---------- */

@@ -12,7 +12,7 @@ function carreira(ritmo = 'normal') {
 function comResultado(extra = {}) {
   const c = carreira();
   const temporada = { ano: c.tecnico.ano, clube: 'Confiança', liga: 'serieB', posicao: 3, pontos: 66, vitorias: 19, empates: 9, derrotas: 10, objetivo: 'Evitar rebaixamento', cumpriuObjetivo: true, titulosConquistados: [], torneios: [] };
-  c.tecnico = { ...c.tecnico, propostasCoerentesVersao: 2, fase: 'resultado', ano: c.tecnico.ano + 1, temporadas: [temporada],
+  c.tecnico = { ...c.tecnico, propostasCoerentesVersao: 3, fase: 'resultado', ano: c.tecnico.ano + 1, temporadas: [temporada],
     propostas: [{ ...CLUBES_CONVITES_TECNICO.find(x => x.nome === 'Santos'), objetivo: 'Terminar na metade de cima', motivo: 'Interesse pela boa campanha', coerencia: 50 }], ...extra };
   c.idade++;
   return c;
@@ -84,27 +84,18 @@ for (const width of [390, 1366]) {
   });
 }
 
-test('convite da seleção leva o treinador à Copa do Mundo e volta ao clube', async ({ page }) => {
+test('convite legado passa a vínculo exclusivo sem acrescentar Copa à temporada do clube', async ({ page }) => {
   const c = comResultado({ conviteSelecao: { ano: 2030, nac: 'BRA', selecao: 'Brasil', forca: 88, status: 'pendente' } });
   await abrir(page, c);
   const convite = page.getByRole('dialog', { name: 'Convite da seleção' });
-  await expect(convite).toContainText('Brasil');
-  await convite.getByRole('button', { name: /Aceitar e disputar a Copa/ }).click();
-  for (let i = 0; i < 8; i++) {
-    await page.waitForTimeout(500);
-    const final = page.getByRole('dialog', { name: /^Final · / });
-    if (await final.count()) { await final.locator('.ct-decisions button').first().click(); continue; }
-    const r = page.getByRole('dialog', { name: 'Resultado da final' });
-    if (await r.count()) { const agora = r.getByRole('button', { name: 'Ver agora' }); if (await agora.count()) await agora.click(); await r.getByRole('button', { name: /^Continuar/ }).click(); continue; }
-    if (await page.getByRole('dialog', { name: 'Copa do Mundo' }).count()) break;
-    const titulo = page.getByRole('dialog', { name: 'Título conquistado' });
-    if (await titulo.count()) await titulo.locator('.ct-champion-continue').click();
-  }
-  await expect(page.getByRole('dialog', { name: 'Copa do Mundo' })).toContainText('CAMPANHA COM BRASIL');
+  await expect(convite).toContainText('O vínculo é exclusivo');
+  await convite.getByRole('button', { name: 'Assumir a seleção' }).click();
+  await expect.poll(async () => (await salvo(page)).tecnico.selecao).toBe('BRA');
   const fim = await salvo(page);
-  expect(fim.tecnico.conviteSelecao.status).toBe('aceito');
-  expect(fim.tecnico.temporadas[0].torneios.some(x => x.tipo === 'copaMundo' && x.selecao === 'Brasil')).toBe(true);
-  expect(fim.tecnico.clube).toBe('Confiança');
+  expect(fim.tecnico.clube).toBe('Brasil');
+  expect(fim.tecnico.tipoEquipe).toBe('selecao');
+  expect(fim.tecnico.temporadas[0].clube).toBe('Confiança');
+  expect(fim.tecnico.temporadas[0].torneios).toEqual([]);
 });
 
 test('ano sem clube: comentarista rende reputação e saldo', async ({ page }) => {

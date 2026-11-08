@@ -20,12 +20,12 @@ function Emblema({ nome, selecao, size = 44 }) {
 
 /* ---------- Final ---------- */
 export function PopUpFinal({ final, moral, onEscolher, ocupado }) {
-  const selecao = final.tipo === 'copaMundo';
+  const selecao = ['copaMundo','continentalSelecao'].includes(final.tipo);
   const diff = (final.forcaUsuario ?? 0) - (final.forcaAdv ?? 0);
   return <JanelaTreinador titulo={`Final · ${final.nome}`} onFechar={() => {}} classe="mt-modal">
     <div className="mt-final" style={{ backgroundImage: `linear-gradient(#0d0f0ecc,#0d0f0ef7 70%),url(${CENARIOS.estadioMobile})` }}>
       <span className="mt-eyebrow">A FINAL · {final.ano}</span>
-      <div className="mt-cup"><TacaCompeticao tipo={final.tipo === 'copaMundo' ? 'copaMundo' : competicaoDoTitulo(final.nome).tipo} nome={final.nome} size={92} /></div>
+      <div className="mt-cup"><TacaCompeticao tipo={['copaMundo','continentalSelecao'].includes(final.tipo) ? 'copaMundo' : competicaoDoTitulo(final.nome).tipo} nome={final.nome} size={92} /></div>
       <h3>{final.nome}</h3>
       <div className="mt-versus">
         <div><Emblema nome={final.lado} selecao={selecao} size={54} /><strong>{final.lado}</strong><span>força {final.forcaUsuario}</span></div>
@@ -49,7 +49,7 @@ export function PopUpResultadoFinal({ uf, onFechar }) {
   const [revelado, setRevelado] = useState(semMovimento());
   useEffect(() => { if (revelado) return; const id = setTimeout(() => setRevelado(true), 1500); return () => clearTimeout(id); }, [revelado]);
   useEffect(() => { if (revelado && uf.venceu) festejar(['#D8B44A', '#FFF2BE', '#FFFFFF']); }, [revelado, uf.venceu]);
-  const selecao = uf.tipo === 'copaMundo';
+  const selecao = ['copaMundo','continentalSelecao'].includes(uf.tipo);
   return <JanelaTreinador titulo="Resultado da final" onFechar={revelado ? onFechar : () => setRevelado(true)} classe="mt-modal">
     <div className={`mt-result ${revelado ? (uf.venceu ? 'mt-win' : 'mt-loss') : ''}`}>
       <span className="mt-eyebrow">{uf.nome} · sua escolha: {uf.escolha}</span>
@@ -122,8 +122,8 @@ export function PopUpConvite({ conv, onResponder, ocupado }) {
       <span className="mt-eyebrow">COPA DO MUNDO {conv.ano}</span>
       <span className="mt-flag mt-flag-big"><Bandeira pais={conv.selecao} /></span>
       <h3>{conv.selecao} quer você no comando</h3>
-      <p>A federação viu o seu trabalho e oferece a seleção para a Copa do Mundo. Você comanda o time no torneio e volta ao seu clube depois. Força da seleção: {conv.forca}.</p>
-      <button className="ct-primary" disabled={ocupado} onClick={() => onResponder(true)}>Aceitar e disputar a Copa<span aria-hidden="true">→</span></button>
+      <p>A federação viu o seu trabalho e oferece a seleção para a Copa do Mundo. O vínculo é exclusivo: ao aceitar, você deixa seu clube e assume todo o calendário da seleção. Força da seleção: {conv.forca}.</p>
+      <button className="ct-primary" disabled={ocupado} onClick={() => onResponder(true)}>Assumir a seleção<span aria-hidden="true">→</span></button>
       <button className="mt-secondary" disabled={ocupado} onClick={() => onResponder(false)}>Agradecer e ficar só no clube</button>
     </div>
   </JanelaTreinador>;
@@ -150,7 +150,7 @@ export function PopUpResumo({ temporada: a, metasNovas = [], rival, onFechar }) 
   return <JanelaTreinador titulo={`Resumo da temporada ${a.ano}`} onFechar={onFechar} classe="mt-modal">
     <div className="ct-event-content mt-summary">
       <div className="ct-event-club"><Escudo nome={a.clube} size={30} /><strong>{a.clube}</strong></div>
-      <p className={a.cumpriuObjetivo ? 'ct-positive' : 'ct-warning'}>Meta: {a.objetivo} · {a.cumpriuObjetivo ? 'cumprida' : 'não cumprida'}</p>
+      <p className="mt-note">{a.formato}</p><p className={a.cumpriuObjetivo ? 'ct-positive' : 'ct-warning'}>Meta: {a.objetivo} · {a.cumpriuObjetivo ? 'cumprida' : 'não cumprida'}</p>
       <div className="mt-table">{top.map(l => <div key={l.nome} className={l.meuClube ? 'mt-me' : ''}><span>{l.posicao}</span><strong>{l.nome}</strong><span>{l.pontos} pts</span></div>)}
         {minha && minha.posicao > top.length && <div className="mt-me"><span>{minha.posicao}</span><strong>{minha.nome}</strong><span>{minha.pontos} pts</span></div>}</div>
       {a.contratoCurto === 'renovado' && <p className="mt-note">✍️ Contrato de um ano cumprido: a diretoria renovou com você.</p>}

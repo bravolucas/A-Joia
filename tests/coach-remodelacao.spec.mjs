@@ -6,13 +6,13 @@ import { iniciarCarreiraTecnico, jogarTemporadaExpressaTecnico, calcularOvrTecni
 function carreira() {
   const jogador = aposentar({ ...criarJogador({ nome: 'Treinador de teste', nac: 'BRA', posicao: 'ATA', personalidade: 'equilibrado', origem: 'base', pe: 'destro', numero: 10, ritmo: 'equilibrado', codigo: 'COACH-REMODELACAO' }), idade: 40 });
   const c = iniciarCarreiraTecnico(jogador);
-  c.tecnico = { ...c.tecnico, clube: 'Confiança', pais: 'Brasil', liga: 'serieB', reputacao: 99, diretoria: 95, torcida: 85,
+  c.tecnico = { ...c.tecnico, propostasCoerentesVersao:3, clube: 'Confiança', pais: 'Brasil', liga: 'serieB', reputacao: 99, diretoria: 95, torcida: 85,
     opcoesInicio: [{ clube: 'Confiança', afinidade: 85, idolatria: true }, { clube: 'Santos', afinidade: 70 }], clubeInicialEscolhido: false };
   return c;
 }
 function comResultado() {
   const c = carreira();
-  c.tecnico = { ...c.tecnico, clubeInicialEscolhido: true, propostasCoerentesVersao:2, fase: 'resultado', ano: c.tecnico.ano + 1,
+  c.tecnico = { ...c.tecnico, clubeInicialEscolhido: true, propostasCoerentesVersao:3, fase: 'resultado', ano: c.tecnico.ano + 1,
     temporadas: [{ ano: c.tecnico.ano, clube: 'Confiança', liga: 'serieB', posicao: 8, pontos: 50, vitorias: 14, empates: 8, derrotas: 16, objetivo: 'Evitar rebaixamento', cumpriuObjetivo: true, titulosConquistados: [] }],
     propostas: [{ ...CLUBES_CONVITES_TECNICO.find(x => x.nome === 'Flamengo'), objetivo: 'Disputar o título',motivo:'Projeto compatível no seu país',coerencia:50 }] };
   c.idade++;

@@ -72,9 +72,9 @@ test('Copa do Mundo da seleção: convite, campanha e ninguém passa da semifina
   c = { ...c, tecnico: { ...c.tecnico, fase: 'resultado', titulos: 0, temporadas: [{ ano: 2030, clube: 'Bahia', titulosConquistados: [], torneios: [] }], conviteSelecao: { ano: 2030, nac: 'BRA', selecao: 'Brasil', forca: 88, status: 'pendente' } } };
   assert.equal(T.responderConviteSelecaoTecnico(c, false).tecnico.conviteSelecao.status, 'recusado');
   const aceito = T.concluirFinaisPendentesTecnico(T.responderConviteSelecaoTecnico(c, true, { interativo: true }));
-  const copa = aceito.tecnico.temporadas[0].torneios.find(x => x.tipo === 'copaMundo');
-  assert.ok(copa);
-  assert.equal(aceito.tecnico.clube, 'Bahia');
+  assert.equal(aceito.tecnico.clube, 'Brasil');
+  assert.equal(aceito.tecnico.tipoEquipe, 'selecao');
+  assert.deepEqual(aceito.tecnico.temporadas[0].torneios, []);
   assert.equal(T.titulosConquistadosTecnico(aceito.tecnico).length, aceito.tecnico.titulos);
 });
 

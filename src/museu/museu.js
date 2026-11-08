@@ -1,3 +1,4 @@
+import { equipeTituloTecnico } from '../treinador/selecoesTecnico.js';
 import {compararMarcasCopas} from '../jogador/recordesHistoricos.js';
 import { CLUBES, LIGAS, COMPS_PAIS, ESTADUAIS } from '../dados/data.js';
 import { competicaoDoTitulo } from '../comum/tacas.js';
@@ -89,7 +90,7 @@ export function extrairConquistasMuseu(c, { modo = 'rapido', temporadas = [] } =
   };
   registrarTacas(tacas, 'Jogador');
   const tecnico = c.tecnico;
-  const tacasTecnico = (tecnico?.temporadas || []).flatMap(t => (t.titulosConquistados?.length ? t.titulosConquistados : t.campeao ? [LIGAS[t.liga || CLUBES.find(clube => clube.nome === t.clube)?.liga]?.nome || t.competicao || 'Campeonato nacional'] : []).map(nome => ({ nome, ano: t.ano, clube: t.clube })));
+  const tacasTecnico = (tecnico?.temporadas || []).flatMap(t => (t.titulosConquistados?.length ? t.titulosConquistados : t.campeao ? [LIGAS[t.liga || CLUBES.find(clube => clube.nome === t.clube)?.liga]?.nome || t.competicao || 'Campeonato nacional'] : []).map(nome => ({ nome, ano: t.ano, clube: equipeTituloTecnico(t,nome) })));
   registrarTacas(tacasTecnico, 'Treinador');
   const jogadas = modo === 'rapido' ? c.temporadas || [] : temporadas;
   const torcida = { ...(modo === 'rapido' ? c.torcida || {} : c.torcidaPorClube || {}) };
@@ -155,7 +156,7 @@ export function mesclarMuseu(atual, registros, agora = new Date().toISOString())
     const anterior = proximo[r.categoria][r.id];
     const item = anterior || { id: r.id, nome: r.nome, tipo: r.tipo || '', desbloqueadoEm: agora, fontes: {} };
     const fonte = item.fontes[r.fonte];
-    if (!fonte || numero(r.quantidade) > fonte.quantidade || r.historia&&JSON.stringify(fonte.historia)!==JSON.stringify(unirHistorias(fonte?.historia,r.historia))) item.fontes[r.fonte] = { quantidade: Math.max(numero(r.quantidade),fonte?.quantidade||0), atleta: r.atleta, papel: r.papel, clube: texto(r.clube), ano: String(r.ano ?? ''), ...(r.historia?{historia:unirHistorias(fonte?.historia,r.historia)}:{}) };
+    if (!fonte || numero(r.quantidade) > fonte.quantidade || (r.papel==='Treinador' && fonte.clube!==texto(r.clube)) || r.historia&&JSON.stringify(fonte.historia)!==JSON.stringify(unirHistorias(fonte?.historia,r.historia))) item.fontes[r.fonte] = { quantidade: Math.max(numero(r.quantidade),fonte?.quantidade||0), atleta: r.atleta, papel: r.papel, clube: texto(r.clube), ano: String(r.ano ?? ''), ...(r.historia?{historia:unirHistorias(fonte?.historia,r.historia)}:{}) };
     proximo[r.categoria][r.id] = item;
   }
   return proximo;

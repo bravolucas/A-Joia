@@ -2,6 +2,13 @@
 
 Tudo que mudou desde a primeira versão publicada, organizado por bloco de trabalho.
 
+## 08/11/2026 — Treinador de clube ou seleção
+
+- Mercado com seleções de diferentes países, sem restringir os convites ao ano da Copa.
+- Emprego exclusivo, eliminatórias e seis torneios continentais em formato rápido, com uma preparação anual.
+- Taças internacionais com o nome correto da seleção em celebrações, histórico e museu.
+- Ofertas de clubes mais variadas e início condicionado ao nível do treinador, com exceção para ídolos máximos.
+
 ---
 
 ## ⚽ Jogador: equilíbrio e memória

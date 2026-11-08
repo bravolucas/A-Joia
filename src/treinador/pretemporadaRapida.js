@@ -11,7 +11,8 @@ const ids=['filosofia','sucessor','pressao-jovem','transicao-projeto','posse-bas
 export function planoPretemporadaRapida(t,quantidade=1){
  if(t.planoRapido?.ano===t.ano&&t.planoRapido.clube===t.clube)return {...t.planoRapido,cartas:t.planoRapido.cartas.slice(0,1),respostas:t.planoRapido.respostas.slice(0,1)};
  const recentes=new Set((t.historicoRapido||[]).slice(-4));
- const possiveis=ids.filter(id=>(id!=='rival'||rivalDe(t))&&!recentes.has(id));
+ const disponiveis=t.tipoEquipe==='selecao'?['convocacao','entrosamento','observacao','lideranca-selecao','bola-parada','recuperacao']:ids;
+ const possiveis=disponiveis.filter(id=>(id!=='rival'||rivalDe(t))&&!recentes.has(id));
  // Cartas cujo ganho seria quase todo cortado pelo teto dão lugar a outra.
  const cartas=cartasDe(t),uteis=possiveis.filter(id=>!cartaNoLimiteRapida(t,cartas[id]));
  const elegiveis=uteis.length?uteis:possiveis;
@@ -53,6 +54,10 @@ function cartasDe(t){
   'pressao-jovem':{titulo:'A intensidade tem um preço',texto:'O elenco jovem pode pressionar mais, se aceitar o desgaste.',opcoes:[op('pressionar','Apertar a saída rival','Time +4, moral −4 agora. Time −1 no próximo ano.',{elenco:4,moral:-4},250,{elenco:-1}),op('dosar','Dosar a energia','Time +1 e moral +4.',{elenco:1,moral:4}),manter]},
   'transicao-projeto':{titulo:'Mudar a forma de atacar',texto:'Paciência para construir ou chegada rápida à área?',opcoes:[{...op('vertical','Buscar jogo vertical','Time +3 e moral −2.',{elenco:3,moral:-2},100),filosofia:'transicao',estilo:'ofensivo'},{...op('construir','Construir com paciência','Time +1 agora e +2 no próximo ano.',{elenco:1},100,{elenco:2}),filosofia:'posse',estilo:'equilibrado'},manter]},
   'posse-base':{titulo:'Aprender com a bola',texto:'Os jovens podem assumir a construção, com risco no começo.',opcoes:[op('ensinar','Aceitar o período de aprendizado','Time −2 e moral +3 agora. Time +5 no próximo ano.',{elenco:-2,moral:3},250,{elenco:5}),op('simples','Jogar simples por enquanto','Time +2 agora. Sem promessa de crescimento futuro.',{elenco:2},100),manter]},
+  convocacao:{titulo:'A lista da seleção',texto:'Qual perfil vai conduzir esta campanha?',opcoes:[op('experientes','Manter os experientes','Moral +4; time +1.',{moral:4,elenco:1}),op('renovar','Renovar com jovens','Time +2 agora e +2 no próximo ano.',{elenco:2},0,{elenco:2})]},
+  entrosamento:{titulo:'Poucos dias para treinar',texto:'Como aproveitar o encontro da seleção?',opcoes:[op('sistema','Repetir o sistema','Time +3; moral −2.',{elenco:3,moral:-2}),op('grupo','Fortalecer o grupo','Moral +5; time +1.',{moral:5,elenco:1})]},
+  observacao:{titulo:'Um nome fora dos holofotes',texto:'Uma boa fase no exterior chamou a atenção da comissão.',opcoes:[op('chamar','Convocar a surpresa','Time +3; torcida −2.',{elenco:3,torcida:-2}),op('continuidade','Priorizar continuidade','Moral +4.',{moral:4})]},
+  'lideranca-selecao':{titulo:'Quem conduz o vestiário?',texto:'A comissão precisa definir uma liderança.',opcoes:[op('veterano','Confiar no veterano','Moral +5.',{moral:5}),op('nova','Dar voz à nova geração','Time +2; torcida +2.',{elenco:2,torcida:2})]},
   'identidade-local':{titulo:'A torcida pede identificação',texto:'Uma promessa local ou experiência de fora?',opcoes:[op('local','Valorizar a base do clube','Torcida +5 e time +1 agora; +2 no próximo ano.',{torcida:5,elenco:1},150,{elenco:2}),op('experiencia','Trazer experiência imediata','Time +4 e torcida −2. Custa mais, resolve agora.',{elenco:4,torcida:-2},500),manter]},
 
   'craque-jovem':{titulo:'Um craque agora ou uma promessa?',texto:'A diretoria libera uma contratação. Qual é sua aposta?',opcoes:[op('craque',`${jogador} · nível ${craque}`,`Craque de 29 anos. Time +5 agora.`,{elenco:5},custo),op('jovem',`Aposta jovem · nível ${jovem}`,`19 anos, potencial ${Math.min(99,jovem+12)}. Time +2 agora e +3 no próximo ano.`,{elenco:2},Math.round(custo*.4),{elenco:3}),manter]},

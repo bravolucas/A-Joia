@@ -1,5 +1,13 @@
 > **Organização (nov/2026):** o código saiu da raiz e foi para `src/` (`jogador/`, `treinador/`, `completo/`, `museu/`, `desafios/`, `comum/`, `dados/`). Os nomes de arquivo citados abaixo continuam valendo; procure-os nessas pastas (ex.: `rapido.js` → `src/jogador/rapido.js`, `tecnico.js` → `src/treinador/tecnico.js`). Os workflows foram unificados em `ci.yml` e `deploy.yml`.
 
+## Continuação — mercado de seleções e vínculo exclusivo (08/11/2026)
+
+Retomada após indisponibilidade do ambiente. Atualizado o checkout com `origin/main` (`3db6e9a`), preservando a reorganização para `src/` e as melhorias recentes de momentos do treinador. Implementado mercado com 79 seleções de seis confederações, ofertas em qualquer ano, vínculo exclusivo clube/seleção, eliminatórias e continentais em formato rápido. Uma única preparação anual com cartas próprias de seleção. Início por nível do técnico ou ídolo máximo comprovado (90 de torcida, quatro temporadas e dois títulos). Ofertas de clubes usam sorteio ponderado e memória recente, com limites de força e reputação.
+
+Copa do Mundo e continentais pertencem à seleção registrada no torneio: correção no pop-up, vitrine, histórico e museu, inclusive em registros antigos misturados à temporada de clube. Nenhum troféu é duplicado. Finais preservam partidas de grupos e atualizam o balanço internacional. Detalhes e limites dos formatos em `docs/TREINADOR_SELECOES.md`.
+
+Validação local: **296 testes de lógica**, **39 cenários de navegador** e build de produção em celular/desktop. A tela inicial identifica a entrega como “Versão 2026.11.08 · Clubes e seleções”. Logs `/tmp/coach-delivery-unit.log`, `/tmp/coach-delivery-build.log`, `/tmp/coach-delivery-browser.log`. Duas imagens de taça mundial com Portugal em `test-results/selecao-titulo-390.png` e `selecao-titulo-1440.png`. Os dois documentos não rastreados de planejamento do usuário foram preservados fora do commit. Confirmação de publicação será registrada após o GitHub Pages concluir.
+
 ## Continuação — históricos incompletos e resumos de competição
 
 Histórico de temporadas do modo completo protegido contra clube visual e artilharia ausentes. Normalização recupera identificação do clube sem alterar o registro original. Próximos registros guardam posição; resumo usa a função daquele ano e não a atual, sem inventar posição para saves antigos. Tabela acessível separa clube/seleção e mostra J/G/A/CS/nota, com legenda e dados opcionais ausentes em “—”. Classificação ausente é explicitada; xG só aparece se registrado. Mantidos títulos, prêmios registrados, metas, finanças e informações do treinador. Resultado de competição deixa de anunciar artilheiro sorteado/melhor jogador não apurado; celebrações e animações permanecem.

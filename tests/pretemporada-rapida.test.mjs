@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {planoPretemporadaRapida,cartaPretemporadaRapida,aplicarPretemporadaRapida} from '../src/treinador/pretemporadaRapida.js';
 import {iniciarCarreiraTecnico,escolherPretemporadaRapidaTecnico,proximaTemporadaTecnico,gerarPropostasTecnico,CLUBES_CONVITES_TECNICO} from '../src/treinador/tecnico.js';
-const carreira=(ritmo='normal')=>{const c=iniciarCarreiraTecnico({nome:'Teste rápido',idade:40,ano:2030,aposentado:true,clubeNome:'Santos',temporadas:[],totais:{},legado:{pontos:600}});return {...c,ritmo,tecnico:{...c.tecnico,clubeInicialEscolhido:true,elenco:70,verbaRapida:3000}};};
+const carreira=(ritmo='normal')=>{const c=iniciarCarreiraTecnico({nome:'Teste rápido',idade:40,ano:2030,aposentado:true,clubeNome:'Santos',temporadas:[],totais:{},legado:{pontos:600}});return {...c,ritmo,tecnico:{...c.tecnico,clubeInicialEscolhido:true,clube:'Santos',liga:'brasileirao',elenco:70,verbaRapida:3000}};};
 test('uma escolha simula a temporada; todos os ritmos têm uma decisão, sem duplicação',()=>{
  for(const ritmo of ['normal','expresso','intenso']){
   let c=carreira(ritmo),chaveAntiga;
@@ -66,7 +66,7 @@ test('moral afeta confrontos; convites legados são migrados uma única vez',asy
  assert.deepEqual(c,antes);assert.ok(novo.tecnico.propostas.every(p=>p.motivo&&Number.isFinite(p.coerencia)));
  assert.equal(atualizarPropostasCoerentesTecnico(novo),novo);
  assert.deepEqual(atualizarPropostasCoerentesTecnico(c),novo);
- const semOfertas={...c,tecnico:{...c.tecnico,propostas:[]}};assert.equal(atualizarPropostasCoerentesTecnico(semOfertas),semOfertas);
+ const semOfertas={...c,tecnico:{...c.tecnico,propostas:[]}};const migrado=atualizarPropostasCoerentesTecnico(semOfertas);assert.equal(migrado.tecnico.propostasCoerentesVersao,3);assert.equal(atualizarPropostasCoerentesTecnico(migrado),migrado);
 });
 
 test('aporte não confisca receita de venda e as dez variações aparecem ao longo da carreira',async()=>{

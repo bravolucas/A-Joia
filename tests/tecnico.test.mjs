@@ -42,7 +42,7 @@ test('tabela mundial é salva nos fluxos expresso e por etapas sem substituir a 
   };
   const clube = CLUBES[0];
   const inicio = iniciarCarreiraTecnico({ ...atleta, clubeNome: clube.nome });
-  const comDecisoes = { ...inicio, tecnico: { ...inicio.tecnico,
+  const comDecisoes = { ...inicio, tecnico: { ...inicio.tecnico, clube:clube.nome,liga:clube.liga,elenco:clube.forca,
     decisoes: Array(QUANTIDADE_DECISOES_TECNICO).fill({ carta: 'teste', opcao: 'neutra' }) } };
 
   const expressa = simularTemporadaTecnico(comDecisoes, rngSeed(44));
@@ -70,7 +70,7 @@ test('tabela mundial é salva nos fluxos expresso e por etapas sem substituir a 
 test('vaga continental só aparece na temporada seguinte quando o clube está classificado na tabela anterior', () => {
   const clube = CLUBES.find(x => x.liga === 'brasileirao');
   const inicio = iniciarCarreiraTecnico({ ...atleta, clubeNome: clube.nome });
-  const comDecisoes = { ...inicio, tecnico: { ...inicio.tecnico,
+  const comDecisoes = { ...inicio, tecnico: { ...inicio.tecnico, clube:clube.nome,liga:clube.liga,elenco:clube.forca,
     decisoes: Array(QUANTIDADE_DECISOES_TECNICO).fill({ carta: 'teste', opcao: 'neutra' }) } };
   const primeira = simularTemporadaTecnico(comDecisoes, () => 0.1);
   assert.ok(!primeira.tecnico.temporadas[0].torneios.some(x => x.tipo === 'continental'));
@@ -84,7 +84,7 @@ test('vaga continental só aparece na temporada seguinte quando o clube está cl
 test('temporada aplica cotas e formato da competição configurados no save', () => {
   const clube = CLUBES.find(x => x.liga === 'brasileirao');
   const inicio = iniciarCarreiraTecnico({ ...atleta, clubeNome: clube.nome });
-  const comDecisoes = { ...inicio, tecnico: { ...inicio.tecnico,
+  const comDecisoes = { ...inicio, tecnico: { ...inicio.tecnico, clube:clube.nome,liga:clube.liga,elenco:clube.forca,
     decisoes: Array(QUANTIDADE_DECISOES_TECNICO).fill({ carta: 'teste', opcao: 'neutra' }) } };
   const primeira = simularTemporadaTecnico(comDecisoes, () => 0.1);
   const nomesExtras = [...new Set([
@@ -138,11 +138,11 @@ test('consequências de decisões atravessam temporadas e não duplicam', () => 
   const pendentes = c.tecnico.efeitosPendentes;
   assert.equal(pendentes.length, 4);
   c = simularTemporadaTecnico(c, () => 0.1);
-  const antes = c.tecnico.elenco;
+  const semHeranca = proximaTemporadaTecnico({...c,tecnico:{...c.tecnico,efeitosPendentes:[]}});
   c = proximaTemporadaTecnico(c);
   assert.equal(c.tecnico.efeitosPendentes.length, 0);
   assert.equal(c.tecnico.efeitosRecebidos.length, 4);
-  assert.ok(c.tecnico.elenco > antes);
+  assert.ok(c.tecnico.elenco > semHeranca.tecnico.elenco);
 });
 
 test('objetivos seguem força do clube, sem exigir reputação elevada', () => {
@@ -175,7 +175,7 @@ test('torcida e diretoria alteram pressão; reputação define elegibilidade de 
   const iniciante = { reputacao: 25, temporadas: [], titulos: 0, clube: 'Outro' };
   assert.ok(gerarPropostasTecnico(iniciante, () => 0).every(p => p.exigencia <= iniciante.reputacao));
   const consagrado = { reputacao: 99, temporadas: Array(10).fill({}), titulos: 5, vitorias: 300, empates: 40, derrotas: 40, clube: 'Outro' };
-  assert.ok(gerarPropostasTecnico(consagrado, () => 0).every(p => CLUBES.some(clube => clube.nome === p.nome)));
+  assert.ok(gerarPropostasTecnico(consagrado, () => 0).filter(p=>p.tipo!=='selecao').every(p => CLUBES.some(clube => clube.nome === p.nome)));
 });
 
 test('ofertas dependem de reputação e sorteio, sem garantir clubes grandes', () => {
@@ -193,7 +193,7 @@ test('desemprego avança o calendário e permite retornar após proposta', () =>
   assert.equal(c.tecnico.desempregado, true);
   assert.equal(c.tecnico.salario, 0);
   assert.ok(c.tecnico.propostas.length > 0);
-  assert.ok(c.tecnico.propostas.every(p => CLUBES.some(clube => clube.nome === p.nome)));
+  assert.ok(c.tecnico.propostas.filter(p=>p.tipo!=='selecao').every(p => CLUBES.some(clube => clube.nome === p.nome)));
   c = aceitarPropostaTecnico(c, c.tecnico.propostas[0].nome);
   assert.equal(c.tecnico.desempregado, false);
   assert.equal(proximaTemporadaTecnico(c).tecnico.fase, 'pretemporada');
@@ -233,7 +233,7 @@ test('ícone de ídolo é registrado e aumenta cobrança após meta não cumprid
 test('mercado de técnicos usa clubes reais e preserva a identidade do cadastro', () => {
   const clubes = gerarPropostasTecnico({ reputacao: 99, temporadas: Array(12).fill({}), titulos: 8, vitorias: 350, empates: 30, derrotas: 30, clube: 'Outro' }, () => 0);
   assert.ok(clubes.length > 0);
-  for (const clube of clubes) {
+  for (const clube of clubes.filter(p=>p.tipo!=='selecao')) {
     const original = CLUBES.find(x => x.nome === clube.nome);
     assert.ok(original);
     assert.equal(clube.elenco, original.forca);

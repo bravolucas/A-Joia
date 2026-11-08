@@ -1,5 +1,7 @@
-import CopaEscolha from '../treinador/CopaEscolha.jsx';
-import {prepararEstadualJogador,chaveEstadualJogador,escolherEstadualJogador} from './estadualJogador.js';
+import {contextoAgenda} from '../competicoes/calendarioCopas.js';
+import {prepararCopasJogador,chaveCopaJogador,escolherCopaJogador,concluirEventoJogador} from './copasJogador.js';
+import CopaEscolha,{MarcoLiga} from '../treinador/CopaEscolha.jsx';
+import {chaveEstadualJogador,escolherEstadualJogador} from './estadualJogador.js';
 import {resolverCopaEscolhaTecnico} from '../treinador/tecnico.js';
 import {jogosDoGrupo,tabelaGrupoCopa,empateGrupo} from './gruposCopa.js';
 import FechamentoTemporada from './FechamentoTemporada.jsx';
@@ -2980,13 +2982,22 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   // tocar numa carta de treino já joga a temporada
   const jogar = (cartaId = null) => {
     const base = cartaId ? escolherPretemporada(c, cartaId) : c;
-    const r = jogarTemporada(base), c2=r.c, k=prepararEstadualJogador(c2,r.card);
+    const r = jogarTemporada(base), c2=r.c, k=prepararCopasJogador(c2,r.card);
+    if(k.calendarioCopas){seguirAgendaJogador(c2,k);return;}
     if(k.estadualEmJogo){setEstadualAberto(true);setEstado({etapa:"estadual",c:c2,card:k,ultimo:estado.ultimo,auto:false});return;}
     if (k.pendente) setEstado({ etapa: "momento", c: c2, card: k, ultimo: estado.ultimo });
     else if (copaPendente(k)) setEstado({ etapa: "copa", c: c2, card: k, ultimo: estado.ultimo });
     else aposFechar(c, fecharTemporada(c2, k));
   };
+  const seguirAgendaJogador=(atleta,k)=>{
+    const p=k.calendarioCopas;
+    if(!p){aposFechar(c,fecharTemporada(atleta,k));return;}
+    const cp=p.campeonatos[p.indice],etapa=p.pausa?.tipo==='momento'?'momento':p.pausa?.tipo==='selecao'?'copa':p.pausa?'calendarioLiga':cp.tipo==='estadual'?'estadual':'copasClubes';
+    setEstadualAberto(true);setEstado({etapa,c:atleta,card:k,ultimo:estado.ultimo,auto:false});
+  };
+  const responderCopaJogador=(chave,opcao)=>{const k=escolherCopaJogador(card,chave,opcao);if(k!==card)seguirAgendaJogador(c,k);};
   const responderEstadual=(chave,opcao)=>{
+    if(card.calendarioCopas){responderCopaJogador(chave,opcao);return;}
     const k=escolherEstadualJogador(card,chave,opcao);if(k===card)return;
     if(k.estadualEmJogo){setEstado(st=>({...st,card:k,auto:false}));return;}
     if(k.pendente)setEstado({etapa:'momento',c,card:k,ultimo:estado.ultimo});
@@ -2996,6 +3007,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const fimMomento = (acertou) => {
     if (acertou) vibrar([40, 50, 40]);
     const k = aplicarMomento(card, acertou);
+    if(card.calendarioCopas){const p=card.calendarioCopas;if(p.pausa?.tipo==='momento'||(!k.pendente&&!copaPendente(k)))seguirAgendaJogador(c,concluirEventoJogador(k));else{setEstado({etapa:k.pendente?'momento':'copa',c,card:k,ultimo:estado.ultimo,auto:false});}return;}
     // mais de um título em jogo na temporada: um desafio por vez
     if (k.pendente) setEstado({ etapa: "momento", c, card: k, ultimo: estado.ultimo });
     else if (copaPendente(k)) setEstado({ etapa: "copa", c, card: k, ultimo: estado.ultimo });
@@ -3003,6 +3015,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   };
   // Copa do Mundo: cada etapa volta pra cá; a final (titular) vira momento decisivo
   const avancarCopa = (k) => {
+    if(card.calendarioCopas){if(!k.pendente&&!copaPendente(k))seguirAgendaJogador(c,concluirEventoJogador(k));else setEstado({etapa:k.pendente?'momento':'copa',c,card:k,ultimo:estado.ultimo,auto:false});return;}
     if (k.pendente) setEstado({ etapa: "momento", c, card: k, ultimo: estado.ultimo });
     else if (copaPendente(k)) setEstado({ etapa: "copa", c, card: k, ultimo: estado.ultimo });
     else aposFechar(c, fecharTemporada(c, k));
@@ -3097,7 +3110,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const comecarTecnico = () => setEstado((st) => ({ ...st, etapa: "tecnico", c: iniciarCarreiraTecnico(st.c) }));
 
   // pausas automáticas: qualquer gaveta ou cena aberta segura o relógio
-  const pausado = !!gaveta || estanteAberta || patrimonioAberto || !!apresentacao || !!popup || ["fechamento","bolaOuro","estadual"].includes(etapa) || !!apresentacaoSelecao;
+  const pausado = !!gaveta || estanteAberta || patrimonioAberto || !!apresentacao || !!popup || ["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa) || !!apresentacaoSelecao;
   const ESPERA_AUTO = 1900;
   const espera = estado.manchete ? 4600 : 2800;
   useEffect(() => {
@@ -3159,7 +3172,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           </section>
         )}
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}
-        {etapa==='estadual'&&card?.estadualEmJogo&&<section className="max-w-xl mx-auto rp-painel p-5"><h2 className="text-xl font-bold">{card.estadual.nome}</h2><p className="my-3 text-sm">Dispute o estadual antes de acompanhar o restante da temporada.</p><button className="rp-btn rp-ouro" onClick={()=>setEstadualAberto(true)}>Retomar estadual →</button></section>}
+        {(['estadual','copasClubes','calendarioLiga'].includes(etapa))&&<section className="max-w-xl mx-auto rp-painel p-5"><h2 className="text-xl font-bold">{card.estadualEmJogo?.nome||'Calendário da temporada'}</h2><p className="my-3 text-sm">Acompanhe os jogos na ordem do calendário. Seu progresso está salvo.</p><button className="rp-btn rp-ouro" onClick={()=>setEstadualAberto(true)}>{etapa==='estadual'?'Retomar estadual →':'Retomar temporada →'}</button></section>}
         {etapa === "copa" && card?.copa && <TelaCopa key={`${card.copa.etapa}:${card.copa.fase}:${card.copa.jogos.length}`} c={c} card={card} jogadaSalva={estado.copaJogada} onRegistrar={jogada=>setEstado(st=>({...st,copaJogada:jogada,auto:false}))} onAvancar={avancarCopa} />}
         {etapa === "momento" && <TelaMomento key={`${card.ano}:${(card.momentos || []).length}`} c={c} momento={card.pendente} onReacao={tipo=>setEstado(st=>({...st,c:reagirReencontro(st.c,{...st.card.pendente,adversario:contextoMomento(st.c,st.card.pendente).adversario},tipo)}))} onFim={fimMomento} />}
 
@@ -3210,13 +3223,15 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           <TelaResumo c={c} card={ultimo} gaveta onRever={() => { setGaveta(null); setEstado((st) => ({ etapa: "fechamento", c: st.c, card: ultimo, retorno: st,auto:false })); }} />
         </Gaveta>
       )}
-      {etapa==='estadual'&&card?.estadualEmJogo&&estadualAberto&&<CopaEscolha modoJogador campanha={card.estadualEmJogo} chave={chaveEstadualJogador(card)} onEscolher={responderEstadual} ocupado={false} onMinimizar={()=>setEstadualAberto(false)}/>}
+      {etapa==='calendarioLiga'&&card?.calendarioCopas?.pausa&&estadualAberto&&<MarcoLiga agenda={card.calendarioCopas} temporada={card} onContinuar={()=>responderCopaJogador(chaveCopaJogador(card),'continuar')} onMinimizar={()=>setEstadualAberto(false)}/>}
+      {etapa==='copasClubes'&&card?.calendarioCopas&&estadualAberto&&<CopaEscolha modoJogador calendario={contextoAgenda(card.calendarioCopas)} campanha={card.calendarioCopas.campeonatos[card.calendarioCopas.indice]} chave={chaveCopaJogador(card)} onEscolher={responderCopaJogador} ocupado={false} onMinimizar={()=>setEstadualAberto(false)}/>}
+      {etapa==='estadual'&&card?.estadualEmJogo&&estadualAberto&&<CopaEscolha modoJogador calendario={contextoAgenda(card.calendarioCopas)} campanha={card.estadualEmJogo} chave={card.calendarioCopas?chaveCopaJogador(card):chaveEstadualJogador(card)} onEscolher={responderEstadual} ocupado={false} onMinimizar={()=>setEstadualAberto(false)}/>}
       {estanteAberta && c && <Estante c={c} onFechar={() => setEstanteAberta(false)} />}
       {patrimonioAberto && c && <Patrimonio c={c} etapa={etapa} onComprar={comprar} onFechar={() => setPatrimonioAberto(false)} />}
       {apresentacao && <CenasClube c={apresentacao.c||c} mudanca={apresentacao.mudanca} onFim={()=>setApresentacao(null)}>{fechar=>apresentacao.curto?<ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} grandeChegada={apresentacao.grande} curto={apresentacao.curto} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>:<ApresentacaoGrande clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>}</CenasClube>}
       {["fechamento","bolaOuro"].includes(etapa)&&card&&c&&!apresentacao&&<PopupTemporada key={card.ano} c={c} card={card} celebracaoIndice={estado.celebracaoIndice||0} onCelebracao={indice=>setEstado(st=>({...st,etapa:"fechamento",celebracaoIndice:indice,auto:false}))} onFechar={()=>{if(estado.retorno){setEstado(estado.retorno);return;}if(card.titulos.length){setContadorPulsa(x=>x+1);vibrar(20);}posTemporada(c,card);}}/>}
-      {apresentacaoSelecao&&!apresentacao&&!["fechamento","bolaOuro","estadual"].includes(etapa)&&!popup&&<PrimeiraSelecao c={apresentacaoSelecao.c} estreia={apresentacaoSelecao.estreia} onFim={()=>setApresentacaoSelecao(null)}/>}
-      {popup && !["fechamento","bolaOuro","estadual"].includes(etapa) && <PopupResultado key={popup.k} info={popup} onFechar={() => setPopup(null)} />}
+      {apresentacaoSelecao&&!apresentacao&&!["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa)&&!popup&&<PrimeiraSelecao c={apresentacaoSelecao.c} estreia={apresentacaoSelecao.estreia} onFim={()=>setApresentacaoSelecao(null)}/>}
+      {popup && !["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa) && <PopupResultado key={popup.k} info={popup} onFechar={() => setPopup(null)} />}
     </div>
   );
 }

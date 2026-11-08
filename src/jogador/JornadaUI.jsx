@@ -21,7 +21,7 @@ import {consultarRecordesUniverso} from './recordesUniverso.js';
 
 export function FasesTemporada({etapa}){
  if(!etapa||['criacao','fim','tecnico'].includes(etapa))return null;
- const idx=['estadual','momento','copa'].includes(etapa)?1:['fechamento','festa','resumo','coletiva','traco'].includes(etapa)?2:0;
+ const idx=['estadual','copasClubes','calendarioLiga','momento','copa'].includes(etapa)?1:['fechamento','festa','resumo','coletiva','traco'].includes(etapa)?2:0;
  return <nav className="jr-fases" aria-label="Fases da temporada">{['Preparação','Campanha','Fechamento'].map((v,i)=><span key={v} aria-current={idx===i?'step':undefined} className={i===idx?'jr-atual':i<idx?'jr-passou':''}><b>{i+1}</b>{v}{i<2&&<i aria-hidden="true">→</i>}</span>)}</nav>;
 }
 function Janela({titulo,onFechar,children}){

@@ -1,3 +1,5 @@
+> Atualização posterior: a chave, a ordem dos eventos, o Mundial e o visual foram remodelados. Consulte [Calendário e temas](CALENDARIO_COPAS_TEMAS.md) para o comportamento atual; este documento registra a entrega inicial.
+
 # Copas com escolhas, vagas e estaduais — modo rápido
 
 ## Entrega

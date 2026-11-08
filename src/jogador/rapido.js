@@ -1695,7 +1695,7 @@ function detectarMarcos(antes, c, card) {
 }
 
 /* Fecha a temporada: títulos, Bola de Ouro, torcida, evolução, idade e mundo. */
-export function fecharTemporada(c0, card0) { const concluida=(c0.temporadas||[]).find(t=>t.ano===card0.ano);if(concluida)return {c:c0,card:concluida};if(card0.estadualEmJogo)throw new Error('Conclua o estadual antes de fechar a temporada.');sincronizarLigas(c0); if (copaPendente(card0)) card0 = resolverCopaAuto(c0, card0); return comSemente(c0.codigo, `fechar:${c0.ano}`, () => fecharTemporadaBase(c0, card0)); }
+export function fecharTemporada(c0, card0) { const concluida=(c0.temporadas||[]).find(t=>t.ano===card0.ano);if(concluida)return {c:c0,card:concluida};if(card0.calendarioCopas)throw new Error('Conclua o calendário antes de fechar a temporada.');if(card0.estadualEmJogo)throw new Error('Conclua o estadual antes de fechar a temporada.');sincronizarLigas(c0); if (copaPendente(card0)) card0 = resolverCopaAuto(c0, card0); return comSemente(c0.codigo, `fechar:${c0.ano}`, () => fecharTemporadaBase(c0, card0)); }
 function fecharTemporadaBase(c0, card0) {
   const antes = c0;
   const c = clone(c0);
@@ -1817,7 +1817,7 @@ function fecharTemporadaBase(c0, card0) {
 
   // vaga continental para o ano seguinte (só conta se você continuar no clube)
   const torneiosVagas=[...(card.copaNac?[{nome:card.copaNac.nome,campeao:card.copaNac.fase==='Campeão'?card.clube:card.copaNac.campeao,vice:card.copaNac.fase==='Vice-campeão'?card.clube:card.copaNac.vice}]:[]),...card.titulos.filter(t=>t.tipo==='continental').map(t=>({nome:t.nome,campeao:card.clube}))];
-  c.vagasInternacionaisClubes=calcularVagasRapidas({ano:card.ano,classificacoesMundo:{[card.ligaId]:{classificacao:(card.tabelaLiga||[]).map(nome=>({nome}))}},torneios:torneiosVagas,ligasMundo:antes.ligas});
+  c.vagasInternacionaisClubes=calcularVagasRapidas({ano:card.ano,classificacoesMundo:{[card.ligaId]:{classificacao:(card.tabelaLiga||[]).map(nome=>({nome}))}},torneios:[...(card.torneios||[]),...torneiosVagas],ligasMundo:antes.ligas});
   c.vagasInternacionaisAno=card.ano+1;
   card.vagaProximaTemporada=c.vagasInternacionaisClubes[card.clube]||null;
   c.vagaContinental=!!c.vagasInternacionaisClubes[c.clubeNome];

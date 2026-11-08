@@ -1,3 +1,5 @@
+> Atualização: o estadual agora faz parte da agenda compartilhada e pode se intercalar com o início da liga e fases preliminares. Continua sendo a primeira competição apresentada no Brasil. Veja [Calendário e temas](CALENDARIO_COPAS_TEMAS.md).
+
 # Estadual disputado no modo jogador
 
 A entrega anterior havia incluído o estadual automaticamente no resumo do jogador. Após o relato de ausência de disputa com Mirassol e Ponte Preta, a interface passou a abrir o Campeonato Paulista após a escolha de treino e antes dos outros lances da temporada.

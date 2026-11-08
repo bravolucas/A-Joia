@@ -897,11 +897,11 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   const confrontos = pausa?structuredClone(pausa.confrontos):[];
   const chaveJogo=calendario.map((j,i)=>({...j,indice:i})).filter(j=>!j.folga&&j.indice>=Math.floor(calendario.length/2)).sort((a,b)=>b.forca-a.forca||a.indice-b.indice)[0];
   // Paradas da temporada (só na tela do jogo): metade no ritmo normal, dois terços no intenso, nenhuma no expresso.
-  const paradas = opcoes.interativo ? paradasDoRitmoTecnico(c.ritmo, calendario.length) : [];
+  const paradas = opcoes.interativo && !t.copasEscolhaHabilitadas ? paradasDoRitmoTecnico(c.ritmo, calendario.length) : [];
   const clubesLiga = CLUBES_CONVITES_TECNICO.filter(x => (t.ligasMundo?.[x.nome] || x.liga) === ligaAtual);
   const rivalInicial = definirRivalTecnico(t, clubesLiga);
   // Clássico contra o técnico rival: o último encontro na liga vira um momento próprio (fora do ritmo expresso).
-  const rodadaClassico = opcoes.interativo && c.ritmo !== 'expresso' && rivalInicial
+  const rodadaClassico = opcoes.interativo && !t.copasEscolhaHabilitadas && c.ritmo !== 'expresso' && rivalInicial
     ? calendario.map((j, i) => (!j.folga && j.nome === rivalInicial.clube ? i : -1)).filter(i => i >= 0).at(-1) ?? -1 : -1;
   let classico = pausa?.classico || null;
   const pausaComum = { ...(classico ? { classico } : {}), ...(pausa?.classicoFeito ? { classicoFeito: true } : {}) };
@@ -937,7 +937,7 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
         temporadaPausada: { tipo: 'rival', ano: t.ano, clube: t.clube, indice: rodada, calendario: structuredClone(calendario), confrontos, classificacao, vitorias, empates, derrotas, golsPro, golsContra,
           paradasFeitas: [...(pausa?.paradasFeitas || [])], ...(classico ? { classico } : {}), classicoFeito: true } } };
     }
-    if(t.acompanharJogo&&!pausa&&rodada===chaveJogo?.indice){
+    if(t.acompanharJogo&&!t.copasEscolhaHabilitadas&&!pausa&&rodada===chaveJogo?.indice){
       const chave=`${t.clube}|${t.ano}|${rodada}`;
       return {...c,tecnico:{...t,fase:'intervencao',intervencaoPendente:{chave,adversario,rodada:rodada+1,pontos:vitorias*3+empates,jogos:confrontos.filter(j=>!j.folga).length},
         temporadaPausada:{ano:t.ano,clube:t.clube,indice:rodada,calendario:structuredClone(calendario),confrontos,classificacao,vitorias,empates,derrotas,golsPro,golsContra}}};

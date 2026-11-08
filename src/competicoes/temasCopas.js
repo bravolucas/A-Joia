@@ -1,0 +1,20 @@
+const temas=[
+ [/Intercontinental|Mundial de Clubes/i,'mundial','O MUNDO EM JOGO','#e1c78b','#102c40','orbita'],
+ [/Libertadores/i,'libertadores','A GLÓRIA ETERNA','#e7c778','#201b0e','gloria'],
+ [/Sul-Americana/i,'sulamericana','A OUTRA METADE DA GLÓRIA','#76ddeb','#092e37','linhas'],
+ [/Conference/i,'conference','UMA NOVA CONQUISTA','#8cda50','#102d20','linhas'],
+ [/Europa League/i,'europa','NOITES DE DECISÃO','#ff963b','#321b13','linhas'],
+ [/Champions League/i,'champions','AS ESTRELAS ENTRAM EM CAMPO','#96bbff','#101a4b','estrelas'],
+ [/Copa do Brasil/i,'brasil','O CAMINHO ATÉ A TAÇA','#f3d16c','#073d2d','faixas'],
+ [/FA Cup/i,'fa','A MAGIA DA COPA','#ff8c9c','#3d1120','faixas'],
+ [/Rey|Rei/i,'rei','UMA TAÇA, MUITAS HISTÓRIAS','#f6ba71','#3a1420','faixas'],
+ [/Coppa Italia/i,'italia','TRADIÇÃO EM CAMPO','#98d9b1','#0b2835','faixas'],
+ [/Pokal/i,'alemanha','TUDO PELA COPA','#f3c654','#20251b','linhas'],
+ [/France|França/i,'franca','O SONHO DA COPA','#9abaff','#17264c','faixas'],
+ [/Portugal/i,'portugal','O CAMINHO DO JAMOR','#ef9b8a','#2c2022','faixas'],
+ [/KNVB/i,'holanda','UMA COPA PARA FICAR NA HISTÓRIA','#ffb477','#3b2111','linhas'],
+ [/Argentina/i,'argentina','PAIXÃO PELA COPA','#99dcff','#14324a','faixas'],
+ [/King|Saudita|Asiática|AFC/i,'asia','UM CONTINENTE NA DISPUTA','#80e2c0','#073328','orbita'],
+ [/Concacaf|MLS/i,'concacaf','UM CONTINENTE EM CAMPO','#e3cc8f','#142d3b','orbita'],
+];
+export function temaCopa(c){const linha=temas.find(([re])=>re.test(c.nome));if(linha){const [,id,lema,cor,fundo,motivo]=linha;return {id,lema,cor,fundo,motivo};}if(c.tipo==='estadual')return {id:'estadual',lema:'A TEMPORADA COMEÇA EM CASA',cor:'#a7e9ad',fundo:'#102e23',motivo:'faixas'};return {id:'nacional',lema:'CADA JOGO ESCREVE UMA HISTÓRIA',cor:'#b7c9f4',fundo:'#20273b',motivo:'linhas'};}

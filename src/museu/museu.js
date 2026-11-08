@@ -46,7 +46,7 @@ export const FEITOS_MUSEU = [
   ...metasCarreiraTecnico().map(m => ({ id: `tecnico-${m.id}`, nome: `${m.nome} · técnico`, descricao: `Como treinador: ${m.descricao}`, icone: '📋' })),
 ];
 
-const nomesCatalogo = [...Object.values(LIGAS).filter(x => !x.naoJogavel).map(x => x.nome), ...Object.values(COMPS_PAIS).flatMap(Object.values), ...Object.values(ESTADUAIS).map(x => x.nome), 'Copa do Brasil', 'Copa do Mundo', 'Mundial de Clubes', 'Libertadores', 'Copa Sul-Americana', 'Copa América', 'Eurocopa', 'Copa Ouro', 'Copa Africana de Nações', 'Copa da Ásia', 'Copa das Nações da OFC'];
+const nomesCatalogo = [...Object.values(LIGAS).filter(x => !x.naoJogavel).map(x => x.nome), ...Object.values(COMPS_PAIS).flatMap(Object.values), ...Object.values(ESTADUAIS).map(x => x.nome), 'Copa do Brasil', 'Copa do Mundo', 'Mundial de Clubes', 'Mundial de Clubes FIFA', 'Copa Intercontinental FIFA', 'Libertadores', 'Copa Sul-Americana', 'Copa América', 'Eurocopa', 'Copa Ouro', 'Copa Africana de Nações', 'Copa da Ásia', 'Copa das Nações da OFC'];
 export const TACAS_MUSEU = [...new Map(nomesCatalogo.filter(x => typeof x === 'string').map(nome => { const c = competenciaMuseu(nome); return [c.id, { ...c, descricao: `Conquiste a competição ${c.nome} como jogador ou treinador.` }]; })).values()];
 export const CAMISAS_MUSEU = CLUBES.map(c => ({ id: `camisa-${slugCompeticao(c.nome)}`, nome: c.nome, cor: c.cor || '#12A876', descricao: `Dispute ao menos uma temporada pelo ${c.nome}. Com 75 de aprovação da torcida, ela vira camisa de ídolo.` }));
 

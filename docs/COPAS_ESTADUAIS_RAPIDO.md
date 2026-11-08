@@ -51,3 +51,7 @@ Testes dedicados: `tests/copas-rapidas.test.mjs` e `tests/copas-rapidas.spec.mjs
 Verificação de duração/volume: 30 temporadas completas, 98 campanhas e save de 2.688.466 bytes no cenário de teste. Logs em `/tmp/copas-*.log`; confirmação final de testes e publicação será acrescentada ao concluir. O tamanho em uma carreira real depende também do histórico prévio e dos demais saves do navegador.
 
 Validação local de entrega: 320 testes de lógica, 194 cenários da regressão ampla de navegador e 40 casos finais direcionados, todos aprovados; o cenário adicional de estadual encerrado integra o CI com 195 casos totais. Build aprovado. Checkpoint de implementação: `a2e71ce`.
+
+## Publicação confirmada
+
+Versão `c77f039`, identificada como **Copas e estaduais**. [GitHub Pages](https://github.com/bravolucas/A-Joia/actions/runs/42500495474) e [validação geral](https://github.com/bravolucas/A-Joia/actions/runs/42500495333) concluídos com sucesso: **320 testes de lógica e 195 cenários de navegador**. A implementação e a publicação deste pedido estão concluídas; as limitações de fidelidade integral aos regulamentos permanecem as explicitadas acima.

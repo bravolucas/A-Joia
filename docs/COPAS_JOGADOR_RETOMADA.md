@@ -19,3 +19,5 @@ Relato: as adições de calendário, temas, animações e disputa de copas não 
 `tests/copas-jogador-retomada.spec.mjs`: oito cenários em 320/1366px. Início pelo treino e sequência estadual → Brasileiro → Libertadores, usando personagem jogador sem `c.tecnico`; temas e escolhas visíveis. Retomada e recarga de estadual antigo preservam o mesmo resultado.
 
 O teste agrupado de sete identidades de copa recebeu limite de 60s, pois faz várias navegações e animações no mesmo caso. Uma execução inicial excedeu os 30s durante captura de tela com a regressão de lógica em paralelo; não foi uma falha do jogo.
+
+Publicado em `4e92264`. [GitHub Pages](https://github.com/bravolucas/A-Joia/actions/runs/42530299556) e [validação geral](https://github.com/bravolucas/A-Joia/actions/runs/42530299564) concluídos com sucesso: 342 testes de lógica e 213 cenários de navegador. Build final e oito cenários exclusivos do jogador repetidos com sucesso antes da publicação.

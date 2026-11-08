@@ -1,4 +1,4 @@
-import{test}from'node:test';import assert from'node:assert/strict';import{compararMarcasCopas}from'../recordesHistoricos.js';
+import{test}from'node:test';import assert from'node:assert/strict';import{compararMarcasCopas}from'../src/jogador/recordesHistoricos.js';
 const marca=c=>compararMarcasCopas(c).find(m=>m.id==='jogos-copas');
 test('partidas de Copas excluem continente, clube e convocações sem entrar',()=>{const r=marca({temporadas:[{ano:2030,selecao:{tipo:'copaMundo',jogos:7}},{ano:2031,selecao:{tipo:'continentalSelecao',jogos:6}},{ano:2034,selecao:{tipo:'copaMundo',jogos:0},jogos:60}]});assert.equal(r.atual,7);assert.equal(r.incompleto,false);});
 test('referência de partidas é atingida no ano correto e sem duplicar replay',()=>{const ts=[7,7,7,5,1].map((j,i)=>({ano:2030+i*4,selecao:{tipo:'copaMundo',jogos:j}}));const r=compararMarcasCopas({temporadas:ts},ts.at(-1)).find(m=>m.id==='jogos-copas');assert.equal(r.atual,27);assert.equal(r.anoIgualou,2042);assert.equal(r.anoSuperou,2046);});

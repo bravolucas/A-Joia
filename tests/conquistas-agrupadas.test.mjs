@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {agruparConquistasTecnico} from '../conquistasTecnico.js';
-import {titulosConquistadosTecnico} from '../tecnico.js';
+import {agruparConquistasTecnico} from '../src/treinador/conquistasTecnico.js';
+import {titulosConquistadosTecnico} from '../src/treinador/tecnico.js';
 test('agrupa a competição e preserva todas as conquistas, anos e clubes',()=>{
  const titulos=[{nome:'Brasileirão',ano:2030,clube:'Santos',tipo:'liga'},{nome:'Brasileirão',ano:2032,clube:'Flamengo',tipo:'liga'},{nome:'Copa do Brasil',ano:2030,clube:'Santos',tipo:'copa'},{nome:'Brasileirao',ano:2031,clube:'Santos',tipo:'liga'}];
  const antes=structuredClone(titulos),g=agruparConquistasTecnico(titulos);

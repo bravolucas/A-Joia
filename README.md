@@ -22,17 +22,39 @@ npm run preview   # testa a versão de produção localmente
 ## Estrutura
 
 ```
+index.html            → página que o Vite serve; carrega src/main.jsx
 src/
-  main.jsx         → ponto de entrada
-  index.css        → Tailwind + estilos base
-  data.js          → dados do jogo (clubes, ligas, posições, itens da loja...)
-  lib.js           → lógica pura (simulação, mercado, calendário, mundo, lesões...)
-  components.jsx   → componentes de UI reutilizáveis (cards, minigames, popups...)
-  AJoiaGame.jsx    → componente principal com todo o fluxo de telas
+  main.jsx, App.jsx   → entrada e menu principal (escolha do modo)
+  LimiteDeErro.jsx    → tela de erro que protege o save
+  index.css           → Tailwind + estilos base
+  jogador/            → carreira do jogador (o modo principal): ModoRapido.jsx (telas) e rapido.js (regras),
+                        criação do atleta, pré-temporada, desafios, Copa, loja, jornada, recordes
+  treinador/          → carreira de técnico pós-aposentadoria: tecnico.js, CarreiraTecnico.jsx, competições,
+                        mercado, comissão, tática, loja e vitrine do treinador
+  completo/           → Modo Carreira completo (jogo a jogo): AJoiaGame.jsx e save.js
+  museu/              → museu permanente de taças e camisas entre carreiras
+  desafios/           → desafios históricos
+  comum/              → peças usadas por vários modos: lib.js (simulação), components.jsx, arte.js,
+                        taças, ícones, sons, animações, visual de campo e minigames
+  dados/              → data.js (clubes, ligas, posições...) e tabela histórica das Copas
+arte/                 → escudos, taças, bandeiras, fotos, fontes, sons e animações (com créditos)
+public/               → ícones do app (PWA)
+tests/                → *.test.mjs (lógica, `npm test`) e *.spec.mjs (navegador, Playwright)
+scripts/              → utilitários: gerar animações, atualizar acervo de taças, auditar gestão
+docs/                 → relatórios e capturas de cada entrega (histórico em docs/CONTINUIDADE.md)
+.github/workflows/    → ci.yml (testes + navegador) e deploy.yml (publica no GitHub Pages)
 ```
 
-A separação é por responsabilidade: `data.js` não depende de nada, `lib.js` depende dos dados,
-`components.jsx` monta a interface, e `AJoiaGame.jsx` orquestra tudo.
+Regra de dependência: `dados/` não depende de nada; `comum/lib.js` depende dos dados;
+cada modo (`jogador/`, `treinador/`, `completo/`) usa `comum/` e `dados/`.
+
+## Testes
+
+```bash
+npm test                       # testes de lógica (node --test)
+GITHUB_PAGES=true npm run build && GITHUB_PAGES=true npm run preview -- --port 4173 &
+npx playwright test tests/*.spec.mjs   # testes no navegador (precisa de @playwright/test)
+```
 
 ## O que o jogo tem
 
@@ -93,4 +115,4 @@ O museu aproveita os saves existentes neste navegador. Ele fica separado dos slo
 
 Os quatro minigames compartilham cenários e personagens vetoriais próprios. Os alvos do pênalti funcionam com Enter/Espaço; falta e passe usam botões com foco e áreas de toque ampliadas. Efeitos respeitam movimento reduzido e a preferência de som. As fontes estão empacotadas para uso offline.
 
-`VisualFutebol.jsx` reúne os desenhos parametrizados; `arte/cenarios/` contém fundos com versões para celular. As taças e as fontes mantêm créditos e licenças em suas pastas. Animações podem ser recriadas com `node scripts/gerar-animacoes.mjs`. A reexportação opcional dos troféus usa `node scripts/atualizar-acervo.mjs /caminho/Football-Career`, com ImageMagick instalado.
+`src/comum/VisualFutebol.jsx` reúne os desenhos parametrizados; `arte/cenarios/` contém fundos com versões para celular. As taças e as fontes mantêm créditos e licenças em suas pastas. Animações podem ser recriadas com `node scripts/gerar-animacoes.mjs`. A reexportação opcional dos troféus usa `node scripts/atualizar-acervo.mjs /caminho/Football-Career`, com ImageMagick instalado.

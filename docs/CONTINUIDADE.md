@@ -1,3 +1,5 @@
+> **Organização (nov/2026):** o código saiu da raiz e foi para `src/` (`jogador/`, `treinador/`, `completo/`, `museu/`, `desafios/`, `comum/`, `dados/`). Os nomes de arquivo citados abaixo continuam valendo; procure-os nessas pastas (ex.: `rapido.js` → `src/jogador/rapido.js`, `tecnico.js` → `src/treinador/tecnico.js`). Os workflows foram unificados em `ci.yml` e `deploy.yml`.
+
 ## Continuação — históricos incompletos e resumos de competição
 
 Histórico de temporadas do modo completo protegido contra clube visual e artilharia ausentes. Normalização recupera identificação do clube sem alterar o registro original. Próximos registros guardam posição; resumo usa a função daquele ano e não a atual, sem inventar posição para saves antigos. Tabela acessível separa clube/seleção e mostra J/G/A/CS/nota, com legenda e dados opcionais ausentes em “—”. Classificação ausente é explicitada; xG só aparece se registrado. Mantidos títulos, prêmios registrados, metas, finanças e informações do treinador. Resultado de competição deixa de anunciar artilheiro sorteado/melhor jogador não apurado; celebrações e animações permanecem.

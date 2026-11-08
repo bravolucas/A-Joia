@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { criarJogador, jogarTemporada, fecharTemporada, aposentar } from '../rapido.js';
-import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, cartaAtualTecnico, jogarTemporadaExpressaTecnico, proximaTemporadaTecnico } from '../tecnico.js';
+import { criarJogador, jogarTemporada, fecharTemporada, aposentar } from '../src/jogador/rapido.js';
+import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, cartaAtualTecnico, jogarTemporadaExpressaTecnico, proximaTemporadaTecnico } from '../src/treinador/tecnico.js';
 
 test('modo treinador expresso: clube, uma decisao, resumo e segunda temporada', () => {
   for (let i = 0; i < 24; i++) {

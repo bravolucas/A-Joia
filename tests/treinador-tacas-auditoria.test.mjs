@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { competicaoTemporadaTecnico, titulosConquistadosTecnico, LIMITE_TEMPORADAS_TECNICO, escolherOpcaoAutomaticaTecnico } from '../tecnico.js';
-import { competicaoDoTitulo, svgDaTaca } from '../tacas.js';
+import { competicaoTemporadaTecnico, titulosConquistadosTecnico, LIMITE_TEMPORADAS_TECNICO, escolherOpcaoAutomaticaTecnico } from '../src/treinador/tecnico.js';
+import { competicaoDoTitulo, svgDaTaca } from '../src/comum/tacas.js';
 
 // Auditoria isolada do modo treinador: nomes devem coincidir com os slugs
 // documentados em arte/competicoes/LEIA-ME.md, evitando fallback silencioso.

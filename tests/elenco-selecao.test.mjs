@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {criarJogador,jogarTemporada,jogarCopa,opcoesCopa,aplicarMomento,fecharTemporada} from '../rapido.js';
-import {atualizarElencoSelecao,prepararElencoCopa,registrarJogoElenco,forcaElencoCopa,consolidarElencoCopa} from '../elencoSelecao.js';
-import {compararMarcasCopas} from '../recordesHistoricos.js';
-import {extrairConquistasMuseu,progressoFeitoMuseu} from '../museu.js';
+import {criarJogador,jogarTemporada,jogarCopa,opcoesCopa,aplicarMomento,fecharTemporada} from '../src/jogador/rapido.js';
+import {atualizarElencoSelecao,prepararElencoCopa,registrarJogoElenco,forcaElencoCopa,consolidarElencoCopa} from '../src/jogador/elencoSelecao.js';
+import {compararMarcasCopas} from '../src/jogador/recordesHistoricos.js';
+import {extrairConquistasMuseu,progressoFeitoMuseu} from '../src/museu/museu.js';
 const copiar=x=>JSON.parse(JSON.stringify(x));
 function atleta(posicao='ATA',codigo='ELENCO'){
  const c=criarJogador({nome:'Lucas Copa',nac:'BRA',posicao,personalidade:'ascensao',origem:'base',pe:'destro',numero:11,ritmo:'normal',codigo});c.idade=25;c.ano=2030;c.clubeNome='Santos';c.flags.baseEscolhida=true;for(const k of Object.keys(c.attrs)){c.attrs[k]=92;c.potencial[k]=95;}return c;

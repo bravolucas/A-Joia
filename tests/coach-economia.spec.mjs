@@ -1,6 +1,19 @@
 import {test,expect} from '@playwright/test';
-import {criarJogador,aposentar} from '../rapido.js';
-import {iniciarCarreiraTecnico} from '../tecnico.js';
+// Paradas da temporada e finais decididas na tela (ritmo normal/intenso).
+async function concluirMomentos(page) {
+  for (let i = 0; i < 8; i++) {
+    await page.waitForTimeout(400);
+    const final = page.getByRole('dialog', { name: /^Final · / });
+    if (await final.count()) { await final.locator('.ct-decisions button').first().click(); continue; }
+    const resultado = page.getByRole('dialog', { name: 'Resultado da final' });
+    if (await resultado.count()) { const agora = resultado.getByRole('button', { name: 'Ver agora' }); if (await agora.count()) await agora.click(); await resultado.getByRole('button', { name: /^Continuar/ }).click(); continue; }
+    const parada = page.getByRole('heading', { name: /Parada na rodada|Reunião de emergência|Clássico contra/ });
+    if (await parada.count()) { await page.locator('.ct-actions .ct-decisions button:enabled').first().click(); await page.locator('.ct-simulating').waitFor({ state: 'detached', timeout: 10000 }); continue; }
+    if (i >= 2) return;
+  }
+}
+import {criarJogador,aposentar} from '../src/jogador/rapido.js';
+import {iniciarCarreiraTecnico} from '../src/treinador/tecnico.js';
 for(const width of [390,1366])test(`loja: confirmação, saldo e salário sem duplicação em ${width}px`,async({page})=>{
   await page.setViewportSize({width,height:900});
   const c=iniciarCarreiraTecnico(aposentar({...criarJogador({nome:'Treinador da loja',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,ritmo:'intenso',codigo:'ECONOMIA'}),idade:40}));
@@ -23,6 +36,7 @@ for(const width of [390,1366])test(`loja: confirmação, saldo e salário sem du
   await page.getByRole('button',{name:'Começar temporada',exact:true}).click();
   const decisao=page.getByRole('dialog',{name:'Decisão de pré-temporada'});await expect(decisao).toContainText('ESCOLHA 1 DE 1');await expect(decisao.locator('.ct-quick-baseline')).toContainText('Força do time: 73');
   await decisao.locator('.ct-decisions button:enabled').first().click();
+  await concluirMomentos(page);
   await expect.poll(async()=>(await salvo()).tecnico.fase).toBe('resultado');
   const fim=await salvo();expect(fim.tecnico.carteiraTecnico.saldo).toBe(3900);expect(fim.tecnico.carteiraTecnico.pagamentos).toHaveLength(1);
   await abrir();expect((await salvo()).tecnico.carteiraTecnico.saldo).toBe(3900);

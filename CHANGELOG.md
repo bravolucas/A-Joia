@@ -4,6 +4,61 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 
 ---
 
+## ⚽ Jogador: equilíbrio e memória
+
+- Teto suave de potencial: o auge típico fica perto de 85; passar de 92 exige teto alto e boas escolhas
+- Fidelidade: do 4º ano seguido no clube em diante, torcida +3 por temporada e mais chance de capitania
+- Clássico como lance jogável raro contra o maior rival do clube, com peso maior na torcida
+- Cerimônia da Bola de Ouro sempre que você fica entre os três: pódio revelado do 3º ao 1º
+- Museu: uma camisa para cada clube defendido, com anos e números; com 75 de torcida vira camisa de ídolo
+- Do campo ao banco: o rival de geração vira técnico rival e um ex-parceiro (ou o mentor) vira seu auxiliar
+
+---
+
+## 📋 Treinador: pendências finalizadas
+
+- Estreia no clube do coração grande vem com contrato de um ano: sem a meta, não renova. Também dá para começar num projeto menor; o clube do coração convida depois de um bom trabalho
+- Cartas de pré-temporada que perderiam o efeito pelo teto (força 99, moral/torcida 100) dão lugar a outra
+- Dificuldade: gigantes ganham a liga em cerca de 35–45% das vezes e podem cair após dois anos sem título
+- Resumo do ano mostra o caminho em cada copa, jogo a jogo
+- Clássico contra o técnico rival vira um momento próprio, com três escolhas
+- Metas da carreira de treinador entram no museu; novo painel "Legado completo" junta jogador e treinador
+
+---
+
+## ⚽ Bola em 3D no modo treinador
+
+- Uma bola de futebol em pseudo-3D (Zdog) gira enquanto a temporada é simulada e enquanto a final é decidida
+- Com "reduzir movimento" ligado no aparelho, a bola aparece parada
+
+---
+
+## 📋 Modo treinador: mais difícil, mais coerente e com momentos de decisão
+
+**Equilíbrio**
+- Os bônus das cartas valem para a temporada: no ano seguinte a força volta para perto da base do clube (fica 30% do ganho, no máximo +5)
+- Diretoria, torcida e moral esquecem parte do passado a cada ano; errar a meta por muito custa mais que errar por pouco
+- A meta segue o tamanho do elenco na liga (o mais forte cobra "Ser campeão"); na estreia, até clube grande cobra só vaga continental
+- Título nacional dá +16 de reputação (Série B/segundas divisões +8), copa continental +12, copa nacional +5
+- Quem acaba de ser campeão é visto acima da reputação acumulada e não recebe convite muito abaixo do seu nível
+- Nas simulações, clube mais forte da liga ganha cerca de 50% das ligas (antes 80–90%); um time médio como o Bahia, ~15% (antes 52%)
+
+**Momentos**
+- **Finais jogáveis**: em cada final de copa você escolhe pressão, jogo controlado ou fechar e contra-atacar; a chance aparece antes e o resultado é revelado na barra
+- **Parada da temporada**: no ritmo normal, uma parada no meio da liga (duas no intenso, nenhuma no expresso) com a tabela parcial; se o time vai mal, vira reunião de emergência
+- **Seleção**: em ano de Copa, com boa reputação, a seleção do seu país convida você para a Copa do Mundo (grupo + mata-mata, final decidida por você); depois você volta ao clube
+- **Personagens**: os jogadores contratados nas cartas ficam no elenco, evoluem, são vendidos, voltam de empréstimo e se aposentam, com notícias a cada ano
+- **Técnico rival**: um treinador fictício do clube mais forte da sua liga, com retrospecto de confrontos e títulos dele
+- **Demissão e ano sem clube**: tela com posição, diretoria e torcida; sem clube, você escolhe curso, comentarista de TV, estágio no exterior ou esperar
+- **Metas de carreira**: campeão em três países, tríplice coroa, do acesso ao título, campeão do mundo e outras, com progresso no perfil
+
+**Informação**
+- Previsão da temporada no painel ("Favorito ao título", "Luta contra o rebaixamento"…) com força, posição do elenco e média da liga
+- Resumo do ano depois de jogar: top 5, meta, copas, paradas, finais, duelo com o rival e metas cumpridas
+- O texto da herança de jogador aparece só na primeira temporada
+
+---
+
 ## ⚖️ OVR mais contido e clube grande mais exigente
 
 - **OVR sobe mais devagar**: o pico típico de uma carreira caiu de 92 para 89, e aos 21 anos o OVR mediano foi de 83 para 81

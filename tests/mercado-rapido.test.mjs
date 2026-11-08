@@ -2,9 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
-import {pesoProjeto} from "../jornadaJogador.js";
+import {pesoProjeto} from "../src/jogador/jornadaJogador.js";
 
-const source = fs.readFileSync(new URL("../rapido.js", import.meta.url), "utf8");
+const source = fs.readFileSync(new URL("../src/jogador/rapido.js", import.meta.url), "utf8");
 const begin = source.indexOf("const LIGAS_ELITE_EUROPA_RAPIDO");
 const end = source.indexOf("export function gerarOfertas", begin);
 assert.ok(begin >= 0 && end > begin, "Mercado rápido deve estar presente");

@@ -101,3 +101,7 @@ O impacto da bola e da rede é sintetizado por Web Audio em `som.js`, sem amostr
 ## Goleiro em mergulho
 
 `personagens/goleiro-mergulho.webp`: nova pose de ação gerada com OpenAI Image Generation a partir do goleiro fictício existente. Transparência preservada. Espelhamento em SVG para defesa à esquerda; pose de espera mantida antes da cobrança.
+
+## Bola em 3D
+
+- [Zdog](https://github.com/metafizzy/zdog) 1.1.3, de David DeSandro — licença MIT. Usado em `src/comum/Bola3D.jsx`.

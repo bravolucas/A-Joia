@@ -6,7 +6,7 @@ import {
   proximaTemporadaTecnico, passarAnoDesempregado, negociarContratoTecnico,
   QUANTIDADE_DECISOES_TECNICO, ETAPAS_TEMPORADA_TECNICO,
   tabelaClassificacaoTecnico, historicoProfissionalTecnico
-} from '../tecnico.js';
+} from '../src/treinador/tecnico.js';
 
 function rngSequencia(semente) {
   let estado = semente >>> 0;

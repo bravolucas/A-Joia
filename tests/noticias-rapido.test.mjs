@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import vm from "node:vm";
-const source = fs.readFileSync(new URL("../rapido.js", import.meta.url), "utf8");
+const source = fs.readFileSync(new URL("../src/jogador/rapido.js", import.meta.url), "utf8");
 const start = source.indexOf("export function noticiasDaTemporada(");
 const end = source.indexOf("export function retrospectoRivalidade(", start);
 assert.ok(start >= 0 && end > start);

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import {criarGestaoTecnico,resumoGestaoTecnico} from '../mercadoTecnico.js';
-import { criarJogador, aposentar } from '../rapido.js';
-import { iniciarCarreiraTecnico, jogarTemporadaExpressaTecnico, calcularOvrTecnico, CLUBES_CONVITES_TECNICO } from '../tecnico.js';
+import {criarGestaoTecnico,resumoGestaoTecnico} from '../src/treinador/mercadoTecnico.js';
+import { criarJogador, aposentar } from '../src/jogador/rapido.js';
+import { iniciarCarreiraTecnico, jogarTemporadaExpressaTecnico, calcularOvrTecnico, CLUBES_CONVITES_TECNICO } from '../src/treinador/tecnico.js';
 
 function carreira() {
   const jogador = aposentar({ ...criarJogador({ nome: 'Treinador de teste', nac: 'BRA', posicao: 'ATA', personalidade: 'equilibrado', origem: 'base', pe: 'destro', numero: 10, ritmo: 'equilibrado', codigo: 'COACH-REMODELACAO' }), idade: 40 });
@@ -24,6 +24,20 @@ async function abrir(page, c) {
   await page.reload();
   await page.getByRole('button', { name: /Continuar · Treinador de teste/ }).click();
   await expect(page.getByRole('heading', { name: 'Treinador de teste' })).toBeVisible();
+}
+
+// Paradas da temporada e finais decididas na tela (ritmo normal/intenso).
+async function concluirMomentos(page) {
+  for (let i = 0; i < 8; i++) {
+    await page.waitForTimeout(400);
+    const final = page.getByRole('dialog', { name: /^Final · / });
+    if (await final.count()) { await final.locator('.ct-decisions button').first().click(); continue; }
+    const resultado = page.getByRole('dialog', { name: 'Resultado da final' });
+    if (await resultado.count()) { const agora = resultado.getByRole('button', { name: 'Ver agora' }); if (await agora.count()) await agora.click(); await resultado.getByRole('button', { name: /Continuar/ }).click(); continue; }
+    const parada = page.getByRole('heading', { name: /Parada na rodada|Reunião de emergência|Clássico contra/ });
+    if (await parada.count()) { await page.locator('.ct-actions .ct-decisions button:enabled').first().click(); await page.locator('.ct-simulating').waitFor({ state: 'detached', timeout: 10000 }); continue; }
+    if (i >= 2) return;
+  }
 }
 async function salvo(page) {
   return page.evaluate(() => JSON.parse(localStorage.getItem('ajoia_rapido_v1')).c);
@@ -53,6 +67,7 @@ for (const width of [390, 1366]) {
     const decisao = page.getByRole('dialog', { name: 'Decisão de pré-temporada' });
     await expect(decisao).toBeVisible();
     await decisao.locator('.ct-decisions button:not(:disabled)').first().click();
+    await concluirMomentos(page);
     await expect.poll(async () => (await salvo(page)).tecnico.temporadas.length).toBe(1);
     const resultado = await salvo(page);
     expect(resultado.tecnico.decisoes[0].carta).not.toBe('simulacao_expressa');
@@ -79,6 +94,7 @@ test('trocar de clube simula a próxima temporada uma única vez', async ({ page
   await page.getByRole('button', { name: 'Começar temporada' }).click();
   const decisao = page.getByRole('dialog', { name: 'Decisão de pré-temporada' });
   if (await decisao.count()) await decisao.locator('.ct-decisions button:not(:disabled)').first().click();
+  await concluirMomentos(page);
   await expect.poll(async () => (await salvo(page)).tecnico.temporadas.length).toBe(2);
   expect((await salvo(page)).tecnico.temporadas[1].clube).toBe('Flamengo');
 });
@@ -92,6 +108,7 @@ test('ficar no clube mantém o contrato e avança uma temporada por vez', async 
   await page.getByRole('button', { name: 'Começar temporada' }).click();
   const decisao = page.getByRole('dialog', { name: 'Decisão de pré-temporada' });
   if (await decisao.count()) await decisao.locator('.ct-decisions button:not(:disabled)').first().click();
+  await concluirMomentos(page);
   await expect.poll(async () => (await salvo(page)).tecnico.temporadas.length).toBe(2);
   expect((await salvo(page)).tecnico.temporadas[1].clube).toBe('Confiança');
 });
@@ -118,7 +135,7 @@ test('encerramento e desemprego não oferecem continuação inválida', async ({
   const desempregado = comResultado();
   desempregado.tecnico = { ...desempregado.tecnico, demitido: true, desempregado: true, propostas: [] };
   await abrir(page, desempregado);
-  await expect(page.getByRole('button', { name: 'Aguardar propostas' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Esperar o telefone tocar/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /Ficar no/ })).toHaveCount(0);
 });
 
@@ -199,6 +216,7 @@ for(const width of [390,1366]){
   await expect(janela).toContainText('potencial');
   await page.screenshot({path:`/tmp/pretemporada-rapida-${width}.png`,fullPage:false});
   await janela.getByRole('button',{name:/Aposta jovem/}).click();
+  await concluirMomentos(page);
   await expect.poll(async()=>(await salvo(page)).tecnico.temporadas.length).toBe(1);
   await page.reload();await page.getByRole('button',{name:/Continuar · Treinador de teste/}).click();
   const fim=await salvo(page);expect(fim.tecnico.planoRapido.respostas.length).toBe(1);
@@ -216,6 +234,7 @@ for(const width of [390,1366]){
   const janela=page.getByRole('dialog',{name:'Decisão de pré-temporada'});
   await expect(janela.getByRole('button',{name:/Aposta jovem/})).toBeDisabled();
   await expect(janela).toContainText('Sem verba');await janela.getByRole('button',{name:/Manter o grupo/}).click();
+  await concluirMomentos(page);
   await expect.poll(async()=>(await salvo(page)).tecnico.temporadas.length).toBe(1);
   expect((await salvo(page)).tecnico.verbaRapida).toBe(0);
  });

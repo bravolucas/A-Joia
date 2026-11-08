@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import{criarJogador,jogarTemporada,aplicarMomento,fecharTemporada}from'../rapido.js';
-import{atualizarRecordesUniverso,consultarRecordesUniverso}from'../recordesUniverso.js';
-import{prepararElencoSelecao,prepararElencoCopa,registrarJogoElenco}from'../elencoSelecao.js';
+import{criarJogador,jogarTemporada,aplicarMomento,fecharTemporada}from'../src/jogador/rapido.js';
+import{atualizarRecordesUniverso,consultarRecordesUniverso}from'../src/jogador/recordesUniverso.js';
+import{prepararElencoSelecao,prepararElencoCopa,registrarJogoElenco}from'../src/jogador/elencoSelecao.js';
 const clone=x=>JSON.parse(JSON.stringify(x));
 function atleta(nac='BRA',posicao='ATA',codigo='CONTINENTAL'){const c=criarJogador({nome:'Lucas Continental',nac,posicao,origem:'base',personalidade:'ascensao',pe:'destro',numero:9,ritmo:'normal',codigo});c.idade=24;c.ano=2028;c.flags.baseEscolhida=true;for(const a of Object.keys(c.attrs)){c.attrs[a]=90;c.potencial[a]=95;}return c;}
 test('campanhas continentais têm adversários, placares e estatísticas que fecham, inclusive final por minigame',()=>{
@@ -29,11 +29,11 @@ test('aposentados de anos anteriores e temporadas curtas não criam novas marcas
 });
 
 test('posturas oferecem pistas imperfeitas, com as três direções e sem tornar defesa automática',async()=>{
- const{lerPosturaCobrador}=await import('../leituraGoleiro.js');let certeiras=0;const posturas=new Set();for(let i=0;i<300;i++){const p=lerPosturaCobrador(i);if(p.pista===p.alvo)certeiras++;posturas.add(p.pista);assert.ok(p.descricao);assert.ok(p.tendencia);}assert.equal(certeiras,240);assert.equal(posturas.size,3);
+ const{lerPosturaCobrador}=await import('../src/jogador/leituraGoleiro.js');let certeiras=0;const posturas=new Set();for(let i=0;i<300;i++){const p=lerPosturaCobrador(i);if(p.pista===p.alvo)certeiras++;posturas.add(p.pista);assert.ok(p.descricao);assert.ok(p.tendencia);}assert.equal(certeiras,240);assert.equal(posturas.size,3);
 });
 test('metas booleanas do museu também têm progresso explícito e IDs desconhecidos não são inventados',async()=>{
- const{progressoFeitoMuseu}=await import('../museu.js');const c=atleta();assert.deepEqual(progressoFeitoMuseu(c,'memoria-convocacao'),{atual:0,meta:1});c.jornada.primeiros.convocacao={ano:2028,clube:'Seleção'};assert.deepEqual(progressoFeitoMuseu(c,'memoria-convocacao'),{atual:1,meta:1});assert.equal(progressoFeitoMuseu(c,'nao-existe'),null);
+ const{progressoFeitoMuseu}=await import('../src/museu/museu.js');const c=atleta();assert.deepEqual(progressoFeitoMuseu(c,'memoria-convocacao'),{atual:0,meta:1});c.jornada.primeiros.convocacao={ano:2028,clube:'Seleção'};assert.deepEqual(progressoFeitoMuseu(c,'memoria-convocacao'),{atual:1,meta:1});assert.equal(progressoFeitoMuseu(c,'nao-existe'),null);
 });
 test('recusar capitania impede atribuição automática na mesma temporada',async()=>{
- const{sortearEvento,resolverEvento}=await import('../rapido.js');const c=atleta();c.clubeNome='Santos';c.idade=28;c.ano=2027;c.torcida.Santos=90;c.temporadas=[2024,2025,2026].map(ano=>({ano,clube:'Santos',jogos:30,gols:10,assist:5,nota:7,ovr:75,titulos:[]}));const ev=sortearEvento(c,{somente:'capitao'});const r=resolverEvento(c,ev,'recusar');assert.equal(r.c.jornada.recusaCapitania.ano,2027);let sim=jogarTemporada(r.c);while(sim.card.pendente)sim.card=aplicarMomento(sim.card,true);const f=fecharTemporada(sim.c,sim.card);assert.notEqual(f.c.jornada.capitao?.clube,'Santos');
+ const{sortearEvento,resolverEvento}=await import('../src/jogador/rapido.js');const c=atleta();c.clubeNome='Santos';c.idade=28;c.ano=2027;c.torcida.Santos=90;c.temporadas=[2024,2025,2026].map(ano=>({ano,clube:'Santos',jogos:30,gols:10,assist:5,nota:7,ovr:75,titulos:[]}));const ev=sortearEvento(c,{somente:'capitao'});const r=resolverEvento(c,ev,'recusar');assert.equal(r.c.jornada.recusaCapitania.ano,2027);let sim=jogarTemporada(r.c);while(sim.card.pendente)sim.card=aplicarMomento(sim.card,true);const f=fecharTemporada(sim.c,sim.card);assert.notEqual(f.c.jornada.capitao?.clube,'Santos');
 });

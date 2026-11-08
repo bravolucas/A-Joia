@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { TACAS_MUSEU } from '../museu.js';
-import { resolverImagemCompeticao } from '../arteCompeticoes.js';
+import { TACAS_MUSEU } from '../src/museu/museu.js';
+import { resolverImagemCompeticao } from '../src/comum/arteCompeticoes.js';
 
 test('todas as competições do catálogo têm imagem própria ou ilustração original',()=>{
  const arquivos=Object.fromEntries(fs.readdirSync(new URL('../arte/competicoes/',import.meta.url)).filter(n=>/\.(svg|webp)$/.test(n)).map(n=>[n.replace(/\.(svg|webp)$/, ''),n]));

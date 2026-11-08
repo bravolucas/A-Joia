@@ -1,5 +1,5 @@
 import{test,expect}from'@playwright/test';
-import{criarJogador,jogarTemporada,fecharTemporada,aplicarMomento}from'../rapido.js';
+import{criarJogador,jogarTemporada,fecharTemporada,aplicarMomento}from'../src/jogador/rapido.js';
 const base='http://127.0.0.1:4173/A-Joia/';
 function atleta(){const c=criarJogador({nome:'Lucas Campeão',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:9,ritmo:'normal',codigo:'FESTA-COPA'});c.ano=2027;c.idade=20;c.clubeNome='Santos';c.primeiroClube='Santos';c.flags.baseEscolhida=true;c.desafioAno=c.ano;for(const a of Object.keys(c.attrs))c.attrs[a]=67;return c;}
 function final(){const r=jogarTemporada(atleta());r.card.copa=null;r.card.selecao=null;r.card.titulos=[];r.card.copaNac={nome:'Copa do Brasil',fase:'Final'};r.card.pendente={tipo:'copa',nome:'Copa do Brasil',titulo:'Final da Copa do Brasil',mini:'penalti',texto:'O título está na sua cobrança',ordem:1,total:1,adversario:{tipo:'clube',nome:'Flamengo'}};r.card.filaMomentos=[];return r;}
@@ -27,7 +27,7 @@ for(const width of[390,1366])test(`elenco continental e recordes locais ficam di
 });
 
 for(const postura of[0,1,2])test(`goleiro vê postura ${postura} e o cobrador pode enganar a leitura`,async({page})=>{
- const{lerPosturaCobrador}=await import('../leituraGoleiro.js');const hash=s=>[...s].reduce((n,c)=>(n*31+c.charCodeAt(0))>>>0,7);let c,leitura;
+ const{lerPosturaCobrador}=await import('../src/jogador/leituraGoleiro.js');const hash=s=>[...s].reduce((n,c)=>(n*31+c.charCodeAt(0))>>>0,7);let c,leitura;
  for(let i=0;i<1000;i++){const teste=atleta();teste.posicao='GOL';teste.codigo=`POSTURA-${i}`;const p=lerPosturaCobrador(hash(`${teste.codigo}|${teste.ano}|continental|reflexo|1`));if(p.pista===postura&&p.pista!==p.alvo){c=teste;leitura=p;break;}}
  expect(c).toBeTruthy();await page.setViewportSize({width:390,height:640});await page.emulateMedia({reducedMotion:'reduce'});const r=jogarTemporada(c);r.card.pendente={tipo:'continental',mini:'reflexo',titulo:'Defenda o lance',texto:'Final',ordem:1,total:1};r.card.continental={nome:'Libertadores'};r.card.filaMomentos=[];await abrir(page,{etapa:'momento',...r});await expect(page.locator('.lc-cobrador')).toHaveAttribute('data-postura',String(postura));await expect(page.locator('.lc-cobrador image')).toHaveAttribute('href',/cobrador/);await expect(page.locator('.lc-dica')).toContainText(leitura.descricao);await page.screenshot({path:`/tmp/leitura-cobrador-${postura}.png`,animations:'disabled'});await page.getByRole('button',{name:`Defender ${['Esquerda','Centro','Direita'][postura]}`,exact:true}).click();await expect(page.locator('.lc-impacto')).toContainText('LANCE PERDIDO');
 });
@@ -42,4 +42,18 @@ test('conquista da seleção usa a bandeira e o país, com números internaciona
 
 test('a Copa do Brasil já ganha pode ser revista pelos detalhes da temporada',async({page})=>{
  const r=final(),f=fecharTemporada(r.c,aplicarMomento(r.card,true));f.c.desafioAno=f.c.ano;await abrir(page,{etapa:'evento',c:f.c,ultimo:f.card,auto:false});await page.getByRole('button',{name:/detalhes/}).click();const detalhes=page.getByRole('dialog',{name:'Temporada 2027'});await expect(detalhes.getByRole('button',{name:'Rever conquistas',exact:true})).toBeVisible();await detalhes.getByRole('button',{name:'Rever conquistas',exact:true}).click();const festa=page.getByRole('dialog',{name:'Fim da temporada 2027'});await expect(festa).toContainText('Copa do Brasil');await festa.getByRole('button',{name:/Continuar carreira/}).click();await expect(festa).toHaveCount(0);const s=await page.evaluate(()=>JSON.parse(localStorage.getItem('ajoia_rapido_v1')));expect(s.etapa).toBe('evento');expect(s.c.lista.filter(t=>t.nome==='Copa do Brasil')).toHaveLength(1);expect(s.c.temporadas).toHaveLength(1);
+});
+
+for(const [width,height]of[[390,844],[1366,760]])test(`resumo mostra liga, copas e tabela sem precisar abrir nada em ${width}px`,async({page})=>{
+ await page.setViewportSize({width,height});await page.emulateMedia({reducedMotion:'reduce'});
+ const r=final();r.card.pendente=null;r.card.titulos=[];const f=fecharTemporada(r.c,r.card);f.card.titulos=[];
+ f.card.copaNac={nome:'Copa do Brasil',fase:'Quartas de final'};f.card.continental={nome:'Libertadores',faseNome:'Semifinal'};
+ await abrir(page,{etapa:'fechamento',...f});
+ const popup=page.getByRole('dialog',{name:'Fim da temporada 2027'});
+ const campanha=popup.getByLabel('Campanha nas competições');
+ await expect(campanha).toContainText(f.card.ligaNome);await expect(campanha).toContainText(`${f.card.posLiga}º`);
+ await expect(campanha).toContainText('Caiu: quartas de final');await expect(campanha).toContainText('Caiu: semifinal');
+ await expect(popup.getByLabel(/Classificação final/)).toContainText('Santos');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.screenshot({path:`test-results/fechamento-informativo-${width}.png`,fullPage:false});
 });

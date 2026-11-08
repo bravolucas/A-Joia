@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {criarGestaoTecnico,resumoGestaoTecnico,gerarMercadoTecnico,contratarJogadorTecnico,venderJogadorTecnico} from '../mercadoTecnico.js';
+import {criarGestaoTecnico,resumoGestaoTecnico,gerarMercadoTecnico,contratarJogadorTecnico,venderJogadorTecnico} from '../src/treinador/mercadoTecnico.js';
 const cenario=()=>({nome:'Teste',tecnico:{clube:'Santos',elenco:65,ano:2030,fase:'pretemporada',temporadas:[]}});
 test('geração determinística, setores e compatibilidade com save antigo',()=>{
  const c=cenario(),antes=structuredClone(c),a=criarGestaoTecnico(c.tecnico);
@@ -71,7 +71,7 @@ test('limite de aporte preserva saldo acumulado com vendas',()=>{
 });
 
 test('integração preserva força numérica, confirma transações e retorna erros seguros',async()=>{
- const {prepararGestaoTecnico,negociarElencoTecnico}=await import('../mercadoTecnico.js');
+ const {prepararGestaoTecnico,negociarElencoTecnico}=await import('../src/treinador/mercadoTecnico.js');
  const c=prepararGestaoTecnico(cenario()),antes=structuredClone(c);
  const alvo=gerarMercadoTecnico(c.tecnico)[0];
  const novo=negociarElencoTecnico(c,'compra',alvo.id);
@@ -84,7 +84,7 @@ test('integração preserva força numérica, confirma transações e retorna er
 });
 
 test('renovação cobra luvas, ajusta folha e preserva atleta na virada anual',async()=>{
- const {renovarJogadorTecnico,propostaRenovacaoTecnico,prepararGestaoTecnico}=await import('../mercadoTecnico.js');
+ const {renovarJogadorTecnico,propostaRenovacaoTecnico,prepararGestaoTecnico}=await import('../src/treinador/mercadoTecnico.js');
  const c=prepararGestaoTecnico(cenario()),antes=structuredClone(c);
  const alvo=c.tecnico.gestao.elenco.find(j=>j.contrato===1),p=propostaRenovacaoTecnico(alvo);
  const novo=renovarJogadorTecnico(c,alvo.id),g=novo.tecnico.gestao;
@@ -100,7 +100,7 @@ test('renovação cobra luvas, ajusta folha e preserva atleta na virada anual',a
  assert.equal(anual.tecnico.gestao.movimentos.filter(m=>m.tipo==='renovacao').length,1);
 });
 test('renovação recusa prazo longo, repetição, falta de verba, teto e janela fechada',async()=>{
- const {renovarJogadorTecnico,prepararGestaoTecnico}=await import('../mercadoTecnico.js');
+ const {renovarJogadorTecnico,prepararGestaoTecnico}=await import('../src/treinador/mercadoTecnico.js');
  const c=prepararGestaoTecnico(cenario()),g=c.tecnico.gestao;
  const alvo=g.elenco.find(j=>j.contrato===1);
  assert.throws(()=>renovarJogadorTecnico(c,g.elenco.find(j=>j.contrato>=3).id),/últimos dois/);
@@ -113,7 +113,7 @@ test('renovação recusa prazo longo, repetição, falta de verba, teto e janela
 });
 
 test('virada reflete a evolução do elenco na força uma única vez, sem afetar ofertas',async()=>{
- const {prepararGestaoTecnico}=await import('../mercadoTecnico.js');
+ const {prepararGestaoTecnico}=await import('../src/treinador/mercadoTecnico.js');
  const c=prepararGestaoTecnico(cenario()),g=c.tecnico.gestao;
  const media=g=>g.elenco.reduce((n,j)=>n+j.qualidade,0)/g.elenco.length;
  const alvo={...c,tecnico:{...c.tecnico,ano:2031}};
@@ -125,7 +125,7 @@ test('virada reflete a evolução do elenco na força uma única vez, sem afetar
 });
 
 test('reposição de 30 anos mantém o nível estrutural do clube sem créditos ou efeitos repetidos',async()=>{
- const {prepararGestaoTecnico,negociarElencoTecnico}=await import('../mercadoTecnico.js');
+ const {prepararGestaoTecnico,negociarElencoTecnico}=await import('../src/treinador/mercadoTecnico.js');
  for(const comissao of [false,true]){
   let c=prepararGestaoTecnico(cenario());const inicial=c.tecnico.elenco;
   for(let ano=1;ano<=30;ano++){

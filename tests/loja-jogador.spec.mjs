@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {criarJogador} from '../rapido.js';
+import {criarJogador} from '../src/jogador/rapido.js';
 for(const width of [390,1366])test(`loja do jogador: compra direta, UP e recarga em ${width}px`,async({page})=>{
  await page.setViewportSize({width,height:844});
  const c={...criarJogador({nome:'Jogador da loja',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,ritmo:'normal',codigo:'LOJA-ROBUSTA'}),patrimonio:10000};

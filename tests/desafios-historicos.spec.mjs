@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {criarJogador} from '../rapido.js';
+import {criarJogador} from '../src/jogador/rapido.js';
 for(const width of [390,1366]){
  test(`desafios: tentativa, recarga e saves independentes em ${width}px`,async({page})=>{
   await page.setViewportSize({width,height:900});await page.goto('http://127.0.0.1:4173/A-Joia/');

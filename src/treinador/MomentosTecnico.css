@@ -1,0 +1,97 @@
+/* Momentos do treinador: finais, parada, seleção, resumo, rival e metas. */
+.mt-modal{width:min(100%,560px)}
+.mt-eyebrow{display:block;font-size:10px;font-weight:800;letter-spacing:1.4px;color:#d8b44a;text-transform:uppercase}
+.mt-final{padding:22px;background-size:cover;background-position:center;text-align:center}
+.mt-final h3{font-size:24px;font-weight:850;margin:6px 0 14px;color:#f8ecc8}
+.mt-cup{display:flex;justify-content:center;margin-top:10px;filter:drop-shadow(0 8px 24px #d8b44a55)}
+.mt-versus{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px;margin:6px 0 10px}
+.mt-versus>div{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}
+.mt-versus strong{font-size:14px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mt-versus span{font-size:11px;color:#a1a1aa}
+.mt-versus>b{font-size:22px;color:#d8b44a}
+.mt-versus-small strong{font-size:12px}
+.mt-flag{display:inline-flex;align-items:center;justify-content:center;overflow:hidden;border-radius:6px}
+.mt-flag img{width:100%!important;height:auto!important;max-height:100%}
+.mt-flag-big{width:72px;height:52px;margin:12px 0 4px}
+.mt-hint{font-size:12px;color:#c9c9d1;margin:0 0 6px}
+.mt-options{text-align:left}
+.mt-options button b{font-size:12px;color:#e6ca84}
+.mt-bar{display:block;height:6px;border-radius:99px;background:#ffffff14;overflow:hidden}
+.mt-bar i{display:block;height:100%;background:linear-gradient(90deg,#b8902a,#fde68a);border-radius:99px}
+.mt-result{padding:22px;text-align:center}
+.mt-result h3{font-size:30px;font-weight:900;margin:14px 0 4px}
+.mt-result.mt-win h3{color:#fde68a}.mt-result.mt-loss h3{color:#fca5a5}
+.mt-result p{font-size:13px;color:#b4b4bf;margin:4px 0 14px}
+.mt-score{font-size:18px!important;font-weight:800;color:#f4f4f5!important}
+.mt-wait{color:#d4d4d8}
+.mt-meter{position:relative;height:30px;border-radius:10px;background:#3f1d1d;overflow:hidden;margin:14px 0 4px}
+.mt-meter-win{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#166534,#22c55e);display:flex;align-items:center;padding-left:8px}
+.mt-meter-win span{font-size:11px;font-weight:800;color:#fff;white-space:nowrap}
+.mt-meter-mark{position:absolute;top:-2px;bottom:-2px;width:4px;margin-left:-2px;background:#fff;box-shadow:0 0 10px #fff;transition:left 1.4s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){.mt-meter-mark{transition:none}}
+.mt-table{display:grid;gap:2px;margin:12px 0;border:1px solid #2c2c33;border-radius:12px;padding:6px}
+.mt-table>div{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:8px;font-size:12px;color:#b4b4bf;padding:4px 6px;border-radius:7px}
+.mt-table strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e4e4e7;font-weight:600}
+.mt-table .mt-me{background:#d8b44a1f;color:#fde68a}.mt-table .mt-me strong{color:#fde68a}
+.mt-invite{text-align:center}
+.mt-invite .ct-primary{width:100%;justify-content:center}
+.mt-secondary{display:block;width:100%;margin-top:8px;padding:12px;border-radius:12px;border:1px solid #3a3a43;background:transparent;color:#d4d4d8;font-size:13px;cursor:pointer}
+.mt-games{display:grid;gap:4px;margin:12px 0 18px}
+.mt-games>div{display:grid;grid-template-columns:minmax(0,7rem) 26px auto 26px minmax(0,1fr);align-items:center;gap:6px;font-size:11px;color:#a1a1aa}
+.mt-games .mt-flag{width:24px;height:17px}
+.mt-games strong{color:#f4f4f5;font-variant-numeric:tabular-nums}
+.mt-games em{font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mt-v{color:#86efac!important}.mt-d{color:#fca5a5!important}
+.mt-cups{display:grid;gap:6px;margin:4px 0 12px}
+.mt-cups>div{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:8px;font-size:12px}
+.mt-cups strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mt-cups span{color:#a1a1aa;font-size:11px}
+.mt-note{font-size:12px!important;color:#c4c4cc!important;margin:6px 0!important;line-height:1.5}
+.mt-goals-new{display:grid;gap:6px;margin:10px 0 14px}
+.mt-goals-new span{font-size:13px;font-weight:700;color:#fde68a;background:#d8b44a14;border:1px solid #d8b44a33;border-radius:10px;padding:8px 10px}
+.mt-summary .ct-primary,.mt-fired .ct-primary{width:100%;justify-content:center;margin-top:10px}
+.mt-fired-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
+.mt-fired-stats>div{background:#232329;border-radius:12px;padding:10px;text-align:center}
+.mt-fired-stats strong{display:block;font-size:20px}.mt-fired-stats span{font-size:10px;color:#a1a1aa;text-transform:uppercase}
+.mt-sabbatical{margin-top:16px}
+.mt-sabbatical h3{font-size:13px;font-weight:800;color:#d4d4d8;margin:0}
+.mt-forecast{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:12px;margin:10px 0;border:1px solid}
+.mt-forecast strong{font-size:14px}.mt-forecast span{font-size:11px;color:#b4b4bf}
+.mt-forecast-alto{background:#16a34a14;border-color:#16a34a44}.mt-forecast-alto strong{color:#86efac}
+.mt-forecast-medio{background:#d8b44a10;border-color:#d8b44a40}.mt-forecast-medio strong{color:#fde68a}
+.mt-forecast-baixo{background:#dc262612;border-color:#dc262644}.mt-forecast-baixo strong{color:#fca5a5}
+.mt-rival{display:flex;align-items:center;gap:8px;font-size:12px;color:#b4b4bf;margin:8px 0}
+.mt-rival strong{color:#f4f4f5}
+.mt-news{display:grid;gap:4px;margin:8px 0;padding:10px 12px;border-radius:12px;background:#ffffff08}
+.mt-news p{font-size:12px;color:#c4c4cc;margin:0;line-height:1.5}
+.mt-goals{margin:10px 0;border:1px solid #2c2c33;border-radius:12px;background:#ffffff05}
+.mt-goals summary{cursor:pointer;padding:10px 12px;font-size:12px;font-weight:800;color:#e4e4e7}
+.mt-goals ul{list-style:none;margin:0;padding:0 12px 10px;display:grid;gap:6px}
+.mt-goals li{display:grid;grid-template-columns:20px minmax(0,1fr);gap:6px;font-size:12px;color:#8b8b95}
+.mt-goals li strong{display:block;color:#c4c4cc;font-size:12px}
+.mt-goals li small{font-size:10.5px}
+.mt-goals li.feita strong{color:#fde68a}
+.mt-forecast-tag{font-size:11px;font-weight:800;border:0!important;background:none!important;padding:0!important}
+.mt-forecast-tag.mt-forecast-alto{color:#86efac}.mt-forecast-tag.mt-forecast-medio{color:#fde68a}.mt-forecast-tag.mt-forecast-baixo{color:#fca5a5}
+.mt-ball{display:flex;justify-content:center;margin-top:10px}
+.mt-cups .mt-path{border:1px solid #2c2c33;border-radius:10px;padding:2px 8px}
+.mt-path summary{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:8px;font-size:12px;cursor:pointer;list-style:none;padding:4px 0}
+.mt-path summary::-webkit-details-marker{display:none}
+.mt-path summary strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mt-path summary span{color:#a1a1aa;font-size:11px}
+.mt-path summary::after{content:'▾';color:#71717a;font-size:10px;grid-column:3;justify-self:end;margin-left:6px}
+.mt-path[open] summary::after{content:'▴'}
+.mt-path summary{grid-template-columns:28px minmax(0,1fr) auto auto}
+.mt-path .mt-games{margin:4px 0 8px}
+.mt-path .mt-games>div{grid-template-columns:minmax(0,6.5rem) 20px auto 20px minmax(0,1fr)}
+.mt-derby{margin:12px 0}
+.mt-legacy-body{padding:0 12px 12px}
+.mt-legacy-total{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.mt-legacy-total strong{font-size:24px;color:#fde68a}.mt-legacy-total span{font-size:11px;color:#a1a1aa}
+.mt-legacy-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.mt-legacy-cols section{background:#ffffff06;border:1px solid #2c2c33;border-radius:10px;padding:10px}
+.mt-legacy-cols h4{margin:0;font-size:12px;font-weight:800;color:#e4e4e7}
+.mt-legacy-cols p{margin:2px 0 8px;font-size:11px;color:#a1a1aa}
+.mt-legacy-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px}
+.mt-legacy-grid div{text-align:center;background:#232329;border-radius:8px;padding:6px 4px}
+.mt-legacy-grid strong{display:block;font-size:15px;color:#f4f4f5}.mt-legacy-grid span{font-size:9.5px;color:#a1a1aa;text-transform:uppercase}

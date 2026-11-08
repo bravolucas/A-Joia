@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { criarJogador, aposentar } from '../rapido.js';
-import { iniciarCarreiraTecnico } from '../tecnico.js';
+import { criarJogador, aposentar } from '../src/jogador/rapido.js';
+import { iniciarCarreiraTecnico } from '../src/treinador/tecnico.js';
 
 const cenarios = [
   {

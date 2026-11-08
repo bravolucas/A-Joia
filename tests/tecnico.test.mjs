@@ -1,7 +1,7 @@
-import { CLUBES } from '../data.js';
+import { CLUBES } from '../src/dados/data.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, perfilClubeTecnico, probabilidadesTecnico, calendarioAdversariosTecnico, calendarioLigaTecnico, probabilidadesConfrontoTecnico, tabelaClassificacaoTecnico, ordenarClassificacaoTecnico, zonaClassificacaoTecnico, placarTecnico, simularRodadaRivaisTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico, CLUBES_CONVITES_TECNICO } from '../tecnico.js';
+import { iniciarCarreiraTecnico, definirEstiloTecnico, tomarDecisaoTecnico, cartaAtualTecnico, sortearCartasTecnico, objetivoTecnico, perfilClubeTecnico, probabilidadesTecnico, calendarioAdversariosTecnico, calendarioLigaTecnico, probabilidadesConfrontoTecnico, tabelaClassificacaoTecnico, ordenarClassificacaoTecnico, zonaClassificacaoTecnico, placarTecnico, simularRodadaRivaisTecnico, calcularOvrTecnico, riscoDemissaoTecnico, painelEstabilidadeTecnico, historicoProfissionalTecnico, gerarPropostasTecnico, salarioTecnico, vinculosComoJogador, opcoesInicioTecnico, iniciarNoClubeIdolo, passarAnoDesempregado, negociarContratoTecnico, aceitarPropostaTecnico, TODAS_CARTAS_TECNICO, elegivelTecnico, QUANTIDADE_DECISOES_TECNICO, simularTemporadaTecnico, simularEtapaTecnico, reuniaoEmergenciaTecnico, ETAPAS_TEMPORADA_TECNICO, proximaTemporadaTecnico, CLUBES_CONVITES_TECNICO } from '../src/treinador/tecnico.js';
 
 const atleta = { nome: 'Teste', idade: 40, ano: 2045, clubeNome: 'Clube A', aposentado: true, legado: { pontos: 700 }, temporadas: [{ ano: 2044 }], totais: { gols: 300 } };
 test('somente aposentados podem iniciar carreira técnica', () => {
@@ -148,7 +148,11 @@ test('consequências de decisões atravessam temporadas e não duplicam', () => 
 test('objetivos seguem força do clube, sem exigir reputação elevada', () => {
   assert.equal(objetivoTecnico({ reputacao: 30, elenco: 45 }).id, 'permanencia');
   assert.equal(objetivoTecnico({ reputacao: 90, elenco: 80 }).id, 'continental');
-  assert.equal(objetivoTecnico({ reputacao: 20, elenco: 85 }).id, 'titulo');
+  assert.equal(objetivoTecnico({ reputacao: 20, elenco: 85, temporadas: [{}] }).id, 'titulo');
+  // Na estreia, até um clube grande cobra só a vaga continental.
+  assert.equal(objetivoTecnico({ reputacao: 20, elenco: 85 }).id, 'continental');
+  // O clube mais forte da liga cobra o título.
+  assert.equal(objetivoTecnico({ clube: 'Flamengo', liga: 'brasileirao', temporadas: [{}] }).id, 'campeao');
 });
 test('demissão exige mudança de clube, preservando o histórico', () => {
   let c = iniciarCarreiraTecnico(atleta);

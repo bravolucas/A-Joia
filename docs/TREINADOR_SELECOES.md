@@ -32,3 +32,5 @@ O museu atualiza a identificação da fonte já existente, sem duplicar a quanti
 ## Validação
 
 Testes em `tests/selecoes-tecnico.test.mjs` e `tests/selecoes-tecnico.spec.mjs`: seis confederações; classificação/eliminação; mudança clube–seleção–clube; salário; preparação; final persistida; museu antigo; início por nível/ídolo; diversidade de clubes; oferta e pop-up em 390 e 1440 px. Testes existentes do treinador foram ajustados quando pressupunham a regra antiga de acumular seleção e clube ou de começar automaticamente no último clube do jogador.
+
+Validação final: **296 testes de lógica**; **39 cenários direcionados de navegador** localmente; **180 cenários de navegador no CI**, todos aprovados. Publicação confirmada no commit `073a713`, [GitHub Pages](https://github.com/bravolucas/A-Joia/actions/runs/42492686184) e [validação geral](https://github.com/bravolucas/A-Joia/actions/runs/42492686115). A dependência de URL base dos testes novos foi corrigida após a primeira execução no CI, sem alteração adicional no jogo.

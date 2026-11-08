@@ -34,3 +34,5 @@ Logs: `/tmp/cenas-carreira-full-unit.log`, `/tmp/cenas-carreira-browser.log`, `/
 ## Demais oportunidades
 
 Loja, novas poses dos minigames, seleção, premiações, museu, transferências e vínculos continuam no mapa de próximos lotes. Não foram apresentados como entregues nesta etapa. Ver `docs/planejamento/OPORTUNIDADES_IMAGENS_2026-11-08.md`.
+
+Publicação confirmada em `a17e027`: [Pages](https://github.com/bravolucas/A-Joia/actions/runs/42534779162) e [validação geral](https://github.com/bravolucas/A-Joia/actions/runs/42534779232) com sucesso, incluindo 346 testes de lógica e 219 cenários de navegador.

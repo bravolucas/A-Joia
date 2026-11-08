@@ -29,3 +29,5 @@ As duas competições têm títulos distintos no histórico/museu. A Intercontin
 Testes em `tests/calendario-copas.test.mjs` e `tests/copas-calendario.spec.mjs`, mais regressão existente. Incluem qualidade estatística dos finalistas, zebras possíveis, adversários sobreviventes, persistência sem mutação, duplo clique, classificação mundial no mesmo ano, janela de quatro anos, cronologia dos dois modos, identidades de sete competições, animação antes da revelação e movimento reduzido. Detalhes finais da execução/publicação em `docs/CONTINUIDADE.md`.
 
 Migração: campanhas antigas sem chave completa preservam o adversário já apresentado; os demais sobreviventes são montados sem reabrir clubes já eliminados. A liga mostra campanha parcial calculada a partir dos confrontos efetivamente salvos, sem inventar uma classificação parcial dos outros clubes. O campeão da liga celebra no marco de encerramento, antes da Intercontinental.
+
+Em telas baixas de celular, a data da agenda permanece no cabeçalho; a faixa duplicada é ocultada para manter as três escolhas inteiras, inclusive na fase de liga da Champions.

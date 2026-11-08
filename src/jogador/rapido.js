@@ -1403,7 +1403,7 @@ function jogarTemporadaBase(c0) {
   const regional=participantesEstadual(clube);
   if(regional){
     const camp=simularCampanhaCopa({nome:regional.nome,tipo:'estadual',usuario:clube.nome,forcaUsuario:clube.forca+(ovr-clube.forca)*share*.2+forcaTimeExtra,clubes:regional.clubes,ano:c.ano,formato:'estadual',estado:regional.estado,seed:`${c.codigo}|${c.ano}|${regional.nome}`});
-    card.estadual={nome:regional.nome,estado:regional.estado,fase:camp.faseUsuario,campeao:camp.campeao,vice:camp.vice,jogos:camp.jogosUsuario,formato:regional.formato};
+    card.estadual={nome:regional.nome,estado:regional.estado,fase:camp.faseUsuario,campeao:camp.campeao,vice:camp.vice,jogos:camp.jogosUsuario,formato:regional.formato,forcaUsuario:camp.forcaUsuario};
     if(camp.campeao===clube.nome)card.titulos.push({tipo:'estadual',nome:regional.nome});
   }
 
@@ -1695,7 +1695,7 @@ function detectarMarcos(antes, c, card) {
 }
 
 /* Fecha a temporada: títulos, Bola de Ouro, torcida, evolução, idade e mundo. */
-export function fecharTemporada(c0, card0) { const concluida=(c0.temporadas||[]).find(t=>t.ano===card0.ano);if(concluida)return {c:c0,card:concluida};sincronizarLigas(c0); if (copaPendente(card0)) card0 = resolverCopaAuto(c0, card0); return comSemente(c0.codigo, `fechar:${c0.ano}`, () => fecharTemporadaBase(c0, card0)); }
+export function fecharTemporada(c0, card0) { const concluida=(c0.temporadas||[]).find(t=>t.ano===card0.ano);if(concluida)return {c:c0,card:concluida};if(card0.estadualEmJogo)throw new Error('Conclua o estadual antes de fechar a temporada.');sincronizarLigas(c0); if (copaPendente(card0)) card0 = resolverCopaAuto(c0, card0); return comSemente(c0.codigo, `fechar:${c0.ano}`, () => fecharTemporadaBase(c0, card0)); }
 function fecharTemporadaBase(c0, card0) {
   const antes = c0;
   const c = clone(c0);

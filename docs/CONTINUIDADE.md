@@ -1,5 +1,13 @@
 > **Organização (nov/2026):** o código saiu da raiz e foi para `src/` (`jogador/`, `treinador/`, `completo/`, `museu/`, `desafios/`, `comum/`, `dados/`). Os nomes de arquivo citados abaixo continuam valendo; procure-os nessas pastas (ex.: `rapido.js` → `src/jogador/rapido.js`, `tecnico.js` → `src/treinador/tecnico.js`). Os workflows foram unificados em `ci.yml` e `deploy.yml`.
 
+## Continuação — estadual interativo no jogador, Mirassol/Ponte Preta (08/11/2026)
+
+Usuário informou que não disputou o estadual no jogador por Mirassol e Ponte Preta. Diagnóstico: a entrega anterior incluía resultado/título do estadual no jogador, mas o resolvia automaticamente, sem escolhas. Corrigido com etapa persistida `estadual` após o treino e antes dos demais lances do ano. Duas decisões da classificação regional, depois semifinal/final se houver classificação. Planos têm texto próprio para jogador; empate eliminatório mantém pênaltis. Eliminação na classificação é mostrada antes de seguir. Fechar permite “Retomar estadual”.
+
+`src/jogador/estadualJogador.js` remove somente a projeção automática do estadual do card ainda não encerrado, sem alterar títulos da carreira, e registra a campanha disputada uma única vez. Não refaz temporadas encerradas. A mudança entra no próximo início de temporada pela interface; lances já em andamento continuam preservados. A opção interativa da classificação é explícita no motor compartilhado, preservando o modo automático de APIs/testes e o fluxo atual do treinador.
+
+Três testes de lógica e doze cenários de navegador direcionados passaram, incluindo Mirassol e Ponte Preta em 320/1366 px, treino, fechar/retomar, reload do resultado e continuidade para os outros lances. Regressão geral aprovada: **323 testes de lógica e 199 cenários de navegador**. Faixa de fases inclui o estadual em “Campanha”; build final e quatro cenários dedicados repetidos após esse ajuste. Publicação em preparação. Relatório `docs/ESTADUAL_JOGADOR_INTERATIVO.md`; logs `/tmp/estadual-jogador-*.log`. Primeira tentativa de navegador sem prévia foi descartada; servidor iniciado e execução válida aprovada. Preservados os documentos não rastreados do usuário.
+
 ## Continuação — copas com escolhas, vagas compartilhadas e estaduais (08/11/2026)
 
 Pedido atual: minigame do treinador nas copas, empate seguido de pênaltis, força de ambos os times, finais com pressão; Copa do Brasil com entrada por nível; Champions/Europa/Conference com tabela única e duas decisões na fase inicial; Libertadores/Sul-Americana; correção das vagas nos modos rápidos de jogador e técnico; estaduais em ambos.

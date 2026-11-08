@@ -7,7 +7,7 @@
 - Champions/Europa/Conference: tabela única de 36 clubes. Oito jogos nas duas primeiras, seis na Conference; duas partidas exigem escolha, as demais são simuladas e contam de verdade na tabela. Oitavo para cima avança diretamente; 9º–24º disputa playoff; 25º–36º sai sem transferência para outra copa europeia.
 - Copa do Brasil no jogo: força-base a partir de 80 começa nas oitavas; de 65 a 79 começa nas pré-oitavas; abaixo de 65, na fase anterior. **Essa entrada por nível é uma adaptação pedida para o jogo, não o regulamento oficial da Copa do Brasil.** Outros mata-matas nacionais mantêm uma versão curta.
 - Estaduais nos dois modos: participantes do mesmo estado, classificação regional resumida e semifinal/final. Não é uma cópia integral de todos os regulamentos estaduais. Inclui o Sergipano para o Confiança, antes ausente do catálogo. Clubes regionais adicionais são reais; suas forças são estimativas de balanceamento.
-- Jogador mantém a simulação rápida, com resultados e títulos de estadual, Copa do Brasil e das competições internacionais no resumo. O minigame novo de três planos pertence ao treinador.
+- Jogador disputa o estadual com escolhas na classificação e, se avançar, semifinal/final. Os demais torneios mantêm seus fluxos atuais. Na entrega inicial o estadual do jogador era automático; a correção está documentada em `docs/ESTADUAL_JOGADOR_INTERATIVO.md`.
 
 ## Vagas e épocas
 

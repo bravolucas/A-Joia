@@ -19,7 +19,7 @@ function tabela(times,jogos,usuario){const tab=new Map(times.map(c=>[c.nome,{nom
  return [...tab.values()].sort((a,b)=>b.pontos-a.pontos||(b.golsPro-b.golsContra)-(a.golsPro-a.golsContra)||b.golsPro-a.golsPro||b.vitorias-a.vitorias||a.nome.localeCompare(b.nome)).map((x,i)=>({...x,posicao:i+1,saldoGols:x.golsPro-x.golsContra}));}
 function calendario(times,rodadas){const anel=[...times],primeiro=[];if(anel.length%2)anel.push(null);const n=anel.length;for(let r=0;r<n-1;r++){const jogos=[];for(let i=0;i<n/2;i++){let a=anel[i],b=anel[n-1-i];if(!a||!b)continue;if(r%2)[a,b]=[b,a];jogos.push({casa:a.nome,fora:b.nome});}primeiro.push(jogos);anel.splice(1,0,anel.pop());}return Array.from({length:rodadas},(_,r)=>primeiro[r%primeiro.length].map(j=>Math.floor(r/primeiro.length)%2?{casa:j.fora,fora:j.casa}:{...j}));}
 const faseN=n=>n===2?'Final':n===4?'Semifinal':n===8?'Quartas de final':n===16?'Oitavas de final':n===32?'Pré-oitavas':'Fase preliminar';
-export function criarCampanhaCopa({nome,tipo='continental',usuario,forcaUsuario,clubes,ano,formato='grupos',entrada='principal',seed,estado}){
+export function criarCampanhaCopa({nome,tipo='continental',usuario,forcaUsuario,clubes,ano,formato='grupos',entrada='principal',seed,estado,interativoEstadual=false}){
  const rng=geradorTecnico(seed||`${ano}|${nome}|${usuario}`),eu={...(clubes.find(c=>c.nome===usuario)||{nome:usuario}),forca:forcaUsuario},outros=embaralhar(clubes.filter(c=>c.nome!==usuario),rng);
  const c={nome,tipo,ano,usuario,selecao:null,seed:seed||`${ano}|${nome}|${usuario}`,forcaUsuario,forcas:Object.fromEntries([eu,...outros].map(c=>[c.nome,nivel(c)])),pool:[eu,...outros],fases:[],grupos:[],jogosUsuario:[],campeao:null,vice:null,faseUsuario:'Em disputa',etapa:0,rodada:0,resultado:null,eliminados:[],estado:estado||null};
  if(formato==='liga'){
@@ -27,7 +27,7 @@ export function criarCampanhaCopa({nome,tipo='continental',usuario,forcaUsuario,
  }else if(formato==='grupos'){
   c.formato='grupos';c.times=[eu,...outros.slice(0,3)];c.participantes=c.pool.length;c.totalRodadas=6;c.calendario=calendario(c.times,6);c.manual=[0,1,2,3,4,5];c.jogosLiga=[];c.fase='grupos';
  }else if(formato==='estadual'){
-  c.formato='estadual';c.times=[eu,...outros.slice(0,7)];c.totalRodadas=c.times.length%2?c.times.length:c.times.length-1;c.calendario=calendario(c.times,c.totalRodadas);c.manual=[];c.jogosLiga=[];c.fase='grupos';
+  c.formato='estadual';c.times=[eu,...outros.slice(0,7)];c.totalRodadas=c.times.length%2?c.times.length:c.times.length-1;c.calendario=calendario(c.times,c.totalRodadas);const rodadasComUsuario=c.calendario.map((js,i)=>js.some(j=>j.casa===usuario||j.fora===usuario)?i:null).filter(i=>i!==null);c.manual=interativoEstadual?[...new Set([rodadasComUsuario[0],rodadasComUsuario.at(-1)])]:[];c.jogosLiga=[];c.fase='grupos';
  }else{
   c.formato=formato;c.fase='mata';c.tamanho=entrada==='pre'?32:entrada==='preliminar'?64:formato==='estadual'?4:16;
  }

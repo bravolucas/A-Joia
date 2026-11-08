@@ -6,7 +6,7 @@ function base(){
  const jogador=aposentar({...criarJogador({nome:'Teste seleção',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,ritmo:'expresso',codigo:'SELECAO'}),idade:40});
  const c=iniciarCarreiraTecnico(jogador);c.tecnico={...c.tecnico,ano:2031,fase:'resultado',propostasCoerentesVersao:3,clubeInicialEscolhido:true,clube:'Bahia',liga:'brasileirao',reputacao:85,temporadas:[{ano:2030,clube:'Bahia',posicao:5,pontos:60,vitorias:18,empates:6,derrotas:14,titulosConquistados:[],torneios:[]}],propostas:[SELECOES_TECNICO.find(n=>n.nac==='POR')]};return c;
 }
-async function abrir(page,c){await page.goto('./');await page.evaluate(c=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,etapa:'tecnico',c})),c);await page.reload();await page.getByRole('button',{name:/Continuar · Teste seleção/}).click();}
+async function abrir(page,c){await page.goto('http://127.0.0.1:4173/A-Joia/');await page.evaluate(c=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,etapa:'tecnico',c})),c);await page.reload();await page.getByRole('button',{name:/Continuar · Teste seleção/}).click();}
 for(const viewport of [{width:390,height:844},{width:1440,height:900}]){
  test(`oferta de seleção usa os cartões de mercado e assume vínculo exclusivo ${viewport.width}`,async({page})=>{
  await page.setViewportSize(viewport);const erros=[];page.on('pageerror',e=>erros.push(e.message));await abrir(page,base());

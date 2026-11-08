@@ -2643,10 +2643,10 @@ export function PopupResultado({ info, onFechar }) {
   );
 }
 
-/* Fim de temporada: tudo o que aconteceu numa tela só */
-function PopupTemporada({c,card,onFechar}){
+/* Resultado exclusivo primeiro; resumo completo depois, sem repetir a simulação. */
+function PopupTemporada({c,card,onFechar,celebracaoIndice,onCelebracao}){
  useEffect(()=>{apito(3);if(!card.titulos?.length)return;const timer=setTimeout(()=>{torcida(2.8,.2);tocar("conquista",.5);if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches)festejar(card.titulos.length>1?'chuva':'titulo',['#EBC557','#FFFFFF']);},400);return()=>clearTimeout(timer);},[card.ano]);
- return <FechamentoTemporada c={c} card={card} onContinuar={onFechar}/>;
+ return <FechamentoTemporada c={c} card={card} onContinuar={onFechar} celebracaoIndice={celebracaoIndice} onCelebracao={onCelebracao}/>;
 }
 
 /* Desafio de OVR de toda temporada: três apostas com chances diferentes */
@@ -2955,7 +2955,6 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     if (f.card.ovrDepois >= 90 && f.card.ovrDepois > (antes.picoOvr || 0)) setTimeout(() => festejar("estrelas", ["#FB923C", "#FFFFFF", "#EBC557"]), 2600);
     if (f.card.titulos.length) vibrar([30, 60, 30]);
     if(antes.emprestimo&&!f.c.emprestimo){const m=f.c.jornada?.ultimaMudanca;setApresentacao({c:f.c,mudanca:m,clube:clubeDe(f.c.clubeNome),curto:true,deOnde:clubeDe(m?.de),contrato:f.c.contrato,valor:0});}
-    if (f.card.bola?.pos <= 3 && f.card.bola.top?.some(r => r.voce)) return setEstado({etapa:"bolaOuro",c:f.c,card:f.card,ultimo:f.card,auto:false});
     setEstado({etapa:"fechamento",c:f.c,card:f.card,ultimo:f.card,auto:false});
   };
   const posTemporada = (cc, k) => {
@@ -3086,7 +3085,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const comecarTecnico = () => setEstado((st) => ({ ...st, etapa: "tecnico", c: iniciarCarreiraTecnico(st.c) }));
 
   // pausas automáticas: qualquer gaveta ou cena aberta segura o relógio
-  const pausado = !!gaveta || estanteAberta || patrimonioAberto || !!apresentacao || !!popup || etapa==="fechamento" || !!apresentacaoSelecao;
+  const pausado = !!gaveta || estanteAberta || patrimonioAberto || !!apresentacao || !!popup || ["fechamento","bolaOuro"].includes(etapa) || !!apresentacaoSelecao;
   const ESPERA_AUTO = 1900;
   const espera = estado.manchete ? 4600 : 2800;
   useEffect(() => {
@@ -3150,7 +3149,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}
         {etapa === "copa" && card?.copa && <TelaCopa key={`${card.copa.etapa}:${card.copa.fase}:${card.copa.jogos.length}`} c={c} card={card} jogadaSalva={estado.copaJogada} onRegistrar={jogada=>setEstado(st=>({...st,copaJogada:jogada,auto:false}))} onAvancar={avancarCopa} />}
         {etapa === "momento" && <TelaMomento key={`${card.ano}:${(card.momentos || []).length}`} c={c} momento={card.pendente} onReacao={tipo=>setEstado(st=>({...st,c:reagirReencontro(st.c,{...st.card.pendente,adversario:contextoMomento(st.c,st.card.pendente).adversario},tipo)}))} onFim={fimMomento} />}
-        {etapa === "bolaOuro" && <TelaBolaDeOuro c={c} card={card} onFim={() => setEstado({etapa:"fechamento",c,card,ultimo:card,auto:false})} />}
+
         {etapa === "festa" && <TelaFesta c={c} card={card} onFim={() => { if (estado.retorno) setEstado({ ...estado.retorno, voar: false }); else setEstado({etapa:"fechamento",c,card,ultimo:card,auto:false}); }} />}
         {etapa === "resumo" && <TelaResumo c={c} card={card} voar={!!estado.voar} onPousou={() => setContadorPulsa((x) => x + 1)} onContinuar={continuar} onAposentar={encerrar} onRever={() => setEstado({etapa:"fechamento",c,card,retorno:estado,auto:false})} />}
         {etapa === "coletiva" && estado.coletiva && <TelaColetiva c={c} coletiva={estado.coletiva} resposta={estado.resposta} onResponder={responder} onSeguir={() => abrirJanela(c, estado.ultimo, false)} />}
@@ -3201,9 +3200,9 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
       {estanteAberta && c && <Estante c={c} onFechar={() => setEstanteAberta(false)} />}
       {patrimonioAberto && c && <Patrimonio c={c} etapa={etapa} onComprar={comprar} onFechar={() => setPatrimonioAberto(false)} />}
       {apresentacao && <CenasClube c={apresentacao.c||c} mudanca={apresentacao.mudanca} onFim={()=>setApresentacao(null)}>{fechar=>apresentacao.curto?<ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} grandeChegada={apresentacao.grande} curto={apresentacao.curto} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>:<ApresentacaoGrande clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>}</CenasClube>}
-      {etapa==="fechamento"&&card&&c&&!apresentacao&&<PopupTemporada key={card.ano} c={c} card={card} onFechar={()=>{if(estado.retorno){setEstado(estado.retorno);return;}if(card.titulos.length){setContadorPulsa(x=>x+1);vibrar(20);}posTemporada(c,card);}}/>}
-      {apresentacaoSelecao&&!apresentacao&&etapa!=="fechamento"&&!popup&&<PrimeiraSelecao c={apresentacaoSelecao.c} estreia={apresentacaoSelecao.estreia} onFim={()=>setApresentacaoSelecao(null)}/>}
-      {popup && etapa!=="fechamento" && <PopupResultado key={popup.k} info={popup} onFechar={() => setPopup(null)} />}
+      {["fechamento","bolaOuro"].includes(etapa)&&card&&c&&!apresentacao&&<PopupTemporada key={card.ano} c={c} card={card} celebracaoIndice={estado.celebracaoIndice||0} onCelebracao={indice=>setEstado(st=>({...st,etapa:"fechamento",celebracaoIndice:indice,auto:false}))} onFechar={()=>{if(estado.retorno){setEstado(estado.retorno);return;}if(card.titulos.length){setContadorPulsa(x=>x+1);vibrar(20);}posTemporada(c,card);}}/>}
+      {apresentacaoSelecao&&!apresentacao&&!["fechamento","bolaOuro"].includes(etapa)&&!popup&&<PrimeiraSelecao c={apresentacaoSelecao.c} estreia={apresentacaoSelecao.estreia} onFim={()=>setApresentacaoSelecao(null)}/>}
+      {popup && !["fechamento","bolaOuro"].includes(etapa) && <PopupResultado key={popup.k} info={popup} onFechar={() => setPopup(null)} />}
     </div>
   );
 }

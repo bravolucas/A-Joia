@@ -1,5 +1,13 @@
 > **Organização (nov/2026):** o código saiu da raiz e foi para `src/` (`jogador/`, `treinador/`, `completo/`, `museu/`, `desafios/`, `comum/`, `dados/`). Os nomes de arquivo citados abaixo continuam valendo; procure-os nessas pastas (ex.: `rapido.js` → `src/jogador/rapido.js`, `tecnico.js` → `src/treinador/tecnico.js`). Os workflows foram unificados em `ci.yml` e `deploy.yml`.
 
+## Continuação — resultados exclusivos antes do resumo do jogador (08/11/2026)
+
+Fechamento do modo rápido agora apresenta primeiro cada título, acesso, rebaixamento e colocação no top 3 da Bola de Ouro em uma apresentação exclusiva, sem números e tabelas. O resumo atual abre somente depois da sequência. Múltiplas conquistas usam uma única janela e avançam uma por vez, com botão sempre acessível. Segundo e terceiro lugares não adicionam Bola de Ouro às conquistas. A fila é derivada do card já fechado e `celebracaoIndice` é persistido no estado da carreira, para retomar após recarregar sem repetir a simulação, trocar de ano ou duplicar troféus.
+
+Saves na etapa antiga `bolaOuro` também abrem o novo pop-up. Escape avança a apresentação, sem encerrar o fechamento. A carreira só continua pelo botão do resumo, preservando a revisão pelo histórico. Compatibilidade de movimento reduzido mantida. Relatório técnico: `docs/FECHAMENTO_JOGADOR_RESULTADOS.md`.
+
+Validação: **298 testes de lógica**; 24 cenários de navegador iniciais, seguidos de nove cenários finais de sequência/pódio/saves (25 cenários distintos com a cobertura antiga). Build de produção aprovado. Logs `/tmp/player-celebrations-unit.log`, `/tmp/player-celebrations-browser.log`, `/tmp/player-celebrations-final-browser.log`, `/tmp/player-celebrations-build.log`. Primeira tentativa de navegador interrompida por prévia não iniciada; execução válida passou após subir o servidor. Publicação e CI serão confirmados ao concluir.
+
 ## Continuação — mercado de seleções e vínculo exclusivo (08/11/2026)
 
 Retomada após indisponibilidade do ambiente. Atualizado o checkout com `origin/main` (`3db6e9a`), preservando a reorganização para `src/` e as melhorias recentes de momentos do treinador. Implementado mercado com 79 seleções de seis confederações, ofertas em qualquer ano, vínculo exclusivo clube/seleção, eliminatórias e continentais em formato rápido. Uma única preparação anual com cartas próprias de seleção. Início por nível do técnico ou ídolo máximo comprovado (90 de torcida, quatro temporadas e dois títulos). Ofertas de clubes usam sorteio ponderado e memória recente, com limites de força e reputação.

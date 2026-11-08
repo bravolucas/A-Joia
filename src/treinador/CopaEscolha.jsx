@@ -14,7 +14,7 @@ export default function CopaEscolha({campanha:c,chave,onEscolher,ocupado,onMinim
  return <JanelaTreinador titulo={`Copa em jogo · ${c.nome}`} onFechar={onMinimizar} classe={`cce-modal cce-${tema.id}`}>
   <div className="cce-corpo" style={{'--cce-cor':tema.cor,'--cce-fundo':tema.fundo}} data-tema={tema.id} data-motivo={tema.motivo} aria-busy={revelando}>
    <div className="cce-ambiente" aria-hidden="true"><i/><i/><i/><i/><i/></div>
-   <div className="cce-topo"><TacaCompeticao nome={c.nome} tipo={c.tipo} size={62}/><div><small>{calendario?.data||`TEMPORADA ${c.ano}`} · {tema.lema}</small><h2>{c.nome}</h2><p>{d?.fase||r?.fase||c.faseUsuario}</p></div></div>
+   <div className="cce-topo"><TacaCompeticao nome={c.nome} tipo={c.tipo} size={62}/><div><small>{calendario?.data||`TEMPORADA ${c.ano}`} · {modoJogador?'MODO RÁPIDO · JOGADOR':tema.lema}</small><h2>{c.nome}</h2><p>{d?.fase||r?.fase||c.faseUsuario}</p></div></div>
    {calendario?.liga&&<div className="cce-agenda"><span>Calendário da temporada</span><b>{calendario.data}</b><span>Entre as rodadas de {calendario.liga}</span></div>}
    <div className={revelando?'cce-conteudo cce-oculto':'cce-conteudo'}>
    {d&&<><div className="cce-confronto"><div><Escudo nome={c.usuario} size={44}/><strong>{c.usuario}</strong><span>Força {Math.round(d.forcaUsuario)}</span></div><b><small>{penaltis?'PÊNALTIS':final?'FINAL':'DIA DE COPA'}</small>×</b><div><Escudo nome={d.adversario} size={44}/><strong>{d.adversario}</strong><span>Força {Math.round(d.forcaAdv)}</span></div></div>

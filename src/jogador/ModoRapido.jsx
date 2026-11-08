@@ -1,5 +1,5 @@
 import {contextoAgenda} from '../competicoes/calendarioCopas.js';
-import {prepararCopasJogador,chaveCopaJogador,escolherCopaJogador,concluirEventoJogador} from './copasJogador.js';
+import {atualizarFluxoCopasJogador,etapaAgendaJogador,registrarLanceLegadoJogador,chaveCopaJogador,escolherCopaJogador,concluirEventoJogador} from './copasJogador.js';
 import CopaEscolha,{MarcoLiga} from '../treinador/CopaEscolha.jsx';
 import {chaveEstadualJogador,escolherEstadualJogador} from './estadualJogador.js';
 import {resolverCopaEscolhaTecnico} from '../treinador/tecnico.js';
@@ -2922,7 +2922,7 @@ function AutoAvanco({ c, ms, onAgora, onPausar }) {
 export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: comecarDoZero = false }) {
   // fluxo: criação → oferta de base → treino → lances/Copa → fechamento salvo → próxima ação
   //        → (traço) → (coletiva) → decisão/mercado nos anos de decisão; nos outros, a temporada rola sozinha
-  const [estado, setEstado] = useState(() => (comecarDoZero ? null : carregarRapido()) || { etapa: "criacao" });
+  const [estado, setEstado] = useState(() => atualizarFluxoCopasJogador((comecarDoZero ? null : carregarRapido()) || { etapa: "criacao" }));
   const [estanteAberta, setEstanteAberta] = useState(false);
   const [estadualAberto,setEstadualAberto]=useState(true);
   const [apresentacao, setApresentacao] = useState(null);
@@ -2982,7 +2982,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   // tocar numa carta de treino já joga a temporada
   const jogar = (cartaId = null) => {
     const base = cartaId ? escolherPretemporada(c, cartaId) : c;
-    const r = jogarTemporada(base), c2=r.c, k=prepararCopasJogador(c2,r.card);
+    const r = jogarTemporada(base,{copasInterativas:true}), c2=r.c, k=r.card;
     if(k.calendarioCopas){seguirAgendaJogador(c2,k);return;}
     if(k.estadualEmJogo){setEstadualAberto(true);setEstado({etapa:"estadual",c:c2,card:k,ultimo:estado.ultimo,auto:false});return;}
     if (k.pendente) setEstado({ etapa: "momento", c: c2, card: k, ultimo: estado.ultimo });
@@ -2992,7 +2992,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const seguirAgendaJogador=(atleta,k)=>{
     const p=k.calendarioCopas;
     if(!p){aposFechar(c,fecharTemporada(atleta,k));return;}
-    const cp=p.campeonatos[p.indice],etapa=p.pausa?.tipo==='momento'?'momento':p.pausa?.tipo==='selecao'?'copa':p.pausa?'calendarioLiga':cp.tipo==='estadual'?'estadual':'copasClubes';
+    const etapa=etapaAgendaJogador(k);
     setEstadualAberto(true);setEstado({etapa,c:atleta,card:k,ultimo:estado.ultimo,auto:false});
   };
   const responderCopaJogador=(chave,opcao)=>{const k=escolherCopaJogador(card,chave,opcao);if(k!==card)seguirAgendaJogador(c,k);};
@@ -3006,7 +3006,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   };
   const fimMomento = (acertou) => {
     if (acertou) vibrar([40, 50, 40]);
-    const k = aplicarMomento(card, acertou);
+    const k = registrarLanceLegadoJogador(aplicarMomento(card, acertou),card.pendente);
     if(card.calendarioCopas){const p=card.calendarioCopas;if(p.pausa?.tipo==='momento'||(!k.pendente&&!copaPendente(k)))seguirAgendaJogador(c,concluirEventoJogador(k));else{setEstado({etapa:k.pendente?'momento':'copa',c,card:k,ultimo:estado.ultimo,auto:false});}return;}
     // mais de um título em jogo na temporada: um desafio por vez
     if (k.pendente) setEstado({ etapa: "momento", c, card: k, ultimo: estado.ultimo });

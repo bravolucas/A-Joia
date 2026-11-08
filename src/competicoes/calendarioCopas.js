@@ -17,7 +17,7 @@ export function criarAgenda(campeonatos,{ano,clube,liga,externos=[]}={}){
 }
 export function selecionarAgenda(p){
  const candidatos=p.campeonatos.map((c,i)=>({i,data:Math.max(p.dataAtual,dataCopa(c))})).filter(x=>!p.concluidas.includes(x.i));
- const externos=p.eventos.filter(x=>!p.vistos.includes(x.id));
+ const externos=p.eventos.filter(x=>!p.vistos.includes(x.id)).map(x=>({...x,data:Math.max(p.dataAtual,x.data)}));
  const primeiro=[...candidatos,...externos].sort((a,b)=>a.data-b.data)[0];
  if(!primeiro)return null;
  return {...p,indice:primeiro.i??-1,pausa:primeiro.i==null?primeiro:null,dataAtual:primeiro.data};

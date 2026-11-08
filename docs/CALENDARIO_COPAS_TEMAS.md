@@ -31,3 +31,5 @@ Testes em `tests/calendario-copas.test.mjs` e `tests/copas-calendario.spec.mjs`,
 Migração: campanhas antigas sem chave completa preservam o adversário já apresentado; os demais sobreviventes são montados sem reabrir clubes já eliminados. A liga mostra campanha parcial calculada a partir dos confrontos efetivamente salvos, sem inventar uma classificação parcial dos outros clubes. O campeão da liga celebra no marco de encerramento, antes da Intercontinental.
 
 Em telas baixas de celular, a data da agenda permanece no cabeçalho; a faixa duplicada é ocultada para manter as três escolhas inteiras, inclusive na fase de liga da Champions.
+
+Publicação concluída em `d3681ad`: [GitHub Pages](https://github.com/bravolucas/A-Joia/actions/runs/42528455345) e [validação geral](https://github.com/bravolucas/A-Joia/actions/runs/42528455375) com sucesso. 334 testes de lógica e 205 cenários de navegador. Identificador inicial: “Calendário e copas”. O calendário completo novo entra nas próximas temporadas iniciadas; saves em andamento continuam compatíveis.

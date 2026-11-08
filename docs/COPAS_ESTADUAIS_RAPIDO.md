@@ -49,3 +49,5 @@ A consulta direta aos sites oficiais CBF e UEFA não ficou acessível na rede de
 Testes dedicados: `tests/copas-rapidas.test.mjs` e `tests/copas-rapidas.spec.mjs`. Abrangem força/chances, final, empate/pênaltis, reload/duplo clique, grupos e tabela única, duas decisões europeias, entrada na Copa do Brasil, estadual sem misturar estados, vaga antiga de G4, vice da Copa do Brasil na Série B e histórico compacto. A regressão de treinador/loja foi atualizada para completar as escolhas novas, mantendo verificação de liga, salário e save.
 
 Verificação de duração/volume: 30 temporadas completas, 98 campanhas e save de 2.688.466 bytes no cenário de teste. Logs em `/tmp/copas-*.log`; confirmação final de testes e publicação será acrescentada ao concluir. O tamanho em uma carreira real depende também do histórico prévio e dos demais saves do navegador.
+
+Validação local de entrega: 320 testes de lógica, 194 cenários da regressão ampla de navegador e 40 casos finais direcionados, todos aprovados; o cenário adicional de estadual encerrado integra o CI com 195 casos totais. Build aprovado. Checkpoint de implementação: `a2e71ce`.

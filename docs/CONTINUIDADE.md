@@ -1,6 +1,6 @@
 > **Organização (nov/2026):** o código saiu da raiz e foi para `src/` (`jogador/`, `treinador/`, `completo/`, `museu/`, `desafios/`, `comum/`, `dados/`). Os nomes de arquivo citados abaixo continuam valendo; procure-os nessas pastas (ex.: `rapido.js` → `src/jogador/rapido.js`, `tecnico.js` → `src/treinador/tecnico.js`). Os workflows foram unificados em `ci.yml` e `deploy.yml`.
 
-## Em andamento — copas com escolhas, vagas compartilhadas e estaduais (08/11/2026)
+## Continuação — copas com escolhas, vagas compartilhadas e estaduais (08/11/2026)
 
 Pedido atual: minigame do treinador nas copas, empate seguido de pênaltis, força de ambos os times, finais com pressão; Copa do Brasil com entrada por nível; Champions/Europa/Conference com tabela única e duas decisões na fase inicial; Libertadores/Sul-Americana; correção das vagas nos modos rápidos de jogador e técnico; estaduais em ambos.
 
@@ -8,7 +8,7 @@ Implementados `src/competicoes/{vagasInternacionais,regrasCopasRapidas,estaduais
 
 Relatório detalhado e limites das regras/formato/pesquisa em `docs/COPAS_ESTADUAIS_RAPIDO.md`. Fontes OpenFootball 2024/25 e 2025/26 consultadas no GitHub; acesso direto CBF/UEFA não funcionou. Não afirmar que todos os regulamentos oficiais futuros foram verificados. Pré-oitavas por força e estaduais resumidos são adaptações do jogo; vagas UEFA adicionais por coeficiente são configuráveis por edição. Vice da Copa do Brasil está condicionado a 2026+.
 
-Validação intermediária: 309 testes de lógica passaram antes dos últimos cinco testes dedicados; 17 testes dedicados de copas, classificação e migração também passaram; 22 cenários de navegador de treinador/loja e minigame passaram; cinco cenários finais de minigame passaram. Regressão geral de 194 cenários aprovada. Depois disso foram acrescentados um teste de estadual já eliminado e pequenas correções de rótulos/qualificação: gerar novo build e executar validação final antes de publicar. Logs `/tmp/copas-*.log`. A prévia está na porta 4173. Nenhuma publicação deste pedido foi feita até este registro. Preservados os dois documentos de planejamento não rastreados do usuário.
+Validação local concluída: **320 testes de lógica**, **194 cenários de navegador** na regressão ampla e **40 cenários finais** de copas/treinador/loja/fechamento. O último grupo inclui o caso adicional de estadual encerrado, fechando 195 cenários distintos. Build de produção aprovado. Simulação de 30 temporadas: 98 campanhas concluídas, save de 2.688.466 bytes (cenário de teste). Logs `/tmp/copas-unit-entrega-final.log`, `/tmp/copas-full-browser.log`, `/tmp/copas-browser-publicacao.log`, `/tmp/copas-build-publicacao.log`. Checkpoint `a2e71ce` salvo em `checkpoint/copas-estaduais-rapido`. Publicação e CI serão confirmados após a execução no GitHub. Preservados os dois documentos de planejamento não rastreados do usuário.
 
 ## Continuação — resultados exclusivos antes do resumo do jogador (08/11/2026)
 

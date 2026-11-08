@@ -9,6 +9,14 @@ Tudo que mudou desde a primeira versão publicada, organizado por bloco de traba
 - Taças internacionais com o nome correto da seleção em celebrações, histórico e museu.
 - Ofertas de clubes mais variadas e início condicionado ao nível do treinador, com exceção para ídolos máximos.
 
+## 08/11/2026 — Copas em jogo e estaduais no modo rápido
+
+- Três planos por jogo nas copas do treinador, com vitória/empate/derrota conforme a força dos dois times; pênaltis como escolha própria e finais com pressão maior.
+- Libertadores, Sul-Americana, Champions, Europa e Conference; fase europeia com 36 clubes e duas decisões, demais partidas simuladas.
+- Copa do Brasil com entrada por nível e estaduais regionais nos modos rápidos de jogador e treinador.
+- Vagas vinculadas ao clube/ano, incluindo copas e campeões continentais; recuperação da posição conhecida em saves antigos.
+- Campanhas persistidas, retomada da janela e histórico compacto; regras e adaptações documentadas em `docs/COPAS_ESTADUAIS_RAPIDO.md`.
+
 ---
 
 ## ⚽ Jogador: equilíbrio e memória

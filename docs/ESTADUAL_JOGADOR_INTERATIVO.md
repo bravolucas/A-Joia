@@ -9,3 +9,7 @@ A etapa `estadual` e a campanha `card.estadualEmJogo` ficam salvas. Fechar/recar
 Testes dedicados: `tests/estadual-jogador.test.mjs` e `tests/estadual-jogador.spec.mjs`. Incluem Mirassol e Ponte Preta, primeira escolha obrigatória, persistência/duplo clique, fechar/retomar, 320/1366 px, continuidade dos demais lances e bloqueio de fechamento prematuro.
 
 Validação: 323 testes de lógica e 199 cenários de navegador aprovados. A faixa da temporada indica Campanha durante o estadual. Build de produção e verificação final dedicada antes da publicação.
+
+Publicação: commit `8c03287`, GitHub Pages [42523762945](https://github.com/bravolucas/A-Joia/actions/runs/42523762945) concluído com sucesso. Tela inicial identifica “Estadual interativo”. Vale para a próxima temporada iniciada pela interface; saves existentes são preservados.
+
+Validação remota [42523762972](https://github.com/bravolucas/A-Joia/actions/runs/42523762972) também concluída com sucesso.

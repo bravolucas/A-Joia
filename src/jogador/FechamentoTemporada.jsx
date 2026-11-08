@@ -1,3 +1,4 @@
+import {nomeVaga} from '../competicoes/regrasCopasRapidas.js';
 import {celebracoesTemporada} from './celebracoesTemporada.js';
 import React,{useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
@@ -11,7 +12,7 @@ import './FechamentoTemporada.css';
 /** A carreira já foi fechada; esta tela apenas apresenta o registro salvo. */
 export default function FechamentoTemporada({c,card,onContinuar,celebracaoIndice=0,onCelebracao}){
  const ref=useRef(null),trava=useRef(false),[indice,I]=useState(0);
- const ordem=['copaMundo','continentalSelecao','continental','mundial','liga','segunda','copa','bolaOuro','botaOuro'];
+ const ordem=['copaMundo','continentalSelecao','continental','mundial','liga','segunda','copa','estadual','bolaOuro','botaOuro'];
  const grupos=agruparConquistasTecnico(card.titulos||[]).sort((a,b)=>ordem.indexOf(a.tipo)-ordem.indexOf(b.tipo)),historico=agruparConquistasTecnico(c.lista||[]),selecionado=grupos[indice]||grupos[0],ganhou=grupos.length>0;
  const carreira=selecionado&&historico.find(g=>g.id===selecionado.id),n=carreira?.quantidade||selecionado?.quantidade||0;
  const eventos=celebracoesTemporada(card),evento=eventos[celebracaoIndice];
@@ -70,8 +71,10 @@ export function campanhaDaTemporada(card,ganhouTipo=(tipo,nome)=>(card.titulos||
   const detalhe=[card.totalLiga?`${card.posLiga||'—'}º de ${card.totalLiga}`:null,card.acesso?`Acesso para ${card.acesso.para}`:null,card.rebaixado?`Rebaixado para ${card.rebaixado.para}`:null,!campeao&&card.tabelaLiga?.[0]?`Campeão: ${card.tabelaLiga[0]}`:null].filter(Boolean).join(' · ');
   lista.push({nome:card.ligaNome,tipo:'liga',res:card.rebaixado?'Rebaixado':card.acesso&&!campeao?'Acesso':res,detalhe});
  }
- if(card.copaNac?.nome){const res=ganhouTipo('copa',card.copaNac.nome)?'Campeão':card.copaNac.fase;lista.push({nome:card.copaNac.nome,tipo:'copa',res:res==='Campeão'||res==='Vice-campeão'?res:`Caiu: ${String(res).toLowerCase()}`});}
- if(card.continental?.nome){const res=ganhouTipo('continental')?'Campeão':card.continental.faseNome;lista.push({nome:card.continental.nome,tipo:'continental',res:res==='Campeão'||res==='Vice-campeão'||res==='Final'?res:`Caiu: ${String(res).toLowerCase()}`});}
+ if(card.estadual?.nome)lista.push({nome:card.estadual.nome,tipo:'estadual',res:card.estadual.fase,detalhe:card.estadual.formato});
+ if(card.vagaProximaTemporada)lista.push({nome:`Vaga internacional · ${card.ano+1}`,tipo:'continental',res:nomeVaga(card.vagaProximaTemporada.competicao),detalhe:(card.vagaProximaTemporada.entrada==='pre'?'Fase preliminar · ':'')+card.vagaProximaTemporada.motivo});
+ if(card.copaNac?.nome){const res=ganhouTipo('copa',card.copaNac.nome)?'Campeão':card.copaNac.fase;lista.push({nome:card.copaNac.nome,tipo:'copa',res:res==='Campeão'||res==='Vice-campeão'?res:`Caiu: ${String(res).replace(/^Eliminado:\s*/i,'').toLowerCase()}`});}
+ if(card.continental?.nome){const res=ganhouTipo('continental')?'Campeão':card.continental.faseNome;lista.push({nome:card.continental.nome,tipo:'continental',res:res==='Campeão'||res==='Vice-campeão'||res==='Final'?res:`Caiu: ${String(res).replace(/^Eliminado:\s*/i,'').toLowerCase()}`});}
  if(card.mundialRes)lista.push({nome:'Mundial de Clubes',tipo:'mundial',res:card.mundialRes});
  if(card.selecao?.nome)lista.push({nome:card.selecao.nome,tipo:/copa do mundo/i.test(card.selecao.nome)?'copaMundo':'continentalSelecao',res:card.selecao.convocado?(card.selecao.resultado||'Convocado'):'Fora da lista'});
  return lista.map(x=>({...x,tom:tom(x.res)}));

@@ -2849,6 +2849,7 @@ export const RIVAIS_PREMIO = RIVAIS_POR_TIER.flatMap((t) => t.nomes);
 export const FASES_COPINHA = ["Fase de Grupos", "Oitavas de Final", "Quartas de Final", "Semifinal", "Final"];
 
 export const ESTADUAIS = {
+  SE: "Campeonato Sergipano",
   SP: "Campeonato Paulista", RJ: "Campeonato Carioca", MG: "Campeonato Mineiro", RS: "Campeonato Gaúcho",
   PR: "Campeonato Paranaense", BA: "Campeonato Baiano", CE: "Campeonato Cearense", PE: "Campeonato Pernambucano",
   SC: "Campeonato Catarinense", GO: "Campeonato Goiano", PA: "Campeonato Paraense", AM: "Campeonato Amazonense", AL: "Campeonato Alagoano",

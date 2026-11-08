@@ -1,3 +1,4 @@
+import {dadosVaga} from '../competicoes/vagasInternacionais.js';
 /* Telas dos momentos da carreira de treinador: finais, parada da temporada,
    convite da seleção, resumo do ano, demissão, ano sem clube, rival e metas. */
 import React, { useEffect, useState } from 'react';
@@ -153,6 +154,7 @@ export function PopUpResumo({ temporada: a, metasNovas = [], rival, onFechar }) 
       <p className="mt-note">{a.formato}</p><p className={a.cumpriuObjetivo ? 'ct-positive' : 'ct-warning'}>Meta: {a.objetivo} · {a.cumpriuObjetivo ? 'cumprida' : 'não cumprida'}</p>
       <div className="mt-table">{top.map(l => <div key={l.nome} className={l.meuClube ? 'mt-me' : ''}><span>{l.posicao}</span><strong>{l.nome}</strong><span>{l.pontos} pts</span></div>)}
         {minha && minha.posicao > top.length && <div className="mt-me"><span>{minha.posicao}</span><strong>{minha.nome}</strong><span>{minha.pontos} pts</span></div>}</div>
+      {a.vagasInternacionaisProxima?.[a.clube]&&<p className="mt-note">Vaga para {a.ano+1}: {dadosVaga(a.vagasInternacionaisProxima[a.clube])}.</p>}
       {a.contratoCurto === 'renovado' && <p className="mt-note">✍️ Contrato de um ano cumprido: a diretoria renovou com você.</p>}
       {(a.torneios || []).length > 0 && <div className="mt-cups" aria-label="Caminho nas copas">{a.torneios.map(x => <CaminhoCopa key={x.nome} torneio={x} lado={x.tipo === 'copaMundo' ? x.selecao : a.clube} />)}</div>}
       {a.classico && <p className="mt-note">⚔️ Clássico contra {a.classico.rival} ({a.classico.clube}): {textoClassico(a.classico)}.</p>}

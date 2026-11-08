@@ -1,3 +1,4 @@
+import {resolverCopaEscolhaTecnico} from '../treinador/tecnico.js';
 import {jogosDoGrupo,tabelaGrupoCopa,empateGrupo} from './gruposCopa.js';
 import FechamentoTemporada from './FechamentoTemporada.jsx';
 import {FasesTemporada,PainelJornada,EcosDaTemporada,ProjetoOferta,CenasClube,AlbumJornada,PrimeiraSelecao,CelebracaoLance,ReacaoAntigoClube,ConsultaElencoCopa} from './JornadaUI.jsx';
@@ -175,8 +176,8 @@ export const ESTILO_BASE = `
 `;
 
 const ATTR_LABEL = { velocidade: "VEL", finalizacao: "FIN", passe: "PAS", drible: "DRI", defesa: "DEF", fisico: "FIS" };
-const ROTULO_TIPO = { liga: "Ligas nacionais", copa: "Copas nacionais", continental: "Continentais", mundial: "Mundiais de Clubes", copaMundo: "Copas do Mundo", continentalSelecao: "Copas continentais (seleção)", bolaOuro: "Bolas de Ouro", botaOuro: "Botas de Ouro", segunda: "Segundas divisões" };
-const ORDEM_TIPOS = ["bolaOuro", "botaOuro", "copaMundo", "continentalSelecao", "mundial", "continental", "liga", "copa", "segunda"];
+const ROTULO_TIPO = { estadual:"Estaduais", liga: "Ligas nacionais", copa: "Copas nacionais", continental: "Continentais", mundial: "Mundiais de Clubes", copaMundo: "Copas do Mundo", continentalSelecao: "Copas continentais (seleção)", bolaOuro: "Bolas de Ouro", botaOuro: "Botas de Ouro", segunda: "Segundas divisões" };
+const ORDEM_TIPOS = ["bolaOuro", "botaOuro", "copaMundo", "continentalSelecao", "mundial", "continental", "liga", "copa", "segunda", "estadual"];
 /* Títulos agrupados pelo nome da competição (Libertadores, Champions League, Brasileirão...), na ordem de importância */
 function agruparTitulos(lista) {
   const grupos = [];
@@ -1960,7 +1961,7 @@ const COR_CHANCE_POS = { alta: "#4ADE80", média: "#FACC15", baixa: "#F87171" };
 function TacasAgrupadas({ titulos, size = 40 }) {
   const grupos = [];
   titulos.forEach((t) => { const g = grupos.find((x) => x.nome === t.nome); if (g) g.anos.push(t.ano); else grupos.push({ tipo: t.tipo, nome: t.nome, anos: [t.ano] }); });
-  const ordem = ["bolaOuro", "copaMundo", "continentalSelecao", "mundial", "continental", "liga", "copa", "segunda"];
+  const ordem = ["bolaOuro", "copaMundo", "continentalSelecao", "mundial", "continental", "liga", "copa", "segunda", "estadual"];
   grupos.sort((a, b) => ordem.indexOf(a.tipo) - ordem.indexOf(b.tipo) || b.anos.length - a.anos.length);
   return (
     <div className="grid grid-cols-2 gap-2">
@@ -3155,22 +3156,22 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "coletiva" && estado.coletiva && <TelaColetiva c={c} coletiva={estado.coletiva} resposta={estado.resposta} onResponder={responder} onSeguir={() => abrirJanela(c, estado.ultimo, false)} />}
         {etapa === "traco" && <TelaTraco c={c} opcoes={(opcoesTraco || []).map(tracoDe).filter(Boolean)} onEscolher={escolherT} />}
         {etapa === "fim" && <FimDeCarreira c={c} onNova={nova} onSair={onSair} onComecarTecnico={comecarTecnico} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
-        {etapa === "tecnico" && <CarreiraTecnico c={c}
+        {etapa === "tecnico" && <CarreiraTecnico c={c} onCopaEscolha={(chave,op)=>setEstado(st=>({...st,c:resolverCopaEscolhaTecnico(st.c,chave,op)}))}
           onComprarMelhoria={id=>{const novo=comprarMelhoriaTecnico(c,id);setEstado(st=>st.c===c?{...st,c:novo}:st);}}
-          onEscolhaRapida={(chave,op) => setEstado(st => ({...st,c:escolherPretemporadaRapidaTecnico(st.c,chave,op,undefined,{interativo:true})}))}
+          onEscolhaRapida={(chave,op) => setEstado(st => ({...st,c:escolherPretemporadaRapidaTecnico(st.c,chave,op,undefined,{interativo:true,copasInterativas:true})}))}
           onParada={(chave, op) => setEstado(st => ({ ...st, c: responderParadaTecnico(st.c, chave, op) }))}
           onFinal={(nome, op) => setEstado(st => ({ ...st, c: resolverFinalTecnico(st.c, nome, op) }))}
-          onConviteSelecao={aceitar => setEstado(st => ({ ...st, c: responderConviteSelecaoTecnico(st.c, aceitar, { interativo: true }) }))}
+          onConviteSelecao={aceitar => setEstado(st => ({ ...st, c: responderConviteSelecaoTecnico(st.c, aceitar, { interativo: true, copasInterativas: true }) }))}
           onIntervir={(chave, escolha) => setEstado(st => ({ ...st, c: responderIntervencaoTecnico(st.c, chave, escolha) }))}
           onDecisao={(id) => setEstado((st) => ({ ...st, c: id ? tomarDecisaoTecnico(st.c, id) : st.c }))}
-          onSimularTemporada={(id) => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(st.c, id ?? null, undefined, { interativo: true }) }))}
+          onSimularTemporada={(id) => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(st.c, id ?? null, undefined, { interativo: true, copasInterativas: true }) }))}
           onReuniao={(id) => setEstado((st) => ({ ...st, c: reuniaoEmergenciaTecnico(st.c, id) }))}
           onJogar={() => setEstado((st) => ({ ...st, c: simularEtapaTecnico(st.c) }))}
           onEscolherClubeInicial={(nome) => setEstado((st) => ({ ...st, c: iniciarNoClubeIdolo(st.c, nome) }))}
           onEsperar={(escolha) => setEstado((st) => ({ ...st, c: passarAnoDesempregado(st.c, undefined, escolha) }))}
           onAceitarProposta={(nome, estrategia) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia); if (!negociado.tecnico.ultimaNegociacao?.aceita) return { ...st, c: negociado }; return { ...st, c: proximaTemporadaTecnico(negociado) }; })}
           onAvancar={() => setEstado((st) => ({ ...st, c: proximaTemporadaTecnico(st.c) }))}
-          onAvancarESimular={() => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(proximaTemporadaTecnico(st.c), null, undefined, { interativo: true }) }))}
+          onAvancarESimular={() => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(proximaTemporadaTecnico(st.c), null, undefined, { interativo: true, copasInterativas: true }) }))}
           onLegado={() => setEstado((st) => ({ ...st, etapa: "fim" }))}
           onSair={onSair} />}
       </main>

@@ -28,8 +28,11 @@ async function abrir(page, c) {
 
 // Paradas da temporada e finais decididas na tela (ritmo normal/intenso).
 async function concluirMomentos(page) {
-  for (let i = 0; i < 8; i++) {
-    await page.waitForTimeout(400);
+  for (let i = 0; i < 80; i++) {
+    await page.locator('.ct-simulating').waitFor({state:'detached',timeout:10000});
+    await page.waitForTimeout(80);
+    const copa=page.getByRole('dialog',{name:/Copa em jogo ·/});
+    if(await copa.count()){const seguir=copa.getByRole('button',{name:/Continuar campanha|Concluir campanha/});if(await seguir.count())await seguir.click();else await copa.locator('.cce-opcoes button').first().click();continue;}
     const final = page.getByRole('dialog', { name: /^Final · / });
     if (await final.count()) { await final.locator('.ct-decisions button').first().click(); continue; }
     const resultado = page.getByRole('dialog', { name: 'Resultado da final' });

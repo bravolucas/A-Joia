@@ -1,3 +1,6 @@
+import {dadosVaga} from '../competicoes/vagasInternacionais.js';
+import CopaEscolha from './CopaEscolha.jsx';
+import {chaveCopaTecnico} from './copasCarreiraTecnico.js';
 import { equipeTituloTecnico, CONTINENTAIS_TECNICO, SELECOES_TECNICO } from './selecoesTecnico.js';
 import {FasesTemporada} from '../jogador/JornadaUI.jsx';
 import LojaTreinador from "./LojaTreinador.jsx";
@@ -157,6 +160,7 @@ function LinhaTemporada({ a, idade, ativa, aberta, onClick }) {
       <p>Meta: {a.objetivo} · <span className={a.cumpriuObjetivo ? 'ct-positive' : 'ct-warning'}>{a.cumpriuObjetivo ? 'atingida' : 'não atingida'}</span></p>
       {a.confrontos?.filter(j => j.intervencao).map(j => <p key={`intervencao-${j.rodada}`}>Jogo importante: {j.nome} · {j.golsPro} × {j.golsContra} · {INTERVENCOES_TECNICO.find(op => op.id === j.intervencao)?.nome}</p>)}
       {a.decisoes?.some(d=>d.carta!=='simulacao_expressa')&&<details className="ct-quick-history"><summary>Decisões da temporada</summary>{a.decisoes.filter(d=>d.carta!=='simulacao_expressa').map((d,i)=><p key={i}><strong>{d.nome}</strong><br/>{d.resultado}</p>)}</details>}
+      {a.vagasInternacionaisProxima?.[a.clube]&&<p>Próxima temporada: {dadosVaga(a.vagasInternacionaisProxima[a.clube])}. {a.vagasInternacionaisProxima[a.clube].motivo}.</p>}
       <CampanhasTemporada torneios={a.torneios} />
       {a.classificacao?.length > 0 && <details className="ct-league-details"><summary>Ver classificação</summary><div className="ct-standings">{a.classificacao.map(l => <div key={l.nome} className={l.meuClube ? 'ct-positive' : ''}><span>{l.posicao}</span><strong>{l.nome}</strong><span>{l.vitorias}V</span><span>{l.pontos} pts</span></div>)}</div></details>}
       <ClassificacoesMundo classificacoes={a.classificacoesMundo} ligaAtual={a.liga} clubeAtual={a.clube} />
@@ -164,7 +168,7 @@ function LinhaTemporada({ a, idade, ativa, aberta, onClick }) {
   </div>;
 }
 
-export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAvancarESimular, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado, onReuniao, onJogar, onIntervir, onEscolhaRapida, onComprarMelhoria, onParada, onFinal, onConviteSelecao, rotuloLegado = '← Ver legado como jogador' }) {
+export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAvancarESimular, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado, onReuniao, onJogar, onIntervir, onEscolhaRapida, onComprarMelhoria, onParada, onFinal, onConviteSelecao, onCopaEscolha, rotuloLegado = '← Ver legado como jogador' }) {
   const t = c.tecnico;
   const temporadas = t.temporadas || [];
   const ultima = temporadas.at(-1);
@@ -186,6 +190,7 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
   const [decisaoAberta, setDecisaoAberta] = useState(false);
   const [lojaAberta,setLojaAberta]=useState(false);
   const [propostaPendente, setPropostaPendente] = useState(null);
+  const [copasAbertas,setCopasAbertas]=useState(true);
 
   const [erroProposta, setErroProposta] = useState(null);
   const [erroSimulacao, setErroSimulacao] = useState(null);
@@ -209,12 +214,13 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
     ...(temporadas.length > temporadasAoAbrir.current ? [{ id: `${base}|resumo`, tipo: 'resumo' }] : []),
     ...(copaSelecao ? [{ id: `${base}|copa`, tipo: 'copaSelecao' }] : []),
   ] : [];
-  const finalPendente = t.fase === 'resultado' && !simulando ? (t.finaisPendentes || [])[0] : null;
+  const copaAtual=t.copasEmJogo?.campeonatos[t.copasEmJogo.indice];
+  const finalPendente = !copaAtual && t.fase === 'resultado' && !simulando ? (t.finaisPendentes || [])[0] : null;
   const chaveFinal = t.ultimaFinal ? `${t.ultimaFinal.ano}|${t.ultimaFinal.nome}` : null;
-  const mostrarResultadoFinal = !simulando && t.fase === 'resultado' && !finalPendente && !!t.ultimaFinal && chaveFinal !== finalVista;
-  const eventoAtual = !simulando && t.fase === 'resultado' && !finalPendente && !mostrarResultadoFinal ? eventosUltima.find(x => !vistos.has(x.id)) || null : null;
+  const mostrarResultadoFinal = !copaAtual && !simulando && t.fase === 'resultado' && !finalPendente && !!t.ultimaFinal && chaveFinal !== finalVista;
+  const eventoAtual = !copaAtual && !simulando && t.fase === 'resultado' && !finalPendente && !mostrarResultadoFinal ? eventosUltima.find(x => !vistos.has(x.id)) || null : null;
   const fecharEvento = () => eventoAtual && setVistos(v => new Set([...v, eventoAtual.id]));
-  const conviteAberto = !simulando && t.fase === 'resultado' && !finalPendente && !mostrarResultadoFinal && !eventoAtual && t.conviteSelecao?.status === 'pendente';
+  const conviteAberto = !copaAtual && !simulando && t.fase === 'resultado' && !finalPendente && !mostrarResultadoFinal && !eventoAtual && t.conviteSelecao?.status === 'pendente';
 
   useEffect(() => {
     const fundoAnterior = document.body.style.backgroundColor;
@@ -268,6 +274,7 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
     {lojaAberta&&<JanelaTreinador titulo="Loja do treinador" onFechar={()=>setLojaAberta(false)}><LojaTreinador c={c} onComprar={onComprarMelhoria} /></JanelaTreinador>}
     {propostaPendente && <JanelaTreinador titulo="Decisão de legado" onFechar={() => setPropostaPendente(null)}><div className="ct-event-content"><h3>Assinar com {propostaPendente}?</h3><p>Você é ídolo em {riscosIdolatriaTecnico(t,propostaPendente).map(v=>v.clube).join(', ')}. Assinar com este rival rompe esse vínculo: você perde os benefícios de ídolo nas futuras propostas e retornos desses clubes. O novo projeto também começa com menos apoio da diretoria e da torcida. Seu histórico e suas conquistas permanecem.</p><button className="ct-primary" disabled={simulando} onClick={()=>iniciarProposta(propostaPendente,true)}>Confirmar transferência</button><button className="ct-primary" onClick={()=>setPropostaPendente(null)}>Manter meu legado</button></div></JanelaTreinador>}
 
+    {copaAtual&&copasAbertas&&!simulando&&<CopaEscolha onMinimizar={()=>setCopasAbertas(false)} campanha={copaAtual} chave={chaveCopaTecnico(t)} ocupado={simulando} onEscolher={(chave,op)=>onCopaEscolha?.(chave,op)}/>}
     {finalPendente && <PopUpFinal final={finalPendente} moral={t.moral} ocupado={simulando} onEscolher={op => executar(() => onFinal?.(finalPendente.nome, op))} />}
     {mostrarResultadoFinal && <PopUpResultadoFinal uf={t.ultimaFinal} onFechar={() => setFinalVista(chaveFinal)} />}
     {conviteAberto && <PopUpConvite conv={t.conviteSelecao} ocupado={simulando} onResponder={aceitar => executar(() => onConviteSelecao?.(aceitar))} />}
@@ -303,6 +310,7 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
           : t.fase === 'parada' && t.paradaPendente ? <PainelParada p={t.paradaPendente} ocupado={simulando} onEscolher={op => executar(() => onParada?.(t.paradaPendente.chave, op))} />
           : t.fase === 'intervencao' && t.intervencaoPendente ? <><h2>Jogo importante</h2><p>Rodada {t.intervencaoPendente.rodada} · {t.intervencaoPendente.jogos} jogos disputados · {t.intervencaoPendente.pontos} pontos</p><div className="ct-season-preview"><Escudo nome={t.intervencaoPendente.adversario.nome} size={52} /><div><strong>{t.intervencaoPendente.adversario.nome}</strong><span>{t.intervencaoPendente.adversario.casa ? 'Em casa' : 'Fora de casa'} · Força {t.intervencaoPendente.adversario.forca}</span></div></div><p>Escolha o plano para esta partida. Depois dela, a temporada continua com a sua tática habitual.</p><div className="ct-decisions">{INTERVENCOES_TECNICO.map(op => <button key={op.id} disabled={simulando} onClick={() => executar(() => onIntervir?.(t.intervencaoPendente.chave, op.id))}><strong>{op.nome}</strong><span>{op.descricao}</span></button>)}</div></>
           : faseTemporada ? <><h2>Temporada {t.ano}</h2><p>O {t.clube} conta com você. Meta da temporada: {objetivo.nome.toLowerCase()}.</p><div className="ct-season-preview"><Escudo nome={t.clube} size={52} /><div><strong>{competicaoTemporadaTecnico({ clube: t.clube, liga: t.liga })}</strong><span>Diretoria {t.diretoria ?? 60}% · Torcida {t.torcida ?? 55}%</span>{previsaoTemporadaTecnico(t).rank&&<span className={`mt-forecast-tag mt-forecast-${previsaoTemporadaTecnico(t).tom}`}>{previsaoTemporadaTecnico(t).rotulo}</span>}</div></div>{t.herancaJogador&&!temporadas.length&&<p className="ct-quick-promise">Sua herança: {t.herancaJogador.rotulos.map(r=>r.nome).join(' · ')}. Reputação inicial {t.herancaJogador.reputacaoInicial}. {t.herancaJogador.explicacao}</p>}{t.filosofia&&<p className="ct-quick-promise">Filosofia atual: {t.filosofia}.</p>}<p className="ct-quick-promise">{retomando?'Retome os jogos já iniciados, sem repetir resultados.':'Uma decisão de preparação. Você decide o rumo; sua comissão cuida da administração.'}</p><button disabled={simulando} className="ct-primary" onClick={() => mostrarDecisao ? setDecisaoAberta(true) : simular()}>{retomando?'Retomar temporada':'Começar temporada'}<span aria-hidden="true">→</span></button><PrevisaoTemporada prev={previsaoTemporadaTecnico(t)} /><RivalTecnico rival={t.rivalTecnico?.clube !== t.clube ? t.rivalTecnico : null} />{!temporadas.length&&(t.memoriaJogador?.auxiliar||t.memoriaJogador?.rival)&&<p className="mt-rival">{t.memoriaJogador.auxiliar&&<span>🤝 Auxiliar: <strong>{t.memoriaJogador.auxiliar.nome}</strong> ({t.memoriaJogador.auxiliar.origem==='dupla'?'ex-parceiro em campo':'seu mentor da base'}) · moral +3. </span>}{t.memoriaJogador.rival&&<span>⚔️ <strong>{t.memoriaJogador.rival.nome}</strong>, seu rival de geração, também virou técnico.</span>}</p>}<NoticiasElenco noticias={t.noticiasElenco} destaque={personagemDestaqueTecnico(t)} /></>
+          : copaAtual ? <><h2>Copas em andamento</h2><p>Conclua as campanhas antes de escolher o próximo trabalho. Suas escolhas e resultados estão salvos.</p><button className="ct-primary" onClick={()=>setCopasAbertas(true)}>Retomar copas<span>→</span></button></>
           : faseResultado ? <><h2>{semClube ? 'Propostas de trabalho' : 'Seu próximo projeto'}</h2><p>{semClube ? 'Um ciclo terminou. Escolha um novo projeto para continuar sua carreira.' : 'Chegaram ofertas depois da última temporada. Clubes e seleções têm vínculos exclusivos. Aceite uma oferta ou mantenha seu trabalho atual.'}</p><div className="ct-offers">{t.propostas?.map(p => <CartaoClube key={p.nome} nome={p.nome} liga={p.liga} pais={p.pais} nivel={p.elenco} salario={p.salario} rotulo={p.tipo === 'selecao' ? 'Comandar seleção' : 'Assinar com'} detalhe={riscosIdolatriaTecnico(t,p.nome).length ? 'Rival de um clube onde você é ídolo' : (t.rupturasIdolo||[]).some(r=>r.clube===p.nome)?'Retorno sem benefícios de ídolo':vinculoAtivoTecnico(t,p.nome)?.idolatria?'Retorno de ídolo':p.motivo||null} disabled={simulando} onClick={() => iniciarProposta(p.nome)} />)}{!semClube && <CartaoClube nome={t.clube} liga={t.liga} pais={t.pais} rotulo="Ficar no" atual disabled={simulando} onClick={continuar} />}</div>{semClube && <AnoSabatico ocupado={simulando} temPropostas={!!t.propostas?.length} onEscolher={op => executar(() => onEsperar?.(op))} />}{ultima?.reencontroMentor&&<p className="ct-quick-promise">{ultima.reencontroMentor.nome} · {ultima.reencontroMentor.clube}. {ultima.reencontroMentor.texto} Personagem fictício.</p>}{ultima && <div className="ct-last-result"><span>Última temporada · {ultima.ano}</span><strong>{ultima.tipoEquipe === 'selecao' ? ultima.torneios.map(x=>`${x.nome}: ${x.faseUsuario}`).join(' · ') : `${ultima.posicao}º lugar · ${ultima.pontos} pontos`}</strong><span>{ultima.vitorias}V · {ultima.empates}E · {ultima.derrotas}D</span></div>}</>
           : <p>Carreira indisponível.</p>}
           {simulando && <div className="ct-simulating" role="status"><Bola3D size={40} /><strong>{t.fase === 'parada' ? 'Voltando a campo…' : 'Simulando a temporada…'}</strong></div>}

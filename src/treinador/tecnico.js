@@ -1,3 +1,6 @@
+import {resumoCampanhaCopa} from './copasEscolha.js';
+import {prepararCopasTecnico,aplicarCopaTecnico,estadualAutomaticoTecnico} from './copasCarreiraTecnico.js';
+import {vagaTecnico,nomeVaga,calcularVagasRapidas,idContinental,classificacoesHistoricas} from '../competicoes/regrasCopasRapidas.js';
 import { SELECOES_TECNICO, propostasSelecoesTecnico, simularAnoSelecaoTecnico, equipeTituloTecnico } from './selecoesTecnico.js';
 import {legadoNarrativo} from '../jogador/jornadaJogador.js';
 import {bonusForcaLoja,creditarSalarioTecnico,comprarItemLojaTecnico} from "./lojaTecnico.js";
@@ -415,6 +418,7 @@ export const ENTREVISTAS_TECNICO = [
   { id: 'ambicioso', nome: 'Prometer grandes resultados (+10%)', multiplicador: 1.1, bonusDiretoria: 10, bonusTorcida: 6, exigenciaExtra: 2, risco: 0.12 }
 ];
 export function negociarContratoTecnico(c, clube, estrategia = 'prudente', rng = sorteio) {
+  if(c?.tecnico?.copasEmJogo)throw new Error('Conclua as copas antes de negociar.');
   c = concluirFinaisPendentesTecnico(c);
   const t = c?.tecnico;
   if (!t || (t.fase !== 'resultado' && !t.desempregado)) throw new Error('Negociação indisponível nesta fase.');
@@ -437,6 +441,7 @@ export function negociarContratoTecnico(c, clube, estrategia = 'prudente', rng =
     ultimaNegociacao: { clube, estrategia, aceita: true } } };
 }
 export function aceitarPropostaTecnico(c, clube) {
+  if(c?.tecnico?.copasEmJogo)throw new Error('Conclua as copas antes de trocar de trabalho.');
   c = concluirFinaisPendentesTecnico(c);
   const t = c.tecnico;
   if (!t || (t.fase !== 'resultado' && !t.desempregado)) throw new Error('Propostas só podem ser aceitas entre temporadas.');
@@ -449,6 +454,7 @@ export function aceitarPropostaTecnico(c, clube) {
     demitido: false, desempregado: false, anosDesempregado: 0, estagioExterior: false, promessaContrato: null, retornoIdolo: !!vinculoAtivoTecnico(t,proposta.nome)?.idolatria, propostas: [], salario: proposta.salario } };
 }
 export function passarAnoDesempregado(c, rng = sorteio, escolha = 'esperar') {
+  if(c?.tecnico?.copasEmJogo)throw new Error('Conclua as copas antes de avançar.');
   if (!c?.tecnico || c.tecnico.fase !== 'resultado') throw new Error('Só é possível aguardar entre temporadas.');
   c = concluirFinaisPendentesTecnico(c);
   const t = c.tecnico;
@@ -478,7 +484,7 @@ export function iniciarCarreiraTecnico(c) {
   const afinidadeInicial = opcoesInicio[0]?.afinidade || 0;
   const memoriaJogador = memoriaJogadorTecnico(c);
   return { ...c, tecnico: {
-    idadeInicio: c.idade, ano: c.ano, clube: clubeInicial, vinculosJogador, opcoesInicio, clubeInicialEscolhido: false, memoriaJogador,
+    idadeInicio: c.idade, ano: c.ano, vagasInicio:c.vagasInternacionaisClubes||null,vagasInicioAno:c.vagasInternacionaisAno||null, clube: clubeInicial, vinculosJogador, opcoesInicio, clubeInicialEscolhido: false, memoriaJogador,
     herancaJogador:{rotulos:legadoNarrativo(c),reputacaoInicial:reputacao,explicacao:'Seu legado de jogador orienta a reputação inicial. Afinidade pode abrir portas, mas o nível esportivo continua limitando os convites.'},
     reputacao, pais: dadosClubeInicial?.pais || 'Brasil', salario: dadosClubeInicial?.salario || 12, desempregado: false, anosDesempregado: 0, estilo: 'equilibrado', temporadas: [], vitorias: 0, empates: 0,
     derrotas: 0, titulos: 0, elenco: dadosClubeInicial?.elenco || 50, moral: memoriaJogador.auxiliar ? 53 : 50, diretoria: limitar(60 + Math.round(afinidadeInicial * 0.15), 0, 100), torcida: limitar(55 + Math.round(afinidadeInicial * 0.35), 0, 100), decisoes: [], demitido: false, propostas: [], historicoCartas: [], cartas: sortearCartasTecnico({ reputacao, temporadas: [], diretoria: 60, moral: 50 }), fase: 'pretemporada'
@@ -873,7 +879,7 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   if (carreiraTecnicoEncerrada(c.tecnico)) throw new Error('Limite de 30 temporadas como treinador atingido.');
   const pausa=c.tecnico.temporadaPausada;
   if(pausa&&!pausa.escolha)throw new Error('Escolha uma intervenção para continuar.');
-  const t = {...c.tecnico,temporadaPausada:null,intervencaoPendente:null};
+  const t = {...c.tecnico,copasEscolhaHabilitadas:c.tecnico.copasEscolhaHabilitadas||!!opcoes.copasInterativas,temporadaPausada:null,intervencaoPendente:null};
   if ((t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) throw new Error('Tome as decisões da temporada antes de simular.');
   if (t.andamento?.rodadas || t.andamento?.jogos) throw new Error('Temporada em andamento: avance pelas etapas.');
   if (t.tipoEquipe === 'selecao') {
@@ -1002,16 +1008,19 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
     formato: t.regrasCompeticoes?.[copaNome]?.formato || {}, rng
   }));
   const torneioAnterior = t.temporadas?.at(-1);
-  const continentalNome = continentaisPorLiga[ligaAtual];
+  const vagaCompartilhada=vagaTecnico(t);
+  const continentalNome = vagaCompartilhada?(['libertadores','champions'].includes(vagaCompartilhada.competicao)?continentaisPorLiga[ligaAtual]||nomeVaga(vagaCompartilhada.competicao):nomeVaga(vagaCompartilhada.competicao)):continentaisPorLiga[ligaAtual];
   const configuracaoContinental = t.regrasCompeticoes?.[continentalNome] || {};
   const formatoContinental = configuracaoContinental.formato || {};
-  const participantesQualificados = continentalNome ? classificarVagasContinentalTecnico({
-    clubes: CLUBES_CONVITES_TECNICO,
-    classificacoesMundo: torneioAnterior?.classificacoesMundo || {},
-    pais: t.pais,
-    limite: formatoContinental.totalParticipantes ?? configuracaoContinental.qualificacao?.limite ?? 16,
-    regra: configuracaoContinental.qualificacao,
-  }) : [];
+  const vagasAnteriores=torneioAnterior?.vagasInternacionaisProxima||calcularVagasRapidas({ano:t.ano-1,classificacoesMundo:classificacoesHistoricas(torneioAnterior,t.ligasMundo),torneios:torneioAnterior?.torneios,ligasMundo:t.ligasMundo});
+  const participantesQualificados = configuracaoContinental.qualificacao ? classificarVagasContinentalTecnico({clubes:CLUBES_CONVITES_TECNICO,classificacoesMundo:torneioAnterior?.classificacoesMundo||{},pais:t.pais,limite:formatoContinental.totalParticipantes??16,regra:configuracaoContinental.qualificacao}) : !torneioAnterior ? [] : CLUBES_CONVITES_TECNICO.filter(clube=>vagasAnteriores[clube.nome]?.competicao===idContinental(continentalNome));
+  // O limite do quadro não pode eliminar a vaga que o clube do usuário já conquistou.
+  if(!configuracaoContinental.qualificacao&&participantesQualificados.some(x=>x.nome===t.clube))participantesQualificados.sort((a,b)=>(b.nome===t.clube)-(a.nome===t.clube));
+  if(!configuracaoContinental.qualificacao&&participantesQualificados.length>=2){
+    const limite=Math.min(16,2**Math.floor(Math.log2(participantesQualificados.length)));
+    participantesQualificados.splice(limite);
+    if(!configuracaoContinental.formato){formatoContinental.totalParticipantes=limite;formatoContinental.grupos=limite>=4?limite/4:0;}
+  }
   if (continentalNome && participantesQualificados.some(clube => clube.nome === t.clube)) {
     const continental = simularCopaContinentalTecnico({
       clubes: CLUBES_CONVITES_TECNICO, nomeUsuario: t.clube, pais: t.pais,
@@ -1020,15 +1029,19 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
     });
     if (continental) torneios.push(continental);
   }
+  const copasEmJogo=t.copasEscolhaHabilitadas?prepararCopasTecnico(t,forcaClubeTecnico(t)):null;
+  if(copasEmJogo)torneios.splice(0,torneios.length,...copasEmJogo.campeonatos.map(resumoCampanhaCopa));
+  else {const estadual=estadualAutomaticoTecnico(t,forcaClubeTecnico(t));if(estadual)torneios.push(estadual);}
   temporada.torneios = torneios;
   // Finais em que o clube chegou viram decisão do treinador na tela; até lá, a taça fica em aberto.
-  const finaisPendentes = opcoes.interativo ? torneios.map(x => finalDoUsuarioTecnico(x, t.clube)).filter(Boolean).map(f => ({ ...f, ano: t.ano,
+  const finaisPendentes = opcoes.interativo&&!copasEmJogo ? torneios.filter(x=>x.tipo!=='estadual').map(x => finalDoUsuarioTecnico(x, t.clube)).filter(Boolean).map(f => ({ ...f, ano: t.ano,
     forcaUsuario: Math.round(forcaClubeTecnico(t)), forcaAdv: CLUBES_CONVITES_TECNICO.find(x => x.nome === f.adversario)?.elenco ?? 70, dado: rng() })) : [];
   for (const x of torneios) if (finaisPendentes.some(f => f.nome === x.nome)) { x.finalPendente = true; x.faseUsuario = 'Final'; x.campeao = null; }
   temporada.titulosConquistados = [
     ...(campeao ? [competicaoTemporadaTecnico(temporada)] : []),
     ...torneios.filter(x => x.campeao === t.clube).map(x => x.nome)
   ];
+  temporada.vagasInternacionaisProxima=calcularVagasRapidas({ano:t.ano,classificacoesMundo,torneios,ligasMundo:t.ligasMundo});
   const rivalTecnico = atualizarRivalTecnico(rivalInicial, temporada);
   if (rivalTecnico?.ultimo) temporada.rival = { nome: rivalTecnico.nome, clube: rivalTecnico.clube, ...rivalTecnico.ultimo };
   // Errar a meta por pouco custa menos do que desabar na tabela.
@@ -1054,13 +1067,13 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   temporada.filosofia=t.filosofia||null;
   const primeiraDivisao = !/(?:2|serieB)$/i.test(ligaAtual || '');
   const reputacaoNova = limitar((t.reputacao ?? 50) + (campeao ? (primeiraDivisao ? 16 : 8) : cumpriuObjetivo ? 4 : -3)
-    + torneios.filter(x => x.campeao === t.clube).reduce((n, x) => n + (x.tipo === 'continental' ? 12 : 5), 0), 10, 99);
+    + torneios.filter(x => x.campeao === t.clube).reduce((n, x) => n + (x.tipo === 'continental' ? 12 : x.tipo==='estadual'?1:5), 0), 10, 99);
   const propostas = gerarPropostasTecnico({ ...t, clube: demitido ? null : t.clube,clubeReferencia:t.clube,temporadas:[...t.temporadas,temporada],titulos:(t.titulos||0)+temporada.titulosConquistados.length, liga: ligaSeguinte,
     ligasMundo: progressaoMundo.ligasMundo, reputacao: reputacaoNova }, rng);
   const conviteSelecao = null;
   return { ...c, idade: c.idade + 1, ano: c.ano + 1, tecnico: comMetas({
     ...t, carteiraTecnico:creditarSalarioTecnico(t,t.ano,t.salario??salarioTecnico(t)), ano: t.ano + 1, liga: ligaSeguinte,
-    finaisPendentes, conviteSelecao, ofertasRecentes:[...(t.ofertasRecentes||[]),...(t.propostas||[]).map(p=>p.nome)].slice(-18), rivalTecnico, temporadaPausada: null, paradaPendente: null, ultimaFinal: null, contratoCurto: null,
+    copasEmJogo, finaisPendentes, conviteSelecao, ofertasRecentes:[...(t.ofertasRecentes||[]),...(t.propostas||[]).map(p=>p.nome)].slice(-18), rivalTecnico, temporadaPausada: null, paradaPendente: null, ultimaFinal: null, contratoCurto: null,
     ligasMundo: progressaoMundo.ligasMundo,
     participantesLiga: ligaSeguinte === ligaAtual && nomesLiga
       ? { liga: ligaAtual, nomes: nomesLiga } : null,
@@ -1111,6 +1124,7 @@ export function resolverFinalTecnico(c, nome, opcaoId) {
     a.vitorias=v;a.empates=e;a.derrotas=d;a.jogos=jogos.length;a.pontos=v*3+e;
     if(venceu)a.cumpriuObjetivo=true;
   }
+  if(a.tipoEquipe!=='selecao')a.vagasInternacionaisProxima=calcularVagasRapidas({ano:a.ano,classificacoesMundo:a.classificacoesMundo,torneios:a.torneios,ligasMundo:t.ligasMundo});
   temporadas[idx] = a;
   const restantes = t.finaisPendentes.filter(x => x.nome !== nome);
   const ganho = venceu ? (f.tipo === 'continental' ? 12 : f.tipo === 'copaMundo' ? 15 : 5) : 1;
@@ -1173,6 +1187,7 @@ function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
   return { ...c, idade: c.idade + 1, ano: c.ano + 1, tecnico: proximo };
 }
 export function proximaTemporadaTecnico(c) {
+  if(c?.tecnico?.copasEmJogo)throw new Error('Conclua as copas antes de avançar.');
   if (!c?.tecnico || c.tecnico.fase !== 'resultado') throw new Error('Nenhum resultado pendente.');
   c = concluirFinaisPendentesTecnico(c);
   const t = c.tecnico;
@@ -1253,4 +1268,11 @@ export function jogarTemporadaExpressaTecnico(c, opcaoId, rng = sorteio, opcoes 
 export function comprarMelhoriaTecnico(c,id){
  if(!c?.tecnico)throw new Error('Carreira de treinador indisponível.');
  return comprarItemLojaTecnico(c,id,calcularOvrTecnico(c.tecnico),forcaClubeTecnico(c.tecnico));
+}
+
+/** Escolhas de copa só atualizam a campanha guardada; nunca simulam outra liga. */
+export function resolverCopaEscolhaTecnico(c,chave,opcao){
+ const novo=aplicarCopaTecnico(c,chave,opcao);if(novo===c)return c;
+ if(!novo.tecnico.copasEmJogo){novo.tecnico=comMetas({...novo.tecnico,propostas:gerarPropostasTecnico(novo.tecnico,geradorTecnico(`${novo.tecnico.ano}|${novo.tecnico.clube}|copas-encerradas`))});}
+ return novo;
 }

@@ -1,3 +1,8 @@
+import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
+import {CLUBES_EUROPEUS_EXTRAS} from '../competicoes/clubesEuropeusExtras.js';
+import {vagaJogador,nomeVaga,calcularVagasRapidas,clubesParaCopas,regiaoDaLiga,idContinental} from '../competicoes/regrasCopasRapidas.js';
+import {participantesEstadual} from '../competicoes/estaduaisRapidos.js';
+import {simularCampanhaCopa} from '../treinador/copasEscolha.js';
 import {jogosDoGrupo,tabelaGrupoCopa,empateGrupo} from './gruposCopa.js';
 import {atualizarRecordesUniverso} from './recordesUniverso.js';
 import {registrarCampanhaContinental,registrarFinalContinental} from './torneioContinental.js';
@@ -305,7 +310,7 @@ function criarJogadorBase({ nome, nac, posicao, personalidade, origem, pe, numer
     clubeNome: clube.nome, primeiroClube: clube.nome, empresario: org?.id === "herdeiro" ? "cauteloso" : "iniciante",
     torcida: { [clube.nome]: 30 }, apelidos: [], tracos: [], tracosEscolhidos: {},
     temporadas: [], totais: { jogos: 0, gols: 0, assist: 0 },
-    titulos: { liga: 0, copa: 0, continental: 0, mundial: 0, copaMundo: 0, continentalSelecao: 0, bolaOuro: 0, botaOuro: 0, segunda: 0 },
+    titulos: { liga: 0, copa: 0, continental: 0, mundial: 0, copaMundo: 0, continentalSelecao: 0, bolaOuro: 0, botaOuro: 0, estadual:0, segunda: 0 },
     lista: [], marcos: [], top3Bola: 0, fama: { varzea: 8, herdeiro: 12, prodigio: 5 }[org?.id] ?? 5, mod: {},
     flags: { historicoEventos: [], cronica: false, blindado: 0, selecaoFria: 0, social: false, traidor: [], mentorJovem: false },
     selecao: { convocacoes: 0, copas: [] }, vagaContinental: false, picoOvr: 0, aposentado: false, emprestimo: null,
@@ -993,12 +998,13 @@ function mataMata(forcaEf, base, bonus = 0) {
   return clampR(0.5 + (forcaEf - base) * 0.03 + bonus, 0.12, 0.85);
 }
 
-function simularContinental(c, clube, ovr, share, extra = 0) {
-  const nome = ligaDe(clube.liga).continental;
+function simularContinental(c, clube, ovr, share, extra = 0, vaga = null) {
+  const nome = vaga?nomeVaga(vaga.competicao):ligaDe(clube.liga).continental;
   const forcaEf = clube.forca + (ovr - clube.forca) * share * 0.3 + somaTraco(c, "forcaTime") * share + extra;
-  const fases = ["Fase de grupos", "Oitavas", "Quartas", "Semifinal", "Final"];
-  const base = nome === "Champions League" ? 84 : 76;
+  const fases = [/Champions League|Europa League|Conference/.test(nome)?"Fase de liga":"Fase de grupos", "Oitavas", "Quartas", "Semifinal", "Final"];
+  const base = /Champions League/.test(nome)?84:/Europa League/.test(nome)?79:/Conference/.test(nome)?73:/Sul-Americana/.test(nome)?70:76;
   const bonus = somaTraco(c, "mataMata") * share;
+  if(vaga?.entrada==='pre'&&!chance(mataMata(forcaEf,base-4,bonus)))return {nome,fase:-1,faseNome:"Fase preliminar"};
   if (!chance(clampR(0.55 + (forcaEf - base) * 0.035, 0.2, 0.92))) return { nome, fase: 0, faseNome: fases[0] };
   for (let f = 1; f <= 3; f++) {
     if (!chance(mataMata(forcaEf, base, bonus))) return { nome, fase: f, faseNome: fases[f] };
@@ -1366,19 +1372,13 @@ function jogarTemporadaBase(c0) {
   }
 
   // copa nacional: chegar à final é o difícil; a final em si é decidida em campo
-  const copaNome = COPA_POR_LIGA[clube.liga];
+  const copaNome = COPA_POR_LIGA[clube.liga]||COPA_POR_LIGA[primeiraLiga(clube.liga)];
   if (copaNome) {
-    const p = clampR(0.06 + (clube.forca - 75) * 0.01 + (ovr - clube.forca) * share * 0.004 + (somaTraco(c, "mataMata") + forcaTimeExtra * 0.02) * share, 0.02, 0.32);
-    // a copa nacional sai como resultado (sem desafio): até onde o time foi
-    if (chance(clampR(p * 1.45, 0.03, 0.5))) {
-      const ganha = chance(clampR(0.45 + (clube.forca - 78) * 0.01 + (emCampo ? (ovr - clube.forca) * 0.006 : 0), 0.3, 0.7));
-      if (ganha) card.titulos.push({ tipo: "copa", nome: copaNome });
-      else card.destaques.push(`Vice-campeão da ${copaNome}`);
-      card.copaNac = { nome: copaNome, fase: ganha ? "Campeão" : "Vice-campeão" };
-    } else {
-      const r = rnd() + (clube.forca - 72) * 0.015;
-      card.copaNac = { nome: copaNome, fase: r < 0.3 ? "Terceira fase" : r < 0.6 ? "Oitavas de final" : r < 0.85 ? "Quartas de final" : "Semifinal" };
-    }
+    const pool=clubesParaCopas(c.ligas),eu=pool.find(x=>x.nome===clube.nome);
+    const camp=simularCampanhaCopa({nome:copaNome,tipo:'copa',usuario:clube.nome,forcaUsuario:clube.forca+(ovr-clube.forca)*share*.25+forcaTimeExtra,ano:c.ano,clubes:pool.filter(x=>x.pais===eu?.pais),formato:'mata',entrada:copaNome==='Copa do Brasil'?(clube.forca>=80?'principal':clube.forca>=65?'pre':'preliminar'):'principal',seed:`${c.codigo}|${c.ano}|${copaNome}`});
+    card.copaNac={nome:copaNome,fase:camp.faseUsuario,campeao:camp.campeao,vice:camp.vice,jogos:camp.jogosUsuario};
+    if(camp.campeao===clube.nome)card.titulos.push({tipo:'copa',nome:copaNome});
+    else if(camp.vice===clube.nome)card.destaques.push(`Vice-campeão da ${copaNome}`);
   }
 
   // Mundial de Clubes: quem foi campeão continental no ano anterior e ficou no clube
@@ -1388,14 +1388,23 @@ function jogarTemporadaBase(c0) {
   }
 
   // continental
-  if (liga.continental && !ehSegundaDivisao(clube.liga) && (c.vagaContinental || (c.temporadas.length === 0 && clube.forca >= 80))) {
-    const cont = simularContinental(c, clube, ovr, share, forcaTimeExtra);
-    card.continental = { nome: cont.nome, faseNome: cont.faseNome, final: !!cont.final, chanceFinal: cont.chanceFinal };
+  let vagaAtual=vagaJogador(c,clube);
+  if(c.vagaContinental&&!c.vagasInternacionaisAno)vagaAtual={competicao:({europa:'champions',sul:'libertadores',arabia:'asia',mls:'concacaf'})[regiaoDaLiga(clube.liga)]||'libertadores',entrada:'principal',motivo:'Vaga preservada do save anterior'};
+  if (vagaAtual || (liga.continental && c.temporadas.length === 0 && clube.forca >= 80)) {
+    const cont = simularContinental(c, clube, ovr, share, forcaTimeExtra, vagaAtual);
+    card.continental = { vaga: vagaAtual, nome: cont.nome, faseNome: cont.faseNome, final: !!cont.final, chanceFinal: cont.chanceFinal };
     if (cont.final) {
       if (share >= 0.5 && !lesao) momentos.push({ tipo: "continental", titulo: `Final da ${cont.nome}` });
       else if (chance(cont.chanceFinal)) card.titulos.push({ tipo: "continental", nome: cont.nome });
       else card.continental.faseNome = "Vice-campeão";
     }
+  }
+
+  const regional=participantesEstadual(clube);
+  if(regional){
+    const camp=simularCampanhaCopa({nome:regional.nome,tipo:'estadual',usuario:clube.nome,forcaUsuario:clube.forca+(ovr-clube.forca)*share*.2+forcaTimeExtra,clubes:regional.clubes,ano:c.ano,formato:'estadual',estado:regional.estado,seed:`${c.codigo}|${c.ano}|${regional.nome}`});
+    card.estadual={nome:regional.nome,estado:regional.estado,fase:camp.faseUsuario,campeao:camp.campeao,vice:camp.vice,jogos:camp.jogosUsuario,formato:regional.formato};
+    if(camp.campeao===clube.nome)card.titulos.push({tipo:'estadual',nome:regional.nome});
   }
 
   // Seleção: Copa do Mundo (2026, 2030…) e copa continental (2028, 2032…)
@@ -1462,8 +1471,14 @@ export function contextoMomento(c,m){
  const historico=selecao?NACIONALIDADES.find(x=>m.titulo?.endsWith(`contra ${x.label}`)):null;
  const adversario=m.adversario||(historico?{tipo:'selecao',id:historico.id,nome:historico.label}:null)||comSemente(c.codigo,`confronto:${c.ano}:${m.tipo}:${m.titulo}`,()=>{
  if(selecao){const conf=CONFEDERACAO_POR_NACAO[c.nac];let pool=NACIONALIDADES.filter(x=>x.id!==c.nac&&(!conf||CONFEDERACAO_POR_NACAO[x.id]===conf));if(!pool.length)pool=NACIONALIDADES.filter(x=>x.id!==c.nac);const x=pick(pool);return {tipo:'selecao',id:x.id,nome:x.label};}
- const liga=ligaDe(clube.liga);const pool=clubesJogaveis().filter(x=>x.nome!==clube.nome&&(m.tipo==='continental'?ligaDe(x.liga).continental===liga.continental&&!ehSegundaDivisao(x.liga):m.tipo==='copa'?COPA_POR_LIGA[x.liga]===COPA_POR_LIGA[clube.liga]:x.liga===clube.liga));
- const x=pool.length?pick(pool):null;return x?{tipo:'clube',nome:x.nome}:null;
+ const liga=ligaDe(clube.liga);let pool=clubesJogaveis().filter(x=>x.nome!==clube.nome&&(m.tipo==='continental'?ligaDe(x.liga).continental===liga.continental&&!ehSegundaDivisao(x.liga):m.tipo==='copa'?(COPA_POR_LIGA[x.liga]||COPA_POR_LIGA[primeiraLiga(x.liga)])===(COPA_POR_LIGA[clube.liga]||COPA_POR_LIGA[primeiraLiga(clube.liga)]):x.liga===clube.liga));
+ if(m.tipo==='continental'){
+  const comp=idContinental(m.titulo),vagas=c.vagasInternacionaisAno===c.ano?c.vagasInternacionaisClubes:calcularVagasRapidas({ano:c.ano-1,ligasMundo:c.ligas});
+  const elegiveis=CLUBES.filter(x=>x.nome!==clube.nome&&vagas?.[x.nome]?.competicao===comp);
+  if(['champions','europa','conference'].includes(comp))elegiveis.push(...CLUBES_EUROPEUS_EXTRAS.filter(x=>x.competicaoInternacional===comp));
+  if(elegiveis.length)pool=elegiveis;
+ }
+ const x=pool.length?pick(pool):null;return x?{tipo:'clube',nome:x.nome,...(x.extra?{forca:x.forca}:{})}:null;
  });
  const mini=m.mini||miniDaPosicao(c.posicao);
  const fase=m.tipo==='classico'?'Clássico':['liga','acesso','permanencia'].includes(m.tipo)?'Última rodada':'Final';
@@ -1579,6 +1594,7 @@ export function aplicarMomento(card0, acertou) {
     if (acertou) { card.titulos.push({ tipo: "mundial", nome: "Mundial de Clubes" }); card.destaques.push(`${acao.ok} na final do Mundial de Clubes`); }
     else card.destaques.push(`${acao.erro}: vice-campeão do Mundial de Clubes`);
   } else if (m.tipo === "copa") {
+    if(card.copaNac){card.copaNac.campeao=acertou?card.clube:m.adversario?.nome||null;card.copaNac.vice=acertou?m.adversario?.nome||null:card.clube;}
     if (acertou) { card.titulos.push({ tipo: "copa", nome: m.nome }); card.destaques.push(`${acao.ok} na final da ${m.nome}`); }
     else card.destaques.push(`${acao.erro}: vice-campeão da ${m.nome}`);
   } else if (m.tipo === "liga" || m.tipo === "acesso" || m.tipo === "permanencia") {
@@ -1690,7 +1706,7 @@ function fecharTemporadaBase(c0, card0) {
   // mundo real anda junto e a Bola de Ouro sai do ranking contra ele
   c.mundo = simularTemporadaMundo(c.mundo);
   atualizarRecordesUniverso(c,card,antes.mundo);
-  const PESO_BOLA = { copaMundo: 3, continental: 2, continentalSelecao: 2, mundial: 1, segunda: 0 };
+  const PESO_BOLA = { estadual:0.2, copaMundo: 3, continental: 2, continentalSelecao: 2, mundial: 1, segunda: 0 };
   const pesoTit = card.titulos.reduce((s, t) => s + (PESO_BOLA[t.tipo] ?? 1), 0);
   const meuCard = { clube: card.clube, posicao: c.posicao, ovr: card.ovr, gols: card.gols, assist: card.assist, nota: card.nota || 6, ligaMult: ligaDe(card.ligaId).mult };
   let ranking = rankingBolaDeOuro(c.mundo, meuCard, c.nome, pesoTit);
@@ -1720,7 +1736,7 @@ function fecharTemporadaBase(c0, card0) {
     const pelaSelecao = t.tipo === "copaMundo" || t.tipo === "continentalSelecao";
     c.lista.push({ ano: card.ano, nome: t.nome, tipo: t.tipo, clube: pelaSelecao ? nacDe(c.nac).label : ehPremioIndividual(t.tipo) ? "Individual" : card.clube });
   });
-  c.campeaoContinental = card.titulos.some((t) => t.tipo === "continental") && !card.emprestado ? card.clube : null;
+  c.campeaoContinental = card.titulos.some((t) => t.tipo === "continental" && !/Sul-Americana|Europa League|Conference/.test(t.nome)) && !card.emprestado ? card.clube : null;
 
   // totais e fama
   c.totais.jogos += card.jogos; c.totais.gols += card.gols; c.totais.assist += card.assist;
@@ -1800,7 +1816,11 @@ function fecharTemporadaBase(c0, card0) {
   card.torcidaDelta = c.torcida[tc] - tAntes;
 
   // vaga continental para o ano seguinte (só conta se você continuar no clube)
-  c.vagaContinental = !card.emprestado && !ehSegundaDivisao(card.ligaId) && !!ligaDe(card.ligaId).continental && (card.posLiga <= 4 || card.titulos.some((t) => t.tipo === "continental"));
+  const torneiosVagas=[...(card.copaNac?[{nome:card.copaNac.nome,campeao:card.copaNac.fase==='Campeão'?card.clube:card.copaNac.campeao,vice:card.copaNac.fase==='Vice-campeão'?card.clube:card.copaNac.vice}]:[]),...card.titulos.filter(t=>t.tipo==='continental').map(t=>({nome:t.nome,campeao:card.clube}))];
+  c.vagasInternacionaisClubes=calcularVagasRapidas({ano:card.ano,classificacoesMundo:{[card.ligaId]:{classificacao:(card.tabelaLiga||[]).map(nome=>({nome}))}},torneios:torneiosVagas,ligasMundo:antes.ligas});
+  c.vagasInternacionaisAno=card.ano+1;
+  card.vagaProximaTemporada=c.vagasInternacionaisClubes[card.clube]||null;
+  c.vagaContinental=!!c.vagasInternacionaisClubes[c.clubeNome];
 
   // evolução e idade
   const focoEvo = c.foco === "evolucao" ? 1.15 : 1;
@@ -2196,7 +2216,7 @@ export function transferir(c, clubeNome, { torcidaInicial = 30, contrato = null,
   c.contrato = contrato ? { ...contrato, clube: clubeNome } : contratoPadrao(c, clubeNome);
   if (luvas) { c.patrimonio = (c.patrimonio || 0) + luvas; c.ganhosTotais = (c.ganhosTotais || 0) + luvas; }
   c.torcida[clubeNome] = c.torcida[clubeNome] ?? torcidaInicial;
-  c.vagaContinental = false;
+  c.vagaContinental = !!(c.vagasInternacionaisClubes?.[clubeNome]?.ano===c.ano);
   c.emprestimo = null;
   const t = { ano: c.ano, de: deOnde, para: clubeNome, valor: pago, anos: c.contrato.anos, tipo: tipo || (pago === 0 ? "livre" : "venda") };
   t.manchete = gerarManchete(c, t);
@@ -3711,7 +3731,7 @@ export function responderColetiva(c0, coletiva, tomId) {
 
 /* ---------- texto para compartilhar ---------- */
 /* "2× Libertadores · 1× Champions League · 3× Brasileirão" — do mais importante para o menos */
-const ORDEM_TITULOS = ["bolaOuro", "botaOuro", "copaMundo", "continentalSelecao", "mundial", "continental", "liga", "copa", "segunda"];
+const ORDEM_TITULOS = ["bolaOuro", "botaOuro", "copaMundo", "continentalSelecao", "mundial", "continental", "liga", "copa", "segunda", "estadual"];
 function tituloPorNome(lista) {
   const cont = new Map();
   ORDEM_TITULOS.forEach((tipo) => (lista || []).filter((x) => x.tipo === tipo).forEach((x) => cont.set(x.nome, (cont.get(x.nome) || 0) + 1)));
@@ -3815,7 +3835,7 @@ export function carregarRapido() {
     s.c.foco = s.c.foco || "equilibrio";
     s.c.picoAttrs = s.c.picoAttrs || { ...s.c.attrs };
     s.c.moral = s.c.moral ?? 65; s.c.transferencias = s.c.transferencias || []; s.c.ligaAlvo = s.c.ligaAlvo || null; s.c.ritmo = s.c.ritmo || "normal"; s.c.pe = s.c.pe || "destro";
-    s.c.titulos = { liga: 0, copa: 0, continental: 0, mundial: 0, copaMundo: 0, continentalSelecao: 0, bolaOuro: 0, botaOuro: 0, segunda: 0, ...(s.c.titulos || {}) };
+    s.c.titulos = { liga: 0, copa: 0, continental: 0, mundial: 0, copaMundo: 0, continentalSelecao: 0, bolaOuro: 0, botaOuro: 0, estadual:0, segunda: 0, ...(s.c.titulos || {}) };
     if (!s.c.mundo?.jogadores) s.c.mundo = mundoCompacto();
     iniciarJornada(s.c);
     if(s.etapa==='festa'&&s.card&&(s.c.temporadas||[]).some(t=>t.ano===s.card.ano))s.etapa='fechamento';

@@ -1,3 +1,5 @@
+import CenaFotografica from '../comum/CenaFotografica.jsx';
+import {cenaCopa} from '../comum/direcaoCenas.js';
 import React,{useEffect,useRef,useState} from 'react';
 import {JanelaTreinador,Escudo} from './uiTreinador.jsx';
 import {TacaCompeticao} from '../comum/trofeus.jsx';
@@ -13,7 +15,7 @@ export default function CopaEscolha({campanha:c,chave,onEscolher,ocupado,onMinim
  const escolher=op=>{if(lock.current||ocupado)return;lock.current=true;const reduzir=window.matchMedia('(prefers-reduced-motion: reduce)').matches;R(!reduzir);onEscolher(chave,op);if(reduzir)lock.current=false;else timer.current=setTimeout(()=>{R(false);lock.current=false;},850);};
  return <JanelaTreinador titulo={`Copa em jogo · ${c.nome}`} onFechar={onMinimizar} classe={`cce-modal cce-${tema.id}`}>
   <div className="cce-corpo" style={{'--cce-cor':tema.cor,'--cce-fundo':tema.fundo}} data-tema={tema.id} data-motivo={tema.motivo} aria-busy={revelando}>
-   <div className="cce-ambiente" aria-hidden="true"><i/><i/><i/><i/><i/></div>
+   <CenaFotografica className="cce-foto" cena={cenaCopa(c,d)}/><div className="cce-ambiente" aria-hidden="true"><i/><i/><i/><i/><i/></div>
    <div className="cce-topo"><TacaCompeticao nome={c.nome} tipo={c.tipo} size={62}/><div><small>{calendario?.data||`TEMPORADA ${c.ano}`} · {modoJogador?'MODO RÁPIDO · JOGADOR':tema.lema}</small><h2>{c.nome}</h2><p>{d?.fase||r?.fase||c.faseUsuario}</p></div></div>
    {calendario?.liga&&<div className="cce-agenda"><span>Calendário da temporada</span><b>{calendario.data}</b><span>Entre as rodadas de {calendario.liga}</span></div>}
    <div className={revelando?'cce-conteudo cce-oculto':'cce-conteudo'}>

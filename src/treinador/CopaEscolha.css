@@ -7,3 +7,7 @@
 .cce-modal>.ct-modal-header h2{font-size:11px;line-height:1.3;font-weight:600}.cce-topo small{display:block;line-height:1.4}.cce-topo p{line-height:1.4}.cce-marco .cce-corpo{--cce-cor:#a7e9ad;--cce-fundo:#102e23}
 @media(max-height:650px) and (max-width:600px){.cce-topo small{font-size:7px;letter-spacing:.05em}.cce-topo h2{font-size:17px;line-height:1.15;margin:3px 0}.cce-confronto{margin:9px 0}.cce-opcoes button{display:flex;padding:10px 11px;gap:6px;min-height:58px}.cce-opcoes strong{padding-right:40px;line-height:1.2}.cce-opcoes button>span{display:none}.cce-carta-topo{position:absolute;right:10px;top:7px;gap:1px}.cce-carta-topo em{font-size:8px}.cce-trajeto{height:21px;width:34px}.cce-chances{font-size:10px;gap:9px;margin:0}.cce-corpo{padding:10px 14px}.cce-agenda{font-size:8px}}
 @media(max-height:650px) and (max-width:600px){.cce-agenda{display:none}}
+
+.cce-corpo>.cce-foto{position:absolute;inset:0;width:100%;height:100%;z-index:-2;opacity:.34;filter:saturate(.7)}.cce-conteudo{position:relative}.cce-opcoes button{background:linear-gradient(145deg,#101a18f0,#08111af0)}.cce-topo{position:relative}.cce-ambiente{background:linear-gradient(180deg,#080c1340,#080c1399);opacity:.65}.cce-corpo[data-motivo=gloria] .cce-ambiente{opacity:.2}.cce-confronto strong{text-shadow:0 2px 6px #000}.cce-corpo>.cce-foto[data-cena="copa-final-sul"],.cce-corpo>.cce-foto[data-cena="copa-final-europa"],.cce-corpo>.cce-foto[data-cena="copa-mundial"]{opacity:.42}
+
+.cce-corpo[data-motivo=estrelas] .cce-ambiente i{opacity:.12}

@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { desafiosDaTemporada, ovrDe } from './rapido.js';
 import './DesafioTemporada.css';
-import {ARTE} from '../comum/arte.js';
+import CenaFotografica from '../comum/CenaFotografica.jsx';
+import {cenaTreino} from '../comum/direcaoCenas.js';
 
-const fotoDesafio=o=>/sono|mental|medit|guru/.test(o.id)?ARTE.mental:/dieta|fisio|recup/.test(o.id)?ARTE.fisio:ARTE.equipamentos;
 const riscos = { baixo: 'Risco baixo', medio: 'Risco médio', alto: 'Tudo ou nada' };
 const pontos = n => `${n > 0 ? '+' : ''}${n}`;
 const DURACAO_REVELACAO = 1800;
@@ -77,7 +77,7 @@ export default function DesafioTemporada({ c, resultado, onEscolher, onContinuar
     </> : <>
       <h2>Como você quer evoluir?</h2><p className="dt-intro">Escolha uma abordagem. Compare as chances de ganhar ou perder pontos de nível.</p>
       <div className="dt-opcoes">{desafiosDaTemporada(c).map((o,ordem) => <button key={o.id} onClick={() => onEscolher(o.id)} aria-label={`Escolher ${o.nome}`}>
-        <img className="dt-opcao-foto" src={fotoDesafio(o)} alt=""/><span className="dt-opcao-conteudo"><span className="dt-risco"><b>0{ordem+1}</b>{riscos[o.faixa]}</span><strong>{o.nome}</strong><span className="dt-descricao">{o.texto}</span>
+        <CenaFotografica className="dt-opcao-foto" cena={cenaTreino(o,c.posicao)}/><span className="dt-opcao-conteudo"><span className="dt-risco"><b>0{ordem+1}</b>{riscos[o.faixa]}</span><strong>{o.nome}</strong><span className="dt-descricao">{o.texto}</span>
         <span className="dt-probabilidade" aria-hidden="true">{o.chances.map((x,i)=><i key={i} style={{flex:x.p}} className={x.d>0?'dt-prob-ganho':x.d<0?'dt-prob-perda':''}/>)}</span><span className="dt-chances">{o.chances.map((x,i) => <span key={i} className={x.d < 0 ? 'dt-chance-perda' : x.d > 0 ? 'dt-chance-ganho' : ''}>{pontos(x.d)} OVR <b>{Math.round(x.p * 100)}%</b></span>)}</span>
         <span className="dt-escolher">Escolher <svg viewBox="0 0 20 20" aria-hidden="true" width="15" height="15"><path d="M4 16 16 4M5 4h11v11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg></span></span>
       </button>)}</div>

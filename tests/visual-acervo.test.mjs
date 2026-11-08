@@ -4,6 +4,21 @@ import fs from 'node:fs';
 import { TACAS_MUSEU } from '../src/museu/museu.js';
 import { resolverImagemCompeticao } from '../src/comum/arteCompeticoes.js';
 
+test('estaduais com fonte específica resolvem imagens distintas da taça genérica',()=>{
+ const fontes=JSON.parse(fs.readFileSync(new URL('../arte/competicoes/estaduais-fontes.json',import.meta.url)));
+ const arquivos=Object.fromEntries(fs.readdirSync(new URL('../arte/competicoes/',import.meta.url)).filter(n=>n.endsWith('.webp')).map(n=>[n.slice(0,-5),n]));
+ const nomes=['Paulista','Carioca','Mineiro','Gaúcho','Paranaense','Catarinense','Goiano','Alagoano'];
+ const resolvidas=nomes.map(n=>resolverImagemCompeticao(`Campeonato ${n}`,arquivos));
+ assert.ok(resolvidas.every(Boolean));
+ assert.equal(new Set(resolvidas).size,nomes.length);
+ for(const arquivo of resolvidas){
+  assert.ok(fs.statSync(new URL('../arte/competicoes/'+arquivo,import.meta.url)).size>1000);
+  assert.ok(fontes[arquivo.slice(0,-5)].fonte.includes('/trophys/ST_'));
+ }
+ assert.ok(fontes.pendentes.includes('Campeonato Amazonense'));
+ assert.match(fontes.descartes['ST_amazonense.png'],/TURNO/);
+});
+
 test('todas as competições do catálogo têm imagem própria ou ilustração original',()=>{
  const arquivos=Object.fromEntries(fs.readdirSync(new URL('../arte/competicoes/',import.meta.url)).filter(n=>/\.(svg|webp)$/.test(n)).map(n=>[n.replace(/\.(svg|webp)$/, ''),n]));
  for(const t of TACAS_MUSEU)assert.ok(resolverImagemCompeticao(t.nome,arquivos),t.nome);

@@ -1,0 +1,54 @@
+{
+  "campeonato-paulista": {
+    "arquivo": "campeonato-paulista.webp",
+    "fonte": "https://github.com/TheSMF-Group/assets/blob/da3e8b2a8264b6d30fa2222da2c643aa250103b3/trophys/ST_paulista.png",
+    "natureza": "Imagem recortada do acervo; autoria fotográfica e caráter oficial não comprovados."
+  },
+  "campeonato-paranaense": {
+    "arquivo": "campeonato-paranaense.webp",
+    "fonte": "https://github.com/TheSMF-Group/assets/blob/da3e8b2a8264b6d30fa2222da2c643aa250103b3/trophys/ST_paranaense.png",
+    "natureza": "Imagem recortada do acervo; autoria fotográfica e caráter oficial não comprovados."
+  },
+  "campeonato-mineiro": {
+    "arquivo": "campeonato-mineiro.webp",
+    "fonte": "https://github.com/TheSMF-Group/assets/blob/da3e8b2a8264b6d30fa2222da2c643aa250103b3/trophys/ST_mineiro.png",
+    "natureza": "Imagem recortada do acervo; autoria fotográfica e caráter oficial não comprovados."
+  },
+  "campeonato-goiano": {
+    "arquivo": "campeonato-goiano.webp",
+    "fonte": "https://github.com/TheSMF-Group/assets/blob/da3e8b2a8264b6d30fa2222da2c643aa250103b3/trophys/ST_goiano.png",
+    "natureza": "Imagem recortada do acervo; autoria fotográfica e caráter oficial não comprovados."
+  },
+  "campeonato-gaucho": {
+    "arquivo": "campeonato-gaucho.webp",
+    "fonte": "https://github.com/TheSMF-Group/assets/blob/da3e8b2a8264b6d30fa2222da2c643aa250103b3/trophys/ST_gaucho.png",
+    "natureza": "Imagem recortada do acervo; autoria fotográfica e caráter oficial não comprovados."
+  },
+  "campeonato-catarinense": {
+    "arquivo": "campeonato-catarinense.webp",
+    "fonte": "https://github.com/TheSMF-Group/assets/blob/da3e8b2a8264b6d30fa2222da2c643aa250103b3/trophys/ST_catarinense.png",
+    "natureza": "Imagem recortada do acervo; autoria fotográfica e caráter oficial não comprovados."
+  },
+  "campeonato-carioca": {
+    "arquivo": "campeonato-carioca.webp",
+    "fonte": "https://github.com/TheSMF-Group/assets/blob/da3e8b2a8264b6d30fa2222da2c643aa250103b3/trophys/ST_carioca.png",
+    "natureza": "Imagem recortada do acervo; autoria fotográfica e caráter oficial não comprovados."
+  },
+  "campeonato-alagoano": {
+    "arquivo": "campeonato-alagoano.webp",
+    "fonte": "https://github.com/TheSMF-Group/assets/blob/da3e8b2a8264b6d30fa2222da2c643aa250103b3/trophys/ST_alagoano.png",
+    "natureza": "Imagem recortada do acervo; autoria fotográfica e caráter oficial não comprovados."
+  },
+  "pendentes": [
+    "Campeonato Sergipano",
+    "Campeonato Baiano",
+    "Campeonato Cearense",
+    "Campeonato Pernambucano",
+    "Campeonato Paraense",
+    "Campeonato Amazonense"
+  ],
+  "descartes": {
+    "ST_amazonense.png": "Inscrição CAMPEÃO DO TURNO, não identifica título geral do campeonato.",
+    "intercontinental.png": "Imagem representa troféu antigo do Mundial de Clubes."
+  }
+}

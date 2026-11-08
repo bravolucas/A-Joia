@@ -22,3 +22,7 @@ respectivas entidades; as imagens servem para identificar os torneios e não
 indicam afiliação ou endosso.
 
 Veja `CREDITOS.md` para a origem de cada grupo de arquivos.
+
+## Estaduais
+
+Oito estaduais possuem agora imagem específica: Paulista, Carioca, Mineiro, Gaúcho, Paranaense, Catarinense, Goiano e Alagoano. Outros seis permanecem com fallback: Sergipano, Baiano, Cearense, Pernambucano, Paraense e Amazonense. Ver `estaduais-fontes.json` para fontes, limitações e arquivos rejeitados. A afirmação de cobertura do catálogo acima não incluía estaduais: há um erro anterior na construção desse catálogo (`ESTADUAIS` contém strings). Essa cobertura não significa que todos os troféus sejam fotografias reais.

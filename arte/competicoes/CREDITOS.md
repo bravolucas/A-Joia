@@ -39,3 +39,9 @@ O alias `concacaf` aponta para `concacaf-champions`, evitando armazenar duas có
 Brasileirão, Copa do Brasil e Libertadores receberam novas renderizações produzidas com a ferramenta de edição de imagens, usando as ilustrações anteriores como referência estrutural. São recriações visuais para o jogo, não fotografias oficiais. As referências foram preservadas em `arte/originais/referencias/`, e as matrizes de produção em `arte/originais/tacas/`. A reexportação respeita essas matrizes; os PNGs gerados também permanecem em `/workspace/generated_images`.
 
 - `copa-intercontinental-fifa.svg`: ilustração vetorial original criada para A JOIA (2026). Representação artística de uma taça mundial, sem reprodução do logotipo oficial.
+
+## Estaduais — pesquisa de 08/11/2026
+
+Oito imagens específicas foram obtidas de [TheSMF-Group/assets](https://github.com/TheSMF-Group/assets), commit `da3e8b2a8264b6d30fa2222da2c643aa250103b3`, pasta `trophys`: Paulista, Carioca, Mineiro, Gaúcho, Paranaense, Catarinense, Goiano e Alagoano. Foram apenas reduzidas e convertidas para WebP, preservando a transparência e a composição. Não foram geradas por IA neste trabalho. O acervo não comprova autoria fotográfica, licença individual ou aprovação das federações; não são apresentadas como fotografias oficiais. A correspondência e as pendências estão em `estaduais-fontes.json`.
+
+O arquivo Amazonense foi descartado por identificar um título de turno. Sergipano, Baiano, Cearense, Pernambucano, Paraense e Amazonense continuam pendentes de fonte adequada; não recebem a taça de outro estadual.

@@ -9,3 +9,5 @@ Títulos repetidos no mesmo card são deduplicados na apresentação. Segundo e 
 A janela mantém bloqueio de rolagem do fundo e foco do diálogo nativo. Escape avança somente a apresentação atual. Movimento reduzido desativa animações. O botão permanece visível em 320×568, 390×844 e desktop.
 
 Testes: fila e top 3 na lógica; apresentação isolada, sequência título/acesso/prêmio, reload, números preservados, primeiro/segundo/terceiro/quarto lugares, rebaixamento, ausência de resultados, revisão, save legado e preferência de movimento reduzido no navegador.
+
+Entrega `305851d` publicada. GitHub Pages (`42494223773`) e validação geral (`42494223817`) aprovados, com 298 testes de lógica e 189 cenários de navegador.

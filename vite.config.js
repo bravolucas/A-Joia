@@ -8,9 +8,13 @@ export default defineConfig({
   base,
   plugins: [
     react(),
-    // instalar como app no celular/computador e abrir mesmo sem internet
+    // Mantém o manifesto instalável e migra o worker legado, sem recriar cache de versões antigas.
     VitePWA({
-      selfDestroying: true,
+      strategies: "injectManifest",
+      srcDir: "src/atualizacao",
+      filename: "sw.js",
+      injectRegister: false,
+      injectManifest: { injectionPoint: undefined, rollupFormat: "iife" },
       registerType: "autoUpdate",
       includeAssets: ["apple-touch-icon.png"],
       manifest: {
@@ -30,17 +34,7 @@ export default defineConfig({
           { src: "icone-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
       },
-      workbox: {
-        // o jogo em si fica salvo para abrir offline; escudos, bandeiras e fotos entram no cache conforme aparecem
-        globPatterns: ["**/*.{js,css,html,mp3}", "icone-*.png"],
-        globIgnores: ["**/AJoiaGame-*.js"],
-        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
-        runtimeCaching: [
-          { urlPattern: ({ request }) => request.destination === "image", handler: "CacheFirst", options: { cacheName: "ajoia-imagens", expiration: { maxEntries: 600, maxAgeSeconds: 60 * 60 * 24 * 60 } } },
-          { urlPattern: /AJoiaGame-.*\.js$/, handler: "StaleWhileRevalidate", options: { cacheName: "ajoia-modo-carreira" } },
-        ],
-        navigateFallback: `${base}index.html`,
-      },
+
     }),
   ],
   server: { port: 5173, open: true },

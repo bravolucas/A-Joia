@@ -1,3 +1,4 @@
+import {prepararDecisaoJogo} from '../src/jogador/decisaoDeJogo.js';
 import{test,expect}from'@playwright/test';
 import{criarJogador,sortearEvento,ovrDe}from'../src/jogador/rapido.js';
 import{registrarMuseu}from'../src/museu/museu.js';
@@ -71,7 +72,7 @@ test('história das duplas mostra rota e memórias registradas com acesso por te
 for(const [width,height]of[[320,568],[1366,640]])test(`comemoração bem sucedida mantém continuar na tela em ${width}×${height}`,async({page})=>{
  await page.setViewportSize({width,height});await page.emulateMedia({reducedMotion:'reduce'});const c=jogador();
  const momento={tipo:'copa',mini:'penalti',nome:'Copa do Brasil',titulo:'O primeiro gol decisivo',texto:'Final',ordem:1,total:1,adversario:{tipo:'clube',nome:'Flamengo'}};const card={ano:c.ano,pendente:momento,filaMomentos:[],momentos:[],titulos:[],jogos:30,gols:0,assist:0};await abrir(page,c,{etapa:'momento',card});
- await page.evaluate(()=>{Math.random=()=>.99;});await page.getByRole('button',{name:'Baixo esquerda',exact:true}).click();await expect(page.locator('.jr-festa-estreia')).toBeVisible();const b=await page.getByRole('button',{name:'Continuar →',exact:true}).boundingBox();expect(b.y).toBeGreaterThan(0);expect(b.y+b.height).toBeLessThanOrEqual(height);await page.screenshot({path:`/tmp/jornada-comemoracao-${width}.png`});
+ await page.evaluate(()=>{Math.random=()=>0;});const indice=prepararDecisaoJogo(c,momento).opcoes.findIndex(op=>op.acao==='finalizar');await page.locator('.dj-escolhas button').nth(indice).click();await expect(page.locator('.jr-festa-estreia')).toBeVisible();const b=await page.locator('.dj-continuar').boundingBox();expect(b.y).toBeGreaterThan(0);expect(b.y+b.height).toBeLessThanOrEqual(height);await page.screenshot({path:`/tmp/jornada-comemoracao-${width}.png`});
 });
 
 test('história do rival diferencia lances, transferência e prêmio sem presumir resultado antigo',async({page})=>{

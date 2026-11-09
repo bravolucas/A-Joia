@@ -1,3 +1,7 @@
+## Continuação — arte própria da decisão por pênaltis (09/11/2026)
+
+Criadas quatro cenas realistas originais em `arte/colecoes/penaltis.webp`, integradas por `CenaPenaltis.jsx` à preparação, revelação e resultado de `CopaEscolha` (jogador e treinador). Gol e defesa variam conforme resultado salvo; goleiro salta na cena de defesa. SVG com clipPath isola cada quadro e meet preserva todo o gol. Sem alteração de regra, chance, RNG, placar, cliques ou duração. Layout 320px preserva três cartas e título integral acima do rodapé. Build aprovado, 14 cenários de navegador + quatro finais móveis aprovados; capturas inspecionadas. Créditos e original preservados; relatório `docs/PENALTIS_DIRECAO_ARTE.md`. Não altera os outros minigames de pênalti/falta/passe. Preservar documentos originais não rastreados.
+
 ## Continuação — dinamismo nas escolhas de copas (09/11/2026)
 
 Publicado em `e8c2b73`: [Pages 42539528256](https://github.com/bravolucas/A-Joia/actions/runs/42539528256) concluído com sucesso. [CI 42539528259](https://github.com/bravolucas/A-Joia/actions/runs/42539528259) ainda em andamento na confirmação do deploy; conferir antes de declarar regressão remota completa aprovada.

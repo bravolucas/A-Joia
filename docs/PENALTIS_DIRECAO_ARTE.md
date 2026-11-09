@@ -1,0 +1,9 @@
+# Arte da decisão por pênaltis — 09/11/2026
+
+Criadas quatro cenas fotográficas sintéticas: preparação, cobrança, gol e defesa. Mesmo jogador, goleiro, estádio e iluminação, sem marcas; atlas WebP local de 1536×1024 (453.882 bytes), original preservado em generated_images e créditos em arte/colecoes/CREDITOS.md. O acervo não representa pessoas ou clubes reais.
+
+CenaPenaltis.jsx enquadra cada quadro com viewBox e clipPath próprios. Preserva imagem completa com meet, sem distorção, sem mostrar células vizinhas e sem cortar o gol. Preparação no confronto; transição curta cobrança→gol/defesa durante a revelação existente; cena do desfecho no resultado e após recarregar o save. Sequência ilustra o resultado da disputa, não cria cobranças/placares intermediários. Redução de movimento continua sem animação.
+
+Integração compartilhada por jogador e treinador. A captura do tipo de escolha antes da atualização do save evita perder a cena de cobrança quando o resultado encerra a final. Chances, RNG, placares e classificação preservados. Não acrescenta clique ou tempo à revelação de 1,35 segundo. Em celular baixo, remove apenas repetições de texto/taça do resultado (placar, nome do plano, chance, título completo e botão mantidos); três cartas continuam inteiras.
+
+Validação: build aprovado. 14 cenários de navegador aprovados (oito novos + seis de regressão), incluindo jogador/treinador × 320/1366 × vitória/derrota, recarga e movimento reduzido. Mais quatro cenários móveis finais aprovados verificam o limite inferior do título, não só visibilidade parcial. Capturas inspecionadas em 320/1366. Primeira rodada apontou quatro falhas de altura móvel; corrigidas. Inspeção adicional identificou vazamento das células vizinhas em meet; corrigido com clipPath. Logs /tmp/penaltis-design-*.log. Mecânica sem alterações; não repetida suíte geral de lógica.

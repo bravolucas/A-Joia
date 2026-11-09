@@ -11,12 +11,9 @@ test('anúncio do novo clube preserva opção de pular e conclusão', () => {
   assert.match(componentes, /<ApresentacaoNovoClube|export function ApresentacaoNovoClube/);
 });
 
-test('pênalti mantém seleção das zonas e cálculo original', () => {
-  assert.match(rapido, /function TelaPenalti\(/);
-  assert.match(rapido, /onZona=\{chutar\}/);
-  assert.match(rapido, /const fin = c\.attrs\.finalizacao/);
-  assert.match(rapido, /rp-pen-acao/);
-});
+// A seleção antiga por zonas foi substituída por decisão contextual a pedido do usuário.
+// Comportamento e retomada são exercitados em decisao-de-jogo.test.mjs e
+// penalti-jogavel.spec.mjs; não exigir uma implementação removida do Modo Rápido.
 
 // As três direções da falta são exercitadas no navegador em
 // arena-minigames.spec.mjs, incluindo foco, escolha e callback real.

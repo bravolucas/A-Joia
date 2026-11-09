@@ -1,3 +1,7 @@
+## Revisão dos fluxos antigos do museu (09/11/2026)
+
+Entrega funcional em `fdc9918`. CI 42712487398: 409 testes de lógica e build aprovados; navegador 281/283. As duas falhas eram testes antigos de camisa/progresso e fonte/escudo que ainda acessavam as abas da coleção diretamente em Meu museu. Corrigidos para navegar pelo botão **Coleção permanente →**, preservando todos os asserts. Ambos aprovados na reprodução local. Nova rodada completa de CI acionada para confirmar a correção. Publicação funcional ainda em acompanhamento.
+
 ## Museu pessoal interativo — implementação e validação local (09/11/2026)
 
 Implementado museu por carreira com salão em perspectiva 2,5D, camisas por passagem/retorno, álbum e gaveta, vitrines com edições, recortes/objetos de lembranças, túnel anual, seleção, personagens e treinador. Curadoria com camisa principal, três favoritos, frase e três ambientes; visita guiada manual. Acesso por **Meu museu** na home e **Visitar meu museu** na ficha/histórico individual. Slots de carreiras separados; coleção permanente e seus backups mantidos em botão próprio. Nada de placares, partidas ou numeração histórica inventados. Relatório: `docs/MUSEU_PESSOAL_INTERATIVO.md`.

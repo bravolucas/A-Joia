@@ -1,5 +1,7 @@
 ## Continuação — dinamismo nas escolhas de copas (09/11/2026)
 
+Publicado em `e8c2b73`: [Pages 42539528256](https://github.com/bravolucas/A-Joia/actions/runs/42539528256) concluído com sucesso. [CI 42539528259](https://github.com/bravolucas/A-Joia/actions/runs/42539528259) ainda em andamento na confirmação do deploy; conferir antes de declarar regressão remota completa aprovada.
+
 24 estratégias em oito cenários e seis abordagens de pênaltis em `estrategiasCopas.js`; trios determinísticos pela campanha/etapa. Cartas mostram intenção/risco; porcentagem só após o clique, em revelação de 1,35s, seguida automaticamente por resultado, sem confirmação. Chances efetivamente usadas persistidas em `resultado.revelacao`. Jogador e treinador compartilham componente/motor; planos antigos mantidos para saves/autossimulação. Força/adversário/final continuam relevantes. Regras europeias expansíveis e ajuste de altura mantêm três escolhas e descrições em 320px. Relatório e pendências em `docs/COPAS_ESTRATEGIAS_VARIADAS.md`. Build e 351 testes de lógica passaram. Browser: 22/24 na rodada inicial válida; duas falhas de altura corrigidas, seis cenários finais passaram, total 24 cenários distintos aprovados. Primeira tentativa com base errada da prévia interrompida e descartada. Última publicação das taças também confirmada com CI e Pages aprovados. Preservar os dois documentos originais não rastreados.
 
 ## Continuação — imagens específicas dos estaduais (08/11/2026)

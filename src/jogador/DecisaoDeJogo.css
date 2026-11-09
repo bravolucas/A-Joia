@@ -8,3 +8,4 @@
 .dj-rival{display:block;color:#d7c88d;font-size:10px;margin-top:4px}@media(max-height:650px) and (max-width:600px){.dj-rival{font-size:8px;margin-top:2px}}
 /* A leitura do rival é útil antes da escolha; o resultado prioriza o lance e continuar. */
 .dj-resolvido .dj-rival{display:none}
+@media(max-height:650px) and (max-width:600px){.dj-resolvido>header>p{display:none}}

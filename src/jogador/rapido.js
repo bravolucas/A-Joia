@@ -1,3 +1,4 @@
+import {ITENS_PESSOAIS} from './itensPessoais.js';
 import {iniciarCamisas,aposentarDonoCamisa,prepararCamisaSelecao,sincronizarCamisasSelecao} from './camisasCarreira.js';
 import {estatisticasDecisao} from './decisaoDeJogo.js';
 import {prepararCopasJogador} from './copasJogador.js';
@@ -589,6 +590,7 @@ export function formaDaTemporada(card, posicao, anterior = 1) {
 export const valorAtual = (c) => Math.max(50, Math.round(valorMercado(ovrDe(c), c.idade, c.fama) * (c.formaMercado ?? 1)));
 
 export function formatarValor(k) {
+  if(k>0&&(k<1||(k<10&&!Number.isInteger(k))))return `€ ${Math.round(k*1000).toLocaleString("pt-BR")}`;
   if (k >= 1000) { const m = k / 1000; return `€ ${m >= 100 ? Math.round(m) : m.toFixed(1).replace(".0", "")} mi`; }
   return `€ ${Math.round(k)} mil`;
 }
@@ -693,7 +695,7 @@ export const INVESTIMENTOS = [
   { id: "mansao", nome: "Mansão com piscina", icone: "🏡", custo: 9000, desc: "+6 de fama. Luxo: custa manutenção e incomoda torcida de clube pequeno.", luxo: true, fama: 6 },
   { id: "iate", nome: "Iate", icone: "🛥️", custo: 25000, desc: "+8 de fama. Luxo de verdade — e polêmica.", luxo: true, fama: 8 },
 ];
-INVESTIMENTOS.push(...MELHORIAS_JOGADOR);
+INVESTIMENTOS.push(...MELHORIAS_JOGADOR,...ITENS_PESSOAIS);
 const CATEGORIAS_INV={psicologo:"Saúde",personal:"Saúde",nutri:"Saúde",fisio:"Saúde",imagem:"Carreira",analista:"Treino",ct:"Treino",instituto:"Carreira",origem:"Carreira",carro:"Estilo de vida",mansao:"Estilo de vida",iate:"Estilo de vida"};
 export const CATALOGO_LOJA_JOGADOR=[...INVESTIMENTOS.map(i=>({...i,categoria:i.categoria||CATEGORIAS_INV[i.id]})),...UPS_JOGADOR];
 export const investimentoDe = (id) => INVESTIMENTOS.find((i) => i.id === id);
@@ -707,9 +709,10 @@ export function comprarInvestimento(c0, id) {
   const c = clone(c0);
   const inv = investimentoDe(id);
   if (!inv || (c.investimentos || []).includes(id) || c.patrimonio < inv.custo) return { c, ok: false };
-  c.patrimonio -= inv.custo;
+  c.patrimonio = Math.round((c.patrimonio-inv.custo)*1000)/1000;
   c.investimentos = [...(c.investimentos || []), id];
   if (inv.curaCronica) c.flags.cronica = false;
+  if(inv.moral)mexerMoral(c,inv.moral);
   if (inv.fama) c.fama = clampR(c.fama + inv.fama, 0, 100);
   if (inv.social) c.flags.social = true;
   if (inv.benfeitor) { c.flags.benfeitor = true; c.torcida[c.primeiroClube] = clampR((c.torcida[c.primeiroClube] ?? 30) + 20, 0, 100); }

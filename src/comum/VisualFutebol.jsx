@@ -2,7 +2,9 @@ import React, { useId, useEffect, useRef, useState } from 'react';
 import { escudoDe, CENARIOS } from './arte.js';
 import {GeometriaCampo} from './CenarioMini.jsx';
 
-import goleiroMergulho from '../../arte/personagens/goleiro-mergulho.webp';
+import goleiroMergulho from '../../arte/personagens/goleiros-quatro-poses.webp';
+import camisaReal from '../../arte/personagens/camisa-realista-base.webp';
+import {uniformeDe,tintaUniforme} from '../dados/uniformes.js';
 import goleiroReal from '../../arte/personagens/goleiro.webp';
 import jogadorReal from '../../arte/personagens/jogador.webp';
 import adversarioReal from '../../arte/personagens/adversario.webp';
@@ -10,36 +12,41 @@ import apresentacaoReal from '../../arte/personagens/apresentacao.webp';
 import dirigenteReal from '../../arte/personagens/dirigente.webp';
 
 // Recortes fotográficos originais; coordenadas e animações dos minigames preservadas.
-export function JogadorCampo({ x=0, y=0, escala=1, numero=10, goleiro=false, adversario=false, esticado=false, direcao=1, exibirNumero=true }) {
+export function JogadorCampo({ x=0, y=0, escala=1, numero=10, goleiro=false, adversario=false, esticado=false, direcao=1, defendeu=false, exibirNumero=true }) {
   useEffect(()=>{if(goleiro){const imagem=new Image();imagem.src=goleiroMergulho;}},[goleiro]);
   const voando=goleiro&&esticado;
   const foto=goleiro?(voando?goleiroMergulho:goleiroReal):adversario?adversarioReal:jogadorReal;
   return <g transform={`translate(${x} ${y}) scale(${escala})`} className="vf-atleta" aria-hidden="true">
     {!voando&&<ellipse cx="0" cy="1" rx="17" ry="3" fill="#000" opacity=".3"/>}
-    <image data-pose={voando?'mergulho':'espera'} href={foto} x={voando?-56:-30} y={voando?-68:-88} width={voando?112:60} height={voando?65:90} transform={voando&&direcao<0?'scale(-1 1)':undefined} preserveAspectRatio="xMidYMax meet"/>
+    {voando?<svg data-pose={defendeu?'defesa':'mergulho'} data-lado={direcao<0?'esquerda':'direita'} x="-56" y="-68" width="112" height="65" viewBox={`${direcao<0?0:887} ${defendeu?443.5:0} 887 443.5`} overflow="hidden" preserveAspectRatio="xMidYMid meet"><image href={goleiroMergulho} width="1774" height="887"/></svg>:<image data-pose="espera" href={foto} x="-30" y="-88" width="60" height="90" preserveAspectRatio="xMidYMax meet"/>}
     {!goleiro&&exibirNumero&&<g><circle cx="17" cy="-55" r="6" fill={adversario?'#28435e':'#103e2c'} stroke="#e2d1a0" strokeWidth=".6"/><text x="17" y="-52.5" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="7" fontWeight="800" fill="#fff4d1">{numero}</text></g>}
   </g>;
 }
 
+export function PadraoCamisa({u,width=180,height=190}){
+ const s=u.secundaria,w=width,h=height;
+ if(u.padrao==='listras'||u.padrao==='tricolor')return <g>{Array.from({length:7},(_,i)=><React.Fragment key={i}><rect x={i*w/3-w} width={w/6} height={h} fill={s}/>{u.padrao==='tricolor'&&<rect x={i*w/3-w+w/6} width={w/30} height={h} fill={u.detalhe}/>}</React.Fragment>)}</g>;
+ if(u.padrao==='horizontais')return <g>{Array.from({length:6},(_,i)=><React.Fragment key={i}><rect y={i*h/3} width={w} height={h/6} fill={s}/>{u.detalhe!==s&&<rect y={i*h/3+h/6} width={w} height={h/45} fill={u.detalhe}/>}</React.Fragment>)}</g>;
+ if(u.padrao==='diagonal')return <path d={`M${w*.77} 0H${w}L${w*.17} ${h}H0Z`} fill={s}/>;
+ if(u.padrao==='metades')return <rect x={w/2} width={w/2} height={h} fill={s}/>;
+ if(u.padrao==='monaco')return <path d={`M${w} ${h*.3}V${h}H0V${h*.7}Z`} fill={s}/>;
+ if(u.padrao==='central')return <rect x={w*.35} width={w*.3} height={h} fill={s}/>;
+ if(u.padrao==='faixa')return <g><rect y={h*.4} width={w} height={h*.2} fill={s}/>{u.detalhe!==s&&<rect y={h*.51} width={w} height={h*.07} fill={u.detalhe}/>}</g>;
+ if(u.padrao==='v')return <path d={`M0 ${h*.27} ${w/2} ${h*.52} ${w} ${h*.27}`} fill="none" stroke={s} strokeWidth={h*.07}/>;
+ if(u.padrao==='cruz')return <g><rect x={w*.43} width={w*.14} height={h} fill={s}/><rect y={h*.36} width={w} height={h*.13} fill={s}/></g>;
+ if(u.padrao==='xadrez')return <g>{Array.from({length:48},(_,i)=>{const x=i%6,y=Math.floor(i/6);return(x+y)%2===0?<rect key={i} x={x*w/6} y={y*h/8} width={w/6} height={h/8} fill={s}/>:null;})}</g>;
+ return null;
+}
 export function CamisaPremium({ nome, cor = '#147356', numero = 10, sobrenome, soletrar=false, className = '' }) {
-  const id=useId().replace(/:/g,'');
-  const escudo=escudoDe(nome);
-  const hex=cor.replace('#','');const expandido=hex.length===3?hex.split('').map(c=>c+c).join(''):hex;
-  const rgb=parseInt(expandido,16);const claro=((rgb>>16&255)*.299+(rgb>>8&255)*.587+(rgb&255)*.114)>170;
-  const tinta=claro?'#15251d':'#fff5df';
-  return <svg viewBox="0 0 180 190" className={`vf-camisa ${className}`} aria-hidden="true">
-    <defs>
-      <linearGradient id={`tecido${id}`}><stop stopColor="#000" stopOpacity=".45"/><stop offset=".25" stopColor="#fff" stopOpacity=".16"/><stop offset=".5" stopColor="#fff" stopOpacity="0"/><stop offset=".8" stopColor="#fff" stopOpacity=".18"/><stop offset="1" stopColor="#000" stopOpacity=".5"/></linearGradient>
-      <pattern id={`fios${id}`} width="3" height="3" patternUnits="userSpaceOnUse"><path d="M0 0V3" stroke="#fff" strokeOpacity=".08" strokeWidth=".5"/></pattern>
-      <clipPath id={`corte${id}`}><path d="M58 16 28 30 8 68 35 83 44 65 42 171Q90 183 138 171L136 65 145 83 172 68 152 30 122 16Q90 40 58 16Z"/></clipPath>
-    </defs>
-    <ellipse cx="90" cy="179" rx="52" ry="6" fill="#0005"/>
-    <g clipPath={`url(#corte${id})`}><path d="M0 0H180V190H0Z" fill={cor}/><path d="M0 0H180V190H0Z" fill={`url(#tecido${id})`}/><path d="M0 0H180V190H0Z" fill={`url(#fios${id})`}/><path d="M43 40 49 163M137 40 131 163M50 149Q90 158 130 149" fill="none" stroke="#000" strokeOpacity=".17" strokeWidth="3"/><path d="M48 42 58 62M132 42 122 62" stroke="#fff" strokeOpacity=".18" strokeWidth="4"/></g>
-    <path d="M58 16Q90 45 122 16L115 14Q90 31 65 14ZM10 66 36 80M144 80 170 66" fill="none" stroke="#eed99e" strokeWidth="4"/>
-    {escudo && !sobrenome && <image href={escudo} x="106" y="48" width="22" height="25"/>}
-    {sobrenome && <text x="90" y="65" textAnchor="middle" fill={tinta} stroke={claro?"#ffffff33":"#0003"} strokeWidth=".5" fontFamily="Inter, sans-serif" fontSize="12" fontWeight="800" textLength={Math.min(92,sobrenome.length*8)} lengthAdjust="spacingAndGlyphs">{soletrar?[...sobrenome].map((letra,i)=><tspan key={`${i}-${letra}`} style={{animation:'ccTinta .3s ease both'}}>{letra}</tspan>):sobrenome}</text>}
-    <text x="90" y="133" textAnchor="middle" fontFamily="Oswald, sans-serif" fontWeight="700" fontSize="57" fill={tinta} stroke={claro?"#ffffff33":"#0004"} strokeWidth="1">{numero}</text>
-  </svg>;
+ const id=useId().replace(/:/g,''),u=uniformeDe(nome,cor),tinta=tintaUniforme(u),escudo=escudoDe(nome);
+ return <svg viewBox="0 0 180 190" className={`vf-camisa ${className}`} aria-hidden="true" data-uniforme={u.padrao} data-cor-camisa={u.base}>
+  <defs><mask id={`camisa-foto-${id}`} style={{maskType:'alpha'}}><image href={camisaReal} x="0" y="0" width="180" height="190" preserveAspectRatio="none"/></mask></defs>
+  <image className="vf-tecido-real" href={camisaReal} width="180" height="190" preserveAspectRatio="none"/>
+  <g mask={`url(#camisa-foto-${id})`} style={{mixBlendMode:'multiply'}}><rect width="180" height="190" fill={u.base}/><PadraoCamisa u={u}/></g>
+  {escudo&&!sobrenome&&<image className="vf-escudo-camisa" href={escudo} x="109" y="42" width="20" height="23"/>}
+  {sobrenome&&<text x="90" y="55" textAnchor="middle" fill={tinta} stroke={tinta==='#19232b'?'#fff9':'#15251d99'} strokeWidth="1.1" paintOrder="stroke" fontFamily="Inter, sans-serif" fontSize="11" fontWeight="800" textLength={Math.min(94,sobrenome.length*7)} lengthAdjust="spacingAndGlyphs">{soletrar?[...sobrenome].map((letra,i)=><tspan key={`${i}-${letra}`} style={{animation:'ccTinta .3s ease both'}}>{letra}</tspan>):sobrenome}</text>}
+  {numero!=null&&<text x="90" y="137" textAnchor="middle" fontFamily="Oswald, sans-serif" fontWeight="700" fontSize="69" fill={tinta} stroke={tinta==='#19232b'?'#fff9':'#15251d99'} strokeWidth="2" paintOrder="stroke">{numero}</text>}
+ </svg>;
 }
 
 export function MedalhaFeito({ id, className = '' }) {

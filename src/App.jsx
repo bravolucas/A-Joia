@@ -53,7 +53,7 @@ export default function App() {
             <h1 className="display text-[34px] leading-none mt-4 tracking-wide" style={{ background: "linear-gradient(180deg,#FFF1B8,#E3B93B 60%,#B8902A)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>A JOIA</h1>
             <p className="text-[17px] font-semibold text-[#F2F5F3] mt-3 leading-snug">Da peneira à Bola de Ouro.</p>
             <p className="text-[15px] text-[#C9D3CE] leading-snug">Cada escolha lapida a sua carreira.</p>
-            <p className="text-[11px] text-[#8FA39A] mt-2">Versão 2026.11.09 · Carreira v3 · Número favorito</p>
+            <p className="text-[11px] text-[#8FA39A] mt-2">Versão 2026.11.09 · Visual v4 · Camisas realistas</p>
             <button className="text-[11px] text-[#B3C4B7] underline underline-offset-4 mt-1" onClick={()=>window.atualizarAJoia?.()}>Atualizar jogo · manter saves</button>
           </div>
         </section>

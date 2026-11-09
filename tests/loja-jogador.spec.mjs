@@ -7,7 +7,7 @@ for(const width of [390,1366])test(`loja do jogador: compra direta, UP e recarga
  const abrir=async()=>{await page.reload();await page.getByRole('button',{name:/Continuar · Jogador da loja/}).click();await page.getByRole('button',{name:/Loja do jogador/}).click();};
  await page.goto('http://127.0.0.1:4173/A-Joia/');await page.evaluate(c=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,etapa:'evento',c})),c);await abrir();
  const loja=page.getByRole('dialog',{name:'Loja do jogador'});
- await expect(loja.locator('article')).toHaveCount(34);
+ await expect(loja.locator('article')).toHaveCount(58);
  await loja.getByRole('button',{name:'UPs temporários',exact:true}).click();await expect(loja.locator('article')).toHaveCount(14);
  const item=nome=>loja.locator('article').filter({has:page.getByRole('heading',{name:nome,exact:true})});
  await expect(loja.getByRole('button',{name:'Confirmar compra'})).toHaveCount(0);

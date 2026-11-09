@@ -41,7 +41,7 @@ test('fontes locais carregam e o escudo de Kasımpaşa não usa um substituto',a
  await page.getByRole('button',{name:'Voltar ao menu',exact:true}).click();
  await page.getByRole('button',{name:/Meu museu/}).click();await page.getByRole('tab',{name:/Camisas/}).click();
  await page.getByRole('searchbox').fill('Kasımpaşa');await page.getByRole('button',{name:'Kasımpaşa, bloqueado',exact:true}).click();
- const escudo=page.getByRole('dialog').locator('image');await expect(escudo).toHaveAttribute('href',/kas-mpasa/);
+ const escudo=page.getByRole('dialog').locator('.vf-escudo-camisa');await expect(escudo).toHaveAttribute('href',/kas-mpasa/);
 });
 
 test('animação de título carrega e reage à preferência de movimento reduzido',async({page})=>{

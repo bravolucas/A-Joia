@@ -1,3 +1,4 @@
+import ApresentacaoOficial from '../comum/ApresentacaoOficial.jsx';
 import {ChegadaCarreira,PainelProgressaoCarreira,RetrospectivaCarreira} from './ProgressaoCarreiraUI.jsx';
 import {camisaInfo,escolherCamisa,sincronizarCamisasSelecao,prepararCamisaSelecao} from './camisasCarreira.js';
 import {definirPlanoEspaco,patamarCarreira} from './projetosCarreira.js';
@@ -350,21 +351,8 @@ function AvatarJogador({ clube, size = 72, numero = null }) {
 }
 
 /* camisa de costas nas cores do clube, com o sobrenome e o número (cartão do topo) */
-function CamisaMini({ cor = "#12A876", nome = "", numero = 9, size = 44 }) {
-  const claro = lumi(cor) > 0.62;
-  const tinta = claro ? "#0E1116" : "#FFFFFF";
-  const sob = (nome || "").trim().split(/\s+/).slice(-1)[0].toUpperCase();
-  const id = `cm${(cor || "").replace("#", "")}`;
-  return (
-    <svg viewBox="0 0 100 100" width={size} height={size} className="shrink-0" aria-hidden="true" style={{ filter: "drop-shadow(0 3px 6px rgba(0,0,0,.45))" }}>
-      <defs><linearGradient id={id} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#000" stopOpacity=".25" /><stop offset=".5" stopColor="#fff" stopOpacity=".12" /><stop offset="1" stopColor="#000" stopOpacity=".28" /></linearGradient></defs>
-      <path d="M30 10 L42 5 Q50 12 58 5 L70 10 L94 30 L82 42 L76 36 L76 96 L24 96 L24 36 L18 42 L6 30 Z" fill={cor} stroke={claro ? "rgba(0,0,0,.3)" : "rgba(255,255,255,.3)"} strokeWidth="2" strokeLinejoin="round" />
-      <path d="M30 10 L42 5 Q50 12 58 5 L70 10 L94 30 L82 42 L76 36 L76 96 L24 96 L24 36 L18 42 L6 30 Z" fill={`url(#${id})`} />
-      <text x="50" y="34" textAnchor="middle" fontFamily="Inter, system-ui" fontWeight="900" fontSize={sob.length > 8 ? 9 : 11} fill={tinta}>{sob}</text>
-      <text x="50" y="78" textAnchor="middle" fontFamily="Inter, system-ui" fontWeight="900" fontSize="40" fill={tinta}>{numero}</text>
-    </svg>
-  );
-}
+function CamisaMini({ cor="#12A876", clube, nome="", numero=9, size=44 }) {return <span style={{width:size,height:size,display:'inline-block',flexShrink:0}}><CamisaPremium nome={clube} cor={cor} numero={numero} sobrenome={nome.trim().split(/\s+/).at(-1).toUpperCase()}/></span>;}
+
 function CartaoCarreira({ c, onEstante, onFicha, contadorPulsa, recorde, etapa }) {
   const ovr = ovrDe(c);
   const [mostrado, delta] = useOvrAnimado(ovr);
@@ -388,7 +376,7 @@ function CartaoCarreira({ c, onEstante, onFicha, contadorPulsa, recorde, etapa }
           {recorde ? <Fogos key={recorde} /> : null}
         </div>
         <div className="flex-1 min-w-0 rounded-2xl pl-1.5 pr-3 py-2 flex items-center gap-1.5" style={{ background: `linear-gradient(120deg, ${clube.cor || "#12A876"}40, rgba(19,26,23,.9) 70%)`, border: "1px solid rgba(255,255,255,.07)" }}>
-          {!semClube && <CamisaMini key={clube.nome} cor={clube.cor} nome={c.nome} numero={numeroDe(c)} size={46} />}
+          {!semClube && <CamisaMini key={clube.nome} cor={clube.cor} clube={clube.nome} nome={c.nome} numero={numeroDe(c)} size={46} />}
           <div className="flex-1 min-w-0 flex flex-col justify-between gap-1 self-stretch">
           <div className="flex items-center gap-1.5 text-[12px] font-bold">
             <span className="text-[#C9D3CE] inline-flex items-center gap-1"><Bandeira nac={c.nac} size={16} /> {c.nac}</span>
@@ -2700,96 +2688,7 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
 /* Apresentação oficial num clube grande: o jogador e o dirigente seguram a camisa com o nome
    e o número, na sala de imprensa (painel com o escudo repetido) ou no gramado do estádio. */
 const lumi = (hex) => { const h = (hex || "#333").replace("#", ""); const n = parseInt(h.length === 3 ? h.split("").map((x) => x + x).join("") : h, 16); return (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
-export function ApresentacaoGrande({ clube, nome, numero, posicao, idade, deOnde, contrato, valor, onConcluir }) {
-  const cor = clube?.cor || "#12A876";
-  const claro = lumi(cor) > 0.62;
-  const tinta = claro ? "#0E1116" : "#FFFFFF";
-  const luz = claro ? "#FFFFFF" : cor; // cor do contorno de luz nas silhuetas
-  const sobrenome = (nome || "").trim().split(/\s+/).slice(-1)[0].toUpperCase();
-  const estadio = ((clube?.nome || "").length + (numero || 0)) % 2 === 1;
-  const fotoCenario = useCenario(estadio ? "estadio" : "imprensa");
-  const [pronto, setPronto] = useState(false);
-  useEffect(() => { vibrar([30, 40, 30]); torcida(3.2, 0.12); setTimeout(() => tocar("vidro", 0.4), 400); setTimeout(() => tocar("vidro", 0.35), 1300); const t = setTimeout(() => setPronto(true), 2000); return () => clearTimeout(t); }, []);
-  const fonteNome = sobrenome.length > 9 ? 12 : sobrenome.length > 6 ? 15 : 18;
-  return createPortal(
-    <div className="cp apresentacao-grande fixed inset-0 z-[72] overflow-y-auto" role="dialog" aria-modal="true" aria-label={`Apresentação no ${clube?.nome}`} style={{ background: "#05070A" }}>
-      <div className="min-h-full max-w-md mx-auto flex flex-col">
-        <div className="relative h-[460px] overflow-hidden shrink-0">
-          {/* fundo */}
-          {estadio ? (
-            <>
-              <div className="absolute inset-0" style={{ background: `url(${fotoCenario}) center 30%/cover`, filter: "saturate(1.1) brightness(.85)" }} aria-hidden="true" />
-              <div className="absolute left-[-30%] right-[-30%] bottom-0 h-[42%]" style={{ background: `url(${ARTE.campo}) center 40%/100% auto no-repeat, #2E7D46`, transform: "perspective(240px) rotateX(48deg)", transformOrigin: "bottom", filter: "brightness(.8) saturate(1.1)" }} aria-hidden="true" />
-              <div className="absolute left-1/2 top-[26px] -translate-x-1/2 rounded-2xl px-4 py-2 flex items-center gap-3 border" style={{ background: "rgba(5,7,10,.6)", borderColor: `${luz}55`, boxShadow: `0 0 30px ${luz}33`, backdropFilter: "blur(6px)", width: "max-content", maxWidth: "calc(100% - 64px)", whiteSpace: "nowrap" }} aria-hidden="true">
-                <ClubDot club={clube} size={36} />
-                <span className="text-left leading-tight"><span className="block text-[10px] font-bold tracking-[0.3em] text-white/60">BEM-VINDO</span><span className="block text-[15px] font-black tracking-wide text-white">{sobrenome} {numero}</span></span>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="absolute inset-0" style={{ background: `url(${fotoCenario}) center 20%/cover`, filter: "brightness(.8)" }} aria-hidden="true" />
-              <div className="absolute inset-0" style={{ background: cor, mixBlendMode: claro ? "soft-light" : "color", opacity: claro ? 0.5 : 0.85 }} aria-hidden="true" />
-              <div className="absolute inset-0" style={{ background: `radial-gradient(80% 60% at 50% 30%, ${cor}55, transparent 70%)` }} aria-hidden="true" />
-              <div className="absolute inset-0 grid grid-cols-6 gap-y-5 px-2 pt-4 opacity-[.28] mix-blend-screen" aria-hidden="true" style={{ maskImage: "linear-gradient(180deg,#000 55%,transparent 85%)", WebkitMaskImage: "linear-gradient(180deg,#000 55%,transparent 85%)" }}>
-                {Array.from({ length: 42 }, (_, k) => <div key={k} className="flex justify-center" style={{ transform: Math.floor(k / 6) % 2 ? "translateX(50%)" : undefined }}><ClubDot club={clube} size={26} /></div>)}
-              </div>
-              {/* brilho passando no painel */}
-              <div className="absolute inset-0 ap-brilho" aria-hidden="true" />
-            </>
-          )}
-          {/* holofotes */}
-          <div className="absolute -top-10 left-[8%] w-[46%] h-[120%] ap-holofote" style={{ transform: "rotate(-14deg)" }} aria-hidden="true" />
-          <div className="absolute -top-10 right-[8%] w-[46%] h-[120%] ap-holofote" style={{ transform: "rotate(14deg)", animationDelay: "1.1s" }} aria-hidden="true" />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.1) 55%, rgba(5,7,10,.97))" }} aria-hidden="true" />
-          {/* flashes dos fotógrafos */}
-          {[[10, 62, 0], [80, 44, 0.9], [28, 34, 1.6], [88, 72, 2.1], [56, 20, 0.4], [4, 30, 1.3]].map(([x, y, d], k) => <span key={k} className="ap-flash" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${d}s` }} aria-hidden="true" />)}
-          {/* silhuetas com contorno de luz e a camisa */}
-          <svg viewBox="0 0 360 300" className="absolute left-0 right-0 bottom-0 w-full" aria-hidden="true">
-            <defs>
-              <linearGradient id="apSil" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#1A1E24" /><stop offset="1" stopColor="#07090C" /></linearGradient>
-              <linearGradient id="apAro" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor={luz} stopOpacity="0" /><stop offset=".7" stopColor={luz} stopOpacity=".15" /><stop offset="1" stopColor={luz} stopOpacity=".95" /></linearGradient>
-              <linearGradient id="apAroE" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stopColor={luz} stopOpacity="0" /><stop offset=".7" stopColor={luz} stopOpacity=".15" /><stop offset="1" stopColor={luz} stopOpacity=".95" /></linearGradient>
-              <linearGradient id="apTecido" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0" stopColor="#000" stopOpacity=".28" /><stop offset=".18" stopColor="#000" stopOpacity="0" /><stop offset=".5" stopColor="#fff" stopOpacity=".1" /><stop offset=".82" stopColor="#000" stopOpacity="0" /><stop offset="1" stopColor="#000" stopOpacity=".3" />
-              </linearGradient>
-              <linearGradient id="apTecidoV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fff" stopOpacity=".12" /><stop offset=".4" stopColor="#fff" stopOpacity="0" /><stop offset="1" stopColor="#000" stopOpacity=".22" /></linearGradient>
-              <filter id="apSombra" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#000" floodOpacity=".55" /></filter>
-            </defs>
-            <g className="ap-sobe" style={{animationDelay:'.15s'}}><RetratoApresentacao x={88} y={150} dirigente nome="Diretoria" /></g>
-            <g className="ap-sobe" style={{animationDelay:'.3s'}}><RetratoApresentacao x={278} y={145} cor={cor} nome={nome} /></g>
-            <g className="ap-camisa" style={{animationDelay:'.6s'}}><foreignObject x="121" y="137" width="124" height="151"><CamisaPremium nome={clube?.nome} cor={cor} numero={numero} sobrenome={sobrenome}/></foreignObject></g>
-            {!estadio && (
-              <g className="ap-sobe" style={{ animationDelay: ".05s" }}>
-                <rect x="0" y="270" width="360" height="30" fill="#07090C" />
-                <rect x="0" y="268" width="360" height="3" fill={luz} opacity=".9" />
-                {[118, 150, 212, 244].map((x) => <g key={x}><rect x={x} y="252" width="2.5" height="16" fill="#2A2E33" /><rect x={x - 3.5} y="243" width="9.5" height="13" rx="4.5" fill="#1C2026" stroke="#3A3F45" /></g>)}
-              </g>
-            )}
-          </svg>
-          <Lottie nome="contrato" className="vf-contrato-lottie" />
-          <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-[0.18em] text-white bg-black/45" aria-hidden="true"><span className="w-1.5 h-1.5 rounded-full bg-[#FF3B3B] animate-pulse" />AO VIVO</div>
-          <div className="absolute top-3 right-3"><button onClick={onConcluir} className="text-[13px] font-bold text-white/85 bg-black/45 rounded-full px-3 py-1.5">Pular</button></div>
-        </div>
-        {/* legenda em painel de vidro */}
-        <div className="relative mx-4 -mt-5 rounded-[22px] border border-white/10 p-4 flex flex-col items-center text-center gap-2.5 ap-texto" style={{ animationDelay: "1.6s", background: "rgba(14,17,22,.72)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", boxShadow: `0 -1px 0 ${luz}55 inset, 0 20px 50px rgba(0,0,0,.5)` }}>
-          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-white/55"><span className="h-px w-6" style={{ background: luz }} />Apresentação oficial<span className="h-px w-6" style={{ background: luz }} /></div>
-          <div className="flex items-center gap-2.5"><ClubDot club={clube} size={34} /><span className="text-[26px] font-black text-white leading-none tracking-tight">{clube?.nome}</span></div>
-          <div className="text-[15px] font-semibold text-[#E4E4E7]">{nome} é o novo reforço</div>
-          <div className="text-[13px] text-[#A1A1AA]">{posicao} · {idade} anos · camisa {numero}{deOnde ? ` · chega do ${deOnde.nome}` : ""}</div>
-          <div className="grid grid-cols-3 gap-2 w-full mt-1">
-            {[["Transferência", valor ? formatarValor(valor) : "Sem custo"], ["Contrato", `${contrato?.anos || 1} anos`], ["Salário/ano", contrato?.salario ? formatarValor(contrato.salario) : "—"]].map(([k, v]) => (
-              <div key={k} className="rounded-xl bg-white/[.04] border border-white/[.07] px-2 py-2"><div className="text-[9px] font-bold uppercase tracking-wider text-[#71717A]">{k}</div><div className="text-[14px] font-extrabold text-white truncate">{v}</div></div>
-            ))}
-          </div>
-        </div>
-        <div className="px-4 pt-4 pb-6">
-          <button onClick={onConcluir} className={`cp-pill cp-branca text-[16px] w-full transition-opacity ${pronto ? "" : "opacity-0 pointer-events-none"}`}>Vestir a camisa</button>
-        </div>
-      </div>
-    </div>,
-    document.body,
-  );
-}
+export function ApresentacaoGrande(props){return <ApresentacaoOficial {...props}/>;}
 
 /* Barra de "a temporada vai rolar sozinha" (anos sem decisão, como no Copero) */
 function AutoAvanco({ c, ms, onAgora, onPausar }) {
@@ -3131,7 +3030,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
       {chegadaPendente&&!popup&&<ChegadaCarreira key={clubePendente?'clube':'selecao'} c={clubePendente?c:cDaSelecao} alvo={clubePendente?'clube':'selecao'} precisaNumero={clubePendente?!infoChegada.escolhido:true} onNumero={receberNumero} onPlano={receberPlano}/>}
       {estanteAberta && c && <Estante c={c} onFechar={() => setEstanteAberta(false)} />}
       {patrimonioAberto && c && <Patrimonio c={c} etapa={etapa} onComprar={comprar} onFechar={() => setPatrimonioAberto(false)} />}
-      {apresentacao && !chegadaPendente && <CenasClube c={apresentacao.c||c} mudanca={apresentacao.mudanca} onFim={()=>setApresentacao(null)}>{fechar=>apresentacao.curto?<ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} grandeChegada={apresentacao.grande} curto={apresentacao.curto} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>:<ApresentacaoGrande clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>}</CenasClube>}
+      {apresentacao && !chegadaPendente && <CenasClube c={apresentacao.c||c} mudanca={apresentacao.mudanca} onFim={()=>setApresentacao(null)}>{fechar=>apresentacao.curto?<ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} grandeChegada={apresentacao.grande} curto={apresentacao.curto} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>:<ApresentacaoGrande fama={c.fama} clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>}</CenasClube>}
       {["fechamento","bolaOuro"].includes(etapa)&&card&&c&&!apresentacao&&<PopupTemporada key={card.ano} c={c} card={card} celebracaoIndice={estado.celebracaoIndice||0} onCelebracao={indice=>setEstado(st=>({...st,etapa:"fechamento",celebracaoIndice:indice,auto:false}))} onFechar={()=>{if(estado.retorno){setEstado(estado.retorno);return;}if(card.titulos.length){setContadorPulsa(x=>x+1);vibrar(20);}posTemporada(c,card);}}/>}
       {apresentacaoSelecao&&!apresentacao&&!chegadaPendente&&!["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa)&&!popup&&<PrimeiraSelecao c={apresentacaoSelecao.c} estreia={apresentacaoSelecao.estreia} onFim={()=>setApresentacaoSelecao(null)}/>}
       {popup && !["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa) && <PopupResultado key={popup.k} info={popup} onFechar={() => setPopup(null)} />}

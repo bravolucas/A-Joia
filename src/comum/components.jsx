@@ -1,5 +1,6 @@
+import ApresentacaoOficial from './ApresentacaoOficial.jsx';
 import CenaPenaltis from '../treinador/CenaPenaltis.jsx';
-import {desfechoCobranca} from './desfechoCobranca.js';
+import {desfechoCobranca,ladoGoleiroCobranca} from './desfechoCobranca.js';
 import {createPortal} from 'react-dom';
 import {bloquearRolagem} from './bloqueioRolagem.js';
 import {BolaTrajeto} from './CenarioMini.jsx';
@@ -471,7 +472,7 @@ function AnuncioClube({ clube, nome, numero, posicao, idade, grandeChegada, deOn
 }
 
 export function ApresentacaoNovoClube(props) {
-  return <AnuncioClube {...props} />;
+  return props.grandeChegada?<ApresentacaoOficial {...props}/>:<AnuncioClube {...props} />;
 }
 
 // Movimento da bola respeita as configurações de acessibilidade do sistema.
@@ -1335,7 +1336,7 @@ export function GoalMini({ onPick, resultado }) {
   return (
     <div className="mb-3 w-full">
       <SuperficieMini largura={PEN_W} altura={PEN_H}>
-          <CenaPenaltis animar={!!resultado} resultado={!!resultado} desfecho={desfechoCobranca(resultado)}/>
+          <CenaPenaltis animar={!!resultado} resultado={!!resultado} desfecho={desfechoCobranca(resultado)} lado={ladoGoleiroCobranca(resultado)}/>
 
       </SuperficieMini>
       <div className="mx-auto mt-2 flex justify-center gap-2 text-[10px] uppercase tracking-widest text-emerald-100/70" aria-live="polite">

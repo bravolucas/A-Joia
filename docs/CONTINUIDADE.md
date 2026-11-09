@@ -1,3 +1,9 @@
+## Entrega concluída — museu pessoal interativo (09/11/2026)
+
+Museu funcional em `fdc9918`; fluxos antigos de teste adaptados em `fe863ca`. [CI 42713713408](https://github.com/bravolucas/A-Joia/actions/runs/42713713408) **aprovado**, com 409 testes de lógica, build e suíte de 283 cenários de navegador. [Pages 42712487336](https://github.com/bravolucas/A-Joia/actions/runs/42712487336) **aprovado** para o código funcional. Conferência no site público em 390px confirmou entrada em Meu museu, oito salas, sala de camisas e coleção permanente. https://bravolucas.github.io/A-Joia/
+
+A alteração posterior ao código funcional contém somente testes e documentação; não muda o pacote do jogo. A home identifica “História viva · Museu pessoal interativo”. Acesso também por **Visitar meu museu** na ficha/histórico individual. Curadoria separada por carreira, três favoritos, camisa central, frase e ambientes. Coleção permanente, seus backups, saves e galeria dos clubes preservados. Relatório `docs/MUSEU_PESSOAL_INTERATIVO.md`. Nenhuma pendência funcional desta rodada.
+
 ## Revisão dos fluxos antigos do museu (09/11/2026)
 
 Entrega funcional em `fdc9918`. CI 42712487398: 409 testes de lógica e build aprovados; navegador 281/283. As duas falhas eram testes antigos de camisa/progresso e fonte/escudo que ainda acessavam as abas da coleção diretamente em Meu museu. Corrigidos para navegar pelo botão **Coleção permanente →**, preservando todos os asserts. Ambos aprovados na reprodução local. Nova rodada completa de CI acionada para confirmar a correção. Publicação funcional ainda em acompanhamento.

@@ -25,3 +25,5 @@ Acessibilidade: diálogos nativos com Escape e restauração de foco, bloqueio d
 ## Validação
 
 Testes de modelo cobrem passagens/retornos, deduplicação das edições, preservação do save, ausência de fatos inventados, modo completo, seleção, treinador, isolamento da curadoria e slots. Testes de navegador cobrem celular/desktop, foco, gavetas, álbuns, edições, favoritos, curadoria persistente, túnel, visita guiada, troca de carreira e coleção permanente. A suíte anterior de backup/importação e galeria dos clubes continua ativa.
+
+Resultado final: 409 testes de lógica, build e 283 cenários de navegador aprovados no [CI 42713713408](https://github.com/bravolucas/A-Joia/actions/runs/42713713408). Código funcional publicado pelo [Pages 42712487336](https://github.com/bravolucas/A-Joia/actions/runs/42712487336) e conferido no site público em tela de 390px. As duas verificações antigas que buscavam diretamente as abas da coleção foram adaptadas ao novo caminho, mantendo seus asserts de número/ano, progresso e escudo.

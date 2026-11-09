@@ -1,3 +1,4 @@
+import {adversarioCopaPorFase} from '../treinador/copasEscolha.js';
 import { AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLASSICOS, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONDICOES_CLIMA, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESPECIALIDADES_LISTA, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, FORMACOES_TATICAS, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "../dados/data.js";
 
 export function potencialDaOrigem(origem, posicao) {
@@ -1497,16 +1498,17 @@ export function statusSelecao(ovr, idade, anosDesdeCopa) {
   return { label: "Fora dos planos por enquanto", cor: "#6b7280" };
 }
 
-export function sortearAdversario(c, competicao) {
+export function sortearAdversario(c, competicao, faseIdx = null) {
+  const escolherClube = pool => faseIdx == null ? pick(pool) : adversarioCopaPorFase(pool, FASES_POR_COMPETICAO[competicao]?.[faseIdx]?.label || 'Final', Math.random);
   if (competicao === "estadual") {
     const pool = CLUBES.filter((x) => x.estado === c.clube.estado && x.nome !== c.clube.nome);
-    return pool.length ? pick(pool).nome : "rival estadual";
+    return pool.length ? escolherClube(pool).nome : "rival estadual";
   }
   if (competicao === "copaNacional" || competicao === "copinha") {
     const brasil = c.clube.liga === "brasileirao" || c.clube.liga === "serieB";
     const ligasPais = brasil ? ["brasileirao", "serieB"] : [c.clube.liga];
     const pool = CLUBES.filter((x) => ligasPais.includes(x.liga) && x.nome !== c.clube.nome);
-    return pool.length ? pick(pool).nome : "adversário nacional";
+    return pool.length ? escolherClube(pool).nome : "adversário nacional";
   }
   if (competicao === "continental") {
     // Continental de verdade cruza países dentro do mesmo grupo continental
@@ -1516,7 +1518,7 @@ export function sortearAdversario(c, competicao) {
     const meuGrupo = LIGAS[c.clube.liga]?.continental;
     const ligasDoGrupo = Object.keys(LIGAS).filter((l) => LIGAS[l].continental === meuGrupo);
     const pool = CLUBES.filter((x) => ligasDoGrupo.includes(x.liga) && x.nome !== c.clube.nome);
-    return pool.length ? pick(pool).nome : "adversário continental";
+    return pool.length ? escolherClube(pool).nome : "adversário continental";
   }
   if (competicao === "copaDoMundo") {
     const outras = NACIONALIDADES.filter((n) => n.id !== c.nacionalidade);

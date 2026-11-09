@@ -1320,7 +1320,7 @@ function concluirPartidaContinentalClube(c, ctx, resultado, golsMinha, assistMin
     return;
   }
   const proximaFase = faseIdx === -1 ? 0 : faseIdx + 1;
-  agendarEventoMataMata(c, { tipo: "continental", jogoGrupo: null, adversario: sortearAdversario(c, "continental"), souCasa: Math.random() < 0.5, opcoesMataMata: { faseIdx: proximaFase, perna: "ida", agregadoMeu: 0, agregadoAdv: 0 } }, rand(3, 5));
+  agendarEventoMataMata(c, { tipo: "continental", jogoGrupo: null, adversario: sortearAdversario(c, "continental", proximaFase), souCasa: Math.random() < 0.5, opcoesMataMata: { faseIdx: proximaFase, perna: "ida", agregadoMeu: 0, agregadoAdv: 0 } }, rand(3, 5));
   setCarreira(c);
 }
 function concluirPartidaMataMata(c, ctx, resultado, golsMinha, assistMinha) {
@@ -1363,7 +1363,7 @@ function concluirPartidaMataMata(c, ctx, resultado, golsMinha, assistMinha) {
     setCompeticaoResultado({ titulo: `${nomeCompeticao} encerrada`, texto: `Derrota por ${placarFinal} contra o ${adversario}. A campanha parou ${f.prep} ${f.label}.`, icone: "😔", epico: true, venceu: false, nomeCompeticao });
     return;
   }
-  agendarEventoMataMata(c, { tipo, faseIdx: faseIdx + 1, adversario: sortearAdversario(c, tipo) }, rand(3, 5));
+  agendarEventoMataMata(c, { tipo, faseIdx: faseIdx + 1, adversario: sortearAdversario(c, tipo, faseIdx + 1) }, rand(3, 5));
   setCarreira(c);
 }
 /* Copa do Mundo: fase de grupos de verdade (3 jogos, classifica com 4+ pontos)
@@ -1919,7 +1919,7 @@ function resolverTemporada(c, extraStats) {
       return;
     }
     logHist(c, `${nomeCompeticao} — ${fases[faseIdx].label} x ${adversario}: vitória por ${placar}. Classificado!`);
-    setPendingCompeticao({ tipo: competicao, faseIdx: faseIdx + 1, adversario: sortearAdversario(c, competicao) });
+    setPendingCompeticao({ tipo: competicao, faseIdx: faseIdx + 1, adversario: sortearAdversario(c, competicao, faseIdx + 1) });
   }
   function avancarFilaCompeticoes() {
     setCompeticaoResultado(null);

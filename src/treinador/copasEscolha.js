@@ -8,12 +8,26 @@ export const PLANOS_PENALTIS=[{id:'canto',nome:'Bater colocado',texto:'Precisão
 export function chancesCopa(forca,adversario,plano='controlar',final=false,perfil=null){
  const estrategia=TODAS_ESTRATEGIAS.find(x=>x.id===plano);
  const diff=forca-adversario,ajuste=estrategia?(estrategia.ajuste==='contra'?clamp(-diff*.24,-4,7):estrategia.ajuste):plano==='pressionar'?3:plano==='contra'?clamp(-diff*.18,-3,5):0;
- const empate=clamp(.27-Math.abs(diff)*.0015+(estrategia?.empate??(plano==='controlar'?.06:plano==='pressionar'?-.07:0)),.12,.34);
- const vitoria=clamp((1-empate)/(1+Math.exp(-(diff+ajuste+ajustePlanoAdversario(plano,perfil))/(final?18:14))),.03,1-empate-.03);
+ const empate=clamp(.27-Math.abs(diff)*.004+(estrategia?.empate??(plano==='controlar'?.06:plano==='pressionar'?-.07:0)),.12,.34);
+ const vitoria=clamp((1-empate)/(1+Math.exp(-(diff+ajuste+ajustePlanoAdversario(plano,perfil))/(final?11:8))),.03,1-empate-.03);
  return {vitoria,empate,derrota:1-vitoria-empate};
 }
 export function chancePenaltis(forca,adversario,plano='canto',final=false){const diff=forca-adversario;return clamp(.5+diff*(final?.003:.004)+(NOVOS_PENALTIS.find(x=>x.id===plano)?.ajuste??(plano==='canto'?.015:plano==='esperar'?clamp(-diff*.0008,-.015,.025):-.005)),.23,.77);}
 function embaralhar(lista,rng){return lista.map(x=>({x,d:rng()})).sort((a,b)=>a.d-b.d).map(x=>x.x);}
+// Ranking de classificação: força pesa mais que o sorteio, sem excluir zebras.
+function selecionarParticipantes(times,limite,rng){return times.map(x=>({x,nota:nivel(x)-4*Math.log(-Math.log(clamp(rng(),Number.EPSILON,1-Number.EPSILON)))})).sort((a,b)=>b.nota-a.nota).slice(0,limite).map(x=>x.x);}
+
+/** Adversários dos momentos resumidos também precisam vencer sua parte da copa. */
+export function adversarioCopaPorFase(times,fase,rng){
+ let vivos=[...times];
+ const limite=/final/i.test(fase)&&!/semi|quart|oitav/i.test(fase)?1:/semi/i.test(fase)?2:/quart/i.test(fase)?4:8;
+ while(vivos.length>limite){
+  const rodada=vivos.sort((a,b)=>nivel(b)-nivel(a)),proximos=[];
+  while(rodada.length>1){const a=rodada.shift(),b=rodada.pop(),j=jogoEliminatorio(a,b,rng);proximos.push(j.vencedor===a.nome?a:b);}
+  if(rodada.length)proximos.push(rodada[0]);vivos=proximos;
+ }
+ return vivos.length?vivos[Math.floor(rng()*vivos.length)]:null;
+}
 function partida(a,b,rng,plano='controlar',final=false,perfil=null){
  const p=chancesCopa(nivel(a),nivel(b),plano,final,perfil),d=rng(),res=d<p.vitoria?'V':d<p.vitoria+p.empate?'E':'D',baixo=Math.floor(rng()*2),alto=baixo+1+Math.floor(rng()*2);
  return {casa:a.nome,fora:b.nome,golsCasa:res==='V'?alto:baixo,golsFora:res==='D'?alto:baixo,vencedor:res==='E'?null:res==='V'?a.nome:b.nome,res};
@@ -26,7 +40,7 @@ export function criarCampanhaCopa({nome,tipo='continental',usuario,forcaUsuario,
  const rng=geradorTecnico(seed||`${ano}|${nome}|${usuario}`),eu={...(clubes.find(c=>c.nome===usuario)||{nome:usuario}),forca:forcaUsuario},outros=embaralhar(clubes.filter(c=>c.nome!==usuario),rng);
  const c={nome,tipo,ano,usuario,selecao:null,seed:seed||`${ano}|${nome}|${usuario}`,forcaUsuario,forcas:Object.fromEntries([eu,...outros].map(c=>[c.nome,nivel(c)])),pool:[eu,...outros],fases:[],grupos:[],jogosUsuario:[],campeao:null,vice:null,faseUsuario:'Em disputa',etapa:0,rodada:0,resultado:null,eliminados:[],estado:estado||null};
  if(formato==='liga'){
-  c.formato='liga';c.times=[eu,...outros.slice(0,35)];c.participantes=c.times.length;c.totalRodadas=/Conference/i.test(nome)?6:8;c.calendario=calendario(c.times,c.totalRodadas);c.manual=[0,c.totalRodadas-1];c.jogosLiga=[];c.fase='liga';
+  c.formato='liga';c.times=embaralhar([eu,...selecionarParticipantes(outros,35,rng)],rng);c.participantes=c.times.length;c.totalRodadas=/Conference/i.test(nome)?6:8;c.calendario=calendario(c.times,c.totalRodadas);c.manual=[0,c.totalRodadas-1];c.jogosLiga=[];c.fase='liga';
  }else if(formato==='grupos'){
   c.formato='grupos';c.times=[eu,...outros.slice(0,3)];c.participantes=c.pool.length;c.totalRodadas=6;c.calendario=calendario(c.times,6);c.manual=[0,1,2,3,4,5];c.jogosLiga=[];c.fase='grupos';
  }else if(formato==='estadual'){

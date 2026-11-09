@@ -6,7 +6,7 @@ import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
 import {CLUBES_EUROPEUS_EXTRAS} from '../competicoes/clubesEuropeusExtras.js';
 import {vagaJogador,nomeVaga,calcularVagasRapidas,clubesParaCopas,regiaoDaLiga,idContinental} from '../competicoes/regrasCopasRapidas.js';
 import {participantesEstadual} from '../competicoes/estaduaisRapidos.js';
-import {simularCampanhaCopa} from '../treinador/copasEscolha.js';
+import {simularCampanhaCopa,adversarioCopaPorFase} from '../treinador/copasEscolha.js';
 import {jogosDoGrupo,tabelaGrupoCopa,empateGrupo} from './gruposCopa.js';
 import {atualizarRecordesUniverso} from './recordesUniverso.js';
 import {registrarCampanhaContinental,registrarFinalContinental} from './torneioContinental.js';
@@ -1486,7 +1486,7 @@ export function contextoMomento(c,m){
   if(['champions','europa','conference'].includes(comp))elegiveis.push(...CLUBES_EUROPEUS_EXTRAS.filter(x=>x.competicaoInternacional===comp));
   if(elegiveis.length)pool=elegiveis;
  }
- const x=pool.length?pick(pool):null;return x?{tipo:'clube',nome:x.nome,...(x.extra?{forca:x.forca}:{})}:null;
+ const x=pool.length?(['copa','continental'].includes(m.tipo)?adversarioCopaPorFase(pool,m.titulo||'Final',Math.random):pick(pool)):null;return x?{tipo:'clube',nome:x.nome,...(x.extra?{forca:x.forca}:{})}:null;
  });
  const mini=m.mini||miniDaPosicao(c.posicao);
  const fase=m.tipo==='classico'?'Clássico':['liga','acesso','permanencia'].includes(m.tipo)?'Última rodada':'Final';

@@ -40,3 +40,6 @@ Validação local: build final aprovado; 399/399 testes de lógica na rodada ger
 
 
 Entrega funcional `203a60e`: publicação Pages 42685294982 confirmada. CI 42685295116 aprovou 400 testes de lógica, build e 274 cenários browser; três testes de migração ainda esperavam o rótulo antigo da versão. Expectativas ajustadas para “História viva”, com todas as verificações de saves/cache/SW preservadas; os três passaram localmente. Nova confirmação completa em acompanhamento.
+
+
+**Confirmação final:** CI [42686549795](https://github.com/bravolucas/A-Joia/actions/runs/42686549795) aprovado, com **400 testes de lógica e 277 cenários de navegador**. Pages [42686550047](https://github.com/bravolucas/A-Joia/actions/runs/42686550047) aprovado. Entrega funcional `203a60e`, ajuste dos testes de versão `27ecbc8`. URL publicada: https://bravolucas.github.io/A-Joia/.

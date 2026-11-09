@@ -34,4 +34,4 @@ Estado inicial: auditoria identificou projetoOferta, preparar/fecharJornada e le
 
 O elenco de camisas do clube é simulado e não pretende reproduzir a numeração real atual. Não há negociação com caixa de diálogo adicional: prestígio suficiente conclui o pedido no clique. Seleções utilizam 1–26 neste modelo compacto. Perfis de adversário e projetos são próprios do jogo. Reputação é reconhecimento persistente, sem compra de OVR; projetos/postura/confiança afetam a simulação com limites. Histórico de outras temporadas não é renumerado. Não incluir os dois documentos originais não rastreados do usuário no commit.
 
-Publicação: pendente confirmação do GitHub Pages após push.
+Publicado em `73b3db3`. GitHub Pages [42629591816](https://github.com/bravolucas/A-Joia/actions/runs/42629591816) confirmado com sucesso. CI [42629591804](https://github.com/bravolucas/A-Joia/actions/runs/42629591804) ainda executando na confirmação.

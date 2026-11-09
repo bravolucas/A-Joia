@@ -1,3 +1,4 @@
+import {BotaoMuseuPessoal} from '../museu/MuseuPessoal.jsx';
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {CLUBES,NACIONALIDADES} from '../dados/data.js';
@@ -23,6 +24,7 @@ export function MarcosIndividuais({c,temporadas,clube}){
  const todas=temporadas||c.temporadas||[],dados=useMemo(()=>estatisticasHistoricas(c,clube?todas.filter(t=>t.clube===clube):todas),[c,todas,clube]);
  const decisoes=todas.reduce((s,t)=>s+(t.defesasDecisivas||0),0);
  return <section className="hf-marcos" aria-label="Histórico individual"><span className="hf-eyebrow">OS NÚMEROS DA SUA HISTÓRIA</span><h2>{clube?'Sua passagem pelo clube':'Sua carreira, competição por competição'}</h2>
+  <BotaoMuseuPessoal c={c} temporadas={todas} modo={c.clube?.nome?'completo':'rapido'}/>
   <div className="hf-numeros"><article><strong>{dados.selecao.jogos}</strong><span>jogos por {dados.selecao.nome}</span></article><article><strong>{dados.selecao.gols}</strong><span>gols pela seleção</span></article><article><strong>{dados.selecao.assist}</strong><span>assistências pela seleção</span></article>{c.posicao==='GOL'&&<article><strong>{decisoes}</strong><span>defesas decisivas registradas</span></article>}</div>
   {dados.competicoes.length?<TabelaEstatisticas linhas={dados.competicoes}/>:<p className="hf-vazio">A divisão por competição começa a aparecer após concluir uma temporada registrada.</p>}
   {dados.incompleto&&<p className="hf-nota">Parte do save antigo não separava os números por competição. Esses anos não foram preenchidos com estimativas retroativas.</p>}

@@ -6,6 +6,8 @@ import { TACAS_MUSEU, CAMISAS_MUSEU, FEITOS_MUSEU, lerMuseu, sincronizarMuseuDos
 import { escudoDe } from '../comum/arte.js';
 import { TacaCompeticao } from '../comum/trofeus.jsx';
 import './Museu.css';
+import MuseuPessoal from './MuseuPessoal.jsx';
+import {carreirasDisponiveis} from './museuPessoal.js';
 
 const ABAS = [{ id: 'tacas', nome: 'Taças', simbolo: '🏆', catalogo: TACAS_MUSEU }, { id: 'camisas', nome: 'Camisas', simbolo: '👕', catalogo: CAMISAS_MUSEU }, { id: 'feitos', nome: 'Feitos', simbolo: '✦', catalogo: FEITOS_MUSEU }];
 const quantidade = item => Object.values(item?.fontes || {}).reduce((s, f) => s + f.quantidade, 0);
@@ -35,7 +37,7 @@ function Detalhe({ aba, item, conquista, progresso, onFechar }) {
   </dialog>;
 }
 
-export default function Museu({ onVoltar }) {
+export function ColecaoPermanente({ onVoltar, destino='menu' }) {
   const [carreiraAtual]=useState(()=>{try{return JSON.parse(localStorage.getItem('ajoia_rapido_v1'))?.c||null;}catch{return null;}});
   const [museu, setMuseu] = useState(() => lerMuseu());
   const [aba, setAba] = useState('tacas');
@@ -73,7 +75,7 @@ export default function Museu({ onVoltar }) {
     } catch (erro) { setAviso(erro instanceof SyntaxError ? 'Arquivo inválido. Escolha um backup JSON do museu.' : erro.message || 'Não foi possível importar.'); }
   };
   return <main className="mu">
-    <header className="mu-top"><button onClick={onVoltar} className="mu-back">← Voltar ao menu</button><span>A JOIA · COLEÇÃO PERMANENTE</span></header>
+    <header className="mu-top"><button onClick={onVoltar} className="mu-back">← Voltar ao {destino}</button><span>A JOIA · COLEÇÃO PERMANENTE</span></header>
     <section className="mu-hero"><div><span className="mu-eyebrow">O FUTEBOL PASSA. A HISTÓRIA FICA.</span><h1>Seu museu.</h1><p>Cada carreira escreve um capítulo. Aqui, todas as suas conquistas se encontram.</p></div><div className="mu-hero-total"><strong>{total}</strong><span>PEÇAS NA COLEÇÃO</span></div></section>
     <Personalizacao/>
     <div className="mu-categories" role="tablist" aria-label="Categorias do museu">{ABAS.map(a => <button key={a.id} role="tab" id={`mu-tab-${a.id}`} aria-selected={aba === a.id} tabIndex={aba === a.id ? 0 : -1} onKeyDown={e => {
@@ -95,4 +97,11 @@ export default function Museu({ onVoltar }) {
     {aviso && <p role="status" className="mu-notice">{aviso}</p>}
     {detalhe && <Detalhe key={detalhe.id} aba={aba} item={detalhe} conquista={museu[aba][detalhe.id]} progresso={progressoFeitoMuseu(carreiraAtual,detalhe.id)} onFechar={() => setDetalhe(null)} />}
   </main>;
+}
+
+export default function Museu({onVoltar}) {
+ const [carreiras]=useState(()=>carreirasDisponiveis()),[selecionada,S]=useState(carreiras[0]?.id),[colecao,C]=useState(false);
+ const carreira=carreiras.find(c=>c.id===selecionada);
+ if(colecao)return <ColecaoPermanente destino="museu" onVoltar={()=>C(false)}/>;
+ return <><MuseuPessoal key={carreira?.id||'vazio'} c={carreira?.c} temporadas={carreira?.temporadas} modo={carreira?.modo} onVoltar={onVoltar} onColecao={()=>C(true)} carreiras={carreiras} onCarreira={S}/><Personalizacao/></>;
 }

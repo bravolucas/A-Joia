@@ -53,7 +53,7 @@ export default function App() {
             <h1 className="display text-[34px] leading-none mt-4 tracking-wide" style={{ background: "linear-gradient(180deg,#FFF1B8,#E3B93B 60%,#B8902A)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>A JOIA</h1>
             <p className="text-[17px] font-semibold text-[#F2F5F3] mt-3 leading-snug">Da peneira à Bola de Ouro.</p>
             <p className="text-[15px] text-[#C9D3CE] leading-snug">Cada escolha lapida a sua carreira.</p>
-            <p className="text-[11px] text-[#8FA39A] mt-2">Versão 2026.11.09 · História viva · Clubes e recordes</p>
+            <p className="text-[11px] text-[#8FA39A] mt-2">Versão 2026.11.09 · História viva · Museu pessoal interativo</p>
             <button className="text-[11px] text-[#B3C4B7] underline underline-offset-4 mt-1" onClick={()=>window.atualizarAJoia?.()}>Atualizar jogo · manter saves</button>
           </div>
         </section>
@@ -102,7 +102,7 @@ export default function App() {
 
         <button onClick={() => setModo("museu")} className="rp-painel flex items-center gap-3 px-4 py-3.5 text-left hover:border-[#D8B44A]/60 transition-colors" style={{ background: 'linear-gradient(115deg, #D8B44A12, #12A87608)', borderColor: '#D8B44A40' }}>
           <span className="text-[28px]" aria-hidden="true">🏛️</span>
-          <span className="flex-1"><strong className="block text-[17px] text-[#F4DE9E]">Meu museu</strong><span className="block text-[13px] text-[#A6B6AB]">Taças, camisas e feitos de todas as carreiras</span></span>
+          <span className="flex-1"><strong className="block text-[17px] text-[#F4DE9E]">Meu museu</strong><span className="block text-[13px] text-[#A6B6AB]">Entre nas salas e reviva sua carreira</span></span>
           <span className="text-[#EBC557]" aria-hidden="true">›</span>
         </button>
 

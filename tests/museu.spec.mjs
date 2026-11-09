@@ -13,6 +13,7 @@ async function preparar(page) {
  await page.reload();
  await page.getByRole('button',{name:/Meu museu/}).click();
  await expect(page.getByRole('heading',{name:'Seu museu.'})).toBeVisible();
+ await page.getByRole('button',{name:'Coleção permanente →',exact:true}).click();
 }
 for(const width of [390,1366])test(`museu: coleção, detalhes e permanência em ${width}px`,async({page})=>{
  await page.setViewportSize({width,height:900});
@@ -34,12 +35,14 @@ for(const width of [390,1366])test(`museu: coleção, detalhes e permanência em
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:`/tmp/ajoia-museu-${width}.png`,fullPage:true});
  const antes=await page.evaluate(k=>localStorage.getItem(k),CHAVE_MUSEU);
+ await page.getByRole('button',{name:'← Voltar ao museu',exact:true}).click();
  await page.getByRole('button',{name:'← Voltar ao menu',exact:true}).click();
  await page.getByRole('button',{name:/Nova carreira/}).click();
  await expect(page.getByRole('button',{name:'Voltar ao menu',exact:true})).toBeVisible();
  expect(await page.evaluate(k=>localStorage.getItem(k),CHAVE_MUSEU)).toBe(antes);
  await page.getByRole('button',{name:'Voltar ao menu',exact:true}).click();
  await page.getByRole('button',{name:/Meu museu/}).click();
+ await page.getByRole('button',{name:'Coleção permanente →',exact:true}).click();
  await expect(page.getByRole('button',{name:'Brasileirão, desbloqueado',exact:true})).toBeVisible();
  expect(erros).toEqual([]);
 });
@@ -64,6 +67,7 @@ test('exportar e importar a coleção preserva conquistas sem duplicar contagens
 
 test('coleção vazia mostra objetivos e permite navegar pelas abas com teclado',async({page})=>{
  await page.goto(base);await page.getByRole('button',{name:/Meu museu/}).click();
+ await page.getByRole('button',{name:'Coleção permanente →',exact:true}).click();
  await expect(page.getByText('Uma coleção começa com uma história.')).toBeVisible();
  await page.getByRole('tab',{name:/Taças/}).focus();await page.keyboard.press('ArrowRight');
  await expect(page.getByRole('tab',{name:/Camisas/})).toBeFocused();

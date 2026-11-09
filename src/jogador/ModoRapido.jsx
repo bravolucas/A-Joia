@@ -1,3 +1,4 @@
+import {BotaoMuseuPessoal} from '../museu/MuseuPessoal.jsx';
 import BotaoHistoria from '../historia/HistoriaFutebol.jsx';
 import ApresentacaoOficial from '../comum/ApresentacaoOficial.jsx';
 import {ChegadaCarreira,PainelProgressaoCarreira,RetrospectivaCarreira} from './ProgressaoCarreiraUI.jsx';
@@ -652,6 +653,7 @@ function Ficha({ c, semTopo = false }) {
       </div>}
       <div className={`px-4 pb-4 ${semTopo ? "pt-3" : ""}`}>
         <BotaoHistoria c={c} nome={clube.nome} className="hf-link">Galeria do clube e marcos da carreira →</BotaoHistoria>
+        <BotaoMuseuPessoal c={c}/>
         {semTopo && <div className="text-[13px] text-[#8FA39A] mb-2">{ligaDe(clube.liga).nome} · {st.label} · {peDe(c.pe).nome}</div>}
         <div className="grid grid-cols-6 gap-2 mt-1">
           {Object.keys(ATTR_LABEL).map((a) => (

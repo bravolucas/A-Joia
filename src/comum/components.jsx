@@ -1,3 +1,5 @@
+import CenaPenaltis from '../treinador/CenaPenaltis.jsx';
+import {desfechoCobranca} from './desfechoCobranca.js';
 import {createPortal} from 'react-dom';
 import {bloquearRolagem} from './bloqueioRolagem.js';
 import {BolaTrajeto} from './CenarioMini.jsx';
@@ -1330,21 +1332,11 @@ export function MatchTicker({ jogo, clube, posicao, attrs, temLance, onFim }) {
 }
 
 export function GoalMini({ onPick, resultado }) {
-  const [golKey, setGolKey] = useState(0);
-  useEffect(() => { if (resultado && resultado.gol) setGolKey((k) => k + 1); }, [resultado]);
-  const zonaGoleiro = useMemo(() => {
-    if (!resultado) return "meio";
-    if (resultado.tipo === "Defesa") return resultado.zona;
-    const outras = ["esquerdo", "meio", "direito"].filter((z) => z !== resultado.zona);
-    return pick(outras);
-  }, [resultado]);
   return (
     <div className="mb-3 w-full">
       <SuperficieMini largura={PEN_W} altura={PEN_H}>
-          <PenEstadio />
-          <PenGoleiro zona={zonaGoleiro} />
-          <PenBola resultado={resultado} />
-          {resultado && resultado.gol && <PenEfeitoGol key={golKey} ativo />}
+          <CenaPenaltis animar={!!resultado} resultado={!!resultado} desfecho={desfechoCobranca(resultado)}/>
+
       </SuperficieMini>
       <div className="mx-auto mt-2 flex justify-center gap-2 text-[10px] uppercase tracking-widest text-emerald-100/70" aria-live="polite">
         <span className="rounded-full border border-white/20 px-3 py-1">{resultado ? (resultado.gol ? "⚽ Bola na rede" : resultado.tipo || "Cobrança concluída") : "🎯 Escolha a direção"}</span>

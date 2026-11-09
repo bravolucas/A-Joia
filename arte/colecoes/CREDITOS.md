@@ -13,3 +13,7 @@ As fotografias não substituem animações, textos acessíveis, chances, nomes, 
 ## Decisão por pênaltis — 09/11/2026
 
 `penaltis.webp`: quatro cenas originais geradas com OpenAI: preparação, cobrança, gol e defesa. Atlas de duas colunas e duas linhas, 1536 × 1024 px, convertido para WebP sem redesenho, recorte ou alteração de conteúdo. Original preservado em `/workspace/generated_images/exec-8c8cffb8-110d-4b84-9713-2f12536ee549.png`. Jogador, goleiro e estádio fictícios, uniformes sem marcas; fotografia sintética, não registro real. `CenaPenaltis` faz enquadramento SVG e transição entre cobrança e desfecho. Ilustra a disputa inteira, sem inventar sequência de placar ou alterar chances/resultados.
+
+## Cobrança jogável e chute para fora — 09/11/2026
+
+`penalti-fora.webp`: imagem original gerada com OpenAI, no mesmo cenário fictício de `penaltis.webp`, com bola acima e fora do gol e rede sem impacto. Original `/workspace/generated_images/exec-c0ebd5c7-b142-4d82-9607-fa2f16362101.png`, preservado; conversão simples para WebP, sem redesenho. Replays do minigame jogável e GoalMini passam a usar cenas correspondentes a gol, defesa e fora. Não confundir `ok` (sucesso do atleta, invertido para goleiros) com `resultado` (destino da cobrança).

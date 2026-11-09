@@ -1,3 +1,4 @@
+import PenaltiJogavel from './PenaltiJogavel.jsx';
 import {contextoAgenda} from '../competicoes/calendarioCopas.js';
 import {atualizarFluxoCopasJogador,etapaAgendaJogador,registrarLanceLegadoJogador,chaveCopaJogador,escolherCopaJogador,concluirEventoJogador} from './copasJogador.js';
 import CopaEscolha,{MarcoLiga} from '../treinador/CopaEscolha.jsx';
@@ -748,55 +749,6 @@ function PlacarMomento({ ok, texto, atraso = 0, c, momento }) {
   return <div className="relative" style={{visibility:visivel?'visible':'hidden'}}>{ok&&visivel&&(!c||["titulo","estreia","decisao"].includes(celebracaoMomento(c,{...momento,adversario:contextoMomento(c,momento).adversario}).tipo))&&<Lottie nome="gol" className="absolute left-1/2 -translate-x-1/2 -top-24 w-48 h-48 pointer-events-none"/>}<div className={`display text-3xl rp-sobe ${ok?'text-[#1BC28A]':'text-[#E36B5B]'}`}>{texto}</div>{ok&&visivel&&c&&<CelebracaoLance c={c} momento={{...momento,adversario:contextoMomento(c,momento).adversario}}/>}</div>;
 }
 
-/* Cena do gol: estádio ao fundo, trave com rede em profundidade e um goleiro de verdade */
-const GZX = (col) => 70 + col * 80, GZY = (lin) => 60 + lin * 46;
-function Goleiro({ cor, mergulho }) { return <JogadorCampo x={150} y={124} escala={.7} cor={cor} numero={1} goleiro esticado={!!mergulho&&mergulho[0]!==1} direcao={mergulho?.[0]===0?-1:1} />; }
-function CenaGol({ goleiro, res, bola, fora, podeEscolher, onZona }) {
-  const cor = goleiro ? "#EBC557" : "#B8F23A";
-  const m = res?.goleiro || null;
-  // Mergulho usa recorte próprio e deslocamento; não gira a pose de espera.
-  const dx = m ? (m[0] - 1) * 50 : 0;
-  const alto = m && m[1] === 0;
-  const dy = !m ? 0 : m[0] === 1 ? (alto ? -22 : 0) : alto ? -40 : -8;
-  const bx = bola ? GZX(bola[0]) + (fora ? (bola[0] - 1) * 46 : 0) : 150;
-  const by = bola ? GZY(bola[1]) - (fora ? 48 : 0) : 192;
-  const gol = res && ((!goleiro && res.resultado === "gol") || (goleiro && res.resultado === "gol"));
-  const salvou = res?.resultado === "defesa";
-  return (
-    <svg viewBox="0 0 300 210" className="w-full rounded-xl" role="group" aria-label={goleiro ? "Gol: escolha para onde pular" : "Gol: escolha onde bater"}>
-      <defs>
-        <pattern id="rpMalha" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-          <path d="M0 0 V7 M0 0 H7" stroke="rgba(255,255,255,.38)" strokeWidth=".7" />
-        </pattern>
-        <pattern id="rpMalhaLado" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-          <path d="M0 0 V6 M0 0 H6" stroke="rgba(255,255,255,.22)" strokeWidth=".6" />
-        </pattern>
-        <linearGradient id="rpGrama" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#23583c" /><stop offset="1" stopColor="#102f22" /></linearGradient>
-        <linearGradient id="rpTrave" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#FFFFFF" /><stop offset=".6" stopColor="#E3E7E5" /><stop offset="1" stopColor="#9AA3A0" /></linearGradient>
-        <radialGradient id="rpBola" cx=".35" cy=".3" r=".75"><stop offset="0" stopColor="#FFFFFF" /><stop offset=".7" stopColor="#E6E8E7" /><stop offset="1" stopColor="#9DA3A1" /></radialGradient>
-        <filter id="rpDesfoque"><feGaussianBlur stdDeviation="1.6" /></filter>
-      </defs>
-      <GeometriaCampo largura={300} altura={210} gol={{x:29,y:40,w:242,h:86}} impacto={gol}/>
-      {/* balanço da rede no gol */}
-      {gol && bola && !fora && <ellipse className="rp-rede" cx={bx} cy={by} rx="24" ry="18" fill="url(#rpMalha)" stroke="rgba(255,255,255,.55)" strokeWidth=".8" />}
-      {/* goleiro */}
-      <g className="rp-goleiro" style={{ transform: `translate(${dx}px, ${dy}px) rotate(0deg)`, transformOrigin: "150px 150px" }}>
-        <Goleiro cor={cor} mergulho={m} />
-      </g>
-      {/* zonas de escolha */}
-      {podeEscolher && ZONAS.map(([col, lin], i) => (
-        <g key={i} onClick={() => onZona(i)} style={{ cursor: "pointer" }} role="button" tabIndex={0} onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onZona(i); } }} aria-label={`${lin === 0 ? "Alto" : "Baixo"} ${["esquerda", "meio", "direita"][col]}`}>
-          <rect x={GZX(col) - 37} y={GZY(lin) - 26} width="74" height="52" rx="8" fill={goleiro ? "rgba(216,180,74,.12)" : "rgba(18,168,118,.12)"} stroke={goleiro ? "rgba(235,197,87,.75)" : "rgba(27,194,138,.7)"} strokeDasharray="4 4" />
-          <circle cx={GZX(col)} cy={GZY(lin)} r="5" fill={goleiro ? "#EBC557" : "#1BC28A"} />
-        </g>
-      ))}
-      {/* faísca da defesa */}
-      {salvou && bola && <circle className="rp-faisca" cx={bx} cy={by} r="10" fill="none" stroke="#F5D77A" strokeWidth="2.5" />}
-      <BolaTrajeto origem={{x:150,y:192}} destino={{x:bx,y:by}} ativo={!!bola} curva={bola?(bx<150?-5:5):0} elevacao={12} raio={7.5}/>
-    </svg>
-  );
-}
-
 /* Pênalti (você bate) e defesa (você é o goleiro) usam o mesmo gol */
 function TelaPenalti({ c, momento, onReacao, onFim, goleiro = false }) {
   const [escolha, setEscolha] = useState(null);
@@ -836,8 +788,7 @@ function TelaPenalti({ c, momento, onReacao, onFim, goleiro = false }) {
     return () => clearTimeout(t);
   }, [res, onFim]);
 
-  const bola = escolha != null ? ZONAS[escolha] : null;
-  const fora = res?.resultado === "fora";
+
   const textoRes = !res ? "" : goleiro
     ? (res.resultado === "defesa" ? "QUE DEFESA!" : res.resultado === "fora" ? "PRA FORA! É CAMPEÃO!" : "GOL DELES…")
     : (res.resultado === "gol" ? "GOOOL!" : res.resultado === "defesa" ? "DEFENDEU!" : "PRA FORA!");
@@ -852,7 +803,7 @@ function TelaPenalti({ c, momento, onReacao, onFim, goleiro = false }) {
             <span className="text-[#EBC557]">{res ? (res.ok ? "LANCE VENCIDO" : "LANCE PERDIDO") : "ESCOLHA O CANTO"}</span>
           </div>
           <div className={res ? "rp-pen-cena rp-pen-acao" : "rp-pen-cena"}>
-            <SuperficieMini largura={300} altura={210}><CenaGol goleiro={goleiro} res={res} bola={bola} fora={fora} podeEscolher={escolha == null} onZona={chutar} /></SuperficieMini>
+            <SuperficieMini largura={300} altura={210}><PenaltiJogavel goleiro={goleiro} res={res} onZona={chutar}/></SuperficieMini>
             {res && <div className="absolute inset-0 pointer-events-none rp-pen-flash" style={{ background: res.ok ? "radial-gradient(circle at 50% 30%, rgba(27,194,138,.24), transparent 65%)" : "radial-gradient(circle at 50% 30%, rgba(227,107,91,.22), transparent 65%)" }} />}
           </div>
           <div className="flex items-center justify-between text-[11px] text-[#8FA39A] px-2 pt-2">
@@ -864,7 +815,7 @@ function TelaPenalti({ c, momento, onReacao, onFim, goleiro = false }) {
         {!res && (goleiro
           ? <p className="text-[17px] text-[#C9D3CE]">Toque no canto para onde vai pular. Defesa <span className="font-stat">{c.attrs.defesa}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "defesa") * 100)}%</span></p>
           : <p className="text-[17px] text-[#C9D3CE]">Toque no canto onde vai bater. Finalização <span className="font-stat">{c.attrs.finalizacao}</span> · chance estimada <span className="font-stat">{Math.round(chancePenalti(c) * 100)}%</span></p>)}
-        {res && <><PlacarMomento c={c} momento={momento} ok={res.ok} texto={textoRes} atraso={720} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.ok)}>Continuar →</button></>}
+        {res && <><PlacarMomento c={c} momento={momento} ok={res.ok} texto={textoRes} atraso={1350} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.ok)}>Continuar →</button></>}
       </div>
     </QuadroMini>
   );

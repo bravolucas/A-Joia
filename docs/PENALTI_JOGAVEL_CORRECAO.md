@@ -1,0 +1,11 @@
+# Correção da entrega no minigame jogável — 09/11/2026
+
+Relato: usuário não viu nova arte após bater um pênalti e viu animação incompatível com gol. Confirmado erro de escopo da entrega anterior: CenaPenaltis só integrava CopaEscolha; TelaPenalti/CenaGol em ModoRapido e GoalMini continuavam antigos. Não atribuir o problema a cache sem evidência.
+
+PenaltiJogavel usa fotografia de preparação com seis alvos acessíveis dentro do gol. Replay usa o resultado real da cobrança (`gol`, `defesa`, `fora`) para selecionar a arte e a transição; `ok` não escolhe imagem, pois é invertido para goleiros. Removida cena SVG anterior do minigame. GoalMini do modo completo também passa a usar a mesma direção de arte. `desfechoCobranca` prioriza gol verdadeiro sobre rótulo legado conflitante (ex.: tipo Trave). Não alterados sorteio, probabilidades, atributos ou placar. Feedback aguarda 1350ms, alinhado ao replay; botão continua disponível para antecipar avanço.
+
+Criada imagem própria de chute para fora (bola acima do gol, rede intacta), sem reutilizar defesa. CenaPenaltis mantém compatibilidade com as disputas por escolhas existentes. Original e créditos preservados. Home identifica `Versão 2026.11.09 · Pênaltis jogáveis` para conferência da entrega.
+
+Validação: build passou; teste unitário de resultado conflitante/goleiro passou; 39 cenários de navegador aprovados (12 novos, 19 de arena/minigames, oito de disputa de copas). Mais 12 verificações finais aprovadas esperando o término real das animações CSS, conferindo opacidade dos quadros e inspecionando capturas de preparação/gol/fora em 320px. Cobertura: batedor/goleiro × gol/defesa/fora × 320/1366px; seis alvos, desfecho, texto e continuar no viewport. Testes com relógio virtual exigem aguardar também a animação CSS para fotografar o quadro final real. Logs /tmp/penalti-jogavel-*.log.
+
+Limite: as cenas são ilustrações da cobrança, não replay físico exato do canto/altura selecionado. A seleção continua influenciando a defesa e o resultado pela regra existente. Não foi adicionada cobrança na trave ao sorteio do rápido (ele já utiliza apenas gol, defesa e fora).

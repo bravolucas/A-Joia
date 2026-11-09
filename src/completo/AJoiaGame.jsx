@@ -1,3 +1,4 @@
+import {MuseuFimCarreira} from '../museu/MuseuPessoal.jsx';
 import {registrarAnoHistoria,simularDefesas,registrarAtletasObservados} from '../historia/historiaFutebol.js';
 import BotaoHistoria,{GaleriaClube,MarcosIndividuais} from '../historia/HistoriaFutebol.jsx';
 import TabelaCompeticoesTemporada from './TabelaCompeticoesTemporada.jsx';
@@ -8384,6 +8385,7 @@ function resolverTemporada(c, extraStats) {
 
         {stage === "fim" && fim && (
           <div className="grid gap-4">
+            <MuseuFimCarreira c={{...fim.c,nome,nacionalidade,aposentado:true}} temporadas={temporadas} modo="completo"/>
             <Card className="text-center" accent="linear-gradient(90deg,#D8B44A,#12A876,#3b82f6)">
               <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-3">Chuteiras no prego · {fim.c.idade} anos</div>
               <PlayerFutCard nome={nome} posicao={posicao} ovr={fim.c.picoOvr} clube="Aposentado" gols={fim.c.gols} assist={fim.c.assist} dinheiro={fim.c.cofre} attrs={fim.c.attrs} nacionalidade={fim.c.nacionalidade} />

@@ -1,3 +1,7 @@
+## Ajuste solicitado — museu ao final de cada carreira
+
+Museu pessoal integrado ao encerramento: após a cena de despedida do jogador no rápido, na tela final do completo e ao encerrar como treinador. Recebe o save daquela carreira diretamente. Botão para voltar ao legado e reabrir **Museu desta carreira**. Marcador por carreira/fase evita interromper todo retorno ao legado. Acervos factuais arquivados em chave separada e preservados ao começar uma nova carreira, acessíveis pelo museu do menu. Coleção permanente e museu existentes mantidos. Relatório atualizado em `docs/MUSEU_PESSOAL_INTERATIVO.md`. Build Pages aprovado; 21 testes de modelo/coleção e 37 cenários distintos de navegador aprovados nas rodadas locais, incluindo aposentadoria real do jogador, modo completo, treinador, acervos isolados e preservação dos fluxos anteriores. Revisão final de oito cenários de encerramento aprovada. Publicação e CI remoto em acompanhamento.
+
 ## Entrega concluída — museu pessoal interativo (09/11/2026)
 
 Museu funcional em `fdc9918`; fluxos antigos de teste adaptados em `fe863ca`. [CI 42713713408](https://github.com/bravolucas/A-Joia/actions/runs/42713713408) **aprovado**, com 409 testes de lógica, build e suíte de 283 cenários de navegador. [Pages 42712487336](https://github.com/bravolucas/A-Joia/actions/runs/42712487336) **aprovado** para o código funcional. Conferência no site público em 390px confirmou entrada em Meu museu, oito salas, sala de camisas e coleção permanente. https://bravolucas.github.io/A-Joia/

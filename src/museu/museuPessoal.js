@@ -68,9 +68,31 @@ export function construirMuseuPessoal(c={}, {modo='rapido',temporadas}={}){
  const visita=[objetos.find(o=>o.id==='primeira-temporada')||objetos.find(o=>o.tipo==='camisa'),...objetos.filter(o=>o.tipo==='camisa'&&o.retorno).slice(0,1),...objetos.filter(o=>o.tipo==='taca').slice(0,2),objetos.find(o=>o.tipo==='selecao'),objetos.find(o=>o.sala==='pessoas'),objetos.find(o=>o.tipo==='prancheta')].filter((o,i,a)=>o&&a.findIndex(x=>x?.id===o.id)===i).map(o=>o.id);
  return {id:identidadeMuseuPessoal(c,modo,ts),nome,nac,nacao,fase,frase,temporadas:ts,objetos,titulos,capitulos,visita,totais:{...total,tacas,camisas:passagens.length,lembrancas:objetos.filter(o=>o.sala==='lembrancas').length},clubeAtual:c.tecnico?.clube||c.emprestimo?.destino||c.clubeNome||c.clube?.nome||null,aposentado:!!c.aposentado,modo};
 }
+export const CHAVE_MUSEUS_ENCERRADOS='ajoia_museus_encerrados_v1';
+function lerAcervos(storage){const bruto=JSON.parse(storage?.getItem(CHAVE_MUSEUS_ENCERRADOS)||'{"versao":1,"carreiras":{}}');if(bruto?.versao!==1||!bruto.carreiras||typeof bruto.carreiras!=='object'||Array.isArray(bruto.carreiras))throw new Error('Acervo inválido');return bruto;}
+const selecionar=(obj,campos)=>Object.fromEntries(campos.filter(k=>obj?.[k]!==undefined).map(k=>[k,obj[k]]));
+function temporadaDoAcervo(t){const r=selecionar(t,['ano','idade','clube','ligaId','liga','ligaNome','temporadaLabel','jogos','gols','assist','defesas','cleanSheets','numero','torcidaFim','torcida','titulosLista','campeaoLiga','feitosHistoricos','lesao','rebaixado','premios','numeroSelecao','destaques','vitorias','empates','derrotas','posicao','titulosConquistados','campeao','competicao','interrompida','objetivo']);
+ for(const k of ['continental','copaNacional','mundial','estadual','selecao','copa','copaResultado','continentalSelecaoResultado','selecaoTemporada'])if(t[k])r[k]=selecionar(t[k],['nome','titulo','convocado','jogos','gols','assist']);
+ if(t.clubeObj)r.clubeObj=selecionar(t.clubeObj,['liga']);
+ if(t.torneios)r.torneios=t.torneios.map(x=>({...selecionar(x,['nome','faseUsuario','vice']),fases:(x.fases||[]).filter(f=>f.fase==='Final').map(f=>({fase:f.fase,jogos:f.jogos}))}));
+ if(t.momentos)r.momentos=t.momentos.filter(m=>m.acertou&&m.decisaoJogo).map(m=>selecionar(m,['acertou','decisaoJogo','titulo','tipo']));return r;
+}
+export function museuEncerradoVisto(id,fase,storage=armazenamento()){try{return !!lerAcervos(storage).carreiras[id]?.vistos?.includes(fase);}catch{return false;}}
+/** Arquivo factual próprio: não escreve nem remove saves ou a coleção permanente. */
+export function registrarMuseuEncerrado(c,{modo='rapido',temporadas,fase='jogador',visto=false}={},storage=armazenamento()){
+ try{if(!storage||!c)return false;const ts=(temporadas||c.temporadas||[]).map(temporadaDoAcervo),id=identidadeMuseuPessoal(c,modo,temporadas||c.temporadas||[]),todos=lerAcervos(storage),anterior=todos.carreiras[id];
+ const copia=selecionar(c,['nome','nac','nacionalidade','posicao','museuId','codigo','primeiroClube','aposentado','clubeNome','clube','lista','selecao','titulosSelecao','torcida','torcidaPorClube','camisaPorClube','marcos','transferencias']);copia.temporadas=ts;
+ if(c.jornada)copia.jornada=selecionar(c.jornada,['memorias','primeiros','mentor','duplas']);
+ if(c.rival)copia.rival=selecionar(c.rival,['nome','clube','clubeAtual','ficticio']);
+ if(c.tecnico)copia.tecnico={...selecionar(c.tecnico,['clube','aposentado']),temporadas:(c.tecnico.temporadas||[]).map(temporadaDoAcervo),memoriaJogador:{auxiliar:c.tecnico.memoriaJogador?.auxiliar}};
+ const registro={id,c:copia,temporadas:ts,modo,nome:c.nome||'Sua carreira',encerrada:true,vistos:[...new Set([...(Array.isArray(anterior?.vistos)?anterior.vistos:[]),...(visto?[fase]:[])])]};
+ todos.carreiras[id]=registro;storage.setItem(CHAVE_MUSEUS_ENCERRADOS,JSON.stringify(todos));return true;
+ }catch{return false;}
+}
 export function carreirasDisponiveis(storage=armazenamento()){
- const lista=[],ids=new Set();const incluir=(s,modo)=>{const c=modo==='rapido'?s?.c:s?.fim?.c||s?.carreira;if(!c)return;const carreira={...c,nome:c.nome||s.nome,nacionalidade:c.nacionalidade||s.nacionalidade},temporadas=modo==='rapido'?c.temporadas||[]:s.temporadas||[],id=identidadeMuseuPessoal(carreira,modo,temporadas);if(ids.has(id))return;ids.add(id);lista.push({id,c:carreira,modo,temporadas,nome:carreira.nome||'Sua carreira'});};
+ const lista=[],ids=new Set();const incluir=(s,modo)=>{const c=modo==='rapido'?s?.c:s?.fim?.c||s?.carreira;if(!c)return;const carreira={...c,nome:c.nome||s.nome,nacionalidade:c.nacionalidade||s.nacionalidade,...(s.fim?{aposentado:true}:{})},temporadas=modo==='rapido'?c.temporadas||[]:s.temporadas||[],id=identidadeMuseuPessoal(carreira,modo,temporadas);if(ids.has(id))return;ids.add(id);lista.push({id,c:carreira,modo,temporadas,nome:carreira.nome||'Sua carreira'});};
  try{incluir(JSON.parse(storage?.getItem('ajoia_rapido_v1')||'null'),'rapido');}catch{}
  for(const slot of ['auto','1','2','3','4','5'])try{incluir(JSON.parse(storage?.getItem(`ajoia_save_${slot}`)||'null'),'completo');}catch{}
+ try{for(const r of Object.values(lerAcervos(storage).carreiras))if(r?.c&&r.id&&!ids.has(r.id)){ids.add(r.id);lista.push({...r,nome:r.nome||r.c.nome||'Sua carreira'});}}catch{}
  return lista;
 }

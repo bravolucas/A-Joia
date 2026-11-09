@@ -134,6 +134,8 @@ test('encerramento e desemprego não oferecem continuação inválida', async ({
   c.idade=85;c.tecnico.idade=85;
   c.tecnico.temporadas = Array.from({ length: 30 }, (_, i) => ({ ...c.tecnico.temporadas[0], ano: 2026 + i }));
   await abrir(page, c);
+  await expect(page.getByRole('dialog',{name:'Museu pessoal da carreira',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Fechar museu pessoal',exact:true}).click();
   await expect(page.getByRole('heading', { name: 'Uma carreira para a história' })).toBeVisible();
   await expect(page.locator('.ct-offer')).toHaveCount(0);
   const desempregado = comResultado();

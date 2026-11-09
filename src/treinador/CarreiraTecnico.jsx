@@ -1,3 +1,4 @@
+import {MuseuFimCarreira} from '../museu/MuseuPessoal.jsx';
 import BotaoHistoria from '../historia/HistoriaFutebol.jsx';
 import {dadosVaga} from '../competicoes/vagasInternacionais.js';
 import {contextoAgenda} from '../competicoes/calendarioCopas.js';
@@ -334,6 +335,7 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
         <footer className="ct-timeline-total"><Bandeira pais={t.pais || 'Brasil'} /><strong>{temporadas.length} temporadas · até {IDADE_MAXIMA_TECNICO} anos</strong><span>{historico.aproveitamento}% aproveitamento</span></footer>
       </section>
     </div>
+    {encerrada&&<MuseuFimCarreira c={c} fase="treinador"/>}
     <footer className="ct-footer">{!encerrada&&onAposentar&&<button type="button" onClick={()=>setAposentadoriaAberta(true)}>Aposentar como treinador</button>}<button type="button" onClick={onLegado}>{rotuloLegado}</button><button type="button" onClick={onSair}>Voltar ao início</button></footer>
   </div>;
 }

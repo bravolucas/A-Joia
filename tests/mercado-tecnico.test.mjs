@@ -28,7 +28,7 @@ test('venda libera folha, credita saldo e preserva mínimo de goleiros',()=>{
 test('troca de clube recria gestão; janela fecha durante jogos e desemprego',()=>{
  const c=cenario();const g=criarGestaoTecnico(c.tecnico);
  const outro=criarGestaoTecnico({...c.tecnico,clube:'Flamengo',gestao:g});assert.equal(outro.clube,'Flamengo');assert.notDeepEqual(outro.elenco,g.elenco);
- for(const patch of [{fase:'resultado'},{desempregado:true},{andamento:{rodadas:1}},{temporadas:Array(30).fill({})}]){
+ for(const patch of [{fase:'resultado'},{desempregado:true},{andamento:{rodadas:1}},{idade:85}]){
   const st={...c,tecnico:{...c.tecnico,...patch}};assert.throws(()=>contratarJogadorTecnico(st,gerarMercadoTecnico(c.tecnico)[0].id));
  }
 });

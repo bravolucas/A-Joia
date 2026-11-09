@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, jogarTemporadaExpressaTecnico, proximaTemporadaTecnico, carreiraTecnicoEncerrada, LIMITE_TEMPORADAS_TECNICO } from '../src/treinador/tecnico.js';
+import { iniciarCarreiraTecnico, iniciarNoClubeIdolo, jogarTemporadaExpressaTecnico, proximaTemporadaTecnico, carreiraTecnicoEncerrada, IDADE_MAXIMA_TECNICO } from '../src/treinador/tecnico.js';
 import { desenhoDaTaca } from '../src/comum/tacas.js';
 
 const atleta = { nome: 'Teste expresso', idade: 39, ano: 2040, clubeNome: 'Santos', aposentado: true, legado: { pontos: 600 }, temporadas: [{ ano: 2037, clube: 'Santos' }, { ano: 2038, clube: 'Santos' }, { ano: 2039, clube: 'Santos' }], totais: { gols: 150 } };
@@ -23,12 +23,12 @@ test('simulação expressa preserva a carreira do jogador e não exige decisões
   assert.equal(c.tecnico.temporadas[0].classificacao.find(x => x.meuClube).posicao, c.tecnico.temporadas[0].posicao);
 });
 
-test('limite de 30 temporadas impede simulação adicional', () => {
+test('limite de 85 anos impede simulação adicional', () => {
   const c = iniciarCarreiraTecnico(atleta);
-  const cheio = { ...c, tecnico: { ...c.tecnico, temporadas: Array.from({ length: LIMITE_TEMPORADAS_TECNICO }, (_, i) => ({ ano: 2040 + i })) } };
+  const cheio = { ...c, idade:85, tecnico: { ...c.tecnico, idade:85, temporadas: Array.from({ length: 46 }, (_, i) => ({ ano: 2040 + i })) } };
   assert.equal(carreiraTecnicoEncerrada(cheio.tecnico), true);
   assert.throws(() => jogarTemporadaExpressaTecnico(cheio, null, sorteio), /encerrada/);
-  assert.throws(() => proximaTemporadaTecnico({ ...cheio, tecnico: { ...cheio.tecnico, fase: 'resultado' } }), /30 temporadas/);
+  assert.throws(() => proximaTemporadaTecnico({ ...cheio, tecnico: { ...cheio.tecnico, fase: 'resultado' } }), /85 anos/);
 });
 
 test('nomes de taças do treinador usam desenhos específicos', () => {
@@ -38,11 +38,12 @@ test('nomes de taças do treinador usam desenhos específicos', () => {
   assert.deepEqual(desenhoDaTaca('segunda', 'Campeonato Brasileiro Série B'), desenhoDaTaca('segunda', 'Brasileirão Série B'));
 });
 
-test('30 temporadas expressas acumulam histórico e encerram a carreira', () => {
+test('temporadas expressas acumulam histórico até os 85 anos', () => {
   let c = iniciarCarreiraTecnico(atleta);
   c = iniciarNoClubeIdolo(c, c.tecnico.opcoesInicio[0].clube);
   const anoInicial = c.tecnico.ano;
-  for (let i = 0; i < LIMITE_TEMPORADAS_TECNICO; i++) {
+  const limite=IDADE_MAXIMA_TECNICO-c.idade;
+  for (let i = 0; i < limite; i++) {
     c = jogarTemporadaExpressaTecnico(c, null, () => 0.48);
     assert.equal(c.tecnico.temporadas.length, i + 1);
     assert.equal(c.tecnico.temporadas[i].ano, anoInicial + i);
@@ -56,13 +57,13 @@ test('30 temporadas expressas acumulam histórico e encerram a carreira', () => 
       assert.equal(linhas.reduce((total, x) => total + x.golsPro, 0),
         linhas.reduce((total, x) => total + x.golsContra, 0), 'gols marcados e sofridos devem coincidir');
     }
-    if (i < LIMITE_TEMPORADAS_TECNICO - 1) {
+    if (i < limite - 1) {
       // A demissão é desativada neste teste para isolar o limite de temporadas.
       c = proximaTemporadaTecnico({ ...c, tecnico: { ...c.tecnico, demitido: false, desempregado: false } });
     }
   }
-  assert.equal(c.tecnico.ano, anoInicial + LIMITE_TEMPORADAS_TECNICO);
-  assert.equal(c.tecnico.temporadas.length, 30);
+  assert.equal(c.tecnico.ano, anoInicial + limite);
+  assert.equal(c.tecnico.temporadas.length, limite);
   assert.equal(carreiraTecnicoEncerrada(c.tecnico), true);
   assert.throws(() => jogarTemporadaExpressaTecnico({ ...c, tecnico: { ...c.tecnico, fase: 'pretemporada' } }, null, sorteio), /encerrada/);
 });

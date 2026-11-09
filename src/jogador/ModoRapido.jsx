@@ -1,3 +1,4 @@
+import BotaoHistoria from '../historia/HistoriaFutebol.jsx';
 import ApresentacaoOficial from '../comum/ApresentacaoOficial.jsx';
 import {ChegadaCarreira,PainelProgressaoCarreira,RetrospectivaCarreira} from './ProgressaoCarreiraUI.jsx';
 import {camisaInfo,escolherCamisa,sincronizarCamisasSelecao,prepararCamisaSelecao} from './camisasCarreira.js';
@@ -36,7 +37,7 @@ import { JogadorCampo, RetratoApresentacao, CamisaPremium, SuperficieMini, useCe
 import { criarIdMuseu } from '../museu/museu.js';
 import Icone from "../comum/Icone.jsx";
 import CarreiraTecnico from "../treinador/CarreiraTecnico.jsx";
-import { responderParadaTecnico, resolverFinalTecnico, responderConviteSelecaoTecnico, comprarMelhoriaTecnico, iniciarCarreiraTecnico, iniciarNoClubeIdolo, atualizarPropostasCoerentesTecnico, escolherPretemporadaRapidaTecnico, responderIntervencaoTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico } from "../treinador/tecnico.js";
+import { aposentarTecnico, responderParadaTecnico, resolverFinalTecnico, responderConviteSelecaoTecnico, comprarMelhoriaTecnico, iniciarCarreiraTecnico, iniciarNoClubeIdolo, atualizarPropostasCoerentesTecnico, escolherPretemporadaRapidaTecnico, responderIntervencaoTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico } from "../treinador/tecnico.js";
 import Lottie from "../comum/Lottie.jsx";
 import { tocar, apito, torcida, somLigado, alternarSom } from "../comum/som.js";
 import React, { useEffect, useRef, useState } from "react";
@@ -385,8 +386,8 @@ function CartaoCarreira({ c, onEstante, onFicha, contadorPulsa, recorde, etapa }
           </div>
           <div className="flex items-center gap-2 min-w-0">
             {semClube ? <span className="w-[22px] h-[22px] rounded-full border border-white/25 flex items-center justify-center text-[12px] text-[#8FA39A] shrink-0">?</span> : <ClubDot club={clube} size={22} />}
-            <span className={`display text-[13px] truncate ${semClube ? "text-[#8FA39A]" : "text-[#F2F5F3]"}`}>{semClube ? "Sem clube" : clube.nome}</span>
-            <span className="ml-auto font-stat text-[17px] text-[#EBC557] shrink-0">{formatarValor(valorAtual(c)).replace(/\s/g, "")}</span>
+            {semClube?<span className="display text-[13px] truncate text-[#8FA39A]">Sem clube</span>:<BotaoHistoria c={c} nome={clube.nome} className="display text-[13px] truncate text-[#F2F5F3]">{clube.nome}</BotaoHistoria>}
+            <span className="ml-auto font-stat text-[17px] text-[#EBC557] shrink-0 hidden min-[420px]:inline">{formatarValor(valorAtual(c)).replace(/\s/g, "")}</span>
           </div>
           </div>
         </div>
@@ -650,6 +651,7 @@ function Ficha({ c, semTopo = false }) {
         </div>
       </div>}
       <div className={`px-4 pb-4 ${semTopo ? "pt-3" : ""}`}>
+        <BotaoHistoria c={c} nome={clube.nome} className="hf-link">Galeria do clube e marcos da carreira →</BotaoHistoria>
         {semTopo && <div className="text-[13px] text-[#8FA39A] mb-2">{ligaDe(clube.liga).nome} · {st.label} · {peDe(c.pe).nome}</div>}
         <div className="grid grid-cols-6 gap-2 mt-1">
           {Object.keys(ATTR_LABEL).map((a) => (
@@ -2998,6 +3000,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           onAceitarProposta={(nome, estrategia) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia); if (!negociado.tecnico.ultimaNegociacao?.aceita) return { ...st, c: negociado }; return { ...st, c: proximaTemporadaTecnico(negociado) }; })}
           onAvancar={() => setEstado((st) => ({ ...st, c: proximaTemporadaTecnico(st.c) }))}
           onAvancarESimular={() => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(proximaTemporadaTecnico(st.c), null, undefined, { interativo: true, copasInterativas: true }) }))}
+          onAposentar={()=>setEstado(st=>({...st,c:aposentarTecnico(st.c)}))}
           onLegado={() => setEstado((st) => ({ ...st, etapa: "fim" }))}
           onSair={onSair} />}
       </main>

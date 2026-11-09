@@ -8,7 +8,7 @@ export const idContinental=nome=>/AFC|Asiática|asiatica/i.test(nome||'')?'asia'
 export const clubesParaCopas=ligas=>CLUBES.map(c=>({...c,liga:ligas?.[c.nome]||c.liga,pais:PAIS_LIGA_COPAS[primeiraLiga(ligas?.[c.nome]||c.liga)]||c.liga,elenco:c.forca}));
 const copaCanonica=nome=>({'Copa do Rei':'Copa del Rey','Copa da França':'Coupe de France','Copa da Turquia':'Türkiye Kupası'}[nome]||nome);
 const copasMundoCache=new Map();
-function copaNacionalMundo(nome,pais,clubes,ano){
+export function copaNacionalMundo(nome,pais,clubes,ano){
  const chave=`${ano}|${pais}`;if(copasMundoCache.has(chave))return copasMundoCache.get(chave);
  const pool=clubes.filter(c=>c.pais===pais),eu=pool[0];if(!eu||pool.length<2)return null;
  const camp=simularCampanhaCopa({nome,tipo:'copa',usuario:eu.nome,forcaUsuario:eu.forca,ano,clubes:pool,formato:'mata',seed:`mundo|${chave}|${nome}`});

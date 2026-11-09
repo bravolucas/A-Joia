@@ -19,7 +19,7 @@ test('comissão cobra uma vez, ocupa folha e persiste sem mutar o save',()=>{
  }
  const limite={...novo,tecnico:{...novo.tecnico,gestao:{...g,tetoSalarial:resumoGestaoTecnico(g).folha}}};
  assert.throws(()=>contratarJogadorTecnico(limite,gerarMercadoTecnico(limite.tecnico)[0].id),/teto salarial/);
- for(const patch of [{fase:'intervencao'},{fase:'resultado'},{desempregado:true},{andamento:{rodadas:1}},{temporadas:Array(30).fill({})}])assert.throws(()=>contratarComissaoTecnico({...c,tecnico:{...c.tecnico,...patch}},'auxiliar'));
+ for(const patch of [{fase:'intervencao'},{fase:'resultado'},{desempregado:true},{andamento:{rodadas:1}},{idade:85}])assert.throws(()=>contratarComissaoTecnico({...c,tecnico:{...c.tecnico,...patch}},'auxiliar'));
  assert.throws(()=>contratarComissaoTecnico(c,'invalido'),/inválido/);
 });
 test('auxiliar aumenta força na liga e nas copas, sem bônus em outro clube ou ano',()=>{

@@ -35,7 +35,7 @@ test('tática persiste sem mutar entrada e bloqueia alterações durante a tempo
  const novo=definirEstiloTecnico(definirFormacaoTecnico(c,'3-5-2'),'defensivo');
  assert.deepEqual(c,antes);assert.equal(novo.tecnico.formacao,'3-5-2');assert.equal(novo.tecnico.estilo,'defensivo');
  assert.deepEqual(JSON.parse(JSON.stringify(novo)),novo);
- for(const patch of [{fase:'resultado'},{andamento:{rodadas:1}},{desempregado:true},{temporadas:Array(30).fill({})}]){
+ for(const patch of [{fase:'resultado'},{andamento:{rodadas:1}},{desempregado:true},{idade:85}]){
   const invalido={tecnico:{...c.tecnico,...patch}};assert.throws(()=>definirEstiloTecnico(invalido,'ofensivo'));assert.throws(()=>definirFormacaoTecnico(invalido,'4-3-3'));
  }
  assert.throws(()=>definirFormacaoTecnico(c,'0-0-10'),/inválida/);

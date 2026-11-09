@@ -1,3 +1,4 @@
+import {carreiraTecnicoEncerrada} from './longevidadeTecnico.js';
 export const ITENS_LOJA_TECNICO = [
   { id: 'preparacao', nome: 'Preparação especial', descricao: 'Força do time +3 apenas nesta temporada, até o limite 99.', preco: 300, forca: 3 },
   { id: 'analise', nome: 'Análise dos adversários', descricao: 'Força do time +2 apenas nesta temporada, até o limite 99.', preco: 200, forca: 2 },
@@ -15,7 +16,7 @@ export function bonusForcaLoja(t) {
 }
 export function comprarItemLojaTecnico(c, id, ovrAtual, forcaAtual) {
   const t = c?.tecnico, item = ITENS_LOJA_TECNICO.find(x => x.id === id);
-  if (!t || !item || t.fase !== 'pretemporada' || t.desempregado || t.demitido || !t.clube || (t.temporadas||[]).length>=30 || (!t.clubeInicialEscolhido&&t.opcoesInicio?.length) || t.andamento?.rodadas || t.andamento?.jogos) throw new Error('Compre antes de iniciar a temporada.');
+  if (!t || !item || t.fase !== 'pretemporada' || t.desempregado || t.demitido || !t.clube || carreiraTecnicoEncerrada(t) || (!t.clubeInicialEscolhido&&t.opcoesInicio?.length) || t.andamento?.rodadas || t.andamento?.jogos) throw new Error('Compre antes de iniciar a temporada.');
   const carteira = carteiraTecnico(t);
   if (carteira.compras.some(x => x.id === id && x.ano === t.ano)) return c;
   if (item.forca && forcaAtual>=99) throw new Error('Força máxima atingida.');

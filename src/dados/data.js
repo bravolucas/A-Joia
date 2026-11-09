@@ -614,7 +614,7 @@ export const PALMARES_HISTORICO = {
 };
 /* Clubes sem palmarés escrito à mão recebem um histórico plausível pela força */
 export function palmaresInicialDe(clube) {
-  const p = PALMARES_HISTORICO[clube.nome];
+  const p = PALMARES_HISTORICO[clube.nome] || PALMARES_HISTORICO[{"Atlético de Madrid":"Atlético Madrid",Leverkusen:"Bayer Leverkusen"}[clube.nome]];
   if (p) return { ...p };
   const f = clube.forca || 60;
   if (f >= 84) return { liga: 3, copa: 3, continental: 1, mundial: 0 };

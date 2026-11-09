@@ -1,3 +1,4 @@
+import {carreiraTecnicoEncerrada} from './longevidadeTecnico.js';
 import React, { useState } from 'react';
 import { ITENS_LOJA_TECNICO, carteiraTecnico, bonusForcaLoja } from './lojaTecnico.js';
 import { formatarVerbaRapida } from './pretemporadaRapida.js';
@@ -6,7 +7,7 @@ import './LojaTreinador.css';
 
 export default function LojaTreinador({ c, onComprar }) {
   const t=c.tecnico, carteira=carteiraTecnico(t), [selecionado,setSelecionado]=useState(null), [aviso,setAviso]=useState('');
-  const podeComprar=t.fase==='pretemporada'&&!t.demitido&&!t.desempregado&&!t.andamento?.rodadas&&!t.andamento?.jogos&&(t.temporadas?.length||0)<30&&(t.clubeInicialEscolhido||!t.opcoesInicio?.length);
+  const podeComprar=t.fase==='pretemporada'&&!t.demitido&&!t.desempregado&&!t.andamento?.rodadas&&!t.andamento?.jogos&&!carreiraTecnicoEncerrada(t)&&(t.clubeInicialEscolhido||!t.opcoesInicio?.length);
   const impedimento=item=>!podeComprar?'Disponível antes de iniciar a temporada':carteira.compras.some(x=>x.id===item.id&&x.ano===t.ano)?'Já comprado nesta temporada':item.ovr&&((t.formacaoLoja||0)>=5||calcularOvrTecnico(t)>=99)?'Limite de OVR atingido':item.forca&&forcaClubeTecnico(t)>=99?'Força máxima atingida':carteira.saldo<item.preco?'Saldo insuficiente':null;
   const comprar=()=>{try{onComprar(selecionado.id);setAviso(`${selecionado.nome}: compra concluída.`);setSelecionado(null);}catch(e){setAviso(e.message);}};
   return <div className="lt">

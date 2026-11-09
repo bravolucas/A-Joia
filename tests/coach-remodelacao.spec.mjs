@@ -131,6 +131,7 @@ test('vitrine abre, prende o foco e fecha por Escape', async ({ page }) => {
 
 test('encerramento e desemprego não oferecem continuação inválida', async ({ page }) => {
   const c = comResultado();
+  c.idade=85;c.tecnico.idade=85;
   c.tecnico.temporadas = Array.from({ length: 30 }, (_, i) => ({ ...c.tecnico.temporadas[0], ano: 2026 + i }));
   await abrir(page, c);
   await expect(page.getByRole('heading', { name: 'Uma carreira para a história' })).toBeVisible();

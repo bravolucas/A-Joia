@@ -1,3 +1,4 @@
+import {registrarAnoHistoria,registrarEstatisticasCompeticoes,registrarAtletasObservados,simularDefesas,novosMarcosIndividuais} from '../historia/historiaFutebol.js';
 import {ITENS_PESSOAIS} from './itensPessoais.js';
 import {iniciarCamisas,aposentarDonoCamisa,prepararCamisaSelecao,sincronizarCamisasSelecao} from './camisasCarreira.js';
 import {estatisticasDecisao} from './decisaoDeJogo.js';
@@ -1747,6 +1748,8 @@ function fecharTemporadaBase(c0, card0) {
   });
   c.campeaoContinental = card.titulos.some((t) => t.tipo === "continental" && !/Sul-Americana|Europa League|Conference/.test(t.nome)) && !card.emprestado ? card.clube : null;
 
+  simularDefesas(c,card);
+  if(card.selecao?.convocado){const sel={...card.selecao,ano:card.ano,nome:"Seleção"};simularDefesas(c,sel);if(Number.isFinite(sel.defesas)){card.selecao.defesas=sel.defesas;c.selecao.defesas=(c.selecao.defesas||0)+sel.defesas;}}
   // totais e fama
   c.totais.jogos += card.jogos; c.totais.gols += card.gols; c.totais.assist += card.assist;
   if (card.selecao?.convocado) {
@@ -1950,6 +1953,11 @@ function fecharTemporadaBase(c0, card0) {
   c.pretemporadaVistas = opcoesPretemporada(antes).map((k) => k.id);
   c.historicoPretemporada=[...(antes.historicoPretemporada||[]),{ano:antes.ano,cartas:c.pretemporadaVistas,escolhida:antes.pretemporada?.id||null}].slice(-3);
   c.idade += 1; c.ano += 1;
+  registrarEstatisticasCompeticoes(c,card);
+  registrarAnoHistoria(c,card);
+  card.feitosHistoricos=[...(card.feitosHistoricos||[]),...novosMarcosIndividuais(antes,c,card)];
+  for(const feito of card.feitosHistoricos||[]){card.destaques.push(feito.titulo);card.marcos.push({...feito,icone:"🏛️"});c.marcos.push({...feito,icone:"🏛️"});}
+  registrarAtletasObservados(c,card);
   c.temporadas.push(card);
   return { c, card };
 }
@@ -3835,6 +3843,7 @@ export function carregarRapido() {
   try {
     const s = JSON.parse(localStorage.getItem(CHAVE_SAVE_RAPIDO) || "null");
     if (!s || s.v !== VERSAO_RAPIDO || !s.c?.attrs || !Array.isArray(s.c.temporadas)) return null;
+    if(s.c.tecnico&&!Number.isFinite(s.c.tecnico.idade))s.c.tecnico.idade=s.c.idade;
     s.c.flags = { historicoEventos: [], traidor: [], ...(s.c.flags || {}) };
     s.c.mod = s.c.mod || {};
     s.c.marcos = s.c.marcos || [];

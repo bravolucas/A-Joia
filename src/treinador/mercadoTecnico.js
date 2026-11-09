@@ -1,3 +1,4 @@
+import {carreiraTecnicoEncerrada} from './longevidadeTecnico.js';
 import { comissaoAtivaGestao, propostaComissaoTecnico } from './comissaoTecnico.js';
 /* Base de gestão do treinador. Valores em R$ mil; salários por mês.
    O gerador é próprio, para não consumir a aleatoriedade da simulação existente. */
@@ -87,7 +88,7 @@ export function gerarMercadoTecnico(t){
 function validarJanela(t){
  if(!t?.clube||t.demitido||t.desempregado)throw new Error('Você precisa estar empregado para administrar o elenco.');
  if(t.fase!=='pretemporada'||t.andamento?.jogos||t.andamento?.rodadas)throw new Error('Negociações disponíveis apenas antes do início da temporada.');
- if((t.temporadas?.length||0)>=30)throw new Error('A carreira de treinador já foi encerrada.');
+ if(carreiraTecnicoEncerrada(t))throw new Error('A carreira de treinador já foi encerrada.');
 }
 export function contratarJogadorTecnico(c,id){
  const t=c?.tecnico;validarJanela(t);const g=criarGestaoTecnico(t);

@@ -1,3 +1,5 @@
+import {registrarAnoHistoria,simularDefesas,registrarAtletasObservados} from '../historia/historiaFutebol.js';
+import BotaoHistoria,{GaleriaClube,MarcosIndividuais} from '../historia/HistoriaFutebol.jsx';
 import TabelaCompeticoesTemporada from './TabelaCompeticoesTemporada.jsx';
 import { criarIdMuseu } from '../museu/museu.js';
 import React, { useState, useMemo, useEffect } from "react";
@@ -2366,6 +2368,7 @@ function resolverTemporada(c, extraStats) {
       });
       estadoAtual = titulosMundo.estado;
       c.campeoesDaTemporada = titulosMundo.campeoes;
+      registrarAnoHistoria(c,{...card,ano:ANO_INICIO+c.idade-16,clube:c.clube.nome,ligaId:c.clube.liga},{modo:"completo"});
 
       // O clube do jogador não entra no sorteio por força do resto do mundo —
       // o destino dele (sobe/desce/fica) é decidido pela posição REAL que ele
@@ -2493,6 +2496,7 @@ function resolverTemporada(c, extraStats) {
     c.valorPico = Math.max(c.valorPico || 0, valorAtual);
     c.valorHistorico = [...(c.valorHistorico || []), { idade: c.idade, valor: valorAtual }];
 
+    simularDefesas(c,card);
     const registro = {
       idade: c.idade, temporadaLabel: temporadaLabel(c.idade, ANO_INICIO), clube: c.clube.nome, clubeObj: c.clube,
       ...card, posicao:c.posicao, copa, premios, titulosLista, torcidaFim: getTorcida(c, c.clube.nome), famaFim: c.fama, salario, expectativa, bateuMeta,
@@ -2505,6 +2509,7 @@ function resolverTemporada(c, extraStats) {
       trocaTecnico, movimentoLigas,
       valorMercado: valorAtual, valorAnterior,
     };
+    {const arquivo={...c,nome,nac:nacionalidade,mundo:mundoAtualizado||mundo};registrarAtletasObservados(arquivo,{...registro,ano:ANO_INICIO+c.idade-16});c.historiaFutebol=arquivo.historiaFutebol;}
     setTemporadas((t) => [...t, registro]);
     // autosave: a virada de temporada é o ponto mais seguro pra gravar
     setTimeout(() => {
@@ -8259,43 +8264,9 @@ function resolverTemporada(c, extraStats) {
                   <div className="bg-zinc-950/40 rounded-sm p-2"><div className="font-mono text-lg font-bold">{assistTotais}</div><div className="text-[8px] text-zinc-500 uppercase">Assist.</div></div>
                 </div>
 
-                {(() => {
-                  const cl = CLUBES.find((x) => x.nome === popupClube);
-                  if (!cl) return null;
-                  const pal = palmaresDoClube(carreira?.estadoClubes, popupClube);
-                  const nomes = nomeDosTitulos(cl.liga);
-                  const inicial = palmaresInicialDe(cl);
-                  const linhas = [
-                    { k: "liga", icone: "🏆", cor: "#12A876" },
-                    { k: "copa", icone: "🥇", cor: "#D8B44A" },
-                    { k: "continental", icone: "🌍", cor: "#f59e0b" },
-                    { k: "mundial", icone: "🌐", cor: "#EC4899" },
-                  ].filter((l) => (pal[l.k] || 0) > 0);
-                  const total = (pal.liga || 0) + (pal.copa || 0) + (pal.continental || 0) + (pal.mundial || 0);
-                  return (
-                    <div className="mb-4">
-                      <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1.5">🏛️ Sala de troféus do clube</div>
-                      {total === 0 ? (
-                        <p className="text-[11px] text-zinc-600 mb-3">O clube ainda não tem títulos de expressão. Uma página em branco pra você escrever.</p>
-                      ) : (
-                        <div className="grid gap-1 mb-2">
-                          {linhas.map((l) => {
-                            const ganhosNaSuaEra = (pal[l.k] || 0) - (inicial[l.k] || 0);
-                            return (
-                              <div key={l.k} className="flex items-center gap-2 text-[11px] px-2 py-1.5 rounded-sm bg-zinc-950/40">
-                                <span>{l.icone}</span>
-                                <span className="flex-1 text-zinc-300">{nomes[l.k]}</span>
-                                <span className="font-mono font-bold" style={{ color: l.cor }}>{pal[l.k]}×</span>
-                                {ganhosNaSuaEra > 0 && <span className="text-[9px] text-emerald-400">+{ganhosNaSuaEra} na sua era</span>}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                      <p className="text-[9px] text-zinc-600">{total} taça(s) na história do clube</p>
-                    </div>
-                  );
-                })()}
+                <BotaoHistoria c={{...carreira,nome,nacionalidade}} nome={popupClube} temporadas={temporadas} className="hf-link">Explorar clubes e recordes →</BotaoHistoria>
+                <GaleriaClube c={carreira} nome={popupClube} temporadas={temporadas}/>
+                <MarcosIndividuais c={{...carreira,nome,nacionalidade}} temporadas={temporadas} clube={popupClube}/>
                 {(() => {
                   const conf = resumoConfronto(carreira, popupClube);
                   if (!conf) return null;

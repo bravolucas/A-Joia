@@ -21,3 +21,6 @@
 Zebra permanece possível pela probabilidade de cada confronto; não se exige que ocorra em toda amostra. Testes adicionais cobrem 600 sorteios por fase resumida, 120 campanhas por cada um de sete formatos, determinismo, preservação de saves e elegibilidade por competição.
 
 Validação: 37 testes relacionados e seis testes novos passaram; rodada geral local 381/381 anterior ao sexto teste. Build final aprovado. Primeira rodada browser descartada por concorrência com alterações/build e carga de simulação; rodada final isolada e CI remoto em acompanhamento.
+
+
+Publicado em `4ab2fac`; ajuste de relógio do teste de cinematográfica em `3c7e8b1`. CI 42658063978 e Pages 42658063955 confirmados com sucesso: 382 testes de lógica e 271 de navegador.

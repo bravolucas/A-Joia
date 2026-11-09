@@ -1,0 +1,16 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {criarJogador,aposentar} from '../src/jogador/rapido.js';
+import {iniciarCarreiraTecnico,idadeTecnico,carreiraTecnicoEncerrada,aposentarTecnico,passarAnoDesempregado,jogarTemporadaExpressaTecnico} from '../src/treinador/tecnico.js';
+function base(idade=70){let c=aposentar(criarJogador({nome:'Longevidade',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:9,codigo:'LONGEVIDADE'}));c.idade=idade;c.ano=2050;return iniciarCarreiraTecnico(c);}
+test('30 temporadas deixam de encerrar a carreira antes dos 85 anos',()=>{const t={idadeInicio:40,ano:2060,temporadas:Array.from({length:30},(_,i)=>({ano:2030+i}))};assert.equal(idadeTecnico(t),70);assert.equal(carreiraTecnicoEncerrada(t),false);assert.equal(carreiraTecnicoEncerrada({...t,idade:85}),true);});
+test('aposentadoria voluntária preserva legado e resultados, é idempotente e não simula o que faltou',()=>{const c=base();c.tecnico.temporadas=[{ano:2049,clube:'Santos',titulosConquistados:['Copa do Brasil']}];c.tecnico.copasEmJogo={campeonatos:[{nome:'Copa aberta',fase:'mata'}]};const antes=JSON.stringify(c),r=aposentarTecnico(c);assert.equal(JSON.stringify(c),antes);assert.deepEqual(r.tecnico.temporadas,c.tecnico.temporadas);assert.equal(r.tecnico.aposentadoria.idade,70);assert.equal(r.tecnico.aposentadoria.pendencias.copas.campeonatos[0].nome,'Copa aberta');assert.equal(r.tecnico.copasEmJogo,null);assert.equal(carreiraTecnicoEncerrada(r.tecnico),true);assert.equal(aposentarTecnico(r),r);assert.throws(()=>jogarTemporadaExpressaTecnico(r),/indisponível|encerrada/);});
+test('ano sem clube também envelhece e respeita o limite',()=>{const c=base(84);c.tecnico.demitido=true;c.tecnico.fase='resultado';const r=passarAnoDesempregado(c,()=>.5,'esperar');assert.equal(r.idade,85);assert.equal(r.tecnico.idade,85);assert.equal(carreiraTecnicoEncerrada(r.tecnico),true);assert.throws(()=>passarAnoDesempregado(r,()=>.5,'esperar'),/encerrada/);});
+test('ao atingir 85 anos, as copas pendentes ainda podem ser concluídas',()=>{const t={idade:85,temporadas:[],copasEmJogo:{ano:2050}};assert.equal(carreiraTecnicoEncerrada(t),false);assert.equal(carreiraTecnicoEncerrada({...t,copasEmJogo:null,finaisPendentes:[{nome:'Final'}]}),false);assert.equal(carreiraTecnicoEncerrada({...t,copasEmJogo:null}),true);});
+
+test('loja e comissão continuam disponíveis após 30 temporadas antes dos 85 anos',async()=>{
+ const {comprarItemLojaTecnico}=await import('../src/treinador/lojaTecnico.js');const {prepararGestaoTecnico,contratarComissaoTecnico}=await import('../src/treinador/mercadoTecnico.js');
+ const c={idade:70,tecnico:{idade:70,ano:2060,clube:'Santos',elenco:70,fase:'pretemporada',clubeInicialEscolhido:true,temporadas:Array(30).fill({}),carteiraTecnico:{saldo:10000,compras:[],pagamentos:[]}}};
+ const compra=comprarItemLojaTecnico(c,'preparacao',70,70);assert.equal(compra.tecnico.carteiraTecnico.compras.length,1);
+ const g=prepararGestaoTecnico(c);g.tecnico.gestao.saldo=100000;g.tecnico.gestao.tetoSalarial=100000;assert.doesNotThrow(()=>contratarComissaoTecnico(g,'auxiliar'));
+ assert.throws(()=>comprarItemLojaTecnico({...c,tecnico:{...c.tecnico,idade:85}},'preparacao',70,70));
+});

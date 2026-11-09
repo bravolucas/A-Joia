@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { competicaoTemporadaTecnico, titulosConquistadosTecnico, LIMITE_TEMPORADAS_TECNICO, escolherOpcaoAutomaticaTecnico } from '../src/treinador/tecnico.js';
+import { competicaoTemporadaTecnico, titulosConquistadosTecnico, IDADE_MAXIMA_TECNICO, escolherOpcaoAutomaticaTecnico } from '../src/treinador/tecnico.js';
 import { competicaoDoTitulo, svgDaTaca } from '../src/comum/tacas.js';
 
 // Auditoria isolada do modo treinador: nomes devem coincidir com os slugs
@@ -30,7 +30,7 @@ test('treinador: vitrine usa o clube e o ano de cada conquista sem misturar vice
     {ano:2041,clube:'Corinthians',nome:'Brasileirão',tipo:'liga'},
     {ano:2043,clube:'Milan',nome:'Serie A',tipo:'liga'}
   ]);
-  assert.equal(LIMITE_TEMPORADAS_TECNICO,30);
+  assert.equal(IDADE_MAXIMA_TECNICO,85);
 });
 test('treinador: nomes de titulos mantem classificacao de liga', () => {
   for (const nome of Object.values(ligas)) {

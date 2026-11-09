@@ -1,3 +1,6 @@
+import {IDADE_MAXIMA_TECNICO,idadeTecnico,carreiraTecnicoEncerrada} from './longevidadeTecnico.js';
+export {IDADE_MAXIMA_TECNICO,idadeTecnico,carreiraTecnicoEncerrada} from './longevidadeTecnico.js';
+import {registrarAnoHistoria} from '../historia/historiaFutebol.js';
 import {resumoCampanhaCopa} from './copasEscolha.js';
 import {prepararCopasTecnico,aplicarCopaTecnico,estadualAutomaticoTecnico} from './copasCarreiraTecnico.js';
 import {vagaTecnico,nomeVaga,calcularVagasRapidas,idContinental,classificacoesHistoricas} from '../competicoes/regrasCopasRapidas.js';
@@ -62,8 +65,18 @@ export const DECISOES_TECNICO = [
   ] }
 ];
 export const QUANTIDADE_DECISOES_TECNICO = 4;
-export const LIMITE_TEMPORADAS_TECNICO = 30;
-export const carreiraTecnicoEncerrada = (t) => (t?.temporadas?.length || 0) >= LIMITE_TEMPORADAS_TECNICO;
+const idadeAtualTecnico=c=>Number.isFinite(c?.idade)?c.idade:idadeTecnico(c?.tecnico);
+export function aposentarTecnico(c){
+ if(!c?.tecnico||c.tecnico.aposentado)return c;
+ const novo=structuredClone(c),t=novo.tecnico;
+ const pendencias={andamento:t.andamento||t.temporadaPausada||null,copas:t.copasEmJogo||null,finais:t.finaisPendentes||[]};
+ novo.tecnico={...t,idade:idadeAtualTecnico(c),aposentado:true,fase:'aposentado',aposentadoria:{idade:idadeAtualTecnico(c),ano:t.ano,motivo:'voluntaria',pendencias},copasEmJogo:null,finaisPendentes:[],andamento:null,temporadaPausada:null,paradaPendente:null,intervencaoPendente:null,conviteSelecao:null,propostas:[]};
+ return registrarHistoriaTecnico(novo);
+}
+function registrarHistoriaTecnico(c){
+ const t=c?.tecnico,a=t?.temporadas?.at(-1);if(!a||t.fase!=='resultado'||t.tipoEquipe==='selecao'||t.copasEmJogo||t.finaisPendentes?.length)return c;
+ const novo={...c};registrarAnoHistoria(novo,{...a});return novo;
+}
 const NOMES_COMPETICOES_TECNICO = { brasileirao: 'Brasileirão', serieB: 'Brasileirão Série B', argentina: 'Liga Profesional', portugal: 'Liga Portugal', portugal2: 'Liga Portugal 2', espanha: 'La Liga', espanha2: 'LaLiga 2', inglaterra: 'Premier League', inglaterra2: 'Championship', italia: 'Serie A', italia2: 'Serie B (Itália)', alemanha: 'Bundesliga', alemanha2: '2. Bundesliga', franca: 'Ligue 1', franca2: 'Ligue 2', arabia: 'Saudi Pro League', holanda: 'Eredivisie', mls: 'MLS', turquia: 'Süper Lig', sulamericano: 'Campeonato Sul-Americano' };
 export function competicaoTemporadaTecnico(a = {}) {
   if (a.competicao) return a.competicao;
@@ -104,6 +117,7 @@ export function cartaAtualTecnico(t) {
 export function tomarDecisaoTecnico(c, opcaoId, rng = sorteio) {
   if (!c?.tecnico || c.tecnico.fase !== 'pretemporada') throw new Error('Decisão indisponível.');
   const t = c.tecnico;
+  if(carreiraTecnicoEncerrada(t,idadeAtualTecnico(c)))throw new Error('Carreira de treinador encerrada.');
   const carta = cartaAtualTecnico(t);
   if (!carta) throw new Error('Todas as decisões já foram tomadas.');
   const op = carta.opcoes.find(x => x.id === opcaoId);
@@ -458,6 +472,7 @@ export function passarAnoDesempregado(c, rng = sorteio, escolha = 'esperar') {
   if (!c?.tecnico || c.tecnico.fase !== 'resultado') throw new Error('Só é possível aguardar entre temporadas.');
   c = concluirFinaisPendentesTecnico(c);
   const t = c.tecnico;
+  if(carreiraTecnicoEncerrada(t,idadeAtualTecnico(c)))throw new Error('Carreira de treinador encerrada.');
   if (!t.demitido && !t.desempregado) throw new Error('O treinador ainda tem contrato.');
   const op = ANO_SEM_CLUBE_TECNICO.find(x => x.id === escolha) || ANO_SEM_CLUBE_TECNICO.at(-1);
   const carteira = t.carteiraTecnico || { saldo: 0, pagamentos: [], compras: [] };
@@ -465,10 +480,10 @@ export function passarAnoDesempregado(c, rng = sorteio, escolha = 'esperar') {
     : op.id === 'comentarista' ? { reputacao: limitar(t.reputacao + 3, 10, 99), carteiraTecnico: { ...carteira, saldo: carteira.saldo + 480, pagamentos: [...carteira.pagamentos, { chave: `${t.ano}|TV`, ano: t.ano, clube: 'TV', valor: 480, meses: 12 }] } }
     : op.id === 'estagio' ? { reputacao: limitar(t.reputacao + 1, 10, 99), estagioExterior: true }
     : { reputacao: limitar(t.reputacao - 2, 10, 99) };
-  const proximo = { ...t, ano: t.ano + 1, desempregado: true, demitido: false, clube: null,
+  const proximo = { ...t, idade:(idadeAtualTecnico(c))+1, ano: t.ano + 1, desempregado: true, demitido: false, clube: null,
     pais: null, salario: 0, propostas: [], ...extras, anoSabatico: [...(t.anoSabatico || []), { ano: t.ano, escolha: op.id, nome: op.nome }],
     anosDesempregado: (t.anosDesempregado || 0) + 1 };
-  return { ...c, idade: c.idade + 1, ano: c.ano + 1, tecnico: {
+  return { ...c, idade: idadeAtualTecnico(c) + 1, ano: c.ano + 1, tecnico: {
     ...proximo, propostasCoerentesVersao:3, propostas: gerarPropostasTecnico(proximo, rng)
   }};
 }
@@ -484,7 +499,7 @@ export function iniciarCarreiraTecnico(c) {
   const afinidadeInicial = opcoesInicio[0]?.afinidade || 0;
   const memoriaJogador = memoriaJogadorTecnico(c);
   return { ...c, tecnico: {
-    idadeInicio: c.idade, ano: c.ano, vagasInicio:c.vagasInternacionaisClubes||null,vagasInicioAno:c.vagasInternacionaisAno||null, clube: clubeInicial, vinculosJogador, opcoesInicio, clubeInicialEscolhido: false, memoriaJogador,
+    idadeInicio: c.idade, idade:c.idade, anoInicio:c.ano, ano: c.ano, vagasInicio:c.vagasInternacionaisClubes||null,vagasInicioAno:c.vagasInternacionaisAno||null, clube: clubeInicial, vinculosJogador, opcoesInicio, clubeInicialEscolhido: false, memoriaJogador,
     herancaJogador:{rotulos:legadoNarrativo(c),reputacaoInicial:reputacao,explicacao:'Seu legado de jogador orienta a reputação inicial. Afinidade pode abrir portas, mas o nível esportivo continua limitando os convites.'},
     reputacao, pais: dadosClubeInicial?.pais || 'Brasil', salario: dadosClubeInicial?.salario || 12, desempregado: false, anosDesempregado: 0, estilo: 'equilibrado', temporadas: [], vitorias: 0, empates: 0,
     derrotas: 0, titulos: 0, elenco: dadosClubeInicial?.elenco || 50, moral: memoriaJogador.auxiliar ? 53 : 50, diretoria: limitar(60 + Math.round(afinidadeInicial * 0.15), 0, 100), torcida: limitar(55 + Math.round(afinidadeInicial * 0.35), 0, 100), decisoes: [], demitido: false, propostas: [], historicoCartas: [], cartas: sortearCartasTecnico({ reputacao, temporadas: [], diretoria: 60, moral: 50 }), fase: 'pretemporada'
@@ -781,6 +796,7 @@ export function reuniaoEmergenciaTecnico(c, escolha, rng = sorteio) {
 export function simularEtapaTecnico(c, rng = sorteio) {
   const t = c?.tecnico;
   if (!t || t.fase !== 'pretemporada') throw new Error('Etapa indisponível.');
+  if(carreiraTecnicoEncerrada(t,idadeAtualTecnico(c)))throw new Error('Carreira de treinador encerrada.');
   if ((t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) throw new Error('Conclua as decisões antes de jogar.');
   if (t.reuniaoPendente) throw new Error('Responda à reunião com a diretoria antes de avançar.');
   const anterior = t.andamento || { jogos: 0, rodadas: 0, vitorias: 0, empates: 0, derrotas: 0, pontos: 0, avaliacoes: [] };
@@ -845,12 +861,12 @@ export function simularEtapaTecnico(c, rng = sorteio) {
     const temporada = { ano: t.ano, clube: t.clube, ...(CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga || t.liga ? { liga: CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga || t.liga } : {}), objetivo: objetivoTecnico(t).nome,
       cumpriuObjetivo: false, posicao, pontos, vitorias: v, empates: e, derrotas: d,
       jogos: jogosDisputados, interrompida: true, demitido: true, confrontos, classificacao: andamento.classificacao, avaliacoes: andamento.avaliacoes };
-    const novo = { ...t, carteiraTecnico:creditarSalarioTecnico(t,t.ano,t.salario??salarioTecnico(t),Math.max(1,Math.ceil(jogosDisputados/totalRodadas*12))), diretoria, torcida, demitido: true, reuniaoPendente: false, andamento: null,
+    const novo = { ...t, idade:idadeAtualTecnico(c)+1, carteiraTecnico:creditarSalarioTecnico(t,t.ano,t.salario??salarioTecnico(t),Math.max(1,Math.ceil(jogosDisputados/totalRodadas*12))), diretoria, torcida, demitido: true, reuniaoPendente: false, andamento: null,
       propostasCoerentesVersao:3, fase: 'resultado', temporadas: [...t.temporadas, temporada],
       vitorias: t.vitorias + v, empates: t.empates + e, derrotas: t.derrotas + d,
       propostas: gerarPropostasTecnico({ ...t, diretoria, torcida, clube: null,clubeReferencia:t.clube,temporadas:[...t.temporadas,temporada] }, rng),
       promessaContrato: null, ano: t.ano + 1 };
-    return { ...c, idade: c.idade + 1, ano: c.ano + 1, tecnico: novo };
+    return { ...c, idade: idadeAtualTecnico(c) + 1, ano: c.ano + 1, tecnico: novo };
   }
   if (limite < totalRodadas) return { ...c, tecnico: { ...t, diretoria, torcida, andamento, reuniaoPendente } };
   // Finalizar usando os resultados já disputados, sem sortear partidas novamente.
@@ -876,7 +892,7 @@ export function responderIntervencaoTecnico(c,chave,escolha,rng=sorteio){
 export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   if (!c?.tecnico) throw new Error('Carreira técnica não iniciada.');
   if (c.tecnico.fase !== 'pretemporada') throw new Error('Conclua a temporada anterior antes de simular.');
-  if (carreiraTecnicoEncerrada(c.tecnico)) throw new Error('Limite de 30 temporadas como treinador atingido.');
+  if(c.tecnico.aposentado||(idadeAtualTecnico(c))>=IDADE_MAXIMA_TECNICO)throw new Error('Carreira de treinador encerrada aos 85 anos ou por aposentadoria.');
   const pausa=c.tecnico.temporadaPausada;
   if(pausa&&!pausa.escolha)throw new Error('Escolha uma intervenção para continuar.');
   const t = {...c.tecnico,copasEscolhaHabilitadas:c.tecnico.copasEscolhaHabilitadas||!!opcoes.copasInterativas,temporadaPausada:null,intervencaoPendente:null};
@@ -884,9 +900,9 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   if (t.andamento?.rodadas || t.andamento?.jogos) throw new Error('Temporada em andamento: avance pelas etapas.');
   if (t.tipoEquipe === 'selecao') {
     const resultado = simularAnoSelecaoTecnico(t, calcularOvrTecnico(t), forcaClubeTecnico(t), rng, opcoes);
-    const novo = {...t, ...resultado, carteiraTecnico:creditarSalarioTecnico(t,t.ano,t.salario??salarioTecnico(t))};
+    const novo = {...t, ...resultado, idade:idadeAtualTecnico(c)+1, carteiraTecnico:creditarSalarioTecnico(t,t.ano,t.salario??salarioTecnico(t))};
     novo.propostas = gerarPropostasTecnico(novo,rng);
-    return {...c, idade:c.idade+1,ano:c.ano+1,tecnico:comMetas(novo)};
+    return {...c, idade:idadeAtualTecnico(c)+1,ano:c.ano+1,tecnico:comMetas(novo)};
   }
   const ligaAtual = t.liga || CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga;
   const participantesLiga = calendarioLigaTecnico({ ...t, liga: ligaAtual });
@@ -1071,8 +1087,8 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   const propostas = gerarPropostasTecnico({ ...t, clube: demitido ? null : t.clube,clubeReferencia:t.clube,temporadas:[...t.temporadas,temporada],titulos:(t.titulos||0)+temporada.titulosConquistados.length, liga: ligaSeguinte,
     ligasMundo: progressaoMundo.ligasMundo, reputacao: reputacaoNova }, rng);
   const conviteSelecao = null;
-  return { ...c, idade: c.idade + 1, ano: c.ano + 1, tecnico: comMetas({
-    ...t, carteiraTecnico:creditarSalarioTecnico(t,t.ano,t.salario??salarioTecnico(t)), ano: t.ano + 1, liga: ligaSeguinte,
+  return registrarHistoriaTecnico({ ...c, idade: idadeAtualTecnico(c) + 1, ano: c.ano + 1, tecnico: comMetas({
+    ...t, idade:idadeAtualTecnico(c)+1, carteiraTecnico:creditarSalarioTecnico(t,t.ano,t.salario??salarioTecnico(t)), ano: t.ano + 1, liga: ligaSeguinte,
     copasEmJogo, finaisPendentes, conviteSelecao, ofertasRecentes:[...(t.ofertasRecentes||[]),...(t.propostas||[]).map(p=>p.nome)].slice(-18), rivalTecnico, temporadaPausada: null, paradaPendente: null, ultimaFinal: null, contratoCurto: null,
     ligasMundo: progressaoMundo.ligasMundo,
     participantesLiga: ligaSeguinte === ligaAtual && nomesLiga
@@ -1082,7 +1098,7 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
     titulos: (t.titulos ?? 0) + temporada.titulosConquistados.length, demitido, propostas,
     promessaContrato: null, objetivoAtual: objetivo.nome, reputacao: reputacaoNova,
     diretoria: novaConfianca, torcida: novaTorcida
-  })};
+  })});
 }
 
 /** Resposta à parada da temporada: aplica o efeito e continua de onde parou. */
@@ -1132,7 +1148,7 @@ export function resolverFinalTecnico(c, nome, opcaoId) {
     reputacao: limitar((t.reputacao ?? 40) + ganho, 10, 99), torcida: f.tipo === 'copaMundo' ? t.torcida : limitar((t.torcida ?? 55) + (venceu ? 6 : -3), 0, 100),
     ultimaFinal: { nome: f.nome, tipo: f.tipo, adversario: f.adversario, lado: f.lado, escolha: op.nome, chance, venceu, placar, ano: f.ano, dado: f.dado } };
   if (!restantes.length && !novo.desempregado) novo.propostas = gerarPropostasTecnico({ ...novo, clube: novo.demitido ? null : novo.clube, clubeReferencia: a.clube }, geradorTecnico(`${f.ano}|${a.clube}|propostas-final`));
-  return { ...c, tecnico: comMetas(novo) };
+  return registrarHistoriaTecnico({ ...c, tecnico: comMetas(novo) });
 }
 /** Saves antigos ou atalhos: finais ainda abertas são decididas com o jogo controlado. */
 export function concluirFinaisPendentesTecnico(c) {
@@ -1175,7 +1191,7 @@ function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
     ...(progressaoMundo.movimentos.length ? { movimentosMundo: progressaoMundo.movimentos } : {}),
     confrontos: andamento.confrontos || [], avaliacoes: andamento.avaliacoes };
   temporada.demitido = demitido;
-  const proximo = { ...t, carteiraTecnico:creditarSalarioTecnico(t,t.ano,t.salario??salarioTecnico(t)), ano: t.ano + 1, fase: 'resultado', andamento: null,
+  const proximo = { ...t, idade:idadeAtualTecnico(c)+1, carteiraTecnico:creditarSalarioTecnico(t,t.ano,t.salario??salarioTecnico(t)), ano: t.ano + 1, fase: 'resultado', andamento: null,
     ligasMundo: progressaoMundo.ligasMundo,
     temporadas: [...t.temporadas, temporada], reuniaoPendente: false, vitorias: t.vitorias + vitorias,
     empates: t.empates + empates, derrotas: t.derrotas + derrotas,
@@ -1184,15 +1200,17 @@ function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
     reputacao: limitar(t.reputacao + (campeao ? 9 : posicao <= 4 ? 5 : posicao >= 15 ? -5 : 1), 10, 99) };
   proximo.propostasCoerentesVersao=3;
   proximo.propostas = gerarPropostasTecnico({ ...proximo, clube: demitido ? null : t.clube,clubeReferencia:t.clube }, rng);
-  return { ...c, idade: c.idade + 1, ano: c.ano + 1, tecnico: proximo };
+  return registrarHistoriaTecnico({ ...c, idade: idadeAtualTecnico(c) + 1, ano: c.ano + 1, tecnico: proximo });
 }
 export function proximaTemporadaTecnico(c) {
   if(c?.tecnico?.copasEmJogo)throw new Error('Conclua as copas antes de avançar.');
   if (!c?.tecnico || c.tecnico.fase !== 'resultado') throw new Error('Nenhum resultado pendente.');
   c = concluirFinaisPendentesTecnico(c);
+  c=structuredClone(c);
   const t = c.tecnico;
+  const ultima=t.temporadas?.at(-1);if(ultima&&ultima.tipoEquipe!=='selecao')registrarAnoHistoria(c,{...ultima});
   if (t.demitido || t.desempregado) throw new Error('Aceite uma proposta antes de começar a próxima temporada.');
-  if (carreiraTecnicoEncerrada(t)) throw new Error('Carreira de treinador encerrada após 30 temporadas.');
+  if(carreiraTecnicoEncerrada(t,idadeAtualTecnico(c)))throw new Error('Carreira de treinador encerrada aos 85 anos ou por aposentadoria.');
   const historicoCartas = [...(t.historicoCartas || []), ...(t.cartas || [])].slice(-32);
   const vencidos = (t.efeitosPendentes || []).filter(e => e.aplicarEm <= t.ano&&(!e.clube||e.clube===t.clube));
   const pendentes = (t.efeitosPendentes || []).filter(e => e.aplicarEm > t.ano);
@@ -1274,5 +1292,5 @@ export function comprarMelhoriaTecnico(c,id){
 export function resolverCopaEscolhaTecnico(c,chave,opcao){
  const novo=aplicarCopaTecnico(c,chave,opcao);if(novo===c)return c;
  if(!novo.tecnico.copasEmJogo){novo.tecnico=comMetas({...novo.tecnico,propostas:gerarPropostasTecnico(novo.tecnico,geradorTecnico(`${novo.tecnico.ano}|${novo.tecnico.clube}|copas-encerradas`))});}
- return novo;
+ return registrarHistoriaTecnico(novo);
 }

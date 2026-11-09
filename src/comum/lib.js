@@ -1591,12 +1591,13 @@ export function dividirPorCompeticao(c, card) {
   const pesoOfensivo = comps.map((k, i) => jogosPorComp[i] * k.dificuldade);
   const golsPorComp = distribuirInteiro(card.gols, pesoOfensivo);
   const assistPorComp = distribuirInteiro(card.assist, pesoOfensivo);
+  const defesasPorComp = distribuirInteiro(card.defesas || 0, jogosPorComp);
   const csPorComp = distribuirInteiro(card.cleanSheets || 0, comps.map((k, i) => jogosPorComp[i] * (2 - k.dificuldade)));
   const mecPorComp = distribuirInteiro(card.melhorEmCampo || 0, pesoOfensivo);
   return comps.map((k, i) => ({
     id: k.id, nome: k.nome, icone: k.icone, cor: k.cor,
     jogos: jogosPorComp[i], gols: golsPorComp[i], assist: assistPorComp[i],
-    cleanSheets: csPorComp[i], melhorEmCampo: mecPorComp[i],
+    ...(Number.isFinite(card.defesas)?{defesas:defesasPorComp[i]}:{}),cleanSheets: csPorComp[i], melhorEmCampo: mecPorComp[i],
     // nota levemente ajustada pela dificuldade da competição, ancorada na nota do ano
     nota: +clamp(card.nota + (k.dificuldade - 1) * 0.6 + (Math.random() - 0.5) * 0.18, 5.2, 9.9).toFixed(2),
   })).filter((k) => k.jogos > 0);

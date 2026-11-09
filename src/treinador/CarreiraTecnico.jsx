@@ -1,3 +1,4 @@
+import BotaoHistoria from '../historia/HistoriaFutebol.jsx';
 import {dadosVaga} from '../competicoes/vagasInternacionais.js';
 import {contextoAgenda} from '../competicoes/calendarioCopas.js';
 import CopaEscolha,{MarcoLiga} from './CopaEscolha.jsx';
@@ -24,7 +25,7 @@ import { Escudo, Bandeira, JanelaTreinador } from './uiTreinador.jsx';
 import { competicaoDoTitulo } from '../comum/tacas.js';
 import {
   historicoProfissionalTecnico, objetivoTecnico,
-  LIMITE_TEMPORADAS_TECNICO, carreiraTecnicoEncerrada, titulosConquistadosTecnico, legadoCompletoTecnico,
+  IDADE_MAXIMA_TECNICO, carreiraTecnicoEncerrada, titulosConquistadosTecnico, legadoCompletoTecnico,
   competicaoTemporadaTecnico, salarioTecnico, calcularOvrTecnico, forcaClubeTecnico,
   INTERVENCOES_TECNICO, OPCOES_REUNIAO_TECNICO, previsaoTemporadaTecnico, metasDoTecnico
 } from './tecnico.js';
@@ -169,13 +170,14 @@ function LinhaTemporada({ a, idade, ativa, aberta, onClick }) {
   </div>;
 }
 
-export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAvancarESimular, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado, onReuniao, onJogar, onIntervir, onEscolhaRapida, onComprarMelhoria, onParada, onFinal, onConviteSelecao, onCopaEscolha, rotuloLegado = '← Ver legado como jogador' }) {
+export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAvancarESimular, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado, onAposentar, onReuniao, onJogar, onIntervir, onEscolhaRapida, onComprarMelhoria, onParada, onFinal, onConviteSelecao, onCopaEscolha, rotuloLegado = '← Ver legado como jogador' }) {
   const t = c.tecnico;
   const temporadas = t.temporadas || [];
   const ultima = temporadas.at(-1);
   const primeira = !temporadas.length && !t.clubeInicialEscolhido && !!t.opcoesInicio?.length;
   const semClube = t.demitido || t.desempregado;
-  const encerrada = carreiraTecnicoEncerrada(t);
+  const encerrada = carreiraTecnicoEncerrada(t,c.idade);
+  const [aposentadoriaAberta,setAposentadoriaAberta]=useState(false);
   const historico = historicoProfissionalTecnico(t);
   const titulos = titulosConquistadosTecnico(t);
   const gruposConquistas = agruparConquistasTecnico(titulos);
@@ -265,7 +267,7 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
   };
   const faseResultado = t.fase === 'resultado';
   const faseTemporada = t.fase === 'pretemporada' && !primeira && !encerrada && !t.reuniaoPendente;
-  const futuras = Math.max(0, LIMITE_TEMPORADAS_TECNICO - temporadas.length - (encerrada ? 0 : 1));
+  const futuras = Math.max(0, IDADE_MAXIMA_TECNICO - idade - (encerrada ? 0 : 1));
   const cartaRapida=cartaPretemporadaRapida(t,1);
   const retomando=!!(t.andamento?.rodadas||t.andamento?.jogos);
   const mostrarDecisao=!!cartaRapida&&!retomando;
@@ -273,6 +275,7 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
 
   return <div className="ct" aria-label="Carreira de treinador">
     {lojaAberta&&<JanelaTreinador titulo="Loja do treinador" onFechar={()=>setLojaAberta(false)}><LojaTreinador c={c} onComprar={onComprarMelhoria} /></JanelaTreinador>}
+    {aposentadoriaAberta&&<JanelaTreinador titulo="Aposentadoria do treinador" onFechar={()=>setAposentadoriaAberta(false)}><div className="ct-event-content"><h3>Encerrar sua carreira aos {idade} anos?</h3><p>Seus títulos, campanhas e legado ficam salvos. Competições ainda abertas serão interrompidas sem simular os jogos restantes.</p><button className="ct-primary" onClick={()=>{setAposentadoriaAberta(false);onAposentar?.();}}>Confirmar aposentadoria</button><button className="ct-primary" onClick={()=>setAposentadoriaAberta(false)}>Continuar treinando</button></div></JanelaTreinador>}
     {propostaPendente && <JanelaTreinador titulo="Decisão de legado" onFechar={() => setPropostaPendente(null)}><div className="ct-event-content"><h3>Assinar com {propostaPendente}?</h3><p>Você é ídolo em {riscosIdolatriaTecnico(t,propostaPendente).map(v=>v.clube).join(', ')}. Assinar com este rival rompe esse vínculo: você perde os benefícios de ídolo nas futuras propostas e retornos desses clubes. O novo projeto também começa com menos apoio da diretoria e da torcida. Seu histórico e suas conquistas permanecem.</p><button className="ct-primary" disabled={simulando} onClick={()=>iniciarProposta(propostaPendente,true)}>Confirmar transferência</button><button className="ct-primary" onClick={()=>setPropostaPendente(null)}>Manter meu legado</button></div></JanelaTreinador>}
 
     {t.copasEmJogo?.pausa&&copasAbertas&&!simulando&&<MarcoLiga agenda={t.copasEmJogo} temporada={ultima} onMinimizar={()=>setCopasAbertas(false)} onContinuar={()=>onCopaEscolha?.(chaveCopaTecnico(t),'continuar')}/>}
@@ -294,7 +297,7 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
           <div className={`ct-rating ${ovr >= 80 ? 'ct-rating-gold' : ovr >= 70 ? 'ct-rating-silver' : ''}`}><span>OVR</span><strong>{ovr}</strong></div>
           <div className="ct-person">
             <div className="ct-badges"><span><Bandeira pais={c.nac || 'BRA'} />{c.nac || 'BRA'}</span><span className="ct-role">TREINADOR</span></div>
-            <h1>{c.nome}</h1><div className="ct-current-club"><Escudo nome={clubeAtual} size={22} /><strong>{clubeAtual}</strong></div>
+            <h1>{c.nome}</h1><div className="ct-current-club"><Escudo nome={clubeAtual} size={22} /><BotaoHistoria c={c} nome={clubeAtual}><strong>{clubeAtual}</strong></BotaoHistoria></div>
           </div>
           <div className="ct-contract"><div><span>IDADE</span><strong>{idade}</strong></div><div><span>SALÁRIO/MÊS</span><strong>R$ {semClube || primeira ? 0 : (t.salario ?? salarioTecnico(t))}<small>mil</small></strong></div></div>
         </header>
@@ -306,7 +309,7 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
         {(t.rupturasIdolo||[]).length>0 && <p className="ct-warning">Legado: vínculo de ídolo rompido com {t.rupturasIdolo.map(r=>r.clube).join(', ')} após assinar com um rival.</p>}
         {onComprarMelhoria&&<button className="ct-wallet-button" onClick={()=>setLojaAberta(true)} aria-label="Abrir loja do treinador"><span><small>SEU SALDO · SALÁRIOS</small><strong>{formatarVerbaRapida(carteiraTecnico(t).saldo)}</strong></span><span>Loja de melhorias →</span></button>}
         <div className="ct-actions" aria-live="polite"><FasesTemporada etapa={agendaAberta?'momento':t.fase==='resultado'?'resumo':simulando||t.fase==='parada'?'momento':'evento'}/>
-          {encerrada ? <><h2>Uma carreira para a história</h2><p>Carreira encerrada após {LIMITE_TEMPORADAS_TECNICO} temporadas. Reveja suas campanhas e conquistas.</p><div className="ct-career-total"><strong>{historico.aproveitamento}%</strong><span>de aproveitamento · {historico.clubes.length} clubes</span></div><button className="ct-primary" onClick={() => abrirConquistas(null)}>Ver conquistas</button></>
+          {encerrada ? <><h2>Uma carreira para a história</h2><p>{t.aposentado?`Você se aposentou aos ${t.aposentadoria?.idade??idade} anos.`:`Carreira encerrada aos ${IDADE_MAXIMA_TECNICO} anos.`} Reveja suas campanhas e conquistas.</p><div className="ct-career-total"><strong>{historico.aproveitamento}%</strong><span>de aproveitamento · {historico.clubes.length} clubes</span></div><button className="ct-primary" onClick={() => abrirConquistas(null)}>Ver conquistas</button></>
           : primeira ? <><h2>Oferta inicial</h2><p>Os primeiros clubes querem você no comando. Escolha onde sua carreira como treinador começa.</p><div className="ct-offers">{t.opcoesInicio.map(op => <CartaoClube key={op.clube} nome={op.clube} pais={op.pais || SELECOES_TECNICO.find(n=>n.nome===op.clube)?.pais || t.pais} liga={op.liga} nivel={op.elenco} salario={op.salario} rotulo="Começar no" detalhe={op.menor ? 'Projeto compatível com seu nível' : `${op.idolatria ? 'Clube do coração' : 'Vínculo como jogador'}${op.contratoCurto ? ' · contrato de 1 ano: cumpra a meta para renovar' : ''}`} disabled={simulando} onClick={() => escolherClubeInicial(op.clube)} />)}</div></>
           : t.reuniaoPendente ? <><div className="vf-hero-diretoria" style={{backgroundImage:`url(${CENARIOS.diretoriaMobile})`}} /><h2>Conversa com a diretoria</h2><p>A pressão aumentou. Sua resposta define os próximos passos.</p><div className="ct-decisions">{OPCOES_REUNIAO_TECNICO.map(op => <button key={op.id} disabled={simulando} onClick={() => executar(() => { onReuniao?.(op.id); onJogar?.(); })}><strong>{op.nome}</strong><span>{op.descricao}</span></button>)}</div></>
           : t.fase === 'parada' && t.paradaPendente ? <PainelParada p={t.paradaPendente} ocupado={simulando} onEscolher={op => executar(() => onParada?.(t.paradaPendente.chave, op))} />
@@ -328,9 +331,9 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
           {!encerrada && <div ref={atualRef} className="ct-timeline-row ct-current-row"><span className="ct-age">{idade}</span><span className="ct-season-club"><span className="ct-unknown">?</span><strong>{simulando ? 'Simulando temporada…' : primeira || faseResultado ? 'Escolhendo clube…' : 'Decisão de carreira…'}</strong></span><span className="ct-position">—</span><span /><span /><span /></div>}
           {Array.from({ length: futuras }, (_, i) => <div key={`futura-${i}`} className="ct-timeline-row ct-future" aria-hidden="true"><span>{idade + i + 1}</span><span /><span /><span /><span /><span /></div>)}
         </div>
-        <footer className="ct-timeline-total"><Bandeira pais={t.pais || 'Brasil'} /><strong>{temporadas.length}/{LIMITE_TEMPORADAS_TECNICO} temporadas</strong><span>{historico.aproveitamento}% aproveitamento</span></footer>
+        <footer className="ct-timeline-total"><Bandeira pais={t.pais || 'Brasil'} /><strong>{temporadas.length} temporadas · até {IDADE_MAXIMA_TECNICO} anos</strong><span>{historico.aproveitamento}% aproveitamento</span></footer>
       </section>
     </div>
-    <footer className="ct-footer"><button type="button" onClick={onLegado}>{rotuloLegado}</button><button type="button" onClick={onSair}>Voltar ao início</button></footer>
+    <footer className="ct-footer">{!encerrada&&onAposentar&&<button type="button" onClick={()=>setAposentadoriaAberta(true)}>Aposentar como treinador</button>}<button type="button" onClick={onLegado}>{rotuloLegado}</button><button type="button" onClick={onSair}>Voltar ao início</button></footer>
   </div>;
 }

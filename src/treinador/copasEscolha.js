@@ -1,15 +1,17 @@
+import {TODAS_ESTRATEGIAS,NOVOS_PENALTIS,escolhasCopa} from './estrategiasCopas.js';
 import {geradorTecnico} from './momentosTecnico.js';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const nivel=c=>Number(c?.forca??c?.elenco??60);
 export const PLANOS_COPA=[{id:'pressionar',nome:'Pressionar e atacar',texto:'Mais risco, menos empates.'},{id:'controlar',nome:'Controlar o jogo',texto:'Mais proteção; aceita levar a decisão adiante.'},{id:'contra',nome:'Explorar os espaços',texto:'Funciona melhor diante de um adversário superior.'}];
 export const PLANOS_PENALTIS=[{id:'canto',nome:'Bater colocado',texto:'Precisão para lidar com a pressão.'},{id:'forte',nome:'Bater com força',texto:'Uma cobrança agressiva.'},{id:'esperar',nome:'Esperar o goleiro',texto:'Frieza para decidir no último instante.'}];
 export function chancesCopa(forca,adversario,plano='controlar',final=false){
- const diff=forca-adversario,ajuste=plano==='pressionar'?3:plano==='contra'?clamp(-diff*.18,-3,5):0;
- const empate=clamp(.27-Math.abs(diff)*.0015+(plano==='controlar'?.06:plano==='pressionar'?-.07:0),.12,.34);
+ const estrategia=TODAS_ESTRATEGIAS.find(x=>x.id===plano);
+ const diff=forca-adversario,ajuste=estrategia?(estrategia.ajuste==='contra'?clamp(-diff*.24,-4,7):estrategia.ajuste):plano==='pressionar'?3:plano==='contra'?clamp(-diff*.18,-3,5):0;
+ const empate=clamp(.27-Math.abs(diff)*.0015+(estrategia?.empate??(plano==='controlar'?.06:plano==='pressionar'?-.07:0)),.12,.34);
  const vitoria=clamp((1-empate)/(1+Math.exp(-(diff+ajuste)/(final?18:14))),.03,1-empate-.03);
  return {vitoria,empate,derrota:1-vitoria-empate};
 }
-export function chancePenaltis(forca,adversario,plano='canto',final=false){const diff=forca-adversario;return clamp(.5+diff*(final?.003:.004)+(plano==='canto'?.015:plano==='esperar'?clamp(-diff*.0008,-.015,.025):-.005),.23,.77);}
+export function chancePenaltis(forca,adversario,plano='canto',final=false){const diff=forca-adversario;return clamp(.5+diff*(final?.003:.004)+(NOVOS_PENALTIS.find(x=>x.id===plano)?.ajuste??(plano==='canto'?.015:plano==='esperar'?clamp(-diff*.0008,-.015,.025):-.005)),.23,.77);}
 function embaralhar(lista,rng){return lista.map(x=>({x,d:rng()})).sort((a,b)=>a.d-b.d).map(x=>x.x);}
 function partida(a,b,rng,plano='controlar',final=false){
  const p=chancesCopa(nivel(a),nivel(b),plano,final),d=rng(),res=d<p.vitoria?'V':d<p.vitoria+p.empate?'E':'D',baixo=Math.floor(rng()*2),alto=baixo+1+Math.floor(rng()*2);
@@ -124,15 +126,16 @@ function registrarMata(c,jogo){
 }
 export function escolherCopa(c,chave,opcao){
  const d=decisaoCopa(c);if(!d||d.chave!==chave)return c;
- const planos=d.penaltis?PLANOS_PENALTIS:PLANOS_COPA;if(!planos.some(x=>x.id===opcao))throw new Error('Escolha inválida.');
+ const planos=[...(d.penaltis?PLANOS_PENALTIS:PLANOS_COPA),...escolhasCopa(c,d).opcoes];if(!planos.some(x=>x.id===opcao))throw new Error('Escolha inválida.');
+ const plano=planos.find(x=>x.id===opcao),revelacao={nome:plano.nome,probabilidades:d.penaltis?{classificacao:chancePenaltis(d.forcaUsuario,d.forcaAdv,opcao,d.final)}:chancesCopa(d.forcaUsuario,d.forcaAdv,opcao,d.final)};
  const novo=structuredClone(c),rng=geradorTecnico(`${chave}|${opcao}`);
  // Campaigns saved before full brackets keep the opponent already shown on screen.
  if(!d.grupo&&!novo.quadroMata&&!novo.roteiroMundial){const outros=reduzirQuadro(novo.pool.filter(x=>x.nome!==novo.usuario&&x.nome!==d.adversario&&!novo.eliminados.includes(x.nome)&&(!novo.candidatosMata||novo.candidatosMata.includes(x.nome))),Math.max(0,novo.tamanho-2),geradorTecnico(`${novo.seed}|migracao-chave`)).sort((a,b)=>nivel(b)-nivel(a));novo.quadroMata=[[novo.usuario,d.adversario]];while(outros.length>1)novo.quadroMata.push([outros.shift().nome,outros.pop().nome]);if(outros.length)novo.quadroMata.push([outros[0].nome,null]);}
 
- if(d.penaltis){const j={...novo.resultado.jogo,penaltis:true,vencedor:rng()<chancePenaltis(d.forcaUsuario,d.forcaAdv,opcao,d.final)?novo.usuario:d.adversario};novo.resultado={jogo:j,escolha:opcao,penaltisPendentes:false,venceu:j.vencedor===novo.usuario,fase:d.fase,final:d.final};registrarMata(novo,j);novo.etapa++;return novo;}
+ if(d.penaltis){const j={...novo.resultado.jogo,penaltis:true,vencedor:rng()<chancePenaltis(d.forcaUsuario,d.forcaAdv,opcao,d.final)?novo.usuario:d.adversario};novo.resultado={jogo:j,escolha:opcao,revelacao,penaltisPendentes:false,venceu:j.vencedor===novo.usuario,fase:d.fase,final:d.final};registrarMata(novo,j);novo.etapa++;return novo;}
  const j=partida({nome:novo.usuario,forca:d.forcaUsuario},{nome:d.adversario,forca:d.forcaAdv},rng,opcao,d.final);
  if(!d.casa){[j.casa,j.fora]=[j.fora,j.casa];[j.golsCasa,j.golsFora]=[j.golsFora,j.golsCasa];}
- novo.resultado={jogo:j,escolha:opcao,penaltisPendentes:!d.grupo&&!j.vencedor,venceu:j.vencedor===novo.usuario,empate:!j.vencedor,fase:d.fase,final:d.final};
+ novo.resultado={jogo:j,escolha:opcao,revelacao,penaltisPendentes:!d.grupo&&!j.vencedor,venceu:j.vencedor===novo.usuario,empate:!j.vencedor,fase:d.fase,final:d.final};
  if(novo.resultado.penaltisPendentes)return novo;
  if(d.grupo)avancarLiga(novo,j);else registrarMata(novo,j);novo.etapa++;return novo;
 }

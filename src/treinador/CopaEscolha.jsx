@@ -1,18 +1,19 @@
+import {escolhasCopa} from './estrategiasCopas.js';
 import CenaFotografica from '../comum/CenaFotografica.jsx';
 import {cenaCopa} from '../comum/direcaoCenas.js';
 import React,{useEffect,useRef,useState} from 'react';
 import {JanelaTreinador,Escudo} from './uiTreinador.jsx';
 import {TacaCompeticao} from '../comum/trofeus.jsx';
-import {PLANOS_COPA,PLANOS_PENALTIS,chancesCopa,chancePenaltis,decisaoCopa} from './copasEscolha.js';
+import {chancesCopa,chancePenaltis,decisaoCopa} from './copasEscolha.js';
 import {temaCopa} from '../competicoes/temasCopas.js';
 import './CopaEscolha.css';
 const pct=n=>`${Math.round(n*100)}%`;
 function Trajeto({tipo}){return <svg className="cce-trajeto" viewBox="0 0 72 38" fill="none" aria-hidden="true"><path d="M1 36H71M16 36V19H56V36M30 36V28H42V36" stroke="currentColor" opacity=".22"/>{tipo===0?<><path d="M25 30L20 10M47 30L52 10M36 26V5" stroke="currentColor" strokeWidth="2"/><path d="M31 10L36 5L41 10" stroke="currentColor" strokeWidth="2"/></>:tipo===1?<><path d="M22 23Q36 4 50 23Q36 38 22 23Z" stroke="currentColor" strokeWidth="2" strokeDasharray="4 3"/><circle cx="36" cy="12" r="3" fill="currentColor"/></>:<><path d="M17 31L30 21L43 26L58 7" stroke="currentColor" strokeWidth="2"/><path d="M49 8L58 7L59 16" stroke="currentColor" strokeWidth="2"/></>}</svg>;}
 export default function CopaEscolha({campanha:c,chave,onEscolher,ocupado,onMinimizar,modoJogador=false,calendario}){
  const d=decisaoCopa(c),r=c.resultado,penaltis=d?.penaltis,final=d?.final||r?.final,tema=temaCopa(c);
- const [revelando,R]=useState(false),timer=useRef(null),lock=useRef(false);
+ const [revelando,R]=useState(false),[revelacao,S]=useState(null),timer=useRef(null),lock=useRef(false);
  useEffect(()=>()=>clearTimeout(timer.current),[]);
- const escolher=op=>{if(lock.current||ocupado)return;lock.current=true;const reduzir=window.matchMedia('(prefers-reduced-motion: reduce)').matches;R(!reduzir);onEscolher(chave,op);if(reduzir)lock.current=false;else timer.current=setTimeout(()=>{R(false);lock.current=false;},850);};
+ const escolher=op=>{if(lock.current||ocupado)return;lock.current=true;const plano=escolhasCopa(c,d).opcoes.find(x=>x.id===op);S({nome:plano.nome,probabilidades:penaltis?{classificacao:chancePenaltis(d.forcaUsuario,d.forcaAdv,op,final)}:chancesCopa(d.forcaUsuario,d.forcaAdv,op,final)});const reduzir=window.matchMedia('(prefers-reduced-motion: reduce)').matches;R(!reduzir);onEscolher(chave,op);if(reduzir)lock.current=false;else timer.current=setTimeout(()=>{R(false);lock.current=false;},1350);};
  return <JanelaTreinador titulo={`Copa em jogo · ${c.nome}`} onFechar={onMinimizar} classe={`cce-modal cce-${tema.id}`}>
   <div className="cce-corpo" style={{'--cce-cor':tema.cor,'--cce-fundo':tema.fundo}} data-tema={tema.id} data-motivo={tema.motivo} aria-busy={revelando}>
    <CenaFotografica className="cce-foto" cena={cenaCopa(c,d)}/><div className="cce-ambiente" aria-hidden="true"><i/><i/><i/><i/><i/></div>
@@ -20,19 +21,25 @@ export default function CopaEscolha({campanha:c,chave,onEscolher,ocupado,onMinim
    {calendario?.liga&&<div className="cce-agenda"><span>Calendário da temporada</span><b>{calendario.data}</b><span>Entre as rodadas de {calendario.liga}</span></div>}
    <div className={revelando?'cce-conteudo cce-oculto':'cce-conteudo'}>
    {d&&<><div className="cce-confronto"><div><Escudo nome={c.usuario} size={44}/><strong>{c.usuario}</strong><span>Força {Math.round(d.forcaUsuario)}</span></div><b><small>{penaltis?'PÊNALTIS':final?'FINAL':'DIA DE COPA'}</small>×</b><div><Escudo nome={d.adversario} size={44}/><strong>{d.adversario}</strong><span>Força {Math.round(d.forcaAdv)}</span></div></div>
-    {c.fase==='liga'&&<p className="cce-info">Tabela única · {c.times.length} clubes · {c.totalRodadas} jogos. Duas decisões suas; os demais jogos são simulados. 1º–8º: oitavas. 9º–24º: playoff. 25º em diante: eliminado.</p>}
-    <div className={`cce-pressao ${final?'cce-final':''}`}>{penaltis?'EMPATE · DECISÃO NOS PÊNALTIS':final?'FINAL · PRESSÃO MÁXIMA':'QUAL VAI SER A SUA LEITURA DO JOGO?'}</div>
-    <div className="cce-opcoes">{(penaltis?PLANOS_PENALTIS:PLANOS_COPA).map((op,i)=>{const p=chancesCopa(d.forcaUsuario,d.forcaAdv,op.id,final);return <button key={op.id} disabled={ocupado||revelando} onClick={()=>escolher(op.id)}><div className="cce-carta-topo"><em>0{i+1}</em><Trajeto tipo={i}/></div><strong>{modoJogador&&!penaltis?({pressionar:'Jogar para cima',controlar:'Valorizar a posse',contra:'Explorar os espaços'}[op.id]):op.nome}</strong><span>{op.texto}</span>{penaltis?<b>{pct(chancePenaltis(d.forcaUsuario,d.forcaAdv,op.id,final))} {final?'de chance de título':'para passar'}</b>:<div className="cce-chances"><div className="cce-probabilidade" aria-hidden="true"><b style={{width:pct(p.vitoria)}}/><b style={{width:pct(p.empate)}}/><b style={{width:pct(p.derrota)}}/></div><i>Vitória {pct(p.vitoria)}</i><i>Empate {pct(p.empate)}</i><i>Derrota {pct(p.derrota)}</i></div>}<span className="cce-escolher">Escolher <svg width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 16L16 4M5 4H16V15" stroke="currentColor" strokeWidth="1.7"/></svg></span></button>;})}</div>
+    {c.fase==='liga'&&<details className="cce-info cce-formato"><summary>Formato · {c.times.length} clubes · {c.totalRodadas} jogos</summary><p>Tabela única · {c.times.length} clubes · {c.totalRodadas} jogos. Duas decisões suas; os demais jogos são simulados. 1º–8º: oitavas. 9º–24º: playoff. 25º em diante: eliminado.</p></details>}
+    <div className={`cce-pressao ${final?'cce-final':!penaltis?'cce-contexto-generico':''}`}>{penaltis?'EMPATE · DECISÃO NOS PÊNALTIS':final?'FINAL · PRESSÃO MÁXIMA':'QUAL VAI SER A SUA LEITURA DO JOGO?'}</div>
+    <p className="cce-situacao">{escolhasCopa(c,d).titulo} <span>Escolha o plano. As chances aparecem depois.</span></p>
+    <div className="cce-opcoes">{escolhasCopa(c,d).opcoes.map((op,i)=><button key={op.id} disabled={ocupado||revelando} onClick={()=>escolher(op.id)}><div className="cce-carta-topo"><em>0{i+1}</em><Trajeto tipo={i}/></div><strong>{op.nome}</strong><span>{op.texto}</span><b className="cce-risco">{op.risco}</b><span className="cce-escolher">Aplicar estratégia <span aria-hidden="true">↗</span></span></button>)}</div>
     {penaltis&&<p className="cce-info">{final?'A taça será decidida na marca. A pressão reduz a vantagem do favorito.':'Um empate no mata-mata abre uma disputa própria. A força dos dois times continua contando.'}</p>}
    </>}
+   {r?.revelacao&&<Revelacao dados={r.revelacao}/> }
    {r&&!r.penaltisPendentes&&<div className={`cce-resultado ${r.venceu?'cce-venceu':r.empate?'cce-empatou':'cce-perdeu'}`} role="status"><div className="cce-placar"><Escudo nome={r.jogo.casa} size={48}/><strong>{r.jogo.golsCasa}<i>:</i>{r.jogo.golsFora}</strong><Escudo nome={r.jogo.fora} size={48}/></div>{c.campeao===c.usuario&&<TacaCompeticao nome={c.nome} tipo={c.tipo} size={82}/>}<h3>{r.jogo.penaltis?r.venceu?(c.campeao===c.usuario?'CAMPEÃO NOS PÊNALTIS!':'PASSOU NOS PÊNALTIS!'):c.vice===c.usuario?'VICE-CAMPEÃO NOS PÊNALTIS':'ELIMINADO NOS PÊNALTIS':r.venceu?c.campeao===c.usuario?'CAMPEÃO!':'VITÓRIA!':r.empate?'EMPATE':'DERROTA'}</h3><p>{r.jogo.casa} <strong>{r.jogo.golsCasa} × {r.jogo.golsFora}</strong> {r.jogo.fora}{r.jogo.penaltis?' · pênaltis':''}</p><small>{c.fase==='fim'?c.faseUsuario:'Resultado registrado. A campanha continua.'}</small></div>}
    {!r&&c.fase==='fim'&&<div className="cce-resultado"><h3>Campanha encerrada</h3><p>{c.faseUsuario}</p></div>}
    {c.classificacao?.length>0&&<details className="cce-tabela"><summary>Ver classificação · {c.classificacao.find(x=>x.meuClube)?.posicao}º</summary>{c.classificacao.filter((x,i)=>i<8||x.meuClube).map(x=><div key={x.nome} className={x.meuClube?'cce-eu':''}><span>{x.posicao}º</span><strong>{x.nome}</strong><span>{x.jogos}J</span><b>{x.pontos} pts</b></div>)}</details>}
    </div>
-   {revelando&&<div className={`cce-cinematica ${r?.venceu?'cce-cena-vitoria':r?.empate?'cce-cena-empate':'cce-cena-derrota'}`} aria-live="polite"><div className="cce-arena"><div className="cce-rede"/><i className="cce-bola">●</i><span className="cce-rastro"/></div><strong>{penaltis?'SANGUE FRIO.':final?'VALE A TAÇA.':'A BOLA ESTÁ ROLANDO.'}</strong><small>Um lance. Uma história.</small></div>}
+   {revelando&&<div className={`cce-cinematica ${r?.venceu?'cce-cena-vitoria':r?.empate?'cce-cena-empate':'cce-cena-derrota'}`} aria-live="polite"><div className="cce-arena"><div className="cce-rede"/><i className="cce-bola">●</i><span className="cce-rastro"/></div><strong>{penaltis?'SANGUE FRIO.':final?'VALE A TAÇA.':'A BOLA ESTÁ ROLANDO.'}</strong><small>Estratégia definida. Estas são as suas chances.</small>{revelacao&&<Revelacao dados={revelacao}/>}</div>}
   </div>
   {((r&&!r.penaltisPendentes)||(!r&&c.fase==='fim'))&&<footer className="cce-rodape"><button disabled={ocupado||revelando} className="ct-primary" onClick={()=>onEscolher(chave,'continuar')}>{c.fase==='fim'?'Concluir campanha':'Continuar campanha'} <span>→</span></button></footer>}
  </JanelaTreinador>;
+}
+function Revelacao({dados}){
+ const p=dados.probabilidades;
+ return <div className="cce-revelacao"><small>PLANO ESCOLHIDO · {dados.nome}</small><div>{p.classificacao!=null?<b>{pct(p.classificacao)} <span>para passar / ser campeão</span></b>:<><b>{pct(p.vitoria)} <span>vitória</span></b><b>{pct(p.empate)} <span>empate</span></b><b>{pct(p.derrota)} <span>derrota</span></b></>}</div></div>;
 }
 export function MarcoLiga({agenda,onContinuar,onMinimizar,temporada}){
  const marco=agenda.pausa,fim=marco.id==='fim',posicao=temporada?.posLiga||temporada?.posicao,campeao=fim&&posicao===1,jogos=temporada?.confrontos?.filter(x=>!x.folga)||[],parcial=jogos.slice(0,Math.floor(jogos.length*marco.fracao)),pontos=parcial.reduce((n,j)=>n+(j.resultado==='V'?3:j.resultado==='E'?1:0),0);

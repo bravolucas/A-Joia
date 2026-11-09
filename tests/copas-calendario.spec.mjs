@@ -1,3 +1,4 @@
+import {escolhasCopa} from '../src/treinador/estrategiasCopas.js';
 import {test,expect} from '@playwright/test';
 import {criarJogador,jogarTemporada,aposentar} from '../src/jogador/rapido.js';
 import {iniciarCarreiraTecnico,simularTemporadaTecnico} from '../src/treinador/tecnico.js';
@@ -6,7 +7,7 @@ import {criarAgenda,avancarPausa} from '../src/competicoes/calendarioCopas.js';
 import {CLUBES} from '../src/dados/data.js';
 function atleta(){const c=criarJogador({nome:'Calendário Visual',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:9,codigo:'VISUAL-COPAS'});c.clubeNome='Flamengo';c.flags.baseEscolhida=true;return c;}
 async function abrir(page,save){await page.goto('http://127.0.0.1:4173/A-Joia/');await page.evaluate(save=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,...save})),save);await page.reload();await page.getByRole('button',{name:/Continuar · Calendário Visual/}).click();}
-function cpTema(nome,tipo='continental'){let cp;for(let i=0;i<40;i++){cp=criarCampanhaCopa({nome,tipo,usuario:'Flamengo',forcaUsuario:90,clubes:CLUBES.filter(x=>['brasileirao','serieB'].includes(x.liga)),ano:2026,formato:'mata',seed:'TEMA-'+i});const d=decisaoCopa(cp);if(!escolherCopa(cp,d.chave,'pressionar').resultado.penaltisPendentes)return cp;}return cp;}
+function cpTema(nome,tipo='continental'){let cp;for(let i=0;i<40;i++){cp=criarCampanhaCopa({nome,tipo,usuario:'Flamengo',forcaUsuario:90,clubes:CLUBES.filter(x=>['brasileirao','serieB'].includes(x.liga)),ano:2026,formato:'mata',seed:'TEMA-'+i});const d=decisaoCopa(cp);if(!escolherCopa(cp,d.chave,escolhasCopa(cp,d).opcoes[0].id).resultado.penaltisPendentes)return cp;}return cp;}
 for(const width of [320,1366])test(`temas próprios, três escolhas, animação curta e resultado salvo antes da revelação em ${width}px`,async({page})=>{
  test.setTimeout(60000);await page.setViewportSize({width,height:width===320?568:768});const erros=[];page.on('pageerror',e=>erros.push(e.message));
  for(const [nome,tema]of[['Libertadores','libertadores'],['Champions League','champions'],['Copa Sul-Americana','sulamericana'],['Europa League','europa'],['Conference League','conference'],['Copa do Brasil','brasil'],['Copa Intercontinental FIFA','mundial']]){

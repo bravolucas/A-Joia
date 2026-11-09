@@ -1,3 +1,4 @@
+import {escolhasCopa} from '../src/treinador/estrategiasCopas.js';
 import {test,expect} from '@playwright/test';
 import {criarJogador,jogarTemporada} from '../src/jogador/rapido.js';
 import {prepararEstadualJogador} from '../src/jogador/estadualJogador.js';
@@ -8,7 +9,7 @@ for(const ritmo of ['normal','expresso','intenso'])for(const width of [320,1366]
  await page.emulateMedia({reducedMotion:'reduce'});await page.setViewportSize({width,height:width===320?568:768});const erros=[];page.on('pageerror',e=>erros.push(e.message));const c=jogador('Flamengo',ritmo);await abrir(page,{etapa:'evento',c});await page.locator('.tp-carta').first().click();await expect(page.getByRole('dialog',{name:'Copa em jogo · Campeonato Carioca'})).toBeVisible();let liga=false,lib=false;
  for(let i=0;i<45;i++){
   const d=page.getByRole('dialog');if(await page.getByRole('dialog',{name:'Calendário · Brasileirão'}).count())liga=true;
-  if(await page.getByRole('dialog',{name:'Copa em jogo · Libertadores'}).count()){lib=true;await expect(d.locator('.cce-corpo')).toHaveAttribute('data-tema','libertadores');await expect(d.locator('.cce-topo small')).toContainText('MODO RÁPIDO · JOGADOR');await expect(d.getByRole('button',{name:/Valorizar a posse/})).toBeVisible();await expect(d.locator('.cce-opcoes button')).toHaveCount(3);await page.screenshot({path:`test-results/jogador-libertadores-${ritmo}-${width}.png`});break;}
+  if(await page.getByRole('dialog',{name:'Copa em jogo · Libertadores'}).count()){lib=true;await expect(d.locator('.cce-corpo')).toHaveAttribute('data-tema','libertadores');await expect(d.locator('.cce-topo small')).toContainText('MODO RÁPIDO · JOGADOR');await expect(d.locator('.cce-opcoes button').nth(1)).toBeVisible();await expect(d.locator('.cce-opcoes button')).toHaveCount(3);await page.screenshot({path:`test-results/jogador-libertadores-${ritmo}-${width}.png`});break;}
   const next=d.getByRole('button',{name:/Continuar campanha|Concluir campanha|Continuar temporada/});if(await next.count())await next.click();else await d.locator('.cce-opcoes button').first().click();
  }
  expect(liga).toBe(true);expect(lib).toBe(true);const salvo=await page.evaluate(()=>JSON.parse(localStorage.getItem('ajoia_rapido_v1')));expect(salvo.c.tecnico).toBeUndefined();expect(salvo.c.temporadas).toHaveLength(0);expect(salvo.c.ano).toBe(c.ano);expect(erros).toEqual([]);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);

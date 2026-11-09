@@ -1,3 +1,4 @@
+import {iniciarCamisas,aposentarDonoCamisa,prepararCamisaSelecao,sincronizarCamisasSelecao} from './camisasCarreira.js';
 import {estatisticasDecisao} from './decisaoDeJogo.js';
 import {prepararCopasJogador} from './copasJogador.js';
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
@@ -229,6 +230,7 @@ export function criarJogador(dados) {
   const c = comSemente(codigo, "criar", () => criarJogadorBase(dados));
   c.codigo = codigo;
   c.diario = ehCodigoDiario(codigo);
+  iniciarCamisas(c,{novo:true});
   iniciarJornada(c);
   return c;
 }
@@ -288,7 +290,7 @@ export function estadoMental(m = 65) {
   return { nome: "No limite", icone: "😣", cor: "#E36B5B" };
 }
 
-function criarJogadorBase({ nome, nac, posicao, personalidade, origem, pe, numero, clube: clubeEscolhido, ritmo }) {
+function criarJogadorBase({ nome, nac, posicao, personalidade, origem, pe, numero, numeroFavorito, clube: clubeEscolhido, ritmo }) {
   const pos = posicaoDe(posicao);
   const persona = personaDe(personalidade);
   const org = origemDe(origem);
@@ -307,7 +309,7 @@ function criarJogadorBase({ nome, nac, posicao, personalidade, origem, pe, numer
   const clube = (clubeEscolhido && CLUBES.find((x) => x.nome === clubeEscolhido)) || clubeInicial(nac, org?.id === "base");
   const c = {
     v: VERSAO_RAPIDO, nome: nome.trim(), nac, posicao, personalidade: persona.id, origem: org?.id || null,
-    pe: peId, numero: clampR(Math.round(+numero || NUMERO_PADRAO[posicao] || 8), 1, 99), ritmo: ritmoDe(ritmo).id, moral: 70,
+    pe: peId, numeroFavorito: clampR(Math.round(+(numeroFavorito??numero)||NUMERO_PADRAO[posicao]||8),1,99), numero: clampR(Math.round(+numero || NUMERO_PADRAO[posicao] || 8), 1, 99), ritmo: ritmoDe(ritmo).id, moral: 70,
     idade: IDADE_INICIAL, ano: ANO_INICIAL, attrs, potencial, foco: "equilibrio",
     clubeNome: clube.nome, primeiroClube: clube.nome, empresario: org?.id === "herdeiro" ? "cauteloso" : "iniciante",
     torcida: { [clube.nome]: 30 }, apelidos: [], tracos: [], tracosEscolhidos: {},
@@ -1435,6 +1437,7 @@ function jogarTemporadaBase(c0) {
     }
   }
 
+  if(card.selecao?.convocado||card.copa?.convocado){const elenco=card.copa?.elenco||card.selecao?.elenco;prepararCamisaSelecao(c,elenco?.jogadores||[]);card.numeroSelecao=c.numeroSelecao;for(const e of [card.copa?.elenco,card.selecao?.elenco])if(e)sincronizarCamisasSelecao(c,e);}
   momentos.forEach((m, i) => { if(m.tipo==='selecao'&&card.selecao?.finalAdversario)m.adversario=card.selecao.finalAdversario; m.mini = miniParaMomento(c,m,momentos.slice(0,i).map(x=>x.mini)); Object.assign(m,contextoMomento(c,m)); m.texto = textoDoMomento(m.mini, m, c); m.lance={minuto:84+hashTexto(c.codigo+':'+c.ano+':'+i)%7,gp:0,gc:0,simulado:true,disputa:['penalti','defesa'].includes(m.mini)}; m.ordem = i + 1; m.total = momentos.length; });
   card.momentos = [];
   card.pendente = momentos[0] || null;
@@ -2673,16 +2676,16 @@ export const EVENTOS_EXTRAS = [
   },
   {
     id: "camisa10", icone: "🔟",
-    peso: (c) => (c.idade >= 20 && ["Titular", "Estrela do time"].includes(statusNoClube(c).label) && !(c.flags.camisas || []).includes(c.clubeNome) ? 1.6 : 0),
+    peso: (c) => (c.idade >= 20 && numeroDe(c)!==(c.posicao==="GOL"?1:10) && ["Titular", "Estrela do time"].includes(statusNoClube(c).label) && !(c.flags.camisas || []).includes(c.clubeNome) ? 1.6 : 0),
     titulo: (c) => `A camisa ${["GOL"].includes(c.posicao) ? "1" : "10"} do ${c.clubeNome} está vaga`,
     texto: () => "O ídolo que vestia o número pendurou as chuteiras. O roupeiro deixou a camisa no seu armário — mas a escolha é sua.",
     opcoes: (c) => [
       { id: "aceitar", label: "Herdar o número do ídolo", dica: "Torcida empolgada · comparação inevitável",
-        efeito: (c) => { c.flags.camisas = [...(c.flags.camisas || []), c.clubeNome]; c.numero = c.posicao === "GOL" ? 1 : 10; sobe(c, c.clubeNome, 6); c.mod.notaBonus = (c.mod.notaBonus || 0) + (chance(0.6) ? 0.15 : -0.15); return "O número pesa. Você decidiu que vai carregar."; } },
+        efeito: (c) => { c.flags.camisas = [...(c.flags.camisas || []), c.clubeNome]; const alvo=c.posicao==="GOL"?1:10,kit=aposentarDonoCamisa(c,alvo);kit.numero=alvo;kit.escolhido=true;c.numero=alvo; sobe(c, c.clubeNome, 6); c.mod.notaBonus = (c.mod.notaBonus || 0) + (chance(0.6) ? 0.15 : -0.15); return "O número pesa. Você decidiu que vai carregar."; } },
       { id: "infancia", label: "Manter o número da base", dica: "Fiel à própria história",
-        efeito: (c) => { c.flags.camisas = [...(c.flags.camisas || []), c.clubeNome]; sobe(c, c.clubeNome, 2); return `Você segue com a ${numeroDe(c)}. A torcida respeitou.`; } },
+        efeito: (c) => { c.flags.camisas = [...(c.flags.camisas || []), c.clubeNome]; aposentarDonoCamisa(c,c.posicao==="GOL"?1:10); sobe(c, c.clubeNome, 2); return `Você segue com a ${numeroDe(c)}. A torcida respeitou.`; } },
       { id: "homenagem", label: "Pedir para aposentar a camisa", dica: "Gesto de respeito ao ídolo · fama sobe",
-        efeito: (c) => { c.flags.camisas = [...(c.flags.camisas || []), c.clubeNome]; c.fama = clampR(c.fama + 4, 0, 100); sobe(c, c.clubeNome, 4); return "Ninguém mais vai usar aquele número. A ideia foi sua."; } },
+        efeito: (c) => { c.flags.camisas = [...(c.flags.camisas || []), c.clubeNome]; aposentarDonoCamisa(c,c.posicao==="GOL"?1:10,{retirarNumero:true}); c.fama = clampR(c.fama + 4, 0, 100); sobe(c, c.clubeNome, 4); return "Ninguém mais vai usar aquele número. A ideia foi sua."; } },
     ],
   },
   {
@@ -3840,6 +3843,9 @@ export function carregarRapido() {
     s.c.moral = s.c.moral ?? 65; s.c.transferencias = s.c.transferencias || []; s.c.ligaAlvo = s.c.ligaAlvo || null; s.c.ritmo = s.c.ritmo || "normal"; s.c.pe = s.c.pe || "destro";
     s.c.titulos = { liga: 0, copa: 0, continental: 0, mundial: 0, copaMundo: 0, continentalSelecao: 0, bolaOuro: 0, botaOuro: 0, estadual:0, segunda: 0, ...(s.c.titulos || {}) };
     if (!s.c.mundo?.jogadores) s.c.mundo = mundoCompacto();
+    const camisasLegadas=!s.c.camisas?.versao;
+    iniciarCamisas(s.c);
+    if(camisasLegadas&&((s.card?.copa?.jogos||[]).length||(s.card?.selecao?.jogos||0)>0)){const e=s.card?.copa?.elenco||s.card?.selecao?.elenco;prepararCamisaSelecao(s.c,e?.jogadores||[],{preservarNumero:e?.usuario?.numero||s.c.numeroSelecao||s.c.numero});if(e)sincronizarCamisasSelecao(s.c,e);}
     iniciarJornada(s.c);
     if(s.etapa==='festa'&&s.card&&(s.c.temporadas||[]).some(t=>t.ano===s.card.ano))s.etapa='fechamento';
     s.c.ligas = s.c.ligas || {};

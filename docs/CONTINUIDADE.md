@@ -1,3 +1,9 @@
+## Continuação — número favorito e oito melhorias de imersão (09/11/2026)
+
+Pacote do usuário integrado no modo rápido jogador: número favorito separado do número efetivo, escolha de camisa na chegada ao clube/seleção, pedido condicionado a moral/prestígio, numeração internacional independente e migração de saves. Disputa por espaço com postura/confiança e efeito real; quatro perfis simulados de rival com efeito pequeno e chance persistida; reputação de estilo; patamares; novos ecos; ofertas com vantagem/custo e projeto; ciclos de clube; retrospectiva factual em três capítulos. Perfil de rival também compartilhado nas copas do treinador. Relatório completo `docs/PACOTE_CARREIRA_FAVORITO.md`.
+
+Build aprovado, 370 testes de lógica aprovados. Navegador: 245/257 na regressão inicial; 12 fluxos antigos adaptados à escolha nova de camisa; revisão final 69/69 aprovada. Total de 259 cenários distintos cobertos no conjunto, em tamanhos móveis e desktop. Home identifica “Carreira v3 · Número favorito”. Publicação em confirmação; preservar os dois documentos originais não rastreados. Usuário confirmou que a animação anterior estava correta no navegador, sem teste pessoal de celular ainda.
+
 ## Continuação — retomar após falha do ambiente e verificar entrega da versão (09/11/2026)
 
 Publicado em `bf8b137`: [Pages 42611693782](https://github.com/bravolucas/A-Joia/actions/runs/42611693782) confirmado com sucesso; [CI 42611693959](https://github.com/bravolucas/A-Joia/actions/runs/42611693959) ainda executando no momento da publicação. Pergunta opcional enviada ao usuário para confirmar se a entrada exibe “Copas v2 · Placar real”. Link com parâmetro não reservado: https://bravolucas.github.io/A-Joia/?v=copas-v2-20261109 . Verificação direta do site segue bloqueada pelo proxy; não registrar resolução no navegador do usuário sem confirmação.

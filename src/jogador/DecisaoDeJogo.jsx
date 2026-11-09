@@ -23,7 +23,7 @@ export default function DecisaoDeJogo({c,momento,cabecalho,onRegistrar,onFim}){
  const cena=prepararDecisaoJogo(c,momento),[res,R]=useState(momento.decisaoJogo||null),trava=useRef(!!momento.decisaoJogo),finalizou=useRef(false);
  const escolher=id=>{if(trava.current)return;trava.current=true;const r=resolverDecisaoJogo(c,momento,id);R(r);onRegistrar?.(r);};
  return <QuadroMini className="dj-quadro"><div>{cabecalho}</div><section className={`dj-painel ${res?'dj-resolvido':''}`} aria-label="Lance que decide">
-  <header><span>UMA LEITURA. UMA DECISÃO.</span><b>{cena.titulo}</b><p>{cena.texto}</p></header>
+  <header><span>UMA LEITURA. UMA DECISÃO.</span><b>{cena.titulo}</b><p>{cena.texto}</p><small className="dj-rival" title={cena.rival.pista}>Rival: {cena.rival.nome}</small></header>
   <Lance cena={cena} res={res}/>
   {!res?<div className="dj-escolhas">{cena.opcoes.map((op,i)=><button key={op.id} onClick={()=>escolher(op.id)}><span className="dj-numero">0{i+1}</span><span><strong>{op.nome}</strong><small>{op.texto}</small></span><em>{op.risco}</em></button>)}</div>:<><div className={`dj-resultado ${res.acertou?'dj-acertou':'dj-falhou'}`} role="status"><span>{res.nome} · {Math.round(res.chance*100)}% de chance</span><strong>{res.acertou?(cena.perfil==='ataque'?'JOGADA DECISIVA!':'ATAQUE NEUTRALIZADO!'):'O RIVAL LEVOU A MELHOR'}</strong><p>{res.texto}</p>{res.acertou&&<CelebracaoLance c={c} momento={{...momento,mini:res.acao==='passe'?'passe':res.mini==='decisaoDefensiva'?(c.posicao==='GOL'?'defesa':'interceptacao'):'decisao'}}/>}</div><button className="dj-continuar" onClick={()=>{if(finalizou.current)return;finalizou.current=true;onFim(res.acertou);}}>Continuar a decisão →</button></>}
  </section></QuadroMini>;

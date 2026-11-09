@@ -1,3 +1,4 @@
+import {perfilAdversario} from '../competicoes/perfilAdversario.js';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const hash=s=>[...String(s)].reduce((h,c)=>Math.imul(h^c.charCodeAt(0),16777619)>>>0,2166136261);
 const op=(id,nome,texto,atributo,ajuste,risco,acao)=>({id,nome,texto,atributo,ajuste,risco,acao});
@@ -24,12 +25,12 @@ export const CENAS_DECISAO={
 export function prepararDecisaoJogo(c,m){
  const perfil=c.posicao==='GOL'?'goleiro':['ZAG','VOL','LD','LE','ALE','ALD'].includes(c.posicao)?'defesa':'ataque';
  const lista=CENAS_DECISAO[perfil],seed=hash(`${c.codigo}|${c.ano}|${m.tipo}|${m.titulo}|${m.ordem||0}|${m.adversario?.nome||''}`);
- const cena=lista[seed%lista.length];return {...cena,perfil,mini:perfil==='ataque'?'decisao':'decisaoDefensiva'};
+ const cena=lista[seed%lista.length];return {...cena,perfil,rival:perfilAdversario(m.adversario?.nome||m.adversario?.id||'Adversário',c.ano),mini:perfil==='ataque'?'decisao':'decisaoDefensiva'};
 }
-export function chanceDecisaoJogo(c,op){return clamp(.52+((c.attrs?.[op.atributo]??60)-60)*.005+op.ajuste+Math.min(.06,Math.max(0,c.bonusDesafio||0))+((c.tracos||[]).includes('decisao')?.04:0),.22,.88);}
+export function chanceDecisaoJogo(c,op,m=null){const ajuste=m?perfilAdversario(m.adversario?.nome||m.adversario?.id||'Adversário',c.ano).atributos[op.atributo]||0:0;return clamp(ajuste+.52+((c.attrs?.[op.atributo]??60)-60)*.005+op.ajuste+Math.min(.06,Math.max(0,c.bonusDesafio||0))+((c.tracos||[]).includes('decisao')?.04:0),.22,.88);}
 export function resolverDecisaoJogo(c,m,id,rng=Math.random){
  const cena=prepararDecisaoJogo(c,m),op=cena.opcoes.find(o=>o.id===id);if(!op)throw Error('Escolha inválida para este lance.');
- const chance=chanceDecisaoJogo(c,op),acertou=rng()<chance;
+ const chance=chanceDecisaoJogo(c,op,m),acertou=rng()<chance;
  return {versao:1,cenario:cena.id,escolha:op.id,nome:op.nome,acao:op.acao,mini:cena.mini,chance,acertou,texto:acertou?(op.acao==='passe'?'O passe abriu o caminho para o gol.':op.acao==='defender'?'Sua leitura neutralizou o ataque.':'Você encontrou a solução e marcou.'):(op.acao==='defender'?'O rival encontrou o espaço e marcou.':'A defesa rival conseguiu neutralizar o lance.')};
 }
 export function estatisticasDecisao(m,ok){return {gols:ok&&['finalizar','driblar'].includes(m.decisaoJogo?.acao)?1:0,assist:ok&&m.decisaoJogo?.acao==='passe'?1:0};}

@@ -17,7 +17,7 @@ test('chances normalizadas, força relevante e planos com probabilidades distint
 });
 test('cada carta oferecida persiste a mesma probabilidade usada no sorteio e não altera origem',()=>{
  const c=campanha(),antes=structuredClone(c),d=decisaoCopa(c);
- for(const op of escolhasCopa(c,d).opcoes){const novo=escolherCopa(c,d.chave,op.id);assert.deepEqual(novo.resultado.revelacao,{nome:op.nome,probabilidades:chancesCopa(d.forcaUsuario,d.forcaAdv,op.id,d.final)});assert.deepEqual(novo,escolherCopa(c,d.chave,op.id));}
+ for(const op of escolhasCopa(c,d).opcoes){const novo=escolherCopa(c,d.chave,op.id);assert.deepEqual(novo.resultado.revelacao,{nome:op.nome,probabilidades:chancesCopa(d.forcaUsuario,d.forcaAdv,op.id,d.final,d.perfilAdversario)});assert.deepEqual(novo,escolherCopa(c,d.chave,op.id));}
  assert.deepEqual(c,antes);assert.throws(()=>escolherCopa(c,d.chave,'inexistente'));
 });
 test('pênaltis têm três opções variadas e chance persistida ao retomar',()=>{

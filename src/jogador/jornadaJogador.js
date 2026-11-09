@@ -1,3 +1,5 @@
+import {iniciarCamisas,prepararCamisaClube,numeroSelecaoDe} from './camisasCarreira.js';
+import {iniciarProjetoChegada,prepararProjetoTemporada,fecharProjetoTemporada,projetoDoClube,reputacaoDeEstilo} from './projetosCarreira.js';
 import {narrarEco,noticiaRival} from './narrativasContinuas.js';
 import {compararMarcasCopas} from './recordesHistoricos.js';
 import {consolidarElencoCopa} from './elencoSelecao.js';
@@ -24,12 +26,14 @@ export const ASSINATURAS=[
 ];
 export function iniciarJornada(c){
  if(!c.jornada||typeof c.jornada!=='object')c.jornada={};
+ iniciarCamisas(c);
  const j=c.jornada;j.versao=1;j.posicaoInicial=j.posicaoInicial||c.posicao;
  for(const k of ['memorias','ecos','duplas','rivalMemorias','relatoriosEmprestimo','interesses','reacoesReencontro'])if(!Array.isArray(j[k]))j[k]=[];
  j.duplas=j.duplas.filter(d=>d&&typeof d==='object'&&d.clube).map(d=>({...d,rota:Array.isArray(d.rota)&&d.rota.length?d.rota:[{ano:c.ano,clube:d.clube}],temporadas:numero(d.temporadas),conexao:clamp(numero(d.conexao),0,4),reencontros:numero(d.reencontros),nascimento:Number.isFinite(d.nascimento)?d.nascimento:c.ano-c.idade+1}));
  j.idiomas=Array.isArray(j.idiomas)?j.idiomas:[idiomaClube(c.primeiroClube||c.clubeNome)];
  j.assinaturas=j.assinaturas&&typeof j.assinaturas==='object'?j.assinaturas:{};
  j.primeiros=j.primeiros&&typeof j.primeiros==='object'?j.primeiros:{};
+ if(!j.pacoteCarreiraVersao){const e=iniciarProjetoChegada(c);if((c.temporadas||[]).length)e.plano=e.plano||'competir';j.pacoteCarreiraVersao=1;}
  j.preferencia=['jogar','titulos','salario'].includes(j.preferencia)?j.preferencia:'jogar';
  return j;
 }
@@ -43,11 +47,12 @@ function primeiro(c,id,titulo,texto,card){
  const j=iniciarJornada(c);if(j.primeiros[id])return;
  const condicoes={estreia:t=>t.jogos>0,'primeiro-gol':t=>t.gols>0,'primeira-assistencia':t=>t.assist>0,titulo:t=>t.titulos?.some(semPremio),convocacao:t=>t.selecao?.convocado||t.copa?.convocado,'estreia-selecao':t=>(t.selecao?.jogos||0)>0,'primeira-defesa':t=>t.momentos?.some(m=>['defesa','reflexo'].includes(m.mini)&&m.acertou),'primeira-recuperacao':t=>t.momentos?.some(m=>m.mini==='interceptacao'&&m.acertou),'primeiro-cruzamento':t=>t.momentos?.some(m=>m.mini==='cruzamento'&&m.acertou)};
  const anterior=condicoes[id]?(c.temporadas||[]).find(condicoes[id]):null,origem=anterior||card;
- const m=memorizar(c,'primeiro',titulo,anterior?`Registro da temporada ${origem.ano} pelo ${origem.clube}.`:texto,{id:`primeiro:${id}`,ano:origem.ano,clube:origem.clube,numeroCamisa:origem.numero??c.numero});
+ const m=memorizar(c,'primeiro',titulo,anterior?`Registro da temporada ${origem.ano} pelo ${origem.clube}.`:texto,{id:`primeiro:${id}`,ano:origem.ano,clube:origem.clube,numeroCamisa:['convocacao','estreia-selecao'].includes(id)?origem.numeroSelecao??numeroSelecaoDe(c):origem.numero??c.numero});
  j.primeiros[id]=m||{ano:origem.ano,clube:origem.clube};if(m&&!anterior)card.jornada.memorias.push(m);
 }
 export function registrarEscolhaJornada(c,evento,opcao,texto){
  const j=iniciarJornada(c);if(evento.id==='base'){
+  prepararCamisaClube(c,c.clubeNome,{novaChegada:true});iniciarProjetoChegada(c,{renovar:true});
   j.mentor=j.mentor||{nome:`Prof. ${NOMES[hash(c.codigo)%NOMES.length]}`,clube:c.primeiroClube,clubeAtual:c.primeiroClube,ficticio:true};
   const m=memorizar(c,'primeiro','Primeiro contrato',`Seu primeiro orientador, ${j.mentor.nome}, recebeu você no ${c.primeiroClube}.`,{id:'primeiro:contrato'});if(m)j.primeiros.contrato=m;return;
  }
@@ -71,8 +76,8 @@ export function projetoOferta(c,nome){
  const x=clubeDe(nome),ovr=c.attrs?Math.max(40,calcOVR({...c.attrs,fintas:3,pernaRuim:3},c.posicao)-penalidadePosicao(c)):60;
  // O jogo fornece seu OVR ponderado para os cartões de oferta quando disponível.
  const nivel=c._ovrProjeto??ovr,dif=nivel-x.forca;
- const share=dif>=6?.92:dif>=0?.75:dif>=-5?.52:.3;
- return{papel:dif>=6?'Protagonista':dif>=0?'Disputa a titularidade':dif>=-5?'Rotação com oportunidade':'Desenvolvimento',jogos:[Math.max(5,Math.round(48*share)-6),Math.min(52,Math.round(48*share)+6)],liga:x.liga,forca:x.forca,forcaLiga:Math.round((LIGAS[x.liga]?.mult??.7)*100),idioma:idiomaClube(nome),mensagem:'Projeção, sujeita a desempenho, adaptação e lesões.'};
+ const share=dif>=6?.95:dif>=0?.86:dif>=-4?.6:dif>=-9?.32:.12;const contexto=projetoDoClube(nome,c.ano),reputacao=reputacaoDeEstilo(c)[0];
+ return{contexto,reputacao:reputacao?.pontos>=12?reputacao.nome:null,beneficio:dif>=0?'Chega com espaço para disputar minutos.':'A concorrência exige conquistar espaço.',custo:dif<-4?'Pode começar como reserva.':'A titularidade depende de desempenho.',papel:dif>=6?'Protagonista':dif>=0?'Disputa a titularidade':dif>=-5?'Rotação com oportunidade':'Desenvolvimento',jogos:[Math.max(5,Math.round(48*share)-6),Math.min(52,Math.round(48*share)+6)],liga:x.liga,forca:x.forca,forcaLiga:Math.round((LIGAS[x.liga]?.mult??.7)*100),idioma:idiomaClube(nome),mensagem:'Projeção, sujeita a desempenho, adaptação e lesões.'};
 }
 export function pesoProjeto(c,destino){
  const j=c.jornada||{},atual=clubeDe(clubeAtual(c)),pref=j.preferencia||'jogar';let peso=1;
@@ -104,6 +109,7 @@ export function cenaDespedida(c,t,saida){
 export function registrarTransferenciaJornada(c,t,saida){
  const j=iniciarJornada(c),id=`transferencia:${t.ano}:${t.de}:${t.para}`;
  if(j.memorias.some(m=>m.id===id))return;
+ prepararCamisaClube(c,t.para,{novaChegada:true});iniciarProjetoChegada(c,{nome:t.para,renovar:true});
  t.cena=cenaDespedida(c,t,saida);
  const conhecidos=j.duplas.filter(d=>!d.aposentado&&d.clube===t.para);
  const paisIgual=clubeDe(t.de).pais===clubeDe(t.para).pais,idiomaIgual=idiomaClube(t.de)===idiomaClube(t.para)||j.idiomas.includes(idiomaClube(t.para));
@@ -123,7 +129,7 @@ export function registrarTransferenciaJornada(c,t,saida){
 }
 export function prepararJornada(c){
  const j=iniciarJornada(c);if(j.preparado===c.ano)return;
- j.preparado=c.ano;c.mod=c.mod||{};
+ j.preparado=c.ano;c.mod=c.mod||{};prepararProjetoTemporada(c);
  const a=j.adaptacao;
  if(a?.clube===clubeAtual(c)&&a.restantes>0){c.mod.notaBonus=(c.mod.notaBonus||0)-.08;c.mod.shareAdd=(c.mod.shareAdd||0)-.025;}
  const dupla=j.duplas.find(d=>d.clube===clubeAtual(c)&&!d.aposentado&&d.conexao>=2);
@@ -231,6 +237,7 @@ export function fecharJornada(c,card){
  if(c.emprestimo&&(c.emprestimo.restantes??1)<=1){const e=c.emprestimo,anos=[...(c.temporadas||[]).filter(t=>t.ano>=e.inicio&&t.clube===e.destino),card];const jogos=anos.reduce((v,t)=>v+t.jogos,0);const rel={ano:card.ano,clube:e.destino,origem:e.origem||c.clubeNome,jogos,esperados:e.projeto?.jogos||null,ovrAntes:e.ovrInicio,ovrDepois:card.ovrDepois,temporadas:anos.length};j.relatoriosEmprestimo=[...j.relatoriosEmprestimo,rel].slice(-6);n.emprestimo=rel;}
  fecharAdaptacaoPosicao(c,card);
  n.memoriaTorcida=memoriaTorcida(c,card.clube);n.capitao=j.capitao?.clube===card.clube?{...j.capitao}:null;
+ fecharProjetoTemporada(c,card);if(card.novoPatamar)n.noticias.push({tipo:'capitulo',titulo:`Novo capítulo: ${card.novoPatamar.nome}`,detalhe:card.novoPatamar.texto});
  n.noticias=n.noticias.sort((a,b)=>(a.tipo==='funcao'?1:0)-(b.tipo==='funcao'?1:0)).slice(0,6);
 }
 export function legadoNarrativo(c){

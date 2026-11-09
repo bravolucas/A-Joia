@@ -1,3 +1,4 @@
+import {numeroSelecaoDe} from './camisasCarreira.js';
 import {descreverMemoriaRival} from './narrativasContinuas.js';
 import {CLUBES} from '../dados/data.js';
 import React,{useEffect,useRef,useState} from 'react';
@@ -24,10 +25,10 @@ export function FasesTemporada({etapa}){
  const idx=['estadual','copasClubes','calendarioLiga','momento','copa'].includes(etapa)?1:['fechamento','festa','resumo','coletiva','traco'].includes(etapa)?2:0;
  return <nav className="jr-fases" aria-label="Fases da temporada">{['Preparação','Campanha','Fechamento'].map((v,i)=><span key={v} aria-current={idx===i?'step':undefined} className={i===idx?'jr-atual':i<idx?'jr-passou':''}><b>{i+1}</b>{v}{i<2&&<i aria-hidden="true">→</i>}</span>)}</nav>;
 }
-function Janela({titulo,onFechar,children}){
+export function Janela({titulo,onFechar,children,classe=''}){
  const ref=useRef(null);
  useEffect(()=>{const anterior=document.activeElement,el=ref.current;el.showModal();const liberar=bloquearRolagem(document.body);return()=>{el.close();liberar();anterior?.focus({preventScroll:true});};},[]);
- return createPortal(<dialog className="jr-modal" aria-label={titulo} ref={ref} onCancel={e=>{e.preventDefault();onFechar();}}><header><h2>{titulo}</h2><button onClick={onFechar} aria-label="Fechar jornada">×</button></header><div className="jr-modal-corpo">{children}</div></dialog>,document.body);
+ return createPortal(<dialog className={`jr-modal ${classe}`} aria-label={titulo} ref={ref} onCancel={e=>{e.preventDefault();onFechar?.();}}><header><h2>{titulo}</h2>{onFechar&&<button onClick={onFechar} aria-label="Fechar jornada">×</button>}</header><div className="jr-modal-corpo">{children}</div></dialog>,document.body);
 }
 export function AlbumJornada({c}){
  const todos=[...Object.values(c.jornada?.primeiros||{}),...(c.jornada?.memorias||[])].filter((m,i,a)=>m?.id&&a.findIndex(v=>v?.id===m.id)===i);
@@ -70,7 +71,7 @@ export function EcosDaTemporada({card,compacto=false}){
 }
 export function ProjetoOferta({c,nome,projeto}){
  if(!projeto)return null;
- return <div className="jr-projeto"><b>{projeto.papel}</b><span>{projeto.jogos.join('–')} jogos projetados · clube força {projeto.forca}{projeto.forcaLiga?` · nível da liga ${projeto.forcaLiga}`:''}</span>{projeto.salario!=null&&<span>€ {projeto.salario>=1000?`${(projeto.salario/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})} mi`:`${projeto.salario} mil`}/ano{projeto.anos?` · ${projeto.anos} temporada(s)`:''}</span>}{projeto.retorno&&<small>{projeto.retorno}</small>}<small>{projeto.mensagem}</small>{c?.jornada?.duplas?.some(d=>d.clube===nome&&!d.aposentado)&&<em>Você reencontra uma dupla conhecida neste clube.</em>}</div>;
+ return <div className="jr-projeto"><b>{projeto.papel}</b>{projeto.contexto&&<span>{projeto.contexto.nome} · ciclo até {projeto.contexto.fim}</span>}<span>{projeto.jogos.join('–')} jogos projetados · clube força {projeto.forca}{projeto.forcaLiga?` · nível da liga ${projeto.forcaLiga}`:''}</span>{projeto.salario!=null&&<span>€ {projeto.salario>=1000?`${(projeto.salario/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})} mi`:`${projeto.salario} mil`}/ano{projeto.anos?` · ${projeto.anos} temporada(s)`:''}</span>}{projeto.retorno&&<small>{projeto.retorno}</small>}<small>{projeto.beneficio} {projeto.custo}</small>{projeto.contexto&&<small>{projeto.contexto.vantagem} {projeto.contexto.limite}</small>}{projeto.reputacao&&<em>O projeto reconhece sua reputação: {projeto.reputacao}.</em>}<small>{projeto.mensagem}</small>{c?.jornada?.duplas?.some(d=>d.clube===nome&&!d.aposentado)&&<em>Você reencontra uma dupla conhecida neste clube.</em>}</div>;
 }
 export function CenasClube({c,mudanca,onFim,children}){
  const raiz=useRef(null);
@@ -91,7 +92,7 @@ export function PrimeiraSelecao({c,estreia,onFim}){
  const ref=useRef(null);
  useEffect(()=>{const liberar=bloquearRolagem(document.body);ref.current?.focus();const tempo=window.matchMedia('(prefers-reduced-motion: reduce)').matches?500:2400;const t=setTimeout(onFim,tempo);return()=>{clearTimeout(t);liberar();};},[onFim]);
  const cor=({BRA:'#ecd34c',ARG:'#96cce0',ENG:'#f0f0e6',ALE:'#e8e8e3',POR:'#a62932',FRA:'#244cb2',ESP:'#b52d38',ITA:'#275aae'})[c.nac]||'#266b4a';
- return createPortal(<div className="jr-cinema jr-internacional" role="dialog" aria-modal="true" aria-label="Sua primeira convocação"><div className="jr-cinema-arte"/><div className="jr-cinema-conteudo"><span>A CAMISA DO SEU PAÍS</span><img src={bandeiraDe(c.nac)} alt={c.nac}/><h2>{estreia?'Convocação e estreia internacional':'Sua primeira convocação'}</h2><p>O nome da família na camisa. Uma memória que fica na carreira e no museu.</p><div className="jr-selecao-camisa"><CamisaPremium cor={cor} sobrenome={c.nome.toUpperCase().split(' ').at(-1)} numero={c.numero||10}/></div><button ref={ref} onClick={onFim}>Seguir minha história →</button><small>A apresentação avança sozinha.</small></div></div>,document.body);
+ return createPortal(<div className="jr-cinema jr-internacional" role="dialog" aria-modal="true" aria-label="Sua primeira convocação"><div className="jr-cinema-arte"/><div className="jr-cinema-conteudo"><span>A CAMISA DO SEU PAÍS</span><img src={bandeiraDe(c.nac)} alt={c.nac}/><h2>{estreia?'Convocação e estreia internacional':'Sua primeira convocação'}</h2><p>O nome da família na camisa. Uma memória que fica na carreira e no museu.</p><div className="jr-selecao-camisa"><CamisaPremium cor={cor} sobrenome={c.nome.toUpperCase().split(' ').at(-1)} numero={numeroSelecaoDe(c)}/></div><button ref={ref} onClick={onFim}>Seguir minha história →</button><small>A apresentação avança sozinha.</small></div></div>,document.body);
 }
 
 

@@ -1,3 +1,4 @@
+import {sincronizarCamisasSelecao} from './camisasCarreira.js';
 import {NACIONALIDADES} from '../dados/data.js';
 import {calcOVR} from '../comum/lib.js';
 import {penalidadePosicao} from './posicoesCarreira.js';
@@ -33,8 +34,7 @@ export function atualizarElencoSelecao(c,ano=c.ano){
  // Mudanças reais de posição podem alterar a distribuição sem retirar todo o núcleo.
  e.jogadores=jogadores;e.ano=ano;e.usuario={...e.usuario,id:'usuario',nome:c.nome,posicao:c.posicao,ovr:Math.max(40,calcOVR(c.attrs,c.posicao)-penalidadePosicao(c)),nascimento:ano-c.idade,estatisticas:{...vazio(),...e.usuario?.estatisticas}};
  e.usuario.estatisticasContinentais={...vazio(),...e.usuario.estatisticasContinentais};
- const numero=Number.isInteger(c.numero)&&c.numero>=1&&c.numero<=26?c.numero:10;e.usuario.numero=numero;
- const numeros=Array.from({length:26},(_,i)=>i+1).filter(n=>n!==numero);e.jogadores.forEach((p,i)=>p.numero=numeros[i]);
+ sincronizarCamisasSelecao(c,e);
  c.jornada.elencoSelecao=e;return e;
 }
 function escolherXI(e,titular){

@@ -1,3 +1,6 @@
+import {ChegadaCarreira,PainelProgressaoCarreira,RetrospectivaCarreira} from './ProgressaoCarreiraUI.jsx';
+import {camisaInfo,escolherCamisa,sincronizarCamisasSelecao,prepararCamisaSelecao} from './camisasCarreira.js';
+import {definirPlanoEspaco,patamarCarreira} from './projetosCarreira.js';
 import DecisaoDeJogo from './DecisaoDeJogo.jsx';
 import {prepararDecisaoJogo} from './decisaoDeJogo.js';
 import {contextoAgenda} from '../competicoes/calendarioCopas.js';
@@ -1123,7 +1126,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
   return (
     <div className="max-w-xl mx-auto px-3 py-3 flex flex-col gap-3 rp-entra">
       {!gaveta && voar && pequenas.length > 0 && <TacasVoando titulos={pequenas} onPousou={onPousou} />}
-      <EcosDaTemporada card={card}/>
+      <EcosDaTemporada card={card}/>{card.protagonismo&&<aside className="car-painel" aria-label="Balanço do seu espaço"><div className="car-fase"><span>{card.novoPatamar?`Novo capítulo: ${card.novoPatamar.nome}`:card.patamar?.nome}</span><b>Confiança {card.protagonismo.confiancaAntes} → {card.protagonismo.confiancaDepois}</b></div><p>{card.protagonismo.projeto.nome} · {card.protagonismo.papel}</p>{card.reputacaoEstilo?.length>0&&<p>Sua marca: {card.reputacaoEstilo.slice(0,2).map(r=>`${r.nome} ${r.pontos}/100`).join(" · ")}</p>}</aside>}
       <div className="rp-painel overflow-hidden">
         <div className="px-4 pt-3 pb-2 flex items-center gap-3" style={{ background: `linear-gradient(120deg, ${card.cor}44, transparent 75%)` }}>
           <ClubDot club={clubeDe(card.clube)} size={36} />
@@ -2202,7 +2205,7 @@ function TelaFim({ c, onNova, onSair, onPosCarreira, onComecarTecnico }) {
         </div>
       )}
       <div ref={cartaRef} className="mx-auto w-full max-w-[364px] p-3 rounded-[32px]" style={{ background: "#0E1512" }}><CartaFinal c={c} /></div>
-      <section className="jr-legado">{legadoNarrativo(c).map(l=><p key={l.nome}><strong>{l.nome}</strong><small>{l.motivo}</small></p>)}<details><summary>Montar meu álbum de momentos</summary><AlbumJornada c={c}/></details></section>
+      <RetrospectivaCarreira c={c}/><section className="jr-legado">{legadoNarrativo(c).map(l=><p key={l.nome}><strong>{l.nome}</strong><small>{l.motivo}</small></p>)}<details><summary>Montar meu álbum de momentos</summary><AlbumJornada c={c}/></details></section>
       <div className="grid grid-cols-2 gap-2">
         <button onClick={baixarCarta} disabled={imagem === "gerando"} className="rp-btn rp-ouro display text-xs">
           {imagem === "gerando" ? "Gerando…" : imagem === "ok" ? "Imagem pronta!" : imagem === "erro" ? "Não deu, tente de novo" : "Baixar carta (PNG)"}
@@ -2992,8 +2995,23 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const nova = () => setEstado({ etapa: "criacao" });
   const comecarTecnico = () => setEstado((st) => ({ ...st, etapa: "tecnico", c: iniciarCarreiraTecnico(st.c) }));
 
+  const infoChegada=c&&c.camisas?.clubes?.[c.emprestimo?.destino||c.clubeNome]&&c.flags?.baseEscolhida&&!c.tecnico&&!c.aposentado&&etapa==='evento'&&evento?.id!=='base'?camisaInfo(c):null;
+  const faltaPlano=!!(infoChegada&&infoChegada.chegada>0&&!c.jornada?.espacoClubes?.[c.emprestimo?.destino||c.clubeNome]?.plano&&c.lojaAnoEmCurso!==c.ano);
+  const clubePendente=!!(infoChegada&&(!infoChegada.escolhido||faltaPlano));
+  const chegadaSelecaoAtiva=!!(c&&!c.tecnico&&!c.aposentado&&(apresentacaoSelecao||(etapa==='copa'&&card?.copa?.convocado)||(etapa==='momento'&&card?.pendente?.tipo==='selecao')));
+  const cDaSelecao=chegadaSelecaoAtiva&&(!c.camisas?.selecao||c.camisas.selecao.nac!==c.nac)?structuredClone(c):c;
+  if(chegadaSelecaoAtiva&&(!cDaSelecao.camisas?.selecao||cDaSelecao.camisas.selecao.nac!==c.nac))prepararCamisaSelecao(cDaSelecao,card?.copa?.elenco?.jogadores||card?.selecao?.elenco?.jogadores||c.jornada?.elencoSelecao?.jogadores||[]);
+  const temChegadaSelecao=!!(chegadaSelecaoAtiva&&cDaSelecao.camisas?.selecao&&!cDaSelecao.camisas.selecao.escolhido);
+  const chegadaPendente=clubePendente||temChegadaSelecao;
+  const receberNumero=(numero,alvo='clube')=>{
+    const novo=escolherCamisa(alvo==='selecao'?cDaSelecao:c,numero,alvo);
+    setEstado(st=>{const k=st.card?structuredClone(st.card):st.card;if(alvo==='selecao'&&k){k.numeroSelecao=novo.numeroSelecao;for(const e of [k.copa?.elenco,k.selecao?.elenco])if(e)sincronizarCamisasSelecao(novo,e);}return {...st,c:novo,card:k,auto:false};});
+    setApresentacao(v=>v?{...v,c:novo}:v);setApresentacaoSelecao(v=>v?{...v,c:novo}:v);
+  };
+  const receberPlano=id=>{const novo=definirPlanoEspaco(c,id);setEstado(st=>({...st,c:novo,auto:false}));setApresentacao(v=>v?{...v,c:novo}:v);};
+
   // pausas automáticas: qualquer gaveta ou cena aberta segura o relógio
-  const pausado = !!gaveta || estanteAberta || patrimonioAberto || !!apresentacao || !!popup || ["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa) || !!apresentacaoSelecao;
+  const pausado = chegadaPendente || !!gaveta || estanteAberta || patrimonioAberto || !!apresentacao || !!popup || ["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa) || !!apresentacaoSelecao;
   const ESPERA_AUTO = 1900;
   const espera = estado.manchete ? 4600 : 2800;
   useEffect(() => {
@@ -3014,7 +3032,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const ultimo = estado.ultimo;
   const torneio = c && c.idade >= 18 ? (anoDeCopa(c.ano) ? "Copa do Mundo" : anoDeContinentalSelecao(c.ano) ? nomeCopaContinental(c.nac) : null) : null;
   return (
-    <div className={etapa === "tecnico" ? "rp ct-root" : "rp rp-jogador"}>
+    <div data-patamar={c&&!c.tecnico?patamarCarreira(c).id:undefined} className={etapa === "tecnico" ? "rp ct-root" : "rp rp-jogador"}>
       <style>{ESTILO_BASE}</style>
       {painel ? <CartaoCarreira c={c} etapa={etapa} onEstante={() => setEstanteAberta(true)} onFicha={() => setGaveta("ficha")} contadorPulsa={contadorPulsa} recorde={recorde} />
         : <Cabecalho etapa={etapa} treinador={etapa === "tecnico"} c={mostrarCabecalho ? c : null} onSair={onSair} onEstante={() => setEstanteAberta(true)} />}
@@ -3028,6 +3046,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
               <header className="rp-proximo-passo"><span className="rp-etiqueta">Temporada {c.ano}</span><h1>{estado.forcada ? "Hora de encerrar o ciclo" : estado.desafioResultado ? "Resultado do desafio" : resultado ? "Decisão tomada" : evento ? "Sua próxima decisão" : desafioPendente(c) ? "Desafio da temporada" : estado.auto ? "Temporada em andamento" : "Prepare sua temporada"}</h1><p>{estado.forcada ? "Confira o aviso e veja o legado da sua carreira." : estado.desafioResultado ? "Veja o que mudou e siga para preparar a temporada." : resultado ? "Confira o resultado da sua escolha antes de seguir." : evento ? "Compare as opções abaixo e escolha o próximo passo." : desafioPendente(c) ? "Uma escolha, um resultado. Tudo acontece aqui." : estado.auto ? "Acompanhe a simulação ou avance quando quiser." : "Escolha um treino abaixo para começar. O histórico fica disponível para consulta."}</p></header>
               <button className="lj-atalho" onClick={()=>setPatrimonioAberto(true)}><span>Loja do jogador<small>{upsAtivosJogador(c).length} UPs ativos · melhorias permanentes e temporárias</small></span><strong>{formatarValor(c.patrimonio||0)} →</strong></button>
               {ultimo && !evento && <><ResumoCompacto c={c} card={ultimo} onDetalhes={() => setGaveta("resumo")} /><EcosDaTemporada card={ultimo}/></>}
+              {!estado.desafioResultado&&<PainelProgressaoCarreira c={c} onNumero={receberNumero}/>}
               {!estado.desafioResultado&&<PainelJornada c={c} onAcao={acaoJornada} caminho={caminhoSelecao(c)} interesses={interesseMercado(c)}/>}
               {estado.aviso && <div className="rp-painel px-4 py-2.5 text-[15px] text-[#F0A99E]" style={{ borderColor: "rgba(227,107,91,.35)" }}>{estado.aviso}</div>}
               {estado.forcada ? (
@@ -3109,11 +3128,12 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
       {etapa==='calendarioLiga'&&card?.calendarioCopas?.pausa&&estadualAberto&&<MarcoLiga agenda={card.calendarioCopas} temporada={card} onContinuar={()=>responderCopaJogador(chaveCopaJogador(card),'continuar')} onMinimizar={()=>setEstadualAberto(false)}/>}
       {etapa==='copasClubes'&&card?.calendarioCopas&&estadualAberto&&<CopaEscolha modoJogador calendario={contextoAgenda(card.calendarioCopas)} campanha={card.calendarioCopas.campeonatos[card.calendarioCopas.indice]} chave={chaveCopaJogador(card)} onEscolher={responderCopaJogador} ocupado={false} onMinimizar={()=>setEstadualAberto(false)}/>}
       {etapa==='estadual'&&card?.estadualEmJogo&&estadualAberto&&<CopaEscolha modoJogador calendario={contextoAgenda(card.calendarioCopas)} campanha={card.estadualEmJogo} chave={card.calendarioCopas?chaveCopaJogador(card):chaveEstadualJogador(card)} onEscolher={responderEstadual} ocupado={false} onMinimizar={()=>setEstadualAberto(false)}/>}
+      {chegadaPendente&&!popup&&<ChegadaCarreira key={clubePendente?'clube':'selecao'} c={clubePendente?c:cDaSelecao} alvo={clubePendente?'clube':'selecao'} precisaNumero={clubePendente?!infoChegada.escolhido:true} onNumero={receberNumero} onPlano={receberPlano}/>}
       {estanteAberta && c && <Estante c={c} onFechar={() => setEstanteAberta(false)} />}
       {patrimonioAberto && c && <Patrimonio c={c} etapa={etapa} onComprar={comprar} onFechar={() => setPatrimonioAberto(false)} />}
-      {apresentacao && <CenasClube c={apresentacao.c||c} mudanca={apresentacao.mudanca} onFim={()=>setApresentacao(null)}>{fechar=>apresentacao.curto?<ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} grandeChegada={apresentacao.grande} curto={apresentacao.curto} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>:<ApresentacaoGrande clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>}</CenasClube>}
+      {apresentacao && !chegadaPendente && <CenasClube c={apresentacao.c||c} mudanca={apresentacao.mudanca} onFim={()=>setApresentacao(null)}>{fechar=>apresentacao.curto?<ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} grandeChegada={apresentacao.grande} curto={apresentacao.curto} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>:<ApresentacaoGrande clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>}</CenasClube>}
       {["fechamento","bolaOuro"].includes(etapa)&&card&&c&&!apresentacao&&<PopupTemporada key={card.ano} c={c} card={card} celebracaoIndice={estado.celebracaoIndice||0} onCelebracao={indice=>setEstado(st=>({...st,etapa:"fechamento",celebracaoIndice:indice,auto:false}))} onFechar={()=>{if(estado.retorno){setEstado(estado.retorno);return;}if(card.titulos.length){setContadorPulsa(x=>x+1);vibrar(20);}posTemporada(c,card);}}/>}
-      {apresentacaoSelecao&&!apresentacao&&!["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa)&&!popup&&<PrimeiraSelecao c={apresentacaoSelecao.c} estreia={apresentacaoSelecao.estreia} onFim={()=>setApresentacaoSelecao(null)}/>}
+      {apresentacaoSelecao&&!apresentacao&&!chegadaPendente&&!["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa)&&!popup&&<PrimeiraSelecao c={apresentacaoSelecao.c} estreia={apresentacaoSelecao.estreia} onFim={()=>setApresentacaoSelecao(null)}/>}
       {popup && !["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa) && <PopupResultado key={popup.k} info={popup} onFechar={() => setPopup(null)} />}
     </div>
   );

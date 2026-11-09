@@ -1,5 +1,7 @@
 ## Continuação — corrigir animação de “Como desmontar a marcação” (09/11/2026)
 
+Publicado em `d0c8058`: [Pages 42546694855](https://github.com/bravolucas/A-Joia/actions/runs/42546694855) confirmado com sucesso. [CI 42546694867](https://github.com/bravolucas/A-Joia/actions/runs/42546694867) ainda em andamento no momento da confirmação.
+
 Relato pertence a CopaEscolha/estrategiasCopas, não ao Lance que decide da etapa anterior. Removido chute genérico com gol e deslocamentos fixos em pixels, que não correspondia ao resultado da partida inteira. Nova SimulacaoCopa mostra circulação tática no campo (três rotas próprias para inverter/entrelinhas/apoio) e cartão FIM DE JOGO com VITÓRIA, EMPATE ou DERROTA, escudos e placar real salvo. Sem assumir derrota enquanto aguarda resultado; exige escolha correspondente. Helper narrativaCopa deriva veredito do placar relativo ao usuário. Probabilidades, RNG, resultado, duração, avanço e cena própria de pênaltis preservados. Home “2026.11.09 · Copas com resultado claro”. Build e 356 testes de lógica aprovados; 44 cenários browser aprovados, mais 12 verificações finais repetidas com chances inteiras acima do rodapé. Captura móvel final inspecionada. Relatório docs/COPAS_ANIMACAO_COERENTE.md. Preservar dois documentos originais não rastreados.
 
 ## Continuação — substituir alvo por decisão de futebol (09/11/2026)

@@ -1,0 +1,23 @@
+import {test,expect} from '@playwright/test';
+import {criarJogador,jogarTemporada,aposentar} from '../src/jogador/rapido.js';
+import {iniciarCarreiraTecnico} from '../src/treinador/tecnico.js';
+import {criarCampanhaCopa,decisaoCopa,escolherCopa} from '../src/treinador/copasEscolha.js';
+import {escolhasCopa} from '../src/treinador/estrategiasCopas.js';
+import {criarAgenda} from '../src/competicoes/calendarioCopas.js';
+function base(cp){const c=iniciarCarreiraTecnico(aposentar({...criarJogador({nome:'Copa Teste',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:10,ritmo:'expresso',codigo:'COPA-ESCOLHA'}),idade:40}));c.tecnico={...c.tecnico,clube:cp.usuario,ano:cp.ano+1,fase:'resultado',clubeInicialEscolhido:true,propostasCoerentesVersao:3,elenco:cp.forcaUsuario,temporadas:[{ano:cp.ano,clube:cp.usuario,liga:'brasileirao',posicao:2,pontos:72,vitorias:22,empates:6,derrotas:10,titulosConquistados:[],torneios:[cp]}],copasEmJogo:{ano:cp.ano,clube:cp.usuario,campeonatos:[cp],indice:0}};return c;}
+async function abrir(page,c){await page.goto('http://127.0.0.1:4173/A-Joia/');await page.evaluate(c=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,etapa:'tecnico',c})),c);await page.reload();await page.getByRole('button',{name:/Continuar · Copa Teste/}).click();}
+
+
+function fixture(estado,indice){
+ for(let i=0;i<1500;i++){
+  const c=criarCampanhaCopa({nome:'Libertadores',usuario:'Santos',forcaUsuario:76,clubes:[{nome:'Santos',forca:76},{nome:'Flamengo',forca:76},{nome:'Cruzeiro',forca:76},{nome:'Corinthians',forca:76}],ano:2030,formato:'grupos',seed:'MARCA-'+i});const d=decisaoCopa(c),ops=escolhasCopa(c,d);if(ops.titulo!=='Como desmontar a marcação?')continue;
+  const novo=escolherCopa(c,d.chave,ops.opcoes[indice].id),r=novo.resultado,estadoReal=r.venceu?'vitoria':r.empate?'empate':'derrota';if(estadoReal===estado)return {c,esperado:r};
+ }throw Error('Sem fixture '+estado);
+}
+for(const modo of ['jogador','treinador'])for(const width of [320,1366])for(const estado of ['vitoria','empate','derrota'])test(`desmontar marcação ${modo} ${estado} ${width}px`,async({page})=>{
+ await page.setViewportSize({width,height:width===320?568:768});const indice=['vitoria','empate','derrota'].indexOf(estado),{c:cp,esperado}=fixture(estado,indice);
+ if(modo==='treinador')await abrir(page,base(cp));
+ else{const c=criarJogador({nome:'Copa Teste',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:9,codigo:'MARCA-COPAS'});c.clubeNome='Santos';const card={...jogarTemporada(c).card,calendarioCopas:criarAgenda([cp],{ano:cp.ano,clube:'Santos'}),titulos:[]};await page.goto('http://127.0.0.1:4173/A-Joia/');await page.evaluate(s=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify(s)),{v:1,etapa:'copasClubes',c,card});await page.reload();await page.getByRole('button',{name:/Continuar · Copa Teste/}).click();}
+ const d=page.getByRole('dialog',{name:'Copa em jogo · Libertadores'});await expect(d).toContainText('Como desmontar a marcação?');await d.locator('.cce-opcoes button').nth(indice).click();const anim=d.locator('.cce-cinematica');await expect(anim).toBeVisible();await expect(anim.locator('.cce-arena,.cce-rede,.cce-bola')).toHaveCount(0);await expect(anim.locator('.cce-simulacao-partida')).toHaveAttribute('data-resultado',estado);const veredito=anim.locator('.cce-veredito');await expect(veredito).toHaveAttribute('data-placar',`${esperado.jogo.golsCasa}-${esperado.jogo.golsFora}`);await expect(veredito.locator('strong')).toHaveText({vitoria:'VITÓRIA',empate:'EMPATE',derrota:'DERROTA'}[estado]);await expect(veredito).toHaveCSS('opacity','1');const chances=await anim.locator('.cce-revelacao').boundingBox(),corpo=await d.locator('.cce-corpo').boundingBox();expect(chances.y+chances.height).toBeLessThanOrEqual(corpo.y+corpo.height+1);await page.screenshot({path:`test-results/copas-coerencia-${modo}-${estado}-${width}.png`});await expect(d.getByRole('status')).toBeVisible({timeout:2500});
+ const salvo=await page.evaluate(modo=>{const s=JSON.parse(localStorage.getItem('ajoia_rapido_v1'));return (modo==='treinador'?s.c.tecnico.copasEmJogo:s.card.calendarioCopas).campeonatos[0].resultado;},modo);expect(salvo).toEqual(esperado);await expect(d.locator('.cce-rodape button')).toBeEnabled();await expect(d.locator('.cce-rodape button')).toBeInViewport();
+});

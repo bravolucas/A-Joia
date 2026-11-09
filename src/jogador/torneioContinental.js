@@ -1,3 +1,4 @@
+import {estatisticasDecisao} from './decisaoDeJogo.js';
 import {NACIONALIDADES,CONFEDERACAO_POR_NACAO} from '../dados/data.js';
 import {registrarJogoElenco} from './elencoSelecao.js';
 const hash=s=>[...String(s)].reduce((a,v)=>Math.imul(a^v.charCodeAt(0),16777619)>>>0,2166136261);
@@ -27,6 +28,6 @@ export function registrarCampanhaContinental(c,t){
 export function registrarFinalContinental(t,m,acertou){
  if(!t?.elenco||!t.partidas||t.partidas.some(j=>j.fase===4))return;
  const disputa=naMarca(m.mini),gp=disputa?0:acertou?1:0,gc=disputa?0:acertou?0:1;
- const j={fase:4,adv:t.finalAdversario||m.adversario,gp,gc,res:acertou?'V':'D',penaltis:disputa,gols:acertou&&['falta','cabeceio'].includes(m.mini)?1:0,assist:acertou&&['passe','cruzamento'].includes(m.mini)?1:0};
+ const stats=estatisticasDecisao(m,acertou);const j={fase:4,adv:t.finalAdversario||m.adversario,gp,gc,res:acertou?'V':'D',penaltis:disputa,gols:stats.gols||(acertou&&['falta','cabeceio'].includes(m.mini)?1:0),assist:stats.assist||(acertou&&['passe','cruzamento'].includes(m.mini)?1:0)};
  registrarJogoElenco(t.elenco,j,{titular:t.titular,ano:t.ano});t.partidas.push(j);t.gols+=j.gols;t.assist+=j.assist;t.jogos=t.partidas.length;
 }

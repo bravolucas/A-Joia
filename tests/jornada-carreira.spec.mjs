@@ -60,7 +60,7 @@ for(const width of[390,1366])test(`reencontro opcional mostra consequência e pe
  const momento={tipo:'copa',nome:'Champions League',mini:'penalti',titulo:'Diante do antigo clube',texto:'Final',ordem:1,total:1,adversario:{tipo:'clube',nome:'Milan'}};
  const card={ano:c.ano,pendente:momento,filaMomentos:[],momentos:[],titulos:[],jogos:30,gols:10,assist:5};await abrir(page,c,{etapa:'momento',card});
  await page.locator('.jr-reacao>summary').click();await page.getByRole('button',{name:/Reconhecer a torcida/}).click();await expect(page.locator('.jr-reacao')).toContainText('+2 de carinho');
- const salvo=await page.evaluate(()=>JSON.parse(localStorage.getItem('ajoia_rapido_v1')).c);expect(salvo.torcida.Milan).toBe(62);await page.reload();await page.getByRole('button',{name:/Continuar · Jornada UI/}).click();await page.locator('.jr-reacao>summary').click();await expect(page.getByRole('button',{name:/Reconhecer a torcida/})).toHaveCount(0);await expect(page.getByRole('button',{name:'Alto esquerda',exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ const salvo=await page.evaluate(()=>JSON.parse(localStorage.getItem('ajoia_rapido_v1')).c);expect(salvo.torcida.Milan).toBe(62);await page.reload();await page.getByRole('button',{name:/Continuar · Jornada UI/}).click();await page.locator('.jr-reacao>summary').click();await expect(page.getByRole('button',{name:/Reconhecer a torcida/})).toHaveCount(0);await expect(page.locator('.dj-escolhas button').first()).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 
 test('história das duplas mostra rota e memórias registradas com acesso por teclado',async({page})=>{

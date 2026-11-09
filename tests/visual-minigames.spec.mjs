@@ -18,11 +18,11 @@ for(const width of [390,1366])for(const mini of ['penalti','defesa','falta','pas
  await expect(page.locator('.vf-confronto .vf-match-club strong')).toHaveCount(2);
  await expect(page.locator('.vf-adversario strong')).not.toBeEmpty();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
- const imagens=page.locator('.vf-cena image');expect(await imagens.count()).toBeGreaterThan(0);
+ if(['penalti','defesa'].includes(mini))await expect(page.locator('.dj-campo')).toBeVisible();else{const imagens=page.locator('.vf-cena image');expect(await imagens.count()).toBeGreaterThan(0);}
  await page.screenshot({path:`/tmp/ajoia-visual-${mini}-${width}.png`,fullPage:true});
  if(mini==='penalti'||mini==='defesa'){
-  const alvo=page.getByRole('button',{name:'Alto esquerda',exact:true});await alvo.focus();await page.keyboard.press('Enter');
-  await expect(page.getByText(/LANCE VENCIDO|LANCE PERDIDO/)).toBeVisible();
+  const alvo=page.locator('.dj-escolhas button').first();await alvo.focus();await page.keyboard.press('Enter');
+  await expect(page.locator('.dj-resultado')).toBeVisible();
  }else if(mini==='falta'){
   const b=page.getByRole('button',{name:'Canto esq.',exact:true});expect((await b.boundingBox()).height).toBeGreaterThanOrEqual(44);await b.click();
   await expect(page.getByText(/GOLAÇO DE FALTA!|NA BARREIRA!|NA TRAVE!|DEFENDEU!|PRA FORA!/)).toBeVisible();
@@ -30,7 +30,7 @@ for(const width of [390,1366])for(const mini of ['penalti','defesa','falta','pas
   const b=page.getByRole('button',{name:/Passar para companheiro/}).first();expect((await b.boundingBox()).width).toBeGreaterThanOrEqual(44);await page.getByRole('button',{name:'Passar para companheiro 1',exact:true}).click();
   await expect(page.getByText(/ASSISTÊNCIA! GOL!|INTERCEPTADO!/)).toBeVisible();
  }
- const continuar=page.getByRole('button',{name:'Continuar →',exact:true});await expect(continuar).toBeVisible();const box=await continuar.boundingBox();expect(box.y+box.height).toBeLessThanOrEqual(page.viewportSize().height);
+ const continuar=['penalti','defesa'].includes(mini)?page.locator('.dj-continuar'):page.getByRole('button',{name:'Continuar →',exact:true});await expect(continuar).toBeVisible();const box=await continuar.boundingBox();expect(box.y+box.height).toBeLessThanOrEqual(page.viewportSize().height);
  expect(erros).toEqual([]);expect(recursos).toEqual([]);
 });
 

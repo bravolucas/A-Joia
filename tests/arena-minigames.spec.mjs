@@ -14,8 +14,8 @@ for(const [width,height] of [[320,568],[1366,768]])for(const mini of ['penalti',
   test(`${mini}: campo, alvos e continuar cabem em ${width}×${height}`,async({page})=>{
     await page.setViewportSize({width,height});await page.emulateMedia({reducedMotion:'reduce'});
     await abrir(page,mini);
-    const quadro=page.locator('.arena-quadro');const palco=quadro.locator('.vf-cena,.lc-gramado');
-    const antes=await palco.boundingBox();expect(antes.height).toBeGreaterThan(130);
+    const quadro=page.locator('.arena-quadro');const palco=quadro.locator('.vf-cena,.lc-gramado,.dj-campo');
+    const antes=await palco.boundingBox();expect(antes.height).toBeGreaterThan(['penalti','defesa'].includes(mini)?50:130);
     const gol=quadro.locator('.arena-gol');
     if(await gol.count()){
       const trave=await gol.boundingBox(),grama=await quadro.locator('.arena-gramado').boundingBox();
@@ -28,7 +28,7 @@ for(const [width,height] of [[320,568],[1366,768]])for(const mini of ['penalti',
       expect(limites.width).toBeLessThanOrEqual(suporte.width+1);
       expect(limites.height).toBeLessThanOrEqual(suporte.height+1);
     }
-    if(['penalti','defesa'].includes(mini))await page.getByRole('button',{name:'Alto esquerda',exact:true}).click();
+    if(['penalti','defesa'].includes(mini))await page.locator('.dj-escolhas button').first().click();
     else if(mini==='falta')await page.getByRole('button',{name:'Canto esq.',exact:true}).click();
     else if(mini==='passe')await page.getByRole('button',{name:'Passar para companheiro 1',exact:true}).click();
     else if(mini==='cabeceio')await page.getByRole('button',{name:'Cabecear agora',exact:true}).click();

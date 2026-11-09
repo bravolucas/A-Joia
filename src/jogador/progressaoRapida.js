@@ -3,5 +3,5 @@ export const multiplicadorMerito=forca=>forca<=65?1.6:forca<=74?1.35:forca<=81?1
 const pesos={liga:9,copa:4,continental:18,mundial:8,segunda:2};
 export function bonusSuperacao(temporadas=[]){return temporadas.reduce((total,t)=>{if(!Number.isFinite(t.forcaClube))return total;const extra=multiplicadorMerito(t.forcaClube)-1;return total+Math.round((t.titulos||[]).reduce((n,v)=>n+(pesos[v.tipo]||0),0)*extra);},0);}
 export const MINIS_NOVOS=['cruzamento','interceptacao','cabeceio','reflexo'];
-export const baseMini=mini=>({cruzamento:'passe',interceptacao:'passe',cabeceio:'penalti',reflexo:'defesa'})[mini]||mini;
+export const baseMini=mini=>({decisao:'penalti',decisaoDefensiva:'defesa',cruzamento:'passe',interceptacao:'passe',cabeceio:'penalti',reflexo:'defesa'})[mini]||mini;
 export const poolMinis=pos=>pos==='GOL'?['defesa','reflexo']:['ZAG','VOL'].includes(pos)?['passe','interceptacao','cabeceio']:['LD','LE','ALE','ALD','PE','PD','ME','MD'].includes(pos)?['passe','cruzamento','falta']:['MC','MEI'].includes(pos)?['passe','falta','interceptacao']:['penalti','cabeceio','cruzamento'];

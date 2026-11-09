@@ -1,3 +1,4 @@
+import {estatisticasDecisao} from './decisaoDeJogo.js';
 import {prepararCopasJogador} from './copasJogador.js';
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
 import {CLUBES_EUROPEUS_EXTRAS} from '../competicoes/clubesEuropeusExtras.js';
@@ -1483,7 +1484,7 @@ export function contextoMomento(c,m){
  });
  const mini=m.mini||miniDaPosicao(c.posicao);
  const fase=m.tipo==='classico'?'Clássico':['liga','acesso','permanencia'].includes(m.tipo)?'Última rodada':'Final';
- const situacao=({cruzamento:'Cruzamento na área. Ache o companheiro livre.',interceptacao:'Último ataque rival. Leia o passe e intercepte.',cabeceio:'A bola vem pelo alto. Encontre o tempo do cabeceio.',reflexo:'Chute à queima-roupa. Reaja para salvar.'})[mini]||(mini==='defesa'?'Pênalti contra. Você é a última barreira.':mini==='penalti'?'A bola está na marca. A próxima cobrança pode decidir.':mini==='falta'?'Falta perigosa. A chance está nos seus pés.':'Último lance. Encontre o passe que pode decidir.');
+ const situacao=({decisao:'O jogo está aberto. Leia o espaço e escolha sua jogada.',decisaoDefensiva:'O rival prepara o ataque. Escolha como neutralizar o perigo.',cruzamento:'Cruzamento na área. Ache o companheiro livre.',interceptacao:'Último ataque rival. Leia o passe e intercepte.',cabeceio:'A bola vem pelo alto. Encontre o tempo do cabeceio.',reflexo:'Chute à queima-roupa. Reaja para salvar.'})[mini]||(mini==='defesa'?'Pênalti contra. Você é a última barreira.':mini==='penalti'?'A bola está na marca. A próxima cobrança pode decidir.':mini==='falta'?'Falta perigosa. A chance está nos seus pés.':'Último lance. Encontre o passe que pode decidir.');
  return {adversario,contexto:{fase,situacao}};
 }
 
@@ -1556,6 +1557,7 @@ function textoDoMomento(mini, m, c) {
 const PESO_MOMENTO = { classico: 3, selecao: 3, continental: 3, mundial: 3, liga: 2, copa: 2, acesso: 2, permanencia: 2, ligaConfirmacao: 1 };
 
 export const ACAO_MINI = {
+ decisao:{ok:"Leitura decisiva que criou o gol",erro:"O rival neutralizou a jogada"},decisaoDefensiva:{ok:"Neutralizou o ataque decisivo",erro:"O rival encontrou o espaço e marcou"},
  cruzamento:{ok:'Cruzamento perfeito para o gol decisivo',erro:'O cruzamento foi cortado'},interceptacao:{ok:'Interceptou o ataque decisivo',erro:'O adversário encontrou o passe'},cabeceio:{ok:'Cabeceio decisivo para o gol',erro:'Não alcançou o cruzamento'},reflexo:{ok:'Defesa de reflexo decisiva',erro:'Não alcançou o chute'},
   penalti: { ok: "Pênalti decisivo convertido", erro: "Perdeu o pênalti decisivo" },
   falta: { ok: "Gol de falta no último minuto", erro: "A falta decisiva não entrou" },
@@ -1629,7 +1631,7 @@ export function aplicarMomento(card0, acertou) {
       const k = card.copa, mini = m.mini || "penalti";
       const naMarca = mini === "penalti" || mini === "defesa";
       const [gp, gc] = m.lance ? (naMarca?[m.lance.gp,m.lance.gc]:acertou?[1,0]:[0,1]) : placarCopa(naMarca ? "E" : acertou ? "V" : "D");
-      const eu = { gols: acertou && ["falta","cabeceio"].includes(mini) ? 1 : 0, assist: acertou && ["passe","cruzamento"].includes(mini) ? 1 : 0 };
+      const stats=estatisticasDecisao(m,acertou);const eu = { gols: stats.gols||(acertou && ["falta","cabeceio"].includes(mini) ? 1 : 0), assist: stats.assist||(acertou && ["passe","cruzamento"].includes(mini) ? 1 : 0) };
       k.gols += eu.gols; k.assist += eu.assist;
       if (acertou) k.craque += 1;
       k.jogos.push({ fase: 4, adv: k.adversario, gp, gc, res: acertou ? "V" : "D", penaltis: naMarca, ...eu });
@@ -1640,7 +1642,7 @@ export function aplicarMomento(card0, acertou) {
     if (acertou) { t.campeao = true; t.resultado = "Campeão"; card.titulos.push({ tipo: t.tipo, nome: t.nome }); card.destaques.push(`${acao.ok}: a ${t.nome} é do seu país`); }
     else { t.resultado = "Vice-campeão"; card.destaques.push(`${acao.erro} na final da ${t.nome}`); }
   }
-  card.momentos = [...(card.momentos || []), { tipo: m.tipo, mini: m.mini || "penalti", acertou, titulo: m.titulo, adversario:m.adversario||null, contexto:m.contexto||null, lance:m.lance||null }];
+  card.momentos = [...(card.momentos || []), { tipo: m.tipo, mini: m.mini || "penalti", acertou, titulo: m.titulo, adversario:m.adversario||null, contexto:m.contexto||null, lance:m.lance||null, decisaoJogo:m.decisaoJogo||null }];
   card.momento = { tipo: m.tipo, mini: m.mini || "penalti", acertou };
   // próximo desafio da fila, se houver
   const fila = card.filaMomentos || [];

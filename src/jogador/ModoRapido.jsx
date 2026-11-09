@@ -1,4 +1,5 @@
-import PenaltiJogavel from './PenaltiJogavel.jsx';
+import DecisaoDeJogo from './DecisaoDeJogo.jsx';
+import {prepararDecisaoJogo} from './decisaoDeJogo.js';
 import {contextoAgenda} from '../competicoes/calendarioCopas.js';
 import {atualizarFluxoCopasJogador,etapaAgendaJogador,registrarLanceLegadoJogador,chaveCopaJogador,escolherCopaJogador,concluirEventoJogador} from './copasJogador.js';
 import CopaEscolha,{MarcoLiga} from '../treinador/CopaEscolha.jsx';
@@ -722,8 +723,7 @@ function MelhoresCarreiras() {
 }
 
 /* ---------- momento decisivo: pênalti, falta, passe ou defesa ---------- */
-const ZONAS = [[0, 0], [1, 0], [2, 0], [0, 1], [1, 1], [2, 1]]; // [coluna, linha]
-const NOME_MINI = { cruzamento:"Cruzamento decisivo",interceptacao:"Interceptação",cabeceio:"Cabeceio decisivo",reflexo:"Defesa de reflexo", penalti: "Pênalti decisivo", falta: "Falta decisiva", passe: "Último lance", defesa: "Pênalti contra" };
+const NOME_MINI = { decisao:"Leitura de jogo",decisaoDefensiva:"Leitura defensiva", cruzamento:"Cruzamento decisivo",interceptacao:"Interceptação",cabeceio:"Cabeceio decisivo",reflexo:"Defesa de reflexo", penalti: "Pênalti decisivo", falta: "Falta decisiva", passe: "Último lance", defesa: "Pênalti contra" };
 
 function CabecalhoMomento({ c, momento, onReacao }) {
   const mini = momento.mini || "penalti";
@@ -747,78 +747,6 @@ function PlacarMomento({ ok, texto, atraso = 0, c, momento }) {
   const [visivel,V]=useState(espera===0);
   useEffect(() => {const mostrar=()=>{V(true);if(ok){efeitoLance("rede");torcida(2.6,.22);tocar("sobe",.5);}else tocar("desce",.5);};if(!espera){mostrar();return;}const timer=setTimeout(mostrar,espera);return()=>clearTimeout(timer);}, [ok,espera]);
   return <div className="relative" style={{visibility:visivel?'visible':'hidden'}}>{ok&&visivel&&(!c||["titulo","estreia","decisao"].includes(celebracaoMomento(c,{...momento,adversario:contextoMomento(c,momento).adversario}).tipo))&&<Lottie nome="gol" className="absolute left-1/2 -translate-x-1/2 -top-24 w-48 h-48 pointer-events-none"/>}<div className={`display text-3xl rp-sobe ${ok?'text-[#1BC28A]':'text-[#E36B5B]'}`}>{texto}</div>{ok&&visivel&&c&&<CelebracaoLance c={c} momento={{...momento,adversario:contextoMomento(c,momento).adversario}}/>}</div>;
-}
-
-/* Pênalti (você bate) e defesa (você é o goleiro) usam o mesmo gol */
-function TelaPenalti({ c, momento, onReacao, onFim, goleiro = false }) {
-  const [escolha, setEscolha] = useState(null);
-  const [res, setRes] = useState(null);
-
-  const chutar = (i) => {
-    if (escolha != null) return;
-    efeitoLance("chute");
-    const [col, lin] = ZONAS[i];
-    const bonus = ((c.tracos || []).includes("decisao") ? 0.12 : 0) + bonusPrecisaoLoja(c,goleiro?"defesa":"penalti");
-    if (goleiro) {
-      // você escolhe para onde pular; o batedor escolhe o canto dele
-      const k = Math.random() < 0.15 ? 4 : [0, 2, 3, 5, 1][Math.floor(Math.random() * 5)];
-      const [bCol, bLin] = ZONAS[k];
-      const def = c.attrs.defesa;
-      let resultado = "gol";
-      if (bLin === 0 && Math.random() < 0.08) resultado = "fora";
-      else if (bCol === col && Math.random() < (bLin === lin ? 0.86 : 0.55) + bonus + (def - 70) * 0.005) resultado = "defesa";
-      setEscolha(k);
-      setRes({ resultado, goleiro: [col, lin], ok: resultado !== "gol" });
-      return;
-    }
-    const r = Math.random();
-    const gCol = r < 0.4 ? 0 : r < 0.6 ? 1 : 2;
-    const gLin = Math.random() < 0.55 ? 1 : 0;
-    const fin = c.attrs.finalizacao;
-    let resultado = "gol";
-    if (lin === 0 && Math.random() < Math.max(0.04, 0.2 - (fin - 60) * 0.005)) resultado = "fora";
-    else if (gCol === col && Math.random() < (gLin === lin ? 0.8 : 0.45) - bonus - (fin - 70) * 0.004) resultado = "defesa";
-    setEscolha(i);
-    setRes({ resultado, goleiro: [gCol, gLin], ok: resultado === "gol" });
-  };
-
-  useEffect(() => {
-    if (!res) return undefined;
-    const t = setTimeout(() => onFim(res.ok), 2200);
-    return () => clearTimeout(t);
-  }, [res, onFim]);
-
-
-  const textoRes = !res ? "" : goleiro
-    ? (res.resultado === "defesa" ? "QUE DEFESA!" : res.resultado === "fora" ? "PRA FORA! É CAMPEÃO!" : "GOL DELES…")
-    : (res.resultado === "gol" ? "GOOOL!" : res.resultado === "defesa" ? "DEFENDEU!" : "PRA FORA!");
-
-  return (
-    <QuadroMini className="mini-fluxo">
-      <CabecalhoMomento c={c} momento={momento} onReacao={onReacao} />
-      <div className="rp-painel vf-cena vf-cena-penalti p-3 overflow-hidden" style={{ background: "linear-gradient(#0F2A1F, #0B1F17)" }}>
-        <div className="relative">
-          <div className="flex justify-between items-center px-2 pb-2 text-[11px] font-bold uppercase tracking-widest text-[#D5E6DC]">
-            <span>⚽ {goleiro ? "Defesa decisiva" : "Cobrança decisiva"}</span>
-            <span className="text-[#EBC557]">{res ? (res.ok ? "LANCE VENCIDO" : "LANCE PERDIDO") : "ESCOLHA O CANTO"}</span>
-          </div>
-          <div className={res ? "rp-pen-cena rp-pen-acao" : "rp-pen-cena"}>
-            <SuperficieMini largura={300} altura={210}><PenaltiJogavel goleiro={goleiro} res={res} onZona={chutar}/></SuperficieMini>
-            {res && <div className="absolute inset-0 pointer-events-none rp-pen-flash" style={{ background: res.ok ? "radial-gradient(circle at 50% 30%, rgba(27,194,138,.24), transparent 65%)" : "radial-gradient(circle at 50% 30%, rgba(227,107,91,.22), transparent 65%)" }} />}
-          </div>
-          <div className="flex items-center justify-between text-[11px] text-[#8FA39A] px-2 pt-2">
-            <span>{goleiro ? "VISÃO DO GOLEIRO" : "VISÃO DO BATEDOR"}</span><span>{res ? "REPLAY DO LANCE" : "TOQUE NO GOL"}</span>
-          </div>
-        </div>
-      </div>
-      <div className="mini-feedback text-center min-h-[64px]">
-        {!res && (goleiro
-          ? <p className="text-[17px] text-[#C9D3CE]">Toque no canto para onde vai pular. Defesa <span className="font-stat">{c.attrs.defesa}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "defesa") * 100)}%</span></p>
-          : <p className="text-[17px] text-[#C9D3CE]">Toque no canto onde vai bater. Finalização <span className="font-stat">{c.attrs.finalizacao}</span> · chance estimada <span className="font-stat">{Math.round(chancePenalti(c) * 100)}%</span></p>)}
-        {res && <><PlacarMomento c={c} momento={momento} ok={res.ok} texto={textoRes} atraso={1350} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.ok)}>Continuar →</button></>}
-      </div>
-    </QuadroMini>
-  );
 }
 
 function TelaFalta({ c, momento, onReacao, onFim }) {
@@ -872,12 +800,16 @@ function TelaPasse({ c, momento, onReacao, onFim }) {
   );
 }
 
-function TelaMomento({ c, momento, onReacao, onFim }) {
+function TelaMomento({ c, momento, onReacao, onFim, onRegistrar }) {
   const mini = momento.mini || "penalti";
+  if(['penalti','defesa','decisao','decisaoDefensiva'].includes(mini)){
+    const cena=prepararDecisaoJogo(c,momento),m={...momento,mini:cena.mini,lance:{...(momento.lance||{}),minuto:momento.lance?.minuto||89,gp:momento.lance?.gp||0,gc:momento.lance?.gc||0,disputa:false}};
+    return <DecisaoDeJogo c={c} momento={m} onRegistrar={onRegistrar} onFim={onFim} cabecalho={<CabecalhoMomento c={c} momento={m} onReacao={onReacao}/>}/>;
+  }
   if(MINIS_NOVOS.includes(mini))return <LancesCriativos c={c} momento={momento} tipo={mini} onFim={onFim} cabecalho={<CabecalhoMomento c={c} momento={momento} onReacao={onReacao}/>}/>;
   if (mini === "falta") return <TelaFalta c={c} momento={momento} onReacao={onReacao} onFim={onFim} />;
   if (mini === "passe") return <TelaPasse c={c} momento={momento} onReacao={onReacao} onFim={onFim} />;
-  return <TelaPenalti c={c} momento={momento} onReacao={onReacao} onFim={onFim} goleiro={mini === "defesa"} />;
+  return <DecisaoDeJogo c={c} momento={momento} onRegistrar={onRegistrar} onFim={onFim} cabecalho={<CabecalhoMomento c={c} momento={momento} onReacao={onReacao}/>}/>;
 }
 
 /* ---------- celebração: uma tela por conquista ---------- */
@@ -3125,7 +3057,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}
         {(['estadual','copasClubes','calendarioLiga'].includes(etapa))&&<section className="max-w-xl mx-auto rp-painel p-5"><h2 className="text-xl font-bold">{card.estadualEmJogo?.nome||'Calendário da temporada'}</h2><p className="my-3 text-sm">Acompanhe os jogos na ordem do calendário. Seu progresso está salvo.</p><button className="rp-btn rp-ouro" onClick={()=>setEstadualAberto(true)}>{etapa==='estadual'?'Retomar estadual →':'Retomar temporada →'}</button></section>}
         {etapa === "copa" && card?.copa && <TelaCopa key={`${card.copa.etapa}:${card.copa.fase}:${card.copa.jogos.length}`} c={c} card={card} jogadaSalva={estado.copaJogada} onRegistrar={jogada=>setEstado(st=>({...st,copaJogada:jogada,auto:false}))} onAvancar={avancarCopa} />}
-        {etapa === "momento" && <TelaMomento key={`${card.ano}:${(card.momentos || []).length}`} c={c} momento={card.pendente} onReacao={tipo=>setEstado(st=>({...st,c:reagirReencontro(st.c,{...st.card.pendente,adversario:contextoMomento(st.c,st.card.pendente).adversario},tipo)}))} onFim={fimMomento} />}
+        {etapa === "momento" && <TelaMomento key={`${card.ano}:${(card.momentos || []).length}`} c={c} momento={card.pendente} onReacao={tipo=>setEstado(st=>({...st,c:reagirReencontro(st.c,{...st.card.pendente,adversario:contextoMomento(st.c,st.card.pendente).adversario},tipo)}))} onRegistrar={r=>setEstado(st=>({...st,auto:false,card:{...st.card,pendente:{...st.card.pendente,mini:r.mini,decisaoJogo:r,lance:{...(st.card.pendente.lance||{}),disputa:false,minuto:st.card.pendente.lance?.minuto||89,gp:st.card.pendente.lance?.gp||0,gc:st.card.pendente.lance?.gc||0}}}}))} onFim={fimMomento} />}
 
         {etapa === "festa" && <TelaFesta c={c} card={card} onFim={() => { if (estado.retorno) setEstado({ ...estado.retorno, voar: false }); else setEstado({etapa:"fechamento",c,card,ultimo:card,auto:false}); }} />}
         {etapa === "resumo" && <TelaResumo c={c} card={card} voar={!!estado.voar} onPousou={() => setContadorPulsa((x) => x + 1)} onContinuar={continuar} onAposentar={encerrar} onRever={() => setEstado({etapa:"fechamento",c,card,retorno:estado,auto:false})} />}

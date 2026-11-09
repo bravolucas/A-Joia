@@ -1,3 +1,7 @@
+## Continuação — substituir alvo por decisão de futebol (09/11/2026)
+
+Usuário rejeitou escolha inicial sobre foto e pediu uma decisão que não fosse necessariamente pênalti. Modo rápido manual agora abre DecisaoDeJogo para minis penalti/defesa (incluindo saves antigos): 12 situações por perfil, três ações claras, diagrama SVG, chance após clique e resultado persistido imediatamente. Registro de lance deixa de ser disputa de pênaltis e histórico usa decisao/decisaoDefensiva. Gol/assistência em finais de seleção seguem ação escolhida; defensor não recebe gol por neutralizar ataque. Removida TelaPenalti antiga do ModoRapido. Demais minigames, CopaEscolha/treinador e modo completo não foram substituídos. Home “2026.11.09 · Lance que decide”. Build e 355 testes de lógica distintos aprovados; 53 cenários browser distintos aprovados entre rodada principal e verificação final (15/15). Um reload de falta falhou durante troca de build, repetição final aprovada. Detalhes e limites em docs/LANCE_QUE_DECIDE.md. Preservar dois documentos originais não rastreados.
+
 ## Continuação — corrigir escopo da arte no pênalti jogável (09/11/2026)
 
 Correção principal `316abbc`, testes complementares `852f30f`. [Pages 42542389394](https://github.com/bravolucas/A-Joia/actions/runs/42542389394) confirmado com sucesso; [CI 42542389574](https://github.com/bravolucas/A-Joia/actions/runs/42542389574) ainda em andamento ao confirmar deploy. Dois testes antigos de sprite foram atualizados para a nova arte e passaram para defesa após escolher esquerda/direita.

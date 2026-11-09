@@ -1,5 +1,7 @@
 ## Continuação — corrigir escopo da arte no pênalti jogável (09/11/2026)
 
+Correção principal `316abbc`, testes complementares `852f30f`. [Pages 42542389394](https://github.com/bravolucas/A-Joia/actions/runs/42542389394) confirmado com sucesso; [CI 42542389574](https://github.com/bravolucas/A-Joia/actions/runs/42542389574) ainda em andamento ao confirmar deploy. Dois testes antigos de sprite foram atualizados para a nova arte e passaram para defesa após escolher esquerda/direita.
+
 Usuário relatou arte antiga e trave com resultado gol. Confirmado que entrega anterior só alterava disputa por escolhas; minigame TelaPenalti e GoalMini permaneciam antigos. Substituída cena antiga do rápido por PenaltiJogavel: fotografia de preparação com seis alvos e replay derivado de gol/defesa/fora; GoalMini também integrado. Helper desfechoCobranca não confunde `ok` do goleiro com destino da bola e prioriza gol verdadeiro sobre tipo legado conflitante. Nova imagem de fora, créditos e original preservados. Home: “2026.11.09 · Pênaltis jogáveis”. Build, teste unitário e 39 cenários browser aprovados; 12 verificações finais adicionais passaram aguardando término CSS e conferindo quadros finais. Relatório `docs/PENALTI_JOGAVEL_CORRECAO.md` contém limites. Não alterar probabilidades ou placares; não culpar cache sem evidência. Preservar dois documentos não rastreados do usuário.
 
 ## Continuação — arte própria da decisão por pênaltis (09/11/2026)

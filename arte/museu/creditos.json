@@ -1,0 +1,101 @@
+{
+  "descricao": "Objetos e ambiente comemorativos gerados para o museu de A Joia. Retratos fictícios. Camisas, nomes, estatísticas e taças são renderizados separadamente a partir da carreira.",
+  "data": "2026-11-10",
+  "imagens": [
+    {
+      "arquivo": "bola-moderna.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "56598abb-9dad-4924-86f3-e5288b223ffe"
+    },
+    {
+      "arquivo": "bola-couro.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "3c5e63f7-49ea-4598-9436-8043a377e253"
+    },
+    {
+      "arquivo": "chuteiras.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "73c15487-16e6-4ee3-95f7-cafbb1104142"
+    },
+    {
+      "arquivo": "luvas.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "57ad2066-57f5-4680-83f5-2c104e0f6599"
+    },
+    {
+      "arquivo": "bracadeira.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "cfa01c5c-1f71-4b2c-b855-6f6ce513fa93"
+    },
+    {
+      "arquivo": "prancheta.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "8f1dbb9f-8aea-4c76-9422-cf3c3dc09ab6"
+    },
+    {
+      "arquivo": "ingressos.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "e95efb0c-031b-4d31-a468-1385fcb4e75c"
+    },
+    {
+      "arquivo": "passaporte.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "9e1d057c-b800-4218-9548-65693d0d9a20"
+    },
+    {
+      "arquivo": "carta.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "8562c485-5276-472c-ac82-5c0b8031701e"
+    },
+    {
+      "arquivo": "jornal.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "7967d620-4ca5-44a0-8568-2807cf548ff6"
+    },
+    {
+      "arquivo": "diario.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "02e5a2e3-48bc-452c-a007-d6d8ce6b79f6"
+    },
+    {
+      "arquivo": "moldura-camisa.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "a0600869-d0ae-49c1-aa61-ade5b96297ba"
+    },
+    {
+      "arquivo": "vitrine-taca.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "615e98d9-d03c-474a-a7d3-e3c77de509bd"
+    },
+    {
+      "arquivo": "homenagem.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "2d9c7f73-b020-4f6b-b2d0-5dbb6b763dc9"
+    },
+    {
+      "arquivo": "retrato-mentor.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "169ca404-fa0c-47ba-9e81-a6d3fe849a09"
+    },
+    {
+      "arquivo": "retrato-parceiro.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "2152d320-1dad-42de-9f32-0cac2ba31e32"
+    },
+    {
+      "arquivo": "retrato-rival.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "8be2ef6a-a5c2-4490-ad1f-6013b5e07265"
+    },
+    {
+      "arquivo": "sala-museu.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "b937edd0-a168-4835-a0ed-e868aa4e3b43"
+    },
+    {
+      "arquivo": "contrato.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "e2304983-440b-441d-84af-290f5ba53c27"
+    }
+  ]
+}

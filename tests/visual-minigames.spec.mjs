@@ -24,8 +24,10 @@ for(const width of [390,1366])for(const mini of ['penalti','defesa','falta','pas
   const alvo=page.locator('.dj-escolhas button').first();await alvo.focus();await page.keyboard.press('Enter');
   await expect(page.locator('.dj-resultado')).toBeVisible();
  }else if(mini==='falta'){
+  await page.evaluate(()=>{Math.random=()=>0;});
   const b=page.getByRole('button',{name:'Canto esq.',exact:true});expect((await b.boundingBox()).height).toBeGreaterThanOrEqual(44);await b.click();
   await expect(page.getByText(/GOLAÇO DE FALTA!|NA BARREIRA!|NA TRAVE!|DEFENDEU!|PRA FORA!/)).toBeVisible();
+  const pose=page.locator('.vf-cena [data-recorte="pose-unica"]');await expect(pose).toHaveCount(1);await expect(pose).toHaveCSS('overflow','hidden');await expect(pose.locator('clipPath rect')).toHaveAttribute('width','887');await expect(pose.locator('clipPath rect')).toHaveAttribute('height','443.5');await page.screenshot({path:`/tmp/falta-goleiro-recortado-${width}.png`,fullPage:true});
  }else{
   const b=page.getByRole('button',{name:/Passar para companheiro/}).first();expect((await b.boundingBox()).width).toBeGreaterThanOrEqual(44);await page.getByRole('button',{name:'Passar para companheiro 1',exact:true}).click();
   await expect(page.getByText(/ASSISTÊNCIA! GOL!|INTERCEPTADO!/)).toBeVisible();

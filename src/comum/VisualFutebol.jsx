@@ -14,11 +14,12 @@ import dirigenteReal from '../../arte/personagens/dirigente.webp';
 // Recortes fotográficos originais; coordenadas e animações dos minigames preservadas.
 export function JogadorCampo({ x=0, y=0, escala=1, numero=10, goleiro=false, adversario=false, esticado=false, direcao=1, defendeu=false, exibirNumero=true }) {
   useEffect(()=>{if(goleiro){const imagem=new Image();imagem.src=goleiroMergulho;}},[goleiro]);
+  const recorteId=`goleiro-${useId().replace(/:/g,'')}`,recorteX=direcao<0?0:887,recorteY=defendeu?443.5:0;
   const voando=goleiro&&esticado;
   const foto=goleiro?(voando?goleiroMergulho:goleiroReal):adversario?adversarioReal:jogadorReal;
   return <g transform={`translate(${x} ${y}) scale(${escala})`} className="vf-atleta" aria-hidden="true">
     {!voando&&<ellipse cx="0" cy="1" rx="17" ry="3" fill="#000" opacity=".3"/>}
-    {voando?<svg data-pose={defendeu?'defesa':'mergulho'} data-lado={direcao<0?'esquerda':'direita'} x="-56" y="-68" width="112" height="65" viewBox={`${direcao<0?0:887} ${defendeu?443.5:0} 887 443.5`} overflow="hidden" preserveAspectRatio="xMidYMid meet"><image href={goleiroMergulho} width="1774" height="887"/></svg>:<image data-pose="espera" href={foto} x="-30" y="-88" width="60" height="90" preserveAspectRatio="xMidYMax meet"/>}
+    {voando?<svg data-pose={defendeu?'defesa':'mergulho'} data-lado={direcao<0?'esquerda':'direita'} x="-56" y="-68" width="112" height="65" viewBox={`${recorteX} ${recorteY} 887 443.5`} overflow="hidden" style={{overflow:'hidden'}} data-recorte="pose-unica" preserveAspectRatio="xMidYMid meet"><defs><clipPath id={recorteId} clipPathUnits="userSpaceOnUse"><rect x={recorteX} y={recorteY} width="887" height="443.5"/></clipPath></defs><g clipPath={`url(#${recorteId})`}><image href={goleiroMergulho} width="1774" height="887"/></g></svg>:<image data-pose="espera" href={foto} x="-30" y="-88" width="60" height="90" preserveAspectRatio="xMidYMax meet"/>}
     {!goleiro&&exibirNumero&&<g><circle cx="17" cy="-55" r="6" fill={adversario?'#28435e':'#103e2c'} stroke="#e2d1a0" strokeWidth=".6"/><text x="17" y="-52.5" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="7" fontWeight="800" fill="#fff4d1">{numero}</text></g>}
   </g>;
 }

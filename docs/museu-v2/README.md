@@ -37,4 +37,8 @@ Novas artes e tratamentos feitos com Adobe Firefly/Photoshop. As referências n�
 
 Testes de lógica cobrem confederações, formatos, títulos corretos, placares e participações, contagem de seleção, arquivos de pódios, distribuição de retratos e prateleiras. Testes no navegador cobrem celular/desktop, imagem carregada, camisa centralizada, ausência de taças indevidas, pódio por edição, cerimônias distintas, partidas continentais e retomada.
 
-Conferência local: build do GitHub Pages aprovado; 52 testes de integração de lógica aprovados após a revisão de contagens; cenários de museu/cerimônia/seleção verificados em 320, 390 e 1366 px, incluindo os dois continentais no motor do modo completo. A validação integral e a publicação ficam registradas após o GitHub Actions.
+Validação integral do commit `2ccd017`: **444 testes de lógica e 309 testes no navegador aprovados**, além do build de produção. Cenários de museu, cerimônia e seleção cobrem celular e desktop, incluindo continentais no motor completo e técnicos contratados.
+
+- [GitHub Actions — validação aprovada](https://github.com/bravolucas/A-Joia/actions/runs/42824326186).
+- [GitHub Pages — publicação aprovada](https://github.com/bravolucas/A-Joia/actions/runs/42824326138).
+- Conferência pública em https://bravolucas.github.io/A-Joia/: entrada `index-BYFIsTBO.js`, marcadores das alterações presentes e 73 recursos HTTP 200, incluindo 70 imagens PNG do acervo e suas miniaturas.

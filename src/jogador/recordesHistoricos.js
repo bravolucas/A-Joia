@@ -2,7 +2,7 @@ import {MARCAS_COPAS} from '../dados/marcasCopas.js';
 const numero=x=>Number.isFinite(x)?Math.max(0,x):0;
 export function compararMarcasCopas(c,atual){
  const temporadas=new Map();for(const t of [...(c.temporadas||[]),...(atual?[atual]:[])])if(t?.ano!=null)temporadas.set(t.ano,t);
- const copas=[...temporadas.values()].filter(t=>t.selecao?.tipo==='copaMundo'||t.copa?.convocado).sort((a,b)=>a.ano-b.ano);
+ const copas=[...temporadas.values()].filter(t=>t.selecao?.tipo==='copaMundo'||t.copa?.convocado&&(t.copa.tipo||t.selecao?.tipo||'copaMundo')==='copaMundo').sort((a,b)=>a.ano-b.ano);
  const gols=t=>numero(t.selecao?.gols??t.copa?.gols);
  return MARCAS_COPAS.map(m=>{
   let acumulado=0,anoIgualou=null,anoSuperou=null,incompleto=false;

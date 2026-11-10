@@ -72,7 +72,7 @@ export function registrarJogoElenco(e,jogo,{titular=true,ano=e?.ano}={}){
  for(const p of linhas){
   p.gols=gols.filter(g=>g.marcadorId===p.id).length;p.assist=gols.filter(g=>g.assistenteId===p.id).length;
   p.nota=Math.round(limitar(6+(jogo.res==='V'?.5:jogo.res==='D'?-.5:0)+p.gols*.6+p.assist*.3+(p.posicao==='GOL'&&jogo.gc===0?.4:0),4,10)*10)/10;
-  const atleta=p.id==='usuario'?e.usuario:e.jogadores.find(a=>a.id===p.id),chave=e.escopo==='continentalSelecao'?'estatisticasContinentais':'estatisticas',s=atleta[chave]||(atleta[chave]=vazio());
+  const atleta=p.id==='usuario'?e.usuario:e.jogadores.find(a=>a.id===p.id),chave=e.escopo==='continentalSelecao'?'estatisticasContinentais':e.escopo==='amistosos'?'estatisticasAmistosos':'estatisticas',s=atleta[chave]||(atleta[chave]=vazio());
   s.jogos++;s.minutos+=p.minutos;s.gols+=p.gols;s.assist+=p.assist;s.notas+=p.nota;if(p.posicao==='GOL'&&jogo.gc===0&&p.minutos>=60)s.semSofrer++;
  }
  jogo.elenco={jogadores:linhas,gols};

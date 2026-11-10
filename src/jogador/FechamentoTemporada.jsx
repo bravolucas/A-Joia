@@ -1,3 +1,4 @@
+import CerimoniaBola from '../comum/CerimoniaBola.jsx';
 import {nomeVaga} from '../competicoes/regrasCopasRapidas.js';
 import {celebracoesTemporada} from './celebracoesTemporada.js';
 import React,{useEffect,useRef,useState} from 'react';
@@ -33,7 +34,7 @@ export default function FechamentoTemporada({c,card,onContinuar,celebracaoIndice
   card.lesao&&{icone:'🩹',texto:`Lesão: ${card.lesao}`},
   card.fidelidade&&{icone:'🏠',texto:`${card.fidelidade}º ano seguido no clube`},
  ].filter(Boolean);
- return createPortal(<dialog ref={ref} className={`ft-modal ${evento?'ft-apresentacao':''} ${ganhou?'ft-campeao':''}`} aria-label={evento?`Resultado da temporada ${card.ano} · ${evento.tipo==='bolaOuro'?'Bola de Ouro':evento.tipo==='titulo'?'Título conquistado':evento.titulo}`:`Fim da temporada ${card.ano}`} onCancel={e=>{e.preventDefault();evento?avancar():continuar();}}>
+ return createPortal(<dialog ref={ref} className={`ft-modal ${evento?'ft-apresentacao':''} ${ganhou&&(!evento||evento.tipo!=='bolaOuro'||evento.posicao===1)?'ft-campeao':''}`} aria-label={evento?`Resultado da temporada ${card.ano} · ${evento.tipo==='bolaOuro'?'Bola de Ouro':evento.tipo==='titulo'?'Título conquistado':evento.titulo}`:`Fim da temporada ${card.ano}`} onCancel={e=>{e.preventDefault();evento?avancar():continuar();}}>
   {evento?<><header className="ft-cabecalho"><span>TEMPORADA {card.ano}</span><strong>{celebracaoIndice+1} de {eventos.length}</strong></header><ResultadoTemporada key={evento.id} evento={evento} card={card} c={c}/><footer><button onClick={avancar}>{celebracaoIndice+1<eventos.length?'Próximo resultado':'Ver resumo da temporada'} <span>→</span></button></footer></>:<>
   <header className="ft-cabecalho"><span>TEMPORADA {card.ano}</span><strong>{ganhou?'Uma conquista para a sua história':'Temporada concluída'}</strong></header>
   <div className="ft-corpo">
@@ -44,6 +45,7 @@ export default function FechamentoTemporada({c,card,onContinuar,celebracaoIndice
     <div className="ft-campanha-lista" aria-label="Campanha nas competições">{campanha.map(x=><div key={x.nome} className={`ft-comp ft-${x.tom}`}>
      <TacaCompeticao nome={x.nome} tipo={x.tipo} size={24}/><span><strong>{x.nome}</strong>{x.detalhe&&<small>{x.detalhe}</small>}</span><b>{x.res}</b></div>)}</div>
     {card.tabelaLiga?.length>0&&<MiniTabela card={card}/>}
+    {card.amistososSelecao?.convocado&&<details className="ft-amistosos"><summary>Amistosos da seleção · {card.amistososSelecao.jogos} jogos · {card.amistososSelecao.gols} gols</summary>{card.amistososSelecao.partidas.map((j,i)=><p key={i}>{NACIONALIDADES.find(n=>n.id===c.nac)?.label} {j.gp} × {j.gc} {j.adv.label}<small>{j.gols} gols · {j.assist} assistências suas</small></p>)}</details>}
    </section>
    <section className="ft-resumo" aria-label="Resumo da temporada">
     <h2>Seus números</h2>
@@ -88,6 +90,7 @@ function MiniTabela({card}){
 
 function ResultadoTemporada({evento:e,card,c}){
  const premio=e.tipo==='bolaOuro',titulo=e.tipo==='titulo',positivo=e.tipo!=='rebaixamento';
+ if(premio)return <CerimoniaBola nome={c.nome} posicao={e.posicao} finalistas={card.bola?.top||[]} ano={card.ano}/>;
  const nacional=['copaMundo','continentalSelecao'].includes(e.taca),equipe=nacional?NACIONALIDADES.find(n=>n.id===c.nac)?.label||c.nac:card.clube,escudo=nacional?bandeiraDe(c.nac):escudoDe(card.clube);
  return <section className={`ft-resultado ft-resultado-${e.tipo}`} aria-label="Resultado exclusivo">
   <span className="ft-resultado-kicker">{premio?'RECONHECIMENTO MUNDIAL':titulo?'TÍTULO CONQUISTADO':'DESTINO DA TEMPORADA'}</span>

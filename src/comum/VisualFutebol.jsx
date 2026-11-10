@@ -38,8 +38,8 @@ export function PadraoCamisa({u,width=180,height=190}){
  if(u.padrao==='xadrez')return <g>{Array.from({length:48},(_,i)=>{const x=i%6,y=Math.floor(i/6);return(x+y)%2===0?<rect key={i} x={x*w/6} y={y*h/8} width={w/6} height={h/8} fill={s}/>:null;})}</g>;
  return null;
 }
-export function CamisaPremium({ nome, cor = '#147356', numero = 10, sobrenome, soletrar=false, className = '' }) {
- const id=useId().replace(/:/g,''),u=uniformeDe(nome,cor),tinta=tintaUniforme(u),escudo=escudoDe(nome);
+export function CamisaPremium({ nome, cor = '#147356', numero = 10, sobrenome, soletrar=false, className = '', uniforme, emblema }) {
+ const id=useId().replace(/:/g,''),u=uniforme||uniformeDe(nome,cor),tinta=tintaUniforme(u),escudo=emblema||escudoDe(nome);
  return <svg viewBox="0 0 180 190" className={`vf-camisa ${className}`} aria-hidden="true" data-uniforme={u.padrao} data-cor-camisa={u.base}>
   <defs><mask id={`camisa-foto-${id}`} style={{maskType:'alpha'}}><image href={camisaReal} x="0" y="0" width="180" height="190" preserveAspectRatio="none"/></mask></defs>
   <image className="vf-tecido-real" href={camisaReal} width="180" height="190" preserveAspectRatio="none"/>

@@ -96,6 +96,143 @@
       "arquivo": "contrato.png",
       "gerador": "Adobe Firefly",
       "requestId": "e2304983-440b-441d-84af-290f5ba53c27"
+    },
+    {
+      "arquivo": "companheiro-1.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "8f02a6de-423a-4094-9ab2-2a1a7205c119",
+      "miniatura": {
+        "arquivo": "mini/companheiro-1.png",
+        "requestId": "9575e5c6-6b93-44b6-93c6-270963580f0d"
+      }
+    },
+    {
+      "arquivo": "companheiro-2.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "a2b9faab-7402-4105-bb2a-772833ac1525",
+      "miniatura": {
+        "arquivo": "mini/companheiro-2.png",
+        "requestId": "1e4adc13-a016-4af6-a8d9-ec03e2ad7c36"
+      }
+    },
+    {
+      "arquivo": "companheiro-3.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "11a184be-e85a-4ca1-8c4d-1bbbce0502df",
+      "miniatura": {
+        "arquivo": "mini/companheiro-3.png",
+        "requestId": "a52b4a80-24ee-4ecb-8ec7-822b81593cc5"
+      }
+    },
+    {
+      "arquivo": "companheiro-4.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "64c212f1-d89c-4bb8-a9d9-43e1c181e8a3",
+      "miniatura": {
+        "arquivo": "mini/companheiro-4.png",
+        "requestId": "d7372267-ee07-4377-b45c-bc62d0db60b9"
+      }
+    },
+    {
+      "arquivo": "companheiro-5.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "6a6de3fa-f00e-42fc-863b-657635e5760e",
+      "miniatura": {
+        "arquivo": "mini/companheiro-5.png",
+        "requestId": "967fe469-cca2-4ea1-b796-11f2da9c0184"
+      }
+    },
+    {
+      "arquivo": "companheiro-6.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "2e853313-5f57-44ee-a90a-cc6074a6ba29",
+      "miniatura": {
+        "arquivo": "mini/companheiro-6.png",
+        "requestId": "05cf0f15-302f-411a-83d9-8967e1785887"
+      }
+    },
+    {
+      "arquivo": "tecnico-1.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "8009361a-5b79-4bea-aafe-e3785c86d9b8",
+      "miniatura": {
+        "arquivo": "mini/tecnico-1.png",
+        "requestId": "c833846c-65a3-4f3a-8fcb-e6681b27930b"
+      }
+    },
+    {
+      "arquivo": "tecnico-2.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "d4ea17ce-6d01-458d-9cb7-0f05cb4c183b",
+      "miniatura": {
+        "arquivo": "mini/tecnico-2.png",
+        "requestId": "2c3b7043-6f26-482d-9ed5-3fae7b6a9102"
+      }
+    },
+    {
+      "arquivo": "tecnico-3.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "0c1fe727-a7ec-4f2d-8c7b-6a0716bad7a5",
+      "miniatura": {
+        "arquivo": "mini/tecnico-3.png",
+        "requestId": "cbf7293c-2d59-4548-a266-8b81efff98f9"
+      }
+    },
+    {
+      "arquivo": "tecnico-4.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "a275c551-7d9f-4572-ad77-18e2b6107f23",
+      "miniatura": {
+        "arquivo": "mini/tecnico-4.png",
+        "requestId": "a50ed3af-e032-42fe-a8b1-2cb6c9ec505e"
+      }
+    },
+    {
+      "arquivo": "tecnico-5.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "839cfe8d-386c-43d3-bff6-1b2e3c5f0a5d",
+      "miniatura": {
+        "arquivo": "mini/tecnico-5.png",
+        "requestId": "252a0911-bc9d-49aa-a48d-5331650f8962"
+      }
+    },
+    {
+      "arquivo": "tecnico-6.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "eebf694e-2bb5-46c7-83cd-1b00c9c4a60d",
+      "miniatura": {
+        "arquivo": "mini/tecnico-6.png",
+        "requestId": "0560b693-6601-48e3-960e-062928df32a5"
+      }
+    },
+    {
+      "arquivo": "convite-gala.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "87d9a600-804b-43b1-973a-d10e862c1bc6",
+      "miniatura": {
+        "arquivo": "mini/convite-gala.png",
+        "requestId": "9a5816f8-b01a-42c1-b653-9f3dff7143fe"
+      }
+    },
+    {
+      "arquivo": "apito-tecnico.png",
+      "gerador": "Adobe Firefly",
+      "requestId": "2d6de69f-f01f-4d64-a816-e52d211f9cc4",
+      "miniatura": {
+        "arquivo": "mini/apito-tecnico.png",
+        "requestId": "362d7fb7-5f37-4295-be60-35e2cdbd2ea2"
+      }
+    },
+    {
+      "arquivo": "camisa-brasil-2024.png",
+      "gerador": "Adobe Firefly e Photoshop; recriação baseada em modelo Nike Brasil 2024/25",
+      "referencia": "https://www.nike.com.br/camisa-nike-brasil-i-2024-25-jogador-masculina-028567.html",
+      "requestId": "088a6794-fb77-409c-9df6-c468019b19f1"
+    },
+    {
+      "arquivo": "bola-ouro-exposicao.png",
+      "gerador": "Adobe Photoshop; recorte da imagem existente do acervo",
+      "requestId": "84fe8660-1ebd-4bf3-add4-4ac18c8537c3"
     }
   ]
 }

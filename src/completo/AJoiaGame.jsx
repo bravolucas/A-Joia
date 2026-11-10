@@ -1,3 +1,6 @@
+import {creditarTorneiosSelecao,resumoSelecaoTemporada} from './estatisticasSelecao.js';
+import {fasesMataSelecao} from '../competicoes/fasesSelecoes.js';
+import CerimoniaBola from '../comum/CerimoniaBola.jsx';
 import {MuseuFimCarreira} from '../museu/MuseuPessoal.jsx';
 import {registrarAnoHistoria,simularDefesas,registrarAtletasObservados} from '../historia/historiaFutebol.js';
 import BotaoHistoria,{GaleriaClube,MarcosIndividuais} from '../historia/HistoriaFutebol.jsx';
@@ -1377,7 +1380,7 @@ function iniciarPartidaCopaDoMundo(c, card, faseIdx, jogoGrupo, pontosGrupo, ram
   const adversarioNome = sortearAdversario(c, "copaDoMundo");
   const adversarioObj = NACIONALIDADES.find((n) => n.label === adversarioNome);
   const forcaSelecao = (nacDe(c.nacionalidade)?.forcaSelecao ?? 80) + (calcOVR(c.attrs, c.posicao) - 78) * 0.08;
-  const { numLances } = definirImportanciaPartida({ faseMataMata: faseIdx > 0, final: ramo === "final" });
+  const { numLances } = definirImportanciaPartida({ faseMataMata: jogoGrupo==null, final: ramo === "final" });
   const roteiro = gerarRoteiroPartida(numLances, c.posicao);
   setCarreira(c);
   setPartidaAoVivo({
@@ -1492,7 +1495,7 @@ function concluirSequenciaSelecao(c, ctx, resultado, golsMinha, assistMinha) {
   if (jogoAtual + 1 < totalJogos) { iniciarSequenciaSelecao(c, card, competicaoId, jogoAtual + 1, novo); return; }
 
   const campanha = `${nomeCompeticao}: ${novo.v}V ${novo.e}E ${novo.d}D`;
-  c.selecaoTemporadaAtual = { jogos: novo.jogos, gols: novo.gols, assist: novo.assist, cleanSheets: 0, campanha, titulo: false };
+  c.selecaoTemporadaAtual = { comp:competicaoId,nomeComp:nomeCompeticao,jogos: novo.jogos, gols: novo.gols, assist: novo.assist, cleanSheets: 0, campanha, titulo: false };
   const primeiraConvocacao = c.selecao.jogos === 0;
   c.selecao = {
     ...c.selecao, jogos: c.selecao.jogos + novo.jogos, gols: c.selecao.gols + novo.gols, assist: c.selecao.assist + novo.assist,
@@ -1511,16 +1514,28 @@ function concluirSequenciaSelecao(c, ctx, resultado, golsMinha, assistMinha) {
   setCompeticaoResultado({ titulo: nomeCompeticao, texto: `Encerrou a data FIFA: ${novo.v}V ${novo.e}E ${novo.d}D pela seleção ${nacDe(c.nacionalidade)?.label}.`, icone, epico: false, venceu: novo.v >= novo.d, nomeCompeticao });
 }
 
-/* Continental (Copa América/Eurocopa): grupos de verdade (3 jogos, 4+ pontos
-   classifica) e depois mata-mata curto (quartas → semifinal → final) — mais
-   enxuto que a Copa do Mundo, mas com o mesmo título em jogo. */
-const FASES_CONTINENTAL_SELECAO = [{ id: "quartas", label: "Quartas de Final", prep: "nas" }, { id: "semifinal", label: "Semifinal", prep: "na" }];
+// Torneios internacionais também abrem o motor de partidas na simulação por temporada.
+useEffect(()=>{
+ if(!pendingCompeticao||!competicaoCtx||partidaAoVivo)return;
+ const e=pendingCompeticao,{c,card}=competicaoCtx;
+ if(e.tipo==='selecaoAno'){
+  setPendingCompeticao(null);
+  if(e.competicaoId==='continental')iniciarPartidaContinentalSelecao(c,card,0,0,0,null);
+  else iniciarSequenciaSelecao(c,card,e.competicaoId,0,{jogos:0,gols:0,assist:0,v:0,e:0,d:0});
+ }else if(e.tipo==='copaDoMundo'){setPendingCompeticao(null);iniciarPartidaCopaDoMundo(c,card,0,0,0,null);}
+},[pendingCompeticao,competicaoCtx]);
+
+/* Continentais de seleção: três jogos de grupos e mata-mata conforme a confederação. */
+const fasesContinentalSelecao=nac=>fasesMataSelecao(nac).slice(0,-1);
 function iniciarPartidaContinentalSelecao(c, card, faseIdx, jogoGrupo, pontosGrupo, ramo) {
   const nomeCompeticao = continentalDaSelecao(c.nacionalidade);
-  const adversarioNome = sortearAdversario(c, "copaDoMundo");
+  const conf=CONFEDERACAO_POR_NACAO[c.nacionalidade],pool=NACIONALIDADES.filter(n=>n.id!==c.nacionalidade&&CONFEDERACAO_POR_NACAO[n.id]===conf).sort((a,b)=>b.forcaSelecao-a.forcaSelecao);
+  const anteriores=new Set((card.continentalSelecaoJogos||[]).map(j=>j.adversario));const livres=pool.filter(n=>!anteriores.has(n.label));const base=livres.length?livres:pool;
+  const candidatos=ramo==='final'?base.slice(0,4):jogoGrupo==null?base.slice(0,Math.max(4,Math.ceil(base.length*.6))):base;
+  const adversarioNome=pick(candidatos)?.label||sortearAdversario(c,'copaDoMundo');
   const adversarioObj = NACIONALIDADES.find((n) => n.label === adversarioNome);
   const forcaSelecao = (nacDe(c.nacionalidade)?.forcaSelecao ?? 80) + (calcOVR(c.attrs, c.posicao) - 78) * 0.08;
-  const { numLances } = definirImportanciaPartida({ faseMataMata: faseIdx > 0, final: ramo === "final" });
+  const { numLances } = definirImportanciaPartida({ faseMataMata: jogoGrupo==null, final: ramo === "final" });
   const roteiro = gerarRoteiroPartida(numLances, c.posicao);
   setCarreira(c);
   setPartidaAoVivo({
@@ -1539,6 +1554,7 @@ function iniciarPartidaContinentalSelecao(c, card, faseIdx, jogoGrupo, pontosGru
 function concluirPartidaContinentalSelecao(c, ctx, resultado, golsMinha, assistMinha) {
   const { faseIdx, jogoGrupo, pontosGrupo, ramo, card, nomeCompeticao } = ctx.copa;
   acumularStatsCompeticao(card, "continentalSelecao", golsMinha, assistMinha);
+  card.continentalSelecaoJogos=[...(card.continentalSelecaoJogos||[]),{fase:jogoGrupo!=null?'grupos':ramo==='final'?'final':fasesContinentalSelecao(c.nacionalidade)[faseIdx].id,adversario:ctx.adversario,gp:resultado.golsMeu,gc:resultado.golsAdv,gols:golsMinha,assist:assistMinha,resultado:resultado.resultado}];
   const nac = nacDe(c.nacionalidade);
   const adversario = ctx.adversario;
   const placarTxt = `${resultado.golsMeu}-${resultado.golsAdv}`;
@@ -1554,7 +1570,7 @@ function concluirPartidaContinentalSelecao(c, ctx, resultado, golsMinha, assistM
       setCompeticaoResultado({ titulo: `${nomeCompeticao} encerrada`, texto: `Campanha de grupos com ${total} pontos não foi suficiente pela seleção ${nac.label}.`, icone: "😔", epico: true, venceu: false, nomeCompeticao });
       return;
     }
-    iniciarPartidaContinentalSelecao(c, card, 1, null, 0, null);
+    iniciarPartidaContinentalSelecao(c, card, 0, null, 0, null);
     return;
   }
   if (ramo === "final") {
@@ -1567,15 +1583,15 @@ function concluirPartidaContinentalSelecao(c, ctx, resultado, golsMinha, assistM
   }
   const passou = resultado.resultado === "V" || (resultado.resultado === "E" && Math.random() < 0.5);
   if (!passou) {
-    const f = FASES_CONTINENTAL_SELECAO[faseIdx];
+    const f = fasesContinentalSelecao(c.nacionalidade)[faseIdx];
     card.continentalSelecaoResultado = { nome: nomeCompeticao, resultado: `Eliminado ${f.prep} ${f.label}`, titulo: false, adversario, placar: placarTxt };
     logHist(c, `${nomeCompeticao} — ${f.label} x ${adversario}: derrota por ${placarTxt}. Eliminado ${f.prep} ${f.label}.`);
     setCarreira(c);
     setCompeticaoResultado({ titulo: `${nomeCompeticao} encerrada`, texto: `Derrota por ${placarTxt} contra ${adversario}. Eliminado ${f.prep} ${f.label}.`, icone: "😔", epico: true, venceu: false, nomeCompeticao });
     return;
   }
-  logHist(c, `${nomeCompeticao} — ${FASES_CONTINENTAL_SELECAO[faseIdx].label} x ${adversario}: vitória por ${placarTxt}. Classificado!`);
-  if (faseIdx === FASES_CONTINENTAL_SELECAO.length - 1) { iniciarPartidaContinentalSelecao(c, card, faseIdx + 1, null, 0, "final"); return; }
+  logHist(c, `${nomeCompeticao} — ${fasesContinentalSelecao(c.nacionalidade)[faseIdx].label} x ${adversario}: vitória por ${placarTxt}. Classificado!`);
+  if (faseIdx === fasesContinentalSelecao(c.nacionalidade).length - 1) { iniciarPartidaContinentalSelecao(c, card, faseIdx + 1, null, 0, "final"); return; }
   iniciarPartidaContinentalSelecao(c, card, faseIdx + 1, null, 0, null);
 }
 function resolverTemporada(c, extraStats) {
@@ -1613,7 +1629,7 @@ function resolverTemporada(c, extraStats) {
       card.copaResultado = { resultado: "Não convocado", titulo: false };
       c.selecao.convocacoesSeguidas = 0;
       logHist(c, `Ficou fora da lista final da Copa do Mundo — ${conv.fila[0]?.nome || "outro"} foi o escolhido na posição.`);
-    } else if (!querCopa && conv.convocado && modoSimulacao === "jogoAJogo") {
+    } else if (!querCopa && conv.convocado && (modoSimulacao === "jogoAJogo" || compSelecao.id === "continental")) {
       // Jogado de verdade ao longo da temporada (amistoso/eliminatórias/continental
       // via motor de lances) — a fila mais abaixo agenda isso, nada a resolver aqui.
     } else if (!querCopa) {
@@ -1664,7 +1680,8 @@ function resolverTemporada(c, extraStats) {
     c.copinhaOportunidadeExpirada = true;
     if (card.lesao) fila.push({ tipo: "lesao" });
     if (querCopa && !card.copaResultado) fila.push({ tipo: "copaDoMundo", faseIdx: 0, ramo: null, adversario: sortearAdversario(c, "copaDoMundo") });
-    if (!querCopa && conv.convocado && modoSimulacao === "jogoAJogo") fila.push({ tipo: "selecaoAno", competicaoId: compSelecao.id, nomeCompeticao: compSelecao.nome || continentalDaSelecao(c.nacionalidade) });
+    if (!querCopa && conv.convocado && (modoSimulacao === "jogoAJogo" || compSelecao.id === "continental")) fila.push({ tipo: "selecaoAno", competicaoId: compSelecao.id, nomeCompeticao: compSelecao.nome || continentalDaSelecao(c.nacionalidade) });
+    if(conv.convocado&&compSelecao.id!=='amistosos')fila.push({tipo:'selecaoAno',competicaoId:'amistosos',nomeCompeticao:'Amistosos e preparação'});
     if (card.continentalPendente) {
       const jogosContinental = [];
       if (card.continentalPendente.formato === "grupo") {
@@ -2426,19 +2443,8 @@ function resolverTemporada(c, extraStats) {
       }
     }
 
-    // Copa do Mundo também entra nos números acumulados de seleção
-    if (card.copaResultado && card.copaResultado.resultado !== "Não convocado") {
-      const st = statsSelecao(c, card);
-      if (st && !(c.selecao.historico || []).some((h) => h.idade === c.idade && h.comp === "copa")) {
-        c.selecao = {
-          ...c.selecao,
-          jogos: c.selecao.jogos + st.jogos, gols: c.selecao.gols + st.gols,
-          assist: c.selecao.assist + st.assist, cleanSheets: (c.selecao.cleanSheets || 0) + (st.cleanSheets || 0),
-          convocacoesSeguidas: (c.selecao.convocacoesSeguidas || 0) + 1,
-          historico: [...(c.selecao.historico || []), { idade: c.idade, comp: "copa", nomeComp: "Copa do Mundo", icone: "🌎", cor: "#D8B44A", campanha: st.campanha, titulo: st.titulo, jogos: st.jogos, gols: st.gols, assist: st.assist, cleanSheets: st.cleanSheets, nota: st.nota }],
-        };
-      }
-    }
+    // Estatísticas das duas copas vêm dos jogos concluídos, sem novo sorteio de gols.
+    creditarTorneiosSelecao(c,card);
 
     // alimenta a insígnia "Jogador de Decisão": quanto você rende a mais em jogo grande
     {
@@ -2503,7 +2509,7 @@ function resolverTemporada(c, extraStats) {
       ...card, posicao:c.posicao, copa, premios, titulosLista, torcidaFim: getTorcida(c, c.clube.nome), famaFim: c.fama, salario, expectativa, bateuMeta,
       jogosLista: jogosLista.length ? jogosLista : card.jogosLista,
       porCompeticao: dividirPorCompeticao(c, card),
-      selecaoTemporada: c.selecaoTemporadaAtual || statsSelecao(c, card),
+      selecaoTemporada: resumoSelecaoTemporada(c) || c.selecaoTemporadaAtual || statsSelecao(c, card),
       selecaoAcumulado: c.selecao ? { ...c.selecao } : null,
       resultadoPromessa,
       rankingBO: rankingBO.slice(0, 10), artilhariaLiga: artilhariaReal.slice(0, 10), postoBO: meuPostoBO,
@@ -2963,7 +2969,7 @@ function resolverTemporada(c, extraStats) {
     if (!pv) return;
     const c = { ...carreira };
     const ta = c.temporadaAndamento;
-    if (!ta) { setPartidaAoVivo(null); return; }
+    if (!ta&&!pv.ctx.copa) { setPartidaAoVivo(null); return; }
     const { estado, eventos, ctx } = pv;
 
     // Primeiro jogo de verdade da carreira toda — vira cena de estreia
@@ -3008,6 +3014,7 @@ function resolverTemporada(c, extraStats) {
     // Partida da Copa Nacional: não mexe na tabela/rodada da liga, que fica
     // pausada — só decide se avança de fase, e a próxima fase já começa direto.
     if (ctx.copa) {
+      setCompeticaoCtx(atual=>atual?{...atual,c,card:ctx.copa.card}:atual);
       setPartidaAoVivo(null);
       if (ctx.copa.tipo === "copaDoMundo") concluirPartidaCopaDoMundo(c, ctx, { resultado, golsMeu: estado.golsMeu, golsAdv: estado.golsAdv }, golsMinha, assistMinha);
       else if (ctx.copa.tipo === "continentalSelecao") concluirPartidaContinentalSelecao(c, ctx, { resultado, golsMeu: estado.golsMeu, golsAdv: estado.golsAdv }, golsMinha, assistMinha);
@@ -6097,7 +6104,7 @@ function resolverTemporada(c, extraStats) {
                 {awardsPopup && (
                   <PopupOverlay>
                     <Card className="border-amber-500/40" key={awardsPopup.slide}>
-                      {awardsPopup.slide === 2 && (awardsPopup.registro.premios.some((p) => p.nome === "BOLA DE OURO" && p.doJogador) || awardsPopup.registro.titulosLista.length > 0) && <Confetti />}
+                      {awardsPopup.slide === 2 && awardsPopup.registro.premios.some((p) => p.nome === "BOLA DE OURO" && p.doJogador) && <Confetti />}
                       <div className="flex justify-center gap-1 mb-3">{[0, 1, 2].map((i) => <div key={i} className={`h-1 w-8 rounded-full ${i <= awardsPopup.slide ? "bg-amber-400" : "bg-zinc-800"}`} />)}</div>
                       <div className="animate-[popIn_0.3s_ease-out]">
                         {awardsPopup.slide === 0 && (
@@ -6130,18 +6137,8 @@ function resolverTemporada(c, extraStats) {
                           <>
                             <div className="text-center mb-3 flex flex-col items-center gap-1"><TrophyIcon tipo="ouro" size={30} /><div className="text-[10px] text-amber-400 uppercase tracking-widest">Premiações & finanças</div></div>
                             {awardsPopup.registro.premios.some((p) => p.nome === "BOLA DE OURO") && (
-                              <div className="bg-zinc-950/40 rounded-sm p-3 mb-3">
-                                <div className="text-[9px] text-zinc-500 uppercase tracking-widest mb-2 text-center">Cerimônia da Bola de Ouro</div>
-                                {(awardsPopup.registro.rankingBO || []).length >= 3 ? (
-                                  <PodiumBolaDeOuro finalistas={awardsPopup.registro.rankingBO.slice(0, 3)} />
-                                ) : (
-                                  <div className="flex justify-center gap-3 text-[10px] text-zinc-400">
-                                    <span>1️⃣ {awardsPopup.registro.premios.find((p) => p.nome === "BOLA DE OURO").vencedor}</span>
-                                    <span>2️⃣ {carreira.rivalPosicao}</span>
-                                    <span>3️⃣ {pick(RIVAIS_PREMIO)}</span>
-                                  </div>
-                                )}
-                              </div>
+                              <CerimoniaBola nome={nome} posicao={awardsPopup.registro.postoBO} finalistas={awardsPopup.registro.rankingBO||[]} ano={awardsPopup.registro.ano||awardsPopup.registro.temporadaLabel}/>
+
                             )}
                             <div className="text-xs text-zinc-300 space-y-2 mb-3">
                               {awardsPopup.registro.premios.length === 0 && <div className="text-zinc-500 text-center">Nenhuma premiação individual pra você nessa temporada.</div>}

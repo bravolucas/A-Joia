@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import{criarJogador,jogarTemporada,aplicarMomento,fecharTemporada}from'../src/jogador/rapido.js';
+import{criarJogador,jogarTemporada,aplicarMomento,fecharTemporada,resolverCopaAuto}from'../src/jogador/rapido.js';
 import{atualizarRecordesUniverso,consultarRecordesUniverso}from'../src/jogador/recordesUniverso.js';
 import{prepararElencoSelecao,prepararElencoCopa,registrarJogoElenco}from'../src/jogador/elencoSelecao.js';
 const clone=x=>JSON.parse(JSON.stringify(x));
@@ -8,6 +8,7 @@ test('campanhas continentais têm adversários, placares e estatísticas que fec
  let finais=0,convocados=0;
  for(const nac of ['BRA','ARG','ENG','ESP'])for(let i=0;i<15;i++){
   let{c,card}=jogarTemporada(atleta(nac,'ATA',`CONT-${nac}-${i}`));while(card.pendente){if(card.pendente.tipo==='selecao')finais++;card=aplicarMomento(card,i%2===0);}
+  card=resolverCopaAuto(c,card);finais+=(card.momentos||[]).filter(m=>m.tipo==='selecao').length;
   const t=card.selecao;if(!t?.convocado)continue;convocados++;
   assert.ok(t.partidas.length>=3&&t.partidas.length<=7);assert.equal(t.jogos,t.partidas.length);assert.equal(t.gols,t.partidas.reduce((n,j)=>n+j.gols,0));assert.equal(t.assist,t.partidas.reduce((n,j)=>n+j.assist,0));
   for(const j of t.partidas){assert.notEqual(j.adv.id,nac);assert.equal(j.elenco.jogadores.reduce((n,p)=>n+p.gols,0),j.gp);assert.equal(j.elenco.jogadores.reduce((n,p)=>n+p.minutos,0),990);assert.equal(j.elenco.jogadores.filter(p=>p.titular).length,11);}

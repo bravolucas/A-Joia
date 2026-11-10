@@ -213,7 +213,7 @@ export function PodiumBolaDeOuro({ finalistas, aoConcluir }) {
           const vencedor = f.pos === 1;
           return (
             <div key={i} className={`relative bg-zinc-950/50 border rounded-sm p-2 flex flex-col items-center justify-center gap-1 min-h-[92px] ${estado === "revelado" && f.voce ? "border-amber-400 animate-[ceremonyGlow_1.6s_ease-in-out_infinite]" : "border-zinc-800"} ${animClasse}`}>
-              {estado === "revelado" && f.voce && <Confetti />}
+              {estado === "revelado" && f.voce && f.pos===1 && <Confetti />}
               <TrophyIcon tipo={vencedor ? "ouro" : "prata"} size={virado ? 26 : 20} />
               <span className="text-[9px] text-zinc-500 uppercase tracking-widest">{f.pos}º lugar</span>
               {virado ? (

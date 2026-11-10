@@ -8,6 +8,9 @@ export const slugCompeticao = (nome) => (nome || "")
 
 const ALIASES = Object.freeze({
   'mundial-de-clubes-fifa':'mundial-de-clubes',
+  'copa-intercontinental-da-fifa':'copa-intercontinental-fifa',
+  'copa-intercontinental':'copa-intercontinental-fifa',
+  'copa-das-nacoes-da-oceania':'copa-das-nacoes-da-ofc',
   'concacaf': 'concacaf-champions',
   'copa-libertadores': 'libertadores',
   'conmebol-libertadores': 'libertadores',

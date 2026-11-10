@@ -61,5 +61,14 @@
     "copa-do-brasil",
     "libertadores"
   ],
-  "originaisRecriados": "arte/originais/tacas/"
+  "originaisRecriados": "arte/originais/tacas/",
+  "novasArtes": {
+    "copa-intercontinental-fifa": {
+      "arquivo": "copa-intercontinental-fifa.png",
+      "gerador": "Adobe Firefly e Photoshop",
+      "requestId": "071d586b-bacc-4196-ad52-f40fe07036c6",
+      "recorteRequestId": "202f340a-0d3a-4b9a-ba62-9b77099557d1",
+      "referencia": "https://inside.fifa.com/official-documents/annual-report/2024/2024-at-a-glance/fifa-intercontinental-cup-2024"
+    }
+  }
 }

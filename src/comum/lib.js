@@ -1248,8 +1248,7 @@ export function girarLigas(estado, forcarClube = null) {
 }
 
 export function continentalDaSelecao(nac) {
-  const sulAmerica = ["BRA", "ARG", "URU", "COL", "CHI"];
-  return sulAmerica.includes(nac) ? "Copa América" : "Eurocopa";
+  return ({CONMEBOL:'Copa América',UEFA:'Eurocopa',CAF:'Copa Africana de Nações',AFC:'Copa da Ásia',CONCACAF:'Copa Ouro',OFC:'Copa das Nações da Oceania'})[CONFEDERACAO_POR_NACAO[nac]]||'Eurocopa';
 }
 
 export function competicaoSelecaoDoAno(anosDesdeCopa, nac) {

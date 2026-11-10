@@ -224,7 +224,7 @@ export const EMOJI_NACIONALIDADE = {
   BOS: "🇧🇦", ISL: "🇮🇸", NOR: "🇳🇴", ISR: "🇮🇱", ARS: "🇸🇦", IRA: "🇮🇷", AUS: "🇦🇺", QAT: "🇶🇦",
   CHN: "🇨🇳", IRQ: "🇮🇶", CDN: "🇰🇵", KUW: "🇰🇼", EAU: "🇦🇪", EGI: "🇪🇬", TUN: "🇹🇳", GAN: "🇬🇭",
   AFS: "🇿🇦", ANG: "🇦🇴", TOG: "🇹🇬", RDC: "🇨🇩", CAN: "🇨🇦", JAM: "🇯🇲", HON: "🇭🇳", PAN: "🇵🇦",
-  TRI: "🇹🇹", HAI: "🇭🇹", ELS: "🇸🇻", NZL: "🇳🇿",
+  TRI: "🇹🇹", HAI: "🇭🇹", ELS: "🇸🇻", NZL: "🇳🇿", FIJ:"🇫🇯",SOL:"🇸🇧",TAH:"🇵🇫",VAN:"🇻🇺",PNG:"🇵🇬",NCL:"🇳🇨",SAM:"🇼🇸",
 };
 
 export const POSICOES = [
@@ -294,6 +294,7 @@ export const NACIONALIDADES = [
   { id: "ELS", label: "El Salvador", forcaSelecao: 60 },
   // ---- OFC ----
   { id: "NZL", label: "Nova Zelândia", forcaSelecao: 65 },
+  { id:'FIJ',label:'Fiji',forcaSelecao:53 },{ id:'SOL',label:'Ilhas Salomão',forcaSelecao:54 },{ id:'TAH',label:'Taiti',forcaSelecao:55 },{ id:'VAN',label:'Vanuatu',forcaSelecao:51 },{ id:'PNG',label:'Papua-Nova Guiné',forcaSelecao:51 },{ id:'NCL',label:'Nova Caledônia',forcaSelecao:52 },{ id:'SAM',label:'Samoa',forcaSelecao:45 },
 ];
 
 export const PERSONALIDADES = [
@@ -3426,7 +3427,7 @@ export const CONFEDERACAO_POR_NACAO = {
   JAP: "AFC", COR: "AFC", ARS: "AFC", IRA: "AFC", AUS: "AFC", QAT: "AFC", CHN: "AFC", IRQ: "AFC", CDN: "AFC", KUW: "AFC", EAU: "AFC",
   MAR: "CAF", SNE: "CAF", NIG: "CAF", CMR: "CAF", ALG: "CAF", CSC: "CAF", EGI: "CAF", TUN: "CAF", GAN: "CAF", AFS: "CAF", ANG: "CAF", TOG: "CAF", RDC: "CAF",
   EUA: "CONCACAF", MEX: "CONCACAF", CRC: "CONCACAF", CAN: "CONCACAF", JAM: "CONCACAF", HON: "CONCACAF", PAN: "CONCACAF", TRI: "CONCACAF", HAI: "CONCACAF", ELS: "CONCACAF",
-  NZL: "OFC",
+  NZL: "OFC", FIJ:"OFC",SOL:"OFC",TAH:"OFC",VAN:"OFC",PNG:"OFC",NCL:"OFC",SAM:"OFC",
 };
 
 export const EVENTOS_CLUBE = [

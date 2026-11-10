@@ -2559,7 +2559,7 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
   const [jogada, setJogada] = useState(jogadaSalva||null); // resultado fica salvo antes de continuar
   const [revelado, setRevelado] = useState(!!jogadaSalva);
   const escolhaFeita=useRef(!!jogadaSalva);
-  const taca = logoCompeticao("Copa do Mundo");
+  const taca = logoCompeticao(k.nome||"Copa do Mundo");
   useEffect(() => { torcida(1.4, 0.1); }, []);
   const escolher = (op) => {
     if(escolhaFeita.current)return;escolhaFeita.current=true;
@@ -2592,8 +2592,8 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
         <div className="relative flex items-center gap-3 p-4">
           {taca ? <img src={taca} alt="" aria-hidden="true" className="w-16 h-20 object-contain drop-shadow-[0_6px_16px_rgba(216,180,74,.45)] shrink-0" /> : <IconeTitulo tipo="copaMundo" size={56} />}
           <div className="min-w-0 flex-1">
-            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#EBC557]">Evento · a cada 4 anos</div>
-            <div className="text-[24px] font-black text-white leading-tight">Copa do Mundo {k.ano}</div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#EBC557]">Seleção · grupos e mata-mata</div>
+            <div className="text-[24px] font-black text-white leading-tight">{k.nome||"Copa do Mundo"} {k.ano}</div>
             <div className="flex items-center gap-2 mt-1 text-[14px] text-[#D4D4D8]"><Bandeira nac={k.nac} size={18} /> {k.label} · força {k.fs}</div>
           </div>
         </div>
@@ -2606,8 +2606,9 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
 
       {k.convocado&&<ConsultaElencoCopa elenco={jogada?.card?.copa?.elenco||k.elenco}/>}
       {/* caminho até a taça */}
-      <div className="grid grid-cols-5 gap-1" aria-label="Fases da Copa">
+      <div className="grid gap-1" style={{gridTemplateColumns:`repeat(${6-(k.primeiraFaseMata||1)},minmax(0,1fr))`}} aria-label="Fases da Copa">
         {CURTO_FASE.map((f, i) => {
+          if(i>0&&i<(k.primeiraFaseMata||1))return null;
           const feito = i < faseAtual, agora = i === faseAtual;
           return (
             <div key={f} className="flex flex-col items-center gap-1">
@@ -2667,9 +2668,9 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
 
       {/* resultado da escolha */}
       {jogada && (
-        <TelaCheia classe="cp-resultado-copa" rotulo={`Copa do Mundo ${k.ano}`} cor={corTela} centro botao={revelado ? "Continuar" : "Pular sorteio"} bloqueado={!revelado} onFechar={() => (revelado ? seguir() : revelar())}>
+        <TelaCheia classe="cp-resultado-copa" rotulo={`${k.nome||"Copa do Mundo"} ${k.ano}`} cor={corTela} centro botao={revelado ? "Continuar" : "Pular sorteio"} bloqueado={!revelado} onFechar={() => (revelado ? seguir() : revelar())}>
           <div className="cp-copa-intro flex flex-col items-center text-center pt-2">
-            <div className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.2em] text-[#A1A1AA]"><Bandeira nac={k.nac} size={16} /> Copa do Mundo {k.ano}</div>
+            <div className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.2em] text-[#A1A1AA]"><Bandeira nac={k.nac} size={16} /> {k.nome||"Copa do Mundo"} {k.ano}</div>
             <div className="text-[22px] font-extrabold text-white leading-tight mt-2">{r.etapa === "grupos" ? `Jogo ${r.rodada} de 3 · ${r.adv.label}` : r.etapa === "convocacao" ? "A convocação" : `${r.fase} · ${r.adv.label}`}</div>
             {r.escolha && <div className="mt-2 inline-flex flex-col items-center"><span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#71717A]">Sua escolha</span><span className="text-[18px] font-bold text-[#E4E4E7] leading-tight mt-0.5">{r.escolha}</span></div>}
           </div>
@@ -2677,7 +2678,7 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
           {revelado && (
             <div className="cp-copa-resumo flex flex-col items-center gap-3 cp-surge" style={r.etapa === "grupos" ? { animationDelay: ".6s" } : undefined}>
               {r.placar && <div className="display text-[34px] leading-none" style={{ color: r.venceu ? "#4ADE80" : r.empate?"#FDE047":"#F87171" }}>{r.placar}</div>}
-              <span className="cp-pop text-[14px] font-extrabold uppercase tracking-wide px-3 py-1 rounded-full" style={{ color: r.venceu ? "#1A1405" : "#fff", background: r.venceu ? "linear-gradient(90deg,#EAB308,#FDE047)" : r.empate?"#A16207":"#DC2626" }}>{jogada.card.copa.campeao ? "🏆 Campeão do mundo" : r.marca}</span>
+              <span className="cp-pop text-[14px] font-extrabold uppercase tracking-wide px-3 py-1 rounded-full" style={{ color: r.venceu ? "#1A1405" : "#fff", background: r.venceu ? "linear-gradient(90deg,#EAB308,#FDE047)" : r.empate?"#A16207":"#DC2626" }}>{jogada.card.copa.campeao ? "🏆 Campeão da competição" : r.marca}</span>
               <p className="text-[18px] leading-snug text-[#F4F4F5] text-center font-medium px-1">{r.texto}</p>
               {r.outro&&<p className="text-[12px] text-[#A1A1AA]">Outro jogo: {r.outro.mandante.label} {r.outro.gp} x {r.outro.gc} {r.outro.visitante.label}</p>}
               {jogada.card.copa.craqueCopa && <div className="cp-card px-4 py-2.5 text-center text-[15px] font-bold text-[#FDE68A]">⭐ Eleito o craque da Copa</div>}

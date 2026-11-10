@@ -1,3 +1,4 @@
+import {primeiraFaseContinental} from '../competicoes/fasesSelecoes.js';
 import {normalizarCampeaoLiga,corrigirCampeoesLiga,registrarAnoHistoria,registrarEstatisticasCompeticoes,registrarAtletasObservados,simularDefesas,novosMarcosIndividuais} from '../historia/historiaFutebol.js';
 import {ITENS_PESSOAIS} from './itensPessoais.js';
 import {iniciarCamisas,aposentarDonoCamisa,prepararCamisaSelecao,sincronizarCamisasSelecao} from './camisasCarreira.js';
@@ -539,7 +540,7 @@ export function nomeCopaContinental(nac) {
   if (CONCACAF.includes(nac)) return "Copa Ouro";
   if (CAF.includes(nac)) return "Copa Africana de Nações";
   if (AFC.includes(nac)) return "Copa da Ásia";
-  if (nac === "NZL") return "Copa das Nações da OFC";
+  if (CONFEDERACAO_POR_NACAO[nac] === "OFC") return "Copa das Nações da OFC";
   return "Eurocopa";
 }
 export const anoDeContinentalSelecao = (ano) => ano % 4 === 0;
@@ -1047,6 +1048,22 @@ function simularTorneioSelecao(c, ovr, { nome, tipo }) {
   return out;
 }
 
+export function simularAmistososSelecao(c,ovr,quantidade=6){
+ if(c.idade<18||c.flags.semSelecao)return null;
+ const fs=forcaSelecao(c),convocado=ovr>=fs-6?true:ovr>=fs-10&&chance(.45);
+ if(!convocado)return null;
+ const titular=ovr>=fs-2,elenco=prepararElencoSelecao(c,c.ano,'amistosos','Amistosos da seleção'),partidas=[];
+ const adversarios=sortearSelecoes(c.nac,quantidade,[Math.max(50,fs-18),Math.min(94,fs+4)]);
+ for(const [i,adv]of adversarios.entries()){
+  const p=clampR(.42+(fs-adv.forca)*.025,.12,.82),r=rnd(),res=r<p?'V':r<p+.22?'E':'D';
+  const [gp,gc]=placarCopa(res),eu=participacaoCopa(c,{titular},gp);
+  const jogo={fase:'amistoso-'+i,rodada:i+1,adv,gp,gc,res,...eu};
+  registrarJogoElenco(elenco,jogo,{titular,ano:c.ano});partidas.push(jogo);
+ }
+ c.jornada=c.jornada||{};c.jornada.elencoSelecao=clone(elenco);
+ return {ano:c.ano,nome:'Amistosos da seleção',tipo:'amistosos',convocado,titular,partidas,jogos:partidas.length,gols:partidas.reduce((n,j)=>n+j.gols,0),assist:partidas.reduce((n,j)=>n+j.assist,0),elenco};
+}
+
 /* ---------- Copa do Mundo: evento jogável a cada 4 anos ----------
    Convocação (com desafio quando você está na briga pela vaga), fase de grupos
    e mata-mata. Em cada jogo eliminatório você escolhe como encarar a partida;
@@ -1054,10 +1071,11 @@ function simularTorneioSelecao(c, ovr, { nome, tipo }) {
    final. A final, se você for titular, vira o momento decisivo da sua posição. */
 export const FASES_COPA = ["Fase de grupos", "Oitavas", "Quartas", "Semifinal", "Final"];
 const FAIXA_ADV = { 1: [74, 84], 2: [79, 89], 3: [83, 92], 4: [86, 93] };
-function sortearSelecoes(nac, n, [min, max], evitar = []) {
-  const livre = (x) => x.id !== nac && !evitar.includes(x.id);
+function sortearSelecoes(nac, n, [min, max], evitar = [], paises = null) {
+  const livre = (x) => x.id !== nac && !evitar.includes(x.id) && (!paises || paises.includes(x.id));
   let pool = NACIONALIDADES.filter((x) => livre(x) && x.forcaSelecao >= min && x.forcaSelecao <= max);
   if (pool.length < n) pool = NACIONALIDADES.filter(livre);
+  if(!pool.length&&paises)pool=NACIONALIDADES.filter(x=>x.id!==nac&&paises.includes(x.id));
   const out = [];
   while (out.length < n && pool.length) out.push(pool.splice(Math.floor(rnd() * pool.length), 1)[0]);
   return out.map((x) => ({ id: x.id, label: x.label, forca: x.forcaSelecao }));
@@ -1087,7 +1105,7 @@ const campanhaSemVoce = (fs) => {
   return chance(mataMata(fs, 82)) ? "foi campeã" : "foi vice-campeã";
 };
 
-function iniciarCopa(c, ovr) {
+export function iniciarCopa(c, ovr, torneio={nome:"Copa do Mundo",tipo:"copaMundo"}) {
   if (c.idade < 18 || c.flags.semSelecao) return null;
   const fs = forcaSelecao(c);
   const vitrine = c.foco === "vitrine" ? 2 : 0;
@@ -1095,15 +1113,18 @@ function iniciarCopa(c, ovr) {
   const dentro = ovr >= corte;
   // fora da lista, o evento aparece mesmo assim: quanto mais longe do corte, menor a chance de entrar
   const bolha = !dentro;
-  const selecao = { ano: c.ano, nome: "Copa do Mundo", tipo: "copaMundo", convocado: dentro, titular: ovr >= fs - 2, fase: 0, resultado: dentro ? "Convocado" : "Fora da convocação", gols: 0, assist: 0, jogos: 0 };
+  const selecao = { ano: c.ano, nome: torneio.nome, tipo: torneio.tipo, convocado: dentro, titular: ovr >= fs - 2, fase: 0, resultado: dentro ? "Convocado" : "Fora da convocação", gols: 0, assist: 0, jogos: 0 };
   const copa = {
-    ano: c.ano, nome: "Copa do Mundo", nac: c.nac, label: nacDe(c.nac).label, fs, ovr, corte, titular: selecao.titular,
+    ano: c.ano, nome: torneio.nome, tipo:torneio.tipo, nac: c.nac, label: nacDe(c.nac).label, fs, ovr, corte, titular: selecao.titular,
     etapa: dentro ? "grupos" : "convocacao", fase: 0, arenga: true, convocado: dentro, bolha,
     jogos: [], gols: 0, assist: 0, craque: 0, efeitos: { moral: 0, fama: 0, fria: 0 }, fim: false,
   };
-  copa.elenco=prepararElencoCopa(c,c.ano);
+  const conf=CONFEDERACAO_POR_NACAO[c.nac];
+  copa.primeiraFaseMata=torneio.tipo==='copaMundo'?1:primeiraFaseContinental(c.nac);
+  copa.participantes=torneio.tipo==='continentalSelecao'?NACIONALIDADES.filter(n=>CONFEDERACAO_POR_NACAO[n.id]===conf).map(n=>n.id):null;
+  copa.elenco=prepararElencoSelecao(c,c.ano,torneio.tipo,torneio.nome);
   copa.grupo = [];
-  for(const faixa of [[85,93],[76,84],[62,77]])copa.grupo.push(...sortearSelecoes(c.nac,1,faixa,copa.grupo.map(x=>x.id)));
+  for(const faixa of [[85,93],[76,84],[62,77]])copa.grupo.push(...sortearSelecoes(c.nac,1,faixa,copa.grupo.map(x=>x.id),copa.participantes));
   copa.enfrentados = copa.grupo.map((x) => x.id);
   return { selecao, copa };
 }
@@ -1138,19 +1159,20 @@ export function opcoesCopa(c, card) {
   ];
   if (k.arenga && k.fase < 4) ops.push({ id: "arenga", icone: "📣", nome: "Discurso no vestiário", texto: "Uma vez por Copa: garante a vitória. Não vale na final.", p: 1, faixa: "ouro" });
   if(grupo)return {etapa:k.etapa,rodada:rodada+1,titulo:`Fase de grupos · Jogo ${rodada+1} de 3`,texto:`${k.label} x ${adv.label}. ${rodada===0?"Estreia: a primeira chance de somar pontos.":rodada===1?"Segunda rodada: cada ponto conta para a classificação.":`Última rodada: sua seleção entra com ${tabelaGrupoCopa(k).find(t=>t.id===k.nac).p} pontos.`} Os dois primeiros avançam após os três jogos.`,adversario:adv,opcoes:ops};
-  return { etapa: k.etapa, titulo: `${FASES_COPA[k.fase]} · ${k.label} x ${adv.label}`, texto: k.fase === 4 ? "A final da Copa do Mundo. Noventa minutos para entrar na história." : `Mata-mata: quem perde volta para casa.`, adversario: adv, opcoes: ops };
+  return { etapa: k.etapa, titulo: `${FASES_COPA[k.fase]} · ${k.label} x ${adv.label}`, texto: k.fase === 4 ? `A final da ${k.nome}. Noventa minutos para entrar na história.` : `Mata-mata: quem perde volta para casa.`, adversario: adv, opcoes: ops };
 }
 
 function finalizarCopa(card, campeao) {
   const k = card.copa, t = card.selecao;
   k.fim = true;
+  if(k.tipo==='continentalSelecao'){t.partidas=k.jogos;t.elenco=k.elenco;}
   t.convocado = k.convocado; t.titular = k.titular; t.fase = k.fase; t.gols = k.gols; t.assist = k.assist; t.jogos = k.jogos.length;
   if (!k.convocado) { t.resultado = "Fora da convocação"; return card; }
   if (campeao) { t.campeao = true; t.resultado = "Campeão"; k.campeao = true; }
   else t.resultado = k.fase === 0 ? "Eliminado na fase de grupos" : k.fase === 4 ? "Vice-campeão" : k.fase === 3 ? "Eliminado na semifinal" : `Eliminado nas ${FASES_COPA[k.fase].toLowerCase()}`;
-  if (k.titular && k.fase >= 3 && (k.craque >= 2 || k.gols >= 5)) { k.craqueCopa = true; card.destaques.push("⭐ Eleito o craque da Copa do Mundo"); k.efeitos.fama += 6; }
-  if (k.gols >= 6) card.destaques.push(`👟 Artilheiro da Copa do Mundo, com ${k.gols} gols`);
-  else if (k.gols >= 3) card.destaques.push(`${k.gols} gols na Copa do Mundo`);
+  if (k.titular && k.fase >= 3 && (k.craque >= 2 || k.gols >= 5)) { k.craqueCopa = true; card.destaques.push(`⭐ Eleito o craque da ${k.nome}`); k.efeitos.fama += 6; }
+  if (k.gols >= 6) card.destaques.push(`👟 Artilheiro da ${k.nome}, com ${k.gols} gols`);
+  else if (k.gols >= 3) card.destaques.push(`${k.gols} gols na ${k.nome}`);
   return card;
 }
 
@@ -1173,7 +1195,7 @@ function jogarCopaBase(c, card0, opId) {
       card.destaques.push(`Ficou fora da Copa. Sem você, a seleção ${card.selecao.semVoce}`);
       finalizarCopa(card, false);
     }
-    return { card, res: { etapa: "convocacao", escolha: op.nome, p: op.p, venceu: ok, marca: ok ? "Convocado" : "Fora", texto: ok ? `Seu nome saiu na lista! Você vai à Copa do Mundo com ${k.label}.` : op.id === "pedir" ? "O técnico não gostou do recado. Você assiste à Copa pela TV." : "Você jogou bem, mas a última vaga foi para outro." } };
+    return { card, res: { etapa: "convocacao", escolha: op.nome, p: op.p, venceu: ok, marca: ok ? "Convocado" : "Fora", texto: ok ? `Seu nome saiu na lista! Você vai à ${k.nome} com ${k.label}.` : op.id === "pedir" ? "O técnico não gostou do recado. Você assiste à Copa pela TV." : "Você jogou bem, mas a última vaga foi para outro." } };
   }
   if (k.etapa === "grupos") {
     const rodada=jogosDoGrupo(k).length,adv=k.grupo[rodada];
@@ -1194,7 +1216,7 @@ function jogarCopaBase(c, card0, opId) {
     const encerrada=rodada===2,passa=encerrada&&pos<=2;
     let texto=`${gp} x ${gc} contra ${adv.label}. ${pts} ${pts===1?"ponto":"pontos"} após ${rodada+1} ${rodada===0?"jogo":"jogos"}.`;
     if(encerrada){
-      if(passa){k.etapa="mata";k.fase=1;k.adversario=sortearSelecoes(c.nac,1,FAIXA_ADV[1],k.enfrentados)[0];k.enfrentados.push(k.adversario.id);texto+=` ${pos}º lugar: classificado para as oitavas contra ${k.adversario.label}.`;}
+      if(passa){k.etapa="mata";k.fase=k.primeiraFaseMata||1;k.adversario=sortearSelecoes(c.nac,1,FAIXA_ADV[k.fase],k.enfrentados,k.participantes)[0];k.enfrentados.push(k.adversario.id);texto+=` ${pos}º lugar: classificado para ${FASES_COPA[k.fase].toLowerCase()} contra ${k.adversario.label}.`;}
       else{finalizarCopa(card,false);texto+=` ${pos}º lugar: eliminado na fase de grupos.`;}
     }else texto+=` Próxima partida: ${k.grupo[rodada+1].label}.`;
     return {card,res:{etapa:"grupos",rodada:rodada+1,adv,escolha:op.nome,p:op.p,jogo,jogos:[jogo],outro,pts,pos,tabela,classificacaoEncerrada:encerrada,classificado:passa,venceu,empate:resultado==="E",marca:venceu?"Vitória":resultado==="E"?"Empate":"Derrota",placar:`${gp} x ${gc}`,texto}};
@@ -1222,15 +1244,15 @@ function jogarCopaBase(c, card0, opId) {
     texto = op.id === "arenga" ? `O discurso incendiou o vestiário. ${placarTxt} sobre ${adv.label}.`
       : decidiu ? (eu.gols ? `Você chamou o jogo e marcou. ${placarTxt} sobre ${adv.label}.` : `Você chamou o jogo e decidiu. ${placarTxt} sobre ${adv.label}.`)
       : `${placarTxt} sobre ${adv.label}. ${k.label} segue viva.`;
-    if (k.fase === 4) { finalizarCopa(card, true); card.titulos.push({ tipo: "copaMundo", nome: "Copa do Mundo" }); card.destaques.push(`🏆 Campeão do mundo com ${k.label}`); texto = `CAMPEÃO DO MUNDO! ${placarTxt} na final contra ${adv.label}.`; }
+    if (k.fase === 4) { finalizarCopa(card, true); card.titulos.push({ tipo: k.tipo||"copaMundo", nome: k.nome||"Copa do Mundo" }); card.destaques.push(`🏆 Campeão da ${k.nome} com ${k.label}`); texto = `CAMPEÃO DA ${k.nome.toUpperCase()}! ${placarTxt} na final contra ${adv.label}.`; }
     else {
       k.fase += 1;
-      k.adversario = sortearSelecoes(c.nac, 1, FAIXA_ADV[k.fase], k.enfrentados)[0];
+      k.adversario = sortearSelecoes(c.nac, 1, FAIXA_ADV[k.fase], k.enfrentados,k.participantes)[0];
       k.enfrentados.push(k.adversario.id);
       texto += ` ${k.fase === 4 ? "Na final" : k.fase === 3 ? "Na semifinal" : `Nas ${FASES_COPA[k.fase].toLowerCase()}`}: ${k.adversario.label}.`;
       if (k.fase === 4 && k.titular) {
         const mini = miniParaMomento(c,{tipo:'selecao'});
-        const m = { tipo: "selecao", titulo: `Final da Copa do Mundo ${k.ano} · contra ${k.adversario.label}`, mini, adversario:{tipo:"selecao",id:k.adversario.id,nome:k.adversario.label}, ordem: 1, total: 1 };
+        const m = { tipo: "selecao", titulo: `Final da ${k.nome} ${k.ano} · contra ${k.adversario.label}`, mini, adversario:{tipo:"selecao",id:k.adversario.id,nome:k.adversario.label}, ordem: 1, total: 1 };
         m.texto = textoDoMomento(mini, m, c);
         m.lance={minuto:89,gp:0,gc:0,simulado:true,disputa:["penalti","defesa"].includes(m.mini)};card.pendente = m; card.filaMomentos = [];
       }
@@ -1238,7 +1260,7 @@ function jogarCopaBase(c, card0, opId) {
   } else {
     texto = op.id === "decidir" ? `Você pediu a bola, mas não foi a sua noite. ${placarTxt} para ${adv.label}.` : `${placarTxt} para ${adv.label}. Fim da linha na ${fase.toLowerCase()}.`;
     finalizarCopa(card, false);
-    card.destaques.push(k.fase === 4 ? `Vice-campeão do mundo com ${k.label}` : `${k.label} caiu ${k.fase === 1 ? "nas oitavas" : k.fase === 2 ? "nas quartas" : "na semifinal"} da Copa`);
+    card.destaques.push(k.fase === 4 ? `Vice-campeão da ${k.nome} com ${k.label}` : `${k.label} caiu ${k.fase === 1 ? "nas oitavas" : k.fase === 2 ? "nas quartas" : "na semifinal"} da Copa`);
   }
   return { card, res: { etapa: "mata", fase, adv, escolha: op.nome, p: op.p, venceu, marca: venceu ? (k.campeao ? "Campeão" : "Vitória") : "Eliminado", placar: placarTxt, jogo, texto } };
 }
@@ -1418,30 +1440,11 @@ function jogarTemporadaBase(c0) {
   // Seleção: Copa do Mundo (2026, 2030…) e copa continental (2028, 2032…)
   const torneio = anoDeCopa(c.ano) ? { nome: "Copa do Mundo", tipo: "copaMundo" }
     : anoDeContinentalSelecao(c.ano) ? { nome: nomeCopaContinental(c.nac), tipo: "continentalSelecao" } : null;
-  if (torneio?.tipo === "copaMundo") {
-    // a Copa do Mundo é jogada na tela depois da temporada (ver jogarCopa)
-    const ini = iniciarCopa(c, ovr);
-    if (ini) { card.selecao = ini.selecao; card.copa = ini.copa; if (ini.selecao.semVoce) card.destaques.push(`Fora da lista da Copa. Sem você, a seleção ${ini.selecao.semVoce}`); }
-  } else if (torneio) {
-    const t = simularTorneioSelecao(c, ovr, torneio);
-    if (t) {
-      card.selecao = t;
-      if (t.convocado) {
-        c.selecao.convocacoes += 1;
-        // jogos e assistências no torneio (para a linha da seleção no painel)
-        t.jogos = (t.titular ? 3 : 2) + (t.fase || 0) + (t.final ? 1 : 0) - (t.titular ? 0 : 1);
-        t.assist = poisson(pos.assistBase * (t.titular ? 0.9 : 0.3) * t.jogos);
-      }
-      if (t.final) {
-        if (t.titular) momentos.push({ tipo: "selecao", titulo: `Final da ${t.nome} ${c.ano}` });
-        else if (chance(t.chanceFinal)) { t.campeao = true; t.resultado = "Campeão"; card.titulos.push({ tipo: t.tipo, nome: t.nome }); }
-        else t.resultado = "Vice-campeão";
-      }
-      registrarCampanhaContinental(c,t);
-    }
-  }
+  // Amistosos têm placares e participações próprios, separados dos torneios.
+  card.amistososSelecao=simularAmistososSelecao(c,ovr,torneio?4:6);
+  if(torneio){const ini=iniciarCopa(c,ovr,torneio);if(ini){card.selecao=ini.selecao;card.copa=ini.copa;}}
 
-  if(card.selecao?.convocado||card.copa?.convocado){const elenco=card.copa?.elenco||card.selecao?.elenco;prepararCamisaSelecao(c,elenco?.jogadores||[]);card.numeroSelecao=c.numeroSelecao;for(const e of [card.copa?.elenco,card.selecao?.elenco])if(e)sincronizarCamisasSelecao(c,e);}
+  if(card.selecao?.convocado||card.copa?.convocado||card.amistososSelecao?.convocado){const elenco=card.copa?.elenco||card.selecao?.elenco||card.amistososSelecao?.elenco;prepararCamisaSelecao(c,elenco?.jogadores||[]);card.numeroSelecao=c.numeroSelecao;for(const e of [card.copa?.elenco,card.selecao?.elenco,card.amistososSelecao?.elenco])if(e)sincronizarCamisasSelecao(c,e);}
   momentos.forEach((m, i) => { if(m.tipo==='selecao'&&card.selecao?.finalAdversario)m.adversario=card.selecao.finalAdversario; m.mini = miniParaMomento(c,m,momentos.slice(0,i).map(x=>x.mini)); Object.assign(m,contextoMomento(c,m)); m.texto = textoDoMomento(m.mini, m, c); m.lance={minuto:84+hashTexto(c.codigo+':'+c.ano+':'+i)%7,gp:0,gc:0,simulado:true,disputa:['penalti','defesa'].includes(m.mini)}; m.ordem = i + 1; m.total = momentos.length; });
   card.momentos = [];
   card.pendente = momentos[0] || null;
@@ -1750,15 +1753,11 @@ function fecharTemporadaBase(c0, card0) {
   c.campeaoContinental = card.titulos.some((t) => t.tipo === "continental" && !/Sul-Americana|Europa League|Conference/.test(t.nome)) && !card.emprestado ? card.clube : null;
 
   simularDefesas(c,card);
-  if(card.selecao?.convocado){const sel={...card.selecao,ano:card.ano,nome:"Seleção"};simularDefesas(c,sel);if(Number.isFinite(sel.defesas)){card.selecao.defesas=sel.defesas;c.selecao.defesas=(c.selecao.defesas||0)+sel.defesas;}}
-  // totais e fama
-  c.totais.jogos += card.jogos; c.totais.gols += card.gols; c.totais.assist += card.assist;
-  if (card.selecao?.convocado) {
-    c.totais.gols += card.selecao.gols || 0;
-    c.selecao.jogos = (c.selecao.jogos || 0) + (card.selecao.jogos || 0);
-    c.selecao.gols = (c.selecao.gols || 0) + (card.selecao.gols || 0);
-    c.selecao.assist = (c.selecao.assist || 0) + (card.selecao.assist || 0);
-  }
+  const internacionais=[card.selecao,card.amistososSelecao].filter(t=>t?.convocado);
+  for(const t of internacionais){const sel={...t,ano:card.ano,nome:'Seleção'};simularDefesas(c,sel);if(Number.isFinite(sel.defesas)){t.defesas=sel.defesas;c.selecao.defesas=(c.selecao.defesas||0)+sel.defesas;}}
+  c.totais.jogos+=card.jogos;c.totais.gols+=card.gols;c.totais.assist+=card.assist;
+  for(const t of internacionais){c.totais.gols+=t.gols||0;c.selecao.jogos=(c.selecao.jogos||0)+(t.jogos||0);c.selecao.gols=(c.selecao.gols||0)+(t.gols||0);c.selecao.assist=(c.selecao.assist||0)+(t.assist||0);}
+  if(card.amistososSelecao?.convocado)c.selecao.convocacoes+=Math.ceil(card.amistososSelecao.jogos/2);
   // Copa do Mundo jogada na tela: a convocação conta aqui, e as escolhas deixam marca
   if (card.copa) {
     if (card.copa.convocado) c.selecao.convocacoes += 1;

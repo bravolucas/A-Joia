@@ -45,7 +45,7 @@ export function memorizar(c,tipo,titulo,texto,{id,clube=clubeAtual(c),ano=c.ano,
 }
 function primeiro(c,id,titulo,texto,card){
  const j=iniciarJornada(c);if(j.primeiros[id])return;
- const condicoes={estreia:t=>t.jogos>0,'primeiro-gol':t=>t.gols>0,'primeira-assistencia':t=>t.assist>0,titulo:t=>t.titulos?.some(semPremio),convocacao:t=>t.selecao?.convocado||t.copa?.convocado,'estreia-selecao':t=>(t.selecao?.jogos||0)>0,'primeira-defesa':t=>t.momentos?.some(m=>['defesa','reflexo'].includes(m.mini)&&m.acertou),'primeira-recuperacao':t=>t.momentos?.some(m=>m.mini==='interceptacao'&&m.acertou),'primeiro-cruzamento':t=>t.momentos?.some(m=>m.mini==='cruzamento'&&m.acertou)};
+ const condicoes={estreia:t=>t.jogos>0,'primeiro-gol':t=>t.gols>0,'primeira-assistencia':t=>t.assist>0,titulo:t=>t.titulos?.some(semPremio),convocacao:t=>t.selecao?.convocado||t.copa?.convocado||t.amistososSelecao?.convocado,'estreia-selecao':t=>((t.selecao?.jogos||0)+(t.amistososSelecao?.jogos||0))>0,'primeira-defesa':t=>t.momentos?.some(m=>['defesa','reflexo'].includes(m.mini)&&m.acertou),'primeira-recuperacao':t=>t.momentos?.some(m=>m.mini==='interceptacao'&&m.acertou),'primeiro-cruzamento':t=>t.momentos?.some(m=>m.mini==='cruzamento'&&m.acertou)};
  const anterior=condicoes[id]?(c.temporadas||[]).find(condicoes[id]):null,origem=anterior||card;
  const m=memorizar(c,'primeiro',titulo,anterior?`Registro da temporada ${origem.ano} pelo ${origem.clube}.`:texto,{id:`primeiro:${id}`,ano:origem.ano,clube:origem.clube,numeroCamisa:['convocacao','estreia-selecao'].includes(id)?origem.numeroSelecao??numeroSelecaoDe(c):origem.numero??c.numero});
  j.primeiros[id]=m||{ano:origem.ano,clube:origem.clube};if(m&&!anterior)card.jornada.memorias.push(m);
@@ -201,9 +201,9 @@ export function fecharJornada(c,card){
  const momentos=card.momentos||[];
  for(const [mini,id,titulo]of [['defesa','primeira-defesa','Primeira defesa decisiva'],['reflexo','primeira-defesa','Primeira defesa decisiva'],['interceptacao','primeira-recuperacao','Primeira recuperação decisiva'],['cruzamento','primeiro-cruzamento','Primeiro cruzamento decisivo']])if(momentos.some(m=>m.mini===mini&&m.acertou))primeiro(c,id,titulo,`Lance registrado pelo ${card.clube} em ${card.ano}.`,card);
  if(card.titulos?.some(semPremio))primeiro(c,'titulo','Primeiro título',card.titulos.find(semPremio).nome,card);
- if(card.selecao?.convocado||card.copa?.convocado){
+ if(card.selecao?.convocado||card.copa?.convocado||card.amistososSelecao?.convocado){
   primeiro(c,'convocacao','A primeira convocação',`Sua primeira lista registrada pela seleção.`,card);
-  if((card.selecao?.jogos||0)>0)primeiro(c,'estreia-selecao','Estreia internacional','A camisa do país entrou na sua história.',card);
+  if(((card.selecao?.jogos||0)+(card.amistososSelecao?.jogos||0))>0)primeiro(c,'estreia-selecao','Estreia internacional','A camisa do país entrou na sua história.',card);
   n.geracao=atualizarGeracaoSelecao(c,card.ano);
  }
  const contrib={cruzador:['LD','LE','ALE','ALD','ME','MD','PE','PD'].includes(card.posicao||c.posicao)&&card.assist>=3||momentos.some(m=>m.mini==='cruzamento'&&m.acertou),vertical:card.assist>=5||momentos.some(m=>m.mini==='passe'&&m.acertou),antecipador:['ZAG','VOL'].includes(card.posicao||c.posicao)&&card.nota>=7||momentos.some(m=>m.mini==='interceptacao'&&m.acertou),decisivo:card.gols>=10||momentos.some(m=>['penalti','falta'].includes(m.mini)&&m.acertou),paredao:(card.posicao||c.posicao)==='GOL'&&(card.nota>=7||momentos.some(m=>['defesa','reflexo'].includes(m.mini)&&m.acertou)),aereo:momentos.some(m=>m.mini==='cabeceio'&&m.acertou)};

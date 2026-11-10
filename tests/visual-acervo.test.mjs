@@ -20,7 +20,7 @@ test('estaduais com fonte específica resolvem imagens distintas da taça genér
 });
 
 test('todas as competições do catálogo têm imagem própria ou ilustração original',()=>{
- const arquivos=Object.fromEntries(fs.readdirSync(new URL('../arte/competicoes/',import.meta.url)).filter(n=>/\.(svg|webp)$/.test(n)).map(n=>[n.replace(/\.(svg|webp)$/, ''),n]));
+ const arquivos=Object.fromEntries(fs.readdirSync(new URL('../arte/competicoes/',import.meta.url)).filter(n=>/\.(svg|png|webp)$/.test(n)).map(n=>[n.replace(/\.(svg|png|webp)$/, ''),n]));
  for(const t of TACAS_MUSEU)assert.ok(resolverImagemCompeticao(t.nome,arquivos),t.nome);
  assert.equal(resolverImagemCompeticao('Concacaf',arquivos),resolverImagemCompeticao('Concacaf Champions',arquivos));
 });

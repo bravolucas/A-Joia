@@ -1,3 +1,9 @@
+## Pedido de demissão do treinador — 10/11/2026
+
+Implementado **Pedir demissão** no rodapé do modo treinador, com confirmação/cancelamento. Válido para clube e seleção. Encerra o vínculo e mantém a carreira como desempregado, com propostas compatíveis e opções de ano sem clube. Registra escolha própria, sem contar como demissão pela diretoria. Preserva títulos, partidas disputadas e patrimônio; limpa campanhas e finais sem sortear resultados pendentes. Campanhas de liga em andamento ficam no histórico e fecham o ciclo anual, com salário proporcional; a confirmação explica o avanço ao próximo ano. O museu conserva a lembrança da saída. Proteção contra inferir título por liderança em uma campanha interrompida. Relatório: `docs/PEDIDO_DEMISSAO_TREINADOR.md`.
+
+Validação local: 113 testes de modelo/regressão, build Pages e 28 cenários distintos de navegador aprovados nas rodadas de pedido de demissão, museu final, aposentadoria e fluxos existentes do treinador. Publicação e CI completo em acompanhamento.
+
 ## Entrega concluída — museu no fim de cada carreira (09/11/2026)
 
 Publicado em `0c9deaf`. [CI 42719950591](https://github.com/bravolucas/A-Joia/actions/runs/42719950591) e [Pages 42719950692](https://github.com/bravolucas/A-Joia/actions/runs/42719950692) aprovados. 413 testes de lógica e 288 cenários de navegador. Arquivo público `index-GQldTxss.js` conferido via HTTPS com verificação TLS; contém o fluxo final, o retorno ao legado e a chave do arquivo de museus. Módulos atuais do museu, modo completo e desafios acessíveis com HTTP 200.

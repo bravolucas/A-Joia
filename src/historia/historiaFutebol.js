@@ -30,7 +30,7 @@ function eventosTemporada(c,a,treinador=false){
  for(const t of a.torneios||[])if(t.campeao&&!t.finalPendente)out.push({ano:a.ano,nome:t.nome,tipo:t.tipo,clube:t.campeao,voce:t.campeao===clube});
  for(const t of a.titulos||[])if(typeof t==='object'&&!['bolaOuro','botaOuro','copaMundo','continentalSelecao','premio'].includes(t.tipo))out.push({ano:a.ano,nome:t.nome,tipo:t.tipo,clube,voce:true});
  for(const valor of [...(a.titulosConquistados||[]),...(a.titulosLista||[])]){const limpo=nomeCanonico(valor),nome=limpo==='Copa Nacional'?nomes.copa:limpo;if(!/Copa do Mundo|Eurocopa|Copa América|Bola de Ouro|Bota de Ouro/i.test(nome))out.push({ano:a.ano,nome,clube,voce:true});}
- if(a.campeaoLiga||(treinador&&a.posicao===1))out.push({ano:a.ano,nome:a.ligaNome||LIGAS[a.ligaId||a.liga]?.nome||nomes.liga,clube,tipo:'liga',voce:true});
+ if(a.campeaoLiga||(treinador&&!a.interrompida&&a.posicao===1))out.push({ano:a.ano,nome:a.ligaNome||LIGAS[a.ligaId||a.liga]?.nome||nomes.liga,clube,tipo:'liga',voce:true});
  for(const [campo,tipo]of [['copaNacional','copa'],['continental','continental'],['mundial','mundial'],['estadual','estadual']])if(a[campo]?.titulo)out.push({ano:a.ano,nome:a[campo].nome||nomes[tipo],clube,tipo,voce:true});
  for(const [liga,t]of Object.entries(a.classificacoesMundo||{})){const campeao=t.classificacao?.[0]?.nome;if(campeao)out.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',clube:campeao});}
  return out;

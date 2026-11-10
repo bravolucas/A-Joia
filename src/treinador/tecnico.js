@@ -73,6 +73,33 @@ export function aposentarTecnico(c){
  novo.tecnico={...t,idade:idadeAtualTecnico(c),aposentado:true,fase:'aposentado',aposentadoria:{idade:idadeAtualTecnico(c),ano:t.ano,motivo:'voluntaria',pendencias},copasEmJogo:null,finaisPendentes:[],andamento:null,temporadaPausada:null,paradaPendente:null,intervencaoPendente:null,conviteSelecao:null,propostas:[]};
  return registrarHistoriaTecnico(novo);
 }
+/** Rescisão voluntária: preserva o que foi jogado e não resolve partidas pendentes. */
+export function pedirDemissaoTecnico(c,rng){
+ const atual=c?.tecnico;
+ if(!atual)throw new Error('Carreira de treinador não iniciada.');
+ if(carreiraTecnicoEncerrada(atual,idadeAtualTecnico(c)))throw new Error('A carreira de treinador já foi encerrada.');
+ if(atual.desempregado&&atual.ultimaSaida?.motivo==='pedido-demissao')return c;
+ if(!atual.clube||atual.demitido||atual.desempregado||(!atual.clubeInicialEscolhido&&atual.opcoesInicio?.length))throw new Error('Você precisa estar empregado para pedir demissão.');
+ const novo=registrarHistoriaTecnico(structuredClone(c)),t=novo.tecnico,clube=t.clube;
+ const andamento=t.andamento||t.temporadaPausada,confrontos=andamento?.confrontos||[];
+ const quantidade=(campo,resultado)=>Number.isFinite(andamento?.[campo])?andamento[campo]:confrontos.filter(j=>j.resultado===resultado).length;
+ const vitorias=quantidade('vitorias','V'),empates=quantidade('empates','E'),derrotas=quantidade('derrotas','D'),jogos=vitorias+empates+derrotas;
+ const parcial=jogos>0&&['pretemporada','parada'].includes(t.fase);
+ const saida={motivo:'pedido-demissao',clube,tipoEquipe:t.tipoEquipe||'clube',ano:t.ano,idade:idadeAtualTecnico(c),jogos:parcial?jogos:0,pendencias:{andamento:parcial?{jogos,rodadas:andamento.rodadas??andamento.indice??null}:null,copas:(t.copasEmJogo?.campeonatos||[]).map(x=>({nome:x.nome,fase:x.faseUsuario||null})),finais:(t.finaisPendentes||[]).map(x=>({nome:x.nome,adversario:x.adversario||null}))}};
+ if(parcial){
+  const minha=andamento.classificacao?.find(x=>x.meuClube);
+  const registro={ano:t.ano,clube,liga:t.liga,tipoEquipe:t.tipoEquipe||'clube',jogos,vitorias,empates,derrotas,pontos:3*vitorias+empates,posicao:minha?.posicao??null,objetivo:objetivoTecnico(t).nome,interrompida:true,pediuDemissao:true,confrontos,classificacao:andamento.classificacao||[],titulosConquistados:[],torneios:[]};
+  t.temporadas=[...(t.temporadas||[]),registro];t.vitorias=(t.vitorias||0)+vitorias;t.empates=(t.empates||0)+empates;t.derrotas=(t.derrotas||0)+derrotas;
+  const total=andamento.calendario?.filter(x=>!x.folga).length||38;
+  t.carteiraTecnico=creditarSalarioTecnico(t,t.ano,t.salario??salarioTecnico(t),Math.min(12,Math.ceil(jogos/total*12)));
+  // O ciclo incompleto segue a mesma passagem anual de uma saída forçada no meio da temporada.
+  novo.idade=idadeAtualTecnico(c)+1;novo.ano=c.ano+1;t.idade=novo.idade;t.ano++;
+ }
+ novo.tecnico={...t,clube:null,clubeReferencia:clube,tipoEquipe:null,selecao:null,classificacaoSelecao:null,pais:null,liga:null,salario:0,desempregado:true,demitido:false,clubeInicialEscolhido:true,fase:'resultado',anosDesempregado:0,ultimaSaida:saida,saidasVoluntarias:[...(t.saidasVoluntarias||[]),saida],andamento:null,temporadaPausada:null,paradaPendente:null,intervencaoPendente:null,reuniaoPendente:false,copasEmJogo:null,finaisPendentes:[],conviteSelecao:null,ultimaFinal:null,ultimaNegociacao:null,promessaContrato:null,contratoCurto:null,participantesLiga:null,personagens:[],noticiasElenco:[],rivalTecnico:null,retornoIdolo:false,decisoes:[],cartas:[],efeitosPendentes:[],efeitosRecebidos:[],ajusteTurno:null,planoRapido:null,propostas:[],propostasCoerentesVersao:3};
+ if(t.modoTreinadorRapido)novo.tecnico.verbaRapida=undefined;
+ novo.tecnico.propostas=gerarPropostasTecnico(novo.tecnico,rng||geradorTecnico(`${saida.ano}|${clube}|pedido-demissao|${novo.tecnico.saidasVoluntarias.length}`)).filter(p=>p.nome!==clube);
+ return novo;
+}
 function registrarHistoriaTecnico(c){
  const t=c?.tecnico,a=t?.temporadas?.at(-1);if(!a||t.fase!=='resultado'||t.tipoEquipe==='selecao'||t.copasEmJogo||t.finaisPendentes?.length)return c;
  const novo={...c};registrarAnoHistoria(novo,{...a});return novo;
@@ -171,7 +198,7 @@ export function historicoProfissionalTecnico(t = {}) {
       if(!n){n={nome:titulo.clube,temporadas:0,jogos:0,vitorias:0,empates:0,derrotas:0,titulos:0,demissoes:0,melhorPosicao:null,anos:[]};clubes.push(n);}
       n.titulos++;if(!n.anos.includes(temporada.ano))n.anos.push(temporada.ano);
     }
-    registro.demissoes += temporada.interrompida || temporada.demitido ? 1 : 0;
+    registro.demissoes += !temporada.pediuDemissao&&(temporada.interrompida||temporada.demitido)?1:0;
     if (Number.isFinite(temporada.posicao)) registro.melhorPosicao = registro.melhorPosicao === null ? temporada.posicao : Math.min(registro.melhorPosicao, temporada.posicao);
     registro.anos.push(temporada.ano);
   }
@@ -182,7 +209,7 @@ export function historicoProfissionalTecnico(t = {}) {
   return { clubes, temporadas: temporadas.length, jogos, vitorias, empates, derrotas,
     aproveitamento: jogos ? Math.round((vitorias * 3 + empates) / (jogos * 3) * 100) : 0,
     titulos: temporadas.reduce((total, temporada) => total + contarTitulosTemporadaTecnico(temporada), 0),
-    demissoes: temporadas.filter(x => x.interrompida || x.demitido).length,
+    demissoes: temporadas.filter(x => !x.pediuDemissao&&(x.interrompida||x.demitido)).length,
     reunioes: (t.reunioes || []).length };
 }
 export function painelEstabilidadeTecnico(t = {}) {
@@ -465,7 +492,7 @@ export function aceitarPropostaTecnico(c, clube) {
   const nacional = proposta.tipo === 'selecao';
   return { ...c, tecnico: { ...t, ...(t.modoTreinadorRapido?{verbaRapida:undefined,planoRapido:null}:{}), rupturasIdolo:registrarRupturasTecnico(t,proposta.nome), clube: proposta.nome, tipoEquipe: nacional ? 'selecao' : 'clube', selecao: nacional ? proposta.nac : null, classificacaoSelecao: proposta.classificacaoSelecao || null, rivalTecnico: nacional || t.tipoEquipe==='selecao' ? null : t.rivalTecnico, conviteSelecao: null, personagens: nacional || t.tipoEquipe==='selecao' ? [] : t.personagens, participantesLiga: null, contratoCurto: null, clubeReferencia: nacional ? null : proposta.nome, pais: proposta.pais, liga: proposta.liga, elenco: proposta.elenco, ofertasRecentes: [...(t.ofertasRecentes||[]),...(t.propostas||[]).map(p=>p.nome)].slice(-18),
     moral: 50, diretoria: proposta.rival || ruptura ? 48 : 65, torcida: proposta.rival || ruptura ? 35 : 55,
-    demitido: false, desempregado: false, anosDesempregado: 0, estagioExterior: false, promessaContrato: null, retornoIdolo: !!vinculoAtivoTecnico(t,proposta.nome)?.idolatria, propostas: [], salario: proposta.salario } };
+    demitido: false, desempregado: false, ultimaSaida:null, anosDesempregado: 0, estagioExterior: false, promessaContrato: null, retornoIdolo: !!vinculoAtivoTecnico(t,proposta.nome)?.idolatria, propostas: [], salario: proposta.salario } };
 }
 export function passarAnoDesempregado(c, rng = sorteio, escolha = 'esperar') {
   if(c?.tecnico?.copasEmJogo)throw new Error('Conclua as copas antes de avançar.');

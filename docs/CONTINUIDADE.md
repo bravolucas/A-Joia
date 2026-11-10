@@ -1,3 +1,9 @@
+## Entrega concluída — pedido de demissão do treinador (10/11/2026)
+
+Publicado em `4180c0e`. [CI 42728234220](https://github.com/bravolucas/A-Joia/actions/runs/42728234220) aprovado: **419 testes de lógica e 292 cenários de navegador**. [Pages 42728234203](https://github.com/bravolucas/A-Joia/actions/runs/42728234203) aprovado. Versão pública conferida por HTTPS com verificação TLS; código de confirmação/cancelamento presente e módulos acessíveis com HTTP 200.
+
+Opção **Pedir demissão** no rodapé, enquanto empregado em clube/seleção. A confirmação encerra apenas o vínculo e abre o fluxo de propostas/desemprego. Preserva patrimônio, títulos e partidas; campanhas abertas não são resolvidas. Se já existem partidas de liga disputadas, registra campanha parcial, salário proporcional e passa ao próximo ciclo anual, como informado na confirmação. Não conta como saída imposta pela diretoria. Registro histórico e lembrança no museu, sem interromper a carreira ou disparar aposentadoria fora do limite de idade. Detalhes em `docs/PEDIDO_DEMISSAO_TREINADOR.md`. Nenhuma pendência desta rodada.
+
 ## Pedido de demissão do treinador — 10/11/2026
 
 Implementado **Pedir demissão** no rodapé do modo treinador, com confirmação/cancelamento. Válido para clube e seleção. Encerra o vínculo e mantém a carreira como desempregado, com propostas compatíveis e opções de ano sem clube. Registra escolha própria, sem contar como demissão pela diretoria. Preserva títulos, partidas disputadas e patrimônio; limpa campanhas e finais sem sortear resultados pendentes. Campanhas de liga em andamento ficam no histórico e fecham o ciclo anual, com salário proporcional; a confirmação explica o avanço ao próximo ano. O museu conserva a lembrança da saída. Proteção contra inferir título por liderança em uma campanha interrompida. Relatório: `docs/PEDIDO_DEMISSAO_TREINADOR.md`.

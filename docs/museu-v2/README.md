@@ -6,6 +6,8 @@ Na sala das camisas, cada peça fica centralizada e maior. A prateleira inferior
 
 A camisa do Brasil usa uma recriação fotográfica baseada no modelo Nike 2024/25, com fundo removido e versões de 512/1024 px. As outras seleções usam tecido fotográfico, cores e padrões próprios inspirados nos modelos nacionais, incluindo listras da Argentina e Paraguai, xadrez da Croácia e faixa diagonal do Peru. São representações comemorativas; o jogo não atribui um modelo de uniforme a cada ano quando o save não guarda esse dado.
 
+Saves completos distinguem o técnico contratado pelo clube ou pela seleção da segunda carreira de treinador do jogador. Os dois técnicos aparecem como pessoas do acervo e permanecem no arquivo de encerramento.
+
 Há 12 retratos adicionais: seis companheiros e seis técnicos. A escolha é estável pelo nome e papel, com distribuição sem repetição nos sete primeiros personagens de cada grupo. Os retratos são fictícios. Convite de gala e apito de treinamento ampliam os objetos comemorativos do acervo.
 
 A taça intercontinental recebeu uma versão fotográfica original com colunas douradas, globo e pedestal. A Bola de Ouro foi recortada para retirar margens vazias, alinhada ao fundo da vitrine e apoiada em uma base. Ao abrir a Bola de Ouro, o top 3 é extraído da temporada correspondente, tanto do modo rápido quanto do completo. O arquivo de encerramento preserva esses dados. Saves antigos sem o ranking informam a ausência.

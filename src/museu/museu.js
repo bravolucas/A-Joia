@@ -89,7 +89,7 @@ export function extrairConquistasMuseu(c, { modo = 'rapido', temporadas = [] } =
     return grupos;
   };
   registrarTacas(tacas, 'Jogador');
-  const tecnico = c.tecnico;
+  const tecnico = Array.isArray(c.tecnico?.temporadas)?c.tecnico:null;
   const tacasTecnico = (tecnico?.temporadas || []).flatMap(t => (t.titulosConquistados?.length ? t.titulosConquistados : t.campeao ? [LIGAS[t.liga || CLUBES.find(clube => clube.nome === t.clube)?.liga]?.nome || t.competicao || 'Campeonato nacional'] : []).map(nome => ({ nome, ano: t.ano, clube: equipeTituloTecnico(t,nome) })));
   registrarTacas(tacasTecnico, 'Treinador');
   const jogadas = modo === 'rapido' ? c.temporadas || [] : temporadas;

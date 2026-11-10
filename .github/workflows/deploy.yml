@@ -42,10 +42,14 @@ jobs:
     steps:
       - id: deploy
         continue-on-error: true
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5.0.1
         with:
-          timeout: '1200000'
+          timeout: '600000'
+        with:
+          timeout: '600000'
       - id: deploy_retry
         name: Repetir publicação após falha
         if: steps.deploy.outcome == 'failure'
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5.0.1
+        with:
+          timeout: '600000'

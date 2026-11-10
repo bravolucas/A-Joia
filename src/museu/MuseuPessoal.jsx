@@ -4,7 +4,7 @@ import {CamisaPremium} from '../comum/VisualFutebol.jsx';
 import {TacaCompeticao} from '../comum/trofeus.jsx';
 import {bandeiraDe} from '../comum/arte.js';
 import {bloquearRolagem} from '../comum/bloqueioRolagem.js';
-import {SALAS_MUSEU,construirMuseuPessoal,lerCuradoria,salvarCuradoria,identidadeMuseuPessoal,museuEncerradoVisto,registrarMuseuEncerrado} from './museuPessoal.js';
+import {SALAS_MUSEU,construirMuseuPessoal,lerCuradoria,salvarCuradoria,identidadeMuseuPessoal,registrarMuseuEncerrado} from './museuPessoal.js';
 import './MuseuPessoal.css';
 const periodo=o=>o.de&&o.ate&&o.de!==o.ate?`${o.de}—${o.ate}`:o.ano||'Sem ano registrado';
 const tipoNome={camisa:'Camisa comemorativa',taca:'Troféu e suas edições',premio:'Prêmio individual',recorte:'Recorte do arquivo',carta:'Carta de lembrança',contrato:'Primeiro contrato',ingresso:'Ingresso comemorativo',passagem:'Passaporte da carreira',bracadeira:'Braçadeira comemorativa',bola:'Bola de lembrança',placa:'Placa de homenagem',retrato:'Retrato comemorativo',selecao:'Camisa da seleção',prancheta:'Prancheta de temporada',convocacao:'Carta de convocação'};
@@ -78,10 +78,11 @@ export function BotaoMuseuPessoal({c,temporadas,modo='rapido',className=''}){
 function MuseuPessoalDialog({c,temporadas,modo,onFechar,rotuloVoltar,aviso}){const ref=useRef(null);useEffect(()=>{const el=ref.current,antes=document.activeElement;el.showModal();const liberar=bloquearRolagem(document.body);return()=>{el.close();liberar();antes?.focus({preventScroll:true});};},[]);return createPortal(<dialog ref={ref} className="mp-dialog" aria-label="Museu pessoal da carreira" onCancel={e=>{e.preventDefault();e.stopPropagation();onFechar();}}><button className="mp-dialog-close" onClick={onFechar} aria-label="Fechar museu pessoal">×</button>{aviso&&<p role="alert" className="mp-notice">{aviso}</p>}<MuseuPessoal c={c} temporadas={temporadas} modo={modo} onVoltar={onFechar} rotuloVoltar={rotuloVoltar}/></dialog>,document.body);}
 
 /** O encerramento apresenta exclusivamente o save recebido; nunca escolhe outra carreira do menu. */
-export function MuseuFimCarreira({c,temporadas,modo='rapido',fase='jogador',automatico=true}){
+export function MuseuFimCarreira({c,temporadas,modo='rapido',fase='jogador',automatico=true,solicitacao=0}){
  const id=identidadeMuseuPessoal(c,modo,temporadas||c.temporadas||[]),[aberto,A]=useState(false),[aviso,V]=useState('');
  const registrar=visto=>{if(!registrarMuseuEncerrado(c,{modo,temporadas,fase,visto}))V('Seu museu pode ser visitado, mas não foi possível arquivar esta carreira. Preserve o save antes de começar outra.');};
- useEffect(()=>{if(!automatico)return;const t=setTimeout(()=>{const visto=museuEncerradoVisto(id,fase);registrar(false);if(!visto)A(true);},0);return()=>clearTimeout(t);},[id,fase,automatico]);
+ // Entrar no encerramento deve sempre apresentar o museu, inclusive em saves antigos já marcados como vistos.
+ useEffect(()=>{if(!automatico&&!solicitacao)return;const t=setTimeout(()=>{if(automatico)registrar(false);A(true);},0);return()=>clearTimeout(t);},[id,fase,automatico,solicitacao]);
  const fechar=()=>{if(automatico)registrar(true);A(false);};
  return <section className="mp-end-entry" aria-label="Museu desta carreira"><p>A história que você escreveu tem seu próprio museu.</p><button className="mp-open" onClick={()=>A(true)}>Museu desta carreira →</button>{!aberto&&aviso&&<p role="alert">{aviso}</p>}{aberto&&<MuseuPessoalDialog c={c} temporadas={temporadas} modo={modo} onFechar={fechar} rotuloVoltar="Voltar ao legado" aviso={aviso}/>}</section>;
 }

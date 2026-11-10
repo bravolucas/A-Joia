@@ -38,7 +38,7 @@ import { JogadorCampo, RetratoApresentacao, CamisaPremium, SuperficieMini, useCe
 import { criarIdMuseu } from '../museu/museu.js';
 import Icone from "../comum/Icone.jsx";
 import CarreiraTecnico from "../treinador/CarreiraTecnico.jsx";
-import { pedirDemissaoTecnico, aposentarTecnico, responderParadaTecnico, resolverFinalTecnico, responderConviteSelecaoTecnico, comprarMelhoriaTecnico, iniciarCarreiraTecnico, iniciarNoClubeIdolo, atualizarPropostasCoerentesTecnico, escolherPretemporadaRapidaTecnico, responderIntervencaoTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico } from "../treinador/tecnico.js";
+import { carreiraTecnicoEncerrada, pedirDemissaoTecnico, aposentarTecnico, responderParadaTecnico, resolverFinalTecnico, responderConviteSelecaoTecnico, comprarMelhoriaTecnico, iniciarCarreiraTecnico, iniciarNoClubeIdolo, atualizarPropostasCoerentesTecnico, escolherPretemporadaRapidaTecnico, responderIntervencaoTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico } from "../treinador/tecnico.js";
 import Lottie from "../comum/Lottie.jsx";
 import { tocar, apito, torcida, somLigado, alternarSom } from "../comum/som.js";
 import React, { useEffect, useRef, useState } from "react";
@@ -2090,7 +2090,7 @@ function GaleriaFim({ c }) {
 
 /* Fim de carreira: galeria, depois da bola e os botões */
 function FimDeCarreira(props) {
-  const { c, onNova, onComecarTecnico } = props;
+  const { c, onNova, onComecarTecnico, onAbrirMuseu } = props;
   const [completo, setCompleto] = useState(false);
   const galeriaRef = useRef(null);
   const [img, setImg] = useState("pronto");
@@ -2123,7 +2123,7 @@ function FimDeCarreira(props) {
       </div>
       <div className="max-w-3xl mx-auto w-full px-3 flex flex-col gap-2">
         <p className="text-center text-[#C9D3CE] font-bold">O que vem depois dos gramados?</p>
-        <button onClick={() => { setCompleto(true); window.scrollTo({ top: 0 }); }} className="rp-btn rp-sec w-full">ENCERRAR CARREIRA · Ver legado completo</button>
+        <button onClick={() => { setCompleto(true); onAbrirMuseu?.(); window.scrollTo({ top: 0 }); }} className="rp-btn rp-sec w-full">ENCERRAR CARREIRA · Abrir meu museu</button>
         <button onClick={onComecarTecnico} className="rp-btn rp-ouro w-full">CONTINUAR COMO TÉCNICO</button>
       </div>
     </div>
@@ -2713,6 +2713,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   //        → (traço) → (coletiva) → decisão/mercado nos anos de decisão; nos outros, a temporada rola sozinha
   const [estado, setEstado] = useState(() => atualizarFluxoCopasJogador((comecarDoZero ? null : carregarRapido()) || { etapa: "criacao" }));
   const [estanteAberta, setEstanteAberta] = useState(false);
+  const [solicitacaoMuseuFinal,setSolicitacaoMuseuFinal]=useState(0);
   const [estadualAberto,setEstadualAberto]=useState(true);
   const [apresentacao, setApresentacao] = useState(null);
   const [apresentacaoSelecao,setApresentacaoSelecao]=useState(null);
@@ -2895,8 +2896,8 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     setEstado({ etapa: "fim", c: cc });
     const t={ano:c.ano,de:c.emprestimo?.destino||c.clubeNome,para:c.clubeNome,tipo:'aposentadoria',valor:0,encerramento:true};t.cena=cenaDespedida(cc,t);setApresentacao({c:cc,clube:clubeDe(t.de),curto:true,mudanca:t});
   };
-  const nova = () => setEstado({ etapa: "criacao" });
-  const comecarTecnico = () => setEstado((st) => ({ ...st, etapa: "tecnico", c: iniciarCarreiraTecnico(st.c) }));
+  const nova = () => {setSolicitacaoMuseuFinal(0);setEstado({ etapa: "criacao" });};
+  const comecarTecnico = () => {setSolicitacaoMuseuFinal(0);setEstado((st) => ({ ...st, etapa: "tecnico", c: iniciarCarreiraTecnico(st.c) }));};
 
   const infoChegada=c&&c.camisas?.clubes?.[c.emprestimo?.destino||c.clubeNome]&&c.flags?.baseEscolhida&&!c.tecnico&&!c.aposentado&&etapa==='evento'&&evento?.id!=='base'?camisaInfo(c):null;
   const faltaPlano=!!(infoChegada&&infoChegada.chegada>0&&!c.jornada?.espacoClubes?.[c.emprestimo?.destino||c.clubeNome]?.plano&&c.lojaAnoEmCurso!==c.ano);
@@ -2985,8 +2986,8 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "resumo" && <TelaResumo c={c} card={card} voar={!!estado.voar} onPousou={() => setContadorPulsa((x) => x + 1)} onContinuar={continuar} onAposentar={encerrar} onRever={() => setEstado({etapa:"fechamento",c,card,retorno:estado,auto:false})} />}
         {etapa === "coletiva" && estado.coletiva && <TelaColetiva c={c} coletiva={estado.coletiva} resposta={estado.resposta} onResponder={responder} onSeguir={() => abrirJanela(c, estado.ultimo, false)} />}
         {etapa === "traco" && <TelaTraco c={c} opcoes={(opcoesTraco || []).map(tracoDe).filter(Boolean)} onEscolher={escolherT} />}
-        {etapa === "fim" && !apresentacao && <MuseuFimCarreira c={c} automatico={!c.tecnico}/>}
-        {etapa === "fim" && <FimDeCarreira c={c} onNova={nova} onSair={onSair} onComecarTecnico={comecarTecnico} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
+        {etapa === "fim" && !apresentacao && <MuseuFimCarreira c={c} fase={c.tecnico&&carreiraTecnicoEncerrada(c.tecnico,c.idade)?"treinador":"jogador"} automatico={!c.tecnico||carreiraTecnicoEncerrada(c.tecnico,c.idade)} solicitacao={solicitacaoMuseuFinal}/>}
+        {etapa === "fim" && <FimDeCarreira c={c} onAbrirMuseu={()=>setSolicitacaoMuseuFinal(n=>n+1)} onNova={nova} onSair={onSair} onComecarTecnico={comecarTecnico} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
         {etapa === "tecnico" && <CarreiraTecnico c={c} onCopaEscolha={(chave,op)=>setEstado(st=>({...st,c:resolverCopaEscolhaTecnico(st.c,chave,op)}))}
           onComprarMelhoria={id=>{const novo=comprarMelhoriaTecnico(c,id);setEstado(st=>st.c===c?{...st,c:novo}:st);}}
           onEscolhaRapida={(chave,op) => setEstado(st => ({...st,c:escolherPretemporadaRapidaTecnico(st.c,chave,op,undefined,{interativo:true,copasInterativas:true})}))}

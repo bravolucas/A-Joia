@@ -1,3 +1,9 @@
+## Correção de abertura do museu final — 10/11/2026
+
+Relato de carreira encerrada sem abrir o museu. Corrigidos bloqueios do fluxo: marcador antigo de visita deixou de suprimir a apresentação no encerramento; legado final do treinador reconhece a fase encerrada; botão **ENCERRAR CARREIRA · Abrir meu museu** faz um pedido explícito de abertura, mesmo após fechar a visita automática. Saves encerrados podem ser retomados para ver o museu, sem refazer a carreira. Despedida, resumo completo e acervo permanecem disponíveis. Relatório `docs/MUSEU_PESSOAL_INTERATIVO.md`.
+
+Build Pages e 23 cenários locais de navegador aprovados. Publicação e CI completo em acompanhamento.
+
 ## Entrega concluída — títulos de liga somente ao campeão (10/11/2026)
 
 Publicado em `e908ce0`. [CI 42732487721](https://github.com/bravolucas/A-Joia/actions/runs/42732487721) aprovado: **427 testes de lógica e 294 cenários de navegador**. [Pages 42732487412](https://github.com/bravolucas/A-Joia/actions/runs/42732487412) aprovado. Arquivos públicos conferidos por HTTPS com verificação TLS e módulos acessíveis com HTTP 200.

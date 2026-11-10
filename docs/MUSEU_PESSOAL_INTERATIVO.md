@@ -30,10 +30,16 @@ Resultado final: 409 testes de lógica, build e 283 cenários de navegador aprov
 
 ## Museu no encerramento de cada carreira
 
-O museu pessoal abre automaticamente depois da despedida final do jogador, no rápido e no completo, e depois do encerramento como treinador. A exposição usa diretamente o jogador daquela carreira, sem seletor nem dados de outros saves. **Voltar ao legado** fecha a visita; **Museu desta carreira →** permite reabri-la. Depois da primeira visita concluída, retomar o legado não força a abertura outra vez. O encerramento como treinador tem sua própria apresentação, mesmo que o museu já tenha sido visitado no fim da fase de jogador.
+O museu pessoal abre automaticamente depois da despedida final do jogador, no rápido e no completo, e depois do encerramento como treinador. A exposição usa diretamente o jogador daquela carreira, sem seletor nem dados de outros saves. **Voltar ao legado** fecha a visita; **Museu desta carreira →** permite reabri-la. Ao retomar uma carreira encerrada, o museu volta a ser apresentado. Marcadores de visita anteriores não bloqueiam essa abertura. O encerramento como treinador tem sua própria apresentação, mesmo que o museu já tenha sido visitado no fim da fase de jogador.
 
 Cada carreira encerrada é arquivada em `ajoia_museus_encerrados_v1`, por identidade, com os registros utilizados pela exposição. Mundo completo, elencos e tabelas de rodadas não são duplicados; resultados documentados de finais são mantidos. O arquivo recebe a carreira depois que os efeitos de salvamento do jogo rodaram. A fase de treinador atualiza o acervo da mesma carreira. Começar uma carreira nova mantém as anteriores disponíveis no seletor de **Meu museu**, sem misturar estatísticas ou títulos. O museu do menu e a coleção permanente continuam disponíveis.
 
 Os acervos finais e seus marcadores de visita são locais ao navegador. O backup da coleção permanente continua com seu escopo original; não inclui esses acervos. Se o armazenamento falhar, o museu ainda abre e avisa para preservar o save antes de começar outra carreira. Um arquivo antigo ilegível não é sobrescrito.
 
 Atualização de encerramento publicada em `0c9deaf`: [CI 42719950591](https://github.com/bravolucas/A-Joia/actions/runs/42719950591) aprovado, com 413 testes de lógica e 288 cenários de navegador. [Pages 42719950692](https://github.com/bravolucas/A-Joia/actions/runs/42719950692) aprovado e arquivos da versão conferidos no site público.
+
+## Correção da abertura final — 10/11/2026
+
+Removida a dependência do marcador de primeira visita para apresentar o museu no encerramento. O legado final de um treinador também reconhece a fase encerrada e abre o museu correspondente; o legado de jogador pode continuar sendo consultado durante uma carreira técnica ativa. O botão **ENCERRAR CARREIRA · Abrir meu museu** solicita explicitamente a abertura, inclusive depois de fechar a visita automática. O pedido é reiniciado ao começar uma carreira nova ou assumir o banco. A despedida segue antes do museu e a navegação para o resumo completo é mantida.
+
+Verificações locais: build Pages e 23 cenários de navegador aprovados, incluindo abertura com marcador antigo, retorno ao legado do treinador encerrado, novo pedido pelo botão de encerramento, recarga e telas de celular/desktop.

@@ -1,0 +1,8 @@
+.premiacao-completa{display:flex;flex-direction:column;max-height:calc(100vh - 72px);max-height:calc(100dvh - max(72px,calc(env(safe-area-inset-top) + env(safe-area-inset-bottom) + 48px)));min-height:0;overflow:hidden}
+.premiacao-etapas,.premiacao-acoes{flex:none}
+.premiacao-corpo{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;overflow-wrap:anywhere}
+.premiacao-acoes{padding-top:16px;margin-top:12px;border-top:1px solid #ffffff18;background:inherit}
+.premiacao-acoes button{width:100%;min-height:48px}
+@media(max-height:500px){.premiacao-completa{padding:12px}.premiacao-acoes{padding-top:8px;margin-top:8px}.premiacao-etapas{margin-bottom:8px}}
+.premiacao-completa{background:var(--joia-painel,#102337);color:var(--joia-texto,#ecf6ff);border:1px solid #9bdeff30;border-radius:16px}
+.premiacao-acoes .btn-primary{background:linear-gradient(115deg,#c6edff,#87d4ff);color:#082036;font-weight:700;border-radius:12px}

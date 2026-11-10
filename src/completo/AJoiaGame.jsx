@@ -1,3 +1,4 @@
+import JanelaPremiacao from '../comum/JanelaPremiacao.jsx';
 import {clubeInternacional} from '../competicoes/clubesInternacionais.js';
 import {RevelacaoTela} from '../comum/efeitos/Movimento.jsx';
 import {creditarTorneiosSelecao,resumoSelecaoTemporada} from './estatisticasSelecao.js';
@@ -6104,11 +6105,7 @@ function resolverTemporada(c, extraStats) {
 
 
                 {awardsPopup && (
-                  <PopupOverlay>
-                    <Card className="border-amber-500/40" key={awardsPopup.slide}>
-                      {awardsPopup.slide === 2 && awardsPopup.registro.premios.some((p) => p.nome === "BOLA DE OURO" && p.doJogador) && <Confetti />}
-                      <div className="flex justify-center gap-1 mb-3">{[0, 1, 2].map((i) => <div key={i} className={`h-1 w-8 rounded-full ${i <= awardsPopup.slide ? "bg-amber-400" : "bg-zinc-800"}`} />)}</div>
-                      <div className="animate-[popIn_0.3s_ease-out]">
+                  <JanelaPremiacao etapa={awardsPopup.slide} onContinuar={avancarAwardsPopup} celebracao={awardsPopup.slide === 2 && awardsPopup.registro.premios.some((p) => p.nome === "BOLA DE OURO" && p.doJogador) ? <Confetti /> : null}>
                         {awardsPopup.slide === 0 && (
                           <>
                             <div className="text-center mb-3 flex flex-col items-center gap-1"><TrophyIcon tipo={awardsPopup.registro.campeaoLiga ? "ouro" : "liga"} size={34} /><div className="text-[10px] text-amber-400 uppercase tracking-widest">Temporada {awardsPopup.registro.temporadaLabel}</div></div>
@@ -6154,10 +6151,7 @@ function resolverTemporada(c, extraStats) {
                             <div className="text-center border-t border-zinc-800 pt-2 text-xs text-emerald-400">💰 Salário recebido: ${formatarDinheiro(awardsPopup.registro.salario)} · Cofre: ${formatarDinheiro(carreira.cofre)}</div>
                           </>
                         )}
-                      </div>
-                      <div className="mt-4"><Button onClick={avancarAwardsPopup}>{awardsPopup.slide < 2 ? "Próximo" : "Continuar"}</Button></div>
-                    </Card>
-                  </PopupOverlay>
+                  </JanelaPremiacao>
                 )}
 
                 {janela && (

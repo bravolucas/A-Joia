@@ -22,8 +22,11 @@ Os componentes `TextoRevelado` e `CartaoLuz` são implementações próprias e e
 
 ## Capturas
 
+[Vídeo curto dos efeitos e interações](efeitos.webm).
+
 ![Início no computador](inicio-desktop.png)
 ![Início no celular](inicio-celular.png)
+![Carreira e pré-temporada no computador](carreira-desktop.png)
 
 ## Validação
 

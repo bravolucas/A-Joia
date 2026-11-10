@@ -47,7 +47,7 @@ export default class LimiteDeErro extends React.Component {
           <div style={{ fontSize: 11, letterSpacing: "0.15em", textTransform: "uppercase", color: "#D6483F", marginBottom: 8 }}>⚠️ O jogo travou</div>
           <h1 style={{ fontSize: 20, fontWeight: 900, margin: "0 0 12px" }}>Alguma coisa quebrou na hora de desenhar a tela</h1>
           <p style={{ fontSize: 13, lineHeight: 1.6, color: "#a1a1aa", margin: "0 0 16px" }}>
-            Sua carreira salva <strong style={{ color: "#12A876" }}>não foi perdida</strong>. Você pode recarregar e continuar do último save.
+            Sua carreira salva <strong style={{ color: "#9BDEFF" }}>não foi perdida</strong>. Você pode recarregar e continuar do último save.
           </p>
 
           <div style={{ background: "#0a0a0a", border: "1px solid #27272a", borderRadius: 6, padding: 12, marginBottom: 16 }}>
@@ -64,7 +64,7 @@ export default class LimiteDeErro extends React.Component {
           </div>
 
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button onClick={() => window.location.reload()} style={{ flex: 1, minWidth: 150, padding: "10px 16px", background: "#12A876", color: "#0a0a0a", fontWeight: 800, border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13 }}>
+            <button onClick={() => window.location.reload()} style={{ flex: 1, minWidth: 150, padding: "10px 16px", background: "#9BDEFF", color: "#0a0a0a", fontWeight: 800, border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13 }}>
               ↻ Recarregar e continuar
             </button>
             <button onClick={this.copiarRelatorio} style={{ flex: 1, minWidth: 150, padding: "10px 16px", background: "transparent", color: "#e4e4e7", border: "1px solid #3f3f46", borderRadius: 6, cursor: "pointer", fontSize: 13 }}>

@@ -1,3 +1,5 @@
+import {clubeInternacional} from '../competicoes/clubesInternacionais.js';
+import {RevelacaoTela} from '../comum/efeitos/Movimento.jsx';
 import {creditarTorneiosSelecao,resumoSelecaoTemporada} from './estatisticasSelecao.js';
 import {fasesMataSelecao} from '../competicoes/fasesSelecoes.js';
 import CerimoniaBola from '../comum/CerimoniaBola.jsx';
@@ -1163,7 +1165,7 @@ function campoMataMata(tipo) {
   return "copaNacional";
 }
 function iniciarPartidaMataMata(c, tipo, adversarioNome, faseIdx, card, opcoesIdaVolta) {
-  const adversarioObj = CLUBES.find((x) => x.nome === adversarioNome);
+  const adversarioObj = CLUBES.find((x) => x.nome === adversarioNome) || clubeInternacional(adversarioNome);
   const forcaClube = forcaEfetivaClube(c, c.clube);
   const ehFinalMataMata = faseIdx >= FASES_POR_COMPETICAO[tipo].length;
   const { numLances } = definirImportanciaPartida({ faseMataMata: true, final: ehFinalMataMata });
@@ -1213,7 +1215,7 @@ function agendarEventoMataMata(c, evento, atrasoRodadas) {
    único — igual às competições de verdade. */
 function iniciarPartidaContinentalClube(c, card, jogoGrupo, adversarioNome, souCasa, opcoesMataMata) {
   const info = card.continentalPendente;
-  const adversarioObj = CLUBES.find((x) => x.nome === adversarioNome);
+  const adversarioObj = CLUBES.find((x) => x.nome === adversarioNome) || clubeInternacional(adversarioNome);
   const forcaClube = forcaEfetivaClube(c, c.clube);
   const emMataMata = jogoGrupo == null;
   const faseIdx = opcoesMataMata?.faseIdx ?? 0;
@@ -2760,7 +2762,7 @@ function resolverTemporada(c, extraStats) {
       const adversario = jogoDoJogador ? (jogoDoJogador.casa.nome === c.clube.nome ? jogoDoJogador.fora.nome : jogoDoJogador.casa.nome) : "adversário";
       const rTipo = Math.random();
       const tipoLance = rTipo < 0.22 ? "falta" : rTipo < 0.44 ? "passe" : "texto";
-      const advObj = CLUBES.find((x) => x.nome === adversario);
+      const advObj = CLUBES.find((x) => x.nome === adversario) || clubeInternacional(adversario);
       const contexto = gerarContextoLance(c, adversario, advObj?.forca);
       setPendingLanceJogo({ adversario, tipoLance, contexto });
       return;
@@ -3047,7 +3049,7 @@ function resolverTemporada(c, extraStats) {
     setPartidaAoVivo(null);
     const resumeData = { c, ta, tabela, historico, meuResultadoRodada };
     if (eraPrimeiroJogoDaCarreira) { setPendingEstreia({ tipo: "profissional", nomeEquipe: c.clube.nome, cor: c.clube.cor, resumeData }); return; }
-    if (eraPrimeiraSelecao) { c.estreiaSelecaoFeita = true; setPendingEstreia({ tipo: "selecao", nomeEquipe: nacDe(c.nacionalidade)?.label, cor: "#12A876", resumeData }); return; }
+    if (eraPrimeiraSelecao) { c.estreiaSelecaoFeita = true; setPendingEstreia({ tipo: "selecao", nomeEquipe: nacDe(c.nacionalidade)?.label, cor: "#9BDEFF", resumeData }); return; }
     if (eraPrimeiroEncontroRival) { c.encarouRivalFeito = true; setPendingRivalidade({ meuNome: nome, rivalNome: c.rivalPosicao, resumeData }); return; }
     const coletiva = gerarColetivaPosJogo(meuResultadoRodada);
     if (coletiva) {
@@ -4102,17 +4104,17 @@ function resolverTemporada(c, extraStats) {
   const tTorc = carreira ? tierTorcida(getTorcida(carreira, carreira.clube.nome)) : null;
 
   return (
-    <div className="min-h-screen text-zinc-100 font-sans relative" style={{ background: "#0a0b0d" }}>
+    <div className="ajoia-completo min-h-screen text-zinc-100 font-sans relative" style={{ background: "#0a0b0d" }}>
       <div className="fixed inset-0 z-0 pointer-events-none" style={{
         background: `
           radial-gradient(ellipse 60% 40% at 15% 0%, rgba(255,255,255,0.16) 0%, transparent 60%),
           radial-gradient(ellipse 60% 40% at 85% 0%, rgba(255,255,255,0.16) 0%, transparent 60%),
           repeating-linear-gradient(180deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 2px, transparent 2px, transparent 26px),
-          radial-gradient(ellipse 90% 50% at 50% 115%, rgba(20,255,150,0.10) 0%, transparent 60%),
-          linear-gradient(180deg, #0d0f11 0%, #0a0b0d 55%, #08090a 100%)
+          radial-gradient(ellipse 90% 50% at 50% 115%, rgba(155,222,255,0.08) 0%, transparent 60%),
+          linear-gradient(180deg, #102337 0%, #091725 55%, #071321 100%)
         `,
       }} />
-      <div className="fixed inset-0 z-0 pointer-events-none opacity-70" style={{ background: "radial-gradient(ellipse at top, rgba(18,168,118,0.10) 0%, transparent 45%), radial-gradient(ellipse at bottom right, rgba(46,111,224,0.07) 0%, transparent 55%)" }} />
+      <div className="fixed inset-0 z-0 pointer-events-none opacity-70" style={{ background: "radial-gradient(ellipse at top, rgba(155,222,255,0.10) 0%, transparent 45%), radial-gradient(ellipse at bottom right, rgba(46,111,224,0.07) 0%, transparent 55%)" }} />
       <style>{`
         /* ===== LAYOUT RESPONSIVO (CSS próprio, sem depender do build do Tailwind) ===== */
         .app-shell{width:100%;max-width:42rem;margin-left:auto;margin-right:auto;padding:2rem 1rem;}
@@ -4163,8 +4165,8 @@ function resolverTemporada(c, extraStats) {
         }
 
         :root{
-          --bg-graphite:#0E1512; --bg-panel:rgba(19,26,23,0.62); --border-glass:rgba(255,255,255,0.08);
-          --neon-green:#1BC28A; --neon-cyan:#2E6FE0; --gold:#D8B44A;
+          --bg-graphite:#071321; --bg-panel:rgba(16,35,55,0.62); --border-glass:rgba(255,255,255,0.08);
+          --neon-green:#BCEAFF; --neon-cyan:#2E6FE0; --gold:#D8B44A;
         }
         .display{font-family:'Oswald',sans-serif;}
         .font-sport{font-family:'Inter',sans-serif;}
@@ -4173,7 +4175,7 @@ function resolverTemporada(c, extraStats) {
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         @keyframes popIn{0%{opacity:0;transform:scale(0.95) translateY(8px)}100%{opacity:1;transform:scale(1) translateY(0)}}
         @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-        @keyframes glowPulse{0%,100%{filter:drop-shadow(0 0 6px rgba(18,168,118,0.5))}50%{filter:drop-shadow(0 0 18px rgba(110,231,249,0.8))}}
+        @keyframes glowPulse{0%,100%{filter:drop-shadow(0 0 6px rgba(155,222,255,0.5))}50%{filter:drop-shadow(0 0 18px rgba(110,231,249,0.8))}}
         @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
         @keyframes slideBar{from{left:0}to{left:calc(100% - 10px)}}
         @keyframes packShine{0%,100%{opacity:0.5;transform:scale(0.95)}50%{opacity:1;transform:scale(1.08)}}
@@ -4197,34 +4199,34 @@ function resolverTemporada(c, extraStats) {
         @keyframes cameraFlashRandom{0%,100%{opacity:0}10%{opacity:1}20%{opacity:0}}
         @keyframes diceRoll{0%{transform:rotate(0deg) scale(1)}50%{transform:rotate(180deg) scale(0.85)}100%{transform:rotate(360deg) scale(1)}}
         @keyframes barFill{from{width:0%}}
-        @keyframes neonPulse{0%,100%{box-shadow:0 0 6px rgba(18,168,118,0.35),0 0 0 1px rgba(18,168,118,0.15)}50%{box-shadow:0 0 18px rgba(18,168,118,0.65),0 0 0 1px rgba(18,168,118,0.3)}}
+        @keyframes neonPulse{0%,100%{box-shadow:0 0 6px rgba(155,222,255,0.35),0 0 0 1px rgba(155,222,255,0.15)}50%{box-shadow:0 0 18px rgba(155,222,255,0.65),0 0 0 1px rgba(155,222,255,0.3)}}
         @keyframes cyanPulse{0%,100%{box-shadow:0 0 6px rgba(46,111,224,0.35)}50%{box-shadow:0 0 18px rgba(46,111,224,0.65)}}
         .float-anim{animation:floatY 3.2s ease-in-out infinite}
         .glow-anim{animation:glowPulse 2.6s ease-in-out infinite}
         .glow-border{box-shadow:0 0 0 1px rgba(216,180,74,0.5),0 0 22px rgba(216,180,74,0.35)}
         .shimmer-bg{background:linear-gradient(110deg,transparent 40%,rgba(255,255,255,0.15) 50%,transparent 60%);background-size:200% 100%;animation:shimmer 2.5s infinite}
         .glass{background:var(--bg-panel);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--border-glass);box-shadow:0 8px 30px rgba(0,0,0,0.35);}
-        .glass-strong{background:rgba(14,21,18,0.82);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+        .glass-strong{background:rgba(7,19,33,0.82);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
         .bar-fill{transition:width 0.9s cubic-bezier(0.22,1,0.36,1);}
         .hud-btn{transition:all 0.3s ease;}
         .hud-btn:hover{transform:translateY(-2px);}
-        .btn-primary{background:#12A876;color:#06110C;}
-        .btn-primary:hover{background:#18BB85;box-shadow:0 0 18px rgba(18,168,118,0.5);}
-        .btn-ghost{background:rgba(19,29,25,0.7);border:1px solid #2A3A33;color:#F2F5F3;}
-        .btn-ghost:hover{border-color:#12A876;box-shadow:0 0 14px rgba(18,168,118,0.3);}
+        .btn-primary{background:#9BDEFF;color:#082036;}
+        .btn-primary:hover{background:#BCEAFF;box-shadow:0 0 18px rgba(155,222,255,0.5);}
+        .btn-ghost{background:rgba(16,35,55,0.7);border:1px solid #30475D;color:#F2F5F3;}
+        .btn-ghost:hover{border-color:#9BDEFF;box-shadow:0 0 14px rgba(155,222,255,0.3);}
         .btn-gold{background:linear-gradient(90deg,#D8B44A,#F5D77A);color:#1A1405;}
-        .tela-titulo{background:#0E1512;color:#F2F5F3;animation:fadeIn 0.5s ease-out;}
-        .tela-titulo-brilho{position:absolute;left:50%;top:22%;width:min(900px,130vw);height:min(620px,90vw);transform:translate(-50%,-50%);border-radius:50%;background:#12A876;opacity:0.10;filter:blur(90px);pointer-events:none;}
+        .tela-titulo{background:#071321;color:#F2F5F3;animation:fadeIn 0.5s ease-out;}
+        .tela-titulo-brilho{position:absolute;left:50%;top:22%;width:min(900px,130vw);height:min(620px,90vw);transform:translate(-50%,-50%);border-radius:50%;background:#9BDEFF;opacity:0.10;filter:blur(90px);pointer-events:none;}
         @media(min-width:768px){ .tela-titulo-brilho{top:50%;left:38%;} }
-        .titulo-btn-principal{background:#12A876;color:#06110C;}
-        .titulo-btn-principal:hover{background:#18BB85;box-shadow:0 0 22px rgba(18,168,118,0.45);}
-        .titulo-btn-secundario{background:#131D19;border:1px solid #2A3A33;color:#F2F5F3;}
-        .titulo-btn-secundario:hover{border-color:#12A876;}
+        .titulo-btn-principal{background:#9BDEFF;color:#082036;}
+        .titulo-btn-principal:hover{background:#BCEAFF;box-shadow:0 0 22px rgba(155,222,255,0.45);}
+        .titulo-btn-secundario{background:#102337;border:1px solid #30475D;color:#F2F5F3;}
+        .titulo-btn-secundario:hover{border-color:#9BDEFF;}
         .btn-gold:hover{filter:brightness(1.1);box-shadow:0 0 18px rgba(216,180,74,0.55);}
         .logo-dot{background:linear-gradient(135deg,#34d399,#22d3ee);}
-        .tab-active{border-color:#34d399 !important;color:#34d399 !important;text-shadow:0 0 12px rgba(52,211,153,0.5);}
+        .tab-active{border-color:#34d399 !important;color:#34d399 !important;text-shadow:0 0 12px rgba(155,222,255,0.3);}
         .opt-card{transition:all 0.3s ease;}
-        .opt-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.35),0 0 14px rgba(18,168,118,0.25);}
+        .opt-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.35),0 0 14px rgba(155,222,255,0.25);}
         .opt-card:active{transform:translateY(0);}
         .shimmer-sweep{position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,0.10) 50%,transparent 65%);background-size:250% 250%;animation:shimmer 4s ease-in-out infinite;pointer-events:none;}
         ::-webkit-scrollbar{width:6px;height:6px;}
@@ -4238,7 +4240,7 @@ function resolverTemporada(c, extraStats) {
       </header>
 
       <main className="app-shell">
-        <div key={stage} className="animate-[stageEnter_0.4s_ease-out]">
+        <RevelacaoTela identidade={`${stage}:${aba}`} className="joia-etapa-completa">
 
         {stage === "intro" && introFase === "splash" && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950">
@@ -4266,9 +4268,9 @@ function resolverTemporada(c, extraStats) {
                   <Gema size={176} className="w-28 h-28 md:w-44 md:h-44" />
                   <div className="flex flex-col gap-2">
                     <h1 className="display font-black text-4xl md:text-6xl tracking-wider leading-none text-[#F2F5F3]">A JOIA</h1>
-                    <p className="font-sport font-semibold text-sm md:text-base uppercase tracking-[0.3em] text-[#8FA39A]">Simulador de carreira</p>
+                    <p className="font-sport font-semibold text-sm md:text-base uppercase tracking-[0.3em] text-[#9EB5C9]">Simulador de carreira</p>
                   </div>
-                  <p className="hidden md:block font-sport text-lg text-[#8FA39A] max-w-sm leading-snug">Da peneira à Bola de Ouro. Cada escolha dentro e fora de campo escreve a sua história.</p>
+                  <p className="hidden md:block font-sport text-lg text-[#9EB5C9] max-w-sm leading-snug">Da peneira à Bola de Ouro. Cada escolha dentro e fora de campo escreve a sua história.</p>
                 </div>
                 <div className="w-full max-w-sm mx-auto md:mx-0 flex flex-col gap-3 mt-10 md:mt-0">
                   {temSave && (
@@ -4286,7 +4288,7 @@ function resolverTemporada(c, extraStats) {
                   )}
                   <button onClick={irParaFormulario} className={`hud-btn display font-bold text-sm tracking-wide rounded-2xl min-h-[56px] px-5 ${temSave ? "titulo-btn-secundario" : "titulo-btn-principal"}`}>Nova carreira</button>
                   {temSave && (
-                    <button onClick={() => setSavesAberto(true)} className="self-center font-sport font-semibold text-base text-[#7FE3BC] hover:text-[#F2F5F3] min-h-[44px] px-3">Gerenciar saves</button>
+                    <button onClick={() => setSavesAberto(true)} className="self-center font-sport font-semibold text-base text-[#BCEAFF] hover:text-[#F2F5F3] min-h-[44px] px-3">Gerenciar saves</button>
                   )}
                   <p className="font-sport text-[13px] tracking-wider text-[#7F918A] text-center md:text-left mt-3">A carreira é sua. A história também.</p>
                 </div>
@@ -4426,7 +4428,7 @@ function resolverTemporada(c, extraStats) {
         })()}
 
         {stage === "teste" && (
-          <Card className="text-center" accent="linear-gradient(90deg,#12A876,#3b82f6)">
+          <Card className="text-center" accent="linear-gradient(90deg,#9BDEFF,#3b82f6)">
             <h2 className="display text-lg font-bold mb-1">Teste de base</h2>
             {testeFase === "penalti" && (
               <>
@@ -4584,7 +4586,7 @@ function resolverTemporada(c, extraStats) {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 mb-1">
                         <span className="text-emerald-400 text-xs">⚡</span>
-                        <div className="flex-1 h-2.5 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full rounded-full bar-fill" style={{ width: `${carreira.energia ?? 100}%`, background: (carreira.energia ?? 100) > 40 ? "linear-gradient(90deg,#12A876,#1BC28A)" : "linear-gradient(90deg,#f59e0b,#ef4444)" }} /></div>
+                        <div className="flex-1 h-2.5 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full rounded-full bar-fill" style={{ width: `${carreira.energia ?? 100}%`, background: (carreira.energia ?? 100) > 40 ? "linear-gradient(90deg,#9BDEFF,#BCEAFF)" : "linear-gradient(90deg,#f59e0b,#ef4444)" }} /></div>
                         <span className="text-[10px] font-mono text-zinc-400 w-7 text-right">{Math.round(carreira.energia ?? 100)}%</span>
                       </div>
                       <div className="text-[10px] text-zinc-500 truncate">
@@ -4656,7 +4658,7 @@ function resolverTemporada(c, extraStats) {
                             copaDoMundo: { nome: "Copa do Mundo", icone: "🌎", cor: "#3b82f6" },
                             copaNacional: { nome: "Copa Nacional", icone: "🏆", cor: "#D8B44A" },
                             estadual: { nome: nomeMataMata(carreira, "estadual"), icone: "🚩", cor: "#f59e0b" },
-                            copinha: { nome: "Copa São Paulo de Futebol Júnior", icone: "🌱", cor: "#12A876" },
+                            copinha: { nome: "Copa São Paulo de Futebol Júnior", icone: "🌱", cor: "#9BDEFF" },
                             selecaoAno: { nome: "Seleção", icone: "🌎", cor: "#5B8FEA" },
                           }[eventoEspecial.tipo] || { nome: "Evento especial", icone: "⭐", cor: "#71717a" };
                           const faseLabel = eventoEspecial.faseIdx != null ? FASES_POR_COMPETICAO[eventoEspecial.tipo]?.[eventoEspecial.faseIdx]?.label : null;
@@ -4795,14 +4797,14 @@ function resolverTemporada(c, extraStats) {
 
 
                 {posTemporada?.ok && !janela && !awardsPopup && !carreira.temporadaAndamento && (
-                  <Card className="border-2 border-emerald-400 glow-anim span-full" accent="linear-gradient(90deg,#12A876,#3b82f6,#12A876)">
+                  <Card className="border-2 border-emerald-400 glow-anim span-full" accent="linear-gradient(90deg,#9BDEFF,#3b82f6,#9BDEFF)">
                     <div className="text-center mb-3">
                       <div className="text-sm font-sport font-black uppercase tracking-widest text-emerald-400">🚦 Defina o rumo da temporada</div>
                       <p className="text-[10px] text-zinc-400 mt-1">Suas escolhas aqui valem pra temporada inteira — treine, cuide do corpo e resolva pendências antes de entrar em campo.</p>
                     </div>
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-[10px] text-zinc-500 uppercase tracking-widest">Energia</span>
-                      <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{ width: `${carreira.energia ?? 100}%`, background: (carreira.energia ?? 100) > 50 ? "#12A876" : "#D6483F" }} /></div>
+                      <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{ width: `${carreira.energia ?? 100}%`, background: (carreira.energia ?? 100) > 50 ? "#9BDEFF" : "#D6483F" }} /></div>
                       <span className="text-[10px] font-mono text-zinc-400">{Math.round(carreira.energia ?? 100)}</span>
                       <span className="text-[10px] text-amber-400 font-bold">💰 ${formatarDinheiro(carreira.cofre)}</span>
                     </div>
@@ -4943,12 +4945,12 @@ function resolverTemporada(c, extraStats) {
                                   {j.vermelho && <span className="absolute -top-1 -right-1 w-2.5 h-3.5 rounded-[2px] bg-red-600 border border-zinc-900" title="Cartão vermelho" />}
                                   {j.amarelo && !j.vermelho && <span className="absolute -top-1 -right-1 w-2.5 h-3.5 rounded-[2px] bg-yellow-400 border border-zinc-900" title="Cartão amarelo" />}
                                 </div>
-                                <span className="text-[9px] font-mono mt-0.5" style={{ color: j.suspenso ? "#52525b" : (j.nota || 0) >= 7.5 ? "#12A876" : (j.nota || 0) >= 6.5 ? "#a1a1aa" : "#D6483F" }}>{j.suspenso ? "—" : j.nota}</span>
+                                <span className="text-[9px] font-mono mt-0.5" style={{ color: j.suspenso ? "#52525b" : (j.nota || 0) >= 7.5 ? "#9BDEFF" : (j.nota || 0) >= 6.5 ? "#a1a1aa" : "#D6483F" }}>{j.suspenso ? "—" : j.nota}</span>
                               </button>
                             ))}
                           </div>
                           <div className="grid grid-cols-3 gap-2 text-center mb-2">
-                            <div><div className="font-mono text-sm font-bold" style={{ color: an.forma.notaMedia >= 7.2 ? "#12A876" : an.forma.notaMedia >= 6.5 ? "#D8B44A" : "#D6483F" }}>{an.forma.notaMedia}</div><div className="text-[8px] text-zinc-500 uppercase">Nota (últ. 5)</div></div>
+                            <div><div className="font-mono text-sm font-bold" style={{ color: an.forma.notaMedia >= 7.2 ? "#9BDEFF" : an.forma.notaMedia >= 6.5 ? "#D8B44A" : "#D6483F" }}>{an.forma.notaMedia}</div><div className="text-[8px] text-zinc-500 uppercase">Nota (últ. 5)</div></div>
                             <div><div className="font-mono text-sm font-bold">{an.total.gols}<span className="text-zinc-600">g</span> {an.total.assist}<span className="text-zinc-600">a</span></div><div className="text-[8px] text-zinc-500 uppercase">Na temporada</div></div>
                             <div><div className="font-mono text-sm font-bold">{an.total.aproveitamento}%</div><div className="text-[8px] text-zinc-500 uppercase">Aproveitamento</div></div>
                           </div>
@@ -5033,7 +5035,7 @@ function resolverTemporada(c, extraStats) {
                     {EIXOS_APROVACAO.map((e) => {
                       const val = Math.round(e.get(carreira, getTorcida));
                       const bom = e.inverso ? 100 - val : val;
-                      const cor = bom >= 70 ? "#12A876" : bom >= 45 ? "#D8B44A" : "#D6483F";
+                      const cor = bom >= 70 ? "#9BDEFF" : bom >= 45 ? "#D8B44A" : "#D6483F";
                       return (
                         <div key={e.id}>
                           <div className="flex justify-between text-[10px] mb-0.5">
@@ -5216,7 +5218,7 @@ function resolverTemporada(c, extraStats) {
                         <div className="flex items-center justify-between text-[9px]">
                           <span className="text-zinc-600">{carreira.tecnico.temporadas || 0} temporada(s) no comando · valoriza {est.valoriza.join(", ")}</span>
                         </div>
-                        <div className="text-[10px] mt-1" style={{ color: enc > 3 ? "#12A876" : enc < -3 ? "#D6483F" : "#a1a1aa" }}>
+                        <div className="text-[10px] mt-1" style={{ color: enc > 3 ? "#9BDEFF" : enc < -3 ? "#D6483F" : "#a1a1aa" }}>
                           {enc > 3 ? `✓ Seu perfil é exatamente o que ele quer (+${enc})` : enc < -3 ? `✗ Seu perfil não combina com o estilo dele (${enc})` : "○ Seu perfil não ajuda nem atrapalha no esquema dele"}
                         </div>
                       </div>
@@ -5979,7 +5981,7 @@ function resolverTemporada(c, extraStats) {
                         <div className="mb-3">
                           <div className="flex justify-between text-[10px] text-zinc-500 mb-1"><span>Disposição da diretoria</span><span>{Math.round(negociacaoContrato.paciencia)}%</span></div>
                           <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                            <div className="h-full rounded-full transition-all" style={{ width: `${negociacaoContrato.paciencia}%`, background: negociacaoContrato.paciencia > 50 ? "#12A876" : negociacaoContrato.paciencia > 20 ? "#D8B44A" : "#D6483F" }} />
+                            <div className="h-full rounded-full transition-all" style={{ width: `${negociacaoContrato.paciencia}%`, background: negociacaoContrato.paciencia > 50 ? "#9BDEFF" : negociacaoContrato.paciencia > 20 ? "#D8B44A" : "#D6483F" }} />
                           </div>
                         </div>
                         {negociacaoContrato.ultimoPedido && <p role="status" className="contrato-retorno" data-aceito={negociacaoContrato.ultimoPedido.aceitou}>{negociacaoContrato.ultimoPedido.aceitou?"Pedido aceito. O valor foi atualizado.":"Pedido recusado. O valor anterior foi mantido."}</p>}
@@ -6111,7 +6113,7 @@ function resolverTemporada(c, extraStats) {
                           <>
                             <div className="text-center mb-3 flex flex-col items-center gap-1"><TrophyIcon tipo={awardsPopup.registro.campeaoLiga ? "ouro" : "liga"} size={34} /><div className="text-[10px] text-amber-400 uppercase tracking-widest">Temporada {awardsPopup.registro.temporadaLabel}</div></div>
                             <div className="text-center text-sm mb-1">{awardsPopup.registro.clube}</div>
-                            <div className="text-center display text-3xl font-black mb-2" style={{ color: awardsPopup.registro.campeaoLiga ? "#D8B44A" : "#12A876" }}>{awardsPopup.registro.posLiga}º</div>
+                            <div className="text-center display text-3xl font-black mb-2" style={{ color: awardsPopup.registro.campeaoLiga ? "#D8B44A" : "#9BDEFF" }}>{awardsPopup.registro.posLiga}º</div>
                             <div className="text-center text-xs text-zinc-400 mb-3">n{awardsPopup.registro.ligaNome === "Premier League" ? "a" : "o"} {awardsPopup.registro.ligaNome}{awardsPopup.registro.campeaoLiga ? " — CAMPEÃO!" : ""}</div>
                             {awardsPopup.registro.continental && <div className="text-center text-xs text-zinc-400">{awardsPopup.registro.continental.nome}: <strong>{awardsPopup.registro.continental.resultado}</strong></div>}
                             {awardsPopup.registro.copaNacional && <div className="text-center text-xs text-zinc-400">Copa Nacional: <strong>{awardsPopup.registro.copaNacional.resultado}</strong></div>}
@@ -6294,7 +6296,7 @@ function resolverTemporada(c, extraStats) {
                             {janela.opcoes.map((op, i) => {
                               const empOferta=carreira.empresario?empresarioPorId(carreira.empresario.id):EMPRESARIOS[0];
                               const sal = Math.round(salarioClube(op.clube, ovrAtual) * (op.salarioMult || 1) * (empOferta.salarioMult??1));
-                              const nivelInt = op.interesse == null ? null : op.interesse >= 1.4 ? { l: "Prioridade máxima", c: "#12A876" } : op.interesse >= 0.8 ? { l: "Interesse forte", c: "#D8B44A" } : op.interesse >= 0.35 ? { l: "Sondagem", c: "#a1a1aa" } : { l: "Interesse discreto", c: "#71717a" };
+                              const nivelInt = op.interesse == null ? null : op.interesse >= 1.4 ? { l: "Prioridade máxima", c: "#9BDEFF" } : op.interesse >= 0.8 ? { l: "Interesse forte", c: "#D8B44A" } : op.interesse >= 0.35 ? { l: "Sondagem", c: "#a1a1aa" } : { l: "Interesse discreto", c: "#71717a" };
                               return (
                                 <button key={op.clube.nome} aria-label={`Ver proposta ${op.tipo==="emprestimo"?"de empréstimo":"de transferência"} do ${op.clube.nome}`} onClick={() => escolherOfertaTransferencia(op)} className="mercado-oferta text-left p-3 border border-zinc-800 rounded-sm hover:border-emerald-500 flex items-start gap-3">
                                   <ClubDot club={op.clube} size={24} />
@@ -6334,7 +6336,7 @@ function resolverTemporada(c, extraStats) {
                       <div className="p-5">
                       {(() => { const f = nivelFragilidade(carreira); return (
                         <div className="grid grid-cols-3 gap-2 mb-3">
-                          <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-[9px] text-zinc-500 uppercase">Desgaste</div><div className="font-mono text-lg font-bold" style={{ color: carreira.desgaste > 1.5 ? "#D6483F" : "#12A876" }}>{(carreira.desgaste ?? 0).toFixed(1)}</div></div>
+                          <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-[9px] text-zinc-500 uppercase">Desgaste</div><div className="font-mono text-lg font-bold" style={{ color: carreira.desgaste > 1.5 ? "#D6483F" : "#9BDEFF" }}>{(carreira.desgaste ?? 0).toFixed(1)}</div></div>
                           <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-[9px] text-zinc-500 uppercase">Energia</div><div className="font-mono text-lg font-bold">{Math.round(carreira.energia ?? 100)}%</div></div>
                           <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-[9px] text-zinc-500 uppercase">Condição</div><div className="font-bold text-[11px] leading-tight mt-1" style={{ color: f.cor }}>{f.label}</div></div>
                         </div>
@@ -6635,7 +6637,7 @@ function resolverTemporada(c, extraStats) {
                                         <span className={`flex-1 truncate ${j.voce ? "font-bold text-emerald-400" : "text-zinc-300"}`}>{j.voce ? `${nome} (você)` : j.nome}</span>
                                         <span className="text-[9px] text-zinc-600 w-8">{j.posicao}</span>
                                         <span className="text-[9px] text-zinc-600 w-8 text-right">{j.idade}a</span>
-                                        <span className="font-mono text-[10px] w-7 text-right" style={{ color: j.ovr >= ovrMeu ? "#D6483F" : "#12A876" }}>{j.ovr}</span>
+                                        <span className="font-mono text-[10px] w-7 text-right" style={{ color: j.ovr >= ovrMeu ? "#D6483F" : "#9BDEFF" }}>{j.ovr}</span>
                                       </div>
                                     );
                                   })}
@@ -6853,7 +6855,7 @@ function resolverTemporada(c, extraStats) {
             {aba === "estatisticas" && (
               <div className="tab-grid">
                 {temporadas.length > 0 && (
-                  <Card accent="linear-gradient(90deg,#12A876,#3b82f6)">
+                  <Card accent="linear-gradient(90deg,#9BDEFF,#3b82f6)">
                     <div className="text-[10px] text-emerald-400 uppercase tracking-widest mb-2">📈 Curva de evolução</div>
                     <GraficoEvolucaoCarreira temporadas={temporadas} />
                   </Card>
@@ -7029,7 +7031,7 @@ function resolverTemporada(c, extraStats) {
                             <span className="flex-1 text-zinc-400 truncate">x {j.adversario}{j.classico ? <span className="text-amber-500"> ⚔️</span> : ""}</span>
                             <span className="font-mono text-zinc-200 mx-2">{j.golsMeu}x{j.golsAdv}</span>
                             {(j.golsMinha > 0 || j.assistMinha > 0) && <span className="text-zinc-600 text-[9px] mr-2">{j.golsMinha > 0 ? `⚽${j.golsMinha}` : ""}{j.assistMinha > 0 ? ` 🎯${j.assistMinha}` : ""}</span>}
-                            {j.nota != null && <span className="font-mono text-[9px] mr-2 w-6 text-right" style={{ color: j.nota >= 7.5 ? "#12A876" : j.nota >= 6.5 ? "#a1a1aa" : "#D6483F" }}>{j.nota}</span>}
+                            {j.nota != null && <span className="font-mono text-[9px] mr-2 w-6 text-right" style={{ color: j.nota >= 7.5 ? "#9BDEFF" : j.nota >= 6.5 ? "#a1a1aa" : "#D6483F" }}>{j.nota}</span>}
                             <span className={`font-bold w-4 text-center ${j.resultado === "V" ? "text-emerald-400" : j.resultado === "E" ? "text-zinc-400" : "text-red-400"}`}>{j.resultado}</span>
                           </div>
                         ))}
@@ -7039,7 +7041,7 @@ function resolverTemporada(c, extraStats) {
                   );
                 })()}
 
-                <Card accent="linear-gradient(90deg,#3b82f6,#12A876)">
+                <Card accent="linear-gradient(90deg,#3b82f6,#9BDEFF)">
                   <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-3">Ficha do atleta</div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-[9px] text-zinc-500 uppercase">Posição atual</div><div className="text-sm font-bold">{POSICOES.find((p) => p.id === carreira.posicao)?.label}</div></div>
@@ -7193,13 +7195,13 @@ function resolverTemporada(c, extraStats) {
                             <div className="text-[9px] text-zinc-600 uppercase tracking-widest mb-1">⚔️ Seu rival de geração</div>
                             <div className="flex items-center justify-between text-[11px]">
                               <span className="font-bold text-zinc-200">{rivalObj.nome} <span className="text-zinc-500 font-normal">· {rivalObj.clubeNome}, {rivalObj.idade} anos</span></span>
-                              <span className="font-mono" style={{ color: rivalObj.ovr > ovrAtual ? "#D6483F" : "#12A876" }}>OVR {rivalObj.ovr}</span>
+                              <span className="font-mono" style={{ color: rivalObj.ovr > ovrAtual ? "#D6483F" : "#9BDEFF" }}>OVR {rivalObj.ovr}</span>
                             </div>
                             <div className="text-[10px] text-zinc-500 mt-0.5">Carreira dele: {rivalObj.carreira.gols} gols e {rivalObj.carreira.assist} assistências em {rivalObj.carreira.jogos} jogos · Bolas de Ouro: {carreira.rivalBolasDeOuro || 0}</div>
                             {(() => {
                               const vRival = valorMundo(rivalObj);
                               const vMeu = valorDeMercado(carreira, ovrAtual, ultima);
-                              return <div className="text-[10px] mt-0.5">Valor de mercado: <span className="font-mono" style={{ color: vRival > vMeu ? "#D6483F" : "#12A876" }}>${formatarDinheiro(vRival)}</span> <span className="text-zinc-600">vs. seus ${formatarDinheiro(vMeu)}</span></div>;
+                              return <div className="text-[10px] mt-0.5">Valor de mercado: <span className="font-mono" style={{ color: vRival > vMeu ? "#D6483F" : "#9BDEFF" }}>${formatarDinheiro(vRival)}</span> <span className="text-zinc-600">vs. seus ${formatarDinheiro(vMeu)}</span></div>;
                             })()}
                           </div>
                         )}
@@ -7444,7 +7446,7 @@ function resolverTemporada(c, extraStats) {
                               <div key={m.id} className="border border-amber-500/25 bg-amber-500/5 rounded-sm p-2.5">
                                 <div className="flex items-center justify-between mb-1">
                                   <span className="text-xs font-bold">{m.casa === false ? "✈️" : "🏠"} x {m.adversario} {m.classico && <span className="text-amber-400">⚔️</span>}</span>
-                                  <span className="font-stat font-black text-sm" style={{ color: m.golsMeu > m.golsAdv ? "#12A876" : m.golsMeu === m.golsAdv ? "#a1a1aa" : "#D6483F" }}>{m.golsMeu}×{m.golsAdv}</span>
+                                  <span className="font-stat font-black text-sm" style={{ color: m.golsMeu > m.golsAdv ? "#9BDEFF" : m.golsMeu === m.golsAdv ? "#a1a1aa" : "#D6483F" }}>{m.golsMeu}×{m.golsAdv}</span>
                                 </div>
                                 <div className="flex flex-wrap gap-1 mb-1">
                                   {m.criterios.map((cr) => <span key={cr.id} className="text-[9px] px-1.5 py-0.5 rounded-sm bg-amber-500/15 text-amber-400">{cr.icone} {cr.label}</span>)}
@@ -7464,7 +7466,7 @@ function resolverTemporada(c, extraStats) {
                                   <span className="font-mono text-zinc-600">{x.jogos}J</span>
                                   <span className="font-mono w-14 text-right"><span className="text-emerald-400">{x.v}</span>-<span className="text-zinc-500">{x.e}</span>-<span className="text-red-400">{x.d}</span></span>
                                   <span className="font-mono text-zinc-400 w-8 text-right">{x.gols}g</span>
-                                  <span className="font-mono w-9 text-right" style={{ color: x.aproveitamento >= 60 ? "#12A876" : x.aproveitamento <= 35 ? "#D6483F" : "#a1a1aa" }}>{x.aproveitamento}%</span>
+                                  <span className="font-mono w-9 text-right" style={{ color: x.aproveitamento >= 60 ? "#9BDEFF" : x.aproveitamento <= 35 ? "#D6483F" : "#a1a1aa" }}>{x.aproveitamento}%</span>
                                 </div>
                               ))}
                             </div>
@@ -7533,7 +7535,7 @@ function resolverTemporada(c, extraStats) {
                                     <span>Recorde do clube: {rec.gols} gols</span>
                                     <span>{faltam > 0 ? `faltam ${faltam}` : "alcançado!"}</span>
                                   </div>
-                                  <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: pct > 80 ? "#D8B44A" : "#12A876" }} /></div>
+                                  <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: pct > 80 ? "#D8B44A" : "#9BDEFF" }} /></div>
                                 </>
                               ))}
                             </div>
@@ -7571,7 +7573,7 @@ function resolverTemporada(c, extraStats) {
                           <span className="text-zinc-500">V / E / D</span><span className="font-mono text-right">{d.v}/{d.e}/{d.d}</span>
                           <span className="text-zinc-500">Gols / Assist.</span><span className="font-mono text-right">{d.gols} / {d.assist}</span>
                           <span className="text-zinc-500">Aproveitamento</span><span className="font-mono text-right">{d.aproveitamento}%</span>
-                          <span className="text-zinc-500">Nota média</span><span className="font-mono text-right font-bold" style={{ color: d.notaMedia >= 7.2 ? "#12A876" : d.notaMedia >= 6.5 ? "#D8B44A" : "#D6483F" }}>{d.notaMedia}</span>
+                          <span className="text-zinc-500">Nota média</span><span className="font-mono text-right font-bold" style={{ color: d.notaMedia >= 7.2 ? "#9BDEFF" : d.notaMedia >= 6.5 ? "#D8B44A" : "#D6483F" }}>{d.notaMedia}</span>
                         </div>
                       </div>
                     );
@@ -7590,7 +7592,7 @@ function resolverTemporada(c, extraStats) {
                           </div>
                         )}
                         <div className="grid grid-cols-2 gap-2">
-                          <Bloco titulo="🏠 Em casa" d={an.casa} cor="#12A876" />
+                          <Bloco titulo="🏠 Em casa" d={an.casa} cor="#9BDEFF" />
                           <Bloco titulo="✈️ Fora de casa" d={an.fora} cor="#3b82f6" />
                         </div>
                         {an.melhor && (
@@ -7708,8 +7710,8 @@ function resolverTemporada(c, extraStats) {
                   </div>
                   <div className="flex justify-between text-[11px] mb-1"><span className="text-zinc-400">Fama</span><span className="font-mono text-pink-400">{Math.round(carreira.fama)}</span></div>
                   <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden mb-2"><div className="h-full rounded-full bg-pink-500" style={{ width: `${carreira.fama}%` }} /></div>
-                  <div className="flex justify-between text-[11px] mb-1"><span className="text-zinc-400">🔥 Calor da mídia</span><span className="font-mono" style={{ color: (carreira.calorMidia ?? 20) >= 80 ? "#D6483F" : (carreira.calorMidia ?? 20) >= 50 ? "#f59e0b" : "#12A876" }}>{Math.round(carreira.calorMidia ?? 20)}</span></div>
-                  <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{ width: `${carreira.calorMidia ?? 20}%`, background: (carreira.calorMidia ?? 20) >= 80 ? "#D6483F" : (carreira.calorMidia ?? 20) >= 50 ? "#f59e0b" : "#12A876" }} /></div>
+                  <div className="flex justify-between text-[11px] mb-1"><span className="text-zinc-400">🔥 Calor da mídia</span><span className="font-mono" style={{ color: (carreira.calorMidia ?? 20) >= 80 ? "#D6483F" : (carreira.calorMidia ?? 20) >= 50 ? "#f59e0b" : "#9BDEFF" }}>{Math.round(carreira.calorMidia ?? 20)}</span></div>
+                  <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden"><div className="h-full rounded-full" style={{ width: `${carreira.calorMidia ?? 20}%`, background: (carreira.calorMidia ?? 20) >= 80 ? "#D6483F" : (carreira.calorMidia ?? 20) >= 50 ? "#f59e0b" : "#9BDEFF" }} /></div>
                   {(carreira.calorMidia ?? 20) >= 70 && <p className="text-[10px] text-red-400 mt-1">Muita exposição — risco de escândalo se continuar subindo.</p>}
                 </Card>
 
@@ -7723,7 +7725,7 @@ function resolverTemporada(c, extraStats) {
                         const jaRespondi = (carreira.respostasFas || []).includes(`${ultima.temporadaLabel}_${i}`);
                         return (
                           <div key={i} className="bg-zinc-950/40 rounded-sm px-2.5 py-2">
-                            <div className="text-[11px]"><span className="font-bold" style={{ color: hater ? "#D6483F" : "#12A876" }}>@torcedor{i + 1}: </span><span className="text-zinc-300">{m}</span></div>
+                            <div className="text-[11px]"><span className="font-bold" style={{ color: hater ? "#D6483F" : "#9BDEFF" }}>@torcedor{i + 1}: </span><span className="text-zinc-300">{m}</span></div>
                             {jaRespondi ? (
                               <div className="text-[10px] text-zinc-600 mt-1.5 pl-3 border-l border-zinc-800">✓ você já respondeu</div>
                             ) : (
@@ -7744,7 +7746,7 @@ function resolverTemporada(c, extraStats) {
                     <Card className="border-pink-500/40">
                       <div className="text-[10px] text-pink-400 uppercase tracking-widest mb-2">💬 Responder {respostaFa.autor}</div>
                       <div className="bg-zinc-950/50 rounded-sm px-3 py-2 mb-3">
-                        <span className="text-[11px] font-bold" style={{ color: respostaFa.hater ? "#D6483F" : "#12A876" }}>{respostaFa.autor}: </span>
+                        <span className="text-[11px] font-bold" style={{ color: respostaFa.hater ? "#D6483F" : "#9BDEFF" }}>{respostaFa.autor}: </span>
                         <span className="text-[11px] text-zinc-300">{respostaFa.msg}</span>
                       </div>
                       <div className="text-[9px] text-zinc-600 uppercase tracking-widest mb-1.5">Como você responde?</div>
@@ -7810,8 +7812,8 @@ function resolverTemporada(c, extraStats) {
                       <Card key={i} padded={false} className="overflow-hidden">
                         <div className="flex items-center gap-2 px-3 py-2 border-b border-zinc-800"><SilhuetaJogador size={22} cor="#E1306C" /><span className="text-xs font-bold">@{nome.toLowerCase().replace(/\s+/g, "")}</span></div>
                         {fotoPost ? (
-                          <div className="relative h-36" style={{ background: `linear-gradient(180deg, rgba(14,21,18,.05) 40%, rgba(14,21,18,.75) 100%), url(${fotoPost}) center/cover` }}>
-                            <span aria-hidden="true" className="absolute left-2.5 bottom-2 w-8 h-8 rounded-full bg-[#0E1512]/80 border border-white/15 flex items-center justify-center text-base">{img.emoji}</span>
+                          <div className="relative h-36" style={{ background: `linear-gradient(180deg, rgba(7,19,33,.05) 40%, rgba(7,19,33,.75) 100%), url(${fotoPost}) center/cover` }}>
+                            <span aria-hidden="true" className="absolute left-2.5 bottom-2 w-8 h-8 rounded-full bg-[#071321]/80 border border-white/15 flex items-center justify-center text-base">{img.emoji}</span>
                           </div>
                         ) : (
                           <div className="h-28 flex items-center justify-center text-4xl" style={{ background: img.bg }}>{img.emoji}</div>
@@ -7858,7 +7860,7 @@ function resolverTemporada(c, extraStats) {
                 </Card>
 
                 <div className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1 mb-1">💰 Patrimônio & Extrato</div>
-                <Card accent="linear-gradient(90deg,#12A876,#D8B44A)">
+                <Card accent="linear-gradient(90deg,#9BDEFF,#D8B44A)">
                   <div className="text-center mb-4"><div className="text-[10px] text-zinc-500 uppercase tracking-widest">Total acumulado</div><div className="display text-3xl font-black text-emerald-400">${formatarDinheiro(carreira.cofre)}</div></div>
                   <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2">Extrato</div>
                   <div className="max-h-56 overflow-y-auto space-y-1">
@@ -7915,7 +7917,7 @@ function resolverTemporada(c, extraStats) {
                           <div className="border-t border-zinc-800 mt-2.5 pt-2">
                             <div className="text-[9px] text-zinc-600 uppercase tracking-widest mb-1">Marcas de olho em você</div>
                             <div className="flex flex-wrap gap-1">
-                              {disp.map((p) => <span key={p.marca} className="text-[9px] px-1.5 py-0.5 rounded-sm" style={{ background: p.perfil === "luxo" ? "#EC489922" : p.perfil === "familia" ? "#12A87622" : "#3f3f4644", color: p.perfil === "luxo" ? "#EC4899" : p.perfil === "familia" ? "#12A876" : "#a1a1aa" }}>{p.marca}</span>)}
+                              {disp.map((p) => <span key={p.marca} className="text-[9px] px-1.5 py-0.5 rounded-sm" style={{ background: p.perfil === "luxo" ? "#EC489922" : p.perfil === "familia" ? "#9BDEFF22" : "#3f3f4644", color: p.perfil === "luxo" ? "#EC4899" : p.perfil === "familia" ? "#9BDEFF" : "#a1a1aa" }}>{p.marca}</span>)}
                             </div>
                             {!luxo.length && <p className="text-[9px] text-zinc-600 mt-1">Marcas de luxo só procuram quem tem padrão de vida de estrela (45+).</p>}
                             {!fam.length && <p className="text-[9px] text-zinc-600 mt-1">Marcas familiares evitam quem ostenta demais ou vive em polêmica.</p>}
@@ -8129,7 +8131,7 @@ function resolverTemporada(c, extraStats) {
 
         {avisoSave && (
           <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] px-4 py-2.5 rounded-md text-xs font-bold animate-[popIn_0.2s_ease-out]"
-            style={{ background: avisoSave.erro ? "#3b1213" : "#0d2a19", border: `1px solid ${avisoSave.erro ? "#D6483F" : "#12A876"}`, color: avisoSave.erro ? "#ff9d97" : "#7FE3BC" }}>
+            style={{ background: avisoSave.erro ? "#3b1213" : "#0d2a19", border: `1px solid ${avisoSave.erro ? "#D6483F" : "#9BDEFF"}`, color: avisoSave.erro ? "#ff9d97" : "#BCEAFF" }}>
             {avisoSave.erro ? "⚠️ " : "💾 "}{avisoSave.txt}
           </div>
         )}
@@ -8275,9 +8277,9 @@ function resolverTemporada(c, extraStats) {
                         <div className="bg-zinc-950/40 rounded-sm p-2"><div className="font-stat font-black text-base">{conf.jogos}</div><div className="text-[8px] text-zinc-500 uppercase">Jogos</div></div>
                         <div className="bg-zinc-950/40 rounded-sm p-2"><div className="font-stat font-black text-base"><span className="text-emerald-400">{conf.v}</span>-<span className="text-zinc-400">{conf.e}</span>-<span className="text-red-400">{conf.d}</span></div><div className="text-[8px] text-zinc-500 uppercase">V-E-D</div></div>
                         <div className="bg-zinc-950/40 rounded-sm p-2"><div className="font-stat font-black text-base">{conf.gols}</div><div className="text-[8px] text-zinc-500 uppercase">Gols</div></div>
-                        <div className="bg-zinc-950/40 rounded-sm p-2"><div className="font-stat font-black text-base" style={{ color: conf.notaMedia >= 7.2 ? "#12A876" : conf.notaMedia >= 6.5 ? "#e4e4e7" : "#D6483F" }}>{conf.notaMedia}</div><div className="text-[8px] text-zinc-500 uppercase">Nota</div></div>
+                        <div className="bg-zinc-950/40 rounded-sm p-2"><div className="font-stat font-black text-base" style={{ color: conf.notaMedia >= 7.2 ? "#9BDEFF" : conf.notaMedia >= 6.5 ? "#e4e4e7" : "#D6483F" }}>{conf.notaMedia}</div><div className="text-[8px] text-zinc-500 uppercase">Nota</div></div>
                       </div>
-                      <p className="text-[10px] mt-1.5" style={{ color: conf.aproveitamento >= 60 ? "#12A876" : conf.aproveitamento <= 35 ? "#D6483F" : "#a1a1aa" }}>
+                      <p className="text-[10px] mt-1.5" style={{ color: conf.aproveitamento >= 60 ? "#9BDEFF" : conf.aproveitamento <= 35 ? "#D6483F" : "#a1a1aa" }}>
                         {conf.aproveitamento >= 60 ? `🍗 Freguesia: ${conf.aproveitamento}% de aproveitamento contra eles.`
                           : conf.aproveitamento <= 35 ? `😖 Pedra no sapato: só ${conf.aproveitamento}% de aproveitamento.`
                           : `Equilibrado: ${conf.aproveitamento}% de aproveitamento.`}
@@ -8383,7 +8385,7 @@ function resolverTemporada(c, extraStats) {
         {stage === "fim" && fim && (
           <div className="grid gap-4">
             <MuseuFimCarreira c={{...fim.c,nome,nacionalidade,aposentado:true}} temporadas={temporadas} modo="completo"/>
-            <Card className="text-center" accent="linear-gradient(90deg,#D8B44A,#12A876,#3b82f6)">
+            <Card className="text-center" accent="linear-gradient(90deg,#D8B44A,#9BDEFF,#3b82f6)">
               <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-3">Chuteiras no prego · {fim.c.idade} anos</div>
               <PlayerFutCard nome={nome} posicao={posicao} ovr={fim.c.picoOvr} clube="Aposentado" gols={fim.c.gols} assist={fim.c.assist} dinheiro={fim.c.cofre} attrs={fim.c.attrs} nacionalidade={fim.c.nacionalidade} />
               <div className="mt-3">
@@ -8432,7 +8434,7 @@ function resolverTemporada(c, extraStats) {
               )}
             </Card>
 
-            <Card accent="linear-gradient(90deg,#12A876,#3b82f6)">
+            <Card accent="linear-gradient(90deg,#9BDEFF,#3b82f6)">
               <div className="text-[10px] text-emerald-400 uppercase tracking-widest mb-2">📈 Curva de evolução</div>
               <GraficoEvolucaoCarreira temporadas={temporadas} />
               <p className="text-[10px] text-zinc-500 mt-1">🟡 Pico: {fim.c.picoOvr} OVR</p>
@@ -8577,7 +8579,7 @@ function resolverTemporada(c, extraStats) {
           </div>
         )}
 
-        </div>
+        </RevelacaoTela>
       </main>
       </div>
     </div>

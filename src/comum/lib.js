@@ -1,3 +1,4 @@
+import {ampliarParticipantesInternacionais,clubeInternacional} from '../competicoes/clubesInternacionais.js';
 import {adversarioCopaPorFase} from '../treinador/copasEscolha.js';
 import { AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLASSICOS, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONDICOES_CLIMA, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESPECIALIDADES_LISTA, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, FORMACOES_TATICAS, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "../dados/data.js";
 
@@ -1181,7 +1182,7 @@ export function palmaresDoClube(estado, clubeNome) {
 }
 
 export function clubeAtual(estado, nome) {
-  const base = CLUBES.find((c) => c.nome === nome);
+  const base = CLUBES.find((c) => c.nome === nome) || clubeInternacional(nome);
   if (!base) return null;
   const mod = estado?.[nome];
   return mod ? { ...base, liga: mod.liga, forca: mod.forca } : base;
@@ -1203,7 +1204,7 @@ export function girarLigas(estado, forcarClube = null) {
   const novo = { ...estado };
   // 1) oscilação de força: clubes sobem e caem de patamar com o tempo
   Object.keys(novo).forEach((nome) => {
-    const base = CLUBES.find((c) => c.nome === nome);
+    const base = CLUBES.find((c) => c.nome === nome) || clubeInternacional(nome);
     if (!base) return;
     const cur = novo[nome];
     const drift = rand(-2, 2) + (Math.random() < 0.08 ? rand(-5, 5) : 0); // choques ocasionais
@@ -1516,7 +1517,9 @@ export function sortearAdversario(c, competicao, faseIdx = null) {
     // de longe é como a Champions/Libertadores funcionam.
     const meuGrupo = LIGAS[c.clube.liga]?.continental;
     const ligasDoGrupo = Object.keys(LIGAS).filter((l) => LIGAS[l].continental === meuGrupo);
-    const pool = CLUBES.filter((x) => ligasDoGrupo.includes(x.liga) && x.nome !== c.clube.nome);
+    const base = CLUBES.filter((x) => ligasDoGrupo.includes(x.liga) && x.nome !== c.clube.nome);
+    const comp = /Libertadores/i.test(meuGrupo)?'libertadores':/Champions League/i.test(meuGrupo)?'champions':null;
+    const pool = ampliarParticipantesInternacionais(base,comp,c.ano??(ANO_INICIO+(c.idade??16)-16),CLUBES);
     return pool.length ? escolherClube(pool).nome : "adversário continental";
   }
   if (competicao === "copaDoMundo") {

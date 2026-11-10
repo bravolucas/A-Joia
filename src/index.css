@@ -4,7 +4,7 @@
 @tailwind utilities;
 
 html, body, #root { min-height: 100%; }
-body { background: #0E1512; color: #E1E6E3; margin: 0; }
+body { background: #071321; color: #E1E6E3; margin: 0; }
 
 /* A área útil muda quando as barras do navegador e o teclado aparecem. */
 .popup-overlay { padding-top: max(16px, env(safe-area-inset-top)); padding-bottom: max(16px, env(safe-area-inset-bottom)); }

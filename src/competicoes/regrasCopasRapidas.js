@@ -1,3 +1,4 @@
+import {classificacaoInternacionalSul} from './clubesInternacionais.js';
 import {simularCampanhaCopa} from '../treinador/copasEscolha.js';
 import {CLUBES} from '../dados/data.js';
 import {vagasInternacionais,primeiraLiga,TORNEIOS_INTERNACIONAIS} from './vagasInternacionais.js';
@@ -28,6 +29,9 @@ export function calcularVagasRapidas({ano,classificacoesMundo={},torneios=[],lig
   const campeaoConference=torneios.find(t=>idContinental(t.nome)==='conference'&&doPais(t.campeao))?.campeao;
   Object.assign(resultado,vagasInternacionais({liga,tabela,ano,campeaoCopa:nacional?.campeao,viceCopa:viceDe(nacional),campeoesContinentais:continentais,campeaoEuropa,campeaoConference,vagasExtrasChampions:extrasPorLiga[liga]||0}));
  }
+ // As oito federações vizinhas têm classificação própria, sem liga doméstica jogável.
+ for(const c of clubes.filter(c=>c.liga==='sulamericano'))delete resultado[c.nome];
+ Object.assign(resultado,classificacaoInternacionalSul(ano,clubes));
  return resultado;
 }
 export function classificacoesHistoricas(a,ligasMundo={}){

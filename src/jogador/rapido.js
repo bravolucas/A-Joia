@@ -5,7 +5,7 @@ import {iniciarCamisas,aposentarDonoCamisa,prepararCamisaSelecao,sincronizarCami
 import {estatisticasDecisao} from './decisaoDeJogo.js';
 import {prepararCopasJogador} from './copasJogador.js';
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
-import {CLUBES_EUROPEUS_EXTRAS} from '../competicoes/clubesEuropeusExtras.js';
+import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternacionais.js';
 import {vagaJogador,nomeVaga,calcularVagasRapidas,clubesParaCopas,regiaoDaLiga,idContinental} from '../competicoes/regrasCopasRapidas.js';
 import {participantesEstadual} from '../competicoes/estaduaisRapidos.js';
 import {simularCampanhaCopa,adversarioCopaPorFase} from '../treinador/copasEscolha.js';
@@ -1487,7 +1487,7 @@ export function contextoMomento(c,m){
  if(m.tipo==='continental'){
   const comp=idContinental(m.titulo),vagas=c.vagasInternacionaisAno===c.ano?c.vagasInternacionaisClubes:calcularVagasRapidas({ano:c.ano-1,ligasMundo:c.ligas});
   const elegiveis=CLUBES.filter(x=>x.nome!==clube.nome&&vagas?.[x.nome]?.competicao===comp);
-  if(['champions','europa','conference'].includes(comp))elegiveis.push(...CLUBES_EUROPEUS_EXTRAS.filter(x=>x.competicaoInternacional===comp));
+  elegiveis.splice(0,elegiveis.length,...ampliarParticipantesInternacionais(elegiveis,comp,c.ano,CLUBES));
   if(elegiveis.length)pool=elegiveis;
  }
  const x=pool.length?(['copa','continental'].includes(m.tipo)?adversarioCopaPorFase(pool,m.titulo||'Final',Math.random):pick(pool)):null;return x?{tipo:'clube',nome:x.nome,...(x.extra?{forca:x.forca}:{})}:null;

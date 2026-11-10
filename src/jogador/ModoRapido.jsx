@@ -1,3 +1,4 @@
+import {RevelacaoTela} from '../comum/efeitos/Movimento.jsx';
 import {BotaoMuseuPessoal,MuseuFimCarreira} from '../museu/MuseuPessoal.jsx';
 import BotaoHistoria from '../historia/HistoriaFutebol.jsx';
 import ApresentacaoOficial from '../comum/ApresentacaoOficial.jsx';
@@ -75,20 +76,20 @@ export const ESTILO_BASE = `
 @media (prefers-reduced-motion:reduce) { .rp-pen-acao, .rp-pen-flash { animation:none; } }
 
 
-.rp{min-height:100vh;background:#0E1512;color:#E1E6E3;font-family:'Inter',ui-sans-serif,system-ui,sans-serif;}
+.rp{min-height:100vh;background:#071321;color:#E1E6E3;font-family:'Inter',ui-sans-serif,system-ui,sans-serif;}
 .rp .display{font-family:'Oswald',sans-serif;}
 .rp .font-stat{font-family:'bebas-neue','Oswald',sans-serif;letter-spacing:.02em;font-synthesis:none;}
 .font-sport{font-family:'Inter',sans-serif;}
-.rp-painel{background:rgba(19,26,23,0.72);border:1px solid rgba(255,255,255,0.08);border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,0.35);}
+.rp-painel{background:rgba(16,35,55,0.72);border:1px solid rgba(255,255,255,0.08);border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,0.35);}
 .rp-btn{transition:transform .2s ease,box-shadow .2s ease,background .2s ease;border-radius:14px;font-weight:700;min-height:52px;}
 .rp-btn:hover{transform:translateY(-1px);} .rp-btn:active{transform:scale(.98);}
 .rp-btn:disabled{opacity:.4;transform:none;cursor:not-allowed;}
-.rp-prim{background:#12A876;color:#06110C;} .rp-prim:hover{background:#18BB85;box-shadow:0 0 18px rgba(18,168,118,.45);}
+.rp-prim{background:#9BDEFF;color:#082036;} .rp-prim:hover{background:#BCEAFF;box-shadow:0 0 18px rgba(155,222,255,.45);}
 .rp-ouro{background:linear-gradient(90deg,#D8B44A,#F5D77A);color:#1A1405;} .rp-ouro:hover{box-shadow:0 0 22px rgba(216,180,74,.5);}
-.rp-sec{background:rgba(19,29,25,.8);border:1px solid #2A3A33;color:#F2F5F3;} .rp-sec:hover{border-color:#12A876;}
-.rp-opcao{background:rgba(19,29,25,.8);border:1px solid #2A3A33;border-radius:16px;text-align:left;transition:all .2s ease;}
-.rp-opcao:hover{border-color:#12A876;background:rgba(18,168,118,.08);transform:translateY(-1px);}
-.rp-opcao.sel{border-color:#12A876;background:rgba(18,168,118,.14);box-shadow:0 0 0 1px #12A876 inset;}
+.rp-sec{background:rgba(16,35,55,.8);border:1px solid #30475D;color:#F2F5F3;} .rp-sec:hover{border-color:#9BDEFF;}
+.rp-opcao{background:rgba(16,35,55,.8);border:1px solid #30475D;border-radius:16px;text-align:left;transition:all .2s ease;}
+.rp-opcao:hover{border-color:#9BDEFF;background:rgba(155,222,255,.08);transform:translateY(-1px);}
+.rp-opcao.sel{border-color:#9BDEFF;background:rgba(155,222,255,.14);box-shadow:0 0 0 1px #9BDEFF inset;}
 .rp-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;}
 .rp-entra{animation:rpEntra .35s ease-out both;}
 .rp-sobe{animation:rpSobe .6s cubic-bezier(.2,.8,.2,1) both;}
@@ -105,7 +106,7 @@ export const ESTILO_BASE = `
 @keyframes rpFaisca{0%{transform:scale(.2);opacity:1}100%{transform:scale(1.6);opacity:0}}
 .rp-faisca{animation:rpFaisca .5s .4s both;transform-box:fill-box;transform-origin:center;}
 .rp-bola{transition:transform .5s cubic-bezier(.2,.8,.2,1);}
-.glass{background:rgba(19,26,23,0.92);border:1px solid rgba(255,255,255,0.08);box-shadow:0 8px 30px rgba(0,0,0,0.35);}
+.glass{background:rgba(16,35,55,0.92);border:1px solid rgba(255,255,255,0.08);box-shadow:0 8px 30px rgba(0,0,0,0.35);}
 .hud-btn{transition:all .3s ease;width:100%;} .btn-gold{background:linear-gradient(90deg,#D8B44A,#F5D77A);color:#1A1405;}
 @keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(420px) rotate(360deg);opacity:0}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -203,12 +204,12 @@ function agruparTitulos(lista) {
   return grupos;
 }
 const RISCO = {
-  seguro: { label: "Seguro", cor: "#7FE3BC", bg: "rgba(18,168,118,.14)" },
+  seguro: { label: "Seguro", cor: "#BCEAFF", bg: "rgba(155,222,255,.14)" },
   equilibrado: { label: "Equilibrado", cor: "#8DB4F5", bg: "rgba(46,111,224,.16)" },
   arriscado: { label: "Arriscado", cor: "#F0A99E", bg: "rgba(227,107,91,.16)" },
 };
 
-function Barra({ valor, cor = "#12A876" }) {
+function Barra({ valor, cor = "#9BDEFF" }) {
   return (
     <div className="h-1.5 rounded-full bg-[#222926] overflow-hidden">
       <div className="h-full rounded-full" style={{ width: `${Math.max(4, Math.min(100, valor))}%`, background: cor, transition: "width .8s ease" }} />
@@ -246,7 +247,7 @@ function BotaDourada({ size = 80 }) {
       <path d="M48 26 l8 4 M47 33 l9 4 M46 40 l10 4" stroke="#6B5200" strokeWidth="2.5" strokeLinecap="round" />
       <path d="M20 76 H82" stroke="#6B5200" strokeWidth="3" />
       {[30, 44, 58, 72].map((x) => <rect key={x} x={x - 3} y="77" width="6" height="8" rx="1.5" fill="#8E6F00" />)}
-      <rect x="26" y="88" width="50" height="7" rx="2" fill="#2A3A33" />
+      <rect x="26" y="88" width="50" height="7" rx="2" fill="#30475D" />
     </svg>
   );
 }
@@ -262,7 +263,7 @@ function IconeTitulo({ tipo, size = 40, nome = null }) {
 
 
 /* ---------- painel de carreira (como no Copero): cartão no topo + ano a ano ---------- */
-const corOvr = (o) => (o >= 85 ? "#D8B44A" : o >= 78 ? "#1BC28A" : o >= 70 ? "#2E6FE0" : "#5F6E68");
+const corOvr = (o) => (o >= 85 ? "#D8B44A" : o >= 78 ? "#BCEAFF" : o >= 70 ? "#2E6FE0" : "#879EB4");
 function useOvrAnimado(ovr) {
   const [mostrado, setMostrado] = useState(ovr);
   const [delta, setDelta] = useState(null);
@@ -287,7 +288,7 @@ function useOvrAnimado(ovr) {
 
 /* comemorações com canvas-confetti (ISC): chuva de papel nas cores do clube, fogos e estrelas */
 const semMovimento = () => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } };
-export function festejar(tipo = "titulo", cores = ["#EBC557", "#FFFFFF", "#12A876"]) {
+export function festejar(tipo = "titulo", cores = ["#EBC557", "#FFFFFF", "#9BDEFF"]) {
   if (semMovimento()) return;
   const base = { colors: cores, zIndex: 80, disableForReducedMotion: true };
   try {
@@ -321,7 +322,7 @@ export const vibrar = (p = 30) => { try { navigator.vibrate?.(p); } catch { /* s
 
 /* Avatar genérico do jogador: manequim com volume (sem rosto), vestindo a camisa do clube com o escudo no peito */
 function AvatarJogador({ clube, size = 72, numero = null }) {
-  const cor = clube?.cor || "#12A876";
+  const cor = clube?.cor || "#9BDEFF";
   const claro = lumi(cor) > 0.62;
   const id = React.useId().replace(/[^a-zA-Z0-9]/g, "");
   const escudo = clube ? escudoDe(clube.nome) : null;
@@ -353,7 +354,7 @@ function AvatarJogador({ clube, size = 72, numero = null }) {
 }
 
 /* camisa de costas nas cores do clube, com o sobrenome e o número (cartão do topo) */
-function CamisaMini({ cor="#12A876", clube, nome="", numero=9, size=44 }) {return <span style={{width:size,height:size,display:'inline-block',flexShrink:0}}><CamisaPremium nome={clube} cor={cor} numero={numero} sobrenome={nome.trim().split(/\s+/).at(-1).toUpperCase()}/></span>;}
+function CamisaMini({ cor="#9BDEFF", clube, nome="", numero=9, size=44 }) {return <span style={{width:size,height:size,display:'inline-block',flexShrink:0}}><CamisaPremium nome={clube} cor={cor} numero={numero} sobrenome={nome.trim().split(/\s+/).at(-1).toUpperCase()}/></span>;}
 
 function CartaoCarreira({ c, onEstante, onFicha, contadorPulsa, recorde, etapa }) {
   const ovr = ovrDe(c);
@@ -363,7 +364,7 @@ function CartaoCarreira({ c, onEstante, onFicha, contadorPulsa, recorde, etapa }
   const cor = corOvr(ovr);
   const semClube = c.temporadas.length === 0 && !c.flags?.baseEscolhida;
   return (
-    <header className="sticky top-0 z-30 bg-[#0E1512]/95 backdrop-blur border-b border-white/5">
+    <header className="sticky top-0 z-30 bg-[#071321]/95 backdrop-blur border-b border-white/5">
       <div className="max-w-xl mx-auto px-3 py-2.5 flex items-stretch gap-2">
         <div key={delta?.k || 0} className={`cp cp-ovr relative w-[70px] shrink-0 rounded-2xl flex flex-col items-center justify-center ${delta ? "rp-ovr-brilho" : ""}`}
           style={{ "--brilho": delta ? (delta.d > 0 ? "rgba(27,194,138,.55)" : "rgba(227,107,91,.55)") : "transparent" }}
@@ -371,23 +372,23 @@ function CartaoCarreira({ c, onEstante, onFicha, contadorPulsa, recorde, etapa }
           <span className="text-[10px] font-semibold tracking-[0.15em] text-white/80">OVR</span>
           <span className="text-[34px] font-black leading-none text-white">{mostrado}</span>
           {delta && (
-            <span key={delta.k} className="rp-delta font-stat text-[22px] px-2 rounded-lg" style={{ color: "#fff", background: delta.d > 0 ? "#12A876" : "#C9493A", boxShadow: "0 4px 14px rgba(0,0,0,.4)" }}>
+            <span key={delta.k} className="rp-delta font-stat text-[22px] px-2 rounded-lg" style={{ color: "#fff", background: delta.d > 0 ? "#9BDEFF" : "#C9493A", boxShadow: "0 4px 14px rgba(0,0,0,.4)" }}>
               {delta.d > 0 ? `+${delta.d}` : delta.d}
             </span>
           )}
           {recorde ? <Fogos key={recorde} /> : null}
         </div>
-        <div className="flex-1 min-w-0 rounded-2xl pl-1.5 pr-3 py-2 flex items-center gap-1.5" style={{ background: `linear-gradient(120deg, ${clube.cor || "#12A876"}40, rgba(19,26,23,.9) 70%)`, border: "1px solid rgba(255,255,255,.07)" }}>
+        <div className="flex-1 min-w-0 rounded-2xl pl-1.5 pr-3 py-2 flex items-center gap-1.5" style={{ background: `linear-gradient(120deg, ${clube.cor || "#9BDEFF"}40, rgba(16,35,55,.9) 70%)`, border: "1px solid rgba(255,255,255,.07)" }}>
           {!semClube && <CamisaMini key={clube.nome} cor={clube.cor} clube={clube.nome} nome={c.nome} numero={numeroDe(c)} size={46} />}
           <div className="flex-1 min-w-0 flex flex-col justify-between gap-1 self-stretch">
           <div className="flex items-center gap-1.5 text-[12px] font-bold">
-            <span className="text-[#C9D3CE] inline-flex items-center gap-1"><Bandeira nac={c.nac} size={16} /> {c.nac}</span>
-            <span className="px-1.5 rounded-md bg-[#0E1512]/60 text-[#F2F5F3]">{semClube ? `#${numeroDe(c)} ` : ""}{c.posicao}</span>
-            <span className="ml-auto text-[#8FA39A]">IDADE <span className="font-stat text-[17px] text-[#F2F5F3]">{c.idade}</span></span>
+            <span className="text-[#C9D9E8] inline-flex items-center gap-1"><Bandeira nac={c.nac} size={16} /> {c.nac}</span>
+            <span className="px-1.5 rounded-md bg-[#071321]/60 text-[#F2F5F3]">{semClube ? `#${numeroDe(c)} ` : ""}{c.posicao}</span>
+            <span className="ml-auto text-[#9EB5C9]">IDADE <span className="font-stat text-[17px] text-[#F2F5F3]">{c.idade}</span></span>
           </div>
           <div className="flex items-center gap-2 min-w-0">
-            {semClube ? <span className="w-[22px] h-[22px] rounded-full border border-white/25 flex items-center justify-center text-[12px] text-[#8FA39A] shrink-0">?</span> : <ClubDot club={clube} size={22} />}
-            {semClube?<span className="display text-[13px] truncate text-[#8FA39A]">Sem clube</span>:<BotaoHistoria c={c} nome={clube.nome} className="display text-[13px] truncate text-[#F2F5F3]">{clube.nome}</BotaoHistoria>}
+            {semClube ? <span className="w-[22px] h-[22px] rounded-full border border-white/25 flex items-center justify-center text-[12px] text-[#9EB5C9] shrink-0">?</span> : <ClubDot club={clube} size={22} />}
+            {semClube?<span className="display text-[13px] truncate text-[#9EB5C9]">Sem clube</span>:<BotaoHistoria c={c} nome={clube.nome} className="display text-[13px] truncate text-[#F2F5F3]">{clube.nome}</BotaoHistoria>}
             <span className="ml-auto font-stat text-[17px] text-[#EBC557] shrink-0 hidden min-[420px]:inline">{formatarValor(valorAtual(c)).replace(/\s/g, "")}</span>
           </div>
           </div>
@@ -396,7 +397,7 @@ function CartaoCarreira({ c, onEstante, onFicha, contadorPulsa, recorde, etapa }
           <button onClick={onEstante} key={contadorPulsa || 0} className={`flex-1 min-w-[46px] flex items-center justify-center gap-1 rounded-xl border border-[#D8B44A]/35 bg-[#D8B44A]/10 text-[#EBC557] ${contadorPulsa ? "rp-contador" : ""}`} aria-label={`Estante de troféus: ${c.lista.length}`} data-contador-tacas>
             <TacaCompeticao tipo="liga" size={13} /><span className="font-stat text-[15px]">{c.lista.length}</span>
           </button>
-          <button onClick={onFicha} className="flex-1 min-w-[46px] flex items-center justify-center rounded-xl border border-white/10 bg-white/5 text-[#C9D3CE]" aria-label="Abrir ficha do jogador">
+          <button onClick={onFicha} className="flex-1 min-w-[46px] flex items-center justify-center rounded-xl border border-white/10 bg-white/5 text-[#C9D9E8]" aria-label="Abrir ficha do jogador">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" /></svg>
           </button>
         </div>
@@ -413,7 +414,7 @@ function Fogos() {
     <span className="absolute inset-0 pointer-events-none" aria-hidden="true">
       {pontos.map((i) => {
         const ang = (i / pontos.length) * Math.PI * 2;
-        return <span key={i} className="rp-fogo" style={{ "--fx": `${Math.cos(ang) * 46}px`, "--fy": `${Math.sin(ang) * 46}px`, background: i % 2 ? "#F5D77A" : "#7FE3BC", animationDelay: `${(i % 3) * 0.05}s` }} />;
+        return <span key={i} className="rp-fogo" style={{ "--fx": `${Math.cos(ang) * 46}px`, "--fy": `${Math.sin(ang) * 46}px`, background: i % 2 ? "#F5D77A" : "#BCEAFF", animationDelay: `${(i % 3) * 0.05}s` }} />;
       })}
     </span>
   );
@@ -537,7 +538,7 @@ function LinhaDoTempo({ c, total = 22 }) {
         const t = ts[i];
         return (
           <div key={i} className="flex-1 h-2 rounded-sm relative" title={t ? `${t.ano} · ${t.clube}` : ""}
-            style={{ background: t ? t.cor || "#12A876" : i === ts.length ? "rgba(18,168,118,.35)" : "#1A211E", opacity: t ? 0.9 : 1 }}>
+            style={{ background: t ? t.cor || "#9BDEFF" : i === ts.length ? "rgba(155,222,255,.35)" : "#1A211E", opacity: t ? 0.9 : 1 }}>
             {t?.titulos?.length ? <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#D8B44A]" /> : null}
           </div>
         );
@@ -549,20 +550,20 @@ function LinhaDoTempo({ c, total = 22 }) {
 function Cabecalho({ c, onSair, onEstante, treinador = false, etapa }) {
   const nTrofeus = c ? c.lista.length : 0;
   return (
-    <header className="sticky top-0 z-30 bg-[#0E1512]/90 backdrop-blur border-b border-white/5">
+    <header className="sticky top-0 z-30 bg-[#071321]/90 backdrop-blur border-b border-white/5">
       <div className="max-w-xl mx-auto px-4 py-2.5 flex items-center gap-3">
         <button onClick={onSair} className="flex items-center gap-2 min-h-[44px] pr-1" aria-label="Voltar ao menu">
           <Gema size={26} />
           <span className="display text-[11px] tracking-[0.2em] text-[#F2F5F3] hidden sm:inline">A JOIA</span>
         </button>
-        {c && <span className="font-stat text-[15px] text-[#C9D3CE]">{c.ano} · {c.idade} anos</span>}
+        {c && <span className="font-stat text-[15px] text-[#C9D9E8]">{c.ano} · {c.idade} anos</span>}
         {c && (
           <button onClick={onEstante} className="ml-auto flex items-center gap-1.5 min-h-[44px] px-3 rounded-xl border border-[#D8B44A]/35 bg-[#D8B44A]/10 text-[#EBC557]" aria-label="Abrir estante de troféus">
             <TacaCompeticao tipo="liga" size={15} />
             <span className="font-stat text-[15px]">{nTrofeus}</span>
           </button>
         )}
-        {!c && <span className="ml-auto font-semibold text-xs uppercase tracking-[0.2em] text-[#8FA39A]">{treinador ? 'Modo Treinador' : 'Modo Rápido'}</span>}
+        {!c && <span className="ml-auto font-semibold text-xs uppercase tracking-[0.2em] text-[#9EB5C9]">{treinador ? 'Modo Treinador' : 'Modo Rápido'}</span>}
       </div>
       {c && <div className="max-w-xl mx-auto px-4 pb-2"><LinhaDoTempo c={c} /></div>}
     <FasesTemporada etapa={etapa}/></header>
@@ -577,33 +578,33 @@ function Estante({ c, onFechar }) {
       <div className="w-full max-w-xl max-h-[85vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-[#121916] border border-white/10 p-5 rp-entra" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between">
           <h2 className="display text-base text-[#F2F5F3]">Estante de troféus</h2>
-          <button onClick={onFechar} className="min-h-[44px] px-3 text-[15px] font-bold text-[#8FA39A]">Fechar</button>
+          <button onClick={onFechar} className="min-h-[44px] px-3 text-[15px] font-bold text-[#9EB5C9]">Fechar</button>
         </div>
-        {!porTipo.length && <p className="text-[16px] text-[#8FA39A] mt-3">Ainda vazia. O primeiro troféu vai ter um lugar de honra aqui.</p>}
+        {!porTipo.length && <p className="text-[16px] text-[#9EB5C9] mt-3">Ainda vazia. O primeiro troféu vai ter um lugar de honra aqui.</p>}
         <div className="grid grid-cols-2 gap-2 mt-4">
           {porTipo.map((g) => (
-            <div key={g.tipo + g.nome} className="rounded-2xl bg-[#0E1512] border border-white/5 p-3 flex items-center gap-3">
+            <div key={g.tipo + g.nome} className="rounded-2xl bg-[#071321] border border-white/5 p-3 flex items-center gap-3">
               <IconeTitulo tipo={g.tipo} nome={g.nome} size={34} />
               <div className="min-w-0">
                 <div className="font-stat text-xl text-[#F2F5F3] leading-none">{g.n}</div>
-                <div className="text-[13px] text-[#C9D3CE] leading-tight">{g.nome}</div>
+                <div className="text-[13px] text-[#C9D9E8] leading-tight">{g.nome}</div>
               </div>
             </div>
           ))}
         </div>
         {c.lista.length > 0 && (
           <ul className="flex flex-col gap-1 mt-4">
-            {[...c.lista].reverse().map((t, i) => <li key={i} className="text-[15px] text-[#C9D3CE]"><span className="font-stat text-[#8FA39A] mr-2">{t.ano}</span>{t.nome} <span className="text-[#7F918A]">· {t.clube}</span></li>)}
+            {[...c.lista].reverse().map((t, i) => <li key={i} className="text-[15px] text-[#C9D9E8]"><span className="font-stat text-[#9EB5C9] mr-2">{t.ano}</span>{t.nome} <span className="text-[#7F918A]">· {t.clube}</span></li>)}
           </ul>
         )}
         {(c.marcos || []).length > 0 && (
           <>
-            <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A] mt-6 mb-2">Momentos da carreira</h3>
+            <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9] mt-6 mb-2">Momentos da carreira</h3>
             <ul className="flex flex-col gap-2">
               {[...c.marcos].reverse().map((m, i) => (
                 <li key={i} className="flex items-start gap-3 text-[15px]">
                   <span className="text-xl leading-none"><Icone e={m.icone} /></span>
-                  <span><span className="font-bold text-[#F2F5F3]">{m.titulo}</span> <span className="text-[#8FA39A]">· {m.ano}</span><br /><span className="text-[#8FA39A]">{m.texto}</span></span>
+                  <span><span className="font-bold text-[#F2F5F3]">{m.titulo}</span> <span className="text-[#9EB5C9]">· {m.ano}</span><br /><span className="text-[#9EB5C9]">{m.texto}</span></span>
                 </li>
               ))}
             </ul>
@@ -618,10 +619,10 @@ function Estante({ c, onFechar }) {
 function BarraMental({ moral = 65, delta = null }) {
   const e = estadoMental(moral);
   return (
-    <div className="mt-2 rounded-xl bg-[#0E1512]/70 px-3 py-2.5" title="Estado mental: afeta nota, evolução e risco de lesão">
+    <div className="mt-2 rounded-xl bg-[#071321]/70 px-3 py-2.5" title="Estado mental: afeta nota, evolução e risco de lesão">
       <div className="flex items-center justify-between text-[14px] mb-1.5">
-        <span className="text-[#C9D3CE]">🧠 Cabeça</span>
-        <span className="font-bold" style={{ color: e.cor }}><Icone e={e.icone} /> {e.nome} <span className="font-stat text-[#8FA39A]">{moral}</span>{delta ? <span className={delta > 0 ? "text-[#1BC28A]" : "text-[#E36B5B]"}> {delta > 0 ? `+${delta}` : delta}</span> : null}</span>
+        <span className="text-[#C9D9E8]">🧠 Cabeça</span>
+        <span className="font-bold" style={{ color: e.cor }}><Icone e={e.icone} /> {e.nome} <span className="font-stat text-[#9EB5C9]">{moral}</span>{delta ? <span className={delta > 0 ? "text-[#BCEAFF]" : "text-[#E36B5B]"}> {delta > 0 ? `+${delta}` : delta}</span> : null}</span>
       </div>
       <Barra valor={moral} cor={e.cor} />
     </div>
@@ -637,9 +638,9 @@ function Ficha({ c, semTopo = false }) {
     <div className="rp-painel overflow-hidden">
       {!semTopo && <div className="p-4 flex items-center gap-3" style={{ background: `linear-gradient(120deg, ${clube.cor}33, transparent 70%)` }}>
         <AvatarJogador clube={clube} size={64} numero={numeroDe(c)} />
-        <div className="w-16 h-16 rounded-2xl flex flex-col items-center justify-center bg-[#0E1512]/80 border border-[#D8B44A]/40 shrink-0">
+        <div className="w-16 h-16 rounded-2xl flex flex-col items-center justify-center bg-[#071321]/80 border border-[#D8B44A]/40 shrink-0">
           <span className="font-stat text-2xl font-bold text-[#EBC557] leading-none">{ovr}</span>
-          <span className="text-[10px] font-bold tracking-widest text-[#8FA39A]">{c.posicao}</span>
+          <span className="text-[10px] font-bold tracking-widest text-[#9EB5C9]">{c.posicao}</span>
         </div>
         <div className="min-w-0 flex-1">
           <div className="display text-sm text-[#F2F5F3] truncate">{c.nome}</div>
@@ -647,33 +648,33 @@ function Ficha({ c, semTopo = false }) {
             <ClubDot club={clube} size={18} />
             <span className="truncate">{clube.nome}{c.emprestimo ? " (empréstimo)" : ""}</span>
           </div>
-          <div className="text-[13px] text-[#8FA39A]">{ligaDe(clube.liga).nome} · {st.label}</div>
-          <div className="text-[13px] text-[#8FA39A]">Camisa <span className="font-stat text-[#E1E6E3]">{numeroDe(c)}</span> · {peDe(c.pe).nome}</div>
+          <div className="text-[13px] text-[#9EB5C9]">{ligaDe(clube.liga).nome} · {st.label}</div>
+          <div className="text-[13px] text-[#9EB5C9]">Camisa <span className="font-stat text-[#E1E6E3]">{numeroDe(c)}</span> · {peDe(c.pe).nome}</div>
         </div>
       </div>}
       <div className={`px-4 pb-4 ${semTopo ? "pt-3" : ""}`}>
         <BotaoHistoria c={c} nome={clube.nome} className="hf-link">Galeria do clube e marcos da carreira →</BotaoHistoria>
         <BotaoMuseuPessoal c={c}/>
-        {semTopo && <div className="text-[13px] text-[#8FA39A] mb-2">{ligaDe(clube.liga).nome} · {st.label} · {peDe(c.pe).nome}</div>}
+        {semTopo && <div className="text-[13px] text-[#9EB5C9] mb-2">{ligaDe(clube.liga).nome} · {st.label} · {peDe(c.pe).nome}</div>}
         <div className="grid grid-cols-6 gap-2 mt-1">
           {Object.keys(ATTR_LABEL).map((a) => (
             <div key={a} className="flex flex-col gap-1">
-              <span className="text-[10px] font-bold tracking-wider text-[#8FA39A]">{ATTR_LABEL[a]}</span>
+              <span className="text-[10px] font-bold tracking-wider text-[#9EB5C9]">{ATTR_LABEL[a]}</span>
               <span className="font-stat text-[15px] text-[#F2F5F3] leading-none">{c.attrs[a]}</span>
               <Barra valor={(c.attrs[a] - 40) * 1.7} />
             </div>
           ))}
         </div>
         {c.contrato && (
-          <div className="mt-4 rounded-xl bg-[#0E1512]/70 px-3 py-2.5 flex items-center justify-between gap-2 text-[14px]">
-            <span className="text-[#C9D3CE]">📄 {formatarValor(c.contrato.salario)}/ano · cláusula {formatarValor(c.contrato.multa)}</span>
-            <span className={`font-bold ${c.contrato.restantes <= 1 ? "text-[#EBC557]" : "text-[#8FA39A]"}`}>{c.contrato.restantes <= 0 ? "acabou" : `${c.contrato.restantes} ano${c.contrato.restantes > 1 ? "s" : ""}`}</span>
+          <div className="mt-4 rounded-xl bg-[#071321]/70 px-3 py-2.5 flex items-center justify-between gap-2 text-[14px]">
+            <span className="text-[#C9D9E8]">📄 {formatarValor(c.contrato.salario)}/ano · cláusula {formatarValor(c.contrato.multa)}</span>
+            <span className={`font-bold ${c.contrato.restantes <= 1 ? "text-[#EBC557]" : "text-[#9EB5C9]"}`}>{c.contrato.restantes <= 0 ? "acabou" : `${c.contrato.restantes} ano${c.contrato.restantes > 1 ? "s" : ""}`}</span>
           </div>
         )}
         <BarraMental moral={c.moral} />
         <div className="grid grid-cols-3 gap-2 mt-2 text-center">
           {[["VALOR", formatarValor(valorAtual(c))], ["TORCIDA", `${torcida}/100`], ["FAMA", `${c.fama}/100`]].map(([k, v]) => (
-            <div key={k} className="rounded-xl bg-[#0E1512]/70 py-2"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">{k}</div><div className="font-stat text-sm">{v}</div></div>
+            <div key={k} className="rounded-xl bg-[#071321]/70 py-2"><div className="text-[10px] font-bold tracking-wider text-[#9EB5C9]">{k}</div><div className="font-stat text-sm">{v}</div></div>
           ))}
         </div>
         {c.tracos.length > 0 && (
@@ -690,7 +691,7 @@ function Ficha({ c, semTopo = false }) {
 function Secao({ titulo, children }) {
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">{titulo}</span>
+      <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9]">{titulo}</span>
       {children}
     </div>
   );
@@ -704,10 +705,10 @@ function MelhoresCarreiras() {
       <ol className="rp-painel p-3 flex flex-col gap-2">
         {hall.map((h, i) => (
           <li key={h.id} className="flex items-center gap-3">
-            <span className="font-stat text-lg w-6 text-center" style={{ color: i === 0 ? "#EBC557" : "#8FA39A" }}>{i + 1}</span>
+            <span className="font-stat text-lg w-6 text-center" style={{ color: i === 0 ? "#EBC557" : "#9EB5C9" }}>{i + 1}</span>
             <div className="min-w-0 flex-1">
-              <div className="text-[16px] font-semibold text-[#F2F5F3] truncate">{h.nome} <span className="text-[13px] font-normal text-[#8FA39A]">· {h.posicao}{h.diario ? " · do dia" : ""}</span></div>
-              <div className="text-[13px] text-[#8FA39A]"><Icone e={h.icone} /> {h.nivel} · {h.gols} gols · {h.titulos} títulos</div>
+              <div className="text-[16px] font-semibold text-[#F2F5F3] truncate">{h.nome} <span className="text-[13px] font-normal text-[#9EB5C9]">· {h.posicao}{h.diario ? " · do dia" : ""}</span></div>
+              <div className="text-[13px] text-[#9EB5C9]"><Icone e={h.icone} /> {h.nivel} · {h.gols} gols · {h.titulos} títulos</div>
             </div>
             <span className="font-stat text-lg" style={{ color: h.cor }}>{h.pontos}</span>
           </li>
@@ -732,7 +733,7 @@ function CabecalhoMomento({ c, momento, onReacao }) {
         {momento.total > 1 ? `Desafio ${momento.ordem} de ${momento.total}` : "Momento decisivo"} · {NOME_MINI[mini]}
       </span>
       <h2 className="display text-lg text-[#F2F5F3] mt-3">{momento.titulo}</h2>
-      <p className="vf-legenda-momento text-[17px] text-[#8FA39A] mt-1">{momento.texto}</p>
+      <p className="vf-legenda-momento text-[17px] text-[#9EB5C9] mt-1">{momento.texto}</p>
     </div>
   );
 }
@@ -741,7 +742,7 @@ function PlacarMomento({ ok, texto, atraso = 0, c, momento }) {
   const espera=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:atraso;
   const [visivel,V]=useState(espera===0);
   useEffect(() => {const mostrar=()=>{V(true);if(ok){efeitoLance("rede");torcida(2.6,.22);tocar("sobe",.5);}else tocar("desce",.5);};if(!espera){mostrar();return;}const timer=setTimeout(mostrar,espera);return()=>clearTimeout(timer);}, [ok,espera]);
-  return <div className="relative" style={{visibility:visivel?'visible':'hidden'}}>{ok&&visivel&&(!c||["titulo","estreia","decisao"].includes(celebracaoMomento(c,{...momento,adversario:contextoMomento(c,momento).adversario}).tipo))&&<Lottie nome="gol" className="absolute left-1/2 -translate-x-1/2 -top-24 w-48 h-48 pointer-events-none"/>}<div className={`display text-3xl rp-sobe ${ok?'text-[#1BC28A]':'text-[#E36B5B]'}`}>{texto}</div>{ok&&visivel&&c&&<CelebracaoLance c={c} momento={{...momento,adversario:contextoMomento(c,momento).adversario}}/>}</div>;
+  return <div className="relative" style={{visibility:visivel?'visible':'hidden'}}>{ok&&visivel&&(!c||["titulo","estreia","decisao"].includes(celebracaoMomento(c,{...momento,adversario:contextoMomento(c,momento).adversario}).tipo))&&<Lottie nome="gol" className="absolute left-1/2 -translate-x-1/2 -top-24 w-48 h-48 pointer-events-none"/>}<div className={`display text-3xl rp-sobe ${ok?'text-[#BCEAFF]':'text-[#E36B5B]'}`}>{texto}</div>{ok&&visivel&&c&&<CelebracaoLance c={c} momento={{...momento,adversario:contextoMomento(c,momento).adversario}}/>}</div>;
 }
 
 function TelaFalta({ c, momento, onReacao, onFim }) {
@@ -766,7 +767,7 @@ function TelaFalta({ c, momento, onReacao, onFim }) {
         <FreeKickMini onPick={bater} resultado={res} />
       </div>
       <div className="mini-feedback text-center min-h-[64px]">
-        {!res && <p className="text-[17px] text-[#C9D3CE]">Escolha onde colocar a bola. Finalização <span className="font-stat">{c.attrs.finalizacao}</span> · drible <span className="font-stat">{c.attrs.drible}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "falta") * 100)}%</span></p>}
+        {!res && <p className="text-[17px] text-[#C9D9E8]">Escolha onde colocar a bola. Finalização <span className="font-stat">{c.attrs.finalizacao}</span> · drible <span className="font-stat">{c.attrs.drible}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "falta") * 100)}%</span></p>}
         {res && <><PlacarMomento c={c} momento={momento} atraso={720} ok={res.gol} texto={res.gol ? "GOLAÇO DE FALTA!" : res.tipo === "Barreira" ? "NA BARREIRA!" : res.tipo === "Trave" ? "NA TRAVE!" : res.tipo === "Defesa" ? "DEFENDEU!" : "PRA FORA!"} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.gol)}>Continuar →</button></>}
       </div>
     </QuadroMini>
@@ -788,7 +789,7 @@ function TelaPasse({ c, momento, onReacao, onFim }) {
         <PasseMini atributoPasse={c.attrs.passe + bonus + 6} onResultado={(r) => setRes(r)} />
       </div>
       <div className="mini-feedback text-center min-h-[64px]">
-        {!res && <p className="text-[17px] text-[#C9D3CE]">Você controla o jogador com a bola. Toque num companheiro de verde, longe dos adversários de azul. Passe <span className="font-stat">{c.attrs.passe}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "passe") * 100)}%</span></p>}
+        {!res && <p className="text-[17px] text-[#C9D9E8]">Você controla o jogador com a bola. Toque num companheiro de verde, longe dos adversários de azul. Passe <span className="font-stat">{c.attrs.passe}</span> · chance estimada <span className="font-stat">{Math.round(chanceMomento(c, "passe") * 100)}%</span></p>}
         {res && <><PlacarMomento c={c} momento={momento} ok={res.gol} texto={res.gol ? "ASSISTÊNCIA! GOL!" : "INTERCEPTADO!"} /><button className="rp-btn rp-prim mini-continuar" onClick={() => onFim(res.gol)}>Continuar →</button></>}
       </div>
     </QuadroMini>
@@ -811,11 +812,11 @@ function TelaMomento({ c, momento, onReacao, onFim, onRegistrar }) {
 function SlideTitulo({ c, card, titulo }) {
   useEffect(() => { festejar(titulo?.tipo === "copaMundo" ? "fogos" : "chuva", [clubeDe(card.clube)?.cor || "#EBC557", "#EBC557", "#FFFFFF"]); }, [titulo?.nome]);
   const pelaSelecao = titulo.tipo === "copaMundo" || titulo.tipo === "continentalSelecao";
-  const cor = pelaSelecao ? "#2E6FE0" : card.cor || "#12A876";
+  const cor = pelaSelecao ? "#2E6FE0" : card.cor || "#9BDEFF";
   const contagem = titulo.n > 1 ? `Seu ${titulo.n}º título de ${titulo.nome}` : titulo.primeiro ? "O primeiro título da sua carreira" : `Seu primeiro título de ${titulo.nome}`;
   return (
     <div className="relative overflow-hidden rounded-[28px] min-h-[440px] flex flex-col items-center justify-center text-center px-6 py-10 border border-white/10"
-      style={{ background: `radial-gradient(circle at 50% 32%, ${cor}55 0%, rgba(14,21,18,.55) 68%), url(${ARTE.confete}) center/cover, #0E1512` }}>
+      style={{ background: `radial-gradient(circle at 50% 32%, ${cor}55 0%, rgba(7,19,33,.55) 68%), url(${ARTE.confete}) center/cover, #071321` }}>
       <div aria-hidden="true" className="absolute left-1/2 top-[38%] w-[620px] h-[620px] opacity-20"
         style={{ background: `repeating-conic-gradient(${cor} 0deg 8deg, transparent 8deg 24deg)`, animation: "rpRaios 26s linear infinite", borderRadius: "50%" }} />
       <Confetti />
@@ -827,7 +828,7 @@ function SlideTitulo({ c, card, titulo }) {
         <div className="display text-lg text-[#F2F5F3] mt-2">{titulo.nome}</div>
         <div className="flex items-center justify-center gap-2 mt-2 text-[17px] font-semibold text-[#E1E6E3]">
           {pelaSelecao ? <span>{nacDe(c.nac).label}</span> : <><ClubDot club={clubeDe(card.clube)} size={20} /><span>{card.clube}</span></>}
-          <span className="text-[#8FA39A]">· {card.ano}</span>
+          <span className="text-[#9EB5C9]">· {card.ano}</span>
         </div>
         <div className="mt-3 rp-chip" style={{ color: "#EBC557", background: "rgba(216,180,74,.16)" }}>{contagem}</div>{!pelaSelecao&&bonusSuperacao([card])>0&&<p className="mt-2 text-sm text-[#EBC557]">Conquista de superação · mérito extra no legado</p>}
       </div>
@@ -849,11 +850,11 @@ function SlideBolaDeOuro({ c, card }) {
   useEffect(() => { if (fim && ganhou) { festejar("fogos", ["#FFF1B8", "#E3B93B", "#FFFFFF"]); setTimeout(() => festejar("estrelas", ["#F5D77A", "#FFFFFF"]), 900); } }, [fim, ganhou]);
   return (
     <div className="relative overflow-hidden rounded-[28px] min-h-[440px] flex flex-col items-center justify-center text-center px-5 py-8 border border-[#D8B44A]/30"
-      style={{ background: `radial-gradient(circle at 50% 25%, rgba(216,180,74,.35) 0%, rgba(14,21,18,.6) 70%), url(${ARTE.confete}) center/cover, #0E1512` }}>
+      style={{ background: `radial-gradient(circle at 50% 25%, rgba(216,180,74,.35) 0%, rgba(7,19,33,.6) 70%), url(${ARTE.confete}) center/cover, #071321` }}>
       {fim && ganhou && <Confetti />}
       <BolaDourada size={84} />
       <div className="display text-lg text-[#F5D77A] mt-3">Bola de Ouro {card.ano}</div>
-      <p className="text-[16px] text-[#8FA39A]">Você está entre os três melhores do mundo.</p>
+      <p className="text-[16px] text-[#9EB5C9]">Você está entre os três melhores do mundo.</p>
       <div className="grid grid-cols-3 gap-2 w-full mt-5 items-end">
         {[1, 0, 2].map((idx) => {
           const r = top[idx];
@@ -865,7 +866,7 @@ function SlideBolaDeOuro({ c, card }) {
                 {visivel ? (r?.voce ? `${r.nome} (você)` : r?.nome) : "?"}
               </div>
               <div className="w-full rounded-t-xl flex items-start justify-center pt-2 font-stat text-2xl"
-                style={{ height: altura, background: idx === 0 ? "linear-gradient(#D8B44A,#8E6F00)" : idx === 1 ? "linear-gradient(#C7CDD6,#6C7470)" : "linear-gradient(#D2915B,#6B4320)", color: "#0E1512", boxShadow: visivel && r?.voce ? "0 0 26px rgba(245,215,122,.7)" : "none" }}>
+                style={{ height: altura, background: idx === 0 ? "linear-gradient(#D8B44A,#8E6F00)" : idx === 1 ? "linear-gradient(#C7CDD6,#6C7470)" : "linear-gradient(#D2915B,#6B4320)", color: "#071321", boxShadow: visivel && r?.voce ? "0 0 26px rgba(245,215,122,.7)" : "none" }}>
                 {idx + 1}º
               </div>
             </div>
@@ -902,7 +903,7 @@ function TelaFesta({ c, card, onFim }) {
   return (
     <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-4">
       {slides.length > 1 && (
-        <div className="flex gap-1.5 justify-center">{slides.map((_, k) => <span key={k} className="h-1.5 rounded-full transition-all" style={{ width: k === i ? 22 : 8, background: k <= i ? "#D8B44A" : "#2A3A33" }} />)}</div>
+        <div className="flex gap-1.5 justify-center">{slides.map((_, k) => <span key={k} className="h-1.5 rounded-full transition-all" style={{ width: k === i ? 22 : 8, background: k <= i ? "#D8B44A" : "#30475D" }} />)}</div>
       )}
       <div key={i}>{s.tipo === "titulo" ? <SlideTitulo c={c} card={card} titulo={s.t} /> : <SlideBolaDeOuro c={c} card={card} />}</div>
       <button onClick={() => (ultimo ? onFim() : setI(i + 1))} className="rp-btn rp-ouro display text-sm">
@@ -916,7 +917,7 @@ function TelaFesta({ c, card, onFim }) {
 function AnelNota({ nota }) {
   const v = nota || 0;
   const p = Math.max(0, Math.min(1, (v - 5) / 4.5));
-  const cor = v >= 7.5 ? "#1BC28A" : v >= 6.8 ? "#EBC557" : "#E36B5B";
+  const cor = v >= 7.5 ? "#BCEAFF" : v >= 6.8 ? "#EBC557" : "#E36B5B";
   const r = 30, circ = 2 * Math.PI * r;
   return (
     <div className="relative w-[76px] h-[76px] shrink-0">
@@ -926,7 +927,7 @@ function AnelNota({ nota }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="font-stat text-xl text-[#F2F5F3] leading-none">{v ? v.toFixed(1) : "—"}</span>
-        <span className="text-[9px] font-bold tracking-widest text-[#8FA39A]">NOTA</span>
+        <span className="text-[9px] font-bold tracking-widest text-[#9EB5C9]">NOTA</span>
       </div>
     </div>
   );
@@ -934,9 +935,9 @@ function AnelNota({ nota }) {
 
 function Stat({ label, valor }) {
   return (
-    <div className="rounded-xl bg-[#0E1512]/70 py-2.5 text-center">
+    <div className="rounded-xl bg-[#071321]/70 py-2.5 text-center">
       <div className="font-stat text-2xl text-[#F2F5F3] leading-none">{valor}</div>
-      <div className="text-[10px] font-bold tracking-wider text-[#8FA39A] mt-1">{label}</div>
+      <div className="text-[10px] font-bold tracking-wider text-[#9EB5C9] mt-1">{label}</div>
     </div>
   );
 }
@@ -953,35 +954,35 @@ function PainelRival({ c, card }) {
     : l.mudou ? `${r.nome} trocou o ${l.mudou} pelo ${l.clube}.`
     : l.bola && l.bola <= 3 ? `${r.nome} ficou em ${l.bola}º na Bola de Ouro.` : null;
   return (
-    <div className="rp-painel p-4" style={{ borderColor: "rgba(227,107,91,.35)", background: "linear-gradient(135deg, rgba(227,107,91,.12), rgba(19,26,23,.9) 55%)" }}>
+    <div className="rp-painel p-4" style={{ borderColor: "rgba(227,107,91,.35)", background: "linear-gradient(135deg, rgba(227,107,91,.12), rgba(16,35,55,.9) 55%)" }}>
       <div className="flex items-center gap-3">
         <span className="text-xl" aria-hidden="true">⚔️</span>
         <div className="min-w-0 flex-1">
           <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#F0A99E]">Seu rival de geração</div>
-          <div className="text-[16px] font-bold text-[#F2F5F3] truncate">{r.nome} <span className="font-normal text-[14px] text-[#8FA39A]">· {nacDe(r.nac).label} · {r.posicao}</span></div>
+          <div className="text-[16px] font-bold text-[#F2F5F3] truncate">{r.nome} <span className="font-normal text-[14px] text-[#9EB5C9]">· {nacDe(r.nac).label} · {r.posicao}</span></div>
         </div>
         <ClubDot club={clubeDe(l.clube)} size={30} />
       </div>
-      {noticia && <p className="text-[15px] text-[#C9D3CE] mt-2">{noticia}</p>}
-      {retrospecto.anos.length > 0 && <div className="mt-3 rounded-xl bg-[#0E1512]/70 p-3" aria-label="Histórico da rivalidade">
-        <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8FA39A]">Histórico da rivalidade</div>
+      {noticia && <p className="text-[15px] text-[#C9D9E8] mt-2">{noticia}</p>}
+      {retrospecto.anos.length > 0 && <div className="mt-3 rounded-xl bg-[#071321]/70 p-3" aria-label="Histórico da rivalidade">
+        <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#9EB5C9]">Histórico da rivalidade</div>
         <div className="grid grid-cols-3 gap-2 mt-2 text-center">
-          <div><div className="font-stat text-[22px] text-[#7FE3BC]">{retrospecto.voce}</div><div className="text-[11px] text-[#8FA39A]">Você</div></div>
-          <div><div className="font-stat text-[22px] text-[#F2F5F3]">{retrospecto.empates}</div><div className="text-[11px] text-[#8FA39A]">Empates</div></div>
-          <div><div className="font-stat text-[22px] text-[#F0A99E]">{retrospecto.rival}</div><div className="text-[11px] text-[#8FA39A]">Rival</div></div>
+          <div><div className="font-stat text-[22px] text-[#BCEAFF]">{retrospecto.voce}</div><div className="text-[11px] text-[#9EB5C9]">Você</div></div>
+          <div><div className="font-stat text-[22px] text-[#F2F5F3]">{retrospecto.empates}</div><div className="text-[11px] text-[#9EB5C9]">Empates</div></div>
+          <div><div className="font-stat text-[22px] text-[#F0A99E]">{retrospecto.rival}</div><div className="text-[11px] text-[#9EB5C9]">Rival</div></div>
         </div>
-        <div className="text-[11px] text-[#8FA39A] mt-2">Comparação por desempenho anual (gols, assistências, títulos e Bola de Ouro). Não representa confrontos diretos.</div>
+        <div className="text-[11px] text-[#9EB5C9] mt-2">Comparação por desempenho anual (gols, assistências, títulos e Bola de Ouro). Não representa confrontos diretos.</div>
         <div className="flex gap-1 mt-2" aria-label="Resultados por temporada">
           {retrospecto.anos.map((ano, i) => <span key={i} title={`${ano.ano}: ${ano.resultado === "voce" ? "Você" : ano.resultado === "rival" ? "Rival" : "Empate"}`}
-            className={`h-2 flex-1 rounded-sm ${ano.resultado === "voce" ? "bg-[#1BC28A]" : ano.resultado === "rival" ? "bg-[#E36B5B]" : "bg-[#8FA39A]"}`} />)}
+            className={`h-2 flex-1 rounded-sm ${ano.resultado === "voce" ? "bg-[#BCEAFF]" : ano.resultado === "rival" ? "bg-[#E36B5B]" : "bg-[#9EB5C9]"}`} />)}
         </div>
       </div>}
       <div className="grid grid-cols-[1fr_auto_1fr] gap-x-3 gap-y-1 mt-3 text-[15px] items-center">
-        <div className="text-[12px] font-bold tracking-wider text-[#7FE3BC] text-right">VOCÊ</div><div /><div className="text-[12px] font-bold tracking-wider" style={{ color: "#F0A99E" }}>ELE</div>
+        <div className="text-[12px] font-bold tracking-wider text-[#BCEAFF] text-right">VOCÊ</div><div /><div className="text-[12px] font-bold tracking-wider" style={{ color: "#F0A99E" }}>ELE</div>
         {comp.map(([k, a, b]) => (
           <React.Fragment key={k}>
             <div className="font-stat text-right text-[#F2F5F3]">{a}</div>
-            <div className="text-[12px] text-[#8FA39A] text-center">{k}</div>
+            <div className="text-[12px] text-[#9EB5C9] text-center">{k}</div>
             <div className="font-stat text-[#F2F5F3]" style={{ borderLeft: `3px solid ${cor}`, paddingLeft: 6 }}>{b}</div>
           </React.Fragment>
         ))}
@@ -1001,7 +1002,7 @@ function MiniCurva({ c, cor }) {
   const ini = c.temporadas[0].idade, pico = c.temporadas[p].idade + 1, fim = c.temporadas[ovr.length - 1].idade + 1;
   return (
     <div className="mt-4 relative">
-      <div className="flex justify-between text-[10px] font-bold tracking-[0.2em] text-[#8FA39A]"><span>CURVA DA CARREIRA</span><span>{ini} → {pico} → {fim} anos</span></div>
+      <div className="flex justify-between text-[10px] font-bold tracking-[0.2em] text-[#9EB5C9]"><span>CURVA DA CARREIRA</span><span>{ini} → {pico} → {fim} anos</span></div>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full mt-1" aria-hidden="true">
         <path d={`${d} L${x(ovr.length - 1)},${H} L${x(0)},${H} Z`} fill={`${cor}22`} />
         <path d={d} fill="none" stroke={cor} strokeWidth="2.2" strokeLinejoin="round" />
@@ -1030,9 +1031,9 @@ function GraficoCarreira({ c, altura = 132, titulo = "Sua curva" }) {
   return (
     <div className="rp-painel p-4">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">{titulo}</span>
-        <span className="flex items-center gap-3 text-[12px] text-[#C9D3CE]">
-          <span className="flex items-center gap-1"><span className="w-3 h-[3px] rounded bg-[#1BC28A] inline-block" />OVR</span>
+        <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9]">{titulo}</span>
+        <span className="flex items-center gap-3 text-[12px] text-[#C9D9E8]">
+          <span className="flex items-center gap-1"><span className="w-3 h-[3px] rounded bg-[#BCEAFF] inline-block" />OVR</span>
           <span className="flex items-center gap-1"><span className="w-3 h-2 rounded-sm bg-[#D8B44A]/40 inline-block" />Valor</span>
         </span>
       </div>
@@ -1040,15 +1041,15 @@ function GraficoCarreira({ c, altura = 132, titulo = "Sua curva" }) {
         {[0, 0.5, 1].map((f) => <line key={f} x1={pl} x2={W - pr} y1={pt + f * (H - pt - pb)} y2={pt + f * (H - pt - pb)} stroke="rgba(255,255,255,.06)" />)}
         <path d={area} fill="rgba(216,180,74,.16)" />
         <path d={linha(val, yv)} fill="none" stroke="#D8B44A" strokeOpacity=".55" strokeWidth="1.5" />
-        <path d={linha(ovr, yo)} fill="none" stroke="#1BC28A" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
-        <circle cx={x(pico)} cy={yo(ovr[pico])} r="4.5" fill="#EBC557" stroke="#0E1512" strokeWidth="1.5" />
+        <path d={linha(ovr, yo)} fill="none" stroke="#BCEAFF" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+        <circle cx={x(pico)} cy={yo(ovr[pico])} r="4.5" fill="#EBC557" stroke="#071321" strokeWidth="1.5" />
         <text x={x(pico)} y={yo(ovr[pico]) - 8} textAnchor="middle" fontSize="11" fontWeight="700" fill="#EBC557">{ovr[pico]}</text>
-        <text x={pl - 6} y={yo(oMax) + 4} textAnchor="end" fontSize="10" fill="#8FA39A">{oMax}</text>
-        <text x={pl - 6} y={yo(oMin) + 4} textAnchor="end" fontSize="10" fill="#8FA39A">{oMin}</text>
+        <text x={pl - 6} y={yo(oMax) + 4} textAnchor="end" fontSize="10" fill="#9EB5C9">{oMax}</text>
+        <text x={pl - 6} y={yo(oMin) + 4} textAnchor="end" fontSize="10" fill="#9EB5C9">{oMin}</text>
         <text x={W - 2} y={pt + 4} textAnchor="end" fontSize="9.5" fill="#B89A4A">{formatarValor(vMax).replace(/\s/g, "")}</text>
-        {idades.map((a, i) => (i === 0 || i === idades.length - 1 || i === pico || a % 4 === 0) && <text key={i} x={x(i)} y={H - 6} textAnchor="middle" fontSize="10" fill={i === pico ? "#EBC557" : "#8FA39A"}>{a + 1}</text>)}
+        {idades.map((a, i) => (i === 0 || i === idades.length - 1 || i === pico || a % 4 === 0) && <text key={i} x={x(i)} y={H - 6} textAnchor="middle" fontSize="10" fill={i === pico ? "#EBC557" : "#9EB5C9"}>{a + 1}</text>)}
       </svg>
-      <p className="text-[13px] text-[#8FA39A] mt-1">Auge: <span className="font-stat text-[#EBC557]">{ovr[pico]}</span> de OVR aos {idades[pico] + 1} anos.</p>
+      <p className="text-[13px] text-[#9EB5C9] mt-1">Auge: <span className="font-stat text-[#EBC557]">{ovr[pico]}</span> de OVR aos {idades[pico] + 1} anos.</p>
     </div>
   );
 }
@@ -1058,11 +1059,11 @@ function TabelaAnoAno({ c }) {
   const [aberta, setAberta] = useState(false);
   const ts = c.temporadas || [];
   const linhas = aberta ? ts : ts.slice(-6);
-  const corOvr = (o) => (o >= 85 ? "#D8B44A" : o >= 78 ? "#1BC28A" : o >= 70 ? "#2E6FE0" : "#5F6E68");
+  const corOvr = (o) => (o >= 85 ? "#D8B44A" : o >= 78 ? "#BCEAFF" : o >= 70 ? "#2E6FE0" : "#879EB4");
   return (
     <div className="rp-painel p-4">
-      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-2">Ano a ano</div>
-      <div className="grid grid-cols-[30px_1fr_auto_38px_30px_30px_30px] gap-x-2 items-center text-[11px] font-bold tracking-wider text-[#8FA39A] pb-1 border-b border-white/5">
+      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9] mb-2">Ano a ano</div>
+      <div className="grid grid-cols-[30px_1fr_auto_38px_30px_30px_30px] gap-x-2 items-center text-[11px] font-bold tracking-wider text-[#9EB5C9] pb-1 border-b border-white/5">
         <span>IDADE</span><span>CLUBE</span><span /><span className="text-center">OVR</span><span className="text-right">J</span><span className="text-right">G</span><span className="text-right">A</span>
       </div>
       {linhas.map((s, i) => {
@@ -1071,17 +1072,17 @@ function TabelaAnoAno({ c }) {
         const o = s.ovrDepois ?? s.ovr;
         return (
           <div key={idx} className="grid grid-cols-[30px_1fr_auto_38px_30px_30px_30px] gap-x-2 items-center py-1.5 border-b border-white/5 text-[14px]">
-            <span className="font-stat text-[#C9D3CE]">{s.idade}</span>
-            <span className="flex items-center gap-1.5 min-w-0">{troca && <span className="text-[#8FA39A]" aria-label="clube novo">↳</span>}<ClubDot club={clubeDe(s.clube)} size={18} /><span className="truncate text-[#F2F5F3]">{s.clube}</span></span>
+            <span className="font-stat text-[#C9D9E8]">{s.idade}</span>
+            <span className="flex items-center gap-1.5 min-w-0">{troca && <span className="text-[#9EB5C9]" aria-label="clube novo">↳</span>}<ClubDot club={clubeDe(s.clube)} size={18} /><span className="truncate text-[#F2F5F3]">{s.clube}</span></span>
             <span className="flex -space-x-1.5">{s.titulos.filter((t) => !ehPremioIndividual(t.tipo)).slice(0, 3).map((t, k) => <IconeTitulo key={k} tipo={t.tipo} nome={t.nome} size={16} />)}{s.titulos.some((t) => t.tipo === "bolaOuro") && <IconeTitulo tipo="bolaOuro" size={15} />}</span>
-            <span className="font-stat text-center rounded-md text-[#0E1512] font-bold" style={{ background: corOvr(o) }}>{o}</span>
-            <span className="font-stat text-right text-[#C9D3CE]">{s.jogos}</span>
+            <span className="font-stat text-center rounded-md text-[#071321] font-bold" style={{ background: corOvr(o) }}>{o}</span>
+            <span className="font-stat text-right text-[#C9D9E8]">{s.jogos}</span>
             <span className="font-stat text-right text-[#F2F5F3]">{s.gols}</span>
-            <span className="font-stat text-right text-[#C9D3CE]">{s.assist}</span>
+            <span className="font-stat text-right text-[#C9D9E8]">{s.assist}</span>
           </div>
         );
       })}
-      {ts.length > 6 && <button onClick={() => setAberta((v) => !v)} className="text-[14px] font-bold text-[#7FE3BC] min-h-[40px] mt-1">{aberta ? "Mostrar só as últimas" : `Ver as ${ts.length} temporadas`}</button>}
+      {ts.length > 6 && <button onClick={() => setAberta((v) => !v)} className="text-[14px] font-bold text-[#BCEAFF] min-h-[40px] mt-1">{aberta ? "Mostrar só as últimas" : `Ver as ${ts.length} temporadas`}</button>}
     </div>
   );
 }
@@ -1090,14 +1091,14 @@ function LinhaTime({ icone, nome, resultado, destaque }) {
   return (
     <div className="flex items-center gap-2.5 py-1.5 border-b border-white/5 last:border-0">
       <span className="w-6 flex justify-center shrink-0">{icone}</span>
-      <span className="text-[15px] text-[#C9D3CE] truncate flex-1">{nome}</span>
+      <span className="text-[15px] text-[#C9D9E8] truncate flex-1">{nome}</span>
       <span className={`font-stat text-[16px] shrink-0 ${destaque === "ouro" ? "text-[#EBC557]" : destaque === "ruim" ? "text-[#F0A99E]" : "text-[#F2F5F3]"}`}>{resultado}</span>
     </div>
   );
 }
 function Delta({ v, fmt = (x) => x }) {
-  if (!v) return <span className="text-[#8FA39A]"> =</span>;
-  return <span className={v > 0 ? "text-[#1BC28A]" : "text-[#E36B5B]"}> {v > 0 ? "▲" : "▼"}{fmt(Math.abs(v))}</span>;
+  if (!v) return <span className="text-[#9EB5C9]"> =</span>;
+  return <span className={v > 0 ? "text-[#BCEAFF]" : "text-[#E36B5B]"}> {v > 0 ? "▲" : "▼"}{fmt(Math.abs(v))}</span>;
 }
 
 function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou, gaveta = false }) {
@@ -1123,9 +1124,9 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
         <div className="px-4 pt-3 pb-2 flex items-center gap-3" style={{ background: `linear-gradient(120deg, ${card.cor}44, transparent 75%)` }}>
           <ClubDot club={clubeDe(card.clube)} size={36} />
           <div className="min-w-0 flex-1">
-            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9D3CE]">Temporada {card.ano} · {card.idade} anos</div>
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9D9E8]">Temporada {card.ano} · {card.idade} anos</div>
             <h2 className="display text-[15px] text-[#F2F5F3] truncate">{card.clube}{card.emprestado ? " (empréstimo)" : ""}</h2>
-            <div className="text-[13px] text-[#8FA39A]">{card.status}{card.lesao ? ` · 🩹 ${card.lesao}` : ""}</div>
+            <div className="text-[13px] text-[#9EB5C9]">{card.status}{card.lesao ? ` · 🩹 ${card.lesao}` : ""}</div>
           </div>
           <AnelNota nota={card.nota} />
         </div>
@@ -1137,23 +1138,23 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
         </div>
         {/* overall, torcida e valor logo abaixo */}
         <div className="grid grid-cols-3 gap-2 px-3 pt-2">
-          <div className="rounded-xl bg-[#0E1512]/70 px-2.5 py-2"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">OVERALL</div><div className="font-stat text-[19px] text-[#F2F5F3] leading-tight">{card.ovrDepois}<Delta v={delta} /></div></div>
-          <div className="rounded-xl bg-[#0E1512]/70 px-2.5 py-2"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">TORCIDA</div><div className="font-stat text-[19px] text-[#F2F5F3] leading-tight">{card.torcida}<Delta v={card.torcidaDelta} /></div></div>
-          <div className="rounded-xl bg-[#0E1512]/70 px-2.5 py-2 min-w-0"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">VALOR</div><div className="font-stat text-[19px] text-[#F2F5F3] leading-tight truncate">{formatarValor(card.valor).replace(/\s/g, "")}</div>{card.valorAntes != null && card.valor !== card.valorAntes && <div className="font-stat text-[13px] leading-tight truncate"><Delta v={card.valor - card.valorAntes} fmt={(x) => formatarValor(x).replace(/€\s?/, "").replace(/\s/g, "")} /></div>}</div>
+          <div className="rounded-xl bg-[#071321]/70 px-2.5 py-2"><div className="text-[10px] font-bold tracking-wider text-[#9EB5C9]">OVERALL</div><div className="font-stat text-[19px] text-[#F2F5F3] leading-tight">{card.ovrDepois}<Delta v={delta} /></div></div>
+          <div className="rounded-xl bg-[#071321]/70 px-2.5 py-2"><div className="text-[10px] font-bold tracking-wider text-[#9EB5C9]">TORCIDA</div><div className="font-stat text-[19px] text-[#F2F5F3] leading-tight">{card.torcida}<Delta v={card.torcidaDelta} /></div></div>
+          <div className="rounded-xl bg-[#071321]/70 px-2.5 py-2 min-w-0"><div className="text-[10px] font-bold tracking-wider text-[#9EB5C9]">VALOR</div><div className="font-stat text-[19px] text-[#F2F5F3] leading-tight truncate">{formatarValor(card.valor).replace(/\s/g, "")}</div>{card.valorAntes != null && card.valor !== card.valorAntes && <div className="font-stat text-[13px] leading-tight truncate"><Delta v={card.valor - card.valorAntes} fmt={(x) => formatarValor(x).replace(/€\s?/, "").replace(/\s/g, "")} /></div>}</div>
         </div>
         {/* Central de notícias: manchetes baseadas nos dados simulados */}
         {noticias.length > 0 && <section className="px-3 pt-3" aria-label="Notícias da temporada">
-          <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-2">📰 Na imprensa</div>
+          <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#9EB5C9] mb-2">📰 Na imprensa</div>
           <div className="flex flex-col gap-1.5">
-            {noticias.map((noticia, i) => <div key={i} className="rounded-xl border border-white/5 bg-[#0E1512]/70 px-3 py-2">
+            {noticias.map((noticia, i) => <div key={i} className="rounded-xl border border-white/5 bg-[#071321]/70 px-3 py-2">
               <div className="text-[13px] font-bold text-[#F2F5F3]">{noticia.titulo}</div>
-              <div className="text-[12px] text-[#8FA39A]">{noticia.detalhe}</div>
+              <div className="text-[12px] text-[#9EB5C9]">{noticia.detalhe}</div>
             </div>)}
           </div>
         </section>}
         {/* o time na temporada */}
         <div className="px-4 pt-3 pb-2">
-          <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-0.5">O time na temporada</div>
+          <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#9EB5C9] mb-0.5">O time na temporada</div>
           <LinhaTime icone={<TacaCompeticao tipo={ehSegundaDivisao(card.ligaId) ? "segunda" : "liga"} nome={card.ligaNome} size={18} />} nome={card.ligaNome}
             resultado={card.acesso ? `${ligaRes} · acesso!` : card.rebaixado ? `${ligaRes} · rebaixado` : vagas && ehSegundaDivisao(card.ligaId) && card.posLiga <= vagas ? `${ligaRes} · acesso` : ligaRes} destaque={card.acesso ? "ouro" : corLiga} />
           {card.copaNac && <LinhaTime icone={<TacaCompeticao tipo="copa" nome={card.copaNac.nome} size={18} />} nome={card.copaNac.nome} resultado={card.titulos.some(t=>t.tipo==="copa"&&t.nome===card.copaNac.nome)?"Campeão":card.copaNac.fase} destaque={card.titulos.some(t=>t.tipo==="copa"&&t.nome===card.copaNac.nome)||card.copaNac.fase === "Campeão" ? "ouro" : null} />}
@@ -1163,7 +1164,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
         </div>
         {/* taças e prêmios */}
         {card.titulos.length > 0 && (
-          <div className="mx-3 mb-3 rounded-2xl p-3 border border-[#D8B44A]/40" style={{ background: "linear-gradient(135deg, rgba(216,180,74,.18), rgba(19,26,23,.85) 60%)" }}>
+          <div className="mx-3 mb-3 rounded-2xl p-3 border border-[#D8B44A]/40" style={{ background: "linear-gradient(135deg, rgba(216,180,74,.18), rgba(16,35,55,.85) 60%)" }}>
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#EBC557]">Conquistas</span>
               {temFesta && <button onClick={onRever} className="text-[13px] font-bold text-[#EBC557] min-h-[36px] px-2">Rever conquistas</button>}
@@ -1172,14 +1173,14 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
               {card.titulos.map((t, i) => (
                 <div key={i} className="flex items-center gap-2 rp-sobe" style={{ animationDelay: `${0.15 + i * 0.12}s` }}>
                   <IconeTitulo tipo={t.tipo} nome={t.nome} size={30} />
-                  <div className="leading-tight"><div className="text-[14px] font-bold text-[#F5D77A]">{t.nome}</div><div className="text-[11px] text-[#C9D3CE]">{t.n > 1 ? `${t.n}º da carreira` : "1º da carreira"}</div></div>
+                  <div className="leading-tight"><div className="text-[14px] font-bold text-[#F5D77A]">{t.nome}</div><div className="text-[11px] text-[#C9D9E8]">{t.n > 1 ? `${t.n}º da carreira` : "1º da carreira"}</div></div>
                 </div>
               ))}
             </div>
           </div>
         )}
         {(bola.pos <= 10 || card.artilharia) && (
-          <div className="px-4 pb-3 flex flex-wrap gap-x-4 gap-y-1 text-[14px] text-[#C9D3CE]">
+          <div className="px-4 pb-3 flex flex-wrap gap-x-4 gap-y-1 text-[14px] text-[#C9D9E8]">
             {bola.pos <= 10 && <span className="flex items-center gap-1.5"><BolaDourada size={16} /> Bola de Ouro: <b className="font-stat text-[16px] text-[#EBC557]">{bola.pos}º</b></span>}
             {card.artilharia && card.artilharia.pontos >= card.artilharia.alvo * 0.7 && <span className="flex items-center gap-1.5"><BotaDourada size={16} /> Bota de Ouro: {card.titulos.some((t) => t.tipo === "botaOuro") ? <b className="text-[#EBC557]">sua!</b> : <span className="font-stat text-[16px]">{card.artilharia.pontos}/{card.artilharia.alvo} pts</span>}</span>}
           </div>
@@ -1212,26 +1213,26 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
             <div className="min-w-0">
               <div className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#EBC557]">⚔️ Rivalidade de geração</div>
               <div className="text-[14px] font-bold text-[#F2F5F3] truncate">Você x {c.rival.nome}</div>
-              <div className="text-[12px] text-[#8FA39A]">Histórico, evolução e comparação de temporadas</div>
+              <div className="text-[12px] text-[#9EB5C9]">Histórico, evolução e comparação de temporadas</div>
             </div>
-            <span className="text-[#7FE3BC] text-[13px] font-bold shrink-0">Ver histórico ›</span>
+            <span className="text-[#BCEAFF] text-[13px] font-bold shrink-0">Ver histórico ›</span>
           </div>
         </button>
       )}
-      {!gaveta && <button onClick={() => setDetalhes((v) => !v)} aria-expanded={detalhes} className="text-[15px] font-bold text-[#7FE3BC] min-h-[44px]">{detalhes ? "Esconder detalhes" : "Ver detalhes da temporada"}</button>}
+      {!gaveta && <button onClick={() => setDetalhes((v) => !v)} aria-expanded={detalhes} className="text-[15px] font-bold text-[#BCEAFF] min-h-[44px]">{detalhes ? "Esconder detalhes" : "Ver detalhes da temporada"}</button>}
       {detalhes && (
       <div className="flex flex-col gap-3 rp-entra">
       {card.rival && c.rival && <PainelRival c={c} card={card} />}
 
       <div className="rp-painel p-4">
         <div className="flex items-center justify-between">
-          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Bola de Ouro</div>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9]">Bola de Ouro</div>
           <div className="font-stat text-[15px] text-[#EBC557]">{bola.pos <= 50 ? `Você: ${bola.pos}º` : "Fora do top 50"}</div>
         </div>
         <ol className="mt-2 flex flex-col gap-1">
           {bola.top.map((r, i) => (
-            <li key={i} className={`flex items-center gap-2 text-[16px] ${r.voce ? "text-[#EBC557] font-bold" : "text-[#C9D3CE]"}`}>
-              <span className="font-stat w-5 text-[#8FA39A]">{i + 1}</span>
+            <li key={i} className={`flex items-center gap-2 text-[16px] ${r.voce ? "text-[#EBC557] font-bold" : "text-[#C9D9E8]"}`}>
+              <span className="font-stat w-5 text-[#9EB5C9]">{i + 1}</span>
               <span className="truncate">{r.nome}</span>
               <span className="ml-auto text-[13px] text-[#7F918A] truncate">{r.clube}</span>
             </li>
@@ -1246,13 +1247,13 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
       {card.ganhos && (
         <div className="rp-painel px-4 py-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Dinheiro da temporada</span>
-            <span className="font-stat text-lg text-[#1BC28A]">+{formatarValor(card.ganhos.total)}</span>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9]">Dinheiro da temporada</span>
+            <span className="font-stat text-lg text-[#BCEAFF]">+{formatarValor(card.ganhos.total)}</span>
           </div>
-          <div className="text-[14px] text-[#8FA39A] mt-1">
+          <div className="text-[14px] text-[#9EB5C9] mt-1">
             Salário {formatarValor(card.ganhos.salario)} · bônus {formatarValor(card.ganhos.bonus)} · empresário −{formatarValor(card.ganhos.comissao)}{card.ganhos.manutencao ? ` · luxos −${formatarValor(card.ganhos.manutencao)}` : ""}
           </div>
-          <div className="text-[14px] mt-1"><span className="text-[#C9D3CE]">Patrimônio: {formatarValor(card.patrimonio)}</span>{card.contratoRestante <= 1 && <span className="text-[#EBC557] font-bold"> · {card.contratoRestante <= 0 ? "contrato encerrado" : "último ano de contrato"}</span>}</div>
+          <div className="text-[14px] mt-1"><span className="text-[#C9D9E8]">Patrimônio: {formatarValor(card.patrimonio)}</span>{card.contratoRestante <= 1 && <span className="text-[#EBC557] font-bold"> · {card.contratoRestante <= 0 ? "contrato encerrado" : "último ano de contrato"}</span>}</div>
         </div>
       )}
 
@@ -1260,20 +1261,20 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
         <div className="rp-painel px-4 py-3 flex items-center gap-3" style={{ borderColor: card.acesso ? "rgba(27,194,138,.45)" : "rgba(227,107,91,.45)", background: card.acesso ? "rgba(27,194,138,.08)" : "rgba(227,107,91,.08)" }}>
           <span className="text-3xl">{card.acesso ? "🎉" : "⬇️"}</span>
           <div>
-            <div className="display text-sm" style={{ color: card.acesso ? "#1BC28A" : "#E36B5B" }}>{card.acesso ? "ACESSO!" : "REBAIXADO"}</div>
-            <div className="text-[15px] text-[#C9D3CE]">O {card.clube} {card.acesso ? "sobe" : "cai"} pra {(card.acesso || card.rebaixado).para} em {card.ano + 1}.</div>
+            <div className="display text-sm" style={{ color: card.acesso ? "#BCEAFF" : "#E36B5B" }}>{card.acesso ? "ACESSO!" : "REBAIXADO"}</div>
+            <div className="text-[15px] text-[#C9D9E8]">O {card.clube} {card.acesso ? "sobe" : "cai"} pra {(card.acesso || card.rebaixado).para} em {card.ano + 1}.</div>
           </div>
         </div>
       )}
 
       {(card.ovrMotivos || []).length > 0 && (
         <div className="rp-painel px-4 py-3">
-          <div className="text-[10px] font-bold tracking-wider text-[#8FA39A] mb-1.5">POR QUE SEU OVERALL MUDOU</div>
+          <div className="text-[10px] font-bold tracking-wider text-[#9EB5C9] mb-1.5">POR QUE SEU OVERALL MUDOU</div>
           <ul className="flex flex-col gap-1">
             {card.ovrMotivos.map((m, i) => (
               <li key={i} className="flex items-center justify-between text-[15px]">
-                <span className="text-[#C9D3CE]">{m.txt}</span>
-                <span className="font-stat" style={{ color: m.d > 0 ? "#1BC28A" : "#E36B5B" }}>{m.d > 0 ? `+${m.d}` : m.d}</span>
+                <span className="text-[#C9D9E8]">{m.txt}</span>
+                <span className="font-stat" style={{ color: m.d > 0 ? "#BCEAFF" : "#E36B5B" }}>{m.d > 0 ? `+${m.d}` : m.d}</span>
               </li>
             ))}
           </ul>
@@ -1282,7 +1283,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
 
       {card.destaques.length > 0 && (
         <ul className="flex flex-col gap-1.5">
-          {card.destaques.map((d, i) => <li key={i} className="text-[16px] text-[#C9D3CE]">✨ {d}</li>)}
+          {card.destaques.map((d, i) => <li key={i} className="text-[16px] text-[#C9D9E8]">✨ {d}</li>)}
         </ul>
       )}
       </div>
@@ -1304,16 +1305,16 @@ function ResumoCompacto({ c, card, onDetalhes }) {
   return (
     <button onClick={onDetalhes} className="rp-painel w-full text-left px-3.5 py-2.5 rp-entra" aria-label={`Resumo da temporada ${card.ano}. Toque para ver os detalhes`}>
       <div className="flex items-center gap-2">
-        <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8FA39A]">{card.ano}</span>
-        <span className="font-stat text-[17px] px-1.5 rounded-md text-[#0E1512]" style={{ background: card.nota >= 7.5 ? "#1BC28A" : card.nota >= 6.6 ? "#EBC557" : "#E36B5B" }}>{card.nota ? card.nota.toFixed(1) : "—"}</span>
+        <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#9EB5C9]">{card.ano}</span>
+        <span className="font-stat text-[17px] px-1.5 rounded-md text-[#071321]" style={{ background: card.nota >= 7.5 ? "#BCEAFF" : card.nota >= 6.6 ? "#EBC557" : "#E36B5B" }}>{card.nota ? card.nota.toFixed(1) : "—"}</span>
         <span className="font-stat text-[16px] text-[#F2F5F3]">{card.jogos}J · {card.gols}G · {card.assist}A</span>
-        <span className={`ml-auto font-stat text-[16px] ${delta > 0 ? "text-[#1BC28A]" : delta < 0 ? "text-[#E36B5B]" : "text-[#8FA39A]"}`}>{delta > 0 ? `+${delta}` : delta < 0 ? delta : "="} OVR</span>
+        <span className={`ml-auto font-stat text-[16px] ${delta > 0 ? "text-[#BCEAFF]" : delta < 0 ? "text-[#E36B5B]" : "text-[#9EB5C9]"}`}>{delta > 0 ? `+${delta}` : delta < 0 ? delta : "="} OVR</span>
       </div>
-      <div className="text-[13px] text-[#C9D3CE] mt-1 truncate">{time.join(" · ")}</div>
+      <div className="text-[13px] text-[#C9D9E8] mt-1 truncate">{time.join(" · ")}</div>
       <div className="flex items-center gap-1.5 mt-1.5 min-h-[22px]">
         {card.titulos.map((t, i) => <IconeTitulo key={i} tipo={t.tipo} nome={t.nome} size={20} />)}
         {card.lesao && <span className="text-[12px] text-[#F0A99E]">🩹 {card.lesao}</span>}
-        <span className="ml-auto text-[12px] font-bold text-[#7FE3BC]">detalhes ›</span>
+        <span className="ml-auto text-[12px] font-bold text-[#BCEAFF]">detalhes ›</span>
       </div>
     </button>
   );
@@ -1341,10 +1342,10 @@ function TelaColetiva({ c, coletiva, resposta, onResponder, onSeguir }) {
   return (
     <div ref={raiz} className={`fluxo-coletiva max-w-xl mx-auto px-4 py-5 flex flex-col gap-4 rp-entra ${resposta?'fluxo-coletiva-resultado':''}`}>
       <div className="rp-painel overflow-hidden">
-        <div aria-hidden="true" className="h-36 -mb-16" style={{ background: `linear-gradient(180deg, rgba(19,26,23,0) 0%, rgba(19,26,23,.75) 60%, rgba(19,26,23,1) 100%), url(${ARTE.coletiva}) center 45%/cover` }} />
+        <div aria-hidden="true" className="h-36 -mb-16" style={{ background: `linear-gradient(180deg, rgba(16,35,55,0) 0%, rgba(16,35,55,.75) 60%, rgba(16,35,55,1) 100%), url(${ARTE.coletiva}) center 45%/cover` }} />
         <div className="relative px-5 pb-4">
           <span className="rp-chip" style={{ color: "#9CC3FF", background: "rgba(46,111,224,.2)" }}>🎙️ Coletiva de imprensa</span>
-          <div className="text-[13px] text-[#8FA39A] mt-3">{coletiva.veiculo} pergunta:</div>
+          <div className="text-[13px] text-[#9EB5C9] mt-3">{coletiva.veiculo} pergunta:</div>
           <p className="display text-[15px] leading-snug text-[#F2F5F3] mt-1">“{coletiva.pergunta}”</p>
         </div>
         {!resposta && (
@@ -1352,7 +1353,7 @@ function TelaColetiva({ c, coletiva, resposta, onResponder, onSeguir }) {
             {coletiva.opcoes.map((o) => (
               <button key={o.id} onClick={() => onResponder(o.id)} className="rp-opcao px-4 py-3">
                 <div className="font-bold text-[16px] text-[#F2F5F3]"><Icone e={o.icone} /> {o.label}</div>
-                <div className="text-[15px] text-[#8FA39A] mt-1 italic">{o.fala}</div>
+                <div className="text-[15px] text-[#9EB5C9] mt-1 italic">{o.fala}</div>
               </button>
             ))}
           </div>
@@ -1360,17 +1361,17 @@ function TelaColetiva({ c, coletiva, resposta, onResponder, onSeguir }) {
         {resposta && (
           <div className="px-5 pb-5 rp-entra">
             <p className="text-[17px] italic text-[#E1E6E3]">{resposta.fala}</p>
-            {resposta.notas.map((n, i) => <p key={i} className="text-[16px] text-[#C9D3CE] mt-2">{n}</p>)}
+            {resposta.notas.map((n, i) => <p key={i} className="text-[16px] text-[#C9D9E8] mt-2">{n}</p>)}
             {resposta.efeitos.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-3">
-                {resposta.efeitos.map((e) => <span key={e} className="rp-chip" style={{ color: "#C9D3CE", background: "rgba(255,255,255,.07)" }}>{e}</span>)}
+                {resposta.efeitos.map((e) => <span key={e} className="rp-chip" style={{ color: "#C9D9E8", background: "rgba(255,255,255,.07)" }}>{e}</span>)}
               </div>
             )}
           </div>
         )}
       </div>
       {resposta && <button onClick={onSeguir} className="rp-btn rp-prim display text-sm">Continuar</button>}
-      {!resposta && <button onClick={onSeguir} className="text-[15px] text-[#8FA39A] min-h-[44px]">Não dar entrevista</button>}
+      {!resposta && <button onClick={onSeguir} className="text-[15px] text-[#9EB5C9] min-h-[44px]">Não dar entrevista</button>}
     </div>
   );
 }
@@ -1382,14 +1383,14 @@ function TelaTraco({ c, opcoes, onEscolher }) {
       <div>
         <span className="rp-chip" style={{ color: "#EBC557", background: "rgba(216,180,74,.14)" }}>Marco {marco} de 3 · {c.idade} anos</span>
         <h2 className="display text-lg text-[#F2F5F3] mt-3">Que jogador você quer ser?</h2>
-        <p className="text-[17px] text-[#8FA39A] mt-1">Escolha um traço. Ele fica com você até o fim e muda como sua carreira é simulada.</p>
+        <p className="text-[17px] text-[#9EB5C9] mt-1">Escolha um traço. Ele fica com você até o fim e muda como sua carreira é simulada.</p>
       </div>
       {opcoes.map((t) => (
         <button key={t.id} onClick={() => onEscolher(t.id)} className="rp-opcao px-4 py-4 flex items-center gap-4">
           <span className="text-3xl w-12 h-12 rounded-2xl bg-[#D8B44A]/12 border border-[#D8B44A]/30 flex items-center justify-center shrink-0"><Icone e={t.icone} /></span>
           <span>
             <span className="block font-bold text-[18px] text-[#F2F5F3]">{t.nome}</span>
-            <span className="block text-[15px] text-[#8FA39A] mt-0.5">{t.desc}</span>
+            <span className="block text-[15px] text-[#9EB5C9] mt-0.5">{t.desc}</span>
           </span>
         </button>
       ))}
@@ -1406,12 +1407,12 @@ function CartaoEvento({ jogador, evento, resultado, efeitos, onEscolher, onPedir
   return (
     <div className={`rp-evento rp-painel overflow-hidden rp-entra ${resultado?'rp-evento-resultado':''}`}>
       <div className="relative px-4 pt-3.5 pb-2.5 flex items-start gap-3" style={{ background: ARTE_EVENTO[evento.id]
-        ? `linear-gradient(90deg, rgba(14,21,18,.97) 0%, rgba(14,21,18,.88) 50%, rgba(14,21,18,.55) 100%), url(${ARTE_EVENTO[evento.id]}) right center/cover`
-        : evento.vida ? "linear-gradient(135deg, rgba(140,110,230,.18), transparent 70%)" : "linear-gradient(135deg, rgba(18,168,118,.14), transparent 70%)" }}>
-        <span className="text-2xl w-11 h-11 rounded-xl bg-[#0E1512]/70 border border-white/10 flex items-center justify-center shrink-0"><Icone e={evento.icone} size={26} cor={evento.vida ? "#C7B8F5" : "#7FE3BC"} /></span>
+        ? `linear-gradient(90deg, rgba(7,19,33,.97) 0%, rgba(7,19,33,.88) 50%, rgba(7,19,33,.55) 100%), url(${ARTE_EVENTO[evento.id]}) right center/cover`
+        : evento.vida ? "linear-gradient(135deg, rgba(140,110,230,.18), transparent 70%)" : "linear-gradient(135deg, rgba(155,222,255,.14), transparent 70%)" }}>
+        <span className="text-2xl w-11 h-11 rounded-xl bg-[#071321]/70 border border-white/10 flex items-center justify-center shrink-0"><Icone e={evento.icone} size={26} cor={evento.vida ? "#C7B8F5" : "#BCEAFF"} /></span>
         <div className="min-w-0">
           <h2 className="display text-[14px] leading-snug text-[#F2F5F3]">{evento.titulo}{evento.vida && <span className="ml-1.5 align-middle rp-chip !text-[9px] !py-0.5" style={{ color: "#C7B8F5", background: "rgba(140,110,230,.18)" }}>vida</span>}</h2>
-          <p className="text-[15px] text-[#C9D3CE] mt-1 leading-snug line-clamp-3">{evento.texto}</p>
+          <p className="text-[15px] text-[#C9D9E8] mt-1 leading-snug line-clamp-3">{evento.texto}</p>
         </div>
       </div>
       {!resultado && evento.grade && evento.id!=='emprestimo' && (
@@ -1422,10 +1423,10 @@ function CartaoEvento({ jogador, evento, resultado, efeitos, onEscolher, onPedir
               const cl = clubeDe(o.oferta.clube);
               return (
                 <button key={o.id} onClick={() => onEscolher(o.id)} className="rp-opcao px-1.5 py-3 flex flex-col items-center text-center min-h-[150px]" aria-label={o.label}>
-                  <span className="text-[11px] text-[#8FA39A] leading-tight">{evento.id === "emprestimo" ? "Empréstimo para" : "Assinar com"}</span>
+                  <span className="text-[11px] text-[#9EB5C9] leading-tight">{evento.id === "emprestimo" ? "Empréstimo para" : "Assinar com"}</span>
                   <span className="text-[14px] font-bold text-[#F2F5F3] leading-tight mt-0.5 line-clamp-2">{o.oferta.clube}</span>
                   <span className="my-2"><ClubDot club={cl} size={46} /></span>
-                  <span className="text-[11px] text-[#8FA39A] leading-tight">{o.oferta.ligaNome}</span>
+                  <span className="text-[11px] text-[#9EB5C9] leading-tight">{o.oferta.ligaNome}</span>
                 </button>
               );
             })}
@@ -1433,7 +1434,7 @@ function CartaoEvento({ jogador, evento, resultado, efeitos, onEscolher, onPedir
           {evento.opcoes.filter((o) => !o.oferta).map((o) => (
             <button key={o.id} onClick={() => onEscolher(o.id)} className="rp-opcao px-4 py-3">
               <div className="font-bold text-[16px] text-[#F2F5F3]">{o.label}</div>
-              {o.dica && <div className="text-[14px] text-[#8FA39A] mt-0.5">{o.dica}</div>}
+              {o.dica && <div className="text-[14px] text-[#9EB5C9] mt-0.5">{o.dica}</div>}
             </button>
           ))}
         </div>
@@ -1448,7 +1449,7 @@ function CartaoEvento({ jogador, evento, resultado, efeitos, onEscolher, onPedir
                 <div key={o.id} className="rounded-2xl border border-dashed border-[#2E6FE0]/50 bg-[#2E6FE0]/8">
                   <button onClick={() => setLigas((v) => !v)} aria-expanded={ligas} className="w-full text-left px-4 py-3 min-h-[52px]">
                     <div className="font-bold text-[17px] text-[#9CC3FF]">{o.label}</div>
-                    <div className="text-[14px] text-[#8FA39A] mt-1">{o.dica} · uma vez por janela</div>
+                    <div className="text-[14px] text-[#9EB5C9] mt-1">{o.dica} · uma vez por janela</div>
                   </button>
                   {ligas && (
                     <div className="grid grid-cols-2 gap-2 px-3 pb-3 rp-entra">
@@ -1471,9 +1472,9 @@ function CartaoEvento({ jogador, evento, resultado, efeitos, onEscolher, onPedir
                       {o.oferta && <ClubDot club={clubeDe(o.oferta.clube)} size={22} />}
                       <span className="font-bold text-[16px] text-[#F2F5F3] truncate">{o.oferta ? o.oferta.clube : o.label}</span>
                     </div>
-                    {o.dica && <div className="text-[13px] text-[#8FA39A] mt-0.5 line-clamp-2">{o.dica}</div>}{o.oferta&&<ProjetoOferta c={jogador} nome={o.oferta.clube} projeto={o.oferta.projeto||projetoOferta(jogador,o.oferta.clube)}/>}
+                    {o.dica && <div className="text-[13px] text-[#9EB5C9] mt-0.5 line-clamp-2">{o.dica}</div>}{o.oferta&&<ProjetoOferta c={jogador} nome={o.oferta.clube} projeto={o.oferta.projeto||projetoOferta(jogador,o.oferta.clube)}/>}
                   </button>
-                  <button onClick={() => onEscolher(o.id, false)} className="shrink-0 px-3 border-l border-white/10 text-[12px] font-bold text-[#7FE3BC] hover:bg-white/5" aria-label={`Negociar com o ${o.oferta?.clube || ""}`}>negociar</button>
+                  <button onClick={() => onEscolher(o.id, false)} className="shrink-0 px-3 border-l border-white/10 text-[12px] font-bold text-[#BCEAFF] hover:bg-white/5" aria-label={`Negociar com o ${o.oferta?.clube || ""}`}>negociar</button>
                 </div>
               );
             }
@@ -1485,11 +1486,11 @@ function CartaoEvento({ jogador, evento, resultado, efeitos, onEscolher, onPedir
                   {!o.chances && o.risco && o.risco !== "seguro" && <span className="rp-chip shrink-0" style={{ color: r.cor, background: r.bg }}>{r.label}</span>}
                 </div>
                 {o.oferta&&<ProjetoOferta c={jogador} nome={o.oferta.clube} projeto={o.oferta.projeto||projetoOferta(jogador,o.oferta.clube)}/>}
-                {o.dica && o.oferta && <div className="text-[13px] text-[#8FA39A] mt-0.5">{o.dica}</div>}
+                {o.dica && o.oferta && <div className="text-[13px] text-[#9EB5C9] mt-0.5">{o.dica}</div>}
                 {o.chances && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {o.chances.map((x, i) => (
-                      <span key={i} className="rp-chip" style={(() => { const b = x.d > 0 || (!x.d && ((x.fama || 0) > 0 || (x.torcida || 0) > 0 || (x.minutos || 0) > 0)); const m = x.d < 0 || (x.torcida || 0) < 0 || (x.lesao || 0) > 0; return { color: m ? "#F0A99E" : b ? "#7FE3BC" : "#C9D3CE", background: m ? "rgba(227,107,91,.16)" : b ? "rgba(18,168,118,.16)" : "rgba(255,255,255,.07)" }; })()}>
+                      <span key={i} className="rp-chip" style={(() => { const b = x.d > 0 || (!x.d && ((x.fama || 0) > 0 || (x.torcida || 0) > 0 || (x.minutos || 0) > 0)); const m = x.d < 0 || (x.torcida || 0) < 0 || (x.lesao || 0) > 0; return { color: m ? "#F0A99E" : b ? "#BCEAFF" : "#C9D9E8", background: m ? "rgba(227,107,91,.16)" : b ? "rgba(155,222,255,.16)" : "rgba(255,255,255,.07)" }; })()}>
                         {x.rotulo || (x.d > 0 ? `+${x.d} OVR` : x.d < 0 ? `−${-x.d} OVR` : "nada muda")} · {Math.round(x.p * 100)}%
                       </span>
                     ))}
@@ -1502,16 +1503,16 @@ function CartaoEvento({ jogador, evento, resultado, efeitos, onEscolher, onPedir
       )}
       {resultado && (
         <button onClick={onAvancar} className="block w-full text-left px-4 pb-3 pt-0.5 rp-entra" aria-label="Continuar">
-          <p className="text-[16px] font-semibold text-[#7FE3BC] leading-snug">→ {resultado}</p>
+          <p className="text-[16px] font-semibold text-[#BCEAFF] leading-snug">→ {resultado}</p>
           {efeitos?.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-2" aria-label="Efeitos da decisão">
-              {efeitos.map((e) => <span key={e.txt} className="rp-chip" style={{ color: e.bom ? "#7FE3BC" : "#F0A99E", background: e.bom ? "rgba(18,168,118,.16)" : "rgba(227,107,91,.16)" }}>{e.txt}</span>)}
+              {efeitos.map((e) => <span key={e.txt} className="rp-chip" style={{ color: e.bom ? "#BCEAFF" : "#F0A99E", background: e.bom ? "rgba(155,222,255,.16)" : "rgba(227,107,91,.16)" }}>{e.txt}</span>)}
             </div>
           )}
           {espera > 0 && (
             <div className="mt-3 flex items-center gap-2">
-              <div className="flex-1 h-1 rounded-full bg-white/10 overflow-hidden"><div key={resultado} className="rp-barra h-full bg-[#12A876]" style={{ "--dur": `${espera}ms` }} /></div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#8FA39A]">toque para seguir</span>
+              <div className="flex-1 h-1 rounded-full bg-white/10 overflow-hidden"><div key={resultado} className="rp-barra h-full bg-[#9BDEFF]" style={{ "--dur": `${espera}ms` }} /></div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#9EB5C9]">toque para seguir</span>
             </div>
           )}
         </button>
@@ -1523,7 +1524,7 @@ function CartaoEvento({ jogador, evento, resultado, efeitos, onEscolher, onPedir
 function SeletorFoco({ c, onFoco }) {
   return (
     <div className="rp-painel p-4">
-      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Foco da temporada</div>
+      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9]">Foco da temporada</div>
       <div className="grid grid-cols-3 gap-2 mt-3">
         {FOCOS.map((f) => (
           <button key={f.id} onClick={() => onFoco(f.id)} className={`rp-opcao px-2 py-2.5 text-center min-h-[64px] ${c.foco === f.id ? "sel" : ""}`} aria-pressed={c.foco === f.id}>
@@ -1532,7 +1533,7 @@ function SeletorFoco({ c, onFoco }) {
           </button>
         ))}
       </div>
-      <p className="text-[14px] text-[#8FA39A] mt-2 min-h-[20px]">{focoDe(c.foco).desc}</p>
+      <p className="text-[14px] text-[#9EB5C9] mt-2 min-h-[20px]">{focoDe(c.foco).desc}</p>
     </div>
   );
 }
@@ -1557,11 +1558,11 @@ function DicasIniciais() {
       <div className="rp-painel p-4 rp-entra" key={passo} style={{ borderColor: "rgba(216,180,74,.45)" }} role="region" aria-label="Dicas para começar">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#EBC557]">Como funciona · {passo + 1}/{DICAS.length}</span>
-          <button onClick={fechar} className="text-[14px] text-[#8FA39A] min-h-[40px] px-2">Pular</button>
+          <button onClick={fechar} className="text-[14px] text-[#9EB5C9] min-h-[40px] px-2">Pular</button>
         </div>
         <div className="flex gap-3 mt-1">
           <span className="text-3xl" aria-hidden="true"><Icone e={d.icone} /></span>
-          <div><div className="font-bold text-[17px] text-[#F2F5F3]">{d.titulo}</div><p className="text-[16px] text-[#C9D3CE] leading-snug mt-0.5">{d.texto}</p></div>
+          <div><div className="font-bold text-[17px] text-[#F2F5F3]">{d.titulo}</div><p className="text-[16px] text-[#C9D9E8] leading-snug mt-0.5">{d.texto}</p></div>
         </div>
         <button onClick={() => (passo + 1 < DICAS.length ? setPasso(passo + 1) : fechar())} className="rp-btn rp-sec text-[16px] w-full mt-3">{passo + 1 < DICAS.length ? "Próxima dica" : "Entendi, bora jogar"}</button>
       </div>
@@ -1616,7 +1617,7 @@ function TelaEvento({ c, evento, resultado, efeitos, temMais, aviso, manchete, o
           <Ficha c={c} semTopo />
           <button onClick={onPatrimonio} className="rp-painel px-4 py-3 flex items-center gap-3 text-left hover:border-[#D8B44A]/50">
             <span className="text-2xl">💼</span>
-            <span className="flex-1"><span className="block text-[13px] font-bold uppercase tracking-[0.15em] text-[#8FA39A]">Loja e patrimônio</span><span className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</span></span>
+            <span className="flex-1"><span className="block text-[13px] font-bold uppercase tracking-[0.15em] text-[#9EB5C9]">Loja e patrimônio</span><span className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</span></span>
             <span className="text-[15px] font-bold text-[#EBC557]">Ver loja →</span>
           </button>
           <SeletorPretemporada key={c.ano} c={c} onEscolher={onPretemporada} />
@@ -1633,28 +1634,28 @@ function TelaEvento({ c, evento, resultado, efeitos, temMais, aviso, manchete, o
 function TelaNegociacao({ c, n, onAjustar, onAssinar, onSair }) {
   const cl = clubeDe(n.clube);
   const t = n.termos, o = n.original;
-  const corPac = n.paciencia >= 60 ? "#1BC28A" : n.paciencia >= 30 ? "#EBC557" : "#E36B5B";
+  const corPac = n.paciencia >= 60 ? "#BCEAFF" : n.paciencia >= 30 ? "#EBC557" : "#E36B5B";
   const humor = n.colapsou ? "Saiu da mesa" : n.paciencia >= 60 ? "Tranquila" : n.paciencia >= 30 ? "Impaciente" : "No limite";
   const fmt = { salario: (v) => `${formatarValor(v)}/ano`, anos: (v) => `${v} ano${v > 1 ? "s" : ""}`, multa: (v) => formatarValor(v), bonusGol: (v) => `${formatarValor(v)}/gol` };
   const luvas = n.luvas ? Math.round(t.salario * 0.5) : 0;
   return (
     <div className="max-w-xl mx-auto px-4 py-5 flex flex-col gap-4 rp-entra">
       <div className="rp-painel overflow-hidden">
-        <div className="p-4 pt-16 flex items-center gap-3" style={{ background: `linear-gradient(180deg, rgba(19,26,23,.1) 0%, rgba(19,26,23,.85) 70%), linear-gradient(120deg, ${cl.cor}44, transparent 75%), url(${ARTE.contrato}) center 40%/cover` }}>
+        <div className="p-4 pt-16 flex items-center gap-3" style={{ background: `linear-gradient(180deg, rgba(16,35,55,.1) 0%, rgba(16,35,55,.85) 70%), linear-gradient(120deg, ${cl.cor}44, transparent 75%), url(${ARTE.contrato}) center 40%/cover` }}>
           <ClubDot club={cl} size={44} />
           <div className="min-w-0 flex-1">
-            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9D3CE]">{n.tipo === "renovacao" ? "Renovação de contrato" : "Proposta de contrato"}</div>
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9D9E8]">{n.tipo === "renovacao" ? "Renovação de contrato" : "Proposta de contrato"}</div>
             <h2 className="display text-base text-[#F2F5F3] truncate">{cl.nome}</h2>
-            <div className="text-[14px] text-[#C9D3CE]">{ligaDe(cl.liga).nome} · sua fama: {fama_negociador(c).toLowerCase()}</div>
+            <div className="text-[14px] text-[#C9D9E8]">{ligaDe(cl.liga).nome} · sua fama: {fama_negociador(c).toLowerCase()}</div>
           </div>
         </div>
         <div className="px-4 py-3 border-t border-white/5">
           <div className="flex items-center justify-between text-[14px]">
-            <span className="font-bold text-[#C9D3CE]">Paciência da diretoria</span>
+            <span className="font-bold text-[#C9D9E8]">Paciência da diretoria</span>
             <span className="font-bold" style={{ color: corPac }}>{humor}</span>
           </div>
           <div className="mt-1.5"><Barra valor={n.paciencia} cor={corPac} /></div>
-          <div className="text-[13px] text-[#8FA39A] mt-1.5">{n.pedidos > 0 && !n.colapsou ? `${n.pedidos} pedido(s) restante(s). Pedir mais desgasta; ceder acalma.` : n.colapsou ? "Você forçou demais." : "Sem mais pedidos: assine ou saia."}</div>
+          <div className="text-[13px] text-[#9EB5C9] mt-1.5">{n.pedidos > 0 && !n.colapsou ? `${n.pedidos} pedido(s) restante(s). Pedir mais desgasta; ceder acalma.` : n.colapsou ? "Você forçou demais." : "Sem mais pedidos: assine ou saia."}</div>
         </div>
       </div>
 
@@ -1666,21 +1667,21 @@ function TelaNegociacao({ c, n, onAjustar, onAssinar, onSair }) {
             <div key={campo.id} className="flex items-center gap-2 px-2 py-2.5 border-b border-white/5 last:border-0">
               <span className="text-xl w-7 text-center"><Icone e={campo.icone} /></span>
               <div className="flex-1 min-w-0">
-                <div className="text-[13px] text-[#8FA39A]">{campo.label}</div>
+                <div className="text-[13px] text-[#9EB5C9]">{campo.label}</div>
                 <div className={`font-stat text-[17px] ${mudou ? "text-[#EBC557]" : "text-[#F2F5F3]"}`}>{fmt[campo.id](t[campo.id])}</div>
-                {campo.id === "salario" && c.contrato?.salario > 0 && <div className="text-[12px] text-[#8FA39A]">Hoje: {formatarValor(c.contrato.salario)}/ano{comparaSalario(c, t.salario)}</div>}
+                {campo.id === "salario" && c.contrato?.salario > 0 && <div className="text-[12px] text-[#9EB5C9]">Hoje: {formatarValor(c.contrato.salario)}/ano{comparaSalario(c, t.salario)}</div>}
               </div>
               <button disabled={bloqueado} onClick={() => onAjustar(campo.id, -1)} className="rp-btn rp-sec !min-h-[44px] px-3 text-[13px]" aria-label={`${campo.ceder}: ${campo.label}`}>−</button>
               <button disabled={bloqueado} onClick={() => onAjustar(campo.id, 1)} className="rp-btn rp-sec !min-h-[44px] px-3 text-[13px]" aria-label={`${campo.pedirMais}: ${campo.label}`}>+</button>
             </div>
           );
         })}
-        <p className="text-[13px] text-[#8FA39A] px-2 pt-2 pb-1">Cláusula baixa facilita sair no futuro, mas um clube grande pode pagá-la sem te consultar.</p>
+        <p className="text-[13px] text-[#9EB5C9] px-2 pt-2 pb-1">Cláusula baixa facilita sair no futuro, mas um clube grande pode pagá-la sem te consultar.</p>
       </div>
 
       {n.historico.length > 0 && (
         <ul className="flex flex-col gap-1">
-          {n.historico.slice(-4).map((h, i) => <li key={i} className="text-[15px] text-[#C9D3CE]">• {h}</li>)}
+          {n.historico.slice(-4).map((h, i) => <li key={i} className="text-[15px] text-[#C9D9E8]">• {h}</li>)}
         </ul>
       )}
       {luvas > 0 && !n.colapsou && <div className="rp-painel px-4 py-3 text-[16px] text-[#EBC557]">💰 Luvas na assinatura: {formatarValor(luvas)}</div>}
@@ -1730,7 +1731,7 @@ function EmblemaLegado({ c, L, size = 96 }) {
     conteudo = <span style={{ filter: L.nivel.min === 0 ? "grayscale(1) brightness(.85)" : undefined }}><Escudo nome={clube} size={interno} /></span>;
   }
   return (
-    <div className="relative shrink-0 rounded-full p-[3px]" style={{ width: size, height: size, background: `conic-gradient(from 210deg, ${cor}, #0E1512 40%, ${cor} 70%, #0E1512 90%, ${cor})`, boxShadow: `0 0 ${size / 4}px ${cor}55` }} aria-hidden="true">
+    <div className="relative shrink-0 rounded-full p-[3px]" style={{ width: size, height: size, background: `conic-gradient(from 210deg, ${cor}, #071321 40%, ${cor} 70%, #071321 90%, ${cor})`, boxShadow: `0 0 ${size / 4}px ${cor}55` }} aria-hidden="true">
       <div className="w-full h-full rounded-full flex items-center justify-center" style={{ background: "radial-gradient(circle at 50% 35%, #1E2A25, #0B1210 75%)" }}>{conteudo}</div>
     </div>
   );
@@ -1742,14 +1743,14 @@ function PecaTemporada({ s, anterior, size = 36 }) {
   const bola = s.titulos.some((t) => t.tipo === "bolaOuro");
   const lesao = s.lesao && s.jogos < 25;
   const novo = anterior && anterior.clube !== s.clube;
-  const cor = s.cor || "#2A3A33";
+  const cor = s.cor || "#30475D";
   let fundo = "#1A211E", borda = "rgba(255,255,255,.06)", conteudo = null, rotulo = "temporada discreta";
   if (bola) { fundo = "radial-gradient(circle, #3A3015, #15120A)"; borda = "#D8B44A"; conteudo = <BolaDourada size={size * 0.72} />; rotulo = "Bola de Ouro"; }
   else if (titulo) { fundo = "radial-gradient(circle, #2A2617, #121510)"; borda = "rgba(216,180,74,.7)"; conteudo = <TacaCompeticao tipo={titulo.tipo} nome={titulo.nome} size={size * 0.6} />; rotulo = titulo.nome; }
   else if (lesao) { fundo = "repeating-linear-gradient(135deg, #3A1714 0 5px, #24100E 5px 10px)"; borda = "rgba(227,107,91,.55)"; rotulo = "lesão"; }
   else if (novo) { fundo = "#16201C"; borda = `${cor}AA`; conteudo = <Escudo nome={s.clube} size={size * 0.62} />; rotulo = `chegada ao ${s.clube}`; }
-  else if (s.nota >= 7.2) { fundo = "#12A876"; rotulo = "grande temporada"; }
-  else if (s.nota >= 6.6) { fundo = "rgba(18,168,118,.4)"; rotulo = "boa temporada"; }
+  else if (s.nota >= 7.2) { fundo = "#9BDEFF"; rotulo = "grande temporada"; }
+  else if (s.nota >= 6.6) { fundo = "rgba(155,222,255,.4)"; rotulo = "boa temporada"; }
   return (
     <div className="flex flex-col items-center gap-1" title={`${s.ano} · ${s.clube} · ${rotulo}`}>
       <div className="rounded-lg flex items-center justify-center overflow-hidden" style={{ width: size, height: size, background: fundo, border: `1px solid ${borda}` }}>{conteudo}</div>
@@ -1762,7 +1763,7 @@ function FaixaTemporadas({ c }) {
   const leg = [
     [<BolaDourada size={14} />, "Bola de Ouro"], [<TacaCompeticao tipo="liga" size={12} />, "título"], [<Escudo nome={clubeDaVida(c)} size={14} />, "clube novo"],
     [<span className="w-3.5 h-3.5 rounded-sm" style={{ background: "repeating-linear-gradient(135deg, #3A1714 0 3px, #24100E 3px 6px)", border: "1px solid rgba(227,107,91,.55)" }} />, "lesão"],
-    [<span className="w-3.5 h-3.5 rounded-sm bg-[#12A876]" />, "grande"], [<span className="w-3.5 h-3.5 rounded-sm bg-[#12A876]/40" />, "boa"], [<span className="w-3.5 h-3.5 rounded-sm bg-[#1A211E] border border-white/10" />, "discreta"],
+    [<span className="w-3.5 h-3.5 rounded-sm bg-[#9BDEFF]" />, "grande"], [<span className="w-3.5 h-3.5 rounded-sm bg-[#9BDEFF]/40" />, "boa"], [<span className="w-3.5 h-3.5 rounded-sm bg-[#1A211E] border border-white/10" />, "discreta"],
   ];
   return (
     <>
@@ -1770,7 +1771,7 @@ function FaixaTemporadas({ c }) {
         {c.temporadas.map((s, i) => <PecaTemporada key={i} s={s} anterior={c.temporadas[i - 1]} />)}
       </div>
       <div className="flex flex-wrap gap-x-3 gap-y-1.5 mt-3">
-        {leg.map(([icone, nome]) => <span key={nome} className="inline-flex items-center gap-1.5 text-[12px] text-[#8FA39A]">{icone}{nome}</span>)}
+        {leg.map(([icone, nome]) => <span key={nome} className="inline-flex items-center gap-1.5 text-[12px] text-[#9EB5C9]">{icone}{nome}</span>)}
       </div>
     </>
   );
@@ -1787,7 +1788,7 @@ function MarcadorMomento({ c, m }) {
   if (id === "ovr90") return <Gema size={24} />;
   if (id === "selecao") return <FotoMini src={ARTE.torcida} size={26} />;
   if (clubeDoAno) return <Escudo nome={clubeDoAno} size={26} />;
-  return <span className="w-2.5 h-2.5 rounded-full bg-[#12A876]" />;
+  return <span className="w-2.5 h-2.5 rounded-full bg-[#9BDEFF]" />;
 }
 
 function CartaFinal({ c }) {
@@ -1795,21 +1796,21 @@ function CartaFinal({ c }) {
   const t = c.titulos;
   const totalTitulos = c.lista.filter((x) => !ehPremioIndividual(x.tipo)).length;
   return (
-    <div className="rp-carta w-full rounded-[28px] p-[2px]" style={{ background: `linear-gradient(160deg, ${L.nivel.cor}, #0E1512 55%, ${L.nivel.cor})` }}>
-      <div className="rounded-[26px] p-5 relative overflow-hidden" style={{ background: "linear-gradient(170deg, #17201C, #0E1512)" }}>
-        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-40" style={{ background: `linear-gradient(180deg, rgba(14,21,18,.35) 0%, rgba(23,32,28,.85) 70%, #17201C 100%), url(${fotoDoNivel(L.nivel)}) center/cover` }} />
+    <div className="rp-carta w-full rounded-[28px] p-[2px]" style={{ background: `linear-gradient(160deg, ${L.nivel.cor}, #071321 55%, ${L.nivel.cor})` }}>
+      <div className="rounded-[26px] p-5 relative overflow-hidden" style={{ background: "linear-gradient(170deg, #17201C, #071321)" }}>
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-40" style={{ background: `linear-gradient(180deg, rgba(7,19,33,.35) 0%, rgba(23,32,28,.85) 70%, #17201C 100%), url(${fotoDoNivel(L.nivel)}) center/cover` }} />
         <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full opacity-20 blur-2xl" style={{ background: L.nivel.cor }} />
         <div className="flex items-start justify-between relative">
           <div>
             <div className="font-stat text-5xl font-bold leading-none" style={{ color: L.nivel.cor }}>{c.picoOvr}</div>
-            <div className="text-sm font-bold tracking-widest text-[#C9D3CE] mt-1">{c.posicao} · #{numeroDe(c)}</div>
-            <div className="text-[13px] text-[#8FA39A]">{nacDe(c.nac).label} · {peDe(c.pe).nome}</div>
+            <div className="text-sm font-bold tracking-widest text-[#C9D9E8] mt-1">{c.posicao} · #{numeroDe(c)}</div>
+            <div className="text-[13px] text-[#9EB5C9]">{nacDe(c.nac).label} · {peDe(c.pe).nome}</div>
           </div>
           <Gema size={64} />
         </div>
         <div className="display text-lg text-[#F2F5F3] mt-5 leading-tight relative">{c.nome}</div>
-        {c.apelidos.length > 0 && <div className="text-[14px] text-[#8FA39A] italic">{c.apelidos.map((a) => `"${a.nome}"`).join(" · ")}</div>}
-        {c.apelidos.some((a) => a.cantico) && <div className="text-[12px] text-[#8FA39A] mt-0.5">"{c.apelidos.filter((a) => a.cantico).slice(-1)[0].cantico}"</div>}
+        {c.apelidos.length > 0 && <div className="text-[14px] text-[#9EB5C9] italic">{c.apelidos.map((a) => `"${a.nome}"`).join(" · ")}</div>}
+        {c.apelidos.some((a) => a.cantico) && <div className="text-[12px] text-[#9EB5C9] mt-0.5">"{c.apelidos.filter((a) => a.cantico).slice(-1)[0].cantico}"</div>}
         <div className="mt-2 inline-flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full text-[14px] font-bold relative" style={{ background: `${L.nivel.cor}22`, color: L.nivel.cor, border: `1px solid ${L.nivel.cor}55` }}>
           <EmblemaLegado c={c} L={L} size={26} /> {L.nivel.nome}
         </div>
@@ -1817,14 +1818,14 @@ function CartaFinal({ c }) {
           {[["JOGOS", c.totais.jogos], ["GOLS", c.totais.gols], ["ASSIST.", c.totais.assist], ["TÍTULOS", totalTitulos], ["BOLAS", t.bolaOuro || 0], ["COPAS", t.copaMundo || 0]].map(([k, v]) => (
             <div key={k} className="rounded-xl bg-black/25 py-2 text-center">
               <div className="font-stat text-lg text-[#F2F5F3] leading-none">{v}</div>
-              <div className="text-[10px] font-bold tracking-wider text-[#8FA39A] mt-1">{k}</div>
+              <div className="text-[10px] font-bold tracking-wider text-[#9EB5C9] mt-1">{k}</div>
             </div>
           ))}
         </div>
         <MiniCurva c={c} cor={L.nivel.cor} />
         {c.lenda && (
           <div className="mt-4 rounded-xl px-3 py-2 relative" style={{ background: "rgba(0,0,0,.28)", border: "1px solid rgba(255,255,255,.06)" }}>
-            <div className="text-[10px] font-bold tracking-[0.2em] text-[#8FA39A]">VOCÊ FOI COMO</div>
+            <div className="text-[10px] font-bold tracking-[0.2em] text-[#9EB5C9]">VOCÊ FOI COMO</div>
             <div className="flex items-baseline justify-between gap-2">
               <span className="text-[17px] font-bold text-[#F2F5F3] truncate">{c.lenda.nome}</span>
               <span className="font-stat text-base" style={{ color: L.nivel.cor }}>{c.lenda.similaridade}%</span>
@@ -1925,7 +1926,7 @@ function PosCarreira({ c, onEscolher }) {
       <>
         {aberto && <PopupPosCarreira c={c} onFechar={() => setAberto(false)} />}
         <button onClick={() => setAberto(true)} className="rp-painel p-4 text-left w-full" style={{ borderColor: `${pc.cor}66` }}>
-          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Depois da bola</div>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9]">Depois da bola</div>
           <div className="flex items-center gap-3 mt-2">
             <span className="w-12 h-12 rounded-xl shrink-0 border border-white/10" style={{ background: `url(${FOTO_POS_CARREIRA[pc.id] || ARTE.porDoSol}) center/cover` }} aria-hidden="true" />
             <span className="min-w-0 flex-1">
@@ -1934,18 +1935,18 @@ function PosCarreira({ c, onEscolher }) {
             </span>
           </div>
           {pc.titulos?.length > 0 && <div className="flex flex-wrap items-center gap-1 mt-2">{pc.titulos.slice(0, 10).map((t, i) => <IconeTitulo key={i} tipo={t.tipo} nome={t.nome} size={22} />)}{pc.titulos.length > 10 && <span className="text-[13px] font-bold text-[#EBC557]">+{pc.titulos.length - 10}</span>}</div>}
-          <div className="text-[13px] font-bold text-[#7FE3BC] mt-2">Ver a trajetória ›</div>
+          <div className="text-[13px] font-bold text-[#BCEAFF] mt-2">Ver a trajetória ›</div>
         </button>
       </>
     );
   }
   if (pc) { // saves antigos: só o texto
-    return <div className="rp-painel p-4"><div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Depois da bola</div><div className="display text-base mt-2" style={{ color: pc.cor }}>{pc.nome}</div><p className="text-[16px] text-[#C9D3CE] mt-1">{pc.epilogo}</p></div>;
+    return <div className="rp-painel p-4"><div className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9]">Depois da bola</div><div className="display text-base mt-2" style={{ color: pc.cor }}>{pc.nome}</div><p className="text-[16px] text-[#C9D9E8] mt-1">{pc.epilogo}</p></div>;
   }
   return (
     <div className="rp-poscarreira rp-painel p-4">
-      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">E agora? O que vem depois da bola</div>
-      <p className="text-[14px] text-[#8FA39A] mt-1">Cada caminho vira uma segunda carreira. O que você fez em campo pesa na chance de dar certo.</p>
+      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9]">E agora? O que vem depois da bola</div>
+      <p className="text-[14px] text-[#9EB5C9] mt-1">Cada caminho vira uma segunda carreira. O que você fez em campo pesa na chance de dar certo.</p>
       <div className="grid grid-cols-[minmax(0,1fr)] gap-2 mt-3">
         {caminhosPosCarreira(c).map((p) => (
           <button key={p.id} onClick={() => { vibrar(15); onEscolher(p.id); setAberto(true); }} className="rp-opcao w-full min-w-0 px-3 py-3 flex items-center gap-3">
@@ -1955,8 +1956,8 @@ function PosCarreira({ c, onEscolher }) {
                 <span className="font-bold text-[16px] text-[#F2F5F3] truncate"><Icone e={p.icone} cor={p.cor} /> {p.nome}</span>
                 {p.id !== "afastar" && <span className="ml-auto shrink-0 text-[10px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ color: COR_CHANCE_POS[p.chance], background: `${COR_CHANCE_POS[p.chance]}1F` }}>chance {p.chance}</span>}
               </span>
-              <span className="block text-[14px] text-[#C9D3CE] leading-snug">{p.desc}</span>
-              <span className="block text-[12px] text-[#8FA39A] mt-0.5">Pesa a favor: {p.aFavor}</span>
+              <span className="block text-[14px] text-[#C9D9E8] leading-snug">{p.desc}</span>
+              <span className="block text-[12px] text-[#9EB5C9] mt-0.5">Pesa a favor: {p.aFavor}</span>
             </span>
           </button>
         ))}
@@ -2122,7 +2123,7 @@ function FimDeCarreira(props) {
         <button onClick={onNova} className="cp-pill cp-contorno text-[15px] min-h-[46px]"><span aria-hidden="true">↻</span> Jogar novamente</button>
       </div>
       <div className="max-w-3xl mx-auto w-full px-3 flex flex-col gap-2">
-        <p className="text-center text-[#C9D3CE] font-bold">O que vem depois dos gramados?</p>
+        <p className="text-center text-[#C9D9E8] font-bold">O que vem depois dos gramados?</p>
         <button onClick={() => { setCompleto(true); onAbrirMuseu?.(); window.scrollTo({ top: 0 }); }} className="rp-btn rp-sec w-full">ENCERRAR CARREIRA · Abrir meu museu</button>
         <button onClick={onComecarTecnico} className="rp-btn rp-ouro w-full">CONTINUAR COMO TÉCNICO</button>
       </div>
@@ -2163,7 +2164,7 @@ function TelaFim({ c, onNova, onSair, onPosCarreira, onComecarTecnico }) {
     try {
       const { toPng } = await import("html-to-image");
       const caixa = cartaRef.current.getBoundingClientRect();
-      const opts = { pixelRatio: 3, cacheBust: true, backgroundColor: "#0E1512", width: Math.round(caixa.width), height: Math.round(caixa.height), style: { margin: "0" } };
+      const opts = { pixelRatio: 3, cacheBust: true, backgroundColor: "#071321", width: Math.round(caixa.width), height: Math.round(caixa.height), style: { margin: "0" } };
       let url;
       try { url = await toPng(cartaRef.current, opts); } catch { url = await toPng(cartaRef.current, { ...opts, skipFonts: true }); }
       const arquivo = `a-joia-${c.nome.normalize("NFD").replace(/[^\w]+/g, "-").toLowerCase()}.png`;
@@ -2184,19 +2185,19 @@ function TelaFim({ c, onNova, onSair, onPosCarreira, onComecarTecnico }) {
   };
   return (
     <div className="rp-legado-completo max-w-xl mx-auto px-4 py-6 flex flex-col gap-5 rp-entra">
-      <div className="text-center -mx-4 -mt-6 px-4 pt-16 pb-6 flex flex-col items-center" style={{ background: `linear-gradient(180deg, rgba(14,21,18,.15) 0%, rgba(14,21,18,.6) 55%, #0E1512 100%), url(${fotoDoNivel(L.nivel)}) center 60%/cover` }}>
+      <div className="text-center -mx-4 -mt-6 px-4 pt-16 pb-6 flex flex-col items-center" style={{ background: `linear-gradient(180deg, rgba(7,19,33,.15) 0%, rgba(7,19,33,.6) 55%, #071321 100%), url(${fotoDoNivel(L.nivel)}) center 60%/cover` }}>
         <EmblemaLegado c={c} L={L} size={104} />
         <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#E1E6E3] mt-4">Fim de carreira · {c.idade - 1} anos</div>
         <h2 className="display text-xl mt-2" style={{ color: L.nivel.cor, textShadow: "0 2px 14px rgba(0,0,0,.9), 0 0 2px rgba(0,0,0,.8)" }}>{L.nivel.nome}</h2>
-        <p className="text-[17px] text-[#C9D3CE] mt-1">{L.nivel.desc}</p>
+        <p className="text-[17px] text-[#C9D9E8] mt-1">{L.nivel.desc}</p>
       </div>
       {c.hall && (
-        <div className="rp-painel px-4 py-3 text-center text-[16px] text-[#C9D3CE]" style={{ borderColor: c.hall.posicao === 1 ? "rgba(216,180,74,.5)" : undefined }}>
+        <div className="rp-painel px-4 py-3 text-center text-[16px] text-[#C9D9E8]" style={{ borderColor: c.hall.posicao === 1 ? "rgba(216,180,74,.5)" : undefined }}>
           {c.hall.total === 1 ? <>Primeira carreira no seu ranking pessoal. Jogue de novo para tentar superá-la.</> : c.hall.posicao === 1 ? <b className="text-[#EBC557]">Sua melhor carreira até hoje!</b> : <>Esta é a sua <span className="font-stat text-[#EBC557]">{c.hall.posicao}ª</span> melhor carreira de {c.hall.total}.</>}
-          {c.diario && <div className="text-[14px] text-[#8FA39A] mt-1">Carreira do Dia: {c.hall.melhorDoDia === 1 ? "seu melhor resultado hoje" : `${c.hall.melhorDoDia}º das suas ${c.hall.tentativasDoDia} tentativas de hoje`}.</div>}
+          {c.diario && <div className="text-[14px] text-[#9EB5C9] mt-1">Carreira do Dia: {c.hall.melhorDoDia === 1 ? "seu melhor resultado hoje" : `${c.hall.melhorDoDia}º das suas ${c.hall.tentativasDoDia} tentativas de hoje`}.</div>}
         </div>
       )}
-      <div ref={cartaRef} className="mx-auto w-full max-w-[364px] p-3 rounded-[32px]" style={{ background: "#0E1512" }}><CartaFinal c={c} /></div>
+      <div ref={cartaRef} className="mx-auto w-full max-w-[364px] p-3 rounded-[32px]" style={{ background: "#071321" }}><CartaFinal c={c} /></div>
       <RetrospectivaCarreira c={c}/><section className="jr-legado">{legadoNarrativo(c).map(l=><p key={l.nome}><strong>{l.nome}</strong><small>{l.motivo}</small></p>)}<details><summary>Montar meu álbum de momentos</summary><AlbumJornada c={c}/></details></section>
       <div className="grid grid-cols-2 gap-2">
         <button onClick={baixarCarta} disabled={imagem === "gerando"} className="rp-btn rp-ouro display text-xs">
@@ -2205,22 +2206,22 @@ function TelaFim({ c, onNova, onSair, onPosCarreira, onComecarTecnico }) {
         <button onClick={compartilharEmoji} className="rp-btn rp-sec text-[16px]">{emojiOk ? "Copiado!" : "Compartilhar"}</button>
       </div>
       <div className="rp-painel p-4">
-        <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-3">Temporada a temporada</div>
+        <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9] mb-3">Temporada a temporada</div>
         <FaixaTemporadas c={c} />
-        <button onClick={copiar} className="text-[14px] font-bold text-[#8FA39A] min-h-[40px] mt-1">{copiado ? "Resumo completo copiado!" : "Copiar resumo completo em texto"}</button>
+        <button onClick={copiar} className="text-[14px] font-bold text-[#9EB5C9] min-h-[40px] mt-1">{copiado ? "Resumo completo copiado!" : "Copiar resumo completo em texto"}</button>
       </div>
 
       {du && (
-        <div className="rp-painel p-4" style={{ borderColor: du.venceu ? "rgba(18,168,118,.45)" : "rgba(227,107,91,.4)" }}>
-          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Duelo de geração</div>
-          <div className="display text-base mt-2" style={{ color: du.venceu ? "#7FE3BC" : "#F0A99E" }}>{du.venceu ? `Você venceu ${c.rival.nome}` : `${c.rival.nome} levou a melhor`}</div>
-          <p className="text-[14px] text-[#8FA39A] mt-1">{nacDe(c.rival.nac).label} · {c.rival.posicao} · último clube: {c.rival.clube}{du.venceu ? " · +25 pontos de legado" : ""}</p>
+        <div className="rp-painel p-4" style={{ borderColor: du.venceu ? "rgba(155,222,255,.45)" : "rgba(227,107,91,.4)" }}>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9]">Duelo de geração</div>
+          <div className="display text-base mt-2" style={{ color: du.venceu ? "#BCEAFF" : "#F0A99E" }}>{du.venceu ? `Você venceu ${c.rival.nome}` : `${c.rival.nome} levou a melhor`}</div>
+          <p className="text-[14px] text-[#9EB5C9] mt-1">{nacDe(c.rival.nac).label} · {c.rival.posicao} · último clube: {c.rival.clube}{du.venceu ? " · +25 pontos de legado" : ""}</p>
           <div className="grid grid-cols-[1fr_auto_1fr] gap-x-3 gap-y-1.5 mt-3 items-center">
-            <div className="text-[12px] font-bold tracking-wider text-[#7FE3BC] text-right">VOCÊ</div><div /><div className="text-[12px] font-bold tracking-wider text-[#F0A99E]">ELE</div>
+            <div className="text-[12px] font-bold tracking-wider text-[#BCEAFF] text-right">VOCÊ</div><div /><div className="text-[12px] font-bold tracking-wider text-[#F0A99E]">ELE</div>
             {[...du.linhas, ["Legado", du.meus, du.dele]].map(([k, a, b]) => (
               <React.Fragment key={k}>
-                <div className={`font-stat text-right ${a > b ? "text-[#1BC28A]" : "text-[#F2F5F3]"}`}>{a}</div>
-                <div className="text-[13px] text-[#8FA39A] text-center">{k}</div>
+                <div className={`font-stat text-right ${a > b ? "text-[#BCEAFF]" : "text-[#F2F5F3]"}`}>{a}</div>
+                <div className="text-[13px] text-[#9EB5C9] text-center">{k}</div>
                 <div className={`font-stat ${b > a ? "text-[#E36B5B]" : "text-[#F2F5F3]"}`}>{b}</div>
               </React.Fragment>
             ))}
@@ -2231,24 +2232,24 @@ function TelaFim({ c, onNova, onSair, onPosCarreira, onComecarTecnico }) {
       <PosCarreira c={c} onEscolher={onPosCarreira} />
 
       <div className="grid grid-cols-2 gap-2">
-        <div className="rp-painel px-4 py-3"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">GANHOU NA CARREIRA</div><div className="font-stat text-lg text-[#F2F5F3]">{formatarValor(c.ganhosTotais || 0)}</div></div>
-        <div className="rp-painel px-4 py-3"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">PATRIMÔNIO FINAL</div><div className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</div></div>
+        <div className="rp-painel px-4 py-3"><div className="text-[10px] font-bold tracking-wider text-[#9EB5C9]">GANHOU NA CARREIRA</div><div className="font-stat text-lg text-[#F2F5F3]">{formatarValor(c.ganhosTotais || 0)}</div></div>
+        <div className="rp-painel px-4 py-3"><div className="text-[10px] font-bold tracking-wider text-[#9EB5C9]">PATRIMÔNIO FINAL</div><div className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</div></div>
         {(c.transferencias || []).length > 0 && (
           <>
-            <div className="rp-painel px-4 py-3"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">PAGARAM POR VOCÊ</div><div className="font-stat text-lg text-[#F2F5F3]">{formatarValor(c.transferencias.reduce((a, t) => a + t.valor, 0))}</div></div>
-            <div className="rp-painel px-4 py-3"><div className="text-[10px] font-bold tracking-wider text-[#8FA39A]">MAIOR TRANSFERÊNCIA</div><div className="font-stat text-lg text-[#F2F5F3]">{(() => { const m = [...c.transferencias].sort((a, b) => b.valor - a.valor)[0]; return m.valor ? formatarValor(m.valor) : "Sem custo"; })()}</div></div>
+            <div className="rp-painel px-4 py-3"><div className="text-[10px] font-bold tracking-wider text-[#9EB5C9]">PAGARAM POR VOCÊ</div><div className="font-stat text-lg text-[#F2F5F3]">{formatarValor(c.transferencias.reduce((a, t) => a + t.valor, 0))}</div></div>
+            <div className="rp-painel px-4 py-3"><div className="text-[10px] font-bold tracking-wider text-[#9EB5C9]">MAIOR TRANSFERÊNCIA</div><div className="font-stat text-lg text-[#F2F5F3]">{(() => { const m = [...c.transferencias].sort((a, b) => b.valor - a.valor)[0]; return m.valor ? formatarValor(m.valor) : "Sem custo"; })()}</div></div>
           </>
         )}
       </div>
 
       {porTipo.length > 0 && (
         <div className="rp-painel p-4">
-          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-3">Sala de troféus</div>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9] mb-3">Sala de troféus</div>
           <div className="grid grid-cols-2 gap-2">
             {porTipo.map((g) => (
-              <div key={g.tipo + g.nome} className="rounded-2xl bg-[#0E1512] border border-white/5 p-3 flex items-center gap-3">
+              <div key={g.tipo + g.nome} className="rounded-2xl bg-[#071321] border border-white/5 p-3 flex items-center gap-3">
                 <IconeTitulo tipo={g.tipo} nome={g.nome} size={34} />
-                <div><div className="font-stat text-xl text-[#F2F5F3] leading-none">×{g.n}</div><div className="text-[13px] text-[#C9D3CE] leading-tight">{g.nome}</div><small className="rp-anos-titulo">{[...g.anos].sort((a,b)=>a-b).join(" · ")}</small></div>
+                <div><div className="font-stat text-xl text-[#F2F5F3] leading-none">×{g.n}</div><div className="text-[13px] text-[#C9D9E8] leading-tight">{g.nome}</div><small className="rp-anos-titulo">{[...g.anos].sort((a,b)=>a-b).join(" · ")}</small></div>
               </div>
             ))}
           </div>
@@ -2260,32 +2261,32 @@ function TelaFim({ c, onNova, onSair, onPosCarreira, onComecarTecnico }) {
 
       <div className="rp-painel p-4">
         <div className="flex items-center justify-between">
-          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A]">Pontos de legado</div>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9]">Pontos de legado</div>
           <div className="font-stat text-lg text-[#EBC557]">{L.pontos}</div>
         </div>
         <div className="flex flex-col gap-2 mt-3">
           {Object.entries(L.partes).map(([k, v]) => (
             <div key={k}>
-              <div className="flex justify-between text-[15px]"><span className="text-[#C9D3CE]">{rotulos[k]}</span><span className="font-stat">{v}</span></div>
+              <div className="flex justify-between text-[15px]"><span className="text-[#C9D9E8]">{rotulos[k]}</span><span className="font-stat">{v}</span></div>
               <Barra valor={(v / Math.max(1, L.pontos)) * 100} cor="#D8B44A" />
             </div>
           ))}
         </div>
-        {proximo && <p className="text-[14px] text-[#8FA39A] mt-3">Faltaram {proximo.min - L.pontos} pontos para "{proximo.nome}".</p>}
+        {proximo && <p className="text-[14px] text-[#9EB5C9] mt-3">Faltaram {proximo.min - L.pontos} pontos para "{proximo.nome}".</p>}
       </div>
 
       <div className="rp-painel p-4">
-        <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-3">Trajetória</div>
+        <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9] mb-3">Trajetória</div>
         <ol className="flex flex-col gap-2.5">
           {clubes.map((k, i) => (
             <li key={i} className="flex items-center gap-3">
               <Escudo nome={k.nome} size={24} />
               <div className="min-w-0 flex-1">
                 <div className="text-[16px] font-semibold text-[#F2F5F3] truncate">{k.nome}{k.emp ? " (empréstimo)" : ""}</div>
-                <div className="text-[13px] text-[#8FA39A]">{k.de === k.ate ? k.de : `${k.de}–${k.ate}`} · {k.jogos} jogos · {k.gols} gols{k.titulos ? ` · ${k.titulos} título(s)` : ""}</div>
+                <div className="text-[13px] text-[#9EB5C9]">{k.de === k.ate ? k.de : `${k.de}–${k.ate}`} · {k.jogos} jogos · {k.gols} gols{k.titulos ? ` · ${k.titulos} título(s)` : ""}</div>
                 {(() => { const t = (c.transferencias || []).find((x) => x.para === k.nome && Math.abs(x.ano - k.de) <= 1); return t ? <div className="text-[13px] text-[#EBC557]">Chegou {t.valor ? `por ${formatarValor(t.valor)}` : "sem custo"}</div> : null; })()}
               </div>
-              {(c.torcida[k.nome] ?? 0) >= 75 && <span className="rp-chip" style={{ color: "#7FE3BC", background: "rgba(18,168,118,.16)" }}>Ídolo</span>}
+              {(c.torcida[k.nome] ?? 0) >= 75 && <span className="rp-chip" style={{ color: "#BCEAFF", background: "rgba(155,222,255,.16)" }}>Ídolo</span>}
             </li>
           ))}
         </ol>
@@ -2293,13 +2294,13 @@ function TelaFim({ c, onNova, onSair, onPosCarreira, onComecarTecnico }) {
 
       {(c.marcos || []).length > 0 && (
         <div className="rp-painel p-4">
-          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8FA39A] mb-3">Momentos da carreira</div>
-          <ol className="flex flex-col gap-3 border-l border-[#2A3A33] ml-3.5 pl-6">
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9] mb-3">Momentos da carreira</div>
+          <ol className="flex flex-col gap-3 border-l border-[#30475D] ml-3.5 pl-6">
             {c.marcos.map((m, i) => (
               <li key={i} className="relative">
                 <span className="absolute -left-[39px] top-0 w-7 h-7 rounded-full bg-[#121916] flex items-center justify-center"><MarcadorMomento c={c} m={m} /></span>
                 <div className="text-[15px] font-bold text-[#F2F5F3]">{m.titulo} <span className="font-stat font-normal text-[#7F918A]">{m.ano}</span></div>
-                <div className="text-[14px] text-[#8FA39A]">{m.texto}</div>
+                <div className="text-[14px] text-[#9EB5C9]">{m.texto}</div>
               </li>
             ))}
           </ol>
@@ -2571,7 +2572,7 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
     setRevelado(true);
     const v = jogada.res.venceu;
     vibrar(jogada.res.empate?15:v ? [30, 50, 30] : 60); tocar(jogada.res.empate?"clique":v ? "sobe" : "desce", 0.55);
-    if (v && jogada.card.copa.campeao) { torcida(3, 0.25); festejar("chuva", ["#EBC557", "#FFFFFF", "#12A876"]); }
+    if (v && jogada.card.copa.campeao) { torcida(3, 0.25); festejar("chuva", ["#EBC557", "#FFFFFF", "#9BDEFF"]); }
     else if (v) torcida(1.8, 0.18);
   };
   const seguir = () => { const novo = jogada.card; setJogada(null); onAvancar(novo); };
@@ -2612,8 +2613,8 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
           const feito = i < faseAtual, agora = i === faseAtual;
           return (
             <div key={f} className="flex flex-col items-center gap-1">
-              <div className="h-1.5 w-full rounded-full" style={{ background: feito ? "#12A876" : agora ? "linear-gradient(90deg,#EBC557,#FDE68A)" : "rgba(255,255,255,.08)" }} />
-              <span className={`text-[11px] font-bold ${agora ? "text-[#EBC557]" : feito ? "text-[#7FE3BC]" : "text-[#52525B]"}`}>{f}</span>
+              <div className="h-1.5 w-full rounded-full" style={{ background: feito ? "#9BDEFF" : agora ? "linear-gradient(90deg,#EBC557,#FDE68A)" : "rgba(255,255,255,.08)" }} />
+              <span className={`text-[11px] font-bold ${agora ? "text-[#EBC557]" : feito ? "text-[#BCEAFF]" : "text-[#52525B]"}`}>{f}</span>
             </div>
           );
         })}
@@ -2700,11 +2701,11 @@ function AutoAvanco({ c, ms, onAgora, onPausar }) {
   return (
     <div className="rp-painel px-4 py-3 rp-entra">
       <div className="flex items-center gap-2">
-        <span className="text-[14px] text-[#C9D3CE] flex-1">Temporada <span className="font-stat text-[16px] text-[#F2F5F3]">{c.ano}</span> rolando…</span>
-        <button onClick={onPausar} className="text-[13px] font-bold text-[#8FA39A] min-h-[36px] px-2">pausar</button>
-        <button onClick={onAgora} className="text-[13px] font-bold text-[#7FE3BC] min-h-[36px] px-2">jogar já</button>
+        <span className="text-[14px] text-[#C9D9E8] flex-1">Temporada <span className="font-stat text-[16px] text-[#F2F5F3]">{c.ano}</span> rolando…</span>
+        <button onClick={onPausar} className="text-[13px] font-bold text-[#9EB5C9] min-h-[36px] px-2">pausar</button>
+        <button onClick={onAgora} className="text-[13px] font-bold text-[#BCEAFF] min-h-[36px] px-2">jogar já</button>
       </div>
-      <div className="h-1.5 rounded-full bg-white/10 overflow-hidden mt-1.5"><div key={c.ano} className="rp-barra h-full bg-[#12A876]" style={{ "--dur": `${ms}ms` }} /></div>
+      <div className="h-1.5 rounded-full bg-white/10 overflow-hidden mt-1.5"><div key={c.ano} className="rp-barra h-full bg-[#9BDEFF]" style={{ "--dur": `${ms}ms` }} /></div>
     </div>
   );
 }
@@ -2941,7 +2942,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
       <style>{ESTILO_BASE}</style>
       {painel ? <CartaoCarreira c={c} etapa={etapa} onEstante={() => setEstanteAberta(true)} onFicha={() => setGaveta("ficha")} contadorPulsa={contadorPulsa} recorde={recorde} />
         : <Cabecalho etapa={etapa} treinador={etapa === "tecnico"} c={mostrarCabecalho ? c : null} onSair={onSair} onEstante={() => setEstanteAberta(true)} />}
-      <main className="pb-10">
+      <RevelacaoTela as="main" identidade={etapa} className="pb-10">
         {etapa === "criacao" && <TelaCriacao onCriar={criar} ritmoInicial={ritmoInicial} />}
         {primeiroClube&&<div className="pc-tela"><PrimeiroClube evento={evento} jogador={c} onEscolher={escolherEvento}/></div>}
         {etapa === "evento" && !primeiroClube && (
@@ -2973,7 +2974,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
                   dica={c.temporadas.length === 0 ? "Cada carta é um treino diferente. Escolha uma e a temporada começa." : torneio ? `🌎 Ano de ${torneio}: jogue bem para ser convocado.` : null} />
               )}
               {!evento && !estado.forcada && podeAposentar(c) && (
-                <button onClick={encerrar} className="text-[14px] font-bold text-[#8FA39A] min-h-[40px]">Pendurar as chuteiras aos {c.idade - 1}</button>
+                <button onClick={encerrar} className="text-[14px] font-bold text-[#9EB5C9] min-h-[40px]">Pendurar as chuteiras aos {c.idade - 1}</button>
               )}
             </div>
           </section>
@@ -3009,8 +3010,8 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           onAposentar={()=>setEstado(st=>({...st,c:aposentarTecnico(st.c)}))}
           onLegado={() => setEstado((st) => ({ ...st, etapa: "fim" }))}
           onSair={onSair} />}
-      </main>
-      {selo && <div key={selo.k} className="rp-selo display text-[22px] px-5 py-2 rounded-2xl" style={{ background: "#0E1512", color: selo.cor, border: `2px solid ${selo.cor}`, boxShadow: `0 0 30px ${selo.cor}66` }}>{selo.txt}</div>}
+      </RevelacaoTela>
+      {selo && <div key={selo.k} className="rp-selo display text-[22px] px-5 py-2 rounded-2xl" style={{ background: "#071321", color: selo.cor, border: `2px solid ${selo.cor}`, boxShadow: `0 0 30px ${selo.cor}66` }}>{selo.txt}</div>}
       {gaveta === "ficha" && c && (
         <Gaveta titulo={c.nome} onFechar={() => setGaveta(null)}>
           <Ficha c={c} />
@@ -3018,10 +3019,10 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           <Personalizacao/>
           <SeletorFoco c={c} onFoco={mudarFoco} />
           {etapa==='evento'&&!evento&&!estado.auto&&!resultado&&!c.emprestimo&&c.flags.baseEscolhida&&(c.contrato?.restantes??0)>0&&c.lojaAnoEmCurso!==c.ano&&<button className="rp-opcao px-4 py-3 text-left" onClick={pedirEmprestimo}>Pedir propostas por empréstimo</button>}
-          {c.emprestimo&&<p className="text-sm text-[#C9D3CE]">Empréstimo no {c.emprestimo.destino} · {c.emprestimo.restantes??1} temporada(s) restante(s). Retorno ao {c.clubeNome}.</p>}
+          {c.emprestimo&&<p className="text-sm text-[#C9D9E8]">Empréstimo no {c.emprestimo.destino} · {c.emprestimo.restantes??1} temporada(s) restante(s). Retorno ao {c.clubeNome}.</p>}
           <button onClick={() => { setGaveta(null); setPatrimonioAberto(true); }} className="rp-painel px-4 py-3 flex items-center gap-3 text-left hover:border-[#D8B44A]/50">
             <span className="text-2xl">💼</span>
-            <span className="flex-1"><span className="block text-[13px] font-bold uppercase tracking-[0.15em] text-[#8FA39A]">Loja e patrimônio</span><span className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</span></span>
+            <span className="flex-1"><span className="block text-[13px] font-bold uppercase tracking-[0.15em] text-[#9EB5C9]">Loja e patrimônio</span><span className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</span></span>
             <span className="text-[15px] font-bold text-[#EBC557]">Ver loja →</span>
           </button>
           <BotaoSom />

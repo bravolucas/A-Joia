@@ -1,3 +1,4 @@
+import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternacionais.js';
 import {IDADE_MAXIMA_TECNICO,idadeTecnico,carreiraTecnicoEncerrada} from './longevidadeTecnico.js';
 export {IDADE_MAXIMA_TECNICO,idadeTecnico,carreiraTecnicoEncerrada} from './longevidadeTecnico.js';
 import {registrarAnoHistoria} from '../historia/historiaFutebol.js';
@@ -1057,6 +1058,11 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   const formatoContinental = configuracaoContinental.formato || {};
   const vagasAnteriores=torneioAnterior?.vagasInternacionaisProxima||calcularVagasRapidas({ano:t.ano-1,classificacoesMundo:classificacoesHistoricas(torneioAnterior,t.ligasMundo),torneios:torneioAnterior?.torneios,ligasMundo:t.ligasMundo});
   const participantesQualificados = configuracaoContinental.qualificacao ? classificarVagasContinentalTecnico({clubes:CLUBES_CONVITES_TECNICO,classificacoesMundo:torneioAnterior?.classificacoesMundo||{},pais:t.pais,limite:formatoContinental.totalParticipantes??16,regra:configuracaoContinental.qualificacao}) : !torneioAnterior ? [] : CLUBES_CONVITES_TECNICO.filter(clube=>vagasAnteriores[clube.nome]?.competicao===idContinental(continentalNome));
+  if(!configuracaoContinental.qualificacao&&participantesQualificados.some(x=>x.nome===t.clube)){
+    participantesQualificados.splice(0,participantesQualificados.length,...ampliarParticipantesInternacionais(participantesQualificados,idContinental(continentalNome),t.ano,CLUBES_CONVITES_TECNICO));
+    const notas=new Map(participantesQualificados.map(x=>[x.nome,(x.forca??x.elenco??60)+rng()*12]));
+    participantesQualificados.sort((a,b)=>notas.get(b.nome)-notas.get(a.nome));
+  }
   // O limite do quadro não pode eliminar a vaga que o clube do usuário já conquistou.
   if(!configuracaoContinental.qualificacao&&participantesQualificados.some(x=>x.nome===t.clube))participantesQualificados.sort((a,b)=>(b.nome===t.clube)-(a.nome===t.clube));
   if(!configuracaoContinental.qualificacao&&participantesQualificados.length>=2){

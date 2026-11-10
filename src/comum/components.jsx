@@ -32,46 +32,46 @@ export function Estrelas({ n }) { return <span className="text-amber-400 text-[1
 /* Gema da marca A JOIA (vetorial, cores da paleta) */
 export function Gema({ size = 64, className = "", titulo = "A JOIA" }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" className={className} role="img" aria-label={titulo}>
-      <g stroke="#0E1512" strokeWidth="3" strokeLinejoin="round">
-        <polygon points="30,12 70,12 62,30 38,30" fill="#1BC28A" />
-        <polygon points="30,12 38,30 28,42 8,40" fill="#12A876" />
-        <polygon points="70,12 92,40 72,42 62,30" fill="#15B37E" />
-        <polygon points="8,40 28,42 50,70 50,92" fill="#0E8C62" />
-        <polygon points="61,56 50,70 50,92 71,66" fill="#12A876" />
+    <svg width={size} height={size} viewBox="0 0 100 100" className={`joia-gema ${className}`} role="img" aria-label={titulo}>
+      <g stroke="#071321" strokeWidth="3" strokeLinejoin="round">
+        <polygon points="30,12 70,12 62,30 38,30" fill="#BCEAFF" />
+        <polygon points="30,12 38,30 28,42 8,40" fill="#9BDEFF" />
+        <polygon points="70,12 92,40 72,42 62,30" fill="#74C9F5" />
+        <polygon points="8,40 28,42 50,70 50,92" fill="#4597D5" />
+        <polygon points="61,56 50,70 50,92 71,66" fill="#9BDEFF" />
         <polygon points="92,40 72,42 61,56 71,66" fill="#2E6FE0" />
-        <polygon points="38,30 62,30 72,42 50,70 28,42" fill="#D8B44A" />
+        <polygon points="38,30 62,30 72,42 50,70 28,42" fill="#D8F2FF" />
       </g>
-      <polygon points="50,30 62,30 72,42 50,70" fill="#C29C34" />
-      <polygon points="38,30 50,30 50,42 28,42" fill="#EACB6E" />
-      <polygon points="38,30 62,30 72,42 50,70 28,42" fill="none" stroke="#0E1512" strokeWidth="3" strokeLinejoin="round" />
+      <polygon points="50,30 62,30 72,42 50,70" fill="#8FD5F8" />
+      <polygon points="38,30 50,30 50,42 28,42" fill="#F3FCFF" />
+      <polygon points="38,30 62,30 72,42 50,70 28,42" fill="none" stroke="#071321" strokeWidth="3" strokeLinejoin="round" />
     </svg>
   );
 }
 
 export function Diamond({ size = 64 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" style={{ filter: "drop-shadow(0 6px 20px rgba(216,180,74,0.5))" }}>
+    <svg width={size} height={size} viewBox="0 0 100 100" style={{ filter: "drop-shadow(0 6px 20px rgba(155,222,255,0.4))" }}>
       <defs>
         <linearGradient id="diamondTopLeft" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#F7E9B0" /><stop offset="100%" stopColor="#D8B44A" />
+          <stop offset="0%" stopColor="#E2F6FF" /><stop offset="100%" stopColor="#9BDEFF" />
         </linearGradient>
         <linearGradient id="diamondTopRight" x1="1" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#E9C868" /><stop offset="100%" stopColor="#B8933A" />
+          <stop offset="0%" stopColor="#BCEAFF" /><stop offset="100%" stopColor="#63BDF0" />
         </linearGradient>
         <linearGradient id="diamondCrown" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FFFAE6" /><stop offset="100%" stopColor="#F4E4A6" />
+          <stop offset="0%" stopColor="#F3FCFF" /><stop offset="100%" stopColor="#D8F2FF" />
         </linearGradient>
         <linearGradient id="diamondLeft" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#C1A055" /><stop offset="100%" stopColor="#8A6B22" />
+          <stop offset="0%" stopColor="#74C9F5" /><stop offset="100%" stopColor="#347EBA" />
         </linearGradient>
         <linearGradient id="diamondRight" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#8A6B22" /><stop offset="100%" stopColor="#5E4712" />
+          <stop offset="0%" stopColor="#347EBA" /><stop offset="100%" stopColor="#16416D" />
         </linearGradient>
       </defs>
-      <polygon points="20,42 32,15 50,42" fill="url(#diamondTopLeft)" stroke="#FFFAE6" strokeOpacity="0.4" strokeWidth="1" strokeLinejoin="round" />
-      <polygon points="80,42 68,15 50,42" fill="url(#diamondTopRight)" stroke="#FFFAE6" strokeOpacity="0.3" strokeWidth="1" strokeLinejoin="round" />
-      <polygon points="32,15 68,15 50,42" fill="url(#diamondCrown)" stroke="#FFFAE6" strokeOpacity="0.6" strokeWidth="1" strokeLinejoin="round" />
+      <polygon points="20,42 32,15 50,42" fill="url(#diamondTopLeft)" stroke="#F3FCFF" strokeOpacity="0.4" strokeWidth="1" strokeLinejoin="round" />
+      <polygon points="80,42 68,15 50,42" fill="url(#diamondTopRight)" stroke="#F3FCFF" strokeOpacity="0.3" strokeWidth="1" strokeLinejoin="round" />
+      <polygon points="32,15 68,15 50,42" fill="url(#diamondCrown)" stroke="#F3FCFF" strokeOpacity="0.6" strokeWidth="1" strokeLinejoin="round" />
       <polygon points="20,42 50,42 50,95" fill="url(#diamondLeft)" stroke="#00000030" strokeWidth="1" strokeLinejoin="round" />
       <polygon points="80,42 50,42 50,95" fill="url(#diamondRight)" stroke="#00000030" strokeWidth="1" strokeLinejoin="round" />
       <polygon points="37,19 50,19 44,32" fill="#ffffff" opacity="0.6" />
@@ -106,7 +106,7 @@ export function BolaGirandoBox({ revelado }) {
   );
 }
 
-export function SilhuetaJogador({ size = 56, cor = "#12A876" }) {
+export function SilhuetaJogador({ size = 56, cor = "#9BDEFF" }) {
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" className="shrink-0">
       <circle cx="32" cy="32" r="31" fill="#1a1a1a" stroke={cor} strokeWidth="1.5" />
@@ -136,7 +136,7 @@ export function DadoIcon({ size = 32, girando }) {
 }
 
 export function TrophyIcon({ tipo = "ouro", size = 24 }) {
-  const cores = { ouro: "#D8B44A", prata: "#C7CDD6", bronze: "#B08D57", mundo: "#3b82f6", liga: "#12A876" };
+  const cores = { ouro: "#D8B44A", prata: "#C7CDD6", bronze: "#B08D57", mundo: "#3b82f6", liga: "#9BDEFF" };
   const cor = cores[tipo] || cores.ouro;
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" className="shrink-0">
@@ -167,7 +167,7 @@ export function CountUp({ value, duration = 700, formatter }) {
 }
 
 export function Confetti() {
-  const cores = ["#D8B44A", "#12A876", "#3b82f6", "#ec4899", "#f59e0b"];
+  const cores = ["#D8B44A", "#9BDEFF", "#3b82f6", "#ec4899", "#f59e0b"];
   const pecas = Array.from({ length: 24 }, (_, i) => ({ left: Math.random() * 100, delay: Math.random() * 0.6, cor: cores[i % cores.length], size: 4 + Math.random() * 5 }));
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -419,7 +419,7 @@ function AnuncioClube({ clube, nome, numero, posicao, idade, grandeChegada, deOn
     const t = setTimeout(() => setFase((f) => f + 1), (curto ? [200, 280, 280, 300] : [650, 950, 1000, 1100])[fase]);
     return () => clearTimeout(t);
   }, [fase, curto, onConcluir]);
-  const cor = clube.cor || "#12A876";
+  const cor = clube.cor || "#9BDEFF";
   const fmt = (k) => (k >= 1000 ? `€ ${(k / 1000).toFixed(k >= 100000 ? 0 : 1).replace(".0", "")} mi` : `€ ${Math.round(k)} mil`);
   return (
     <div className="anuncio-transferencia fixed inset-0 z-50" style={{ background: "#07100C", fontFamily: "'Rajdhani',sans-serif" }} role="dialog" aria-label={`Anúncio: ${nome} no ${clube.nome}`}>
@@ -519,7 +519,7 @@ export function CenaLevantarTaca({ titulos, clube, onConcluir }) {
 export function CenaEstreia({ tipo, nomeEquipe, corDestaque, onConcluir }) {
   const [fase, setFase] = useState(0);
   useEffect(() => { if (fase === 0) { const t = setTimeout(() => setFase(1), 1600); return () => clearTimeout(t); } }, [fase]);
-  const cor = corDestaque || "#12A876";
+  const cor = corDestaque || "#9BDEFF";
   return (
     <PopupOverlay>
       <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `linear-gradient(180deg, rgba(3,3,3,.35) 0%, rgba(3,3,3,.55) 50%, #030303 100%), radial-gradient(circle at 50% 60%, ${cor}33 0%, transparent 70%), url(${tipo === "selecao" ? ARTE.torcida : ARTE.tunel}) center 60%/cover` }}>
@@ -817,7 +817,7 @@ export function CartaoCarreira({ fim, temporadas, nome, posicao, onClose }) {
 export function FichaPartida({ jogo, clubeNome, posicao, onClose }) {
   if (!jogo) return null;
   const venceu = jogo.resultado === "V", empatou = jogo.resultado === "E";
-  const cor = venceu ? "#12A876" : empatou ? "#a1a1aa" : "#D6483F";
+  const cor = venceu ? "#9BDEFF" : empatou ? "#a1a1aa" : "#D6483F";
   const adv = CLUBES.find((x) => x.nome === jogo.adversario);
   const meu = CLUBES.find((x) => x.nome === clubeNome);
   const melhorEmCampo = (jogo.nota ?? 0) >= 8;
@@ -856,7 +856,7 @@ export function FichaPartida({ jogo, clubeNome, posicao, onClose }) {
       {melhorEmCampo && <div className="text-center text-[10px] text-amber-400 mb-3">⭐ Você foi o melhor em campo</div>}
       <div className="grid grid-cols-3 gap-2 mb-3">
         <div className="bg-zinc-950/50 rounded-sm p-2.5 text-center">
-          <div className="font-stat font-black text-xl" style={{ color: (jogo.nota ?? 0) >= 7.5 ? "#12A876" : (jogo.nota ?? 0) >= 6.5 ? "#e4e4e7" : "#D6483F" }}>{jogo.nota ?? "—"}</div>
+          <div className="font-stat font-black text-xl" style={{ color: (jogo.nota ?? 0) >= 7.5 ? "#9BDEFF" : (jogo.nota ?? 0) >= 6.5 ? "#e4e4e7" : "#D6483F" }}>{jogo.nota ?? "—"}</div>
           <div className="text-[8px] text-zinc-500 uppercase tracking-widest">Sua nota</div>
         </div>
         <div className="bg-zinc-950/50 rounded-sm p-2.5 text-center">
@@ -1003,7 +1003,7 @@ export function Brasao({ club, size = 20 }) {
   const h = hashNome(club.nome);
   const forma = FORMAS_BRASAO[h % FORMAS_BRASAO.length];
   const padrao = (h >> 3) % 6;
-  const cor = club.cor || "#12A876";
+  const cor = club.cor || "#9BDEFF";
   const claro = !!club.escuro; // cor principal clara pede detalhe escuro
   const sec = claro ? "#121916" : (h >> 7) % 3 === 0 ? "#D8B44A" : "#F2F5F3";
   const id = `br${h.toString(36)}`;
@@ -1027,14 +1027,14 @@ export function Brasao({ club, size = 20 }) {
         <rect width="100" height="114" fill={`url(#${id}g)`} />
       </g>
       <path d={forma} fill="none" stroke={sec} strokeWidth={pequeno ? 6 : 4} opacity=".95" />
-      <path d={forma} fill="none" stroke="#0E1512" strokeWidth="2" opacity=".55" transform="translate(50 57) scale(1.04) translate(-50 -57)" />
+      <path d={forma} fill="none" stroke="#071321" strokeWidth="2" opacity=".55" transform="translate(50 57) scale(1.04) translate(-50 -57)" />
       {!pequeno && estrelas > 0 && (
         <g fill="#D8B44A">{Array.from({ length: estrelas }).map((_, i) => {
           const cx = 50 + (i - (estrelas - 1) / 2) * 13, cy = 22;
           return <polygon key={i} points={`${cx},${cy - 6} ${cx + 1.8},${cy - 1.9} ${cx + 6},${cy - 1.9} ${cx + 2.6},${cy + 1} ${cx + 3.8},${cy + 5.6} ${cx},${cy + 2.8} ${cx - 3.8},${cy + 5.6} ${cx - 2.6},${cy + 1} ${cx - 6},${cy - 1.9} ${cx - 1.8},${cy - 1.9}`} />;
         })}</g>
       )}
-      <circle cx="50" cy="60" r={pequeno ? 26 : 23} fill="#0E1512" opacity=".55" />
+      <circle cx="50" cy="60" r={pequeno ? 26 : 23} fill="#071321" opacity=".55" />
       <text x="50" y="60" textAnchor="middle" dominantBaseline="central" fill="#F2F5F3"
         style={{ fontFamily: "'Unbounded','Oswald',sans-serif", fontWeight: 900, fontSize: pequeno ? 30 : ini.length >= 3 ? 19 : 24, letterSpacing: "-0.02em" }}>
         {pequeno ? ini[0] : ini}
@@ -1123,10 +1123,10 @@ export function CalendarioTemporadaPopup({ carreira, mesAtual, setMesAtual, onCl
               const jaJogou = ta && temRodada && info.rodadaIdx < ta.rodadaAtual;
               const eHoje = ta && temRodada && info.rodadaIdx === ta.rodadaAtual;
               const resultado = ta && temRodada ? ta.resultadosRodadas[info.rodadaIdx] : null;
-              const corFundo = eHoje ? "#D8B44A" : jaJogou ? (resultado === "V" ? "#12A876" : resultado === "D" ? "#D6483F" : "#71717a") : temRodada ? "#27272a" : "transparent";
+              const corFundo = eHoje ? "#D8B44A" : jaJogou ? (resultado === "V" ? "#9BDEFF" : resultado === "D" ? "#D6483F" : "#71717a") : temRodada ? "#27272a" : "transparent";
               const corBorda = info.janelasAtivas[0]?.cor || "#3f3f46";
               return (
-                <button key={i} onClick={() => setDiaSelecionado(d)} className="aspect-square rounded-sm flex flex-col items-center justify-center relative text-[11px]" style={{ background: corFundo, border: `${temRodada ? "2px" : "1px"} solid ${temRodada ? (eHoje ? "#D8B44A" : "#12A876") : info.janelasAtivas.length ? corBorda : "#27272a"}`, opacity: diaSelecionado === d ? 1 : 0.94 }}>
+                <button key={i} onClick={() => setDiaSelecionado(d)} className="aspect-square rounded-sm flex flex-col items-center justify-center relative text-[11px]" style={{ background: corFundo, border: `${temRodada ? "2px" : "1px"} solid ${temRodada ? (eHoje ? "#D8B44A" : "#9BDEFF") : info.janelasAtivas.length ? corBorda : "#27272a"}`, opacity: diaSelecionado === d ? 1 : 0.94 }}>
                   <span className={`font-mono ${eHoje ? "text-zinc-900 font-black" : "text-zinc-100"}`}>{d}</span>
                   {temRodada
                     ? <span className="absolute bottom-0 text-[11px]" title="Dia de jogo">⚽</span>
@@ -1159,7 +1159,7 @@ export function CalendarioTemporadaPopup({ carreira, mesAtual, setMesAtual, onCl
             {jogoSel && (
               <div className="mt-2 pt-2 border-t border-zinc-800 text-xs">
                 <div className="font-bold">{jogoSel.casa.nome} <span className="text-zinc-500">x</span> {jogoSel.fora.nome} <span className="text-zinc-600">— rodada {rodadaSel + 1}</span></div>
-                {jogadaSel && resultadoSel && <div className="text-[10px] mt-1" style={{ color: resultadoSel === "V" ? "#12A876" : resultadoSel === "D" ? "#D6483F" : "#a1a1aa" }}>{resultadoSel === "V" ? "Vitória" : resultadoSel === "D" ? "Derrota" : "Empate"}</div>}
+                {jogadaSel && resultadoSel && <div className="text-[10px] mt-1" style={{ color: resultadoSel === "V" ? "#9BDEFF" : resultadoSel === "D" ? "#D6483F" : "#a1a1aa" }}>{resultadoSel === "V" ? "Vitória" : resultadoSel === "D" ? "Derrota" : "Empate"}</div>}
                 {hojeSel && <div className="text-[10px] text-amber-400 mt-1">📍 Próximo compromisso</div>}
                 {!jogadaSel && !hojeSel && <div className="text-[10px] text-zinc-600 mt-1">Ainda por vir</div>}
                 {jogadaSel && fichaDoDia && onAbrirFicha && (
@@ -1512,7 +1512,7 @@ export function TimingBar({ onResult, sweetMin = 0.42, sweetMax = 0.58, duracao 
     <div className="mb-2">
       <div className="relative h-7 bg-zinc-800 rounded-full overflow-hidden mb-2 border border-zinc-700">
         <div className="absolute top-0 bottom-0 bg-emerald-500/40" style={{ left: `${sweetMin * 100}%`, width: `${(sweetMax - sweetMin) * 100}%` }} />
-        <div className="absolute top-0 bottom-0 w-2 bg-white rounded-full" style={{ animation: `slideBar ${duracao}ms linear infinite alternate` }} />
+        <div className="joia-timing-marker absolute top-0 bottom-0 w-2 bg-white rounded-full" style={{ "--joia-tempo": `${duracao}ms`, animation: `slideBar ${duracao}ms linear infinite alternate` }} />
       </div>
       <Button onClick={handleClick}>{label}</Button>
     </div>
@@ -1536,7 +1536,7 @@ export function AttrRadar({ attrs, baseline }) {
     <svg viewBox="-9 -9 118 118" className="w-full h-44">
       {[0.33, 0.66, 1].map((f, i) => <polygon key={i} points={toPath(keys.map((_, j) => pointFor(99 * f, j)))} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />)}
       <polygon points={toPath(basePts)} fill="rgba(46,111,224,0.10)" stroke="#5B8FEA" strokeWidth="1" strokeDasharray="2,2" />
-      <polygon points={toPath(playerPts)} fill="rgba(18,168,118,0.25)" stroke="#1BC28A" strokeWidth="1.5" />
+      <polygon points={toPath(playerPts)} fill="rgba(155,222,255,0.25)" stroke="#BCEAFF" strokeWidth="1.5" />
       {labelPts.map((p, i) => <text key={i} x={p.x} y={p.y} fontSize="6" fill="#a1a1aa" textAnchor="middle" dominantBaseline="middle">{p.label}</text>)}
     </svg>
   );
@@ -1549,7 +1549,7 @@ export function AttrBarDelta({ label, value, anterior, max = 99, posicao }) {
     <div className="flex items-center gap-2 mb-2">
       <div className="w-8 text-[10px] font-sport font-bold text-zinc-400">{labelExibido}</div>
       <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
-        <div className="h-full rounded-full bar-fill" style={{ width: `${(value / max) * 100}%`, background: "linear-gradient(90deg, #2E6FE0, #1BC28A)" }} />
+        <div className="h-full rounded-full bar-fill" style={{ width: `${(value / max) * 100}%`, background: "linear-gradient(90deg, #2E6FE0, #BCEAFF)" }} />
       </div>
       <div className="w-7 text-right text-[11px] font-stat font-bold text-zinc-200">{value}</div>
       {delta !== 0 && (
@@ -1570,7 +1570,7 @@ export function AttrBar({ label, value, max = 99, posicao }) {
     <div className="flex items-center gap-2 mb-1">
       <div className="w-8 text-[9px] font-sport font-bold text-zinc-400">{labelExibido}</div>
       <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
-        <div className="h-full rounded-full bar-fill" style={{ width: `${w}%`, background: "linear-gradient(90deg, #2E6FE0, #1BC28A)" }} />
+        <div className="h-full rounded-full bar-fill" style={{ width: `${w}%`, background: "linear-gradient(90deg, #2E6FE0, #BCEAFF)" }} />
       </div>
       <div className="w-6 text-right text-[10px] font-stat text-zinc-300">{value}</div>
     </div>
@@ -1585,7 +1585,7 @@ export function GraficoEvolucaoCarreira({ temporadas }) {
   const idades = temporadas.map((t) => t.idade);
   const minIdade = Math.min(...idades), maxIdade = Math.max(...idades);
   const metricas = {
-    ovr: { cor: "#12A876", label: "OVR", valores: temporadas.map((t) => t.ovr || 0) },
+    ovr: { cor: "#9BDEFF", label: "OVR", valores: temporadas.map((t) => t.ovr || 0) },
     nota: { cor: "#D8B44A", label: "Nota ×10", valores: temporadas.map((t) => (t.nota || 0) * 10) },
     gols: { cor: "#3b82f6", label: "Gols", valores: temporadas.map((t) => t.gols || 0) },
     assist: { cor: "#a855f7", label: "Assistências", valores: temporadas.map((t) => t.assist || 0) },
@@ -1681,7 +1681,7 @@ export function CurvaEvolucao({ temporadas }) {
   const pts = coords.map((p) => `${p.x},${p.y}`).join(" ");
   return (
     <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none">
-      <polyline points={pts} fill="none" stroke="#12A876" strokeWidth="2" />
+      <polyline points={pts} fill="none" stroke="#9BDEFF" strokeWidth="2" />
       {coords[picoIdx] && <circle cx={coords[picoIdx].x} cy={coords[picoIdx].y} r="4" fill="#D8B44A" />}
     </svg>
   );

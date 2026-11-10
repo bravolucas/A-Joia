@@ -1,6 +1,6 @@
 import {ANO_INICIO,CLUBES,LIGAS,NACIONALIDADES,ESTADUAIS,PALMARES_HISTORICO,nomeDosTitulos,palmaresInicialDe} from '../dados/data.js';
 import {clubesParaCopas,copaNacionalMundo,COPAS_NACIONAIS,calcularVagasRapidas,nomeVaga} from '../competicoes/regrasCopasRapidas.js';
-import {CLUBES_EUROPEUS_EXTRAS} from '../competicoes/clubesEuropeusExtras.js';
+import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternacionais.js';
 import {simularCampanhaCopa} from '../treinador/copasEscolha.js';
 import {geradorTecnico} from '../treinador/momentosTecnico.js';
 const clubeCanonico=nome=>({'Atlético Madrid':'Atlético de Madrid','Bayer Leverkusen':'Leverkusen'}[nome]||nome);
@@ -78,7 +78,7 @@ function simularMundo(c,a){
   out.push({ano:a.ano,nome,tipo:'copa',clube:camp.campeao});
  }
  for(const comp of ['champions','europa','conference','libertadores','sulamericana','asia','concacaf']){
-  const pool=clubes.filter(x=>vagas[x.nome]?.competicao===comp);if(['champions','europa','conference'].includes(comp))pool.push(...CLUBES_EUROPEUS_EXTRAS.filter(x=>x.competicaoInternacional===comp));if(pool.length<2)continue;
+  const pool=clubes.filter(x=>vagas[x.nome]?.competicao===comp);pool.splice(0,pool.length,...ampliarParticipantesInternacionais(pool,comp,a.ano,clubes));if(pool.length<2)continue;
   const nome=nomeVaga(comp),camp=simularCampanhaCopa({nome,tipo:'continental',usuario:pool[0].nome,forcaUsuario:pool[0].forca,clubes:pool,ano:a.ano,formato:['champions','europa','conference'].includes(comp)?'liga':'grupos',seed:`${c.codigo}|${a.ano}|historia|${nome}`});
   out.push({ano:a.ano,nome,tipo:'continental',clube:camp.campeao});
  }

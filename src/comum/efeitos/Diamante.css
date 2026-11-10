@@ -1,0 +1,66 @@
+/* Identidade A JOIA: cristal azul, noite de estádio e superfícies legíveis. */
+:root{--joia-fundo:#071321;--joia-painel:#102337;--joia-acento:#9bdeff;--joia-acento-forte:#52baf2;--joia-texto:#ecf6ff;--joia-muted:#9eb5c9;--joia-borda:#9bdeff26;--joia-curva:cubic-bezier(.22,1,.36,1);color-scheme:dark}
+body{background:var(--joia-fundo);color:var(--joia-texto)}
+.joia-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.rp.rp-inicio{background:radial-gradient(ellipse at 35% 0%,#173957 0%,#0a1a2b 48%,#071321 100%);isolation:isolate}
+.rp :where(.rp-painel,.glass),.ajoia-completo .glass{background:linear-gradient(135deg,#132b40e6,#0d1e30ed);border-color:var(--joia-borda)}
+.rp .rp-prim,.titulo-btn-principal{background:linear-gradient(115deg,#c6edff,#87d4ff);color:#082036}
+.rp .rp-prim:hover,.titulo-btn-principal:hover{background:linear-gradient(115deg,#e1f6ff,#a3e0ff);box-shadow:0 7px 28px #52baf233}
+.rp .rp-sec,.rp .rp-opcao{background:#102337dd;border-color:#30475d;color:var(--joia-texto)}
+.rp .rp-opcao:hover,.rp .rp-opcao.sel{border-color:var(--joia-acento);background:#9bdeff12}
+.rp .rp-opcao.sel{box-shadow:inset 0 0 0 1px #9bdeff66,0 3px 20px #52baf211}
+.rp-inicio .rp-ouro{background:linear-gradient(110deg,#dcf5ff,#9bdeff 65%,#67bdf2);color:#082036;box-shadow:0 8px 30px #52baf222}
+.rp-inicio .rp-ouro:hover{box-shadow:0 8px 36px #52baf244}
+:where(.rp,.ajoia-completo,.ct,.popup-conteudo) :where(button,input,select,textarea):focus-visible{outline:2px solid var(--joia-acento);outline-offset:4px}
+.rp .rp-etiqueta{color:var(--joia-acento)}
+.rp-inicio .inicio-hero{border-color:#a3e0ff50;box-shadow:0 20px 70px #0005,inset 0 1px #dff5ff24}
+.rp-inicio .inicio-marca{font-size:clamp(38px,6vw,60px);letter-spacing:.12em;background:linear-gradient(160deg,#fff 10%,#bceaff 45%,#72bde9 90%);background-clip:text;-webkit-background-clip:text;color:transparent}
+.inicio-insignia{display:inline-flex;align-items:center;gap:8px;border:1px solid #bceaff30;background:#07132180;border-radius:99px;padding:6px 12px;margin-bottom:20px;color:#c6edff;font-size:10px;font-weight:650;letter-spacing:.14em;text-transform:uppercase}
+.inicio-insignia:before{content:'';width:6px;height:6px;border-radius:50%;background:#aee7ff;box-shadow:0 0 9px #9bdeff88}
+.inicio-gema{filter:drop-shadow(0 8px 24px #67cfff66);animation:joiaGema 1s var(--joia-curva) both}
+.joia-luz{position:relative;isolation:isolate}
+.joia-luz:after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(260px circle at var(--luz-x,50%) var(--luz-y,40%),#b6eaff16,transparent 75%);opacity:0;transition:opacity .25s;z-index:-1}
+.joia-luz[data-luz=ativa]:after,.joia-luz:focus-visible:after{opacity:1}
+.joia-estadio{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.joia-facho{position:absolute;top:-20%;width:46%;height:120%;background:linear-gradient(180deg,#c5ecff2b,transparent 78%);filter:blur(12px);transform-origin:top center;clip-path:polygon(40% 0,60% 0,100% 100%,0 100%);opacity:.55;animation:joiaFacho 3s var(--joia-curva) both}
+.joia-facho-a{left:-10%;rotate:-23deg}.joia-facho-b{right:-10%;rotate:23deg;animation-delay:.12s}
+.joia-linhas-campo{position:absolute;left:10%;right:10%;height:35%;bottom:6%;border:1px solid #bceaff26;border-radius:3px;transform:perspective(500px) rotateX(55deg);opacity:.6}
+.joia-linhas-campo:before{content:'';position:absolute;left:50%;top:0;bottom:0;border-left:1px solid #bceaff33}.joia-linhas-campo>i{position:absolute;left:calc(50% - 30px);top:calc(50% - 30px);width:60px;height:60px;border:1px solid #bceaff33;border-radius:50%}.joia-linhas-campo>b,.joia-linhas-campo>span{position:absolute;top:25%;height:50%;width:15%;border:1px solid #bceaff33}.joia-linhas-campo>b{left:-1px}.joia-linhas-campo>span{right:-1px}
+.joia-faceta{position:absolute;width:240px;height:240px;border:1px solid #bceaff15;rotate:45deg;pointer-events:none}.joia-faceta-a{left:-140px;top:30%}.joia-faceta-b{right:-150px;top:15%}
+.rp-inicio .inicio-ritmo [role=radio]{position:relative;transition:border-color .2s,background .2s,box-shadow .2s,translate .2s}
+.rp-inicio .inicio-main> :where(button,.inicio-ritmo){animation:joiaEntrada .5s var(--joia-curva) both}
+.rp-inicio .inicio-main>.inicio-ritmo{animation-delay:.08s}.rp-inicio .inicio-main>button:nth-of-type(1){animation-delay:.12s}.rp-inicio .inicio-main>button:nth-of-type(2){animation-delay:.16s}
+:where(.rp,.ajoia-completo,.mp,.ct) :where(.rp-btn,.rp-opcao,.hud-btn,.opt-card,.mp-exhibit,.mp-map>button,.ct-actions>button){transition:border-color .2s,background-color .2s,box-shadow .2s,translate .2s var(--joia-curva)}
+@media(hover:hover) and (pointer:fine){:where(.rp,.ajoia-completo,.mp,.ct) :where(.rp-btn,.rp-opcao,.opt-card,.mp-exhibit,.mp-map>button):not(:disabled):hover{translate:0 -2px;box-shadow:0 8px 24px #0003}.mp-exhibit:hover .mp-object-photo{filter:brightness(1.08)}}
+:where(.rp,.ajoia-completo,.mp,.ct) :where(.rp-btn,.rp-opcao,.opt-card,.mp-exhibit):not(:disabled):active{translate:0 0;scale:.99}
+.rp :where(.rp-btn,.rp-opcao):disabled{scale:1;translate:0}
+:where(.popup-conteudo,.mp-detail,.ct-modal){animation:joiaEntrada .25s var(--joia-curva) both}
+:where(.completo-abas,.mp-nav) button{transition:color .18s,border-color .18s,background-color .18s}
+.completo-abas>button[aria-current=page]{color:#bceaff;border-bottom-color:#9bdeff;background:#9bdeff12}
+.ajoia-completo .tab-active{border-color:#9bdeff!important;color:#bceaff!important;text-shadow:0 0 16px #9bdeff30}
+.rp .ct{--ct-bg:#102337;--ct-muted:#9eb5c9}
+.rp .cp-card,.ct-board{background:#102337;border-color:#9bdeff22}
+.rp .cp-seg{background:#0c1c2c;border-color:#9bdeff22}
+/* Nas salas, latão, papel, madeira e cores das peças conservam a materialidade. */
+.mp:not(.mp-theme-memoria){--mp-bg:#091725;--mp-panel:#122a3e;--mp-muted:#a7bdca}
+.mp .mp-nav [aria-current=page]{box-shadow:inset 0 -2px #9bdeff}
+.mp-exhibit .mp-object-photo{transition:filter .2s}
+.mp-exhibits>.mp-exhibit{animation:joiaEntrada .35s var(--joia-curva) both}.mp-exhibits>.mp-exhibit:nth-child(2){animation-delay:.035s}.mp-exhibits>.mp-exhibit:nth-child(3){animation-delay:.07s}.mp-exhibits>.mp-exhibit:nth-child(4){animation-delay:.105s}
+@keyframes joiaEntrada{from{opacity:0;translate:0 8px}to{opacity:1;translate:0 0}}
+@keyframes joiaGema{from{opacity:0;transform:translateY(14px) scale(.88) rotate(-6deg)}to{opacity:1;transform:none}}
+@keyframes joiaFacho{from{opacity:0;transform:scaleX(.6)}to{opacity:.55;transform:scaleX(1)}}
+@media(max-width:600px){.joia-facho{filter:none}.rp-inicio .inicio-marca{font-size:40px}.inicio-insignia{font-size:9px}}
+@media(prefers-reduced-motion:reduce){
+ html:focus-within{scroll-behavior:auto}
+ :where(.rp,.ajoia-completo,.mp,.mp-detail,.mp-dialog,.popup-overlay,.ct-modal,.joia-revelacao,.joia-estadio) :where(*,*:before,*:after),.joia-revelacao,.mp-detail,.ct-modal{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition:none!important;scroll-behavior:auto!important}
+ :where(.rp,.ajoia-completo,.mp,.ct) :where(.rp-btn,.rp-opcao,.opt-card,.mp-exhibit,.mp-map>button):hover{translate:none;scale:1}
+ .joia-luz:after{display:none}.inicio-gema{animation:none!important}
+}
+
+/* Superfícies de decisão e ficha da carreira compartilham o azul da marca. */
+.rp :where(.jr-painel,.jr-poster,.rp-historico,.rp-proxima .dt){background-color:#102337;border-color:#9bdeff26}
+html[data-visual=classico] .rp:not(.rp-inicio){background:#0e1512}
+@media(prefers-reduced-motion:reduce){:where(.rp,.ajoia-completo,.mp,.ct) :where(.rp-btn,.rp-opcao,.opt-card,.mp-exhibit,.mp-map>button):is(:hover,:active){translate:none!important;scale:1!important;transform:none!important}}
+
+/* O marcador pequeno é informação essencial do minigame, não decoração. */
+@media(prefers-reduced-motion:reduce){.joia-timing-marker{animation:slideBar var(--joia-tempo) linear infinite alternate!important;animation-duration:var(--joia-tempo)!important;animation-iteration-count:infinite!important}}

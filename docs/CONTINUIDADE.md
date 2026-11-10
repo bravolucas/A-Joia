@@ -1,3 +1,9 @@
+## Entrega concluída — títulos de liga somente ao campeão (10/11/2026)
+
+Publicado em `e908ce0`. [CI 42732487721](https://github.com/bravolucas/A-Joia/actions/runs/42732487721) aprovado: **427 testes de lógica e 294 cenários de navegador**. [Pages 42732487412](https://github.com/bravolucas/A-Joia/actions/runs/42732487412) aprovado. Arquivos públicos conferidos por HTTPS com verificação TLS e módulos acessíveis com HTTP 200.
+
+Resolvido caso Ponte Preta em 6º e 5º: nenhuma Série B atribuída à Ponte. Nome do campeão e indicador de conquista do clube agora são separados, com compatibilidade com saves antigos. Ao continuar a carreira antiga, temporadas são normalizadas e o histórico de títulos corrigido, mantendo resultados, estatísticas, outras competições e conquistas pessoais legítimas. Os campeões já registrados permanecem com suas respectivas edições. Um título efetivo posterior entra só uma vez, inclusive após recarregar. Sem necessidade de começar outra carreira. Relatório `docs/CORRECAO_TITULOS_LIGA.md`. Nenhuma pendência desta rodada.
+
 ## Correção de títulos indevidos na galeria — 10/11/2026
 
 Reproduzido caso da Ponte Preta em 6º e 5º com duas Séries B indevidas. Causa: `campeaoLiga` era nome do vencedor no rápido e foi interpretado como booleano. Separado indicador de conquista e nome do campeão nas novas temporadas, com leitura compatível e reparação dos registros antigos ao carregar. Histórico reconciliado sem apagar classificações, estatísticas ou conquistas legítimas. Museu usa o mesmo critério e conserva o campo do vencedor no arquivo. Relatório `docs/CORRECAO_TITULOS_LIGA.md`.

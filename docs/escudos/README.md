@@ -13,4 +13,6 @@ O manifesto [do acervo](../../arte/escudos/acervo-adicoes-2026-11-10.json) regis
 ![Clubes com nomes semelhantes](identidades.png)
 ![Estaduais e Mundial](regionais-mundial.png)
 
-Validação local: build de produção aprovado, 21 testes de lógica relacionados e 18 cenários de navegador aprovados. Os cenários incluem o acervo completo, identidades em 320/1366 px, escudos nos confrontos com Bolívar/Panathinaikos, Boavista de campanha regional antiga e os placares das copas. A validação integral e a publicação serão registradas após o GitHub Actions.
+Validação integral do commit `ffd85b3`: **454 testes de lógica e 336 testes no navegador aprovados**, além do build de produção. [GitHub Actions](https://github.com/bravolucas/A-Joia/actions/runs/42868077049) e [publicação no GitHub Pages](https://github.com/bravolucas/A-Joia/actions/runs/42868076966) concluídos com sucesso.
+
+Conferência pública em https://bravolucas.github.io/A-Joia/: JavaScript principal, CSS e módulo completo idênticos aos arquivos do build testado. Os 278 novos escudos estão no catálogo publicado (250 arquivos com URL própria HTTP 200 e 28 incorporados ao código); as 70 imagens do museu e miniaturas também retornaram HTTP 200.

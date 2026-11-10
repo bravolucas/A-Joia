@@ -23,6 +23,24 @@ export function acervoInicial(nome){
  return {tacas:itens,conhecido:!!(PALMARES_HISTORICO[nome]||PALMARES_HISTORICO[{"Atlético de Madrid":"Atlético Madrid",Leverkusen:"Bayer Leverkusen"}[nome]])};
 }
 function inserir(mapa,e){if(e?.clube&&e?.nome&&Number.isFinite(e.ano)&&!e.pendente)mapa.set(idEdicao(e.ano,e.nome),{ano:e.ano,nome:nomeCanonico(e.nome),clube:clubeCanonico(e.clube),tipo:e.tipo||tipoTaca(e.nome),...(e.voce?{voce:true}:{})});}
+// No rápido antigo, campeaoLiga era o NOME do vencedor; no completo, é booleano.
+export function vencedorLigaRegistrado(a,treinador=false){
+ if(a?.interrompida)return null;
+ const vencedor=typeof a?.vencedorLiga==='string'?a.vencedorLiga:typeof a?.campeaoLiga==='string'?a.campeaoLiga:null;
+ if(vencedor)return clubeCanonico(vencedor);
+ const clube=typeof a?.clube==='string'?a.clube:a?.clube?.nome;
+ if(a?.campeaoLiga===true&&!(Number.isFinite(a.posLiga)&&a.posLiga!==1))return clubeCanonico(clube);
+ if(treinador&&a?.posicao===1)return clubeCanonico(clube);
+ return null;
+}
+export function conquistouLiga(a){const clube=typeof a?.clube==='string'?a.clube:a?.clube?.nome;return !!clube&&vencedorLigaRegistrado(a)===clubeCanonico(clube);}
+export function normalizarCampeaoLiga(a){
+ if(!a||typeof a.campeaoLiga!=='string')return a;
+ const vencedor=vencedorLigaRegistrado(a),clube=clubeCanonico(typeof a.clube==='string'?a.clube:a.clube?.nome);
+ const corrigido={...a,vencedorLiga:vencedor,campeaoLiga:!!vencedor&&vencedor===clube};
+ if(!corrigido.campeaoLiga&&a.feitosHistoricos){const nome=nomeCanonico(a.ligaNome||LIGAS[a.ligaId||a.liga]?.nome);corrigido.feitosHistoricos=a.feitosHistoricos.filter(f=>nomeCanonico(f.nome)!==nome||f.clube&&clubeCanonico(f.clube)!==clube);}
+ return corrigido;
+}
 function eventosTemporada(c,a,treinador=false){
  a={...a,ano:a.ano??(Number.isFinite(a.idade)?ANO_INICIO+a.idade-16:undefined)};
  const out=[],clube=a.clube||c.clube?.nome||c.clubeNome,nomes=nomeDosTitulos(a.ligaId||a.liga||CLUBES.find(x=>x.nome===clube)?.liga);
@@ -30,7 +48,7 @@ function eventosTemporada(c,a,treinador=false){
  for(const t of a.torneios||[])if(t.campeao&&!t.finalPendente)out.push({ano:a.ano,nome:t.nome,tipo:t.tipo,clube:t.campeao,voce:t.campeao===clube});
  for(const t of a.titulos||[])if(typeof t==='object'&&!['bolaOuro','botaOuro','copaMundo','continentalSelecao','premio'].includes(t.tipo))out.push({ano:a.ano,nome:t.nome,tipo:t.tipo,clube,voce:true});
  for(const valor of [...(a.titulosConquistados||[]),...(a.titulosLista||[])]){const limpo=nomeCanonico(valor),nome=limpo==='Copa Nacional'?nomes.copa:limpo;if(!/Copa do Mundo|Eurocopa|Copa América|Bola de Ouro|Bota de Ouro/i.test(nome))out.push({ano:a.ano,nome,clube,voce:true});}
- if(a.campeaoLiga||(treinador&&!a.interrompida&&a.posicao===1))out.push({ano:a.ano,nome:a.ligaNome||LIGAS[a.ligaId||a.liga]?.nome||nomes.liga,clube,tipo:'liga',voce:true});
+ const vencedor=vencedorLigaRegistrado(a,treinador);if(vencedor)out.push({ano:a.ano,nome:a.ligaNome||LIGAS[a.ligaId||a.liga]?.nome||nomes.liga,clube:vencedor,tipo:'liga',voce:clubeCanonico(clube)===vencedor});
  for(const [campo,tipo]of [['copaNacional','copa'],['continental','continental'],['mundial','mundial'],['estadual','estadual']])if(a[campo]?.titulo)out.push({ano:a.ano,nome:a[campo].nome||nomes[tipo],clube,tipo,voce:true});
  for(const [liga,t]of Object.entries(a.classificacoesMundo||{})){const campeao=t.classificacao?.[0]?.nome;if(campeao)out.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',clube:campeao});}
  return out;
@@ -41,6 +59,13 @@ export function eventosConhecidos(c,temporadas=c.temporadas||[]){
  for(const a of c.tecnico?.temporadas||[])for(const e of eventosTemporada(c,a,true))inserir(mapa,e);
  for(const t of c.lista||[])if(t.clube&&t.clube!=='Individual'&&CLUBES.some(x=>x.nome===clubeCanonico(t.clube)))inserir(mapa,t);
  return [...mapa.values()].sort((a,b)=>a.ano-b.ano||a.nome.localeCompare(b.nome));
+}
+/** Repara apenas a interpretação ambígua da liga, preservando as demais conquistas e estatísticas. */
+export function corrigirCampeoesLiga(c){
+ if(!Array.isArray(c?.temporadas)||!c.temporadas.some(t=>typeof t.campeaoLiga==='string'))return c;
+ const novo={...c,temporadas:c.temporadas.map(normalizarCampeaoLiga)};
+ if(c.historiaFutebol?.titulos)novo.historiaFutebol={...c.historiaFutebol,titulos:eventosConhecidos(novo)};
+ return novo;
 }
 function simularMundo(c,a){
  const clubes=clubesParaCopas(c.tecnico?.ligasMundo||c.ligas),vagas=calcularVagasRapidas({ano:a.ano-1,ligasMundo:c.tecnico?.ligasMundo||c.ligas,seed:'mundo'}),out=[];

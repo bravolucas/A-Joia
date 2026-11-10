@@ -1,3 +1,9 @@
+## Correção de títulos indevidos na galeria — 10/11/2026
+
+Reproduzido caso da Ponte Preta em 6º e 5º com duas Séries B indevidas. Causa: `campeaoLiga` era nome do vencedor no rápido e foi interpretado como booleano. Separado indicador de conquista e nome do campeão nas novas temporadas, com leitura compatível e reparação dos registros antigos ao carregar. Histórico reconciliado sem apagar classificações, estatísticas ou conquistas legítimas. Museu usa o mesmo critério e conserva o campo do vencedor no arquivo. Relatório `docs/CORRECAO_TITULOS_LIGA.md`.
+
+Validação local: build, 48 testes de modelo/regressão, nove cenários existentes de galeria/museu e duas reproduções específicas em 320 e 1366 px aprovados. Os casos específicos verificam zero títulos para 6º/5º, persistência no save e uma única taça após conquista real. Publicação e CI completo em acompanhamento.
+
 ## Entrega concluída — pedido de demissão do treinador (10/11/2026)
 
 Publicado em `4180c0e`. [CI 42728234220](https://github.com/bravolucas/A-Joia/actions/runs/42728234220) aprovado: **419 testes de lógica e 292 cenários de navegador**. [Pages 42728234203](https://github.com/bravolucas/A-Joia/actions/runs/42728234203) aprovado. Versão pública conferida por HTTPS com verificação TLS; código de confirmação/cancelamento presente e módulos acessíveis com HTTP 200.

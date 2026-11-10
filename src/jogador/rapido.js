@@ -1,4 +1,4 @@
-import {registrarAnoHistoria,registrarEstatisticasCompeticoes,registrarAtletasObservados,simularDefesas,novosMarcosIndividuais} from '../historia/historiaFutebol.js';
+import {normalizarCampeaoLiga,corrigirCampeoesLiga,registrarAnoHistoria,registrarEstatisticasCompeticoes,registrarAtletasObservados,simularDefesas,novosMarcosIndividuais} from '../historia/historiaFutebol.js';
 import {ITENS_PESSOAIS} from './itensPessoais.js';
 import {iniciarCamisas,aposentarDonoCamisa,prepararCamisaSelecao,sincronizarCamisasSelecao} from './camisasCarreira.js';
 import {estatisticasDecisao} from './decisaoDeJogo.js';
@@ -1365,7 +1365,7 @@ function jogarTemporadaBase(c0) {
 
   // campeonato nacional
   const tab = simularLiga(c, clube, ovr, share, forcaTimeExtra);
-  card.posLiga = tab.pos; card.totalLiga = tab.total; card.campeaoLiga = tab.campeao;
+  card.posLiga = tab.pos; card.totalLiga = tab.total; card.campeaoLiga = tab.pos===1; card.vencedorLiga = tab.campeao;
   card.tabelaLiga = tab.ordem; // a virada de divisões no fim da temporada usa a classificação inteira
   // só a briga pelo título vira desafio, e nem sempre; acesso e permanência saem da tabela
   const decisaoBruta = emCampo ? decisaoNaTabela(clube, tab) : null;
@@ -1618,7 +1618,8 @@ export function aplicarMomento(card0, acertou) {
     if (i !== -1 && i !== alvo && (i === f - 1 || i === f)) [ordem[f - 1], ordem[f]] = [ordem[f], ordem[f - 1]];
     card.tabelaLiga = ordem;
     if (i !== -1) card.posLiga = ordem.indexOf(card.clube) + 1;
-    card.campeaoLiga = ordem[0] || card.campeaoLiga;
+    card.vencedorLiga = ordem[0] || card.vencedorLiga;
+    card.campeaoLiga = card.vencedorLiga === card.clube;
     // o que aconteceu no outro jogo, quando ele decidiu a história
     const outro = acertou && !terminaEmCima ? "Você fez sua parte, mas o rival também venceu"
       : !acertou && terminaEmCima ? "O rival também tropeçou" : null;
@@ -3862,6 +3863,8 @@ export function carregarRapido() {
     if(s.etapa==='festa'&&s.card&&(s.c.temporadas||[]).some(t=>t.ano===s.card.ano))s.etapa='fechamento';
     s.c.ligas = s.c.ligas || {};
     sincronizarLigas(s.c);
+    s.c=corrigirCampeoesLiga(s.c);
+    if(s.card)s.card=normalizarCampeaoLiga(s.card);
     return s;
   } catch { return null; }
 }

@@ -1,3 +1,4 @@
+import {conquistouLiga} from '../historia/historiaFutebol.js';
 import {ANO_INICIO,CLUBES,NACIONALIDADES,LIGAS,nomeDosTitulos} from '../dados/data.js';
 import {competenciaMuseu} from './museu.js';
 const n=x=>Number.isFinite(x)?Math.max(0,x):0;
@@ -27,7 +28,7 @@ export function construirMuseuPessoal(c={}, {modo='rapido',temporadas}={}){
  for(const t of ts){const liga=t.ligaId||t.liga||t.clubeObj?.liga||CLUBES.find(x=>x.nome===t.clube)?.liga,nomes=nomeDosTitulos(liga);
   if(modo==='completo'){
    for(const valor of t.titulosLista||[]){let nm=competenciaMuseu(typeof valor==='string'?valor:valor.nome).nome;if(nm==='Copa Nacional')nm=t.copaNacional?.nome||nomes.copa;adicionarTitulo({nome:nm,ano:t.ano,clube:t.clube},'Jogador',t);}
-   if(t.campeaoLiga)adicionarTitulo({nome:t.ligaNome||LIGAS[liga]?.nome||nomes.liga,ano:t.ano,clube:t.clube},'Jogador',t);
+   if(conquistouLiga(t))adicionarTitulo({nome:t.ligaNome||LIGAS[liga]?.nome||nomes.liga,ano:t.ano,clube:t.clube},'Jogador',t);
    for(const [campo,tipo]of [['continental','continental'],['copaNacional','copa'],['mundial','mundial'],['estadual','estadual']])if(t[campo]?.titulo)adicionarTitulo({nome:t[campo].nome||nomes[tipo],ano:t.ano,clube:t.clube},'Jogador',t);
   }
   if(modo==='completo'){
@@ -72,7 +73,7 @@ export function construirMuseuPessoal(c={}, {modo='rapido',temporadas}={}){
 export const CHAVE_MUSEUS_ENCERRADOS='ajoia_museus_encerrados_v1';
 function lerAcervos(storage){const bruto=JSON.parse(storage?.getItem(CHAVE_MUSEUS_ENCERRADOS)||'{"versao":1,"carreiras":{}}');if(bruto?.versao!==1||!bruto.carreiras||typeof bruto.carreiras!=='object'||Array.isArray(bruto.carreiras))throw new Error('Acervo inválido');return bruto;}
 const selecionar=(obj,campos)=>Object.fromEntries(campos.filter(k=>obj?.[k]!==undefined).map(k=>[k,obj[k]]));
-function temporadaDoAcervo(t){const r=selecionar(t,['ano','idade','clube','ligaId','liga','ligaNome','temporadaLabel','jogos','gols','assist','defesas','cleanSheets','numero','torcidaFim','torcida','titulosLista','campeaoLiga','feitosHistoricos','lesao','rebaixado','premios','numeroSelecao','destaques','vitorias','empates','derrotas','posicao','titulosConquistados','campeao','competicao','interrompida','pediuDemissao','objetivo']);
+function temporadaDoAcervo(t){const r=selecionar(t,['ano','idade','clube','ligaId','liga','ligaNome','temporadaLabel','jogos','gols','assist','defesas','cleanSheets','numero','torcidaFim','torcida','titulosLista','campeaoLiga','vencedorLiga','feitosHistoricos','lesao','rebaixado','premios','numeroSelecao','destaques','vitorias','empates','derrotas','posicao','titulosConquistados','campeao','competicao','interrompida','pediuDemissao','objetivo']);
  for(const k of ['continental','copaNacional','mundial','estadual','selecao','copa','copaResultado','continentalSelecaoResultado','selecaoTemporada'])if(t[k])r[k]=selecionar(t[k],['nome','titulo','convocado','jogos','gols','assist']);
  if(t.clubeObj)r.clubeObj=selecionar(t.clubeObj,['liga']);
  if(t.torneios)r.torneios=t.torneios.map(x=>({...selecionar(x,['nome','faseUsuario','vice']),fases:(x.fases||[]).filter(f=>f.fase==='Final').map(f=>({fase:f.fase,jogos:f.jogos}))}));

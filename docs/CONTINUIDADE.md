@@ -1,3 +1,9 @@
+## Entrega concluída — abertura do museu no encerramento (10/11/2026)
+
+Publicado em `c7586c6`. [CI 42738591956](https://github.com/bravolucas/A-Joia/actions/runs/42738591956) e [Pages 42738592218](https://github.com/bravolucas/A-Joia/actions/runs/42738592218) aprovados: 427 testes de lógica e 296 cenários de navegador. Versão pública `index-C-V1DBXb.js` conferida por HTTPS com verificação TLS; botão de encerramento atualizado e módulos acessíveis com HTTP 200.
+
+A entrada no encerramento reapresenta o museu independentemente de marcador de visita anterior. Legado final do treinador também abre a exposição da fase correta. **ENCERRAR CARREIRA · Abrir meu museu** faz pedido explícito de abertura, mesmo após fechar a apresentação automática. Na recarga de save finalizado, a exposição volta a abrir. O usuário pode atualizar e retomar a mesma carreira, sem refazer o jogo. A mudança mantém acesso ao legado, início do treinador, nova carreira e acervos existentes. Relatório `docs/MUSEU_PESSOAL_INTERATIVO.md`. Nenhuma pendência desta rodada.
+
 ## Correção de abertura do museu final — 10/11/2026
 
 Relato de carreira encerrada sem abrir o museu. Corrigidos bloqueios do fluxo: marcador antigo de visita deixou de suprimir a apresentação no encerramento; legado final do treinador reconhece a fase encerrada; botão **ENCERRAR CARREIRA · Abrir meu museu** faz um pedido explícito de abertura, mesmo após fechar a visita automática. Saves encerrados podem ser retomados para ver o museu, sem refazer a carreira. Despedida, resumo completo e acervo permanecem disponíveis. Relatório `docs/MUSEU_PESSOAL_INTERATIVO.md`.

@@ -1,0 +1,12 @@
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import {CLUBES} from '../../src/dados/data.js';
+import {CLUBES_SULAMERICANOS_EXTRAS} from '../../src/competicoes/clubesInternacionais.js';
+import {CLUBES_EUROPEUS_EXTRAS} from '../../src/competicoes/clubesEuropeusExtras.js';
+import {CLUBES_REGIONAIS_EXTRAS} from '../../src/competicoes/estaduaisRapidos.js';
+import {CLUBES_MUNDIAIS_EXTRAS} from '../../src/competicoes/mundialRapido.js';
+import '../../src/index.css';
+import {Escudo} from '../../src/treinador/uiTreinador.jsx';
+import {escudoDe} from '../../src/comum/arte.js';
+const todos=[...new Map([...CLUBES,...CLUBES_SULAMERICANOS_EXTRAS,...CLUBES_EUROPEUS_EXTRAS,...CLUBES_REGIONAIS_EXTRAS,...CLUBES_MUNDIAIS_EXTRAS].map(c=>[c.nome,c])).values()],q=new URLSearchParams(location.search),lista=q.has('todos')?todos:q.has('regionais')?[...CLUBES_REGIONAIS_EXTRAS,...CLUBES_MUNDIAIS_EXTRAS]:q.has('nomes')?q.get('nomes').split('|').map(nome=>todos.find(c=>c.nome===nome)||{nome}):[...CLUBES_SULAMERICANOS_EXTRAS,...CLUBES_EUROPEUS_EXTRAS];
+createRoot(document.getElementById('root')).render(<main style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(125px,1fr))',gap:12,padding:16,fontFamily:'system-ui'}}>{lista.map(c=><article key={c.nome} data-clube={c.nome} style={{textAlign:'center',padding:10,border:'1px solid #9bdeff22',borderRadius:12}}>{q.has('estado')?<Escudo nome={c.nome} size={76} estado={q.get('estado')}/>:<img className="joia-escudo" src={escudoDe(c.nome)||''} alt={`Escudo do ${c.nome}`} width="76" height="76" style={{objectFit:'contain'}}/>}<strong style={{display:'block',fontSize:12,marginTop:8}}>{c.nome}</strong><small style={{display:'block',fontSize:10,color:'#a9becf'}}>{c.pais||c.liga}</small></article>)}</main>);

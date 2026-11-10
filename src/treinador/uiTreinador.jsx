@@ -5,10 +5,10 @@ import { NACIONALIDADES } from '../dados/data.js';
 import { escudoDe, bandeiraDe } from '../comum/arte.js';
 import { bloquearRolagem } from "../comum/bloqueioRolagem.js";
 
-export function Escudo({ nome, size = 32 }) {
+export function Escudo({ nome, size = 32, estado }) {
   const nacao=NACIONALIDADES.find(n=>n.label===nome);
-  const src = nacao ? bandeiraDe(nacao.id) : escudoDe(nome);
-  return src ? <img src={src} alt="" className="object-contain shrink-0" style={{ width: size, height: size }} />
+  const src = nacao ? bandeiraDe(nacao.id) : escudoDe(nome,{estado});
+  return src ? <img src={src} alt="" className="joia-escudo object-contain shrink-0" style={{ width: size, height: size }} />
     : <span aria-hidden="true" className="shrink-0 flex items-center justify-center rounded-full bg-white/10" style={{ width: size, height: size }}>⚽</span>;
 }
 

@@ -1,3 +1,4 @@
+import {chaveEscudo} from './chavesEscudos.js';
 /* Fotos de fundo — Adobe Stock (licença gratuita), tratadas no Adobe
    Photoshop e convertidas para WebP. Ver arte/CREDITOS.md. */
 import refletores from "../../arte/refletores.webp";
@@ -44,8 +45,7 @@ export const slug = slugCompeticao;
 const porNome = (g) => Object.fromEntries(Object.entries(g).map(([k, v]) => [k.split("/").pop().replace(/\.\w+$/, ""), v]));
 const ESCUDOS = porNome(import.meta.glob("../../arte/escudos/*.{svg,png,webp}", { eager: true, query: "?url", import: "default" }));
 const LOGOS = porNome(import.meta.glob("../../arte/competicoes/*.{svg,png,webp}", { eager: true, query: "?url", import: "default" }));
-const ALIASES_ESCUDOS = { kasimpasa: 'kas-mpasa', 'fc-koln': 'koln', 'hamburger-sv': 'hamburgo' };
-export const escudoDe = (nome) => ESCUDOS[ALIASES_ESCUDOS[slug(nome)] || slug(nome)] || null;
+export const escudoDe = (nome,contexto) => ESCUDOS[chaveEscudo(nome,contexto)] || null;
 export const logoCompeticao = (nome) => resolverImagemCompeticao(nome, LOGOS);
 const BANDEIRAS = porNome(import.meta.glob("../../arte/bandeiras/*.svg", { eager: true, query: "?url", import: "default" }));
 /* bandeiras em SVG (pacote flag-icons, MIT): o emoji de bandeira não aparece no Windows */

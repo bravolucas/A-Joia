@@ -1,0 +1,2562 @@
+{
+  "data": "2026-11-10",
+  "total": 278,
+  "descricao": "Escudos reais adicionados ao acervo; originais sem edição. Identificação de clubes de futebol.",
+  "fontes": [
+    "https://github.com/JoseArroyave/football-logos",
+    "https://en.wikipedia.org/"
+  ],
+  "escudos": [
+    {
+      "clube": "Egnatia",
+      "pais": "Albânia",
+      "arquivo": "egnatia.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/albania/Egnatia.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/albania/Egnatia.svg",
+      "sha256": "72346578800468f7fa5315fdaa391fc5ded316cd651b5cf2e16a14d1793610b7",
+      "bytes": 18450
+    },
+    {
+      "clube": "Partizani Tirana",
+      "pais": "Albânia",
+      "arquivo": "partizani-tirana.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/albania/Partizani.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/albania/Partizani.svg",
+      "sha256": "6b1dd244cfe1a572bfde6b0f6fd7c4ddbd607e9a8888490f554ec42ed357a434",
+      "bytes": 5042
+    },
+    {
+      "clube": "Skenderbeu",
+      "pais": "Albânia",
+      "arquivo": "skenderbeu.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/albania/Sk%C3%ABnderbeu.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/albania/Sk%C3%ABnderbeu.svg",
+      "sha256": "583aa3854231508f72cd88655dcb7d9f1ca7ddac44f4b357297163ad516729e1",
+      "bytes": 15796
+    },
+    {
+      "clube": "Tirana",
+      "pais": "Albânia",
+      "arquivo": "tirana.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/albania/Tirana.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/albania/Tirana.svg",
+      "sha256": "a1bbdea1eca5863e7fda715da1fa702da1fa73ebe792a36dbdeb28904d0511b4",
+      "bytes": 28535
+    },
+    {
+      "clube": "Ararat-Armenia",
+      "pais": "Armênia",
+      "arquivo": "ararat-armenia.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/armenia/Ararat-Armenia.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/armenia/Ararat-Armenia.svg",
+      "sha256": "f2f46431ee4b77d4585568aa278d82c6590f82688c217a81c88ccc60e7237fce",
+      "bytes": 4535
+    },
+    {
+      "clube": "Noah",
+      "pais": "Armênia",
+      "arquivo": "noah.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/armenia/Noah.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/armenia/Noah.svg",
+      "sha256": "e2d03774594b671e1d7dfedb86353657d2172f1d6b2d97768714c3fbe87a53dc",
+      "bytes": 5836
+    },
+    {
+      "clube": "Pyunik",
+      "pais": "Armênia",
+      "arquivo": "pyunik.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/armenia/Pyunik.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/armenia/Pyunik.svg",
+      "sha256": "28c26596df595aac2e13fc8d69d6ab025d60f1b6d6fb265c0879eea178245f1a",
+      "bytes": 10750
+    },
+    {
+      "clube": "Neftchi Baku",
+      "pais": "Azerbaijão",
+      "arquivo": "neftchi-baku.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/azerbaijan/Neft%C3%A7i.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/azerbaijan/Neft%C3%A7i.svg",
+      "sha256": "c792de928860319e81dbfd50e6f0d288b4533f5fcc240863973d15b6e5ae5686",
+      "bytes": 4955
+    },
+    {
+      "clube": "Qarabag",
+      "pais": "Azerbaijão",
+      "arquivo": "qarabag.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/azerbaijan/Qaraba%C4%9F.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/azerbaijan/Qaraba%C4%9F.svg",
+      "sha256": "73145bdaea7f1dfd62c275b216deaef31a3af21f1f8b7de938d9f34a18d915b7",
+      "bytes": 24929
+    },
+    {
+      "clube": "Zira",
+      "pais": "Azerbaijão",
+      "arquivo": "zira.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/azerbaijan/Zire.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/azerbaijan/Zire.svg",
+      "sha256": "66246956d64a1a26d3ffeb5f2da7a8e8510113ed936508bb024aa464f0e6466c",
+      "bytes": 16211
+    },
+    {
+      "clube": "BATE Borisov",
+      "pais": "Bielorrússia",
+      "arquivo": "bate-borisov.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/belarus/BATE_Borisov.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/belarus/BATE_Borisov.svg",
+      "sha256": "c71d5a5f26a36b3c49337b89a380f28d8d06bcbffb91226f4e0ea6ba4420599f",
+      "bytes": 1700
+    },
+    {
+      "clube": "Dinamo Minsk",
+      "pais": "Bielorrússia",
+      "arquivo": "dinamo-minsk.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/belarus/Dinamo-Minsk.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/belarus/Dinamo-Minsk.svg",
+      "sha256": "8eb606400c94b149075b51b67aa90fbe8906dd733f6689685e23e1d5dca6f38e",
+      "bytes": 17330
+    },
+    {
+      "clube": "Always Ready",
+      "pais": "Bolívia",
+      "arquivo": "always-ready.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/bolivia/Always_Ready.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/bolivia/Always_Ready.svg",
+      "sha256": "417eb0b83d28cfaa5916a71e7e521a2f41051df35d6e03d75ec30720b53d85c5",
+      "bytes": 3036
+    },
+    {
+      "clube": "Aurora",
+      "pais": "Bolívia",
+      "arquivo": "aurora.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/bolivia/Aurora.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/bolivia/Aurora.svg",
+      "sha256": "f0b11f6e104b6f8057d5f8d7e5ecfc857ed13107061266c277471ce4bb4e23ee",
+      "bytes": 9751
+    },
+    {
+      "clube": "Blooming",
+      "pais": "Bolívia",
+      "arquivo": "blooming.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/bolivia/Blooming.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/bolivia/Blooming.svg",
+      "sha256": "cf9765ca46854847c80c1318b583890faed26d1efc525b640f1c88972bd2b311",
+      "bytes": 61093
+    },
+    {
+      "clube": "Bolívar",
+      "pais": "Bolívia",
+      "arquivo": "bolivar.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/bolivia/Bol%C3%ADvar.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/bolivia/Bol%C3%ADvar.svg",
+      "sha256": "5b22d3b3d0637f517bcf0cce819bc42246a2e2bcfa7ca5e14a211d492fe0bd15",
+      "bytes": 7664
+    },
+    {
+      "clube": "Jorge Wilstermann",
+      "pais": "Bolívia",
+      "arquivo": "jorge-wilstermann.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/bolivia/Jorge_Wilstermann.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/bolivia/Jorge_Wilstermann.svg",
+      "sha256": "3cd18a669ad4b19b2c3526ae4366e44990c22214631578faee986fa9059001d0",
+      "bytes": 4128
+    },
+    {
+      "clube": "Nacional Potosí",
+      "pais": "Bolívia",
+      "arquivo": "nacional-potosi.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/bolivia/Atl%C3%A9tico_Nacional_Potos%C3%AD.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/bolivia/Atl%C3%A9tico_Nacional_Potos%C3%AD.svg",
+      "sha256": "85b98ba654cf16ac7bcb1a4f48c8b1f7fcbfd357e75d0a38d4ba539ed86ac551",
+      "bytes": 18243
+    },
+    {
+      "clube": "Oriente Petrolero",
+      "pais": "Bolívia",
+      "arquivo": "oriente-petrolero.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/bolivia/Deportivo_Oriente_Petrolero.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/bolivia/Deportivo_Oriente_Petrolero.svg",
+      "sha256": "513403fd840544aaf9f2055e22b2ee3fb4a855bfe3c467def2d9b7ab616ed1f3",
+      "bytes": 81554
+    },
+    {
+      "clube": "The Strongest",
+      "pais": "Bolívia",
+      "arquivo": "the-strongest.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/bolivia/The_Strongest.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/bolivia/The_Strongest.svg",
+      "sha256": "d7cc15ddc488463796e359c6cabebb91449efd343a50ed3c927d765bb5d63dd3",
+      "bytes": 46674
+    },
+    {
+      "clube": "ASA",
+      "pais": "Brasil",
+      "estado": "AL",
+      "arquivo": "asa.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/ASA_de_Arapiraca.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/ASA_de_Arapiraca.svg",
+      "sha256": "ae2eb78096ec0c89bd904ea0588ce3a1847c3f567405c5fcb8629a39a6cda7f1",
+      "bytes": 51062
+    },
+    {
+      "clube": "Anápolis",
+      "pais": "Brasil",
+      "estado": "GO",
+      "arquivo": "anapolis.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/An%C3%A1polis.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/An%C3%A1polis.svg",
+      "sha256": "49eca73265f73d2f48be771142643a7df446f78a606cdcb88aafed063e9c3366",
+      "bytes": 11773
+    },
+    {
+      "clube": "Aparecidense",
+      "pais": "Brasil",
+      "estado": "GO",
+      "arquivo": "aparecidense.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Associa%C3%A7%C3%A3o_Atl%C3%A9tica_Aparecidense.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Associa%C3%A7%C3%A3o_Atl%C3%A9tica_Aparecidense.svg",
+      "sha256": "f086e5ada863badd5ecc5da96ac8046193afc88c78d33ec7ec43556a06efd354",
+      "bytes": 12378
+    },
+    {
+      "clube": "Athletic Club",
+      "pais": "Brasil",
+      "estado": "MG",
+      "arquivo": "athletic-club.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Athletic.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Athletic.svg",
+      "sha256": "bc3ffcbd4b322c41246ab6da328e748b150dbe85af0c63be5311307e51655c75",
+      "bytes": 5650
+    },
+    {
+      "clube": "Atlético de Alagoinhas",
+      "pais": "Brasil",
+      "estado": "BA",
+      "arquivo": "atletico-de-alagoinhas.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Atl%C3%A9tico_de_Alagoinhas.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Atl%C3%A9tico_de_Alagoinhas.svg",
+      "sha256": "134721fa3b35b97cb5178f9be6087c009830bb8d7d21b284cb424070c02d2419",
+      "bytes": 16519
+    },
+    {
+      "clube": "Bahia de Feira",
+      "pais": "Brasil",
+      "estado": "BA",
+      "arquivo": "bahia-de-feira.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Bahia_de_Feira.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Bahia_de_Feira.svg",
+      "sha256": "1e6f8d673f2b865e5a9ddf24a7e5a77ea352276a7f71d15f1828e0d80e91898b",
+      "bytes": 1865
+    },
+    {
+      "clube": "Barra-SC",
+      "pais": "Brasil",
+      "estado": "SC",
+      "arquivo": "barra-sc.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Barra.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Barra.svg",
+      "sha256": "d1b383652ce7550245ac98a3409e4b57550e7d08ad1eaa3e2365c12ff19dad88",
+      "bytes": 34464
+    },
+    {
+      "clube": "Boavista-RJ",
+      "pais": "Brasil",
+      "estado": "RJ",
+      "arquivo": "boavista-rj.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Boavista_SC.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Boavista_SC.svg",
+      "sha256": "5fc52f186b2571cbdab992e74598a83041ab53861db17cac7e314fc237329a04",
+      "bytes": 8554
+    },
+    {
+      "clube": "Brasil de Pelotas",
+      "pais": "Brasil",
+      "estado": "RS",
+      "arquivo": "brasil-de-pelotas.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Brasil_de_Pelotas.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Brasil_de_Pelotas.svg",
+      "sha256": "6aacc71aa666ed1fadf76735c611ae8de8cfa93ca893b18f78a1b1a3e5d72943",
+      "bytes": 23483
+    },
+    {
+      "clube": "Brusque",
+      "pais": "Brasil",
+      "estado": "SC",
+      "arquivo": "brusque.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Brusque.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Brusque.svg",
+      "sha256": "33afd9236373cb9016449e496a06222daeaef443ea762ceaef2f3fb2607d69f6",
+      "bytes": 8352
+    },
+    {
+      "clube": "CSA",
+      "pais": "Brasil",
+      "estado": "AL",
+      "arquivo": "csa.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/CSA.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/CSA.svg",
+      "sha256": "e734df940261b6f2147c613e423df292230ef55a6c9a17159be4f28e85693654",
+      "bytes": 22661
+    },
+    {
+      "clube": "CSE",
+      "pais": "Brasil",
+      "estado": "AL",
+      "arquivo": "cse.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/CSE.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/CSE.svg",
+      "sha256": "a3f69a430e6cb13af795bc911fcdf3104ab2a2050b1276177b36ecbecd6daf92",
+      "bytes": 24396
+    },
+    {
+      "clube": "Cametá",
+      "pais": "Brasil",
+      "arquivo": "cameta.png",
+      "fonte": "https://thumb.wikimedia.org/wikipedia/en/thumb/2/23/Camet%C3%A1_Sport_Club.svg/330px-Camet%C3%A1_Sport_Club.svg.png",
+      "referencia": "https://en.wikipedia.org/wiki/Camet%C3%A1_Sport_Club",
+      "sha256": "1d39ddfe4a9f274d4eb07954555f8c53b4f87098cd8c4a8ae8df6ceef4f8c3d4",
+      "bytes": 39138
+    },
+    {
+      "clube": "Castanhal",
+      "pais": "Brasil",
+      "arquivo": "castanhal.png",
+      "fonte": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/Castanhal_Esporte_Clube.svg/1920px-Castanhal_Esporte_Clube.svg.png",
+      "referencia": "https://en.wikipedia.org/wiki/Castanhal_Esporte_Clube",
+      "sha256": "a7e71a3a0be12261adf513a1cb20f99e4805c367fdd94ac1d04070acf0d6ea83",
+      "bytes": 175442
+    },
+    {
+      "clube": "Caxias",
+      "pais": "Brasil",
+      "estado": "RS",
+      "arquivo": "caxias.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Caxias.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Caxias.svg",
+      "sha256": "7ad89efba33781738cd364aab42ba562762aaa9546d375bd7048c264478f8249",
+      "bytes": 16012
+    },
+    {
+      "clube": "Central",
+      "pais": "Brasil",
+      "estado": "PE",
+      "arquivo": "central.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Central_Sport_Club.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Central_Sport_Club.svg",
+      "sha256": "15cfaf6a0581838eafabf322fdbac46876ccc060951b028423777c56f4d5f6b8",
+      "bytes": 16506
+    },
+    {
+      "clube": "Cianorte",
+      "pais": "Brasil",
+      "estado": "PR",
+      "arquivo": "cianorte.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Cianorte_FC.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Cianorte_FC.svg",
+      "sha256": "06746b0a65a54390d0ec5c55766b168b7ada1deb65bbbd2fb8aff90d0067f968",
+      "bytes": 66366
+    },
+    {
+      "clube": "Falcon",
+      "pais": "Brasil",
+      "arquivo": "falcon.png",
+      "fonte": "https://upload.wikimedia.org/wikipedia/en/1/1b/Falcon_FC_logo.png",
+      "referencia": "https://en.wikipedia.org/wiki/Falcon_Futebol_Clube",
+      "sha256": "15d179ca062cea4747ef2ca42a6bfec846eb423c17577e17ad8d623cbb3876c3",
+      "bytes": 54004
+    },
+    {
+      "clube": "Ferroviário",
+      "pais": "Brasil",
+      "estado": "CE",
+      "arquivo": "ferroviario.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Ferrovi%C3%A1rio_Atl%C3%A9tico_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Ferrovi%C3%A1rio_Atl%C3%A9tico_Clube.svg",
+      "sha256": "092625939c7cb76aa597c7ca90900f70293fc039a896e862e11e20698f085e35",
+      "bytes": 8156
+    },
+    {
+      "clube": "Floresta",
+      "pais": "Brasil",
+      "estado": "CE",
+      "arquivo": "floresta.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Floresta.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Floresta.svg",
+      "sha256": "d5524cc3161c7c28774f49d03b82c923560996603da521ff794c12115df66bf1",
+      "bytes": 20409
+    },
+    {
+      "clube": "Goianésia",
+      "pais": "Brasil",
+      "arquivo": "goianesia.png",
+      "fonte": "https://upload.wikimedia.org/wikipedia/commons/2/23/Escudo_Goian%C3%A9sia_EC.png",
+      "referencia": "https://en.wikipedia.org/wiki/Goian%C3%A9sia_Esporte_Clube",
+      "sha256": "2fde281bac91754158d827a6c0af76826ea8e323d51984cd7768847a5f72037a",
+      "bytes": 127813
+    },
+    {
+      "clube": "Goiânia",
+      "pais": "Brasil",
+      "estado": "GO",
+      "arquivo": "goiania.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Goi%C3%A2nia.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Goi%C3%A2nia.svg",
+      "sha256": "aab8729d631ea9304c7ef64e136e67ba9caf9109a06b8d6bd6c49ad16d4cfcf0",
+      "bytes": 5367
+    },
+    {
+      "clube": "Hercílio Luz",
+      "pais": "Brasil",
+      "arquivo": "hercilio-luz.png",
+      "fonte": "https://upload.wikimedia.org/wikipedia/en/d/de/Herc%C3%ADlio_Luz_FC_logo.png",
+      "referencia": "https://en.wikipedia.org/wiki/Herc%C3%ADlio_Luz_Futebol_Clube",
+      "sha256": "3feea649cdc63cf08f0cc17cf07d5a4f2dc17d60db43c41b861b7068521a9be1",
+      "bytes": 84429
+    },
+    {
+      "clube": "Iguatu",
+      "pais": "Brasil",
+      "estado": "CE",
+      "arquivo": "iguatu.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Associa%C3%A7%C3%A3o_Desportiva_Iguatu.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Associa%C3%A7%C3%A3o_Desportiva_Iguatu.svg",
+      "sha256": "c41325bcd56573289b7c33d7d197dbb2d578345e8aa8cf84b2cc8ee14472cf11",
+      "bytes": 261548
+    },
+    {
+      "clube": "Inter de Limeira",
+      "pais": "Brasil",
+      "estado": "SP",
+      "arquivo": "inter-de-limeira.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Inter_de_Limeira.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Inter_de_Limeira.svg",
+      "sha256": "10013c2edee56634e7f994b0bf9a3d500d53af09d48c254a1d6bae077a10ec4f",
+      "bytes": 10360
+    },
+    {
+      "clube": "Itabaiana",
+      "pais": "Brasil",
+      "estado": "SE",
+      "arquivo": "itabaiana.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Itabaiana.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Itabaiana.svg",
+      "sha256": "56dc7b0e7b42c7c5e678e413c917ef31a87914fd941d4e41f61df99ce6ada497",
+      "bytes": 47538
+    },
+    {
+      "clube": "Ituano",
+      "pais": "Brasil",
+      "estado": "SP",
+      "arquivo": "ituano.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Ituano.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Ituano.svg",
+      "sha256": "80f9b97cda7b0a0b63d9373aea1c218c3131c7a2b5e159fe37f9eadd81cab27e",
+      "bytes": 5902
+    },
+    {
+      "clube": "Jacuipense",
+      "pais": "Brasil",
+      "estado": "BA",
+      "arquivo": "jacuipense.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/EC_Jacuipense.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/EC_Jacuipense.svg",
+      "sha256": "39bccd454c0b07b651713253f3bf7f14cf1c2bf6604671f5e120e7cf3636fbe1",
+      "bytes": 24087
+    },
+    {
+      "clube": "Juazeirense",
+      "pais": "Brasil",
+      "estado": "BA",
+      "arquivo": "juazeirense.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Juazeirense.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Juazeirense.svg",
+      "sha256": "3ea7231f6f9d3adfd5264a30f8e58ca066de339a62169615731b1858c59e890d",
+      "bytes": 23621
+    },
+    {
+      "clube": "Lagarto",
+      "pais": "Brasil",
+      "estado": "SE",
+      "arquivo": "lagarto.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Lagarto_FC.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Lagarto_FC.svg",
+      "sha256": "0e9381e34d010201bbb29312157022a22c747e5836791f728d1c2e251aefbfc9",
+      "bytes": 21492
+    },
+    {
+      "clube": "Madureira",
+      "pais": "Brasil",
+      "estado": "RJ",
+      "arquivo": "madureira.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Madureira_Esporte_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Madureira_Esporte_Clube.svg",
+      "sha256": "c6ef703d16a140bc21b618ec70624e5e380d7c54363e046c3273fe5658102c6f",
+      "bytes": 3120
+    },
+    {
+      "clube": "Manauara",
+      "pais": "Brasil",
+      "estado": "AM",
+      "arquivo": "manauara.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Manauara_Esporte_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Manauara_Esporte_Clube.svg",
+      "sha256": "036b64b097cac6555cb8f58db4ce107bb93534c744e87b094fa53795f533720a",
+      "bytes": 10161
+    },
+    {
+      "clube": "Manaus",
+      "pais": "Brasil",
+      "estado": "AM",
+      "arquivo": "manaus.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Manaus_Futebol_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Manaus_Futebol_Clube.svg",
+      "sha256": "5aa54c322c838c81305659954795f544f151c9025096e8328401b88063041b48",
+      "bytes": 81448
+    },
+    {
+      "clube": "Maracanã",
+      "pais": "Brasil",
+      "estado": "CE",
+      "arquivo": "maracana.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Maracan%C3%A3_Esporte_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Maracan%C3%A3_Esporte_Clube.svg",
+      "sha256": "4fe1088ead4d34248eca6fe58a0585660d45e5730a8c8df0dff220c088b3c93c",
+      "bytes": 56633
+    },
+    {
+      "clube": "Marcílio Dias",
+      "pais": "Brasil",
+      "estado": "SC",
+      "arquivo": "marcilio-dias.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Marc%C3%ADlio_Dias.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Marc%C3%ADlio_Dias.svg",
+      "sha256": "736ad28025c6b03bc6ebb7fe5c9fe89a4a7d13def8de6e7d1926612d1cdff905",
+      "bytes": 31813
+    },
+    {
+      "clube": "Maringá",
+      "pais": "Brasil",
+      "estado": "PR",
+      "arquivo": "maringa.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Maring%C3%A1.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Maring%C3%A1.svg",
+      "sha256": "68c7e60fb1e47733bb9cb67e7fc516c1216ab9382128b98ddae345a4d448b73f",
+      "bytes": 4975
+    },
+    {
+      "clube": "Murici",
+      "pais": "Brasil",
+      "arquivo": "murici.png",
+      "fonte": "https://upload.wikimedia.org/wikipedia/commons/7/77/Murici_FC_%282017%29.png",
+      "referencia": "https://en.wikipedia.org/wiki/Murici_Futebol_Clube",
+      "sha256": "f825f220ae2d1b336a375b57639d098ef9d0edbc56bd15c3b2501b42bc8e06a3",
+      "bytes": 538388
+    },
+    {
+      "clube": "Nacional-AM",
+      "pais": "Brasil",
+      "estado": "AM",
+      "arquivo": "nacional-am.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Nacional_Futebol_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Nacional_Futebol_Clube.svg",
+      "sha256": "736095a47c419f6e08272a943a49681796bc4062b0ff05a3fafc05d5df551721",
+      "bytes": 27710
+    },
+    {
+      "clube": "Petrolina",
+      "pais": "Brasil",
+      "arquivo": "petrolina.png",
+      "fonte": "https://upload.wikimedia.org/wikipedia/en/0/07/Petrolina_SFC.png",
+      "referencia": "https://en.wikipedia.org/wiki/Petrolina_Social_Futebol_Clube",
+      "sha256": "3ab9a390ecc367511c5da595759f7e64a2d188d8fb81f8c96c68b481e67b63a6",
+      "bytes": 106341
+    },
+    {
+      "clube": "Portuguesa-RJ",
+      "pais": "Brasil",
+      "estado": "RJ",
+      "arquivo": "portuguesa-rj.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Associa%C3%A7%C3%A3o_Atl%C3%A9tica_Portuguesa_%28RJ%29.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Associa%C3%A7%C3%A3o_Atl%C3%A9tica_Portuguesa_%28RJ%29.svg",
+      "sha256": "e1761034036e6e4ff80384a1673541acbd7bd24a6721440a1b878618bf5002e7",
+      "bytes": 20078
+    },
+    {
+      "clube": "Pouso Alegre",
+      "pais": "Brasil",
+      "estado": "MG",
+      "arquivo": "pouso-alegre.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Pouso_Alegre_Futebol_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Pouso_Alegre_Futebol_Clube.svg",
+      "sha256": "cce7ad85d6bbf6cb4f1ede608dff631de2e0409ea3494fadc529554c6dd01a59",
+      "bytes": 17513
+    },
+    {
+      "clube": "Princesa do Solimões",
+      "pais": "Brasil",
+      "arquivo": "princesa-do-solimoes.png",
+      "fonte": "https://upload.wikimedia.org/wikipedia/en/a/a2/Princesa_do_Solim%C3%B5es_Esporte_Clube.png",
+      "referencia": "https://en.wikipedia.org/wiki/Princesa_do_Solim%C3%B5es_Esporte_Clube",
+      "sha256": "a46af3d0ba737cf9a1ac065bfc175cb10d021c48b78f11e6fa6558f509b5998c",
+      "bytes": 155112
+    },
+    {
+      "clube": "Retrô",
+      "pais": "Brasil",
+      "estado": "PE",
+      "arquivo": "retro.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Retr%C3%B4_FC.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Retr%C3%B4_FC.svg",
+      "sha256": "5e2875f1df578aae71af12600f1a9af392b2e5361cccccd2264cc9a8aeb48ddc",
+      "bytes": 43909
+    },
+    {
+      "clube": "Santa Cruz",
+      "pais": "Brasil",
+      "estado": "PE",
+      "arquivo": "santa-cruz.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Santa_Cruz.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Santa_Cruz.svg",
+      "sha256": "ce4ab06a0f6a163515dbf48b6bb364e2da90a79487281606b822ad693e5146f6",
+      "bytes": 4460
+    },
+    {
+      "clube": "Sergipe",
+      "pais": "Brasil",
+      "estado": "SE",
+      "arquivo": "sergipe.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Club_Sportivo_Sergipe.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Club_Sportivo_Sergipe.svg",
+      "sha256": "5209312e8b8f58184e1a26cd210ad2e27fb158dc59587be9168a5897e6a18bac",
+      "bytes": 7282
+    },
+    {
+      "clube": "São Bernardo",
+      "pais": "Brasil",
+      "estado": "SP",
+      "arquivo": "sao-bernardo.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/S%C3%A3o_Bernardo.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/S%C3%A3o_Bernardo.svg",
+      "sha256": "3b3f82e7f40142f8f142d881142bd4e7087835cbab8a1d311a0206efa84156df",
+      "bytes": 38151
+    },
+    {
+      "clube": "São José-RS",
+      "pais": "Brasil",
+      "estado": "RS",
+      "arquivo": "sao-jose-rs.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/EC_S%C3%A3o_Jos%C3%A9.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/EC_S%C3%A3o_Jos%C3%A9.svg",
+      "sha256": "0f770b27157c25036b5061daf4bb501e075589be1e169416ac1c659004d54753",
+      "bytes": 46465
+    },
+    {
+      "clube": "Tombense",
+      "pais": "Brasil",
+      "estado": "MG",
+      "arquivo": "tombense.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Tombense_FC.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Tombense_FC.svg",
+      "sha256": "bdade81314905ba4888ed60c30787e5e02c2e017cdac90710cdaa09c53de61a6",
+      "bytes": 99634
+    },
+    {
+      "clube": "Tuna Luso",
+      "pais": "Brasil",
+      "estado": "PA",
+      "arquivo": "tuna-luso.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Tuna_Luso_Brasileira.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Tuna_Luso_Brasileira.svg",
+      "sha256": "6da06eecaaf4f251fb33d8629b935187eb1f3470c41de4d69a82a6bc3ad34b7d",
+      "bytes": 5750
+    },
+    {
+      "clube": "Volta Redonda",
+      "pais": "Brasil",
+      "estado": "RJ",
+      "arquivo": "volta-redonda.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Volta_Redonda.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Volta_Redonda.svg",
+      "sha256": "f2d1c856021c8623c439b1d7e57e705c00d21f7ee8116c31040d572bbd9cb51a",
+      "bytes": 3742
+    },
+    {
+      "clube": "Ypiranga-RS",
+      "pais": "Brasil",
+      "estado": "RS",
+      "arquivo": "ypiranga-rs.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Ypiranga.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Ypiranga.svg",
+      "sha256": "9226ae32865c462eab87708db9b27bf27fd045f10b31cc03d4d44899ac281149",
+      "bytes": 3975
+    },
+    {
+      "clube": "Água Santa",
+      "pais": "Brasil",
+      "estado": "SP",
+      "arquivo": "agua-santa.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Esporte_Clube_%C3%81gua_Santa.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Esporte_Clube_%C3%81gua_Santa.svg",
+      "sha256": "87db2f4bea769c30e63be6c7195c5d049d8266daf0a4b60370a6ae1d67ff847a",
+      "bytes": 48288
+    },
+    {
+      "clube": "Águia de Marabá",
+      "pais": "Brasil",
+      "estado": "PA",
+      "arquivo": "aguia-de-maraba.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/%C3%81guia_de_Marab%C3%A1_Futebol_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/%C3%81guia_de_Marab%C3%A1_Futebol_Clube.svg",
+      "sha256": "13f0f51855df8d4d02c43738e061dd447e91fe24f067072fa91061d6e69aeb96",
+      "bytes": 7532
+    },
+    {
+      "clube": "CSKA Sofia",
+      "pais": "Bulgária",
+      "arquivo": "cska-sofia.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/bulgaria/CSKA-Sofia.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/bulgaria/CSKA-Sofia.svg",
+      "sha256": "08b6aae78273748cee2144560fa03d0841dcbb1bb746c25272de6cd07ea0d290",
+      "bytes": 17553
+    },
+    {
+      "clube": "Levski Sofia",
+      "pais": "Bulgária",
+      "arquivo": "levski-sofia.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/bulgaria/Levski_Sofia.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/bulgaria/Levski_Sofia.svg",
+      "sha256": "dadd8d394343d7fa1b03ec408faa367a45fa846f36707d5acd94d4d0664ec6c8",
+      "bytes": 21115
+    },
+    {
+      "clube": "Ludogorets",
+      "pais": "Bulgária",
+      "arquivo": "ludogorets.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/bulgaria/Ludogorets.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/bulgaria/Ludogorets.svg",
+      "sha256": "8fef1fc7722e5dd824cf4d8341bb06e90b6e7a5d1fc4d13b4009b80e1db45241",
+      "bytes": 78890
+    },
+    {
+      "clube": "Anderlecht",
+      "pais": "Bélgica",
+      "arquivo": "anderlecht.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/belgium/RSC_Anderlecht.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/belgium/RSC_Anderlecht.svg",
+      "sha256": "4d5808cb913f20e633aa506a9930495319f985d51e3dd1e09ad356a996fac614",
+      "bytes": 34405
+    },
+    {
+      "clube": "Club Brugge",
+      "pais": "Bélgica",
+      "arquivo": "club-brugge.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/belgium/Club_Brugge.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/belgium/Club_Brugge.svg",
+      "sha256": "ba9154c9334d58305ca15a071c8daafb2fe8f121932a843d9104630b004d24e6",
+      "bytes": 17590
+    },
+    {
+      "clube": "Genk",
+      "pais": "Bélgica",
+      "arquivo": "genk.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/belgium/KRC_Genk.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/belgium/KRC_Genk.svg",
+      "sha256": "9142f15459cdf440ede47b624c2192e6c5b023404399c759979fd5afd1305dea",
+      "bytes": 3841
+    },
+    {
+      "clube": "Gent",
+      "pais": "Bélgica",
+      "arquivo": "gent.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/belgium/KAA_Gent.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/belgium/KAA_Gent.svg",
+      "sha256": "1243201f10f5aeeb2d2f4d3d932a7034b70a8245e4f04e2f169b2171f0eba1dc",
+      "bytes": 19195
+    },
+    {
+      "clube": "Royal Antwerp",
+      "pais": "Bélgica",
+      "arquivo": "royal-antwerp.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/belgium/Royal_Antwerp_FC.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/belgium/Royal_Antwerp_FC.svg",
+      "sha256": "bece5191b0b1d1b56c739d2ff490aff3e78582c7a2c90296b86c9502308c994c",
+      "bytes": 31538
+    },
+    {
+      "clube": "Standard Liège",
+      "pais": "Bélgica",
+      "arquivo": "standard-liege.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/belgium/Standard_Li%C3%A8ge.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/belgium/Standard_Li%C3%A8ge.svg",
+      "sha256": "9272ea2d5b8943df2590c2c93ee9e499b3f13bd2dcf957d06ae973f14d5dde1f",
+      "bytes": 7768
+    },
+    {
+      "clube": "Union Saint-Gilloise",
+      "pais": "Bélgica",
+      "arquivo": "union-saint-gilloise.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/belgium/Union_Saint-Gilloise.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/belgium/Union_Saint-Gilloise.svg",
+      "sha256": "f4b2df955547898a6b1ed955246b40f6599ab437510eccff7f87cd9213473e1f",
+      "bytes": 13309
+    },
+    {
+      "clube": "Borac Banja Luka",
+      "pais": "Bósnia",
+      "arquivo": "borac-banja-luka.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/bosnia-and-herzegovina/Borac_Banja_Luka.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/bosnia-and-herzegovina/Borac_Banja_Luka.svg",
+      "sha256": "f8ceae2e7a79dd583eaf1434483acc100a98c60096b5305d8908d7f196558c7e",
+      "bytes": 34637
+    },
+    {
+      "clube": "Sarajevo",
+      "pais": "Bósnia",
+      "arquivo": "sarajevo.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/bosnia-and-herzegovina/Sarajevo.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/bosnia-and-herzegovina/Sarajevo.svg",
+      "sha256": "badeaf9745c03fa8e00cb8306d9bdf0ef996247327ebbbb49bb2666744e3b50b",
+      "bytes": 6863
+    },
+    {
+      "clube": "Zeljeznicar",
+      "pais": "Bósnia",
+      "arquivo": "zeljeznicar.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/bosnia-and-herzegovina/%C5%BDeljezni%C4%8Dar.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/bosnia-and-herzegovina/%C5%BDeljezni%C4%8Dar.svg",
+      "sha256": "8cda76c7b4a2b0098028409f7e4eab239db27d8649fe5599a6fe10e6fcd43bd2",
+      "bytes": 77119
+    },
+    {
+      "clube": "Zrinjski Mostar",
+      "pais": "Bósnia",
+      "arquivo": "zrinjski-mostar.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/bosnia-and-herzegovina/Zrinjski_Mostar.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/bosnia-and-herzegovina/Zrinjski_Mostar.svg",
+      "sha256": "f6b15ea48578675bb2baf7b65c78a4c27d274478b33abffd39a977dcf5e415b9",
+      "bytes": 25851
+    },
+    {
+      "clube": "Astana",
+      "pais": "Cazaquistão",
+      "arquivo": "astana.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/kazakhstan/Astana.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/kazakhstan/Astana.svg",
+      "sha256": "bd5625bd5986cf1c2feec9918c337e9f3ef035ce43cbd0accbfe3592c62f5685",
+      "bytes": 13675
+    },
+    {
+      "clube": "Kairat",
+      "pais": "Cazaquistão",
+      "arquivo": "kairat.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/kazakhstan/Kairat.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/kazakhstan/Kairat.svg",
+      "sha256": "259914c7530bf775da4e36d8a0b904d4bb16d32977a2dfb521fcb8158e959533",
+      "bytes": 18402
+    },
+    {
+      "clube": "Tobol",
+      "pais": "Cazaquistão",
+      "arquivo": "tobol.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/kazakhstan/Tobol.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/kazakhstan/Tobol.svg",
+      "sha256": "75baf8a38a2e6806846610558934deed30cd99c1049ceada7362047655b18123",
+      "bytes": 9457
+    },
+    {
+      "clube": "Audax Italiano",
+      "pais": "Chile",
+      "arquivo": "audax-italiano.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/chile/Audax_Italiano.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/chile/Audax_Italiano.svg",
+      "sha256": "19fbf4224dde2c16bf9b578ae162863af5ce872fbc0f6d772a387d56cc1ba276",
+      "bytes": 27094
+    },
+    {
+      "clube": "Cobreloa",
+      "pais": "Chile",
+      "arquivo": "cobreloa.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/chile/Cobreloa.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/chile/Cobreloa.svg",
+      "sha256": "8b6548e7cdb794dbcd696e59c432061c73673c92b4457f59ff65c6ae1b349231",
+      "bytes": 7689
+    },
+    {
+      "clube": "Cobresal",
+      "pais": "Chile",
+      "arquivo": "cobresal.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/chile/Cobresal.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/chile/Cobresal.svg",
+      "sha256": "c6593564122fa470c639979be65424cb12bc5202bb6aa1ef5c62f44881410813",
+      "bytes": 9075
+    },
+    {
+      "clube": "Coquimbo Unido",
+      "pais": "Chile",
+      "arquivo": "coquimbo-unido.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/chile/Coquimbo_Unido.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/chile/Coquimbo_Unido.svg",
+      "sha256": "3c87b706936ae25caa45aaccfab3f8331092ca9d64eeddbabfab66f0f5248d15",
+      "bytes": 42908
+    },
+    {
+      "clube": "Everton de Viña del Mar",
+      "pais": "Chile",
+      "arquivo": "everton-de-vina-del-mar.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/chile/Everton_de_Vi%C3%B1a_del_Mar.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/chile/Everton_de_Vi%C3%B1a_del_Mar.svg",
+      "sha256": "99e5407aa5ceaa767e2e35dc650bf62065cf639da54f0c7c5e198769e0d62e89",
+      "bytes": 5337
+    },
+    {
+      "clube": "Huachipato",
+      "pais": "Chile",
+      "arquivo": "huachipato.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/chile/Huachipato.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/chile/Huachipato.svg",
+      "sha256": "e2ae3b83043208ff4055681045b6a7aa8c42c53b4a78582ec4ba94aa24f66086",
+      "bytes": 15137
+    },
+    {
+      "clube": "Palestino",
+      "pais": "Chile",
+      "arquivo": "palestino.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/chile/Palestino.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/chile/Palestino.svg",
+      "sha256": "e9f730f3e09dd9f3a5d1681ec610c66d8ab91c53082291b95c7da3452166b93d",
+      "bytes": 5240
+    },
+    {
+      "clube": "Unión Española",
+      "pais": "Chile",
+      "arquivo": "union-espanola.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/chile/Uni%C3%B3n_Espa%C3%B1ola.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/chile/Uni%C3%B3n_Espa%C3%B1ola.svg",
+      "sha256": "cebdd1617a9d09001409dc48f6416bc5c36326d9f5093b0315eae1a7213b8822",
+      "bytes": 23742
+    },
+    {
+      "clube": "AEK Larnaca",
+      "pais": "Chipre",
+      "arquivo": "aek-larnaca.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/cyprus/AEK_Larnaca.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/cyprus/AEK_Larnaca.svg",
+      "sha256": "7548ab2f0f76b8acda710657036c867e4c14a7661ee60bec8a7d86ce3fc36fab",
+      "bytes": 6965
+    },
+    {
+      "clube": "APOEL",
+      "pais": "Chipre",
+      "arquivo": "apoel.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/cyprus/APOEL.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/cyprus/APOEL.svg",
+      "sha256": "cecb800ee923fb07a11ee7e11474426804c2cb2462a5fafd33bcf1cf3340633e",
+      "bytes": 2840
+    },
+    {
+      "clube": "Apollon Limassol",
+      "pais": "Chipre",
+      "arquivo": "apollon-limassol.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/cyprus/Apollon_Limassol.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/cyprus/Apollon_Limassol.svg",
+      "sha256": "73e50ed4d85b1cb2df3cb14bd540a7291088d7fb1628b48d9756324e52b4cdfa",
+      "bytes": 91085
+    },
+    {
+      "clube": "Omonia",
+      "pais": "Chipre",
+      "arquivo": "omonia.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/cyprus/Omonoia_Nicosia.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/cyprus/Omonoia_Nicosia.svg",
+      "sha256": "55d8c06f31df6d50aa281ad118848db78c840851429b45d2640956aa02420806",
+      "bytes": 17965
+    },
+    {
+      "clube": "Pafos",
+      "pais": "Chipre",
+      "arquivo": "pafos.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/cyprus/Pafos.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/cyprus/Pafos.svg",
+      "sha256": "aec038c1abc919f7b873aa4e9d367081b5b2efe167fdf86878f63eac94517d36",
+      "bytes": 50882
+    },
+    {
+      "clube": "América de Cali",
+      "pais": "Colômbia",
+      "arquivo": "america-de-cali.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/colombia/Am%C3%A9rica_de_Cali.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/colombia/Am%C3%A9rica_de_Cali.svg",
+      "sha256": "c6634e464074c6dabd56feb03a68d0c06804104c21d47ffc08a53b2f58ef2884",
+      "bytes": 10753
+    },
+    {
+      "clube": "Atlético Bucaramanga",
+      "pais": "Colômbia",
+      "arquivo": "atletico-bucaramanga.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/colombia/Bucaramanga.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/colombia/Bucaramanga.svg",
+      "sha256": "5f0e2cdfd912b2e429bd694a23cae249f80226ee1de503acf8f45a5a14d98863",
+      "bytes": 12092
+    },
+    {
+      "clube": "Deportes Tolima",
+      "pais": "Colômbia",
+      "arquivo": "deportes-tolima.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/colombia/Deportes_Tolima.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/colombia/Deportes_Tolima.svg",
+      "sha256": "497a89c3bf2fe1d0afb284b968d1c4b63d4fe6a0f6d8569730c95a12da20a0f4",
+      "bytes": 6112
+    },
+    {
+      "clube": "Deportivo Cali",
+      "pais": "Colômbia",
+      "arquivo": "deportivo-cali.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/colombia/Deportivo_Cali.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/colombia/Deportivo_Cali.svg",
+      "sha256": "70915e27b1f44f06e674060ca69662c46c98c1ddb2d709d6cf2cf51e66abf629",
+      "bytes": 11049
+    },
+    {
+      "clube": "Deportivo Pereira",
+      "pais": "Colômbia",
+      "arquivo": "deportivo-pereira.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/colombia/Deportivo_Pereira.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/colombia/Deportivo_Pereira.svg",
+      "sha256": "a55ef05d1d8c8e0662d590e189e1a832f6aca9e8f6fb9bb14bbae9ea726cdfa8",
+      "bytes": 4624
+    },
+    {
+      "clube": "Independiente Medellín",
+      "pais": "Colômbia",
+      "arquivo": "independiente-medellin.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/colombia/Independiente_Medell%C3%ADn.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/colombia/Independiente_Medell%C3%ADn.svg",
+      "sha256": "8c2be0134be904a0f1a376ad14a652c75dca4a6cd9dc7a1b987778d38f9fc264",
+      "bytes": 23966
+    },
+    {
+      "clube": "Independiente Santa Fe",
+      "pais": "Colômbia",
+      "arquivo": "independiente-santa-fe.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/colombia/Independiente_Santa_Fe.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/colombia/Independiente_Santa_Fe.svg",
+      "sha256": "7d5c366e216600ba7d987c303dfe48764889d58b8f3b8b36ce0b4a39547f7d92",
+      "bytes": 7730
+    },
+    {
+      "clube": "Once Caldas",
+      "pais": "Colômbia",
+      "arquivo": "once-caldas.png",
+      "fonte": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/Once_Caldas_logo.svg/250px-Once_Caldas_logo.svg.png",
+      "referencia": "https://en.wikipedia.org/wiki/Once_Caldas",
+      "sha256": "e84a5e16c52b2732e95d3f22527de9989414b503835b2eca07bb8e6397b0b340",
+      "bytes": 13520,
+      "referencia_apenas": false
+    },
+    {
+      "clube": "Dinamo Zagreb",
+      "pais": "Croácia",
+      "arquivo": "dinamo-zagreb.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/croatia/GNK_Dinamo_Zagreb.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/croatia/GNK_Dinamo_Zagreb.svg",
+      "sha256": "251958acf7be06c84292f2f9035ba48d0d3fce82ee596a5000cd4d2322196a06",
+      "bytes": 7320
+    },
+    {
+      "clube": "Hajduk Split",
+      "pais": "Croácia",
+      "arquivo": "hajduk-split.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/croatia/Hajduk_Split.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/croatia/Hajduk_Split.svg",
+      "sha256": "bcab01e14631529c326cb172fbb8ca2a3ca1096222fe2be4be455820dc2c078a",
+      "bytes": 5868
+    },
+    {
+      "clube": "Osijek",
+      "pais": "Croácia",
+      "arquivo": "osijek.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/croatia/Osijek.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/croatia/Osijek.svg",
+      "sha256": "d1343e0dc5ecef084ee73cb7e9653f04a75cb397518debfc6c02fa6701633959",
+      "bytes": 15171
+    },
+    {
+      "clube": "Rijeka",
+      "pais": "Croácia",
+      "arquivo": "rijeka.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/croatia/Rijeka.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/croatia/Rijeka.svg",
+      "sha256": "052fff2fd2fe711fa8aad68059901b6c2f63c5a37c36fee836f76a2a311137e0",
+      "bytes": 5739
+    },
+    {
+      "clube": "Aarhus",
+      "pais": "Dinamarca",
+      "arquivo": "aarhus.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/denmark/AGF.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/denmark/AGF.svg",
+      "sha256": "5c8e1eced3d2c9c2498e5f4dc3787ab9e43c8f840e335bdaaefd1a1f48be3998",
+      "bytes": 43215
+    },
+    {
+      "clube": "Brondby",
+      "pais": "Dinamarca",
+      "arquivo": "brondby.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/denmark/Br%C3%B8ndby_IF.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/denmark/Br%C3%B8ndby_IF.svg",
+      "sha256": "276cfdd48815d353044286084384da5207fbd08ebf16ff501cda921cb01b4833",
+      "bytes": 37627
+    },
+    {
+      "clube": "Copenhagen",
+      "pais": "Dinamarca",
+      "arquivo": "copenhagen.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/denmark/F.C._Copenhagen.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/denmark/F.C._Copenhagen.svg",
+      "sha256": "ff21dc98e706e511b7ec9b8a90a0dc40542143ebad921d5c4abfa6527b71ee03",
+      "bytes": 7475
+    },
+    {
+      "clube": "Midtjylland",
+      "pais": "Dinamarca",
+      "arquivo": "midtjylland.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/denmark/FC_Midtjylland.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/denmark/FC_Midtjylland.svg",
+      "sha256": "1f0da45e77193f5136125b4635e0be4a52d9556bbc2cd5ecf50cc1ff0c4b7978",
+      "bytes": 46915
+    },
+    {
+      "clube": "Nordsjaelland",
+      "pais": "Dinamarca",
+      "arquivo": "nordsjaelland.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/denmark/FC_Nordsj%C3%A6lland.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/denmark/FC_Nordsj%C3%A6lland.svg",
+      "sha256": "4af79789ff757cef5cc7456f2da5f905c1cfcb2f769970bca2e5112fd9ece996",
+      "bytes": 3099
+    },
+    {
+      "clube": "Al Ahly",
+      "pais": "Egito",
+      "arquivo": "al-ahly.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/egypt/Al_Ahly_SC.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/egypt/Al_Ahly_SC.svg",
+      "sha256": "6441f5c09336edea219dfb3e5aed9117dc28777c4bf318bb1cf948b4c9ba260d",
+      "bytes": 26283
+    },
+    {
+      "clube": "Aucas",
+      "pais": "Equador",
+      "arquivo": "aucas.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/ecuador/Aucas.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/ecuador/Aucas.svg",
+      "sha256": "cb5b1f9e4405d7fbec06740815da695eca469202c1a663688da1890a3175b76e",
+      "bytes": 18386
+    },
+    {
+      "clube": "Deportivo Cuenca",
+      "pais": "Equador",
+      "arquivo": "deportivo-cuenca.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/ecuador/Deportivo_Cuenca.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/ecuador/Deportivo_Cuenca.svg",
+      "sha256": "630af145e491e75bb6ce2e147a9f3e9df866cd1e15c1462a46ea6537afc10954",
+      "bytes": 80559
+    },
+    {
+      "clube": "El Nacional",
+      "pais": "Equador",
+      "arquivo": "el-nacional.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/ecuador/El_Nacional.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/ecuador/El_Nacional.svg",
+      "sha256": "3019a70163960c9aef4417a039e8df8155efa278cd628ca0bdc7a1c9861ff949",
+      "bytes": 5475
+    },
+    {
+      "clube": "Emelec",
+      "pais": "Equador",
+      "arquivo": "emelec.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/ecuador/Emelec.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/ecuador/Emelec.svg",
+      "sha256": "3d899c8a2a632c9f3200c249a762b39b8ed170bc6dfe5316056640eef6981c00",
+      "bytes": 11371
+    },
+    {
+      "clube": "Mushuc Runa",
+      "pais": "Equador",
+      "arquivo": "mushuc-runa.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/ecuador/Mushuc_Runa_Sporting_Club.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/ecuador/Mushuc_Runa_Sporting_Club.svg",
+      "sha256": "6ca46c2672477a44c41355a5a713f2b0b11af2d20ce3edfccf75910b80d18da5",
+      "bytes": 28388
+    },
+    {
+      "clube": "Universidad Católica de Quito",
+      "pais": "Equador",
+      "arquivo": "universidad-catolica-de-quito.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/ecuador/Universidad_Cat%C3%B3lica.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/ecuador/Universidad_Cat%C3%B3lica.svg",
+      "sha256": "ce0da8454098bd0783d08f86b7db4640d35db9566d0695ee369161e8c0f8359a",
+      "bytes": 6396
+    },
+    {
+      "clube": "Aberdeen",
+      "pais": "Escócia",
+      "arquivo": "aberdeen.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/scotland/Aberdeen.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/scotland/Aberdeen.svg",
+      "sha256": "afa6c77394e1e5d95e36cce248f674145fe98d106fa61fda1b98f481312658e8",
+      "bytes": 9610
+    },
+    {
+      "clube": "Celtic",
+      "pais": "Escócia",
+      "arquivo": "celtic.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/scotland/Celtic.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/scotland/Celtic.svg",
+      "sha256": "ea25a6e3b968bde699bf950e621c88bdb0930bf6f8d83c6b64fb0fec0c434649",
+      "bytes": 24422
+    },
+    {
+      "clube": "Dundee United",
+      "pais": "Escócia",
+      "arquivo": "dundee-united.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/scotland/Dundee_United.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/scotland/Dundee_United.svg",
+      "sha256": "9641ebf3c51a1d32c763af302e94103d9f776c23446765812ae4c6707d7e645a",
+      "bytes": 15579
+    },
+    {
+      "clube": "Hearts",
+      "pais": "Escócia",
+      "arquivo": "hearts.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/scotland/Hearts.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/scotland/Hearts.svg",
+      "sha256": "11afe751318dc5e64d95f172cb6f97f7cb6115312a7907b55fe367b766062d73",
+      "bytes": 22586
+    },
+    {
+      "clube": "Hibernian",
+      "pais": "Escócia",
+      "arquivo": "hibernian.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/scotland/Hibernian.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/scotland/Hibernian.svg",
+      "sha256": "24c2ab235151a6a300264cd3a5b320f756eb0afb9e44445a45b969e8b1a5447e",
+      "bytes": 30301
+    },
+    {
+      "clube": "Rangers",
+      "pais": "Escócia",
+      "arquivo": "rangers.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/scotland/Rangers.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/scotland/Rangers.svg",
+      "sha256": "97152738afc7b748c9d7e893b023b5c6a33cb87e0f6ae75e2953148f26ff61e8",
+      "bytes": 15378
+    },
+    {
+      "clube": "DAC Dunajska Streda",
+      "pais": "Eslováquia",
+      "arquivo": "dac-dunajska-streda.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/slovakia/Dunajsk%C3%A1_Streda.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/slovakia/Dunajsk%C3%A1_Streda.svg",
+      "sha256": "4fbeddab7606e0d1a61b9e3e25b79e805a28a2d0be7d33a8577e73048074e3c1",
+      "bytes": 1228
+    },
+    {
+      "clube": "Slovan Bratislava",
+      "pais": "Eslováquia",
+      "arquivo": "slovan-bratislava.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/slovakia/Slovan_Bratislava.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/slovakia/Slovan_Bratislava.svg",
+      "sha256": "0cf68f7423bcda3b7c752a110c873cbdf469393594cdb709c0eb918c7ab72378",
+      "bytes": 13162
+    },
+    {
+      "clube": "Spartak Trnava",
+      "pais": "Eslováquia",
+      "arquivo": "spartak-trnava.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/slovakia/Spartak_Trnava.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/slovakia/Spartak_Trnava.svg",
+      "sha256": "baab56b39c294f377893291915f3dc244313024958c3906f89128e63be1ba9ad",
+      "bytes": 7902
+    },
+    {
+      "clube": "Zilina",
+      "pais": "Eslováquia",
+      "arquivo": "zilina.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/slovakia/%C5%BDilina.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/slovakia/%C5%BDilina.svg",
+      "sha256": "e32b18a46024013effda7de3416e0d31b9f8f7e8809f1423eafd085372ff4073",
+      "bytes": 6258
+    },
+    {
+      "clube": "Celje",
+      "pais": "Eslovênia",
+      "arquivo": "celje.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/slovenia/Celje.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/slovenia/Celje.svg",
+      "sha256": "2e868273d66abf309c507c3134bbc9801d3fdca5da2fbf6fbeaf9f2d80e719ff",
+      "bytes": 7602
+    },
+    {
+      "clube": "Koper",
+      "pais": "Eslovênia",
+      "arquivo": "koper.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/slovenia/Koper.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/slovenia/Koper.svg",
+      "sha256": "035f09ed4a01619ab2bfd28f614abbdb2f554efe6a17867d927436c96ea8c722",
+      "bytes": 12114
+    },
+    {
+      "clube": "Maribor",
+      "pais": "Eslovênia",
+      "arquivo": "maribor.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/slovenia/Maribor.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/slovenia/Maribor.svg",
+      "sha256": "042914051830b33746437be00e0c7d3fb11f515a58bebd628e9fa575bf4e58bc",
+      "bytes": 7849
+    },
+    {
+      "clube": "Olimpija Ljubljana",
+      "pais": "Eslovênia",
+      "arquivo": "olimpija-ljubljana.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/slovenia/Olimpija.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/slovenia/Olimpija.svg",
+      "sha256": "024588e6d3cadced3d8e3d6cd6f706d77a241dbfa932b43f082ce154f92d5fca",
+      "bytes": 11731
+    },
+    {
+      "clube": "Flora Tallinn",
+      "pais": "Estônia",
+      "arquivo": "flora-tallinn.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/estonia/Flora_Tallinn.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/estonia/Flora_Tallinn.svg",
+      "sha256": "db91589fed6387950d18ce64f0df3cde5247e850ea0a3bf70a97d622f4b5023b",
+      "bytes": 9800
+    },
+    {
+      "clube": "Levadia Tallinn",
+      "pais": "Estônia",
+      "arquivo": "levadia-tallinn.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/estonia/Levadia.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/estonia/Levadia.svg",
+      "sha256": "8f8d420303863beb9bc862c73cca4a1f2b8c864eda2572aa09b020ba2eaf68f3",
+      "bytes": 3487
+    },
+    {
+      "clube": "Paide",
+      "pais": "Estônia",
+      "arquivo": "paide.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/estonia/Paide.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/estonia/Paide.svg",
+      "sha256": "f79960979e6073e160d56674dac091d898a45ebb5f1b26248732f1e20eefb857",
+      "bytes": 22381
+    },
+    {
+      "clube": "HJK Helsinki",
+      "pais": "Finlândia",
+      "arquivo": "hjk-helsinki.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/finland/HJK_Helsinki.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/finland/HJK_Helsinki.svg",
+      "sha256": "ac866a0b6ebd19159eb518c240f4dab7b6eae8c68516b713f1308c1ca344137b",
+      "bytes": 9747
+    },
+    {
+      "clube": "Ilves",
+      "pais": "Finlândia",
+      "arquivo": "ilves.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/finland/Ilves.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/finland/Ilves.svg",
+      "sha256": "38ee0c20040f431d406861719c1ae9c422b5aee60f7b7dfe2460dca8fc0e695e",
+      "bytes": 45287
+    },
+    {
+      "clube": "Inter Turku",
+      "pais": "Finlândia",
+      "arquivo": "inter-turku.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/finland/Inter_Turku.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/finland/Inter_Turku.svg",
+      "sha256": "f0d0ad062717c9d33b86b9e409cfc746d631c51dfcc30499ed2e15650c4d3fff",
+      "bytes": 12724
+    },
+    {
+      "clube": "KuPS",
+      "pais": "Finlândia",
+      "arquivo": "kups.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/finland/KuPS.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/finland/KuPS.svg",
+      "sha256": "5a63d6d9a260376e5e331e10a347e0e60abcb5d8db0e155da206fa11d6800627",
+      "bytes": 10084
+    },
+    {
+      "clube": "Dila Gori",
+      "pais": "Geórgia",
+      "arquivo": "dila-gori.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/georgia/Dila.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/georgia/Dila.svg",
+      "sha256": "6a80f08183c329a36d132b52a355f0aac0aa5689064b31b8083eeea7cc27347b",
+      "bytes": 56540
+    },
+    {
+      "clube": "Dinamo Tbilisi",
+      "pais": "Geórgia",
+      "arquivo": "dinamo-tbilisi.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/georgia/Dinamo_Tbilisi.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/georgia/Dinamo_Tbilisi.svg",
+      "sha256": "7d4814778bf8ff519eadb11a4693ed47a5b0866e940bd12004a269071e66f8c3",
+      "bytes": 8457
+    },
+    {
+      "clube": "Iberia 1999",
+      "pais": "Geórgia",
+      "arquivo": "iberia-1999.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/georgia/Iberia.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/georgia/Iberia.svg",
+      "sha256": "cfb403f04f7c249070282dbde0adee2e4ab5d4ad963b814025054852346df2e5",
+      "bytes": 6937
+    },
+    {
+      "clube": "AEK Atenas",
+      "pais": "Grécia",
+      "arquivo": "aek-atenas.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/greece/AEK_Athens.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/greece/AEK_Athens.svg",
+      "sha256": "faceb94d95be270b7f5bb6955cbc344a13d01a488505822ce74600fcb6cde1ba",
+      "bytes": 9972
+    },
+    {
+      "clube": "Aris Thessaloniki",
+      "pais": "Grécia",
+      "arquivo": "aris-thessaloniki.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/greece/Aris_Thessaloniki.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/greece/Aris_Thessaloniki.svg",
+      "sha256": "ee1dcfa7e629946f40e53c81589d7675a39779cfc4d13531f29b38b07b3c26a2",
+      "bytes": 94539
+    },
+    {
+      "clube": "Olympiacos",
+      "pais": "Grécia",
+      "arquivo": "olympiacos.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/greece/Olympiacos.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/greece/Olympiacos.svg",
+      "sha256": "83ce165aa847c188b777bb350b54ab6725efc0d03a24cde0ce182389a6c9f804",
+      "bytes": 14392
+    },
+    {
+      "clube": "PAOK",
+      "pais": "Grécia",
+      "arquivo": "paok.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/greece/PAOK.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/greece/PAOK.svg",
+      "sha256": "c3240a4101b6b6be92edb054481fa2e4ac62a5954aaac6447ee085ee3b89ec42",
+      "bytes": 11303
+    },
+    {
+      "clube": "Panathinaikos",
+      "pais": "Grécia",
+      "arquivo": "panathinaikos.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/greece/Panathinaikos.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/greece/Panathinaikos.svg",
+      "sha256": "be0c09b4d3b065b1aeb9b2cc5f1fbaa9ee0f19d8ceac4bd12303ebd5bad26951",
+      "bytes": 5345
+    },
+    {
+      "clube": "Ferencváros",
+      "pais": "Hungria",
+      "arquivo": "ferencvaros.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/hungary/Ferencv%C3%A1ros.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/hungary/Ferencv%C3%A1ros.svg",
+      "sha256": "a7709281b8da95eab0f7ba118199b89ef417af9a63ebcc09dd820f1276a78336",
+      "bytes": 14380
+    },
+    {
+      "clube": "Paks",
+      "pais": "Hungria",
+      "arquivo": "paks.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/hungary/Paksi.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/hungary/Paksi.svg",
+      "sha256": "1113b61fd520e13419780d7527c3ab750e4dcd5ed24bc19798b1a6db5015a512",
+      "bytes": 10974
+    },
+    {
+      "clube": "Puskás Akadémia",
+      "pais": "Hungria",
+      "arquivo": "puskas-akademia.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/hungary/Pusk%C3%A1s_Akad%C3%A9mia.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/hungary/Pusk%C3%A1s_Akad%C3%A9mia.svg",
+      "sha256": "8487c28406ec09753266f2e04d7036fed56af0adf1e7cbfc0d9185cabdbaa03d",
+      "bytes": 2454
+    },
+    {
+      "clube": "Újpest",
+      "pais": "Hungria",
+      "arquivo": "ujpest.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/hungary/%C3%9Ajpest.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/hungary/%C3%9Ajpest.svg",
+      "sha256": "b08be1fdce9eb330e9b3687687a8ad38053a1945c37e38d29dd3d69199b01dde",
+      "bytes": 18023
+    },
+    {
+      "clube": "Bohemians",
+      "pais": "Irlanda",
+      "arquivo": "bohemians.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/republic-of-ireland/Bohemian.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/republic-of-ireland/Bohemian.svg",
+      "sha256": "0be4ae9a5fa6c940478dbcfc300106cc0f137075d9685a2ed7d7808a1e53b2ce",
+      "bytes": 29064
+    },
+    {
+      "clube": "Derry City",
+      "pais": "Irlanda",
+      "arquivo": "derry-city.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/republic-of-ireland/Derry_City.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/republic-of-ireland/Derry_City.svg",
+      "sha256": "e4dbd0ba632f6efd46d7091e3bfcf4283f7bcd1a81a3ac2358b24d7c229e66c5",
+      "bytes": 108574
+    },
+    {
+      "clube": "Shamrock Rovers",
+      "pais": "Irlanda",
+      "arquivo": "shamrock-rovers.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/republic-of-ireland/Shamrock_Rovers.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/republic-of-ireland/Shamrock_Rovers.svg",
+      "sha256": "4759a070e4c743b60efdf294dbc2d84ca20545c12aec8eb10bf380f55b90b845",
+      "bytes": 17708
+    },
+    {
+      "clube": "St Patrick’s Athletic",
+      "pais": "Irlanda",
+      "arquivo": "st-patricks-athletic.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/republic-of-ireland/St_Patrick%27s_Athletic.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/republic-of-ireland/St_Patrick%27s_Athletic.svg",
+      "sha256": "1ced48cf50515c33c8ab0f7c24e1cc188956c838890566d1e083bcf63b1055ce",
+      "bytes": 13935
+    },
+    {
+      "clube": "Glentoran",
+      "pais": "Irlanda do Norte",
+      "arquivo": "glentoran.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/northern-ireland/Glentoran.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/northern-ireland/Glentoran.svg",
+      "sha256": "9bd25b6e9a5f28a4583240d26b26832ddcf761e7c5d5d72a2683910edd4f771e",
+      "bytes": 49357
+    },
+    {
+      "clube": "Larne",
+      "pais": "Irlanda do Norte",
+      "arquivo": "larne.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/northern-ireland/Larne.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/northern-ireland/Larne.svg",
+      "sha256": "20fb922bb939d7c7a9e9660b4aeef5bb79f96bf48fdb18b9d0214edf75d94171",
+      "bytes": 10624
+    },
+    {
+      "clube": "Linfield",
+      "pais": "Irlanda do Norte",
+      "arquivo": "linfield.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/northern-ireland/Linfield.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/northern-ireland/Linfield.svg",
+      "sha256": "5074859768d04c87b343f4968ebcb81e7d67306e79677a9640c22bc15d520c58",
+      "bytes": 50190
+    },
+    {
+      "clube": "Breidablik",
+      "pais": "Islândia",
+      "arquivo": "breidablik.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/iceland/Breidablik.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/iceland/Breidablik.svg",
+      "sha256": "22ab13b491c4233a367cc84f39b6dc3db420732fa0678839a6d8c538a39bcba5",
+      "bytes": 5952
+    },
+    {
+      "clube": "Valur",
+      "pais": "Islândia",
+      "arquivo": "valur.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/iceland/Valur.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/iceland/Valur.svg",
+      "sha256": "ae011024ec400c9adc849c7b03794971877c0608ee0695fe7d6a284c8a837319",
+      "bytes": 13589
+    },
+    {
+      "clube": "Vikingur Reykjavik",
+      "pais": "Islândia",
+      "arquivo": "vikingur-reykjavik.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/iceland/V%C3%ADkingur_R..svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/iceland/V%C3%ADkingur_R..svg",
+      "sha256": "5065985bfb82fc7af3403be31ba0266e62610975337544a83e6de2bb48b2f8ff",
+      "bytes": 3907
+    },
+    {
+      "clube": "Hapoel Beer Sheva",
+      "pais": "Israel",
+      "arquivo": "hapoel-beer-sheva.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/israel/Hapoel_Be%27er_Sheva.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/israel/Hapoel_Be%27er_Sheva.svg",
+      "sha256": "1eb6cd69d4d549e62c62c18c664f0a112a1a535d98d017c4dee6f5d4409e2d30",
+      "bytes": 11979
+    },
+    {
+      "clube": "Maccabi Haifa",
+      "pais": "Israel",
+      "arquivo": "maccabi-haifa.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/israel/Maccabi_Haifa.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/israel/Maccabi_Haifa.svg",
+      "sha256": "288959852949951d52eb636bb740714c47e0522d76cc21ebf8ae9362aafd7c05",
+      "bytes": 13664
+    },
+    {
+      "clube": "Maccabi Tel Aviv",
+      "pais": "Israel",
+      "arquivo": "maccabi-tel-aviv.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/israel/Maccabi_Tel-Aviv.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/israel/Maccabi_Tel-Aviv.svg",
+      "sha256": "c962c354526327956215a7cf6883475b8364439b6a611f641a4478227d4785e7",
+      "bytes": 30603
+    },
+    {
+      "clube": "Ballkani",
+      "pais": "Kosovo",
+      "arquivo": "ballkani.png",
+      "fonte": "https://thumb.wikimedia.org/wikipedia/en/thumb/0/00/FC_Ballkani.svg/330px-FC_Ballkani.svg.png",
+      "referencia": "https://en.wikipedia.org/wiki/FC_Ballkani",
+      "sha256": "01d6c631e34dce8ec380bb4dd95f84525949a906ea5e19c7c945881bab13e7f9",
+      "bytes": 58418
+    },
+    {
+      "clube": "Drita",
+      "pais": "Kosovo",
+      "arquivo": "drita.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/kosovo/Drita.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/kosovo/Drita.svg",
+      "sha256": "0e66e3d8b2501631b665b2fb806749817ea65f3c69b7020cfced795b7ed247bd",
+      "bytes": 13632
+    },
+    {
+      "clube": "Prishtina",
+      "pais": "Kosovo",
+      "arquivo": "prishtina.png",
+      "fonte": "https://thumb.wikimedia.org/wikipedia/en/thumb/1/16/FC_Prishtina.svg/330px-FC_Prishtina.svg.png",
+      "referencia": "https://en.wikipedia.org/wiki/FC_Prishtina",
+      "sha256": "e4575440240b5718b247c843b493e53b248daa95f152377a39370994a437f656",
+      "bytes": 40148
+    },
+    {
+      "clube": "Liepaja",
+      "pais": "Letônia",
+      "arquivo": "liepaja.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/latvia/Liep%C4%81ja.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/latvia/Liep%C4%81ja.svg",
+      "sha256": "848fc0bea8cdafdb93f5398f1fbf7503676750afcc17f53112e4c3b619bb1601",
+      "bytes": 67858
+    },
+    {
+      "clube": "RFS",
+      "pais": "Letônia",
+      "arquivo": "rfs.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/latvia/RFS.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/latvia/RFS.svg",
+      "sha256": "649d69bb21f6735d59c64145e7a04ad67eca15620ab47852c40286cff433ae7b",
+      "bytes": 4246
+    },
+    {
+      "clube": "Riga",
+      "pais": "Letônia",
+      "arquivo": "riga.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/latvia/Riga.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/latvia/Riga.svg",
+      "sha256": "9e2e9b7d622e012858c64cec227ed0189676d59428d2f55c35fab144df28f5c3",
+      "bytes": 17145
+    },
+    {
+      "clube": "Panevezys",
+      "pais": "Lituânia",
+      "arquivo": "panevezys.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/lithuania/Panev%C4%97%C5%BEys.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/lithuania/Panev%C4%97%C5%BEys.svg",
+      "sha256": "c29af897ff1cfd98351e149f21d4a6fba96669e1fa0348f4ec98267aeba0b85e",
+      "bytes": 25393
+    },
+    {
+      "clube": "Suduva",
+      "pais": "Lituânia",
+      "arquivo": "suduva.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/lithuania/S%C5%ABduva.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/lithuania/S%C5%ABduva.svg",
+      "sha256": "f99186000a8b2cf88d0fa3099c4c34d711963776c8c5e74de1b3fabfe8a5deda",
+      "bytes": 7015
+    },
+    {
+      "clube": "Zalgiris Vilnius",
+      "pais": "Lituânia",
+      "arquivo": "zalgiris-vilnius.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/lithuania/%C5%BDalgiris_Vilnius.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/lithuania/%C5%BDalgiris_Vilnius.svg",
+      "sha256": "4c2be496e93203c39a94fc9eb2a7623239fe419e6bb2c60f52a30d8665ce2b53",
+      "bytes": 12361
+    },
+    {
+      "clube": "Differdange",
+      "pais": "Luxemburgo",
+      "arquivo": "differdange.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/luxembourg/Differdange.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/luxembourg/Differdange.svg",
+      "sha256": "42a7f2f10a3154baa5fac30664ebe2e1b2cfd6535f460f94d52f40c7984573cb",
+      "bytes": 21496
+    },
+    {
+      "clube": "Dudelange",
+      "pais": "Luxemburgo",
+      "arquivo": "dudelange.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/luxembourg/Diddeleng.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/luxembourg/Diddeleng.svg",
+      "sha256": "5b3b59940337d44a9f6f41ac61f89441f7fa925743f5b6ac33ab9ae3cbf4b852",
+      "bytes": 46475
+    },
+    {
+      "clube": "Progrès Niederkorn",
+      "pais": "Luxemburgo",
+      "arquivo": "progres-niederkorn.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/luxembourg/Progr%C3%A8s.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/luxembourg/Progr%C3%A8s.svg",
+      "sha256": "320ec6dfeafa27213f1f82ab95ffe4757cfbb8cb7e8a2ae145750fcccacf6400",
+      "bytes": 29109
+    },
+    {
+      "clube": "Rabotnicki",
+      "pais": "Macedônia do Norte",
+      "arquivo": "rabotnicki.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/north-macedonia/Rabotnicki.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/north-macedonia/Rabotnicki.svg",
+      "sha256": "91ed4e357016b5e7004e15692285448f5a6bf0291635cf10ee77761977cd8496",
+      "bytes": 37969
+    },
+    {
+      "clube": "Shkendija",
+      "pais": "Macedônia do Norte",
+      "arquivo": "shkendija.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/north-macedonia/Shk%C3%ABndija.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/north-macedonia/Shk%C3%ABndija.svg",
+      "sha256": "d4f4a6a8797113229a2f38d6444fca1f79f2da4fa548f5325e845c3510212e85",
+      "bytes": 18897
+    },
+    {
+      "clube": "Vardar",
+      "pais": "Macedônia do Norte",
+      "arquivo": "vardar.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/north-macedonia/Vardar.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/north-macedonia/Vardar.svg",
+      "sha256": "3a7e896f7c6cd123dc07182f279cd18429049c1038670829426a5dc7df00e98c",
+      "bytes": 36507
+    },
+    {
+      "clube": "Floriana",
+      "pais": "Malta",
+      "arquivo": "floriana.png",
+      "fonte": "https://upload.wikimedia.org/wikipedia/en/a/ae/FlorianaFClogo.png",
+      "referencia": "https://en.wikipedia.org/wiki/Floriana_F.C.",
+      "sha256": "f8e9c54e58e713dfff42b288b51697a6cbbd5370d98e1117b10b397cd8e3eb6c",
+      "bytes": 89649
+    },
+    {
+      "clube": "Hibernians Malta",
+      "pais": "Malta",
+      "arquivo": "hibernians-malta.png",
+      "fonte": "https://upload.wikimedia.org/wikipedia/en/e/ec/Hibernians_F.C..png",
+      "referencia": "https://en.wikipedia.org/wiki/Hibernians_F.C.",
+      "sha256": "5f80d0b187ceb38657d06b9b1a8f3a817b979c95bbcbaa5e28f871fc58b9917e",
+      "bytes": 121424
+    },
+    {
+      "clube": "Valletta",
+      "pais": "Malta",
+      "arquivo": "valletta.png",
+      "fonte": "https://upload.wikimedia.org/wikipedia/en/c/c9/Valletta_F.C._logo.png",
+      "referencia": "https://en.wikipedia.org/wiki/Valletta_F.C.",
+      "sha256": "70ee7da1ddc7e17d428243fe2fc67746c30e868e57e3113a042ea2df3681319e",
+      "bytes": 14179
+    },
+    {
+      "clube": "Wydad Casablanca",
+      "pais": "Marrocos",
+      "estado": null,
+      "arquivo": "wydad-casablanca.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/morocco/Wydad_AC.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/morocco/Wydad_AC.svg",
+      "sha256": "6c149169a47a370c92f61122a2d887b4b52e324c47f5a94de4dbd9a018a6311f",
+      "bytes": 13641
+    },
+    {
+      "clube": "Dacia Buiucani",
+      "pais": "Moldávia",
+      "arquivo": "dacia-buiucani.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/moldova/Dacia_Buiucani.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/moldova/Dacia_Buiucani.svg",
+      "sha256": "f44d90256a71cac7301e6317144bd178f895d2af431a2ec3a8cb97e5c96a010a",
+      "bytes": 105231
+    },
+    {
+      "clube": "Petrocub",
+      "pais": "Moldávia",
+      "arquivo": "petrocub.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/moldova/Petrocub.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/moldova/Petrocub.svg",
+      "sha256": "cb79861f7c706e2c22a959219f171402ac043cc99429a30bc982986fc1412d76",
+      "bytes": 18827
+    },
+    {
+      "clube": "Sheriff Tiraspol",
+      "pais": "Moldávia",
+      "arquivo": "sheriff-tiraspol.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/moldova/Sheriff.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/moldova/Sheriff.svg",
+      "sha256": "c76efb82cce5fd01686a8897bc53b33357e8f4553dc880aaa224cc1957f20597",
+      "bytes": 21526
+    },
+    {
+      "clube": "Zimbru",
+      "pais": "Moldávia",
+      "arquivo": "zimbru.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/moldova/Zimbru.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/moldova/Zimbru.svg",
+      "sha256": "af24b5d5bf9360320e10b1f79210ae1778c004ee4f61f6ac1e24d7314bafa57d",
+      "bytes": 34444
+    },
+    {
+      "clube": "Buducnost Podgorica",
+      "pais": "Montenegro",
+      "arquivo": "buducnost-podgorica.png",
+      "fonte": "https://upload.wikimedia.org/wikipedia/en/6/6f/Fk_Buducnost_Logo.png",
+      "referencia": "https://en.wikipedia.org/wiki/FK_Budu%C4%87nost_Podgorica",
+      "sha256": "cc4822fd812bf448b574f989ed89e2174c501aef8e2b3b822d283b530cc8070e",
+      "bytes": 25051
+    },
+    {
+      "clube": "Decic",
+      "pais": "Montenegro",
+      "arquivo": "decic.png",
+      "fonte": "https://thumb.wikimedia.org/wikipedia/en/thumb/6/65/FK_Decic_%28logo%29.svg/250px-FK_Decic_%28logo%29.svg.png",
+      "referencia": "https://en.wikipedia.org/wiki/FK_De%C4%8Di%C4%87",
+      "sha256": "53f7187b4f60a772773b21fcf0e6c49297d49b9b933b46716dc471dc265ac9c4",
+      "bytes": 26367
+    },
+    {
+      "clube": "Sutjeska",
+      "pais": "Montenegro",
+      "arquivo": "sutjeska.png",
+      "fonte": "https://upload.wikimedia.org/wikipedia/en/e/e9/FK_Sutjeska_Nik%C5%A1i%C4%87.png",
+      "referencia": "https://en.wikipedia.org/wiki/FK_Sutjeska_Nik%C5%A1i%C4%87",
+      "sha256": "49e123bb7bddf87375b59bb4efb639c5e98a818e710bd4c210f066e390459cda",
+      "bytes": 72199
+    },
+    {
+      "clube": "Bodø/Glimt",
+      "pais": "Noruega",
+      "arquivo": "bod-glimt.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/norway/Bod%C3%B8Glimt.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/norway/Bod%C3%B8Glimt.svg",
+      "sha256": "0a8cdaba6e316022dc54914d27d355517c6fafc50fecd5417a0aa3b9437ebd5d",
+      "bytes": 5274
+    },
+    {
+      "clube": "Brann",
+      "pais": "Noruega",
+      "arquivo": "brann.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/norway/Brann.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/norway/Brann.svg",
+      "sha256": "af78a0f0df317d42927a6953202d829057796f6b106b3f42bd1d83d3a853e03e",
+      "bytes": 1654
+    },
+    {
+      "clube": "Molde",
+      "pais": "Noruega",
+      "arquivo": "molde.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/norway/Molde.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/norway/Molde.svg",
+      "sha256": "f6cc803dada84bb83b16e8b3d80193a1ebe54d7802b38ac4826f2c9600081e5d",
+      "bytes": 3257
+    },
+    {
+      "clube": "Rosenborg",
+      "pais": "Noruega",
+      "arquivo": "rosenborg.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/norway/Rosenborg.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/norway/Rosenborg.svg",
+      "sha256": "e5686101aff412f60594a2783029e4d8d5f1821eb28995358fa3aeda76968f76",
+      "bytes": 5993
+    },
+    {
+      "clube": "Viking",
+      "pais": "Noruega",
+      "arquivo": "viking.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/norway/Viking_FK.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/norway/Viking_FK.svg",
+      "sha256": "4f922e023f8b1ff0a8c7cd55314e5ed4d7c03211a51b9e17ad2ae55d20b119d8",
+      "bytes": 11558
+    },
+    {
+      "clube": "Auckland City",
+      "pais": "Nova Zelândia",
+      "arquivo": "auckland-city.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/new-zealand/Auckland_City_FC.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/new-zealand/Auckland_City_FC.svg",
+      "sha256": "8a4d29bee81b32533659e7106d8a335bb5d3d2496bbd35789068d1ca1788cf75",
+      "bytes": 129656
+    },
+    {
+      "clube": "Guairena",
+      "pais": "Paraguai",
+      "arquivo": "guairena.png",
+      "fonte": "https://upload.wikimedia.org/wikipedia/en/6/60/Guaire%C3%B1a_F.C._logo.png",
+      "referencia": "https://en.wikipedia.org/wiki/Guaire%C3%B1a_F.C.",
+      "sha256": "a14549a019b1413fa7c730b21d943f247da05834f0aa81a61f5c016bfd4b0572",
+      "bytes": 95739
+    },
+    {
+      "clube": "Guaraní",
+      "pais": "Paraguai",
+      "arquivo": "guarani-paraguai.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/paraguay/Guaran%C3%AD.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/paraguay/Guaran%C3%AD.svg",
+      "sha256": "3f19a77e988740ceebb45ca6572ec7ce5dbdc4577fa957178e29d1d0d7aa9524",
+      "bytes": 4410
+    },
+    {
+      "clube": "Libertad",
+      "pais": "Paraguai",
+      "arquivo": "libertad.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/paraguay/Libertad.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/paraguay/Libertad.svg",
+      "sha256": "d208f298020d66f0551658ac5b71e4f8e7d08d6d3f1f3c8be437d1dfe3b44cce",
+      "bytes": 6600
+    },
+    {
+      "clube": "Nacional de Asunción",
+      "pais": "Paraguai",
+      "arquivo": "nacional-de-asuncion.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/paraguay/Nacional.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/paraguay/Nacional.svg",
+      "sha256": "6b405df6a496221af2e1d048f95e25af65883d55e03191a390dcf14caac12b2a",
+      "bytes": 2389
+    },
+    {
+      "clube": "Sportivo Ameliano",
+      "pais": "Paraguai",
+      "arquivo": "sportivo-ameliano.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/paraguay/Club_Sportivo_Ameliano.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/paraguay/Club_Sportivo_Ameliano.svg",
+      "sha256": "2ffb4c632ea196d6a3f69ff370783159c1f45b915844f8349c1e3a12eeb04347",
+      "bytes": 51169
+    },
+    {
+      "clube": "Sportivo Luqueño",
+      "pais": "Paraguai",
+      "arquivo": "sportivo-luqueno.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/paraguay/Sportivo_Luque%C3%B1o.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/paraguay/Sportivo_Luque%C3%B1o.svg",
+      "sha256": "899698b5d1e5979aa9455c54a8a16e489bc5c9f1931956fc3a53312d5dfa3397",
+      "bytes": 4149
+    },
+    {
+      "clube": "Bala Town",
+      "pais": "País de Gales",
+      "arquivo": "bala-town.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/wales/Bala_Town_FC.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/wales/Bala_Town_FC.svg",
+      "sha256": "c96a15c304c2bcafb3fd4516b7c08ce363b1722c7d83e7d00327c4b1991c8d2d",
+      "bytes": 47977
+    },
+    {
+      "clube": "Connah’s Quay",
+      "pais": "País de Gales",
+      "arquivo": "connahs-quay.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/wales/Connah%27s_Quay_Nomads.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/wales/Connah%27s_Quay_Nomads.svg",
+      "sha256": "95d8df8690453bfbacf8fec6a50ba8ce0bbf164ef2c4e0858380b41ba53e0881",
+      "bytes": 18450
+    },
+    {
+      "clube": "The New Saints",
+      "pais": "País de Gales",
+      "arquivo": "the-new-saints.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/wales/The_New_Saints.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/wales/The_New_Saints.svg",
+      "sha256": "1f574ea22009ccd174f382a2d94a878ae2b6d5487d0fa3279d5d2866d8d8f1a0",
+      "bytes": 60408
+    },
+    {
+      "clube": "Alianza Lima",
+      "pais": "Peru",
+      "arquivo": "alianza-lima.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/peru/Alianza_Lima.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/peru/Alianza_Lima.svg",
+      "sha256": "02cb87433cf203fec7146a55a79daaa346887d2c07bde85cbfe5c72426f74baa",
+      "bytes": 7522
+    },
+    {
+      "clube": "Cienciano",
+      "pais": "Peru",
+      "arquivo": "cienciano.png",
+      "fonte": "https://upload.wikimedia.org/wikipedia/commons/4/41/Escudo_Cienciano.png",
+      "referencia": "https://en.wikipedia.org/wiki/Cienciano",
+      "sha256": "9f436893466e7b9f31a3cc0c45dc802fa5ef2de0526481bdf675014c5a62ee97",
+      "bytes": 181827,
+      "referencia_apenas": false
+    },
+    {
+      "clube": "Cusco FC",
+      "pais": "Peru",
+      "arquivo": "cusco-fc.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/peru/Cusco_FC.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/peru/Cusco_FC.svg",
+      "sha256": "8d387b5066a10e77ccef60a632b801244047bb5db30794549c10456991fa8217",
+      "bytes": 10184
+    },
+    {
+      "clube": "Deportivo Garcilaso",
+      "pais": "Peru",
+      "arquivo": "deportivo-garcilaso.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/peru/Deportivo_Garcilaso.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/peru/Deportivo_Garcilaso.svg",
+      "sha256": "8ae74762a6cfc7c0c70294793a72ae34f1b2c7c4a9db4ba52ac3ee2a286b1323",
+      "bytes": 1129
+    },
+    {
+      "clube": "Melgar",
+      "pais": "Peru",
+      "arquivo": "melgar.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/peru/FBC_Melgar.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/peru/FBC_Melgar.svg",
+      "sha256": "5ed83ce28f17779e24dddbae09a9fac650f9df4ecd1a07f0b115075556454566",
+      "bytes": 20457
+    },
+    {
+      "clube": "Sport Huancayo",
+      "pais": "Peru",
+      "arquivo": "sport-huancayo.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/peru/Sport_Huancayo.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/peru/Sport_Huancayo.svg",
+      "sha256": "a489500b0f8c1e4beae5410410448879bc3a23cfbca7e5fbc866c53bbfb74d18",
+      "bytes": 5219
+    },
+    {
+      "clube": "Sporting Cristal",
+      "pais": "Peru",
+      "arquivo": "sporting-cristal.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/peru/Sporting_Cristal.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/peru/Sporting_Cristal.svg",
+      "sha256": "2c2c03409b09605ce3d5daaaf41b869aca920a01f4ff6fb9a90f26d58fbef585",
+      "bytes": 5539
+    },
+    {
+      "clube": "Universitario de Deportes",
+      "pais": "Peru",
+      "arquivo": "universitario-de-deportes.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/peru/Universitario_de_Deportes.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/peru/Universitario_de_Deportes.svg",
+      "sha256": "30333e4ee979b71f35754f6ffdbf6bfd5ebd8ece58a57e0b07181e9ba26cd170",
+      "bytes": 1359
+    },
+    {
+      "clube": "Jagiellonia Bialystok",
+      "pais": "Polônia",
+      "arquivo": "jagiellonia-bialystok.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/poland/Jagiellonia_Bia%C5%82ystok.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/poland/Jagiellonia_Bia%C5%82ystok.svg",
+      "sha256": "cee7de7622ae51d9ac2da0bab18ed80bbc07e2f41ff8e0443af3e309c457d5f0",
+      "bytes": 17352
+    },
+    {
+      "clube": "Lech Poznan",
+      "pais": "Polônia",
+      "arquivo": "lech-poznan.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/poland/Lech_Pozna%C5%84.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/poland/Lech_Pozna%C5%84.svg",
+      "sha256": "1c90c3a894d7c28c75571374b4b0eb61ad16d48828eb6fe68a0823697ee3cc88",
+      "bytes": 6656
+    },
+    {
+      "clube": "Legia Varsóvia",
+      "pais": "Polônia",
+      "arquivo": "legia-varsovia.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/poland/Legia_Warszawa.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/poland/Legia_Warszawa.svg",
+      "sha256": "8528bd0b35378eab01912312734daa043887128ff41d0b184e085d536fa50fc8",
+      "bytes": 3403
+    },
+    {
+      "clube": "Raków",
+      "pais": "Polônia",
+      "arquivo": "rakow.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/poland/Rak%C3%B3w_Cz%C4%99stochowa.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/poland/Rak%C3%B3w_Cz%C4%99stochowa.svg",
+      "sha256": "ef8dd9023666d15df0a3b0c3ec59504249749217eb7888024514975ad774c4b2",
+      "bytes": 8837
+    },
+    {
+      "clube": "Wisla Kraków",
+      "pais": "Polônia",
+      "arquivo": "wisla-krakow.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/poland/Wis%C5%82a_Krak%C3%B3w.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/poland/Wis%C5%82a_Krak%C3%B3w.svg",
+      "sha256": "f9a6a338d5d4ab8468163fc70b5f2ce24c13b2dab314782f74a18ef16a1d04c7",
+      "bytes": 44042
+    },
+    {
+      "clube": "Baník Ostrava",
+      "pais": "República Tcheca",
+      "arquivo": "banik-ostrava.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/czech-republic/Ban%C3%ADk_Ostrava.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/czech-republic/Ban%C3%ADk_Ostrava.svg",
+      "sha256": "1d243ff6685963ceec275ce6717538a4b291ed80bfb79ad9f8a66a36e4093296",
+      "bytes": 7384
+    },
+    {
+      "clube": "Sigma Olomouc",
+      "pais": "República Tcheca",
+      "arquivo": "sigma-olomouc.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/czech-republic/Sigma_Olomouc.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/czech-republic/Sigma_Olomouc.svg",
+      "sha256": "4e9c87b80cc27ca970c58c42f2e82080fde96eef303ea522722ff17b342b76e0",
+      "bytes": 7719
+    },
+    {
+      "clube": "Slavia Praga",
+      "pais": "República Tcheca",
+      "arquivo": "slavia-praga.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/czech-republic/SK_Slavia_Praha.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/czech-republic/SK_Slavia_Praha.svg",
+      "sha256": "2c59f46f9f54adf17700c014050531baa1999759ce7116dc679bd236a4dee44e",
+      "bytes": 865
+    },
+    {
+      "clube": "Sparta Praga",
+      "pais": "República Tcheca",
+      "arquivo": "sparta-praga.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/czech-republic/AC_Sparta_Praha.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/czech-republic/AC_Sparta_Praha.svg",
+      "sha256": "23c964e3427fa7cc6d5bf59100f3bfcf2d59d4999e66494c83a67a384b6df4a4",
+      "bytes": 3031
+    },
+    {
+      "clube": "Viktoria Plzen",
+      "pais": "República Tcheca",
+      "arquivo": "viktoria-plzen.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/czech-republic/Viktoria_Plze%C5%88.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/czech-republic/Viktoria_Plze%C5%88.svg",
+      "sha256": "92d5ef29e33d70750b2092603090cb88b617d1a4303cd59c9fff9690f0e4854c",
+      "bytes": 7355
+    },
+    {
+      "clube": "CFR Cluj",
+      "pais": "Romênia",
+      "arquivo": "cfr-cluj.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/romania/CFR_Cluj.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/romania/CFR_Cluj.svg",
+      "sha256": "799d7c62cbba76d1911110f4d31bcc7b8aa1bcdd356b86b97739a718f3fffa7c",
+      "bytes": 22136
+    },
+    {
+      "clube": "Dinamo Bucareste",
+      "pais": "Romênia",
+      "arquivo": "dinamo-bucareste.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/romania/Dinamo_Bucure%C5%9Fti.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/romania/Dinamo_Bucure%C5%9Fti.svg",
+      "sha256": "d750eb8c444829634e82c29ca328f6785f1c1a6a26d95deec1c220306f138c15",
+      "bytes": 69126
+    },
+    {
+      "clube": "FCSB",
+      "pais": "Romênia",
+      "arquivo": "fcsb.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/romania/FC_Steaua_Bucure%C8%99ti.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/romania/FC_Steaua_Bucure%C8%99ti.svg",
+      "sha256": "dead3d01d128ca2a2b6b421b1b102c3c802ffcc3ab06ee9c2da8b40b5d509ee4",
+      "bytes": 21234
+    },
+    {
+      "clube": "Rapid Bucareste",
+      "pais": "Romênia",
+      "arquivo": "rapid-bucareste.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/romania/Rapid_Bucure%C5%9Fti.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/romania/Rapid_Bucure%C5%9Fti.svg",
+      "sha256": "a614274122bb6a1c289641b175a06cb384f6c66610a9135328261bcfcb473499",
+      "bytes": 36035
+    },
+    {
+      "clube": "Universitatea Craiova",
+      "pais": "Romênia",
+      "arquivo": "universitatea-craiova.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/romania/Universitatea_Craiova.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/romania/Universitatea_Craiova.svg",
+      "sha256": "1d4d08eff5f455ec66b8f2eefb75b34d491121edc22348570a1d8b4fe126563f",
+      "bytes": 122464
+    },
+    {
+      "clube": "AIK",
+      "pais": "Suécia",
+      "arquivo": "aik.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/sweden/AIK.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/sweden/AIK.svg",
+      "sha256": "752ed618013f5cc5dcbd9f80dd9f1fdfdd5ee9128ed881c806fbe1ed2fbe6b7e",
+      "bytes": 14606
+    },
+    {
+      "clube": "Djurgården",
+      "pais": "Suécia",
+      "arquivo": "djurgarden.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/sweden/Djurg%C3%A5rden.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/sweden/Djurg%C3%A5rden.svg",
+      "sha256": "c6d40646657268709085d16d7c88cdb85a4d0acf8adf2c7129eb27d22b2bdab4",
+      "bytes": 1564
+    },
+    {
+      "clube": "Elfsborg",
+      "pais": "Suécia",
+      "arquivo": "elfsborg.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/sweden/Elfsborg.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/sweden/Elfsborg.svg",
+      "sha256": "41a13967df856ec6bd56e0159c53195d11531ecf0fc7acd4bebb8e3e08581b80",
+      "bytes": 9682
+    },
+    {
+      "clube": "Hammarby",
+      "pais": "Suécia",
+      "arquivo": "hammarby.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/sweden/Hammarby.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/sweden/Hammarby.svg",
+      "sha256": "f5ca83727479011b3452f98885b4e23120057f7313f0b4535243c928f217d544",
+      "bytes": 25860
+    },
+    {
+      "clube": "IFK Göteborg",
+      "pais": "Suécia",
+      "arquivo": "ifk-goteborg.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/sweden/IFK_G%C3%B6teborg.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/sweden/IFK_G%C3%B6teborg.svg",
+      "sha256": "8e4f653ba9e74609ee0a98d13d0231a0e88bab9a701859df7b8cd0ac4e425053",
+      "bytes": 31938
+    },
+    {
+      "clube": "Malmö",
+      "pais": "Suécia",
+      "arquivo": "malmo.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/sweden/Malm%C3%B6.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/sweden/Malm%C3%B6.svg",
+      "sha256": "dfb4c2d9f7980d0b23aaa999336a21f5057e808bfffa45ed41ba991357226498",
+      "bytes": 3323
+    },
+    {
+      "clube": "Basel",
+      "pais": "Suíça",
+      "arquivo": "basel.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/switzerland/Basel.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/switzerland/Basel.svg",
+      "sha256": "2a22f378746dc51604a85016471f74cd7589aefde8ae2152f9c9120675190e37",
+      "bytes": 30914
+    },
+    {
+      "clube": "FC Zürich",
+      "pais": "Suíça",
+      "arquivo": "fc-zurich.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/switzerland/Z%C3%BCrich.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/switzerland/Z%C3%BCrich.svg",
+      "sha256": "bb4fa590b0d53a0f9378c0a80a2e5b9146abce796d229e6b9a1b188d389fc88f",
+      "bytes": 104708
+    },
+    {
+      "clube": "Grasshopper",
+      "pais": "Suíça",
+      "arquivo": "grasshopper.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/switzerland/Grasshoppers.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/switzerland/Grasshoppers.svg",
+      "sha256": "10b27c6fff37682846b41662d0b8a0bf1fff66bb363263a8462a2995d61bedc0",
+      "bytes": 2457
+    },
+    {
+      "clube": "Lugano",
+      "pais": "Suíça",
+      "arquivo": "lugano.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/switzerland/Lugano.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/switzerland/Lugano.svg",
+      "sha256": "02ca5d5c980e1888045a56dded127109000ac92b4111af49647d78eba3b298e5",
+      "bytes": 3946
+    },
+    {
+      "clube": "Servette",
+      "pais": "Suíça",
+      "arquivo": "servette.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/switzerland/Servette.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/switzerland/Servette.svg",
+      "sha256": "eda9185f18a284b5e088e4ee0e1a4aac2f88272c1706cbb5144225e83e46f5cc",
+      "bytes": 23252
+    },
+    {
+      "clube": "Young Boys",
+      "pais": "Suíça",
+      "arquivo": "young-boys.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/switzerland/Young_Boys.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/switzerland/Young_Boys.svg",
+      "sha256": "e2c9f1d92107706a98dad978fed8d5d5cf420eaaa65e52fd11f49d8dce82789d",
+      "bytes": 7655
+    },
+    {
+      "clube": "Estrela Vermelha",
+      "pais": "Sérvia",
+      "arquivo": "estrela-vermelha.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/serbia/Crvena_Zvezda.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/serbia/Crvena_Zvezda.svg",
+      "sha256": "f9ac69d3368a46cc646237e892e54a2328f91a0e1318fb2288270930e139d0a8",
+      "bytes": 2430
+    },
+    {
+      "clube": "Partizan",
+      "pais": "Sérvia",
+      "arquivo": "partizan.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/serbia/FK_Partizan.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/serbia/FK_Partizan.svg",
+      "sha256": "a9f09839009a7cf25670f827ce9e8d47cd03d6fa6a04a17e8aa5f5776d4affd4",
+      "bytes": 14164
+    },
+    {
+      "clube": "TSC Backa Topola",
+      "pais": "Sérvia",
+      "arquivo": "tsc-backa-topola.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/serbia/FK_TSC.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/serbia/FK_TSC.svg",
+      "sha256": "fa4c3ef473714d425c0c61b9abce5d33179811edf55979d45f4aafc5306bd586",
+      "bytes": 47692
+    },
+    {
+      "clube": "Vojvodina",
+      "pais": "Sérvia",
+      "arquivo": "vojvodina.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/serbia/FK_Vojvodina.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/serbia/FK_Vojvodina.svg",
+      "sha256": "a64604f09e64b225b828de65b7f78f67b435ba639d8a8cf8b8dd727179de8d2f",
+      "bytes": 6029
+    },
+    {
+      "clube": "Espérance de Tunis",
+      "pais": "Tunísia",
+      "arquivo": "esperance-de-tunis.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/tunisia/Esp%C3%A9rance_Sportive_de_Tunis.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/tunisia/Esp%C3%A9rance_Sportive_de_Tunis.svg",
+      "sha256": "69ea2a44b15e0774fbed7ccf49ac80082f9460fc1ec77128a7426d0a94209a6e",
+      "bytes": 114984
+    },
+    {
+      "clube": "Dynamo Kyiv",
+      "pais": "Ucrânia",
+      "arquivo": "dynamo-kyiv.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/ukraine/Dynamo_Kyiv.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/ukraine/Dynamo_Kyiv.svg",
+      "sha256": "5480856e6e27e506c068fdd8a5947108fd6a3e3002ca3305ba4bc9729e128a52",
+      "bytes": 8003
+    },
+    {
+      "clube": "Polissya",
+      "pais": "Ucrânia",
+      "arquivo": "polissya.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/ukraine/Polissya_Zhytomyr.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/ukraine/Polissya_Zhytomyr.svg",
+      "sha256": "dc3586b941350fce66ca76737ea5e16912c70fe2f303ef6464629b8e02beea15",
+      "bytes": 33259
+    },
+    {
+      "clube": "Shakhtar Donetsk",
+      "pais": "Ucrânia",
+      "arquivo": "shakhtar-donetsk.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/ukraine/Shakhtar.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/ukraine/Shakhtar.svg",
+      "sha256": "1b91f2d033d43586bbc8cff072087710885c8635d5d941c8c3337efc23488e47",
+      "bytes": 7563
+    },
+    {
+      "clube": "Zorya Luhansk",
+      "pais": "Ucrânia",
+      "arquivo": "zorya-luhansk.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/ukraine/Zorya_Luhansk.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/ukraine/Zorya_Luhansk.svg",
+      "sha256": "f9ee2009f3132767dbb8334ed3339c5affd829d5bf931e9f5b5913a1913c7ecb",
+      "bytes": 22576
+    },
+    {
+      "clube": "Cerro Largo",
+      "pais": "Uruguai",
+      "arquivo": "cerro-largo.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/uruguay/Cerro_Largo.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/uruguay/Cerro_Largo.svg",
+      "sha256": "a56c973e5f3cb30f1a29120d606bbeca4e096cd639e8e8166b8ca2863a5b9480",
+      "bytes": 16060
+    },
+    {
+      "clube": "Danubio",
+      "pais": "Uruguai",
+      "arquivo": "danubio.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/uruguay/Danubio.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/uruguay/Danubio.svg",
+      "sha256": "4038cc42bc0047bf12ec439bf020552ed83d11a2e021702bdf7748c67fa64537",
+      "bytes": 2320
+    },
+    {
+      "clube": "Defensor Sporting",
+      "pais": "Uruguai",
+      "arquivo": "defensor-sporting.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/uruguay/Defensor_Sporting.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/uruguay/Defensor_Sporting.svg",
+      "sha256": "5019143216f8811be6ad0dd9472334a0a8a15aaf44ad39b1a4b19efa1e4505cc",
+      "bytes": 4100
+    },
+    {
+      "clube": "Liverpool de Montevidéu",
+      "pais": "Uruguai",
+      "arquivo": "liverpool-de-montevideu.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/uruguay/Liverpool.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/uruguay/Liverpool.svg",
+      "sha256": "e9383aa801b955413690528044fa9604a48b2f0be9e66bec0635afd9900779e0",
+      "bytes": 17342
+    },
+    {
+      "clube": "Montevideo Wanderers",
+      "pais": "Uruguai",
+      "arquivo": "montevideo-wanderers.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/uruguay/Montevideo_Wanderers.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/uruguay/Montevideo_Wanderers.svg",
+      "sha256": "1e31c3eb421ecac412268d5a4240083f05ff938184add155706d2fbfcb55c21a",
+      "bytes": 5756
+    },
+    {
+      "clube": "Racing de Montevidéu",
+      "pais": "Uruguai",
+      "arquivo": "racing-de-montevideu.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/uruguay/Racing.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/uruguay/Racing.svg",
+      "sha256": "e7ae4bbee3652597bd12f83b0e432995c015d27c5fe035375afe773dd9345a1d",
+      "bytes": 4183
+    },
+    {
+      "clube": "Carabobo",
+      "pais": "Venezuela",
+      "arquivo": "carabobo.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/venezuela/Carabobo_FC.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/venezuela/Carabobo_FC.svg",
+      "sha256": "b99f25c412239756e565076773aae9a65b405b854f125682c1829c5644086043",
+      "bytes": 8083
+    },
+    {
+      "clube": "Caracas",
+      "pais": "Venezuela",
+      "arquivo": "caracas.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/venezuela/Caracas.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/venezuela/Caracas.svg",
+      "sha256": "96abda0d8cc4a2ae35c6068d90a06588e6eb54776ad624f4dc68124960169160",
+      "bytes": 39307
+    },
+    {
+      "clube": "Deportivo La Guaira",
+      "pais": "Venezuela",
+      "arquivo": "deportivo-la-guaira.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/venezuela/Deportivo_La_Guaira.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/venezuela/Deportivo_La_Guaira.svg",
+      "sha256": "142b92e05de0dcb8d194d01109b9bac29c9f355e1c0ac23cd1537cd875c1004a",
+      "bytes": 123288
+    },
+    {
+      "clube": "Deportivo Táchira",
+      "pais": "Venezuela",
+      "arquivo": "deportivo-tachira.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/venezuela/Deportivo_T%C3%A1chira.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/venezuela/Deportivo_T%C3%A1chira.svg",
+      "sha256": "7d68b261926482e30a506e7a2bbdd05b462239be8fa2305147f2042422f7696a",
+      "bytes": 55933
+    },
+    {
+      "clube": "Metropolitanos",
+      "pais": "Venezuela",
+      "arquivo": "metropolitanos.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/venezuela/Metropolitanos_FC.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/venezuela/Metropolitanos_FC.svg",
+      "sha256": "ea24bb204ee2cc1fe07c70d4c9afd1c97a90581ef1db2357c8bfb50ba089fe4a",
+      "bytes": 33266
+    },
+    {
+      "clube": "Monagas",
+      "pais": "Venezuela",
+      "arquivo": "monagas.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/venezuela/Monagas_SC.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/venezuela/Monagas_SC.svg",
+      "sha256": "961dd6ac1a2dd3cb8ab21e1cd7aeaa08a8f40aa144906a3af268a1ba9f73694a",
+      "bytes": 54361
+    },
+    {
+      "clube": "Universidad Central de Venezuela",
+      "pais": "Venezuela",
+      "arquivo": "universidad-central-de-venezuela.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/venezuela/Universidad_Central.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/venezuela/Universidad_Central.svg",
+      "sha256": "f4fdb9c52730a1c3cb8cd349b22a3adf6a299afdf3d89da0d31ff78a131ebc93",
+      "bytes": 27457
+    },
+    {
+      "clube": "Zamora",
+      "pais": "Venezuela",
+      "arquivo": "zamora.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/venezuela/Zamora_FC.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/venezuela/Zamora_FC.svg",
+      "sha256": "a5ba32950ed2f6d99402c865295190565f97f2c3936b0ebdc1b194b1f6ff249e",
+      "bytes": 44495
+    },
+    {
+      "clube": "Mamelodi Sundowns",
+      "pais": "África do Sul",
+      "estado": null,
+      "arquivo": "mamelodi-sundowns.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/south-africa/Mamelodi_Sundowns.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/south-africa/Mamelodi_Sundowns.svg",
+      "sha256": "5fb903112253b2e742c6e049d851af71b0b3dc0d90ca76a62cc91f9bfc8eafc4",
+      "bytes": 22418
+    },
+    {
+      "clube": "Austria Viena",
+      "pais": "Áustria",
+      "arquivo": "austria-viena.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/austria/Austria_Wien.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/austria/Austria_Wien.svg",
+      "sha256": "053f155d403466cc393101f82f985a183d83fc04868971a7c878330b7ef9973f",
+      "bytes": 8207
+    },
+    {
+      "clube": "LASK",
+      "pais": "Áustria",
+      "arquivo": "lask.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/austria/LASK.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/austria/LASK.svg",
+      "sha256": "f523cd2ff17e27e3946a67853e04e1b990df12137044e7e34bb6cc5f32cfcff0",
+      "bytes": 1810
+    },
+    {
+      "clube": "Rapid Viena",
+      "pais": "Áustria",
+      "arquivo": "rapid-viena.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/austria/Rapid_Vienna.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/austria/Rapid_Vienna.svg",
+      "sha256": "c100194fda8e046121662b6358852703d1a4571ee97ab440568a2aabca656cbf",
+      "bytes": 14749
+    },
+    {
+      "clube": "Red Bull Salzburg",
+      "pais": "Áustria",
+      "arquivo": "red-bull-salzburg.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/austria/Salzburg.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/austria/Salzburg.svg",
+      "sha256": "dc1715e11e64209c12d59c95e5c93c4ac24c21c408397acadefdfbf259d03505",
+      "bytes": 25262
+    },
+    {
+      "clube": "Sturm Graz",
+      "pais": "Áustria",
+      "arquivo": "sturm-graz.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/austria/Sturm_Graz.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/austria/Sturm_Graz.svg",
+      "sha256": "2df8ddeac5b847fdc6cf42485ac9f0c9c881b7f610f30ee504f6ef8488829214",
+      "bytes": 18131
+    }
+  ]
+}

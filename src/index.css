@@ -61,3 +61,6 @@ dialog.popup-overlay .popup-conteudo{min-width:0;overflow-x:hidden;scrollbar-gut
 @media(max-width:479px){.resumo-temporada-completo{padding:14px}.resumo-indicadores{grid-template-columns:repeat(2,minmax(0,1fr))}.resumo-competicoes table{font-size:11px}.resumo-competicoes th,.resumo-competicoes td{padding:8px 3px}.resumo-competicoes th:first-child{max-width:100px}.resumo-temporada-completo>.flex{flex-wrap:wrap}}
 
 .resumo-cabecalho{flex-wrap:nowrap!important;align-items:center}.resumo-cabecalho>span{flex:1;min-width:0;font-size:12px;letter-spacing:.06em;line-height:1.5}
+
+/* Um contorno de luz preserva a leitura de emblemas escuros sem mudar suas cores. */
+.joia-escudo{filter:drop-shadow(0 0 1px #ffffff88) drop-shadow(0 2px 3px #0005)}

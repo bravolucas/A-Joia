@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {createHash} from 'node:crypto';
+import {CLUBES} from '../src/dados/data.js';
+import {CLUBES_SULAMERICANOS_EXTRAS} from '../src/competicoes/clubesInternacionais.js';
+import {CLUBES_EUROPEUS_EXTRAS} from '../src/competicoes/clubesEuropeusExtras.js';
+import {CLUBES_REGIONAIS_EXTRAS} from '../src/competicoes/estaduaisRapidos.js';
+import {CLUBES_MUNDIAIS_EXTRAS} from '../src/competicoes/mundialRapido.js';
+import {chaveEscudo} from '../src/comum/chavesEscudos.js';
+const pasta=new URL('../arte/escudos/',import.meta.url),arquivos=fs.readdirSync(pasta).filter(f=>/\.(svg|png|webp)$/.test(f)),chaves=new Set(arquivos.map(f=>f.replace(/\.[^.]+$/,'')));
+const clubes=[...new Map([...CLUBES,...CLUBES_SULAMERICANOS_EXTRAS,...CLUBES_EUROPEUS_EXTRAS,...CLUBES_REGIONAIS_EXTRAS,...CLUBES_MUNDIAIS_EXTRAS].map(c=>[c.nome,c])).values()];
+const acervo=JSON.parse(fs.readFileSync(new URL('acervo-adicoes-2026-11-10.json',pasta),'utf8'));
+test('todos os clubes cadastrados, regionais e adversários do Mundial têm escudo próprio',()=>{assert.ok(clubes.length>=642);for(const c of clubes)assert.ok(chaves.has(chaveEscudo(c.nome)),c.nome);const porChave=new Map();for(const c of clubes){const k=chaveEscudo(c.nome);porChave.set(k,[...(porChave.get(k)||[]),c.nome]);}assert.deepEqual([...porChave.values()].filter(v=>v.length>1).map(v=>v.sort()).sort(),[['Hamburger SV','Hamburgo'],['FC Köln','Köln']].map(v=>v.sort()).sort(),'somente aliases históricos do mesmo clube podem compartilhar escudo');});
+test('Guarani e Guaraní e os dois Boavistas mantêm identidades distintas',()=>{assert.notEqual(chaveEscudo('Guarani'),chaveEscudo('Guaraní'));assert.equal(chaveEscudo(' GUARANI\u0301 '),chaveEscudo('Guaraní'));assert.notEqual(chaveEscudo('Boavista'),chaveEscudo('Boavista-RJ'));assert.equal(chaveEscudo('Boavista',{estado:'RJ'}),chaveEscudo('Boavista-RJ'));assert.equal(chaveEscudo('Boavista',{estado:null}),'boavista');assert.equal(chaveEscudo('St Patrick’s Athletic'),chaveEscudo("St Patrick's Athletic"));assert.equal(chaveEscudo('Connah’s Quay'),chaveEscudo("Connah's Quay"));assert.equal(chaveEscudo('Kasımpaşa'),'kas-mpasa');assert.equal(chaveEscudo('FC Köln'),'koln');assert.equal(chaveEscudo('Hamburger SV'),'hamburgo');});
+test('novos escudos têm referência rastreável e são os originais pesquisados',()=>{assert.equal(acervo.escudos.length,278);assert.equal(new Set(acervo.escudos.map(r=>r.arquivo)).size,278);for(const r of acervo.escudos){assert.ok(r.pais&&r.clube);assert.ok(r.fonte.startsWith('https://'));assert.ok(r.referencia.startsWith('https://'));assert.equal(r.arquivo.replace(/\.[^.]+$/,''),chaveEscudo(r.clube),r.clube);const data=fs.readFileSync(new URL(r.arquivo,pasta));assert.equal(createHash('sha256').update(data).digest('hex'),r.sha256,r.clube);if(r.arquivo.endsWith('.png'))assert.equal(data.subarray(0,8).toString('hex'),'89504e470d0a1a0a');else{const svg=data.toString('utf8');assert.match(svg,/<svg\b/);assert.doesNotMatch(svg,/<script\b|<foreignObject\b|\sonload\s*=|\sonerror\s*=/i);}}});

@@ -17,6 +17,8 @@ Validação do commit `157ec91`: os workflows de testes e build passaram com **4
 
 As duas bolas da coleção são de futebol de campo (soccer): uma moderna e uma clássica redonda de couro. Os originais e as versões menores usados no jogo foram conferidos visualmente.
 
-Publicação no GitHub Pages ainda em processamento no serviço externo.
+Publicação concluída com sucesso no commit `1d50154`, após atualizar o publicador oficial para `actions/deploy-pages@v5.0.1` e ajustar o limite permitido de 600.000 ms. A execução anterior ficou presa na sincronização e atingiu o limite nas duas tentativas; a publicação nova foi concluída pelo publicador atualizado. [Execução de publicação aprovada](https://github.com/bravolucas/A-Joia/actions/runs/42812926112).
+
+Verificação HTTPS no endereço público: o módulo `assets/index-DtdhPOBB.js` contém o recorte `pose-unica` e o renderer `mp-object-photo`. As 38 imagens PNG (19 originais e 19 versões menores) e os módulos/estilos consultados responderam HTTP 200, totalizando 41 recursos verificados. [Jogo publicado](https://bravolucas.github.io/A-Joia/).
 
 Capturas: [desktop](entrada-desktop.png), [celular](entrada-celular.png), [objetos](objetos-desktop.png), [retratos](retratos-desktop.png) e [falta](falta-celular.png).

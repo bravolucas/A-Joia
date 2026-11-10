@@ -64,3 +64,11 @@ html[data-visual=classico] .rp:not(.rp-inicio){background:#0e1512}
 
 /* O marcador pequeno é informação essencial do minigame, não decoração. */
 @media(prefers-reduced-motion:reduce){.joia-timing-marker{animation:slideBar var(--joia-tempo) linear infinite alternate!important;animation-duration:var(--joia-tempo)!important;animation-iteration-count:infinite!important}}
+/* Cartas e decisões antigas também pertencem à identidade azul; fotos não são tingidas. */
+.rp :where(.tp,.car-painel,.lc-jogo,.pv,.car-retrospectiva){background-color:#102337;background-image:linear-gradient(135deg,#142e46,#0c1d2e);border-color:#9bdeff30}
+.rp :where(.tp-carta,.dt-opcoes>button,.car-planos>button,.pv-grade>button,.cc-carta){background-color:#102337;color:#ecf6ff}
+.rp .tp-imagem:after{background:linear-gradient(transparent,#071321cc)}
+.rp :where(.tp header>div>span,.tp-jogar,.car-fase>span){color:#bceaff}
+.rp :where(.tp header p,.tp-conteudo>p,.tp footer small,.car-painel p){color:#b3cadb}
+.rp .tp-trocar{background:#9bdeff0b;border-color:#9bdeff40;color:#bceaff}
+.mp-exhibits>.mp-exhibit{animation-fill-mode:backwards}

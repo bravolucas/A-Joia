@@ -686,7 +686,7 @@ export const CLUBES = [
   { nome: "Vasco da Gama", forca: 74, liga: "brasileirao", estado: "RJ", modesto: true, cor: "#111111" },
   { nome: "Athletico-PR", forca: 66, liga: "brasileirao", estado: "PR", modesto: true, cor: "#A6192E" },
   { nome: "Bahia", forca: 71, liga: "brasileirao", estado: "BA", modesto: true, cor: "#12318C" },
-  { nome: "Fortaleza", forca: 76, liga: "serieB", estado: "CE", cor: "#0033A0" },
+  { nome: "Fortaleza", forca: 64, liga: "serieB", estado: "CE", cor: "#0033A0" },
   { nome: "Bragantino", forca: 67, liga: "brasileirao", estado: "SP", modesto: true, cor: "#E4181C" },
   { nome: "Mirassol", forca: 72, liga: "brasileirao", estado: "SP", modesto: true, cor: "#FDE100", escuro: true },
   { nome: "Sport Recife", forca: 66, liga: "serieB", estado: "PE", modesto: true, cor: "#E4181C" },

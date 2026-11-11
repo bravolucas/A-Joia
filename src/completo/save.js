@@ -1,3 +1,4 @@
+import {corrigirEquilibrioClubes} from '../dados/equilibrioClubes.js';
 import {CLUBES} from '../dados/data.js';
 import { registrarMuseu } from '../museu/museu.js';
 /* ===================== SISTEMA DE SAVE =====================
@@ -156,7 +157,7 @@ const PADRAO_CARREIRA = {
 
 export function normalizarCarreira(c) {
   if (!c) return null;
-  const out = { ...PADRAO_CARREIRA, ...c };
+  const out = { ...PADRAO_CARREIRA, ...corrigirEquilibrioClubes(c) };
   // garante que campos de coleção sejam do tipo certo, mesmo se vierem nulos
   Object.entries(PADRAO_CARREIRA).forEach(([k, v]) => {
     if (Array.isArray(v) && !Array.isArray(out[k])) out[k] = [];

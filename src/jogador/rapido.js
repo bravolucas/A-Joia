@@ -1,3 +1,4 @@
+import {AJUSTE_FORTALEZA,corrigirEquilibrioClubes} from '../dados/equilibrioClubes.js';
 import {primeiraFaseContinental} from '../competicoes/fasesSelecoes.js';
 import {normalizarCampeaoLiga,corrigirCampeoesLiga,registrarAnoHistoria,registrarEstatisticasCompeticoes,registrarAtletasObservados,simularDefesas,novosMarcosIndividuais} from '../historia/historiaFutebol.js';
 import {ITENS_PESSOAIS} from './itensPessoais.js';
@@ -231,6 +232,7 @@ export function criarJogador(dados) {
   const codigo = normalizarCodigo(dados.codigo) || gerarCodigo();
   sincronizarLigas(null); // carreira nova: todo mundo na liga de origem
   const c = comSemente(codigo, "criar", () => criarJogadorBase(dados));
+  c.ajustesCadastro = {[AJUSTE_FORTALEZA]:true};
   c.codigo = codigo;
   c.diario = ehCodigoDiario(codigo);
   iniciarCamisas(c,{novo:true});
@@ -3843,6 +3845,7 @@ export function carregarRapido() {
   try {
     const s = JSON.parse(localStorage.getItem(CHAVE_SAVE_RAPIDO) || "null");
     if (!s || s.v !== VERSAO_RAPIDO || !s.c?.attrs || !Array.isArray(s.c.temporadas)) return null;
+    s.c=corrigirEquilibrioClubes(s.c);
     if(s.c.tecnico&&!Number.isFinite(s.c.tecnico.idade))s.c.tecnico.idade=s.c.idade;
     s.c.flags = { historicoEventos: [], traidor: [], ...(s.c.flags || {}) };
     s.c.mod = s.c.mod || {};

@@ -41,7 +41,7 @@ function MuseuExposicao({c={},temporadas,modo='rapido',onVoltar,onColecao,carrei
  useEffect(()=>{P(lerCuradoriaDoPerfil(dados,ids));S('entrada');O(null);T(null);Y(dados.capitulos.at(-1)?.ano||null);},[dados.id]);
  const guardar=patch=>{const prox={...preferencias,...patch};P(prox);V(salvarCuradoria(dados.curadoriaId,prox,ids)?'Curadoria guardada neste navegador.':'Não foi possível guardar a curadoria neste navegador.');};
  const favoritar=id=>{if(!preferencias.favoritos.includes(id)&&preferencias.favoritos.length>=3){V('A entrada tem três lugares. Remova uma favorita antes de escolher outra.');return;}guardar({favoritos:preferencias.favoritos.includes(id)?preferencias.favoritos.filter(x=>x!==id):[...preferencias.favoritos,id]});};
- const irSala=id=>{S(id);T(null);L(24);requestAnimationFrame(()=>{cabecalho.current?.focus({preventScroll:true});cabecalho.current?.scrollIntoView({block:'start'});});};
+ const irSala=id=>{const origem=document.activeElement;S(id);T(null);L(24);requestAnimationFrame(()=>{if(document.activeElement!==origem)return;cabecalho.current?.focus({preventScroll:true});cabecalho.current?.scrollIntoView({block:'start'});});};
  const abrir=id=>{O(id);};
  const anoAtual=dados.capitulos.find(a=>a.ano===ano),itens=sala==='tunel'?(anoAtual?.pecas||[]):dados.objetos.filter(o=>o.sala===sala),parada=visita==null?null:dados.objetos.find(o=>o.id===dados.visita[visita]);
  return <main className={`mp mp-theme-${preferencias.tema}`} data-museu-carreira={dados.id} data-museu-perfil={perfil}>

@@ -175,9 +175,18 @@ Guia: `docs/historico-competicoes/README.md`.
 
 ## Estado da entrega
 
-**Implementação concluída e testes direcionados aprovados. Publicação e validação global aguardam confirmação nesta retomada.**
+**Concluído, publicado e validado em 13/11/2026.**
 
-Esta seção será atualizada após enviar o commit e conferir os workflows. Não confundir o estado acima com uma confirmação de publicação deste lote.
+- Revisão funcional: [`637a84598d353c114c721e5cfb20ce98bbcf2aff`](https://github.com/bravolucas/A-Joia/commit/637a84598d353c114c721e5cfb20ce98bbcf2aff).
+- Validação global: **472 testes de dados aprovados, zero falhas; 344 testes de navegador aprovados**.
+- Workflow de validação: https://github.com/bravolucas/A-Joia/actions/runs/43497686659 — sucesso.
+- Workflow de publicação: https://github.com/bravolucas/A-Joia/actions/runs/43497686657 — sucesso.
+- A implantação `github-pages` aponta para a revisão funcional acima.
+- Conferência no JavaScript servido pelo site: cobrança da diretoria, Copa jogável e histórico de campeões presentes.
+- O ajuste do contrato anual também passou na validação global final. A falha intermediária mencionada anteriormente está resolvida.
+- Nenhuma pendência conhecida dos pedidos deste lote: cobrança/demissão, ofertas ocasionais de seleção, Copa do Mundo jogável, histórico de campeões e este resumo.
+
+O commit posterior que finaliza este documento é somente de documentação (`[skip ci]`); não modifica o jogo publicado. Os próximos pedidos podem partir desta revisão.
 
 ## Como continuar tecnicamente
 
@@ -196,6 +205,8 @@ GITHUB_PAGES=true npm run build
 GITHUB_PAGES=true npm run preview -- --host 127.0.0.1 --port 4173
 PLAYWRIGHT_BROWSERS_PATH=/workspace/work/pw-browsers npx playwright test tests/historia-futebol.spec.mjs tests/copa-mundo-tecnico-jogavel.spec.mjs --reporter=line --workers=2 --output=/tmp/ajoia-validacao
 ```
+
+Observação de reprodução: `package-lock.json` está ignorado no repositório, e os workflows resolvem dependências por intervalos de versão. Foram observados hashes diferentes entre o build local e o CI por uma diferença na biblioteca de animação. A revisão implantada e os testes completos do CI foram conferidos; uma diferença de hash, isoladamente, não prova divergência no código do jogo.
 
 O caminho dos navegadores é específico desta máquina; conferir antes de reutilizar em outro ambiente. No GitHub Actions há workflows **Validar A JOIA** e **Publicar no GitHub Pages**. O site usa a base `/A-Joia/`.
 

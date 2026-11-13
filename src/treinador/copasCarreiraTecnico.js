@@ -27,12 +27,23 @@ export function aplicarCopaTecnico(c,chave,opcao){
   temporada.torneios=(temporada.torneios||[]).filter(x=>x.nome!==nova.nome).concat({...resumoCampanhaCopa(nova),celebrado:nova.campeao===p.clube});
   const ganhou=nova.campeao===p.clube,ja=(temporada.titulosConquistados||[]).includes(nova.nome);
   if(ganhou&&!ja){temporada.titulosConquistados=[...(temporada.titulosConquistados||[]),nova.nome];tecnico={...tecnico,titulos:(t.titulos||0)+1,reputacao:Math.min(99,t.reputacao+(nova.tipo==='estadual'?1:nova.tipo==='continental'?8:4)),diretoria:Math.min(100,(t.diretoria||0)+4),torcida:Math.min(100,(t.torcida||0)+5)};}
+  if(temporada.tipoEquipe==='selecao'){
+   const jogos=temporada.torneios.flatMap(x=>x.jogosUsuario||[]),v=jogos.filter(j=>j.vencedor===temporada.clube).length,e=jogos.filter(j=>!j.vencedor).length,d=jogos.length-v-e;
+   tecnico={...tecnico,vitorias:(tecnico.vitorias||0)+v-(temporada.vitorias||0),empates:(tecnico.empates||0)+e-(temporada.empates||0),derrotas:(tecnico.derrotas||0)+d-(temporada.derrotas||0)};
+   temporada.jogos=jogos.length;temporada.vitorias=v;temporada.empates=e;temporada.derrotas=d;temporada.pontos=v*3+e;
+   if(ganhou||nova.tipo==='copaMundo'&&nova.posicaoInicial<=2)temporada.cumpriuObjetivo=true;
+  }
   temporadas[idx]=temporada;tecnico.temporadas=temporadas;
   if(nova.repescagemSulamericana){const base=clubesParaCopas(t.ligasMundo),clubes=ampliarParticipantesInternacionais(base.filter(x=>regiaoDaLiga(x.liga)==='sul'),'sulamericana',t.ano,base);copas.campeonatos.push(criarCampanhaCopa({nome:'Copa Sul-Americana',tipo:'continental',usuario:p.clube,forcaUsuario:nova.forcaUsuario,clubes,ano:p.ano,formato:'mata',entrada:'pre',seed:`${nova.seed}|repescagem` }));}
-  if(eCampeaoPrincipal(nova)&&!copas.campeonatos.some(x=>x.tipo==='mundial'&&x.nome==='Copa Intercontinental FIFA'))copas.campeonatos.push(criarMundialAnual(nova));
+  if(temporada.tipoEquipe!=='selecao'&&eCampeaoPrincipal(nova)&&!copas.campeonatos.some(x=>x.tipo==='mundial'&&x.nome==='Copa Intercontinental FIFA'))copas.campeonatos.push(criarMundialAnual(nova));
   if(copas.calendarioVersao){copas.concluidas.push(p.indice);tecnico.copasEmJogo=selecionarAgenda(copas);}else copas.indice++;
   if(!tecnico.copasEmJogo||(!copas.calendarioVersao&&copas.indice>=copas.campeonatos.length)){tecnico.copasEmJogo=null;temporada.vagasInternacionaisProxima=calcularVagasRapidas({ano:p.ano,classificacoesMundo:temporada.classificacoesMundo,torneios:temporada.torneios,ligasMundo:t.ligasMundo});}
  }else if(opcao==='continuar'&&copas.calendarioVersao)tecnico.copasEmJogo=selecionarAgenda(copas);
+ if(!tecnico.copasEmJogo&&tecnico.temporadas.at(-1)?.avaliacaoSelecaoPendente){
+  const temporadas=[...tecnico.temporadas],a={...temporadas.at(-1),avaliacaoSelecaoPendente:false},base=a.baseAvaliacaoSelecao;
+  const diretoria=Math.max(0,Math.min(100,base.diretoria+(a.cumpriuObjetivo?5:-10))),torcida=Math.max(0,Math.min(100,base.torcida+(a.cumpriuObjetivo?5:-6)));
+  temporadas[temporadas.length-1]=a;tecnico={...tecnico,temporadas,diretoria,torcida,demitido:diretoria<20,reputacao:Math.max(10,Math.min(99,tecnico.reputacao+(a.cumpriuObjetivo?3:-3)))};
+ }
  return {...c,tecnico};
 }
 export function estadualAutomaticoTecnico(t,forca){const clube=clubesParaCopas(t.ligasMundo).find(c=>c.nome===t.clube),regional=participantesEstadual(clube);return regional?resumoCampanhaCopa(simularCampanhaCopa({nome:regional.nome,tipo:'estadual',usuario:t.clube,forcaUsuario:forca,ano:t.ano,clubes:regional.clubes,formato:'estadual',estado:regional.estado,interativoEstadual:true})):null;}

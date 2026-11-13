@@ -56,7 +56,7 @@ function eventosTemporada(c,a,treinador=false){
 export function eventosConhecidos(c,temporadas=c.temporadas||[]){
  const mapa=new Map();for(const e of c.historiaFutebol?.titulos||[])inserir(mapa,e);
  for(const a of temporadas)for(const e of eventosTemporada(c,a))inserir(mapa,e);
- for(const a of c.tecnico?.temporadas||[])for(const e of eventosTemporada(c,a,true))inserir(mapa,e);
+ for(const a of Array.isArray(c.tecnico?.temporadas)?c.tecnico.temporadas:[])for(const e of eventosTemporada(c,a,true))inserir(mapa,e);
  for(const t of c.lista||[])if(t.clube&&t.clube!=='Individual'&&CLUBES.some(x=>x.nome===clubeCanonico(t.clube)))inserir(mapa,t);
  return [...mapa.values()].sort((a,b)=>a.ano-b.ano||a.nome.localeCompare(b.nome));
 }

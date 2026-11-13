@@ -177,6 +177,7 @@ export function PopUpDemissao({ temporada: a, t, onFechar }) {
       <h3>Você foi demitido</h3>
       <div className="ct-event-club"><Escudo nome={a.clube} size={30} /><strong>{a.clube}</strong></div>
       <div className="mt-fired-stats">{[[`${a.posicao}º`, 'posição'], [`${t.diretoria ?? 0}%`, 'diretoria'], [`${t.torcida ?? 0}%`, 'torcida']].map(([v, r]) => <div key={r}><strong>{v}</strong><span>{r}</span></div>)}</div>
+      {a.avaliacaoDiretoria?.motivo&&<p>{a.avaliacaoDiretoria.motivo}</p>}
       <p>Meta: {a.objetivo}. {a.contratoCurto === 'encerrado' ? 'O contrato de um ano terminou sem a meta e não foi renovado.' : a.cumpriuObjetivo ? 'A meta veio, mas a relação desgastou.' : 'O resultado ficou longe do combinado e a diretoria decidiu encerrar o trabalho.'} A carreira continua: há propostas, e você também pode tirar um ano para se preparar.</p>
       <button className="ct-primary" onClick={onFechar}>Seguir em frente<span aria-hidden="true">→</span></button>
     </div>

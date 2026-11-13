@@ -9,7 +9,7 @@ const experiencia={reputacao:88,temporadas:Array.from({length:6},(_,i)=>({ano:20
 const carreira=()=>({nome:'Teste',ano:2031,idade:45,tecnico:{...experiencia}});
 function assumir(nac){const c=carreira();c.tecnico.propostas=[SELECOES_TECNICO.find(n=>n.nac===nac)];return T.aceitarPropostaTecnico(c,c.tecnico.propostas[0].nome);}
 test('mercado internacional inclui países distintos fora de ano de Copa, respeitando nível',()=>{
- const nomes=new Set();for(let i=0;i<50;i++){for(const p of propostasSelecoesTecnico(experiencia,78,geradorTecnico(i))){nomes.add(p.nome);assert.ok(p.exigencia<=88);assert.ok(p.elenco<=95);}}
+ const nomes=new Set();for(let i=0;i<400;i++){for(const p of propostasSelecoesTecnico({...experiencia,ano:2025+i},78,geradorTecnico(i))){nomes.add(p.nome);assert.ok(p.exigencia<=88);assert.ok(p.elenco<=95);}}
  assert.ok(nomes.size>20);assert.ok(nomes.has('Portugal'));assert.ok(nomes.has('Japão'));assert.deepEqual(propostasSelecoesTecnico({...experiencia,temporadas:[]},45,()=>0),[]);
  assert.ok(propostasSelecoesTecnico(experiencia,60,()=>.1).every(p=>p.elenco<85));
 });

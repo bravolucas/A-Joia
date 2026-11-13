@@ -41,8 +41,8 @@ export function criarCampanhaCopa({nome,tipo='continental',usuario,forcaUsuario,
  const c={nome,tipo,ano,usuario,selecao:null,seed:seed||`${ano}|${nome}|${usuario}`,forcaUsuario,forcas:Object.fromEntries([eu,...outros].map(c=>[c.nome,nivel(c)])),pool:[eu,...outros],fases:[],grupos:[],jogosUsuario:[],campeao:null,vice:null,faseUsuario:'Em disputa',etapa:0,rodada:0,resultado:null,eliminados:[],estado:estado||null};
  if(formato==='liga'){
   c.formato='liga';c.times=embaralhar([eu,...selecionarParticipantes(outros,35,rng)],rng);c.participantes=c.times.length;c.totalRodadas=/Conference/i.test(nome)?6:8;c.calendario=calendario(c.times,c.totalRodadas);c.manual=[0,c.totalRodadas-1];c.jogosLiga=[];c.fase='liga';
- }else if(formato==='grupos'){
-  c.formato='grupos';c.times=[eu,...outros.slice(0,3)];c.participantes=c.pool.length;c.totalRodadas=6;c.calendario=calendario(c.times,6);c.manual=[0,1,2,3,4,5];c.jogosLiga=[];c.fase='grupos';
+ }else if(formato==='grupos'||formato==='selecao32'){
+  c.formato=formato;c.times=[eu,...outros.slice(0,3)];c.participantes=c.pool.length;c.totalRodadas=formato==='selecao32'?3:6;c.calendario=calendario(c.times,c.totalRodadas);c.manual=Array.from({length:c.totalRodadas},(_,i)=>i);c.jogosLiga=[];c.fase='grupos';
  }else if(formato==='estadual'){
   c.formato='estadual';c.times=[eu,...outros.slice(0,7)];c.totalRodadas=c.times.length%2?c.times.length:c.times.length-1;c.calendario=calendario(c.times,c.totalRodadas);const rodadasComUsuario=c.calendario.map((js,i)=>js.some(j=>j.casa===usuario||j.fora===usuario)?i:null).filter(i=>i!==null);c.manual=interativoEstadual?[...new Set([rodadasComUsuario[0],rodadasComUsuario.at(-1)])]:[];c.jogosLiga=[];c.fase='grupos';
  }else{
@@ -56,7 +56,7 @@ function avancarLiga(c,jogoUsuario){
  c.jogosLiga.push(...jogos);for(const j of jogos)if([j.casa,j.fora].includes(c.usuario))c.jogosUsuario.push({...j,fase:c.fase==='liga'?'Fase de liga':'Fase de grupos',rodada:c.rodada+1});c.rodada++;c.classificacao=tabela(c.times,c.jogosLiga,c.usuario);
 }
 function concluirLiga(c){
- c.grupos=[{grupo:c.formato==='liga'?'Tabela única':c.formato==='estadual'?'Classificação estadual':'Grupo do seu clube',jogos:c.jogosLiga,classificacao:c.classificacao}];const pos=c.classificacao.find(x=>x.meuClube)?.posicao||99;c.posicaoInicial=pos;
+ c.grupos=[{grupo:c.formato==='liga'?'Tabela única':c.formato==='estadual'?'Classificação estadual':c.selecao?'Grupo da seleção':'Grupo do seu clube',jogos:c.jogosLiga,classificacao:c.classificacao}];const pos=c.classificacao.find(x=>x.meuClube)?.posicao||99;c.posicaoInicial=pos;
  if(c.formato==='estadual'){
   c.candidatosMata=c.classificacao.slice(0,4).map(x=>x.nome);if(pos>4){c.fase='fim';c.faseUsuario='Eliminado na classificação estadual';return;}c.tamanho=4;c.fase='mata';c.adversario=null;return;
  }
@@ -69,7 +69,7 @@ function concluirLiga(c){
   if(pos>2){c.fase='fim';c.faseUsuario=`${pos}º na fase de grupos`;c.repescagemSulamericana=pos===3&&/Libertadores/i.test(c.nome);return;}
   c.eliminados.push(...c.classificacao.filter(x=>x.posicao>2).map(x=>x.nome));
   const restantes=c.pool.filter(x=>!c.times.some(t=>t.nome===x.nome)),rng=geradorTecnico(`${c.seed}|outros-grupos`),classificados=c.classificacao.slice(0,2).map(x=>x.nome);
-  for(let i=0;i<restantes.length;i+=4){const grupo=restantes.slice(i,i+4),js=[];for(let a=0;a<grupo.length;a++)for(let b=a+1;b<grupo.length;b++){js.push(partida(grupo[a],grupo[b],rng));js.push(partida(grupo[b],grupo[a],rng));}const tab=tabela(grupo,js,c.usuario);classificados.push(...tab.slice(0,2).map(x=>x.nome));c.eliminados.push(...tab.slice(2).map(x=>x.nome));}
+  for(let i=0;i<restantes.length;i+=4){const grupo=restantes.slice(i,i+4),js=[];for(let a=0;a<grupo.length;a++)for(let b=a+1;b<grupo.length;b++){js.push(partida(grupo[a],grupo[b],rng));if(c.formato!=='selecao32')js.push(partida(grupo[b],grupo[a],rng));}const tab=tabela(grupo,js,c.usuario);classificados.push(...tab.slice(0,2).map(x=>x.nome));c.eliminados.push(...tab.slice(2).map(x=>x.nome));}
   c.candidatosMata=classificados;
   c.tamanho=/Sul-Americana/i.test(c.nome)&&pos===2?32:16;c.playoff=c.tamanho===32;
  }
@@ -158,4 +158,4 @@ export function continuarCopa(c){if(c?.fase==='fim'&&!c.resultado)return {...c};
 export function simularCampanhaCopa(opcoes){let c=criarCampanhaCopa(opcoes);for(let i=0;c.fase!=='fim'&&i<80;i++){const d=decisaoCopa(c);c=d?escolherCopa(c,d.chave,d.penaltis?'canto':'controlar'):continuarCopa(c);}return c;}
 
 /** Keep full public results; discard draw and animation state from historical seasons. */
-export function resumoCampanhaCopa(c){return {nome:c.nome,tipo:c.tipo,ano:c.ano,participantes:c.participantes||c.pool?.length||0,campeao:c.campeao,vice:c.vice,faseUsuario:c.faseUsuario,formato:c.formato,grupos:c.grupos||[],classificacao:c.classificacao||[],fases:c.fases||[],jogosUsuario:c.jogosUsuario||[],...(c.repescagemSulamericana?{repescagemSulamericana:true}:{})};}
+export function resumoCampanhaCopa(c){return {nome:c.nome,tipo:c.tipo,ano:c.ano,...(c.selecao?{selecao:c.selecao}:{}),participantes:c.participantes||c.pool?.length||0,campeao:c.campeao,vice:c.vice,faseUsuario:c.faseUsuario,formato:c.formato,grupos:c.grupos||[],classificacao:c.classificacao||[],fases:c.fases||[],jogosUsuario:c.jogosUsuario||[],...(c.repescagemSulamericana?{repescagemSulamericana:true}:{})};}

@@ -2,6 +2,7 @@ import {decisaoCopa} from '../treinador/copasEscolha.js';
 const meses=['','JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 export function dataCopa(c){
  const d=decisaoCopa(c),t=c.tamanho||16;
+ if(c.tipo==='copaMundo')return c.fase==='grupos'?6.1+c.rodada*.15:t>=16?6.75:t>=8?7.05:t>=4?7.2:7.4;
  if(c.tipo==='estadual')return c.fase==='grupos'?1+(c.rodada/Math.max(1,c.totalRodadas))*1.5:t<=2?3.3:3.1;
  if(c.tipo==='mundial')return c.formato==='mundial32'?(c.fase==='grupos'?6.15+c.rodada*.1:t>=16?6.8:t>=8?7.05:t>=4?7.2:7.4):12.2+(c.roteiroMundial?.length?(3-c.roteiroMundial.length)*.12:.36);
  const europeu=c.formato==='liga'||c.regiao==='europa';

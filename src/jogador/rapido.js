@@ -3868,6 +3868,13 @@ export function registrarNoHall(c) {
 export function salvarRapido(estado) {
   try { const r=gravarPersistente(CHAVE_SAVE_RAPIDO,{ v: VERSAO_RAPIDO, ...estado });r.pendente?.catch(()=>{}); if (estado.c) registrarMuseu(estado.c); return true; } catch { return false; }
 }
+/** Confirma a gravação durável antes de apresentar uma nova etapa. */
+export async function salvarRapidoConfirmado(estado){
+ const resultado=gravarPersistente(CHAVE_SAVE_RAPIDO,{v:VERSAO_RAPIDO,...estado});
+ if(resultado.pendente)await resultado.pendente;
+ if(estado.c)registrarMuseu(estado.c);
+ return true;
+}
 export function carregarRapido() {
   try {
     const s = lerPersistente(CHAVE_SAVE_RAPIDO);

@@ -28,7 +28,7 @@ O arquivo tem acesso pela História do futebol:
 
 O mundo é serializável e pertence ao save; não altera `CLUBES`. O fechamento é idempotente por ano. Consultar uma ficha não simula temporadas. As decisões mantêm referência ao arquivo imutável, evitando copiar décadas de jogos a cada escolha; cada fechamento cria novas linhas e mapas.
 
-Novos saves com arquivo vivo usam IndexedDB (`ajoia-carreiras`, store `saves`). O indicador de localStorage é atualizado depois da confirmação da transação. A aplicação aguarda a abertura dos arquivos antes de mostrar a tela inicial. Os consumidores de saves, incluindo museu e slots do modo completo, usam o mesmo leitor. Falhas de gravação são apresentadas ao usuário. Exportações do modo completo continuam incluindo todos os dados no JSON.
+Novos saves com arquivo vivo usam IndexedDB (`ajoia-carreiras`, store `saves`). O indicador de localStorage é atualizado depois da confirmação da transação. A aplicação aguarda a abertura dos arquivos antes de mostrar a tela inicial. Os consumidores de saves, incluindo museu e slots do modo completo, usam o mesmo leitor. As transições do modo rápido são serializadas e a próxima etapa só aparece depois da confirmação da gravação. Falhas mantêm a etapa anterior e permitem tentar novamente, sem apresentar um avanço que ainda não foi salvo. Exportações do modo completo continuam incluindo todos os dados no JSON.
 
 Saves JSON antigos continuam legíveis. Há compactação compatível para ambientes sem IndexedDB. O acervo do mundo e os resultados compactam nomes repetidos e linhas históricas; as consultas reconstroem os objetos somente quando necessário. Nada é apagado para caber na cota de localStorage.
 

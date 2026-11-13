@@ -19,7 +19,7 @@ export default function FechamentoTemporada({c,card,onContinuar,celebracaoIndice
  const carreira=selecionado&&historico.find(g=>g.id===selecionado.id),n=carreira?.quantidade||selecionado?.quantidade||0;
  const eventos=celebracoesTemporada(card),evento=eventos[celebracaoIndice];
  const avancar=()=>{onCelebracao?.(celebracaoIndice+1);};
- const continuar=()=>{if(trava.current)return;trava.current=true;onContinuar();};
+ const continuar=async()=>{if(trava.current)return;trava.current=true;try{await onContinuar();}finally{trava.current=false;}};
  useEffect(()=>{const el=ref.current,anterior=document.activeElement;el.showModal();const liberar=bloquearRolagem(document.body);return()=>{el.close();liberar();anterior?.focus({preventScroll:true});};},[]);
  const antes=card.ovrAntes??card.ovr??card.ovrDepois,depois=card.ovrDepois??card.ovr,delta=depois-antes;
  const nacional=selecionado&&['copaMundo','continentalSelecao'].includes(selecionado.tipo),nomeEquipe=nacional?NACIONALIDADES.find(n=>n.id===c.nac)?.label||c.nac:card.clube,emblema=nacional?bandeiraDe(c.nac):escudoDe(card.clube);

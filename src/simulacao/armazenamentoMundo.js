@@ -32,7 +32,9 @@ export function gravarPersistente(chave,valor){
  const snapshot=structuredClone(valor),anterior=cache.get(chave);
  cache.set(chave,snapshot);
  const tarefa=()=>new Promise((resolve,reject)=>{
-  const tx=banco.transaction(LOJA,'readwrite');tx.objectStore(LOJA).put(snapshot,chave);
+  let tx;
+  try{tx=banco.transaction(LOJA,'readwrite');tx.objectStore(LOJA).put(snapshot,chave);}
+  catch(erro){cache.set(chave,anterior);comunicar(chave,erro.message);reject(erro);return;}
   tx.oncomplete=()=>{
    try{localStorage.setItem(chave,JSON.stringify({arquivoMundo:1}));comunicar(chave);resolve(true);}catch(e){cache.set(chave,anterior);comunicar(chave,e.message);reject(e);}
   };

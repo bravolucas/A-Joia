@@ -54,7 +54,7 @@ import {
   criarJogador, jogarTemporada, aplicarMomento, fecharTemporada, sortearEvento, resolverEvento, janelaExtra,
   precisaEscolherTraco, opcoesDeTraco, escolherTraco, tracoDe, podeAposentar, aposentadoriaForcada, aposentar,
   calcularLegado, NIVEIS_LEGADO, statusNoClube, valorMercado, formatarValor, ovrDe, clubeDe, ligaDe, posicaoDe, nacDe, personaDe,
-  textoCompartilhar, salvarRapido, carregarRapido, apagarRapido, NACS_DESTAQUE, IDADES_TRACO, anoDeCopa, anoDeContinentalSelecao,
+  textoCompartilhar, salvarRapidoConfirmado, carregarRapido, apagarRapido, NACS_DESTAQUE, IDADES_TRACO, anoDeCopa, anoDeContinentalSelecao,
   nomeCopaContinental, chancePenalti, ORIGENS_RAPIDO, origemDe, FOCOS, focoDe, definirFoco,
   escolherPretemporada,
   iniciarNegociacao, ajustarNegociacao, fecharNegociacao, CAMPOS_NEGOCIACAO, fama_negociador,
@@ -2713,7 +2713,7 @@ function AutoAvanco({ c, ms, onAgora, onPausar }) {
 export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: comecarDoZero = false }) {
   // fluxo: criação → oferta de base → treino → lances/Copa → fechamento salvo → próxima ação
   //        → (traço) → (coletiva) → decisão/mercado nos anos de decisão; nos outros, a temporada rola sozinha
-  const [estado, setEstado] = useState(() => atualizarFluxoCopasJogador((comecarDoZero ? null : carregarRapido()) || { etapa: "criacao" }));
+  const [estado, alterarEstado] = useState(() => atualizarFluxoCopasJogador((comecarDoZero ? null : carregarRapido()) || { etapa: "criacao" }));
   const [estanteAberta, setEstanteAberta] = useState(false);
   const [solicitacaoMuseuFinal,setSolicitacaoMuseuFinal]=useState(0);
   const [estadualAberto,setEstadualAberto]=useState(true);
@@ -2725,14 +2725,30 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const [recorde, setRecorde] = useState(0);
   const [selo, setSelo] = useState(null);
   const [popup, setPopup] = useState(null); // resultado de decisão ou desafio
-  const [erroSave,ERRO_SAVE]=useState(null);
+  const [erroSave,ERRO_SAVE]=useState(null),[salvando,SALVANDO]=useState(false);
+  const estadoAtual=useRef(estado),filaDeEstados=useRef(Promise.resolve());
+  function setEstado(valor){
+    const aplicar=async()=>{
+      const proximo=typeof valor==='function'?valor(estadoAtual.current):valor;
+      if(proximo===estadoAtual.current)return;
+      SALVANDO(true);
+      try{
+        if(proximo.etapa==='criacao')apagarRapido();else await salvarRapidoConfirmado(proximo);
+        estadoAtual.current=proximo;alterarEstado(proximo);ERRO_SAVE(null);
+      }catch(erro){ERRO_SAVE(erro.message||'Não foi possível salvar o progresso. Tente novamente.');}
+      finally{SALVANDO(false);}
+    };
+    filaDeEstados.current=filaDeEstados.current.then(aplicar,aplicar);
+    return filaDeEstados.current;
+  }
   const fechou=useRef(null);
   const { etapa, c, card, evento, resultado, opcoesTraco, fila } = estado;
 
   useEffect(() => {
-    if (etapa === "criacao") apagarRapido();
-    else if(!salvarRapido(estado))ERRO_SAVE("Não foi possível salvar o progresso. Mantenha o jogo aberto e libere espaço no navegador antes de continuar.");
-  }, [estado, etapa]);
+    if(estadoAtual.current.etapa==='criacao'){apagarRapido();return;}
+    SALVANDO(true);
+    filaDeEstados.current=salvarRapidoConfirmado(estadoAtual.current).catch(erro=>ERRO_SAVE(erro.message||'Não foi possível salvar o progresso.')).finally(()=>SALVANDO(false));
+  }, []);
   useEffect(()=>{const ouvir=e=>{if(e.detail.chave==='ajoia_rapido_v1')ERRO_SAVE(e.detail.erro);};window.addEventListener('ajoia-salvamento',ouvir);return()=>window.removeEventListener('ajoia-salvamento',ouvir);},[]);
   useEffect(() => { window.scrollTo({ top: 0 }); }, [etapa]);
   useEffect(()=>{
@@ -2761,17 +2777,17 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     const forcada = aposentadoriaForcada(cc);
     if (forcada) return setEstado({ etapa: "evento", c: cc, evento: null, ultimo: k, voar: true, forcada });
     if (precisaEscolherTraco(cc)) return setEstado({ etapa: "traco", c: cc, card: k, ultimo: k, voar: true, opcoesTraco: opcoesDeTraco(cc).map((t) => t.id) });
-    seguirJanela(cc, k, true);
+    return seguirJanela(cc, k, true);
   };
   const seguirJanela = (cc, k, voar) => {
     if (k && deveTerColetiva(cc, k)) return setEstado({ etapa: "coletiva", c: cc, card: k, ultimo: k, voar, coletiva: gerarColetiva(cc, k), resposta: null });
-    abrirJanela(cc, k, voar);
+    return abrirJanela(cc, k, voar);
   };
   const abrirJanela = (cc, k, voar = false) => {
     let ev = eventoDaJanela(cc);
     let fl = true;
     if (!ev && anoDeDecisao(cc)) { ev = segundoEvento(cc, null); fl = false; }
-    setEstado({ etapa: "evento", c: cc, evento: ev, resultado: null, fila: fl, ultimo: k, voar, auto: !ev && !anoDeDecisao(cc) });
+    return setEstado({ etapa: "evento", c: cc, evento: ev, resultado: null, fila: fl, ultimo: k, voar, auto: !ev && !anoDeDecisao(cc) });
   };
   // tocar numa carta de treino já joga a temporada
   const jogar = (cartaId = null) => {
@@ -2941,7 +2957,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const torneio = c && c.idade >= 18 ? (anoDeCopa(c.ano) ? "Copa do Mundo" : anoDeContinentalSelecao(c.ano) ? nomeCopaContinental(c.nac) : null) : null;
   return (
     <div data-patamar={c&&!c.tecnico?patamarCarreira(c).id:undefined} className={etapa === "tecnico" ? "rp ct-root" : "rp rp-jogador"}>
-      <style>{ESTILO_BASE}</style>{erroSave&&<div role="alert" className="mv-erro-save">{erroSave}</div>}
+      <style>{ESTILO_BASE}</style>{salvando&&<div className="mv-salvando" aria-live="polite"><span>Salvando progresso…</span></div>}{erroSave&&<div role="alert" className="mv-erro-save">{erroSave}</div>}
       {painel ? <CartaoCarreira c={c} etapa={etapa} onEstante={() => setEstanteAberta(true)} onFicha={() => setGaveta("ficha")} contadorPulsa={contadorPulsa} recorde={recorde} />
         : <Cabecalho etapa={etapa} treinador={etapa === "tecnico"} c={mostrarCabecalho ? c : null} onSair={onSair} onEstante={() => setEstanteAberta(true)} />}
       <RevelacaoTela as="main" identidade={etapa} className="pb-10">
@@ -3043,7 +3059,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
       {estanteAberta && c && <Estante c={c} onFechar={() => setEstanteAberta(false)} />}
       {patrimonioAberto && c && <Patrimonio c={c} etapa={etapa} onComprar={comprar} onFechar={() => setPatrimonioAberto(false)} />}
       {apresentacao && !chegadaPendente && <CenasClube c={apresentacao.c||c} mudanca={apresentacao.mudanca} onFim={()=>setApresentacao(null)}>{fechar=>apresentacao.curto?<ApresentacaoNovoClube clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} grandeChegada={apresentacao.grande} curto={apresentacao.curto} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>:<ApresentacaoGrande fama={c.fama} clube={apresentacao.clube} nome={c.nome} numero={numeroDe(c)} posicao={posicaoDe(c.posicao).label} idade={c.idade} deOnde={apresentacao.deOnde} contrato={apresentacao.contrato} valor={apresentacao.valor} onConcluir={fechar}/>}</CenasClube>}
-      {["fechamento","bolaOuro"].includes(etapa)&&card&&c&&!apresentacao&&<PopupTemporada key={card.ano} c={c} card={card} celebracaoIndice={estado.celebracaoIndice||0} onCelebracao={indice=>setEstado(st=>({...st,etapa:"fechamento",celebracaoIndice:indice,auto:false}))} onFechar={()=>{if(estado.retorno){setEstado(estado.retorno);return;}if(card.titulos.length){setContadorPulsa(x=>x+1);vibrar(20);}posTemporada(c,card);}}/>}
+      {["fechamento","bolaOuro"].includes(etapa)&&card&&c&&!apresentacao&&<PopupTemporada key={card.ano} c={c} card={card} celebracaoIndice={estado.celebracaoIndice||0} onCelebracao={indice=>setEstado(st=>({...st,etapa:"fechamento",celebracaoIndice:indice,auto:false}))} onFechar={()=>{if(estado.retorno){return setEstado(estado.retorno);}if(card.titulos.length){setContadorPulsa(x=>x+1);vibrar(20);}return posTemporada(c,card);}}/>}
       {apresentacaoSelecao&&!apresentacao&&!chegadaPendente&&!["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa)&&!popup&&<PrimeiraSelecao c={apresentacaoSelecao.c} estreia={apresentacaoSelecao.estreia} onFim={()=>setApresentacaoSelecao(null)}/>}
       {popup && !["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa) && <PopupResultado key={popup.k} info={popup} onFechar={() => setPopup(null)} />}
     </div>

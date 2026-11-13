@@ -16,3 +16,21 @@ for(const pos of [1,2,3,4])test(`Bola de Ouro tem apresentação exclusiva para 
 test('rebaixamento tem resultado próprio sem comemoração de taça',async({page})=>{const s=fixture();s.card.rebaixado={para:'Série B'};await abrir(page,s);const d=page.getByRole('dialog',{name:/Resultado da temporada/});await expect(d.getByRole('heading',{name:'REBAIXADO',exact:true})).toBeVisible();await expect(d.locator('.ft-papel')).toHaveCount(0);await d.getByRole('button',{name:'Ver resumo da temporada'}).click();await expect(page.getByRole('dialog',{name:/Fim da temporada/})).toBeVisible();});
 
 test('save antigo da Bola de Ouro abre o novo popup; Escape leva ao resumo e movimento reduzido é respeitado',async({page})=>{const s=fixture();s.etapa='bolaOuro';s.card.bola={pos:2};await page.emulateMedia({reducedMotion:'reduce'});await abrir(page,s);const d=page.getByRole('dialog',{name:/Resultado da temporada.*Bola de Ouro/});await expect(d).toContainText('2º MELHOR DO MUNDO');await expect(d.locator('.ft-taca')).toHaveCount(0);await expect(d.locator('.cb-palco')).toHaveCSS('animation-name','none');await page.keyboard.press('Escape');await expect(page.getByRole('dialog',{name:/Fim da temporada/})).toBeVisible();expect(await lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo.etapa))).toBe('fechamento');});
+
+test('falha de gravação mantém o resultado atual e permite tentar novamente sem perder a retomada',async({page})=>{
+ const s=fixture();s.card.titulos=[{tipo:'segunda',nome:'Brasileirão Série B'}];s.card.acesso={para:'Brasileirão'};s.card.bola={pos:3};await abrir(page,s);
+ const dialog=page.getByRole('dialog');await expect(dialog).toContainText('CAMPEÃO!');
+ await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await expect(page.locator('.mv-salvando')).toHaveCount(0);
+ await page.evaluate(()=>{const original=IDBDatabase.prototype.transaction;let falhar=true;IDBDatabase.prototype.transaction=function(...args){if(args[1]==='readwrite'&&falhar){falhar=false;throw new Error('Falha de gravação simulada');}return original.apply(this,args);};});
+ await dialog.getByRole('button',{name:'Próximo resultado'}).click();await expect(page.getByRole('alert')).toContainText('Falha de gravação simulada');await expect(dialog).toContainText('CAMPEÃO!');
+ await dialog.getByRole('button',{name:'Próximo resultado'}).click();await expect(dialog.getByRole('heading',{name:'ACESSO!',exact:true})).toBeVisible();
+ await page.reload();await page.getByRole('button',{name:/Continuar · Teste resultado/}).click();await expect(dialog.getByRole('heading',{name:'ACESSO!',exact:true})).toBeVisible();
+});
+
+test('falha ao continuar a carreira não prende o resumo e a nova tentativa avança uma vez',async({page})=>{
+ await abrir(page,fixture());const dialog=page.getByRole('dialog');await expect(dialog.getByRole('region',{name:'Resumo da temporada'})).toBeVisible();
+ await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await expect(page.locator('.mv-salvando')).toHaveCount(0);
+ await page.evaluate(()=>{const original=IDBDatabase.prototype.transaction;let falhar=true;IDBDatabase.prototype.transaction=function(...args){if(args[1]==='readwrite'&&falhar){falhar=false;throw new Error('Falha ao continuar simulada');}return original.apply(this,args);};});
+ await dialog.getByRole('button',{name:/Continuar carreira/}).click();await expect(page.getByRole('alert')).toContainText('Falha ao continuar simulada');await expect(dialog).toBeVisible();
+ await dialog.getByRole('button',{name:/Continuar carreira/}).click();await expect(dialog).toHaveCount(0);const salvo=await lerSave(page);expect(salvo.c.temporadas).toHaveLength(1);
+});

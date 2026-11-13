@@ -8,3 +8,5 @@
 .mv-erro-save{position:fixed;bottom:12px;left:12px;right:12px;z-index:10000;background:#401e25;color:#fff;padding:16px;border:1px solid #ff9d97;border-radius:10px}
 
 .mv-lideres{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:18px 0}.mv-lideres article{background:#101e30;border-radius:10px;padding:12px}.mv-lideres h4{color:#7dd3fc;margin-bottom:8px}.mv-lideres ol{list-style:none;padding:0}.mv-lideres li{display:flex;justify-content:space-between;gap:8px;padding:7px 0;font-size:12px}.mv-lideres small{display:block;color:#9db4c8}
+
+.mv-salvando{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:flex-end;justify-content:center;padding:20px;cursor:progress}.mv-salvando span{padding:8px 14px;border:1px solid #7dd3fc55;border-radius:20px;background:#101e30;color:#d8f0ff;font-size:12px}

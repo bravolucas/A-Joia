@@ -1,3 +1,4 @@
+import {clubesDoMundo} from '../simulacao/mundoVivo.js';
 import {criarAgenda,selecionarAgenda,chaveAgenda,avancarPausa} from '../competicoes/calendarioCopas.js';
 import {eCampeaoPrincipal,criarMundialAnual,criarMundial32} from '../competicoes/mundialRapido.js';
 import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternacionais.js';
@@ -6,11 +7,11 @@ import {clubesParaCopas,vagaTecnico,nomeVaga,regiaoDaLiga,COPAS_NACIONAIS,calcul
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
 import {participantesEstadual} from '../competicoes/estaduaisRapidos.js';
 export function prepararCopasTecnico(t,forca){
- const clubes=clubesParaCopas(t.ligasMundo),clube=clubes.find(c=>c.nome===t.clube);if(!clube||t.tipoEquipe==='selecao')return null;
+ const clubes=clubesDoMundo({tecnico:t},clubesParaCopas(t.ligasMundo)),clube=clubes.find(c=>c.nome===t.clube);if(!clube||t.tipoEquipe==='selecao')return null;
  const campeonatos=[],regional=participantesEstadual(clube),criar=o=>criarCampanhaCopa({usuario:t.clube,forcaUsuario:forca,ano:t.ano,...o});
- if(regional)campeonatos.push(criar({nome:regional.nome,tipo:'estadual',clubes:regional.clubes,formato:'estadual',estado:regional.estado,interativoEstadual:true}));
+ if(regional)campeonatos.push(criar({nome:regional.nome,tipo:'estadual',clubes:clubesDoMundo({tecnico:t},regional.clubes),formato:'estadual',estado:regional.estado,interativoEstadual:true}));
  const copa=COPAS_NACIONAIS[primeiraLiga(t.liga||clube.liga)];if(copa){const pool=clubes.filter(c=>c.pais===clube.pais);campeonatos.push(criar({nome:copa,tipo:'copa',clubes:pool,formato:'mata',entrada:copa==='Copa do Brasil'?(clube.forca>=80?'principal':clube.forca>=65?'pre':'preliminar'):'principal'}));}
- const vaga=vagaTecnico(t);if(vaga){const regiao=regiaoDaLiga(clube.liga),anterior=t.temporadas?.at(-1),vagas=anterior?.vagasInternacionaisProxima||(t.vagasInicioAno===t.ano?t.vagasInicio:null)||calcularVagasRapidas({ano:t.ano-1,classificacoesMundo:anterior?.classificacoesMundo,torneios:anterior?.torneios,ligasMundo:t.ligasMundo}),pool=clubes.filter(c=>c.nome===t.clube||vagas[c.nome]?.competicao===vaga.competicao);pool.splice(0,pool.length,...ampliarParticipantesInternacionais(pool,vaga.competicao,t.ano,clubes));campeonatos.push(criar({nome:nomeVaga(vaga.competicao),tipo:'continental',clubes:pool,formato:regiao==='europa'?'liga':'grupos',entrada:vaga.entrada}));}
+ const vaga=vagaTecnico(t);if(vaga){const regiao=regiaoDaLiga(clube.liga),anterior=t.temporadas?.at(-1),vagas=anterior?.vagasInternacionaisProxima||(t.vagasInicioAno===t.ano?t.vagasInicio:null)||calcularVagasRapidas({ano:t.ano-1,classificacoesMundo:anterior?.classificacoesMundo,torneios:anterior?.torneios,ligasMundo:t.ligasMundo}),pool=clubes.filter(c=>c.nome===t.clube||vagas[c.nome]?.competicao===vaga.competicao);pool.splice(0,pool.length,...ampliarParticipantesInternacionais(pool,vaga.competicao,t.ano,clubesParaCopas(t.ligasMundo)));campeonatos.push(criar({nome:nomeVaga(vaga.competicao),tipo:'continental',clubes:pool,formato:regiao==='europa'?'liga':'grupos',entrada:vaga.entrada}));}
  const mundial=criarMundial32({usuario:t.clube,forcaUsuario:forca,ano:t.ano,historico:(t.temporadas||[]),seed:`tecnico|${t.clube}`});if(mundial)campeonatos.push(mundial);
  for(const cp of campeonatos)cp.regiao=regiaoDaLiga(clube.liga);
  return criarAgenda(campeonatos,{ano:t.ano,clube:t.clube,liga:{nome:t.liga==='brasileirao'?'Brasileirão':t.liga==='serieB'?'Brasileirão Série B':'Campeonato nacional',europa:regiaoDaLiga(clube.liga)==='europa',brasil:clube.pais==='Brasil'}});
@@ -46,4 +47,4 @@ export function aplicarCopaTecnico(c,chave,opcao){
  }
  return {...c,tecnico};
 }
-export function estadualAutomaticoTecnico(t,forca){const clube=clubesParaCopas(t.ligasMundo).find(c=>c.nome===t.clube),regional=participantesEstadual(clube);return regional?resumoCampanhaCopa(simularCampanhaCopa({nome:regional.nome,tipo:'estadual',usuario:t.clube,forcaUsuario:forca,ano:t.ano,clubes:regional.clubes,formato:'estadual',estado:regional.estado,interativoEstadual:true})):null;}
+export function estadualAutomaticoTecnico(t,forca){const clube=clubesParaCopas(t.ligasMundo).find(c=>c.nome===t.clube),regional=participantesEstadual(clube);return regional?resumoCampanhaCopa(simularCampanhaCopa({nome:regional.nome,tipo:'estadual',usuario:t.clube,forcaUsuario:forca,ano:t.ano,clubes:clubesDoMundo({tecnico:t},regional.clubes),formato:'estadual',estado:regional.estado,interativoEstadual:true})):null;}

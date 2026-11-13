@@ -62,45 +62,32 @@ function ordenarTabela(linhas) {
   ).map((linha, indice) => ({ ...linha, posicao: jaClassificada ? linha.posicao : indice + 1 }));
 }
 
-function simularPartida(casa, fora, tabela, rng) {
-  const diferenca = Number(casa.elenco ?? casa.forca ?? 50) - Number(fora.elenco ?? fora.forca ?? 50);
-  const golsCasa = sortearPoisson(limitar(1.35 + diferenca * 0.012, 0.25, 3.1), rng);
-  const golsFora = sortearPoisson(limitar(1.12 - diferenca * 0.009, 0.2, 2.8), rng);
+function simularPartida(casa, fora, tabela, rng, jogos, rodada) {
+  const ataqueCasa=casa.ataque??Number(casa.elenco??casa.forca??50),defesaCasa=casa.defesa??Number(casa.elenco??casa.forca??50);
+  const ataqueFora=fora.ataque??Number(fora.elenco??fora.forca??50),defesaFora=fora.defesa??Number(fora.elenco??fora.forca??50);
+  const golsCasa = sortearPoisson(limitar(1.35 + (ataqueCasa-defesaFora) * 0.035, 0.25, 3.5), rng);
+  const golsFora = sortearPoisson(limitar(1.12 + (ataqueFora-defesaCasa) * 0.03, 0.2, 3.2), rng);
   registrarPartida(tabela, casa, fora, golsCasa, golsFora);
+  jogos?.push({rodada,casa:casa.nome,fora:fora.nome,golsCasa,golsFora});
 }
 
-function simularLiga(clubes, rng) {
-  if (clubes.length < 2) return ordenarTabela([...criarTabela(clubes).values()]);
-  const tabela = criarTabela(clubes);
+export function simularLigaMundo(clubes, rng = Math.random) {
+  const tabela = criarTabela(clubes), jogos = [], primeiroTurno = [];
   const base = [...clubes];
-  if (base.length % 2) base.push(null);
-  const tamanho = base.length;
-  const jogosPrimeiroTurno = tamanho - 1;
-  const porNome = new Map(clubes.map(clube => [clube.nome, clube]));
-
-  for (let rodada = 0; rodada < jogosPrimeiroTurno; rodada++) {
-    for (let indice = 0; indice < tamanho / 2; indice++) {
-      const primeiro = base[indice];
-      const segundo = base[tamanho - 1 - indice];
-      if (!primeiro || !segundo) continue;
-      const casa = (rodada + indice) % 2 === 0 ? primeiro : segundo;
-      const fora = casa === primeiro ? segundo : primeiro;
-      simularPartida(casa, fora, tabela, rng);
+  if(base.length<2)return {classificacao:ordenarTabela([...tabela.values()]),jogos};
+  if(base.length%2)base.push(null);
+  const rodadas=base.length-1;
+  for(let rodada=0;rodada<rodadas;rodada++){
+    for(let i=0;i<base.length/2;i++){
+      const a=base[i],b=base[base.length-1-i];if(!a||!b)continue;
+      const casa=(rodada+i)%2===0?a:b,fora=casa===a?b:a;
+      primeiroTurno.push({casa,fora,rodada:rodada+1});
+      simularPartida(casa,fora,tabela,rng,jogos,rodada+1);
     }
-    base.splice(1, 0, base.pop());
+    base.splice(1,0,base.pop());
   }
-
-  const participantes = [...tabela.keys()].map(nome => porNome.get(nome));
-  // O returno repete os confrontos com mando invertido.
-  for (let i = 0; i < participantes.length; i++) {
-    for (let j = i + 1; j < participantes.length; j++) {
-      const a = participantes[i];
-      const b = participantes[j];
-      simularPartida(b, a, tabela, rng);
-    }
-  }
-
-  return ordenarTabela([...tabela.values()]);
+  for(const j of primeiroTurno)simularPartida(j.fora,j.casa,tabela,rng,jogos,j.rodada+rodadas);
+  return {classificacao:ordenarTabela([...tabela.values()]),jogos};
 }
 
 /**
@@ -152,7 +139,7 @@ export function simularClassificacoesMundoTecnico({
       continue;
     }
     const ordenados = [...participantes].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
-    resultado[liga] = { liga, origem: 'simulacao-global', classificacao: simularLiga(ordenados, rng) };
+    resultado[liga] = { liga, origem: 'simulacao-global', ...simularLigaMundo(ordenados, rng) };
   }
   return resultado;
 }
@@ -204,4 +191,11 @@ export function atualizarLigasMundoTecnico({
   }
 
   return { ligasMundo: atribuicoes, movimentos };
+}
+
+/** Reavalia a tabela quando um lance jogável altera um placar já registrado. */
+export function classificacaoDosJogos(jogos,nomes){
+ const clubes=nomes.map(nome=>({nome})),tabela=criarTabela(clubes);
+ for(const j of jogos)registrarPartida(tabela,{nome:j.casa},{nome:j.fora},j.golsCasa,j.golsFora);
+ return ordenarTabela([...tabela.values()]);
 }

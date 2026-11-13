@@ -1,0 +1,42 @@
+import React,{useMemo,useState} from 'react';
+import {jogosDaEdicao,historicoAtleta} from './mundoVivo.js';
+import {avaliarClubeNoMundo} from './forcaEquipe.js';
+import {CLUBES} from '../dados/data.js';
+const universo=c=>c.tecnico?.universo||c.universo;
+const sinal=n=>n>0?`+${n}`:String(n);
+export function EvolucaoClube({c,nome}){
+ const u=universo(c),p=u?.clubes?.[nome];
+ const cl=CLUBES.find(x=>x.nome===nome)||{nome,forca:60},atual=avaliarClubeNoMundo(c,cl);
+ return <section className="mv-painel" aria-label={`Evolução do ${nome}`}><span className="hf-eyebrow">UM CLUBE EM MOVIMENTO</span><h3>O momento do {nome}</h3><div className="hf-numeros"><article><strong>{atual.forca}</strong><span>força do elenco</span></article><article><strong>{p?.reputacao??cl.forca}</strong><span>reputação</span></article><article><strong>{p?.financas??50}/100</strong><span>saúde financeira</span></article></div><p className="hf-nota">A força acompanha a qualidade dos jogadores, o equilíbrio dos setores e a fase. Reputação e estrutura mudam mais devagar.</p>
+ {p?.historico?.length?<div className="hf-tabela-scroll"><table className="hf-tabela"><thead><tr><th>Ano</th><th>Colocação</th><th>Força</th><th>O que aconteceu</th></tr></thead><tbody>{[...historicoAtleta(p)].reverse().map(a=><tr key={a.ano}><th>{a.ano}</th><td>{a.posicao?`${a.posicao}º / ${a.total}`:'—'}</td><td>{a.forcaAntes} → {a.forca}</td><td>{a.motivos.join(' · ')}{a.titulos.length>0&&<small className="mv-titulos">{a.titulos.join(' · ')}</small>}</td></tr>)}</tbody></table></div>:<p className="hf-vazio">A evolução será registrada a partir da próxima temporada concluída.</p>}</section>;
+}
+export function ImpactoJogador({avaliacao}){
+ if(!avaliacao)return null;
+ return <section className="mv-impacto" aria-label="Seu impacto no time"><strong>Você muda este time</strong><span>Sem você: {avaliacao.semUsuario} · Com você: {avaliacao.forca}</span><b>{sinal(avaliacao.impactoUsuario)} de força com sua participação</b><small>Goleiro {avaliacao.setores.GOL} · Defesa {avaliacao.setores.DEF} · Meio {avaliacao.setores.MEI} · Ataque {avaliacao.setores.ATA}</small></section>;
+}
+export function ArquivoAtletas({c}){
+ const u=universo(c),[busca,B]=useState(''),[clube,C]=useState(''),[id,I]=useState(null);
+ const todos=useMemo(()=>Object.values(u?.atletas||{}),[u]);
+ const lista=useMemo(()=>todos.filter(p=>(!busca||p.nome.toLocaleLowerCase('pt-BR').includes(busca.toLocaleLowerCase('pt-BR')))&&(!clube||p.clube===clube||historicoAtleta(p).some(a=>a.clube===clube))).sort((a,b)=>Number(!!b.voce)-Number(!!a.voce)||a.nome.localeCompare(b.nome,'pt-BR')),[todos,busca,clube]);
+ const p=todos.find(x=>x.id===id),clubes=[...new Set(todos.flatMap(p=>historicoAtleta(p).map(a=>a.clube)))].filter(Boolean).sort();
+ return <section aria-label="Arquivo de jogadores"><span className="hf-eyebrow">AS CARREIRAS DESTE MUNDO</span><h2>Jogadores e suas histórias</h2><p className="hf-nota">Partidas, gols, assistências e números principais dos goleiros. Os registros começam na primeira temporada concluída com este arquivo; anos antigos não são estimados.</p><div className="hf-filtros"><label>Buscar jogador<input type="search" value={busca} onChange={e=>B(e.target.value)} placeholder="Nome do jogador…"/></label><label>Clube da trajetória<select value={clube} onChange={e=>C(e.target.value)}><option value="">Todos os clubes</option>{clubes.map(n=><option key={n}>{n}</option>)}</select></label></div>
+ {p&&<article className="mv-ficha" aria-label={`Ficha de ${p.nome}`}><button className="mv-voltar" onClick={()=>I(null)}>Fechar ficha ×</button><h3>{p.nome}{p.voce?' · Você':''}</h3><p>{p.posicao} · {p.clube}{p.aposentado?' · Aposentado':''}</p><div className="hf-tabela-scroll"><table className="hf-tabela"><thead><tr><th>Ano / clube</th><th>J</th><th>Gols</th><th>Ast.</th>{p.posicao==='GOL'&&<><th>Defesas</th><th>SG</th></>}<th>Conquistas e movimentos</th></tr></thead><tbody>{[...historicoAtleta(p)].reverse().map(a=><tr key={a.ano}><th>{a.ano}<small>{a.clube}</small></th><td>{a.jogos}</td><td>{a.gols}</td><td>{a.assist}</td>{p.posicao==='GOL'&&<><td>{a.defesas??'—'}</td><td>{a.cleanSheets??'—'}</td></>}<td>{a.titulos.join(' · ')||'—'}{a.destino&&<small>Transferência para {a.destino}</small>}{a.aposentou&&<small>Aposentadoria</small>}</td></tr>)}</tbody></table></div></article>}
+ <p className="hf-nota">{lista.length} jogador{lista.length===1?'':'es'} encontrado{lista.length===1?'':'s'}{lista.length>60?' · Refine a busca para encontrar outros nomes.':''}</p><ul className="mv-atletas">{lista.slice(0,60).map(p=><li key={p.id}><button onClick={()=>I(p.id)}><strong>{p.nome}{p.voce?' · Você':''}</strong><span>{p.posicao} · {p.clube}{p.aposentado?' · Aposentado':''}</span><small>{historicoAtleta(p).reduce((s,a)=>s+a.jogos,0)} jogos · {historicoAtleta(p).reduce((s,a)=>s+a.gols,0)} gols · {historicoAtleta(p).reduce((s,a)=>s+a.assist,0)} assistências</small></button></li>)}</ul>{!todos.length&&<p className="hf-vazio">Os jogadores terão suas temporadas registradas ao avançar a carreira.</p>}</section>;
+}
+export function EdicoesCompeticao({c,nome}){
+ const u=universo(c),edicoes=useMemo(()=>(u?.edicoes||[]).filter(e=>e.nome===nome).sort((a,b)=>b.ano-a.ano),[u,nome]);
+ const [ano,A]=useState(null),[equipe,E]=useState('');
+ const edicao=edicoes.find(e=>e.ano===Number(ano))||edicoes[0];
+ const jogos=useMemo(()=>jogosDaEdicao(edicao),[edicao]);
+ const destaques=useMemo(()=>Object.values(u?.atletas||{}).flatMap(p=>{
+  const linha=p.historico.find(a=>(Array.isArray(a)?a[0]:a.ano)===edicao?.ano);
+  if(!linha)return [];
+  const a=historicoAtleta({historico:[linha]})[0],t=a.porCompeticao?.find(t=>t.nome===nome);
+  return t?[{id:p.id,nome:p.nome,clube:a.clube,...t}]:[];
+ }),[u,edicao,nome]);
+ if(!edicao)return null;
+ return <section className="mv-painel" aria-label="Edições da competição"><h3>Por dentro da temporada</h3><div className="hf-filtros"><label>Edição<select value={edicao.ano} onChange={e=>{A(e.target.value);E('');}}>{edicoes.map(e=><option key={e.ano}>{e.ano}</option>)}</select></label><label>Filtrar partidas por clube<select value={equipe} onChange={e=>E(e.target.value)}><option value="">Todos</option>{[...new Set(jogos.flatMap(j=>[j.casa,j.fora]))].sort().map(n=><option key={n}>{n}</option>)}</select></label></div>
+ {edicao.classificacao?.length>0&&<div className="hf-tabela-scroll"><table className="hf-tabela"><thead><tr><th>Pos.</th><th>Clube</th><th>J</th><th>Pts</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th></tr></thead><tbody>{edicao.classificacao.map((t,i)=><tr key={t.nome}><td>{t.posicao||i+1}º</td><th>{t.nome}</th>{['jogos','pontos','vitorias','empates','derrotas','golsPro','golsContra'].map(k=><td key={k}>{t[k]??'—'}</td>)}</tr>)}</tbody></table></div>}
+ {destaques.length>0&&<div className="mv-lideres">{[['gols','Artilheiros'],['assist','Assistências'],['defesas','Defesas']].map(([campo,titulo])=>{const lista=destaques.filter(p=>p[campo]>0).sort((a,b)=>b[campo]-a[campo]||a.nome.localeCompare(b.nome)).slice(0,5);return lista.length>0&&<article key={campo}><h4>{titulo}</h4><ol>{lista.map(p=><li key={p.id}><span>{p.nome}<small>{p.clube}</small></span><b>{p[campo]}</b></li>)}</ol></article>;})}</div>}
+ {jogos.length>0?<><p className="hf-nota">{jogos.length} partidas registradas nesta edição.</p><ol className="mv-jogos">{jogos.filter(j=>!equipe||[j.casa,j.fora].includes(equipe)).map((j,i)=><li key={i}><small>{typeof j.rodada==='number'?`Rodada ${j.rodada}`:j.rodada}</small><span>{j.casa}</span><b>{j.golsCasa} × {j.golsFora}</b><span>{j.fora}</span>{j.penaltis&&<small>Pênaltis · {j.vencedor}</small>}</li>)}</ol></>:<p className="hf-nota">Esta edição preserva a classificação registrada; os placares individuais não estavam disponíveis.</p>}</section>;
+}

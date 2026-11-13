@@ -1,3 +1,4 @@
+import {lerPersistente} from '../simulacao/armazenamentoMundo.js';
 import { equipeTituloTecnico } from '../treinador/selecoesTecnico.js';
 import {compararMarcasCopas} from '../jogador/recordesHistoricos.js';
 import { CLUBES, LIGAS, COMPS_PAIS, ESTADUAIS } from '../dados/data.js';
@@ -188,11 +189,11 @@ export function sincronizarMuseuDosSaves(storage = armazenamentoMuseu()) {
     const colecao = storage.getItem(CHAVE_MUSEU);
     if (colecao) validarMuseu(JSON.parse(colecao));
     let rapido;
-    try { rapido = JSON.parse(storage.getItem('ajoia_rapido_v1') || 'null'); } catch { rapido = null; }
+    try { rapido = lerPersistente('ajoia_rapido_v1',storage); } catch { rapido = null; }
     if (rapido?.c) ok = registrarMuseu(rapido.c, {}, storage).ok && ok;
     for (const slot of ['auto', '1', '2', '3', '4', '5']) {
       let salvo;
-      try { salvo = JSON.parse(storage?.getItem(`ajoia_save_${slot}`) || 'null'); } catch { continue; }
+      try { salvo = lerPersistente(`ajoia_save_${slot}`,storage); } catch { continue; }
       if (salvo?.carreira || salvo?.fim?.c) ok = registrarMuseu({ ...(salvo.fim?.c || salvo.carreira), nome: salvo.nome || salvo.fim?.c?.nome || salvo.carreira?.nome }, { modo: 'completo', temporadas: salvo.temporadas || [] }, storage).ok && ok;
     }
   } catch { ok = false; }

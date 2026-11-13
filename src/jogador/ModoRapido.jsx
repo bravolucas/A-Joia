@@ -2725,13 +2725,15 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const [recorde, setRecorde] = useState(0);
   const [selo, setSelo] = useState(null);
   const [popup, setPopup] = useState(null); // resultado de decisão ou desafio
+  const [erroSave,ERRO_SAVE]=useState(null);
   const fechou=useRef(null);
   const { etapa, c, card, evento, resultado, opcoesTraco, fila } = estado;
 
   useEffect(() => {
     if (etapa === "criacao") apagarRapido();
-    else salvarRapido(estado);
+    else if(!salvarRapido(estado))ERRO_SAVE("Não foi possível salvar o progresso. Mantenha o jogo aberto e libere espaço no navegador antes de continuar.");
   }, [estado, etapa]);
+  useEffect(()=>{const ouvir=e=>{if(e.detail.chave==='ajoia_rapido_v1')ERRO_SAVE(e.detail.erro);};window.addEventListener('ajoia-salvamento',ouvir);return()=>window.removeEventListener('ajoia-salvamento',ouvir);},[]);
   useEffect(() => { window.scrollTo({ top: 0 }); }, [etapa]);
   useEffect(()=>{
     if(etapa!=='tecnico')return;
@@ -2939,7 +2941,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const torneio = c && c.idade >= 18 ? (anoDeCopa(c.ano) ? "Copa do Mundo" : anoDeContinentalSelecao(c.ano) ? nomeCopaContinental(c.nac) : null) : null;
   return (
     <div data-patamar={c&&!c.tecnico?patamarCarreira(c).id:undefined} className={etapa === "tecnico" ? "rp ct-root" : "rp rp-jogador"}>
-      <style>{ESTILO_BASE}</style>
+      <style>{ESTILO_BASE}</style>{erroSave&&<div role="alert" className="mv-erro-save">{erroSave}</div>}
       {painel ? <CartaoCarreira c={c} etapa={etapa} onEstante={() => setEstanteAberta(true)} onFicha={() => setGaveta("ficha")} contadorPulsa={contadorPulsa} recorde={recorde} />
         : <Cabecalho etapa={etapa} treinador={etapa === "tecnico"} c={mostrarCabecalho ? c : null} onSair={onSair} onEstante={() => setEstanteAberta(true)} />}
       <RevelacaoTela as="main" identidade={etapa} className="pb-10">

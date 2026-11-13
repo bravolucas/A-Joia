@@ -1,3 +1,6 @@
+import {instalarSave,lerSave} from './helpers/save-browser.mjs';
+// Full-world fixtures include thousands of players and IndexedDB hydration.
+test.setTimeout(90000);
 import { test, expect } from '@playwright/test';
 import { criarJogador, desafiosDaTemporada, jogarTemporada, gerarColetiva } from '../src/jogador/rapido.js';
 
@@ -6,7 +9,7 @@ for (const width of [320, 390, 1366]) test(`desafio e resultado no mesmo painel,
   const c = criarJogador({ nome: 'Desafio Visual', nac: 'BRA', posicao: 'ATA', personalidade: 'equilibrado', origem: 'base', pe: 'destro', numero: 10, ritmo: 'normal', codigo: 'DESAFIO-PAINEL' });
   c.flags.baseEscolhida = true; c.clubeNome = 'Santos'; c.ano = 2027;
   await page.goto('http://127.0.0.1:4173/A-Joia/');
-  await page.evaluate(c => localStorage.setItem('ajoia_rapido_v1', JSON.stringify({ v: 1, etapa: 'evento', c })), c);
+  await instalarSave(page,((c)=>({ v: 1, etapa: 'evento', c }))(c),"ajoia_rapido_v1");
   await page.reload(); await page.getByRole('button', { name: /Continuar · Desafio Visual/ }).click();
   const desafio = page.getByRole('region', { name: 'Desafio da temporada 2027' });
   await page.screenshot({path:`/tmp/escolhas-novas-${width}.png`,fullPage:true});
@@ -19,13 +22,13 @@ for (const width of [320, 390, 1366]) test(`desafio e resultado no mesmo painel,
   expect(limites.y + limites.height).toBeLessThanOrEqual(page.viewportSize().height);
 
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  const salvo = await page.evaluate(() => JSON.parse(localStorage.getItem('ajoia_rapido_v1')));
+  const salvo = await lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo));
   expect(salvo.c.desafios).toHaveLength(1);
   await page.reload(); await page.getByRole('button', { name: /Continuar · Desafio Visual/ }).click();
   await expect(desafio.getByRole('status')).toBeVisible();
   await page.getByRole('button', { name: 'Continuar para o treino' }).click();
   await expect(page.getByText('Treino da pré-temporada', { exact: true })).toBeVisible();
-  const depois = await page.evaluate(() => JSON.parse(localStorage.getItem('ajoia_rapido_v1')));
+  const depois = await lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo));
   expect(depois.c.desafios).toEqual(salvo.c.desafios);
   expect(depois.c.attrs).toEqual(salvo.c.attrs);
 });
@@ -38,11 +41,11 @@ async function abrirAnimacao(page) {
   const c = criarJogador({ nome: 'Desafio Animado', nac: 'BRA', posicao: 'ATA', personalidade: 'equilibrado', origem: 'base', pe: 'destro', numero: 10, ritmo: 'normal', codigo: 'DESAFIO-ANIMADO' });
   c.flags.baseEscolhida = true; c.clubeNome = 'Santos'; c.ano = 2027;
   await page.goto('http://127.0.0.1:4173/A-Joia/');
-  await page.evaluate(c => localStorage.setItem('ajoia_rapido_v1', JSON.stringify({ v: 1, etapa: 'evento', c })), c);
+  await instalarSave(page,((c)=>({ v: 1, etapa: 'evento', c }))(c),"ajoia_rapido_v1");
   await page.reload(); await page.getByRole('button', { name: /Continuar · Desafio Animado/ }).click();
   await page.getByRole('button', { name: `Escolher ${desafiosDaTemporada(c)[0].nome}`, exact: true }).click();
   await expect(page.getByRole('status')).toHaveText('Revelando resultado…');
-  return page.evaluate(() => JSON.parse(localStorage.getItem('ajoia_rapido_v1')));
+  return lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo));
 }
 
 test('animação revela o resultado salvo e não reinicia após recarga', async ({ page }) => {
@@ -57,7 +60,7 @@ test('animação revela o resultado salvo e não reinicia após recarga', async 
   await expect(page.getByTestId('desafio-ovr-atual')).toHaveText(String(salvo.desafioResultado.ovrDepois));
   await page.reload(); await page.getByRole('button', { name: /Continuar · Desafio Animado/ }).click();
   await expect(page.getByRole('status')).toHaveText('Resultado confirmado');
-  const depois = await page.evaluate(() => JSON.parse(localStorage.getItem('ajoia_rapido_v1')));
+  const depois = await lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo));
   expect(depois.c.attrs).toEqual(salvo.c.attrs);
   expect(depois.c.desafios).toEqual(salvo.c.desafios);
 });
@@ -68,7 +71,7 @@ test('revelar imediatamente mantém o mesmo resultado e aguarda continuar', asyn
   await expect(page.getByRole('status')).toHaveText('Resultado confirmado');
   await expect(page.getByRole('button', { name: 'Continuar para o treino' })).toBeVisible();
   await expect(page.getByTestId('desafio-ovr-atual')).toHaveText(String(salvo.desafioResultado.ovrDepois));
-  const depois = await page.evaluate(() => JSON.parse(localStorage.getItem('ajoia_rapido_v1')));
+  const depois = await lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo));
   expect(depois.c.desafios).toEqual(salvo.c.desafios);
   expect(depois.c.attrs).toEqual(salvo.c.attrs);
 });
@@ -78,7 +81,7 @@ for (const width of [320, 1366]) test(`entrevista mantém consequência e contin
   const c = criarJogador({nome:'Entrevista Visual',nac:'BRA',posicao:'ATA',personalidade:'ascensao',origem:'base',pe:'destro',numero:10,ritmo:'normal',codigo:'ENTREVISTA'});
   const {card}=jogarTemporada(c), coletiva=gerarColetiva(c,card);
   await page.goto('http://127.0.0.1:4173/A-Joia/');
-  await page.evaluate(s=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify(s)),{v:1,etapa:'coletiva',c,card,ultimo:card,coletiva});
+  await instalarSave(page,((s)=>(s))({v:1,etapa:'coletiva',c,card,ultimo:card,coletiva}),"ajoia_rapido_v1");
   await page.reload();await page.getByRole('button',{name:/Continuar · Entrevista Visual/}).click();
   await page.locator('.fluxo-coletiva .rp-opcao').last().click();
   const botao=page.locator('.fluxo-coletiva').getByRole('button',{name:'Continuar',exact:true});

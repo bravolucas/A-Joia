@@ -1,3 +1,6 @@
+import {instalarSave,lerSave} from './helpers/save-browser.mjs';
+// Full-world fixtures include thousands of players and IndexedDB hydration.
+test.setTimeout(90000);
 import { test, expect } from '@playwright/test';
 import {criarGestaoTecnico,resumoGestaoTecnico} from '../src/treinador/mercadoTecnico.js';
 import { criarJogador, aposentar } from '../src/jogador/rapido.js';
@@ -20,7 +23,7 @@ function comResultado() {
 }
 async function abrir(page, c) {
   await page.goto('http://127.0.0.1:4173/A-Joia/');
-  await page.evaluate(c => localStorage.setItem('ajoia_rapido_v1', JSON.stringify({ v: 1, etapa: 'tecnico', c })), c);
+  await instalarSave(page,((c)=>({ v: 1, etapa: 'tecnico', c }))(c),"ajoia_rapido_v1");
   await page.reload();
   await page.getByRole('button', { name: /Continuar · Treinador de teste/ }).click();
   await expect(page.getByRole('heading', { name: 'Treinador de teste' })).toBeVisible();
@@ -43,7 +46,7 @@ async function concluirMomentos(page) {
   }
 }
 async function salvo(page) {
-  return page.evaluate(() => JSON.parse(localStorage.getItem('ajoia_rapido_v1')).c);
+  return lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo.c));
 }
 async function fecharEventos(page) {
   for (let i = 0; i < 8; i++) {

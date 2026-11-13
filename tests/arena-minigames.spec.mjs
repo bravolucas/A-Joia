@@ -1,3 +1,6 @@
+import {instalarSave} from './helpers/save-browser.mjs';
+// Full-world fixtures include thousands of players and IndexedDB hydration.
+test.setTimeout(90000);
 import {test,expect} from '@playwright/test';
 import {criarJogador,jogarTemporada} from '../src/jogador/rapido.js';
 
@@ -6,7 +9,7 @@ async function abrir(page,mini){
   const {card}=jogarTemporada(c);
   card.pendente={tipo:'copa',nome:'Copa do Brasil',mini,titulo:'A decisão está nos seus pés',texto:'Final',ordem:1,total:1};card.filaMomentos=[];
   await page.goto('http://127.0.0.1:4173/A-Joia/');
-  await page.evaluate(s=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify(s)),{v:1,etapa:'momento',c,card});
+  await instalarSave(page,((s)=>(s))({v:1,etapa:'momento',c,card}),"ajoia_rapido_v1");
   await page.reload();await page.getByRole('button',{name:/Continuar · Arena Visual/}).click();
 }
 

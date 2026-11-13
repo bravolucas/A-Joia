@@ -1,3 +1,6 @@
+import {instalarSave} from './helpers/save-browser.mjs';
+// Full-world fixtures include thousands of players and IndexedDB hydration.
+test.setTimeout(90000);
 import {test,expect} from '@playwright/test';
 import { criarJogador,jogarTemporada } from '../src/jogador/rapido.js';
 const base='http://127.0.0.1:4173/A-Joia/';
@@ -6,7 +9,7 @@ async function abrir(page,mini){
  const {card}=jogarTemporada(c);
  card.pendente={tipo:'copa',nome:'Copa do Brasil',mini,titulo:'A decisão está nos seus pés',texto:'Final de campeonato · lance decisivo',ordem:1,total:1};card.filaMomentos=[card.pendente];
  await page.goto(base);
- await page.evaluate(estado=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify(estado)),{v:1,etapa:'momento',c,card});
+ await instalarSave(page,((estado)=>(estado))({v:1,etapa:'momento',c,card}),"ajoia_rapido_v1");
  await page.reload();await page.getByRole('button',{name:/Continuar · Visual Teste/}).click();
  await expect(page.getByText('A decisão está nos seus pés',{exact:true})).toBeVisible();
 }
@@ -53,7 +56,7 @@ test('animação de título carrega e reage à preferência de movimento reduzid
  const {iniciarCarreiraTecnico}=await import('../src/treinador/tecnico.js');const carreira=iniciarCarreiraTecnico(c);
  carreira.tecnico={...carreira.tecnico,fase:'resultado',clubeInicialEscolhido:true,temporadas:[{ano:2026,clube:'Santos',liga:'brasileirao',posicao:1,pontos:80,vitorias:24,empates:8,derrotas:6,titulosConquistados:['Brasileirão'],campeao:true}],propostas:[]};
  const erros=[];page.on('pageerror',e=>erros.push(e.message));
- await page.goto(base);await page.evaluate(c=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,etapa:'tecnico',c})),carreira);
+ await page.goto(base);await instalarSave(page,((c)=>({v:1,etapa:'tecnico',c}))(carreira),"ajoia_rapido_v1");
  await page.reload();await page.getByRole('button',{name:/Continuar · Visual Efeito/}).click();
  const janela=page.getByRole('dialog',{name:'Título conquistado'});
  await expect(janela.locator('.ct-champion-cup > div svg')).toBeVisible();

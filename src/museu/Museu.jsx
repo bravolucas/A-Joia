@@ -1,3 +1,4 @@
+import {lerPersistente} from '../simulacao/armazenamentoMundo.js';
 import Personalizacao from '../comum/Personalizacao.jsx';
 import { CamisaPremium, MedalhaFeito } from '../comum/VisualFutebol.jsx';
 import Icone from '../comum/Icone.jsx';
@@ -38,7 +39,7 @@ function Detalhe({ aba, item, conquista, progresso, onFechar }) {
 }
 
 export function ColecaoPermanente({ onVoltar, destino='menu' }) {
-  const [carreiraAtual]=useState(()=>{try{return JSON.parse(localStorage.getItem('ajoia_rapido_v1'))?.c||null;}catch{return null;}});
+  const [carreiraAtual]=useState(()=>{try{return lerPersistente('ajoia_rapido_v1')?.c||null;}catch{return null;}});
   const [museu, setMuseu] = useState(() => lerMuseu());
   const [aba, setAba] = useState('tacas');
   const [filtro, setFiltro] = useState('todos');

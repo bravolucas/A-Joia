@@ -1,3 +1,6 @@
+import {instalarSave} from './helpers/save-browser.mjs';
+// Full-world fixtures include thousands of players and IndexedDB hydration.
+test.setTimeout(90000);
 import {test,expect} from '@playwright/test';
 import {criarJogador} from '../src/jogador/rapido.js';
 for(const width of [390,1366]){
@@ -5,7 +8,7 @@ for(const width of [390,1366]){
   await page.setViewportSize({width,height:900});await page.goto('http://127.0.0.1:4173/A-Joia/');
   await expect(page.getByRole('button',{name:/^Desafios históricos/})).toBeVisible();
   const c=criarJogador({nome:'Carreira preservada',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,codigo:'DESAFIOS'});
-  await page.evaluate(c=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,etapa:'painel',c})),c);
+  await instalarSave(page,((c)=>({v:1,etapa:'painel',c}))(c),"ajoia_rapido_v1");
   await page.getByRole('button',{name:/^Desafios históricos/}).click();
   const originais=await page.evaluate(()=>({carreira:localStorage.getItem('ajoia_rapido_v1'),museu:localStorage.getItem('ajoia_museu_v1')}));
   await page.getByRole('button',{name:'Iniciar A força dos meninos'}).click();

@@ -1,3 +1,4 @@
+import {instalarSave,lerSave} from './helpers/save-browser.mjs';
 import {test,expect} from '@playwright/test';
 import {criarJogador,jogarTemporada,opcoesPretemporada,desafiosDaTemporada} from '../src/jogador/rapido.js';
 import {criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa} from '../src/treinador/copasEscolha.js';
@@ -6,7 +7,7 @@ import {cenaTreino} from '../src/comum/direcaoCenas.js';
 import {grupoTreino} from '../src/jogador/catalogoTreinos.js';
 import {CLUBES} from '../src/dados/data.js';
 function jogador(clube='Flamengo'){const c=criarJogador({nome:'Cenas da carreira',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:9,codigo:'CENAS-CARREIRA'});c.clubeNome=clube;c.flags.baseEscolhida=true;return c;}
-async function abrir(page,s){await page.goto('http://127.0.0.1:4173/A-Joia/');await page.evaluate(s=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,auto:false,...s})),s);await page.reload();await page.getByRole('button',{name:/Continuar · Cenas da carreira/}).click();}
+async function abrir(page,s){await page.goto('http://127.0.0.1:4173/A-Joia/');await instalarSave(page,((s)=>({v:1,auto:false,...s}))(s),"ajoia_rapido_v1");await page.reload();await page.getByRole('button',{name:/Continuar · Cenas da carreira/}).click();}
 async function artePronta(el){await expect.poll(()=>el.evaluate(async s=>{const i=s.querySelector('image'),img=new Image();img.src=i.href.baseVal;try{await img.decode();return img.naturalWidth>500&&img.naturalWidth===img.naturalHeight;}catch{return false;}})).toBe(true);const vb=await el.evaluate(s=>({w:s.viewBox.baseVal.width,h:s.viewBox.baseVal.height}));expect(vb.w).toBeLessThan(3);expect(vb.h).toBeLessThan(2);}
 function fase(nome,usuario,alvo){const pool=CLUBES.filter(x=>nome==='Libertadores'?['brasileirao','argentina','sulamericano'].includes(x.liga):['inglaterra','espanha','italia','alemanha','franca','portugal'].includes(x.liga));for(let seed=0;seed<60;seed++){let c=criarCampanhaCopa({nome,usuario,forcaUsuario:99,clubes:pool,ano:2030,formato:'mata',seed:'CENA-'+seed});for(let i=0;c.fase!=='fim'&&i<40;i++){const d=decisaoCopa(c);if(d?.fase===alvo)return c;c=d?escolherCopa(c,d.chave,d.penaltis?'canto':'pressionar'):continuarCopa(c);}}throw new Error('Não encontrou fase válida');}
 for(const width of [320,1366]){
@@ -16,7 +17,7 @@ for(const width of [320,1366]){
  });
  test(`treino e desafio: imagem acompanha o conteúdo sem mudar os efeitos em ${width}px`,async({page})=>{
   await page.setViewportSize({width,height:844});await page.emulateMedia({reducedMotion:'reduce'});const c=jogador();await abrir(page,{etapa:'evento',c});const desafios=desafiosDaTemporada(c);for(let i=0;i<3;i++)await expect(page.locator('.dt-opcoes button').nth(i).locator('[data-cena]')).toHaveAttribute('data-cena',cenaTreino(desafios[i],c.posicao));await page.getByRole('button',{name:'Não arriscar este ano'}).click();await expect(page.locator('.tp-carta')).toHaveCount(3);
-  for(const [i,k]of opcoesPretemporada(c).entries())await expect(page.locator('.tp-carta').nth(i).locator('[data-cena]')).toHaveAttribute('data-cena',cenaTreino({...k,grupo:grupoTreino(k)},c.posicao));await page.screenshot({path:`test-results/cenas-treinos-${width}.png`,fullPage:true});await page.locator('.tp-carta').first().click();const s=await page.evaluate(()=>JSON.parse(localStorage.getItem('ajoia_rapido_v1')));expect(s.card.pretemporada.nome).toBe(opcoesPretemporada(c)[0].nome);expect(s.c.temporadas).toHaveLength(0);
+  for(const [i,k]of opcoesPretemporada(c).entries())await expect(page.locator('.tp-carta').nth(i).locator('[data-cena]')).toHaveAttribute('data-cena',cenaTreino({...k,grupo:grupoTreino(k)},c.posicao));await page.screenshot({path:`test-results/cenas-treinos-${width}.png`,fullPage:true});await page.locator('.tp-carta').first().click();const s=await lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo));expect(s.card.pretemporada.nome).toBe(opcoesPretemporada(c)[0].nome);expect(s.c.temporadas).toHaveLength(0);
  });
  test(`copas: semifinal, final sul-americana e final europeia com cenas diferentes em ${width}px`,async({page})=>{
   test.setTimeout(60000);await page.setViewportSize({width,height:width===320?568:768});await page.emulateMedia({reducedMotion:'reduce'});const erros=[];page.on('pageerror',e=>erros.push(e.message));

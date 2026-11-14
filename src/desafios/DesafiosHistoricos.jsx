@@ -1,16 +1,27 @@
-import React,{useEffect,useState} from 'react';
+import React,{useRef,useState} from 'react';
 import CarreiraTecnico from '../treinador/CarreiraTecnico.jsx';
 import {ESTILO_BASE} from '../jogador/ModoRapido.jsx';
 import {escudoDe,CENARIOS} from '../comum/arte.js';
-import {DESAFIOS_HISTORICOS,carregarDesafiosHistoricos,salvarDesafiosHistoricos,iniciarDesafioHistorico,atualizarDesafioHistorico} from './desafiosHistoricos.js';
+import {DESAFIOS_HISTORICOS,carregarDesafiosHistoricos,salvarDesafiosConfirmados,iniciarDesafioHistorico,atualizarDesafioHistorico} from './desafiosHistoricos.js';
 import {jogarTemporadaExpressaTecnico,escolherPretemporadaRapidaTecnico,responderIntervencaoTecnico} from '../treinador/tecnico.js';
 export default function DesafiosHistoricos({onVoltar}){
- const [estado,setEstado]=useState(carregarDesafiosHistoricos),[catalogo,setCatalogo]=useState(true),[encerrar,setEncerrar]=useState(false),[erro,setErro]=useState('');
- useEffect(()=>{if(!salvarDesafiosHistoricos(estado))setErro('Não foi possível salvar os desafios neste navegador.');},[estado]);
+ const [estado,alterarEstado]=useState(carregarDesafiosHistoricos),[catalogo,setCatalogo]=useState(true),[encerrar,setEncerrar]=useState(false),[erro,setErro]=useState('');
+ const atual=useRef(estado),fila=useRef(Promise.resolve()),[salvando,setSalvando]=useState(false);
+ const setEstado=valor=>{
+  const aplicar=async()=>{
+   const novo=typeof valor==='function'?valor(atual.current):valor;
+   if(novo===atual.current)return;
+   setSalvando(true);
+   try{await salvarDesafiosConfirmados(novo);atual.current=novo;alterarEstado(novo);setErro('');}
+   catch(e){setErro(e.message||'Não foi possível salvar os desafios neste navegador. Tente novamente.');}
+   finally{setSalvando(false);}
+  };
+  fila.current=fila.current.then(aplicar,aplicar);return fila.current;
+ };
  const ativo=estado.ativo,d=DESAFIOS_HISTORICOS.find(d=>d.id===ativo?.id);
  const atualizar=fn=>setEstado(s=>s.ativo&&!s.ativo.contabilizado?atualizarDesafioHistorico(s,fn(s.ativo.c)):s);
  const iniciar=id=>{setEstado(s=>iniciarDesafioHistorico(s,id));setCatalogo(false);};
- return <div className="rp ct-root"><style>{ESTILO_BASE}</style><main className="max-w-5xl mx-auto p-4"><header className="flex flex-wrap items-center justify-between gap-3 py-4"><h1 className="text-2xl font-bold text-[#F4DE9E]">Desafios históricos</h1><button className="ct-primary px-4" onClick={onVoltar}>Voltar ao menu</button></header><p className="text-sm text-[#A1A1AA] mb-4">Missões inspiradas em campanhas reais, com elencos fictícios e calendário da simulação. Uma temporada por tentativa. Sua carreira principal e seu museu ficam preservados.</p>{erro&&<p role="alert">{erro}</p>}
+ return <div className="rp ct-root"><style>{ESTILO_BASE}</style><main inert={salvando?'':undefined} className="max-w-5xl mx-auto p-4"><header className="flex flex-wrap items-center justify-between gap-3 py-4"><h1 className="text-2xl font-bold text-[#F4DE9E]">Desafios históricos</h1><button className="ct-primary px-4" onClick={onVoltar}>Voltar ao menu</button></header><p className="text-sm text-[#A1A1AA] mb-4">Missões inspiradas em campanhas reais, com elencos fictícios e calendário da simulação. Uma temporada por tentativa. Sua carreira principal e seu museu ficam preservados.</p>{erro&&<p role="alert">{erro}</p>}{salvando&&<p className="mv-salvando">Salvando progresso…</p>}
  {!catalogo&&ativo&&!ativo.contabilizado?<><p className="text-[#F4DE9E]">{d.clube} · {d.ano} · Meta: {d.objetivo}</p><CarreiraTecnico c={ativo.c} onEscolhaRapida={(chave,op)=>atualizar(c=>escolherPretemporadaRapidaTecnico(c,chave,op))} rotuloLegado="← Voltar aos desafios" onLegado={()=>setCatalogo(true)} onSair={onVoltar} onSimularTemporada={id=>atualizar(c=>jogarTemporadaExpressaTecnico(c,id))} onIntervir={(chave,op)=>atualizar(c=>responderIntervencaoTecnico(c,chave,op))}/></>
  :!catalogo&&ativo?.contabilizado?<section className="ct-event-content bg-[#18181b] rounded-2xl" aria-label="Resultado do desafio"><h2 className="text-2xl font-bold text-[#F4DE9E]">{ativo.sucesso?'Desafio concluído!':'Tente uma nova estratégia'}</h2><p>{d.nome} · {d.clube} · {d.ano}</p><p>Meta: {d.objetivo}</p><p>{ativo.c.tecnico.temporadas[0].posicao}º lugar · {ativo.c.tecnico.temporadas[0].pontos} pontos</p><p>{ativo.sucesso?'A conquista está registrada na sua galeria de desafios.':'A campanha terminou. Você pode tentar novamente com outro plano de jogo.'}</p><button className="ct-primary" onClick={()=>iniciar(d.id)}>Tentar novamente</button><button className="ct-primary" onClick={()=>setCatalogo(true)}>Ver desafios</button></section>
  :<>{ativo?.contabilizado&&<button className="ct-primary mb-4" onClick={()=>setCatalogo(false)}>Ver último resultado</button>}{ativo&&!ativo.contabilizado&&<section className="ct-event-content bg-[#18181b] rounded-2xl mb-4"><h2>Tentativa em andamento</h2><p>{d.nome} · {d.clube}</p><button className="ct-primary" onClick={()=>setCatalogo(false)}>Continuar desafio</button><button className="ct-primary" onClick={()=>setEncerrar(true)}>Encerrar tentativa</button>{encerrar&&<div role="group" aria-label="Encerrar tentativa"><p>Encerrar esta tentativa? As conquistas anteriores permanecem.</p><button onClick={()=>{setEstado(s=>({...s,ativo:null}));setEncerrar(false);}}>Confirmar encerramento</button><button onClick={()=>setEncerrar(false)}>Cancelar encerramento</button></div>}</section>}

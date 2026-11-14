@@ -2935,7 +2935,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const receberPlano=id=>{const novo=definirPlanoEspaco(c,id);setEstado(st=>({...st,c:novo,auto:false}));setApresentacao(v=>v?{...v,c:novo}:v);};
 
   // pausas automáticas: qualquer gaveta ou cena aberta segura o relógio
-  const pausado = chegadaPendente || !!gaveta || estanteAberta || patrimonioAberto || !!apresentacao || !!popup || ["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa) || !!apresentacaoSelecao;
+  const pausado = salvando || chegadaPendente || !!gaveta || estanteAberta || patrimonioAberto || !!apresentacao || !!popup || ["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa) || !!apresentacaoSelecao;
   const ESPERA_AUTO = 1900;
   const espera = estado.manchete ? 4600 : 2800;
   useEffect(() => {

@@ -267,7 +267,10 @@ export const ritmoDe = (id) => RITMOS.find((r) => r.id === id) || RITMOS[1];
 export function ofertasEmprestimo(c){
  if(c.emprestimo||c.aposentado||!c.flags?.baseEscolhida||c.contrato?.restantes<1||c.lojaAnoEmCurso===c.ano)return [];
  return comSemente(c.codigo,`emprestimos:${c.ano}:${c.clubeNome}`,()=>{
- const ovr=ovrDe(c),atual=clubeDe(c.clubeNome),pool=clubesJogaveis().filter(x=>x.nome!==c.clubeNome&&x.forca>=ovr-12&&x.forca<=ovr+5);
+ const ovr=ovrDe(c),atual=clubeDe(c.clubeNome),disponiveis=clubesJogaveis().filter(x=>x.nome!==c.clubeNome),pool=disponiveis.filter(x=>x.forca>=ovr-12&&x.forca<=ovr+5);
+ // A força dos clubes evolui com seus elencos. Mesmo quando nenhum clube está
+ // na faixa ideal de um jovem, os destinos mais próximos ainda oferecem minutos.
+ if(pool.length<3)for(const x of disponiveis.filter(x=>!pool.includes(x)).sort((a,b)=>Math.abs(a.forca-ovr)-Math.abs(b.forca-ovr)||a.nome.localeCompare(b.nome))){pool.push(x);if(pool.length===3)break;}
  const locais=pool.filter(x=>x.liga===atual.liga),out=[];
  if(locais.length)out.push(pick(locais));
  const restantes=pool.filter(x=>!out.some(d=>d.nome===x.nome));

@@ -1,3 +1,4 @@
+import {lerPersistente,gravarPersistente} from '../simulacao/armazenamentoMundo.js';
 import { iniciarCarreiraTecnico } from '../treinador/tecnico.js';
 import { prepararGestaoTecnico } from '../treinador/mercadoTecnico.js';
 export const CHAVE_DESAFIOS='ajoia_desafios_v1';
@@ -25,9 +26,14 @@ export function atualizarDesafioHistorico(estado,c){
  return {...estado,ativo:{...estado.ativo,c,contabilizado:!!terminou,sucesso},concluidos:sucesso?{...estado.concluidos,[d.id]:{posicao:Math.min(estado.concluidos[d.id]?.posicao??Infinity,temporada.posicao),pontos:Math.max(estado.concluidos[d.id]?.pontos||0,temporada.pontos)}}:estado.concluidos};
 }
 export function carregarDesafiosHistoricos(storage=globalThis.localStorage){
- try{const s=JSON.parse(storage.getItem(CHAVE_DESAFIOS));if(s?.v===1&&s.concluidos&&s.tentativas&&(!s.ativo||(DESAFIOS_HISTORICOS.some(d=>d.id===s.ativo.id)&&s.ativo.c?.tecnico)))return s;}catch{}
+ try{const s=lerPersistente(CHAVE_DESAFIOS,storage);if(s?.v===1&&s.concluidos&&s.tentativas&&(!s.ativo||(DESAFIOS_HISTORICOS.some(d=>d.id===s.ativo.id)&&s.ativo.c?.tecnico)))return s;}catch{}
  return estadoInicialDesafios();
 }
 export function salvarDesafiosHistoricos(estado,storage=globalThis.localStorage){
- try{storage.setItem(CHAVE_DESAFIOS,JSON.stringify(estado));return true;}catch{return false;}
+ try{const r=gravarPersistente(CHAVE_DESAFIOS,estado,storage);r.pendente?.catch(()=>{});return true;}catch{return false;}
+}
+
+export async function salvarDesafiosConfirmados(estado){
+ const r=gravarPersistente(CHAVE_DESAFIOS,estado);
+ if(r.pendente)await r.pendente;
 }

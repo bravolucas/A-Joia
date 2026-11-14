@@ -18,7 +18,7 @@ export default function FechamentoTemporada({c,card,onContinuar,celebracaoIndice
  const grupos=agruparConquistasTecnico(card.titulos||[]).sort((a,b)=>ordem.indexOf(a.tipo)-ordem.indexOf(b.tipo)),historico=agruparConquistasTecnico(c.lista||[]),selecionado=grupos[indice]||grupos[0],ganhou=grupos.length>0;
  const carreira=selecionado&&historico.find(g=>g.id===selecionado.id),n=carreira?.quantidade||selecionado?.quantidade||0;
  const eventos=celebracoesTemporada(card),evento=eventos[celebracaoIndice];
- const avancar=()=>{onCelebracao?.(celebracaoIndice+1);};
+ const avancar=async()=>{if(trava.current)return;trava.current=true;try{await onCelebracao?.(celebracaoIndice+1);}finally{trava.current=false;}};
  const continuar=async()=>{if(trava.current)return;trava.current=true;try{await onContinuar();}finally{trava.current=false;}};
  useEffect(()=>{const el=ref.current,anterior=document.activeElement;el.showModal();const liberar=bloquearRolagem(document.body);return()=>{el.close();liberar();anterior?.focus({preventScroll:true});};},[]);
  const antes=card.ovrAntes??card.ovr??card.ovrDepois,depois=card.ovrDepois??card.ovr,delta=depois-antes;

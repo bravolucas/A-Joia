@@ -9,7 +9,13 @@ export async function instalarSave(page,valor,chave='ajoia_rapido_v1'){
   db.close();localStorage.setItem(chave,JSON.stringify({arquivoMundo:1}));
  },{valor,chave});
 }
+export async function aguardarSave(page){
+ // Allow React to publish a queued transition even when the game clock is mocked.
+ await page.waitForTimeout(30);
+ await page.locator('.mv-salvando').waitFor({state:'hidden'});
+}
 export async function lerSave(page,chave='ajoia_rapido_v1'){
+ await aguardarSave(page);
  return page.evaluate(async chave=>{
   // Hash large archives inside the browser: equality assertions still detect
   // any change without transporting thousands of records through the test protocol.

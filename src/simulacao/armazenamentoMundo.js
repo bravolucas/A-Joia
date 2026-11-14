@@ -1,3 +1,4 @@
+import {clonarEstado} from './clonarEstado.js';
 import {serializarCarreira,lerCarreira} from './arquivoSave.js';
 const BANCO='ajoia-carreiras',LOJA='saves';
 let banco=null;
@@ -12,7 +13,7 @@ export async function prepararArmazenamento(){
   await new Promise((resolve,reject)=>{const tx=banco.transaction(LOJA,'readonly'),r=tx.objectStore(LOJA).openCursor();r.onsuccess=()=>{const cursor=r.result;if(cursor){cache.set(cursor.key,cursor.value);cursor.continue();}};tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
  }catch{banco=null;}
  if(typeof localStorage!=='undefined'){
-  for(const chave of ['ajoia_rapido_v1',...['auto','1','2','3','4','5'].map(s=>`ajoia_save_${s}`)]){
+  for(const chave of ['ajoia_rapido_v1','ajoia_desafios_v1',...['auto','1','2','3','4','5'].map(s=>`ajoia_save_${s}`)]){
    try{if(JSON.parse(localStorage.getItem(chave))?.arquivoMundo&&!cache.has(chave))throw new Error('ARQUIVO_INDISPONIVEL');}catch(e){if(e.message==='ARQUIVO_INDISPONIVEL')throw new Error('Não foi possível abrir os saves deste navegador. Recarregue a página para tentar novamente. Seus saves foram preservados.');}
   }
  }
@@ -25,11 +26,11 @@ export function lerPersistente(chave,storage=globalThis.localStorage){
  return structuredClone(salvo);
 }
 function comunicar(chave,erro){if(typeof window!=='undefined')window.dispatchEvent(new CustomEvent('ajoia-salvamento',{detail:{chave,erro:erro||null}}));}
-export function gravarPersistente(chave,valor){
- const temArquivo=valor?.c?.universo||valor?.c?.tecnico?.universo||valor?.carreira?.universo||valor?.carreira?.tecnico?.universo;
- if(!banco||!temArquivo){localStorage.setItem(chave,serializarCarreira(valor));return {ok:true};}
+export function gravarPersistente(chave,valor,storage=globalThis.localStorage){
+ const temArquivo=valor?.ativo?.c?.tecnico?.universo||valor?.ativo?.c?.universo||valor?.c?.universo||valor?.c?.tecnico?.universo||valor?.carreira?.universo||valor?.carreira?.tecnico?.universo;
+ if(!banco||storage!==globalThis.localStorage||!temArquivo){storage.setItem(chave,serializarCarreira(valor));return {ok:true};}
  // Structured clone is part of the IndexedDB write. No JSON/compression of decades of history on the UI thread.
- const snapshot=structuredClone(valor),anterior=cache.get(chave);
+ const snapshot=structuredClone(clonarEstado(valor)),anterior=cache.get(chave);
  cache.set(chave,snapshot);
  const tarefa=()=>new Promise((resolve,reject)=>{
   let tx;

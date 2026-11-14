@@ -1,3 +1,4 @@
+import {jogosDaCampanha} from '../competicoes/jogosCampanha.js';
 import { CLUBES, LIGAS } from '../dados/data.js';
 import { avaliarClubeNoMundo } from './forcaEquipe.js';
 import { geradorTecnico } from '../treinador/momentosTecnico.js';
@@ -20,7 +21,7 @@ function campanhaClube(a,nome){
   if((typeof a.clube==='string'?a.clube:a.clube?.nome)===nome)return {liga:a.ligaId||a.liga,posicao:a.posLiga||a.posicao,total:a.totalLiga||a.classificacao?.length||a.tabelaLiga?.length||20,pontos:a.pontos};
   return null;
 }
-function jogosTorneio(t){return (t.fases||[]).flatMap(f=>(f.jogos||[]).map(j=>({...j,fase:j.fase||f.fase})));}
+const jogosTorneio=jogosDaCampanha;
 /** Grava somente o ano que acaba de ocorrer. Retomar ou consultar não sorteia outra temporada. */
 export function registrarMundoVivo(c,a,{antesMundo}={}){
   if(!Number.isFinite(a?.ano))return;

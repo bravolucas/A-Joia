@@ -1814,20 +1814,26 @@ export function gerarMundoJogadores(rng = Math.random) {
   return { jogadores, elencosCompletos:true, temporada: 0, historicoBolaDeOuro: [] };
 }
 
-export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES, perfis = {}} = {}) {
+export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES, perfis = {}, clubeControlado = null, ano = mundo.anoCalendario} = {}) {
 
   const rand=(a,b)=>Math.floor(rng()*(b-a+1))+a;
   const pick=lista=>lista[Math.min(lista.length-1,Math.floor(rng()*lista.length))];
   const nomeMundo=nac=>{const n=NOMES_MUNDO[nac]||NOMES_MUNDO.BRA;return `${pick(n.pri)} ${pick(n.sob)}`;};
   const poisson=media=>{let p=1,n=0;const limite=Math.exp(-Math.max(0,media));do{n++;p*=rng();}while(p>limite&&n<300);return n-1;};
   const ocupacao=new Map();for(const p of mundo.jogadores)if(!p.aposentado)ocupacao.set(p.clubeNome,(ocupacao.get(p.clubeNome)||0)+1);
-  const mover=(p,d)=>{ocupacao.set(p.clubeNome,(ocupacao.get(p.clubeNome)||1)-1);ocupacao.set(d.nome,(ocupacao.get(d.nome)||0)+1);p.clubeNome=d.nome;p.liga=d.liga;};
+  const mover=(p,d)=>{ocupacao.set(p.clubeNome,(ocupacao.get(p.clubeNome)||1)-1);ocupacao.set(d.nome,(ocupacao.get(d.nome)||0)+1);if(mundo.cadastroElencos)p.movimentos=[...(p.movimentos||[]),{ano,tipo:'transferencia',de:p.clubeNome,para:d.nome,valor:null}];p.clubeNome=d.nome;p.liga=d.liga;if(Number.isInteger(p.contrato))p.contrato=3;};
   const jogadores = mundo.jogadores.map((j) => {
     if (j.aposentado) return { ...j, idade: j.idade + 1 };
     const p = { ...j };
     const clube = clubes.find((x) => x.nome === p.clubeNome) || { forca: 70, liga: p.liga };
     const liga = LIGAS[clube.liga] || { mult: 0.8 };
     const pos = POSICOES.find((x) => x.id === p.posicao) || POSICOES[0];
+    if(!p.clubeNome){
+      p.idade++;p.jogos=0;p.gols=0;p.assist=0;p.defesas=0;p.cleanSheets=0;p.clubeTemporada=null;
+      if(p.idade>=39)p.aposentado=true;
+      else if(rng()<.35){const destinos=clubes.filter(cl=>cl.nome!==clubeControlado&&(ocupacao.get(cl.nome)||0)<24&&Math.abs(cl.forca-p.ovr)<=10&&(perfis[cl.nome]?.financas??50)>15);if(destinos.length){mover(p,pick(destinos));p.contrato=3;}}
+      return p;
+    }
     // rendimento da temporada
     const jogos = clampR(Math.round(rand(24, 40) * clamp(p.ovr / 80, 0.7, 1.1)), 8, 46);
     const nivel = Math.pow(Math.max(0.25, (p.ovr - 55) / 35), 1.55) * (1.25 - liga.mult * 0.45);
@@ -1848,6 +1854,14 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
     else p.ovr = clampR(p.ovr - rand(0, 2) - Math.max(0, Math.round((p.idade - p.picoIdade - 2) * 0.6)), 40, 99);
     // aposentadoria
     if (p.idade >= 34 && (p.idade >= 39 || rng() < (p.idade - 33) * 0.2)) { p.aposentado = true; return p; }
+    if(Number.isInteger(p.contrato)){
+      p.contrato=Math.max(0,p.contrato-1);
+      if(!p.contrato){
+        if(p.clubeNome===clubeControlado){p.movimentos=[...(p.movimentos||[]),{ano,tipo:'fim-contrato',de:p.clubeNome,para:null,valor:0}];p.clubeNome=null;return p;}
+        p.contrato=3;
+      }
+    }
+    if(p.clubeNome===clubeControlado)return p;
     // transferência: quem cresceu muito acima do clube tende a sair — traço de personalidade ajusta a chance e o destino
     const traco = TRACOS_MUNDO.find((t) => t.id === p.traco);
     const multTransf = traco?.chanceTransferenciaMult ?? 1;
@@ -1872,12 +1886,12 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
   });
   // repõe os aposentados com jovens promessas, mantendo a população estável
   const aposentadosAgora = jogadores.filter((j) => j.aposentado).length - mundo.jogadores.filter((j) => j.aposentado).length;
-  let proxId = Math.max(0, ...mundo.jogadores.map((j) => j.id)) + 1;
+  let proxId = Math.max(0, ...mundo.jogadores.map((j) => j.id).filter(Number.isFinite)) + 1;
   const idsAposentados=new Set(mundo.jogadores.filter(j=>j.aposentado).map(j=>j.id));
   const novasAposentadorias=jogadores.filter(j=>j.aposentado&&!idsAposentados.has(j.id));
   for (let i = 0; i < Math.max(0, aposentadosAgora); i++) {
     const aposentado=novasAposentadorias[i];
-    const clube = clubes.find(c=>c.nome===aposentado?.clubeNome)||pick(clubes);
+    const clube = clubes.find(c=>c.nome===aposentado?.clubeNome)||pick(mundo.cadastroElencos?clubes.filter(cl=>cl.nome!==clubeControlado&&(ocupacao.get(cl.nome)||0)<24):clubes)||{nome:null,forca:60,liga:null};
     const nac = pick(NACS_MUNDO);
     const teto = clampR(Math.round(clube.forca + rand(-4, 12)), 60, 96);
     jogadores.push({
@@ -1899,7 +1913,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
     historicoBolaDeOuro = [...historicoBolaDeOuro, { temporada: (mundo.temporada || 0) + 1, nome: vencedor.nome, clube: vencedor.clubeNome, ovr: vencedor.ovr, gols: vencedor.gols, assist: vencedor.assist }].slice(-30);
     vencedor.carreira.bolasDeOuro = (vencedor.carreira.bolasDeOuro || 0) + 1;
   }
-  return { ...mundo, jogadores: jogadoresLimpos, temporada: (mundo.temporada || 0) + 1, historicoBolaDeOuro };
+  return { ...mundo,...(Number.isFinite(ano)?{anoCalendario:ano+1}:{}), jogadores: jogadoresLimpos, temporada: (mundo.temporada || 0) + 1, historicoBolaDeOuro };
 }
 
 export function scoreBolaDeOuro({ ovr, gols, assist, nota, ligaMult, titulos = 0 }) {

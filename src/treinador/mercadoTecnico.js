@@ -161,7 +161,8 @@ export function prepararGestaoTecnico(c){
  if(c.mundo&&!salva&&(!t.gestao?.cadastroUnificado||t.gestao.clube!==t.clube))gestao.saldo+=c.mundo.receitasMercado?.[t.clube]||0;
  const virada=t.gestao?.versao===1&&t.gestao.clube===t.clube&&gestao.ano>t.gestao.ano;
  const delta=virada?mediaElenco(gestao)-mediaElenco(t.gestao):0;
- gestao.ajusteNumerico=(t.gestao?.ajusteNumerico||0)+delta;
+ gestao.ajusteNumerico=t.gestao?.clube===t.clube?(t.gestao.ajusteNumerico||0)+delta:0;
+ if(salva&&t.gestao?.clube!==t.clube)gestao.forcaReferencia=Number(t.elenco)||gestao.forcaReferencia;
  const novo={...c,tecnico:{...t,gestao,elenco:limitar((Number(t.elenco)||50)+delta,10,95)}};
  if(!c.mundo?.jogadores)return novo;
  const legado=!!t.gestao&&!t.gestao.cadastroUnificado&&t.gestao.clube===t.clube;

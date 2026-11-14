@@ -61,7 +61,8 @@ test('virada envelhece e decrementa uma vez, libera expirados e repõe a base um
 test('trocar e retornar ao clube preserva compras, contratos e orçamento',()=>{
  let c=pronto();const a=gerarMercadoTecnico(c.tecnico)[0];c=contratarJogadorTecnico(c,a.id);const g=c.tecnico.gestao;
  c=prepararGestaoTecnico({...c,tecnico:{...c.tecnico,clube:'Flamengo',elenco:80}});
- c=prepararGestaoTecnico({...c,tecnico:{...c.tecnico,clube:'Avaí',elenco:65}});
+ c=prepararGestaoTecnico({...c,tecnico:{...c.tecnico,clube:'Avaí',elenco:80}});
+ assert.equal(forcaClubeTecnico(c.tecnico),avaliarClubeNoMundo(c,CLUBES.find(cl=>cl.nome==='Avaí')).forca);
  assert.equal(c.tecnico.gestao.saldo,g.saldo);assert.ok(c.tecnico.gestao.elenco.some(j=>j.mundoId===a.mundoId));
 });
 test('preparar próximo ano não retira a força de uma contratação já contada no elenco',()=>{

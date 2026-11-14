@@ -1,6 +1,6 @@
 import {COPAS_NACIONAIS} from '../competicoes/regrasCopasRapidas.js';
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
-import {prepararMundoTemporada,creditarCampeoesCalendario,registrarPremioCalendario,clubesDoCompleto,vagasProximaTemporada,aplicarVagaTemporada} from './mundoTemporada.js';
+import {prepararMundoTemporada,creditarCampeoesCalendario,registrarPremioCalendario,clubesDoCompleto,vagasProximaTemporada,aplicarVagaTemporada,ajustarCardNovoClube} from './mundoTemporada.js';
 import {estatisticasDasPartidas} from '../simulacao/estatisticasMundo.js';
 import {geradorTecnico} from '../treinador/momentosTecnico.js';
 import {prepararCopaPersistente,registrarJogoPersistente} from './copasPersistentes.js';
@@ -409,10 +409,11 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
       if (c.temporadaAndamento && (c.temporadaAndamento.rodadaAtual || 0) === 0) {
         const novoCalendario = gerarCalendarioLiga(clubeNovo, clubesDoCompleto(c,mundo), clubeNovo.liga);
         const ta = c.temporadaAndamento;
-        const cardAjustado = ta.cardOriginal ? { ...ta.cardOriginal } : null;
+        const cardAjustado = ajustarCardNovoClube(c,ta.cardOriginal);
         if (cardAjustado?.copaNacionalPendente) cardAjustado.copaNacionalPendente = { ...cardAjustado.copaNacionalPendente, adversario: sortearAdversario(c, "copaNacional") };
         if (cardAjustado?.continentalPendente) cardAjustado.continentalPendente = { ...cardAjustado.continentalPendente, adversario: sortearAdversario(c, "continental") };
         const eventosAjustados = (ta.eventosAgendados || []).map((ev) => {
+          if(ev.tipo === "continental" && !cardAjustado?.continentalPendente)return null;
           if (ev.tipo === "copinha" || ev.tipo === "estadual") {
             if (!clubeNovo.estado) return null; // clube novo não é brasileiro/sem estadual — o evento não existe mais
             return { ...ev, adversario: sortearAdversario(c, ev.tipo) };
@@ -420,6 +421,8 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
           if (ev.tipo === "classico" || ev.tipo === "falta") return { ...ev, adversario: sortearAdversario(c, "classico") };
           return ev;
         }).filter(Boolean);
+        if(cardAjustado?.copasPersistentesVersao&&cardAjustado.continentalPendente&&!eventosAjustados.some(e=>e.tipo==='continental'))eventosAjustados.push({tipo:'continental',jogoGrupo:0,rodadaAlvo:Math.max(1,Math.floor(novoCalendario.length/3))});
+        eventosAjustados.sort((a,b)=>a.rodadaAlvo-b.rodadaAlvo);
         c.temporadaAndamento = { ...ta, calendario: novoCalendario, tabela: criarTabelaZerada(clubeNovo.liga,clubesDoCompleto(c,mundo)), cardOriginal: cardAjustado, eventosAgendados: eventosAjustados };
       }
       c.elenco = gerarElenco(clubeNovo, mundo, c.posicao);

@@ -100,3 +100,17 @@ test('artilharia de save sem divisão por competição usa a liga e o clube defe
  const mundo={temporada:2,jogadores:[{nome:'Transferido',liga:'inglaterra',ligaTemporada:'brasileirao',clubeNome:'Arsenal',clubeTemporada:'Santos',jogos:30,gols:12,assist:3,temporadaEstatisticas:2}]};
  assert.equal(artilhariaLiga(mundo,'brasileirao',null,'')[0].clube,'Santos');assert.deepEqual(artilhariaLiga(mundo,'inglaterra',null,''),[]);
 });
+import {ajustarCardNovoClube} from '../src/completo/mundoTemporada.js';
+test('transferência antes da estreia troca a liga e remove a chave pertencente ao clube anterior',()=>{
+ const c=carreira();c.clube=CLUBES.find(c=>c.nome==='Arsenal');
+ const card={copasPersistentesVersao:1,ligaNome:'Brasileirão',continentalPendente:{nome:'Libertadores',formato:'grupo'},campanhasCompletas:{continental:{usuario:'Santos'}},pernasCopas:{},torneios:[]},antes=JSON.stringify(card),novo=ajustarCardNovoClube(c,card);
+ assert.equal(novo.ligaId,'inglaterra');assert.equal(novo.ligaNome,LIGAS.inglaterra.nome);assert.equal(novo.ligaMult,LIGAS.inglaterra.mult);assert.equal(novo.continentalPendente.nome,'Champions League');assert.equal(novo.campanhasCompletas,undefined);assert.equal(JSON.stringify(card),antes);
+});
+test('transferência antes da estreia respeita a vaga continental do clube de destino',()=>{
+ const c=carreira();c.clube=CLUBES.find(c=>c.nome==='Arsenal');c.vagasInternacionaisAno=ANO_INICIO+c.idade-16;c.vagasLigasSimuladas=['inglaterra'];c.vagasInternacionaisClubes={};
+ assert.equal(ajustarCardNovoClube(c,{continentalPendente:{nome:'Libertadores'}}).continentalPendente,null);
+});
+test('registro da liga usa seu cadastro atual mesmo quando o card trouxe um nome antigo',()=>{
+ const c=carreira();const card=prepararMundoTemporada(c,{ligaNome:'Premier League',ligaMult:99},null);
+ assert.equal(card.ligaNome,LIGAS.brasileirao.nome);assert.equal(card.ligaMult,LIGAS.brasileirao.mult);
+});

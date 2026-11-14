@@ -19,3 +19,5 @@ A liga do próprio jogador no modo anual e as copas de seleções ainda precisam
 ## Validação
 
 Os testes cobrem conservação dos placares do usuário, dois turnos das outras ligas, campeão único, retomada determinística, divisões atualizadas, promoções pela tabela, estatísticas e vagas continentais, clubes de segunda divisão, liga defendida antes de transferir e identidade do vencedor do prêmio. O navegador fecha uma temporada, verifica o arquivo mundial, salva e retoma em celular e desktop.
+
+Uma transferência ou empréstimo antes da estreia redefine os dados da liga e as chaves pertencentes ao clube anterior, usando a vaga continental do destino quando já estiver registrada.

@@ -23,7 +23,7 @@ export function prepararMundoTemporada(c,card,mundo){
  if(card.classificacao?.length)classificacoesMundo[ligaId]={liga:ligaId,origem:'partidas-jogador',classificacao:card.classificacao.map(t=>({...t})),jogos:(card.jogosLiga||[]).map(j=>({...j}))};
  const nomes=nomeDosTitulos(ligaId);
  const competicoesPreservadas=[COPAS_NACIONAIS[primeiraLiga(ligaId)],nomes.copa,card.copaNacional?.nome,card.continental?.nome,card.continentalPendente?.nome].filter(Boolean);
- const novo={...card,ano,ligaId,clube,ligaNome:card.ligaNome||LIGAS[ligaId]?.nome,calendarioMundoVersao:1,classificacoesMundo,torneiosMundo:[],competicoesPreservadas};
+ const novo={...card,ano,ligaId,clube,ligaNome:LIGAS[ligaId]?.nome||card.ligaNome,ligaMult:LIGAS[ligaId]?.mult??card.ligaMult,calendarioMundoVersao:1,classificacoesMundo,torneiosMundo:[],competicoesPreservadas};
  simularMundo({...c,mundo,ligas},novo,{preservarTorneios:true});
  const campeoes=new Map();
  const inserir=t=>{if(t.clube&&t.nome)campeoes.set(nomeCanonico(t.nome),{...t,ano,nome:nomeCanonico(t.nome)});};
@@ -53,4 +53,16 @@ export function aplicarVagaTemporada(c,card){
  if(c.vagasInternacionaisAno!==ano||!c.vagasLigasSimuladas?.includes(c.clube.liga))return card;
  const vaga=c.vagasInternacionaisClubes?.[c.clube.nome];
  return {...card,continental:null,continentalPendente:vaga?{nome:nomeVaga(vaga.competicao),formato:['champions','europa','conference'].includes(vaga.competicao)?'liga':'grupo',entrada:vaga.entrada}:null};
+}
+
+/** Um empréstimo antes da primeira partida não pode carregar a chave do clube anterior. */
+export function ajustarCardNovoClube(c,card){
+ if(!card)return card;
+ const liga=LIGAS[c.clube.liga],novo={...card,ligaId:c.clube.liga,ligaNome:liga?.nome,ligaMult:liga?.mult};
+ delete novo.campanhasCompletas;delete novo.pernasCopas;delete novo.torneios;
+ if(card.continentalPendente||card.continental){
+  novo.continental=null;
+  novo.continentalPendente=liga?.continental?{nome:liga.continental,formato:['Champions League','Europa League','Conference League'].includes(liga.continental)?'liga':'grupo'}:null;
+ }
+ return aplicarVagaTemporada(c,novo);
 }

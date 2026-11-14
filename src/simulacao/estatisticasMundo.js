@@ -60,7 +60,7 @@ export function estatisticasDasPartidas(mundo,antes,card,seed='mundo',{zerarSemP
  return {...mundo,jogadores:mundo.jogadores.map(p=>{
   const original=originais.get(p.id);
   if(original?.aposentado)return p;
-  if(legados.has(original?.clubeNome))return {...p,origemEstatisticas:'projecao-legada'};
+  if(legados.has(original?.clubeNome)){const atual={...p,origemEstatisticas:'projecao-legada'};delete atual.porCompeticao;return atual;}
   const comps=linhas.get(String(p.id));if(!comps&&(!zerarSemPartidas||!cobertos.has(original?.clubeNome)))return p;
   const porCompeticao=[...(comps?.values()||[])],total=porCompeticao.reduce((s,t)=>{for(const k of Object.keys(s))s[k]+=t[k];return s;},vazio());
   const carreira={...p.carreira};for(const k of ['jogos','gols','assist','defesas','cleanSheets','golsSofridos'])carreira[k]=Math.max(0,(original?.carreira?.[k]||0)+total[k]);

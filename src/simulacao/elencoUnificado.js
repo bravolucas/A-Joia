@@ -8,7 +8,7 @@ const financeiro=p=>({contrato:Number.isInteger(p.contrato)?p.contrato:2+(String
 export function jogadorDaGestao(p,anterior){return {...p,id:anterior?.id??p.idLegadoGestao??p.id,mundoId:p.id,setor:setorJogador(p),qualidade:p.ovr,...financeiro(p),origem:p.origem||'elenco'};}
 export function mercadoDoMundo(mundo,g){
  const usados=new Set(g.movimentos.filter(m=>m.ano===g.ano&&['compra','venda'].includes(m.tipo)).map(m=>chave(m.mundoId??m.jogador)));
- return ['GOL','DEF','MEI','ATA'].flatMap(setor=>mundo.jogadores.filter(p=>!p.aposentado&&p.clubeNome!==g.clube&&setorJogador(p)===setor&&!usados.has(chave(p.id))).sort((a,b)=>Math.abs(a.ovr-g.forcaMercado)-Math.abs(b.ovr-g.forcaMercado)||chave(a.id).localeCompare(chave(b.id))).slice(0,3).map(p=>({...jogadorDaGestao(p),clubeVendedor:p.clubeNome||null,valor:p.clubeNome?financeiro(p).valor:financeiro(p).salario*2,origem:'mercado'})));
+ return ['GOL','DEF','MEI','ATA'].flatMap(setor=>mundo.jogadores.filter(p=>!p.aposentado&&p.clubeNome!==g.clube&&setorJogador(p)===setor&&!usados.has(chave(p.id))).sort((a,b)=>Math.abs(a.ovr-g.forcaMercado)-Math.abs(b.ovr-g.forcaMercado)||chave(a.id).localeCompare(chave(b.id))).slice(0,3).map(p=>({...jogadorDaGestao(p),id:p.id,clubeVendedor:p.clubeNome||null,valor:p.clubeNome?financeiro(p).valor:financeiro(p).salario*2,origem:'mercado'})));
 }
 /** Migração explícita: o elenco administrado prevalece; atletas do cadastro antigo
  * permanecem disponíveis, com suas identidades e histórias, sem inventar vendas. */
@@ -47,7 +47,7 @@ export function aplicarNegociacaoMundo(c,g,{tipo,alvo,destino}={}){
   if(alvo&&chave(p.id)===chave(id)){
    encontrado=true;const para=venda?destino.nome:clube;
    const movimento={ano,tipo,de:p.clubeNome||null,para,valor:venda?Math.round(alvo.valor*.8):tipo==='compra'?alvo.valor:0};
-   novo={...novo,clubeNome:para,liga:venda?destino.liga:(c.tecnico.liga||CLUBES.find(cl=>cl.nome===clube)?.liga),contrato:tipo==='renovacao'?3:tipo==='compra'||venda?3:novo.contrato,movimentos:[...(p.movimentos||[]),movimento]};
+   novo={...novo,clubeNome:para,liga:venda?destino.liga:(c.tecnico.liga||CLUBES.find(cl=>cl.nome===clube)?.liga),contrato:tipo==='renovacao'?novo.contrato:tipo==='compra'||venda?3:novo.contrato,movimentos:[...(p.movimentos||[]),movimento]};
   }
   return novo;
  });

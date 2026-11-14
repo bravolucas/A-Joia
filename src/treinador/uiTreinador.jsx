@@ -17,6 +17,8 @@ export function Bandeira({ pais }) {
   return src ? <img src={src} alt={pais} className="w-5 h-4 rounded-sm object-cover" /> : <span aria-label={pais || 'País'}>🌎</span>;
 }
 
+const janelasTreinador = [];
+
 export function JanelaTreinador({ titulo, onFechar, children, classe = '' }) {
   const painel = useRef(null);
   const focoAnterior = useRef(document.activeElement);
@@ -24,10 +26,15 @@ export function JanelaTreinador({ titulo, onFechar, children, classe = '' }) {
   fechar.current = onFechar;
   useEffect(() => {
     const anterior = focoAnterior.current;
+    const janela = painel.current;
+    const inferior = janelasTreinador.at(-1);
+    if (inferior) inferior.inert = true;
+    janelasTreinador.push(janela);
     const liberarRolagem = bloquearRolagem(document.body);
     painel.current?.querySelector('button')?.focus();
     const teclado = e => {
-      if (e.key === 'Escape') fechar.current();
+      if (janelasTreinador.at(-1) !== janela) return;
+      if (e.key === 'Escape') { e.preventDefault(); fechar.current(); }
       if (e.key !== 'Tab') return;
       const itens = [...(painel.current?.querySelectorAll('button:not(:disabled), [href], input, select, summary, [tabindex="0"]') || [])];
       const primeiro = itens[0], ultimo = itens.at(-1);
@@ -35,7 +42,7 @@ export function JanelaTreinador({ titulo, onFechar, children, classe = '' }) {
       else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primeiro?.focus(); }
     };
     document.addEventListener('keydown', teclado);
-    return () => { liberarRolagem(); document.removeEventListener('keydown', teclado); anterior?.focus(); };
+    return () => { liberarRolagem(); document.removeEventListener('keydown', teclado); janelasTreinador.splice(janelasTreinador.indexOf(janela), 1); if (inferior) inferior.inert = false; anterior?.focus({preventScroll:true}); };
   }, []);
   return createPortal(<div className="ct-overlay" onClick={onFechar}>
     <section ref={painel} role="dialog" aria-modal="true" aria-label={titulo} className={`ct-modal ${classe}`} onClick={e => e.stopPropagation()}>

@@ -1814,7 +1814,7 @@ export function gerarMundoJogadores(rng = Math.random) {
   return { jogadores, elencosCompletos:true, temporada: 0, historicoBolaDeOuro: [] };
 }
 
-export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES, perfis = {}, clubeControlado = null, ano = mundo.anoCalendario} = {}) {
+export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES, perfis = {}, clubeControlado = null, treinoClube = 0, ano = mundo.anoCalendario} = {}) {
 
   const rand=(a,b)=>Math.floor(rng()*(b-a+1))+a;
   const pick=lista=>lista[Math.min(lista.length-1,Math.floor(rng()*lista.length))];
@@ -1852,6 +1852,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
     p.idade += 1;
     if (p.idade <= p.picoIdade) p.ovr = clampR(p.ovr + Math.max(0, Math.round((p.potencial - p.ovr) * 0.28)) + rand(0, 1), 40, 99);
     else p.ovr = clampR(p.ovr - rand(0, 2) - Math.max(0, Math.round((p.idade - p.picoIdade - 2) * 0.6)), 40, 99);
+    if(p.clubeNome===clubeControlado&&treinoClube&&p.idade<30)p.ovr=Math.min(99,Math.max(p.ovr,Math.min(p.potencial??99,p.ovr+Math.max(0,Math.min(1,treinoClube)))));
     // aposentadoria
     if (p.idade >= 34 && (p.idade >= 39 || rng() < (p.idade - 33) * 0.2)) { p.aposentado = true; return p; }
     if(Number.isInteger(p.contrato)){
@@ -1903,6 +1904,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
       carreira: { gols: 0, assist: 0, jogos: 0, titulos: 0, bolasDeOuro: 0, premios: 0, temporadas: 0 }, aposentado: false,
     });
   }
+  if(mundo.cadastroElencos)for(const p of jogadores)if(!Number.isInteger(p.contrato)){p.contrato=p.clubeNome?3:0;p.salario=Math.max(3,Math.round(p.ovr**2/220));p.valor=Math.max(100,Math.round(p.ovr**3/180*(p.idade<24?1.2:.7)));}
   const jogadoresLimpos = jogadores.filter((j) => !j.aposentado || j.idade <= 45);
   // Hall da fama: registra quem ficou no topo do ranking mundial nessa
   // temporada — histórico existia declarado, mas nunca era preenchido.

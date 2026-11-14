@@ -121,7 +121,7 @@ function registrarUniversoAno(c,ano){
  const a=ano,novo={...c};registrarAnoHistoria(novo,ano);
  const antesMundo=c.mundo||gerarMundoJogadores(geradorTecnico(`${c.codigo||c.nome}|${a.ano}|origem-mundo`));
  // A população avança uma única vez por temporada concluída, depois de todas as copas.
- if(!(c.tecnico?.universo||c.universo)?.anos?.includes(a.ano))novo.mundo=estatisticasDasPartidas(simularTemporadaMundo(antesMundo,geradorTecnico(`${c.codigo||c.nome}|${a.ano}|evolucao-mundo`),{clubes:clubesDoMundo({...c,mundo:antesMundo}),perfis:(c.universo||c.tecnico?.universo)?.clubes,clubeControlado:c.tecnico?.gestao?.cadastroUnificado&&c.tecnico.gestao.clube===a.clube?c.tecnico.gestao.clube:null,ano:a.ano}),antesMundo,ano,c.codigo);
+ if(!(c.tecnico?.universo||c.universo)?.anos?.includes(a.ano))novo.mundo=estatisticasDasPartidas(simularTemporadaMundo(antesMundo,geradorTecnico(`${c.codigo||c.nome}|${a.ano}|evolucao-mundo`),{clubes:clubesDoMundo({...c,mundo:antesMundo}),perfis:(c.universo||c.tecnico?.universo)?.clubes,treinoClube:c.tecnico?.gestao?.cadastroUnificado&&c.tecnico.gestao.comissao?.some(p=>p.id==='preparador'&&p.ano===a.ano)?1:0,clubeControlado:c.tecnico?.gestao?.cadastroUnificado&&c.tecnico.gestao.clube===a.clube?c.tecnico.gestao.clube:null,ano:a.ano}),antesMundo,ano,c.codigo);
  registrarMundoVivo(novo,ano,{antesMundo});
  return atualizarProjecaoGestao(novo);
 }

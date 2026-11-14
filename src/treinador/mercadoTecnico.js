@@ -30,6 +30,7 @@ export function atualizarGestaoAnual(gestao, anoAlvo){
   const equipe=comissaoAtivaGestao(g);
   const treino=equipe.some(p=>p.id==='preparador')?1:0;
   const observacao=equipe.some(p=>p.id==='olheiro')?2:0;
+  if(g.cadastroUnificado)g.bonusBase=observacao;
   if(!g.cadastroUnificado){
   const expirados=g.elenco.filter(j=>j.contrato<=1);
   const base=g.elenco.reduce((n,j)=>n+j.qualidade,0)/Math.max(1,g.elenco.length);
@@ -172,6 +173,7 @@ export function prepararGestaoTecnico(c){
    const faltam=Math.min(Math.max(0,setor.quantidade-g.elenco.filter(j=>j.setor===setor.id).length),Math.max(0,24-g.elenco.length-novos.length));
    for(let i=0;i<faltam;i++){
     const jovem=jogador(rng,`base:${g.clube}:${g.ano}:${setor.id}:${i}`,setor.id,Math.max(30,g.forcaMercado-7));
+    jovem.qualidade=Math.min(95,jovem.qualidade+(g.bonusBase||0));jovem.salario=Math.max(3,Math.round(jovem.qualidade**2/220));
     novos.push({...jovem,idade:18,potencial:Math.min(99,jovem.qualidade+10),valor:Math.max(100,Math.round(jovem.qualidade**3/180*1.2)),ovr:jovem.qualidade,posicao:({GOL:'GOL',DEF:'ZAG',MEI:'MC',ATA:'ATA'}[setor.id]),nac:'BRA',clubeNome:g.clube,clubeOrigem:g.clube,liga:t.liga||CLUBES.find(cl=>cl.nome===g.clube)?.liga,picoIdade:28,contrato:3,origem:'base',aposentado:false,jogos:0,gols:0,assist:0,carreira:{jogos:0,gols:0,assist:0,temporadas:0}});
    }
   }

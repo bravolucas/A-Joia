@@ -80,3 +80,10 @@ test('arquivo anterior não muda durante negociação e janela fecha quando a co
  const antes=structuredClone(c.universo),r=contratarJogadorTecnico(c,a.id);assert.deepEqual(r.universo,antes);
  assert.throws(()=>contratarJogadorTecnico({...c,tecnico:{...c.tecnico,copasEmJogo:{campeonatos:[]}}},a.id),/antes do início/);
 });
+
+test('preparador melhora o mesmo atleta canônico uma vez, sem duplicar a evolução anual',()=>{
+ const c=pronto(),j=c.tecnico.gestao.elenco[0];const mundo={...c.mundo,jogadores:c.mundo.jogadores.map(p=>p.id===j.mundoId?{...p,idade:20,ovr:60,potencial:90,picoIdade:28,contrato:3}:p)};
+ const antes=structuredClone(mundo),sem=simularTemporadaMundo(mundo,geradorTecnico('treino'),{clubeControlado:'Avaí'}),com=simularTemporadaMundo(mundo,geradorTecnico('treino'),{clubeControlado:'Avaí',treinoClube:1});
+ assert.deepEqual(mundo,antes);const a=sem.jogadores.find(p=>p.id===j.mundoId),b=com.jogadores.find(p=>p.id===j.mundoId);
+ assert.equal(b.idade,21);assert.equal(b.contrato,2);assert.equal(b.ovr,a.ovr+1);
+});

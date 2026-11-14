@@ -41,9 +41,21 @@ Esta é a primeira camada do mundo persistente, preservando os motores e regulam
 - Saves antigos que guardavam somente a elite mantêm esses atletas; suas temporadas passadas não recebem elencos ou estatísticas inventados.
 - O calendário e as copas já existentes no modo completo continuam no motor próprio. Só são arquivados os detalhes efetivamente disponíveis nesse modo; a tabela de consulta informa quando não há placares individuais.
 - A carreira do usuário mantém seus totais e as distribuições por competição já existentes; uma reformulação integral das partidas do jogador deve ser tratada separadamente, para não apagar o que foi conquistado em minijogos.
-- As estruturas de elenco da gestão do treinador e dos jogadores do mundo ainda são distintas. A escalação da gestão influencia a força das partidas do treinador; unificar contratos e identidades entre esses cadastros exige migração específica.
+- O elenco do treinador se vincula ao cadastro do mundo na pré-temporada, após escolher o clube. Saves sem esse vínculo continuam compatíveis com a gestão antiga até a próxima pré-temporada elegível. Os personagens das decisões narrativas e os empréstimos do jogador mantêm seus sistemas próprios.
 - Competições sem liga doméstica cadastrada continuam usando a classificação internacional simplificada existente.
 
 ## Validação
 
 Testes específicos em `tests/mundo-vivo.test.mjs` cobrem presença/ausência, jogador fraco, reservas, perda de titulares, mando dos confrontos, conservação dos gols, goleiros, determinismo, isolamento dos saves e retomada. `tests/mundo-vivo.spec.mjs` valida o arquivo, IndexedDB, filtros e recarga em celular e desktop. As suítes existentes de mercado, história, copas, Fortaleza e museu verificam compatibilidade.
+
+## Elenco e contratos do treinador
+
+A tela **Elenco e contratos** abre a gestão do clube e o mercado na mesma carreira. Cada oferta corresponde a um atleta existente no mundo. Contratar transfere sua identidade para o clube; vender envia o mesmo jogador para um destino disponível. O vendedor recebe a receita, o comprador paga, e os dados de orçamento do clube ficam preservados quando o treinador muda de emprego e retorna. Negociações exigem pré-temporada e ficam bloqueadas após o início das copas.
+
+O contrato, o salário e a qualidade são projetados do cadastro do mundo para a gestão. A renovação altera o registro canônico. O mundo envelhece e evolui os atletas uma vez por ano; a gestão avança apenas seu orçamento e sua comissão. O contrato vencido do elenco administrado libera o jogador; os outros clubes renovam automaticamente no modelo simplificado. O mercado automático pode receber jogadores livres, sem atribuir a eles partidas anteriores à contratação.
+
+Os elencos reais já existentes podem superar 30 jogadores: são preservados, mas novas compras exigem liberar espaço. A base preenche vagas até 24 atletas uma vez por pré-temporada, sem transformar vendas repetidas em geração ilimitada de jovens.
+
+Na migração de uma gestão antiga, os nomes, atributos, contratos e identificadores de interface do elenco administrado prevalecem. Cada atleta ganha uma referência estável ao mundo. Os registros paralelos anteriores desse clube ficam livres, preservando identidade e estatísticas; uma marca de migração explica a reconciliação, sem inventar uma venda. O arquivo de temporadas passadas permanece intacto. A ficha passa a exibir o clube e o vínculo atuais e as movimentações registradas após a integração.
+
+Limites: os valores da gestão continuam em R$ mil; as transferências automáticas entre NPCs conservam seu modelo financeiro abstrato, e não se inventam taxas de transferência para movimentos sem valor registrado. Os personagens narrativos não são convertidos em atletas do mercado nesta etapa.

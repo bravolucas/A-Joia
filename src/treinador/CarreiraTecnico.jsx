@@ -1,3 +1,4 @@
+import GestaoElenco from './GestaoElenco.jsx';
 import {exigenciaClubeTecnico} from './exigenciasTecnico.js';
 import {MuseuFimCarreira} from '../museu/MuseuPessoal.jsx';
 import BotaoHistoria from '../historia/HistoriaFutebol.jsx';
@@ -174,13 +175,14 @@ function LinhaTemporada({ a, idade, ativa, aberta, onClick }) {
   </div>;
 }
 
-export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAvancarESimular, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado, onAposentar, onPedirDemissao, onReuniao, onJogar, onIntervir, onEscolhaRapida, onComprarMelhoria, onParada, onFinal, onConviteSelecao, onCopaEscolha, rotuloLegado = '← Ver legado como jogador' }) {
+export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, onSimularTemporada, onAvancar, onAvancarESimular, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado, onAposentar, onPedirDemissao, onReuniao, onJogar, onIntervir, onEscolhaRapida, onComprarMelhoria, onParada, onFinal, onConviteSelecao, onCopaEscolha, rotuloLegado = '← Ver legado como jogador' }) {
   const t = c.tecnico;
   const temporadas = t.temporadas || [];
   const ultima = temporadas.at(-1);
   const primeira = !temporadas.length && !t.clubeInicialEscolhido && !!t.opcoesInicio?.length;
   const semClube = t.demitido || t.desempregado;
   const encerrada = carreiraTecnicoEncerrada(t,c.idade);
+  const [elencoAberto,setElencoAberto]=useState(false);
   const [aposentadoriaAberta,setAposentadoriaAberta]=useState(false);
   const [demissaoAberta,setDemissaoAberta]=useState(false);
   const historico = historicoProfissionalTecnico(t);
@@ -295,6 +297,7 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
     {(eventoAtual?.tipo === 'rebaixado' || eventoAtual?.tipo === 'acesso') && <PopUpDivisao temporada={ultima} movimento={eventoAtual.movimento} tipo={eventoAtual.tipo} onFechar={fecharEvento} />}
     {eventoAtual?.tipo === 'demissao' && <PopUpDemissao temporada={ultima} t={t} onFechar={fecharEvento} />}
     {vitrineAberta && <JanelaTreinador titulo="Conquistas como treinador" onFechar={() => setVitrineAberta(false)} classe="ct-trophy-modal"><VitrineConquistas grupos={gruposConquistas} total={titulos.length} selecionada={conquistaSelecionada} onSelecionar={setConquistaSelecionada}/></JanelaTreinador>}
+    {elencoAberto&&<JanelaTreinador titulo="Elenco e contratos" onFechar={()=>setElencoAberto(false)}><GestaoElenco c={c} onNegociar={onNegociarElenco}/></JanelaTreinador>}
     {decisaoAberta && cartaRapida && <JanelaTreinador titulo="Decisão de pré-temporada" onFechar={() => setDecisaoAberta(false)} classe="ct-quick-modal"><div className="ct-quick-decision"><div className="ct-quick-heading"><span>ESCOLHA {cartaRapida.indice} DE {cartaRapida.total}</span><span>Verba: {formatarVerbaRapida(cartaRapida.verba)}</span></div><h3>{cartaRapida.titulo}</h3><p>{cartaRapida.texto}</p><p className="ct-quick-baseline">Força do time: {Math.round(forcaClubeTecnico(t))} · Moral: {Math.round(t.moral??50)}{bonusForcaLoja(t)>0?` · Inclui +${bonusForcaLoja(t)} da loja`:""}</p><div className="ct-decisions">{cartaRapida.opcoes.map(op=><button key={op.id} disabled={simulando||op.custo>cartaRapida.verba} onClick={()=>executar(()=>onEscolhaRapida?.(cartaRapida.chave,op.id))}><strong>{op.nome}</strong><span>{op.descricao}</span>{op.custo>0&&<small>Investimento: {formatarVerbaRapida(op.custo)}{op.custo>cartaRapida.verba?' · Sem verba':''}</small>}<b>{cartaRapida.indice<cartaRapida.total?'Escolher e continuar →':'Escolher e simular →'}</b></button>)}</div><p className="ct-quick-footnote">{cartaRapida.indice<cartaRapida.total?'Só mais uma escolha antes de jogar.':'Após a escolha, a temporada é simulada automaticamente.'}</p></div></JanelaTreinador>}
 
     <div className="ct-board" aria-busy={simulando}>
@@ -328,6 +331,7 @@ export default function CarreiraTecnico({ c, onSimularTemporada, onAvancar, onAv
           {erroProposta && <p role="status" className="ct-warning">A proposta de {erroProposta} foi recusada. Escolha outra opção.</p>}
           {erroSimulacao && <p role="alert" className="ct-warning">{erroSimulacao}</p>}
         </div>
+        {onAbrirElenco&&!primeira&&!semClube&&!encerrada&&t.tipoEquipe!=='selecao'&&((t.gestao?.cadastroUnificado&&t.gestao.clube===t.clube)||(t.fase==='pretemporada'&&!t.copasEmJogo&&!t.andamento?.jogos&&!t.andamento?.rodadas&&!t.temporadaPausada))&&<button className="ct-wallet-button ct-elenco-button" onClick={()=>{setElencoAberto(true);onAbrirElenco();}}>Elenco e contratos →</button>}
       </section>
 
       <section className="ct-timeline" aria-label="Trajetória como treinador">

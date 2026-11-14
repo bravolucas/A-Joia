@@ -1,6 +1,11 @@
+import {COPAS_NACIONAIS} from '../competicoes/regrasCopasRapidas.js';
+import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
+import {prepararMundoTemporada,creditarCampeoesCalendario,registrarPremioCalendario,clubesDoCompleto,vagasProximaTemporada,aplicarVagaTemporada} from './mundoTemporada.js';
+import {estatisticasDasPartidas} from '../simulacao/estatisticasMundo.js';
+import {geradorTecnico} from '../treinador/momentosTecnico.js';
 import {prepararCopaPersistente,registrarJogoPersistente} from './copasPersistentes.js';
 import {registrarRodadaTemporada,estatisticasReaisTemporada} from './registrosTemporada.js';
-import {registrarMundoVivo} from '../simulacao/mundoVivo.js';
+import {registrarMundoVivo,resumirTabelas} from '../simulacao/mundoVivo.js';
 import {AJUSTE_FORTALEZA} from '../dados/equilibrioClubes.js';
 import JanelaPremiacao from '../comum/JanelaPremiacao.jsx';
 import {clubeInternacional} from '../competicoes/clubesInternacionais.js';
@@ -9,7 +14,7 @@ import {creditarTorneiosSelecao,resumoSelecaoTemporada} from './estatisticasSele
 import {fasesMataSelecao} from '../competicoes/fasesSelecoes.js';
 import CerimoniaBola from '../comum/CerimoniaBola.jsx';
 import {MuseuFimCarreira} from '../museu/MuseuPessoal.jsx';
-import {registrarAnoHistoria,simularDefesas,registrarAtletasObservados,nomeCanonico} from '../historia/historiaFutebol.js';
+import {registrarAnoHistoria,simularDefesas,registrarAtletasObservados} from '../historia/historiaFutebol.js';
 import BotaoHistoria,{GaleriaClube,MarcosIndividuais} from '../historia/HistoriaFutebol.jsx';
 import TabelaCompeticoesTemporada from './TabelaCompeticoesTemporada.jsx';
 import { criarIdMuseu } from '../museu/museu.js';
@@ -19,7 +24,7 @@ import { TacaCompeticao } from "../comum/trofeus.jsx";
 import { competicaoDoTitulo } from "../comum/tacas.js";
 import { montarSave, resumoDoSave, salvarLocal, carregarLocal, apagarLocal, listarSaves, existeAlgumSave, baixarSave, lerArquivoSave, formatarData, normalizarSave, definirLabelSlot, SLOTS } from "./save.js";
 import { ANO_INICIO, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONFEDERACAO_POR_NACAO, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, EMOJI_NACIONALIDADE, ESPECIALIDADES_LISTA, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, FUNCOES_ELENCO, JOGOS_FASE_CONTINENTAL, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "../dados/data.js";
-import { nomeMundo, agregarPorCompeticao, ajustarMeta, ajustesDoContexto, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusEspecialidades, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, continentalDaSelecao, creditarTitulo, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, distribuirTitulosDoMundo, dividirPorCompeticao, efeitosOstentacao, ehClassicoReal, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, especialidadesIniciais, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, fatorTitulosTemporada, forcaEfetivaClube, formatarDinheiro, gerarChegadaClube, gerarColetivaPosJogo, gerarContextoLance, gerarElenco, gerarEventoAmbiente, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, PIRAMIDE_LIGAS, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearClima, sortearConcorrente, sortearFormacao, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, valorDeMercado, valorMundo, veredito } from "../comum/lib.js";
+import { nomeMundo, agregarPorCompeticao, ajustarMeta, ajustesDoContexto, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusEspecialidades, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, continentalDaSelecao, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, dividirPorCompeticao, efeitosOstentacao, ehClassicoReal, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, especialidadesIniciais, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, fatorTitulosTemporada, forcaEfetivaClube, formatarDinheiro, gerarChegadaClube, gerarColetivaPosJogo, gerarContextoLance, gerarElenco, gerarEventoAmbiente, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, PIRAMIDE_LIGAS, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearClima, sortearConcorrente, sortearFormacao, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, valorDeMercado, valorMundo, veredito } from "../comum/lib.js";
 import { AttrBarDelta, AttrRadar, BallIcon, ApresentacaoNovoClube, Button, CalendarioTemporadaPopup, Card, CartaoCarreira,
   CenaAposentadoria, CenaAssinaturaContrato, CenaDespedidaClube, CenaEstreia, CenaLesaoGrave, CenaLevantarTaca, CenaRivalidade, ClubDot, ComparadorTemporadas, Confetti, CountUp, CurvaEvolucao, DadoIcon, Diamond, Gema, FichaPartida, FreeKickMini, GoalMini, GraficoEvolucaoCarreira, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PodiumBolaDeOuro, PopupConvocacao, PopupOverlay, SilhuetaJogador, Sparkle, TelaPartidaAoVivo, TimelineCarreira, TimingBar, TrophyIcon } from "../comum/components.jsx";
 
@@ -402,7 +407,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
       // senão ficam "presos", podendo até misturar países num confronto
       // que deveria ser só nacional (ex: Copa Nacional contra time de fora).
       if (c.temporadaAndamento && (c.temporadaAndamento.rodadaAtual || 0) === 0) {
-        const novoCalendario = gerarCalendarioLiga(clubeNovo, CLUBES, clubeNovo.liga);
+        const novoCalendario = gerarCalendarioLiga(clubeNovo, clubesDoCompleto(c,mundo), clubeNovo.liga);
         const ta = c.temporadaAndamento;
         const cardAjustado = ta.cardOriginal ? { ...ta.cardOriginal } : null;
         if (cardAjustado?.copaNacionalPendente) cardAjustado.copaNacionalPendente = { ...cardAjustado.copaNacionalPendente, adversario: sortearAdversario(c, "copaNacional") };
@@ -415,7 +420,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
           if (ev.tipo === "classico" || ev.tipo === "falta") return { ...ev, adversario: sortearAdversario(c, "classico") };
           return ev;
         }).filter(Boolean);
-        c.temporadaAndamento = { ...ta, calendario: novoCalendario, tabela: criarTabelaZerada(clubeNovo.liga), cardOriginal: cardAjustado, eventosAgendados: eventosAjustados };
+        c.temporadaAndamento = { ...ta, calendario: novoCalendario, tabela: criarTabelaZerada(clubeNovo.liga,clubesDoCompleto(c,mundo)), cardOriginal: cardAjustado, eventosAgendados: eventosAjustados };
       }
       c.elenco = gerarElenco(clubeNovo, mundo, c.posicao);
       c.recordesClube = { ...(c.recordesClube || {}), [clubeNovo.nome]: (c.recordesClube || {})[clubeNovo.nome] || gerarRecordeClube(clubeNovo) };
@@ -936,9 +941,9 @@ function simularPartidaLiga(casa, fora, clubeJogadorNome, forcaClubeJogador, ovr
   const golsFora = poisson(clamp(1.35 - diferenca * 0.045, 0.25, 4));
   return { golsCasa, golsFora };
 }
-function criarTabelaZerada(liga) {
+function criarTabelaZerada(liga, clubes = CLUBES) {
   const tab = {};
-  CLUBES.filter((x) => x.liga === liga).forEach((t) => { tab[t.nome] = { clube: t, pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 }; });
+  clubes.filter((x) => x.liga === liga).forEach((t) => { tab[t.nome] = { clube: t, pts: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0, sg: 0 }; });
   return tab;
 }
 function atualizarTabelaPartida(tab, casaNome, foraNome, gc, gf) {
@@ -1168,7 +1173,7 @@ function concluirRodada(c, ta, { tabela, historico, meuResultadoRodada, golsRest
 function nomeMataMata(c, tipo) {
   if (tipo === "estadual") return ESTADUAIS[c.clube.estado] || "Campeonato Estadual";
   if (tipo === "copinha") return "Copa São Paulo de Futebol Júnior";
-  return COMPS_PAIS[c.clube.liga]?.copa || "Copa do Brasil";
+  return COPAS_NACIONAIS[primeiraLiga(c.clube.liga)] || COMPS_PAIS[c.clube.liga]?.copa || "Copa Nacional";
 }
 function campoMataMata(tipo) {
   if (tipo === "continental") return "continental";
@@ -1198,7 +1203,7 @@ function iniciarPartidaMataMata(c, tipo, adversarioNome, faseIdx, card, opcoesId
     stats: { chutesMeu: 0, chutesAlvoMeu: 0, chutesAdv: 0, chutesAlvoAdv: 0, faltasMeu: 0, faltasAdv: 0 },
     ctx: {
       posicao: c.posicao, postura: "normal", forcaClube, forcaJogador: calcOVR(c.attrs, c.posicao),
-      adversarioForca: adversarioObj?.forca ?? 70, adversario: adversarioNome, classico: false, souCasa: opcoesIdaVolta?.souCasa ?? Math.random() < 0.5,
+      adversarioForca: decisaoPersistente?.forcaAdv ?? adversarioObj?.forca ?? 70, adversario: adversarioNome, classico: false, souCasa: opcoesIdaVolta?.souCasa ?? Math.random() < 0.5,
       meuClube: c.clube, adversarioObj, ...(() => { const cl = sortearClima(); return { clima: cl.id, climaMult: cl.mult }; })(),
       formacao: formacaoMataMata?.label ?? null, formacaoFavorece: formacaoMataMata ? formacaoMataMata.favorece.includes(c.posicao) : null, especialidades: c.especialidades,
       copa: { tipo, faseIdx, card, persistente: !!decisaoPersistente, faseLabel: decisaoPersistente?.fase, nomeCompeticao: card.campanhasCompletas?.[tipo]?.nome || nomeMataMata(c, tipo), perna: opcoesIdaVolta?.perna || "ida", agregadoMeu: opcoesIdaVolta?.agregadoMeu || 0, agregadoAdv: opcoesIdaVolta?.agregadoAdv || 0 },
@@ -1258,7 +1263,7 @@ function iniciarPartidaContinentalClube(c, card, jogoGrupo, adversarioNome, souC
     stats: { chutesMeu: 0, chutesAlvoMeu: 0, chutesAdv: 0, chutesAlvoAdv: 0, faltasMeu: 0, faltasAdv: 0 },
     ctx: {
       posicao: c.posicao, postura: "normal", forcaClube, forcaJogador: calcOVR(c.attrs, c.posicao),
-      adversarioForca: adversarioObj?.forca ?? 70, adversario: adversarioNome, classico: emMataMata, souCasa: souCasa ?? Math.random() < 0.5,
+      adversarioForca: decisaoPersistente?.forcaAdv ?? adversarioObj?.forca ?? 70, adversario: adversarioNome, classico: emMataMata, souCasa: souCasa ?? Math.random() < 0.5,
       meuClube: c.clube, adversarioObj, ...(() => { const cl = sortearClima(); return { clima: cl.id, climaMult: cl.mult }; })(),
       formacao: formacaoJogo?.label ?? null, formacaoFavorece: formacaoJogo ? formacaoJogo.favorece.includes(c.posicao) : null, especialidades: c.especialidades,
       copa: {
@@ -1651,7 +1656,7 @@ function concluirPartidaContinentalSelecao(c, ctx, resultado, golsMinha, assistM
   iniciarPartidaContinentalSelecao(c, card, faseIdx + 1, null, 0, null);
 }
 function resolverTemporada(c, extraStats) {
-    const card = simularTemporada(c);
+    const card = aplicarVagaTemporada(c,simularTemporada(c));
     if (extraStats.gols) card.gols += extraStats.gols;
     if (extraStats.assist) card.assist += extraStats.assist;
     c.anosDesdeCopa += 1;
@@ -1772,8 +1777,8 @@ function resolverTemporada(c, extraStats) {
 
     if (modoSimulacao === "jogoAJogo") {
       // Espalha os eventos decisivos ao longo do calendário — não resolve tudo de uma vez no início
-      const calendario = gerarCalendarioLiga(c.clube, CLUBES, c.clube.liga);
-      const tabela = criarTabelaZerada(c.clube.liga);
+      const calendario = gerarCalendarioLiga(c.clube, clubesDoCompleto(c,mundo), c.clube.liga);
+      const tabela = criarTabelaZerada(c.clube.liga,clubesDoCompleto(c,mundo));
       const totalRodadas = calendario.length;
       const eventosAgendados = fila.map((item, i) => ({
         ...item,
@@ -2020,6 +2025,9 @@ function resolverTemporada(c, extraStats) {
   }
 
   function finalizarTemporada(c, card, jogosLista = [], tabelaFinal = null) {
+    const anoTemporada=ANO_INICIO+c.idade-16;
+    if(c.universo?.anos?.includes(anoTemporada))return;
+    const clubeTemporada={...c.clube};
     // Motor jogo a jogo: os números da liga nascem da soma real das partidas
     // jogadas (placar decidido por lance, não sorteado no início do ano).
     // As copas efetivamente jogadas entram com seus registros próprios.
@@ -2039,6 +2047,9 @@ function resolverTemporada(c, extraStats) {
         if (minhaPos >= 0) { card.posLiga = minhaPos + 1; card.campeaoLiga = minhaPos === 0; }
       }
     }
+    simularDefesas(c,card);
+    c.codigoMundo ||= c.codigo || c.museuId || `${nome}|${nacionalidade}|${c.posicao}`;
+    card=prepararMundoTemporada({...c,nome,codigo:c.codigoMundo},{...card,posicao:c.posicao,jogosLista:jogosLista.length?jogosLista:card.jogosLista,porCompeticao:dividirPorCompeticao(c,card)},mundo);
     const copa = card.copaResultado || null;
     if (copa) {
       const nac = nacDe(c.nacionalidade);
@@ -2118,12 +2129,14 @@ function resolverTemporada(c, extraStats) {
     if (copa?.titulo) { const nac = nacDe(c.nacionalidade); c.titulosSelecao = [...(c.titulosSelecao || []), `Copa do Mundo (${nac.label})`]; }
 
     // O mundo avança junto: rivais rendem, evoluem, trocam de clube e se aposentam
-    const mundoAtualizado = mundo ? simularTemporadaMundo(mundo) : null;
+    const clubesMundo=clubesDoCompleto(c,mundo);
+    let mundoAtualizado = mundo ? simularTemporadaMundo(mundo,geradorTecnico(`${c.codigoMundo}|${card.ano}|evolucao-completo`),{clubes:clubesMundo,perfis:c.universo?.clubes||{},ano:card.ano,registrarPremio:false}) : null;
+    if(mundoAtualizado)mundoAtualizado=estatisticasDasPartidas(mundoAtualizado,mundo,card,c.codigoMundo,{zerarSemPartidas:true,clubesLegados:card.classificacoesMundo[card.ligaId]?[]:clubesMundo.filter(cl=>cl.liga===card.ligaId).map(cl=>cl.nome)});
 
     // Artilharia real da liga e disputa real da Bola de Ouro
     let rankingBO = [], artilhariaReal = [], meuPostoBO = null;
     if (mundoAtualizado) {
-      const meuCardMundo = { clube: c.clube.nome, posicao: c.posicao, ovr: card.ovr, gols: card.gols, assist: card.assist, nota: card.nota, ligaMult: card.ligaMult };
+      const meuCardMundo = { clube: c.clube.nome, posicao: c.posicao, ovr: card.ovr, gols: card.gols, assist: card.assist, nota: card.nota, ligaMult: card.ligaMult, porCompeticao:card.porCompeticao };
       rankingBO = rankingBolaDeOuro(mundoAtualizado, meuCardMundo, nome, titulosLista.length);
       artilhariaReal = artilhariaLiga(mundoAtualizado, c.clube.liga, meuCardMundo, nome);
       meuPostoBO = rankingBO.find((x) => x.voce)?.pos ?? null;
@@ -2140,24 +2153,10 @@ function resolverTemporada(c, extraStats) {
 
     const premios = avaliarPremios(card, c.posicao, copa?.titulo, nome, c.rivalPosicao, meuPostoBO);
     premios.forEach((p) => { if (p.doJogador) { c.premiosIndividuais += 1; if (p.bolaDeOuro) { c.bolasDeOuro += 1; logHist(c, "Conquistou a BOLA DE OURO!"); } } });
-    // Bolas de Ouro do rival: antes só contava quando o sistema de prêmios
-    // "sorteava" o rival especificamente como vencedor (raro, já que o mundo
-    // tem milhares de jogadores) — agora conta de verdade sempre que o
-    // vencedor real da temporada (no Hall da Fama do mundo) é o seu rival.
-    if (mundoAtualizado && meuPostoBO !== 1 && (mundoAtualizado.historicoBolaDeOuro || []).length) {
-      const vencedorReal = mundoAtualizado.historicoBolaDeOuro[mundoAtualizado.historicoBolaDeOuro.length - 1];
-      if (vencedorReal?.nome === c.rivalPosicao) c.rivalBolasDeOuro = (c.rivalBolasDeOuro || 0) + 1;
+    if(mundoAtualizado){
+      mundoAtualizado=registrarPremioCalendario(mundoAtualizado,rankingBO[0]);
+      if(rankingBO[0]&&!rankingBO[0].voce&&rankingBO[0].nome===c.rivalPosicao)c.rivalBolasDeOuro=(c.rivalBolasDeOuro||0)+1;
     }
-    // O Hall da Fama do mundo (aba Mundo) calculava o vencedor da temporada
-    // só entre os jogadores simulados, sem saber que você mesmo pode ter
-    // vencido de verdade — corrige o registro dessa temporada com seu nome
-    // quando você é realmente o nº1 do ranking.
-    if (mundoAtualizado && meuPostoBO === 1 && (mundoAtualizado.historicoBolaDeOuro || []).length) {
-      const hist = [...mundoAtualizado.historicoBolaDeOuro];
-      hist[hist.length - 1] = { ...hist[hist.length - 1], nome, clube: c.clube.nome, ovr: card.ovr, gols: card.gols, assist: card.assist, voce: true };
-      mundoAtualizado.historicoBolaDeOuro = hist;
-    }
-    if (mundoAtualizado) setMundo(mundoAtualizado);
 
     c.gols += card.gols; c.assist += card.assist; c.melhorEmCampo += card.melhorEmCampo;
 
@@ -2432,28 +2431,12 @@ function resolverTemporada(c, extraStats) {
     {
       let estadoAtual = c.estadoClubes || estadoInicialClubes();
 
-      // ---- PALMARÉS: credita os títulos da temporada ----
-      // 1) o que VOCÊ ganhou vai pro seu clube
-      if (card.campeaoLiga) estadoAtual = creditarTitulo(estadoAtual, c.clube.nome, "liga");
-      if (card.copaNacional?.titulo) estadoAtual = creditarTitulo(estadoAtual, c.clube.nome, "copa");
-      if (card.continental?.titulo) estadoAtual = creditarTitulo(estadoAtual, c.clube.nome, "continental");
-      if (card.mundial?.titulo) estadoAtual = creditarTitulo(estadoAtual, c.clube.nome, "mundial");
-      // 2) o resto do mundo também tem campeões — o Real segue somando Champions
-      const titulosMundo = distribuirTitulosDoMundo(estadoAtual, c.clube.liga, {
-        liga: !!card.campeaoLiga, copa: !!card.copaNacional?.titulo,
-        continental: !!card.continental?.titulo, mundial: !!card.mundial?.titulo,
-      });
-      estadoAtual = titulosMundo.estado;
-      for(const copaReal of (card.torneios||[]).filter(t=>['copa','continental'].includes(t.tipo)&&t.campeao)){
-        const ligaCopa=c.clube.liga==='serieB'?'brasileirao':c.clube.liga;
-        const substituidos=titulosMundo.campeoes.filter(t=>t.tipo===copaReal.tipo&&(copaReal.tipo==='copa'?t.liga===ligaCopa:nomeCanonico(t.nome)===nomeCanonico(copaReal.nome)));
-        for(const t of substituidos)estadoAtual=creditarTitulo(estadoAtual,t.clube,t.tipo,-1);
-        titulosMundo.campeoes=titulosMundo.campeoes.filter(t=>!substituidos.includes(t));
-        if(copaReal.campeao!==c.clube.nome)estadoAtual=creditarTitulo(estadoAtual,copaReal.campeao,copaReal.tipo);
-        titulosMundo.campeoes.push({liga:ligaCopa,tipo:copaReal.tipo,nome:copaReal.nome,clube:copaReal.campeao});
-      }
-      c.campeoesDaTemporada = titulosMundo.campeoes;
-      registrarAnoHistoria(c,{...card,ano:ANO_INICIO+c.idade-16,clube:c.clube.nome,ligaId:c.clube.liga},{modo:"completo"});
+      estadoAtual=creditarCampeoesCalendario(estadoAtual,card);
+      c.vagasInternacionaisClubes=vagasProximaTemporada(c,card);
+      c.vagasInternacionaisAno=card.ano+1;
+      c.vagasLigasSimuladas=Object.keys(card.classificacoesMundo);
+      c.campeoesDaTemporada=card.campeoesCalendarioMundo;
+      registrarAnoHistoria(c,card,{modo:'completo'});
 
       // O clube do jogador não entra no sorteio por força do resto do mundo —
       // o destino dele (sobe/desce/fica) é decidido pela posição REAL que ele
@@ -2462,7 +2445,7 @@ function resolverTemporada(c, extraStats) {
       if (card.posLiga) {
         const divInfo = PIRAMIDE_LIGAS.find((d) => d.elite === c.clube.liga || d.acesso === c.clube.liga);
         if (divInfo) {
-          const totalNaLiga = CLUBES.filter((x) => x.liga === c.clube.liga).length;
+          const totalNaLiga = clubesMundo.filter((x) => x.liga === c.clube.liga).length;
           if (divInfo.elite === c.clube.liga && card.posLiga > totalNaLiga - divInfo.vagas) {
             forcarClube = { nome: c.clube.nome, liga: c.clube.liga, desceu: true };
           } else if (divInfo.acesso === c.clube.liga && card.posLiga <= divInfo.vagas) {
@@ -2472,8 +2455,11 @@ function resolverTemporada(c, extraStats) {
           }
         }
       }
-      const giro = girarLigas(estadoAtual, forcarClube);
+      const giro = girarLigas(estadoAtual, forcarClube, card.classificacoesMundo);
       c.estadoClubes = giro.estado;
+      c.ligas=Object.fromEntries(Object.entries(giro.estado).map(([n,v])=>[n,v.liga]));
+      card.movimentosMundo=[...giro.promovidos.map(clube=>({clube,tipo:'acesso'})),...giro.rebaixados.map(clube=>({clube,tipo:'rebaixamento'}))];
+      if(mundoAtualizado)mundoAtualizado={...mundoAtualizado,jogadores:mundoAtualizado.jogadores.map(p=>c.ligas[p.clubeNome]?{...p,liga:c.ligas[p.clubeNome]}:p)};
       movimentoLigas = { promovidos: giro.promovidos, rebaixados: giro.rebaixados };
       // seu clube pode ter mudado de divisão ou de patamar
       const meuNovo = clubeAtual(giro.estado, c.clube.nome);
@@ -2488,6 +2474,8 @@ function resolverTemporada(c, extraStats) {
         }
       }
     }
+
+    if(mundoAtualizado)setMundo(mundoAtualizado);
 
     // ---- O TÉCNICO PODE CAIR ----
     let trocaTecnico = null;
@@ -2572,10 +2560,13 @@ function resolverTemporada(c, extraStats) {
 
     simularDefesas(c,card);
     const registro = {
-      idade: c.idade, temporadaLabel: temporadaLabel(c.idade, ANO_INICIO), clube: c.clube.nome, clubeObj: c.clube,
-      ...card, posicao:c.posicao, copa, premios, titulosLista, torcidaFim: getTorcida(c, c.clube.nome), famaFim: c.fama, salario, expectativa, bateuMeta,
+      idade: c.idade, temporadaLabel: temporadaLabel(c.idade, ANO_INICIO), clube: clubeTemporada.nome, clubeObj: clubeTemporada,
+      ...card,
+      classificacoesMundo:resumirTabelas(card.classificacoesMundo),
+      torneiosMundo:(card.torneiosMundo||[]).map(t=>({nome:t.nome,tipo:t.tipo,campeao:t.campeao,vice:t.vice,formato:t.formato})),
+      posicao:c.posicao, copa, premios, titulosLista, torcidaFim: getTorcida(c, c.clube.nome), famaFim: c.fama, salario, expectativa, bateuMeta,
       jogosLista: jogosLista.length ? jogosLista : card.jogosLista,
-      porCompeticao: dividirPorCompeticao(c, card),
+      porCompeticao: card.porCompeticao,
       selecaoTemporada: resumoSelecaoTemporada(c) || c.selecaoTemporadaAtual || statsSelecao(c, card),
       selecaoAcumulado: c.selecao ? { ...c.selecao } : null,
       resultadoPromessa,
@@ -2583,7 +2574,7 @@ function resolverTemporada(c, extraStats) {
       trocaTecnico, movimentoLigas,
       valorMercado: valorAtual, valorAnterior,
     };
-    {const arquivo={...c,nome,nac:nacionalidade,mundo:mundoAtualizado||mundo};registrarAtletasObservados(arquivo,{...registro,ano:ANO_INICIO+c.idade-16});registrarMundoVivo(arquivo,{...registro,ano:ANO_INICIO+c.idade-16},{antesMundo:mundo});c.historiaFutebol=arquivo.historiaFutebol;c.universo=arquivo.universo;}
+    {const arquivo={...c,nome,nac:nacionalidade,mundo:mundoAtualizado||mundo};registrarAtletasObservados(arquivo,{...registro,ano:ANO_INICIO+c.idade-16});registrarMundoVivo(arquivo,{...registro,classificacoesMundo:card.classificacoesMundo,torneiosMundo:card.torneiosMundo,ano:ANO_INICIO+c.idade-16},{antesMundo:mundo});c.historiaFutebol=arquivo.historiaFutebol;c.universo=arquivo.universo;}
     setTemporadas((t) => [...t, registro]);
     // autosave: a virada de temporada é o ponto mais seguro pra gravar
     setTimeout(async () => {

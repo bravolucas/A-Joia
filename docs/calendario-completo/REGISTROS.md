@@ -18,7 +18,7 @@ Saves que já estavam no meio de uma temporada sem a versão nova continuam no f
 
 ## Trabalho restante
 
-O modo `completa` ainda usa projeção anual. Copas de seleções do modo completo ainda usam o fluxo anterior. A integração de todas as ligas mundiais, a reconciliação dos NPCs do modo completo com o calendário mundial inteiro e as promoções/rebaixamentos das demais ligas permanecem para uma próxima etapa. O leitor compartilhado de estatísticas já aceita os jogos novos; esta etapa não substitui toda a evolução anual dos NPCs no modo completo.
+O modo `completa` ainda usa projeção anual. Copas de seleções do modo completo ainda usam o fluxo anterior. A integração das outras ligas, das promoções/rebaixamentos e das estatísticas dos NPCs com o calendário foi acrescentada em MUNDO.md. A liga própria do modo anual ainda preserva sua projeção e os dados legados; não há placares retroativos para ela.
 
 ## Verificação
 

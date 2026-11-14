@@ -1,10 +1,13 @@
+import {instalarSave,lerSave} from './helpers/save-browser.mjs';
+// Full-world fixtures include thousands of players and IndexedDB hydration.
+test.setTimeout(90000);
 import {prepararDecisaoJogo} from '../src/jogador/decisaoDeJogo.js';
 import{test,expect}from'@playwright/test';
 import{criarJogador,sortearEvento,ovrDe}from'../src/jogador/rapido.js';
 import{registrarMuseu}from'../src/museu/museu.js';
 const base='http://127.0.0.1:4173/A-Joia/';
 function jogador(){const c=criarJogador({nome:'Jornada UI',nac:'BRA',posicao:'ATA',personalidade:'ascensao',origem:'base',pe:'destro',numero:9,ritmo:'normal',codigo:'JORNADA-UI'});c.idade=30;c.ano=2040;c.desafioAno=c.ano;c.flags.baseEscolhida=true;c.clubeNome='Santos';c.primeiroClube='Santos';c.torcida.Santos=85;c.patrimonio=5000;for(const k of Object.keys(c.attrs)){c.attrs[k]=76;c.potencial[k]=90;}c.contrato={clube:'Santos',anos:3,restantes:3,salario:1000,multa:30000};return c;}
-async function abrir(page,c,extras={}){await page.goto(base);await page.evaluate(s=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify(s)),{v:1,etapa:'evento',c,auto:false,...extras});await page.reload();await page.getByRole('button',{name:/Continuar · Jornada UI/}).click();}
+async function abrir(page,c,extras={}){await page.goto(base);await instalarSave(page,((s)=>(s))({v:1,etapa:'evento',c,auto:false,...extras}),"ajoia_rapido_v1");await page.reload();await page.getByRole('button',{name:/Continuar · Jornada UI/}).click();}
 
 for(const width of[390,1366])test(`troca real de posição mostra prazo, altera o save e retoma em ${width}px`,async({page})=>{
  await page.setViewportSize({width,height:760});await page.emulateMedia({reducedMotion:'reduce'});await abrir(page,jogador());
@@ -12,7 +15,7 @@ for(const width of[390,1366])test(`troca real de posição mostra prazo, altera 
  await page.locator('.jr-painel>details>summary').click();await page.getByRole('button',{name:'Mudar de posição',exact:true}).click();
  const modal=page.getByRole('dialog',{name:'Mudar de posição de verdade'});await expect(modal).toContainText('temporários');
  await modal.getByRole('button',{name:/ATA → MEI/}).click();await expect(modal).toHaveCount(0);
- const salvo=await page.evaluate(()=>JSON.parse(localStorage.getItem('ajoia_rapido_v1')));expect(salvo.c.posicao).toBe('MEI');expect(salvo.c.jornada.transicao.restantes).toBe(2);
+ const salvo=await lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo));expect(salvo.c.posicao).toBe('MEI');expect(salvo.c.jornada.transicao.restantes).toBe(2);
  await expect(page.locator('.jr-painel')).toContainText('MEI');await page.reload();await page.getByRole('button',{name:/Continuar · Jornada UI/}).click();
  await expect(page.locator('.jr-painel')).toContainText('Nova função');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:`/tmp/jornada-posicao-${width}.png`,fullPage:true});
@@ -22,7 +25,7 @@ test('preferência e assinatura são opcionais, persistem e não concedem OVR ao
  const c=jogador();c.jornada.assinaturas={vertical:{anos:[2037,2038,2039]},decisivo:{anos:[2037,2038,2039]}};
  await abrir(page,c);await page.locator('.jr-painel>details>summary').click();await page.getByRole('button',{name:'Disputar títulos',exact:true}).click();
  await page.getByRole('button',{name:'Assinatura técnica',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:/Passe que quebra linhas/}).click();
- const salvo=await page.evaluate(()=>JSON.parse(localStorage.getItem('ajoia_rapido_v1')).c);expect(salvo.jornada.preferencia).toBe('titulos');expect(salvo.jornada.assinaturaAtiva).toBe('vertical');expect(ovrDe(salvo)).toBe(ovrDe(c));
+ const salvo=await lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo.c));expect(salvo.jornada.preferencia).toBe('titulos');expect(salvo.jornada.assinaturaAtiva).toBe('vertical');expect(ovrDe(salvo)).toBe(ovrDe(c));
 });
 
 test('UP comprado continua visível na preparação sem abrir a loja',async({page})=>{
@@ -52,7 +55,7 @@ test('transferência apresenta despedida histórica, anúncio e primeiro dia sem
  await despedida.getByRole('button',{name:/Seguir para o novo clube/}).click();await page.clock.runFor(3200);const primeiro=page.getByRole('dialog',{name:'Primeiro dia no clube'});
  // Anúncios grandes aguardam vestir a camisa; anúncios curtos seguem sozinhos.
  if(await primeiro.count()===0){const vestir=page.getByRole('button',{name:/Vestir a camisa/});if(await vestir.count())await vestir.click();}
- await expect(primeiro).toContainText(op.oferta.clube);await expect(primeiro.getByLabel('Reencontro da dupla')).toContainText('Davi Monteiro');await page.screenshot({path:'/tmp/jornada-reencontro-chegada.png',animations:'disabled'});const botao=await primeiro.getByRole('button',{name:/Entrar na temporada/}).boundingBox();expect(botao.y+botao.height).toBeLessThanOrEqual(760);await primeiro.getByRole('button',{name:/Entrar na temporada/}).click();const salvo=await page.evaluate(()=>JSON.parse(localStorage.getItem('ajoia_rapido_v1')).c);expect(salvo.transferencias).toHaveLength(1);expect(salvo.clubeNome).toBe(op.oferta.clube);expect(salvo.jornada.adaptacao.restantes).toBeGreaterThan(0);
+ await expect(primeiro).toContainText(op.oferta.clube);await expect(primeiro.getByLabel('Reencontro da dupla')).toContainText('Davi Monteiro');await page.screenshot({path:'/tmp/jornada-reencontro-chegada.png',animations:'disabled'});const botao=await primeiro.getByRole('button',{name:/Entrar na temporada/}).boundingBox();expect(botao.y+botao.height).toBeLessThanOrEqual(760);await primeiro.getByRole('button',{name:/Entrar na temporada/}).click();const salvo=await lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo.c));expect(salvo.transferencias).toHaveLength(1);expect(salvo.clubeNome).toBe(op.oferta.clube);expect(salvo.jornada.adaptacao.restantes).toBeGreaterThan(0);
 });
 
 for(const width of[390,1366])test(`reencontro opcional mostra consequência e persiste sem impedir minigame em ${width}px`,async({page})=>{
@@ -61,7 +64,7 @@ for(const width of[390,1366])test(`reencontro opcional mostra consequência e pe
  const momento={tipo:'copa',nome:'Champions League',mini:'penalti',titulo:'Diante do antigo clube',texto:'Final',ordem:1,total:1,adversario:{tipo:'clube',nome:'Milan'}};
  const card={ano:c.ano,pendente:momento,filaMomentos:[],momentos:[],titulos:[],jogos:30,gols:10,assist:5};await abrir(page,c,{etapa:'momento',card});
  await page.locator('.jr-reacao>summary').click();await page.getByRole('button',{name:/Reconhecer a torcida/}).click();await expect(page.locator('.jr-reacao')).toContainText('+2 de carinho');
- const salvo=await page.evaluate(()=>JSON.parse(localStorage.getItem('ajoia_rapido_v1')).c);expect(salvo.torcida.Milan).toBe(62);await page.reload();await page.getByRole('button',{name:/Continuar · Jornada UI/}).click();await page.locator('.jr-reacao>summary').click();await expect(page.getByRole('button',{name:/Reconhecer a torcida/})).toHaveCount(0);await expect(page.locator('.dj-escolhas button').first()).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ const salvo=await lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo.c));expect(salvo.torcida.Milan).toBe(62);await page.reload();await page.getByRole('button',{name:/Continuar · Jornada UI/}).click();await page.locator('.jr-reacao>summary').click();await expect(page.getByRole('button',{name:/Reconhecer a torcida/})).toHaveCount(0);await expect(page.locator('.dj-escolhas button').first()).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 
 test('história das duplas mostra rota e memórias registradas com acesso por teclado',async({page})=>{

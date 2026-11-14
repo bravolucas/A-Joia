@@ -1,3 +1,6 @@
+import {instalarSave,lerSave} from './helpers/save-browser.mjs';
+// Full-world fixtures include thousands of players and IndexedDB hydration.
+test.setTimeout(90000);
 import {test,expect} from '@playwright/test';
 // Paradas da temporada e finais decididas na tela (ritmo normal/intenso).
 async function concluirMomentos(page) {
@@ -22,8 +25,8 @@ for(const width of [390,1366])test(`loja: confirmação, saldo e salário sem du
   const c=iniciarCarreiraTecnico(aposentar({...criarJogador({nome:'Treinador da loja',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,ritmo:'intenso',codigo:'ECONOMIA'}),idade:40}));
   c.ritmo='intenso';c.tecnico={...c.tecnico,clubeInicialEscolhido:true,elenco:70,salario:100,carteiraTecnico:{saldo:3000,pagamentos:[],compras:[]}};
   const abrir=async()=>{await page.reload();await page.getByRole('button',{name:/Continuar · Treinador da loja/}).click();};
-  const salvo=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('ajoia_rapido_v1')).c);
-  await page.goto('http://127.0.0.1:4173/A-Joia/');await page.evaluate(c=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,etapa:'tecnico',c})),c);await abrir();
+  const salvo=()=>lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo.c));
+  await page.goto('http://127.0.0.1:4173/A-Joia/');await instalarSave(page,((c)=>({v:1,etapa:'tecnico',c}))(c),"ajoia_rapido_v1");await abrir();
   await page.getByRole('button',{name:'Abrir loja do treinador'}).click();
   const loja=page.getByRole('dialog',{name:'Loja do treinador'});
   const item=loja.locator('article').filter({hasText:'Preparação especial'});

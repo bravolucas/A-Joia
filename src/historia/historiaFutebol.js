@@ -1,3 +1,5 @@
+import {clubesDoMundo} from '../simulacao/mundoVivo.js';
+import {simularClassificacoesMundoTecnico} from '../treinador/classificacoesMundoTecnico.js';
 import {ANO_INICIO,CLUBES,LIGAS,NACIONALIDADES,ESTADUAIS,PALMARES_HISTORICO,nomeDosTitulos,palmaresInicialDe} from '../dados/data.js';
 import {clubesParaCopas,copaNacionalMundo,COPAS_NACIONAIS,calcularVagasRapidas,nomeVaga} from '../competicoes/regrasCopasRapidas.js';
 import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternacionais.js';
@@ -68,18 +70,20 @@ export function corrigirCampeoesLiga(c){
  return novo;
 }
 function simularMundo(c,a){
- const clubes=clubesParaCopas(c.tecnico?.ligasMundo||c.ligas),vagas=calcularVagasRapidas({ano:a.ano-1,ligasMundo:c.tecnico?.ligasMundo||c.ligas,seed:'mundo'}),out=[];
+ const clubes=clubesDoMundo(c,clubesParaCopas(c.tecnico?.ligasMundo||c.ligas)),vagas=(c.vagasInternacionaisAno===a.ano?c.vagasInternacionaisClubes:null)||(Array.isArray(c.tecnico?.temporadas)?c.tecnico.temporadas.find(t=>t.ano===a.ano-1)?.vagasInternacionaisProxima:null)||calcularVagasRapidas({ano:a.ano-1,ligasMundo:c.tecnico?.ligasMundo||c.ligas,seed:'mundo'}),out=[];
  for(const [liga,nome]of Object.entries(COPAS_NACIONAIS)){
   const pool=clubes.filter(x=>x.pais===clubes.find(c=>c.liga===liga)?.pais);if(pool.length<2)continue;
   const rng=geradorTecnico(`mundo|${a.ano}|${liga}|tabela-anterior`),tabela=a.classificacoesMundo?.[liga]?.classificacao||(a.ligaId===liga&&a.tabelaLiga?.length?a.tabelaLiga.map(nome=>({nome})):null);
   const campeao=tabela?.[0]?.nome||clubes.filter(x=>x.liga===liga).map(x=>({...x,pontos:x.forca+(rng()+rng()-1)*8})).sort((x,y)=>y.pontos-x.pontos)[0]?.nome;
   if(campeao)out.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',clube:campeao});
-  const camp=copaNacionalMundo(nome,pool[0].pais,clubes,a.ano);
+  const camp=simularCampanhaCopa({nome,tipo:'copa',usuario:pool[0].nome,forcaUsuario:pool[0].forca,clubes:pool,ano:a.ano,formato:'mata',seed:`${c.codigo}|${a.ano}|mundo|${nome}`});
+  a.torneiosMundo.push(camp);
   out.push({ano:a.ano,nome,tipo:'copa',clube:camp.campeao});
  }
  for(const comp of ['champions','europa','conference','libertadores','sulamericana','asia','concacaf']){
   const pool=clubes.filter(x=>vagas[x.nome]?.competicao===comp);pool.splice(0,pool.length,...ampliarParticipantesInternacionais(pool,comp,a.ano,clubes));if(pool.length<2)continue;
   const nome=nomeVaga(comp),camp=simularCampanhaCopa({nome,tipo:'continental',usuario:pool[0].nome,forcaUsuario:pool[0].forca,clubes:pool,ano:a.ano,formato:['champions','europa','conference'].includes(comp)?'liga':'grupos',seed:`${c.codigo}|${a.ano}|historia|${nome}`});
+  a.torneiosMundo.push(camp);
   out.push({ano:a.ano,nome,tipo:'continental',clube:camp.campeao});
  }
  return out;
@@ -89,7 +93,11 @@ export function registrarAnoHistoria(c,a,{modo='rapido'}={}){
  if(!Number.isFinite(a?.ano)||c.historiaFutebol?.anos?.includes(a.ano))return;
  const mapa=new Map(eventosConhecidos(c).map(e=>[idEdicao(e.ano,e.nome),e]));
  const anteriores=[...mapa.values()];
- if(modo==='rapido')for(const e of simularMundo(c,a))inserir(mapa,e);
+ if(modo==='rapido'){
+  if(!a.classificacoesMundo)a.classificacoesMundo=simularClassificacoesMundoTecnico({clubes:clubesDoMundo(c).filter(x=>!LIGAS[x.liga]?.naoJogavel),ligasMundo:c.tecnico?.ligasMundo||c.ligas,rng:geradorTecnico(`${c.codigo}|${a.ano}|ligas-arquivo`)});
+  a.torneiosMundo=[];
+  for(const e of simularMundo(c,a))inserir(mapa,e);
+ }
  else for(const t of c.campeoesDaTemporada||[])inserir(mapa,{ano:a.ano,nome:t.nome||nomeDosTitulos(t.liga||CLUBES.find(x=>x.nome===t.clube)?.liga)[t.tipo],...t});
  for(const e of anteriores)inserir(mapa,e);
  for(const e of eventosTemporada(c,a))inserir(mapa,e);

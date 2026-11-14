@@ -1,8 +1,11 @@
+import {instalarSave} from './helpers/save-browser.mjs';
+// Full-world fixtures include thousands of players and IndexedDB hydration.
+test.setTimeout(90000);
 import {test,expect} from '@playwright/test';
 import {criarJogador,jogarTemporada,aplicarMomento} from '../src/jogador/rapido.js';
 const base='http://127.0.0.1:4173/A-Joia/';
 function jogador(){const c=criarJogador({nome:'Lucas Layout',nac:'BRA',posicao:'ATA',personalidade:'ascensao',origem:'base',pe:'destro',numero:10,ritmo:'normal',codigo:'LAYOUT-OVR'});c.clubeNome='Ponte Preta';c.primeiroClube='Ponte Preta';c.flags.baseEscolhida=true;c.desafioAno=c.ano;for(const a of Object.keys(c.attrs))c.attrs[a]=54;return c;}
-async function abrir(page,c,extra={}){await page.goto(base);await page.evaluate(s=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify(s)),{v:1,etapa:'evento',c,auto:false,...extra});await page.reload();await page.getByRole('button',{name:/Continuar · Lucas Layout/}).click();}
+async function abrir(page,c,extra={}){await page.goto(base);await instalarSave(page,((s)=>(s))({v:1,etapa:'evento',c,auto:false,...extra}),"ajoia_rapido_v1");await page.reload();await page.getByRole('button',{name:/Continuar · Lucas Layout/}).click();}
 async function conferirOvr(page){
  const ovr=page.locator('header [aria-label^="Overall "]');await expect(ovr).toHaveCSS('display','flex');
  const medidas=await ovr.evaluate(el=>{const r=el.getBoundingClientRect();return{caixa:{x:r.x,y:r.y,w:r.width,h:r.height},textos:[...el.querySelectorAll(':scope>span')].slice(0,2).map(s=>{const b=s.getBoundingClientRect();return{x:b.x,y:b.y,w:b.width,h:b.height}})};});

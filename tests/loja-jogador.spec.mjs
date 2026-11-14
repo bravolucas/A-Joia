@@ -1,11 +1,14 @@
+import {instalarSave,lerSave} from './helpers/save-browser.mjs';
+// Full-world fixtures include thousands of players and IndexedDB hydration.
+test.setTimeout(90000);
 import {test,expect} from '@playwright/test';
 import {criarJogador} from '../src/jogador/rapido.js';
 for(const width of [390,1366])test(`loja do jogador: compra direta, UP e recarga em ${width}px`,async({page})=>{
  await page.setViewportSize({width,height:844});
  const c={...criarJogador({nome:'Jogador da loja',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,ritmo:'normal',codigo:'LOJA-ROBUSTA'}),patrimonio:10000};
- const salvo=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('ajoia_rapido_v1')).c);
+ const salvo=()=>lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo.c));
  const abrir=async()=>{await page.reload();await page.getByRole('button',{name:/Continuar · Jogador da loja/}).click();await page.getByRole('button',{name:/Loja do jogador/}).click();};
- await page.goto('http://127.0.0.1:4173/A-Joia/');await page.evaluate(c=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,etapa:'evento',c})),c);await abrir();
+ await page.goto('http://127.0.0.1:4173/A-Joia/');await instalarSave(page,((c)=>({v:1,etapa:'evento',c}))(c),"ajoia_rapido_v1");await abrir();
  const loja=page.getByRole('dialog',{name:'Loja do jogador'});
  await expect(loja.locator('article')).toHaveCount(58);
  await loja.getByRole('button',{name:'UPs temporários',exact:true}).click();await expect(loja.locator('article')).toHaveCount(14);

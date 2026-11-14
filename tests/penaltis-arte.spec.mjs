@@ -1,3 +1,6 @@
+import {instalarSave} from './helpers/save-browser.mjs';
+// Full-world fixtures include thousands of players and IndexedDB hydration.
+test.setTimeout(90000);
 import {test,expect} from '@playwright/test';
 import {criarJogador,jogarTemporada,aposentar} from '../src/jogador/rapido.js';
 import {iniciarCarreiraTecnico} from '../src/treinador/tecnico.js';
@@ -5,7 +8,7 @@ import {criarCampanhaCopa,decisaoCopa,escolherCopa} from '../src/treinador/copas
 import {escolhasCopa} from '../src/treinador/estrategiasCopas.js';
 import {criarAgenda} from '../src/competicoes/calendarioCopas.js';
 function base(cp){const c=iniciarCarreiraTecnico(aposentar({...criarJogador({nome:'Copa Teste',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:10,ritmo:'expresso',codigo:'COPA-ESCOLHA'}),idade:40}));c.tecnico={...c.tecnico,clube:cp.usuario,ano:cp.ano+1,fase:'resultado',clubeInicialEscolhido:true,propostasCoerentesVersao:3,elenco:cp.forcaUsuario,temporadas:[{ano:cp.ano,clube:cp.usuario,liga:'brasileirao',posicao:2,pontos:72,vitorias:22,empates:6,derrotas:10,titulosConquistados:[],torneios:[cp]}],copasEmJogo:{ano:cp.ano,clube:cp.usuario,campeonatos:[cp],indice:0}};return c;}
-async function abrir(page,c){await page.goto('http://127.0.0.1:4173/A-Joia/');await page.evaluate(c=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,etapa:'tecnico',c})),c);await page.reload();await page.getByRole('button',{name:/Continuar · Copa Teste/}).click();}
+async function abrir(page,c){await page.goto('http://127.0.0.1:4173/A-Joia/');await instalarSave(page,((c)=>({v:1,etapa:'tecnico',c}))(c),"ajoia_rapido_v1");await page.reload();await page.getByRole('button',{name:/Continuar · Copa Teste/}).click();}
 
 function disputa(venceu){
  for(let i=0;i<150;i++){
@@ -17,7 +20,7 @@ function disputa(venceu){
 for(const modo of ['jogador','treinador'])for(const width of [320,1366])for(const venceu of [true,false])test(`arte de pênaltis ${modo} ${width}px ${venceu?'gol':'defesa'}`,async({page})=>{
  await page.setViewportSize({width,height:width===320?568:768});const reduzir=modo==='treinador'&&width===1366&&!venceu;if(reduzir)await page.emulateMedia({reducedMotion:'reduce'});const erros=[];page.on('pageerror',e=>erros.push(e.message));const cp=disputa(venceu);
  if(modo==='treinador')await abrir(page,base(cp));
- else{const c=criarJogador({nome:'Copa Teste',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:9,codigo:'PENAL-ARTE'});c.clubeNome='Santos';const card={...jogarTemporada(c).card,calendarioCopas:criarAgenda([cp],{ano:cp.ano,clube:'Santos'}),titulos:[]};await page.goto('http://127.0.0.1:4173/A-Joia/');await page.evaluate(s=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify(s)),{v:1,etapa:'copasClubes',c,card});await page.reload();await page.getByRole('button',{name:/Continuar · Copa Teste/}).click();}
+ else{const c=criarJogador({nome:'Copa Teste',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:9,codigo:'PENAL-ARTE'});c.clubeNome='Santos';const card={...jogarTemporada(c).card,calendarioCopas:criarAgenda([cp],{ano:cp.ano,clube:'Santos'}),titulos:[]};await page.goto('http://127.0.0.1:4173/A-Joia/');await instalarSave(page,((s)=>(s))({v:1,etapa:'copasClubes',c,card}),"ajoia_rapido_v1");await page.reload();await page.getByRole('button',{name:/Continuar · Copa Teste/}).click();}
  const d=page.getByRole('dialog',{name:'Copa em jogo · Copa do Brasil'});await expect(d.locator('[data-penalti-cena="preparacao"]')).toBeVisible();await expect(d.locator('.cce-opcoes button')).toHaveCount(3);
  // Mede os dois limites no mesmo quadro, sem misturar posições da animação de entrada.
  const limites=await d.evaluate(el=>({fim:el.querySelector('.cce-opcoes button:last-child').getBoundingClientRect().bottom,corpo:el.querySelector('.cce-corpo').getBoundingClientRect().bottom}));expect(limites.fim).toBeLessThanOrEqual(limites.corpo+1);

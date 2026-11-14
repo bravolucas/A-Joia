@@ -6,3 +6,12 @@ test('duas temporadas no destino e retorno único, mantendo vínculo e save',()=
 test('empréstimos antigos e de uma temporada continuam terminando no primeiro fechamento',()=>{for(const antigo of [true,false]){const c=base(),nome=ofertasEmprestimo(c)[0].nome;const e=antigo?{...c,emprestimo:{destino:nome}}:iniciarEmprestimo(c,nome,1);const t=jogarTemporada(e),f=fecharTemporada(t.c,t.card);assert.equal(f.c.emprestimo,null);}});
 
 test('ofertas automáticas mostram duas durações e aplicam o mesmo contrato',()=>{const c=base(),e=sortearEvento(c,{somente:'emprestimo'});assert.equal(e.id,'emprestimo');const op=e.opcoes.find(x=>x.id.endsWith(':2'));assert.ok(op);const r=resolverEvento(c,e,op.id);assert.equal(r.c.emprestimo.restantes,2);assert.equal(r.c.clubeNome,c.clubeNome);});
+
+test('jovem abaixo da força dos clubes ainda recebe três destinos possíveis',()=>{
+ const c=base();for(const atributo of Object.keys(c.attrs))c.attrs[atributo]=40;
+ const propostas=ofertasEmprestimo(c);
+ assert.equal(propostas.length,3);assert.equal(new Set(propostas.map(p=>p.nome)).size,3);
+ assert.deepEqual(ofertasEmprestimo(c),propostas);
+ const e=sortearEvento(c,{somente:'emprestimo'}),op=e.opcoes.find(o=>o.oferta?.emprestimoAnos===2);
+ assert.ok(op);assert.equal(resolverEvento(c,e,op.id).c.emprestimo.destino,op.oferta.clube);
+});

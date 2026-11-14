@@ -66,13 +66,13 @@ export function criarGestaoTecnico(t){
  if(!t?.clube)throw new Error('Escolha um clube antes de administrar o elenco.');
  if(t.gestao?.versao===1&&t.gestao.clube===t.clube){
   const g=t.fase==='pretemporada'?atualizarGestaoAnual(t.gestao,t.ano):structuredClone(t.gestao);
-  g.forcaMercado ??= Number(t.elenco)||50;return g;
+  g.forcaMercado ??= Number(t.elenco)||50;g.forcaReferencia ??= g.forcaMercado;return g;
  }
  const forca=limitar(Number(t.elenco)||CLUBES.find(c=>c.nome===t.clube)?.forca||50,30,95);
  const rng=gerador(`${t.clube}|${t.ano}|gestao-v1`);const elenco=[];
  for(const setor of SETORES_ELENCO)for(let i=0;i<setor.quantidade;i++)elenco.push(jogador(rng,`${t.clube}:${setor.id}:${i}`,setor.id,forca));
  const folha=elenco.reduce((n,j)=>n+j.salario,0);
- return {versao:1,clube:t.clube,ano:t.ano,forcaMercado:forca,orcamentoInicial:Math.round((forca-25)**2*8),saldo:Math.round((forca-25)**2*8),tetoSalarial:Math.ceil(folha*1.25),elenco,movimentos:[]};
+ return {versao:1,clube:t.clube,ano:t.ano,forcaReferencia:forca,forcaMercado:forca,orcamentoInicial:Math.round((forca-25)**2*8),saldo:Math.round((forca-25)**2*8),tetoSalarial:Math.ceil(folha*1.25),elenco,movimentos:[]};
 }
 export function resumoGestaoTecnico(g){
  const setores=SETORES_ELENCO.map(s=>{const jogadores=g.elenco.filter(j=>j.setor===s.id);return {...s,jogadores:jogadores.length,media:jogadores.length?Math.round(jogadores.reduce((n,j)=>n+j.qualidade,0)/jogadores.length):0};});
@@ -145,6 +145,7 @@ export function prepararGestaoTecnico(c){
  const gestao=criarGestaoTecnico(t);
  const virada=t.gestao?.versao===1&&t.gestao.clube===t.clube&&gestao.ano>t.gestao.ano;
  const delta=virada?mediaElenco(gestao)-mediaElenco(t.gestao):0;
+ gestao.ajusteNumerico=(t.gestao?.ajusteNumerico||0)+delta;
  return {...c,tecnico:{...t,gestao,elenco:limitar((Number(t.elenco)||50)+delta,10,95)}};
 }
 export function negociarElencoTecnico(c,tipo,id){
@@ -152,6 +153,7 @@ export function negociarElencoTecnico(c,tipo,id){
   if(!['compra','venda','renovacao','comissao'].includes(tipo))throw new Error('Operação inválida.');
   const novo=tipo==='compra'?contratarJogadorTecnico(c,id):tipo==='venda'?venderJogadorTecnico(c,id):tipo==='comissao'?contratarComissaoTecnico(c,id):renovarJogadorTecnico(c,id);
   const delta=mediaElenco(novo.tecnico.gestao)-mediaElenco(criarGestaoTecnico(c.tecnico));
+  novo.tecnico.gestao.ajusteNumerico=(c.tecnico.gestao?.ajusteNumerico||0)+delta;
   return {...novo,tecnico:{...novo.tecnico,elenco:limitar((Number(c.tecnico.elenco)||50)+delta,10,95),avisoGestao:{texto:tipo==='compra'?'Contratação concluída.':tipo==='venda'?'Venda concluída.':tipo==='comissao'?'Comissão contratada.':'Contrato renovado.',erro:false}}};
  } catch(erro){return {...c,tecnico:{...c.tecnico,avisoGestao:{texto:erro.message,erro:true}}};}
 }

@@ -1,3 +1,6 @@
+import {instalarSave,lerSave} from './helpers/save-browser.mjs';
+// Full-world fixtures include thousands of players and IndexedDB hydration.
+test.setTimeout(90000);
 import {escolhasCopa} from '../src/treinador/estrategiasCopas.js';
 import {test,expect} from '@playwright/test';
 import {criarJogador,aposentar} from '../src/jogador/rapido.js';
@@ -5,8 +8,8 @@ import {iniciarCarreiraTecnico} from '../src/treinador/tecnico.js';
 import {criarCampanhaCopa,decisaoCopa,escolherCopa} from '../src/treinador/copasEscolha.js';
 import {CLUBES} from '../src/dados/data.js';
 function base(cp){const c=iniciarCarreiraTecnico(aposentar({...criarJogador({nome:'Copa Teste',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:10,ritmo:'expresso',codigo:'COPA-ESCOLHA'}),idade:40}));c.tecnico={...c.tecnico,clube:cp.usuario,ano:cp.ano+1,fase:'resultado',clubeInicialEscolhido:true,propostasCoerentesVersao:3,elenco:cp.forcaUsuario,temporadas:[{ano:cp.ano,clube:cp.usuario,liga:'brasileirao',posicao:2,pontos:72,vitorias:22,empates:6,derrotas:10,titulosConquistados:[],torneios:[cp]}],copasEmJogo:{ano:cp.ano,clube:cp.usuario,campeonatos:[cp],indice:0}};return c;}
-async function abrir(page,c){await page.goto('http://127.0.0.1:4173/A-Joia/');await page.evaluate(c=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,etapa:'tecnico',c})),c);await page.reload();await page.getByRole('button',{name:/Continuar · Copa Teste/}).click();}
-async function salvo(page){return page.evaluate(()=>JSON.parse(localStorage.getItem('ajoia_rapido_v1')).c);}
+async function abrir(page,c){await page.goto('http://127.0.0.1:4173/A-Joia/');await instalarSave(page,((c)=>({v:1,etapa:'tecnico',c}))(c),"ajoia_rapido_v1");await page.reload();await page.getByRole('button',{name:/Continuar · Copa Teste/}).click();}
+async function salvo(page){return lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo.c));}
 for(const [width,height] of [[320,568],[390,844],[1366,768]])test(`copa: três escolhas, adversário, chances, resultado salvo e dois jogos europeus em ${width}px`,async({page})=>{
  await page.setViewportSize({width,height});const pool=CLUBES.filter(x=>['inglaterra','espanha','italia','alemanha','franca','portugal','holanda','turquia'].includes(x.liga)),cp=criarCampanhaCopa({nome:'Champions League',usuario:'Real Madrid',forcaUsuario:91,clubes:pool,ano:2030,formato:'liga'});await abrir(page,base(cp));
  const dialog=page.getByRole('dialog',{name:'Copa em jogo · Champions League'});await expect(dialog.locator('.cce-opcoes button')).toHaveCount(3);await expect(dialog).toContainText('36 clubes');await expect(dialog).toContainText('Real Madrid');await expect(dialog).toContainText(decisaoCopa(cp).adversario);await expect(dialog.locator('.cce-opcoes')).not.toContainText('%');await expect(dialog).toContainText('As chances aparecem depois.');

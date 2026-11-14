@@ -1,3 +1,6 @@
+import {instalarSave} from './helpers/save-browser.mjs';
+// Full-world fixtures include thousands of players and IndexedDB hydration.
+test.setTimeout(90000);
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { criarJogador } from '../src/jogador/rapido.js';
@@ -9,7 +12,7 @@ function cenario() {
 }
 async function preparar(page) {
  await page.goto(base);
- await page.evaluate(c=>localStorage.setItem('ajoia_rapido_v1',JSON.stringify({v:1,etapa:'evento',c})),cenario());
+ await instalarSave(page,((c)=>({v:1,etapa:'evento',c}))(cenario()),"ajoia_rapido_v1");
  await page.reload();
  await page.getByRole('button',{name:/Meu museu/}).click();
  await expect(page.getByRole('heading',{name:'Seu museu.'})).toBeVisible();

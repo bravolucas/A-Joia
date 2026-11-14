@@ -1,3 +1,4 @@
+import {ImpactoJogador} from '../simulacao/MundoVivo.jsx';
 import CerimoniaBola from '../comum/CerimoniaBola.jsx';
 import {nomeVaga} from '../competicoes/regrasCopasRapidas.js';
 import {celebracoesTemporada} from './celebracoesTemporada.js';
@@ -17,8 +18,8 @@ export default function FechamentoTemporada({c,card,onContinuar,celebracaoIndice
  const grupos=agruparConquistasTecnico(card.titulos||[]).sort((a,b)=>ordem.indexOf(a.tipo)-ordem.indexOf(b.tipo)),historico=agruparConquistasTecnico(c.lista||[]),selecionado=grupos[indice]||grupos[0],ganhou=grupos.length>0;
  const carreira=selecionado&&historico.find(g=>g.id===selecionado.id),n=carreira?.quantidade||selecionado?.quantidade||0;
  const eventos=celebracoesTemporada(card),evento=eventos[celebracaoIndice];
- const avancar=()=>{onCelebracao?.(celebracaoIndice+1);};
- const continuar=()=>{if(trava.current)return;trava.current=true;onContinuar();};
+ const avancar=async()=>{if(trava.current)return;trava.current=true;try{await onCelebracao?.(celebracaoIndice+1);}finally{trava.current=false;}};
+ const continuar=async()=>{if(trava.current)return;trava.current=true;try{await onContinuar();}finally{trava.current=false;}};
  useEffect(()=>{const el=ref.current,anterior=document.activeElement;el.showModal();const liberar=bloquearRolagem(document.body);return()=>{el.close();liberar();anterior?.focus({preventScroll:true});};},[]);
  const antes=card.ovrAntes??card.ovr??card.ovrDepois,depois=card.ovrDepois??card.ovr,delta=depois-antes;
  const nacional=selecionado&&['copaMundo','continentalSelecao'].includes(selecionado.tipo),nomeEquipe=nacional?NACIONALIDADES.find(n=>n.id===c.nac)?.label||c.nac:card.clube,emblema=nacional?bandeiraDe(c.nac):escudoDe(card.clube);
@@ -37,7 +38,7 @@ export default function FechamentoTemporada({c,card,onContinuar,celebracaoIndice
  return createPortal(<dialog ref={ref} className={`ft-modal ${evento?'ft-apresentacao':''} ${ganhou&&(!evento||evento.tipo!=='bolaOuro'||evento.posicao===1)?'ft-campeao':''}`} aria-label={evento?`Resultado da temporada ${card.ano} · ${evento.tipo==='bolaOuro'?'Bola de Ouro':evento.tipo==='titulo'?'Título conquistado':evento.titulo}`:`Fim da temporada ${card.ano}`} onCancel={e=>{e.preventDefault();evento?avancar():continuar();}}>
   {evento?<><header className="ft-cabecalho"><span>TEMPORADA {card.ano}</span><strong>{celebracaoIndice+1} de {eventos.length}</strong></header><ResultadoTemporada key={evento.id} evento={evento} card={card} c={c}/><footer><button onClick={avancar}>{celebracaoIndice+1<eventos.length?'Próximo resultado':'Ver resumo da temporada'} <span>→</span></button></footer></>:<>
   <header className="ft-cabecalho"><span>TEMPORADA {card.ano}</span><strong>{ganhou?'Uma conquista para a sua história':'Temporada concluída'}</strong></header>
-  <div className="ft-corpo">
+  <div className="ft-corpo"><ImpactoJogador avaliacao={card.avaliacaoForca}/>
    <section className={`ft-palco ${selecionado?'':'ft-palco-curto'}`} aria-label="Conquistas da temporada">
     <div className="ft-clube">{emblema&&<img src={emblema} alt={nacional?`Bandeira de ${nomeEquipe}`:''}/>}<span>{nomeEquipe}</span></div>
     {selecionado?<><h1>{premio?'É SEU!':'CAMPEÃO!'}</h1><div className="ft-taca" key={selecionado.id}><div className="ft-halo"/>{Array.from({length:12},(_,i)=><i key={i} className="ft-papel" style={{'--i':i}}/>)}<TacaCompeticao nome={selecionado.nome} tipo={selecionado.tipo} size={112}/><b aria-label={`${n} conquistas na carreira`}>×{n}</b></div><h2>{selecionado.nome}</h2><p className="ft-anos">{carreira?.conquistas?.map(x=>x.ano).filter(Boolean).filter((a,i,v)=>v.indexOf(a)===i).sort((a,b)=>a-b).join(' · ')||card.ano}</p>{grupos.length>1&&<div className="ft-titulos" aria-label="Todas as conquistas desta temporada">{grupos.map((g,i)=><button key={g.id} aria-pressed={indice===i} onClick={()=>I(i)}>{g.nome}<small>×{historico.find(h=>h.id===g.id)?.quantidade||g.quantidade}</small></button>)}</div>}</>

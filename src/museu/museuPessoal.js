@@ -1,3 +1,4 @@
+import {lerPersistente} from '../simulacao/armazenamentoMundo.js';
 import {podioTemporada,destaquesMuseu,marcasMuseu} from './curadoriaMuseu.js';
 import {conquistouLiga} from '../historia/historiaFutebol.js';
 import {ANO_INICIO,CLUBES,NACIONALIDADES,LIGAS,nomeDosTitulos} from '../dados/data.js';
@@ -103,8 +104,8 @@ export function registrarMuseuEncerrado(c,{modo='rapido',temporadas,fase='jogado
 }
 export function carreirasDisponiveis(storage=armazenamento()){
  const lista=[],ids=new Set();const incluir=(s,modo)=>{const c=modo==='rapido'?s?.c:s?.fim?.c||s?.carreira;if(!c)return;const carreira={...c,nome:c.nome||s.nome,nacionalidade:c.nacionalidade||s.nacionalidade,...(s.fim?{aposentado:true}:{})},temporadas=modo==='rapido'?c.temporadas||[]:s.temporadas||[],id=identidadeMuseuPessoal(carreira,modo,temporadas);if(ids.has(id))return;ids.add(id);lista.push({id,c:carreira,modo,temporadas,nome:carreira.nome||'Sua carreira'});};
- try{incluir(JSON.parse(storage?.getItem('ajoia_rapido_v1')||'null'),'rapido');}catch{}
- for(const slot of ['auto','1','2','3','4','5'])try{incluir(JSON.parse(storage?.getItem(`ajoia_save_${slot}`)||'null'),'completo');}catch{}
+ try{incluir(lerPersistente('ajoia_rapido_v1',storage),'rapido');}catch{}
+ for(const slot of ['auto','1','2','3','4','5'])try{incluir(lerPersistente(`ajoia_save_${slot}`,storage),'completo');}catch{}
  try{for(const r of Object.values(lerAcervos(storage).carreiras))if(r?.c&&r.id&&!ids.has(r.id)){ids.add(r.id);lista.push({...r,nome:r.nome||r.c.nome||'Sua carreira'});}}catch{}
  return lista;
 }

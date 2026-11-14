@@ -1,3 +1,6 @@
+import {instalarSave} from './helpers/save-browser.mjs';
+// Full-world fixtures include thousands of players and IndexedDB hydration.
+test.setTimeout(90000);
 import { test, expect } from '@playwright/test';
 import { criarJogador, aposentar } from '../src/jogador/rapido.js';
 import { iniciarCarreiraTecnico } from '../src/treinador/tecnico.js';
@@ -99,7 +102,7 @@ for (const width of [390, 1366]) {
       const erros = [];
       page.on('pageerror', erro => erros.push(erro.message));
       await page.goto('http://127.0.0.1:4173/A-Joia/');
-      await page.evaluate(save => localStorage.setItem('ajoia_rapido_v1', JSON.stringify(save)), criarSave(cenario));
+      await instalarSave(page,((save)=>(save))(criarSave(cenario)),"ajoia_rapido_v1");
       await page.reload();
 
       await expect(page.getByRole('button', { name: /Continuar · Teste responsivo técnico/ })).toBeVisible();
@@ -160,7 +163,7 @@ test('campanhas de copa exibem grupos e todas as partidas do mata-mata', async (
     }
   });
   await page.goto('http://127.0.0.1:4173/A-Joia/');
-  await page.evaluate(value => localStorage.setItem('ajoia_rapido_v1', JSON.stringify(value)), save);
+  await instalarSave(page,((value)=>(value))(save),"ajoia_rapido_v1");
   await page.reload();
   await page.getByRole('button', { name: /Continuar · Teste responsivo técnico/ }).click();
   await page.getByRole('button', { name: /^Temporada / }).first().click();
@@ -194,7 +197,7 @@ test('popup de título usa a imagem da taça ligada ao nome da competição', as
     }
   });
   await page.goto('http://127.0.0.1:4173/A-Joia/');
-  await page.evaluate(value => localStorage.setItem('ajoia_rapido_v1', JSON.stringify(value)), save);
+  await instalarSave(page,((value)=>(value))(save),"ajoia_rapido_v1");
   await page.reload();
   await page.getByRole('button', { name: /Continuar · Teste responsivo técnico/ }).click();
   const dialog = page.getByRole('dialog', { name: 'Título conquistado' });

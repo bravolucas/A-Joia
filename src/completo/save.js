@@ -1,3 +1,4 @@
+import {gravarPersistente,lerPersistente,apagarPersistente} from '../simulacao/armazenamentoMundo.js';
 import {corrigirEquilibrioClubes} from '../dados/equilibrioClubes.js';
 import {CLUBES} from '../dados/data.js';
 import { registrarMuseu } from '../museu/museu.js';
@@ -56,9 +57,9 @@ function chave(slot) { return PREFIXO + slot; }
 
 export function salvarLocal(slot, save) {
   try {
-    localStorage.setItem(chave(slot), JSON.stringify(save));
+    const resultado=gravarPersistente(chave(slot),save);
     if (save.carreira || save.fim?.c) registrarMuseu({ ...(save.fim?.c || save.carreira), nome: save.nome || save.fim?.c?.nome || save.carreira?.nome }, { modo: "completo", temporadas: save.temporadas || [] });
-    return { ok: true };
+    return resultado;
   } catch (e) {
     // o motivo mais comum é a cota do navegador estourar
     return { ok: false, erro: e?.name === "QuotaExceededError" ? "Espaço do navegador cheio. Apague um save antigo." : "Não foi possível salvar." };
@@ -69,7 +70,7 @@ export function carregarLocal(slot) {
   try {
     const txt = localStorage.getItem(chave(slot));
     if (!txt) return null;
-    const save = JSON.parse(txt);
+    const save = lerPersistente(chave(slot));
     if (!save || typeof save !== "object") return null;
     return save;
   } catch {
@@ -78,7 +79,7 @@ export function carregarLocal(slot) {
 }
 
 export function apagarLocal(slot) {
-  try { localStorage.removeItem(chave(slot)); definirLabelSlot(slot, null); return true; } catch { return false; }
+  try { apagarPersistente(chave(slot)); definirLabelSlot(slot, null); return true; } catch { return false; }
 }
 
 export function listarSaves() {

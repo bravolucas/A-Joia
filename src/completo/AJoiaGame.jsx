@@ -1,3 +1,4 @@
+import {registrarMundoVivo} from '../simulacao/mundoVivo.js';
 import {AJUSTE_FORTALEZA} from '../dados/equilibrioClubes.js';
 import JanelaPremiacao from '../comum/JanelaPremiacao.jsx';
 import {clubeInternacional} from '../competicoes/clubesInternacionais.js';
@@ -925,8 +926,8 @@ function gerarCalendarioLiga(clube, todosClubes, ligaAtual) {
 }
 /* Confronto: força de cada time (+ um empurrão se o jogador reforça aquele lado) + mando de campo, com Poisson pra variância real */
 function simularPartidaLiga(casa, fora, clubeJogadorNome, forcaClubeJogador, ovrJogador) {
-  let forcaCasa = casa.nome === clubeJogadorNome ? forcaClubeJogador + (ovrJogador - 70) * 0.25 : casa.forca;
-  let forcaFora = fora.nome === clubeJogadorNome ? forcaClubeJogador + (ovrJogador - 70) * 0.25 : fora.forca;
+  let forcaCasa = casa.nome === clubeJogadorNome ? forcaClubeJogador : casa.forca;
+  let forcaFora = fora.nome === clubeJogadorNome ? forcaClubeJogador : fora.forca;
   forcaCasa += 4; // vantagem de mando de campo
   const diferenca = forcaCasa - forcaFora;
   const golsCasa = poisson(clamp(1.35 + diferenca * 0.045, 0.25, 4));
@@ -1023,13 +1024,16 @@ function simularRodadaAtual(c, ta, bonusGol = 0, bonusAssist = 0, forcarNaoEscal
   let meuResultadoRodada = null;
   let golsRestantes = ta.golsRestantes, assistRestantes = ta.assistRestantes;
   const forcaJogador = calcOVR(c.attrs, c.posicao);
-  const forcaClube = forcaEfetivaClube(c, c.clube);
+  const funcao = c.contrato?.funcao || 'titular';
+  const chanceEscalado=clamp(({reserva:.55,titular:.87,fundamental:.95,estrela:.98}[funcao]??.87)+((c.tecnicoConfianca??60)-60)/300,.15,.99);
+  const ausente=forcarNaoEscalado||(c.cartoes?.suspensoesRestantes||0)>0||ta.preparacaoSemana==='descanso'||Math.random()>=chanceEscalado;
+  const forcaClube = forcaEfetivaClube(c, c.clube,{participacao:ausente?0:1});
   rodada.forEach((partida) => {
     const ehJogoDoJogador = partida.casa.nome === c.clube.nome || partida.fora.nome === c.clube.nome;
-    let { golsCasa, golsFora } = simularPartidaLiga(partida.casa, partida.fora, c.clube.nome, forcaClube, forcaJogador);
+    let { golsCasa, golsFora } = simularPartidaLiga({...partida.casa,forca:forcaEfetivaClube(c,partida.casa)}, {...partida.fora,forca:forcaEfetivaClube(c,partida.fora)}, c.clube.nome, forcaClube, forcaJogador);
     if (ehJogoDoJogador && bonusGol) { if (partida.casa.nome === c.clube.nome) golsCasa += bonusGol; else golsFora += bonusGol; }
     tabela = atualizarTabelaPartida(tabela, partida.casa.nome, partida.fora.nome, golsCasa, golsFora);
-    historico.push({ texto: `${emojiClube(partida.casa.nome)} ${partida.casa.nome} ${golsCasa} x ${golsFora} ${partida.fora.nome} ${emojiClube(partida.fora.nome)}`, destaque: ehJogoDoJogador });
+    historico.push({casa:partida.casa.nome,fora:partida.fora.nome,golsCasa,golsFora,rodada:ta.rodadaAtual+1, texto: `${emojiClube(partida.casa.nome)} ${partida.casa.nome} ${golsCasa} x ${golsFora} ${partida.fora.nome} ${emojiClube(partida.fora.nome)}`, destaque: ehJogoDoJogador });
     if (ehJogoDoJogador) {
       const souCasa = partida.casa.nome === c.clube.nome;
       const meusGolsTime = souCasa ? golsCasa : golsFora;
@@ -1074,7 +1078,7 @@ function simularRodadaAtual(c, ta, bonusGol = 0, bonusAssist = 0, forcarNaoEscal
       const funcaoAtual = FUNCOES_ELENCO.find((f) => f.id === c.contrato?.funcao) || FUNCOES_ELENCO[1];
       const chanceBaseEscalado = { reserva: 0.55, titular: 0.87, fundamental: 0.95, estrela: 0.98 }[funcaoAtual.id] ?? 0.87;
       const ajusteConfianca = ((c.tecnicoConfianca ?? 60) - 60) / 300;
-      const naoEscalado = forcarNaoEscalado || Math.random() >= clamp(chanceBaseEscalado + ajusteConfianca, 0.15, 0.99);
+      const naoEscalado = ausente;
       if (naoEscalado) {
         meuResultadoRodada = {
           adversario: adversarioObj.nome, adversarioForca: adversarioObj.forca,
@@ -1127,9 +1131,9 @@ function simularOutrasPartidasDaRodada(c, ta) {
   rodada.forEach((partida) => {
     const ehJogoDoJogador = partida.casa.nome === c.clube.nome || partida.fora.nome === c.clube.nome;
     if (ehJogoDoJogador) return;
-    const { golsCasa, golsFora } = simularPartidaLiga(partida.casa, partida.fora, c.clube.nome, 0, 0);
+    const { golsCasa, golsFora } = simularPartidaLiga({...partida.casa,forca:forcaEfetivaClube(c,partida.casa)}, {...partida.fora,forca:forcaEfetivaClube(c,partida.fora)}, c.clube.nome, 0, 0);
     tabela = atualizarTabelaPartida(tabela, partida.casa.nome, partida.fora.nome, golsCasa, golsFora);
-    historico.push({ texto: `${emojiClube(partida.casa.nome)} ${partida.casa.nome} ${golsCasa} x ${golsFora} ${partida.fora.nome} ${emojiClube(partida.fora.nome)}`, destaque: false });
+    historico.push({casa:partida.casa.nome,fora:partida.fora.nome,golsCasa,golsFora,rodada:ta.rodadaAtual+1, texto: `${emojiClube(partida.casa.nome)} ${partida.casa.nome} ${golsCasa} x ${golsFora} ${partida.fora.nome} ${emojiClube(partida.fora.nome)}`, destaque: false });
   });
   return { tabela, historico };
 }
@@ -1969,6 +1973,7 @@ function resolverTemporada(c, extraStats) {
     // Copa/estadual/continental ainda vêm da projeção — são resolvidos por
     // um sistema à parte, ainda não convertido pro motor de lances.
     if (jogosLista.length) {
+      card.jogosLiga=c.temporadaAndamento?.resultadosRodadas?.flatMap(r=>r.historico||[])||[];
       const jogosDeVerdade = jogosLista.filter((j) => !j.suspenso && !j.descansou && !j.naoEscalado);
       const comNota = jogosLista.filter((j) => j.nota != null);
       card = {
@@ -1981,6 +1986,8 @@ function resolverTemporada(c, extraStats) {
       if (tabelaFinal) {
         const classificacao = Object.values(tabelaFinal).sort((a, b) => b.pts - a.pts || b.sg - a.sg);
         const minhaPos = classificacao.findIndex((r) => r.clube.nome === c.clube.nome);
+        card.classificacao=classificacao.map((r,i)=>({nome:r.clube.nome,posicao:i+1,jogos:r.j,pontos:r.pts,vitorias:r.v,empates:r.e,derrotas:r.d,golsPro:r.gp,golsContra:r.gc,saldoGols:r.sg}));
+        card.vencedorLiga=card.classificacao[0]?.nome;
         if (minhaPos >= 0) { card.posLiga = minhaPos + 1; card.campeaoLiga = minhaPos === 0; }
       }
     }
@@ -2356,7 +2363,7 @@ function resolverTemporada(c, extraStats) {
     }
 
     // O elenco envelhece e evolui junto
-    c.elenco = evoluirElenco(c.elenco, c.clube);
+    c.elenco = evoluirElenco(c.elenco, c.clube,mundoAtualizado||mundo);
     if ((c.elenco || []).length < 14) c.elenco = gerarElenco(c.clube, mundoAtualizado || mundo, c.posicao);
     c.concorrente = sortearConcorrente(c.clube, c.elenco, c.posicao);
 
@@ -2520,15 +2527,16 @@ function resolverTemporada(c, extraStats) {
       trocaTecnico, movimentoLigas,
       valorMercado: valorAtual, valorAnterior,
     };
-    {const arquivo={...c,nome,nac:nacionalidade,mundo:mundoAtualizado||mundo};registrarAtletasObservados(arquivo,{...registro,ano:ANO_INICIO+c.idade-16});c.historiaFutebol=arquivo.historiaFutebol;}
+    {const arquivo={...c,nome,nac:nacionalidade,mundo:mundoAtualizado||mundo};registrarAtletasObservados(arquivo,{...registro,ano:ANO_INICIO+c.idade-16});registrarMundoVivo(arquivo,{...registro,ano:ANO_INICIO+c.idade-16},{antesMundo:mundo});c.historiaFutebol=arquivo.historiaFutebol;c.universo=arquivo.universo;}
     setTemporadas((t) => [...t, registro]);
     // autosave: a virada de temporada é o ponto mais seguro pra gravar
-    setTimeout(() => {
+    setTimeout(async () => {
       const r = salvarLocal("auto", montarSave({
         stage: "carreira", nome, posicao, nacionalidade, personalidade, pernaDominante, clubeCoracao,
         potencial, origemId: c.origem || null, carreira: c,
         temporadas: [...temporadas, registro], mundo: mundoAtualizado || mundo, fim: null, aba, modoSimulacao,
       }));
+      if(r.pendente){try{await r.pendente;}catch(e){setAvisoSave({erro:true,txt:e.message||"Não foi possível salvar."});return;}}
       if (r.ok) { setTemSave(true); setAvisoSave({ erro: false, txt: "Progresso salvo automaticamente." }); setTimeout(() => setAvisoSave(null), 2500); }
     }, 0);
 
@@ -2787,7 +2795,7 @@ function resolverTemporada(c, extraStats) {
       const { tabela: tabelaParcial, historico: historicoParcial } = simularOutrasPartidasDaRodada(c, ta);
       const souCasa = meuJogoRodada.casa.nome === c.clube.nome;
       const adversarioObj = souCasa ? meuJogoRodada.fora : meuJogoRodada.casa;
-      const forcaClube = forcaEfetivaClube(c, c.clube);
+      const forcaClube = forcaEfetivaClube(c, c.clube,{participacao:1});
       const forcaJogador = calcOVR(c.attrs, c.posicao);
       const ehClassico = ehClassicoReal(c.clube.nome, adversarioObj.nome);
       const { numLances } = definirImportanciaPartida({ classico: ehClassico, ligaDecisiva: ta.cardOriginal?.ligaDecisiva });
@@ -2799,7 +2807,7 @@ function resolverTemporada(c, extraStats) {
         minutoVisivel: 0, fase: "1T", acrescimos: rand(1, 6), velocidade: 1,
         estado: { golsMeu: 0, golsAdv: 0, cartoes: {}, fadiga: 0 },
         stats: { chutesMeu: 0, chutesAlvoMeu: 0, chutesAdv: 0, chutesAlvoAdv: 0, faltasMeu: 0, faltasAdv: 0 },
-        ctx: { posicao: c.posicao, postura: ta.postura || "normal", forcaClube, forcaJogador, adversarioForca: adversarioObj.forca, adversario: adversarioObj.nome, classico: ehClassico, souCasa, meuClube: c.clube, adversarioObj, clima: climaPartida.id, climaMult: climaPartida.mult, formacao: formacaoPartida?.label ?? null, formacaoFavorece: formacaoPartida ? formacaoPartida.favorece.includes(c.posicao) : null, especialidades: c.especialidades },
+        ctx: { posicao: c.posicao, postura: ta.postura || "normal", forcaClube, forcaJogador, adversarioForca: forcaEfetivaClube(c,adversarioObj), adversario: adversarioObj.nome, classico: ehClassico, souCasa, meuClube: c.clube, adversarioObj, clima: climaPartida.id, climaMult: climaPartida.mult, formacao: formacaoPartida?.label ?? null, formacaoFavorece: formacaoPartida ? formacaoPartida.favorece.includes(c.posicao) : null, especialidades: c.especialidades },
         tabelaParcial, historicoParcial,
       });
       return;
@@ -3925,9 +3933,10 @@ function resolverTemporada(c, extraStats) {
       carreira, temporadas, mundo, fim, aba, modoSimulacao,
     });
   }
-  function salvarJogo(slot) {
+  async function salvarJogo(slot) {
     if (!carreira && !fim) { setAvisoSave({ erro: true, txt: "Não há carreira pra salvar ainda." }); return; }
     const r = salvarLocal(slot, estadoAtualParaSave());
+    if(r.pendente){try{await r.pendente;}catch(e){setAvisoSave({erro:true,txt:e.message||"Não foi possível salvar."});return;}}
     setTemSave(existeAlgumSave());
     setAvisoSave(r.ok
       ? { erro: false, txt: slot === "auto" ? "Progresso salvo automaticamente." : `Carreira salva no espaço ${slot}.` }

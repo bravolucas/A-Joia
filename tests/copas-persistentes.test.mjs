@@ -80,14 +80,14 @@ import {registrarMundoVivo,jogosDaEdicao} from '../src/simulacao/mundoVivo.js';
 import {estatisticasDasPartidas} from '../src/simulacao/estatisticasMundo.js';
 test('arquivo e estatísticas do mundo incluem grupos e as duas pernas sem duplicar gols',()=>{
  const pernas=[{casa:'Santos',fora:'Flamengo',golsCasa:1,golsFora:0},{casa:'Flamengo',fora:'Santos',golsCasa:2,golsFora:0}];
- const torneio={nome:'Copa de verificação',tipo:'copa',campeao:'Flamengo',vice:'Santos',grupos:[{grupo:'Grupo A',jogos:[{casa:'Santos',fora:'Flamengo',golsCasa:2,golsFora:1}]}],fases:[{fase:'Final',jogos:[{casa:'Santos',fora:'Flamengo',golsCasa:1,golsFora:2,partidas:pernas,vencedor:'Flamengo'}]}]};
+ const torneio={nome:'Copa de verificação',tipo:'copa',campeao:'Flamengo',vice:'Santos',grupos:[{grupo:'Grupo A',classificacao:[{nome:'Santos',pontos:3},{nome:'Flamengo',pontos:0}],jogos:[{casa:'Santos',fora:'Flamengo',golsCasa:2,golsFora:1}]}],fases:[{fase:'Final',jogos:[{casa:'Santos',fora:'Flamengo',golsCasa:1,golsFora:2,partidas:pernas,vencedor:'Flamengo'}]}]};
  const antes={jogadores:['Santos','Flamengo'].flatMap((clube,i)=>['GOL','ATA'].map((posicao,j)=>({id:i*2+j,nome:`Atleta ${i}-${j}`,posicao,ovr:70,clubeNome:clube,carreira:{}})))};
  const a={ano:2030,clube:'Outro',torneios:[torneio]},mundo=estatisticasDasPartidas(structuredClone(antes),antes,a,'arquivo');
  assert.equal(mundo.jogadores.reduce((n,p)=>n+p.gols,0),6);
  assert.ok(mundo.jogadores.every(p=>p.jogos===3));
  const c={codigo:'arquivo-copas',mundo};registrarMundoVivo(c,a,{antesMundo:antes});
  const edicao=c.universo.edicoes.find(e=>e.nome===torneio.nome);
- assert.equal(edicao.campeao,'Flamengo');assert.equal(jogosDaEdicao(edicao).length,3);
+ assert.deepEqual(edicao.grupos[0].classificacao,torneio.grupos[0].classificacao);assert.equal(edicao.campeao,'Flamengo');assert.equal(jogosDaEdicao(edicao).length,3);
  assert.equal(jogosDaEdicao(edicao).reduce((n,p)=>n+p.golsCasa+p.golsFora,0),6);
 });
 test('rodadas de folga não exigem uma partida inexistente em grupo com número ímpar',()=>{

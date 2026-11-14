@@ -26,6 +26,10 @@ for(const width of [360,1366])test(`mundo vivo: IndexedDB, arquivo de clubes, jo
  const d=page.getByRole('dialog',{name:'História do futebol'});await expect(d.getByRole('region',{name:'Evolução do Corinthians'})).toContainText(String(s.c.ano-1));
  await d.getByRole('button',{name:'Jogadores',exact:true}).click();await d.getByLabel('Buscar jogador',{exact:true}).fill('Mundo Persistente');await d.locator('.mv-atletas button').click();await expect(d.getByRole('article',{name:'Ficha de Mundo Persistente'})).toContainText(String(s.c.ano-1));
  await d.getByRole('button',{name:'Competições',exact:true}).click();await d.getByLabel('Competição do histórico').selectOption(LIGAS.brasileirao.nome);await expect(d.getByRole('region',{name:'Edições da competição'})).toBeVisible();await expect(d.locator('.mv-jogos li').first()).toBeVisible();await d.getByLabel('Filtrar partidas por clube').selectOption('Corinthians');await expect(d.locator('.mv-jogos li')).toHaveCount(38);
+ const torneio=s.c.universo.edicoes.find(e=>e.grupos?.length>1);expect(torneio).toBeTruthy();
+ await d.getByLabel('Competição do histórico').selectOption(torneio.nome);
+ await d.getByLabel('Classificação do grupo').selectOption(torneio.grupos[1].grupo);
+ await expect(d.getByRole('region',{name:'Edições da competição'}).locator('table tbody tr').first()).toContainText(torneio.grupos[1].classificacao[0].nome);
  expect(await d.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);await page.screenshot({path:`test-results/mundo-vivo-${width}.png`,animations:'disabled'});
  await d.getByRole('button',{name:'Voltar ao jogo',exact:true}).click();
  await expect.poll(()=>page.evaluate(async()=>{const db=await new Promise(resolve=>{const r=indexedDB.open('ajoia-carreiras',1);r.onsuccess=()=>resolve(r.result);});const dado=await new Promise(resolve=>{const tx=db.transaction('saves','readonly'),r=tx.objectStore('saves').get('ajoia_rapido_v1');r.onsuccess=()=>resolve(r.result);});db.close();return dado?.c?.universo?.anos?.length;})).toBe(1);

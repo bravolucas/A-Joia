@@ -12,7 +12,7 @@ As novas temporadas em `jogoAJogo` ativam `copasPersistentesVersao`. Copa nacion
 
 São formatos adaptados ao jogo: copa nacional com 16 participantes, estadual com até oito clubes do mesmo estado, Copinha e continental por grupos com até 32 participantes; continental por fase de liga com até 36. Os participantes são congelados no início da campanha. A força do jogador é atualizada ao iniciar suas partidas. A copa nacional e o mata-mata continental têm ida e volta, com final única. O agregado não vira uma terceira partida nas estatísticas nem no arquivo. A classificação dos grupos vem dos placares, substituindo os antigos limites fixos de pontos.
 
-O motor compartilhado conserva os demais grupos e continua o torneio após eliminação na fase de grupos, fase de liga ou classificação estadual. Tanto o arquivo do mundo quanto a distribuição das estatísticas dos NPCs leem os grupos e as pernas efetivas dos confrontos. O campeão da chave da copa nacional e do continental prevalece sobre o sorteio antigo na história e no palmarés do modo completo.
+O motor compartilhado conserva os demais grupos e continua o torneio após eliminação na fase de grupos, fase de liga ou classificação estadual. As tabelas de todos os grupos ficam no arquivo e podem ser escolhidas na tela da edição. Tanto o arquivo do mundo quanto a distribuição das estatísticas dos NPCs leem os grupos e as pernas efetivas dos confrontos. O campeão da chave da copa nacional e do continental prevalece sobre o sorteio antigo na história e no palmarés do modo completo.
 
 Saves que já estavam no meio de uma temporada sem a versão nova continuam no fluxo anterior. Não se recriam chaves ou placares de partidas passadas.
 
@@ -23,3 +23,5 @@ O modo `completa` ainda usa projeção anual. Copas de seleções do modo comple
 ## Verificação
 
 Testes de lógica cobrem eliminação nos três formatos iniciais, continuação até o campeão, ida e volta, preservação dos placares, validação do agregado, folgas, retomada, ausência de migração de competições em andamento e leitura dos jogos pelo arquivo e pelas estatísticas do mundo. Testes no navegador verificam partida ao vivo alimentando a copa nacional e o continental, próximo jogo agendado, estatísticas e salvamento; os testes anteriores cobrem avanço rápido e retomada em celular e desktop.
+
+Os testes de animação foram separados por competição e resolução, com relógio controlado, para verificar o estado de revelação e o resultado sem depender de observar uma janela de 1,35 segundo sob carga.

@@ -25,8 +25,10 @@ export function ArquivoAtletas({c}){
 }
 export function EdicoesCompeticao({c,nome}){
  const u=universo(c),edicoes=useMemo(()=>(u?.edicoes||[]).filter(e=>e.nome===nome).sort((a,b)=>b.ano-a.ano),[u,nome]);
- const [ano,A]=useState(null),[equipe,E]=useState('');
+ const [ano,A]=useState(null),[equipe,E]=useState(''),[grupo,G]=useState('');
  const edicao=edicoes.find(e=>e.ano===Number(ano))||edicoes[0];
+ const grupoAtual=edicao?.grupos?.find(g=>g.grupo===grupo)||edicao?.grupos?.[0];
+ const classificacao=grupoAtual?.classificacao||edicao?.classificacao;
  const jogos=useMemo(()=>jogosDaEdicao(edicao),[edicao]);
  const destaques=useMemo(()=>Object.values(u?.atletas||{}).flatMap(p=>{
   const linha=p.historico.find(a=>(Array.isArray(a)?a[0]:a.ano)===edicao?.ano);
@@ -35,8 +37,9 @@ export function EdicoesCompeticao({c,nome}){
   return t?[{id:p.id,nome:p.nome,clube:a.clube,...t}]:[];
  }),[u,edicao,nome]);
  if(!edicao)return null;
- return <section className="mv-painel" aria-label="Edições da competição"><h3>Por dentro da temporada</h3><div className="hf-filtros"><label>Edição<select value={edicao.ano} onChange={e=>{A(e.target.value);E('');}}>{edicoes.map(e=><option key={e.ano}>{e.ano}</option>)}</select></label><label>Filtrar partidas por clube<select value={equipe} onChange={e=>E(e.target.value)}><option value="">Todos</option>{[...new Set(jogos.flatMap(j=>[j.casa,j.fora]))].sort().map(n=><option key={n}>{n}</option>)}</select></label></div>
- {edicao.classificacao?.length>0&&<div className="hf-tabela-scroll"><table className="hf-tabela"><thead><tr><th>Pos.</th><th>Clube</th><th>J</th><th>Pts</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th></tr></thead><tbody>{edicao.classificacao.map((t,i)=><tr key={t.nome}><td>{t.posicao||i+1}º</td><th>{t.nome}</th>{['jogos','pontos','vitorias','empates','derrotas','golsPro','golsContra'].map(k=><td key={k}>{t[k]??'—'}</td>)}</tr>)}</tbody></table></div>}
+ return <section className="mv-painel" aria-label="Edições da competição"><h3>Por dentro da temporada</h3><div className="hf-filtros"><label>Edição<select value={edicao.ano} onChange={e=>{A(e.target.value);E('');G('');}}>{edicoes.map(e=><option key={e.ano}>{e.ano}</option>)}</select></label><label>Filtrar partidas por clube<select value={equipe} onChange={e=>E(e.target.value)}><option value="">Todos</option>{[...new Set(jogos.flatMap(j=>[j.casa,j.fora]))].sort().map(n=><option key={n}>{n}</option>)}</select></label></div>
+ {edicao.grupos?.length>1&&<label className="hf-filtros">Classificação do grupo<select value={grupoAtual.grupo} onChange={e=>G(e.target.value)}>{edicao.grupos.map(g=><option key={g.grupo}>{g.grupo}</option>)}</select></label>}
+ {classificacao?.length>0&&<div className="hf-tabela-scroll"><table className="hf-tabela"><thead><tr><th>Pos.</th><th>Clube</th><th>J</th><th>Pts</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th></tr></thead><tbody>{classificacao.map((t,i)=><tr key={t.nome}><td>{t.posicao||i+1}º</td><th>{t.nome}</th>{['jogos','pontos','vitorias','empates','derrotas','golsPro','golsContra'].map(k=><td key={k}>{t[k]??'—'}</td>)}</tr>)}</tbody></table></div>}
  {destaques.length>0&&<div className="mv-lideres">{[['gols','Artilheiros'],['assist','Assistências'],['defesas','Defesas']].map(([campo,titulo])=>{const lista=destaques.filter(p=>p[campo]>0).sort((a,b)=>b[campo]-a[campo]||a.nome.localeCompare(b.nome)).slice(0,5);return lista.length>0&&<article key={campo}><h4>{titulo}</h4><ol>{lista.map(p=><li key={p.id}><span>{p.nome}<small>{p.clube}</small></span><b>{p[campo]}</b></li>)}</ol></article>;})}</div>}
  {jogos.length>0?<><p className="hf-nota">{jogos.length} partidas registradas nesta edição.</p><ol className="mv-jogos">{jogos.filter(j=>!equipe||[j.casa,j.fora].includes(equipe)).map((j,i)=><li key={i}><small>{typeof j.rodada==='number'?`Rodada ${j.rodada}`:j.rodada}</small><span>{j.casa}</span><b>{j.golsCasa} × {j.golsFora}</b><span>{j.fora}</span>{j.penaltis&&<small>Pênaltis · {j.vencedor}</small>}</li>)}</ol></>:<p className="hf-nota">Esta edição preserva a classificação registrada; os placares individuais não estavam disponíveis.</p>}</section>;
 }

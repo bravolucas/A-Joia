@@ -19,7 +19,7 @@ async function concluirMomentos(page) {
   }
 }
 import {criarJogador,aposentar} from '../src/jogador/rapido.js';
-import {iniciarCarreiraTecnico} from '../src/treinador/tecnico.js';
+import {iniciarCarreiraTecnico,forcaClubeTecnico} from '../src/treinador/tecnico.js';
 for(const width of [390,1366])test(`loja: confirmação, saldo e salário sem duplicação em ${width}px`,async({page})=>{
   await page.setViewportSize({width,height:900});
   const c=iniciarCarreiraTecnico(aposentar({...criarJogador({nome:'Treinador da loja',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,ritmo:'intenso',codigo:'ECONOMIA'}),idade:40}));
@@ -28,6 +28,7 @@ for(const width of [390,1366])test(`loja: confirmação, saldo e salário sem du
   const salvo=()=>lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo.c));
   await page.goto('http://127.0.0.1:4173/A-Joia/');await instalarSave(page,((c)=>({v:1,etapa:'tecnico',c}))(c),"ajoia_rapido_v1");await abrir();
   await page.getByRole('button',{name:'Abrir loja do treinador'}).click();
+  const forcaAntesDaCompra=forcaClubeTecnico((await salvo()).tecnico);
   const loja=page.getByRole('dialog',{name:'Loja do treinador'});
   const item=loja.locator('article').filter({hasText:'Preparação especial'});
   await item.getByRole('button',{name:'Ver melhoria'}).click();await loja.getByRole('button',{name:'Cancelar',exact:true}).click();
@@ -40,7 +41,7 @@ for(const width of [390,1366])test(`loja: confirmação, saldo e salário sem du
   await expect(loja).toContainText('Força extra nesta temporada');expect((await salvo()).tecnico.carteiraTecnico.compras).toHaveLength(1);
   await loja.getByRole('button',{name:'Fechar janela'}).click();
   await page.getByRole('button',{name:'Começar temporada',exact:true}).click();
-  const decisao=page.getByRole('dialog',{name:'Decisão de pré-temporada'});await expect(decisao).toContainText('ESCOLHA 1 DE 1');await expect(decisao.locator('.ct-quick-baseline')).toContainText('Força do time: 73');
+  const decisao=page.getByRole('dialog',{name:'Decisão de pré-temporada'});await expect(decisao).toContainText('ESCOLHA 1 DE 1');await expect(decisao.locator('.ct-quick-baseline')).toContainText(`Força do time: ${Math.round(forcaAntesDaCompra+3)}`);await expect(decisao.locator('.ct-quick-baseline')).toContainText('Inclui +3 da loja');
   await decisao.locator('.ct-decisions button:enabled').first().click();
   await concluirMomentos(page);
   await expect.poll(async()=>(await salvo()).tecnico.fase).toBe('resultado');

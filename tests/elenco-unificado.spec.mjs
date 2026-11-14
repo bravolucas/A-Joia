@@ -15,15 +15,15 @@ for(const width of [390,1366])test(`elenco unificado: contratação, mundo, vend
  await page.getByRole('button',{name:'Elenco e contratos →',exact:true}).click();
  const d=page.getByRole('dialog',{name:'Elenco e contratos',exact:true});await expect(d.getByRole('button',{name:'Mercado de jogadores',exact:true})).toBeVisible();
  await d.getByRole('button',{name:'Mercado de jogadores',exact:true}).click();
- const linha=d.locator('.ge-lista li').first(),nome=await linha.locator('strong').textContent(),id=await linha.getAttribute('data-atleta');
+ const linha=d.locator('.ge-lista li').last(),nome=await linha.locator('strong').textContent(),id=await linha.getAttribute('data-atleta');
  await linha.getByRole('button',{name:`Contratar ${nome}`,exact:true}).click();
- await d.getByRole('button',{name:'Confirmar negociação',exact:true}).click();await aguardarSave(page);
+ await expect(d.getByRole('button',{name:'Confirmar negociação',exact:true})).toBeInViewport();await d.getByRole('button',{name:'Confirmar negociação',exact:true}).click();await aguardarSave(page);
  await expect(d.getByRole('status')).toHaveText('Contratação concluída.');
  await d.getByRole('button',{name:/^Elenco ·/}).click();const contratado=d.locator(`.ge-lista li[data-atleta="${id}"]`);await expect(contratado).toHaveCount(1);
  const lerAtleta=()=>page.evaluate(async id=>{const db=await new Promise(resolve=>{const r=indexedDB.open('ajoia-carreiras',1);r.onsuccess=()=>resolve(r.result);});const save=await new Promise(resolve=>{const r=db.transaction('saves').objectStore('saves').get('ajoia_rapido_v1');r.onsuccess=()=>resolve(r.result);});db.close();const p=save.c.mundo.jogadores.find(p=>String(p.id)===id);return p&&{id:p.id,clube:p.clubeNome,movimentos:p.movimentos};},id);
  const comprado=await lerAtleta();expect(comprado.clube).toBe('Avaí');expect(comprado.movimentos.at(-1).tipo).toBe('compra');
  await page.reload();await page.getByRole('button',{name:/Continuar · Treinador Unificado/}).click();await page.getByRole('button',{name:'Elenco e contratos →',exact:true}).click();await expect(contratado).toHaveCount(1);expect((await lerAtleta()).id).toBe(comprado.id);
- await contratado.getByRole('button',{name:`Vender ${nome}`,exact:true}).click();await d.getByRole('button',{name:'Confirmar negociação',exact:true}).click();await aguardarSave(page);await expect(contratado).toHaveCount(0);await expect(d.getByRole('status')).toHaveText('Venda concluída.');
+ await contratado.getByRole('button',{name:`Vender ${nome}`,exact:true}).click();await expect(d.getByRole('button',{name:'Confirmar negociação',exact:true})).toBeInViewport();await d.getByRole('button',{name:'Confirmar negociação',exact:true}).click();await aguardarSave(page);await expect(contratado).toHaveCount(0);await expect(d.getByRole('status')).toHaveText('Venda concluída.');
  const vendido=await lerAtleta();expect(vendido.id).toBe(comprado.id);expect(vendido.clube).not.toBe('Avaí');expect(vendido.movimentos.at(-1).tipo).toBe('venda');
  await d.getByRole('button',{name:'Fechar janela',exact:true}).click();await page.getByRole('button',{name:'Ver história do Avaí',exact:true}).click();
  const historia=page.getByRole('dialog',{name:'História do futebol'});await historia.getByRole('button',{name:'Jogadores',exact:true}).click();

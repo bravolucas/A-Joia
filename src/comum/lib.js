@@ -1212,7 +1212,7 @@ export const PIRAMIDE_LIGAS = [
   { elite: "portugal", acesso: "portugal2", vagas: 2, nome: "Portugal" },
 ];
 
-export function girarLigas(estado, forcarClube = null) {
+export function girarLigas(estado, forcarClube = null, classificacoesMundo = null) {
   const novo = { ...estado };
   // 1) oscilação de força: clubes sobem e caem de patamar com o tempo
   Object.keys(novo).forEach((nome) => {
@@ -1245,10 +1245,13 @@ export function girarLigas(estado, forcarClube = null) {
     const E = ordenar(eliteSemForcado), A = ordenar(acessoSemForcado);
     const vagasCaem = div.vagas - (ehForcadoNaElite && forcarClube.desceu ? 1 : 0);
     const vagasSobem = div.vagas - (ehForcadoNoAcesso && forcarClube.subiu ? 1 : 0);
-    const caem = E.slice(-vagasCaem).map((x) => x.n);
-    const sobem = A.slice(0, vagasSobem).map((x) => x.n);
-    if (ehForcadoNaElite && forcarClube.desceu) caem.push(forcarClube.nome);
-    if (ehForcadoNoAcesso && forcarClube.subiu) sobem.push(forcarClube.nome);
+    const cima=classificacoesMundo?.[div.elite]?.classificacao,baixo=classificacoesMundo?.[div.acesso]?.classificacao;
+    const valida=(t,times,liga)=>Array.isArray(t)&&t.length===times.length&&new Set(t.map(x=>x.nome)).size===times.length&&t.every(x=>novo[x.nome]?.liga===liga);
+    const cimaReal=valida(cima,naElite,div.elite),baixoReal=valida(baixo,naAcesso,div.acesso);
+    const caem = cimaReal?cima.slice(-div.vagas).map(t=>t.nome):E.slice(-vagasCaem).map((x) => x.n);
+    const sobem = baixoReal?baixo.slice(0,div.vagas).map(t=>t.nome):A.slice(0, vagasSobem).map((x) => x.n);
+    if (!cimaReal && ehForcadoNaElite && forcarClube.desceu) caem.push(forcarClube.nome);
+    if (!baixoReal && ehForcadoNoAcesso && forcarClube.subiu) sobem.push(forcarClube.nome);
 
     caem.forEach((n) => { novo[n] = { ...novo[n], liga: div.acesso, forca: clampR(novo[n].forca - rand(1, 4), 40, 96) }; });
     sobem.forEach((n) => { novo[n] = { ...novo[n], liga: div.elite, forca: clampR(novo[n].forca + rand(1, 4), 40, 96) }; });
@@ -1820,7 +1823,7 @@ export function gerarMundoJogadores(rng = Math.random) {
   return { jogadores, elencosCompletos:true, temporada: 0, historicoBolaDeOuro: [] };
 }
 
-export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES, perfis = {}, clubeControlado = null, treinoClube = 0, ano = mundo.anoCalendario} = {}) {
+export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES, perfis = {}, clubeControlado = null, treinoClube = 0, ano = mundo.anoCalendario, registrarPremio = true} = {}) {
 
   const rand=(a,b)=>Math.floor(rng()*(b-a+1))+a;
   const pick=lista=>lista[Math.min(lista.length-1,Math.floor(rng()*lista.length))];
@@ -1830,7 +1833,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
   const mover=(p,d)=>{ocupacao.set(p.clubeNome,(ocupacao.get(p.clubeNome)||1)-1);ocupacao.set(d.nome,(ocupacao.get(d.nome)||0)+1);if(mundo.cadastroElencos)p.movimentos=[...(p.movimentos||[]),{ano,tipo:'transferencia',de:p.clubeNome,para:d.nome,valor:null}];p.clubeNome=d.nome;p.liga=d.liga;if(Number.isInteger(p.contrato))p.contrato=3;};
   const jogadores = mundo.jogadores.map((j) => {
     if (j.aposentado) return { ...j, idade: j.idade + 1 };
-    const p = { ...j };
+    const p = { ...j, ligaTemporada:j.liga };
     const clube = clubes.find((x) => x.nome === p.clubeNome) || { forca: 70, liga: p.liga };
     const liga = LIGAS[clube.liga] || { mult: 0.8 };
     const pos = POSICOES.find((x) => x.id === p.posicao) || POSICOES[0];
@@ -1916,7 +1919,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
   // temporada — histórico existia declarado, mas nunca era preenchido.
   const candidatos = jogadoresLimpos.filter((j) => !j.aposentado && j.jogos > 0);
   let historicoBolaDeOuro = mundo.historicoBolaDeOuro || [];
-  if (candidatos.length) {
+  if (registrarPremio && candidatos.length) {
     const vencedor = candidatos.reduce((a, b) => (scoreJogadorMundo(b) > scoreJogadorMundo(a) ? b : a));
     historicoBolaDeOuro = [...historicoBolaDeOuro, { temporada: (mundo.temporada || 0) + 1, nome: vencedor.nome, clube: vencedor.clubeNome, ovr: vencedor.ovr, gols: vencedor.gols, assist: vencedor.assist }].slice(-30);
     vencedor.carreira.bolasDeOuro = (vencedor.carreira.bolasDeOuro || 0) + 1;
@@ -1929,14 +1932,14 @@ export function scoreBolaDeOuro({ ovr, gols, assist, nota, ligaMult, titulos = 0
 }
 
 export function scoreJogadorMundo(j) {
-  const liga = LIGAS[j.liga] || { mult: 0.8 };
+  const liga = LIGAS[j.ligaTemporada||j.liga] || { mult: 0.8 };
   return scoreBolaDeOuro({ ovr: j.ovr, gols: j.gols, assist: j.assist, nota: j.nota, ligaMult: liga.mult });
 }
 
 export function rankingBolaDeOuro(mundo, meuCard, meuNome, titulosMeus) {
   if (!mundo) return [];
   const lista = mundo.jogadores.filter((j) => !j.aposentado && j.jogos > 0).map((j) => ({
-    nome: j.nome, clube: j.clubeTemporada || j.clubeNome, posicao: j.posicao, ovr: j.ovr, gols: j.gols, assist: j.assist, nota: j.nota,
+    id:j.id, nome: j.nome, clube: j.clubeTemporada || j.clubeNome, posicao: j.posicao, ovr: j.ovr, gols: j.gols, assist: j.assist, nota: j.nota,
     score: scoreJogadorMundo(j), voce: false,
   }));
   if (meuCard) lista.push({

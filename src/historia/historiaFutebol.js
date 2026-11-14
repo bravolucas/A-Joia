@@ -52,7 +52,7 @@ function eventosTemporada(c,a,treinador=false){
  for(const valor of [...(a.titulosConquistados||[]),...(a.titulosLista||[])]){const limpo=nomeCanonico(valor),nome=limpo==='Copa Nacional'?nomes.copa:limpo;if(!/Copa do Mundo|Eurocopa|Copa América|Bola de Ouro|Bota de Ouro/i.test(nome))out.push({ano:a.ano,nome,clube,voce:true});}
  const vencedor=vencedorLigaRegistrado(a,treinador);if(vencedor)out.push({ano:a.ano,nome:a.ligaNome||LIGAS[a.ligaId||a.liga]?.nome||nomes.liga,clube:vencedor,tipo:'liga',voce:clubeCanonico(clube)===vencedor});
  for(const [campo,tipo]of [['copaNacional','copa'],['continental','continental'],['mundial','mundial'],['estadual','estadual']])if(a[campo]?.titulo)out.push({ano:a.ano,nome:a[campo].nome||nomes[tipo],clube,tipo,voce:true});
- for(const [liga,t]of Object.entries(a.classificacoesMundo||{})){const campeao=t.classificacao?.[0]?.nome;if(campeao)out.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',clube:campeao});}
+ for(const [liga,t]of Object.entries(a.classificacoesMundo||{})){const campeao=t.classificacao?.[0]?.nome;if(campeao)out.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',clube:campeao,voce:campeao===clube});}
  return out;
 }
 export function eventosConhecidos(c,temporadas=c.temporadas||[]){
@@ -69,20 +69,23 @@ export function corrigirCampeoesLiga(c){
  if(c.historiaFutebol?.titulos)novo.historiaFutebol={...c.historiaFutebol,titulos:eventosConhecidos(novo)};
  return novo;
 }
-function simularMundo(c,a){
+export function simularMundo(c,a,{preservarTorneios=false}={}){
  const clubes=clubesDoMundo(c,clubesParaCopas(c.tecnico?.ligasMundo||c.ligas)),vagas=(c.vagasInternacionaisAno===a.ano?c.vagasInternacionaisClubes:null)||(Array.isArray(c.tecnico?.temporadas)?c.tecnico.temporadas.find(t=>t.ano===a.ano-1)?.vagasInternacionaisProxima:null)||calcularVagasRapidas({ano:a.ano-1,ligasMundo:c.tecnico?.ligasMundo||c.ligas,seed:'mundo'}),out=[];
+ const conhecidos=new Map((a.torneios||[]).map(t=>[nomeCanonico(t.nome),t]));
+ const preservar=(nome)=>preservarTorneios&&((a.competicoesPreservadas||[]).some(n=>nomeCanonico(n)===nomeCanonico(nome))||conhecidos.has(nomeCanonico(nome))||[a.copaNacional,a.continental,a.mundial].some(t=>t?.nome&&nomeCanonico(t.nome)===nomeCanonico(nome)));
  for(const [liga,nome]of Object.entries(COPAS_NACIONAIS)){
   const pool=clubes.filter(x=>x.pais===clubes.find(c=>c.liga===liga)?.pais);if(pool.length<2)continue;
   const rng=geradorTecnico(`mundo|${a.ano}|${liga}|tabela-anterior`),tabela=a.classificacoesMundo?.[liga]?.classificacao||(a.ligaId===liga&&a.tabelaLiga?.length?a.tabelaLiga.map(nome=>({nome})):null);
   const campeao=tabela?.[0]?.nome||clubes.filter(x=>x.liga===liga).map(x=>({...x,pontos:x.forca+(rng()+rng()-1)*8})).sort((x,y)=>y.pontos-x.pontos)[0]?.nome;
   if(campeao)out.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',clube:campeao});
+  if(preservar(nome))continue;
   const camp=simularCampanhaCopa({nome,tipo:'copa',usuario:pool[0].nome,forcaUsuario:pool[0].forca,clubes:pool,ano:a.ano,formato:'mata',seed:`${c.codigo}|${a.ano}|mundo|${nome}`});
   a.torneiosMundo.push(camp);
   out.push({ano:a.ano,nome,tipo:'copa',clube:camp.campeao});
  }
  for(const comp of ['champions','europa','conference','libertadores','sulamericana','asia','concacaf']){
-  const pool=clubes.filter(x=>vagas[x.nome]?.competicao===comp);pool.splice(0,pool.length,...ampliarParticipantesInternacionais(pool,comp,a.ano,clubes));if(pool.length<2)continue;
-  const nome=nomeVaga(comp),camp=simularCampanhaCopa({nome,tipo:'continental',usuario:pool[0].nome,forcaUsuario:pool[0].forca,clubes:pool,ano:a.ano,formato:['champions','europa','conference'].includes(comp)?'liga':'grupos',seed:`${c.codigo}|${a.ano}|historia|${nome}`});
+  const pool=clubes.filter(x=>vagas[x.nome]?.competicao===comp&&(!preservarTorneios||x.nome!==a.clube));pool.splice(0,pool.length,...ampliarParticipantesInternacionais(pool,comp,a.ano,clubes));if(pool.length<2)continue;
+  const nome=nomeVaga(comp);if(preservar(nome))continue;const camp=simularCampanhaCopa({nome,tipo:'continental',usuario:pool[0].nome,forcaUsuario:pool[0].forca,clubes:pool,ano:a.ano,formato:['champions','europa','conference'].includes(comp)?'liga':'grupos',seed:`${c.codigo}|${a.ano}|historia|${nome}`});
   a.torneiosMundo.push(camp);
   out.push({ano:a.ano,nome,tipo:'continental',clube:camp.campeao});
  }

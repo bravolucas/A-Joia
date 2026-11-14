@@ -88,3 +88,15 @@ test('o ranking usa a liga defendida na temporada, mesmo depois de uma transfer�
  const jogador={ovr:80,gols:20,assist:10,nota:8,liga:'serieB',ligaTemporada:'inglaterra'};
  assert.equal(scoreJogadorMundo(jogador),scoreJogadorMundo({...jogador,liga:'inglaterra',ligaTemporada:undefined}));
 });
+
+test('projeção atual não reaproveita a divisão por competição do ano anterior',()=>{
+ const antes={jogadores:[{id:1,clubeNome:'Santos',liga:'brasileirao',porCompeticao:[{nome:'Premier League',jogos:20,gols:10}]}]};
+ const depois={jogadores:[{...antes.jogadores[0],jogos:30,gols:5,assist:2}]},original=JSON.stringify(depois);
+ const r=estatisticasDasPartidas(depois,antes,{ano:2030},'legado',{clubesLegados:['Santos']}).jogadores[0];
+ assert.equal(r.porCompeticao,undefined);assert.equal(r.gols,5);assert.equal(r.jogos,30);assert.equal(r.origemEstatisticas,'projecao-legada');assert.equal(JSON.stringify(depois),original);
+});
+import {artilhariaLiga} from '../src/comum/lib.js';
+test('artilharia de save sem divisão por competição usa a liga e o clube defendidos',()=>{
+ const mundo={temporada:2,jogadores:[{nome:'Transferido',liga:'inglaterra',ligaTemporada:'brasileirao',clubeNome:'Arsenal',clubeTemporada:'Santos',jogos:30,gols:12,assist:3,temporadaEstatisticas:2}]};
+ assert.equal(artilhariaLiga(mundo,'brasileirao',null,'')[0].clube,'Santos');assert.deepEqual(artilhariaLiga(mundo,'inglaterra',null,''),[]);
+});

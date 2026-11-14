@@ -1957,7 +1957,7 @@ export function artilhariaLiga(mundo, ligaId, meuCard, meuNome) {
     if(!atual)return [];
     const linha=j.porCompeticao?.find(t=>t.nome===nomeLiga);
     if(j.porCompeticao&&!linha)return [];
-    if(!linha&&j.liga!==ligaId)return [];
+    if(!linha&&(j.ligaTemporada||j.liga)!==ligaId)return [];
     const gols=linha?.gols??j.gols,assist=linha?.assist??j.assist;
     return gols>0?[{nome:j.nome,clube:j.clubeTemporada||j.clubeNome,gols,assist,voce:false}]:[];
   });

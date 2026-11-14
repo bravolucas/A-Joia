@@ -1,3 +1,5 @@
+import {prepararElencoTecnico} from '../treinador/tecnico.js';
+import {negociarElencoTecnico} from '../treinador/mercadoTecnico.js';
 import {RevelacaoTela} from '../comum/efeitos/Movimento.jsx';
 import {BotaoMuseuPessoal,MuseuFimCarreira} from '../museu/MuseuPessoal.jsx';
 import BotaoHistoria from '../historia/HistoriaFutebol.jsx';
@@ -2760,6 +2762,12 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
 
 
 
+  useEffect(()=>{
+    const t=c?.tecnico,g=t?.gestao;
+    if(etapa!=='tecnico'||!c.mundo||!t?.clubeInicialEscolhido||t.tipoEquipe==='selecao'||t.demitido||t.desempregado||t.fase!=='pretemporada'||t.copasEmJogo||t.andamento?.jogos||t.andamento?.rodadas||t.temporadaPausada)return;
+    if(!g?.cadastroUnificado||g.clube!==t.clube||g.ano!==t.ano)setEstado(st=>({...st,c:prepararElencoTecnico(st.c)}));
+  },[etapa,c]);
+
   // a primeira decisão é dentro do jogo: três clubes de base para escolher
   const criar = (dados) => { const cc = criarJogador(dados); cc.museuId = criarIdMuseu(); setEstado({ etapa: "evento", c: cc, evento: sortearEvento(cc, { somente: "base" }), resultado: null, fila: false }); };
 
@@ -3008,7 +3016,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "traco" && <TelaTraco c={c} opcoes={(opcoesTraco || []).map(tracoDe).filter(Boolean)} onEscolher={escolherT} />}
         {etapa === "fim" && !apresentacao && <MuseuFimCarreira c={c} fase={c.tecnico&&carreiraTecnicoEncerrada(c.tecnico,c.idade)?"treinador":"jogador"} automatico={!c.tecnico||carreiraTecnicoEncerrada(c.tecnico,c.idade)} solicitacao={solicitacaoMuseuFinal}/>}
         {etapa === "fim" && <FimDeCarreira c={c} onAbrirMuseu={()=>setSolicitacaoMuseuFinal(n=>n+1)} onNova={nova} onSair={onSair} onComecarTecnico={comecarTecnico} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
-        {etapa === "tecnico" && <CarreiraTecnico c={c} onCopaEscolha={(chave,op)=>setEstado(st=>({...st,c:resolverCopaEscolhaTecnico(st.c,chave,op)}))}
+        {etapa === "tecnico" && <CarreiraTecnico c={c} onAbrirElenco={()=>setEstado(st=>({...st,c:prepararElencoTecnico(st.c)}))} onNegociarElenco={(tipo,id)=>setEstado(st=>({...st,c:negociarElencoTecnico(st.c,tipo,id)}))} onCopaEscolha={(chave,op)=>setEstado(st=>({...st,c:resolverCopaEscolhaTecnico(st.c,chave,op)}))}
           onComprarMelhoria={id=>{const novo=comprarMelhoriaTecnico(c,id);setEstado(st=>st.c===c?{...st,c:novo}:st);}}
           onEscolhaRapida={(chave,op) => setEstado(st => ({...st,c:escolherPretemporadaRapidaTecnico(st.c,chave,op,undefined,{interativo:true,copasInterativas:true})}))}
           onParada={(chave, op) => setEstado(st => ({ ...st, c: responderParadaTecnico(st.c, chave, op) }))}

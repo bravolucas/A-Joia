@@ -1,3 +1,5 @@
+import {prepararGestaoTecnico} from './mercadoTecnico.js';
+import {atualizarProjecaoGestao} from '../simulacao/elencoUnificado.js';
 import {clonarEstado} from '../simulacao/clonarEstado.js';
 import {gerarMundoJogadores,simularTemporadaMundo} from '../comum/lib.js';
 import {estatisticasDasPartidas} from '../simulacao/estatisticasMundo.js';
@@ -119,9 +121,9 @@ function registrarUniversoAno(c,ano){
  const a=ano,novo={...c};registrarAnoHistoria(novo,ano);
  const antesMundo=c.mundo||gerarMundoJogadores(geradorTecnico(`${c.codigo||c.nome}|${a.ano}|origem-mundo`));
  // A população avança uma única vez por temporada concluída, depois de todas as copas.
- if(!(c.tecnico?.universo||c.universo)?.anos?.includes(a.ano))novo.mundo=estatisticasDasPartidas(simularTemporadaMundo(antesMundo,geradorTecnico(`${c.codigo||c.nome}|${a.ano}|evolucao-mundo`),{clubes:clubesDoMundo({...c,mundo:antesMundo}),perfis:(c.universo||c.tecnico?.universo)?.clubes}),antesMundo,ano,c.codigo);
+ if(!(c.tecnico?.universo||c.universo)?.anos?.includes(a.ano))novo.mundo=estatisticasDasPartidas(simularTemporadaMundo(antesMundo,geradorTecnico(`${c.codigo||c.nome}|${a.ano}|evolucao-mundo`),{clubes:clubesDoMundo({...c,mundo:antesMundo}),perfis:(c.universo||c.tecnico?.universo)?.clubes,treinoClube:c.tecnico?.gestao?.cadastroUnificado&&c.tecnico.gestao.comissao?.some(p=>p.id==='preparador'&&p.ano===a.ano)?1:0,clubeControlado:c.tecnico?.gestao?.cadastroUnificado&&c.tecnico.gestao.clube===a.clube?c.tecnico.gestao.clube:null,ano:a.ano}),antesMundo,ano,c.codigo);
  registrarMundoVivo(novo,ano,{antesMundo});
- return novo;
+ return atualizarProjecaoGestao(novo);
 }
 const NOMES_COMPETICOES_TECNICO = { brasileirao: 'Brasileirão', serieB: 'Brasileirão Série B', argentina: 'Liga Profesional', portugal: 'Liga Portugal', portugal2: 'Liga Portugal 2', espanha: 'La Liga', espanha2: 'LaLiga 2', inglaterra: 'Premier League', inglaterra2: 'Championship', italia: 'Serie A', italia2: 'Serie B (Itália)', alemanha: 'Bundesliga', alemanha2: '2. Bundesliga', franca: 'Ligue 1', franca2: 'Ligue 2', arabia: 'Saudi Pro League', holanda: 'Eredivisie', mls: 'MLS', turquia: 'Süper Lig', sulamericano: 'Campeonato Sul-Americano' };
 export function competicaoTemporadaTecnico(a = {}) {
@@ -1262,8 +1264,8 @@ export function proximaTemporadaTecnico(c) {
   // da base do clube (35% do ganho fica, de −6 a +8) e diretoria, torcida e moral
   // esquecem parte do passado — o título de ontem não garante o emprego amanhã.
   const base = (t.tipoEquipe!=='selecao'?(t.gestao?.clube===t.clube?(t.gestao.forcaReferencia??t.gestao.forcaMercado):t.forcasMundo?.[t.clube]):undefined) ?? (t.tipoEquipe === 'selecao' ? SELECOES_TECNICO.find(x=>x.nac===t.selecao) : CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube))?.elenco ?? t.elenco ?? 50;
-  const herdado = limitar(Math.round(((t.elenco ?? base) - base) * 0.3), -6, 5);
-  const proximo = { ...t, ...(t.modoTreinadorRapido?{verbaRapida:renovarVerbaPretemporada(t)}:{}), historicoCartas, decisoes: [], andamento: null, reuniaoPendente: false, fase: 'pretemporada', ultimaNegociacao: null,
+  const herdado = limitar(Math.round(((t.elenco ?? base) - (t.gestao?.cadastroUnificado?(t.gestao.ajusteNumerico||0):0) - base) * 0.3), -6, 5);
+  const proximo = { ...t, ...(t.gestao?.cadastroUnificado?{gestao:{...t.gestao,ajusteNumerico:0}}:{}), ...(t.modoTreinadorRapido?{verbaRapida:renovarVerbaPretemporada(t)}:{}), historicoCartas, decisoes: [], andamento: null, reuniaoPendente: false, fase: 'pretemporada', ultimaNegociacao: null,
     efeitosPendentes: pendentes, efeitosRecebidos: vencidos, ajusteTurno: null, paradasTemporada: [], conviteSelecao: null,
     elenco: limitar(base + herdado + soma('elenco'), 10, 99),
     moral: limitar(Math.round(55 + ((t.moral ?? 50) - 55) * 0.7) + 2 + soma('moral'), 10, 95),
@@ -1275,7 +1277,8 @@ export function proximaTemporadaTecnico(c) {
   proximo.noticiasElenco = ano.noticias;
   if (ano.bonusForca) proximo.elenco = limitar(proximo.elenco + ano.bonusForca, 10, 99);
   if (ano.verba && proximo.verbaRapida != null) proximo.verbaRapida += ano.verba;
-  return { ...c, tecnico: { ...proximo, cartas: sortearCartasTecnico(proximo) } };
+  const novo={ ...c, tecnico: { ...proximo, cartas: sortearCartasTecnico(proximo) } };
+  return t.gestao?.cadastroUnificado?prepararElencoTecnico(novo):novo;
 }
 
 /** Escolha interna imparcial para eventos não exibidos no fluxo expresso. */
@@ -1336,4 +1339,11 @@ export function resolverCopaEscolhaTecnico(c,chave,opcao){
  let novo=aplicarCopaTecnico(c,chave,opcao);if(novo===c)return c;novo=reavaliarDiretoriaTecnico(novo);
  if(!novo.tecnico.copasEmJogo){novo.tecnico=comMetas({...novo.tecnico,propostas:gerarPropostasTecnico(novo.tecnico,geradorTecnico(`${novo.tecnico.ano}|${novo.tecnico.clube}|copas-encerradas`))});}
  return registrarHistoriaTecnico(novo);
+}
+
+/** Abre o mesmo cadastro de atletas usado pela simulação e pelo arquivo. */
+export function prepararElencoTecnico(c){
+ if(!c?.tecnico?.clube||c.tecnico.tipoEquipe==='selecao')return c;
+ const t=c.tecnico;if(t.fase!=='pretemporada'||t.copasEmJogo||t.andamento?.jogos||t.andamento?.rodadas||t.temporadaPausada)return c;
+ return prepararGestaoTecnico({...c,mundo:c.mundo||gerarMundoJogadores(geradorTecnico(`${c.codigo||c.nome}|elenco-unificado`))});
 }

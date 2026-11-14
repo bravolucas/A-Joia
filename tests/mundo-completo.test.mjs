@@ -114,3 +114,11 @@ test('registro da liga usa seu cadastro atual mesmo quando o card trouxe um nome
  const c=carreira();const card=prepararMundoTemporada(c,{ligaNome:'Premier League',ligaMult:99},null);
  assert.equal(card.ligaNome,LIGAS.brasileirao.nome);assert.equal(card.ligaMult,LIGAS.brasileirao.mult);
 });
+
+import {sortearAdversario} from '../src/comum/lib.js';
+test('sorteio continental funciona sem ano explícito em clubes de continentes diferentes',()=>{
+ for(const nome of ['Santos','Arsenal']){
+  const c={idade:24,clube:CLUBES.find(x=>x.nome===nome)};
+  const adversario=sortearAdversario(c,'continental');assert.equal(typeof adversario,'string');assert.ok(adversario.length);assert.notEqual(adversario,nome);
+ }
+});

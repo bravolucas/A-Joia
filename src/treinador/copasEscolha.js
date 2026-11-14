@@ -40,9 +40,9 @@ export function criarCampanhaCopa({nome,tipo='continental',usuario,forcaUsuario,
  const rng=geradorTecnico(seed||`${ano}|${nome}|${usuario}`),eu={...(clubes.find(c=>c.nome===usuario)||{nome:usuario}),forca:forcaUsuario},outros=embaralhar(clubes.filter(c=>c.nome!==usuario),rng);
  const c={nome,tipo,ano,usuario,selecao:null,seed:seed||`${ano}|${nome}|${usuario}`,forcaUsuario,forcas:Object.fromEntries([eu,...outros].map(c=>[c.nome,nivel(c)])),pool:[eu,...outros],fases:[],grupos:[],jogosUsuario:[],campeao:null,vice:null,faseUsuario:'Em disputa',etapa:0,rodada:0,resultado:null,eliminados:[],estado:estado||null};
  if(formato==='liga'){
-  c.formato='liga';c.times=embaralhar([eu,...selecionarParticipantes(outros,35,rng)],rng);c.participantes=c.times.length;c.totalRodadas=/Conference/i.test(nome)?6:8;c.calendario=calendario(c.times,c.totalRodadas);c.manual=[0,c.totalRodadas-1];c.jogosLiga=[];c.fase='liga';
+  c.formato='liga';c.times=embaralhar([eu,...selecionarParticipantes(outros,35,rng)],rng);c.participantes=c.times.length;c.totalRodadas=/Conference/i.test(nome)?6:8;c.calendario=calendario(c.times,c.totalRodadas);const jogaveis=c.calendario.flatMap((js,i)=>js.some(j=>j.casa===usuario||j.fora===usuario)?[i]:[]);c.manual=[...new Set([jogaveis[0],jogaveis.at(-1)])];c.jogosLiga=[];c.fase='liga';
  }else if(formato==='grupos'||formato==='selecao32'){
-  c.formato=formato;c.times=[eu,...outros.slice(0,3)];c.participantes=c.pool.length;c.totalRodadas=formato==='selecao32'?3:6;c.calendario=calendario(c.times,c.totalRodadas);c.manual=Array.from({length:c.totalRodadas},(_,i)=>i);c.jogosLiga=[];c.fase='grupos';
+  c.formato=formato;c.times=[eu,...outros.slice(0,3)];c.participantes=c.pool.length;c.totalRodadas=formato==='selecao32'?3:6;c.calendario=calendario(c.times,c.totalRodadas);c.manual=c.calendario.flatMap((js,i)=>js.some(j=>j.casa===usuario||j.fora===usuario)?[i]:[]);c.jogosLiga=[];c.fase='grupos';
  }else if(formato==='estadual'){
   c.formato='estadual';c.times=[eu,...outros.slice(0,7)];c.totalRodadas=c.times.length%2?c.times.length:c.times.length-1;c.calendario=calendario(c.times,c.totalRodadas);const rodadasComUsuario=c.calendario.map((js,i)=>js.some(j=>j.casa===usuario||j.fora===usuario)?i:null).filter(i=>i!==null);c.manual=interativoEstadual?[...new Set([rodadasComUsuario[0],rodadasComUsuario.at(-1)])]:[];c.jogosLiga=[];c.fase='grupos';
  }else{
@@ -58,22 +58,36 @@ function avancarLiga(c,jogoUsuario){
 function concluirLiga(c){
  c.grupos=[{grupo:c.formato==='liga'?'Tabela única':c.formato==='estadual'?'Classificação estadual':c.selecao?'Grupo da seleção':'Grupo do seu clube',jogos:c.jogosLiga,classificacao:c.classificacao}];const pos=c.classificacao.find(x=>x.meuClube)?.posicao||99;c.posicaoInicial=pos;
  if(c.formato==='estadual'){
-  c.candidatosMata=c.classificacao.slice(0,4).map(x=>x.nome);if(pos>4){c.fase='fim';c.faseUsuario='Eliminado na classificação estadual';return;}c.tamanho=4;c.fase='mata';c.adversario=null;return;
+  c.candidatosMata=c.classificacao.slice(0,4).map(x=>x.nome);if(pos>4){c.faseUsuario='Eliminado na classificação estadual';concluirSemUsuario(c,c.candidatosMata);return;}c.tamanho=4;c.fase='mata';c.adversario=null;return;
  }
  if(c.formato==='liga'){
-  if(pos>24){c.fase='fim';c.faseUsuario=`Eliminado na fase de liga · ${pos}º`;return;}
+  if(pos>24){c.faseUsuario=`Eliminado na fase de liga · ${pos}º`;const diretos=c.classificacao.slice(0,8).map(x=>x.nome),playoffs=c.classificacao.slice(8,24).map(x=>x.nome);concluirSemUsuario(c,playoffs,{reservados:diretos,playoff:true});return;}
   c.candidatosMata=c.classificacao.slice(0,24).map(x=>x.nome);c.reservados=c.classificacao.slice(0,8).map(x=>x.nome).filter(x=>x!==c.usuario);c.tamanho=pos<=8?16:32;c.playoff=pos>8;c.faseUsuario=pos<=8?'Classificação direta às oitavas':'Playoff · 9º ao 24º';
-  if(pos<=8){const rng=geradorTecnico(`${c.seed}|playoffs-outros`),diretos=c.classificacao.slice(0,8).map(x=>x.nome),playoffs=c.classificacao.slice(8,24).map(x=>({nome:x.nome,forca:c.forcas[x.nome]})),jogos=[];while(playoffs.length>1){const a=playoffs.shift(),b=playoffs.pop(),j=jogoEliminatorio(a,b,rng);jogos.push(j);diretos.push(j.vencedor);c.eliminados.push(j.vencedor===a.nome?b.nome:a.nome);}c.candidatosMata=diretos;c.reservados=[];c.fases.push({fase:'Playoff de acesso às oitavas',jogos});}
+  if(pos<=8){const rng=geradorTecnico(`${c.seed}|playoffs-outros`),diretos=c.classificacao.slice(0,8).map(x=>x.nome),playoffs=c.classificacao.slice(8,24).map(x=>({nome:x.nome,forca:c.forcas[x.nome]})),jogos=[];while(playoffs.length>1){const a=playoffs.shift(),b=playoffs.pop(),j=jogoDaChave({...c,tamanho:32},a,b,rng);jogos.push(j);diretos.push(j.vencedor);c.eliminados.push(j.vencedor===a.nome?b.nome:a.nome);}c.candidatosMata=diretos;c.reservados=[];c.fases.push({fase:'Playoff de acesso às oitavas',jogos});}
 
  }else{
-  if(pos>2){c.fase='fim';c.faseUsuario=`${pos}º na fase de grupos`;c.repescagemSulamericana=pos===3&&/Libertadores/i.test(c.nome);return;}
   c.eliminados.push(...c.classificacao.filter(x=>x.posicao>2).map(x=>x.nome));
   const restantes=c.pool.filter(x=>!c.times.some(t=>t.nome===x.nome)),rng=geradorTecnico(`${c.seed}|outros-grupos`),classificados=c.classificacao.slice(0,2).map(x=>x.nome);
-  for(let i=0;i<restantes.length;i+=4){const grupo=restantes.slice(i,i+4),js=[];for(let a=0;a<grupo.length;a++)for(let b=a+1;b<grupo.length;b++){js.push(partida(grupo[a],grupo[b],rng));if(c.formato!=='selecao32')js.push(partida(grupo[b],grupo[a],rng));}const tab=tabela(grupo,js,c.usuario);classificados.push(...tab.slice(0,2).map(x=>x.nome));c.eliminados.push(...tab.slice(2).map(x=>x.nome));}
+  for(let i=0;i<restantes.length;i+=4){const grupo=restantes.slice(i,i+4),js=[];for(let a=0;a<grupo.length;a++)for(let b=a+1;b<grupo.length;b++){js.push(partida(grupo[a],grupo[b],rng));if(c.formato!=='selecao32')js.push(partida(grupo[b],grupo[a],rng));}const tab=tabela(grupo,js,c.usuario);c.grupos.push({grupo:`Grupo ${c.grupos.length+1}`,jogos:js,classificacao:tab});classificados.push(...tab.slice(0,2).map(x=>x.nome));c.eliminados.push(...tab.slice(2).map(x=>x.nome));}
+  if(pos>2){c.faseUsuario=`${pos}º na fase de grupos`;c.repescagemSulamericana=pos===3&&/Libertadores/i.test(c.nome);concluirSemUsuario(c,classificados);return;}
   c.candidatosMata=classificados;
   c.tamanho=/Sul-Americana/i.test(c.nome)&&pos===2?32:16;c.playoff=c.tamanho===32;
  }
  c.fase='mata';c.adversario=null;
+}
+/** O torneio continua com os classificados reais mesmo sem o usuário. */
+function concluirSemUsuario(c, nomes, {reservados=[],playoff=false}={}) {
+ const rng=geradorTecnico(`${c.seed}|apos-grupos`);
+ let vivos=[...new Set(nomes)].map(nome=>({nome,forca:c.forcas[nome]}));
+ while(vivos.length>1){
+  vivos.sort((a,b)=>nivel(b)-nivel(a));const tamanho=vivos.length,jogos=[],proximos=[];
+  while(vivos.length>1){const a=vivos.shift(),b=vivos.pop(),j=jogoDaChave({...c,tamanho},a,b,rng);jogos.push(j);proximos.push(j.vencedor===a.nome?a:b);c.eliminados.push(j.vencedor===a.nome?b.nome:a.nome);if(tamanho===2&&!reservados.length)c.vice=j.vencedor===a.nome?b.nome:a.nome;}
+  if(vivos.length)proximos.push(vivos[0]);
+  c.fases.push({fase:playoff?'Playoff de acesso às oitavas':faseN(tamanho),jogos});
+  vivos=proximos;
+  if(reservados.length){vivos.push(...reservados.map(nome=>({nome,forca:c.forcas[nome]})));reservados=[];playoff=false;}
+ }
+ c.campeao=vivos[0]?.nome||null;c.fase='fim';c.adversario=null;
 }
 function preparar(c){
  while(['liga','grupos'].includes(c.fase)&&c.rodada<c.totalRodadas&&!c.manual.includes(c.rodada))avancarLiga(c);
@@ -91,6 +105,11 @@ function jogoEliminatorio(a,b,rng){
  const j=partida(a,b,rng,'pressionar');
  if(!j.vencedor){j.vencedor=rng()<chancePenaltis(nivel(a),nivel(b))?a.nome:b.nome;j.penaltis=true;}
  return j;
+}
+function jogoDaChave(c,a,b,rng){
+ if(!c.idaVolta||c.tamanho===2)return jogoEliminatorio(a,b,rng);
+ const ida=partida(a,b,rng),volta=partida(b,a,rng),golsCasa=ida.golsCasa+volta.golsFora,golsFora=ida.golsFora+volta.golsCasa;
+ return {casa:a.nome,fora:b.nome,golsCasa,golsFora,vencedor:golsCasa>golsFora?a.nome:golsFora>golsCasa?b.nome:rng()<chancePenaltis(nivel(a),nivel(b))?a.nome:b.nome,penaltis:golsCasa===golsFora,partidas:[ida,volta]};
 }
 function reduzirQuadro(times,limite,rng){
  let lista=[...times];if(limite<=0)return [];
@@ -124,7 +143,7 @@ function registrarMata(c,jogo){
  if(c.roteiroMundial){const final=c.roteiroMundial.length===1,fase=final?'Final':c.roteiroMundial.length===3?'Derby das Américas':'Copa Challenger';c.fases.push({fase,jogos:[{...jogo,fase}]});c.jogosUsuario.push({...jogo,fase});if(jogo.vencedor!==c.usuario||final){c.fase='fim';c.campeao=final?jogo.vencedor:c.roteiroMundial.at(-1);c.vice=final?(jogo.vencedor===c.usuario?c.adversario.nome:c.usuario):null;c.faseUsuario=final?(c.campeao===c.usuario?'Campeão':'Vice-campeão'):`Eliminado: ${fase}`;}else{c.roteiroMundial.shift();c.tamanho=2**c.roteiroMundial.length;c.adversario=null;}return;}
  const fase=c.preContinental?'Pré-classificação continental':c.playoff&&c.tamanho===32?'Playoff de acesso às oitavas':faseN(c.tamanho);
  const rng=geradorTecnico(`${c.seed}|chave-resultados|${c.etapa}|${c.tamanho}`),jogos=[{...jogo,fase}],vencedores=[jogo.vencedor];
- for(const par of c.quadroMata||[]){if(par.includes(c.usuario))continue;const [a,b]=par;if(!b){vencedores.push(a);continue;}const j=jogoEliminatorio({nome:a,forca:c.forcas[a]},{nome:b,forca:c.forcas[b]},rng);jogos.push({...j,fase});vencedores.push(j.vencedor);c.eliminados.push(j.vencedor===a?b:a);}
+ for(const par of c.quadroMata||[]){if(par.includes(c.usuario))continue;const [a,b]=par;if(!b){vencedores.push(a);continue;}const j=jogoDaChave(c,{nome:a,forca:c.forcas[a]},{nome:b,forca:c.forcas[b]},rng);jogos.push({...j,fase});vencedores.push(j.vencedor);c.eliminados.push(j.vencedor===a?b:a);}
  c.fases.push({fase,jogos});c.jogosUsuario.push({...jogo,fase});
  c.eliminados.push(jogo.vencedor===jogo.casa?jogo.fora:jogo.casa);
  c.sobreviventes=vencedores;
@@ -135,7 +154,7 @@ function registrarMata(c,jogo){
   c.faseUsuario=`Eliminado: ${fase.toLowerCase()}`;c.fase='fim';let times=vencedores.map(nome=>({nome,forca:c.forcas[nome]}));
   // Continue the real remaining bracket, including stronger clubs joining after early national rounds.
   if(c.reservados?.length){times.push(...c.reservados.map(nome=>({nome,forca:c.forcas[nome]})));c.reservados=[];}
-  while(times.length>1){const js=[],next=[];times.sort((a,b)=>nivel(b)-nivel(a));while(times.length>1){const a=times.shift(),b=times.pop(),j=jogoEliminatorio(a,b,rng);js.push(j);next.push(j.vencedor===a.nome?a:b);if(!times.length&&!next.slice(0,-1).length)c.vice=j.vencedor===a.nome?b.nome:a.nome;}if(times.length)next.push(times[0]);c.fases.push({fase:faseN(next.length*2),jogos:js});times=next;}
+  while(times.length>1){const js=[],next=[];times.sort((a,b)=>nivel(b)-nivel(a));while(times.length>1){const a=times.shift(),b=times.pop(),j=jogoDaChave({...c,tamanho:times.length+next.length*2+2},a,b,rng);js.push(j);next.push(j.vencedor===a.nome?a:b);if(!times.length&&!next.slice(0,-1).length)c.vice=j.vencedor===a.nome?b.nome:a.nome;}if(times.length)next.push(times[0]);c.fases.push({fase:faseN(next.length*2),jogos:js});times=next;}
   c.campeao=times[0]?.nome||null;
  }
 }
@@ -153,6 +172,23 @@ export function escolherCopa(c,chave,opcao){
  novo.resultado={jogo:j,escolha:opcao,revelacao,penaltisPendentes:!d.grupo&&!j.vencedor,venceu:j.vencedor===novo.usuario,empate:!j.vencedor,fase:d.fase,final:d.final};
  if(novo.resultado.penaltisPendentes)return novo;
  if(d.grupo)avancarLiga(novo,j);else registrarMata(novo,j);novo.etapa++;return novo;
+}
+/** Insere o resultado do motor ao vivo na mesma chave dos demais clubes. */
+export function registrarPlacarCopa(c,chave,jogo) {
+ const d=decisaoCopa(c);if(!d||d.chave!==chave||c.resultado)return c;
+ const casa=d.casa?c.usuario:d.adversario,fora=d.casa?d.adversario:c.usuario;
+ if(jogo.casa!==casa||jogo.fora!==fora||![jogo.golsCasa,jogo.golsFora].every(n=>Number.isInteger(n)&&n>=0))throw new Error('Placar incompatível com a partida da chave.');
+ if(jogo.partidas?.length){
+  const ps=jogo.partidas;
+  if(d.grupo||ps.length!==2||ps.some(p=>![p.golsCasa,p.golsFora].every(n=>Number.isInteger(n)&&n>=0))||ps[0].casa!==casa||ps[0].fora!==fora||ps[1].casa!==fora||ps[1].fora!==casa||ps[0].golsCasa+ps[1].golsFora!==jogo.golsCasa||ps[0].golsFora+ps[1].golsCasa!==jogo.golsFora)throw new Error('Agregado incompatível com os jogos de ida e volta.');
+ }
+ const vencedor=jogo.golsCasa>jogo.golsFora?casa:jogo.golsFora>jogo.golsCasa?fora:null;
+ if(jogo.vencedor&&![casa,fora].includes(jogo.vencedor)||vencedor&&jogo.vencedor&&vencedor!==jogo.vencedor||d.grupo&&!vencedor&&jogo.vencedor)throw new Error('Vencedor incompatível com o placar.');
+ if(!d.grupo&&!vencedor&&!jogo.vencedor)throw new Error('O mata-mata empatado precisa de um vencedor nos pênaltis.');
+ const novo=structuredClone(c),j={...structuredClone(jogo),vencedor:vencedor||jogo.vencedor||null};
+ novo.resultado={jogo:j,origem:'partida-ao-vivo',penaltisPendentes:false,venceu:j.vencedor===novo.usuario,empate:!j.vencedor,fase:d.fase,final:d.final};
+ if(d.grupo)avancarLiga(novo,j);else registrarMata(novo,j);novo.etapa++;
+ return novo;
 }
 export function continuarCopa(c){if(c?.fase==='fim'&&!c.resultado)return {...c};if(!c?.resultado||c.resultado.penaltisPendentes)return c;return preparar({...structuredClone(c),resultado:null});}
 export function simularCampanhaCopa(opcoes){let c=criarCampanhaCopa(opcoes);for(let i=0;c.fase!=='fim'&&i<80;i++){const d=decisaoCopa(c);c=d?escolherCopa(c,d.chave,d.penaltis?'canto':'controlar'):continuarCopa(c);}return c;}

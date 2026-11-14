@@ -1,0 +1,30 @@
+import {test,expect} from '@playwright/test';
+import {instalarSave,lerSave} from './helpers/save-browser.mjs';
+import {normalizarSave} from '../src/completo/save.js';
+import {CLUBES} from '../src/dados/data.js';
+const base='http://127.0.0.1:4173/A-Joia/';
+for(const width of [390,1366]) test(`avanço rápido conserva placares após salvar e retomar em ${width}px`,async({page})=>{
+  test.setTimeout(90000);
+  await page.setViewportSize({width,height:800});
+  const clube=CLUBES.find(c=>c.nome==='Santos'),rival=CLUBES.find(c=>c.nome==='Flamengo');
+  const linha=clube=>({clube,pts:0,j:0,v:0,e:0,d:0,gp:0,gc:0,sg:0});
+  const s=normalizarSave({versao:1,nome:'Arquivo Real',posicao:'MD',nacionalidade:'BRA',personalidade:'ascensao',pernaDominante:'destro',temporadas:[],aba:'carreira',modoSimulacao:'jogoAJogo',carreira:{posicao:'MD',clube,attrs:{velocidade:65,finalizacao:65,passe:65,drible:65,defesa:65,fisico:65,fintas:3,pernaRuim:3},idade:24,picoOvr:65,contrato:{salario:1000,multa:5000,anos:3,restantes:2},temporadaAndamento:{calendario:Array.from({length:4},(_,i)=>[{casa:i%2?rival:clube,fora:i%2?clube:rival}]),rodadaAtual:0,eventosAgendados:[],cardOriginal:{jogos:4,gols:2,assist:1,nota:7,ovr:65},tabela:{Santos:linha(clube),Flamengo:linha(rival)},logJogos:[],resultadosRodadas:[],historicoRodada:[],golsRestantes:2,assistRestantes:1}}});
+  const erros=[];page.on('pageerror',e=>erros.push(e.message));
+  await page.goto(base);await instalarSave(page,s,'ajoia_save_auto');await page.reload();
+  const abrir=async()=>{await page.getByRole('button',{name:/Modo Carreira completo/}).click();await page.getByRole('button',{name:/Continuar carreira/}).click();};
+  await abrir();await page.getByRole('button',{name:/Simular metade da temporada/}).click();
+  await page.getByRole('button',{name:'💾 Salvar',exact:true}).click();
+  await page.getByRole('button',{name:'Salvar aqui',exact:true}).first().click();
+  await expect.poll(async()=> (await lerSave(page,'ajoia_save_1'))?.carreira?.temporadaAndamento?.rodadaAtual).toBe(2);
+  const salvo=await lerSave(page,'ajoia_save_1');
+  const jogos=salvo.carreira.temporadaAndamento.cardOriginal.jogosLiga;
+  expect(jogos).toHaveLength(2);
+  for(const j of jogos){expect(Number.isInteger(j.golsCasa)).toBe(true);expect(Number.isInteger(j.golsFora)).toBe(true);}
+  await page.reload();await abrir();
+  await page.getByRole('button',{name:'💾 Salvar',exact:true}).click();
+  await page.getByRole('button',{name:'Carregar',exact:true}).nth(1).click();
+  await expect(page.getByRole('button',{name:/Avançar — rodada 3/})).toBeVisible();
+  const retomado=await lerSave(page,'ajoia_save_1');
+  expect(retomado.carreira.temporadaAndamento.cardOriginal.jogosLiga).toEqual(jogos);
+  expect(erros).toEqual([]);
+});

@@ -1599,6 +1599,12 @@ export function competicoesDaTemporada(c, card) {
 export function dividirPorCompeticao(c, card) {
   const comps = competicoesDaTemporada(c, card);
   if (!comps.length) return [];
+  if (card.porCompeticaoReal) {
+    return comps.flatMap(k => {
+      const real = card.porCompeticaoReal[k.id];
+      return real?.jogos ? [{id:k.id,nome:k.nome,icone:k.icone,cor:k.cor,...real,nota:real.nota ?? card.nota,origem:'partidas'}] : [];
+    });
+  }
   // jogos: proporcional ao tamanho típico de cada competição
   const jogosPorComp = distribuirInteiro(card.jogos, comps.map((k) => k.peso));
   // gols/assistências: proporcional a (jogos × facilidade de pontuar naquela competição)

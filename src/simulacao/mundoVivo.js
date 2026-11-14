@@ -1,3 +1,4 @@
+import {jogosDaCampanha} from '../competicoes/jogosCampanha.js';
 import { CLUBES, LIGAS } from '../dados/data.js';
 import { avaliarClubeNoMundo } from './forcaEquipe.js';
 import { geradorTecnico } from '../treinador/momentosTecnico.js';
@@ -20,7 +21,7 @@ function campanhaClube(a,nome){
   if((typeof a.clube==='string'?a.clube:a.clube?.nome)===nome)return {liga:a.ligaId||a.liga,posicao:a.posLiga||a.posicao,total:a.totalLiga||a.classificacao?.length||a.tabelaLiga?.length||20,pontos:a.pontos};
   return null;
 }
-function jogosTorneio(t){return (t.fases||[]).flatMap(f=>(f.jogos||[]).map(j=>({...j,fase:j.fase||f.fase})));}
+const jogosTorneio=jogosDaCampanha;
 /** Grava somente o ano que acaba de ocorrer. Retomar ou consultar não sorteia outra temporada. */
 export function registrarMundoVivo(c,a,{antesMundo}={}){
   if(!Number.isFinite(a?.ano))return;
@@ -63,7 +64,7 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
   // Edições completas existentes são arquivadas; dados antigos ausentes continuam ausentes.
   for(const [liga,t]of Object.entries(a.classificacoesMundo||{}))u.edicoes.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',classificacao:t.classificacao,jogos:compactarJogos(t.jogos||[]),campeao:t.classificacao?.[0]?.nome});
   if(!a.classificacoesMundo?.[a.ligaId||a.liga]&&(a.classificacao?.length||a.tabelaLiga?.length))u.edicoes.push({ano:a.ano,nome:a.ligaNome||LIGAS[a.ligaId||a.liga]?.nome||a.liga,tipo:'liga',classificacao:a.classificacao||a.tabelaLiga.map((nome,i)=>({nome,posicao:i+1})),jogos:compactarJogos(a.jogosLiga||[]),campeao:a.vencedorLiga||a.classificacao?.[0]?.nome||a.tabelaLiga?.[0]});
-  for(const t of [...(a.torneiosMundo||[]),...(a.torneios||[])])if(t.campeao&&!t.finalPendente)u.edicoes.push({ano:a.ano,nome:t.nome,tipo:t.tipo,campeao:t.campeao,vice:t.vice,classificacao:t.classificacao||[],jogos:compactarJogos(jogosTorneio(t))});
+  for(const t of [...(a.torneiosMundo||[]),...(a.torneios||[])])if(t.campeao&&!t.finalPendente)u.edicoes.push({ano:a.ano,nome:t.nome,tipo:t.tipo,campeao:t.campeao,vice:t.vice,classificacao:t.classificacao||[],grupos:(t.grupos||[]).map(g=>({grupo:g.grupo,classificacao:g.classificacao||[]})),jogos:compactarJogos(jogosTorneio(t))});
   u.edicoes=[...new Map(u.edicoes.map(e=>[`${e.ano}|${e.nome}`,e])).values()];
   if(c.tecnico){delete c.universo;c.tecnico={...c.tecnico,universo:u,forcasMundo:forcasDoMundo({...c,universo:u})};}else c.universo=u;
 }

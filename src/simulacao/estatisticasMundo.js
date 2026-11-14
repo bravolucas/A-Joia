@@ -1,3 +1,4 @@
+import {jogosDaCampanha} from '../competicoes/jogosCampanha.js';
 import {LIGAS} from '../dados/data.js';
 import {geradorTecnico} from '../treinador/momentosTecnico.js';
 import {setorJogador} from './forcaEquipe.js';
@@ -12,7 +13,7 @@ export function estatisticasDasPartidas(mundo,antes,card,seed='mundo'){
  const times=new Map(),linhas=new Map(),posicoes={GOL:1,DEF:4,MEI:3,ATA:3};
  for(const p of antes.jogadores){if(p.aposentado)continue;if(!times.has(p.clubeNome))times.set(p.clubeNome,[]);times.get(p.clubeNome).push(p);}
  const competicoes=Object.entries(card.classificacoesMundo||{}).map(([liga,t])=>({nome:LIGAS[liga]?.nome||liga,jogos:t.jogos||[]}));
- for(const t of [...(card.torneiosMundo||[]),...(card.torneios||[])])competicoes.push({nome:t.nome,jogos:(t.fases||[]).flatMap(f=>f.jogos||[])});
+ for(const t of [...(card.torneiosMundo||[]),...(card.torneios||[])])competicoes.push({nome:t.nome,jogos:jogosDaCampanha(t)});
  const unicas=[...new Map(competicoes.map(t=>[t.nome,t])).values()];
  for(const comp of unicas){
   const rng=geradorTecnico(`${seed}|${card.ano}|${comp.nome}|estatisticas-principais`);

@@ -1,3 +1,4 @@
+import {registrarRodadaTemporada,estatisticasReaisTemporada} from './registrosTemporada.js';
 import {registrarMundoVivo} from '../simulacao/mundoVivo.js';
 import {AJUSTE_FORTALEZA} from '../dados/equilibrioClubes.js';
 import JanelaPremiacao from '../comum/JanelaPremiacao.jsx';
@@ -1096,7 +1097,8 @@ function simularRodadaAtual(c, ta, bonusGol = 0, bonusAssist = 0, forcarNaoEscal
       golsRestantes = Math.max(0, golsRestantes - golsPessoais);
       let assistPessoal = assistRestantes > 0 && Math.random() < 0.32 * post.assistMult * (prepSem.assistMult || 1) ? 1 : 0;
       assistRestantes = Math.max(0, assistRestantes - assistPessoal);
-      golsPessoais += bonusGol; assistPessoal += bonusAssist;
+      golsPessoais = Math.min(meusGolsTime, golsPessoais + bonusGol);
+      assistPessoal = Math.min(Math.max(0, meusGolsTime - golsPessoais), assistPessoal + bonusAssist);
       const resultado = meusGolsTime > golsAdvTime ? "V" : meusGolsTime === golsAdvTime ? "E" : "D";
 
       // ---- CARTÕES ----
@@ -1111,7 +1113,7 @@ function simularRodadaAtual(c, ta, bonusGol = 0, bonusAssist = 0, forcarNaoEscal
       meuResultadoRodada = {
         adversario: adversarioObj.nome, adversarioForca: adversarioObj.forca,
         golsMeu: meusGolsTime, golsAdv: golsAdvTime, resultado,
-        golsMinha: golsPessoais, assistMinha: assistPessoal, numero: ta.rodadaAtual + 1,
+        golsMinha: golsPessoais, assistMinha: assistPessoal, ...(c.posicao === "GOL" ? {defesas: rand(1, 7), cleanSheets: golsAdvTime === 0 ? 1 : 0} : {}), numero: ta.rodadaAtual + 1,
         casa: souCasa, competicao: "liga", classico: ehClassico, postura,
         amarelo: cart.amarelo, vermelho: cart.vermelho, segundoAmarelo: cart.segundoAmarelo,
         suspensaoGerada: susp.suspendeu, motivoSuspensao: susp.motivo,
@@ -1120,6 +1122,7 @@ function simularRodadaAtual(c, ta, bonusGol = 0, bonusAssist = 0, forcarNaoEscal
       };
     }
   });
+  registrarRodadaTemporada(ta.cardOriginal, historico);
   return { tabela, historico, meuResultadoRodada, golsRestantes, assistRestantes };
 }
 /* Resolve todas as partidas da rodada MENOS a do jogador — usada pelo motor
@@ -1140,6 +1143,7 @@ function simularOutrasPartidasDaRodada(c, ta) {
 /* Monta o registro final da partida ao vivo (mesmo formato de sempre) a
    partir do estado real resolvido pelo motor de lances, e conclui a rodada. */
 function concluirRodada(c, ta, { tabela, historico, meuResultadoRodada, golsRestantes, assistRestantes }) {
+  registrarRodadaTemporada(ta.cardOriginal, historico);
   const proxRodada = ta.rodadaAtual + 1;
   const logJogos = meuResultadoRodada ? [...ta.logJogos, meuResultadoRodada] : ta.logJogos;
   const resultadosRodadas = [...ta.resultadosRodadas, meuResultadoRodada ? meuResultadoRodada.resultado : "E"];
@@ -1192,16 +1196,16 @@ function iniciarPartidaMataMata(c, tipo, adversarioNome, faseIdx, card, opcoesId
     },
   });
 }
-function acumularStatsCompeticao(card, campo, golsMinha, assistMinha) {
+function acumularStatsCompeticao(card, campo, golsMinha, assistMinha, goleiro = {}) {
   const atual = card.statsCompeticoes?.[campo] || { gols: 0, assist: 0, jogos: 0 };
-  card.statsCompeticoes = { ...card.statsCompeticoes, [campo]: { gols: atual.gols + (golsMinha || 0), assist: atual.assist + (assistMinha || 0), jogos: atual.jogos + 1 } };
+  card.statsCompeticoes = { ...card.statsCompeticoes, [campo]: { gols: atual.gols + (golsMinha || 0), assist: atual.assist + (assistMinha || 0), jogos: atual.jogos + 1, defesas: (atual.defesas || 0) + (goleiro.defesas || 0), cleanSheets: (atual.cleanSheets || 0) + (goleiro.cleanSheets || 0) } };
 }
 /* Registro permanente de cada partida de copa/continental jogada na
    carreira — igual à liga já guarda rodada a rodada, isso guarda fase a
    fase, com placar, adversário e resultado, pra sempre poder acompanhar
    depois (aba Estatísticas). Nunca é apagado entre temporadas. */
 function registrarPartidaCopa(c, info) {
-  c.historicoPartidasCopa = [...(c.historicoPartidasCopa || []), { idade: c.idade, clube: c.clube.nome, ...info }].slice(-120);
+  c.historicoPartidasCopa = [...(c.historicoPartidasCopa || []), { idade: c.idade, clube: c.clube.nome, ...info }];
 }
 /* Agenda a próxima partida de mata-mata pra uma rodada futura de verdade,
    em vez de encadear na hora — rodadas de copa ficam semanas separadas na
@@ -1252,7 +1256,7 @@ function concluirPartidaContinentalClube(c, ctx, resultado, golsMinha, assistMin
   const { jogoGrupo, pontosGrupo, formato, faseIdx, perna, agregadoMeu, agregadoAdv, card, nomeCompeticao } = ctx.copa;
   const adversario = ctx.adversario;
   const placarTxt = `${resultado.golsMeu}-${resultado.golsAdv}`;
-  acumularStatsCompeticao(card, "continental", golsMinha, assistMinha);
+  acumularStatsCompeticao(card, "continental", golsMinha, assistMinha, ctx.copa.estatisticasGoleiro);
   {
     const fases = FASES_POR_COMPETICAO.continental;
     const faseLabelRegistro = jogoGrupo != null ? (formato === "grupo" ? "Fase de Grupos" : "Fase de Liga") : faseIdx === -1 ? "Playoff" : faseIdx >= fases.length ? "Final" : fases[faseIdx].label;
@@ -1346,7 +1350,7 @@ function concluirPartidaMataMata(c, ctx, resultado, golsMinha, assistMinha) {
   const ehFinal = faseIdx >= fases.length;
   const idaVolta = !ehFinal && fases[faseIdx].idaVolta;
   const placarTxt = `${resultado.golsMeu}-${resultado.golsAdv}`;
-  acumularStatsCompeticao(card, campo, golsMinha, assistMinha);
+  acumularStatsCompeticao(card, campo, golsMinha, assistMinha, ctx.copa.estatisticasGoleiro);
   registrarPartidaCopa(c, { competicao: nomeCompeticao, fase: ehFinal ? "Final" : fases[faseIdx].label, adversario, resultado: resultado.resultado, placar: placarTxt, casa: ctx.souCasa });
 
   if (idaVolta && perna === "ida") {
@@ -1406,7 +1410,7 @@ function iniciarPartidaCopaDoMundo(c, card, faseIdx, jogoGrupo, pontosGrupo, ram
 }
 function concluirPartidaCopaDoMundo(c, ctx, resultado, golsMinha, assistMinha) {
   const { faseIdx, jogoGrupo, pontosGrupo, ramo, card } = ctx.copa;
-  acumularStatsCompeticao(card, "copaDoMundo", golsMinha, assistMinha);
+  acumularStatsCompeticao(card, "copaDoMundo", golsMinha, assistMinha, ctx.copa.estatisticasGoleiro);
   const nac = nacDe(c.nacionalidade);
   const adversario = ctx.adversario;
   const placarTxt = `${resultado.golsMeu}-${resultado.golsAdv}`;
@@ -1494,7 +1498,7 @@ function iniciarSequenciaSelecao(c, card, competicaoId, jogoAtual, acumulado) {
 }
 function concluirSequenciaSelecao(c, ctx, resultado, golsMinha, assistMinha) {
   const { competicaoId, jogoAtual, totalJogos, acumulado, card, nomeCompeticao, icone } = ctx.copa;
-  acumularStatsCompeticao(card, "selecao", golsMinha, assistMinha);
+  acumularStatsCompeticao(card, "selecao", golsMinha, assistMinha, ctx.copa.estatisticasGoleiro);
   const novo = {
     jogos: acumulado.jogos + 1,
     gols: acumulado.gols + golsMinha, assist: acumulado.assist + assistMinha,
@@ -1561,7 +1565,7 @@ function iniciarPartidaContinentalSelecao(c, card, faseIdx, jogoGrupo, pontosGru
 }
 function concluirPartidaContinentalSelecao(c, ctx, resultado, golsMinha, assistMinha) {
   const { faseIdx, jogoGrupo, pontosGrupo, ramo, card, nomeCompeticao } = ctx.copa;
-  acumularStatsCompeticao(card, "continentalSelecao", golsMinha, assistMinha);
+  acumularStatsCompeticao(card, "continentalSelecao", golsMinha, assistMinha, ctx.copa.estatisticasGoleiro);
   card.continentalSelecaoJogos=[...(card.continentalSelecaoJogos||[]),{fase:jogoGrupo!=null?'grupos':ramo==='final'?'final':fasesContinentalSelecao(c.nacionalidade)[faseIdx].id,adversario:ctx.adversario,gp:resultado.golsMeu,gc:resultado.golsAdv,gols:golsMinha,assist:assistMinha,resultado:resultado.resultado}];
   const nac = nacDe(c.nacionalidade);
   const adversario = ctx.adversario;
@@ -1970,17 +1974,13 @@ function resolverTemporada(c, extraStats) {
   function finalizarTemporada(c, card, jogosLista = [], tabelaFinal = null) {
     // Motor jogo a jogo: os números da liga nascem da soma real das partidas
     // jogadas (placar decidido por lance, não sorteado no início do ano).
-    // Copa/estadual/continental ainda vêm da projeção — são resolvidos por
-    // um sistema à parte, ainda não convertido pro motor de lances.
+    // As copas efetivamente jogadas entram com seus registros próprios.
     if (jogosLista.length) {
-      card.jogosLiga=c.temporadaAndamento?.resultadosRodadas?.flatMap(r=>r.historico||[])||[];
-      const jogosDeVerdade = jogosLista.filter((j) => !j.suspenso && !j.descansou && !j.naoEscalado);
+      card.jogosLiga=card.jogosLiga||[];
       const comNota = jogosLista.filter((j) => j.nota != null);
       card = {
         ...card,
-        jogos: jogosDeVerdade.length,
-        gols: jogosLista.reduce((a, j) => a + (j.golsMinha || 0), 0),
-        assist: jogosLista.reduce((a, j) => a + (j.assistMinha || 0), 0),
+        ...estatisticasReaisTemporada(card, jogosLista),
         nota: comNota.length ? +(comNota.reduce((a, j) => a + j.nota, 0) / comNota.length).toFixed(2) : card.nota,
       };
       if (tabelaFinal) {
@@ -3026,6 +3026,17 @@ function resolverTemporada(c, extraStats) {
     // Partida da Copa Nacional: não mexe na tabela/rodada da liga, que fica
     // pausada — só decide se avança de fase, e a próxima fase já começa direto.
     if (ctx.copa) {
+      ctx.copa.estatisticasGoleiro = c.posicao === "GOL" ? {defesas:eventos.filter(e => e.tipo === "defesa" && e.meu).length,cleanSheets:estado.golsAdv === 0 ? 1 : 0} : {};
+      const cardPartida = ctx.copa.card;
+      cardPartida.partidasCompeticoes = [...(cardPartida.partidasCompeticoes || []), {
+        competicao: ctx.copa.nomeCompeticao || ctx.copa.tipo, tipo: ctx.copa.tipo,
+        selecao: ehJogoDeSelecao, fase: ctx.copa.faseIdx, perna: ctx.copa.perna,
+        casa: ctx.souCasa ? (ehJogoDeSelecao ? nacDe(c.nacionalidade).label : c.clube.nome) : ctx.adversario,
+        fora: ctx.souCasa ? ctx.adversario : (ehJogoDeSelecao ? nacDe(c.nacionalidade).label : c.clube.nome),
+        golsCasa: ctx.souCasa ? estado.golsMeu : estado.golsAdv,
+        golsFora: ctx.souCasa ? estado.golsAdv : estado.golsMeu,
+        gols: golsMinha, assist: assistMinha, nota, ...ctx.copa.estatisticasGoleiro,
+      }];
       setCompeticaoCtx(atual=>atual?{...atual,c,card:ctx.copa.card}:atual);
       setPartidaAoVivo(null);
       if (ctx.copa.tipo === "copaDoMundo") concluirPartidaCopaDoMundo(c, ctx, { resultado, golsMeu: estado.golsMeu, golsAdv: estado.golsAdv }, golsMinha, assistMinha);
@@ -3041,13 +3052,13 @@ function resolverTemporada(c, extraStats) {
     const nomeCasa = ctx.souCasa ? c.clube.nome : ctx.adversario;
     const nomeFora = ctx.souCasa ? ctx.adversario : c.clube.nome;
     const tabela = atualizarTabelaPartida(pv.tabelaParcial, nomeCasa, nomeFora, golsCasa, golsFora);
-    const historico = [...pv.historicoParcial, { texto: `${emojiClube(nomeCasa)} ${nomeCasa} ${golsCasa} x ${golsFora} ${nomeFora} ${emojiClube(nomeFora)}`, destaque: true }];
+    const historico = [...pv.historicoParcial, { casa: nomeCasa, fora: nomeFora, golsCasa, golsFora, rodada: ta.rodadaAtual + 1, texto: `${emojiClube(nomeCasa)} ${nomeCasa} ${golsCasa} x ${golsFora} ${nomeFora} ${emojiClube(nomeFora)}`, destaque: true }];
     const post = ctx.postura || "normal";
 
     const meuResultadoRodada = {
       adversario: ctx.adversario, adversarioForca: ctx.adversarioForca,
       golsMeu: estado.golsMeu, golsAdv: estado.golsAdv, resultado,
-      golsMinha, assistMinha, numero: ta.rodadaAtual + 1,
+      golsMinha, assistMinha, ...(c.posicao === "GOL" ? {defesas: eventos.filter(e => e.tipo === "defesa" && e.meu).length, cleanSheets: estado.golsAdv === 0 ? 1 : 0} : {}), numero: ta.rodadaAtual + 1,
       casa: ctx.souCasa, competicao: "liga", classico: ctx.classico, postura: post,
       amarelo, vermelho, segundoAmarelo,
       suspensaoGerada: susp.suspendeu, motivoSuspensao: susp.motivo,
@@ -3135,7 +3146,7 @@ function resolverTemporada(c, extraStats) {
     });
     if (proxRodada >= ta.calendario.length) {
       c.temporadaAndamento = null;
-      finalizarTemporada(c, ta.cardOriginal, logJogos, ta.tabela);
+      finalizarTemporada(c, ta.cardOriginal, logJogos, tabela);
     } else {
       c.temporadaAndamento = { ...ta, rodadaAtual: proxRodada, tabela, historicoRodada: historico, ultimoResultado: meuResultadoRodada, lanceResolvido: true, golsRestantes, assistRestantes, logJogos, resultadosRodadas };
       setCarreira(c);
@@ -3155,7 +3166,7 @@ function resolverTemporada(c, extraStats) {
     setResultadoAcao({ titulo: tituloResultado, texto: textoResultado, icone: iconeResultado });
     if (proxRodada >= ta.calendario.length) {
       c.temporadaAndamento = null;
-      finalizarTemporada(c, ta.cardOriginal, logJogos, ta.tabela);
+      finalizarTemporada(c, ta.cardOriginal, logJogos, tabela);
     } else {
       c.temporadaAndamento = { ...ta, rodadaAtual: proxRodada, tabela, historicoRodada: historico, ultimoResultado: meuResultadoRodada, lanceResolvido: true, golsRestantes, assistRestantes, logJogos, resultadosRodadas };
       setCarreira(c);

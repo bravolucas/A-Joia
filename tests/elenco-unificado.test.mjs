@@ -87,3 +87,9 @@ test('preparador melhora o mesmo atleta canônico uma vez, sem duplicar a evolu�
  assert.deepEqual(mundo,antes);const a=sem.jogadores.find(p=>p.id===j.mundoId),b=com.jogadores.find(p=>p.id===j.mundoId);
  assert.equal(b.idade,21);assert.equal(b.contrato,2);assert.equal(b.ovr,a.ovr+1);
 });
+
+test('jogador livre conserva carreira, mas não repete gols e competições do ano anterior',()=>{
+ const p={id:1,nome:'Livre',idade:25,ovr:65,posicao:'ATA',clubeNome:null,contrato:0,aposentado:false,carreira:{jogos:22,gols:9,assist:2},porCompeticao:[{nome:'Brasileirão',jogos:22,gols:9,assist:2}],gols:9,jogos:22,assist:2};
+ const mundo={cadastroElencos:1,temporada:1,jogadores:[p]},r=simularTemporadaMundo(mundo,()=>.99),atual=r.jogadores[0];
+ assert.deepEqual(atual.carreira,p.carreira);assert.deepEqual(atual.porCompeticao,[]);assert.equal(atual.jogos,0);assert.equal(atual.gols,0);assert.equal(atual.temporadaEstatisticas,2);assert.equal(p.porCompeticao[0].gols,9);
+});

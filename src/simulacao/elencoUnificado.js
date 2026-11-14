@@ -26,7 +26,10 @@ export function conectarElencoMundo(c,g,{legado=false}={}){
  g={...g,cadastroUnificado:1,elenco:ativos(mundo,g.clube).map(p=>jogadorDaGestao(p,anteriores.get(chave(p.id))))};
  g.mercado=mercadoDoMundo(mundo,g);
  mundo.gestoesClubes={...mundo.gestoesClubes,[g.clube]:metadadosGestao(g)};
- return {...c,mundo,tecnico:{...c.tecnico,gestao:g}};
+ const forcasMundo={...c.tecnico.forcasMundo};
+ if(!Object.keys(forcasMundo).length)for(const cl of CLUBES)forcasMundo[cl.nome]=avaliarClubeNoMundo({...c,mundo},cl).forca;
+ const clube=CLUBES.find(cl=>cl.nome===g.clube)||{nome:g.clube,forca:g.forcaMercado};forcasMundo[g.clube]=avaliarClubeNoMundo({...c,mundo},clube).forca;
+ return {...c,mundo,tecnico:{...c.tecnico,gestao:g,forcasMundo}};
 }
 export function destinoDaVenda(c,j){
  const g=c.tecnico.gestao,ocupacao=new Map();for(const p of c.mundo.jogadores)if(!p.aposentado&&p.clubeNome)ocupacao.set(p.clubeNome,(ocupacao.get(p.clubeNome)||0)+1);

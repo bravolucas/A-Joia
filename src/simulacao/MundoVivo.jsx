@@ -34,7 +34,7 @@ export function EdicoesCompeticao({c,nome}){
   const linha=p.historico.find(a=>(Array.isArray(a)?a[0]:a.ano)===edicao?.ano);
   if(!linha)return [];
   const a=historicoAtleta({historico:[linha]})[0],t=a.porCompeticao?.find(t=>t.nome===nome);
-  return t?[{id:p.id,nome:p.nome,clube:a.clube,...t}]:[];
+  return t?[{...t,id:p.id,nome:p.nome,clube:a.clube}]:[];
  }),[u,edicao,nome]);
  if(!edicao)return null;
  return <section className="mv-painel" aria-label="Edições da competição"><h3>Por dentro da temporada</h3><div className="hf-filtros"><label>Edição<select value={edicao.ano} onChange={e=>{A(e.target.value);E('');G('');}}>{edicoes.map(e=><option key={e.ano}>{e.ano}</option>)}</select></label><label>Filtrar partidas por clube<select value={equipe} onChange={e=>E(e.target.value)}><option value="">Todos</option>{[...new Set(jogos.flatMap(j=>[j.casa,j.fora]))].sort().map(n=><option key={n}>{n}</option>)}</select></label></div>

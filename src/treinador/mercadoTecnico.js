@@ -89,6 +89,18 @@ export function gerarMercadoTecnico(t){
  const g=criarGestaoTecnico(t);if(g.cadastroUnificado)return g.mercado||[];const rng=gerador(`${g.clube}|${g.ano}|mercado-v1`);
  return SETORES_ELENCO.flatMap(s=>Array.from({length:3},(_,i)=>({...jogador(rng,`mercado:${g.clube}:${g.ano}:${s.id}:${i}`,s.id,g.forcaMercado),origem:'mercado'}))).filter(j=>!g.movimentos.some(m=>m.ano===g.ano&&m.jogador===j.id&&(m.tipo==='compra'||m.tipo==='venda')));
 }
+/** Elencos reais do cadastro; a consulta não cria atletas nem altera o save. */
+export function elencoClubeTecnico(c,clube){
+ const g=c.tecnico?.gestao;
+ if(clube===g?.clube)return g.elenco;
+ return (c.mundo?.jogadores||[]).filter(p=>!p.aposentado&&(p.clubeNome||'')===clube).map(p=>({...jogadorDaGestao(p),id:p.id,clubeVendedor:p.clubeNome||null,valor:p.clubeNome?jogadorDaGestao(p).valor:jogadorDaGestao(p).salario*2,origem:'mercado'}));
+}
+function alvoContratacao(c,g,id){
+ if(!g.cadastroUnificado)return gerarMercadoTecnico(c.tecnico).find(j=>j.id===id);
+ const p=c.mundo?.jogadores.find(p=>!p.aposentado&&p.clubeNome!==g.clube&&String(p.id)===String(id));
+ if(!p||g.movimentos.some(m=>m.ano===g.ano&&['compra','venda'].includes(m.tipo)&&String(m.mundoId??m.jogador)===String(p.id)))return null;
+ return {...jogadorDaGestao(p),id:p.id,clubeVendedor:p.clubeNome||null,valor:p.clubeNome?jogadorDaGestao(p).valor:jogadorDaGestao(p).salario*2,origem:'mercado'};
+}
 function validarJanela(t){
  if(!t?.clube||t.demitido||t.desempregado)throw new Error('Você precisa estar empregado para administrar o elenco.');
  if(t.fase!=='pretemporada'||t.andamento?.jogos||t.andamento?.rodadas||t.copasEmJogo||t.temporadaPausada)throw new Error('Negociações disponíveis apenas antes do início da temporada.');
@@ -98,7 +110,7 @@ export function contratarJogadorTecnico(c,id){
  c=prepararGestaoTecnico(c);
  const t=c?.tecnico;validarJanela(t);const g=criarGestaoTecnico(t);
  if(g.elenco.some(j=>j.id===id))throw new Error('Esse jogador já está no elenco.');
- const alvo=gerarMercadoTecnico(t).find(j=>j.id===id);if(!alvo)throw new Error('Jogador indisponível no mercado.');
+ const alvo=alvoContratacao(c,g,id);if(!alvo)throw new Error('Jogador indisponível no mercado.');
  if(g.elenco.length>=30)throw new Error('O elenco já tem 30 jogadores.');
  if(g.saldo<alvo.valor)throw new Error('Orçamento insuficiente para esta contratação.');
  if(resumoGestaoTecnico(g).folha+alvo.salario>g.tetoSalarial)throw new Error('A contratação ultrapassa o teto salarial.');
@@ -118,23 +130,24 @@ export function venderJogadorTecnico(c,id){
 }
 
 /** Proposta exibida na confirmação; valores em R$ mil. */
-export function propostaRenovacaoTecnico(j){
+export function propostaRenovacaoTecnico(j,anos=3){
+ if(!Number.isInteger(anos)||anos<1||anos>5)throw new Error('Escolha um contrato de 1 a 5 anos.');
  const salario=Math.ceil(j.salario*1.1);
- return {salario,luvas:salario*2,contrato:3};
+ return {salario,luvas:salario*2,contrato:anos};
 }
-export function renovarJogadorTecnico(c,id){
+export function renovarJogadorTecnico(c,id,anos=3){
  c=prepararGestaoTecnico(c);
  const t=c?.tecnico;validarJanela(t);const g=criarGestaoTecnico(t);
  const alvo=g.elenco.find(j=>j.id===id);
  if(!alvo)throw new Error('Jogador não encontrado no elenco.');
  if(alvo.contrato>2)throw new Error('A renovação fica disponível nos últimos dois anos de contrato.');
  if(g.movimentos.some(m=>m.tipo==='renovacao'&&m.jogador===id&&m.ano===g.ano))throw new Error('Esse contrato já foi renovado nesta janela.');
- const proposta=propostaRenovacaoTecnico(alvo);
+ const proposta=propostaRenovacaoTecnico(alvo,anos);
  if(g.saldo<proposta.luvas)throw new Error('Orçamento insuficiente para pagar as luvas.');
  if(resumoGestaoTecnico(g).folha-alvo.salario+proposta.salario>g.tetoSalarial)throw new Error('A renovação ultrapassa o teto salarial.');
  const gestao={...g,saldo:g.saldo-proposta.luvas,
   elenco:g.elenco.map(j=>j.id===id?{...j,salario:proposta.salario,contrato:proposta.contrato}:j),
-  movimentos:[...g.movimentos,{tipo:'renovacao',jogador:id,nome:alvo.nome,valor:proposta.luvas,salario:proposta.salario,ano:g.ano}]};
+  movimentos:[...g.movimentos,{tipo:'renovacao',jogador:id,nome:alvo.nome,valor:proposta.luvas,salario:proposta.salario,contrato:proposta.contrato,ano:g.ano}]};
  return aplicarNegociacaoMundo(c,gestao,{tipo:'renovacao',alvo});
 }
 
@@ -183,10 +196,10 @@ export function prepararGestaoTecnico(c){
  }
  return unido;
 }
-export function negociarElencoTecnico(c,tipo,id){
+export function negociarElencoTecnico(c,tipo,id,anos=3){
  try {
   if(!['compra','venda','renovacao','comissao'].includes(tipo))throw new Error('Operação inválida.');
-  const novo=tipo==='compra'?contratarJogadorTecnico(c,id):tipo==='venda'?venderJogadorTecnico(c,id):tipo==='comissao'?contratarComissaoTecnico(c,id):renovarJogadorTecnico(c,id);
+  const novo=tipo==='compra'?contratarJogadorTecnico(c,id):tipo==='venda'?venderJogadorTecnico(c,id):tipo==='comissao'?contratarComissaoTecnico(c,id):renovarJogadorTecnico(c,id,anos);
   const delta=mediaElenco(novo.tecnico.gestao)-mediaElenco(criarGestaoTecnico(c.tecnico));
   novo.tecnico.gestao.ajusteNumerico=(c.tecnico.gestao?.ajusteNumerico||0)+delta;
   return {...novo,tecnico:{...novo.tecnico,elenco:limitar((Number(c.tecnico.elenco)||50)+delta,10,95),avisoGestao:{texto:tipo==='compra'?'Contratação concluída.':tipo==='venda'?'Venda concluída.':tipo==='comissao'?'Comissão contratada.':'Contrato renovado.',erro:false}}};

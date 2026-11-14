@@ -2743,6 +2743,12 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     filaDeEstados.current=filaDeEstados.current.then(aplicar,aplicar);
     return filaDeEstados.current;
   }
+  async function negociarElenco(tipo,id,anos){
+    let resultado;
+    await setEstado(st=>{resultado=negociarElencoTecnico(st.c,tipo,id,anos);return {...st,c:resultado};});
+    if(estadoAtual.current.c!==resultado)throw new Error('Não foi possível salvar a negociação. Tente novamente.');
+    return resultado.tecnico.avisoGestao;
+  }
   const fechou=useRef(null);
   const { etapa, c, card, evento, resultado, opcoesTraco, fila } = estado;
 
@@ -3016,7 +3022,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "traco" && <TelaTraco c={c} opcoes={(opcoesTraco || []).map(tracoDe).filter(Boolean)} onEscolher={escolherT} />}
         {etapa === "fim" && !apresentacao && <MuseuFimCarreira c={c} fase={c.tecnico&&carreiraTecnicoEncerrada(c.tecnico,c.idade)?"treinador":"jogador"} automatico={!c.tecnico||carreiraTecnicoEncerrada(c.tecnico,c.idade)} solicitacao={solicitacaoMuseuFinal}/>}
         {etapa === "fim" && <FimDeCarreira c={c} onAbrirMuseu={()=>setSolicitacaoMuseuFinal(n=>n+1)} onNova={nova} onSair={onSair} onComecarTecnico={comecarTecnico} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
-        {etapa === "tecnico" && <CarreiraTecnico c={c} onAbrirElenco={()=>setEstado(st=>({...st,c:prepararElencoTecnico(st.c)}))} onNegociarElenco={(tipo,id)=>setEstado(st=>({...st,c:negociarElencoTecnico(st.c,tipo,id)}))} onCopaEscolha={(chave,op)=>setEstado(st=>({...st,c:resolverCopaEscolhaTecnico(st.c,chave,op)}))}
+        {etapa === "tecnico" && <CarreiraTecnico c={c} onAbrirElenco={()=>setEstado(st=>({...st,c:prepararElencoTecnico(st.c)}))} onNegociarElenco={negociarElenco} onCopaEscolha={(chave,op)=>setEstado(st=>({...st,c:resolverCopaEscolhaTecnico(st.c,chave,op)}))}
           onComprarMelhoria={id=>{const novo=comprarMelhoriaTecnico(c,id);setEstado(st=>st.c===c?{...st,c:novo}:st);}}
           onEscolhaRapida={(chave,op) => setEstado(st => ({...st,c:escolherPretemporadaRapidaTecnico(st.c,chave,op,undefined,{interativo:true,copasInterativas:true})}))}
           onParada={(chave, op) => setEstado(st => ({ ...st, c: responderParadaTecnico(st.c, chave, op) }))}

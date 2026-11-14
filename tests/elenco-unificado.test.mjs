@@ -94,3 +94,34 @@ test('jogador livre conserva carreira, mas não repete gols e competições do a
  const mundo={cadastroElencos:1,temporada:1,jogadores:[p]},r=simularTemporadaMundo(mundo,()=>.99),atual=r.jogadores[0];
  assert.deepEqual(atual.carreira,p.carreira);assert.deepEqual(atual.porCompeticao,[]);assert.equal(atual.jogos,0);assert.equal(atual.gols,0);assert.equal(atual.temporadaEstatisticas,2);assert.equal(p.porCompeticao[0].gols,9);
 });
+
+test('renovação de 1 a 5 anos persiste no cadastro, na gestão e após recarga',()=>{
+ const c=pronto(),antes=structuredClone(c),j=c.tecnico.gestao.elenco.find(j=>j.contrato<=2);
+ for(const anos of [1,2,3,4,5]){
+  const r=negociarElencoTecnico(c,'renovacao',j.id,anos);
+  assert.equal(r.tecnico.avisoGestao.erro,false);
+  assert.equal(atleta(r,j.mundoId).contrato,anos);
+  assert.equal(r.tecnico.gestao.elenco.find(p=>p.id===j.id).contrato,anos);
+  assert.equal(r.tecnico.gestao.movimentos.at(-1).contrato,anos);
+  assert.deepEqual(prepararGestaoTecnico(JSON.parse(JSON.stringify(r))),r);
+ }
+ for(const anos of [0,6,1.5,'5',null])assert.throws(()=>renovarJogadorTecnico(c,j.id,anos),/1 a 5/);
+ assert.deepEqual(c,antes);
+});
+
+test('consultar outro elenco permite contratar atleta fora das sugestões, preservando história e limites',async()=>{
+ const {elencoClubeTecnico}=await import('../src/treinador/mercadoTecnico.js');
+ const c=pronto(),antes=structuredClone(c),sugeridos=new Set(gerarMercadoTecnico(c.tecnico).map(j=>j.mundoId));
+ const p=c.mundo.jogadores.find(p=>!p.aposentado&&p.clubeNome&&p.clubeNome!=='Avaí'&&!sugeridos.has(p.id)&&p.ovr<65);
+ const elenco=elencoClubeTecnico(c,p.clubeNome),j=elenco.find(j=>j.mundoId===p.id);
+ assert.equal(elenco.length,c.mundo.jogadores.filter(j=>!j.aposentado&&j.clubeNome===p.clubeNome).length);
+ assert.deepEqual(c,antes);assert.ok(j);assert.ok(!sugeridos.has(j.mundoId));
+ const r=contratarJogadorTecnico(c,j.id);
+ assert.equal(atleta(r,j.mundoId).clubeNome,'Avaí');assert.deepEqual(atleta(r,j.mundoId).carreira,p.carreira);
+ assert.equal(elencoClubeTecnico(r,p.clubeNome).some(p=>p.mundoId===j.mundoId),false);
+ assert.equal(r.mundo.receitasMercado[j.clubeVendedor],j.valor);
+ assert.throws(()=>contratarJogadorTecnico({...c,tecnico:{...c.tecnico,gestao:{...c.tecnico.gestao,saldo:0}}},j.id),/Orçamento/);
+ assert.throws(()=>contratarJogadorTecnico({...c,tecnico:{...c.tecnico,fase:'resultado'}},j.id),/início/);
+ const vendido=venderJogadorTecnico(r,j.id);assert.throws(()=>contratarJogadorTecnico(vendido,j.id),/indisponível/);
+ assert.equal(elencoClubeTecnico(c,p.clubeNome).some(j=>j.mundoId===p.id),true);
+});

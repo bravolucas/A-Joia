@@ -26,6 +26,10 @@ for(const width of [360,1366])test(`mundo vivo: IndexedDB, arquivo de clubes, jo
  const d=page.getByRole('dialog',{name:'História do futebol'});await expect(d.getByRole('region',{name:'Evolução do Corinthians'})).toContainText(String(s.c.ano-1));
  await d.getByRole('button',{name:'Jogadores',exact:true}).click();await d.getByLabel('Buscar jogador',{exact:true}).fill('Mundo Persistente');await d.locator('.mv-atletas button').click();await expect(d.getByRole('article',{name:'Ficha de Mundo Persistente'})).toContainText(String(s.c.ano-1));
  await d.getByRole('button',{name:'Competições',exact:true}).click();await d.getByLabel('Competição do histórico').selectOption(LIGAS.brasileirao.nome);await expect(d.getByRole('region',{name:'Edições da competição'})).toBeVisible();await expect(d.locator('.mv-jogos li').first()).toBeVisible();await d.getByLabel('Filtrar partidas por clube').selectOption('Corinthians');await expect(d.locator('.mv-jogos li')).toHaveCount(38);
+ const lider=d.locator('.mv-lideres article').filter({has:page.getByRole('heading',{name:'Artilheiros',exact:true})}).locator('li').first();
+ await expect(lider).toBeVisible();await expect(lider).not.toContainText(LIGAS.brasileirao.nome);
+ const nomes=new Set([s.c.nome,...s.c.mundo.jogadores.map(p=>p.nome)]);
+ expect(nomes.has(await lider.locator('span').evaluate(el=>el.firstChild.textContent))).toBe(true);
  const torneio=s.c.universo.edicoes.find(e=>e.grupos?.length>1);expect(torneio).toBeTruthy();
  await d.getByLabel('Competição do histórico').selectOption(torneio.nome);
  await d.getByLabel('Classificação do grupo').selectOption(torneio.grupos[1].grupo);

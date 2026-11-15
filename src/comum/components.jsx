@@ -9,7 +9,7 @@ import { JogadorCampo, CampoPremium, SuperficieMini, CamisaPremium } from './Vis
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { ARTE, escudoDe } from "./arte.js";
 import { TacaCompeticao } from "./trofeus.jsx";
-import { ANO_INICIO, ATTR_SLOTS, CLUBES, CONDICOES_CLIMA, DIAS_SEMANA_ABREV, DIAS_SEMANA_LABEL, FALTA_BONECO_POS, FALTA_BOX, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, LANCES_POR_POSICAO, MESES_LABEL, NUM_ATTRS, PASSE_H, PASSE_ORIGEM, PASSE_W, PEN_GOAL, PEN_H, PEN_SPOT, PEN_W, PEN_ZONE_X, POS_GRUPO, TIPOS_NOTICIA } from "../dados/data.js";
+import { anoTemporadaCarreira, ATTR_SLOTS, CLUBES, CONDICOES_CLIMA, DIAS_SEMANA_ABREV, DIAS_SEMANA_LABEL, FALTA_BONECO_POS, FALTA_BOX, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, LANCES_POR_POSICAO, MESES_LABEL, NUM_ATTRS, PASSE_H, PASSE_ORIGEM, PASSE_W, PEN_GOAL, PEN_H, PEN_SPOT, PEN_W, PEN_ZONE_X, POS_GRUPO, TIPOS_NOTICIA } from "../dados/data.js";
 import { calcularSucessoPasse, clamp, diaNaJanela, diasNoMes, distribuirRodadasNaJanela, estimarRodadasLiga, faltaAlvoBola, formatarDinheiro, gerarCenaPasse, janelasPorLiga, janelasSelecao, labelAtributoGoleiro, nacDe, penAlvoBola, pick, primeiroDiaSemanaMes, rand, tierInfo } from "./lib.js";
 
 export function Card({ children, className = "", accent, padded = true, id, style }) {
@@ -1064,7 +1064,7 @@ export function ClubDot({ club, size = 20 }) {
 
 export function CalendarioTemporadaPopup({ carreira, mesAtual, setMesAtual, onClose, onAbrirFicha }) {
   const [diaSelecionado, setDiaSelecionado] = useState(null);
-  const ano = ANO_INICIO + (carreira.idade - 16);
+  const ano = anoTemporadaCarreira(carreira);
   const ligaId = carreira.clube.liga;
   const janelas = [...janelasPorLiga(ligaId), ...janelasSelecao(carreira)];
   const janelaLiga = janelas.find((j) => j.ligaPrincipal);

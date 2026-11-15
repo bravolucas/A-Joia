@@ -1,6 +1,6 @@
 # Histórico e calendário dos estaduais
 
-O início da carreira é 2025 (`ANO_INICIO`). A base de estaduais inclui os registros anteriores a esse ano, com os clubes e os anos das conquistas. Títulos de 2025 em diante pertencem à simulação do save. A base não injeta resultados reais posteriores ao início da carreira.
+As novas carreiras começam em 2026 (`ANO_INICIO`), nos modos rápido e completo. O modo completo salva `anoInicio`; saves antigos sem esse campo mantêm a referência anterior de 2025. O acervo estadual documentado permanece com corte em 2024, indicado na interface; mudar o início da carreira não cria resultados históricos. As conquistas efetivamente salvas mantêm seus anos. O calendário quadrienal dos mundiais mantém sua referência real de 2025.
 
 `src/dados/estaduaisHistoricos.js` contém os dados compilados de listas históricas da RSSSF Brasil e das tabelas de campeões da Wikipédia em português, consultadas em 14/11/2026. Os URLs específicos dos 27 campeonatos estão em cada registro. A RSSSF credita as listas aos seus respectivos autores (entre eles Julio Bovi Diogo e colaboradores). O arquivo do jogo contém fatos — clubes e anos — e mantém a atribuição por links; não reproduz os textos das páginas.
 

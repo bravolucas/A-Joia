@@ -34,7 +34,7 @@ import { registrarMuseu } from '../museu/museu.js';
    lê ou grava o save do Modo Carreira. */
 
 import {
-  CONFEDERACAO_POR_NACAO, CLUBES, LIGAS, POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS, AFINIDADE_MERCADO, CLASSICOS, ORIGENS, CAMINHOS_POS_CARREIRA, LENDAS,
+  ANO_INICIO, CONFEDERACAO_POR_NACAO, CLUBES, LIGAS, POSICOES, NACIONALIDADES, PERSONALIDADES, EMPRESARIOS, AFINIDADE_MERCADO, CLASSICOS, ORIGENS, CAMINHOS_POS_CARREIRA, LENDAS,
 } from "../dados/data.js";
 import {
   rand, pick, clampR, clamp, poisson, calcOVR, evoluirAtributos,
@@ -43,7 +43,7 @@ import {
 
 export const VERSAO_RAPIDO = 1;
 export const CHAVE_SAVE_RAPIDO = "ajoia_rapido_v1";
-export const ANO_INICIAL = 2026;
+export const ANO_INICIAL = ANO_INICIO;
 export const IDADE_INICIAL = 16;
 export const IDADES_TRACO = [19, 24, 29];
 

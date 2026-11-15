@@ -1,4 +1,4 @@
-// Edições anteriores ao início da carreira (2025). Fontes e critérios: docs/ESTADUAIS.md.
+// Acervo de edições documentadas até 2024. Fontes e critérios: docs/ESTADUAIS.md.
 export const HISTORICO_ESTADUAIS = {
  "AC": {
   "nome": "Campeonato Acreano",

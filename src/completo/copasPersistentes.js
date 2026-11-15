@@ -1,6 +1,6 @@
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
 import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternacionais.js';
-import {ANO_INICIO,COMPS_PAIS} from '../dados/data.js';
+import {anoTemporadaCarreira,COMPS_PAIS} from '../dados/data.js';
 import {idContinental,calcularVagasRapidas,clubesParaCopas,COPAS_NACIONAIS} from '../competicoes/regrasCopasRapidas.js';
 import {participantesEstadual} from '../competicoes/estaduaisRapidos.js';
 import {clubesDoMundo} from '../simulacao/mundoVivo.js';
@@ -12,13 +12,13 @@ export function prepararCopaPersistente(c,card,tipo,forcaUsuario){
  if(!card.campanhasCompletas[tipo]){
   const clubes=clubesDoMundo(c,clubesParaCopas(c.ligas)),eu=clubes.find(x=>x.nome===c.clube.nome),regional=tipo==='estadual'?participantesEstadual(c.clube):null;
   const continental=tipo==='continental',comp=idContinental(card.continentalPendente?.nome);
-  const vagas=continental&&c.vagasInternacionaisAno===ANO_INICIO+c.idade-16?c.vagasInternacionaisClubes:continental?calcularVagasRapidas({ano:ANO_INICIO+c.idade-17,ligasMundo:c.ligas,seed:c.codigo||c.nome}):null;
-  const pool=continental?ampliarParticipantesInternacionais(clubes.filter(x=>vagas[x.nome]?.competicao===comp),comp,ANO_INICIO+c.idade-16,clubes):regional?regional.clubes.map(x=>clubes.find(p=>p.nome===x.nome)||x):clubes.filter(x=>x.pais===eu?.pais);
+  const vagas=continental&&c.vagasInternacionaisAno===anoTemporadaCarreira(c)?c.vagasInternacionaisClubes:continental?calcularVagasRapidas({ano:(anoTemporadaCarreira(c)-1),ligasMundo:c.ligas,seed:c.codigo||c.nome}):null;
+  const pool=continental?ampliarParticipantesInternacionais(clubes.filter(x=>vagas[x.nome]?.competicao===comp),comp,anoTemporadaCarreira(c),clubes):regional?regional.clubes.map(x=>clubes.find(p=>p.nome===x.nome)||x):clubes.filter(x=>x.pais===eu?.pais);
   const ligaContinental=continental&&card.continentalPendente?.formato!=='grupo';
   const limite=continental?(ligaContinental?36:32):tipo==='copinha'?32:tipo==='estadual'?8:16;
   const participantes=[eu||c.clube,...pool.filter(x=>x.nome!==c.clube.nome).sort((a,b)=>b.forca-a.forca).slice(0,limite-1)];
   const nome=(continental?card.continentalPendente.nome:null)||regional?.nome||(tipo==='copinha'?'Copa São Paulo de Futebol Júnior':COPAS_NACIONAIS[primeiraLiga(c.clube.liga)]||COMPS_PAIS[c.clube.liga]?.copa||'Copa Nacional');
-  const camp=criarCampanhaCopa({nome,tipo:tipo==='copaNacional'?'copa':tipo,usuario:c.clube.nome,forcaUsuario,clubes:participantes,ano:ANO_INICIO+c.idade-16,entrada:continental?card.continentalPendente?.entrada||'principal':'principal',formato:continental?(ligaContinental?'liga':'grupos'):tipo==='estadual'?'estadual':tipo==='copinha'?'grupos':'mata',seed:`${c.codigo||c.nome}|${c.idade}|completo|${tipo}`,interativoEstadual:true});
+  const camp=criarCampanhaCopa({nome,tipo:tipo==='copaNacional'?'copa':tipo,usuario:c.clube.nome,forcaUsuario,clubes:participantes,ano:anoTemporadaCarreira(c),entrada:continental?card.continentalPendente?.entrada||'principal':'principal',formato:continental?(ligaContinental?'liga':'grupos'):tipo==='estadual'?'estadual':tipo==='copinha'?'grupos':'mata',seed:`${c.codigo||c.nome}|${c.idade}|completo|${tipo}`,interativoEstadual:true});
   if(tipo==='estadual'||continental)camp.manual=camp.calendario.flatMap((js,i)=>js.some(j=>j.casa===c.clube.nome||j.fora===c.clube.nome)?[i]:[]);
   camp.idaVolta=tipo==='copaNacional'||continental;
   card.campanhasCompletas[tipo]=camp;

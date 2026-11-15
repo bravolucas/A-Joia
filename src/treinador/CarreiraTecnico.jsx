@@ -297,6 +297,7 @@ export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, on
 
   const podeNegociarElenco=!!(onAbrirElenco&&!primeira&&!semClube&&!encerrada&&t.tipoEquipe!=='selecao'&&((t.gestao?.cadastroUnificado&&t.gestao.clube===t.clube)||(t.fase==='pretemporada'&&!t.copasEmJogo&&!t.andamento?.jogos&&!t.andamento?.rodadas&&!t.temporadaPausada)));
   const abrirElenco=()=>{if(podeNegociarElenco){setElencoAberto(true);onAbrirElenco();}};
+  const mudarAbaCentro=aba=>{setAbaCentro(aba);requestAnimationFrame(()=>document.querySelector('.ct-manager .ctm-page-heading')?.scrollIntoView({behavior:'instant',block:'start'}));};
   const irParaDecisao=()=>{if(t.copasEmJogo){setCopasAbertas(true);return;}setAbaCentro('geral');requestAnimationFrame(()=>document.querySelector('.ct-manager .ct-actions')?.scrollIntoView({behavior:'instant',block:'center'}));};
   return <div className="ct ct-manager" aria-label="Carreira de treinador">
     {lojaAberta&&<JanelaTreinador titulo="Loja do treinador" onFechar={()=>setLojaAberta(false)}><LojaTreinador c={c} onComprar={onComprarMelhoria} /></JanelaTreinador>}
@@ -320,9 +321,9 @@ export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, on
 
     {campanhaAberta&&<JanelaTreinador titulo={`Campanha · ${campanhaAberta.nome}`} onFechar={()=>setCampanhaAberta(null)} classe="ctm-campaign-modal"><div className="ctm-campaign-content"><CampanhasTemporada torneios={[campanhaAberta]} abertas/></div></JanelaTreinador>}
     <div className="ct-manager-layout">
-      <MenuCentroTreinador aba={abaCentro} onMudar={setAbaCentro} selecao={t.tipoEquipe==='selecao'} clube={clubeAtual} ano={anoPainelTecnico(t)} onLoja={onComprarMelhoria?()=>setLojaAberta(true):null}/>
+      <MenuCentroTreinador aba={abaCentro} onMudar={mudarAbaCentro} selecao={t.tipoEquipe==='selecao'} clube={clubeAtual} ano={anoPainelTecnico(t)} onLoja={onComprarMelhoria?()=>setLojaAberta(true):null}/>
       <div className={`ct-manager-main ctm-view-${abaCentro}`} id="centro-treinador">
-        <CabecalhoCentro c={c} clube={clubeAtual} aba={abaCentro} encerrada={encerrada} primeira={primeira} semClube={semClube} onDecisao={irParaDecisao} onMudar={setAbaCentro}/>
+        <CabecalhoCentro c={c} clube={clubeAtual} aba={abaCentro} encerrada={encerrada} primeira={primeira} semClube={semClube} onDecisao={irParaDecisao} onMudar={mudarAbaCentro}/>
     {abaCentro==='geral'&&<div className="ct-board" aria-busy={simulando}>
       <section className="ct-profile" aria-label="Ficha do treinador">
         <header className="ct-identity">
@@ -359,7 +360,7 @@ export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, on
 
       <TrajetoriaCentro temporadas={temporadas} idadeInicio={idadeInicio} aberta={aberta} setAberta={setAberta} encerrada={encerrada} atualRef={atualRef} idade={idade} simulando={simulando} primeira={primeira} faseResultado={faseResultado} t={t} historico={historico}/>
     </div>}
-    {abaCentro!=='geral'&&<ConteudoCentro c={c} aba={abaCentro} historico={historico} titulos={titulos} onVoltar={()=>setAbaCentro('geral')} onRetomar={()=>setCopasAbertas(true)} onElenco={abrirElenco} podeNegociar={podeNegociarElenco} onCampanha={setCampanhaAberta} onHistorico={()=>setAbaCentro('carreira')} onConquistas={()=>abrirConquistas(null)}/>}
+    {abaCentro!=='geral'&&<ConteudoCentro key={abaCentro} c={c} aba={abaCentro} historico={historico} titulos={titulos} onVoltar={irParaDecisao} onRetomar={()=>setCopasAbertas(true)} onElenco={abrirElenco} podeNegociar={podeNegociarElenco} onCampanha={setCampanhaAberta} onHistorico={()=>mudarAbaCentro('carreira')} onConquistas={()=>abrirConquistas(null)}/>}
     {abaCentro==='carreira'&&<TrajetoriaCentro temporadas={temporadas} idadeInicio={idadeInicio} aberta={aberta} setAberta={setAberta} encerrada={encerrada} atualRef={atualRef} idade={idade} simulando={simulando} primeira={primeira} faseResultado={faseResultado} t={t} historico={historico}/>}
       </div>
     </div>

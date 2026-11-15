@@ -19,8 +19,9 @@ for(const width of [320,390,768,1366])test(`central moderna: consultas, imagens 
  await page.screenshot({path:`/tmp/central-geral-${width}.png`,fullPage:true});
  for(const nome of ['Elenco','Calendário','Competições','Estatísticas','Carreira','Clube','Visão geral']){
   await nav.getByRole('button',{name:nome,exact:true}).click();await expect(nav.getByRole('button',{name:nome,exact:true})).toHaveAttribute('aria-current','page');
+  await expect(page.locator('.ctm-page-heading h1')).toBeInViewport();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-  if(nome==='Elenco'){await expect(page.getByRole('button',{name:'Contratos e mercado'})).toBeVisible();await page.getByLabel('Buscar no elenco').fill('NOME-INEXISTENTE');await expect(page.getByText('Nenhum jogador encontrado.')).toBeVisible();await page.getByLabel('Buscar no elenco').clear();}
+  if(nome==='Elenco'){await expect(page.getByRole('button',{name:'Contratos e mercado'})).toBeVisible();await page.getByLabel('Buscar no elenco').fill('NOME-INEXISTENTE');await expect(page.getByText('Nenhum jogador encontrado.')).toBeVisible();await page.getByLabel('Buscar no elenco').fill('Consulta do elenco');await page.locator('.ct-footer').scrollIntoViewIfNeeded();}
   if(nome==='Calendário'){await expect(page.getByRole('table')).toContainText('Flamengo');await expect(page.getByRole('table')).toContainText('Palmeiras');}
   if(nome==='Competições'){await page.getByRole('button',{name:/Copa do Brasil.*Semifinal/}).click();const modal=page.getByRole('dialog',{name:'Campanha · Copa do Brasil'});await expect(modal).toContainText('Cruzeiro');await modal.getByRole('button',{name:'Fechar janela'}).click();}
   if(nome==='Estatísticas'){await expect(page.getByRole('table')).toContainText('Pedro Arquivado');await expect(page.getByRole('table')).toContainText('140');await page.getByLabel('Temporada das estatísticas').selectOption(String(c.tecnico.ano-2));await expect(page.getByRole('table')).not.toContainText('Carlos Goleiro');await page.screenshot({path:`/tmp/central-estatisticas-${width}.png`,fullPage:true});}

@@ -1127,7 +1127,7 @@ export function avaliarPermanenciaTecnico(c, card, bateuMeta) {
 
 export function estadoInicialClubes() {
   const st = {};
-  CLUBES.forEach((c) => { st[c.nome] = { liga: c.liga, forca: c.forca, palmares: palmaresInicialDe(c) }; });
+  CLUBES.forEach((c) => { st[c.nome] = { liga: c.liga, forca: c.forca, palmares: palmaresInicialDe(c), ...(c.estado?{historicoEstadualVersao:1}:{}) }; });
   return st;
 }
 
@@ -1136,8 +1136,11 @@ export function creditarTitulo(estado, clubeNome, tipo, qtd = 1) {
   if (!estado || !clubeNome) return estado;
   const atual = estado[clubeNome];
   if (!atual) return estado;
-  const base = atual.palmares || palmaresInicialDe(CLUBES.find((c) => c.nome === clubeNome) || { forca: 60 });
-  return { ...estado, [clubeNome]: { ...atual, palmares: { ...base, [tipo]: (base[tipo] || 0) + qtd } } };
+  const clube = CLUBES.find((c) => c.nome === clubeNome);
+  const inicial = palmaresInicialDe(clube || { forca: 60 });
+  const base = { ...inicial, ...atual.palmares };
+  if(clube?.estado&&!atual.historicoEstadualVersao)base.estadual=(inicial.estadual||0)+(atual.palmares?.estadual||0);
+  return { ...estado, [clubeNome]: { ...atual, ...(clube?.estado?{historicoEstadualVersao:1}:{}), palmares: { ...base, [tipo]: (base[tipo] || 0) + qtd } } };
 }
 
 /* Ao fim de cada temporada, decide os campeões das ligas onde VOCÊ NÃO joga.
@@ -1188,7 +1191,7 @@ export function distribuirTitulosDoMundo(estado, ligaDoJogador, jaCreditado = {}
 /* Palmarés atual de um clube, já com o que foi conquistado durante a carreira */
 export function palmaresDoClube(estado, clubeNome) {
   const st = estado?.[clubeNome];
-  if (st?.palmares) return st.palmares;
+  if (st?.palmares) {const cl=CLUBES.find(c=>c.nome===clubeNome);return cl?.estado&&!st.historicoEstadualVersao?{...st.palmares,estadual:(palmaresInicialDe(cl).estadual||0)+(st.palmares.estadual||0)}:st.palmares;}
   const cl = CLUBES.find((c) => c.nome === clubeNome);
   return cl ? palmaresInicialDe(cl) : { liga: 0, copa: 0, continental: 0, mundial: 0 };
 }

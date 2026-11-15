@@ -1,3 +1,4 @@
+import {historicoEstadualDoClube} from './estaduaisHistoricos.js';
 import { clamp, clampR, formatarDinheiro } from "../comum/lib.js";
 
 export const ATTR_SLOTS = [
@@ -616,12 +617,13 @@ export const PALMARES_HISTORICO = {
 /* Clubes sem palmarés escrito à mão recebem um histórico plausível pela força */
 export function palmaresInicialDe(clube) {
   const p = PALMARES_HISTORICO[clube.nome] || PALMARES_HISTORICO[{"Atlético de Madrid":"Atlético Madrid",Leverkusen:"Bayer Leverkusen"}[clube.nome]];
-  if (p) return { ...p };
+  if (p) return { ...p, ...(clube.estado?{estadual:historicoEstadualDoClube(clube.nome,clube.estado)?.quantidade||0}:{}) };
+  const estadual=clube.estado?{estadual:historicoEstadualDoClube(clube.nome,clube.estado)?.quantidade||0}:{};
   const f = clube.forca || 60;
-  if (f >= 84) return { liga: 3, copa: 3, continental: 1, mundial: 0 };
-  if (f >= 78) return { liga: 1, copa: 2, continental: 0, mundial: 0 };
-  if (f >= 70) return { liga: 0, copa: 1, continental: 0, mundial: 0 };
-  return { liga: 0, copa: 0, continental: 0, mundial: 0 };
+  if (f >= 84) return { ...estadual, liga: 3, copa: 3, continental: 1, mundial: 0 };
+  if (f >= 78) return { ...estadual, liga: 1, copa: 2, continental: 0, mundial: 0 };
+  if (f >= 70) return { ...estadual, liga: 0, copa: 1, continental: 0, mundial: 0 };
+  return { ...estadual, liga: 0, copa: 0, continental: 0, mundial: 0 };
 }
 
 /* Nome bonito de cada tipo de taça, por liga */
@@ -2850,7 +2852,10 @@ export const RIVAIS_PREMIO = RIVAIS_POR_TIER.flatMap((t) => t.nomes);
 export const FASES_COPINHA = ["Fase de Grupos", "Oitavas de Final", "Quartas de Final", "Semifinal", "Final"];
 
 export const ESTADUAIS = {
-  SE: "Campeonato Sergipano",
+  AC: "Campeonato Acreano", AP: "Campeonato Amapaense", DF: "Campeonato Brasiliense", ES: "Campeonato Capixaba",
+  MA: "Campeonato Maranhense", MT: "Campeonato Mato-Grossense", MS: "Campeonato Sul-Mato-Grossense",
+  PB: "Campeonato Paraibano", PI: "Campeonato Piauiense", RN: "Campeonato Potiguar", RO: "Campeonato Rondoniense",
+  RR: "Campeonato Roraimense", TO: "Campeonato Tocantinense", SE: "Campeonato Sergipano",
   SP: "Campeonato Paulista", RJ: "Campeonato Carioca", MG: "Campeonato Mineiro", RS: "Campeonato Gaúcho",
   PR: "Campeonato Paranaense", BA: "Campeonato Baiano", CE: "Campeonato Cearense", PE: "Campeonato Pernambucano",
   SC: "Campeonato Catarinense", GO: "Campeonato Goiano", PA: "Campeonato Paraense", AM: "Campeonato Amazonense", AL: "Campeonato Alagoano",

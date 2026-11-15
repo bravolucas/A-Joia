@@ -1,6 +1,6 @@
 import {COPAS_NACIONAIS,calcularVagasRapidas,nomeVaga} from '../competicoes/regrasCopasRapidas.js';
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
-import {ANO_INICIO,CLUBES,LIGAS,nomeDosTitulos} from '../dados/data.js';
+import {ANO_INICIO,CLUBES,LIGAS,ESTADUAIS,nomeDosTitulos} from '../dados/data.js';
 import {clubesDoMundo} from '../simulacao/mundoVivo.js';
 import {simularClassificacoesMundoTecnico} from '../treinador/classificacoesMundoTecnico.js';
 import {simularMundo,nomeCanonico} from '../historia/historiaFutebol.js';
@@ -29,13 +29,13 @@ export function prepararMundoTemporada(c,card,mundo){
  const inserir=t=>{if(t.clube&&t.nome)campeoes.set(nomeCanonico(t.nome),{...t,ano,nome:nomeCanonico(t.nome)});};
  for(const [liga,t] of Object.entries(classificacoesMundo))inserir({nome:LIGAS[liga]?.nome||liga,tipo:'liga',liga,clube:t.classificacao[0]?.nome});
  for(const t of [...novo.torneiosMundo,...(novo.torneios||[])])if(t.campeao&&!t.finalPendente)inserir({nome:t.nome,tipo:t.tipo,clube:t.campeao});
- for(const [campo,tipo]of [['copaNacional','copa'],['continental','continental'],['mundial','mundial']])if(novo[campo]?.titulo)inserir({nome:novo[campo].nome||nomes[tipo],tipo,clube});
+ for(const [campo,tipo]of [['copaNacional','copa'],['continental','continental'],['mundial','mundial'],['estadual','estadual']])if(novo[campo]?.titulo)inserir({nome:novo[campo].nome||nomes[tipo]||(tipo==='estadual'?ESTADUAIS[c.clube.estado]:null),tipo,clube});
  if(novo.campeaoLiga===true&&!classificacoesMundo[ligaId])inserir({nome:novo.ligaNome,tipo:'liga',liga:ligaId,clube});
  novo.campeoesCalendarioMundo=[...campeoes.values()];
  return novo;
 }
 export function creditarCampeoesCalendario(estado,card){
- return (card.campeoesCalendarioMundo||[]).reduce((s,t)=>['liga','copa','continental','mundial'].includes(t.tipo)?creditarTitulo(s,t.clube,t.tipo):s,estado);
+ return (card.campeoesCalendarioMundo||[]).reduce((s,t)=>['liga','copa','continental','mundial','estadual'].includes(t.tipo)?creditarTitulo(s,t.clube,t.tipo):s,estado);
 }
 /** O prêmio usa o ranking recalculado após distribuir as estatísticas dos jogos. */
 export function registrarPremioCalendario(mundo,vencedor){

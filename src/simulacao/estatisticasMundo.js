@@ -22,7 +22,7 @@ export function estatisticasDasPartidas(mundo,antes,card,seed='mundo',{zerarSemP
  const times=new Map(),linhas=new Map(),posicoes={GOL:1,DEF:4,MEI:3,ATA:3};
  for(const p of antes.jogadores){if(p.aposentado)continue;if(!times.has(p.clubeNome))times.set(p.clubeNome,[]);times.get(p.clubeNome).push(p);}
  const competicoes=Object.entries(card.classificacoesMundo||{}).map(([liga,t])=>({nome:LIGAS[liga]?.nome||liga,jogos:t.jogos||[]}));
- for(const t of [...(card.torneiosMundo||[]),...(card.torneios||[])])competicoes.push({nome:t.nome,jogos:jogosDaCampanha(t)});
+ for(const t of [...(card.torneiosMundo||[]),...(card.torneios||[])])competicoes.push({nome:t.nome,tipo:t.tipo,jogos:jogosDaCampanha(t)});
  const cobertos=new Set(competicoes.flatMap(t=>t.jogos.flatMap(j=>[j.casa,j.fora])));
  const legados=new Set(clubesLegados);
  const usuario=participacoesUsuario(card);
@@ -34,7 +34,7 @@ export function estatisticasDasPartidas(mundo,antes,card,seed='mundo',{zerarSemP
    if(!Number.isFinite(jogo.golsCasa)||!Number.isFinite(jogo.golsFora))continue;
    const participacao=usuario.mapa.get(chaveJogo(comp.nome,jogo))?.shift();
    for(const [clube,gols,sofridos]of [[jogo.casa,jogo.golsCasa,jogo.golsFora],[jogo.fora,jogo.golsFora,jogo.golsCasa]]){
-    const elenco=times.get(clube)||[];if(!elenco.length)continue;
+    const elenco=(times.get(clube)||[]).filter(p=>comp.tipo!=='copinha'||p.idade<=20);if(!elenco.length)continue;
     const titulares=[];
     for(const [setor,vagas]of Object.entries(posicoes))titulares.push(...elenco.filter(p=>setorJogador(p)===setor).map(p=>({p,peso:p.ovr+rng()*10})).sort((a,b)=>b.peso-a.peso).slice(0,Math.max(0,vagas-(clube===card.clube&&participacao?.presente&&setorJogador({posicao:card.posicao})===setor?1:0))).map(x=>x.p));
     const stats=new Map();

@@ -101,7 +101,7 @@ export function decisaoCopa(c){
  return {chave:`${c.seed}|${c.etapa}|${c.rodada}|${c.resultado?.penaltisPendentes?'penaltis':'jogo'}`,fase:c.roteiroMundial?(c.roteiroMundial.length===1?'Final':c.roteiroMundial.length===3?'Derby das Américas':'Copa Challenger'):grupo?`${c.fase==='liga'?'Fase de liga':'Fase de grupos'} · jogo ${c.rodada+1}/${c.totalRodadas}`:c.preContinental?'Pré-classificação continental':c.playoff&&c.tamanho===32?'Playoff de acesso às oitavas':faseN(c.tamanho),adversario:adv,perfilAdversario:perfilAdversario(adv,c.ano),forcaUsuario:c.forcaUsuario,forcaAdv:c.forcas[adv],final:!grupo&&c.tamanho===2&&!c.preContinental,grupo,penaltis:!!c.resultado?.penaltisPendentes,casa:grupo?j.casa===c.usuario:true};
 }
 // All clubs play their side of the bracket. Later opponents are survivors, never fresh draws.
-function jogoEliminatorio(a,b,rng){
+export function jogoEliminatorio(a,b,rng){
  const j=partida(a,b,rng,'pressionar');
  if(!j.vencedor){j.vencedor=rng()<chancePenaltis(nivel(a),nivel(b))?a.nome:b.nome;j.penaltis=true;}
  return j;

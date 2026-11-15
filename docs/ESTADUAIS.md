@@ -35,3 +35,7 @@ A base histórica é consultada também nos saves antigos. Contadores estaduais 
 Não são inventadas temporadas simuladas que aconteceram antes desta implementação e não foram salvas. A base anterior a 2025 passa a aparecer imediatamente; o novo calendário registra as próximas temporadas concluídas. Visualizar ou recarregar não gera uma nova edição. Arquivos de partidas completos são preservados no universo; os resumos das temporadas continuam compactos.
 
 Falsas placas antigas de “primeiro estadual”, causadas pela base vazia, deixam de ser apresentadas como feitos históricos no arquivo e no museu pessoal. As conquistas reais da carreira são mantidas.
+
+## Escudos dos representantes adicionados
+
+Os 52 clubes dos novos estaduais possuem arquivos reais locais. O manifesto `arte/escudos/acervo-estaduais-2026-11-15.json` registra clube, estado, país, arquivo, URL da imagem original, referência e SHA-256. Os arquivos foram preservados sem edição; as fontes são a coleção football-logos, Escudos FC, Logo de Times e Escudos Futebol API. As verificações de integridade e o carregamento no navegador incluem os 694 nomes do catálogo ampliado.

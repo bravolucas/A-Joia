@@ -1,9 +1,9 @@
 /** Copia os dados JSON da carreira sem serializar e reler milhares de atletas.
  * O arquivo é imutável: cada fechamento cria novos mapas e novas linhas. */
-export function clonarEstado(valor){
+export function clonarEstado(valor,{compartilharUniverso=true}={}){
  const ativos=new WeakSet();
  function copiar(v,chave='',emArray=false){
-  if(chave==='universo'&&v?.versao)return v;
+  if(compartilharUniverso&&chave==='universo'&&v?.versao)return v;
   if(v===null)return null;
   const tipo=typeof v;
   if(tipo==='number')return Number.isFinite(v)?(v===0?0:v):null;

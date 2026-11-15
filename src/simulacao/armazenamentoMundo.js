@@ -27,10 +27,11 @@ export function lerPersistente(chave,storage=globalThis.localStorage){
 }
 function comunicar(chave,erro){if(typeof window!=='undefined')window.dispatchEvent(new CustomEvent('ajoia-salvamento',{detail:{chave,erro:erro||null}}));}
 export function gravarPersistente(chave,valor,storage=globalThis.localStorage){
- const temArquivo=valor?.ativo?.c?.tecnico?.universo||valor?.ativo?.c?.universo||valor?.c?.universo||valor?.c?.tecnico?.universo||valor?.carreira?.universo||valor?.carreira?.tecnico?.universo;
+ const temArquivo=[valor?.ativo?.c,valor?.c,valor?.carreira,valor].some(c=>c?.universo||c?.tecnico?.universo||c?.mundo?.jogadores);
  if(!banco||storage!==globalThis.localStorage||!temArquivo){storage.setItem(chave,serializarCarreira(valor));return {ok:true};}
- // Structured clone is part of the IndexedDB write. No JSON/compression of decades of history on the UI thread.
- const snapshot=structuredClone(clonarEstado(valor)),anterior=cache.get(chave);
+ // O banco clona ao gravar. Uma única cópia JSON isolada captura também o arquivo
+ // imutável, sem comprimir o mundo nem duplicar o snapshot na interface.
+ const snapshot=clonarEstado(valor,{compartilharUniverso:false}),anterior=cache.get(chave);
  cache.set(chave,snapshot);
  const tarefa=()=>new Promise((resolve,reject)=>{
   let tx;

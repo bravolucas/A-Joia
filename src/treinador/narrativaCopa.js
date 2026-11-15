@@ -1,3 +1,6 @@
+// Primeiro a movimentação, depois o placar; o cálculo da partida permanece único.
+export const TEMPO_MOVIMENTACAO_COPA = 2400;
+export const TEMPO_PRE_RESULTADO_COPA = 4500;
 const ROTAS={
  inverter:{path:'M65 125 L140 150 L275 50 L300 110',pontos:[[65,125],[140,150],[275,50],[300,110]],texto:'Inversão para mudar o lado da jogada'},
  entrelinhas:{path:'M65 125 L145 110 L220 85 L275 110',pontos:[[65,125],[145,110],[220,85],[275,110]],texto:'Passes verticais entre os setores'},

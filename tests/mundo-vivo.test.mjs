@@ -84,3 +84,12 @@ test('cópia rápida preserva o contrato JSON e isola dados mutáveis, compartil
  const novo=clonarEstado(c);assert.deepEqual(novo,JSON.parse(JSON.stringify(c)));assert.equal(novo.universo,c.universo);
  novo.attrs.passe=90;assert.equal(novo.picoAttrs.passe,70);assert.equal(c.attrs.passe,70);
 });
+
+test('snapshot de salvamento isola também o arquivo e preserva o contrato JSON',async()=>{
+ const {clonarEstado}=await import('../src/simulacao/clonarEstado.js');
+ const arquivo={versao:1,anos:[2030],atletas:{a:{nome:'Atleta',temporadas:[[2030,10,3]]}}};
+ const estado={c:{mundo:{jogadores:[{id:'a',ovr:70}]},universo:arquivo,tecnico:{universo:arquivo}},card:{pendente:undefined},lista:[undefined,NaN]};
+ const snapshot=clonarEstado(estado,{compartilharUniverso:false});assert.deepEqual(snapshot,JSON.parse(JSON.stringify(estado)));
+ arquivo.anos.push(2031);arquivo.atletas.a.temporadas[0][1]=99;estado.c.mundo.jogadores[0].ovr=90;
+ assert.deepEqual(snapshot.c.universo.anos,[2030]);assert.equal(snapshot.c.universo.atletas.a.temporadas[0][1],10);assert.equal(snapshot.c.mundo.jogadores[0].ovr,70);assert.deepEqual(snapshot.c.tecnico.universo.anos,[2030]);
+});

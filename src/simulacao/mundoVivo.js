@@ -1,3 +1,4 @@
+import {CLUBES_REGIONAIS_EXTRAS} from '../competicoes/estaduaisRapidos.js';
 import {jogosDaCampanha} from '../competicoes/jogosCampanha.js';
 import { CLUBES, LIGAS } from '../dados/data.js';
 import { avaliarClubeNoMundo } from './forcaEquipe.js';
@@ -28,9 +29,10 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
   const anterior=c.universo||c.tecnico?.universo||{versao:1,desde:a.ano,clubes:{},atletas:{},edicoes:[],anos:[]};
   if(anterior.anos?.includes(a.ano))return;
   const u={...anterior,versao:1,clubes:{...anterior.clubes},atletas:{...anterior.atletas},edicoes:[...(anterior.edicoes||[])],anos:[...(anterior.anos||[]),a.ano]};
-  const forcasAntes=forcasDoMundo({...c,universo:anterior,mundo:antesMundo||c.mundo});
+  const clubesRegistrados=[...CLUBES,...CLUBES_REGIONAIS_EXTRAS];
+  const forcasAntes=forcasDoMundo({...c,universo:anterior,mundo:antesMundo||c.mundo},clubesRegistrados);
   const titulos=c.historiaFutebol?.titulos?.filter(t=>t.ano===a.ano)||[];
-  for(const cl of CLUBES){
+  for(const cl of clubesRegistrados){
     const p=u.clubes[cl.nome]||{mercado:0,estrutura:0,fase:0,reputacao:cl.forca,financas:50,historico:[]};
     const campanha=campanhaClube(a,cl.nome),tacas=titulos.filter(t=>t.clube===cl.nome).map(t=>t.nome);
     const rng=geradorTecnico(`${c.codigo||'carreira'}|${a.ano}|${cl.nome}|gestao-mundo`);

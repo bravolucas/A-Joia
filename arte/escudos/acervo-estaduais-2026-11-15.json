@@ -1,0 +1,527 @@
+{
+  "data": "2026-11-15",
+  "total": 52,
+  "descricao": "Escudos reais dos clubes adicionados aos estaduais; arquivos originais sem edição. Identificação de clubes de futebol.",
+  "escudos": [
+    {
+      "clube": "Rio Branco-AC",
+      "estado": "AC",
+      "pais": "Brasil",
+      "arquivo": "rio-branco-ac.png",
+      "fonte": "https://logodetimes.com/times/rio-branco-ac/logo-rio-branco-ac-256.png",
+      "referencia": "https://logodetimes.com/times/rio-branco-ac/logo-rio-branco-ac-256.png",
+      "sha256": "e8645d06efa753f4a614087578913408867f7529ef2d74d04a7f63742001cd3a",
+      "bytes": 3949
+    },
+    {
+      "clube": "Atlético-AC",
+      "estado": "AC",
+      "pais": "Brasil",
+      "arquivo": "atletico-ac.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Atl%C3%A9tico_Acreano.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Atl%C3%A9tico_Acreano.svg",
+      "sha256": "a244f92200af02c5393ba1ebfe68a9aec70949b0a61c555e194fbb3b43ee18a6",
+      "bytes": 905
+    },
+    {
+      "clube": "Galvez",
+      "estado": "AC",
+      "pais": "Brasil",
+      "arquivo": "galvez.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Galvez_Esporte_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Galvez_Esporte_Clube.svg",
+      "sha256": "6518ea4d580211e9f7c27591da7152156b042133dccafca15af65f80fdf7b8c3",
+      "bytes": 16344
+    },
+    {
+      "clube": "Independência",
+      "estado": "AC",
+      "pais": "Brasil",
+      "arquivo": "independencia.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Independ%C3%AAncia_Futebol_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Independ%C3%AAncia_Futebol_Clube.svg",
+      "sha256": "e2871d8bf24e9ded60155b2fe729d5871f655017a9af5f29e1b3aa81fb482ea6",
+      "bytes": 11911
+    },
+    {
+      "clube": "Trem",
+      "estado": "AP",
+      "pais": "Brasil",
+      "arquivo": "trem.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Trem_Desportivo_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Trem_Desportivo_Clube.svg",
+      "sha256": "4abd4d9e9c3995b4b12afc6c2c9e22685bcf873e40922d4cc31d063c36839912",
+      "bytes": 39633
+    },
+    {
+      "clube": "Santos-AP",
+      "pais": "Brasil",
+      "estado": "AP",
+      "arquivo": "santos-ap.png",
+      "fonte": "https://www.escudosfc.com.br/images/santos_ap.png",
+      "referencia": "https://www.escudosfc.com.br/ap.htm",
+      "sha256": "e55eb90608ddbefa8aeaffe2efcc8b643b72d9869b598ca98f4c13636d33847d",
+      "bytes": 24599
+    },
+    {
+      "clube": "Ypiranga-AP",
+      "pais": "Brasil",
+      "estado": "AP",
+      "arquivo": "ypiranga-ap.png",
+      "fonte": "https://www.escudosfc.com.br/images/ypiranga_ap.png",
+      "referencia": "https://www.escudosfc.com.br/ap.htm",
+      "sha256": "b650c36da4816b7b0bc93cbc399bc76f5ad56be77193d1914596f5ce061a20e9",
+      "bytes": 23364
+    },
+    {
+      "clube": "São José-AP",
+      "pais": "Brasil",
+      "estado": "AP",
+      "arquivo": "sao-jose-ap.png",
+      "fonte": "https://www.escudosfc.com.br/images/saojose_ap.png",
+      "referencia": "https://www.escudosfc.com.br/ap.htm",
+      "sha256": "e095c9e2709905c575d30662b60ef22c14e218ecae03194c845ee950eea94fdc",
+      "bytes": 127476
+    },
+    {
+      "clube": "Brasiliense",
+      "estado": "DF",
+      "pais": "Brasil",
+      "arquivo": "brasiliense.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Brasiliense_Futebol_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Brasiliense_Futebol_Clube.svg",
+      "sha256": "f423d27c7980c7f9536af81914ad209e864ab0abdf81c851d7a76a87c7071628",
+      "bytes": 84430
+    },
+    {
+      "clube": "Gama",
+      "estado": "DF",
+      "pais": "Brasil",
+      "arquivo": "gama.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Sociedade_Esportiva_do_Gama.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Sociedade_Esportiva_do_Gama.svg",
+      "sha256": "e92f8c7922f3da561cf1b58dcfc76401d2994f7ea8912250d2fbad0724d02f5e",
+      "bytes": 22937
+    },
+    {
+      "clube": "Capital-DF",
+      "estado": "DF",
+      "pais": "Brasil",
+      "arquivo": "capital-df.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Capital_Clube_de_Futebol.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Capital_Clube_de_Futebol.svg",
+      "sha256": "8fb01e995fc3c7a2ad92f1a8a866cae2f2fbda8eb18a04d28d399474eba6961f",
+      "bytes": 27974
+    },
+    {
+      "clube": "Ceilândia",
+      "estado": "DF",
+      "pais": "Brasil",
+      "arquivo": "ceilandia.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Ceil%C3%A2ndia_Esporte_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Ceil%C3%A2ndia_Esporte_Clube.svg",
+      "sha256": "199309d1ab3b88668fe0278e03294184bd8eb7c6b708d960f5fd6c5bc88b71c8",
+      "bytes": 16016
+    },
+    {
+      "clube": "Rio Branco-ES",
+      "estado": "ES",
+      "pais": "Brasil",
+      "arquivo": "rio-branco-es.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Rio_Branco-ES.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Rio_Branco-ES.svg",
+      "sha256": "159fa8b674fc728c809c29fc351290b3ec1f660debced4f7b0174cff8dcfe6b4",
+      "bytes": 4643
+    },
+    {
+      "clube": "Desportiva Ferroviária",
+      "pais": "Brasil",
+      "estado": "ES",
+      "arquivo": "desportiva-ferroviaria.svg",
+      "fonte": "https://raw.githubusercontent.com/washingtonos/escudos-futebol-api/e5f0ac4ee134d695c51fa16206dabb9775c14466/assets/badges/desportiva-ferroviaria.svg",
+      "referencia": "https://github.com/washingtonos/escudos-futebol-api/blob/e5f0ac4ee134d695c51fa16206dabb9775c14466/assets/badges/desportiva-ferroviaria.svg",
+      "sha256": "0e4feea9161685c3762bff597c624f54a43eb37c94b305b17041c7c8dfe157db",
+      "bytes": 101147
+    },
+    {
+      "clube": "Vitória-ES",
+      "estado": "ES",
+      "pais": "Brasil",
+      "arquivo": "vitoria-es.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Vit%C3%B3ria-ES.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Vit%C3%B3ria-ES.svg",
+      "sha256": "161bf7b549dae4c0bd223337395f335be565a732f387217b13318f04a3444a5c",
+      "bytes": 6005
+    },
+    {
+      "clube": "Real Noroeste",
+      "estado": "ES",
+      "pais": "Brasil",
+      "arquivo": "real-noroeste.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Real_Noroeste.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Real_Noroeste.svg",
+      "sha256": "02888ae76681979d125cbe121cd47a2ee5fc941bb8739967bbd3c0cf81aca34d",
+      "bytes": 28449
+    },
+    {
+      "clube": "Sampaio Corrêa",
+      "estado": "MA",
+      "pais": "Brasil",
+      "arquivo": "sampaio-correa.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Sampaio_Corr%C3%AAa_Futebol_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Sampaio_Corr%C3%AAa_Futebol_Clube.svg",
+      "sha256": "b61e9936fdd9c29b1c07a6fc987baf57b49db32104594fcb5bc8dda1e823e9cd",
+      "bytes": 16864
+    },
+    {
+      "clube": "Moto Club",
+      "estado": "MA",
+      "pais": "Brasil",
+      "arquivo": "moto-club.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Moto_Club_de_S%C3%A3o_Lu%C3%ADs.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Moto_Club_de_S%C3%A3o_Lu%C3%ADs.svg",
+      "sha256": "34a4d625319c9de21f32c922df808356e01c30dc31a5b884c357002ff8c59774",
+      "bytes": 31047
+    },
+    {
+      "clube": "Maranhão",
+      "estado": "MA",
+      "pais": "Brasil",
+      "arquivo": "maranhao.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Maranh%C3%A3o.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Maranh%C3%A3o.svg",
+      "sha256": "90e5846ccd777d5a5bae260bdeca937cb8b2b9f6640b8bfed0fe4a40d6ecc9c4",
+      "bytes": 3211
+    },
+    {
+      "clube": "Imperatriz",
+      "estado": "MA",
+      "pais": "Brasil",
+      "arquivo": "imperatriz.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Sociedade_Imperatriz_de_Desportos.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Sociedade_Imperatriz_de_Desportos.svg",
+      "sha256": "ca38c414a0c274bad47e8b08742b7736500379ce95a87c1f48f419071be91513",
+      "bytes": 20837
+    },
+    {
+      "clube": "Cuiabá",
+      "estado": "MT",
+      "pais": "Brasil",
+      "arquivo": "cuiaba.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Cuiab%C3%A1.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Cuiab%C3%A1.svg",
+      "sha256": "3fecc487c31973fbb1518c4fcb69437e3717737acc4228aebe724cd012f27bf3",
+      "bytes": 11940
+    },
+    {
+      "clube": "Mixto",
+      "estado": "MT",
+      "pais": "Brasil",
+      "arquivo": "mixto.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Mixto_Esporte_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Mixto_Esporte_Clube.svg",
+      "sha256": "7c73e9b349dbcc7568cd7ee7fb309d54d62ec9ed478264a914d96911f39d15b2",
+      "bytes": 1928
+    },
+    {
+      "clube": "Operário-VG",
+      "estado": "MT",
+      "pais": "Brasil",
+      "arquivo": "operario-vg.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Oper%C3%A1rio_V%C3%A1rzea-Grandense.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Oper%C3%A1rio_V%C3%A1rzea-Grandense.svg",
+      "sha256": "526987be30109373e97334faf312f8705b98e125346955b1169ab5c0ed095b84",
+      "bytes": 13800
+    },
+    {
+      "clube": "União Rondonópolis",
+      "estado": "MT",
+      "pais": "Brasil",
+      "arquivo": "uniao-rondonopolis.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Uni%C3%A3o_Esporte_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Uni%C3%A3o_Esporte_Clube.svg",
+      "sha256": "d819aa22c16ed9c041cee368b9c98b80821723338c8f71d8b3b79eb04e37cb44",
+      "bytes": 18657
+    },
+    {
+      "clube": "Operário-MS",
+      "estado": "MS",
+      "pais": "Brasil",
+      "arquivo": "operario-ms.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Oper%C3%A1rio-MS.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Oper%C3%A1rio-MS.svg",
+      "sha256": "5c5282675a9bc3e0d02a32460feafb6f1fed9b10d52740bc8d156d203db343fd",
+      "bytes": 25326
+    },
+    {
+      "clube": "Comercial-MS",
+      "pais": "Brasil",
+      "estado": "MS",
+      "arquivo": "comercial-ms.png",
+      "fonte": "https://www.escudosfc.com.br/images/comercial_ms.png",
+      "referencia": "https://www.escudosfc.com.br/ms.htm",
+      "sha256": "162095742db13cafa6111cc6009bf963d75ac5cabc31de4931b67b63ae26e258",
+      "bytes": 26034
+    },
+    {
+      "clube": "Dourados",
+      "pais": "Brasil",
+      "estado": "MS",
+      "arquivo": "dourados.png",
+      "fonte": "https://www.escudosfc.com.br/images/douradosac_ms.png",
+      "referencia": "https://www.escudosfc.com.br/ms.htm",
+      "sha256": "ef43d89ba6ad1a68a69fcf5953a7009a3b1d30bf2f20f66be1575f747e071ad7",
+      "bytes": 139715
+    },
+    {
+      "clube": "Ivinhema",
+      "estado": "MS",
+      "pais": "Brasil",
+      "arquivo": "ivinhema.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Ivinhema_Futebol_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Ivinhema_Futebol_Clube.svg",
+      "sha256": "3c5d1d08d2fd2dc28196ce97d65e6320b4e3f36febc8c6e543ccc89a7e872171",
+      "bytes": 39399
+    },
+    {
+      "clube": "Botafogo-PB",
+      "estado": "PB",
+      "pais": "Brasil",
+      "arquivo": "botafogo-pb.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Botafogo_PB.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Botafogo_PB.svg",
+      "sha256": "6b9e4f15a734cfbc16e61ee6816ebc6920629c1ea12601f09f3decaf19e56f4f",
+      "bytes": 10160
+    },
+    {
+      "clube": "Campinense",
+      "estado": "PB",
+      "pais": "Brasil",
+      "arquivo": "campinense.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Campinense.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Campinense.svg",
+      "sha256": "4e9daad4f00305e75efcb06b88e775338a36432ddb3376f54af0fa4d03707948",
+      "bytes": 3332
+    },
+    {
+      "clube": "Treze",
+      "estado": "PB",
+      "pais": "Brasil",
+      "arquivo": "treze.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Treze_FC.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Treze_FC.svg",
+      "sha256": "b1cf5ae5b4f3efeeba81ce98f86323b9f9e5eee86bc9246c786f82a12215f8db",
+      "bytes": 11125
+    },
+    {
+      "clube": "Sousa",
+      "estado": "PB",
+      "pais": "Brasil",
+      "arquivo": "sousa.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Sousa_Esporte_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Sousa_Esporte_Clube.svg",
+      "sha256": "2abd6cc7347cb5f9e994a0954cdf541714df5bd2d077ee1ed9bcf41d5e885b16",
+      "bytes": 92723
+    },
+    {
+      "clube": "Ríver-PI",
+      "pais": "Brasil",
+      "estado": "PI",
+      "arquivo": "river-pi.png",
+      "fonte": "https://www.escudosfc.com.br/images/river_pi.png",
+      "referencia": "https://www.escudosfc.com.br/pi.htm",
+      "sha256": "bf6e26191404cb6389aa9e9f8f40327ce035a26538655295c4279f95b6fca727",
+      "bytes": 52788
+    },
+    {
+      "clube": "Altos",
+      "estado": "PI",
+      "pais": "Brasil",
+      "arquivo": "altos.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Associa%C3%A7%C3%A3o_Atl%C3%A9tica_de_Altos.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Associa%C3%A7%C3%A3o_Atl%C3%A9tica_de_Altos.svg",
+      "sha256": "359a20063c3aee9dd2b692b4a3d920e346d38ad90f9715bc56c1c594db7f02fc",
+      "bytes": 66961
+    },
+    {
+      "clube": "Parnahyba",
+      "estado": "PI",
+      "pais": "Brasil",
+      "arquivo": "parnahyba.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Parnahyba_Sport_Club.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Parnahyba_Sport_Club.svg",
+      "sha256": "b77f1a86ccb6b6f4106028b2c99309833600c292367b1c51d2650bfefad85af5",
+      "bytes": 11984
+    },
+    {
+      "clube": "Fluminense-PI",
+      "estado": "PI",
+      "pais": "Brasil",
+      "arquivo": "fluminense-pi.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Fluminense_Esporte_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Fluminense_Esporte_Clube.svg",
+      "sha256": "62d1cbc48fd789805d9dd7b9b55ea76dc8b2f4facfdc681d58058da54dc94137",
+      "bytes": 4562
+    },
+    {
+      "clube": "ABC",
+      "estado": "RN",
+      "pais": "Brasil",
+      "arquivo": "abc.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/ABC_Futebol_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/ABC_Futebol_Clube.svg",
+      "sha256": "a8070490bbf7fdfa70768b7f58d4eea245f067628fa1235f06d7171fcb3a0da5",
+      "bytes": 19523
+    },
+    {
+      "clube": "América-RN",
+      "estado": "RN",
+      "pais": "Brasil",
+      "arquivo": "america-rn.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Am%C3%A9rica_de_Natal.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Am%C3%A9rica_de_Natal.svg",
+      "sha256": "e23a7c6ba3cb3de91765b1c2f389d5c2a46fdda24866981c5bf55226ea22680f",
+      "bytes": 10287
+    },
+    {
+      "clube": "Potiguar de Mossoró",
+      "pais": "Brasil",
+      "estado": "RN",
+      "arquivo": "potiguar-de-mossoro.png",
+      "fonte": "https://www.escudosfc.com.br/images/potiguar_rn.png",
+      "referencia": "https://www.escudosfc.com.br/rn.htm",
+      "sha256": "ffd20fbac7ea9a72013a1d7cb16ede5b5709f6596d4a4d533bf795221fd96282",
+      "bytes": 23115
+    },
+    {
+      "clube": "Globo",
+      "pais": "Brasil",
+      "estado": "RN",
+      "arquivo": "globo.png",
+      "fonte": "https://www.escudosfc.com.br/images/globo_rn.png",
+      "referencia": "https://www.escudosfc.com.br/rn.htm",
+      "sha256": "4a0561faded7067a09a76a2a8eb0c1de73895408661ec650061ac05df2ee7ad5",
+      "bytes": 105729
+    },
+    {
+      "clube": "Porto Velho",
+      "estado": "RO",
+      "pais": "Brasil",
+      "arquivo": "porto-velho.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Porto_Velho_Esporte_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Porto_Velho_Esporte_Clube.svg",
+      "sha256": "52c654458a897900ccf63a27979aa8ce982d1373b875068d92615a78f2e69f8e",
+      "bytes": 97987
+    },
+    {
+      "clube": "Ji-Paraná",
+      "pais": "Brasil",
+      "estado": "RO",
+      "arquivo": "ji-parana.png",
+      "fonte": "https://www.escudosfc.com.br/images/ji_parana_ro.png",
+      "referencia": "https://www.escudosfc.com.br/ro.htm",
+      "sha256": "511b4640513c59419aaeed2819ffd28ad659248829917dd11d2dd2a6fa75589d",
+      "bytes": 36391
+    },
+    {
+      "clube": "Vilhena",
+      "pais": "Brasil",
+      "estado": "RO",
+      "arquivo": "vilhena.png",
+      "fonte": "https://www.escudosfc.com.br/images/vilhena_ro.png",
+      "referencia": "https://www.escudosfc.com.br/ro.htm",
+      "sha256": "545ad929a5e2bfdcb2a9603fe0c14519d7623fff1f06d070ec3f17b97ad2bbff",
+      "bytes": 1117095
+    },
+    {
+      "clube": "Real Ariquemes",
+      "pais": "Brasil",
+      "estado": "RO",
+      "arquivo": "real-ariquemes.png",
+      "fonte": "https://www.escudosfc.com.br/images/real_ariquemes_ro.png",
+      "referencia": "https://www.escudosfc.com.br/ro.htm",
+      "sha256": "3e421ddf531007d441d7f2ce5e455ac1a8227a45d18d72f1fc09f82a9a4e9390",
+      "bytes": 87233
+    },
+    {
+      "clube": "São Raimundo-RR",
+      "estado": "RR",
+      "pais": "Brasil",
+      "arquivo": "sao-raimundo-rr.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/S%C3%A3o_Raimundo-RR.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/S%C3%A3o_Raimundo-RR.svg",
+      "sha256": "60013a5a3d2f7ce056187cba8023b2429bd0ad5dc1998c108eb357f885ab0209",
+      "bytes": 6176
+    },
+    {
+      "clube": "Baré",
+      "pais": "Brasil",
+      "estado": "RR",
+      "arquivo": "bare.svg",
+      "fonte": "https://raw.githubusercontent.com/washingtonos/escudos-futebol-api/e5f0ac4ee134d695c51fa16206dabb9775c14466/assets/badges/bare.svg",
+      "referencia": "https://github.com/washingtonos/escudos-futebol-api/blob/e5f0ac4ee134d695c51fa16206dabb9775c14466/assets/badges/bare.svg",
+      "sha256": "c5d2344c6b18947071c3bce81cf9337a1b210f6d4d50d70419edad1486575f30",
+      "bytes": 6201
+    },
+    {
+      "clube": "Náutico-RR",
+      "pais": "Brasil",
+      "estado": "RR",
+      "arquivo": "nautico-rr.png",
+      "fonte": "https://www.escudosfc.com.br/images/nautico_rr.png",
+      "referencia": "https://www.escudosfc.com.br/rr.htm",
+      "sha256": "5411b2ce9e335b6dab3f55600e64a7e7ea07a09cd976e44104a6b3e6820745c0",
+      "bytes": 132828
+    },
+    {
+      "clube": "GAS",
+      "estado": "RR",
+      "pais": "Brasil",
+      "arquivo": "gas.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Gr%C3%AAmio_Atl%C3%A9tico_Sampaio_%28GAS%29.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Gr%C3%AAmio_Atl%C3%A9tico_Sampaio_%28GAS%29.svg",
+      "sha256": "d1689bb503fc30f32fc1834cecf991a58530fe477d7f7667b1ead928d7e958fb",
+      "bytes": 72770
+    },
+    {
+      "clube": "Tocantinópolis",
+      "estado": "TO",
+      "pais": "Brasil",
+      "arquivo": "tocantinopolis.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Tocantin%C3%B3polis_Esporte_Clube.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Tocantin%C3%B3polis_Esporte_Clube.svg",
+      "sha256": "d96ff3c00151a08f764c97a1723855ff63517bbe54374ea5a8a42be8e109ae98",
+      "bytes": 15689
+    },
+    {
+      "clube": "Palmas",
+      "pais": "Brasil",
+      "estado": "TO",
+      "arquivo": "palmas.png",
+      "fonte": "https://www.escudosfc.com.br/images/palmas_to.png",
+      "referencia": "https://www.escudosfc.com.br/to.htm",
+      "sha256": "cbf81e1931a5aa708158dcc1ac6efa2cde80f98de38a6a3042d8e7f0a04eea5f",
+      "bytes": 30700
+    },
+    {
+      "clube": "Araguaína",
+      "estado": "TO",
+      "pais": "Brasil",
+      "arquivo": "araguaina.svg",
+      "fonte": "https://raw.githubusercontent.com/JoseArroyave/football-logos/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Aragua%C3%ADna_Futebol_e_Regatas.svg",
+      "referencia": "https://github.com/JoseArroyave/football-logos/blob/5ab11fed47427b3003f4b276554491fe683387b1/logos/brazil/Aragua%C3%ADna_Futebol_e_Regatas.svg",
+      "sha256": "f59d263374987e9804c4564d391828e9f41af6bf4ae8b8966a145510a95459f0",
+      "bytes": 58683
+    },
+    {
+      "clube": "Capital-TO",
+      "pais": "Brasil",
+      "estado": "TO",
+      "arquivo": "capital-to.png",
+      "fonte": "https://www.escudosfc.com.br/images/capital_to.png",
+      "referencia": "https://www.escudosfc.com.br/to.htm",
+      "sha256": "7d17cda0563d46e3731a5b660af2d3647d142cf29ff2fe4cb9e43947bb232238",
+      "bytes": 384620
+    }
+  ]
+}

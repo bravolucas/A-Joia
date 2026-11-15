@@ -1,3 +1,4 @@
+import {feitoEstadualHistoricoValido} from '../dados/estaduaisHistoricos.js';
 import {lerPersistente} from '../simulacao/armazenamentoMundo.js';
 import {podioTemporada,destaquesMuseu,marcasMuseu} from './curadoriaMuseu.js';
 import {conquistouLiga} from '../historia/historiaFutebol.js';
@@ -25,7 +26,7 @@ export function construirMuseuPessoal(c={}, {modo='rapido',temporadas}={}){
  const adicionar=o=>{if(!objetos.some(x=>x.id===o.id))objetos.push(o);return o;};
  const adicionarTitulo=(r,papel='Jogador',temporada)=>{if(!r?.nome)return;const comp=competenciaMuseu(r.nome),ano=Number.isFinite(r.ano)?r.ano:temporada?.ano??null,clube=r.clube||temporada?.clube||(papel==='Treinador'?c.tecnico?.clube:null)||null,k=`${papel}|${ano??'sem-ano'}|${comp.id}|${clube||''}`;if(titulos.some(t=>t.chave===k))return;
   const camp=temporada?.torneios?.find(t=>competenciaMuseu(t.nome).id===comp.id),final=camp?.fases?.find(t=>t.fase==='Final')?.jogos?.find(j=>[j.casa,j.fora].includes(clube)),lance=temporada?.momentos?.find(m=>m.acertou&&m.decisaoJogo&&['copa','continental','selecao','mundial'].includes(m.tipo));
-  titulos.push({id:`titulo-${hash(k)}`,chave:k,nome:comp.nome,tipo:comp.tipo,ano,clube,papel,campanha:camp?.faseUsuario||null,adversario:final?(final.casa===clube?final.fora:final.casa):null,placar:final&&Number.isFinite(final.golsCasa)&&Number.isFinite(final.golsFora)?`${final.casa} ${final.golsCasa} × ${final.golsFora} ${final.fora}`:null,lance:lance?.titulo?.includes(comp.nome)?lance.decisaoJogo.nome:null,primeiro:temporada?.feitosHistoricos?.find(f=>f.nome&&competenciaMuseu(f.nome).id===comp.id)?.titulo||null});
+  titulos.push({id:`titulo-${hash(k)}`,chave:k,nome:comp.nome,tipo:comp.tipo,ano,clube,papel,campanha:camp?.faseUsuario||null,adversario:final?(final.casa===clube?final.fora:final.casa):null,placar:final&&Number.isFinite(final.golsCasa)&&Number.isFinite(final.golsFora)?`${final.casa} ${final.golsCasa} × ${final.golsFora} ${final.fora}`:null,lance:lance?.titulo?.includes(comp.nome)?lance.decisaoJogo.nome:null,primeiro:temporada?.feitosHistoricos?.filter(feitoEstadualHistoricoValido).find(f=>f.nome&&competenciaMuseu(f.nome).id===comp.id)?.titulo||null});
  };
  if(modo==='rapido')for(const t of c.lista||[])if(t.nome){if(premio(t)){const o={id:`premio-${hash(`${t.nome}|${t.ano}`)}`,sala:'trofeus',tipo:'premio',nome:t.nome,ano:t.ano??null,clube:null,tipoTaca:t.tipo,podio:podioTemporada(ts.find(a=>a.ano===t.ano)),texto:`${t.nome}${t.ano?` · ${t.ano}`:''}. Prêmio individual registrado na carreira.`};adicionar(o);}else adicionarTitulo(t,'Jogador',ts.find(a=>a.ano===t.ano&&a.clube===t.clube)||ts.find(a=>a.ano===t.ano));}
  for(const t of ts){const liga=t.ligaId||t.liga||t.clubeObj?.liga||CLUBES.find(x=>x.nome===t.clube)?.liga,nomes=nomeDosTitulos(liga);
@@ -40,7 +41,7 @@ export function construirMuseuPessoal(c={}, {modo='rapido',temporadas}={}){
   }
   const lugar=t.bola?.pos??t.postoBO;
   if(lugar>1&&lugar<=3)memorias.push({id:`gala-${t.ano}`,tipo:'convite',nome:`O pódio de ${t.ano}`,ano:t.ano,clube:t.clube,podio:podioTemporada(t),texto:`${lugar}º lugar na Bola de Ouro. O reconhecimento de estar entre os três melhores do mundo e a vontade de voltar para vencer.`,stats:{}});
-  for(const f of t.feitosHistoricos||[])memorias.push({id:`feito-${hash(`${f.id}|${t.ano}`)}`,tipo:'placa',nome:f.titulo,ano:t.ano,clube:f.clube||t.clube,texto:f.texto||'Feito registrado nesta temporada.'});
+  for(const f of (t.feitosHistoricos||[]).filter(feitoEstadualHistoricoValido))memorias.push({id:`feito-${hash(`${f.id}|${t.ano}`)}`,tipo:'placa',nome:f.titulo,ano:t.ano,clube:f.clube||t.clube,texto:f.texto||'Feito registrado nesta temporada.'});
   if(t.lesao)memorias.push({id:`superacao-${hash(`${t.ano}|${t.clube}`)}`,tipo:'carta',nome:'Os anos que me fizeram',ano:t.ano,clube:t.clube,texto:`Uma temporada marcada por ${typeof t.lesao==='string'?t.lesao:t.lesao.nome||'lesão'}. Este capítulo também faz parte da sua história.`});
   if(t.rebaixado)memorias.push({id:`queda-${hash(`${t.ano}|${t.clube}`)}`,tipo:'recorte',nome:'Quando o caminho ficou difícil',ano:t.ano,clube:t.clube,texto:`O rebaixamento do ${t.clube} ficou registrado nesta temporada.`});
   for(const torneio of t.torneios||[])if(torneio.vice===t.clube)memorias.push({id:`vice-${hash(`${t.ano}|${torneio.nome}`)}`,tipo:'recorte',nome:'Uma final que ficou na memória',ano:t.ano,clube:t.clube,texto:`${torneio.nome}: vice-campeonato com o ${t.clube}.`});

@@ -32,7 +32,7 @@ test('vaga conquistada nas eliminatórias habilita Copa; eliminação não inven
 });
 test('temporada de seleção integra fluxo expresso, salário e histórico sem liga de clube',()=>{
  let c=assumir('POR');c=T.proximaTemporadaTecnico(c);const carta=cartaPretemporadaRapida(c.tecnico);assert.ok(['convocacao','entrosamento','observacao','lideranca-selecao','bola-parada','recuperacao'].includes(carta.id));
- c=T.escolherPretemporadaRapidaTecnico(c,carta.chave,carta.opcoes[0].id,geradorTecnico('ano'));assert.equal(c.tecnico.fase,'resultado');assert.equal(c.tecnico.temporadas.at(-1).clube,'Portugal');assert.ok(c.tecnico.carteiraTecnico.pagamentos.length);assert.equal(c.tecnico.temporadas.at(-1).classificacoesMundo,undefined);
+ c=T.escolherPretemporadaRapidaTecnico(c,carta.chave,carta.opcoes[0].id,geradorTecnico('ano'));assert.equal(c.tecnico.fase,'resultado');assert.equal(c.tecnico.temporadas.at(-1).clube,'Portugal');assert.ok(c.tecnico.carteiraTecnico.pagamentos.length);assert.ok(c.tecnico.temporadas.at(-1).classificacao.some(x=>x.nome==='Portugal'));assert.ok(c.tecnico.temporadas.at(-1).classificacoesMundo.inglaterra.classificacao.length);assert.equal(c.tecnico.universo.edicoes.filter(e=>e.tipo==='estadual'&&e.ano===2031).length,27);assert.equal(c.tecnico.universo.anos.filter(a=>a===2031).length,1);
 });
 test('taça de seleção em save antigo não pertence ao clube; histórico e total preservados',()=>{
  const t={temporadas:[{ano:2030,clube:'Bahia',titulosConquistados:['Copa do Brasil','Copa do Mundo'],torneios:[{nome:'Copa do Mundo',selecao:'Portugal',campeao:'Portugal'}]}]};

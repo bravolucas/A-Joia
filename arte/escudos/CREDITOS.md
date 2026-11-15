@@ -20,3 +20,7 @@ a usar o brasão desenhado.
 - Complementos: arquivos indicados pelas páginas dos clubes na Wikipédia e hospedados no Wikimedia. A referência individual identifica clube e arquivo; as condições de cada original permanecem nas respectivas páginas.
 
 Emblemas e marcas pertencem aos clubes e respectivos titulares; são usados para identificação na simulação. Nenhum escudo novo foi gerado por IA. Os arquivos são distribuídos com o jogo, sem dependência de hotlinks para renderizar os clubes.
+
+### Estaduais adicionados em 15/11/2026
+
+Os 52 arquivos listados em [acervo-estaduais-2026-11-15.json](acervo-estaduais-2026-11-15.json) foram obtidos, sem edição, nas coleções públicas football-logos (JoseArroyave), Escudos FC, Logo de Times e Escudos Futebol API (washingtonos). Cada emblema mantém sua fonte, referência e SHA-256 no manifesto. Uso para identificação dos clubes nas competições.

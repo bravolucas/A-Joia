@@ -1,3 +1,7 @@
+import {CLUBES_REGIONAIS_EXTRAS} from '../competicoes/estaduaisRapidos.js';
+import {simularSelecoesMundo,simularMundiaisMundo,simularCopinhaMundo} from '../simulacao/copasExternasMundo.js';
+import {historicosEstaduaisDoClube} from '../dados/estaduaisHistoricos.js';
+import {simularEstaduaisMundo} from '../simulacao/estaduaisMundo.js';
 import {clubesDoMundo} from '../simulacao/mundoVivo.js';
 import {simularClassificacoesMundoTecnico} from '../treinador/classificacoesMundoTecnico.js';
 import {ANO_INICIO,CLUBES,LIGAS,NACIONALIDADES,ESTADUAIS,PALMARES_HISTORICO,nomeDosTitulos,palmaresInicialDe} from '../dados/data.js';
@@ -17,11 +21,16 @@ export const tipoTaca=nome=>regionais.has(nome)?'estadual':/Mundial|Intercontine
 const CONTINENTAIS={Sevilla:{'Europa League':7},'Athletico-PR':{'Copa Sul-Americana':2},Parma:{'Europa League':2},'Schalke 04':{'Europa League':1},'Atlético de Madrid':{'Europa League':3,'Champions League':0}};
 export function acervoInicial(nome){
  nome=clubeCanonico(nome);
- const clube=CLUBES.find(x=>x.nome===nome);if(!clube)return {tacas:[],conhecido:false};
+ const clube=CLUBES.find(x=>x.nome===nome),regional=CLUBES_REGIONAIS_EXTRAS.find(x=>x.nome===nome),estado=clube?.estado||regional?.estado;
+ const estaduais=historicosEstaduaisDoClube(nome).map(h=>({nome:h.nome,tipo:'estadual',inicial:h.quantidade,anosHistoricos:[...h.anos],fontes:h.fontes,historicoConhecido:true}));
+ if(!estaduais.length&&estado)estaduais.push({nome:ESTADUAIS[estado],tipo:'estadual',inicial:0,anosHistoricos:[],historicoConhecido:true});
+ if(!clube)return {tacas:estaduais,conhecido:!!estaduais.length};
  const p=palmaresInicialDe(clube),nomes=nomeDosTitulos(clube.liga),itens=[];
  for(const tipo of ['liga','copa','mundial'])if(nomes[tipo])itens.push({nome:nomes[tipo],tipo,inicial:n(p[tipo])});
  const continentais=CONTINENTAIS[nome]||{[nomes.continental||'Títulos continentais']:n(p.continental)};
  for(const [nome,quantidade]of Object.entries(continentais))itens.push({nome,tipo:'continental',inicial:quantidade});
+ itens.push(...estaduais);
+ for(const t of itens)if(t.tipo!=='estadual')t.historicoConhecido=!!(PALMARES_HISTORICO[nome]||CONTINENTAIS[nome]||PALMARES_HISTORICO[{'Atlético de Madrid':'Atlético Madrid',Leverkusen:'Bayer Leverkusen'}[nome]]);
  return {tacas:itens,conhecido:!!(PALMARES_HISTORICO[nome]||PALMARES_HISTORICO[{"Atlético de Madrid":"Atlético Madrid",Leverkusen:"Bayer Leverkusen"}[nome]])};
 }
 function inserir(mapa,e){if(e?.clube&&e?.nome&&Number.isFinite(e.ano)&&!e.pendente)mapa.set(idEdicao(e.ano,e.nome),{ano:e.ano,nome:nomeCanonico(e.nome),clube:clubeCanonico(e.clube),tipo:e.tipo||tipoTaca(e.nome),...(e.voce?{voce:true}:{})});}
@@ -51,7 +60,7 @@ function eventosTemporada(c,a,treinador=false){
  for(const t of a.titulos||[])if(typeof t==='object'&&!['bolaOuro','botaOuro','copaMundo','continentalSelecao','premio'].includes(t.tipo))out.push({ano:a.ano,nome:t.nome,tipo:t.tipo,clube,voce:true});
  for(const valor of [...(a.titulosConquistados||[]),...(a.titulosLista||[])]){const limpo=nomeCanonico(valor),nome=limpo==='Copa Nacional'?nomes.copa:limpo;if(!/Copa do Mundo|Eurocopa|Copa América|Bola de Ouro|Bota de Ouro/i.test(nome))out.push({ano:a.ano,nome,clube,voce:true});}
  const vencedor=vencedorLigaRegistrado(a,treinador);if(vencedor)out.push({ano:a.ano,nome:a.ligaNome||LIGAS[a.ligaId||a.liga]?.nome||nomes.liga,clube:vencedor,tipo:'liga',voce:clubeCanonico(clube)===vencedor});
- for(const [campo,tipo]of [['copaNacional','copa'],['continental','continental'],['mundial','mundial'],['estadual','estadual']])if(a[campo]?.titulo)out.push({ano:a.ano,nome:a[campo].nome||nomes[tipo],clube,tipo,voce:true});
+ for(const [campo,tipo]of [['copaNacional','copa'],['continental','continental'],['mundial','mundial'],['estadual','estadual']])if(a[campo]?.titulo)out.push({ano:a.ano,nome:a[campo].nome||nomes[tipo]||(tipo==='estadual'?ESTADUAIS[CLUBES.find(cl=>cl.nome===clube)?.estado]:null),clube,tipo,voce:true});
  for(const [liga,t]of Object.entries(a.classificacoesMundo||{})){const campeao=t.classificacao?.[0]?.nome;if(campeao)out.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',clube:campeao,voce:campeao===clube});}
  return out;
 }
@@ -89,6 +98,7 @@ export function simularMundo(c,a,{preservarTorneios=false}={}){
   a.torneiosMundo.push(camp);
   out.push({ano:a.ano,nome,tipo:'continental',clube:camp.campeao});
  }
+ for(const t of [...simularEstaduaisMundo(c,a),...simularSelecoesMundo(c,a),...simularMundiaisMundo(c,a,clubes),...simularCopinhaMundo(c,a,clubes)]){a.torneiosMundo.push(t);out.push({ano:a.ano,nome:t.nome,tipo:t.tipo,clube:t.campeao});}
  return out;
 }
 /** Um registro por edição; os campeões efetivos prevalecem sobre o restante do mundo. */
@@ -104,7 +114,7 @@ export function registrarAnoHistoria(c,a,{modo='rapido'}={}){
  else for(const t of c.campeoesDaTemporada||[])inserir(mapa,{ano:a.ano,nome:t.nome||nomeDosTitulos(t.liga||CLUBES.find(x=>x.nome===t.clube)?.liga)[t.tipo],...t});
  for(const e of anteriores)inserir(mapa,e);
  for(const e of eventosTemporada(c,a))inserir(mapa,e);
- const novos=[...mapa.values()].filter(e=>e.ano===a.ano&&e.voce&&acervoInicial(e.clube).conhecido&&!(acervoInicial(e.clube).tacas.find(t=>chave(t.nome)===chave(e.nome))?.inicial)&&!anteriores.some(t=>t.clube===e.clube&&chave(t.nome)===chave(e.nome)&&t.ano<e.ano));
+ const novos=[...mapa.values()].filter(e=>e.ano===a.ano&&e.voce&&acervoInicial(e.clube).tacas.some(t=>chave(t.nome)===chave(e.nome)&&t.historicoConhecido&&t.inicial===0)&&!anteriores.some(t=>t.clube===e.clube&&chave(t.nome)===chave(e.nome)&&t.ano<e.ano));
  a.feitosHistoricos=novos.map(e=>({id:`primeiro|${e.clube}|${chave(e.nome)}`,titulo:`A primeira ${e.nome} do ${e.clube}`,texto:`Você participou do primeiro título desta competição no acervo do clube.`,ano:a.ano,clube:e.clube,nome:e.nome}));
  c.historiaFutebol={...(c.historiaFutebol||{}),versao:1,desde:c.historiaFutebol?.desde??a.ano,anos:[...(c.historiaFutebol?.anos||[]),a.ano],titulos:[...mapa.values()]};
 }
@@ -114,9 +124,14 @@ export function galeriaClube(c,nome,temporadas){
  for(const e of eventos){const k=chave(e.nome);if(!mapa.has(k))mapa.set(k,{nome:e.nome,tipo:e.tipo,inicial:0,anos:[],suas:[]});const t=mapa.get(k);t.anos.push(e.ano);if(e.voce)t.suas.push(e.ano);}
  // Saves do modo completo já têm totais absolutos: não somar esses totais outra vez.
  const legado=c.estadoClubes?.[nome]?.palmares,nomes=nomeDosTitulos(CLUBES.find(x=>x.nome===nome)?.liga);
- for(const tipo of ['liga','copa','continental','mundial'])if(legado&&n(legado[tipo])>n(palmaresInicialDe(CLUBES.find(x=>x.nome===nome)||{} )[tipo])){const delta=n(legado[tipo])-n(palmaresInicialDe(CLUBES.find(x=>x.nome===nome)||{})[tipo]),registrados=[...mapa.values()].filter(t=>t.tipo===tipo).reduce((s,t)=>s+t.anos.length,0);if(delta>registrados){const k=chave(nomes[tipo]),t=mapa.get(k)||{nome:nomes[tipo]||tipo,tipo,inicial:0,anos:[],suas:[]};t.legado=delta-registrados;mapa.set(k,t);}}
+ for(const tipo of ['liga','copa','continental','mundial','estadual'])if(legado){
+  const base=n(palmaresInicialDe(CLUBES.find(x=>x.nome===nome)||{})[tipo]);
+  const delta=tipo==='estadual'&&!c.estadoClubes[nome].historicoEstadualVersao?n(legado[tipo]):n(legado[tipo])-base;
+  const registrados=[...mapa.values()].filter(t=>t.tipo===tipo).reduce((s,t)=>s+t.anos.length,0);
+  if(delta>registrados){const nomeTaca=nomes[tipo]||(tipo==='estadual'?ESTADUAIS[CLUBES.find(cl=>cl.nome===nome)?.estado]:tipo),k=chave(nomeTaca),t=mapa.get(k)||{nome:nomeTaca,tipo,inicial:0,anos:[],suas:[]};t.legado=delta-registrados;mapa.set(k,t);}
+ }
  const tacas=[...mapa.values()].map(t=>({...t,total:t.inicial+t.anos.length+(t.legado||0)}));
- return {nome,conhecido:inicial.conhecido,tacas,total:tacas.reduce((s,t)=>s+t.total,0),eventos:eventsOrdenados(eventos),primeiros:tacas.filter(t=>inicial.conhecido&&t.inicial===0&&t.anos.length&&!t.legado).map(t=>({...t,ano:Math.min(...t.anos)}))};
+ return {nome,conhecido:inicial.conhecido,tacas,total:tacas.reduce((s,t)=>s+t.total,0),eventos:eventsOrdenados(eventos),primeiros:tacas.filter(t=>t.historicoConhecido&&t.inicial===0&&t.anos.length&&!t.legado).map(t=>({...t,ano:Math.min(...t.anos)}))};
 }
 const eventsOrdenados=e=>[...e].sort((a,b)=>b.ano-a.ano);
 

@@ -112,16 +112,18 @@ export function pedirDemissaoTecnico(c,rng){
 function registrarHistoriaTecnico(c){
  const t=c?.tecnico,a=t?.temporadas?.at(-1);if(!a||t.fase!=='resultado'||t.copasEmJogo||t.finaisPendentes?.length)return c;
  if(c.historiaFutebol?.anos?.includes(a.ano)&&!(c.tecnico?.universo||c.universo)?.anos?.includes(a.ano))return c;
- const novo=registrarUniversoAno(c,{...a});
- const temporadas=[...novo.tecnico.temporadas];temporadas[temporadas.length-1]={...a,classificacoesMundo:resumirTabelas(a.classificacoesMundo)};
+ const anual={...a},novo=registrarUniversoAno(c,anual);
+ const temporadas=[...novo.tecnico.temporadas];temporadas[temporadas.length-1]={...a,classificacoesMundo:resumirTabelas(anual.classificacoesMundo),...(anual.movimentosMundo?{movimentosMundo:anual.movimentosMundo}:{}),...(anual.feitosHistoricos?{feitosHistoricos:anual.feitosHistoricos}:{})};
  return {...novo,tecnico:{...novo.tecnico,temporadas}};
 }
 function registrarUniversoAno(c,ano){
  if((c.tecnico?.universo||c.universo)?.anos?.includes(ano.ano))return c;
  const a=ano,novo={...c};registrarAnoHistoria(novo,ano);
+ if(a.tipoEquipe==='selecao'&&a.classificacoesMundo){const progressao=atualizarLigasMundoDaTemporada(c.tecnico,null,a.classificacoesMundo);novo.tecnico={...novo.tecnico,ligasMundo:progressao.ligasMundo};a.movimentosMundo=progressao.movimentos;}
  const antesMundo=c.mundo||gerarMundoJogadores(geradorTecnico(`${c.codigo||c.nome}|${a.ano}|origem-mundo`));
  // A população avança uma única vez por temporada concluída, depois de todas as copas.
  if(!(c.tecnico?.universo||c.universo)?.anos?.includes(a.ano))novo.mundo=estatisticasDasPartidas(simularTemporadaMundo(antesMundo,geradorTecnico(`${c.codigo||c.nome}|${a.ano}|evolucao-mundo`),{clubes:clubesDoMundo({...c,mundo:antesMundo}),perfis:(c.universo||c.tecnico?.universo)?.clubes,treinoClube:c.tecnico?.gestao?.cadastroUnificado&&c.tecnico.gestao.comissao?.some(p=>p.id==='preparador'&&p.ano===a.ano)?1:0,clubeControlado:c.tecnico?.gestao?.cadastroUnificado&&c.tecnico.gestao.clube===a.clube?c.tecnico.gestao.clube:null,ano:a.ano}),antesMundo,ano,c.codigo);
+ if(a.tipoEquipe==='selecao')novo.mundo={...novo.mundo,jogadores:novo.mundo.jogadores.map(p=>p.clubeNome&&novo.tecnico.ligasMundo?.[p.clubeNome]?{...p,liga:novo.tecnico.ligasMundo[p.clubeNome]}:p)};
  registrarMundoVivo(novo,ano,{antesMundo});
  return atualizarProjecaoGestao(novo);
 }
@@ -957,7 +959,7 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
     const resultado = simularAnoSelecaoTecnico(t, calcularOvrTecnico(t), forcaClubeTecnico(t), rng, {...opcoes,copasInterativas:t.copasEscolhaHabilitadas});
     const novo = {...t, ...resultado, idade:idadeAtualTecnico(c)+1, carteiraTecnico:creditarSalarioTecnico(t,t.ano,t.salario??salarioTecnico(t))};
     novo.propostas = gerarPropostasTecnico(novo,rng);
-    return {...c, idade:idadeAtualTecnico(c)+1,ano:c.ano+1,tecnico:comMetas(novo)};
+    return registrarHistoriaTecnico({...c, idade:idadeAtualTecnico(c)+1,ano:c.ano+1,tecnico:comMetas(novo)});
   }
   const ligaAtual = t.liga || CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga;
   const participantesLiga = calendarioLigaTecnico({ ...t, liga: ligaAtual });

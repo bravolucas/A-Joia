@@ -1,6 +1,6 @@
 # Escudos completos dos clubes
 
-278 arquivos reais adicionados: 220 para o catálogo internacional e 58 para estaduais/Mundial. A pesquisa cobriu 276 faltas e duas identidades confundidas pela grafia. Os 642 nomes do catálogo atual, incluindo aliases históricos de Hamburgo e Köln, agora resolvem um escudo local.
+278 arquivos reais adicionados: 220 para o catálogo internacional e 58 para estaduais/Mundial. A pesquisa cobriu 276 faltas e duas identidades confundidas pela grafia. Os 642 nomes do catálogo de 10/11/2026, incluindo aliases históricos de Hamburgo e Köln, agora resolvem um escudo local.
 
 - Guaraní do Paraguai tem arquivo próprio; Guarani do Brasil mantém o seu.
 - Boavista-RJ ganha identificação explícita nos novos estaduais; campanhas regionais antigas com `Boavista` usam o contexto `RJ` para mostrar o escudo brasileiro. Boavista de Portugal permanece separado.
@@ -16,3 +16,7 @@ O manifesto [do acervo](../../arte/escudos/acervo-adicoes-2026-11-10.json) regis
 Validação integral do commit `ffd85b3`: **454 testes de lógica e 336 testes no navegador aprovados**, além do build de produção. [GitHub Actions](https://github.com/bravolucas/A-Joia/actions/runs/42868077049) e [publicação no GitHub Pages](https://github.com/bravolucas/A-Joia/actions/runs/42868076966) concluídos com sucesso.
 
 Conferência pública em https://bravolucas.github.io/A-Joia/: JavaScript principal, CSS e módulo completo idênticos aos arquivos do build testado. Os 278 novos escudos estão no catálogo publicado (250 arquivos com URL própria HTTP 200 e 28 incorporados ao código); as 70 imagens do museu e miniaturas também retornaram HTTP 200.
+
+## Ampliação dos estaduais em 15/11/2026
+
+Foram adicionados 52 escudos reais para os representantes das 13 novas federações estaduais/DF, completando 694 nomes no catálogo. O [manifesto dos novos estaduais](../../arte/escudos/acervo-estaduais-2026-11-15.json) preserva fontes, referência, país, estado, tamanho e SHA-256 dos arquivos originais. A verificação de todos os clubes continua obrigatória; não foram utilizados emblemas genéricos ou escudos de homônimos de outro estado.

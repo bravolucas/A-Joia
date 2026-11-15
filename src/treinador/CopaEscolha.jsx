@@ -1,4 +1,5 @@
 import SimulacaoCopa from './SimulacaoCopa.jsx';
+import {TEMPO_PRE_RESULTADO_COPA} from './narrativaCopa.js';
 import CenaPenaltis from './CenaPenaltis.jsx';
 import {escolhasCopa} from './estrategiasCopas.js';
 import CenaFotografica from '../comum/CenaFotografica.jsx';
@@ -15,7 +16,7 @@ export default function CopaEscolha({campanha:c,chave,onEscolher,ocupado,onMinim
  const d=decisaoCopa(c),r=c.resultado,penaltis=d?.penaltis,disputaPenaltis=!!(d?.penaltis||r?.jogo?.penaltis),final=d?.final||r?.final,tema=temaCopa(c);
  const [revelando,R]=useState(false),[revelacao,S]=useState(null),[cobranca,C]=useState(false),[planoAnimado,P]=useState(null),timer=useRef(null),lock=useRef(false);
  useEffect(()=>()=>clearTimeout(timer.current),[]);
- const escolher=op=>{if(lock.current||ocupado)return;lock.current=true;C(!!penaltis);P(op);const plano=escolhasCopa(c,d).opcoes.find(x=>x.id===op);S({nome:plano.nome,probabilidades:penaltis?{classificacao:chancePenaltis(d.forcaUsuario,d.forcaAdv,op,final)}:chancesCopa(d.forcaUsuario,d.forcaAdv,op,final,d.perfilAdversario)});const reduzir=window.matchMedia('(prefers-reduced-motion: reduce)').matches;R(!reduzir);onEscolher(chave,op);if(reduzir)lock.current=false;else timer.current=setTimeout(()=>{R(false);lock.current=false;},1350);};
+ const escolher=op=>{if(lock.current||ocupado)return;lock.current=true;C(!!penaltis);P(op);const plano=escolhasCopa(c,d).opcoes.find(x=>x.id===op);S({nome:plano.nome,probabilidades:penaltis?{classificacao:chancePenaltis(d.forcaUsuario,d.forcaAdv,op,final)}:chancesCopa(d.forcaUsuario,d.forcaAdv,op,final,d.perfilAdversario)});const reduzir=window.matchMedia('(prefers-reduced-motion: reduce)').matches;R(!reduzir);onEscolher(chave,op);if(reduzir)lock.current=false;else timer.current=setTimeout(()=>{R(false);lock.current=false;},penaltis?1350:TEMPO_PRE_RESULTADO_COPA);};
  return <JanelaTreinador titulo={`Copa em jogo · ${c.nome}`} onFechar={onMinimizar} classe={`cce-modal cce-${tema.id}`}>
   <div className="cce-corpo" style={{'--cce-cor':tema.cor,'--cce-fundo':tema.fundo}} data-penaltis={disputaPenaltis} data-tema={tema.id} data-motivo={tema.motivo} aria-busy={revelando}>
    <CenaFotografica className="cce-foto" cena={cenaCopa(c,d)}/><div className="cce-ambiente" aria-hidden="true"><i/><i/><i/><i/><i/></div>

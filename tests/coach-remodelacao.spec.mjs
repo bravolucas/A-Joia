@@ -66,8 +66,8 @@ for (const width of [390, 1366]) {
     await expect(page.locator('.ct-rating strong')).toHaveText(String(calcularOvrTecnico(c.tecnico)));
     const ficha = await page.locator('.ct-identity').boundingBox();
     const linha = await page.locator('.ct-timeline').boundingBox();
-    if (width > 900) expect(linha.x).toBeGreaterThan(ficha.x + ficha.width);
-    else expect(linha.y).toBeGreaterThan(ficha.y);
+    expect(linha.y).toBeGreaterThan(ficha.y);
+    if(width>900){const menu=await page.getByRole('navigation',{name:'Áreas do treinador'}).boundingBox();expect(menu.x+menu.width).toBeLessThan(ficha.x);}
     await page.getByRole('button', { name: /Começar no Confiança/ }).click();
     await page.getByRole('button', { name: 'Começar temporada' }).click();
     const decisao = page.getByRole('dialog', { name: 'Decisão de pré-temporada' });

@@ -1,7 +1,7 @@
 import React,{useEffect,useState} from 'react';
 import {Escudo} from './uiTreinador.jsx';
 import {rotaEstrategiaCopa,resultadoVisualCopa,TEMPO_MOVIMENTACAO_COPA} from './narrativaCopa.js';
-export default function SimulacaoCopa({plano,resultado,usuario,estado}){
+export default function SimulacaoCopa({plano,resultado,usuario,estado,reduzirMovimento=false}){
  const [movimentacaoConcluida,M]=useState(false);
  useEffect(()=>{const timer=setTimeout(()=>M(true),TEMPO_MOVIMENTACAO_COPA);return()=>clearTimeout(timer);},[]);
  const rota=rotaEstrategiaCopa(plano),r=resultadoVisualCopa(resultado,usuario);
@@ -11,7 +11,7 @@ export default function SimulacaoCopa({plano,resultado,usuario,estado}){
    {[[110,50],[205,135],[290,85]].map(([x,y],i)=><circle key={i} cx={x} cy={y} r="8" fill="#b96f69" opacity=".75"/>)}
    <path d={rota.path} stroke="#e0cf97" strokeOpacity=".6" strokeWidth="2" strokeDasharray="5 4" fill="none"/>
    {rota.pontos.map(([x,y],i)=><g key={i}><circle cx={x} cy={y} r="10" fill="#88cfb3"/><circle cx={x} cy={y} r="15" fill="none" stroke="#88cfb333"/></g>)}
-   <circle className="cce-bola-tatica" r="5" fill="#fff5d5" stroke="#18392d"><animateMotion dur={`${TEMPO_MOVIMENTACAO_COPA/1000}s`} path={rota.path} fill="freeze" additive="replace"/></circle>
+   <circle className="cce-bola-tatica" cx={reduzirMovimento?rota.pontos[0][0]:undefined} cy={reduzirMovimento?rota.pontos[0][1]:undefined} r="5" fill="#fff5d5" stroke="#18392d">{!reduzirMovimento&&<animateMotion dur={`${TEMPO_MOVIMENTACAO_COPA/1000}s`} path={rota.path} fill="freeze" additive="replace"/>}</circle>
   </svg><span>{rota.texto}</span></div>
   {r&&movimentacaoConcluida?<div className={`cce-veredito cce-veredito-${r.estado}`} data-placar={`${r.golsCasa}-${r.golsFora}`}><small>FIM DE JOGO</small><strong>{r.titulo}</strong><div className="cce-veredito-placar"><span><Escudo estado={estado} nome={r.casa} size={27}/><b>{r.casa}</b></span><em>{r.golsCasa} <i>×</i> {r.golsFora}</em><span><Escudo estado={estado} nome={r.fora} size={27}/><b>{r.fora}</b></span></div><p>{r.descricao}</p></div>:<p className="cce-calculando">Simulando a partida…</p>}
  </div>;

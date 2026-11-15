@@ -2,7 +2,7 @@ import {feitoEstadualHistoricoValido} from '../dados/estaduaisHistoricos.js';
 import {lerPersistente} from '../simulacao/armazenamentoMundo.js';
 import {podioTemporada,destaquesMuseu,marcasMuseu} from './curadoriaMuseu.js';
 import {conquistouLiga} from '../historia/historiaFutebol.js';
-import {ANO_INICIO,CLUBES,NACIONALIDADES,LIGAS,nomeDosTitulos} from '../dados/data.js';
+import {anoRegistroTemporada,CLUBES,NACIONALIDADES,LIGAS,nomeDosTitulos} from '../dados/data.js';
 import {competenciaMuseu} from './museu.js';
 const n=x=>Number.isFinite(x)?Math.max(0,x):0;
 const texto=x=>typeof x==='string'?x:'';
@@ -10,10 +10,10 @@ const slug=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLo
 const hash=s=>[...s].reduce((h,v)=>Math.imul(h^v.charCodeAt(0),16777619)>>>0,2166136261).toString(36);
 const armazenamento=()=>{try{return globalThis.localStorage;}catch{return null;}};
 const premio=t=>/bola.?ouro|bota.?ouro|yashin|artilheiro|premio|melhor|revelacao/i.test(t.tipo||'');
-const anoDe=t=>Number.isFinite(t?.ano)?t.ano:Number.isFinite(t?.idade)?ANO_INICIO+t.idade-16:null;
+const anoDe=(t,c)=>anoRegistroTemporada(c,t);
 export const SALAS_MUSEU=[{id:'entrada',nome:'Salão de entrada',sub:'Uma vida em exposição',numero:'01'},{id:'camisas',nome:'Sala das camisas',sub:'Os lugares que viraram casa',numero:'02'},{id:'trofeus',nome:'Sala dos troféus',sub:'Cada conquista tem uma história',numero:'03'},{id:'lembrancas',nome:'Arquivo de lembranças',sub:'Os detalhes que ficaram',numero:'04'},{id:'tunel',nome:'Túnel da carreira',sub:'Volte a cada capítulo',numero:'05'},{id:'selecao',nome:'A camisa do país',sub:'Quando você representou uma nação',numero:'06'},{id:'pessoas',nome:'Quem esteve com você',sub:'Encontros que marcaram o caminho',numero:'07'},{id:'treinador',nome:'Do campo ao banco',sub:'Uma nova maneira de fazer história',numero:'08'}];
 export const CHAVE_CURADORIA='ajoia_museu_pessoal_v1';
-export function identidadeMuseuPessoal(c={},modo='rapido',temporadas=[]){const ts=c.temporadas||temporadas;return `${modo}:${c.museuId||c.codigo||hash([c.nome,c.nac||c.nacionalidade,c.primeiroClube,ts[0]?.clube,anoDe(ts[0])].join('|'))}`;}
+export function identidadeMuseuPessoal(c={},modo='rapido',temporadas=[]){const ts=c.temporadas||temporadas;return `${modo}:${c.museuId||c.codigo||hash([c.nome,c.nac||c.nacionalidade,c.primeiroClube,ts[0]?.clube,anoDe(ts[0],c)].join('|'))}`;}
 function limpoPreferencias(p={},ids){p=p&&typeof p==='object'?p:{};const permite=id=>typeof id==='string'&&(!ids||ids.has(id));return{tema:['esmeralda','noite','memoria'].includes(p.tema)?p.tema:'esmeralda',frase:typeof p.frase==='string'?p.frase.slice(0,120):'',camisa:permite(p.camisa)?p.camisa:null,favoritos:[...new Set(Array.isArray(p.favoritos)?p.favoritos.filter(permite):[])].slice(0,3)};}
 export function lerCuradoria(id,ids,storage=armazenamento()){try{return limpoPreferencias(JSON.parse(storage?.getItem(CHAVE_CURADORIA)||'{}')[id],ids);}catch{return limpoPreferencias();}}
 export function salvarCuradoria(id,p,ids,storage=armazenamento()){try{const todos=JSON.parse(storage?.getItem(CHAVE_CURADORIA)||'{}');if(!todos||typeof todos!=='object'||Array.isArray(todos))return false;const seguro=Object.fromEntries(Object.entries(todos).filter(([k])=>!['__proto__','constructor','prototype'].includes(k)));seguro[id]=limpoPreferencias(p,ids);storage?.setItem(CHAVE_CURADORIA,JSON.stringify(seguro));return !!storage;}catch{return false;}}
@@ -21,7 +21,7 @@ export function salvarCuradoria(id,p,ids,storage=armazenamento()){try{const todo
 /** Só utiliza fatos presentes no save; fotografias/objetos são representações comemorativas. */
 export function construirMuseuPessoal(c={}, {modo='rapido',temporadas}={}){
  const carreiraTecnico=Array.isArray(c.tecnico?.temporadas),temporadasTecnico=carreiraTecnico?c.tecnico.temporadas:[];
- const todas=temporadas||c.temporadas||[],vistas=new Set(),ts=todas.filter(t=>{const k=`${anoDe(t)}|${t.clube?.nome||t.clube}|${t.idade??''}`;if(vistas.has(k))return false;vistas.add(k);return true;}).map(t=>({...t,clube:typeof t.clube==='string'?t.clube:t.clube?.nome,ano:anoDe(t)}));
+ const todas=temporadas||c.temporadas||[],vistas=new Set(),ts=todas.filter(t=>{const k=`${anoDe(t,c)}|${t.clube?.nome||t.clube}|${t.idade??''}`;if(vistas.has(k))return false;vistas.add(k);return true;}).map(t=>({...t,clube:typeof t.clube==='string'?t.clube:t.clube?.nome,ano:anoDe(t,c)}));
  const nome=c.nome||'Sua carreira',nac=c.nac||c.nacionalidade,nacao=NACIONALIDADES.find(x=>x.id===nac)?.label||nac||'Seleção',objetos=[],titulos=[],memorias=[];
  const adicionar=o=>{if(!objetos.some(x=>x.id===o.id))objetos.push(o);return o;};
  const adicionarTitulo=(r,papel='Jogador',temporada)=>{if(!r?.nome)return;const comp=competenciaMuseu(r.nome),ano=Number.isFinite(r.ano)?r.ano:temporada?.ano??null,clube=r.clube||temporada?.clube||(papel==='Treinador'?c.tecnico?.clube:null)||null,k=`${papel}|${ano??'sem-ano'}|${comp.id}|${clube||''}`;if(titulos.some(t=>t.chave===k))return;

@@ -1,6 +1,6 @@
 import {COPAS_NACIONAIS,calcularVagasRapidas,nomeVaga} from '../competicoes/regrasCopasRapidas.js';
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
-import {ANO_INICIO,CLUBES,LIGAS,ESTADUAIS,nomeDosTitulos} from '../dados/data.js';
+import {anoTemporadaCarreira,CLUBES,LIGAS,ESTADUAIS,nomeDosTitulos} from '../dados/data.js';
 import {clubesDoMundo} from '../simulacao/mundoVivo.js';
 import {simularClassificacoesMundoTecnico} from '../treinador/classificacoesMundoTecnico.js';
 import {simularMundo,nomeCanonico} from '../historia/historiaFutebol.js';
@@ -17,7 +17,7 @@ export function clubesDoCompleto(c,mundo){
 /** Calendários externos são simulados uma vez; os placares do usuário prevalecem. */
 export function prepararMundoTemporada(c,card,mundo){
  if(card.calendarioMundoVersao===1)return card;
- const ano=card.ano??ANO_INICIO+c.idade-16,ligaId=card.ligaId||c.clube.liga,clube=c.clube.nome;
+ const ano=card.ano??anoTemporadaCarreira(c),ligaId=card.ligaId||c.clube.liga,clube=c.clube.nome;
  const ligas=ligasDoCompleto(c),clubes=clubesDoCompleto(c,mundo);
  const classificacoesMundo=simularClassificacoesMundoTecnico({clubes:clubes.filter(cl=>cl.liga!==ligaId&&!LIGAS[cl.liga]?.naoJogavel),ligasMundo:ligas,rng:geradorTecnico(`${c.codigo||c.nome}|${ano}|ligas-completo`)});
  if(card.classificacao?.length)classificacoesMundo[ligaId]={liga:ligaId,origem:'partidas-jogador',classificacao:card.classificacao.map(t=>({...t})),jogos:(card.jogosLiga||[]).map(j=>({...j}))};
@@ -49,7 +49,7 @@ export function vagasProximaTemporada(c,card){
  return calcularVagasRapidas({ano:card.ano,classificacoesMundo:card.classificacoesMundo,torneios:[...(card.torneiosMundo||[]),...(card.torneios||[])],ligasMundo:ligasDoCompleto(c),seed:c.codigoMundo||c.codigo||c.nome});
 }
 export function aplicarVagaTemporada(c,card){
- const ano=ANO_INICIO+c.idade-16;
+ const ano=anoTemporadaCarreira(c);
  if(c.vagasInternacionaisAno!==ano||!c.vagasLigasSimuladas?.includes(c.clube.liga))return card;
  const vaga=c.vagasInternacionaisClubes?.[c.clube.nome];
  return {...card,continental:null,continentalPendente:vaga?{nome:nomeVaga(vaga.competicao),formato:['champions','europa','conference'].includes(vaga.competicao)?'liga':'grupo',entrada:vaga.entrada}:null};

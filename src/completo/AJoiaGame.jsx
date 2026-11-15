@@ -23,7 +23,7 @@ import { ARTE } from "../comum/arte.js";
 import { TacaCompeticao } from "../comum/trofeus.jsx";
 import { competicaoDoTitulo } from "../comum/tacas.js";
 import { montarSave, resumoDoSave, salvarLocal, carregarLocal, apagarLocal, listarSaves, existeAlgumSave, baixarSave, lerArquivoSave, formatarData, normalizarSave, definirLabelSlot, SLOTS } from "./save.js";
-import { ANO_INICIO, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONFEDERACAO_POR_NACAO, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, EMOJI_NACIONALIDADE, ESPECIALIDADES_LISTA, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, FUNCOES_ELENCO, JOGOS_FASE_CONTINENTAL, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "../dados/data.js";
+import { ANO_INICIO, anoInicioCarreira, anoTemporadaCarreira, APELIDOS_TORCIDA, ATTR_SLOTS, CAMINHOS_POS_CARREIRA, CATEGORIAS_HISTORICO, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONFEDERACAO_POR_NACAO, COSMETICOS, CRITERIOS_MEMORAVEL, DECISOES_JOGO, EIXOS_APROVACAO, EMPRESARIOS, EMOJI_NACIONALIDADE, ESPECIALIDADES_LISTA, ESTADUAIS, FAN_MSGS_NEG, FAN_MSGS_POS, FASES_COPA_MUNDO, FASES_COPINHA, FASES_POR_COMPETICAO, FUNCOES_ELENCO, JOGOS_FASE_CONTINENTAL, LANCES_POR_POSICAO, LENDAS, LIGAS, LOJA_ITENS, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NUM_ATTRS, OFERTAS_PATROCINIO, ORIGENS, PALMARES_HISTORICO, PAPEIS_TATICOS, PEDIDOS_DIRETORIA, PEDIDOS_TECNICO, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, POS_GRUPO, PREPARACOES_SEMANA, REGRAS_CARTAO, RESPOSTAS_FA, RESPOSTAS_HATER, RIVAIS_PREMIO, ROTINAS_FISICAS, TIPOS_MARCO, TIPOS_NOTICIA, TIPOS_RELACAO, TONS_COLETIVA, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "../dados/data.js";
 import { nomeMundo, agregarPorCompeticao, ajustarMeta, ajustesDoContexto, aplicarCartao, aplicarEfeitoCosmetico, aplicarEfeitosVestiario, aplicarLesao, aplicarPreparacaoSemana, artilhariaLiga, attrsIniciais, atualizarTraits, avaliarApelido, avaliarConvocacao, avaliarMetaIndividual, avaliarMetasCompeticao, avaliarPermanenciaTecnico, avaliarPremios, bonusEspecialidades, bonusParceria, bonusTraitsMataMata, calcOVR, calcularSucessoDecisivo, calcularSucessoFalta, canticoDoApelido, categorizarEvento, chanceFaseCopaMundo, chanceFaseGenerica, checarMarcosEspeciais, clamp, clampR, clubeAtual, competicaoSelecaoDoAno, concorrentesSelecao, continentalDaSelecao, definirImportanciaPartida, descreverMetaPromessa, detectarJogosMemoraveis, distribuirRodadasNaJanela, dividirPorCompeticao, efeitosOstentacao, ehClassicoReal, emojiClube, empresarioPorId, encaixeNoEstilo, escalacaoProvavel, escolherRivalDoMundo, especialidadesIniciais, estadoInicialClubes, estiloTecnico, evoluirAtributos, evoluirElenco, faixaValor, fatorDesempenhoTemporada, fatorTitulosTemporada, forcaEfetivaClube, formatarDinheiro, gerarChegadaClube, gerarColetivaPosJogo, gerarContextoLance, gerarElenco, gerarEventoAmbiente, gerarMetaIndividual, gerarMetasCompeticao, gerarMundoJogadores, gerarNoticias, gerarPlacar, gerarPromessaTecnico, gerarRecordeClube, gerarRelacoesVestiario, gerarRoteiroPartida, gerarTecnico, gerarTecnicoSelecao, girarLigas, imagemPost, janelasPorLiga, labelFaseCopaMundo, labelFaseGenerica, ligasOrdenadas, logHist, marcasDeGolAtingidas, melhoresEPioresConfrontos, nacDe, nivelDaInsignia, nivelFragilidade, noticia, ovrHexGradiente, palmaresDoClube, patrocinadoresDisponiveis, pick, poisson, pontosCampanhaCopa, poolRivalPorOvr, potencialDaOrigem, precoAjustado, promessaPorId, PIRAMIDE_LIGAS, rand, rankingBolaDeOuro, rankingPorPosicao, registrarConfrontos, registrarMarco, resolverLance, resumoConfronto, riscoLesao, rodarEventoClube, salarioClube, scoreInteresseClube, seguidoresBase, simularSelecao, simularTemporada, simularTemporadaMundo, situacaoAtual, sortearAdversario, sortearCartoes, sortearClima, sortearConcorrente, sortearFormacao, sortearPorInteresse, sortearRival, statsNoClube, statsSelecao, statusNoTime, statusSelecao, temporadaLabel, tierDoTeste, tierInfo, tierTorcida, tipoResultadoFalta, todosEmpresarios, valorDeMercado, valorMundo, veredito } from "../comum/lib.js";
 import { AttrBarDelta, AttrRadar, BallIcon, ApresentacaoNovoClube, Button, CalendarioTemporadaPopup, Card, CartaoCarreira,
   CenaAposentadoria, CenaAssinaturaContrato, CenaDespedidaClube, CenaEstreia, CenaLesaoGrave, CenaLevantarTaca, CenaRivalidade, ClubDot, ComparadorTemporadas, Confetti, CountUp, CurvaEvolucao, DadoIcon, Diamond, Gema, FichaPartida, FreeKickMini, GoalMini, GraficoEvolucaoCarreira, JogadorCard, LeitorNoticia, PasseMini, PlayerFutCard, PodiumBolaDeOuro, PopupConvocacao, PopupOverlay, SilhuetaJogador, Sparkle, TelaPartidaAoVivo, TimelineCarreira, TimingBar, TrophyIcon } from "../comum/components.jsx";
@@ -326,9 +326,9 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
     const c = {
       museuId: criarIdMuseu(), ajustesCadastro: {[AJUSTE_FORTALEZA]:true},
       attrs: attrsIni, attrsAnteriores: { ...attrsIni }, potencial: potencialFinal, posicao, personalidade, nacionalidade, clubeCoracao, pernaDominante, origem: origem?.id,
-      idade: 16, clube: clubeEscolhido, forma: 0, anoNoClube: 0,
+      anoInicio: ANO_INICIO, idade: 16, clube: clubeEscolhido, forma: 0, anoNoClube: 0,
       gols: 0, assist: 0, melhorEmCampo: 0, titulos: 0, bolasDeOuro: 0, premiosIndividuais: 0, copasDoMundo: 0,
-      picoOvr: calcOVR(attrsIni, posicao), anosDesdeCopa: rand(0, 3), fama: (personalidade === "midiatico" ? 25 : 12) + (copinhaResultado?.bonus || 0),
+      picoOvr: calcOVR(attrsIni, posicao), anosDesdeCopa: 3, fama: (personalidade === "midiatico" ? 25 : 12) + (copinhaResultado?.bonus || 0),
       torcidaPorClube: { [clubeEscolhido.nome]: 40 }, cofre: 0, extrato: [], patrocinio: null, posses: [], staff: {}, investimentosClube: {}, pontosCopa: 0,
       camisaPorClube: { [clubeEscolhido.nome]: [numero] }, titulosPorClube: {}, titulosSelecao: [], clubesInteresse: [], contrato: null,
       seguidores: Math.round(seguidoresBase(calcOVR(attrsIni, posicao))),
@@ -2028,7 +2028,7 @@ function resolverTemporada(c, extraStats) {
   }
 
   function finalizarTemporada(c, card, jogosLista = [], tabelaFinal = null) {
-    const anoTemporada=ANO_INICIO+c.idade-16;
+    const anoTemporada=anoTemporadaCarreira(c);
     if(c.universo?.anos?.includes(anoTemporada))return;
     const clubeTemporada={...c.clube};
     // Motor jogo a jogo: os números da liga nascem da soma real das partidas
@@ -2532,7 +2532,7 @@ function resolverTemporada(c, extraStats) {
       const jogosDaTemporada = jogosLista.length ? jogosLista : (card.jogosLista || []);
       registrarConfrontos(c, jogosDaTemporada);
       const memoraveis = detectarJogosMemoraveis(c, jogosDaTemporada, {
-        temporadaLabel: temporadaLabel(c.idade, ANO_INICIO), idade: c.idade, clube: c.clube.nome,
+        ano: anoTemporadaCarreira(c), temporadaLabel: temporadaLabel(c.idade, anoInicioCarreira(c)), idade: c.idade, clube: c.clube.nome,
       });
       memoraveis.slice(0, 2).forEach((m) => {
         logHist(c, `⭐ Jogo memorável x ${m.adversario} (${m.golsMeu}-${m.golsAdv}): ${m.criterios.map((x) => x.label).join(", ")}.`);
@@ -2563,7 +2563,7 @@ function resolverTemporada(c, extraStats) {
 
     simularDefesas(c,card);
     const registro = {
-      idade: c.idade, temporadaLabel: temporadaLabel(c.idade, ANO_INICIO), clube: clubeTemporada.nome, clubeObj: clubeTemporada,
+      idade: c.idade, ano: anoTemporadaCarreira(c), temporadaLabel: temporadaLabel(c.idade, anoInicioCarreira(c)), clube: clubeTemporada.nome, clubeObj: clubeTemporada,
       ...card,
       classificacoesMundo:resumirTabelas(card.classificacoesMundo),
       torneiosMundo:(card.torneiosMundo||[]).map(t=>({nome:t.nome,tipo:t.tipo,campeao:t.campeao,vice:t.vice,formato:t.formato})),
@@ -2577,7 +2577,7 @@ function resolverTemporada(c, extraStats) {
       trocaTecnico, movimentoLigas,
       valorMercado: valorAtual, valorAnterior,
     };
-    {const arquivo={...c,nome,nac:nacionalidade,mundo:mundoAtualizado||mundo};registrarAtletasObservados(arquivo,{...registro,ano:ANO_INICIO+c.idade-16});registrarMundoVivo(arquivo,{...registro,classificacoesMundo:card.classificacoesMundo,torneiosMundo:card.torneiosMundo,ano:ANO_INICIO+c.idade-16},{antesMundo:mundo});c.historiaFutebol=arquivo.historiaFutebol;c.universo=arquivo.universo;}
+    {const arquivo={...c,nome,nac:nacionalidade,mundo:mundoAtualizado||mundo};registrarAtletasObservados(arquivo,{...registro,ano:anoTemporadaCarreira(c)});registrarMundoVivo(arquivo,{...registro,classificacoesMundo:card.classificacoesMundo,torneiosMundo:card.torneiosMundo,ano:anoTemporadaCarreira(c)},{antesMundo:mundo});c.historiaFutebol=arquivo.historiaFutebol;c.universo=arquivo.universo;}
     setTemporadas((t) => [...t, registro]);
     // autosave: a virada de temporada é o ponto mais seguro pra gravar
     setTimeout(async () => {
@@ -3981,7 +3981,7 @@ function resolverTemporada(c, extraStats) {
   }
   // Carimba a notícia com o clube e a idade do momento — assim ela não "muda de time" depois
   function noticiaDoMomento(c, tipo, titulo, corpo, prioridade = 1) {
-    return { ...noticia(tipo, titulo, corpo, prioridade), idade: c.idade, temporada: temporadaLabel(c.idade, ANO_INICIO), clube: c.clube?.nome, clubeObj: c.clube };
+    return { ...noticia(tipo, titulo, corpo, prioridade), idade: c.idade, temporada: temporadaLabel(c.idade, anoInicioCarreira(c)), clube: c.clube?.nome, clubeObj: c.clube };
   }
   // ao abrir o jogo, descobre se existe carreira salva (pra mostrar "Continuar")
   useEffect(() => { setTemSave(existeAlgumSave()); }, []);
@@ -4677,7 +4677,7 @@ function resolverTemporada(c, extraStats) {
                     </div>
                     <div className="shrink-0 text-right">
                       <div className="flex items-center gap-1 justify-end text-amber-400 font-stat font-bold text-sm">💰 ${formatarDinheiro(carreira.cofre)}</div>
-                      <div className="text-[9px] text-zinc-500">{temporadaLabel(carreira.idade, ANO_INICIO)}</div>
+                      <div className="text-[9px] text-zinc-500">{temporadaLabel(carreira.idade, anoInicioCarreira(carreira))}</div>
                     </div>
                   </div>
                 </Card>
@@ -4982,7 +4982,7 @@ function resolverTemporada(c, extraStats) {
                         <div className="text-[9px] text-zinc-500 uppercase tracking-widest">🗓️ Calendário da temporada — rodada {carreira.temporadaAndamento.rodadaAtual + 1}/{(carreira.temporadaAndamento.calendario || []).length}</div>
                         <button
                           onClick={() => {
-                            const ano = ANO_INICIO + (carreira.idade - 16);
+                            const ano = anoTemporadaCarreira(carreira);
                             const janelaLiga = janelasPorLiga(carreira.clube.liga).find((j) => j.ligaPrincipal);
                             const datas = distribuirRodadasNaJanela((carreira.temporadaAndamento.calendario || []).length, janelaLiga, ano);
                             setCalendarioMesAberto(datas[carreira.temporadaAndamento.rodadaAtual]?.mes ?? janelaLiga.inicioMes);
@@ -5576,7 +5576,7 @@ function resolverTemporada(c, extraStats) {
                 {pendingAbordagem && (
                   <PopupOverlay>
                     <Card className="border-blue-500/40">
-                      <div className="text-[10px] text-blue-400 uppercase tracking-widest mb-2">Abordagem da temporada {temporadaLabel(carreira.idade, ANO_INICIO)}</div>
+                      <div className="text-[10px] text-blue-400 uppercase tracking-widest mb-2">Abordagem da temporada {temporadaLabel(carreira.idade, anoInicioCarreira(carreira))}</div>
                       <p className="text-sm mb-4">Como você encara essa temporada?</p>
                       <div className="grid gap-2">
                         <button onClick={() => escolherAbordagem("dedicado")} className="text-left p-3 border border-zinc-800 rounded-sm hover:border-emerald-500">

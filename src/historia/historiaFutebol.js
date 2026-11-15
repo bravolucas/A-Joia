@@ -4,7 +4,7 @@ import {historicosEstaduaisDoClube} from '../dados/estaduaisHistoricos.js';
 import {simularEstaduaisMundo} from '../simulacao/estaduaisMundo.js';
 import {clubesDoMundo} from '../simulacao/mundoVivo.js';
 import {simularClassificacoesMundoTecnico} from '../treinador/classificacoesMundoTecnico.js';
-import {ANO_INICIO,CLUBES,LIGAS,NACIONALIDADES,ESTADUAIS,PALMARES_HISTORICO,nomeDosTitulos,palmaresInicialDe} from '../dados/data.js';
+import {anoRegistroTemporada,CLUBES,LIGAS,NACIONALIDADES,ESTADUAIS,PALMARES_HISTORICO,nomeDosTitulos,palmaresInicialDe} from '../dados/data.js';
 import {clubesParaCopas,copaNacionalMundo,COPAS_NACIONAIS,calcularVagasRapidas,nomeVaga} from '../competicoes/regrasCopasRapidas.js';
 import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternacionais.js';
 import {simularCampanhaCopa} from '../treinador/copasEscolha.js';
@@ -53,7 +53,7 @@ export function normalizarCampeaoLiga(a){
  return corrigido;
 }
 function eventosTemporada(c,a,treinador=false){
- a={...a,ano:a.ano??(Number.isFinite(a.idade)?ANO_INICIO+a.idade-16:undefined)};
+ a={...a,ano:anoRegistroTemporada(c,a)??undefined};
  const out=[],clube=a.clube||c.clube?.nome||c.clubeNome,nomes=nomeDosTitulos(a.ligaId||a.liga||CLUBES.find(x=>x.nome===clube)?.liga);
  if(a.tipoEquipe==='selecao')return out;
  for(const t of a.torneios||[])if(t.campeao&&!t.finalPendente)out.push({ano:a.ano,nome:t.nome,tipo:t.tipo,clube:t.campeao,voce:t.campeao===clube});

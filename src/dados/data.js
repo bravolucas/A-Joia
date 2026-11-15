@@ -3653,7 +3653,10 @@ export const PASSE_W = 320, PASSE_H = 210;
 
 export const PASSE_ORIGEM = { x: PASSE_W / 2, y: PASSE_H - 18 };
 
-export const ANO_INICIO = 2025;
+export const ANO_INICIO = 2026;
+export const anoInicioCarreira = c => Number.isInteger(c?.anoInicio) ? c.anoInicio : ANO_INICIO;
+export const anoTemporadaCarreira = (c, idade = c?.idade ?? 16) => anoInicioCarreira(c) + idade - 16;
+export const anoRegistroTemporada = (c, t) => Number.isInteger(t?.ano) ? t.ano : /^\d{4}\//.test(t?.temporadaLabel || "") ? Number(t.temporadaLabel.slice(0, 4)) : Number.isFinite(t?.idade) ? anoTemporadaCarreira({...c, anoInicio: c?.anoInicio ?? 2025}, t.idade) : null;
 
 export const MESES_LABEL = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 

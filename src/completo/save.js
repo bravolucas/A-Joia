@@ -1,6 +1,6 @@
 import {gravarPersistente,lerPersistente,apagarPersistente} from '../simulacao/armazenamentoMundo.js';
 import {corrigirEquilibrioClubes} from '../dados/equilibrioClubes.js';
-import {CLUBES} from '../dados/data.js';
+import {CLUBES,anoRegistroTemporada} from '../dados/data.js';
 import { registrarMuseu } from '../museu/museu.js';
 /* ===================== SISTEMA DE SAVE =====================
    Guarda a carreira no navegador (localStorage) e permite exportar/importar
@@ -158,7 +158,7 @@ const PADRAO_CARREIRA = {
 
 export function normalizarCarreira(c) {
   if (!c) return null;
-  const out = { ...PADRAO_CARREIRA, ...corrigirEquilibrioClubes(c) };
+  const out = { ...PADRAO_CARREIRA, ...corrigirEquilibrioClubes(c), anoInicio: Number.isInteger(c.anoInicio) ? c.anoInicio : 2025 };
   // garante que campos de coleção sejam do tipo certo, mesmo se vierem nulos
   Object.entries(PADRAO_CARREIRA).forEach(([k, v]) => {
     if (Array.isArray(v) && !Array.isArray(out[k])) out[k] = [];
@@ -193,9 +193,10 @@ export function normalizarTemporada(t) {
 
 export function normalizarSave(save) {
   if (!save) return null;
+  const carreira = normalizarCarreira(save.carreira);
   return {
     ...save,
-    carreira: normalizarCarreira(save.carreira),
-    temporadas: (Array.isArray(save.temporadas) ? save.temporadas : []).map(normalizarTemporada).filter(Boolean),
+    carreira,
+    temporadas: (Array.isArray(save.temporadas) ? save.temporadas : []).map(normalizarTemporada).filter(Boolean).map(t => ({...t, ano: anoRegistroTemporada(carreira,t)})),
   };
 }

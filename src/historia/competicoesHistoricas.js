@@ -1,5 +1,5 @@
 import {edicoesEstaduaisHistoricas,HISTORICO_ESTADUAIS} from '../dados/estaduaisHistoricos.js';
-import {CLUBES,LIGAS,NACIONALIDADES,ANO_INICIO,ESTADUAIS} from '../dados/data.js';
+import {CLUBES,LIGAS,NACIONALIDADES,anoRegistroTemporada,ESTADUAIS} from '../dados/data.js';
 import {eventosConhecidos,nomeCanonico,acervoInicial,galeriaClube} from './historiaFutebol.js';
 const nacional=nome=>/Copa do Mundo|Eurocopa|Copa América|Copa Africana|Copa da Ásia|Copa Ouro|Nações da Oceania/i.test(nome||'');
 const nomeComp=nome=>/^Copa do Mundo\b/i.test(nome||'')?'Copa do Mundo':nomeCanonico(nome);
@@ -12,7 +12,7 @@ export function campeoesRegistrados(c={},temporadas=c.temporadas||[]){
  for(const e of eventosConhecidos(c,temporadas))inserir(e);
  const nacao=NACIONALIDADES.find(n=>n.id===(c.nac||c.nacionalidade))?.label||c.nac||c.nacionalidade;
  for(const a of [...temporadas,...(Array.isArray(c.tecnico?.temporadas)?c.tecnico.temporadas:[])]){
-  const ano=a.ano??(Number.isFinite(a.idade)?ANO_INICIO+a.idade-16:null),eu=a.tipoEquipe==='selecao'?a.clube:nacao;
+  const ano=anoRegistroTemporada(c,a),eu=a.tipoEquipe==='selecao'?a.clube:nacao;
   for(const copa of a.torneios||[])if(copa.campeao&&!copa.finalPendente)inserir({ano,nome:copa.nome,clube:copa.campeao,tipo:copa.tipo,voce:copa.campeao===(copa.selecao||a.clube)});
   for(const t of a.titulos||[])if(typeof t==='object'&&['copaMundo','continentalSelecao'].includes(t.tipo))inserir({ano,nome:t.nome,clube:eu,tipo:t.tipo,voce:true});
   if(a.tipoEquipe==='selecao')for(const nome of a.titulosConquistados||[])inserir({ano,nome,clube:eu,voce:true});

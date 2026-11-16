@@ -1,4 +1,5 @@
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
+import { MINIMOS_ELENCO, diagnosticarElenco } from '../simulacao/profundidadeElenco.js';
 import {ampliarParticipantesInternacionais,clubeInternacional} from '../competicoes/clubesInternacionais.js';
 import {adversarioCopaPorFase} from '../treinador/copasEscolha.js';
 import { anoTemporadaCarreira, AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLASSICOS, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONDICOES_CLIMA, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESPECIALIDADES_LISTA, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, FORMACOES_TATICAS, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "../dados/data.js";
@@ -1772,7 +1773,47 @@ export function nomeMundo(nac) {
 
 /* Composição realista de um elenco (~24 jogadores): posição -> quantidade.
    Clubes maiores têm elenco um pouco mais fundo (bancos de reserva maiores). */
-const COMPOSICAO_ELENCO = [["GOL", 2], ["ZAG", 3], ["LD", 1], ["LE", 1], ["VOL", 2], ["MC", 2], ["MEI", 2], ["PD", 1], ["PE", 1], ["SA", 1], ["ATA", 2]];
+const COMPOSICAO_ELENCO = Object.entries(MINIMOS_ELENCO);
+
+/**
+ * Reposição de emergência da base: mantém a cobertura por posição sem
+ * apagar atletas existentes, inclusive em elencos reais incompletos.
+ * Usa o RNG recebido pelo motor para permitir reprodução dos testes.
+ */
+export function completarCarenciasMundo(jogadores, clubes = CLUBES, rng = Math.random) {
+  const novos = [...jogadores];
+  let id = novos.reduce((maior, j) => Number.isInteger(j.id) ? Math.max(maior, j.id) : maior, 0) + 1;
+  const nacionalidade = clube => {
+    const ligaNac = { brasileiro:'BRA', brasileirao:'BRA', serieB:'BRA', inglaterra:'ENG', espanha:'ESP', italia:'ITA', alemanha:'ALE', franca:'FRA', portugal:'POR' };
+    const local = ligaNac[clube.liga];
+    return local && rng() < .85 ? local : NACS_MUNDO[Math.floor(rng() * NACS_MUNDO.length)];
+  };
+  for (const clube of clubes) {
+    const carencias = diagnosticarElenco(novos, {clubeNome:clube.nome}).faltantes;
+    for (const [posicao, qtd] of Object.entries(carencias)) {
+      for (let n = 0; n < qtd; n++) {
+        const nac = nacionalidade(clube);
+        const nomes = NOMES_MUNDO[nac] || NOMES_MUNDO.BRA;
+        const escolha = lista => lista[Math.min(lista.length - 1, Math.floor(rng() * lista.length))];
+        const teto = clampR(Math.round(clube.forca + Math.floor(rng()*21) - 8), 50, 98);
+        const ovr = clampR(teto - (5 + Math.floor(rng()*16)), 38, 90);
+        novos.push({
+          id:id++, nome:`${escolha(nomes.pri)} ${escolha(nomes.sob)}`, nac, posicao,
+          idade:16 + Math.floor(rng()*5), ovr, potencial:Math.max(teto,ovr),
+          picoIdade:26 + Math.floor(rng()*5), clubeNome:clube.nome,
+          clubeOrigem:clube.nome, liga:clube.liga, daBase:true,
+          traco:escolha(TRACOS_MUNDO).id, estilo:escolha(ESTILOS_JOGO_MUNDO).id,
+          gols:0, assist:0, jogos:0, nota:0,
+          carreira:{gols:0,assist:0,jogos:0,titulos:0,bolasDeOuro:0,premios:0,temporadas:0},
+          aposentado:false, contrato:3,
+          salario:Math.max(3,Math.round(ovr**2/220)),
+          valor:Math.max(100,Math.round(ovr**3/180*1.2)),
+        });
+      }
+    }
+  }
+  return novos;
+}
 
 export function gerarMundoJogadores(rng = Math.random) {
 
@@ -1823,7 +1864,7 @@ export function gerarMundoJogadores(rng = Math.random) {
       }
     });
   });
-  return { jogadores, elencosCompletos:true, temporada: 0, historicoBolaDeOuro: [] };
+  return { jogadores: completarCarenciasMundo(jogadores, CLUBES, rng), elencosCompletos:true, temporada: 0, historicoBolaDeOuro: [] };
 }
 
 export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES, perfis = {}, clubeControlado = null, treinoClube = 0, ano = mundo.anoCalendario, registrarPremio = true} = {}) {
@@ -1917,7 +1958,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
     });
   }
   if(mundo.cadastroElencos)for(const p of jogadores)if(!Number.isInteger(p.contrato)){p.contrato=p.clubeNome?3:0;p.salario=Math.max(3,Math.round(p.ovr**2/220));p.valor=Math.max(100,Math.round(p.ovr**3/180*(p.idade<24?1.2:.7)));}
-  const jogadoresLimpos = jogadores.filter((j) => !j.aposentado || j.idade <= 45);
+  const jogadoresLimpos = completarCarenciasMundo(jogadores.filter((j) => !j.aposentado || j.idade <= 45), clubes, rng);
   // Hall da fama: registra quem ficou no topo do ranking mundial nessa
   // temporada — histórico existia declarado, mas nunca era preenchido.
   const candidatos = jogadoresLimpos.filter((j) => !j.aposentado && j.jogos > 0);

@@ -43,3 +43,42 @@ export function lerHistoricoTemporadas(jogador) {
       ovrFinal, jogos, gols, assistencias, nota,
     }));
 }
+
+/**
+ * Premiações individuais vinculadas ao ID do atleta (não ao nome).
+ * Cada tupla: [temporada, ano, tipo, clube]. Permite que o jogador receba
+ * outros prêmios no futuro sem alterar o formato das temporadas anteriores.
+ */
+export function registrarPremioIndividual(jogador, {
+  temporada, ano = null, tipo = 'bola-de-ouro', clube = null,
+} = {}) {
+  const anteriores = Array.isArray(jogador?.premiacoesIndividuais)
+    ? jogador.premiacoesIndividuais : [];
+  if (!Number.isSafeInteger(temporada) || temporada < 1 || !tipo) return anteriores;
+  const registro = [temporada, Number.isInteger(ano) ? ano : null, tipo, clube];
+  return [...anteriores.filter(r =>
+    Array.isArray(r) && !(r[0] === temporada && r[2] === tipo)), registro]
+    .slice(-LIMITE_HISTORICO_TEMPORADAS);
+}
+
+export function lerPremiosIndividuais(jogador) {
+  if (!Array.isArray(jogador?.premiacoesIndividuais)) return [];
+  return jogador.premiacoesIndividuais
+    .filter(r => Array.isArray(r) && r.length >= 4)
+    .map(([temporada, ano, tipo, clube]) => ({temporada, ano, tipo, clube}));
+}
+
+/** Recupera negociações do histórico já gravado no cadastro unificado. */
+export function lerMovimentacoesJogador(jogador) {
+  if (!Array.isArray(jogador?.movimentos)) return [];
+  return jogador.movimentos
+    .filter(m => m && ['transferencia', 'compra', 'venda', 'fim-contrato'].includes(m.tipo))
+    .map(m => ({
+      temporada: Number.isInteger(m.temporada) ? m.temporada : null,
+      ano: Number.isInteger(m.ano) ? m.ano : null,
+      tipo: m.tipo,
+      de: m.de ?? null,
+      para: m.para ?? null,
+      valor: m.valor ?? null,
+    }));
+}

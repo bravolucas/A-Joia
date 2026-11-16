@@ -5,6 +5,7 @@ import {clubesDoMundo} from '../simulacao/mundoVivo.js';
 import {simularClassificacoesMundoTecnico} from '../treinador/classificacoesMundoTecnico.js';
 import {simularMundo,nomeCanonico} from '../historia/historiaFutebol.js';
 import {geradorTecnico} from '../treinador/momentosTecnico.js';
+import {registrarPremioIndividual} from '../simulacao/historicoJogadorMundo.js';
 import {creditarTitulo} from '../comum/lib.js';
 
 export function ligasDoCompleto(c){
@@ -42,7 +43,14 @@ export function registrarPremioCalendario(mundo,vencedor){
  if(!mundo||!vencedor||mundo.historicoBolaDeOuro?.some(t=>t.temporada===mundo.temporada))return mundo;
  const registro={temporada:mundo.temporada,nome:vencedor.nome,clube:vencedor.clube,ovr:vencedor.ovr,gols:vencedor.gols,assist:vencedor.assist,...(vencedor.voce?{voce:true}:{id:vencedor.id})};
  const historicoBolaDeOuro=[...(mundo.historicoBolaDeOuro||[]).filter(t=>t.temporada!==mundo.temporada),registro].slice(-30);
- return {...mundo,historicoBolaDeOuro,jogadores:mundo.jogadores.map(p=>vencedor.id!=null&&p.id===vencedor.id&&!vencedor.voce?{...p,carreira:{...p.carreira,bolasDeOuro:(p.carreira?.bolasDeOuro||0)+1}}:p)};
+ return {...mundo,historicoBolaDeOuro,jogadores:mundo.jogadores.map(p=>vencedor.id!=null&&p.id===vencedor.id&&!vencedor.voce?{
+  ...p,
+  carreira:{...p.carreira,bolasDeOuro:(p.carreira?.bolasDeOuro||0)+1},
+  premiacoesIndividuais:registrarPremioIndividual(p,{
+    temporada:mundo.temporada, ano:mundo.anoCalendario,
+    tipo:'bola-de-ouro', clube:vencedor.clube,
+  }),
+}:p)};
 }
 
 export function vagasProximaTemporada(c,card){

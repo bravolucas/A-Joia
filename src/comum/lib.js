@@ -1960,7 +1960,19 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
   });
   // repõe os aposentados com jovens promessas, mantendo a população estável
   const aposentadosAgora = jogadores.filter((j) => j.aposentado).length - mundo.jogadores.filter((j) => j.aposentado).length;
-  let proxId = Math.max(0, ...mundo.jogadores.map((j) => j.id).filter(Number.isFinite)) + 1;
+  // A reposição por aposentadoria também respeita IDs de saves legados
+  // armazenados como texto, inclusive os numéricos.
+  const idsMundo = new Set(jogadores.map(j => String(j.id)));
+  let proxId = jogadores.reduce((maior, j) => {
+    const valor = Number(j.id);
+    return Number.isSafeInteger(valor) && valor >= 0 ? Math.max(maior, valor) : maior;
+  }, 0) + 1;
+  const proximoIdAposentadoria = () => {
+    while (idsMundo.has(String(proxId))) proxId++;
+    const novo = proxId++;
+    idsMundo.add(String(novo));
+    return novo;
+  };
   const idsAposentados=new Set(mundo.jogadores.filter(j=>j.aposentado).map(j=>j.id));
   const novasAposentadorias=jogadores.filter(j=>j.aposentado&&!idsAposentados.has(j.id));
   for (let i = 0; i < Math.max(0, aposentadosAgora); i++) {
@@ -1975,7 +1987,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
     const nac = nacLocal && rng() < .85 ? nacLocal : pick(NACS_MUNDO);
     const teto = clampR(Math.round(clube.forca + rand(-4, 12)), 60, 96);
     jogadores.push({
-      id: proxId++, nome: nomeMundo(nac), nac, posicao: aposentado?.posicao||pick(POSICOES).id,
+      id: proximoIdAposentadoria(), nome: nomeMundo(nac), nac, posicao: aposentado?.posicao||pick(POSICOES).id,
       idade: rand(16, 19), ovr: clampR(teto - rand(10, 20), 48, 74), potencial: teto, picoIdade: rand(26, 30),
       clubeNome: clube.nome, clubeOrigem: clube.nome, liga: clube.liga,
       traco: pick(TRACOS_MUNDO).id, estilo: pick(ESTILOS_JOGO_MUNDO).id,

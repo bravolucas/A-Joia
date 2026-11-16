@@ -51,3 +51,16 @@ test('simulação de 30 anos mantém elencos mínimos e controla criação exces
    assert.equal(atletas.length,66);
  }
 });
+
+test('saves antigos com IDs em string não criam colisões ao promover atletas',()=>{
+ const antigos=[
+  {id:'1',nome:'Jogador histórico',posicao:'GOL',clubeNome:'Clube brasileiro',ovr:70},
+  {id:'999',nome:'Outro jogador',posicao:'ATA',clubeNome:'Clube inglês',ovr:70},
+  {id:'legado:base:1',nome:'Base antiga',posicao:'MC',clubeNome:'Clube pequeno',ovr:70},
+ ];
+ const completo=completarCarenciasMundo(antigos,clubes,geradorTecnico('ids-legados'));
+ const ids=completo.map(j=>String(j.id));
+ assert.equal(new Set(ids).size,ids.length);
+ assert.deepEqual(completo.slice(0,antigos.length),antigos);
+ for(const clube of clubes) assert.equal(diagnosticarElenco(completo,{clubeNome:clube.nome}).totalFaltante,0);
+});

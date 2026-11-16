@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { registrarHistoricoTemporada, lerHistoricoTemporadas, registrarPremioIndividual, lerPremiosIndividuais, lerMovimentacoesJogador, LIMITE_HISTORICO_TEMPORADAS } from '../src/simulacao/historicoJogadorMundo.js';
+import { registrarHistoricoTemporada, lerHistoricoTemporadas, registrarPremioIndividual, lerPremiosIndividuais, lerMovimentacoesJogador, creditarTitulosAtleta, lerTitulosAtleta, LIMITE_HISTORICO_TEMPORADAS } from '../src/simulacao/historicoJogadorMundo.js';
+import {LIGAS} from '../src/dados/data.js';
 import { registrarPremioCalendario } from '../src/completo/mundoTemporada.js';
 import { estatisticasDasPartidas } from '../src/simulacao/estatisticasMundo.js';
 import { completarCarenciasMundo, simularTemporadaMundo } from '../src/comum/lib.js';
@@ -166,4 +167,49 @@ test('placares definitivos atualizam o histórico sazonal e preservam os dados d
   assert.equal(registro.assistencias,p.assist);
  }
  assert.deepEqual(estatisticasDasPartidas(projecao,antes,card,'placares-historico'),resultado);
+});
+
+test('título coletivo exige partida na competição e no clube campeão', () => {
+ const competicao='Brasileirão';
+ const jogador={
+  clubeNome:'Equipe B',clubeTemporada:'Equipe A',
+  historicoTemporadas:[[1,2027,'Equipe A','brasileirao',20,67,69,4,2,0,7]],
+  carreira:{titulos:0},
+  porCompeticao:[{nome:competicao,jogos:4},{nome:'Copa do Brasil',jogos:0}],
+ };
+ const campeoes=[
+  {clube:'Equipe A',nome:competicao,tipo:'liga',ano:2027},
+  {clube:'Equipe A',nome:'Copa do Brasil',tipo:'copa',ano:2027},
+  {clube:'Equipe B',nome:'Outra competição',tipo:'copa',ano:2027},
+ ];
+ const anterior=structuredClone(jogador);
+ const premiado=creditarTitulosAtleta(jogador,campeoes,1);
+ assert.deepEqual(jogador,anterior);
+ assert.equal(premiado.carreira.titulos,1);
+ assert.deepEqual(lerTitulosAtleta(premiado),[{temporada:1,ano:2027,tipo:'liga',nome:competicao,clube:'Equipe A'}]);
+ assert.equal(creditarTitulosAtleta(premiado,campeoes,1),premiado,'duplicidade não deve criar cópia ou título');
+ assert.deepEqual(lerTitulosAtleta(creditarTitulosAtleta({...jogador,porCompeticao:[]},campeoes,1)),[]);
+});
+
+test('títulos de calendário seguem só jogadores que disputaram a competição no campeão', () => {
+ const antes={jogadores:completarCarenciasMundo([],clubes,geradorTecnico('titulos-placares')),temporada:0};
+ const projetado=simularTemporadaMundo(antes,geradorTecnico('titulos-ano'),{clubes,ano:2027});
+ const liga=LIGAS.brasileirao.nome;
+ const card={ano:2027,classificacoesMundo:{brasileirao:{jogos:[
+  {casa:'Equipe A',fora:'Equipe B',golsCasa:1,golsFora:0},
+ ]}},campeoesCalendarioMundo:[
+   {clube:'Equipe A',nome:liga,tipo:'liga',ano:2027},
+   {clube:'Equipe A',nome:'Copa do Brasil',tipo:'copa',ano:2027},
+ ]};
+ const resultado=estatisticasDasPartidas(projetado,antes,card,'titulos-historico');
+ const comTitulo=resultado.jogadores.filter(j=>lerTitulosAtleta(j).length>0);
+ assert.ok(comTitulo.length>0);
+ for(const p of comTitulo){
+  assert.equal(p.clubeTemporada,'Equipe A');
+  assert.equal(p.carreira.titulos,1);
+  assert.equal(lerTitulosAtleta(p)[0].nome,liga);
+  assert.ok(p.porCompeticao.some(comp=>comp.nome===liga&&comp.jogos>0));
+ }
+ assert.ok(resultado.jogadores.filter(j=>j.clubeTemporada==='Equipe B').every(j=>lerTitulosAtleta(j).length===0));
+ assert.deepEqual(estatisticasDasPartidas(projetado,antes,card,'titulos-historico'),resultado);
 });

@@ -2026,7 +2026,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
   let historicoBolaDeOuro = mundo.historicoBolaDeOuro || [];
   if (registrarPremio && candidatos.length) {
     const vencedor = candidatos.reduce((a, b) => (scoreJogadorMundo(b) > scoreJogadorMundo(a) ? b : a));
-    historicoBolaDeOuro = [...historicoBolaDeOuro, { temporada: (mundo.temporada || 0) + 1, nome: vencedor.nome, clube: vencedor.clubeNome, ovr: vencedor.ovr, gols: vencedor.gols, assist: vencedor.assist }].slice(-30);
+    historicoBolaDeOuro = [...historicoBolaDeOuro, { temporada: (mundo.temporada || 0) + 1, id: vencedor.id, nome: vencedor.nome, clube: vencedor.clubeTemporada ?? vencedor.clubeNome, ovr: vencedor.ovr, gols: vencedor.gols, assist: vencedor.assist }].slice(-30);
     vencedor.carreira.bolasDeOuro = (vencedor.carreira.bolasDeOuro || 0) + 1;
     vencedor.premiacoesIndividuais = registrarPremioIndividual(vencedor, {
       temporada: (mundo.temporada || 0) + 1, ano,

@@ -1788,8 +1788,16 @@ export function completarCarenciasMundo(jogadores, clubes = CLUBES, rng = Math.r
     const local = ligaNac[clube.liga];
     return local && rng() < .85 ? local : NACS_MUNDO[Math.floor(rng() * NACS_MUNDO.length)];
   };
+  // Índice de jogadores por clube: evita varrer todo o mundo para cada elenco.
+  const porClube = new Map();
+  for (const atleta of novos) {
+    if (!atleta || atleta.aposentado || !atleta.clubeNome) continue;
+    if (!porClube.has(atleta.clubeNome)) porClube.set(atleta.clubeNome, []);
+    porClube.get(atleta.clubeNome).push(atleta);
+  }
   for (const clube of clubes) {
-    const carencias = diagnosticarElenco(novos, {clubeNome:clube.nome}).faltantes;
+    const atletasDoClube = porClube.get(clube.nome) || [];
+    const carencias = diagnosticarElenco(atletasDoClube).faltantes;
     for (const [posicao, qtd] of Object.entries(carencias)) {
       for (let n = 0; n < qtd; n++) {
         const nac = nacionalidade(clube);

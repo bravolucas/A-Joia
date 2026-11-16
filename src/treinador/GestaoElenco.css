@@ -14,3 +14,9 @@
 .ge-historico-tabela tbody tr:hover{background:#ffffff08}
 .ge-historico-vazio{padding:22px 10px;font-size:12px;color:#a9bac5}
 @media(max-width:650px){.ct-modal.ge-historico-modal{width:96vw}.ge-historico-painel{padding:14px}.ge-historico-scroll{max-height:55dvh}.ge-historico-tabela th,.ge-historico-tabela td{padding:10px}}
+
+.ge-eventos{margin-top:18px;border-top:1px solid #ffffff24;padding-top:14px}
+.ge-eventos h4{font-size:12px;color:#bfe7d8;margin:0 0 10px;font-weight:750}
+.ge-eventos ul{list-style:none;margin:0;padding:0;max-height:155px;overflow:auto}
+.ge-eventos li{padding:8px 0;color:#b9cbd7;font-size:11px;border-bottom:1px solid #ffffff11;line-height:1.55}
+.ge-eventos li strong{color:#ecf5f1}

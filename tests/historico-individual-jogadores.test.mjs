@@ -213,3 +213,19 @@ test('títulos de calendário seguem só jogadores que disputaram a competição
  assert.ok(resultado.jogadores.filter(j=>j.clubeTemporada==='Equipe B').every(j=>lerTitulosAtleta(j).length===0));
  assert.deepEqual(estatisticasDasPartidas(projetado,antes,card,'titulos-historico'),resultado);
 });
+
+test('Bola de Ouro do calendário usa ano da temporada, não o próximo ano já avançado', () => {
+ const temporada=2, anoTemporada=2028;
+ const mundo={
+  temporada,anoCalendario:2029,
+  jogadores:[
+   {id:1,nome:'Atleta Campeão',carreira:{bolasDeOuro:0},
+    historicoTemporadas:[[2,anoTemporada,'Equipe A','brasileirao',24,82,85,36,20,6,8.1]]},
+  ],
+ };
+ const resultado=registrarPremioCalendario(mundo,{
+  id:1,nome:'Atleta Campeão',clube:'Equipe A',ovr:85,gols:20,assist:6,
+ });
+ assert.equal(lerPremiosIndividuais(resultado.jogadores[0])[0].ano,anoTemporada);
+ assert.equal(mundo.jogadores[0].premiacoesIndividuais,undefined);
+});

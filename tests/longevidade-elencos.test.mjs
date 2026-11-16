@@ -64,3 +64,17 @@ test('saves antigos com IDs em string não criam colisões ao promover atletas',
  assert.deepEqual(completo.slice(0,antigos.length),antigos);
  for(const clube of clubes) assert.equal(diagnosticarElenco(completo,{clubeNome:clube.nome}).totalFaltante,0);
 });
+
+test('aposentadoria não reutiliza ID numérico já salvo como texto',()=>{
+ const atletas=completarCarenciasMundo([],clubes,geradorTecnico('aposentadoria-id'));
+ const original=atletas[0];
+ // O identificador numérico textual precisa permanecer reservado na troca anual.
+ const legado={...original,id:'9999',idade:39,contrato:3};
+ const elenco=[legado,...atletas.slice(1)];
+ const mundo={jogadores:elenco,cadastroElencos:true,temporada:0};
+ const proximo=simularTemporadaMundo(mundo,geradorTecnico('aposentadoria-id-ano'),{clubes});
+ const ids=proximo.jogadores.map(j=>String(j.id));
+ assert.equal(new Set(ids).size,ids.length);
+ assert.ok(proximo.jogadores.some(j=>j.id==='9999'&&j.aposentado));
+ for(const clube of clubes)assert.equal(diagnosticarElenco(proximo.jogadores,{clubeNome:clube.nome}).totalFaltante,0);
+});

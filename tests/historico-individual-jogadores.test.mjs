@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { registrarHistoricoTemporada, lerHistoricoTemporadas, registrarPremioIndividual, lerPremiosIndividuais, lerMovimentacoesJogador, LIMITE_HISTORICO_TEMPORADAS } from '../src/simulacao/historicoJogadorMundo.js';
 import { registrarPremioCalendario } from '../src/completo/mundoTemporada.js';
+import { estatisticasDasPartidas } from '../src/simulacao/estatisticasMundo.js';
 import { completarCarenciasMundo, simularTemporadaMundo } from '../src/comum/lib.js';
 import { geradorTecnico } from '../src/treinador/momentosTecnico.js';
 
@@ -140,4 +141,29 @@ test('leitura de movimentações filtra dados legados e conserva origem e destin
  assert.deepEqual(res[0],{temporada:2,ano:2028,tipo:'transferencia',de:'Equipe A',para:'Equipe B',valor:null});
  assert.deepEqual(res[1],{temporada:null,ano:2029,tipo:'fim-contrato',de:'Equipe B',para:null,valor:0});
  assert.deepEqual(lerMovimentacoesJogador({}),[]);
+});
+
+test('placares definitivos atualizam o histórico sazonal e preservam os dados de origem', () => {
+ const antes={jogadores:completarCarenciasMundo([],clubes,geradorTecnico('historico-placares')),temporada:0};
+ const projecao=simularTemporadaMundo(antes,geradorTecnico('projecao-placares'),{clubes,ano:2027});
+ const card={ano:2027,classificacoesMundo:{brasileirao:{jogos:[
+  {casa:'Equipe A',fora:'Equipe B',golsCasa:3,golsFora:1},
+ ]}}};
+ const snapshot=structuredClone(projecao);
+ const resultado=estatisticasDasPartidas(projecao,antes,card,'placares-historico');
+ assert.deepEqual(projecao,snapshot,'o recálculo não pode modificar a projeção de origem');
+ const recalculados=resultado.jogadores.filter(p=>p.origemEstatisticas==='partidas');
+ assert.ok(recalculados.length>0);
+ for(const p of recalculados){
+  const original=antes.jogadores.find(j=>j.id===p.id);
+  const registro=lerHistoricoTemporadas(p).at(-1);
+  assert.equal(registro.temporada,1);
+  assert.equal(registro.clube,original.clubeNome);
+  assert.equal(registro.idadeInicial,original.idade);
+  assert.equal(registro.ovrInicial,original.ovr);
+  assert.equal(registro.jogos,p.jogos);
+  assert.equal(registro.gols,p.gols);
+  assert.equal(registro.assistencias,p.assist);
+ }
+ assert.deepEqual(estatisticasDasPartidas(projecao,antes,card,'placares-historico'),resultado);
 });

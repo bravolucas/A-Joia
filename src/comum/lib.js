@@ -1945,7 +1945,13 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
   for (let i = 0; i < Math.max(0, aposentadosAgora); i++) {
     const aposentado=novasAposentadorias[i];
     const clube = clubes.find(c=>c.nome===aposentado?.clubeNome)||pick(mundo.cadastroElencos?clubes.filter(cl=>cl.nome!==clubeControlado&&(ocupacao.get(cl.nome)||0)<24):clubes)||{nome:null,forca:60,liga:null};
-    const nac = pick(NACS_MUNDO);
+    // A maioria das revelações acompanha o país da liga; estrangeiros continuam possíveis.
+    const nacionalidadeLiga = {
+      brasileirao:'BRA', serieB:'BRA', inglaterra:'ENG', espanha:'ESP',
+      italia:'ITA', alemanha:'ALE', franca:'FRA', portugal:'POR',
+    };
+    const nacLocal = nacionalidadeLiga[clube.liga];
+    const nac = nacLocal && rng() < .85 ? nacLocal : pick(NACS_MUNDO);
     const teto = clampR(Math.round(clube.forca + rand(-4, 12)), 60, 96);
     jogadores.push({
       id: proxId++, nome: nomeMundo(nac), nac, posicao: aposentado?.posicao||pick(POSICOES).id,

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { completarCarenciasMundo, gerarMundoJogadores, simularTemporadaMundo } from '../src/comum/lib.js';
+import { completarCarenciasMundo, simularTemporadaMundo } from '../src/comum/lib.js';
 import { diagnosticarElenco } from '../src/simulacao/profundidadeElenco.js';
 import { geradorTecnico } from '../src/treinador/momentosTecnico.js';
 
@@ -31,9 +31,9 @@ test('reposição é idempotente e não multiplica atletas na mesma temporada',(
  assert.deepEqual(a,b);
 });
 
-test('aposentadorias e transferências não deixam posição descoberta após cada temporada',()=>{
+test('motor completo mantém cobertura por 30 temporadas com aposentadorias e transferências',()=>{
  let mundo={jogadores:completarCarenciasMundo([],clubes,geradorTecnico('inicio')),cadastroElencos:true,temporada:0};
- for(let ano=0;ano<5;ano++){
+ for(let ano=0;ano<30;ano++){
    mundo=simularTemporadaMundo(mundo,geradorTecnico('temporada'+ano),{clubes});
    for(const clube of clubes)
      assert.equal(diagnosticarElenco(mundo.jogadores,{clubeNome:clube.nome}).totalFaltante,0,`${clube.nome}, temporada ${ano+1}`);

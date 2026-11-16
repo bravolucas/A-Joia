@@ -18,6 +18,7 @@ for (const width of [390, 1366]) test(`histórico individual no elenco: temporad
   const dados={
     historicoTemporadas:[[1,2029,'Avaí','serieB',21,64,68,31,7,3,7.45]],
     premiacoesIndividuais:[[1,2029,'bola-de-ouro','Avaí']],
+    titulosConquistados:[[1,2029,'liga','Brasileirão Série B','Avaí']],
     movimentos:[{tipo:'transferencia',ano:2029,temporada:1,de:'Figueirense',para:'Avaí',valor:null}],
   };
   c.mundo.jogadores=c.mundo.jogadores.map(j=>String(j.id)===String(id)?{...j,...dados}:j);
@@ -37,6 +38,8 @@ for (const width of [390, 1366]) test(`histórico individual no elenco: temporad
   await expect(historico.getByRole('region',{name:`Temporadas de ${atleta.nome}`})).toContainText('2029');
   await expect(historico.getByRole('region',{name:`Temporadas de ${atleta.nome}`})).toContainText('7.45');
   await expect(historico).toContainText('Bola de Ouro');
+  await expect(historico).toContainText('Brasileirão Série B');
+  await expect(historico).toContainText('Títulos conquistados');
   await expect(historico).toContainText('Figueirense');
   await expect(historico).toContainText('Transferência');
   await page.keyboard.press('Escape');

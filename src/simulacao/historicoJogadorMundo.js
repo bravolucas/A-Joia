@@ -82,3 +82,56 @@ export function lerMovimentacoesJogador(jogador) {
       valor: m.valor ?? null,
     }));
 }
+
+/**
+ * Títulos coletivos só são creditados a atletas que disputaram partidas da
+ * competição pelo clube campeão na temporada correspondente.
+ *
+ * Tupla: [temporada, ano, tipo, competicao, clube].
+ * Os campeões vêm do calendário oficial do mundo, não de sorteios do atleta.
+ */
+export const LIMITE_TITULOS_JOGADOR = 120;
+
+export function creditarTitulosAtleta(jogador, campeoes = [], temporada) {
+  if (!Number.isSafeInteger(temporada) || temporada < 1 ||
+      !Array.isArray(campeoes) || !campeoes.length) return jogador;
+  const historico = jogador?.historicoTemporadas?.find(
+    r => Array.isArray(r) && r[0] === temporada
+  );
+  const clubeTemporada = historico?.[2] ?? jogador?.clubeTemporada;
+  if (!clubeTemporada) return jogador;
+  const disputadas = new Set((jogador.porCompeticao || [])
+    .filter(c => c && c.jogos > 0 && c.nome)
+    .map(c => c.nome));
+  if (!disputadas.size) return jogador;
+
+  const atuais = Array.isArray(jogador.titulosConquistados)
+    ? jogador.titulosConquistados : [];
+  const chaves = new Set(atuais.filter(Array.isArray)
+    .map(r => [r[0], r[2], r[3], r[4]].join('|')));
+  const novos = [];
+  for (const titulo of campeoes) {
+    if (!titulo || titulo.clube !== clubeTemporada || !titulo.nome ||
+        !disputadas.has(titulo.nome)) continue;
+    const chave = [temporada, titulo.tipo, titulo.nome, titulo.clube].join('|');
+    if (chaves.has(chave)) continue;
+    chaves.add(chave);
+    novos.push([temporada, Number.isInteger(titulo.ano) ? titulo.ano : historico?.[1] ?? null,
+      titulo.tipo ?? 'titulo', titulo.nome, titulo.clube]);
+  }
+  if (!novos.length) return jogador;
+  return {
+    ...jogador,
+    titulosConquistados: [...atuais, ...novos].slice(-LIMITE_TITULOS_JOGADOR),
+    carreira: {...jogador.carreira, titulos:(jogador.carreira?.titulos || 0) + novos.length},
+  };
+}
+
+export function lerTitulosAtleta(jogador) {
+  if (!Array.isArray(jogador?.titulosConquistados)) return [];
+  return jogador.titulosConquistados
+    .filter(r => Array.isArray(r) && r.length >= 5)
+    .map(([temporada, ano, tipo, nome, clube]) => ({
+      temporada, ano, tipo, nome, clube,
+    }));
+}

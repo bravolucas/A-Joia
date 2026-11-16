@@ -1894,7 +1894,19 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
   const nomeMundo=nac=>gerarNomeRegional(nac,rng);
   const poisson=media=>{let p=1,n=0;const limite=Math.exp(-Math.max(0,media));do{n++;p*=rng();}while(p>limite&&n<300);return n-1;};
   const ocupacao=new Map();for(const p of mundo.jogadores)if(!p.aposentado)ocupacao.set(p.clubeNome,(ocupacao.get(p.clubeNome)||0)+1);
-  const mover=(p,d)=>{ocupacao.set(p.clubeNome,(ocupacao.get(p.clubeNome)||1)-1);ocupacao.set(d.nome,(ocupacao.get(d.nome)||0)+1);if(mundo.cadastroElencos)p.movimentos=[...(p.movimentos||[]),{ano,tipo:'transferencia',de:p.clubeNome,para:d.nome,valor:null}];p.clubeNome=d.nome;p.liga=d.liga;if(Number.isInteger(p.contrato))p.contrato=3;};
+  const mover=(p,d)=>{
+    const anterior=p.clubeNome??null;
+    ocupacao.set(anterior,(ocupacao.get(anterior)||1)-1);
+    ocupacao.set(d.nome,(ocupacao.get(d.nome)||0)+1);
+    // Toda carreira mantém registro de transferências, inclusive o mundo
+    // gerado antes da migração para o cadastro unificado do treinador.
+    p.movimentos=[...(Array.isArray(p.movimentos)?p.movimentos:[]),{
+      ano, temporada:(mundo.temporada||0)+1, tipo:'transferencia',
+      de:anterior, para:d.nome, valor:null,
+    }].slice(-30);
+    p.clubeNome=d.nome;p.liga=d.liga;
+    if(Number.isInteger(p.contrato))p.contrato=3;
+  };
   const clubesPorNome = new Map(clubes.map(clube => [clube.nome, clube]));
   const jogadores = mundo.jogadores.map((j) => {
     if (j.aposentado) return { ...j, idade: j.idade + 1 };

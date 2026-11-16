@@ -1,7 +1,7 @@
 import React,{useState,useMemo} from 'react';
 import {gerarMercadoTecnico,resumoGestaoTecnico,elencoClubeTecnico,propostaRenovacaoTecnico,SETORES_ELENCO} from './mercadoTecnico.js';
 import {JanelaTreinador,Escudo} from './uiTreinador.jsx';
-import {lerHistoricoTemporadas,lerPremiosIndividuais,lerMovimentacoesJogador} from '../simulacao/historicoJogadorMundo.js';
+import {lerHistoricoTemporadas,lerPremiosIndividuais,lerMovimentacoesJogador,lerTitulosAtleta} from '../simulacao/historicoJogadorMundo.js';
 import './GestaoElenco.css';
 const dinheiro=n=>`R$ ${Math.round(n).toLocaleString('pt-BR')} mil`;
 const texto=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
@@ -24,6 +24,7 @@ export default function GestaoElenco({c,onNegociar}){
  const proposta=confirmar?.tipo==='renovacao'?propostaRenovacaoTecnico(confirmar.j,anos):null;
  const historicoPerfil=lerHistoricoTemporadas(perfil);
  const premiosPerfil=lerPremiosIndividuais(perfil),movimentosPerfil=lerMovimentacoesJogador(perfil);
+ const titulosPerfil=lerTitulosAtleta(perfil);
  const negociado=j=>g.movimentos.some(m=>m.ano===g.ano&&['compra','venda'].includes(m.tipo)&&String(m.mundoId??m.jogador)===String(j.mundoId??j.id));
  return <section className="ge" aria-label="Elenco e contratos">
  <div className="ge-cabecalho"><div className="ge-clube"><Escudo nome={g.clube} size={42}/><div><span className="ge-sobretitulo">CENTRAL DO ELENCO</span><h3>{g.clube}</h3><p>{g.ano} · {g.elenco.length} jogadores</p></div></div><span className={`ge-janela ${aberta?'ge-aberta':''}`}>{aberta?'Janela aberta':'Janela fechada'}</span></div>
@@ -38,6 +39,7 @@ export default function GestaoElenco({c,onNegociar}){
  {perfil&&<JanelaTreinador titulo={`Histórico de ${perfil.nome}`} classe="ge-historico-modal" onFechar={()=>P(null)}><div className="ge-historico-painel">
   <p className="ge-historico-resumo"><strong>{perfil.nome}</strong> · {perfil.idade} anos · Qualidade atual {perfil.qualidade} · {historicoPerfil.length} {historicoPerfil.length===1?'temporada registrada':'temporadas registradas'}</p>
   {historicoPerfil.length?<div className="ge-historico-scroll" role="region" tabIndex={0} aria-label={`Temporadas de ${perfil.nome}`}><table className="ge-historico-tabela"><thead><tr><th>Ano</th><th>Clube</th><th>Idade</th><th>OVR</th><th>Jogos</th><th>Gols</th><th>Assist.</th><th>Nota</th></tr></thead><tbody>{[...historicoPerfil].reverse().map(r=><tr key={r.temporada}><td>{r.ano??`T${r.temporada}`}</td><td>{r.clube}</td><td>{r.idadeInicial}</td><td>{r.ovrInicial} → {r.ovrFinal}</td><td>{r.jogos}</td><td>{r.gols}</td><td>{r.assistencias}</td><td>{r.nota.toFixed(2)}</td></tr>)}</tbody></table></div>:<p className="ge-historico-vazio">O histórico começará a aparecer após a primeira temporada simulada nesta versão.</p>}
+  {!!titulosPerfil.length&&<div className="ge-eventos"><h4>Títulos conquistados · {titulosPerfil.length}</h4><ul>{[...titulosPerfil].reverse().map((t,i)=><li key={`${t.temporada}:${t.nome}:${i}`}>🏆 <strong>{t.nome}</strong> · {t.ano??`Temporada ${t.temporada}`} · {t.clube}</li>)}</ul></div>}
   {!!premiosPerfil.length&&<div className="ge-eventos"><h4>Prêmios individuais</h4><ul>{[...premiosPerfil].reverse().map((p,i)=><li key={`${p.temporada}:${p.tipo}:${i}`}><strong>{p.tipo==='bola-de-ouro'?'Bola de Ouro':p.tipo}</strong> · {p.ano??`Temporada ${p.temporada}`}{p.clube?` · ${p.clube}`:''}</li>)}</ul></div>}
   {!!movimentosPerfil.length&&<div className="ge-eventos"><h4>Transferências e saídas</h4><ul>{[...movimentosPerfil].reverse().map((m,i)=><li key={`${m.temporada??m.ano??'m'}:${i}`}><strong>{m.tipo==='fim-contrato'?'Fim de contrato':m.tipo==='transferencia'?'Transferência':m.tipo==='compra'?'Contratação':'Venda'}</strong> · {m.ano??'Ano não registrado'} · {m.de||'Sem clube'} → {m.para||'Sem clube'}</li>)}</ul></div>}
   <div className="ge-proposta-acoes"><button type="button" onClick={()=>P(null)}>Fechar histórico</button></div>

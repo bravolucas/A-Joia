@@ -1,5 +1,6 @@
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
 import { MINIMOS_ELENCO, diagnosticarElenco } from '../simulacao/profundidadeElenco.js';
+import { gerarNomeRegional } from '../simulacao/nomesRegionais.js';
 import {ampliarParticipantesInternacionais,clubeInternacional} from '../competicoes/clubesInternacionais.js';
 import {adversarioCopaPorFase} from '../treinador/copasEscolha.js';
 import { anoTemporadaCarreira, AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLASSICOS, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONDICOES_CLIMA, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESPECIALIDADES_LISTA, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, FORMACOES_TATICAS, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "../dados/data.js";
@@ -1767,8 +1768,7 @@ export function simularTemporada(c) {
 }
 
 export function nomeMundo(nac) {
-  const n = NOMES_MUNDO[nac] || NOMES_MUNDO.BRA;
-  return `${pick(n.pri)} ${pick(n.sob)}`;
+  return gerarNomeRegional(nac);
 }
 
 /* Composição realista de um elenco (~24 jogadores): posição -> quantidade.
@@ -1793,12 +1793,11 @@ export function completarCarenciasMundo(jogadores, clubes = CLUBES, rng = Math.r
     for (const [posicao, qtd] of Object.entries(carencias)) {
       for (let n = 0; n < qtd; n++) {
         const nac = nacionalidade(clube);
-        const nomes = NOMES_MUNDO[nac] || NOMES_MUNDO.BRA;
         const escolha = lista => lista[Math.min(lista.length - 1, Math.floor(rng() * lista.length))];
         const teto = clampR(Math.round(clube.forca + Math.floor(rng()*21) - 8), 50, 98);
         const ovr = clampR(teto - (5 + Math.floor(rng()*16)), 38, 90);
         novos.push({
-          id:id++, nome:`${escolha(nomes.pri)} ${escolha(nomes.sob)}`, nac, posicao,
+          id:id++, nome:gerarNomeRegional(nac,rng), nac, posicao,
           idade:16 + Math.floor(rng()*5), ovr, potencial:Math.max(teto,ovr),
           picoIdade:26 + Math.floor(rng()*5), clubeNome:clube.nome,
           clubeOrigem:clube.nome, liga:clube.liga, daBase:true,
@@ -1819,7 +1818,7 @@ export function gerarMundoJogadores(rng = Math.random) {
 
   const rand=(a,b)=>Math.floor(rng()*(b-a+1))+a;
   const pick=lista=>lista[Math.min(lista.length-1,Math.floor(rng()*lista.length))];
-  const nomeMundo=nac=>{const n=NOMES_MUNDO[nac]||NOMES_MUNDO.BRA;return `${pick(n.pri)} ${pick(n.sob)}`;};
+  const nomeMundo=nac=>gerarNomeRegional(nac,rng);
   const jogadores = [];
   let id = 1;
   const nomeParaNac = (clube) => clube.liga === "brasileirao" || clube.liga === "serieB"
@@ -1871,7 +1870,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
 
   const rand=(a,b)=>Math.floor(rng()*(b-a+1))+a;
   const pick=lista=>lista[Math.min(lista.length-1,Math.floor(rng()*lista.length))];
-  const nomeMundo=nac=>{const n=NOMES_MUNDO[nac]||NOMES_MUNDO.BRA;return `${pick(n.pri)} ${pick(n.sob)}`;};
+  const nomeMundo=nac=>gerarNomeRegional(nac,rng);
   const poisson=media=>{let p=1,n=0;const limite=Math.exp(-Math.max(0,media));do{n++;p*=rng();}while(p>limite&&n<300);return n-1;};
   const ocupacao=new Map();for(const p of mundo.jogadores)if(!p.aposentado)ocupacao.set(p.clubeNome,(ocupacao.get(p.clubeNome)||0)+1);
   const mover=(p,d)=>{ocupacao.set(p.clubeNome,(ocupacao.get(p.clubeNome)||1)-1);ocupacao.set(d.nome,(ocupacao.get(d.nome)||0)+1);if(mundo.cadastroElencos)p.movimentos=[...(p.movimentos||[]),{ano,tipo:'transferencia',de:p.clubeNome,para:d.nome,valor:null}];p.clubeNome=d.nome;p.liga=d.liga;if(Number.isInteger(p.contrato))p.contrato=3;};

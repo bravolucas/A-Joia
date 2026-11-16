@@ -1882,10 +1882,11 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
   const poisson=media=>{let p=1,n=0;const limite=Math.exp(-Math.max(0,media));do{n++;p*=rng();}while(p>limite&&n<300);return n-1;};
   const ocupacao=new Map();for(const p of mundo.jogadores)if(!p.aposentado)ocupacao.set(p.clubeNome,(ocupacao.get(p.clubeNome)||0)+1);
   const mover=(p,d)=>{ocupacao.set(p.clubeNome,(ocupacao.get(p.clubeNome)||1)-1);ocupacao.set(d.nome,(ocupacao.get(d.nome)||0)+1);if(mundo.cadastroElencos)p.movimentos=[...(p.movimentos||[]),{ano,tipo:'transferencia',de:p.clubeNome,para:d.nome,valor:null}];p.clubeNome=d.nome;p.liga=d.liga;if(Number.isInteger(p.contrato))p.contrato=3;};
+  const clubesPorNome = new Map(clubes.map(clube => [clube.nome, clube]));
   const jogadores = mundo.jogadores.map((j) => {
     if (j.aposentado) return { ...j, idade: j.idade + 1 };
     const p = { ...j, ligaTemporada:j.liga };
-    const clube = clubes.find((x) => x.nome === p.clubeNome) || { forca: 70, liga: p.liga };
+    const clube = clubesPorNome.get(p.clubeNome) || { forca: 70, liga: p.liga };
     const liga = LIGAS[clube.liga] || { mult: 0.8 };
     const pos = POSICOES.find((x) => x.id === p.posicao) || POSICOES[0];
     if(!p.clubeNome){
@@ -1952,7 +1953,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
   const novasAposentadorias=jogadores.filter(j=>j.aposentado&&!idsAposentados.has(j.id));
   for (let i = 0; i < Math.max(0, aposentadosAgora); i++) {
     const aposentado=novasAposentadorias[i];
-    const clube = clubes.find(c=>c.nome===aposentado?.clubeNome)||pick(mundo.cadastroElencos?clubes.filter(cl=>cl.nome!==clubeControlado&&(ocupacao.get(cl.nome)||0)<24):clubes)||{nome:null,forca:60,liga:null};
+    const clube = clubesPorNome.get(aposentado?.clubeNome)||pick(mundo.cadastroElencos?clubes.filter(cl=>cl.nome!==clubeControlado&&(ocupacao.get(cl.nome)||0)<24):clubes)||{nome:null,forca:60,liga:null};
     // A maioria das revelações acompanha o país da liga; estrangeiros continuam possíveis.
     const nacionalidadeLiga = {
       brasileirao:'BRA', serieB:'BRA', inglaterra:'ENG', espanha:'ESP',

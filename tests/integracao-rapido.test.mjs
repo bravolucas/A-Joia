@@ -14,6 +14,11 @@ test("carreira real: criação, cinco temporadas, notícias e retrospecto",()=>{
     c=resultado.c;
     assert.equal(c.ano,anterior+1);
     assert.equal(c.temporadas.length,i+1);
+    // O ano dos atletas do universo precisa acompanhar o calendário do jogador,
+    // inclusive no primeiro ano (quando mundo.anoCalendario ainda não existe).
+    const registrosMundo=c.mundo.jogadores.flatMap(j=>j.historicoTemporadas||[]);
+    assert.ok(registrosMundo.some(r=>r[0]===i+1&&r[1]===anterior),
+      `Temporada ${i+1}: histórico do mundo sem ano ${anterior}`);
     const noticias=noticiasDaTemporada(c,resultado.card);
     assert.ok(noticias.length>0&&noticias.length<=4);
     assert.ok(noticias.every(n=>typeof n.titulo==="string"&&typeof n.detalhe==="string"));

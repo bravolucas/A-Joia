@@ -125,6 +125,8 @@ test('simulação anual vincula o prêmio a somente um atleta do próprio univer
  assert.equal(lerPremiosIndividuais(vencedores[0])[0].temporada,1);
  assert.equal(resultado.historicoBolaDeOuro.length,1);
  assert.equal(resultado.historicoBolaDeOuro[0].nome,vencedores[0].nome);
+ assert.equal(resultado.historicoBolaDeOuro[0].id,vencedores[0].id);
+ assert.equal(resultado.historicoBolaDeOuro[0].clube,lerPremiosIndividuais(vencedores[0])[0].clube);
 });
 
 test('leitura de movimentações filtra dados legados e conserva origem e destino', () => {

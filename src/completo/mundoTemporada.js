@@ -47,7 +47,10 @@ export function registrarPremioCalendario(mundo,vencedor){
   ...p,
   carreira:{...p.carreira,bolasDeOuro:(p.carreira?.bolasDeOuro||0)+1},
   premiacoesIndividuais:registrarPremioIndividual(p,{
-    temporada:mundo.temporada, ano:mundo.anoCalendario,
+    temporada:mundo.temporada,
+    // A simulação pode já ter avançado anoCalendario para o próximo ano.
+    // Prefira o ano efetivamente registrado na temporada do vencedor.
+    ano:p.historicoTemporadas?.find(r=>Array.isArray(r)&&r[0]===mundo.temporada)?.[1]??mundo.anoCalendario,
     tipo:'bola-de-ouro', clube:vencedor.clube,
   }),
 }:p)};

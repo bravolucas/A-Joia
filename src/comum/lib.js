@@ -1,6 +1,7 @@
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
 import { MINIMOS_ELENCO, diagnosticarElenco } from '../simulacao/profundidadeElenco.js';
 import { gerarNomeRegional } from '../simulacao/nomesRegionais.js';
+import { registrarHistoricoTemporada } from '../simulacao/historicoJogadorMundo.js';
 import {ampliarParticipantesInternacionais,clubeInternacional} from '../competicoes/clubesInternacionais.js';
 import {adversarioCopaPorFase} from '../treinador/copasEscolha.js';
 import { anoTemporadaCarreira, AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLASSICOS, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONDICOES_CLIMA, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESPECIALIDADES_LISTA, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, FORMACOES_TATICAS, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "../dados/data.js";
@@ -1898,6 +1899,10 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
   const jogadores = mundo.jogadores.map((j) => {
     if (j.aposentado) return { ...j, idade: j.idade + 1 };
     const p = { ...j, ligaTemporada:j.liga };
+    const clubeTemporada = p.clubeNome;
+    const ligaTemporada = p.liga;
+    const idadeInicial = p.idade;
+    const ovrInicial = p.ovr;
     const clube = clubesPorNome.get(p.clubeNome) || { forca: 70, liga: p.liga };
     const liga = LIGAS[clube.liga] || { mult: 0.8 };
     const pos = POSICOES.find((x) => x.id === p.posicao) || POSICOES[0];
@@ -1926,6 +1931,12 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
     if (p.idade <= p.picoIdade) p.ovr = clampR(p.ovr + Math.max(0, Math.round((p.potencial - p.ovr) * 0.28)) + rand(0, 1), 40, 99);
     else p.ovr = clampR(p.ovr - rand(0, 2) - Math.max(0, Math.round((p.idade - p.picoIdade - 2) * 0.6)), 40, 99);
     if(p.clubeNome===clubeControlado&&treinoClube&&p.idade<30)p.ovr=Math.min(99,Math.max(p.ovr,Math.min(p.potencial??99,p.ovr+Math.max(0,Math.min(1,treinoClube)))));
+    // O retrato sazonal é registrado antes de eventuais transferências ou
+    // aposentadoria, preservando o clube no qual os números foram obtidos.
+    p.historicoTemporadas = registrarHistoricoTemporada(p, {
+      temporada: (mundo.temporada || 0) + 1, ano,
+      clube: clubeTemporada, liga: ligaTemporada, idadeInicial, ovrInicial,
+    });
     // aposentadoria
     if (p.idade >= 34 && (p.idade >= 39 || rng() < (p.idade - 33) * 0.2)) { p.aposentado = true; return p; }
     if(Number.isInteger(p.contrato)){

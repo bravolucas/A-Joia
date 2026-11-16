@@ -1782,7 +1782,19 @@ const COMPOSICAO_ELENCO = Object.entries(MINIMOS_ELENCO);
  */
 export function completarCarenciasMundo(jogadores, clubes = CLUBES, rng = Math.random) {
   const novos = [...jogadores];
-  let id = novos.reduce((maior, j) => Number.isInteger(j.id) ? Math.max(maior, j.id) : maior, 0) + 1;
+  // IDs podem ser numéricos ou strings em saves antigos; evitar colisões
+  // também na comparação textual usada pelo mercado unificado.
+  const idsExistentes = new Set(novos.filter(Boolean).map(j => String(j.id)));
+  let id = novos.reduce((maior, j) => {
+    const valor = Number(j?.id);
+    return Number.isSafeInteger(valor) && valor >= 0 ? Math.max(maior, valor) : maior;
+  }, 0) + 1;
+  const proximoId = () => {
+    while (idsExistentes.has(String(id))) id++;
+    const novoId = id++;
+    idsExistentes.add(String(novoId));
+    return novoId;
+  };
   const nacionalidade = clube => {
     const ligaNac = { brasileiro:'BRA', brasileirao:'BRA', serieB:'BRA', inglaterra:'ENG', espanha:'ESP', italia:'ITA', alemanha:'ALE', franca:'FRA', portugal:'POR' };
     const local = ligaNac[clube.liga];
@@ -1805,7 +1817,7 @@ export function completarCarenciasMundo(jogadores, clubes = CLUBES, rng = Math.r
         const teto = clampR(Math.round(clube.forca + Math.floor(rng()*21) - 8), 50, 98);
         const ovr = clampR(teto - (5 + Math.floor(rng()*16)), 38, 90);
         novos.push({
-          id:id++, nome:gerarNomeRegional(nac,rng), nac, posicao,
+          id:proximoId(), nome:gerarNomeRegional(nac,rng), nac, posicao,
           idade:16 + Math.floor(rng()*5), ovr, potencial:Math.max(teto,ovr),
           picoIdade:26 + Math.floor(rng()*5), clubeNome:clube.nome,
           clubeOrigem:clube.nome, liga:clube.liga, daBase:true,

@@ -1,7 +1,7 @@
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
 import { MINIMOS_ELENCO, diagnosticarElenco } from '../simulacao/profundidadeElenco.js';
 import { gerarNomeRegional } from '../simulacao/nomesRegionais.js';
-import { registrarHistoricoTemporada } from '../simulacao/historicoJogadorMundo.js';
+import { registrarHistoricoTemporada, registrarPremioIndividual } from '../simulacao/historicoJogadorMundo.js';
 import {ampliarParticipantesInternacionais,clubeInternacional} from '../competicoes/clubesInternacionais.js';
 import {adversarioCopaPorFase} from '../treinador/copasEscolha.js';
 import { anoTemporadaCarreira, AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLASSICOS, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONDICOES_CLIMA, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESPECIALIDADES_LISTA, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, FORMACOES_TATICAS, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "../dados/data.js";
@@ -2016,6 +2016,11 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
     const vencedor = candidatos.reduce((a, b) => (scoreJogadorMundo(b) > scoreJogadorMundo(a) ? b : a));
     historicoBolaDeOuro = [...historicoBolaDeOuro, { temporada: (mundo.temporada || 0) + 1, nome: vencedor.nome, clube: vencedor.clubeNome, ovr: vencedor.ovr, gols: vencedor.gols, assist: vencedor.assist }].slice(-30);
     vencedor.carreira.bolasDeOuro = (vencedor.carreira.bolasDeOuro || 0) + 1;
+    vencedor.premiacoesIndividuais = registrarPremioIndividual(vencedor, {
+      temporada: (mundo.temporada || 0) + 1, ano,
+      tipo: 'bola-de-ouro',
+      clube: vencedor.clubeTemporada ?? vencedor.clubeNome,
+    });
   }
   return { ...mundo,...(Number.isFinite(ano)?{anoCalendario:ano+1}:{}), jogadores: jogadoresLimpos, temporada: (mundo.temporada || 0) + 1, historicoBolaDeOuro };
 }

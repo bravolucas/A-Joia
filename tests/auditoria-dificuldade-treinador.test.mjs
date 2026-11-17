@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { selecionarFaixas, rngSemente, resumirAmostras, contarOutrosTitulos } from '../scripts/auditar-dificuldade-treinador.mjs';
+import { selecionarFaixas, rngSemente, resumirAmostras, contarOutrosTitulos, listarTitulosDeCopa } from '../scripts/auditar-dificuldade-treinador.mjs';
 
 test('auditoria da dificuldade escolhe equipes fraca, média e forte na mesma liga', () => {
   const clubes = [
@@ -32,6 +32,7 @@ test('auditoria conta copa separada do título da liga pelo nome exibido', () =>
     titulosConquistados: ['Brasileirão', 'Copa do Brasil', 'Libertadores'],
   };
   assert.equal(contarOutrosTitulos(temporada), 2);
+  assert.deepEqual(listarTitulosDeCopa(temporada),['Copa do Brasil','Libertadores']);
   assert.equal(contarOutrosTitulos({...temporada,titulosConquistados:['Brasileirão']}),0);
   assert.equal(contarOutrosTitulos({...temporada,titulosConquistados:[]}),0);
   assert.equal(contarOutrosTitulos({...temporada,titulosConquistados:['Copa do Brasil']}),1);
@@ -52,5 +53,19 @@ test('resumo reporta posições, títulos e demissões sem inventar conclusão',
   assert.equal(s.mediaPosicao,10);
   assert.deepEqual(s.posicoes,{minimo:1,p50:4,p90:16,maximo:19});
   assert.equal(s.mediaOutrosTitulos,0.75);
+  assert.deepEqual(s.titulosPorCompeticao,{});
   assert.throws(()=>resumirAmostras([]),/Nenhuma temporada/);
+});
+
+test('títulos adicionais são contados separadamente por competição, inclusive repetidos',()=>{
+  const amostras=[
+    {posicao:1,pontos:70,campeaoLiga:true,demitido:false,outrosTitulos:2,titulosCopa:['Copa do Brasil','Libertadores']},
+    {posicao:2,pontos:68,campeaoLiga:false,demitido:false,outrosTitulos:1,titulosCopa:['Copa do Brasil']},
+    {posicao:4,pontos:60,campeaoLiga:false,demitido:false,outrosTitulos:0,titulosCopa:[]},
+  ];
+  const resumo=resumirAmostras(amostras);
+  assert.deepEqual(resumo.titulosPorCompeticao,{'Copa do Brasil':2,'Libertadores':1});
+  assert.equal(Object.values(resumo.titulosPorCompeticao).reduce((a,b)=>a+b,0),3);
+  assert.equal(resumo.mediaOutrosTitulos,1);
+  assert.equal(resumo.percentualTitulosLiga,33.33);
 });

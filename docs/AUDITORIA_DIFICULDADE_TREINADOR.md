@@ -24,6 +24,11 @@ A primeira medição de nove temporadas **já foi executada com sucesso** no run
 
 A nova execução de 150 temporadas **ainda precisa terminar com sucesso** e seus números devem ser lidos do log/JSON do run atual, não presumidos. A interpretação requer comparar os mesmos clubes e parâmetros depois de qualquer alteração no motor.
 
+## Discriminação dos títulos adicionais (após a linha de base)
+O resumo por faixa agora inclui `titulosPorCompeticao`, que reúne os nomes reais registrados em `temporada.titulosConquistados`, excluindo o título da própria liga. Assim será possível identificar quantas vezes o Flamengo levou Copa do Brasil, Libertadores, estaduais e outros campeonatos nas mesmas 50 temporadas, em vez de depender só da média agregada de 1,02.
+
+**A contagem por competição foi adicionada após o primeiro baseline de 150 temporadas**; não existem números confirmados para cada copa até a nova execução terminar. Os dados agregados de `docs/DIFICULDADE_TREINADOR_BASELINE_50.json` permanecem congelados para comparação, sem inventar decomposição retroativa. A alteração é exclusiva do auditor e seus testes: não muda resultados nem chances no jogo.
+
 ## Critérios de análise, sem fabricar números
 - Comparar títulos e posição média entre clubes fracos, médios e fortes: um padrão de clubes fracos dominando frequentemente exige investigação.
 - Comparar diretamente com as mesmas três equipes e `--semente` antes/depois da proposta de balanceamento.

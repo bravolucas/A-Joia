@@ -40,6 +40,15 @@ export function resumirAmostras(amostras = []) {
     if (!valores.length) return null;
     return { minimo: valores[0], p50: valores[Math.floor((valores.length - 1) * .5)], p90: valores[Math.floor((valores.length - 1) * .9)], maximo: valores.at(-1) };
   };
+  // A contagem por competição distingue Copa do Brasil, Libertadores,
+  // estaduais e outras taças: soma deve coincidir com os "outrosTitulos".
+  const contagemCopas = new Map();
+  for (const amostra of amostras) {
+    for (const titulo of amostra.titulosCopa || []) {
+      contagemCopas.set(titulo, (contagemCopas.get(titulo) || 0) + 1);
+    }
+  }
+  const titulosPorCompeticao = Object.fromEntries([...contagemCopas].sort(([a], [b]) => a.localeCompare(b, 'pt-BR')));
   return {
     amostras: total, titulosLiga: quantidade('campeaoLiga'),
     percentualTitulosLiga: taxa('campeaoLiga'),
@@ -49,6 +58,7 @@ export function resumirAmostras(amostras = []) {
     posicoes: faixas('posicao'),
     pontos: faixas('pontos'),
     mediaOutrosTitulos: media('outrosTitulos'),
+    titulosPorCompeticao,
   };
 }
 
@@ -73,10 +83,13 @@ function argumentos(argv) {
  * Conta troféus de copas e outros torneios sem contar a liga uma segunda vez.
  * O motor registra nomes exibidos (e.g. "Brasileirão"), não IDs de liga ("brasileirao").
  */
-export function contarOutrosTitulos(temporada = {}) {
+export function listarTitulosDeCopa(temporada = {}) {
   const titulos = Array.isArray(temporada.titulosConquistados) ? temporada.titulosConquistados : [];
   const nomeLiga = competicaoTemporadaTecnico(temporada);
-  return titulos.filter(titulo => titulo !== nomeLiga).length;
+  return titulos.filter(titulo => typeof titulo === 'string' && titulo !== nomeLiga);
+}
+export function contarOutrosTitulos(temporada = {}) {
+  return listarTitulosDeCopa(temporada).length;
 }
 
 function simularUmaTemporada(clube, semente, indice) {
@@ -105,6 +118,7 @@ function simularUmaTemporada(clube, semente, indice) {
     posicao: temporada.posicao, pontos: temporada.pontos,
     campeaoLiga: temporada.posicao === 1,
     outrosTitulos: contarOutrosTitulos(temporada),
+    titulosCopa: listarTitulosDeCopa(temporada),
     demitido: !!(temporada.demitido || resultado.tecnico.demitido),
   };
 }

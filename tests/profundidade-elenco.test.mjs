@@ -60,7 +60,11 @@ test('não assume aptidão sem evidência, nem impõe limite numérico arbitrár
   assert.equal(diagnosticarElenco(elenco,{contarSecundarias:true}).contagem.LE,0);
   assert.equal(diagnosticarElenco(elenco,{contarSecundarias:true,proficienciaMinima:70}).contagem.LE,1);
   assert.equal(diagnosticarElenco(elenco,{contarSecundarias:true,proficienciaMinima:80}).contagem.LE,0);
-  assert.equal(diagnosticarElenco(elenco,{contarSecundarias:true}).contagem.LD,2);
+  // Sem aptidão secundária confirmada, os três LD permanecem contabilizados
+  // na posição principal (inclusive o excedente); não são só dois atletas.
+  const semLimiar = diagnosticarElenco(elenco,{contarSecundarias:true});
+  assert.equal(semLimiar.contagem.LD,3);
+  assert.equal(semLimiar.contagem.LE,0);
 });
 
 test('reposicionamento não altera objeto do atleta e não depende da ordem de preenchimento', () => {

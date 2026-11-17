@@ -1,0 +1,25 @@
+name: Auditar onze posicional do treinador
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/treinador/escalacaoPosicionalTecnico.js'
+      - 'tests/escalacao-posicional-tecnico.test.mjs'
+      - '.github/workflows/auditar-onze-posicional-treinador.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  posicoes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Conferir formação, aptidão e banco de reservas
+        run: node --test tests/escalacao-posicional-tecnico.test.mjs tests/escalacao-secundaria.test.mjs
+      - name: Compilar a versão do navegador
+        run: GITHUB_PAGES=true npm run build

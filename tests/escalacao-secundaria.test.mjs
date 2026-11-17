@@ -87,3 +87,58 @@ test('aptidão sincroniza ao evoluir e não altera o objeto original do mundo',(
  assert.deepEqual(atualizado[0].posicoesSecundarias,[{posicao:'LE',apto:true}]);
  assert.deepEqual(originais,copia);
 });
+
+
+test('lesões e suspensões removem atletas da escalação e do banco, sem gerar atletas fantasmas',()=>{
+ const elenco=versatil();
+ const lesionado=elenco.find(j=>j.posicao==='ZAG');
+ const suspenso=elenco.find(j=>j.posicao==='PD');
+ lesionado.lesao={jogosRestantes:2};
+ suspenso.suspenso=true;
+ const antes=structuredClone(elenco);
+ const r=escalacaoProvavel(elenco);
+ const IDs=r.titulares.concat(r.banco).map(j=>j.id);
+ assert.equal(r.titulares.length,9,'sem substitutos, escala apenas atletas disponíveis');
+ assert.equal(new Set(IDs).size,IDs.length);
+ assert.ok(!IDs.includes(lesionado.id));
+ assert.ok(!IDs.includes(suspenso.id));
+ assert.ok(r.titulares.every(j=>!j.aposentado&&!j.indisponivel&&!j.suspenso));
+ assert.deepEqual(elenco,antes,'indisponibilidade não altera o cadastro');
+
+ // Recuperou-se: volta a concorrer sem haver perda de posição secundária.
+ lesionado.lesao={jogosRestantes:0};
+ suspenso.suspenso=false;
+ const recuperado=escalacaoProvavel(elenco);
+ assert.equal(recuperado.titulares.length,11);
+ assert.equal(new Set(recuperado.titulares.map(j=>j.id)).size,11);
+ assert.equal(recuperado.titulares.find(j=>j.vaga==='LE')?.secundaria,true);
+});
+
+test('jogador do usuário suspenso não é escalado, e substituto apto não é improvisado',()=>{
+ const jogadores=versatil();
+ // O companheiro apto ocupa LE, o jogador do usuário não pode atuar suspenso.
+ const eu={nome:'Usuário',posicao:'ATA',idade:23,ovr:99,suspenso:true,titularidade:100};
+ const escalados=escalacaoProvavel(jogadores,eu);
+ assert.equal(escalados.voceTitular,false);
+ assert.equal(escalados.titulares.length,11);
+ assert.ok(escalados.titulares.every(j=>j.id!=='EU'));
+ assert.ok(escalados.banco.every(j=>j.id!=='EU'));
+ assert.equal(escalados.titulares.find(j=>j.vaga==='LE')?.improvisado,undefined);
+
+ // Uma suspensão encerrada permite o retorno do próprio usuário à seleção.
+ const recuperado=escalacaoProvavel(jogadores,{...eu,suspenso:false});
+ assert.ok(recuperado.titulares.some(j=>j.id==='EU')||recuperado.banco.some(j=>j.id==='EU'));
+});
+
+test('lesões não fazem gerar jogadores novos no cadastro persistente ao escalar',()=>{
+ const jogadores=versatil();
+ const lesionado=jogadores.find(j=>j.posicao==='LE') ?? jogadores.find(j=>j.posicoesSecundarias?.length);
+ lesionado.indisponivel=true;
+ const ids=new Set(jogadores.map(j=>j.id));
+ const antes=structuredClone(jogadores);
+ const selecionados=escalacaoProvavel(jogadores);
+ const todos=[...selecionados.titulares,...selecionados.banco];
+ assert.ok(todos.every(j=>ids.has(j.id)));
+ assert.deepEqual(jogadores,antes);
+ assert.ok(todos.every(j=>j.id!==lesionado.id));
+});

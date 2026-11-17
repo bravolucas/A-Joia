@@ -1,5 +1,6 @@
 import React from "react";
 import { logoCompeticao } from "./arte.js";
+import { imagemEstadualCommons } from "./arteCompeticoes.js";
 import { svgDaTaca, metalDaTaca } from "./tacas.js";
 
 /* O acervo apresenta a taça da competição quando existe uma imagem licenciada.
@@ -14,9 +15,10 @@ const METAIS = {
 /* Taças: cada competição tem a sua, gerada em tacas.js a partir do nome. */
 export function TacaCompeticao({ tipo = "liga", size = 40, nome = null, preferirTaca = false }) {
   const uid = React.useId().replace(/[^a-zA-Z0-9]/g, "");
+  const [imagemFalhou, setImagemFalhou] = React.useState(null);
   // Imagem da taça da competição; algumas são fornecidas pelo autor do jogo.
-  const logo = nome ? logoCompeticao(nome) : null;
-  if (logo && !preferirTaca) return <img src={logo} loading="lazy" decoding="async" alt="" aria-hidden="true" className="shrink-0 object-contain select-none vf-revelar" draggable="false" style={{ width: size, height: size * 1.2, filter: "drop-shadow(0 2px 6px rgba(0,0,0,.5))" }} />;
+  const logo = nome ? logoCompeticao(nome) || imagemEstadualCommons(nome) : null;
+  if (logo && !preferirTaca && imagemFalhou !== logo) return <img src={logo} onError={() => setImagemFalhou(logo)} loading="lazy" decoding="async" alt="" aria-hidden="true" className="shrink-0 object-contain select-none vf-revelar" draggable="false" style={{ width: size, height: size * 1.2, filter: "drop-shadow(0 2px 6px rgba(0,0,0,.5))" }} />;
   const brilho = METAIS[metalDaTaca(tipo, nome) === "bronze" ? "bronze" : metalDaTaca(tipo, nome) === "ouro" ? "ouro" : "prata"][1];
   const sombra = { filter: `drop-shadow(0 ${Math.max(2, size / 20)}px ${Math.max(4, size / 7)}px rgba(0,0,0,.55)) drop-shadow(0 0 ${Math.max(4, size / 6)}px ${brilho}55)` };
   const html = svgDaTaca(tipo, nome).replaceAll("__ID__", `t${uid}`);

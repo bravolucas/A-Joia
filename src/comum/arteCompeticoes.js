@@ -37,3 +37,19 @@ export function resolverImagemCompeticao(nome, arquivos = {}) {
   const alternativas = Object.keys(ALIASES).filter(k => ALIASES[k] === canonica);
   return arquivos[chave] || arquivos[canonica] || alternativas.map(k => arquivos[k]).find(Boolean) || null;
 }
+
+/**
+ * Representações de taças estaduais disponibilizadas no Wikimedia Commons.
+ * Não são fotos oficiais das federações. Créditos e licenças em
+ * arte/competicoes/estaduais-fontes.json.
+ *
+ * Imagens externas só preenchem lacunas do acervo local. A interface mantém
+ * fallback SVG do A JOIA se estiver offline ou a CDN falhar.
+ */
+export const IMAGENS_ESTADUAIS_COMMONS = Object.freeze({
+  'campeonato-baiano': 'https://upload.wikimedia.org/wikipedia/commons/1/18/CampeonatoBaiano2019-.png',
+  'campeonato-cearense': 'https://upload.wikimedia.org/wikipedia/commons/2/26/CampeonatoCearense2019-.png',
+  'campeonato-pernambucano': 'https://upload.wikimedia.org/wikipedia/commons/a/a5/CampeonatoPernambucano2025-.png',
+  'campeonato-amazonense': 'https://upload.wikimedia.org/wikipedia/commons/5/5d/CampeonatoAmazonense2018-.png',
+});
+export const imagemEstadualCommons = nome => IMAGENS_ESTADUAIS_COMMONS[chaveCompeticao(nome)] || null;

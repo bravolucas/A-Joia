@@ -46,8 +46,8 @@ jobs:
   carreiras-massivas:
     name: carreiras-massivas (${{ matrix.caso }})
     runs-on: ubuntu-latest
-    # Quatro runners: os 32 casos de integração rodam em 2x16, e os outros
-    # três arquivos continuam completos (dois deles em um único job).
+    # Sete runners: integração 32 casos em 2x16; melhorias 24 casos em 4x6;
+    # treinador e simulação massiva permanecem completos num runner.
     timeout-minutes: 75
     strategy:
       fail-fast: false
@@ -61,10 +61,30 @@ jobs:
             arquivos: tests/integracao-jogador-tecnico.test.mjs
             parte: 2
             partes: 2
-          - caso: jogador-melhorias
+          - caso: jogador-melhorias-1-de-4
             arquivos: tests/jogador-melhorias.test.mjs
             parte: 1
             partes: 1
+            melhorias_parte: 1
+            melhorias_partes: 4
+          - caso: jogador-melhorias-2-de-4
+            arquivos: tests/jogador-melhorias.test.mjs
+            parte: 1
+            partes: 1
+            melhorias_parte: 2
+            melhorias_partes: 4
+          - caso: jogador-melhorias-3-de-4
+            arquivos: tests/jogador-melhorias.test.mjs
+            parte: 1
+            partes: 1
+            melhorias_parte: 3
+            melhorias_partes: 4
+          - caso: jogador-melhorias-4-de-4
+            arquivos: tests/jogador-melhorias.test.mjs
+            parte: 1
+            partes: 1
+            melhorias_parte: 4
+            melhorias_partes: 4
           - caso: treinador-e-simulacao
             arquivos: tests/treinador-expresso.test.mjs tests/simulacao-massiva-tecnico.test.mjs
             parte: 1
@@ -81,11 +101,46 @@ jobs:
         env:
           A_JOIA_INTEGRACAO_PARTE: ${{ matrix.parte }}
           A_JOIA_INTEGRACAO_PARTES: ${{ matrix.partes }}
+          A_JOIA_MELHORIAS_PARTE: ${{ matrix.melhorias_parte }}
+          A_JOIA_MELHORIAS_PARTES: ${{ matrix.melhorias_partes }}
           ARQUIVOS_CARREIRAS: ${{ matrix.arquivos }}
         run: |
           read -r -a arquivos <<< "$ARQUIVOS_CARREIRAS"
           test "${#arquivos[@]}" -gt 0
           node --test "${arquivos[@]}"
+      - name: Publicar relatórios das seis carreiras da partição
+        if: ${{ startsWith(matrix.caso, 'jogador-melhorias-') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultados-${{ matrix.caso }}
+          path: resultados-auditoria/jogador-melhorias-parte-*.json
+          if-no-files-found: error
+          retention-days: 14
+
+  conferir-melhorias-24:
+    name: conferir-melhorias-24
+    needs: carreiras-massivas
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: resultados-jogador-melhorias-*
+          merge-multiple: true
+          path: resultados-auditoria
+      - name: Exigir os 24 cenários e os limiares globais originais
+        run: node scripts/agregar-jogador-melhorias.mjs resultados-auditoria
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: jogador-melhorias-24-validado
+          path: resultados-auditoria/jogador-melhorias-24-agregado.json
+          retention-days: 14
 
   navegador:
     runs-on: ubuntu-latest

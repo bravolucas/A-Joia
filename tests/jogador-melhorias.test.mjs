@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {mkdirSync,writeFileSync} from 'node:fs';
+import {TOTAL_CARREIRAS_MELHORIAS} from '../scripts/agregar-jogador-melhorias.mjs';
 import { anosSeguidosNoClube, ANOS_FIDELIDADE, aplicarMomento, contextoMomento, criarJogador, aposentar, simularCarreiraAutomatica } from '../src/jogador/rapido.js';
 import { extrairConquistasMuseu } from '../src/museu/museu.js';
 import { iniciarCarreiraTecnico, memoriaJogadorTecnico } from '../src/treinador/tecnico.js';
@@ -22,18 +24,40 @@ test('clássico jogado vira destaque e não mexe em títulos', () => {
   assert.equal(contextoMomento(c, card.pendente).contexto.fase, 'Clássico');
 });
 
+// No CI, os índices 0..23 são repartidos por módulo. A verificação GLOBAL
+// original é repetida após juntar os relatórios, nunca substituída por
+// medianas ou limiares de cada partição isolada.
+const PARTES=Number(process.env.A_JOIA_MELHORIAS_PARTES||1);
+const PARTE=Number(process.env.A_JOIA_MELHORIAS_PARTE||1);
+if(!Number.isInteger(PARTES)||!Number.isInteger(PARTE)||PARTES<1||
+  TOTAL_CARREIRAS_MELHORIAS%PARTES!==0||PARTE<1||PARTE>PARTES)
+  throw new Error('Partição do teste de 24 carreiras inválida.');
+
 test('carreiras automáticas: teto suave, clássicos e fidelidade aparecem', () => {
-  const picos = [];
+  const picos = [],resultados=[];
   let classicos = 0, fieis = 0;
-  for (let i = 0; i < 24; i++) {
+  for (let i = 0; i < TOTAL_CARREIRAS_MELHORIAS; i++) {
+    if(i%PARTES!==PARTE-1)continue;
     const c = simularCarreiraAutomatica({ nome: 'T' + i, nac: 'BRA', posicao: ['ATA', 'MEI', 'ZAG', 'GOL'][i % 4], personalidade: 'equilibrado', origem: 'base', pe: 'destro', numero: 10, ritmo: 'normal', codigo: 'MELHORIAS' + i });
-    picos.push(Math.max(...c.temporadas.map(t => t.ovr || 0)));
-    classicos += c.temporadas.filter(t => (t.momentos || []).some(m => m.tipo === 'classico')).length;
-    fieis += c.temporadas.filter(t => t.fidelidade).length;
+    const pico=Math.max(...c.temporadas.map(t=>t.ovr||0));
+    const classicosAtleta=c.temporadas.filter(t => (t.momentos || []).some(m => m.tipo === 'classico')).length;
+    const fieisAtleta=c.temporadas.filter(t => t.fidelidade).length;
+    picos.push(pico);classicos+=classicosAtleta;fieis+=fieisAtleta;
+    resultados.push({indice:i,codigo:'MELHORIAS'+i,pico,classicos:classicosAtleta,fieis:fieisAtleta});
   }
-  picos.sort((a, b) => a - b);
-  assert.ok(picos[picos.length >> 1] <= 90, `mediana ${picos[picos.length >> 1]}`);
-  assert.ok(classicos > 0 && fieis > 0, `${classicos} clássicos, ${fieis} anos de fidelidade`);
+  assert.equal(resultados.length,TOTAL_CARREIRAS_MELHORIAS/PARTES);
+  if(PARTES===1){
+    // O teste local original continua cobrindo as mesmas 24 carreiras,
+    // as mesmas métricas e os MESMOS critérios (mediana global e ambos >0).
+    picos.sort((a,b)=>a-b);
+    assert.ok(picos[picos.length>>1]<=90,`mediana ${picos[picos.length>>1]}`);
+    assert.ok(classicos>0&&fieis>0,`${classicos} clássicos, ${fieis} anos de fidelidade`);
+    return;
+  }
+  mkdirSync('resultados-auditoria',{recursive:true});
+  writeFileSync(`resultados-auditoria/jogador-melhorias-parte-${PARTE}.json`,
+    JSON.stringify({tipo:'jogador-melhorias-v1',total:TOTAL_CARREIRAS_MELHORIAS,
+      parte:PARTE,partes:PARTES,resultados},null,2));
 });
 
 test('museu guarda uma camisa por clube defendido; ídolo só com torcida', () => {

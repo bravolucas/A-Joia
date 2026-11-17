@@ -28,3 +28,26 @@ export function destinosTransferenciaIA(
     return true;
   });
 }
+
+/**
+ * Jogadores de campo perdem mobilidade no mercado depois dos 32 anos.
+ * Goleiros mantêm mais oportunidades pelo ciclo esportivo mais longo.
+ * Para atletas até 32 anos, conserva exatamente a chance anterior.
+ */
+export function fatorMobilidadeVeteranoIA(idade, posicao) {
+  const anos = Math.max(0, (Number.isFinite(idade) ? idade : 32) - 32);
+  return posicao === 'GOL'
+    ? Math.max(0.52, 1 - anos * 0.06)
+    : Math.max(0.36, 1 - anos * 0.08);
+}
+
+/**
+ * Ao contratar/renovar, veteranos recebem acordos mais curtos.
+ * O campo contrato já faz parte do cadastro; não altera o esquema dos saves.
+ */
+export function duracaoContratoIA(idade, posicao) {
+  const limite = posicao === 'GOL' ? 37 : 35;
+  if (Number.isFinite(idade) && idade >= limite + 3) return 1;
+  if (Number.isFinite(idade) && idade >= limite) return 2;
+  return 3;
+}

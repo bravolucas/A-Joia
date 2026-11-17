@@ -16,7 +16,8 @@ concurrency:
 jobs:
   testes-e-build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # A suíte de carreiras longas ultrapassa 45 min em execuções carregadas.
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,6 +25,8 @@ jobs:
           node-version: '22'
       - name: Instalar dependências
         run: npm install --no-audit --no-fund
+      - name: Regressões rápidas do mercado da IA
+        run: node --test tests/mercado-ia.test.mjs
       - name: Testes de lógica
         run: npm test
       - name: Gerar versão de produção

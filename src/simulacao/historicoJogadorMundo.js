@@ -27,8 +27,16 @@ export function registrarHistoricoTemporada(jogador, {
     inteiro(jogador.ovr), inteiro(jogador.jogos), inteiro(jogador.gols),
     inteiro(jogador.assist), notaSegura(jogador.nota),
   ];
-  // Uma temporada só pode aparecer uma vez por atleta, inclusive na
-  // retomada de save ou em eventual reprocessamento do mesmo ciclo.
+  // Caminho comum: as temporadas entram em ordem crescente. Evita filtrar
+  // todo o histórico de milhares de atletas a cada avanço anual.
+  const ultima = anteriores.at(-1);
+  if (!anteriores.length || (Array.isArray(ultima) && ultima[0] < temporada)) {
+    return anteriores.length < LIMITE_HISTORICO_TEMPORADAS
+      ? [...anteriores, registro]
+      : [...anteriores.slice(1 - LIMITE_HISTORICO_TEMPORADAS), registro];
+  }
+  // Save antigo, temporada reprocessada ou registro fora de ordem: preserve
+  // a regra de um único registro por temporada e o limite de 30.
   return [...anteriores.filter(r => Array.isArray(r) && r[0] !== temporada), registro]
     .slice(-LIMITE_HISTORICO_TEMPORADAS);
 }

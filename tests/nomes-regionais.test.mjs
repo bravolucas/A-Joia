@@ -69,13 +69,19 @@ test('sorteio global de novos jogadores alcança 83 nacionalidades sem inflar a 
   assert.equal(sortearNacionalidadeMundo(()=>1),'SAM');
   assert.notEqual(sortearNacionalidadeMundo(()=>0.5),'INT');
   const observadas=new Set();
+  const contagens=new Map();
   let oceania=0;
   for(let i=0;i<10000;i++){
     const codigo=sortearNacionalidadeMundo(()=>i/10000);
     observadas.add(codigo);
+    contagens.set(codigo,(contagens.get(codigo)||0)+1);
     if(NACIONALIDADES_OCEANIA_NEWGEN.includes(codigo))oceania++;
     assert.notEqual(origemNomes(codigo),'INT');
   }
   assert.equal(observadas.size,83);
   assert.equal(oceania,50,'política provisória: 0,5% de origens raras no sorteio global');
+  for(const codigo of NACS_MUNDO){
+    assert.ok(contagens.get(codigo)>=130 && contagens.get(codigo)<=131,
+      `pool legado distribuído uniformemente: ${codigo} recebeu ${contagens.get(codigo)} de 10.000 sorteios`);
+  }
 });

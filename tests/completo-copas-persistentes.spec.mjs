@@ -19,13 +19,16 @@ for(const tipo of ['copaNacional','continental']) test(`partida ao vivo alimenta
  // A partida pode apresentar uma cena de carreira após o apito final.
  // Fechá-la pelo botão próprio antes de continuar a rodada, sem clicar através do modal.
  const popupCarreira=page.getByRole('dialog',{name:'Detalhes da carreira'});
- const continuar=page.getByRole('button',{name:'Continuar',exact:true}).first();
+ // Resultados das copas têm um diálogo próprio com "Continuar"; outras
+ // cenas de carreira podem oferecer "Seguir em frente". A ação deve ser
+ // disparada DENTRO do diálogo ativo, nunca no botão atrás do overlay.
  await expect(async()=>{
    if(await popupCarreira.isVisible()){
-     await popupCarreira.getByRole('button',{name:'Seguir em frente'}).click({timeout:3000});
+     await popupCarreira.getByRole('button',{name:/^(?:Continuar|Seguir em frente)$/}).click({timeout:3000});
      await expect(popupCarreira).toHaveCount(0);
+   } else {
+     await page.getByRole('button',{name:'Continuar',exact:true}).first().click({timeout:3000});
    }
-   await continuar.click({timeout:3000});
  }).toPass({timeout:20000,intervals:[200,1000]});
  await page.getByRole('button',{name:'💾 Salvar',exact:true}).click();
  await page.getByRole('button',{name:'Salvar aqui',exact:true}).first().click();

@@ -24,7 +24,7 @@ test('ausência, duplicação e índice fora da partição provocam falha explí
  const base=relatorios();
  assert.throws(()=>validarResultadosMelhorias(base.slice(1)),/relatórios/);
  assert.throws(()=>validarResultadosMelhorias([...base.slice(0,3),base[2]]),/repetido/);
- const ruim=structuredClone(base);ruim[0].resultados[0].indice=4;
+ const ruim=structuredClone(base);ruim[0].resultados[0].indice=1; // atribuído à partição 2, não à primeira
  assert.throws(()=>validarResultadosMelhorias(ruim),/índice/);
  const faltando=structuredClone(base);faltando[0].resultados.pop();
  assert.throws(()=>validarResultadosMelhorias(faltando),/todas as carreiras/);

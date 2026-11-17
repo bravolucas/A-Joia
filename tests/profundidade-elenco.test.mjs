@@ -53,6 +53,8 @@ test('posição secundária com aptidão explícita cobre lacuna sem duplicar at
 test('não assume aptidão sem evidência, nem impõe limite numérico arbitrário', () => {
   const elenco=[
     {posicao:'LD',posicoesSecundarias:['LE']},
+    {posicao:'LD'},
+    // O terceiro LD só é usado como LE se houver aptidão comprovada.
     {posicao:'LD',posicoesSecundarias:[{posicao:'LE',proficiencia:75}]},
   ];
   assert.equal(diagnosticarElenco(elenco,{contarSecundarias:true}).contagem.LE,0);

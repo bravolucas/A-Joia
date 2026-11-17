@@ -69,7 +69,7 @@ for (const width of [390, 1366]) {
     expect(linha.y).toBeGreaterThan(ficha.y);
     if(width>900){const menu=await page.getByRole('navigation',{name:'Áreas do treinador'}).boundingBox();expect(menu.x+menu.width).toBeLessThan(ficha.x);}
     await page.getByRole('button', { name: /Começar no Confiança/ }).click();
-    await page.getByRole('button', { name: 'Começar temporada' }).click();
+    await page.getByRole('button', { name: 'Preparar equipe (opcional)', exact: true }).click();
     const decisao = page.getByRole('dialog', { name: 'Decisão de pré-temporada' });
     await expect(decisao).toBeVisible();
     await decisao.locator('.ct-decisions button:not(:disabled)').first().click();
@@ -89,6 +89,22 @@ for (const width of [390, 1366]) {
     expect(erros).toEqual([]);
   });
 }
+
+test('treinador: começar temporada ignora a preparação opcional e não duplica a carreira', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  const c = carreira();
+  await abrir(page, c);
+  await page.getByRole('button', { name: /Começar no Confiança/ }).click();
+  await expect(page.getByRole('button', { name: 'Preparar equipe (opcional)', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Começar temporada', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Decisão de pré-temporada' })).toHaveCount(0);
+  await concluirMomentos(page);
+  await expect.poll(async () => (await salvo(page)).tecnico.temporadas.length).toBe(1);
+  const resultado = await salvo(page);
+  expect(resultado.tecnico.temporadas[0].decisoes.length).toBeGreaterThan(0);
+  expect(resultado.tecnico.temporadas[0].decisoes.every(d => d.carta === 'simulacao_expressa')).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
 
 test('trocar de clube simula a próxima temporada uma única vez', async ({ page }) => {
   await abrir(page, comResultado());
@@ -219,7 +235,7 @@ for(const width of [390,1366]){
   const inicio=page.getByRole('button',{name:'Começar temporada',exact:true});
   if(width===390){const box=await inicio.boundingBox();expect(box.y+box.height).toBeLessThanOrEqual(900);}
   await page.screenshot({path:`/tmp/treinador-rapido-painel-${width}.png`,fullPage:false});
-  await inicio.click();
+  await page.getByRole('button',{name:'Preparar equipe (opcional)',exact:true}).click();
   const janela=page.getByRole('dialog',{name:'Decisão de pré-temporada'});
   await expect(janela).toContainText('ESCOLHA 1 DE 1');
   await expect(janela).toContainText('potencial');
@@ -239,7 +255,7 @@ for(const width of [390,1366]){
  test(`treinador rápido: opção gratuita quando não há verba em ${width}px`,async({page})=>{
   await page.setViewportSize({width,height:900});const c=carreira();c.tecnico.clubeInicialEscolhido=true;c.tecnico.verbaRapida=0;
   c.tecnico.planoRapido={ano:c.tecnico.ano,clube:c.tecnico.clube,cartas:['craque-jovem'],respostas:[]};
-  await abrir(page,c);await page.getByRole('button',{name:'Começar temporada',exact:true}).click();
+  await abrir(page,c);await page.getByRole('button',{name:'Preparar equipe (opcional)',exact:true}).click();
   const janela=page.getByRole('dialog',{name:'Decisão de pré-temporada'});
   await expect(janela.getByRole('button',{name:/Aposta jovem/})).toBeDisabled();
   await expect(janela).toContainText('Sem verba');await janela.getByRole('button',{name:/Manter o grupo/}).click();

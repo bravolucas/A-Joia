@@ -2,6 +2,7 @@ import {CLUBES_REGIONAIS_EXTRAS} from '../competicoes/estaduaisRapidos.js';
 import {jogosDaCampanha} from '../competicoes/jogosCampanha.js';
 import { CLUBES, LIGAS } from '../dados/data.js';
 import { avaliarClubeNoMundo } from './forcaEquipe.js';
+import { EIXOS_REPUTACAO_CLUBE, evoluirReputacoesClube } from './reputacoesClube.js';
 import { geradorTecnico } from '../treinador/momentosTecnico.js';
 const limitar=(n,a,b)=>Math.max(a,Math.min(b,n));
 const red=n=>Math.round(n*10)/10||0;
@@ -30,11 +31,20 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
   if(anterior.anos?.includes(a.ano))return;
   const u={...anterior,versao:1,clubes:{...anterior.clubes},atletas:{...anterior.atletas},edicoes:[...(anterior.edicoes||[])],anos:[...(anterior.anos||[]),a.ano]};
   const clubesRegistrados=[...CLUBES,...CLUBES_REGIONAIS_EXTRAS];
+  // Só são considerados formados os atletas efetivamente marcados como base:
+  // não inferir formação a partir do clube de nascimento ou do nome.
+  const formadosPorClube = new Map();
+  for (const jogador of c.mundo?.jogadores || []) {
+    if (!jogador?.daBase || !jogador.clubeOrigem ||
+        !((jogador.carreira?.temporadas || 0) > 0)) continue;
+    formadosPorClube.set(jogador.clubeOrigem,
+      (formadosPorClube.get(jogador.clubeOrigem) || 0) + 1);
+  }
   const forcasAntes=forcasDoMundo({...c,universo:anterior,mundo:antesMundo||c.mundo},clubesRegistrados);
   const titulos=c.historiaFutebol?.titulos?.filter(t=>t.ano===a.ano)||[];
   for(const cl of clubesRegistrados){
     const p=u.clubes[cl.nome]||{mercado:0,estrutura:0,fase:0,reputacao:cl.forca,financas:50,historico:[]};
-    const campanha=campanhaClube(a,cl.nome),tacas=titulos.filter(t=>t.clube===cl.nome).map(t=>t.nome);
+    const campanha=campanhaClube(a,cl.nome),titulosClube=titulos.filter(t=>t.clube===cl.nome),tacas=titulosClube.map(t=>t.nome);
     const rng=geradorTecnico(`${c.codigo||'carreira'}|${a.ano}|${cl.nome}|gestao-mundo`);
     const esperado=limitar(1-(cl.forca-40)/65,.08,.85);
     const desempenho=campanha?limitar(esperado-campanha.posicao/Math.max(1,campanha.total),-.8,.8):0;
@@ -48,9 +58,18 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
     const fase=limitar(desempenho*2,-1.5,1.5);
     const motivos=[...(movimento?[movimento==='acesso'?'Acesso de divisão':'Rebaixamento']:[]),...(tacas.length?[`${tacas.length} título${tacas.length>1?'s':''} na temporada`]:[]),ajusteMercado>.45?'Planejamento do elenco fortaleceu o clube':ajusteMercado<-.45?'Planejamento do elenco deixou perdas':'Elenco passou por ajustes pontuais'];
     const antes=forcasAntes[cl.nome];
-    const perfil={...p,mercado:red(mercado),estrutura:red(estrutura),fase:red(fase),financas:red(financas),reputacao:red(limitar(p.reputacao+receita*.2,20,99))};
+    // Indicadores adicionais não substituem os atributos legados de força,
+    // reputação e orçamento até existir calibração do mercado e testes próprios.
+    const reputacoes=evoluirReputacoesClube(p,{
+      campanha,titulos:titulosClube,movimento,financas,estrutura,
+      atletasFormados:formadosPorClube.get(cl.nome)||0
+    });
+    const perfil={...p,mercado:red(mercado),estrutura:red(estrutura),fase:red(fase),financas:red(financas),reputacao:red(limitar(p.reputacao+receita*.2,20,99)),reputacoes};
     const depois=avaliarClubeNoMundo({...c,universo:{clubes:{[cl.nome]:perfil}}},cl).forca;
-    u.clubes[cl.nome]={...perfil,historico:[...p.historico,{ano:a.ano,...campanha,titulos:tacas,forcaAntes:antes,forca:depois,financas:perfil.financas,motivos,...(movimento?{movimento}:{})}]};
+    u.clubes[cl.nome]={...perfil,historico:[...p.historico,{ano:a.ano,...campanha,titulos:tacas,forcaAntes:antes,forca:depois,financas:perfil.financas,motivos,
+      // Snapshot compacto por ordem dos 8 eixos; não inventar histórico legado.
+      reputacoesEixos:EIXOS_REPUTACAO_CLUBE.map(eixo=>reputacoes[eixo]),
+      ...(movimento?{movimento}:{})}]};
   }
   const antigos=new Map((antesMundo?.jogadores||[]).map(p=>[String(p.id),p]));
   for(const p of c.mundo?.jogadores||[]){

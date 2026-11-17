@@ -96,3 +96,8 @@
 .ct-quick-decision .ct-quick-baseline{display:inline-block;font-size:10px;color:#d6c79d;background:#d8b44a09;padding:6px 9px;border-radius:6px;margin-top:10px}.ct-quick-history{margin:12px 0;font-size:11px;color:#9eaaa1}.ct-quick-history summary{cursor:pointer;color:#d7c28e}.ct-quick-history p{padding:10px 0;border-top:1px solid #ffffff0b}
 @media(max-width:900px){.ct-actions{order:3}.ct-timeline{order:4}}
 .ct-footer{flex-wrap:wrap}.ct-footer button{min-height:40px}
+
+/* A simulação direta é a ação primária; preparação permanece opt-in. */
+.ct-prep-optional{display:block;width:100%;margin-top:10px;min-height:44px;border:1px solid #57534e;border-radius:999px;padding:10px 14px;background:transparent;color:#e4e4e7;font-size:12px;font-weight:650;text-align:center;transition:background .2s,border-color .2s}
+.ct-prep-optional:hover:not(:disabled){background:#27272c;border-color:#a8a29e}
+.ct-prep-optional:disabled{cursor:wait;opacity:.55}

@@ -25,5 +25,5 @@ for(const viewport of [{width:390,height:844},{width:1440,height:900}]){
  });
 }
 test('preparação da seleção apresenta decisões de convocação, sem compras e vendas',async({page})=>{
- let c=base();c=aceitarPropostaTecnico(c,'Portugal');c=proximaTemporadaTecnico(c);await abrir(page,c);await page.getByRole('button',{name:'Começar temporada'}).click();const dialog=page.getByRole('dialog');await expect(dialog).toBeVisible();await expect(dialog).not.toContainText('Vender por');await expect(dialog).not.toContainText('Contratar do rival');
+ let c=base();c=aceitarPropostaTecnico(c,'Portugal');c=proximaTemporadaTecnico(c);await abrir(page,c);await page.getByRole('button',{name:'Preparar equipe (opcional)'}).click();const dialog=page.getByRole('dialog');await expect(dialog).toBeVisible();await expect(dialog).not.toContainText('Vender por');await expect(dialog).not.toContainText('Contratar do rival');
 });

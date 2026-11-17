@@ -31,7 +31,7 @@ for (const width of [390, 1366]) {
   test(`calendário intercala estadual e liga, mostra campanha parcial e continua em ${width}px`, async ({ page }) => {
     test.setTimeout(90000);await page.setViewportSize({width,height:900});await page.emulateMedia({reducedMotion:'reduce'});
     const erros=[];page.on('pageerror',e=>erros.push(e.message));await abrir(page,carreira('normal'));
-    await page.getByRole('button',{name:'Começar temporada',exact:true}).click();await page.getByRole('dialog',{name:'Decisão de pré-temporada'}).locator('.ct-decisions button:enabled').first().click();
+    await page.getByRole('button',{name:'Preparar equipe (opcional)',exact:true}).click();await page.getByRole('dialog',{name:'Decisão de pré-temporada'}).locator('.ct-decisions button:enabled').first().click();
     await expect(page.getByRole('dialog',{name:/Copa em jogo · Campeonato Sergipano/})).toBeVisible();let data=-99,achou=false;
     for(let i=0;i<70;i++){
       const c=await salvo(page),p=c.tecnico.copasEmJogo;expect(p).toBeTruthy();expect(p.dataAtual).toBeGreaterThanOrEqual(data);data=p.dataAtual;

@@ -68,6 +68,17 @@ const paises = [...porPais.values()].map(g => ({
   nomesRepetidos:g.total-g.distintos.size
 }));
 const repetidos = paises.reduce((n,p)=>n+p.nomesRepetidos,0);
+// Repetição também pode surgir entre duas nacionalidades que compartilham
+// um conjunto cultural; não confundir isso com repetição dentro do país.
+const todosNomes = new Map();
+for (const grupo of porPais.values()) for (const nome of grupo.distintos) {
+  if (!todosNomes.has(nome)) todosNomes.set(nome, new Set());
+  todosNomes.get(nome).add(grupo.codigo);
+}
+const nomesCompartilhadosEntrePaises = [...todosNomes]
+  .filter(([, paises]) => paises.size > 1)
+  .map(([nome, paises]) => ({nome, paises:[...paises]}))
+  .sort((a,b) => b.paises.length - a.paises.length || a.nome.localeCompare(b.nome,'pt-BR'));
 const duracaoMs = Math.round(performance.now()-inicio);
 const relatorio = {
   base:'Auditoria exploratória A JOIA (não representa o universo completo nem a economia)',
@@ -83,10 +94,13 @@ const relatorio = {
   nomes:{totalGerados:amostra,totalRepetidosPorNacionalidade:repetidos,
     taxaRepeticaoPercentual:+(100*repetidos/amostra).toFixed(2),
     paisesSemOrigemRegional:paises.filter(p=>p.origem==='INT').map(p=>p.codigo),
+    totalNomesDistintosGlobais:todosNomes.size,
+    combinacoesCompartilhadasEntreNacionalidades:nomesCompartilhadosEntrePaises.length,
+    exemplosDeNomesCompartilhados:nomesCompartilhadosEntrePaises.slice(0,15),
     dezPaisesComMaisRepeticoes:paises.slice().sort((a,b)=>b.nomesRepetidos-a.nomesRepetidos).slice(0,10),
     porNacionalidade:paises},
   medicao:{duracaoMs,heapFinalMiB:memoria()},
-  limitacoes:['Ensaio com 3 clubes apenas; não prova cobertura ou orçamento mundial.','Amostras de nomes percorrem 83 países igualmente; não representam distribuição real de futebolistas.','Sem testes de lesões, scouting, reputação multidimensional ou economia detalhada.','Contagem de repetição é por nacionalidade e não detecta combinações culturais inadequadas.']
+  limitacoes:['Ensaio com 3 clubes apenas; não prova cobertura ou orçamento mundial.','Amostras de nomes percorrem 83 países igualmente; não representam distribuição real de futebolistas.','Sem testes de lesões, scouting, reputação multidimensional ou economia detalhada.','Amostragem detecta nomes repetidos por país e homônimos compartilhados entre países, mas não identifica combinações culturalmente inadequadas nem migração familiar.']
 };
 if(options.json!==undefined || process.argv.includes('--json')) console.log(JSON.stringify(relatorio,null,2));
 else console.log('Fases 1/2: '+anos+' anos; '+amostra+' nomes; '+problemas.length+' violacoes de elenco/ID; '+relatorio.nomes.taxaRepeticaoPercentual+'% de repeticoes de nomes por nacionalidade; '+duracaoMs+' ms; '+Math.round(maxBytes/1024)+' KiB de save maximo.');

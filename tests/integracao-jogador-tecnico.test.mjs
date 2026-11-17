@@ -19,9 +19,21 @@ function criar(i) {
     personalidade: perfis[i % perfis.length], origem: 'base', pe: i % 2 ? 'canhoto' : 'destro',
     numero: (i % 20) + 1, ritmo: 'equilibrado', codigo: 'INTEGRACAO' + i });
 }
-test('32 carreiras de jogador até aposentadoria e transição para técnico', () => {
+// O comportamento local sem variáveis de ambiente continua executando as 32 carreiras.
+// No CI, duas partições complementares distribuem as mesmas 32 carreiras em runners.
+const TOTAL_CARREIRAS = 32;
+const PARTES_CI = Number(process.env.A_JOIA_INTEGRACAO_PARTES || 1);
+const PARTE_CI = Number(process.env.A_JOIA_INTEGRACAO_PARTE || 1);
+if (!Number.isInteger(PARTES_CI) || !Number.isInteger(PARTE_CI) ||
+    PARTES_CI < 1 || TOTAL_CARREIRAS % PARTES_CI !== 0 ||
+    PARTE_CI < 1 || PARTE_CI > PARTES_CI) {
+  throw new Error('Partição de carreiras inválida.');
+}
+const INDICES_CARREIRAS = Array.from({ length: TOTAL_CARREIRAS }, (_, i) => i)
+  .filter(i => i % PARTES_CI === PARTE_CI - 1);
+test(`carreiras de jogador até aposentadoria e transição para técnico — ${INDICES_CARREIRAS.length}/32 (parte ${PARTE_CI}/${PARTES_CI})`, () => {
   let totalTemporadas = 0, totalJogosTecnico = 0;
-  for (let i = 0; i < 32; i++) {
+  for (const i of INDICES_CARREIRAS) {
     let c = criar(i);
     const primeiroAno = c.ano;
     for (let temporada = 0; c.idade < 40 && temporada < 30; temporada++) {
@@ -67,6 +79,9 @@ test('32 carreiras de jogador até aposentadoria e transição para técnico', (
     totalJogosTecnico += c.tecnico.temporadas[0].jogos ?? 38;
     assert.ok(Number.isFinite(ovrDe(c)));
   }
-  assert.ok(totalTemporadas > 300);
-  assert.ok(totalJogosTecnico >= 320);
+  // O limiar proporcional preserva a exigência global original sem enfraquecê-la.
+  // Com duas partes, ambas precisam passar, cobrindo os mesmos índices 0..31.
+  assert.equal(INDICES_CARREIRAS.length * PARTES_CI, TOTAL_CARREIRAS);
+  assert.ok(totalTemporadas > 300 * INDICES_CARREIRAS.length / TOTAL_CARREIRAS);
+  assert.ok(totalJogosTecnico >= 320 * INDICES_CARREIRAS.length / TOTAL_CARREIRAS);
 });

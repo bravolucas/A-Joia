@@ -19,6 +19,9 @@ for(const tipo of ['copaNacional','continental']) test(`partida ao vivo alimenta
  // A partida pode apresentar uma cena de carreira após o apito final.
  // Fechá-la pelo botão próprio antes de continuar a rodada, sem clicar através do modal.
  const popupCarreira=page.getByRole('dialog',{name:'Detalhes da carreira'});
+ // A interface deve exibir a conquista da copa antes do destaque individual,
+ // nunca os dois overlays acessíveis ao mesmo tempo.
+ await expect(popupCarreira).toHaveCount(1);
  // O resultado da copa e o prêmio "Melhor em Campo" podem aparecer juntos.
  // Os dois <dialog> compartilham o nome acessível. isVisible() e click() em
  // um locator com dois elementos causavam "strict mode violation" no CI.

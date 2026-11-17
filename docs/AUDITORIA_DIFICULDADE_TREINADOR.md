@@ -24,6 +24,13 @@ A primeira medição de nove temporadas **já foi executada com sucesso** no run
 
 A nova execução de 150 temporadas **ainda precisa terminar com sucesso** e seus números devem ser lidos do log/JSON do run atual, não presumidos. A interpretação requer comparar os mesmos clubes e parâmetros depois de qualquer alteração no motor.
 
+## Correção metodológica: anos independentes para os estaduais
+**Limitação identificada após a execução do baseline com 150 temporadas:** a auditoria original criava todas as carreiras com `ano: 2030`. O motor de estaduais usa `simularCampanhaCopa`, cuja semente interna é derivada de `ano|nome do torneio|clube`; por isso, mesmo variando a semente externa, ela **repetia a mesma edição do estadual 50 vezes**. Os 50 Campeonatos Cariocas observados **não demonstram 100% de probabilidade de título**; apenas que o Flamengo venceu a edição determinística testada. O resultado anterior do Brasileirão tem semente externa variável, mas não usar as taxas agregadas de copas como baseline probabilístico.
+
+A partir desta correção, a repetição `i` da auditoria começa em `2030+i` (2030 a 2079, no cenário de 50 amostras). Os três níveis de clube usam **o mesmo ano dentro da mesma repetição**, e a semente externa de cada repetição continua parametrizada. Os anos distintos produzem sorteios internos de estaduais distintos, sem mudar o motor, a dificuldade, os saves ou as taças do jogo. O teste de unidade garante 50 anos distintos. **A nova taxa de títulos estaduais só pode ser divulgada após o workflow desta revisão terminar com sucesso.**
+
+O arquivo `docs/DIFICULDADE_TREINADOR_BASELINE_50.json` é preservado como **baseline histórico não independente para estaduais**; não sobrescrever silenciosamente os dados antigos. Uma nova edição, com nome e SHA, deve ser salva após a auditoria corrigida.
+
 ## Discriminação dos títulos adicionais (após a linha de base)
 O resumo por faixa agora inclui `titulosPorCompeticao`, que reúne os nomes reais registrados em `temporada.titulosConquistados`, excluindo o título da própria liga. Assim será possível identificar quantas vezes o Flamengo levou Copa do Brasil, Libertadores, estaduais e outros campeonatos nas mesmas 50 temporadas, em vez de depender só da média agregada de 1,02.
 

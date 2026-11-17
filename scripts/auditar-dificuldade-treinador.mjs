@@ -92,9 +92,13 @@ export function contarOutrosTitulos(temporada = {}) {
   return listarTitulosDeCopa(temporada).length;
 }
 
+// O estadual usa semente interna derivada de ano/nome/clube.
+// Sem variar o ano, 50 amostras independentes repetem exatamente a mesma
+// edição da competição, independentemente da semente externa passada à liga.
+export const anoAmostra = indice => 2030 + indice;
 function simularUmaTemporada(clube, semente, indice) {
   const atleta = {
-    nome: 'Auditoria ' + indice, idade: 40, ano: 2030, aposentado: true,
+    nome: 'Auditoria ' + indice, idade: 40, ano: anoAmostra(indice), aposentado: true,
     clubeNome: clube.nome, temporadas: [], totais: {}, legado: { pontos: 600 },
   };
   const inicial = iniciarCarreiraTecnico(atleta);
@@ -114,7 +118,7 @@ function simularUmaTemporada(clube, semente, indice) {
     throw new Error(`Resultado incompleto: ${clube.nome} / semente ${semente}`);
   }
   return {
-    semente, clube: clube.nome, forcaInicial: clube.elenco,
+    semente, ano: anoAmostra(indice), clube: clube.nome, forcaInicial: clube.elenco,
     posicao: temporada.posicao, pontos: temporada.pontos,
     campeaoLiga: temporada.posicao === 1,
     outrosTitulos: contarOutrosTitulos(temporada),
@@ -136,6 +140,7 @@ export async function auditar({ liga = 'brasileirao', amostras = 12, semente = 2
   return {
     metodo: 'motor real do Modo Treinador, uma temporada por carreira, ritmo expresso, sem decisão opcional',
     liga, semente, repeticoesPorFaixa: amostras,
+    anosSimulados: {primeiro: anoAmostra(0), ultimo: anoAmostra(amostras - 1)},
     aviso: 'Amostragem exploratória, não prova de realismo; para comparação publicar parâmetros idênticos antes/depois.',
     faixas: series.map(({dados,...m}) => ({...m, ...resumirAmostras(dados)})),
   };

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { selecionarFaixas, rngSemente, resumirAmostras, contarOutrosTitulos, listarTitulosDeCopa } from '../scripts/auditar-dificuldade-treinador.mjs';
+import { selecionarFaixas, rngSemente, resumirAmostras, contarOutrosTitulos, listarTitulosDeCopa, anoAmostra } from '../scripts/auditar-dificuldade-treinador.mjs';
 
 test('auditoria da dificuldade escolhe equipes fraca, média e forte na mesma liga', () => {
   const clubes = [
@@ -15,6 +15,13 @@ test('auditoria da dificuldade escolhe equipes fraca, média e forte na mesma li
   assert.deepEqual(faixas.map(x => x.nome), ['A','B','C']);
   assert.deepEqual(faixas.map(x => x.elenco), [50,60,90]);
   assert.throws(() => selecionarFaixas(clubes,'espanha'), /três clubes/);
+});
+
+test('estaduais usam edições diferentes por amostra para não repetir o sorteio interno',()=>{
+  assert.equal(anoAmostra(0),2030);
+  assert.equal(anoAmostra(1),2031);
+  assert.equal(anoAmostra(49),2079);
+  assert.equal(new Set(Array.from({length:50},(_,i)=>anoAmostra(i))).size,50);
 });
 
 test('amostragem da auditoria reproduz a mesma sequência por semente', () => {

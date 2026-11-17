@@ -11,6 +11,7 @@
 import { pathToFileURL } from 'node:url';
 import {
   CLUBES_CONVITES_TECNICO, iniciarCarreiraTecnico, jogarTemporadaExpressaTecnico,
+  competicaoTemporadaTecnico,
 } from '../src/treinador/tecnico.js';
 
 export function selecionarFaixas(clubes, liga = 'brasileirao') {
@@ -68,6 +69,16 @@ function argumentos(argv) {
   return config;
 }
 
+/**
+ * Conta troféus de copas e outros torneios sem contar a liga uma segunda vez.
+ * O motor registra nomes exibidos (e.g. "Brasileirão"), não IDs de liga ("brasileirao").
+ */
+export function contarOutrosTitulos(temporada = {}) {
+  const titulos = Array.isArray(temporada.titulosConquistados) ? temporada.titulosConquistados : [];
+  const nomeLiga = competicaoTemporadaTecnico(temporada);
+  return titulos.filter(titulo => titulo !== nomeLiga).length;
+}
+
 function simularUmaTemporada(clube, semente, indice) {
   const atleta = {
     nome: 'Auditoria ' + indice, idade: 40, ano: 2030, aposentado: true,
@@ -89,12 +100,11 @@ function simularUmaTemporada(clube, semente, indice) {
       !Number.isFinite(temporada.posicao) || !Number.isFinite(temporada.pontos)) {
     throw new Error(`Resultado incompleto: ${clube.nome} / semente ${semente}`);
   }
-  const titulos = temporada.titulosConquistados ?? [];
   return {
     semente, clube: clube.nome, forcaInicial: clube.elenco,
     posicao: temporada.posicao, pontos: temporada.pontos,
     campeaoLiga: temporada.posicao === 1,
-    outrosTitulos: Array.isArray(titulos) ? titulos.length - Number(titulos.includes(temporada.liga)) : 0,
+    outrosTitulos: contarOutrosTitulos(temporada),
     demitido: !!(temporada.demitido || resultado.tecnico.demitido),
   };
 }

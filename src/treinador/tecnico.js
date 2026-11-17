@@ -5,7 +5,7 @@ import {gerarMundoJogadores,simularTemporadaMundo} from '../comum/lib.js';
 import {estatisticasDasPartidas} from '../simulacao/estatisticasMundo.js';
 import {exigenciaClubeTecnico,avaliarDiretoriaTemporada,reavaliarDiretoriaTecnico} from './exigenciasTecnico.js';
 import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternacionais.js';
-import {IDADE_MAXIMA_TECNICO,LIMITE_TEMPORADAS_TECNICO,idadeTecnico,carreiraTecnicoEncerrada} from './longevidadeTecnico.js';
+import {idadeTecnico,carreiraTecnicoEncerrada} from './longevidadeTecnico.js';
 export {IDADE_MAXIMA_TECNICO,LIMITE_TEMPORADAS_TECNICO,anosCarreiraTecnico,idadeTecnico,carreiraTecnicoEncerrada} from './longevidadeTecnico.js';
 import {avaliarForcaEquipe} from '../simulacao/forcaEquipe.js';
 import {forcasDoMundo,clubesDoMundo,registrarMundoVivo,resumirTabelas} from '../simulacao/mundoVivo.js';

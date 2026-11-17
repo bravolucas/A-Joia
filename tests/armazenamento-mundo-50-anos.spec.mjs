@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {build} from 'esbuild';
 import {createHash} from 'node:crypto';
+import {mkdirSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {gerarMundoJogadores,simularTemporadaMundo} from '../src/comum/lib.js';
 import {CLUBES} from '../src/dados/data.js';
@@ -117,5 +118,7 @@ test('save mundial de 50 anos persiste em IndexedDB, recarrega e resiste à falh
   expect(desktop.atletas).toBe(quantidade);
   medidas.recargaDesktopMs=desktop.leituraMs;
   medidas.falhaQuotaRejeitada=true;
+  mkdirSync('resultados-auditoria',{recursive:true});
+  writeFileSync('resultados-auditoria/medicoes-indexeddb-50-anos.json',JSON.stringify(medidas,null,2));
   await testInfo.attach('medicoes-indexeddb-50-anos.json',{body:Buffer.from(JSON.stringify(medidas,null,2)),contentType:'application/json'});
 });

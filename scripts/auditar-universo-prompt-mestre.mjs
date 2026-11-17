@@ -33,6 +33,7 @@ const bytes = valor => Buffer.byteLength(JSON.stringify(valor), 'utf8');
 const inicio = performance.now();
 let mundo = {jogadores:completarCarenciasMundo([],clubes,geradorTecnico('inicial|' + semente)),cadastroElencos:true,temporada:0};
 const tamanhoInicial = bytes(mundo);
+const totalInicial = mundo.jogadores.length;
 const cobertura = [], problemas = [];
 let maxTotal = mundo.jogadores.length, maxAtivos = 0, maxHeapMiB = memoria(), maxBytes = tamanhoInicial;
 for (let indice=0;indice<anos;indice++) {
@@ -72,7 +73,7 @@ const relatorio = {
   base:'Auditoria exploratória A JOIA (não representa o universo completo nem a economia)',
   parametros:{anos,amostraNomes:amostra,seed:semente,clubes:clubes.length,nacionalidades:codigos.length,elencoMinimoPadrao:TOTAL_MINIMO_ELENCO},
   mundo:{temporadasSimuladas:cobertura.length,ultimoAno:2030+anos-1,
-    jogadoresIniciais:Math.round(tamanhoInicial),jogadoresMundoFinal:mundo.jogadores.length,
+    jogadoresIniciais:totalInicial,jogadoresMundoFinal:mundo.jogadores.length,
     jogadoresAtivosFinal:mundo.jogadores.filter(j=>!j.aposentado).length,
     maxTotalJogadores:maxTotal,maxAtivos,
     tamanhoJsonInicialBytes:tamanhoInicial,tamanhoJsonFinalBytes:bytes(mundo),

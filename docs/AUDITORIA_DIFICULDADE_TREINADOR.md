@@ -17,6 +17,11 @@ O relatório de cada faixa apresenta: clube e força inicial, amostras, títulos
 
 `--amostras` aceita valores entre 1 e 200 **por faixa**: 50 significa 150 temporadas completas e pode levar um tempo considerável. Começar pequeno; aumentar a amostragem para decisões de balanceamento. O script não roda no CI por padrão, para não tornar a validação geral ainda mais lenta. Os testes de unidade `tests/auditoria-dificuldade-treinador.test.mjs` rodam normalmente e cobrem as métricas, seleção de clubes e semente.
 
+## Amostra automatizada no GitHub Actions
+O workflow `.github/workflows/auditoria-dificuldade.yml` roda de forma independente quando este auditor é alterado em um pull request para `main`. Ele testa primeiro os auxiliares e executa **três temporadas por faixa (nove no total)** com `--liga=brasileirao --amostras=3 --semente=2026 --json`; guarda o resultado no artefato `dificuldade-treinador-brasileirao` por 14 dias.
+
+Isso confirma **que a CLI executa de verdade** no ambiente de CI e disponibiliza um primeiro retrato exploratório, mas nove temporadas não dão base suficiente para concluir que o jogo está equilibrado. Para uma decisão, execute `--amostras=50` ou mais na mesma revisão e compare estatísticas com as mesmas sementes depois de qualquer mudança no motor.
+
 ## Critérios de análise, sem fabricar números
 - Comparar títulos e posição média entre clubes fracos, médios e fortes: um padrão de clubes fracos dominando frequentemente exige investigação.
 - Comparar diretamente com as mesmas três equipes e `--semente` antes/depois da proposta de balanceamento.

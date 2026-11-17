@@ -58,3 +58,26 @@ test('veterano livre jamais é contratado automaticamente pelo clube do técnico
   });
   assert.equal(proximo.jogadores.find(j => j.id === 1).clubeNome, null);
 });
+
+
+test('save legado sem contrato recebe prazo curto de veterano ao ser inicializado', () => {
+  const clube = { nome: 'Meu Clube', liga: 'brasileirao', forca: 80 };
+  const veterano = {
+    id: 45, nome: 'Veterano Legado', idade: 35, ovr: 80,
+    potencial: 84, picoIdade: 28, posicao: 'ATA', nac: 'BRA',
+    clubeNome: clube.nome, liga: clube.liga, aposentado: false,
+    carreira: { gols: 0, assist: 0, jogos: 0, temporadas: 0 },
+    // contrato ausente em saves mais antigos
+  };
+  const mundo = { jogadores: [veterano], cadastroElencos: 1, temporada: 0 };
+  const origem = structuredClone(mundo);
+  const futuro = simularTemporadaMundo(mundo, () => 0.99, {
+    clubes: [clube], clubeControlado: clube.nome, ano: 2027,
+    registrarPremio: false,
+  });
+  const atualizado = futuro.jogadores.find(j => j.id === 45);
+  assert.ok(atualizado, 'atleta do save deve permanecer no mundo');
+  assert.equal(atualizado.idade, 36);
+  assert.equal(atualizado.contrato, 2, 'veterano sem contrato não deve receber três anos');
+  assert.deepEqual(mundo, origem, 'o save original não pode ser reescrito');
+});

@@ -1,7 +1,11 @@
 name: Publicar no GitHub Pages
 
+# A publicação só é disparada quando a validação da main termina com
+# todos os testes (lógica, navegador) e o build aprovados.
 on:
-  push:
+  workflow_run:
+    workflows: ["Validar A JOIA"]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -16,14 +20,20 @@ concurrency:
 
 jobs:
   construir:
+    # Ignora execuções de PR e validações que não terminaram com sucesso.
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Faz o deploy do SHA que passou no CI, sem pegar um HEAD mais recente.
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20
       - run: npm install
-      - run: npm test
+      # Os testes já rodaram em 'Validar A JOIA'; evita executar a suíte
+      # de carreiras longas outra vez antes de disponibilizar o site.
       - run: npm run build
         env:
           GITHUB_PAGES: "true"

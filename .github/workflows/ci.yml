@@ -1,6 +1,6 @@
 name: Validar A JOIA
 # Roda em todo push na main e em todo pull request:
-# 1) testes de lógica (node --test) e build de produção;
+# 1) testes de lógica, dividindo carreiras longas em jobs paralelos, e build;
 # 2) testes no navegador (Playwright) em desktop e celular, contra o build do GitHub Pages.
 on:
   push:
@@ -16,7 +16,6 @@ concurrency:
 jobs:
   testes-e-build:
     runs-on: ubuntu-latest
-    # A suíte de carreiras longas ultrapassa 45 min em execuções carregadas.
     timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
@@ -27,10 +26,66 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Regressões rápidas de mercado e veteranos IA
         run: node --test tests/mercado-ia.test.mjs tests/fase4-disponibilidade-veteranos.test.mjs tests/fase4-mercado-veteranos.test.mjs
-      - name: Testes de lógica
-        run: npm test
+      - name: Testes de lógica (exceto carreiras massivas)
+        shell: bash
+        run: |
+          # Todos os arquivos continuam obrigatórios: os quatro retirados deste
+          # grupo são executados pela matriz carreiras-massivas, sem reduções.
+          arquivos=()
+          for caminho in tests/*.test.mjs; do
+            case "$caminho" in
+              tests/integracao-jogador-tecnico.test.mjs|tests/jogador-melhorias.test.mjs|tests/treinador-expresso.test.mjs|tests/simulacao-massiva-tecnico.test.mjs) ;;
+              *) arquivos+=("$caminho") ;;
+            esac
+          done
+          test "${#arquivos[@]}" -gt 0
+          node --test "${arquivos[@]}"
       - name: Gerar versão de produção
         run: npm run build
+
+  carreiras-massivas:
+    name: carreiras-massivas (${{ matrix.caso }})
+    runs-on: ubuntu-latest
+    # Quatro runners: os 32 casos de integração rodam em 2x16, e os outros
+    # três arquivos continuam completos (dois deles em um único job).
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - caso: integracao-1-de-2
+            arquivos: tests/integracao-jogador-tecnico.test.mjs
+            parte: 1
+            partes: 2
+          - caso: integracao-2-de-2
+            arquivos: tests/integracao-jogador-tecnico.test.mjs
+            parte: 2
+            partes: 2
+          - caso: jogador-melhorias
+            arquivos: tests/jogador-melhorias.test.mjs
+            parte: 1
+            partes: 1
+          - caso: treinador-e-simulacao
+            arquivos: tests/treinador-expresso.test.mjs tests/simulacao-massiva-tecnico.test.mjs
+            parte: 1
+            partes: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar dependências
+        run: npm install --no-audit --no-fund
+      - name: Executar todos os cenários atribuídos ao runner
+        shell: bash
+        env:
+          A_JOIA_INTEGRACAO_PARTE: ${{ matrix.parte }}
+          A_JOIA_INTEGRACAO_PARTES: ${{ matrix.partes }}
+          ARQUIVOS_CARREIRAS: ${{ matrix.arquivos }}
+        run: |
+          read -r -a arquivos <<< "$ARQUIVOS_CARREIRAS"
+          test "${#arquivos[@]}" -gt 0
+          node --test "${arquivos[@]}"
 
   navegador:
     runs-on: ubuntu-latest
@@ -48,6 +103,9 @@ jobs:
         run: |
           GITHUB_PAGES=true npm run preview -- --host 127.0.0.1 --port 4173 &
           npx wait-on http://127.0.0.1:4173/A-Joia/
+          # Exercita cedo os dois cenários que dependem do diálogo final da copa:
+          # se falharem, evita gastar ~17 min em todos os 399 testes antes de detectar.
+          npx playwright test tests/completo-copas-persistentes.spec.mjs --reporter=line
           npx playwright test tests/*.spec.mjs --reporter=line
       - uses: actions/upload-artifact@v4
         if: always()

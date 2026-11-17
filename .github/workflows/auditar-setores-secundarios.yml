@@ -1,0 +1,26 @@
+name: Auditar setores aptos do treinador
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/treinador/alocacaoSetoresTecnico.js'
+      - 'src/treinador/taticasTecnico.js'
+      - 'tests/alocacao-setores-secundarios.test.mjs'
+      - '.github/workflows/auditar-setores-secundarios.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  setores:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Verificar setores sem duplicar jogadores
+        run: node --test tests/alocacao-setores-secundarios.test.mjs tests/taticas-tecnico.test.mjs tests/profundidade-elenco.test.mjs
+      - name: Confirmar build do jogo
+        run: GITHUB_PAGES=true npm run build

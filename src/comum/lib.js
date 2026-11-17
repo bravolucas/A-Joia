@@ -1,5 +1,6 @@
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
 import { MINIMOS_ELENCO, diagnosticarElenco } from '../simulacao/profundidadeElenco.js';
+import {posicoesSecundariasNewgen} from '../simulacao/posicoesSecundariasNewgen.js';
 import { gerarNomeRegional, sortearNacionalidadeMundo } from '../simulacao/nomesRegionais.js';
 import { metadadosAtletaReal, idadeAtletaReal } from '../dados/metadadosAtletasReais.js';
 import { registrarHistoricoTemporada, registrarPremioIndividual } from '../simulacao/historicoJogadorMundo.js';
@@ -1819,7 +1820,7 @@ export function completarCarenciasMundo(jogadores, clubes = CLUBES, rng = Math.r
         const escolha = lista => lista[Math.min(lista.length - 1, Math.floor(rng() * lista.length))];
         const teto = clampR(Math.round(clube.forca + Math.floor(rng()*21) - 8), 50, 98);
         const ovr = clampR(teto - (5 + Math.floor(rng()*16)), 38, 90);
-        novos.push({
+        const novoAtleta={
           id:proximoId(), nome:gerarNomeRegional(nac,rng), nac, posicao,
           idade:16 + Math.floor(rng()*5), ovr, potencial:Math.max(teto,ovr),
           picoIdade:26 + Math.floor(rng()*5), clubeNome:clube.nome,
@@ -1830,7 +1831,10 @@ export function completarCarenciasMundo(jogadores, clubes = CLUBES, rng = Math.r
           aposentado:false, contrato:3,
           salario:Math.max(3,Math.round(ovr**2/220)),
           valor:Math.max(100,Math.round(ovr**3/180*1.2)),
-        });
+        };
+        const alternativas=posicoesSecundariasNewgen(novoAtleta);
+        if(alternativas.length)novoAtleta.posicoesSecundarias=alternativas;
+        novos.push(novoAtleta);
       }
     }
   }
@@ -2024,14 +2028,17 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
     const nacLocal = nacionalidadeLiga[clube.liga];
     const nac = nacLocal && rng() < .85 ? nacLocal : sortearNacionalidadeMundo(rng);
     const teto = clampR(Math.round(clube.forca + rand(-4, 12)), 60, 96);
-    jogadores.push({
+    const novoAtleta={
       id: proximoIdAposentadoria(), nome: nomeMundo(nac), nac, posicao: aposentado?.posicao||pick(POSICOES).id,
       idade: rand(16, 19), ovr: clampR(teto - rand(10, 20), 48, 74), potencial: teto, picoIdade: rand(26, 30),
       clubeNome: clube.nome, clubeOrigem: clube.nome, liga: clube.liga,
       traco: pick(TRACOS_MUNDO).id, estilo: pick(ESTILOS_JOGO_MUNDO).id,
       gols: 0, assist: 0, jogos: 0, nota: 0,
       carreira: { gols: 0, assist: 0, jogos: 0, titulos: 0, bolasDeOuro: 0, premios: 0, temporadas: 0 }, aposentado: false,
-    });
+    };
+    const alternativas=posicoesSecundariasNewgen(novoAtleta);
+    if(alternativas.length)novoAtleta.posicoesSecundarias=alternativas;
+    jogadores.push(novoAtleta);
   }
   if(mundo.cadastroElencos)for(const p of jogadores)if(!Number.isInteger(p.contrato)){p.contrato=p.clubeNome?duracaoContratoIA(p.idade,p.posicao):0;p.salario=Math.max(3,Math.round(p.ovr**2/220));p.valor=Math.max(100,Math.round(p.ovr**3/180*(p.idade<24?1.2:.7)));}
   const jogadoresLimpos = completarCarenciasMundo(jogadores.filter((j) => !j.aposentado || j.idade <= 45), clubes, rng);

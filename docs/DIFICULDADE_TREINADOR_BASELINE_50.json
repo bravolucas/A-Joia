@@ -1,0 +1,81 @@
+{
+  "metodo": "motor real do Modo Treinador, uma temporada por carreira, ritmo expresso, sem decisão opcional",
+  "liga": "brasileirao",
+  "semente": 2026,
+  "repeticoesPorFaixa": 50,
+  "aviso": "Amostragem exploratória, não prova de realismo; para comparação publicar parâmetros idênticos antes/depois.",
+  "faixas": [
+    {
+      "faixa": "fraco",
+      "clube": "Remo",
+      "forca": 52,
+      "amostras": 50,
+      "titulosLiga": 0,
+      "percentualTitulosLiga": 0,
+      "percentualDemissoes": 72,
+      "mediaPontos": 38.72,
+      "mediaPosicao": 17.14,
+      "posicoes": {
+        "minimo": 3,
+        "p50": 19,
+        "p90": 20,
+        "maximo": 20
+      },
+      "pontos": {
+        "minimo": 20,
+        "p50": 37,
+        "p90": 48,
+        "maximo": 64
+      },
+      "mediaOutrosTitulos": 0
+    },
+    {
+      "faixa": "medio",
+      "clube": "Fluminense",
+      "forca": 74,
+      "amostras": 50,
+      "titulosLiga": 1,
+      "percentualTitulosLiga": 2,
+      "percentualDemissoes": 30,
+      "mediaPontos": 56.34,
+      "mediaPosicao": 8.02,
+      "posicoes": {
+        "minimo": 1,
+        "p50": 7,
+        "p90": 15,
+        "maximo": 18
+      },
+      "pontos": {
+        "minimo": 38,
+        "p50": 57,
+        "p90": 65,
+        "maximo": 76
+      },
+      "mediaOutrosTitulos": 0.06
+    },
+    {
+      "faixa": "forte",
+      "clube": "Flamengo",
+      "forca": 86,
+      "amostras": 50,
+      "titulosLiga": 15,
+      "percentualTitulosLiga": 30,
+      "percentualDemissoes": 0,
+      "mediaPontos": 65.14,
+      "mediaPosicao": 3.64,
+      "posicoes": {
+        "minimo": 1,
+        "p50": 2,
+        "p90": 9,
+        "maximo": 14
+      },
+      "pontos": {
+        "minimo": 48,
+        "p50": 65,
+        "p90": 75,
+        "maximo": 78
+      },
+      "mediaOutrosTitulos": 1.02
+    }
+  ]
+}

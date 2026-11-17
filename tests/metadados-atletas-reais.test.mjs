@@ -69,7 +69,7 @@ test('idade é calculada pela data exata, respeitando aniversários depois de ju
   assert.equal(idadeAtletaReal(undefined, 2026), null);
 });
 
-test('duas novas carreiras preservam idade e seleção de jogadores reais independentemente da seed', () => {
+test('61 jogadores reais preservam idade e seleção em duas seeds independentes', () => {
   const a = gerarMundoJogadores(geradorTecnico('metadados-reais-a'));
   const b = gerarMundoJogadores(geradorTecnico('metadados-reais-b'));
   for (const [nome, clube, idade, nac] of [
@@ -111,6 +111,29 @@ test('duas novas carreiras preservam idade e seleção de jogadores reais indepe
     ['João Neves', 'PSG', 21, 'POR'],
     ['Michael Olise', 'Bayern de Munique', 24, 'FRA'],
     ['Alphonso Davies', 'Bayern de Munique', 25, 'CAN'],
+    ['Neymar Jr', 'Santos', 34, 'BRA'],
+    ['Harry Kane', 'Bayern de Munique', 32, 'ENG'],
+    ['Kevin De Bruyne', 'Napoli', 35, 'BEL'],
+    ['Thibaut Courtois', 'Real Madrid', 34, 'BEL'],
+    ['Federico Valverde', 'Real Madrid', 27, 'URU'],
+    ['Raphinha', 'Barcelona', 29, 'BRA'],
+    ['Jamal Musiala', 'Bayern de Munique', 23, 'ALE'],
+    ['Bruno Fernandes', 'Manchester United', 31, 'POR'],
+    ['Lewandowski', 'Barcelona', 37, 'POL'],
+    ['Bukayo Saka', 'Arsenal', 24, 'ENG'],
+    ['Aurélien Tchouaméni', 'Real Madrid', 26, 'FRA'],
+    ['Éder Militão', 'Real Madrid', 28, 'BRA'],
+    ['Frenkie de Jong', 'Barcelona', 29, 'HOL'],
+    ['Jules Koundé', 'Barcelona', 27, 'FRA'],
+    ['Alejandro Balde', 'Barcelona', 22, 'ESP'],
+    ['Dani Olmo', 'Barcelona', 28, 'ESP'],
+    ['Dominik Szoboszlai', 'Liverpool', 25, 'HUN'],
+    ['Alexis Mac Allister', 'Liverpool', 27, 'ARG'],
+    ['Cody Gakpo', 'Liverpool', 27, 'HOL'],
+    ['Nuno Mendes', 'PSG', 24, 'POR'],
+    ['Vitinha', 'PSG', 26, 'POR'],
+    ['Joshua Kimmich', 'Bayern de Munique', 31, 'ALE'],
+    ['Luis Díaz', 'Bayern de Munique', 29, 'COL'],
   ]) {
     for (const mundo of [a,b]) {
       const encontrado = atleta(mundo, nome, clube);

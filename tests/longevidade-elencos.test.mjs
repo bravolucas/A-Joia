@@ -69,7 +69,9 @@ test('aposentadoria não reutiliza ID numérico já salvo como texto',()=>{
  const atletas=completarCarenciasMundo([],clubes,geradorTecnico('aposentadoria-id'));
  const original=atletas[0];
  // O identificador numérico textual precisa permanecer reservado na troca anual.
- const legado={...original,id:'9999',idade:39,contrato:3};
+ // Idade 40 é aposentadoria obrigatória no ciclo (o atleta chega aos 41).
+ // A regra anterior de aposentadoria aos 39 deixou de ser mandatória na Fase 4.
+ const legado={...original,id:'9999',idade:40,contrato:3};
  const elenco=[legado,...atletas.slice(1)];
  const mundo={jogadores:elenco,cadastroElencos:true,temporada:0};
  const proximo=simularTemporadaMundo(mundo,geradorTecnico('aposentadoria-id-ano'),{clubes});

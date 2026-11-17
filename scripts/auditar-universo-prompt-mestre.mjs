@@ -19,8 +19,8 @@ const options = Object.fromEntries(process.argv.slice(2)
 const anos = options.anos === undefined ? 50 : Number(options.anos);
 const amostra = options.amostra === undefined ? 10000 : Number(options.amostra);
 const semente = options.semente || '2026';
-const cobertura=options.cobertura||'principal';
-if(!['principal','qualificada'].includes(cobertura))throw Error('Use --cobertura=principal|qualificada');
+const modoCobertura=options.cobertura||'principal';
+if(!['principal','qualificada'].includes(modoCobertura))throw Error('Use --cobertura=principal|qualificada');
 if (!Number.isInteger(anos) || anos < 1 || anos > 80 ||
     !Number.isInteger(amostra) || amostra < 83 || amostra > 30000) {
   throw new Error('Use --anos=1..80 e --amostra=83..30000.');
@@ -43,7 +43,7 @@ for (let indice=0;indice<anos;indice++) {
   const ids = mundo.jogadores.map(j=>String(j.id));
   const idsDuplicados = ids.length - new Set(ids).size;
   const clubesAno = clubes.map(clube => {
-    const d = diagnosticarElenco(mundo.jogadores,{clubeNome:clube.nome,contarSecundarias:cobertura==='qualificada'});
+    const d = diagnosticarElenco(mundo.jogadores,{clubeNome:clube.nome,contarSecundarias:modoCobertura==='qualificada'});
     return {clube:clube.nome,ativos:d.totalAtivo,faltantes:d.totalFaltante};
   });
   const ativos = mundo.jogadores.filter(j=>!j.aposentado).length;
@@ -84,7 +84,7 @@ const nomesCompartilhadosEntrePaises = [...todosNomes]
 const duracaoMs = Math.round(performance.now()-inicio);
 const relatorio = {
   base:'Auditoria exploratória A JOIA (não representa o universo completo nem a economia)',
-  parametros:{anos,amostraNomes:amostra,seed:semente,cobertura,clubes:clubes.length,nacionalidades:codigos.length,elencoMinimoPadrao:TOTAL_MINIMO_ELENCO},
+  parametros:{anos,amostraNomes:amostra,seed:semente,cobertura:modoCobertura,clubes:clubes.length,nacionalidades:codigos.length,elencoMinimoPadrao:TOTAL_MINIMO_ELENCO},
   mundo:{temporadasSimuladas:cobertura.length,ultimoAno:2030+anos-1,
     jogadoresIniciais:totalInicial,jogadoresMundoFinal:mundo.jogadores.length,
     jogadoresAtivosFinal:mundo.jogadores.filter(j=>!j.aposentado).length,

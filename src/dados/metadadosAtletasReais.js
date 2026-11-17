@@ -36,6 +36,29 @@ const REGISTROS = [
   ['Bruno Fernandes', 'Manchester United', 'POR', '1994-09-08'],
   ['Lewandowski', 'Barcelona', 'POL', '1988-08-21'],
   ['Bukayo Saka', 'Arsenal', 'ENG', '2001-09-05'],
+
+  // Lote 2 — nascimentos e seleções conferidos em documentos oficiais.
+  ['Antoine Griezmann', 'Atlético de Madrid', 'FRA', '1991-03-21'],
+  ['Phil Foden', 'Manchester City', 'ENG', '2000-05-28'],
+  ['Kenan Yildiz', 'Juventus', 'TUR', '2005-05-04'],
+  ['Dušan Vlahović', 'Juventus', 'SER', '2000-01-28'],
+  ['Virgil van Dijk', 'Liverpool', 'HOL', '1991-07-08'],
+  ['Trent Alexander-Arnold', 'Real Madrid', 'ENG', '1998-10-07'],
+  ['Alisson', 'Liverpool', 'BRA', '1992-10-02'],
+  ['Manuel Neuer', 'Bayern de Munique', 'ALE', '1986-03-27'],
+  ['Rúben Dias', 'Manchester City', 'POR', '1997-05-14'],
+  ['Pedri', 'Barcelona', 'ESP', '2002-11-25'],
+  ['Gavi', 'Barcelona', 'ESP', '2004-08-05'],
+  ['Gabriel Martinelli', 'Arsenal', 'BRA', '2001-06-18'],
+  ['Gabriel Magalhães', 'Arsenal', 'BRA', '1997-12-19'],
+  ['Enzo Fernández', 'Chelsea', 'ARG', '2001-01-17'],
+  ['Cole Palmer', 'Chelsea', 'ENG', '2002-05-06'],
+  ['Florian Wirtz', 'Liverpool', 'ALE', '2003-05-03'],
+  ['Ousmane Dembélé', 'PSG', 'FRA', '1997-05-15'],
+  ['Rodrygo', 'Real Madrid', 'BRA', '2001-01-09'],
+  ['Gianluigi Donnarumma', 'Manchester City', 'ITA', '1999-02-25'],
+  ['Rúben Neves', 'Al-Hilal', 'POR', '1997-03-13'],
+  ['Bernardo Silva', 'Manchester City', 'POR', '1994-08-10'],
 ];
 
 const chave = (nome, clube) => `${nome}\u0000${clube}`;

@@ -32,3 +32,20 @@ test('aposentadoria mantém identidade e promove substituto com ID distinto', ()
   assert.ok(proximo.jogadores.some(j => j.id === 1 && j.aposentado));
   assert.ok(proximo.jogadores.some(j => j.id !== 1 && !j.aposentado));
 });
+
+test('agente livre de 39 anos continua elegível; aos 41 se aposenta', () => {
+  const livre = jogador(38);
+  livre.clubeNome = null;
+  const mundo = { jogadores: [livre], temporada: 0 };
+  const primeiro = simularTemporadaMundo(mundo, () => 0.99, {
+    clubes: [], clubeControlado: 'Clube Teste', registrarPremio: false,
+  });
+  assert.equal(primeiro.jogadores.find(j => j.id === 1).idade, 39);
+  assert.equal(primeiro.jogadores.find(j => j.id === 1).aposentado, false);
+  const segundo = simularTemporadaMundo({
+    jogadores: [{ ...livre, idade: 40 }], temporada: 0,
+  }, () => 0.99, {
+    clubes: [], clubeControlado: 'Clube Teste', registrarPremio: false,
+  });
+  assert.equal(segundo.jogadores.find(j => j.id === 1).aposentado, true);
+});

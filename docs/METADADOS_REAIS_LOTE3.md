@@ -1,6 +1,6 @@
 # Issue #84 — lote 3: 22 atletas reais adicionais
 
-Este lote incrementa **PR #86**, já empilhado sobre o **PR #85**. Amplia o mapa de nacionalidade e nascimento para **61 identidades reais** no catálogo de 1.775 atletas, sem mudar OVR, clube, posição ou histórico de saves.
+Este lote incrementa o **PR #86**, já publicado na `main`, após o **PR #85**. Amplia o mapa de nacionalidade e nascimento para **61 identidades reais** no catálogo de 1.775 atletas, sem mudar OVR, clube, posição ou histórico de saves.
 
 A data do nascimento determina a idade em **01/07/2026**; o país corresponde à seleção representada pelo atleta, não ao lugar de nascimento. A chave é `nome do catálogo + clube do catálogo`, sem inferências pelo nome ou pela liga.
 
@@ -42,4 +42,4 @@ A data do nascimento determina a idade em **01/07/2026**; o país corresponde à
 
 ## Ordem segura
 
-**Não integrar antes de #83, #85 e #86** estarem publicados, respeitando essa ordem. Este PR começa como draft empilhado sobre #86 e precisa ser redirecionado para `main` após o PR #86, seguido por CI completo verde de lógica, build e navegador no SHA final. Não declarar disponibilizado no site antes do workflow GitHub Pages confirmar o SHA de merge.
+**Pré-requisitos #83, #85 e #86 publicados e conferidos.** Em 17/11/2026, este PR foi reconciliado e redirecionado para `main` no SHA `8bfb13d` (lote #86 já publicado). O diff contra essa base contém apenas os 22 novos atletas e seus testes/documentação, sem duplicar o lote anterior. Exigir CI completo verde de lógica, build e navegador após esta reconciliação, revisar o head imediatamente antes do merge e aguardar o workflow Pages confirmar o SHA integrado. Não declarar disponibilizado antes da verificação.

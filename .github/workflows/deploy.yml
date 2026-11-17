@@ -32,6 +32,11 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-audit --no-fund
+      # Uma execução manual não herda uma aprovação anterior. Mantém a
+      # garantia original: falha de teste impede o deploy.
+      - name: Testar antes de publicação manual
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: npm test
       # Os testes já rodaram em 'Validar A JOIA'; evita executar a suíte
       # de carreiras longas outra vez antes de disponibilizar o site.
       - run: npm run build

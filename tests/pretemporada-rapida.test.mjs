@@ -78,6 +78,21 @@ test('aporte não confisca receita de venda e as dez variações aparecem ao lon
  assert.ok(vistas.size>=14);
 });
 
+test('decisão rápida mantém a força do elenco em 95 mesmo após bônus ou carta neutra',()=>{
+ const original=carreira(),antes=structuredClone(original);
+ const comBonus={...original,tecnico:{...original.tecnico,elenco:94,planoRapido:{ano:2030,clube:'Santos',cartas:['rival'],respostas:[]}}};
+ const bonus=cartaPretemporadaRapida(comBonus.tecnico);
+ const depoisBonus=aplicarPretemporadaRapida(comBonus,bonus.chave,bonus.opcoes[0].id);
+ assert.equal(depoisBonus.tecnico.elenco,95,'bônus nunca ultrapassa o teto 95');
+ const neutra={...original,tecnico:{...original.tecnico,elenco:99,planoRapido:{ano:2030,clube:'Santos',cartas:['esquema'],respostas:[]}}};
+ const carta=cartaPretemporadaRapida(neutra.tecnico);
+ const aposEscolha=aplicarPretemporadaRapida(neutra,carta.chave,carta.opcoes[0].id);
+ assert.equal(aposEscolha.tecnico.elenco,95,'carta neutra normaliza save legado com força superior a 95');
+ assert.equal(aposEscolha.tecnico.modoTreinadorRapido,true);
+ assert.equal(neutra.tecnico.elenco,99,'não alterar o objeto de entrada');
+ assert.deepEqual(original,antes,'preservar carreira anterior');
+});
+
 test('carreiras rápidas de 30 temporadas preservam limites, recarga e uma decisão por temporada',async()=>{
  const {negociarContratoTecnico,passarAnoDesempregado}=await import('../src/treinador/tecnico.js');
  for(const ritmo of ['normal','intenso']){

@@ -5,8 +5,8 @@ import {gerarMundoJogadores,simularTemporadaMundo} from '../comum/lib.js';
 import {estatisticasDasPartidas} from '../simulacao/estatisticasMundo.js';
 import {exigenciaClubeTecnico,avaliarDiretoriaTemporada,reavaliarDiretoriaTecnico} from './exigenciasTecnico.js';
 import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternacionais.js';
-import {IDADE_MAXIMA_TECNICO,idadeTecnico,carreiraTecnicoEncerrada} from './longevidadeTecnico.js';
-export {IDADE_MAXIMA_TECNICO,idadeTecnico,carreiraTecnicoEncerrada} from './longevidadeTecnico.js';
+import {IDADE_MAXIMA_TECNICO,LIMITE_TEMPORADAS_TECNICO,idadeTecnico,carreiraTecnicoEncerrada} from './longevidadeTecnico.js';
+export {IDADE_MAXIMA_TECNICO,LIMITE_TEMPORADAS_TECNICO,anosCarreiraTecnico,idadeTecnico,carreiraTecnicoEncerrada} from './longevidadeTecnico.js';
 import {avaliarForcaEquipe} from '../simulacao/forcaEquipe.js';
 import {forcasDoMundo,clubesDoMundo,registrarMundoVivo,resumirTabelas} from '../simulacao/mundoVivo.js';
 import {registrarAnoHistoria} from '../historia/historiaFutebol.js';
@@ -949,7 +949,7 @@ export function responderIntervencaoTecnico(c,chave,escolha,rng=sorteio){
 export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   if (!c?.tecnico) throw new Error('Carreira técnica não iniciada.');
   if (c.tecnico.fase !== 'pretemporada') throw new Error('Conclua a temporada anterior antes de simular.');
-  if(c.tecnico.aposentado||(idadeAtualTecnico(c))>=IDADE_MAXIMA_TECNICO)throw new Error('Carreira de treinador encerrada aos 85 anos ou por aposentadoria.');
+  if(carreiraTecnicoEncerrada(c.tecnico,idadeAtualTecnico(c)))throw new Error('Carreira de treinador encerrada ao completar 30 temporadas/anos, 85 anos de idade ou por aposentadoria.');
   const pausa=c.tecnico.temporadaPausada;
   if(pausa&&!pausa.escolha)throw new Error('Escolha uma intervenção para continuar.');
   const t = {...c.tecnico,forcasMundo:forcasDoMundo(c),copasEscolhaHabilitadas:c.tecnico.copasEscolhaHabilitadas||!!opcoes.copasInterativas,temporadaPausada:null,intervencaoPendente:null};
@@ -1257,7 +1257,7 @@ export function proximaTemporadaTecnico(c) {
   const t = c.tecnico;
   const ultima=t.temporadas?.at(-1);if(ultima&&ultima.tipoEquipe!=='selecao')registrarAnoHistoria(c,{...ultima});
   if (t.demitido || t.desempregado) throw new Error('Aceite uma proposta antes de começar a próxima temporada.');
-  if(carreiraTecnicoEncerrada(t,idadeAtualTecnico(c)))throw new Error('Carreira de treinador encerrada aos 85 anos ou por aposentadoria.');
+  if(carreiraTecnicoEncerrada(t,idadeAtualTecnico(c)))throw new Error('Carreira de treinador encerrada ao completar 30 temporadas/anos, 85 anos de idade ou por aposentadoria.');
   const historicoCartas = [...(t.historicoCartas || []), ...(t.cartas || [])].slice(-32);
   const vencidos = (t.efeitosPendentes || []).filter(e => e.aplicarEm <= t.ano&&(!e.clube||e.clube===t.clube));
   const pendentes = (t.efeitosPendentes || []).filter(e => e.aplicarEm > t.ano);

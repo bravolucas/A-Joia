@@ -31,7 +31,7 @@ import { Escudo, Bandeira, JanelaTreinador } from './uiTreinador.jsx';
 import { competicaoDoTitulo } from '../comum/tacas.js';
 import {
   historicoProfissionalTecnico, objetivoTecnico,
-  IDADE_MAXIMA_TECNICO, carreiraTecnicoEncerrada, titulosConquistadosTecnico, legadoCompletoTecnico,
+  IDADE_MAXIMA_TECNICO, LIMITE_TEMPORADAS_TECNICO, carreiraTecnicoEncerrada, titulosConquistadosTecnico, legadoCompletoTecnico,
   competicaoTemporadaTecnico, salarioTecnico, calcularOvrTecnico, forcaClubeTecnico,
   INTERVENCOES_TECNICO, OPCOES_REUNIAO_TECNICO, previsaoTemporadaTecnico, metasDoTecnico
 } from './tecnico.js';
@@ -187,7 +187,7 @@ function TrajetoriaCentro({temporadas,idadeInicio,aberta,setAberta,encerrada,atu
           {temporadas.map((a, i) => <LinhaTemporada key={`${a.ano}-${i}`} a={a} idade={idadeInicio + i} ativa={i === temporadas.length - 1} aberta={aberta === i} onClick={() => setAberta(aberta === i ? null : i)} />)}
           {!encerrada && <div ref={atualRef} className="ct-timeline-row ct-current-row"><span className="ct-age">{idade}</span><span className="ct-season-club"><span className="ct-unknown">?</span><strong>{simulando ? 'Simulando temporada…' : primeira || faseResultado ? 'Escolhendo clube…' : 'Decisão de carreira…'}</strong></span><span className="ct-position">—</span><span /><span /><span /></div>}
         </div>
-        <footer className="ct-timeline-total"><Bandeira pais={t.pais || 'Brasil'} /><strong>{temporadas.length} temporadas · até {IDADE_MAXIMA_TECNICO} anos</strong><span>{historico.aproveitamento}% aproveitamento</span></footer>
+        <footer className="ct-timeline-total"><Bandeira pais={t.pais || 'Brasil'} /><strong>{temporadas.length} temporadas · limite de {LIMITE_TEMPORADAS_TECNICO} anos de carreira ou {IDADE_MAXIMA_TECNICO} anos de idade</strong><span>{historico.aproveitamento}% aproveitamento</span></footer>
       </section>);}
 
 export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, onSimularTemporada, onAvancar, onAvancarESimular, onAceitarProposta, onEscolherClubeInicial, onEsperar, onSair, onLegado, onAposentar, onPedirDemissao, onReuniao, onJogar, onIntervir, onEscolhaRapida, onComprarMelhoria, onParada, onFinal, onConviteSelecao, onCopaEscolha, rotuloLegado = '← Ver legado como jogador' }) {
@@ -344,7 +344,7 @@ export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, on
         {podeNegociarElenco&&<button className="ct-wallet-button ct-elenco-button" onClick={abrirElenco}>Elenco e contratos →</button>}
       </section>
         <div className="ct-actions" aria-live="polite"><FasesTemporada etapa={agendaAberta?'momento':t.fase==='resultado'?'resumo':simulando||t.fase==='parada'?'momento':'evento'}/>
-          {encerrada ? <><h2>Uma carreira para a história</h2><p>{t.aposentado?`Você se aposentou aos ${t.aposentadoria?.idade??idade} anos.`:`Carreira encerrada aos ${IDADE_MAXIMA_TECNICO} anos.`} Reveja suas campanhas e conquistas.</p><div className="ct-career-total"><strong>{historico.aproveitamento}%</strong><span>de aproveitamento · {historico.clubes.length} clubes</span></div><button className="ct-primary" onClick={() => abrirConquistas(null)}>Ver conquistas</button></>
+          {encerrada ? <><h2>Uma carreira para a história</h2><p>{t.aposentado?`Você se aposentou aos ${t.aposentadoria?.idade??idade} anos.`:`Carreira encerrada após ${LIMITE_TEMPORADAS_TECNICO} anos de treinador ou ao atingir ${IDADE_MAXIMA_TECNICO} anos de idade.`} Reveja suas campanhas e conquistas.</p><div className="ct-career-total"><strong>{historico.aproveitamento}%</strong><span>de aproveitamento · {historico.clubes.length} clubes</span></div><button className="ct-primary" onClick={() => abrirConquistas(null)}>Ver conquistas</button></>
           : primeira ? <><h2>Oferta inicial</h2><p>Os primeiros clubes querem você no comando. Escolha onde sua carreira como treinador começa.</p><div className="ct-offers">{t.opcoesInicio.map(op => <CartaoClube key={op.clube} nome={op.clube} pais={op.pais || SELECOES_TECNICO.find(n=>n.nome===op.clube)?.pais || t.pais} liga={op.liga} nivel={op.elenco} salario={op.salario} rotulo="Começar no" detalhe={op.menor ? 'Projeto compatível com seu nível' : `${op.idolatria ? 'Clube do coração' : 'Vínculo como jogador'}${op.contratoCurto ? ' · contrato de 1 ano: cumpra a meta para renovar' : ''}`} disabled={simulando} onClick={() => escolherClubeInicial(op.clube)} />)}</div></>
           : t.reuniaoPendente ? <><div className="vf-hero-diretoria" style={{backgroundImage:`url(${CENARIOS.diretoriaMobile})`}} /><h2>Conversa com a diretoria</h2><p>A pressão aumentou. Sua resposta define os próximos passos.</p><div className="ct-decisions">{OPCOES_REUNIAO_TECNICO.map(op => <button key={op.id} disabled={simulando} onClick={() => executar(() => { onReuniao?.(op.id); onJogar?.(); })}><strong>{op.nome}</strong><span>{op.descricao}</span></button>)}</div></>
           : t.fase === 'parada' && t.paradaPendente ? <PainelParada p={t.paradaPendente} ocupado={simulando} onEscolher={op => executar(() => onParada?.(t.paradaPendente.chave, op))} />

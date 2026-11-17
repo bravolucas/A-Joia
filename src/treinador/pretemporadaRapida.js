@@ -88,7 +88,10 @@ export function aplicarPretemporadaRapida(c,chave,opcaoId,quantidade=1){
  if(op.custo>carta.verba)throw new Error('Verba insuficiente.');
  const plano=planoPretemporadaRapida(t,quantidade),resposta={carta:carta.id,opcao:op.id,nome:op.nome,resultado:op.descricao,impacto:{...op.efeitos},custo:op.custo};
  const novo={...t,modoTreinadorRapido:true,acompanharJogo:false,verbaRapida:carta.verba-op.custo,planoRapido:{...plano,respostas:[...plano.respostas,resposta]},historicoRapido:[...(t.historicoRapido||[]),carta.id].slice(-12),decisoes:[...(t.decisoes||[]),resposta]};
- for(const [atributo,valor] of Object.entries(op.efeitos))novo[atributo]=limitar((t[atributo]??50)+valor,atributo==='elenco'?10:0,atributo==='elenco'?99:100);
+ for(const [atributo,valor] of Object.entries(op.efeitos))novo[atributo]=limitar((t[atributo]??50)+valor,atributo==='elenco'?10:0,atributo==='elenco'?95:100);
+ // No fluxo rápido, o limite é 95 mesmo em cartas que não alteram a força.
+ // Evita carregar valores >95 de temporadas antigas sem reescrever saves anteriores.
+ novo.elenco=limitar(novo.elenco??t.elenco??50,10,95);
  if(op.filosofia)novo.filosofia=op.filosofia;if(op.estilo)novo.estilo=op.estilo;if(op.formacao)novo.formacao=op.formacao;
  novo.personagens=registrarPersonagemTecnico(t,carta.id,op);
  if(Object.keys(op.futuro).length)novo.efeitosPendentes=[...(t.efeitosPendentes||[]),{carta:carta.id,opcao:op.id,heranca:op.futuro,clube:t.clube,aplicarEm:t.ano+1}];

@@ -59,6 +59,30 @@ const REGISTROS = [
   ['Gianluigi Donnarumma', 'Manchester City', 'ITA', '1999-02-25'],
   ['Rúben Neves', 'Al-Hilal', 'POR', '1997-03-13'],
   ['Bernardo Silva', 'Manchester City', 'POR', '1994-08-10'],
+
+  // Lote 3 — identidades verificadas com referência documental por atleta.
+  ['Aurélien Tchouaméni', 'Real Madrid', 'FRA', '2000-01-27'],
+  ['Arda Güler', 'Real Madrid', 'TUR', '2005-02-25'],
+  ['Éder Militão', 'Real Madrid', 'BRA', '1998-01-18'],
+  ['Dean Huijsen', 'Real Madrid', 'ESP', '2005-04-14'],
+  ['Brahim Díaz', 'Real Madrid', 'MAR', '1999-08-03'],
+  ['Frenkie de Jong', 'Barcelona', 'HOL', '1997-05-12'],
+  ['Jules Koundé', 'Barcelona', 'FRA', '1998-11-12'],
+  ['Alejandro Balde', 'Barcelona', 'ESP', '2003-10-18'],
+  ['Dani Olmo', 'Barcelona', 'ESP', '1998-05-07'],
+  ['Ferran Torres', 'Barcelona', 'ESP', '2000-02-29'],
+  ['Omar Marmoush', 'Manchester City', 'EGI', '1999-02-07'],
+  ['Alexander Isak', 'Liverpool', 'SUE', '1999-09-21'],
+  ['Dominik Szoboszlai', 'Liverpool', 'HUN', '2000-10-25'],
+  ['Alexis Mac Allister', 'Liverpool', 'ARG', '1998-12-24'],
+  ['Cody Gakpo', 'Liverpool', 'HOL', '1999-05-07'],
+  ['Nuno Mendes', 'PSG', 'POR', '2002-06-19'],
+  ['Vitinha', 'PSG', 'POR', '2000-02-13'],
+  ['João Neves', 'PSG', 'POR', '2004-09-27'],
+  ['Joshua Kimmich', 'Bayern de Munique', 'ALE', '1995-02-08'],
+  ['Michael Olise', 'Bayern de Munique', 'FRA', '2001-12-12'],
+  ['Luis Díaz', 'Bayern de Munique', 'COL', '1997-01-13'],
+  ['Alphonso Davies', 'Bayern de Munique', 'CAN', '2000-11-02'],
 ];
 
 const chave = (nome, clube) => `${nome}\u0000${clube}`;

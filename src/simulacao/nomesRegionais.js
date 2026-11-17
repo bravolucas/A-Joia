@@ -91,13 +91,13 @@ export function gerarNomeRegional(nacionalidade, rng=Math.random) {
  * ou estatística real de circulação de atletas. Para clubes com formação
  * regional específica a escolha local continua no chamador.
  *
- * Usa um único sorteio e preserva as amostras do pool antigo abaixo de 99,5%.
+ * Usa um único sorteio; normaliza o pool anterior nos 99,5% reservados, sem penalizar a última origem.
  * Saves antigos mantêm seus atletas, nacionalidades e IDs.
  */
 export const NACIONALIDADES_OCEANIA_NEWGEN = Object.freeze(['FIJ','SOL','TAH','VAN','PNG','NCL','SAM']);
 export function sortearNacionalidadeMundo(rng=Math.random) {
   const sorteio=Math.max(0,Math.min(0.999999999,Number(rng())||0));
-  if(sorteio<0.995) return NACS_MUNDO[Math.min(NACS_MUNDO.length-1,Math.floor(sorteio*NACS_MUNDO.length))];
+  if(sorteio<0.995) return NACS_MUNDO[Math.min(NACS_MUNDO.length-1,Math.floor((sorteio/0.995)*NACS_MUNDO.length))];
   const fracao=(sorteio-0.995)/0.005;
   return NACIONALIDADES_OCEANIA_NEWGEN[Math.min(NACIONALIDADES_OCEANIA_NEWGEN.length-1,Math.floor(fracao*NACIONALIDADES_OCEANIA_NEWGEN.length))];
 }

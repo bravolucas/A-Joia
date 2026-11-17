@@ -44,17 +44,31 @@ jobs:
         run: npm run build
 
   carreiras-massivas:
+    name: carreiras-massivas (${{ matrix.caso }})
     runs-on: ubuntu-latest
-    # São os mesmos arquivos e cenários da suíte original, em runners isolados.
+    # Quatro runners: os 32 casos de integração rodam em 2x16, e os outros
+    # três arquivos continuam completos (dois deles em um único job).
     timeout-minutes: 75
     strategy:
       fail-fast: false
       matrix:
-        arquivo:
-          - tests/integracao-jogador-tecnico.test.mjs
-          - tests/jogador-melhorias.test.mjs
-          - tests/treinador-expresso.test.mjs
-          - tests/simulacao-massiva-tecnico.test.mjs
+        include:
+          - caso: integracao-1-de-2
+            arquivos: tests/integracao-jogador-tecnico.test.mjs
+            parte: 1
+            partes: 2
+          - caso: integracao-2-de-2
+            arquivos: tests/integracao-jogador-tecnico.test.mjs
+            parte: 2
+            partes: 2
+          - caso: jogador-melhorias
+            arquivos: tests/jogador-melhorias.test.mjs
+            parte: 1
+            partes: 1
+          - caso: treinador-e-simulacao
+            arquivos: tests/treinador-expresso.test.mjs tests/simulacao-massiva-tecnico.test.mjs
+            parte: 1
+            partes: 1
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -62,8 +76,16 @@ jobs:
           node-version: '22'
       - name: Instalar dependências
         run: npm install --no-audit --no-fund
-      - name: Testar cenário de carreira completo
-        run: node --test "${{ matrix.arquivo }}"
+      - name: Executar todos os cenários atribuídos ao runner
+        shell: bash
+        env:
+          A_JOIA_INTEGRACAO_PARTE: ${{ matrix.parte }}
+          A_JOIA_INTEGRACAO_PARTES: ${{ matrix.partes }}
+          ARQUIVOS_CARREIRAS: ${{ matrix.arquivos }}
+        run: |
+          read -r -a arquivos <<< "$ARQUIVOS_CARREIRAS"
+          test "${#arquivos[@]}" -gt 0
+          node --test "${arquivos[@]}"
 
   navegador:
     runs-on: ubuntu-latest

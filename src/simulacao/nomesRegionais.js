@@ -35,6 +35,17 @@ const ADICIONAIS = {
   IRN:[['Amir','Mehdi','Ali','Reza','Saeid'],['Hosseini','Mohammadi','Karimi','Rahimi','Ahmadi']],
   ISR:[['Noam','Daniel','Omer','Itay','Eitan'],['Cohen','Levi','Mizrahi','Peretz','Friedman']],
   AFS:[['Thabo','Sipho','Siyabonga','Lwazi','Kabelo'],['Dlamini','Ndlovu','Mokoena','Khumalo','Mthembu']],
+  // Até aqui havia fallback internacional para as nove nacionalidades abaixo.
+  // Amostras linguísticas dos elencos regionais e seleções; não são identidades reais.
+  ISL:[['Aron','Birkir','Jón','Albert','Andri'],['Gunnarsson','Sigurðsson','Guðmundsson','Þórðarson','Bjarnason']],
+  CDN:[['Kwang-song','Il-song','Kwang-hun','Yong-jik','Jong-il'],['Han','Ri','Pak','Choe','Kim']],
+  FIJ:[['Setareki','Sairusi','Tevita','Sitiveni','Rahul'],['Hughes','Nalaubu','Waranivalu','Cavuilagi','Krishna']],
+  SOL:[['Joses','Raphael','Gagame','Atkin','Micah'],['Nawo',"Lea'i",'Feni','Kaua',"Le'alafa"]],
+  TAH:[['Teaonui','Alvin','Marama','Roonui','Teave'],['Tehau','Vahirua','Teamotuaitau','Tihoni','Teniau']],
+  VAN:[['Brian','Kensi','Jean','Robert','Eddison'],['Kaltack','Tangis','Tasso','Stephen','Hinge']],
+  PNG:[['Raymond','Tommy','Nigel','David','Michael'],['Gunemba','Semmy','Dabinyaba','Muta','Foster']],
+  NCL:[['Georges','Bertrand','Jean-Philippe','Morgan','Germain'],['Gope-Fenepej','Kaï','Saiko','Matelon','Haewengene']],
+  SAM:[['Andrew','Jarvis','Desmond','Pita','Kevin'],['Setefano','Vaai',"Fa'aiuaso",'Rabo','Maninoa']],
 };
 
 const GRUPOS = {

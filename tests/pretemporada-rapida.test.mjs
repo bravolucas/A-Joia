@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {planoPretemporadaRapida,cartaPretemporadaRapida,aplicarPretemporadaRapida} from '../src/treinador/pretemporadaRapida.js';
+import {planoPretemporadaRapida,cartaPretemporadaRapida,aplicarPretemporadaRapida,cartaNoLimiteRapida} from '../src/treinador/pretemporadaRapida.js';
 import {iniciarCarreiraTecnico,escolherPretemporadaRapidaTecnico,proximaTemporadaTecnico,gerarPropostasTecnico,CLUBES_CONVITES_TECNICO} from '../src/treinador/tecnico.js';
 const carreira=(ritmo='normal')=>{const c=iniciarCarreiraTecnico({nome:'Teste rápido',idade:40,ano:2030,aposentado:true,clubeNome:'Santos',temporadas:[],totais:{},legado:{pontos:600}});return {...c,ritmo,tecnico:{...c.tecnico,clubeInicialEscolhido:true,clube:'Santos',liga:'brasileirao',elenco:70,verbaRapida:3000}};};
 test('uma escolha simula a temporada; todos os ritmos têm uma decisão, sem duplicação',()=>{
@@ -76,6 +76,28 @@ test('aporte não confisca receita de venda e as dez variações aparecem ao lon
  let t={clube:'Santos',ano:2030,historicoRapido:[]};const vistas=new Set();
  for(let i=0;i<30;i++){const plano=planoPretemporadaRapida(t,1);vistas.add(plano.cartas[0]);t={...t,ano:t.ano+1,historicoRapido:[...t.historicoRapido,plano.cartas[0]]};}
  assert.ok(vistas.size>=14);
+});
+
+test('decisão rápida mantém a força do elenco em 95 mesmo após bônus ou carta neutra',()=>{
+ const original=carreira(),antes=structuredClone(original);
+ const comBonus={...original,tecnico:{...original.tecnico,elenco:94,planoRapido:{ano:2030,clube:'Santos',cartas:['rival'],respostas:[]}}};
+ const bonus=cartaPretemporadaRapida(comBonus.tecnico);
+ assert.match(bonus.opcoes[0].descricao,/Time \+1 \(limite 95\)/,'carta apresenta ganho real, não +4');
+ // O bônus da contratação também aumenta a torcida, por isso a carta completa
+ // não é considerada desperdiçada; isolar o atributo elenco neste teste.
+ assert.equal(cartaNoLimiteRapida(comBonus.tecnico,bonus),false,'aumento de torcida ainda traz valor');
+ assert.equal(cartaNoLimiteRapida(comBonus.tecnico,{opcoes:[
+  {efeitos:{elenco:4}},{efeitos:{moral:2}}
+ ]}),true,'o teto 95 é considerado para efeitos apenas de elenco');
+ const depoisBonus=aplicarPretemporadaRapida(comBonus,bonus.chave,bonus.opcoes[0].id);
+ assert.equal(depoisBonus.tecnico.elenco,95,'bônus nunca ultrapassa o teto 95');
+ const neutra={...original,tecnico:{...original.tecnico,elenco:99,planoRapido:{ano:2030,clube:'Santos',cartas:['esquema'],respostas:[]}}};
+ const carta=cartaPretemporadaRapida(neutra.tecnico);
+ const aposEscolha=aplicarPretemporadaRapida(neutra,carta.chave,carta.opcoes[0].id);
+ assert.equal(aposEscolha.tecnico.elenco,95,'carta neutra normaliza save legado com força superior a 95');
+ assert.equal(aposEscolha.tecnico.modoTreinadorRapido,true);
+ assert.equal(neutra.tecnico.elenco,99,'não alterar o objeto de entrada');
+ assert.deepEqual(original,antes,'preservar carreira anterior');
 });
 
 test('carreiras rápidas de 30 temporadas preservam limites, recarga e uma decisão por temporada',async()=>{

@@ -1,13 +1,13 @@
 name: Publicar no GitHub Pages
 
-# A publicação só é disparada quando a validação da main termina com
-# todos os testes (lógica, navegador) e o build aprovados.
+# Publica somente uma revisão aprovada do commit mais recente da main.
+# Para forçar um novo deploy, execute manualmente "Validar A JOIA" na main.
+# O workflow de publicação não aceita mais despacho direto sem testes de navegador.
 on:
   workflow_run:
     workflows: ["Validar A JOIA"]
     types: [completed]
     branches: [main]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -19,26 +19,43 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  conferir-aprovacao:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'workflow_dispatch') && github.event.workflow_run.head_branch == 'main' }}
+    runs-on: ubuntu-latest
+    outputs:
+      atual: ${{ steps.sha.outputs.atual }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Evitar deploy de CI de um commit antigo
+        id: sha
+        env:
+          SHA_APROVADO: ${{ github.event.workflow_run.head_sha }}
+        shell: bash
+        run: |
+          git fetch origin main --depth=1
+          SHA_ATUAL="$(git rev-parse FETCH_HEAD)"
+          if [ "$SHA_ATUAL" = "$SHA_APROVADO" ]; then
+            echo "atual=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::CI aprovado para $SHA_APROVADO, mas main já está em $SHA_ATUAL. Nenhuma publicação será feita."
+            echo "atual=false" >> "$GITHUB_OUTPUT"
+          fi
+
   construir:
-    # Ignora execuções de PR e validações que não terminaram com sucesso.
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main') }}
+    needs: conferir-aprovacao
+    if: ${{ needs.conferir-aprovacao.outputs.atual == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          # Faz o deploy do SHA que passou no CI, sem pegar um HEAD mais recente.
-          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          # O artefato precisa corresponder à revisão aprovada pelo CI.
+          ref: ${{ github.event.workflow_run.head_sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: npm install --no-audit --no-fund
-      # Uma execução manual não herda uma aprovação anterior. Mantém a
-      # garantia original: falha de teste impede o deploy.
-      - name: Testar antes de publicação manual
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        run: npm test
-      # Os testes já rodaram em 'Validar A JOIA'; evita executar a suíte
-      # de carreiras longas outra vez antes de disponibilizar o site.
       - run: npm run build
         env:
           GITHUB_PAGES: "true"
@@ -55,14 +72,33 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url || steps.deploy_retry.outputs.page_url }}
     steps:
+      # Um novo commit pode ter entrado na main durante o build.
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Conferir novamente o SHA imediatamente antes do deploy
+        id: sha
+        env:
+          SHA_APROVADO: ${{ github.event.workflow_run.head_sha }}
+        shell: bash
+        run: |
+          git fetch origin main --depth=1
+          SHA_ATUAL="$(git rev-parse FETCH_HEAD)"
+          if [ "$SHA_ATUAL" = "$SHA_APROVADO" ]; then
+            echo "atual=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Publicação ignorada: main avançou para $SHA_ATUAL desde o CI $SHA_APROVADO."
+            echo "atual=false" >> "$GITHUB_OUTPUT"
+          fi
       - id: deploy
+        if: ${{ steps.sha.outputs.atual == 'true' }}
         continue-on-error: true
         uses: actions/deploy-pages@v5.0.1
         with:
           timeout: '600000'
       - id: deploy_retry
         name: Repetir publicação após falha
-        if: steps.deploy.outcome == 'failure'
+        if: ${{ steps.sha.outputs.atual == 'true' && steps.deploy.outcome == 'failure' }}
         uses: actions/deploy-pages@v5.0.1
         with:
           timeout: '600000'

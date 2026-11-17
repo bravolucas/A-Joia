@@ -41,14 +41,58 @@
   },
   "pendentes": [
     "Campeonato Sergipano",
-    "Campeonato Baiano",
-    "Campeonato Cearense",
-    "Campeonato Pernambucano",
-    "Campeonato Paraense",
-    "Campeonato Amazonense"
+    "Campeonato Paraense"
   ],
   "descartes": {
     "ST_amazonense.png": "Inscrição CAMPEÃO DO TURNO, não identifica título geral do campeonato.",
-    "intercontinental.png": "Imagem representa troféu antigo do Mundial de Clubes."
+    "intercontinental.png": "Imagem representa troféu antigo do Mundial de Clubes.",
+    "SEtrophy.png": "Representação genérica com bandeira estadual, sem confirmação de que reproduz a taça do Campeonato Sergipano.",
+    "PAtrophy.png": "Representação genérica com bandeira estadual, sem confirmação de que reproduz a taça do Campeonato Paraense."
+  },
+  "externasCommons": {
+    "campeonato-baiano": {
+      "nome": "Campeonato Baiano",
+      "arquivo": "CampeonatoBaiano2019-.png",
+      "fonte": "https://commons.wikimedia.org/wiki/File:CampeonatoBaiano2019-.png",
+      "autor": "Guigoma (Gmttos)",
+      "licenca": "CC BY-SA 4.0",
+      "periodo": "desde 2019",
+      "natureza": "Ilustração de troféu de competição, criada pelo autor no Wikimedia Commons; não é fotografia oficial nem produto da federação.",
+      "uso": "Carregamento externo on-line; o jogo mantém desenho original offline ou se a CDN falhar.",
+      "modificacoes": "Nenhuma: imagem remota original sem recortes ou alteração."
+    },
+    "campeonato-cearense": {
+      "nome": "Campeonato Cearense",
+      "arquivo": "CampeonatoCearense2019-.png",
+      "fonte": "https://commons.wikimedia.org/wiki/File:CampeonatoCearense2019-.png",
+      "autor": "Guigoma (Gmttos)",
+      "licenca": "CC BY-SA 4.0",
+      "periodo": "desde 2019",
+      "natureza": "Ilustração de troféu de competição, criada pelo autor no Wikimedia Commons; não é fotografia oficial nem produto da federação.",
+      "uso": "Carregamento externo on-line; o jogo mantém desenho original offline ou se a CDN falhar.",
+      "modificacoes": "Nenhuma: imagem remota original sem recortes ou alteração."
+    },
+    "campeonato-pernambucano": {
+      "nome": "Campeonato Pernambucano",
+      "arquivo": "CampeonatoPernambucano2025-.png",
+      "fonte": "https://commons.wikimedia.org/wiki/File:CampeonatoPernambucano2025-.png",
+      "autor": "Guigoma (Gmttos)",
+      "licenca": "CC BY 4.0",
+      "periodo": "desde 2025",
+      "natureza": "Ilustração de troféu de competição, criada pelo autor no Wikimedia Commons; não é fotografia oficial nem produto da federação.",
+      "uso": "Carregamento externo on-line; o jogo mantém desenho original offline ou se a CDN falhar.",
+      "modificacoes": "Nenhuma: imagem remota original sem recortes ou alteração."
+    },
+    "campeonato-amazonense": {
+      "nome": "Campeonato Amazonense",
+      "arquivo": "CampeonatoAmazonense2018-.png",
+      "fonte": "https://commons.wikimedia.org/wiki/File:CampeonatoAmazonense2018-.png",
+      "autor": "Guigoma (Gmttos)",
+      "licenca": "CC BY-SA 4.0",
+      "periodo": "desde 2018",
+      "natureza": "Ilustração de troféu de competição, criada pelo autor no Wikimedia Commons; não é fotografia oficial nem produto da federação.",
+      "uso": "Carregamento externo on-line; o jogo mantém desenho original offline ou se a CDN falhar.",
+      "modificacoes": "Nenhuma: imagem remota original sem recortes ou alteração."
+    }
   }
 }

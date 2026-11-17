@@ -1,0 +1,46 @@
+name: Perfil de tamanho do mundo (Fase 1)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/simulacao/perfilPesoMundo.js'
+      - 'scripts/perfil-peso-mundo-50-anos.mjs'
+      - 'tests/perfil-peso-mundo.test.mjs'
+      - '.github/workflows/perfil-peso-mundo.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  perfil-mundo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar dependências
+        run: npm install --no-audit --no-fund
+      - name: Validar contabilidade em bytes
+        run: node --test tests/perfil-peso-mundo.test.mjs
+      - name: Medir JSON do mundo em 0/10/20/30/50 anos (3 seeds)
+        run: |
+          mkdir -p resultados-auditoria
+          node --max-old-space-size=4096 scripts/perfil-peso-mundo-50-anos.mjs --anos=50 --sementes=2026,2027,2028 > resultados-auditoria/perfil-peso-mundo-50-anos.json
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const a=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
+            if(a.resultados.length!==3 || a.resultados.some(s=>s.etapas.length!==5 || s.etapas.some(p=>p.totalBytes!==p.jogadores.totalBytes+p.outrosCamposMundo.totalBytes || p.jogadores.totalBytes!==p.jogadores.ativos.bytes+p.jogadores.aposentados.bytes+p.jogadores.estruturaBytes)))process.exit(1);
+            const linhas=["### Perfil de crescimento do universo (somente leitura)","",...a.resultados.map(s=>"- Seed "+s.seed+": "+s.etapas.map(p=>p.ano+" anos="+(p.totalBytes/1048576).toFixed(2)+" MiB").join("; ")),"","> Não mede IndexedDB real, fluxo Jogador→Treinador ou memória móvel."];
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,linhas.join("\n")+"\n");
+          ' resultados-auditoria/perfil-peso-mundo-50-anos.json
+      - name: Arquivar relatório (inclusive após falha)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perfil-peso-mundo-50-anos
+          path: resultados-auditoria/*.json
+          if-no-files-found: warn
+          retention-days: 14

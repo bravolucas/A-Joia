@@ -1,6 +1,7 @@
 import React,{useMemo,useState} from 'react';
 import {jogosDaEdicao,historicoAtleta} from './mundoVivo.js';
 import {avaliarClubeNoMundo} from './forcaEquipe.js';
+import {EIXOS_REPUTACAO_CLUBE,NOMES_REPUTACAO_CLUBE} from './reputacoesClube.js';
 import {CLUBES} from '../dados/data.js';
 const universo=c=>c.tecnico?.universo||c.universo;
 const sinal=n=>n>0?`+${n}`:String(n);
@@ -8,6 +9,7 @@ export function EvolucaoClube({c,nome}){
  const u=universo(c),p=u?.clubes?.[nome];
  const cl=CLUBES.find(x=>x.nome===nome)||{nome,forca:60},atual=avaliarClubeNoMundo(c,cl);
  return <section className="mv-painel" aria-label={`Evolução do ${nome}`}><span className="hf-eyebrow">UM CLUBE EM MOVIMENTO</span><h3>O momento do {nome}</h3><div className="hf-numeros"><article><strong>{atual.forca}</strong><span>força do elenco</span></article><article><strong>{p?.reputacao??cl.forca}</strong><span>reputação</span></article><article><strong>{p?.financas??50}/100</strong><span>saúde financeira</span></article></div><p className="hf-nota">A força acompanha a qualidade dos jogadores, o equilíbrio dos setores e a fase. Reputação e estrutura mudam mais devagar.</p>
+ {p?.reputacoes&&<section aria-label="Oito dimensões de reputação do clube"><h4>Reputação em oito dimensões</h4><dl style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(120px,1fr))',gap:'0.6rem'}}>{EIXOS_REPUTACAO_CLUBE.map(eixo=><div key={eixo}><dt>{NOMES_REPUTACAO_CLUBE[eixo]}</dt><dd><strong>{Number.isFinite(p.reputacoes[eixo])?p.reputacoes[eixo]:'—'}</strong><small>/99</small></dd></div>)}</dl><p className="hf-nota">Indicadores calculados a partir das temporadas registradas. Não alteram, por enquanto, a força do elenco nem o dinheiro do clube.</p></section>}
  {p?.historico?.length?<div className="hf-tabela-scroll"><table className="hf-tabela"><thead><tr><th>Ano</th><th>Colocação</th><th>Força</th><th>O que aconteceu</th></tr></thead><tbody>{[...historicoAtleta(p)].reverse().map(a=><tr key={a.ano}><th>{a.ano}</th><td>{a.posicao?`${a.posicao}º / ${a.total}`:'—'}</td><td>{a.forcaAntes} → {a.forca}</td><td>{a.motivos.join(' · ')}{a.titulos.length>0&&<small className="mv-titulos">{a.titulos.join(' · ')}</small>}</td></tr>)}</tbody></table></div>:<p className="hf-vazio">A evolução será registrada a partir da próxima temporada concluída.</p>}</section>;
 }
 export function ImpactoJogador({avaliacao}){

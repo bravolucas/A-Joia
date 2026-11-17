@@ -1,0 +1,35 @@
+name: Validar fila de salvamento (cache x IndexedDB)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/simulacao/armazenamentoMundo.js'
+      - 'tests/armazenamento-fila-falhas.spec.mjs'
+      - '.github/workflows/testar-fila-salvamento.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fila-indexeddb:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-package-lock --no-audit --no-fund
+      - run: npm install --no-save @playwright/test wait-on
+      - run: npx playwright install --with-deps chromium
+      - run: GITHUB_PAGES=true npm run build
+      - name: Validar ordem e recuperação após falha da primeira gravação
+        run: |
+          GITHUB_PAGES=true npm run preview -- --host 127.0.0.1 --port 4173 &
+          npx wait-on http://127.0.0.1:4173/A-Joia/
+          npx playwright test tests/armazenamento-fila-falhas.spec.mjs --workers=1 --reporter=line
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: falha-fila-indexeddb
+          path: test-results/
+          retention-days: 7

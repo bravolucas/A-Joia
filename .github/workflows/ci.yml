@@ -103,6 +103,9 @@ jobs:
         run: |
           GITHUB_PAGES=true npm run preview -- --host 127.0.0.1 --port 4173 &
           npx wait-on http://127.0.0.1:4173/A-Joia/
+          # Exercita cedo os dois cenários que dependem do diálogo final da copa:
+          # se falharem, evita gastar ~17 min em todos os 399 testes antes de detectar.
+          npx playwright test tests/completo-copas-persistentes.spec.mjs --reporter=line
           npx playwright test tests/*.spec.mjs --reporter=line
       - uses: actions/upload-artifact@v4
         if: always()

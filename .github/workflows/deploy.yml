@@ -30,8 +30,8 @@ jobs:
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - run: npm install
+          node-version: 22
+      - run: npm install --no-audit --no-fund
       # Os testes já rodaram em 'Validar A JOIA'; evita executar a suíte
       # de carreiras longas outra vez antes de disponibilizar o site.
       - run: npm run build

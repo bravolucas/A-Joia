@@ -11,8 +11,8 @@ const atleta = (mundo, nome, clube) => mundo.jogadores.find(
   j => j.nome === nome && j.clubeNome === clube && !j.aposentado,
 );
 
-test('39 identidades verificadas correspondem a entradas reais e usam códigos de seleção válidos', () => {
-  assert.equal(totalMetadadosAtletasReais, 39);
+test('61 identidades verificadas correspondem a entradas reais e usam códigos de seleção válidos', () => {
+  assert.equal(totalMetadadosAtletasReais, 61);
   const conhecidos = [
     ['Lionel Messi', 'Inter Miami'], ['Cristiano Ronaldo', 'Al-Nassr'],
     ['Neymar Jr', 'Santos'], ['Kylian Mbappé', 'Real Madrid'],
@@ -33,6 +33,18 @@ test('39 identidades verificadas correspondem a entradas reais e usam códigos d
     ['Ousmane Dembélé', 'PSG'], ['Rodrygo', 'Real Madrid'],
     ['Gianluigi Donnarumma', 'Manchester City'], ['Rúben Neves', 'Al-Hilal'],
     ['Bernardo Silva', 'Manchester City'],
+    ['Aurélien Tchouaméni', 'Real Madrid'], ['Arda Güler', 'Real Madrid'],
+    ['Éder Militão', 'Real Madrid'], ['Dean Huijsen', 'Real Madrid'],
+    ['Brahim Díaz', 'Real Madrid'], ['Frenkie de Jong', 'Barcelona'],
+    ['Jules Koundé', 'Barcelona'], ['Alejandro Balde', 'Barcelona'],
+    ['Dani Olmo', 'Barcelona'], ['Ferran Torres', 'Barcelona'],
+    ['Omar Marmoush', 'Manchester City'], ['Alexander Isak', 'Liverpool'],
+    ['Dominik Szoboszlai', 'Liverpool'], ['Alexis Mac Allister', 'Liverpool'],
+    ['Cody Gakpo', 'Liverpool'], ['Nuno Mendes', 'PSG'],
+    ['Vitinha', 'PSG'], ['João Neves', 'PSG'],
+    ['Joshua Kimmich', 'Bayern de Munique'],
+    ['Michael Olise', 'Bayern de Munique'],
+    ['Luis Díaz', 'Bayern de Munique'], ['Alphonso Davies', 'Bayern de Munique'],
   ];
   for (const [nome, clube] of conhecidos) {
     const cadastro = JOGADORES_REAIS_BASE.filter(x => x.nome === nome && x.time === clube);
@@ -50,6 +62,8 @@ test('idade é calculada pela data exata, respeitando aniversários depois de ju
   assert.equal(idadeAtletaReal('2000-07-01', 2026), 26);
   assert.equal(idadeAtletaReal('2000-07-02', 2026), 25);
   assert.equal(idadeAtletaReal('2000-06-30', 2026), 26);
+  assert.equal(idadeAtletaReal('2000-02-29', 2026), 26, 'dia bissexto válido');
+  assert.equal(idadeAtletaReal('2001-02-29', 2026), null, 'dia bissexto inválido');
   assert.equal(idadeAtletaReal('2026-02-30', 2026), null);
   assert.equal(idadeAtletaReal('1988-99-01', 2026), null);
   assert.equal(idadeAtletaReal(undefined, 2026), null);
@@ -77,6 +91,15 @@ test('duas novas carreiras preservam idade e seleção de jogadores reais indepe
     ['Gavi', 'Barcelona', 21, 'ESP'],
     ['Ousmane Dembélé', 'PSG', 29, 'FRA'],
     ['Gianluigi Donnarumma', 'Manchester City', 27, 'ITA'],
+    ['Arda Güler', 'Real Madrid', 21, 'TUR'],
+    ['Dean Huijsen', 'Real Madrid', 21, 'ESP'],
+    ['Brahim Díaz', 'Real Madrid', 26, 'MAR'],
+    ['Ferran Torres', 'Barcelona', 26, 'ESP'],
+    ['Omar Marmoush', 'Manchester City', 27, 'EGI'],
+    ['Alexander Isak', 'Liverpool', 26, 'SUE'],
+    ['João Neves', 'PSG', 21, 'POR'],
+    ['Michael Olise', 'Bayern de Munique', 24, 'FRA'],
+    ['Alphonso Davies', 'Bayern de Munique', 25, 'CAN'],
   ]) {
     for (const mundo of [a,b]) {
       const encontrado = atleta(mundo, nome, clube);
@@ -90,6 +113,9 @@ test('duas novas carreiras preservam idade e seleção de jogadores reais indepe
 test('homônimos e registros incompletos não herdam metadados de outro clube', () => {
   assert.equal(metadadosAtletaReal('Alisson', 'Fluminense'), null);
   assert.equal(metadadosAtletaReal('Alisson', 'Liverpool')?.nac, 'BRA');
+  assert.equal(metadadosAtletaReal('Marquinhos', 'Cruzeiro'), null);
+  assert.equal(metadadosAtletaReal('Brahim Díaz', 'Real Madrid')?.nac, 'MAR');
+  assert.equal(metadadosAtletaReal('Dean Huijsen', 'Real Madrid')?.nac, 'ESP');
   assert.equal(idadeAtletaReal(metadadosAtletaReal('Virgil van Dijk', 'Liverpool')?.nascimento, 2026), 34);
   assert.equal(metadadosAtletaReal('Lionel Messi', 'Real Madrid'), null);
   assert.equal(metadadosAtletaReal('Bruno Fernandes', 'Santos'), null);

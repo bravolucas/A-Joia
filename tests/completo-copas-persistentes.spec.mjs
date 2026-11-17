@@ -16,8 +16,17 @@ for(const tipo of ['copaNacional','continental']) test(`partida ao vivo alimenta
  await expect(page.getByRole('button',{name:/Pular pro final/})).toBeVisible();
  await expect(page.getByText('Adversário antigo',{exact:true})).toHaveCount(0);
  await page.getByRole('button',{name:/Pular pro final/}).click();
- await expect(page.getByRole('button',{name:'Continuar',exact:true}).first()).toBeVisible();
- await page.getByRole('button',{name:'Continuar',exact:true}).first().click();
+ // A partida pode apresentar uma cena de carreira após o apito final.
+ // Fechá-la pelo botão próprio antes de continuar a rodada, sem clicar através do modal.
+ const popupCarreira=page.getByRole('dialog',{name:'Detalhes da carreira'});
+ const continuar=page.getByRole('button',{name:'Continuar',exact:true}).first();
+ await expect(async()=>{
+   if(await popupCarreira.isVisible()){
+     await popupCarreira.getByRole('button',{name:'Seguir em frente'}).click({timeout:3000});
+     await expect(popupCarreira).toHaveCount(0);
+   }
+   await continuar.click({timeout:3000});
+ }).toPass({timeout:20000,intervals:[200,1000]});
  await page.getByRole('button',{name:'💾 Salvar',exact:true}).click();
  await page.getByRole('button',{name:'Salvar aqui',exact:true}).first().click();
  const salvo=await lerSave(page,'ajoia_save_1'),ta=salvo.carreira.temporadaAndamento,k=ta.cardOriginal;

@@ -59,8 +59,11 @@ test('elenco persistente com 22 vagas qualificadas não cria titulares fantasmas
  const jogadores=Object.entries(MINIMOS_ELENCO).flatMap(([posicao,n])=>
    Array.from({length:n},(_,i)=>({id:posicao+i,nome:'Jogador '+posicao+i,
      posicao,ovr:77,idade:25,clubeNome:'Time Teste',nac:'BRA'})));
- const le=jogadores.find(j=>j.posicao==='LE');
- le.posicao='LD';le.posicoesSecundarias=[{posicao:'LE',apto:true}];
+ // Dois LE inexistentes na posição principal: ambos podem ser cobertos
+ // por laterais adaptados que tenham aptidão secundária explícita.
+ for(const le of jogadores.filter(j=>j.posicao==='LE')){
+   le.posicao='LD';le.posicoesSecundarias=[{posicao:'LE',apto:true}];
+ }
  assert.equal(diagnosticarElenco(jogadores,{clubeNome:'Time Teste',contarSecundarias:true}).totalFaltante,0);
  const elenco=gerarElenco({nome:'Time Teste',liga:'brasileirao',forca:75},{jogadores},null);
  assert.equal(elenco.filter(j=>j.doMundo).length,22);

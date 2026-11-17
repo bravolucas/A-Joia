@@ -1746,7 +1746,7 @@ function fecharTemporadaBase(c0, card0) {
   simularDefesas(c,card);
   registrarEstatisticasCompeticoes(c,card);
   registrarAnoHistoria(c,card);
-  c.mundo = estatisticasDasPartidas(simularTemporadaMundo(c.mundo,Math.random,{clubes:clubesDoMundo(antes),perfis:antes.universo?.clubes}),antes.mundo,card,c.codigo);
+  c.mundo = estatisticasDasPartidas(simularTemporadaMundo(c.mundo,Math.random,{clubes:clubesDoMundo(antes),perfis:antes.universo?.clubes,ano:card.ano}),antes.mundo,card,c.codigo);
   atualizarRecordesUniverso(c,card,antes.mundo);
   const PESO_BOLA = { estadual:0.2, copaMundo: 3, continental: 2, continentalSelecao: 2, mundial: 1, segunda: 0 };
   const pesoTit = card.titulos.reduce((s, t) => s + (PESO_BOLA[t.tipo] ?? 1), 0);

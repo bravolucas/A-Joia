@@ -2,6 +2,7 @@ import {jogosDaCampanha} from '../competicoes/jogosCampanha.js';
 import {LIGAS} from '../dados/data.js';
 import {geradorTecnico} from '../treinador/momentosTecnico.js';
 import {setorJogador} from './forcaEquipe.js';
+import {registrarHistoricoTemporada,creditarTitulosAtleta} from './historicoJogadorMundo.js';
 const chaveJogo=(nome,j)=>`${nome}|${j.casa}|${j.fora}|${j.golsCasa}|${j.golsFora}`;
 function participacoesUsuario(card){
  const mapa=new Map(),competicoes=new Set();
@@ -57,6 +58,8 @@ export function estatisticasDasPartidas(mundo,antes,card,seed='mundo',{zerarSemP
    }
   }
  }
+ const campeoes=card.campeoesCalendarioMundo||[];
+ const premiar=j=>creditarTitulosAtleta(j,campeoes,mundo.temporada);
  return {...mundo,jogadores:mundo.jogadores.map(p=>{
   const original=originais.get(p.id);
   if(original?.aposentado)return p;
@@ -64,6 +67,15 @@ export function estatisticasDasPartidas(mundo,antes,card,seed='mundo',{zerarSemP
   const comps=linhas.get(String(p.id));if(!comps&&(!zerarSemPartidas||!cobertos.has(original?.clubeNome)))return p;
   const porCompeticao=[...(comps?.values()||[])],total=porCompeticao.reduce((s,t)=>{for(const k of Object.keys(s))s[k]+=t[k];return s;},vazio());
   const carreira={...p.carreira};for(const k of ['jogos','gols','assist','defesas','cleanSheets','golsSofridos'])carreira[k]=Math.max(0,(original?.carreira?.[k]||0)+total[k]);
-  return {...p,...total,carreira,porCompeticao,origemEstatisticas:'partidas'};
+  const atualizado={...p,...total,carreira,porCompeticao,origemEstatisticas:'partidas'};
+  // O motor anual registra a linha do tempo antes de conhecer os placares.
+  // Ao substituir projeções pelas estatísticas reais da temporada, sincronize
+  // o registro mantendo clube, idade e OVR de origem (pré-transferência).
+  const registro=p.historicoTemporadas?.find(r=>Array.isArray(r)&&r[0]===mundo.temporada);
+  if(!registro)return premiar(atualizado);
+  return premiar({...atualizado,historicoTemporadas:registrarHistoricoTemporada(atualizado,{
+    temporada:registro[0],ano:registro[1],clube:registro[2],
+    liga:registro[3],idadeInicial:registro[4],ovrInicial:registro[5],
+  })});
  })};
 }

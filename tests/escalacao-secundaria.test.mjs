@@ -78,7 +78,13 @@ test('elenco persistente com 22 vagas qualificadas não cria titulares fantasmas
  assert.equal(titulares.titulares.length,11);
  assert.equal(new Set(titulares.titulares.map(j=>j.id)).size,11);
  assert.ok(titulares.titulares.every(j=>!j.improvisado));
- assert.equal(titulares.titulares.find(j=>j.vaga==='LE')?.secundaria,true);
+ // Jovens extras podem surgir naturalmente como LE e ganhar a vaga principal.
+ // Portanto a aptidão mundial é verificada isolando apenas atletas persistidos.
+ const titularesMundo=escalacaoProvavel(elenco.filter(j=>j.doMundo));
+ assert.equal(titularesMundo.titulares.length,11);
+ assert.equal(new Set(titularesMundo.titulares.map(j=>j.id)).size,11);
+ assert.ok(titularesMundo.titulares.every(j=>!j.improvisado));
+ assert.equal(titularesMundo.titulares.find(j=>j.vaga==='LE')?.secundaria,true);
 });
 
 test('aptidão sincroniza ao evoluir e não altera o objeto original do mundo',()=>{

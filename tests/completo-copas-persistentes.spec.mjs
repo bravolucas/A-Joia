@@ -19,17 +19,25 @@ for(const tipo of ['copaNacional','continental']) test(`partida ao vivo alimenta
  // A partida pode apresentar uma cena de carreira após o apito final.
  // Fechá-la pelo botão próprio antes de continuar a rodada, sem clicar através do modal.
  const popupCarreira=page.getByRole('dialog',{name:'Detalhes da carreira'});
- // Resultados das copas têm um diálogo próprio com "Continuar"; outras
- // cenas de carreira podem oferecer "Seguir em frente". A ação deve ser
- // disparada DENTRO do diálogo ativo, nunca no botão atrás do overlay.
+ // A interface deve exibir a conquista da copa antes do destaque individual,
+ // nunca os dois overlays acessíveis ao mesmo tempo.
+ await expect(popupCarreira).toHaveCount(1);
+ // O resultado da copa e o prêmio "Melhor em Campo" podem aparecer juntos.
+ // Os dois <dialog> compartilham o nome acessível. isVisible() e click() em
+ // um locator com dois elementos causavam "strict mode violation" no CI.
+ // Fechar sempre o último (no topo da pilha) e repetir até esvaziar a pilha.
+ // Nunca clicar por trás de um diálogo aberto.
  await expect(async()=>{
-   if(await popupCarreira.isVisible()){
-     await popupCarreira.getByRole('button',{name:/^(?:Continuar|Seguir em frente)$/}).click({timeout:3000});
-     await expect(popupCarreira).toHaveCount(0);
+   if(await popupCarreira.count()){
+     await popupCarreira.last()
+       .getByRole('button',{name:/^(?:Continuar|Seguir em frente)$/})
+       .click({timeout:3000});
    } else {
      await page.getByRole('button',{name:'Continuar',exact:true}).first().click({timeout:3000});
    }
- }).toPass({timeout:20000,intervals:[200,1000]});
+   // Se outro diálogo ainda estiver aberto, toPass tenta fechar o próximo.
+   await expect(popupCarreira).toHaveCount(0,{timeout:600});
+ }).toPass({timeout:25000,intervals:[200,1000]});
  await page.getByRole('button',{name:'💾 Salvar',exact:true}).click();
  await page.getByRole('button',{name:'Salvar aqui',exact:true}).first().click();
  const salvo=await lerSave(page,'ajoia_save_1'),ta=salvo.carreira.temporadaAndamento,k=ta.cardOriginal;

@@ -5927,7 +5927,11 @@ function resolverTemporada(c, extraStats) {
                   </PopupOverlay>
                 )}
 
-                {pendingMelhorEmCampo && (
+                {/* Uma copa pode encerrar no mesmo instante em que o jogador
+                    recebe "Melhor em Campo". Apresente primeiro o resultado
+                    da competição e só depois o destaque individual, sem
+                    empilhar dois dialogs com o mesmo nome acessível. */}
+                {pendingMelhorEmCampo && !competicaoResultado && (
                   <PopupOverlay>
                     <Card className="border-amber-500/40 text-center">
                       <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-2">⭐ Melhor em Campo</div>

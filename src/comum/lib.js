@@ -1812,7 +1812,7 @@ export function completarCarenciasMundo(jogadores, clubes = CLUBES, rng = Math.r
   }
   for (const clube of clubes) {
     const atletasDoClube = porClube.get(clube.nome) || [];
-    const carencias = diagnosticarElenco(atletasDoClube).faltantes;
+    const carencias = diagnosticarElenco(atletasDoClube,{contarSecundarias:true}).faltantes;
     for (const [posicao, qtd] of Object.entries(carencias)) {
       for (let n = 0; n < qtd; n++) {
         const nac = nacionalidade(clube);

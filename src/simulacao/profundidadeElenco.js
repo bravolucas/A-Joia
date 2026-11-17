@@ -25,41 +25,77 @@ export function normalizarPosicao(posicao) {
   return MINIMOS_ELENCO[valor] ? valor : (ALIASES[valor] || null);
 }
 
-export function diagnosticarElenco(jogadores = [], { clubeNome = null, contarSecundarias = false } = {}) {
-  const contagem = Object.fromEntries(Object.keys(MINIMOS_ELENCO).map(pos => [pos, 0]));
-  const usados = new Set();
+/**
+ * Sem uma informação de aptidão explícita, uma posição secundária em texto
+ * é apenas um rótulo: não é prova de que o jogador consiga cobrir a vaga.
+ * Valores numéricos só contam se o consumidor definir o mínimo (0..100).
+ * Isso evita inventar um limiar de proficiência não definido no game design.
+ */
+function podeCobrirSecundaria(jogador, entrada, minimo) {
+  const rotulo = typeof entrada === 'string' ? entrada : entrada?.posicao ?? entrada?.id;
+  const posicao = normalizarPosicao(rotulo);
+  if (!posicao) return null;
+  if (typeof entrada === 'object' && (entrada.apto === true || entrada.apta === true)) return posicao;
+  const habilidades = jogador.proficienciaPosicoes || jogador.proficiencias || {};
+  const nivel = typeof entrada === 'object'
+    ? entrada.proficiencia ?? entrada.nivel ?? habilidades[rotulo] ?? habilidades[posicao]
+    : habilidades[rotulo] ?? habilidades[posicao];
+  return Number.isFinite(minimo) && Number.isFinite(nivel) && nivel >= minimo ? posicao : null;
+}
+
+export function diagnosticarElenco(jogadores = [], {
+  clubeNome = null, contarSecundarias = false, proficienciaMinima = null,
+} = {}) {
+  const posicoes = Object.keys(MINIMOS_ELENCO);
+  const contagem = Object.fromEntries(posicoes.map(pos => [pos, 0]));
   const atletas = jogadores.filter(j =>
     j && !j.aposentado && (clubeNome === null || j.clubeNome === clubeNome)
   );
-  // Cada atleta só conta uma vez, priorizando sua posição principal.
-  for (let indice = 0; indice < atletas.length; indice++) {
-    const jogador = atletas[indice];
-    const pos = normalizarPosicao(jogador.posicao);
-    if (pos) { contagem[pos]++; usados.add(indice); }
-  }
+  const principais = atletas.map(j => normalizarPosicao(j.posicao));
+  for (const pos of principais) if (pos) contagem[pos]++;
+
   if (contarSecundarias) {
-    // Somente atletas sem posição principal reconhecida entram por posição secundária.
-    // Não contabilizar o mesmo atleta duas vezes para cumprir a cobertura.
-    for (let indice = 0; indice < atletas.length; indice++) {
-      if (usados.has(indice)) continue;
-      const secundarias = atletas[indice].posicoesSecundarias || [];
-      for (const secundaria of secundarias) {
-        const pos = normalizarPosicao(secundaria);
-        if (pos && contagem[pos] < MINIMOS_ELENCO[pos]) {
+    // Associação de atletas com vagas disponíveis, sem contar ninguém duas
+    // vezes. Permite mover um atleta versátil para liberar sua posição principal
+    // a outro jogador quando isso aumenta a cobertura total do elenco.
+    const elegiveis = atletas.map((j, i) => [
+      principais[i],
+      ...(Array.isArray(j.posicoesSecundarias) ? j.posicoesSecundarias : [])
+        .map(entrada => podeCobrirSecundaria(j, entrada, proficienciaMinima)),
+    ].filter((pos, i, todas) => pos && todas.indexOf(pos) === i));
+    const porPosicao = Object.fromEntries(posicoes.map(pos => [pos, []]));
+    const tentar = (indice, tentadas) => {
+      for (const pos of elegiveis[indice]) {
+        if (tentadas.has(pos)) continue;
+        tentadas.add(pos);
+        const titulares = porPosicao[pos];
+        if (titulares.length < MINIMOS_ELENCO[pos]) {
+          titulares.push(indice);
+          return true;
+        }
+        for (let slot=0;slot<titulares.length;slot++) {
+          if (tentar(titulares[slot], tentadas)) {
+            titulares[slot] = indice;
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+    for (let i=0;i<atletas.length;i++) tentar(i,new Set());
+    for (const [pos,indices] of Object.entries(porPosicao)) {
+      for (const indice of indices) {
+        const principal = principais[indice];
+        if (principal !== pos) {
+          if (principal) contagem[principal]--;
           contagem[pos]++;
-          usados.add(indice);
-          break;
         }
       }
     }
   }
   const faltantes = Object.fromEntries(
-    Object.entries(MINIMOS_ELENCO).map(([pos, minimo]) => [pos, Math.max(0, minimo - contagem[pos])])
+    Object.entries(MINIMOS_ELENCO).map(([pos, minimo]) => [pos, Math.max(0, minimo-contagem[pos])])
   );
-  const totalFaltante = Object.values(faltantes).reduce((a, b) => a + b, 0);
-  return {
-    contagem, faltantes, totalFaltante,
-    totalAtivo: atletas.length,
-    completo: totalFaltante === 0,
-  };
+  const totalFaltante = Object.values(faltantes).reduce((a,b) => a+b, 0);
+  return { contagem, faltantes, totalFaltante, totalAtivo: atletas.length, completo: totalFaltante === 0 };
 }

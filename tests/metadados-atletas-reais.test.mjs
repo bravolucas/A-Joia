@@ -11,8 +11,8 @@ const atleta = (mundo, nome, clube) => mundo.jogadores.find(
   j => j.nome === nome && j.clubeNome === clube && !j.aposentado,
 );
 
-test('18 identidades verificadas correspondem a entradas reais e usam códigos de seleção válidos', () => {
-  assert.equal(totalMetadadosAtletasReais, 18);
+test('39 identidades verificadas correspondem a entradas reais e usam códigos de seleção válidos', () => {
+  assert.equal(totalMetadadosAtletasReais, 39);
   const conhecidos = [
     ['Lionel Messi', 'Inter Miami'], ['Cristiano Ronaldo', 'Al-Nassr'],
     ['Neymar Jr', 'Santos'], ['Kylian Mbappé', 'Real Madrid'],
@@ -23,6 +23,16 @@ test('18 identidades verificadas correspondem a entradas reais e usam códigos d
     ['Federico Valverde', 'Real Madrid'], ['Raphinha', 'Barcelona'],
     ['Jamal Musiala', 'Bayern de Munique'], ['Bruno Fernandes', 'Manchester United'],
     ['Lewandowski', 'Barcelona'], ['Bukayo Saka', 'Arsenal'],
+    ['Antoine Griezmann', 'Atlético de Madrid'], ['Phil Foden', 'Manchester City'],
+    ['Kenan Yildiz', 'Juventus'], ['Dušan Vlahović', 'Juventus'],
+    ['Virgil van Dijk', 'Liverpool'], ['Trent Alexander-Arnold', 'Real Madrid'],
+    ['Alisson', 'Liverpool'], ['Manuel Neuer', 'Bayern de Munique'],
+    ['Rúben Dias', 'Manchester City'], ['Pedri', 'Barcelona'], ['Gavi', 'Barcelona'],
+    ['Gabriel Martinelli', 'Arsenal'], ['Gabriel Magalhães', 'Arsenal'],
+    ['Enzo Fernández', 'Chelsea'], ['Cole Palmer', 'Chelsea'], ['Florian Wirtz', 'Liverpool'],
+    ['Ousmane Dembélé', 'PSG'], ['Rodrygo', 'Real Madrid'],
+    ['Gianluigi Donnarumma', 'Manchester City'], ['Rúben Neves', 'Al-Hilal'],
+    ['Bernardo Silva', 'Manchester City'],
   ];
   for (const [nome, clube] of conhecidos) {
     const cadastro = JOGADORES_REAIS_BASE.filter(x => x.nome === nome && x.time === clube);
@@ -57,6 +67,16 @@ test('duas novas carreiras preservam idade e seleção de jogadores reais indepe
     ['Mohamed Salah', 'Liverpool', 34, 'EGI'],
     ['Jude Bellingham', 'Real Madrid', 23, 'ENG'],
     ['Luka Modrić', 'Milan', 40, 'CRO'],
+    ['Kenan Yildiz', 'Juventus', 21, 'TUR'],
+    ['Dušan Vlahović', 'Juventus', 26, 'SER'],
+    ['Virgil van Dijk', 'Liverpool', 34, 'HOL'],
+    ['Trent Alexander-Arnold', 'Real Madrid', 27, 'ENG'],
+    ['Alisson', 'Liverpool', 33, 'BRA'],
+    ['Manuel Neuer', 'Bayern de Munique', 40, 'ALE'],
+    ['Pedri', 'Barcelona', 23, 'ESP'],
+    ['Gavi', 'Barcelona', 21, 'ESP'],
+    ['Ousmane Dembélé', 'PSG', 29, 'FRA'],
+    ['Gianluigi Donnarumma', 'Manchester City', 27, 'ITA'],
   ]) {
     for (const mundo of [a,b]) {
       const encontrado = atleta(mundo, nome, clube);
@@ -69,6 +89,8 @@ test('duas novas carreiras preservam idade e seleção de jogadores reais indepe
 
 test('homônimos e registros incompletos não herdam metadados de outro clube', () => {
   assert.equal(metadadosAtletaReal('Alisson', 'Fluminense'), null);
+  assert.equal(metadadosAtletaReal('Alisson', 'Liverpool')?.nac, 'BRA');
+  assert.equal(idadeAtletaReal(metadadosAtletaReal('Virgil van Dijk', 'Liverpool')?.nascimento, 2026), 34);
   assert.equal(metadadosAtletaReal('Lionel Messi', 'Real Madrid'), null);
   assert.equal(metadadosAtletaReal('Bruno Fernandes', 'Santos'), null);
   assert.equal(metadadosAtletaReal('Jogador Inexistente', 'Arsenal'), null);

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { selecionarFaixas, rngSemente, resumirAmostras } from '../scripts/auditar-dificuldade-treinador.mjs';
+import { selecionarFaixas, rngSemente, resumirAmostras, contarOutrosTitulos } from '../scripts/auditar-dificuldade-treinador.mjs';
 
 test('auditoria da dificuldade escolhe equipes fraca, média e forte na mesma liga', () => {
   const clubes = [
@@ -23,6 +23,18 @@ test('amostragem da auditoria reproduz a mesma sequência por semente', () => {
   assert.deepEqual(primeiro,Array.from({length:100},()=>b()));
   assert.notDeepEqual(primeiro.slice(0,4),Array.from({length:4},()=>c()));
   assert.ok(primeiro.every(v=>v>=0&&v<1));
+});
+
+test('auditoria conta copa separada do título da liga pelo nome exibido', () => {
+  const temporada = {
+    liga: 'brasileirao',
+    campeao: true,
+    titulosConquistados: ['Brasileirão', 'Copa do Brasil', 'Libertadores'],
+  };
+  assert.equal(contarOutrosTitulos(temporada), 2);
+  assert.equal(contarOutrosTitulos({...temporada,titulosConquistados:['Brasileirão']}),0);
+  assert.equal(contarOutrosTitulos({...temporada,titulosConquistados:[]}),0);
+  assert.equal(contarOutrosTitulos({...temporada,titulosConquistados:['Copa do Brasil']}),1);
 });
 
 test('resumo reporta posições, títulos e demissões sem inventar conclusão', () => {

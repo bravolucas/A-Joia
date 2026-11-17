@@ -40,14 +40,6 @@ jobs:
           done
           test "${#arquivos[@]}" -gt 0
           node --test "${arquivos[@]}"
-      - name: Publicar relatórios das seis carreiras da partição
-        if: ${{ startsWith(matrix.caso, 'jogador-melhorias-') }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: resultados-${{ matrix.caso }}
-          path: resultados-auditoria/jogador-melhorias-parte-*.json
-          if-no-files-found: error
-          retention-days: 14
       - name: Gerar versão de produção
         run: npm run build
 
@@ -116,7 +108,14 @@ jobs:
           read -r -a arquivos <<< "$ARQUIVOS_CARREIRAS"
           test "${#arquivos[@]}" -gt 0
           node --test "${arquivos[@]}"
-
+      - name: Publicar relatórios das seis carreiras da partição
+        if: ${{ startsWith(matrix.caso, 'jogador-melhorias-') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultados-${{ matrix.caso }}
+          path: resultados-auditoria/jogador-melhorias-parte-*.json
+          if-no-files-found: error
+          retention-days: 14
 
   conferir-melhorias-24:
     name: conferir-melhorias-24

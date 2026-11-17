@@ -1028,10 +1028,16 @@ export function gerarElenco(clube, mundo, posicaoJogador) {
   return elenco;
 }
 
+/** Regras de disponibilidade compartilhadas com a força coletiva.
+ * Lesão e suspensão retiram o atleta apenas da partida, nunca do cadastro. */
+function disponivelParaEscalacao(j) {
+  return !!j && !j.aposentado && !j.indisponivel && !j.suspenso
+    && !(typeof j.lesao === 'object' && j.lesao?.jogosRestantes > 0);
+}
 export function escalacaoProvavel(elenco, jogador) {
-  const disponiveis = [...(elenco || [])];
-  const eu = jogador ? { id: "EU", nome: jogador.nome, posicao: jogador.posicao, idade: jogador.idade, ovr: jogador.ovr, voce: true, titularidade: jogador.titularidade } : null;
-  if (eu) disponiveis.push(eu);
+  const disponiveis = (elenco || []).filter(disponivelParaEscalacao);
+  const eu = jogador ? { id: "EU", nome: jogador.nome, posicao: jogador.posicao, idade: jogador.idade, ovr: jogador.ovr, voce: true, titularidade: jogador.titularidade, suspenso: jogador.suspenso, indisponivel: jogador.indisponivel, lesao: jogador.lesao } : null;
+  if (eu && disponivelParaEscalacao(eu)) disponiveis.push(eu);
   // Alocação global evita usar o mesmo polivalente em duas posições;
   // improviso só ocorre quando não há cobertura qualificada.
   const escalados=escalarVagasAptas(disponiveis,FORMACAO_433,{improvisar:true})

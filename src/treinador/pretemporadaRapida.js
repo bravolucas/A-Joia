@@ -25,13 +25,13 @@ export function cartaPretemporadaRapida(t,quantidade=1){
  const carta=cartasDe(t)[id];
  const opcoes=carta.opcoes.map(o=>({...o,descricao:o.descricao.replace(/([Tt]ime|[Mm]oral|[Tt]orcida|[Dd]iretoria) \+(\d+)/g,(texto,nome,numero)=>{
   const atributo=/time/i.test(nome)?'elenco':nome.toLowerCase();
-  const teto=atributo==='elenco'?99:100,valor=Math.min(Number(numero),Math.max(0,teto-(t[atributo]??50)));
+  const teto=atributo==='elenco'?95:100,valor=Math.min(Number(numero),Math.max(0,teto-(t[atributo]??50)));
   return `${nome} +${valor}${valor<Number(numero)?` (limite ${teto})`:''}`;
  })}));
  return {...carta,opcoes,id,chave:`${t.clube}|${t.ano}|${indice}|${id}`,indice:indice+1,total:plano.cartas.length,verba:verbaPretemporada(t)};
 }
 /** Uma carta "bate no teto" quando metade ou mais das opções perderia pelo menos metade do ganho por causa dos limites. */
-const tetoDe=a=>a==='elenco'?99:100;
+const tetoDe=a=>a==='elenco'?95:100;
 export function cartaNoLimiteRapida(t,carta){
  const desperdicadas=carta.opcoes.filter(o=>{
   const positivos=Object.entries(o.efeitos||{}).filter(([,v])=>v>0);

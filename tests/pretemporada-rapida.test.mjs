@@ -83,7 +83,12 @@ test('decisão rápida mantém a força do elenco em 95 mesmo após bônus ou ca
  const comBonus={...original,tecnico:{...original.tecnico,elenco:94,planoRapido:{ano:2030,clube:'Santos',cartas:['rival'],respostas:[]}}};
  const bonus=cartaPretemporadaRapida(comBonus.tecnico);
  assert.match(bonus.opcoes[0].descricao,/Time \+1 \(limite 95\)/,'carta apresenta ganho real, não +4');
- assert.equal(cartaNoLimiteRapida(comBonus.tecnico,bonus),true,'ganho desperdiçado ao atingir teto 95');
+ // O bônus da contratação também aumenta a torcida, por isso a carta completa
+ // não é considerada desperdiçada; isolar o atributo elenco neste teste.
+ assert.equal(cartaNoLimiteRapida(comBonus.tecnico,bonus),false,'aumento de torcida ainda traz valor');
+ assert.equal(cartaNoLimiteRapida(comBonus.tecnico,{opcoes:[
+  {efeitos:{elenco:4}},{efeitos:{moral:2}}
+ ]}),true,'o teto 95 é considerado para efeitos apenas de elenco');
  const depoisBonus=aplicarPretemporadaRapida(comBonus,bonus.chave,bonus.opcoes[0].id);
  assert.equal(depoisBonus.tecnico.elenco,95,'bônus nunca ultrapassa o teto 95');
  const neutra={...original,tecnico:{...original.tecnico,elenco:99,planoRapido:{ano:2030,clube:'Santos',cartas:['esquema'],respostas:[]}}};

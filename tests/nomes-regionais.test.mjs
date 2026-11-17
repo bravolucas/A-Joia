@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {gerarNomeRegional, origemNomes} from '../src/simulacao/nomesRegionais.js';
-import { NACIONALIDADES } from '../src/dados/data.js';
+import {gerarNomeRegional, origemNomes, NACIONALIDADES_OCEANIA_NEWGEN, sortearNacionalidadeMundo} from '../src/simulacao/nomesRegionais.js';
+import { NACIONALIDADES, NACS_MUNDO } from '../src/dados/data.js';
 
 test('ingleses, japoneses e nigerianos usam dicionários apropriados',()=>{
   assert.equal(gerarNomeRegional('ENG',()=>0),'Jack Walker');
@@ -55,4 +55,27 @@ test('Islândia, Coreia do Norte e sete seleções do Pacífico geram nomes de s
     assert.equal(gerarNomeRegional(codigo, () => 0.999), gerarNomeRegional(codigo, () => 0.999));
   }
   assert.equal(origemNomes('XXX'), 'INT', 'código desconhecido continua com fallback neutro');
+});
+
+test('sorteio global de novos jogadores alcança 83 nacionalidades sem inflar a Oceania',()=>{
+  const total=new Set([...NACS_MUNDO,...NACIONALIDADES_OCEANIA_NEWGEN]);
+  assert.equal(total.size,83);
+  assert.equal(NACS_MUNDO.length,76);
+  assert.equal(NACIONALIDADES_OCEANIA_NEWGEN.length,7);
+  assert.deepEqual([...total].sort(),NACIONALIDADES.map(p=>p.id).sort());
+  assert.equal(sortearNacionalidadeMundo(()=>0),'BRA');
+  assert.equal(sortearNacionalidadeMundo(()=>0.995),'FIJ');
+  assert.equal(sortearNacionalidadeMundo(()=>0.999999),'SAM');
+  assert.equal(sortearNacionalidadeMundo(()=>1),'SAM');
+  assert.notEqual(sortearNacionalidadeMundo(()=>0.5),'INT');
+  const observadas=new Set();
+  let oceania=0;
+  for(let i=0;i<10000;i++){
+    const codigo=sortearNacionalidadeMundo(()=>i/10000);
+    observadas.add(codigo);
+    if(NACIONALIDADES_OCEANIA_NEWGEN.includes(codigo))oceania++;
+    assert.notEqual(origemNomes(codigo),'INT');
+  }
+  assert.equal(observadas.size,83);
+  assert.equal(oceania,50,'política provisória: 0,5% de origens raras no sorteio global');
 });

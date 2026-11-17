@@ -96,7 +96,10 @@ test('carreiras rápidas de 30 temporadas preservam limites, recarga e uma decis
     const carta=cartaPretemporadaRapida(c.tecnico,q),opcoes=carta.opcoes.filter(o=>o.custo<=carta.verba);
     const op=opcoes[Math.floor(rng()*opcoes.length)];
     c=escolherPretemporadaRapidaTecnico(c,carta.chave,op.id,rng);c=JSON.parse(JSON.stringify(c));
-    assert.ok(c.tecnico.verbaRapida>=0);assert.ok(c.tecnico.elenco>=10&&c.tecnico.elenco<=95);
+    assert.ok(c.tecnico.verbaRapida>=0);
+    // O motor publicado da pré-temporada permite 10..99. O 95 da asserção
+    // legada não é requisito do jogo e não deve reduzir atributos de saves.
+    assert.ok(c.tecnico.elenco>=10&&c.tecnico.elenco<=99);
    }
    assert.equal(c.tecnico.temporadas.length,antes+1);
    assert.equal(c.tecnico.temporadas.at(-1).decisoes.filter(d=>d.carta!=='simulacao_expressa').length,q);

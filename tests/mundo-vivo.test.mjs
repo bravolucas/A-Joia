@@ -93,3 +93,23 @@ test('snapshot de salvamento isola também o arquivo e preserva o contrato JSON'
  arquivo.anos.push(2031);arquivo.atletas.a.temporadas[0][1]=99;estado.c.mundo.jogadores[0].ovr=90;
  assert.deepEqual(snapshot.c.universo.anos,[2030]);assert.equal(snapshot.c.universo.atletas.a.temporadas[0][1],10);assert.equal(snapshot.c.mundo.jogadores[0].ovr,70);assert.deepEqual(snapshot.c.tecnico.universo.anos,[2030]);
 });
+
+test('arquivo do clube registra oito reputações por temporada sem regravar o mesmo ano',()=>{
+ const c={codigo:'reputacoes-teste',nome:'Arquivo',posicao:'ATA',mundo:{jogadores:[]},
+  historiaFutebol:{titulos:[{ano:2030,clube:'Santos',nome:'Conquista comprovada',tipo:'continental'}]}};
+ const ano={ano:2030,clube:'Santos',ligaId:'brasileirao',
+  classificacoesMundo:{brasileirao:{classificacao:[
+   {nome:'Santos',posicao:1,pontos:80},{nome:'Flamengo',posicao:2,pontos:76}
+  ]}}};
+ registrarMundoVivo(c,ano);
+ const clube=c.universo.clubes.Santos,primeira=structuredClone(clube);
+ assert.equal(Object.keys(clube.reputacoes).length,8);
+ assert.equal(clube.historico.length,1);
+ assert.equal(clube.historico[0].reputacoesEixos.length,8);
+ assert.ok(clube.reputacoes.continental>0);
+ registrarMundoVivo(c,ano);
+ assert.deepEqual(c.universo.clubes.Santos,primeira);
+ const restaurado=lerCarreira(serializarCarreira(c));
+ assert.deepEqual(restaurado.universo.clubes.Santos.reputacoes,clube.reputacoes);
+ assert.equal(restaurado.universo.clubes.Santos.historico[0].reputacoesEixos.length,8);
+});

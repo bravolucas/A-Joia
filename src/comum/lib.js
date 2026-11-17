@@ -1951,7 +1951,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
       clube: clubeTemporada, liga: ligaTemporada, idadeInicial, ovrInicial,
     });
     // aposentadoria
-    if (p.idade >= 34 && (p.idade >= 39 || rng() < (p.idade - 33) * 0.2)) { p.aposentado = true; return p; }
+    if (p.idade >= 34 && (p.idade >= 41 || rng() < Math.min(0.8, 0.04 + (p.idade - 34) ** 2 * 0.018))) { p.aposentado = true; return p; }
     if(Number.isInteger(p.contrato)){
       p.contrato=Math.max(0,p.contrato-1);
       if(!p.contrato){

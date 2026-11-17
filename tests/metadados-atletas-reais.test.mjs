@@ -77,6 +77,17 @@ test('duas novas carreiras preservam idade e seleção de jogadores reais indepe
     ['Gavi', 'Barcelona', 21, 'ESP'],
     ['Ousmane Dembélé', 'PSG', 29, 'FRA'],
     ['Gianluigi Donnarumma', 'Manchester City', 27, 'ITA'],
+    ['Antoine Griezmann', 'Atlético de Madrid', 35, 'FRA'],
+    ['Phil Foden', 'Manchester City', 26, 'ENG'],
+    ['Rúben Dias', 'Manchester City', 29, 'POR'],
+    ['Gabriel Martinelli', 'Arsenal', 25, 'BRA'],
+    ['Gabriel Magalhães', 'Arsenal', 28, 'BRA'],
+    ['Enzo Fernández', 'Chelsea', 25, 'ARG'],
+    ['Cole Palmer', 'Chelsea', 24, 'ENG'],
+    ['Florian Wirtz', 'Liverpool', 23, 'ALE'],
+    ['Rodrygo', 'Real Madrid', 25, 'BRA'],
+    ['Rúben Neves', 'Al-Hilal', 29, 'POR'],
+    ['Bernardo Silva', 'Manchester City', 31, 'POR'],
   ]) {
     for (const mundo of [a,b]) {
       const encontrado = atleta(mundo, nome, clube);

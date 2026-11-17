@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {planoPretemporadaRapida,cartaPretemporadaRapida,aplicarPretemporadaRapida} from '../src/treinador/pretemporadaRapida.js';
+import {planoPretemporadaRapida,cartaPretemporadaRapida,aplicarPretemporadaRapida,cartaNoLimiteRapida} from '../src/treinador/pretemporadaRapida.js';
 import {iniciarCarreiraTecnico,escolherPretemporadaRapidaTecnico,proximaTemporadaTecnico,gerarPropostasTecnico,CLUBES_CONVITES_TECNICO} from '../src/treinador/tecnico.js';
 const carreira=(ritmo='normal')=>{const c=iniciarCarreiraTecnico({nome:'Teste rápido',idade:40,ano:2030,aposentado:true,clubeNome:'Santos',temporadas:[],totais:{},legado:{pontos:600}});return {...c,ritmo,tecnico:{...c.tecnico,clubeInicialEscolhido:true,clube:'Santos',liga:'brasileirao',elenco:70,verbaRapida:3000}};};
 test('uma escolha simula a temporada; todos os ritmos têm uma decisão, sem duplicação',()=>{
@@ -82,6 +82,8 @@ test('decisão rápida mantém a força do elenco em 95 mesmo após bônus ou ca
  const original=carreira(),antes=structuredClone(original);
  const comBonus={...original,tecnico:{...original.tecnico,elenco:94,planoRapido:{ano:2030,clube:'Santos',cartas:['rival'],respostas:[]}}};
  const bonus=cartaPretemporadaRapida(comBonus.tecnico);
+ assert.match(bonus.opcoes[0].descricao,/Time \+1 \(limite 95\)/,'carta apresenta ganho real, não +4');
+ assert.equal(cartaNoLimiteRapida(comBonus.tecnico,bonus),true,'ganho desperdiçado ao atingir teto 95');
  const depoisBonus=aplicarPretemporadaRapida(comBonus,bonus.chave,bonus.opcoes[0].id);
  assert.equal(depoisBonus.tecnico.elenco,95,'bônus nunca ultrapassa o teto 95');
  const neutra={...original,tecnico:{...original.tecnico,elenco:99,planoRapido:{ano:2030,clube:'Santos',cartas:['esquema'],respostas:[]}}};

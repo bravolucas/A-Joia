@@ -3,7 +3,7 @@ import { MINIMOS_ELENCO, diagnosticarElenco } from '../simulacao/profundidadeEle
 import { gerarNomeRegional } from '../simulacao/nomesRegionais.js';
 import { metadadosAtletaReal, idadeAtletaReal } from '../dados/metadadosAtletasReais.js';
 import { registrarHistoricoTemporada, registrarPremioIndividual } from '../simulacao/historicoJogadorMundo.js';
-import { destinosTransferenciaIA } from '../simulacao/mercadoIA.js';
+import { destinosTransferenciaIA, fatorMobilidadeVeteranoIA, duracaoContratoIA } from '../simulacao/mercadoIA.js';
 import {ampliarParticipantesInternacionais,clubeInternacional} from '../competicoes/clubesInternacionais.js';
 import {adversarioCopaPorFase} from '../treinador/copasEscolha.js';
 import { ANO_INICIO, anoTemporadaCarreira, AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLASSICOS, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONDICOES_CLIMA, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESPECIALIDADES_LISTA, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, FORMACOES_TATICAS, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "../dados/data.js";
@@ -1912,7 +1912,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
       de:anterior, para:d.nome, valor:null,
     }].slice(-30);
     p.clubeNome=d.nome;p.liga=d.liga;
-    if(Number.isInteger(p.contrato))p.contrato=3;
+    if(Number.isInteger(p.contrato))p.contrato=duracaoContratoIA(p.idade,p.posicao);
   };
   const clubesPorNome = new Map(clubes.map(clube => [clube.nome, clube]));
   const jogadores = mundo.jogadores.map((j) => {
@@ -1928,7 +1928,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
     if(!p.clubeNome){
       p.idade++;p.jogos=0;p.gols=0;p.assist=0;p.defesas=0;p.cleanSheets=0;p.clubeTemporada=null;p.porCompeticao=[];p.nota=0;p.temporadaEstatisticas=(mundo.temporada||0)+1;
       if(p.idade>=41)p.aposentado=true;
-      else if(rng()<.35){const destinos=destinosTransferenciaIA(p,clubes,ocupacao,perfis,{clubeControlado,limiteElenco:24,toleranciaOvr:10});if(destinos.length){mover(p,pick(destinos));p.contrato=3;}}
+      else if(rng()<.35){const destinos=destinosTransferenciaIA(p,clubes,ocupacao,perfis,{clubeControlado,limiteElenco:24,toleranciaOvr:10});if(destinos.length){mover(p,pick(destinos));p.contrato=duracaoContratoIA(p.idade,p.posicao);}}
       return p;
     }
     // A longevidade traz gestão de minutos: veteranos de linha disputam
@@ -1970,13 +1970,13 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
       p.contrato=Math.max(0,p.contrato-1);
       if(!p.contrato){
         if(p.clubeNome===clubeControlado){p.movimentos=[...(p.movimentos||[]),{ano,tipo:'fim-contrato',de:p.clubeNome,para:null,valor:0}];p.clubeNome=null;return p;}
-        p.contrato=3;
+        p.contrato=duracaoContratoIA(p.idade,p.posicao);
       }
     }
     if(p.clubeNome===clubeControlado)return p;
     // transferência: quem cresceu muito acima do clube tende a sair — traço de personalidade ajusta a chance e o destino
     const traco = TRACOS_MUNDO.find((t) => t.id === p.traco);
-    const multTransf = traco?.chanceTransferenciaMult ?? 1;
+    const multTransf = (traco?.chanceTransferenciaMult ?? 1) * fatorMobilidadeVeteranoIA(p.idade,p.posicao);
     const gap = p.ovr - clube.forca;
     // nostálgico: depois dos 27, pode voltar pro clube que o revelou, mesmo sem gap de força
     if (traco?.voltaParaClubeOrigem && p.idade >= 27 && p.clubeNome !== p.clubeOrigem && rng() < 0.08) {
@@ -2033,7 +2033,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
       carreira: { gols: 0, assist: 0, jogos: 0, titulos: 0, bolasDeOuro: 0, premios: 0, temporadas: 0 }, aposentado: false,
     });
   }
-  if(mundo.cadastroElencos)for(const p of jogadores)if(!Number.isInteger(p.contrato)){p.contrato=p.clubeNome?3:0;p.salario=Math.max(3,Math.round(p.ovr**2/220));p.valor=Math.max(100,Math.round(p.ovr**3/180*(p.idade<24?1.2:.7)));}
+  if(mundo.cadastroElencos)for(const p of jogadores)if(!Number.isInteger(p.contrato)){p.contrato=p.clubeNome?duracaoContratoIA(p.idade,p.posicao):0;p.salario=Math.max(3,Math.round(p.ovr**2/220));p.valor=Math.max(100,Math.round(p.ovr**3/180*(p.idade<24?1.2:.7)));}
   const jogadoresLimpos = completarCarenciasMundo(jogadores.filter((j) => !j.aposentado || j.idade <= 45), clubes, rng);
   // Hall da fama: registra quem ficou no topo do ranking mundial nessa
   // temporada — histórico existia declarado, mas nunca era preenchido.

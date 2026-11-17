@@ -80,3 +80,23 @@ test('aposentadoria não reutiliza ID numérico já salvo como texto',()=>{
  assert.ok(proximo.jogadores.some(j=>j.id==='9999'&&j.aposentado));
  for(const clube of clubes)assert.equal(diagnosticarElenco(proximo.jogadores,{clubeNome:clube.nome}).totalFaltante,0);
 });
+
+
+test('reposição usa posição secundária apta sem gerar jovem desnecessário',()=>{
+  const elencoBase = completarCarenciasMundo([],clubes,geradorTecnico('reposição-versátil'));
+  const clube=clubes[0].nome;
+  const atletas=elencoBase.filter(j=>j.clubeNome===clube);
+  const le=atletas.find(j=>j.posicao==='LE');
+  const ld=atletas.find(j=>j.posicao==='LD');
+  const semLe=elencoBase.filter(j=>j.id!==le.id);
+  // Atleta extra com posição principal ocupada e segunda função verificada.
+  const versatil={...ld,id:'versatil-unico',nome:'Atleta versátil',posicoesSecundarias:[{posicao:'LE',apto:true}]};
+  const plantel=[...semLe,versatil];
+  const antes=structuredClone(plantel);
+  const fim=completarCarenciasMundo(plantel,clubes,geradorTecnico('reposição-versátil'));
+  assert.equal(fim.length,plantel.length);
+  assert.deepEqual(plantel,antes);
+  const diagnostico=diagnosticarElenco(fim.filter(j=>j.clubeNome===clube),{contarSecundarias:true});
+  assert.equal(diagnostico.totalFaltante,0);
+  assert.equal(new Set(fim.map(j=>String(j.id))).size,fim.length);
+});

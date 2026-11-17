@@ -40,7 +40,7 @@ for(const width of [390,1366])test(`loja: confirmação, saldo e salário sem du
   await abrir();await page.getByRole('button',{name:'Abrir loja do treinador'}).click();
   await expect(loja).toContainText('Força extra nesta temporada');expect((await salvo()).tecnico.carteiraTecnico.compras).toHaveLength(1);
   await loja.getByRole('button',{name:'Fechar janela'}).click();
-  await page.getByRole('button',{name:'Começar temporada',exact:true}).click();
+  await page.getByRole('button',{name:'Preparar equipe (opcional)',exact:true}).click();
   const decisao=page.getByRole('dialog',{name:'Decisão de pré-temporada'});await expect(decisao).toContainText('ESCOLHA 1 DE 1');await expect(decisao.locator('.ct-quick-baseline')).toContainText(`Força do time: ${Math.round(forcaAntesDaCompra+3)}`);await expect(decisao.locator('.ct-quick-baseline')).toContainText('Inclui +3 da loja');
   await decisao.locator('.ct-decisions button:enabled').first().click();
   await concluirMomentos(page);

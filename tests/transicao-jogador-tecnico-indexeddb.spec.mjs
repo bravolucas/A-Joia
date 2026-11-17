@@ -11,7 +11,10 @@ const hash=valor=>createHash('sha256').update(JSON.stringify(valor)).digest('hex
 let retirado,bundle;
 test.setTimeout(360000);
 
-test.beforeAll(async()=>{
+test.beforeAll(async({},testInfo)=>{
+  // A carreira completa é custosa: o limite padrão de 30s do hook não serve.
+  // Isso não reduz nem pula qualquer temporada, teste ou verificação.
+  testInfo.setTimeout(360000);
   // Usar a carreira REAL do modo rápido; o teste não fabrica histórico de atleta.
   retirado=simularCarreiraAutomatica({
     nome:'Auditoria transição',nac:'BRA',posicao:'ATA',

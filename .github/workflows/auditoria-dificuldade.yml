@@ -36,9 +36,14 @@ jobs:
           mkdir -p resultados-auditoria
           node scripts/auditar-dificuldade-treinador.mjs --liga=brasileirao --amostras=3 --semente=2026 --json > resultados-auditoria/brasileirao.json
           cat resultados-auditoria/brasileirao.json
+      - name: Medir dificuldade com 150 temporadas (50 por força)
+        shell: bash
+        run: |
+          node scripts/auditar-dificuldade-treinador.mjs --liga=brasileirao --amostras=50 --semente=2026 --json > resultados-auditoria/brasileirao-50.json
+          cat resultados-auditoria/brasileirao-50.json
       - name: Guardar números para comparação antes e depois
         uses: actions/upload-artifact@v4
         with:
           name: dificuldade-treinador-brasileirao
-          path: resultados-auditoria/brasileirao.json
+          path: resultados-auditoria/*.json
           retention-days: 14

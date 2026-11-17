@@ -144,10 +144,16 @@ test('jogador aposentado reabre e vira técnico mantendo mundo, histórico e tí
   await preparar(page);
   const recarga=await resumo(page);
   expect(recarga).toEqual(posTransicao);
-  const carregado=await page.evaluate(()=>window.__ajoiaTransicao.carregarRapido());
-  expect(carregado?.c?.tecnico).toBeTruthy();
-  expect(carregado.c.temporadas).toHaveLength(esperado.anosJogador);
-  expect(carregado.c.aposentado).toBe(true);
+  // Nunca retornar o objeto inteiro (~60 MB) pelo IPC do Playwright:
+  // o Chromium valida tudo localmente e só devolve os campos necessários.
+  const carregado=await page.evaluate(()=>{
+    const c=window.__ajoiaTransicao.carregarRapido()?.c;
+    return {possuiTecnico:!!c?.tecnico,
+      anosJogador:c?.temporadas?.length??null,aposentado:c?.aposentado??null};
+  });
+  expect(carregado.possuiTecnico).toBe(true);
+  expect(carregado.anosJogador).toBe(esperado.anosJogador);
+  expect(carregado.aposentado).toBe(true);
 
   const medidas={modo:'rapido-jogador-aposentado-para-tecnico',
     anosJogador:esperado.anosJogador,atletas:esperado.atletas,

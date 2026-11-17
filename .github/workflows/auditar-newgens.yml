@@ -1,0 +1,51 @@
+name: Auditar posições secundárias de newgens
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/simulacao/posicoesSecundariasNewgen.js'
+      - 'src/comum/lib.js'
+      - 'src/simulacao/escalacaoApta.js'
+      - 'tests/escalacao-secundaria.test.mjs'
+      - 'tests/posicoes-newgens.test.mjs'
+      - '.github/workflows/auditar-newgens.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  versatilidade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Regressões das posições e aposentadorias
+        run: node --test tests/posicoes-newgens.test.mjs tests/profundidade-elenco.test.mjs tests/longevidade-elencos.test.mjs tests/escalacao-secundaria.test.mjs
+      - name: Auditar 50 temporadas no catálogo completo
+        run: |
+          mkdir -p resultados-auditoria
+          node --max-old-space-size=4096 scripts/auditar-catalogo-mundial-50-anos.mjs --anos=50 --semente=2026 --cobertura=qualificada --json > resultados-auditoria/newgens-50-anos.json
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const a=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
+            if(a.indicadores.violacoes!==0 || a.parametros.anos!==50 || a.parametros.cobertura!=="qualificada" || a.parametros.clubesCatalogados<300)process.exit(1);
+            const linhas=["### Newgens — compatibilidade e cobertura do universo",
+              "- Clubes: "+a.parametros.clubesCatalogados,
+              "- Temporadas: "+a.parametros.anos,
+              "- Atletas finais: "+a.fim.atletas,
+              "- Violacoes de ID ou vagas qualificados: "+a.indicadores.violacoes,
+              "- Max clubes sem minimo pela posicao principal: "+a.indicadores.maxClubesIncompletosPrincipais,
+              "",
+              "> Não comprova mercado, scouting e aptidão de atletas reais."];
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,linhas.join("\n")+"\n");
+          ' resultados-auditoria/newgens-50-anos.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: newgens-cobertura-50-anos
+          path: resultados-auditoria/*.json
+          if-no-files-found: warn
+          retention-days: 14

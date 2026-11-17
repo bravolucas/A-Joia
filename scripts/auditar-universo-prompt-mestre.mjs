@@ -19,6 +19,8 @@ const options = Object.fromEntries(process.argv.slice(2)
 const anos = options.anos === undefined ? 50 : Number(options.anos);
 const amostra = options.amostra === undefined ? 10000 : Number(options.amostra);
 const semente = options.semente || '2026';
+const modoCobertura=options.cobertura||'principal';
+if(!['principal','qualificada'].includes(modoCobertura))throw Error('Use --cobertura=principal|qualificada');
 if (!Number.isInteger(anos) || anos < 1 || anos > 80 ||
     !Number.isInteger(amostra) || amostra < 83 || amostra > 30000) {
   throw new Error('Use --anos=1..80 e --amostra=83..30000.');
@@ -41,7 +43,7 @@ for (let indice=0;indice<anos;indice++) {
   const ids = mundo.jogadores.map(j=>String(j.id));
   const idsDuplicados = ids.length - new Set(ids).size;
   const clubesAno = clubes.map(clube => {
-    const d = diagnosticarElenco(mundo.jogadores,{clubeNome:clube.nome});
+    const d = diagnosticarElenco(mundo.jogadores,{clubeNome:clube.nome,contarSecundarias:modoCobertura==='qualificada'});
     return {clube:clube.nome,ativos:d.totalAtivo,faltantes:d.totalFaltante};
   });
   const ativos = mundo.jogadores.filter(j=>!j.aposentado).length;
@@ -82,7 +84,7 @@ const nomesCompartilhadosEntrePaises = [...todosNomes]
 const duracaoMs = Math.round(performance.now()-inicio);
 const relatorio = {
   base:'Auditoria exploratória A JOIA (não representa o universo completo nem a economia)',
-  parametros:{anos,amostraNomes:amostra,seed:semente,clubes:clubes.length,nacionalidades:codigos.length,elencoMinimoPadrao:TOTAL_MINIMO_ELENCO},
+  parametros:{anos,amostraNomes:amostra,seed:semente,cobertura:modoCobertura,clubes:clubes.length,nacionalidades:codigos.length,elencoMinimoPadrao:TOTAL_MINIMO_ELENCO},
   mundo:{temporadasSimuladas:cobertura.length,ultimoAno:2030+anos-1,
     jogadoresIniciais:totalInicial,jogadoresMundoFinal:mundo.jogadores.length,
     jogadoresAtivosFinal:mundo.jogadores.filter(j=>!j.aposentado).length,
@@ -100,7 +102,7 @@ const relatorio = {
     dezPaisesComMaisRepeticoes:paises.slice().sort((a,b)=>b.nomesRepetidos-a.nomesRepetidos).slice(0,10),
     porNacionalidade:paises},
   medicao:{duracaoMs,heapFinalMiB:memoria()},
-  limitacoes:['Ensaio com 3 clubes apenas; não prova cobertura ou orçamento mundial.','Amostras de nomes percorrem 83 países igualmente; não representam distribuição real de futebolistas.','Sem testes de lesões, scouting, reputação multidimensional ou economia detalhada.','Amostragem detecta nomes repetidos por país e homônimos compartilhados entre países, mas não identifica combinações culturalmente inadequadas nem migração familiar.']
+  limitacoes:['Ensaio com 3 clubes apenas; não prova cobertura ou orçamento mundial.','Amostras de nomes percorrem 83 países igualmente; não representam distribuição real de futebolistas.','Sem testes de lesões, scouting, reputação multidimensional ou economia detalhada.','Cobertura principal é avaliada sem posições secundárias; cobertura qualificada usa aptidão explícita sem dupla contagem.','Amostragem detecta nomes repetidos por país e homônimos compartilhados entre países, mas não identifica combinações culturalmente inadequadas nem migração familiar.']
 };
 if(options.json!==undefined || process.argv.includes('--json')) console.log(JSON.stringify(relatorio,null,2));
 else console.log('Fases 1/2: '+anos+' anos; '+amostra+' nomes; '+problemas.length+' violacoes de elenco/ID; '+relatorio.nomes.taxaRepeticaoPercentual+'% de repeticoes de nomes por nacionalidade; '+duracaoMs+' ms; '+Math.round(maxBytes/1024)+' KiB de save maximo.');

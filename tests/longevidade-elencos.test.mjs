@@ -36,7 +36,9 @@ test('motor completo mantém cobertura por 30 temporadas com aposentadorias e tr
  for(let ano=0;ano<30;ano++){
    mundo=simularTemporadaMundo(mundo,geradorTecnico('temporada'+ano),{clubes});
    for(const clube of clubes)
-     assert.equal(diagnosticarElenco(mundo.jogadores,{clubeNome:clube.nome}).totalFaltante,0,`${clube.nome}, temporada ${ano+1}`);
+     // Vagas cobertas por aptidão secundária comprovada também contam,
+     // mas nenhum atleta pode ocupar duas vagas simultaneamente.
+     assert.equal(diagnosticarElenco(mundo.jogadores,{clubeNome:clube.nome,contarSecundarias:true}).totalFaltante,0,`${clube.nome}, temporada ${ano+1}`);
    assert.equal(new Set(mundo.jogadores.map(j=>j.id)).size,mundo.jogadores.length);
  }
 });

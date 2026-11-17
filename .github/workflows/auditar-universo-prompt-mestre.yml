@@ -35,11 +35,11 @@ jobs:
         run: mkdir -p resultados-auditoria
       - name: Smoke de 3 temporadas, 830 nomes
         run: |
-          node scripts/auditar-universo-prompt-mestre.mjs --anos=3 --amostra=830 --semente=2026 --json > resultados-auditoria/universo-smoke.json
+          node scripts/auditar-universo-prompt-mestre.mjs --anos=3 --amostra=830 --semente=2026 --cobertura=qualificada --json > resultados-auditoria/universo-smoke.json
           node --input-type=module -e 'import fs from "node:fs"; const a=JSON.parse(fs.readFileSync(process.argv[1])); if(a.parametros.nacionalidades!==83||a.mundo.temporadasSimuladas!==3||a.mundo.violacoes!==0) process.exit(1);' resultados-auditoria/universo-smoke.json
       - name: Ensaio de 50 temporadas, 10 mil nomes
         run: |
-          node scripts/auditar-universo-prompt-mestre.mjs --anos=50 --amostra=10000 --semente=2026 --json > resultados-auditoria/universo-50-anos-10k.json
+          node scripts/auditar-universo-prompt-mestre.mjs --anos=50 --amostra=10000 --semente=2026 --cobertura=qualificada --json > resultados-auditoria/universo-50-anos-10k.json
           node --input-type=module -e 'import fs from "node:fs"; const a=JSON.parse(fs.readFileSync(process.argv[1])); if(a.parametros.nacionalidades!==83||a.parametros.amostraNomes!==10000||a.mundo.temporadasSimuladas!==50||a.mundo.violacoes!==0) process.exit(1);' resultados-auditoria/universo-50-anos-10k.json
       - name: Resumo das métricas observadas
         if: always()
@@ -49,7 +49,7 @@ jobs:
               import fs from "node:fs";
               const v=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
               const linhas=[
-                "### Auditoria exploratória: universo de três clubes",
+                "### Auditoria exploratória: universo de três clubes (cobertura qualificada)",
                 "",
                 "- Temporadas: "+v.mundo.temporadasSimuladas,
                 "- Atletas iniciais / finais (inclui aposentados): "+v.mundo.jogadoresIniciais+" / "+v.mundo.jogadoresMundoFinal,
@@ -91,7 +91,7 @@ jobs:
       - name: Simular 50 temporadas do catálogo completo
         run: |
           mkdir -p resultados-auditoria
-          node --max-old-space-size=4096 scripts/auditar-catalogo-mundial-50-anos.mjs --anos=50 --semente=2026 --json > resultados-auditoria/catalogo-real-50-anos.json
+          node --max-old-space-size=4096 scripts/auditar-catalogo-mundial-50-anos.mjs --anos=50 --semente=2026 --cobertura=qualificada --json > resultados-auditoria/catalogo-real-50-anos.json
       - name: Resumo do catálogo, inclusive em caso de falha de cobertura
         if: always()
         run: |
@@ -100,7 +100,7 @@ jobs:
               import fs from "node:fs";
               const r=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
               const lines=[
-                "### Auditoria do catálogo completo — "+r.parametros.anos+" temporadas",
+                "### Auditoria do catálogo completo — "+r.parametros.anos+" temporadas (cobertura "+r.parametros.cobertura+")",
                 "",
                 "- Clubes: "+r.parametros.clubesCatalogados,
                 "- Atletas iniciais: "+r.inicio.atletas,

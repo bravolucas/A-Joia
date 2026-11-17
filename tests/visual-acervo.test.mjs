@@ -15,8 +15,23 @@ test('estaduais com fonte específica resolvem imagens distintas da taça genér
   assert.ok(fs.statSync(new URL('../arte/competicoes/'+arquivo,import.meta.url)).size>1000);
   assert.ok(fontes[arquivo.slice(0,-5)].fonte.includes('/trophys/ST_'));
  }
- assert.ok(fontes.pendentes.includes('Campeonato Amazonense'));
+ // O Amazonense deixou de estar sem imagem: agora há representação Commons
+ // licenciada. A foto antiga do campeão de turno continua rejeitada.
+ assert.deepEqual(fontes.pendentes, ['Campeonato Sergipano','Campeonato Paraense']);
  assert.match(fontes.descartes['ST_amazonense.png'],/TURNO/);
+ for (const [slug,arquivo] of [
+   ['campeonato-baiano','CampeonatoBaiano2019-.png'],
+   ['campeonato-cearense','CampeonatoCearense2019-.png'],
+   ['campeonato-pernambucano','CampeonatoPernambucano2025-.png'],
+   ['campeonato-amazonense','CampeonatoAmazonense2018-.png'],
+ ]) {
+   const fonte=fontes.externasCommons[slug];
+   assert.equal(fonte.arquivo,arquivo,slug);
+   assert.ok(fonte.fonte.startsWith('https://commons.wikimedia.org/wiki/File:'),slug);
+   assert.match(fonte.licenca,/^CC BY(?:-SA)? 4\.0$/,slug);
+   assert.match(fonte.natureza,/não é fotografia oficial/,slug);
+ }
+ assert.equal(Object.keys(fontes.externasCommons).length,4);
 });
 
 test('todas as competições do catálogo têm imagem própria ou ilustração original',()=>{

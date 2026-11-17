@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { destinosTransferenciaIA } from '../src/simulacao/mercadoIA.js';
-import { simularTemporadaMundo } from '../src/comum/lib.js';
+import { simularTemporadaMundo, completarCarenciasMundo } from '../src/comum/lib.js';
+import {geradorTecnico} from '../src/treinador/momentosTecnico.js';
 
 const clubes = [
   {nome:'Clube de Origem',liga:'brasileirao',forca:66},
@@ -74,4 +75,25 @@ test('nostálgico não volta automaticamente ao clube controlado',()=>{
   {nome:'Clube Controlado',liga:'brasileirao',forca:75},
  ],clubeControlado:'Clube Controlado',ano:2027});
  assert.equal(res.jogadores.find(j=>j.id===1).clubeNome,'Clube de Origem');
+});
+
+test('mercado em 15 temporadas nunca invade o clube do técnico nem altera o mundo de origem',()=>{
+ const lista=[
+  {nome:'Meu Clube',liga:'brasileirao',forca:80},
+  {nome:'Equipe Norte',liga:'brasileirao',forca:70},
+  {nome:'Equipe Sul',liga:'brasileirao',forca:75},
+  {nome:'Equipe Leste',liga:'brasileirao',forca:84},
+ ];
+ let mundo={jogadores:completarCarenciasMundo([],lista,geradorTecnico('mercado-base')),temporada:0,cadastroElencos:1};
+ for(let ano=0;ano<15;ano++){
+  const antes=structuredClone(mundo);
+  mundo=simularTemporadaMundo(mundo,geradorTecnico('mercado-ano-'+ano),{
+   clubes:lista,ano:2027+ano,clubeControlado:'Meu Clube',
+  });
+  assert.deepEqual(antes.temporada,ano);
+  assert.deepEqual(mundo.temporada,ano+1);
+  assert.deepEqual(antes.jogadores,structuredClone(antes.jogadores));
+  assert.ok(mundo.jogadores.every(j=>(j.movimentos||[]).every(m=>m.tipo!=='transferencia'||m.para!=='Meu Clube')),
+   'IA não pode contratar automaticamente para o clube do treinador');
+ }
 });

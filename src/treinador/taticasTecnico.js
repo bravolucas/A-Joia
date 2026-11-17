@@ -1,4 +1,5 @@
 import { bonusAuxiliarTecnico } from './comissaoTecnico.js';
+import {qualidadeTaticaApta} from './alocacaoSetoresTecnico.js';
 // As formações redistribuem o peso dos setores, sem somar força gratuitamente.
 export const FORMACOES_TECNICO = [
  {id:'4-3-3',nome:'4-3-3',descricao:'Valoriza o ataque e dá menos peso ao meio-campo.',pesos:{GOL:1,DEF:4,MEI:3,ATA:3}},
@@ -11,11 +12,10 @@ export function perfilTaticoTecnico(t={}){
  const elenco=!t.modoTreinadorRapido&&t.gestao&&t.gestao.clube===t.clube?t.gestao.elenco:[];
  let ajuste=0;
  if(elenco?.length){
-  const qualidade=pesos=>Object.entries(pesos).reduce((total,[setor,vagas])=>{
-   const titulares=elenco.filter(j=>j.setor===setor).sort((a,b)=>b.qualidade-a.qualidade).slice(0,vagas);
-   // Vagas sem jogador contam como zero: vender não melhora um setor incompleto.
-   return total+titulares.reduce((n,j)=>n+j.qualidade,0);
-  },0)/11;
+  // Matching exclusivo: um atleta só preenche um setor. Posição secundária
+  // requer aptidão explícita e não gera OVR adicional ou convocação fictícia.
+  // Vagas vazias continuam valendo zero no cálculo de força.
+  const qualidade=pesos=>qualidadeTaticaApta(elenco,pesos);
   ajuste=Math.max(-3,Math.min(3,qualidade(formacao.pesos)-qualidade(FORMACOES_TECNICO[1].pesos)));
  }
  return {estilo,formacao:formacao.id,ajuste:ajuste+bonusAuxiliarTecnico(t)};

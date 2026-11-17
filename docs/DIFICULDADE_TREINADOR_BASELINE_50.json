@@ -3,6 +3,10 @@
   "liga": "brasileirao",
   "semente": 2026,
   "repeticoesPorFaixa": 50,
+  "anosSimulados": {
+    "primeiro": 2030,
+    "ultimo": 2079
+  },
   "aviso": "Amostragem exploratória, não prova de realismo; para comparação publicar parâmetros idênticos antes/depois.",
   "faixas": [
     {
@@ -12,7 +16,7 @@
       "amostras": 50,
       "titulosLiga": 0,
       "percentualTitulosLiga": 0,
-      "percentualDemissoes": 72,
+      "percentualDemissoes": 66,
       "mediaPontos": 38.72,
       "mediaPosicao": 17.14,
       "posicoes": {
@@ -27,7 +31,10 @@
         "p90": 48,
         "maximo": 64
       },
-      "mediaOutrosTitulos": 0
+      "mediaOutrosTitulos": 0.2,
+      "titulosPorCompeticao": {
+        "Campeonato Paraense": 10
+      }
     },
     {
       "faixa": "medio",
@@ -36,7 +43,7 @@
       "amostras": 50,
       "titulosLiga": 1,
       "percentualTitulosLiga": 2,
-      "percentualDemissoes": 30,
+      "percentualDemissoes": 10,
       "mediaPontos": 56.34,
       "mediaPosicao": 8.02,
       "posicoes": {
@@ -51,7 +58,11 @@
         "p90": 65,
         "maximo": 76
       },
-      "mediaOutrosTitulos": 0.06
+      "mediaOutrosTitulos": 0.18,
+      "titulosPorCompeticao": {
+        "Campeonato Carioca": 6,
+        "Copa do Brasil": 3
+      }
     },
     {
       "faixa": "forte",
@@ -60,7 +71,7 @@
       "amostras": 50,
       "titulosLiga": 15,
       "percentualTitulosLiga": 30,
-      "percentualDemissoes": 0,
+      "percentualDemissoes": 38,
       "mediaPontos": 65.14,
       "mediaPosicao": 3.64,
       "posicoes": {
@@ -75,7 +86,17 @@
         "p90": 75,
         "maximo": 78
       },
-      "mediaOutrosTitulos": 1.02
+      "mediaOutrosTitulos": 0.5,
+      "titulosPorCompeticao": {
+        "Campeonato Carioca": 24,
+        "Copa do Brasil": 1
+      }
     }
-  ]
+  ],
+  "fonte": {
+    "workflow": "https://github.com/bravolucas/A-Joia/actions/runs/44136767868",
+    "shaAmostragem": "bd0bf1527a97fdf8fd0faaaddca1b396df272e62",
+    "amostrasDistintas": "anos distintos: 2030 a 2079; mesma janela temporal para três faixas",
+    "nota": "Substitui o baseline anterior que repetia a edição estadual de 2030; histórico anterior permanece no Git."
+  }
 }

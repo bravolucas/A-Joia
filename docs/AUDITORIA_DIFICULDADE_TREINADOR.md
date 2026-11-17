@@ -22,19 +22,19 @@ O workflow `.github/workflows/auditoria-dificuldade.yml` roda de forma independe
 
 A primeira medição de nove temporadas **já foi executada com sucesso** no run [#44128447416](https://github.com/bravolucas/A-Joia/actions/runs/44128447416) (SHA `9509097`), e está registrada na issue #89. Resultados observados: Remo (força 52) 0/3 títulos, 17ª posição média, 41 pontos médios, 1/3 demissão; Fluminense (74) 0/3 títulos, 5,67ª posição, 59,33 pontos, 0 demissões; Flamengo (86) 1/3 títulos, 3,33ª posição, 65 pontos, 0 demissões. Nove temporadas não bastam para conclusões estatísticas.
 
-A nova execução de 150 temporadas **ainda precisa terminar com sucesso** e seus números devem ser lidos do log/JSON do run atual, não presumidos. A interpretação requer comparar os mesmos clubes e parâmetros depois de qualquer alteração no motor.
+A auditoria com anos independentes concluiu com **sucesso** no [run #44136767868](https://github.com/bravolucas/A-Joia/actions/runs/44136767868), SHA `bd0bf152`. Uma linha de base corrigida e permanente está em `docs/DIFICULDADE_TREINADOR_BASELINE_50.json`. Seus valores devem ser comparados com os mesmos 50 anos e a mesma semente após mudanças no motor.
 
 ## Correção metodológica: anos independentes para os estaduais
 **Limitação identificada após a execução do baseline com 150 temporadas:** a auditoria original criava todas as carreiras com `ano: 2030`. O motor de estaduais usa `simularCampanhaCopa`, cuja semente interna é derivada de `ano|nome do torneio|clube`; por isso, mesmo variando a semente externa, ela **repetia a mesma edição do estadual 50 vezes**. Os 50 Campeonatos Cariocas observados **não demonstram 100% de probabilidade de título**; apenas que o Flamengo venceu a edição determinística testada. O resultado anterior do Brasileirão tem semente externa variável, mas não usar as taxas agregadas de copas como baseline probabilístico.
 
-A partir desta correção, a repetição `i` da auditoria começa em `2030+i` (2030 a 2079, no cenário de 50 amostras). Os três níveis de clube usam **o mesmo ano dentro da mesma repetição**, e a semente externa de cada repetição continua parametrizada. Os anos distintos produzem sorteios internos de estaduais distintos, sem mudar o motor, a dificuldade, os saves ou as taças do jogo. O teste de unidade garante 50 anos distintos. **A nova taxa de títulos estaduais só pode ser divulgada após o workflow desta revisão terminar com sucesso.**
+A partir desta correção, a repetição `i` da auditoria começa em `2030+i` (2030 a 2079, no cenário de 50 amostras). Os três níveis de clube usam **o mesmo ano dentro da mesma repetição**, e a semente externa de cada repetição continua parametrizada. Os anos distintos produzem sorteios internos de estaduais distintos, sem mudar o motor, a dificuldade, os saves ou as taças do jogo. O teste de unidade garante 50 anos distintos. O workflow corrigido foi aprovado: Flamengo venceu o Carioca em **24/50** edições (48%), Fluminense em **6/50** (12%) e Remo venceu o Paraense em **10/50** (20%). Isso não representa títulos automáticos.
 
-O arquivo `docs/DIFICULDADE_TREINADOR_BASELINE_50.json` é preservado como **baseline histórico não independente para estaduais**; não sobrescrever silenciosamente os dados antigos. Uma nova edição, com nome e SHA, deve ser salva após a auditoria corrigida.
+O JSON antigo, **não independente para estaduais**, está preservado no histórico Git do commit `e84c7a36`. O caminho atual `docs/DIFICULDADE_TREINADOR_BASELINE_50.json` passa a conter os resultados corrigidos, com indicação expressa do SHA `bd0bf152` que os produziu.
 
 ## Discriminação dos títulos adicionais (após a linha de base)
 O resumo por faixa agora inclui `titulosPorCompeticao`, que reúne os nomes reais registrados em `temporada.titulosConquistados`, excluindo o título da própria liga. Assim será possível identificar quantas vezes o Flamengo levou Copa do Brasil, Libertadores, estaduais e outros campeonatos nas mesmas 50 temporadas, em vez de depender só da média agregada de 1,02.
 
-**A contagem por competição foi adicionada após o primeiro baseline de 150 temporadas**; não existem números confirmados para cada copa até a nova execução terminar. Os dados agregados de `docs/DIFICULDADE_TREINADOR_BASELINE_50.json` permanecem congelados para comparação, sem inventar decomposição retroativa. A alteração é exclusiva do auditor e seus testes: não muda resultados nem chances no jogo.
+**Resultados observados na auditoria corrigida (50 temporadas por faixa):** Remo: 10 Campeonatos Paraenses; Fluminense: 6 Cariocas e 3 Copas do Brasil; Flamengo: 24 Cariocas e 1 Copa do Brasil. Brasileirão: Remo 0/50, Fluminense 1/50, Flamengo 15/50. Taxas de demissão observadas: Remo 66%, Fluminense 10%, Flamengo 38%; a taxa alta do Flamengo apesar da posição média de 3,64º exige auditoria das expectativas da diretoria antes de qualquer mudança. Nenhuma probabilidade ou regra foi alterada.
 
 ## Critérios de análise, sem fabricar números
 - Comparar títulos e posição média entre clubes fracos, médios e fortes: um padrão de clubes fracos dominando frequentemente exige investigação.
@@ -46,7 +46,7 @@ O resumo por faixa agora inclui `titulosPorCompeticao`, que reúne os nomes reai
 
 ## Escopo e riscos
 - Nenhuma alteração ao código de partidas, ao balanceamento, a saves, a jogadores, às taças ou ao fluxo da interface.
-- Uma amostra de nove temporadas foi observada e documentada, mas **a amostragem de 150 temporadas ainda não teve seus resultados confirmados**. Este é um instrumento de diagnóstico, não uma afirmação de que a dificuldade atual está correta ou incorreta.
+- A amostragem corrigida de 150 temporadas foi observada e preservada, com resultados por competição e ressalva sobre comparar anos diferentes. Este instrumento diagnostica, mas não prova por si só que a dificuldade atual está correta ou incorreta.
 - A integração definitiva deve ser feita depois da revisão em curso dos PRs #90 (temporada direta) e #91 (limite 30 anos), porque os resultados do jogo precisam ser novamente medidos no motor efetivamente publicado.
 
 ## Checklist de aceite

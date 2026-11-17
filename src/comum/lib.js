@@ -1925,8 +1925,16 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
       else if(rng()<.35){const destinos=destinosTransferenciaIA(p,clubes,ocupacao,perfis,{clubeControlado,limiteElenco:24,toleranciaOvr:10});if(destinos.length){mover(p,pick(destinos));p.contrato=3;}}
       return p;
     }
+    // A longevidade traz gestão de minutos: veteranos de linha disputam
+    // menos partidas, enquanto goleiros preservam disponibilidade por mais
+    // tempo. A redução parte da idade no início da temporada e não cria
+    // campos novos nos saves.
+    const anosVeterano = Math.max(0, (Number.isFinite(idadeInicial) ? idadeInicial : 32) - 32);
+    const fatorDisponibilidade = p.posicao === 'GOL'
+      ? Math.max(0.78, 1 - anosVeterano * 0.025)
+      : Math.max(0.68, 1 - anosVeterano * 0.04);
     // rendimento da temporada
-    const jogos = clampR(Math.round(rand(24, 40) * clamp(p.ovr / 80, 0.7, 1.1)), 8, 46);
+    const jogos = clampR(Math.round(rand(24, 40) * clamp(p.ovr / 80, 0.7, 1.1) * fatorDisponibilidade), 8, 46);
     const nivel = Math.pow(Math.max(0.25, (p.ovr - 55) / 35), 1.55) * (1.25 - liga.mult * 0.45);
     const gols = p.posicao === "GOL" ? 0 : poisson(pos.golBase * nivel * jogos);
     const assist = poisson(pos.assistBase * nivel * jogos * (p.posicao === "GOL" ? 0.1 : 1));

@@ -1,11 +1,12 @@
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
 import { MINIMOS_ELENCO, diagnosticarElenco } from '../simulacao/profundidadeElenco.js';
 import { gerarNomeRegional } from '../simulacao/nomesRegionais.js';
+import { metadadosAtletaReal, idadeAtletaReal } from '../dados/metadadosAtletasReais.js';
 import { registrarHistoricoTemporada, registrarPremioIndividual } from '../simulacao/historicoJogadorMundo.js';
 import { destinosTransferenciaIA } from '../simulacao/mercadoIA.js';
 import {ampliarParticipantesInternacionais,clubeInternacional} from '../competicoes/clubesInternacionais.js';
 import {adversarioCopaPorFase} from '../treinador/copasEscolha.js';
-import { anoTemporadaCarreira, AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLASSICOS, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONDICOES_CLIMA, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESPECIALIDADES_LISTA, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, FORMACOES_TATICAS, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "../dados/data.js";
+import { ANO_INICIO, anoTemporadaCarreira, AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLASSICOS, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONDICOES_CLIMA, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESPECIALIDADES_LISTA, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, FORMACOES_TATICAS, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "../dados/data.js";
 
 export function potencialDaOrigem(origem, posicao) {
   const base = { velocidade: 64, finalizacao: 64, passe: 64, drible: 64, defesa: 64, fisico: 64, fintas: 3, pernaRuim: 3 };
@@ -1852,9 +1853,14 @@ export function gerarMundoJogadores(rng = Math.random) {
     // clube coberto pela base real (planilha) — usa nome/posição/OVR de verdade em vez de sortear
     if (clubesComElencoReal.has(clube.nome)) {
       JOGADORES_REAIS_BASE.filter((j) => j.time === clube.nome).forEach((jr) => {
-        const idade = rand(18, 33);
+        // Mantém as chamadas antigas ao RNG para não deslocar as seeds de
+        // todos os outros atletas quando um registro passa a ser verificado.
+        const idadeSorteada = rand(18, 33);
+        const metadados = metadadosAtletaReal(jr.nome, clube.nome);
+        const idade = idadeAtletaReal(metadados?.nascimento, ANO_INICIO) ?? idadeSorteada;
         const teto = clampR(jr.ovr + rand(0, idade < 23 ? 12 : 4), 58, 99);
-        const nac = jr.nac || nomeParaNac(clube);
+        const nacSorteada = jr.nac ? null : nomeParaNac(clube);
+        const nac = jr.nac || metadados?.nac || nacSorteada;
         jogadores.push({
           id: id++, nome: jr.nome, nac, posicao: jr.posicao,
           idade, ovr: jr.ovr, potencial: teto, picoIdade: rand(26, 30), clubeNome: clube.nome, clubeOrigem: clube.nome, liga: clube.liga,

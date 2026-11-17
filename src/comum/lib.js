@@ -1,12 +1,12 @@
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
 import { MINIMOS_ELENCO, diagnosticarElenco } from '../simulacao/profundidadeElenco.js';
-import { gerarNomeRegional } from '../simulacao/nomesRegionais.js';
+import { gerarNomeRegional, sortearNacionalidadeMundo } from '../simulacao/nomesRegionais.js';
 import { metadadosAtletaReal, idadeAtletaReal } from '../dados/metadadosAtletasReais.js';
 import { registrarHistoricoTemporada, registrarPremioIndividual } from '../simulacao/historicoJogadorMundo.js';
 import { destinosTransferenciaIA, fatorMobilidadeVeteranoIA, duracaoContratoIA } from '../simulacao/mercadoIA.js';
 import {ampliarParticipantesInternacionais,clubeInternacional} from '../competicoes/clubesInternacionais.js';
 import {adversarioCopaPorFase} from '../treinador/copasEscolha.js';
-import { ANO_INICIO, anoTemporadaCarreira, AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLASSICOS, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONDICOES_CLIMA, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESPECIALIDADES_LISTA, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, FORMACOES_TATICAS, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "../dados/data.js";
+import { ANO_INICIO, anoTemporadaCarreira, AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLASSICOS, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONDICOES_CLIMA, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESPECIALIDADES_LISTA, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, FORMACOES_TATICAS, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "../dados/data.js";
 
 export function potencialDaOrigem(origem, posicao) {
   const base = { velocidade: 64, finalizacao: 64, passe: 64, drible: 64, defesa: 64, fisico: 64, fintas: 3, pernaRuim: 3 };
@@ -977,7 +977,7 @@ export function efeitosOstentacao(c) {
 }
 
 export function gerarJogadorElenco(clube, posId, idBase) {
-  const nac = clube.liga === "brasileirao" || clube.liga === "serieB" ? (Math.random() < 0.85 ? "BRA" : pick(NACS_MUNDO)) : pick(NACS_MUNDO);
+  const nac = clube.liga === "brasileirao" || clube.liga === "serieB" ? (Math.random() < 0.85 ? "BRA" : sortearNacionalidadeMundo(Math.random)) : sortearNacionalidadeMundo(Math.random);
   const idade = rand(18, 34);
   const variacao = idade < 21 ? rand(-14, -4) : idade > 31 ? rand(-8, 2) : rand(-7, 6);
   return {
@@ -1801,7 +1801,7 @@ export function completarCarenciasMundo(jogadores, clubes = CLUBES, rng = Math.r
   const nacionalidade = clube => {
     const ligaNac = { brasileiro:'BRA', brasileirao:'BRA', serieB:'BRA', inglaterra:'ENG', espanha:'ESP', italia:'ITA', alemanha:'ALE', franca:'FRA', portugal:'POR' };
     const local = ligaNac[clube.liga];
-    return local && rng() < .85 ? local : NACS_MUNDO[Math.floor(rng() * NACS_MUNDO.length)];
+    return local && rng() < .85 ? local : sortearNacionalidadeMundo(rng);
   };
   // Índice de jogadores por clube: evita varrer todo o mundo para cada elenco.
   const porClube = new Map();
@@ -1845,8 +1845,8 @@ export function gerarMundoJogadores(rng = Math.random) {
   const jogadores = [];
   let id = 1;
   const nomeParaNac = (clube) => clube.liga === "brasileirao" || clube.liga === "serieB"
-    ? (rng() < 0.85 ? "BRA" : pick(NACS_MUNDO))
-    : (rng() < 0.55 ? { inglaterra: "ENG", espanha: "ESP", italia: "ITA", alemanha: "ALE", franca: "FRA", portugal: "POR" }[clube.liga] || pick(NACS_MUNDO) : pick(NACS_MUNDO));
+    ? (rng() < 0.85 ? "BRA" : sortearNacionalidadeMundo(rng))
+    : (rng() < 0.55 ? { inglaterra: "ENG", espanha: "ESP", italia: "ITA", alemanha: "ALE", franca: "FRA", portugal: "POR" }[clube.liga] || sortearNacionalidadeMundo(rng) : sortearNacionalidadeMundo(rng));
   const clubesComElencoReal = new Set(JOGADORES_REAIS_BASE.map((j) => j.time));
 
   CLUBES.forEach((clube) => {
@@ -2022,7 +2022,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
       italia:'ITA', alemanha:'ALE', franca:'FRA', portugal:'POR',
     };
     const nacLocal = nacionalidadeLiga[clube.liga];
-    const nac = nacLocal && rng() < .85 ? nacLocal : pick(NACS_MUNDO);
+    const nac = nacLocal && rng() < .85 ? nacLocal : sortearNacionalidadeMundo(rng);
     const teto = clampR(Math.round(clube.forca + rand(-4, 12)), 60, 96);
     jogadores.push({
       id: proximoIdAposentadoria(), nome: nomeMundo(nac), nac, posicao: aposentado?.posicao||pick(POSICOES).id,

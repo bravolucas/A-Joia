@@ -1,4 +1,4 @@
-import { NOMES_MUNDO } from '../dados/data.js';
+import { NOMES_MUNDO, NACS_MUNDO } from '../dados/data.js';
 
 // Complementos regionais. A nacionalidade nunca implica automaticamente um nome brasileiro.
 // Os grupos de referência são aproximações e devem evoluir para tabelas por região/idioma.
@@ -80,4 +80,24 @@ export function gerarNomeRegional(nacionalidade, rng=Math.random) {
   if (adicional) return `${escolher(adicional[0],rng)} ${escolher(adicional[1],rng)}`;
   // Nunca usar o Brasil como fallback silencioso.
   return `${escolher(['Alex','Sam','Daniel','Adrian','Robin'],rng)} ${escolher(['Martin','Lee','Khan','Ali','Costa'],rng)}`;
+}
+
+/**
+ * A cobertura de nomes alcança as 83 nacionalidades, mas o pool legado
+ * de novos jogadores continha só 76. As sete nações da Oceania abaixo
+ * entram de forma rara no sorteio global (0,5% dos sorteios de origem).
+ *
+ * A ponderação é uma política PROVISÓRIA do jogo, não um dado demográfico
+ * ou estatística real de circulação de atletas. Para clubes com formação
+ * regional específica a escolha local continua no chamador.
+ *
+ * Usa um único sorteio; normaliza o pool anterior nos 99,5% reservados, sem penalizar a última origem.
+ * Saves antigos mantêm seus atletas, nacionalidades e IDs.
+ */
+export const NACIONALIDADES_OCEANIA_NEWGEN = Object.freeze(['FIJ','SOL','TAH','VAN','PNG','NCL','SAM']);
+export function sortearNacionalidadeMundo(rng=Math.random) {
+  const sorteio=Math.max(0,Math.min(0.999999999,Number(rng())||0));
+  if(sorteio<0.995) return NACS_MUNDO[Math.min(NACS_MUNDO.length-1,Math.floor((sorteio/0.995)*NACS_MUNDO.length))];
+  const fracao=(sorteio-0.995)/0.005;
+  return NACIONALIDADES_OCEANIA_NEWGEN[Math.min(NACIONALIDADES_OCEANIA_NEWGEN.length-1,Math.floor(fracao*NACIONALIDADES_OCEANIA_NEWGEN.length))];
 }

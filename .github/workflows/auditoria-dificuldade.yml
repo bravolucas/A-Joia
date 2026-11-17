@@ -1,0 +1,49 @@
+name: Auditar dificuldade do treinador
+
+# Amostra curta separada da CI obrigatória; não altera jogo nem faz deploy.
+# Executa no PR #97, mas o comando pode ser reaproveitado por novos PRs.
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/auditar-dificuldade-treinador.mjs'
+      - 'tests/auditoria-dificuldade-treinador.test.mjs'
+      - 'docs/AUDITORIA_DIFICULDADE_TREINADOR.md'
+      - '.github/workflows/auditoria-dificuldade.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: auditar-dificuldade-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  amostra-real:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Validar seleção de faixas e estatísticas
+        run: node --test tests/auditoria-dificuldade-treinador.test.mjs
+      - name: Executar nove temporadas reais com semente fixa
+        shell: bash
+        run: |
+          mkdir -p resultados-auditoria
+          node scripts/auditar-dificuldade-treinador.mjs --liga=brasileirao --amostras=3 --semente=2026 --json > resultados-auditoria/brasileirao.json
+          cat resultados-auditoria/brasileirao.json
+      - name: Medir dificuldade com 150 temporadas (50 por força)
+        shell: bash
+        run: |
+          node scripts/auditar-dificuldade-treinador.mjs --liga=brasileirao --amostras=50 --semente=2026 --json > resultados-auditoria/brasileirao-50.json
+          cat resultados-auditoria/brasileirao-50.json
+      - name: Guardar números para comparação antes e depois
+        uses: actions/upload-artifact@v4
+        with:
+          name: dificuldade-treinador-brasileirao
+          path: resultados-auditoria/*.json
+          retention-days: 14

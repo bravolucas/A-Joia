@@ -25,16 +25,17 @@ jobs:
       - name: Auditar 50 temporadas no catálogo completo
         run: |
           mkdir -p resultados-auditoria
-          node --max-old-space-size=4096 scripts/auditar-catalogo-mundial-50-anos.mjs --anos=50 --semente=2026 --json > resultados-auditoria/newgens-50-anos.json
+          node --max-old-space-size=4096 scripts/auditar-catalogo-mundial-50-anos.mjs --anos=50 --semente=2026 --cobertura=qualificada --json > resultados-auditoria/newgens-50-anos.json
           node --input-type=module -e '
             import fs from "node:fs";
             const a=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
-            if(a.indicadores.violacoes!==0 || a.parametros.anos!==50 || a.parametros.clubesCatalogados<300)process.exit(1);
+            if(a.indicadores.violacoes!==0 || a.parametros.anos!==50 || a.parametros.cobertura!=="qualificada" || a.parametros.clubesCatalogados<300)process.exit(1);
             const linhas=["### Newgens — compatibilidade e cobertura do universo",
               "- Clubes: "+a.parametros.clubesCatalogados,
               "- Temporadas: "+a.parametros.anos,
               "- Atletas finais: "+a.fim.atletas,
-              "- Violacoes de ID ou vagas: "+a.indicadores.violacoes,
+              "- Violacoes de ID ou vagas qualificados: "+a.indicadores.violacoes,
+              "- Max clubes sem minimo pela posicao principal: "+a.indicadores.maxClubesIncompletosPrincipais,
               "",
               "> Não comprova mercado, scouting e aptidão de atletas reais."];
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,linhas.join("\n")+"\n");

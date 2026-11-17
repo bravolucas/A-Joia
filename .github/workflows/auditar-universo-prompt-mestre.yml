@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/auditar-universo-prompt-mestre.mjs'
+      - 'scripts/auditar-catalogo-mundial-50-anos.mjs'
       - '.github/workflows/auditar-universo-prompt-mestre.yml'
       - 'tests/longevidade-elencos.test.mjs'
       - 'tests/nomes-regionais.test.mjs'
@@ -72,5 +73,55 @@ jobs:
         with:
           name: auditoria-universo-50-anos-10k
           path: resultados-auditoria/*.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  auditar-catalogo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar dependências
+        run: npm install --no-audit --no-fund
+      - name: Simular 50 temporadas do catálogo completo
+        run: |
+          mkdir -p resultados-auditoria
+          node --max-old-space-size=4096 scripts/auditar-catalogo-mundial-50-anos.mjs --anos=50 --semente=2026 --json > resultados-auditoria/catalogo-real-50-anos.json
+      - name: Resumo do catálogo, inclusive em caso de falha de cobertura
+        if: always()
+        run: |
+          if [ -f resultados-auditoria/catalogo-real-50-anos.json ]; then
+            node --input-type=module -e '
+              import fs from "node:fs";
+              const r=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
+              const lines=[
+                "### Auditoria do catálogo completo — "+r.parametros.anos+" temporadas",
+                "",
+                "- Clubes: "+r.parametros.clubesCatalogados,
+                "- Atletas iniciais: "+r.inicio.atletas,
+                "- Atletas finais / ativos: "+r.fim.atletas+" / "+r.fim.ativos,
+                "- Violações de IDs ou posições: "+r.indicadores.violacoes,
+                "- Save inicial/final (bytes): "+r.inicio.bytes+" / "+r.fim.bytes,
+                "- Maior heap Node (MiB): "+r.indicadores.maxHeapMiB,
+                "- Duração total (ms): "+r.indicadores.tempoTotalMs,
+                "- P95 de virada anual (ms): "+r.indicadores.tempoTemporadaP95Ms,
+                "",
+                "> Motor do catálogo; calendários detalhados e bancos do navegador ainda não foram testados."
+              ];
+              fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,lines.join("\n")+"\n");
+              console.log(lines.join("\n"));
+            ' resultados-auditoria/catalogo-real-50-anos.json
+          fi
+      - name: Preservar JSON completo de 50 anos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auditoria-catalogo-real-50-anos
+          path: resultados-auditoria/catalogo-real-50-anos.json
           if-no-files-found: warn
           retention-days: 14

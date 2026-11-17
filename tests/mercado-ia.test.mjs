@@ -87,12 +87,13 @@ test('mercado em 15 temporadas nunca invade o clube do técnico nem altera o mun
  let mundo={jogadores:completarCarenciasMundo([],lista,geradorTecnico('mercado-base')),temporada:0,cadastroElencos:1};
  for(let ano=0;ano<15;ano++){
   const antes=structuredClone(mundo);
-  mundo=simularTemporadaMundo(mundo,geradorTecnico('mercado-ano-'+ano),{
+  const proximo=simularTemporadaMundo(mundo,geradorTecnico('mercado-ano-'+ano),{
    clubes:lista,ano:2027+ano,clubeControlado:'Meu Clube',
   });
-  assert.deepEqual(antes.temporada,ano);
-  assert.deepEqual(mundo.temporada,ano+1);
-  assert.deepEqual(antes.jogadores,structuredClone(antes.jogadores));
+  assert.deepEqual(mundo,antes,'a simulação não modifica o save de origem');
+  mundo=proximo;
+  assert.equal(antes.temporada,ano);
+  assert.equal(mundo.temporada,ano+1);
   assert.ok(mundo.jogadores.every(j=>(j.movimentos||[]).every(m=>m.tipo!=='transferencia'||m.para!=='Meu Clube')),
    'IA não pode contratar automaticamente para o clube do treinador');
  }

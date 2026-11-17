@@ -26,7 +26,7 @@ jobs:
       - name: Instalar dependências
         run: npm install --no-audit --no-fund
       - name: Regressões rápidas de mercado e veteranos IA
-        run: node --test tests/mercado-ia.test.mjs tests/fase4-disponibilidade-veteranos.test.mjs
+        run: node --test tests/mercado-ia.test.mjs tests/fase4-disponibilidade-veteranos.test.mjs tests/fase4-mercado-veteranos.test.mjs
       - name: Testes de lógica
         run: npm test
       - name: Gerar versão de produção

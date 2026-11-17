@@ -5,6 +5,8 @@ on:
     paths:
       - 'src/simulacao/posicoesSecundariasNewgen.js'
       - 'src/comum/lib.js'
+      - 'src/simulacao/escalacaoApta.js'
+      - 'tests/escalacao-secundaria.test.mjs'
       - 'tests/posicoes-newgens.test.mjs'
       - '.github/workflows/auditar-newgens.yml'
   workflow_dispatch:
@@ -21,7 +23,7 @@ jobs:
           node-version: '22'
       - run: npm install --no-audit --no-fund
       - name: Regressões das posições e aposentadorias
-        run: node --test tests/posicoes-newgens.test.mjs tests/profundidade-elenco.test.mjs tests/longevidade-elencos.test.mjs
+        run: node --test tests/posicoes-newgens.test.mjs tests/profundidade-elenco.test.mjs tests/longevidade-elencos.test.mjs tests/escalacao-secundaria.test.mjs
       - name: Auditar 50 temporadas no catálogo completo
         run: |
           mkdir -p resultados-auditoria

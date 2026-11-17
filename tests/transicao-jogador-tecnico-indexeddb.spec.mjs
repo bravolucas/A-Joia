@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {build} from 'esbuild';
 import {createHash} from 'node:crypto';
-import {mkdirSync,writeFileSync} from 'node:fs';
+import {mkdirSync,writeFileSync,unlinkSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {simularCarreiraAutomatica} from '../src/jogador/rapido.js';
 
@@ -9,6 +9,7 @@ const URL='http://127.0.0.1:4173/A-Joia/';
 const CHAVE='ajoia_rapido_v1';
 const hash=valor=>createHash('sha256').update(JSON.stringify(valor)).digest('hex');
 let retirado,bundle;
+const FIXTURE='dist/auditoria-transicao-carreira.json';
 test.setTimeout(360000);
 
 test.beforeAll(async({},testInfo)=>{
@@ -25,6 +26,14 @@ test.beforeAll(async({},testInfo)=>{
      !retirado.mundo?.jogadores?.length) {
     throw new Error('O motor não concluiu uma carreira real com mundo e histórico.');
   }
+  // O fixture gerado pelo motor fica temporariamente no dist do runner;
+  // buscar pelo próprio Chromium evita clonar dezenas de MB pelo canal IPC
+  // do Playwright antes do teste de IndexedDB.
+  const serializado=JSON.stringify(retirado);
+  console.log('[transicao] anos=',retirado.temporadas.length,
+    'atletas=',retirado.mundo.jogadores.length,
+    'bytes fixture=',Buffer.byteLength(serializado,'utf8'));
+  writeFileSync(FIXTURE,serializado);
   const script=[
     "export {salvarRapidoConfirmado,carregarRapido,CHAVE_SAVE_RAPIDO} from './src/jogador/rapido.js';",
     "export {prepararArmazenamento,lerPersistente,aguardarSalvamentos} from './src/simulacao/armazenamentoMundo.js';",
@@ -35,6 +44,8 @@ test.beforeAll(async({},testInfo)=>{
     globalName:'__ajoiaTransicao',logLevel:'silent'});
   bundle=out.outputFiles[0].text;
 });
+
+test.afterAll(()=>{try{unlinkSync(FIXTURE);}catch{ /* fixture de runner já eliminado */ }});
 
 async function preparar(page){
   await page.addScriptTag({content:bundle});
@@ -77,13 +88,17 @@ test('jogador aposentado reabre e vira técnico mantendo mundo, histórico e tí
     digestTitulos:hash(retirado.titulos),
     anosJogador:retirado.temporadas.length,
   };
-  const inicial=await page.evaluate(async c=>{
+  page.on('crash',()=>console.error('[transicao] Chromium encerrou o renderer durante o teste'));
+  const inicial=await page.evaluate(async()=>{
+    const resposta=await fetch('./auditoria-transicao-carreira.json',{cache:'no-store'});
+    if(!resposta.ok)throw new Error('Fixture de carreira não servido: '+resposta.status);
+    const c=await resposta.json();
     const api=window.__ajoiaTransicao;
     if(api.CHAVE_SAVE_RAPIDO!=='ajoia_rapido_v1')throw Error('Chave de save real divergente');
     await api.salvarRapidoConfirmado({etapa:'aposentadoria',c,auto:false});
     await api.aguardarSalvamentos();
     return {marcador:localStorage.getItem(api.CHAVE_SAVE_RAPIDO)};
-  },retirado);
+  });
   expect(inicial.marcador).toBe('{"arquivoMundo":1}');
   const antes=await resumo(page);
   expect(antes.atletas).toBe(esperado.atletas);

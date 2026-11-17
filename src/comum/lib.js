@@ -2,6 +2,7 @@ import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
 import { MINIMOS_ELENCO, diagnosticarElenco } from '../simulacao/profundidadeElenco.js';
 import { gerarNomeRegional } from '../simulacao/nomesRegionais.js';
 import { registrarHistoricoTemporada, registrarPremioIndividual } from '../simulacao/historicoJogadorMundo.js';
+import { destinosTransferenciaIA } from '../simulacao/mercadoIA.js';
 import {ampliarParticipantesInternacionais,clubeInternacional} from '../competicoes/clubesInternacionais.js';
 import {adversarioCopaPorFase} from '../treinador/copasEscolha.js';
 import { anoTemporadaCarreira, AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLASSICOS, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONDICOES_CLIMA, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESPECIALIDADES_LISTA, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, FORMACOES_TATICAS, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NACS_MUNDO, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "../dados/data.js";
@@ -1921,7 +1922,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
     if(!p.clubeNome){
       p.idade++;p.jogos=0;p.gols=0;p.assist=0;p.defesas=0;p.cleanSheets=0;p.clubeTemporada=null;p.porCompeticao=[];p.nota=0;p.temporadaEstatisticas=(mundo.temporada||0)+1;
       if(p.idade>=39)p.aposentado=true;
-      else if(rng()<.35){const destinos=clubes.filter(cl=>cl.nome!==clubeControlado&&(ocupacao.get(cl.nome)||0)<24&&Math.abs(cl.forca-p.ovr)<=10&&(perfis[cl.nome]?.financas??50)>15);if(destinos.length){mover(p,pick(destinos));p.contrato=3;}}
+      else if(rng()<.35){const destinos=destinosTransferenciaIA(p,clubes,ocupacao,perfis,{clubeControlado,limiteElenco:24,toleranciaOvr:10});if(destinos.length){mover(p,pick(destinos));p.contrato=3;}}
       return p;
     }
     // rendimento da temporada
@@ -1966,17 +1967,17 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
     // nostálgico: depois dos 27, pode voltar pro clube que o revelou, mesmo sem gap de força
     if (traco?.voltaParaClubeOrigem && p.idade >= 27 && p.clubeNome !== p.clubeOrigem && rng() < 0.08) {
       const origem = clubes.find((x) => x.nome === p.clubeOrigem);
-      if (origem) { mover(p,origem); return p; }
+      if (origem && origem.nome !== clubeControlado) { mover(p,origem); return p; }
     }
     if (gap > 5 && rng() < 0.35 * multTransf) {
-      let destinos = clubes.filter((x) => x.liga !== "serieB" && x.nome !== p.clubeNome && (ocupacao.get(x.nome)||0)<30 && (perfis[x.nome]?.financas??50)>15 && Math.abs(x.forca - p.ovr) <= 6);
+      let destinos = destinosTransferenciaIA(p,clubes,ocupacao,perfis,{clubeControlado,toleranciaOvr:6,forcaMinima:clube.forca+1,apenasPrimeiraDivisao:true});
       if (traco?.prefereMesmoPais) { const mesmaLiga = destinos.filter((x) => x.liga === p.liga); if (mesmaLiga.length) destinos = mesmaLiga; }
       if (destinos.length) {
         const d = traco?.prefereClubeMaior ? destinos.reduce((a, b) => (b.forca > a.forca ? b : a)) : pick(destinos);
         mover(p,d);
       }
     } else if (gap < -10 && rng() < 0.3 * multTransf) {
-      const destinos = clubes.filter((x) => x.nome !== p.clubeNome && (ocupacao.get(x.nome)||0)<30 && (perfis[x.nome]?.financas??50)>15 && Math.abs(x.forca - p.ovr) <= 7);
+      const destinos = destinosTransferenciaIA(p,clubes,ocupacao,perfis,{clubeControlado,toleranciaOvr:7});
       if (destinos.length) { const d = pick(destinos); mover(p,d); }
     }
     return p;

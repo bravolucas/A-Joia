@@ -1921,7 +1921,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
     const pos = POSICOES.find((x) => x.id === p.posicao) || POSICOES[0];
     if(!p.clubeNome){
       p.idade++;p.jogos=0;p.gols=0;p.assist=0;p.defesas=0;p.cleanSheets=0;p.clubeTemporada=null;p.porCompeticao=[];p.nota=0;p.temporadaEstatisticas=(mundo.temporada||0)+1;
-      if(p.idade>=39)p.aposentado=true;
+      if(p.idade>=41)p.aposentado=true;
       else if(rng()<.35){const destinos=destinosTransferenciaIA(p,clubes,ocupacao,perfis,{clubeControlado,limiteElenco:24,toleranciaOvr:10});if(destinos.length){mover(p,pick(destinos));p.contrato=3;}}
       return p;
     }
@@ -1951,7 +1951,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
       clube: clubeTemporada, liga: ligaTemporada, idadeInicial, ovrInicial,
     });
     // aposentadoria
-    if (p.idade >= 34 && (p.idade >= 39 || rng() < (p.idade - 33) * 0.2)) { p.aposentado = true; return p; }
+    if (p.idade >= 34 && (p.idade >= 41 || rng() < Math.min(0.8, 0.04 + (p.idade - 34) ** 2 * 0.018))) { p.aposentado = true; return p; }
     if(Number.isInteger(p.contrato)){
       p.contrato=Math.max(0,p.contrato-1);
       if(!p.contrato){

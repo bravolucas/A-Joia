@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolverImagemCompeticao, slugCompeticao } from '../src/comum/arteCompeticoes.js';
+import { resolverImagemCompeticao, slugCompeticao, imagemEstadualCommons, IMAGENS_ESTADUAIS_COMMONS } from '../src/comum/arteCompeticoes.js';
 
 const imagens = {
   libertadores: '/arte/competicoes/libertadores.webp',
@@ -43,4 +43,28 @@ test('resolve nomes oficiais e aliases para as imagens de taça correspondentes'
 test('nao usa a imagem de outra taça quando o torneio não tem arquivo', () => {
   assert.equal(resolverImagemCompeticao("King's Cup", imagens), null);
   assert.equal(resolverImagemCompeticao('Copa da Turquia', imagens), null);
+});
+
+test('os quatro estaduais sem imagem local usam somente fontes Commons atribuídas', () => {
+  const esperadas = {
+    'Campeonato Baiano': 'CampeonatoBaiano2019-.png',
+    'Campeonato Cearense': 'CampeonatoCearense2019-.png',
+    'Campeonato Pernambucano': 'CampeonatoPernambucano2025-.png',
+    'Campeonato Amazonense': 'CampeonatoAmazonense2018-.png',
+  };
+  assert.equal(Object.keys(IMAGENS_ESTADUAIS_COMMONS).length, 4);
+  for (const [nome, arquivo] of Object.entries(esperadas)) {
+    const url = imagemEstadualCommons(nome);
+    assert.ok(url?.startsWith('https://upload.wikimedia.org/wikipedia/commons/'), nome);
+    assert.ok(url.endsWith('/' + arquivo), nome);
+    assert.equal(resolverImagemCompeticao(nome, imagens), null, 'o acervo local permanece sem essa imagem');
+  }
+});
+
+test('não troca imagens de outros torneios por estaduais remotos nem inventa troféus oficiais', () => {
+  for (const nome of ['Campeonato Sergipano','Campeonato Paraense',
+    'Copa do Brasil','Brasileirão','Copa Libertadores','UEFA Champions League',
+    'Campeonato Paulista','Campeonato Carioca','Copa do Nordeste']) {
+    assert.equal(imagemEstadualCommons(nome), null, nome);
+  }
 });

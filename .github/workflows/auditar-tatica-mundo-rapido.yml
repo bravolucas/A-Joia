@@ -1,0 +1,27 @@
+name: Auditar tática do Treinador Rápido no mundo
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/treinador/elencoRapidoMundo.js'
+      - 'src/treinador/taticasTecnico.js'
+      - 'src/treinador/tecnico.js'
+      - 'tests/tatica-mundo-treinador-rapido.test.mjs'
+      - '.github/workflows/auditar-tatica-mundo-rapido.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tatica-mundo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Validar mundo, formações e saves do técnico rápido
+        run: node --test tests/tatica-mundo-treinador-rapido.test.mjs tests/taticas-tecnico.test.mjs tests/alocacao-setores-secundarios.test.mjs
+      - name: Compilar versão GitHub Pages
+        run: GITHUB_PAGES=true npm run build

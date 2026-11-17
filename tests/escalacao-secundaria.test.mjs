@@ -68,7 +68,12 @@ test('elenco persistente com 22 vagas qualificadas não cria titulares fantasmas
  const elenco=gerarElenco({nome:'Time Teste',liga:'brasileirao',forca:75},{jogadores},null);
  assert.equal(elenco.filter(j=>j.doMundo).length,22);
  assert.ok(elenco.every(j=>j.doMundo||j.daBase||j.id?.startsWith('e')));
- assert.ok(elenco.filter(j=>!j.doMundo).length<=4,'Só os jovens extras devem ser criados');
+ // A formação 4-3-3 exige dois MEI, enquanto o mínimo do mundo exige um.
+ // Esse único complemento é legítimo; os demais são de 2 a 4 jovens da base.
+ const novos=elenco.filter(j=>!j.doMundo);
+ assert.ok(novos.length>=3&&novos.length<=5,'Somente o MEI faltante e 2–4 jovens da base podem ser criados');
+ assert.equal(novos.filter(j=>j.posicao==='MEI'&&!j.daBase).length,1,'Completa o segundo MEI da formação');
+ assert.equal(novos.filter(j=>j.posicao==='LE'&&!j.daBase).length,0,'Não duplica lateral apto da base mundial');
  const titulares=escalacaoProvavel(elenco);
  assert.equal(titulares.titulares.length,11);
  assert.equal(new Set(titulares.titulares.map(j=>j.id)).size,11);

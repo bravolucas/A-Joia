@@ -108,6 +108,7 @@ export function simularClassificacoesMundoTecnico({
   clubeTreinador,
   forcaTreinador,
   classificacaoTreinador,
+  jogosTreinador = [],
   ano = 2026,
   rng = Math.random,
 }) {
@@ -129,6 +130,22 @@ export function simularClassificacoesMundoTecnico({
     // A Série D serve como banco de clubes para acesso; não fingir uma liga
     // de pontos corridos com 23 times quando a competição real tem 96.
     if (liga === 'serieD' && liga !== ligaTreinador) continue;
+    if (liga === 'serieC' && liga === ligaTreinador &&
+        Array.isArray(classificacaoTreinador) && classificacaoTreinador.length &&
+        participantes.length === regulamentoSerieC(ano).participantes) {
+      const edicaoSerieC = simularSerieC({
+        clubes: participantes, ano, rng,
+        faseJogada: { classificacao: classificacaoTreinador, jogos: jogosTreinador },
+      });
+      resultado[liga] = {
+        liga, origem: 'serie-c-treinador',
+        classificacao: edicaoSerieC.classificacao || edicaoSerieC.primeiraFase.grupos.flatMap(g =>
+          g.classificacao.map(linha => ({ ...linha, grupo: g.nome }))),
+        jogos: edicaoSerieC.primeiraFase.grupos.flatMap(g => g.jogos),
+        edicaoSerieC,
+      };
+      continue;
+    }
     if (liga === ligaTreinador && Array.isArray(classificacaoTreinador) && classificacaoTreinador.length) {
       resultado[liga] = {
         liga,

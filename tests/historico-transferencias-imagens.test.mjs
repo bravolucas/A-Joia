@@ -57,3 +57,14 @@ test('taxas elevadas e intermediarias usam unidade monetaria legivel',()=>{
  assert.equal(valorTransferencia(1200,'EUR'),'€ 1,2 mi');
  assert.equal(valorTransferencia(0.4,'EUR'),'€ 400');
 });
+
+test('histórico compacto do universo identifica mudanças de clube sem inventar custo',()=>{
+ const atleta={historicoTemporadas:[[1,2026,'Fortaleza','brasileirao',22,73,74,34,6,8,7.1],[2,2027,'Fortaleza','brasileirao',23,74,75,36,7,10,7.3],[3,2028,'Grêmio','brasileirao',24,75,76,35,8,11,7.2]]};
+ const t=historicoTransferenciasAtleta(atleta,[]);
+ assert.equal(t.length,1);
+ assert.equal(t[0].ano,2028);
+ assert.equal(t[0].de,'Fortaleza');
+ assert.equal(t[0].para,'Grêmio');
+ assert.equal(t[0].valor,null);
+ assert.equal(t[0].fonte,'temporadas');
+});

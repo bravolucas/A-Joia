@@ -4,6 +4,7 @@ import {anoPainelTecnico} from './painelTecnico.js';
 import {exigenciaClubeTecnico} from './exigenciasTecnico.js';
 import {MuseuFimCarreira} from '../museu/MuseuPessoal.jsx';
 import BotaoHistoria from '../historia/HistoriaFutebol.jsx';
+import LinkEntidade from '../historia/LinkEntidade.jsx';
 import {dadosVaga} from '../competicoes/vagasInternacionais.js';
 import {contextoAgenda} from '../competicoes/calendarioCopas.js';
 import CopaEscolha,{MarcoLiga} from './CopaEscolha.jsx';
@@ -112,7 +113,7 @@ function CampanhasTemporada({ torneios = [], abertas = false }) {
       <div className="px-2 pb-2">
         {torneio.grupos?.map(grupo => <details key={`grupo-${grupo.grupo}`} className="mt-1 rounded-lg border border-white/[.06] bg-black/15">
           <summary className="cursor-pointer px-2 py-1.5 text-[9px] font-bold text-[#D4D4D8]">Grupo {grupo.grupo} · tabela e partidas</summary>
-          {grupo.classificacao?.length > 0 && <div className="overflow-x-auto px-2 pb-1"><div className="grid min-w-[250px] grid-cols-[1.5rem_minmax(6rem,1fr)_2rem_3.4rem_2rem] gap-1 border-b border-white/[.08] py-1 text-[8px] uppercase text-[#71717A]"><span>#</span><span>Clube</span><span className="text-right">Pts</span><span className="text-right">SG</span><span className="text-right">V</span></div>{grupo.classificacao.map((clube, posicao) => <div key={clube.nome} className={`grid min-w-[250px] grid-cols-[1.5rem_minmax(6rem,1fr)_2rem_3.4rem_2rem] gap-1 py-1 text-[9px] ${clube.nome === clubeUsuario ? 'font-bold text-[#FDE68A]' : 'text-[#A1A1AA]'}`}><span>{posicao + 1}</span><span className="truncate">{clube.nome}</span><span className="text-right">{clube.pontos}</span><span className="text-right">{(clube.golsPro || 0) - (clube.golsContra || 0)}</span><span className="text-right">{clube.vitorias}</span></div>)}</div>}
+          {grupo.classificacao?.length > 0 && <div className="overflow-x-auto px-2 pb-1"><div className="grid min-w-[250px] grid-cols-[1.5rem_minmax(6rem,1fr)_2rem_3.4rem_2rem] gap-1 border-b border-white/[.08] py-1 text-[8px] uppercase text-[#71717A]"><span>#</span><span>Clube</span><span className="text-right">Pts</span><span className="text-right">SG</span><span className="text-right">V</span></div>{grupo.classificacao.map((clube, posicao) => <div key={clube.nome} className={`grid min-w-[250px] grid-cols-[1.5rem_minmax(6rem,1fr)_2rem_3.4rem_2rem] gap-1 py-1 text-[9px] ${clube.nome === clubeUsuario ? 'font-bold text-[#FDE68A]' : 'text-[#A1A1AA]'}`}><span>{posicao + 1}</span><span className="truncate"><LinkEntidade tipo="clube" nome={clube.nome}/></span><span className="text-right">{clube.pontos}</span><span className="text-right">{(clube.golsPro || 0) - (clube.golsContra || 0)}</span><span className="text-right">{clube.vitorias}</span></div>)}</div>}
           <div className="px-2 pb-2">{(grupo.jogos || []).map((jogo, i) => <PlacarCompeticao key={`grupo-${grupo.grupo}-${i}`} jogo={jogo} />)}</div>
         </details>)}
         {torneio.fases?.filter((fase, faseIdx) => !(torneio.finalPendente && faseIdx === torneio.fases.length - 1)).map((fase, faseIdx) => <details key={`fase-${fase.rodada || faseIdx}-${fase.fase}`} className="mt-1 rounded-lg border border-white/[.06] bg-black/15">
@@ -330,7 +331,7 @@ export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, on
           <div className={`ct-rating ${ovr >= 80 ? 'ct-rating-gold' : ovr >= 70 ? 'ct-rating-silver' : ''}`}><span>OVR</span><strong>{ovr}</strong></div>
           <div className="ct-person">
             <div className="ct-badges"><span><Bandeira pais={c.nac || 'BRA'} />{c.nac || 'BRA'}</span><span className="ct-role">TREINADOR</span></div>
-            <h2>{c.nome}</h2><div className="ct-current-club"><Escudo nome={clubeAtual} size={22} /><BotaoHistoria c={c} nome={clubeAtual}><strong>{clubeAtual}</strong></BotaoHistoria></div>
+            <h2><LinkEntidade tipo="treinador" id="voce" nome={c.nome}/></h2><div className="ct-current-club"><Escudo nome={clubeAtual} size={22} /><BotaoHistoria c={c} nome={clubeAtual}><strong>{clubeAtual}</strong></BotaoHistoria></div>
           </div>
           <div className="ct-contract"><div><span>IDADE</span><strong>{idade}</strong></div><div><span>SALÁRIO/MÊS</span><strong>R$ {semClube || primeira ? 0 : (t.salario ?? salarioTecnico(t))}<small>mil</small></strong></div></div>
         </header>

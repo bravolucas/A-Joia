@@ -25,7 +25,7 @@
 .ctm-panel .ge-integrada{padding:0;overflow:visible;min-height:auto;background:transparent;color:inherit}
 .ctm-panel .ge-integrada .ge-financas{margin:16px 0 18px}
 .ctm-panel .ge-integrada .ge-financas article{background:#17263b;border-color:#2c3c53}
-.ctm-panel .ge-integrada .ge-tabela-scroll{max-height:unset;border-color:#2c3c53}
+.ctm-panel .ge-integrada .ge-tabela-scroll{max-height:52dvh;border-color:#2c3c53}
 .ctm-panel .ge-integrada .ge-tabela tbody tr{background:#121e30}
 .ctm-panel .ge-integrada .ge-tabela tbody tr:nth-child(even){background:#17263b}
 .ctm-panel .ge-integrada .ge-tabela thead th{background:#1d3047}

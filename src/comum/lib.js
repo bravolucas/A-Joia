@@ -1,4 +1,5 @@
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
+import {resolverPlayoffSerieB} from '../competicoes/playoffSerieB.js';
 import { MINIMOS_ELENCO, diagnosticarElenco } from '../simulacao/profundidadeElenco.js';
 import {posicoesSecundariasNewgen} from '../simulacao/posicoesSecundariasNewgen.js';
 import {escalarVagasAptas} from '../simulacao/escalacaoApta.js';
@@ -1258,9 +1259,15 @@ export function girarLigas(estado, forcarClube = null, classificacoesMundo = nul
     const valida=(t,times,liga)=>Array.isArray(t)&&t.length===times.length&&new Set(t.map(x=>x.nome)).size===times.length&&t.every(x=>novo[x.nome]?.liga===liga);
     const cimaReal=valida(cima,naElite,div.elite),baixoReal=valida(baixo,naAcesso,div.acesso);
     const caem = cimaReal?cima.slice(-div.vagas).map(t=>t.nome):E.slice(-vagasCaem).map((x) => x.n);
-    const sobem = baixoReal?baixo.slice(0,div.vagas).map(t=>t.nome):A.slice(0, vagasSobem).map((x) => x.n);
+    const playoff = div.acesso === 'serieB'
+      ? classificacoesMundo?.serieB?.playoffAcesso || resolverPlayoffSerieB({
+          classificacao: baixoReal ? baixo : A.map(x => ({ nome: x.n })),
+          forcas: Object.fromEntries(naAcesso.map(([nome, v]) => [nome, v.forca])),
+        })
+      : null;
+    const sobem = playoff?.promovidos || (baixoReal?baixo.slice(0,div.vagas).map(t=>t.nome):A.slice(0, vagasSobem).map((x) => x.n));
     if (!cimaReal && ehForcadoNaElite && forcarClube.desceu) caem.push(forcarClube.nome);
-    if (!baixoReal && ehForcadoNoAcesso && forcarClube.subiu) sobem.push(forcarClube.nome);
+    if (!playoff && !baixoReal && ehForcadoNoAcesso && forcarClube.subiu) sobem.push(forcarClube.nome);
 
     caem.forEach((n) => { novo[n] = { ...novo[n], liga: div.acesso, forca: clampR(novo[n].forca - rand(1, 4), 40, 96) }; });
     sobem.forEach((n) => { novo[n] = { ...novo[n], liga: div.elite, forca: clampR(novo[n].forca + rand(1, 4), 40, 96) }; });

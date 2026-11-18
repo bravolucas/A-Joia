@@ -1,5 +1,6 @@
 import {CLUBES_REGIONAIS_EXTRAS} from '../competicoes/estaduaisRapidos.js';
 import {jogosDaCampanha} from '../competicoes/jogosCampanha.js';
+import {registrarPartidasDetalhadasUsuario} from './historicoConfrontos.js';
 import { CLUBES, LIGAS } from '../dados/data.js';
 import { avaliarClubeNoMundo } from './forcaEquipe.js';
 import { EIXOS_REPUTACAO_CLUBE, evoluirReputacoesClube } from './reputacoesClube.js';
@@ -29,7 +30,8 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
   if(!Number.isFinite(a?.ano))return;
   const anterior=c.universo||c.tecnico?.universo||{versao:1,desde:a.ano,clubes:{},atletas:{},edicoes:[],anos:[]};
   if(anterior.anos?.includes(a.ano))return;
-  const u={...anterior,versao:1,clubes:{...anterior.clubes},atletas:{...anterior.atletas},edicoes:[...(anterior.edicoes||[])],anos:[...(anterior.anos||[]),a.ano]};
+  let u={...anterior,versao:1,clubes:{...anterior.clubes},atletas:{...anterior.atletas},edicoes:[...(anterior.edicoes||[])],anos:[...(anterior.anos||[]),a.ano]};
+  u=registrarPartidasDetalhadasUsuario(u,a);
   const clubesRegistrados=[...CLUBES,...CLUBES_REGIONAIS_EXTRAS];
   // Só são considerados formados os atletas efetivamente marcados como base:
   // não inferir formação a partir do clube de nascimento ou do nome.
@@ -83,7 +85,18 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
   const eu={ano:a.ano,clube:typeof a.clube==='string'?a.clube:a.clube?.nome,jogos:a.jogos||0,gols:a.gols||0,assist:a.assist||0,...(Number.isFinite(a.defesas)?{defesas:a.defesas}:{}),...(Number.isFinite(a.cleanSheets)?{cleanSheets:a.cleanSheets}:{}),porCompeticao:a.porCompeticao||[],titulos:(a.titulos||[]).filter(t=>typeof t==='object').map(t=>t.nome)};
   if(!c.tecnico||c.tecnico.fase!=='resultado')u.atletas.voce={id:'voce',nome:c.nome,posicao:c.posicao,nac:c.nac||c.nacionalidade,voce:true,clube:eu.clube,historico:[...(u.atletas.voce?.historico||[]),compactarLinhaAtleta(eu)]};
   // Edições completas existentes são arquivadas; dados antigos ausentes continuam ausentes.
-  for(const [liga,t]of Object.entries(a.classificacoesMundo||{}))u.edicoes.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',classificacao:t.classificacao,jogos:compactarJogos(t.jogos||[]),campeao:t.classificacao?.[0]?.nome});
+  for(const [liga,t]of Object.entries(a.classificacoesMundo||{})){
+    // A liga do treinador grava a tabela sem seus placares no calendario global.
+    // Recupere apenas os resultados realmente disputados, nunca sorteie novamente.
+    const jogosTreinador=c.tecnico&&a.liga===liga?(a.confrontos||[])
+      .filter(j=>!j.folga&&j.nome&&Number.isFinite(j.golsPro)&&Number.isFinite(j.golsContra))
+      .map((j,i)=>({casa:j.casa?a.clube:j.nome,fora:j.casa?j.nome:a.clube,
+        golsCasa:j.casa?j.golsPro:j.golsContra,golsFora:j.casa?j.golsContra:j.golsPro,
+        rodada:j.rodada??i+1})):[];
+    const jogosArquivo=t.jogos?.length?t.jogos:jogosTreinador;
+    u.edicoes.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',
+      classificacao:t.classificacao,jogos:compactarJogos(jogosArquivo),campeao:t.classificacao?.[0]?.nome});
+  }
   if(!a.classificacoesMundo?.[a.ligaId||a.liga]&&(a.classificacao?.length||a.tabelaLiga?.length))u.edicoes.push({ano:a.ano,nome:a.ligaNome||LIGAS[a.ligaId||a.liga]?.nome||a.liga,tipo:'liga',classificacao:a.classificacao||a.tabelaLiga.map((nome,i)=>({nome,posicao:i+1})),jogos:compactarJogos(a.jogosLiga||[]),campeao:a.vencedorLiga||a.classificacao?.[0]?.nome||a.tabelaLiga?.[0]});
   for(const t of [...(a.torneiosMundo||[]),...(a.torneios||[])])if(t.campeao&&!t.finalPendente)u.edicoes.push({ano:a.ano,nome:t.nome,tipo:t.tipo,campeao:t.campeao,vice:t.vice,classificacao:t.classificacao||[],grupos:(t.grupos||[]).map(g=>({grupo:g.grupo,classificacao:g.classificacao||[]})),jogos:compactarJogos(jogosTorneio(t))});
   u.edicoes=[...new Map(u.edicoes.map(e=>[`${e.ano}|${e.nome}`,e])).values()];

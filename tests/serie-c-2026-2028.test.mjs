@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CLUBES } from '../src/dados/data.js';
 import { regulamentoSerieC, simularSerieC } from '../src/simulacao/serieC.js';
+import { calendarioLigaTecnico } from '../src/treinador/tecnico.js';
 import { simularClassificacoesMundoTecnico, atualizarLigasMundoTecnico } from '../src/treinador/classificacoesMundoTecnico.js';
 
 const participantes = CLUBES.filter(c => c.liga === 'serieC');
@@ -88,5 +89,39 @@ test('universo 2026-2029 preserva 20 na A e B, expande C 20 → 24 → 28 e incl
     assert.equal(contagem(mapa, 'serieB'), 20);
     assert.equal(contagem(mapa, 'serieC'), esperadoC);
     assert.equal(contagem(mapa, 'serieD'), clubes.length - 40 - esperadoC);
+  }
+});
+
+
+test('treinador na Série C usa 19 rodadas (2026), 23 (2027) e grupo de 14 em 2028+', () => {
+  const reservas = CLUBES.filter(c => c.liga === 'serieD');
+  const cenarios = [
+    { ano: 2026, nomes: participantes.map(c => c.nome), rodadas: 19, jogosRodada: 10 },
+    { ano: 2027, nomes: [...participantes, ...reservas.slice(0, 4)].map(c => c.nome),
+      rodadas: 23, jogosRodada: 12 },
+    { ano: 2028, nomes: [...participantes, ...reservas.slice(0, 8)].map(c => c.nome),
+      rodadas: 26, jogosRodada: 7 },
+  ];
+  for (const { ano, nomes, rodadas, jogosRodada } of cenarios) {
+    const calendario = calendarioLigaTecnico({
+      clube: 'Guarani', liga: 'serieC', ano,
+      participantesLiga: { liga: 'serieC', nomes },
+    });
+    assert.equal(calendario.length, rodadas, String(ano));
+    assert.ok(calendario.every(jogos => jogos.length === jogosRodada), String(ano));
+    const pares = new Map();
+    for (const jogo of calendario.flat()) {
+      const chave = [jogo.casa, jogo.fora].sort().join(' | ');
+      pares.set(chave, [...(pares.get(chave) || []), jogo]);
+    }
+    assert.ok(calendario.flat().some(jogo =>
+      jogo.casa === 'Guarani' || jogo.fora === 'Guarani'));
+    if (ano <= 2027) {
+      assert.ok([...pares.values()].every(jogos => jogos.length === 1));
+    } else {
+      assert.equal(pares.size, 91);
+      assert.ok([...pares.values()].every(jogos => jogos.length === 2 &&
+        jogos[0].casa === jogos[1].fora));
+    }
   }
 });

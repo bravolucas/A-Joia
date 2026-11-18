@@ -39,7 +39,7 @@ export function MarcosIndividuais({c,temporadas,clube}){
  const decisoes=todas.reduce((s,t)=>s+(t.defesasDecisivas||0),0);
  return <section className="hf-marcos" aria-label="Histórico individual"><span className="hf-eyebrow">OS NÚMEROS DA SUA HISTÓRIA</span><h2>{clube?'Sua passagem pelo clube':'Sua carreira, competição por competição'}</h2>
   <BotaoMuseuPessoal c={c} temporadas={todas} modo={c.clube?.nome?'completo':'rapido'}/>
-  <div className="hf-numeros"><article><strong>{dados.selecao.jogos}</strong><span>jogos por {dados.selecao.nome}</span></article><article><strong>{dados.selecao.gols}</strong><span>gols pela seleção</span></article><article><strong>{dados.selecao.assist}</strong><span>assistências pela seleção</span></article>{c.posicao==='GOL'&&<article><strong>{decisoes}</strong><span>defesas decisivas registradas</span></article>}</div>
+  <div className="hf-numeros"><article><strong>{dados.selecao.jogos}</strong><span>jogos por <LinkEntidade tipo="selecao" nome={dados.selecao.nome}/></span></article><article><strong>{dados.selecao.gols}</strong><span>gols pela seleção</span></article><article><strong>{dados.selecao.assist}</strong><span>assistências pela seleção</span></article>{c.posicao==='GOL'&&<article><strong>{decisoes}</strong><span>defesas decisivas registradas</span></article>}</div>
   {dados.competicoes.length?<TabelaEstatisticas linhas={dados.competicoes} tipo="competicao"/>:<p className="hf-vazio">A divisão por competição começa a aparecer após concluir uma temporada registrada.</p>}
   {dados.incompleto&&<p className="hf-nota">Parte do save antigo não separava os números por competição. Esses anos não foram preenchidos com estimativas retroativas.</p>}
   {todas.some(t=>t.porCompeticao?.some(x=>x.origem==='distribuicao-simulada'))&&<p className="hf-nota">Os totais anuais do jogador são distribuídos entre as competições disputadas pela simulação.</p>}
@@ -75,7 +75,7 @@ function PerfilTreinador({c,nome}){
    <span className="hf-eyebrow">ARQUIVO VIVO / TREINADORES</span><h2>{atual}</h2>
    <p className="hf-nota">Acompanhamento da carreira no banco, com temporadas, clubes e títulos preservados no save.</p>
    {tecnico.clube&&<div className="hf-identidade"><img src={escudoDe(tecnico.clube)} alt=""/>
-     <div><span className="hf-eyebrow">CLUBE ATUAL</span><h3><LinkEntidade tipo="clube" nome={tecnico.clube}/></h3></div></div>}
+     <div><span className="hf-eyebrow">CLUBE ATUAL</span><h3><LinkEntidade tipo={tecnico.tipoEquipe==='selecao'?'selecao':'clube'} nome={tecnico.clube}/></h3></div></div>}
    <div className="fm27-kpis">
     {[[resumo.temporadas,'Temporadas'],[resumo.jogos,'Jogos'],[resumo.vitorias,'Vitórias'],
       [resumo.aproveitamento+'%','Aproveitamento'],[titulos.length,'Títulos']].map(([valor,rotulo])=>
@@ -85,7 +85,7 @@ function PerfilTreinador({c,nome}){
    {resumo.clubes.length?<div className="fm27-data-scroll"><table className="fm27-data">
      <thead><tr><th>Clube</th><th>Temporadas</th><th>Jogos</th><th>Vitórias</th><th>Títulos</th><th>Melhor posição</th></tr></thead>
      <tbody>{resumo.clubes.map(cl=><tr key={cl.nome}>
-       <td className="fm27-club-cell"><img src={escudoDe(cl.nome)} alt=""/><LinkEntidade tipo="clube" nome={cl.nome}/></td>
+       <td className="fm27-club-cell"><img src={escudoDe(cl.nome)} alt=""/><LinkEntidade tipo={NACIONALIDADES.some(n=>n.label===cl.nome)?'selecao':'clube'} nome={cl.nome}/></td>
        <td>{cl.temporadas}</td><td>{cl.jogos}</td><td>{cl.vitorias}</td><td>{cl.titulos}</td>
        <td>{cl.melhorPosicao?cl.melhorPosicao+'º':'—'}</td>
      </tr>)}</tbody></table></div>:<p className="hf-vazio">Ainda não há clubes registrados como treinador.</p>}
@@ -96,7 +96,7 @@ function PerfilTreinador({c,nome}){
      const premiacoes=titulos.filter(x=>x.ano===t.ano&&x.clube===t.clube);
      const jogos=Number.isFinite(t.jogos)?t.jogos:(t.vitorias||0)+(t.empates||0)+(t.derrotas||0);
      return <tr key={[t.ano,t.clube,i].join('|')}><td>{t.ano??'—'}</td>
-      <td><LinkEntidade tipo="clube" nome={t.clube||''}>{t.clube||'Sem clube'}</LinkEntidade></td>
+      <td><LinkEntidade tipo={t.tipoEquipe==='selecao'?'selecao':'clube'} nome={t.clube||''}>{t.clube||'Sem clube'}</LinkEntidade></td>
       <td>{abreviar(jogos)}</td><td>{[t.vitorias,t.empates,t.derrotas].map(abreviar).join('–')}</td>
       <td>{Number.isFinite(t.posicao)?t.posicao+'º':'—'}</td>
       <td>{premiacoes.length?premiacoes.map((titulo,i)=><React.Fragment key={i}>{i>0?' · ':''}

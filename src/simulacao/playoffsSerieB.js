@@ -61,3 +61,36 @@ export function resolverPlayoffsSerieB(classificacao, forcas = {}, rng = Math.ra
     promovidos: [...nomes.slice(0, 2), ...confrontos.map(c => c.classificado)],
   };
 }
+
+
+/**
+ * A mesma temporada pode ser consultada novamente pelo histórico ou pelo
+ * encerramento das copas. Reaproveita a chave já registrada quando ela continua
+ * válida para esta classificação, sem sortear outros classificados no mesmo ano.
+ */
+export function resolverOuReusarPlayoffsSerieB(classificacao, forcas = {}, rng = Math.random, anterior = null) {
+  const nomes = Array.isArray(classificacao) ? classificacao.map(linha => linha?.nome) : [];
+  const pares = [[2, 5], [3, 4]];
+  const anteriores = anterior?.confrontos;
+  const conferirChave = (chave, indice) => {
+    const [melhorIndice, piorIndice] = pares[indice];
+    const melhor = nomes[melhorIndice], pior = nomes[piorIndice];
+    const [ida, volta] = chave?.jogos || [];
+    if (!ida || !volta || chave.melhorCampanha !== melhor || chave.adversario !== pior ||
+        ida.casa !== pior || ida.fora !== melhor || volta.casa !== melhor || volta.fora !== pior) return false;
+    const gols = [ida.golsCasa, ida.golsFora, volta.golsCasa, volta.golsFora];
+    if (!gols.every(n => Number.isInteger(n) && n >= 0)) return false;
+    const golsMelhor = ida.golsFora + volta.golsCasa;
+    const golsPior = ida.golsCasa + volta.golsFora;
+    return chave.classificado === (golsMelhor >= golsPior ? melhor : pior);
+  };
+  if (nomes.length === 20 && new Set(nomes).size === 20 &&
+      anterior?.regulamento === 'serie-b-2026' &&
+      Array.isArray(anteriores) && anteriores.length === 2 &&
+      anteriores.every(conferirChave) &&
+      JSON.stringify(anterior.acessoDireto) === JSON.stringify(nomes.slice(0, 2)) &&
+      JSON.stringify(anterior.promovidos) === JSON.stringify([
+        ...nomes.slice(0, 2), ...anteriores.map(chave => chave.classificado),
+      ])) return anterior;
+  return resolverPlayoffsSerieB(classificacao, forcas, rng);
+}

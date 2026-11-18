@@ -65,8 +65,13 @@ export function conquistasDoJogador(c={},jogadorId='voce'){
   const existentes=atleta?.conquistas||[];
   const cadastro=conquistasDoCadastroMundo(jogador);
   const usuario=id==='voce'?
-    [...(c.lista||[]).map(t=>registroConquista(t.ano,premioIndividual(t.tipo||t.nome)?'premio':'titulo',t.nome,t.clube,t.tipo)),
-      ...(c.temporadas||[]).flatMap(conquistasDaTemporadaUsuario)] : [];
+    [...(c.lista||[]).map(t=>{
+      const clubePremio=t.clube==='Individual'
+        ? (c.temporadas||[]).find(ano=>ano.ano===t.ano)?.clube||t.clube
+        : t.clube;
+      return registroConquista(t.ano,premioIndividual(t.tipo||t.nome)?'premio':'titulo',
+        t.nome,clubePremio,t.tipo);
+    }),...(c.temporadas||[]).flatMap(conquistasDaTemporadaUsuario)] : [];
   // Compatibilidade com saves anteriores ao arquivo de conquistas: um título
   // do clube só pode ser creditado quando há jogos do próprio atleta na copa.
   const legado=(atleta?.historico||[]).flatMap(linha=>{

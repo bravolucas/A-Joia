@@ -2,7 +2,7 @@
  * Linha do tempo de transferências. Valores gravados no mercado são em R$ mil.
  * Nunca estimamos uma taxa a partir do valor de mercado do jogador.
  */
-const ANOTACOES = new Set(['transferencia','compra','venda','emprestimo','fim-contrato','dispensa','rescisao']);
+const ANOTACOES = new Set(['transferencia','compra','venda','contratacao','emprestimo','retornoEmprestimo','livre','fim-contrato','dispensa','rescisao']);
 const nomeClube = nome => typeof nome === 'string' && nome.trim() ? nome.trim() : null;
 const numeroAno = ano => Number.isInteger(Number(ano)) && Number(ano) > 1900 ? Number(ano) : null;
 const valorRegistrado = valor => valor !== null && valor !== undefined && valor !== '' && Number.isFinite(Number(valor)) && Number(valor) >= 0 ? Number(valor) : null;
@@ -37,7 +37,7 @@ export function historicoTransferenciasAtleta(atleta = {}, temporadas = []) {
 }
 export const tipoTransferencia = tipo => ({
  transferencia:'Transferência',compra:'Transferência',venda:'Transferência',
- emprestimo:'Empréstimo','fim-contrato':'Fim de contrato',dispensa:'Dispensa',
+ contratacao:'Transferência',emprestimo:'Empréstimo',retornoEmprestimo:'Retorno de empréstimo',livre:'Chegada sem custos','fim-contrato':'Fim de contrato',dispensa:'Dispensa',
  rescisao:'Rescisão','mudanca-clube':'Mudança de clube'
 })[tipo] || 'Movimentação';
 export const valorTransferencia = valor => valor===null||valor===undefined

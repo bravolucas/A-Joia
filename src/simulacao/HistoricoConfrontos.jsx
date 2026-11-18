@@ -50,8 +50,7 @@ export default function HistoricoConfrontos({c,jogadorInicial=null}){
  const atletas=useMemo(()=>{
   const ids=new Set(Object.keys(u.partidasAtletas||{}));
   if((c.temporadas||[]).length)ids.add('voce');
-  for(const [id,p] of Object.entries(u.atletas||{}))
-   if((p.historico||[]).some(t=>Array.isArray(t)?t[10]?.length:t.porCompeticao?.length))ids.add(id);
+  for(const id of Object.keys(u.atletas||{}))ids.add(id);
   return [...ids].map(id=>({id,nome:id==='voce'?(c.nome||u.atletas?.voce?.nome||'Seu jogador'):(u.atletas?.[id]?.nome||'Jogador '+id)}))
    .sort((a,b)=>(b.id==='voce')-(a.id==='voce')||a.nome.localeCompare(b.nome,'pt-BR'));
  },[u,c.temporadas,c.nome]);

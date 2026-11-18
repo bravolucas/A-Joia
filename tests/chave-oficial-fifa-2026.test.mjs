@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {montarChaveFifa48,CONFRONTOS_FIFA_2026} from '../src/competicoes/chaveMundial48.js';
+import {alocacaoOficialTerceirosFifa26} from '../src/competicoes/annexoCFifa2026.js';
 const grupos=Array.from('ABCDEFGHIJKL',l=>({
  grupo:'Grupo '+l,
  classificacao:[1,2,3,4].map(i=>({nome:i+l,pontos:5-i,golsPro:5-i,golsContra:i}))
@@ -36,4 +37,13 @@ test('as 495 combinações de melhores terceiros produzem chave elegível sem du
    if(slot.startsWith('3'))assert.ok(slot.slice(1).includes(b.slice(-1)),slot+' vs '+b);
   }
  }
+});
+
+test('Anexo C: opção 1 confere com a tabela oficial da FIFA',()=>{
+ const r=alocacaoOficialTerceirosFifa26('EFGHIJKL');
+ assert.deepEqual(r,{A:'E',B:'J',D:'I',E:'F',G:'H',I:'G',K:'L',L:'K'});
+ const chave=montarChaveFifa48(grupos,grupos.slice(4).map(g=>g.classificacao[2].nome));
+ assert.equal(chave[10][1],'3E'); // 1A vs 3E (M79)
+ assert.equal(chave[14][1],'3J'); // 1B vs 3J (M85)
+ assert.equal(chave[0][1],'3F');  // 1E vs 3F (M74)
 });

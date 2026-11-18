@@ -6,7 +6,7 @@ import './GestaoElenco.css';
 import LinkEntidade from '../historia/LinkEntidade.jsx';
 const dinheiro=n=>`R$ ${Math.round(n).toLocaleString('pt-BR')} mil`;
 const texto=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
-export default function GestaoElenco({c,onNegociar}){
+export default function GestaoElenco({c,onNegociar,integrada=false}){
  const [ocupado,O]=useState(false),[confirmar,C]=useState(null),[perfil,P]=useState(null),[aba,A]=useState('elenco');
  const [busca,B]=useState(''),[setor,S]=useState(''),[ordem,Q]=useState('setor'),[clube,K]=useState(''),[anos,Y]=useState(3),[erro,E]=useState('');
  const g=c.tecnico.gestao;
@@ -27,8 +27,8 @@ export default function GestaoElenco({c,onNegociar}){
  const premiosPerfil=lerPremiosIndividuais(perfil),movimentosPerfil=lerMovimentacoesJogador(perfil);
  const titulosPerfil=lerTitulosAtleta(perfil);
  const negociado=j=>g.movimentos.some(m=>m.ano===g.ano&&['compra','venda'].includes(m.tipo)&&String(m.mundoId??m.jogador)===String(j.mundoId??j.id));
- return <section className="ge" aria-label="Elenco e contratos">
- <div className="ge-cabecalho"><div className="ge-clube"><Escudo nome={g.clube} size={42}/><div><span className="ge-sobretitulo">CENTRAL DO ELENCO</span><h3><LinkEntidade tipo="clube" nome={g.clube}/></h3><p>{g.ano} · {g.elenco.length} jogadores</p></div></div><span className={`ge-janela ${aberta?'ge-aberta':''}`}>{aberta?'Janela aberta':'Janela fechada'}</span></div>
+ return <section className={`ge ${integrada?'ge-integrada':''}`} aria-label="Elenco e contratos">
+ {!integrada&&<div className="ge-cabecalho"><div className="ge-clube"><Escudo nome={g.clube} size={42}/><div><span className="ge-sobretitulo">CENTRAL DO ELENCO</span><h3><LinkEntidade tipo="clube" nome={g.clube}/></h3><p>{g.ano} · {g.elenco.length} jogadores</p></div></div><span className={`ge-janela ${aberta?'ge-aberta':''}`}>{aberta?'Janela aberta':'Janela fechada'}</span></div>}
  <div className="ge-financas"><article><span>Orçamento de transferências</span><strong>{dinheiro(g.saldo)}</strong></article><article><span>Folha mensal</span><strong>{dinheiro(resumo.folha)}</strong></article><article><span>Limite salarial mensal</span><strong>{dinheiro(g.tetoSalarial)}</strong></article></div>
  <nav className="ge-abas" aria-label="Gestão do elenco">{[['elenco',`Elenco · ${g.elenco.length}`],['mercado','Mercado de jogadores'],['clubes','Outros clubes']].map(([id,label])=><button key={id} onClick={()=>mudarAba(id)} aria-pressed={aba===id}>{label}</button>)}</nav>
  {!aberta&&<p className="ge-nota">Você pode consultar os elencos. Negociações disponíveis na próxima pré-temporada.</p>}

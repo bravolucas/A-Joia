@@ -81,7 +81,7 @@ export function PainelParada({ p, onEscolher, ocupado }) {
     <h2>{p.crise ? 'Reunião de emergência' : `Parada na rodada ${p.rodada}`}</h2>
     <p>{p.crise ? `A diretoria quer respostas: ${p.posicao}º lugar, longe da meta (${p.objetivo.toLowerCase()}).` : `${p.posicao}º lugar com ${p.pontos} pontos em ${p.jogos} jogos. Meta: ${p.objetivo.toLowerCase()}.`}</p>
     <div className="mt-table" aria-label="Classificação parcial">
-      {p.tabela.map(l => <div key={l.nome} className={l.meuClube ? 'mt-me' : ''}><span>{l.posicao}</span><strong>{l.nome}</strong><span>{l.pontos} pts</span></div>)}
+      {p.tabela.map(l => <div key={l.nome} className={l.meuClube ? 'mt-me' : ''}><span>{l.posicao}</span><strong><LinkEntidade tipo="clube" nome={l.nome}/></strong><span>{l.pontos} pts</span></div>)}
       {p.minha && p.minha.posicao > p.tabela.length && <div className="mt-me"><span>{p.minha.posicao}</span><strong><LinkEntidade tipo="clube" nome={p.minha.nome}/></strong><span>{p.minha.pontos} pts</span></div>}
     </div>
     <div className="ct-decisions">{ops.map(op => <button key={op.id} disabled={ocupado} onClick={() => onEscolher(op.id)}><strong>{op.nome}</strong><span>{op.descricao}</span></button>)}</div>
@@ -151,9 +151,9 @@ export function PopUpResumo({ temporada: a, metasNovas = [], rival, onFechar }) 
   const top = tabela.slice(0, 5);
   return <JanelaTreinador titulo={`Resumo da temporada ${a.ano}`} onFechar={onFechar} classe="mt-modal">
     <div className="ct-event-content mt-summary">
-      <div className="ct-event-club"><Escudo nome={a.clube} size={30} /><strong>{a.clube}</strong></div>
+      <div className="ct-event-club"><Escudo nome={a.clube} size={30} /><strong><LinkEntidade tipo={a.tipoEquipe==='selecao'?'selecao':'clube'} nome={a.clube}/></strong></div>
       <p className="mt-note">{a.formato}</p><p className={a.cumpriuObjetivo ? 'ct-positive' : 'ct-warning'}>Meta: {a.objetivo} · {a.cumpriuObjetivo ? 'cumprida' : 'não cumprida'}</p>
-      <div className="mt-table">{top.map(l => <div key={l.nome} className={l.meuClube ? 'mt-me' : ''}><span>{l.posicao}</span><strong>{l.nome}</strong><span>{l.pontos} pts</span></div>)}
+      <div className="mt-table">{top.map(l => <div key={l.nome} className={l.meuClube ? 'mt-me' : ''}><span>{l.posicao}</span><strong><LinkEntidade tipo={a.tipoEquipe==='selecao'?'selecao':'clube'} nome={l.nome}/></strong><span>{l.pontos} pts</span></div>)}
         {minha && minha.posicao > top.length && <div className="mt-me"><span>{minha.posicao}</span><strong><LinkEntidade tipo={a.tipoEquipe==='selecao'?'selecao':'clube'} nome={minha.nome}/></strong><span>{minha.pontos} pts</span></div>}</div>
       {a.vagasInternacionaisProxima?.[a.clube]&&<p className="mt-note">Vaga para {a.ano+1}: {dadosVaga(a.vagasInternacionaisProxima[a.clube])}.</p>}
       {a.contratoCurto === 'renovado' && <p className="mt-note">✍️ Contrato de um ano cumprido: a diretoria renovou com você.</p>}
@@ -161,7 +161,7 @@ export function PopUpResumo({ temporada: a, metasNovas = [], rival, onFechar }) 
       {a.classico && <p className="mt-note">⚔️ Clássico contra {a.classico.rival} ({a.classico.clube}): {textoClassico(a.classico)}.</p>}
       {a.cobrancaGigante && <p className="mt-note">{a.cobrancaGigante === 'jejum' ? '🔥 Segundo ano sem título: a cobrança no clube grande ficou pesada.' : '👀 Em clube grande, só o título conta. A diretoria cobra.'}</p>}
       {(a.paradas || []).length > 0 && <p className="mt-note">Paradas: {a.paradas.map(p => `rodada ${p.rodada} — ${p.nome}${p.apostaDeuCerto === false ? ' (a diretoria não comprou)' : ''}`).join(' · ')}</p>}
-      {(a.finais || []).length > 0 && <p className="mt-note">Finais: {a.finais.map(f => `${f.nome}: ${f.venceu ? 'título' : 'vice'} (${f.escolhaNome})`).join(' · ')}</p>}
+      {(a.finais || []).length > 0 && <p className="mt-note">Finais: {a.finais.map((f,i) => <React.Fragment key={i}><LinkEntidade tipo="competicao" nome={f.nome}/>: {f.venceu?'título':'vice'} ({f.escolhaNome}){i<a.finais.length-1?' · ':''}</React.Fragment>)}</p>}
       {a.rival && <p className="mt-note">Duelo com {a.rival.nome} ({a.rival.clube}): {a.rival.v}V {a.rival.e}E {a.rival.d}D{a.rival.campeao ? ' · ele foi campeão' : ''}{rival ? ` · no total ${rival.v}V ${rival.e}E ${rival.d}D` : ''}</p>}
       {metasNovas.length > 0 && <div className="mt-goals-new">{metasNovas.map(m => <span key={m.id}>🏅 Meta cumprida: {m.nome}</span>)}</div>}
       <button className="ct-primary" onClick={onFechar}>Continuar<span aria-hidden="true">→</span></button>
@@ -176,7 +176,7 @@ export function PopUpDemissao({ temporada: a, t, onFechar }) {
       <div className="vf-hero-diretoria" style={{ backgroundImage: `url(${CENARIOS.diretoriaMobile})` }} />
       <span className="mt-eyebrow">{a.interrompida ? 'NO MEIO DA TEMPORADA' : `FIM DA TEMPORADA ${a.ano}`}</span>
       <h3>Você foi demitido</h3>
-      <div className="ct-event-club"><Escudo nome={a.clube} size={30} /><strong>{a.clube}</strong></div>
+      <div className="ct-event-club"><Escudo nome={a.clube} size={30} /><strong><LinkEntidade tipo={a.tipoEquipe==='selecao'?'selecao':'clube'} nome={a.clube}/></strong></div>
       <div className="mt-fired-stats">{[[`${a.posicao}º`, 'posição'], [`${t.diretoria ?? 0}%`, 'diretoria'], [`${t.torcida ?? 0}%`, 'torcida']].map(([v, r]) => <div key={r}><strong>{v}</strong><span>{r}</span></div>)}</div>
       {a.avaliacaoDiretoria?.motivo&&<p>{a.avaliacaoDiretoria.motivo}</p>}
       <p>Meta: {a.objetivo}. {a.contratoCurto === 'encerrado' ? 'O contrato de um ano terminou sem a meta e não foi renovado.' : a.cumpriuObjetivo ? 'A meta veio, mas a relação desgastou.' : 'O resultado ficou longe do combinado e a diretoria decidiu encerrar o trabalho.'} A carreira continua: há propostas, e você também pode tirar um ano para se preparar.</p>

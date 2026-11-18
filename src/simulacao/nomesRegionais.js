@@ -82,6 +82,30 @@ export function gerarNomeRegional(nacionalidade, rng=Math.random) {
   return `${escolher(['Alex','Sam','Daniel','Adrian','Robin'],rng)} ${escolher(['Martin','Lee','Khan','Ali','Costa'],rng)}`;
 }
 
+// Gerador para elencos persistentes: não acessa Math.random nem o RNG do jogo.
+// O caller escolhe chave única por carreira/ano/vaga e envia nomes já ocupados.
+const hashRegional=s=>[...String(s)].reduce((a,v)=>Math.imul(a^v.charCodeAt(0),16777619)>>>0,2166136261);
+export function gerarNomeRegionalUnico(nacionalidade,chave,usados=new Set()) {
+ const sortear=ramo=>{
+  let etapa=0;
+  return ()=>hashRegional(`${chave}:${ramo}:${etapa++}`)/4294967296;
+ };
+ for(let tentativa=0;tentativa<256;tentativa++){
+  const nome=gerarNomeRegional(nacionalidade,sortear(tentativa));
+  if(!usados.has(nome))return nome;
+ }
+ // Pools regionais pequenos podem estar completos: duas famílias de
+ // sobrenome mantêm a origem cultural, sem fallback indevido para BRA.
+ for(let tentativa=0;tentativa<512;tentativa++){
+  const primeiro=gerarNomeRegional(nacionalidade,sortear(`duplo-a-${tentativa}`));
+  const segundo=gerarNomeRegional(nacionalidade,sortear(`duplo-b-${tentativa}`));
+  const sobrenomeAdicional=segundo.slice(segundo.indexOf(' ')+1);
+  const nome=`${primeiro} ${sobrenomeAdicional}`;
+  if(!usados.has(nome))return nome;
+ }
+ throw new Error('Não foi possível gerar um nome regional único.');
+}
+
 /**
  * A cobertura de nomes alcança as 83 nacionalidades, mas o pool legado
  * de novos jogadores continha só 76. As sete nações da Oceania abaixo

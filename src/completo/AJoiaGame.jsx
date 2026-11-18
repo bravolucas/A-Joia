@@ -17,6 +17,8 @@ import {MuseuFimCarreira} from '../museu/MuseuPessoal.jsx';
 import {registrarAnoHistoria,simularDefesas,registrarAtletasObservados} from '../historia/historiaFutebol.js';
 import BotaoHistoria,{GaleriaClube,MarcosIndividuais} from '../historia/HistoriaFutebol.jsx';
 import PortalHistorico from '../historia/PortalHistorico.jsx';
+import LinkEntidade from '../historia/LinkEntidade.jsx';
+import {idJogadorPorNome} from '../historia/navegacaoEntidades.js';
 import TabelaCompeticoesTemporada from './TabelaCompeticoesTemporada.jsx';
 import { criarIdMuseu } from '../museu/museu.js';
 import React, { useState, useMemo, useEffect } from "react";
@@ -7057,14 +7059,14 @@ function resolverTemporada(c, extraStats) {
                   </button>
                   {!tabelaExpandida ? (
                     <div className="flex items-center justify-between text-[11px] py-1.5 px-1.5 rounded-sm bg-emerald-500/10 border border-emerald-500/30">
-                      <span className="flex items-center gap-1.5 truncate"><span className="font-mono text-zinc-500 w-4">{tabelaLiga.find((r) => r.jogador)?.posicao}º</span><ClubDot club={carreira.clube} size={14} /><span className="font-bold text-emerald-400">{carreira.clube.nome} (você)</span></span>
+                      <span className="flex items-center gap-1.5 truncate"><span className="font-mono text-zinc-500 w-4">{tabelaLiga.find((r) => r.jogador)?.posicao}º</span><ClubDot club={carreira.clube} size={14} /><span className="font-bold text-emerald-400"><LinkEntidade tipo="clube" nome={carreira.clube.nome}/> (você)</span></span>
                       <span className="font-mono text-zinc-500">de {tabelaLiga.length}</span>
                     </div>
                   ) : (
                     <div className="grid gap-0.5">
                       {tabelaLiga.map((row) => (
                         <div key={row.clube.nome} className={`flex items-center justify-between text-[11px] py-1 px-1.5 rounded-sm ${row.jogador ? "bg-emerald-500/10 border border-emerald-500/30" : ""}`}>
-                          <span className="flex items-center gap-1.5 truncate"><span className="font-mono text-zinc-500 w-4">{row.posicao}º</span><ClubDot club={row.clube} size={14} /><span className={row.jogador ? "font-bold text-emerald-400" : "text-zinc-400"}>{row.clube.nome}{row.jogador ? " (você)" : ""}</span></span>
+                          <span className="flex items-center gap-1.5 truncate"><span className="font-mono text-zinc-500 w-4">{row.posicao}º</span><ClubDot club={row.clube} size={14} /><span className={row.jogador ? "font-bold text-emerald-400" : "text-zinc-400"}><LinkEntidade tipo="clube" nome={row.clube.nome}/>{row.jogador ? " (você)" : ""}</span></span>
                           <span className="font-mono text-zinc-500">{row.jogador ? "—" : row.pontos}pts</span>
                         </div>
                       ))}
@@ -7117,7 +7119,7 @@ function resolverTemporada(c, extraStats) {
                     <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-[9px] text-zinc-500 uppercase">Posição atual</div><div className="text-sm font-bold">{POSICOES.find((p) => p.id === carreira.posicao)?.label}</div></div>
                     <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-[9px] text-zinc-500 uppercase">Nacionalidade</div><div className="text-sm font-bold">{nacDe(carreira.nacionalidade).label}</div></div>
                     <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-[9px] text-zinc-500 uppercase">Personalidade</div><div className="text-sm font-bold" style={{ color: PERSONALIDADES.find((p) => p.id === carreira.personalidade)?.cor }}>{PERSONALIDADES.find((p) => p.id === carreira.personalidade)?.icone} {PERSONALIDADES.find((p) => p.id === carreira.personalidade)?.label}</div></div>
-                    <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-[9px] text-zinc-500 uppercase">Clube do coração</div><div className="text-sm font-bold">{carreira.clubeCoracao?.nome || "—"}</div></div>
+                    <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-[9px] text-zinc-500 uppercase">Clube do coração</div><div className="text-sm font-bold"><LinkEntidade tipo="clube" nome={carreira.clubeCoracao?.nome||""}>{carreira.clubeCoracao?.nome||"—"}</LinkEntidade></div></div>
                     <div className="bg-zinc-950/40 rounded-sm p-2"><div className="text-[9px] text-zinc-500 uppercase">Relação com a diretoria</div><div className="text-sm font-bold">{Math.round(carreira.relacaoDiretoria ?? 40)}/100</div></div>
                     <div className="bg-zinc-950/40 rounded-sm p-2 col-span-2"><div className="text-[9px] text-zinc-500 uppercase">Posições aprendidas</div><div className="text-sm font-bold">{(carreira.posicoesAprendidas || [carreira.posicao]).join(" · ")}</div></div>
                   </div>
@@ -7242,7 +7244,7 @@ function resolverTemporada(c, extraStats) {
                     <div className={`flex items-center gap-2 text-[11px] py-1 px-1.5 rounded-sm ${x.voce ? "bg-emerald-500/15 border border-emerald-500/30" : ""}`}>
                       <span className={`font-mono w-6 text-right ${x.pos <= 3 ? "text-amber-400 font-bold" : "text-zinc-600"}`}>{x.pos}º</span>
                       <span className={`flex-1 truncate ${x.voce ? "font-bold text-emerald-400" : "text-zinc-300"}`}>{x.voce ? "VOCÊ" : x.nome}</span>
-                      <span className="text-[9px] text-zinc-600 truncate max-w-[80px]">{x.clube}</span>
+                      <span className="text-[9px] text-zinc-600 truncate max-w-[80px]"><LinkEntidade tipo="clube" nome={x.clube}/></span>
                       <span className="font-mono text-zinc-200 w-10 text-right">{x[campo]}{sufixo}</span>
                     </div>
                   );
@@ -7264,7 +7266,7 @@ function resolverTemporada(c, extraStats) {
                           <div className="border-t border-zinc-800 mt-3 pt-2.5">
                             <div className="text-[9px] text-zinc-600 uppercase tracking-widest mb-1">⚔️ Seu rival de geração</div>
                             <div className="flex items-center justify-between text-[11px]">
-                              <span className="font-bold text-zinc-200">{rivalObj.nome} <span className="text-zinc-500 font-normal">· {rivalObj.clubeNome}, {rivalObj.idade} anos</span></span>
+                              <span className="font-bold text-zinc-200"><LinkEntidade tipo="jogador" id={rivalObj.id} nome={rivalObj.nome}/> <span className="text-zinc-500 font-normal">· <LinkEntidade tipo="clube" nome={rivalObj.clubeNome}/>, {rivalObj.idade} anos</span></span>
                               <span className="font-mono" style={{ color: rivalObj.ovr > ovrAtual ? "#D6483F" : "#9BDEFF" }}>OVR {rivalObj.ovr}</span>
                             </div>
                             <div className="text-[10px] text-zinc-500 mt-0.5">Carreira dele: {rivalObj.carreira.gols} gols e {rivalObj.carreira.assist} assistências em {rivalObj.carreira.jogos} jogos · Bolas de Ouro: {carreira.rivalBolasDeOuro || 0}</div>
@@ -7286,8 +7288,8 @@ function resolverTemporada(c, extraStats) {
                             {[...mundo.historicoBolaDeOuro].reverse().slice(0, 8).map((v, i) => (
                               <div key={i} className="flex items-center gap-2 text-[11px] py-1 px-1.5 rounded-sm odd:bg-zinc-950/30">
                                 <span className="font-mono text-zinc-600 w-8">{v.temporada}</span>
-                                <span className="flex-1 truncate text-zinc-200 font-bold">{v.nome}</span>
-                                <span className="text-[9px] text-zinc-600 truncate max-w-[90px]">{v.clube}</span>
+                                <span className="flex-1 truncate text-zinc-200 font-bold"><LinkEntidade tipo="jogador" id={v.jogadorId??v.id??idJogadorPorNome({mundo,nome},v.nome)} nome={v.nome}/></span>
+                                <span className="text-[9px] text-zinc-600 truncate max-w-[90px]"><LinkEntidade tipo="clube" nome={v.clube}/></span>
                                 <span className="font-mono text-amber-400 text-[10px]">{v.gols}G {v.assist}A</span>
                               </div>
                             ))}
@@ -7320,7 +7322,7 @@ function resolverTemporada(c, extraStats) {
                           return (
                             <div>
                               <div className="flex items-center justify-between mb-2">
-                                <span className="text-[10px] font-bold text-zinc-300">{jogadorComparado.nome} <span className="text-zinc-600 font-normal">({jogadorComparado.clubeNome})</span></span>
+                                <span className="text-[10px] font-bold text-zinc-300"><LinkEntidade tipo="jogador" id={jogadorComparado.id} nome={jogadorComparado.nome}/> <span className="text-zinc-600 font-normal">(<LinkEntidade tipo="clube" nome={jogadorComparado.clubeNome}/>)</span></span>
                                 <button onClick={() => { setJogadorComparado(null); setBuscaComparador(""); }} className="text-[9px] text-zinc-600 hover:text-red-400">trocar ✕</button>
                               </div>
                               <div className="grid gap-0.5">
@@ -7532,7 +7534,7 @@ function resolverTemporada(c, extraStats) {
                             <div className="grid gap-0.5">
                               {conf.todos.slice(0, 10).map((x) => (
                                 <div key={x.nome} className="flex items-center gap-2 text-[10px] px-1.5 py-1 rounded-sm hover:bg-white/5">
-                                  <span className="flex-1 truncate text-zinc-300">{x.nome}</span>
+                                  <span className="flex-1 truncate text-zinc-300"><LinkEntidade tipo="clube" nome={x.nome}/></span>
                                   <span className="font-mono text-zinc-600">{x.jogos}J</span>
                                   <span className="font-mono w-14 text-right"><span className="text-emerald-400">{x.v}</span>-<span className="text-zinc-500">{x.e}</span>-<span className="text-red-400">{x.d}</span></span>
                                   <span className="font-mono text-zinc-400 w-8 text-right">{x.gols}g</span>
@@ -8282,10 +8284,10 @@ function resolverTemporada(c, extraStats) {
         {popupPremio && (
           <PopupOverlay onClose={() => setPopupPremio(null)}>
             <Card className="border-amber-500/40">
-              <div className="flex items-center gap-2 mb-3"><TrophyIcon tipo={popupPremio.nome.includes("OURO") ? "ouro" : "bronze"} size={24} /><span className="font-bold text-sm">{popupPremio.nome}</span></div>
+              <div className="flex items-center gap-2 mb-3"><TrophyIcon tipo={popupPremio.nome.includes("OURO") ? "ouro" : "bronze"} size={24} /><span className="font-bold text-sm"><LinkEntidade tipo="premio" nome={popupPremio.nome}/></span></div>
               <div className="grid gap-1">
                 {popupPremio.lista.map((x, i) => (
-                  <div key={i} className="flex justify-between text-xs border-b border-zinc-800/50 py-1.5"><span className="font-mono text-zinc-400">{x.ano}</span><span>{x.clube}</span></div>
+                  <div key={i} className="flex justify-between text-xs border-b border-zinc-800/50 py-1.5"><span className="font-mono text-zinc-400">{x.ano}</span><span><LinkEntidade tipo="clube" nome={x.clube}/></span></div>
                 ))}
               </div>
               <div className="mt-4"><Button onClick={() => setPopupPremio(null)}>Fechar</Button></div>
@@ -8312,7 +8314,7 @@ function resolverTemporada(c, extraStats) {
               <Card className="border-emerald-500/40">
                 <div className="flex items-center gap-3 mb-3">
                   {cl && <ClubDot club={cl} size={28} />}
-                  <div className="flex-1"><div className="font-bold text-sm">{popupClube}</div><div className="text-[10px] font-bold" style={{ color: t.cor }}>{t.label} com a torcida</div></div>
+                  <div className="flex-1"><div className="font-bold text-sm"><LinkEntidade tipo="clube" nome={popupClube}/></div><div className="text-[10px] font-bold" style={{ color: t.cor }}>{t.label} com a torcida</div></div>
                 </div>
 
                 {numerosClube.length > 0 && (
@@ -8415,17 +8417,17 @@ function resolverTemporada(c, extraStats) {
                 <div><div className="font-mono text-lg font-bold">{popupTemporada.nota}</div><div className="text-[9px] text-zinc-500 uppercase">Nota</div></div>
               </div>
               <div className="text-xs text-zinc-300 space-y-1.5 border-t border-zinc-800 pt-3">
-                <div className="flex items-center gap-1.5"><TrophyIcon tipo={popupTemporada.campeaoLiga ? "ouro" : "liga"} size={14} />{popupTemporada.ligaNome}: <strong>{Number.isFinite(popupTemporada.posLiga)?`${popupTemporada.posLiga}º lugar`:"Posição não registrada"}</strong>{popupTemporada.campeaoLiga ? " — CAMPEÃO" : ""}</div>
-                {popupTemporada.continental && <div className="flex items-center gap-1.5"><TrophyIcon tipo={popupTemporada.continental.titulo ? "ouro" : "prata"} size={14} />{popupTemporada.continental.nome}: <strong>{popupTemporada.continental.resultado}</strong>{popupTemporada.continental.adversario ? ` (x ${popupTemporada.continental.adversario}, ${popupTemporada.continental.placar})` : ""}</div>}
+                <div className="flex items-center gap-1.5"><TrophyIcon tipo={popupTemporada.campeaoLiga ? "ouro" : "liga"} size={14} /><LinkEntidade tipo="competicao" nome={popupTemporada.ligaNome}/>: <strong>{Number.isFinite(popupTemporada.posLiga)?`${popupTemporada.posLiga}º lugar`:"Posição não registrada"}</strong>{popupTemporada.campeaoLiga ? " — CAMPEÃO" : ""}</div>
+                {popupTemporada.continental && <div className="flex items-center gap-1.5"><TrophyIcon tipo={popupTemporada.continental.titulo ? "ouro" : "prata"} size={14} /><LinkEntidade tipo="competicao" nome={popupTemporada.continental.nome}/>: <strong>{popupTemporada.continental.resultado}</strong>{popupTemporada.continental.adversario ? ` (x ${popupTemporada.continental.adversario}, ${popupTemporada.continental.placar})` : ""}</div>}
                 {popupTemporada.copaNacional && <div className="flex items-center gap-1.5"><TrophyIcon tipo="bronze" size={14} />Copa Nacional: <strong>{popupTemporada.copaNacional.resultado}</strong>{popupTemporada.copaNacional.adversario ? ` (x ${popupTemporada.copaNacional.adversario}, ${popupTemporada.copaNacional.placar})` : ""}</div>}
-                {popupTemporada.estadual && <div className="flex items-center gap-1.5"><TrophyIcon tipo={popupTemporada.estadual.titulo ? "ouro" : "bronze"} size={14} />{popupTemporada.estadual.nome}: <strong>{popupTemporada.estadual.resultado}</strong>{popupTemporada.estadual.adversario ? ` (x ${popupTemporada.estadual.adversario}, ${popupTemporada.estadual.placar})` : ""}</div>}
-                {popupTemporada.copinhaCarreira && <div className="flex items-center gap-1.5"><TrophyIcon tipo={popupTemporada.copinhaCarreira.titulo ? "ouro" : "bronze"} size={14} />{popupTemporada.copinhaCarreira.nome}: <strong>{popupTemporada.copinhaCarreira.resultado}</strong>{popupTemporada.copinhaCarreira.adversario ? ` (x ${popupTemporada.copinhaCarreira.adversario}, ${popupTemporada.copinhaCarreira.placar})` : ""}</div>}
+                {popupTemporada.estadual && <div className="flex items-center gap-1.5"><TrophyIcon tipo={popupTemporada.estadual.titulo ? "ouro" : "bronze"} size={14} /><LinkEntidade tipo="competicao" nome={popupTemporada.estadual.nome}/>: <strong>{popupTemporada.estadual.resultado}</strong>{popupTemporada.estadual.adversario ? ` (x ${popupTemporada.estadual.adversario}, ${popupTemporada.estadual.placar})` : ""}</div>}
+                {popupTemporada.copinhaCarreira && <div className="flex items-center gap-1.5"><TrophyIcon tipo={popupTemporada.copinhaCarreira.titulo ? "ouro" : "bronze"} size={14} /><LinkEntidade tipo="competicao" nome={popupTemporada.copinhaCarreira.nome}/>: <strong>{popupTemporada.copinhaCarreira.resultado}</strong>{popupTemporada.copinhaCarreira.adversario ? ` (x ${popupTemporada.copinhaCarreira.adversario}, ${popupTemporada.copinhaCarreira.placar})` : ""}</div>}
                 {popupTemporada.copa && <div className="flex items-center gap-1.5"><TrophyIcon tipo={popupTemporada.copa.titulo ? "ouro" : "prata"} size={14} />Copa do Mundo: <strong>{popupTemporada.copa.resultado}</strong>{popupTemporada.copa.adversario ? ` (x ${popupTemporada.copa.adversario}, ${popupTemporada.copa.placar})` : ""}</div>}
-                {popupTemporada.artilheiro?.nome?<div>⚽ Artilheiro da liga: <strong>{popupTemporada.artilheiro.nome}</strong> ({popupTemporada.artilheiro.gols??"—"} gols)</div>:<div className="text-zinc-500">Artilharia não registrada nesta temporada.</div>}
+                {popupTemporada.artilheiro?.nome?<div>⚽ Artilheiro da liga: <strong><LinkEntidade tipo="jogador" id={idJogadorPorNome({mundo,nome},popupTemporada.artilheiro.nome)} nome={popupTemporada.artilheiro.nome}/></strong> ({popupTemporada.artilheiro.gols??"—"} gols)</div>:<div className="text-zinc-500">Artilharia não registrada nesta temporada.</div>}
                 {popupTemporada.posicao !== "GOL" && Number.isFinite(popupTemporada.xG) && <div>📊 xG esperado: <strong>{popupTemporada.xG}</strong> (fez {popupTemporada.gols}) · nota média da posição: <strong>{popupTemporada.notaMediaPosicao??"—"}</strong></div>}
                 {popupTemporada.passesTentados > 0 && <div>🎯 Passes: <strong>{popupTemporada.passesCompletos}/{popupTemporada.passesTentados}</strong> ({popupTemporada.passeCerto}%){popupTemporada.desarmesTentados > 0 ? ` · Desarmes: ${popupTemporada.desarmesCerteiros}/${popupTemporada.desarmesTentados}` : ""}</div>}
                 {popupTemporada.expectativa && <div className={popupTemporada.bateuMeta ? "text-emerald-400" : "text-red-400"}>{popupTemporada.bateuMeta ? "✓" : "✗"} Meta: {popupTemporada.posicao === "GOL" ? `${popupTemporada.expectativa.cleanSheets} jogos sem sofrer gol` : `${popupTemporada.expectativa.gols}g / ${popupTemporada.expectativa.assist}a`}</div>}
-                {popupTemporada.premios.length === 0 ? <div className="text-zinc-500">Nenhum prêmio individual anunciado.</div> : popupTemporada.premios.map((p, i) => <div key={i} className={p.doJogador ? "text-amber-400 font-bold" : ""}>🏅 {p.nome}: <strong>{p.vencedor}</strong></div>)}
+                {popupTemporada.premios.length === 0 ? <div className="text-zinc-500">Nenhum prêmio individual anunciado.</div> : popupTemporada.premios.map((p, i) => <div key={i} className={p.doJogador ? "text-amber-400 font-bold" : ""}>🏅 <LinkEntidade tipo="premio" nome={p.nome}/>: <strong><LinkEntidade tipo="jogador" id={idJogadorPorNome({mundo,nome},p.vencedor)} nome={p.vencedor}/></strong></div>)}
                 {popupTemporada.resultadoPromessa && (
                   <div className={`flex items-start gap-1.5 ${popupTemporada.resultadoPromessa.cumpriu ? "text-emerald-400" : popupTemporada.resultadoPromessa.culpaDoTecnico ? "text-amber-400" : "text-red-400"}`}>
                     <span>{popupTemporada.resultadoPromessa.cumpriu ? "🤝" : popupTemporada.resultadoPromessa.culpaDoTecnico ? "⚠️" : "✗"}</span>
@@ -8603,7 +8605,7 @@ function resolverTemporada(c, extraStats) {
                           <span className="font-mono text-zinc-600 shrink-0 w-16">{t.temporadaLabel}</span>
                           <ClubDot club={clubeObj} size={16} />
                           <div className="flex-1">
-                            <span className="text-zinc-300">{t.clube}</span>
+                            <span className="text-zinc-300"><LinkEntidade tipo="clube" nome={t.clube}/></span>
                             <span className="text-zinc-500"> · {posicao === "GOL" ? `${t.cleanSheets} CS` : `${t.gols}g ${t.assist}a`} · nota {t.nota}</span>
                             {marcos.length > 0 && <div className="text-amber-400 text-[10px] mt-0.5">{marcos.join(" · ")}</div>}
                           </div>

@@ -17,6 +17,7 @@ import './ArquivoFM.css';
 import LinkEntidade from './LinkEntidade.jsx';
 import HistoricoPremios from './HistoricoPremios.jsx';
 import {EVENTO_ENTIDADE,empilharPagina,paginaEntidade} from './navegacaoEntidades.js';
+import {historicoProfissionalTecnico,titulosConquistadosTecnico} from '../treinador/tecnico.js';
 
 
 export function GaleriaClube({c,nome,temporadas,onCompeticao}){
@@ -63,17 +64,43 @@ export function GaleriaCompeticoes({c,temporadas,nome,onCompeticao,onClube}){
  </section>;
 }
 function PerfilTreinador({c,nome}){
- const t=c.tecnico||{};
- const atual=nome||t.nome||'Seu treinador';
- const temporadas=Array.isArray(t.historico)?t.historico:Array.isArray(t.temporadas)?t.temporadas:[];
- return <section className="hf-marcos" aria-label="Histórico do treinador">
+ const tecnico=c.tecnico||{},temporadas=Array.isArray(tecnico.temporadas)?tecnico.temporadas:[];
+ const resumo=historicoProfissionalTecnico(tecnico);
+ const titulos=titulosConquistadosTecnico(tecnico);
+ const atual=nome||c.nome||tecnico.nome||'Seu treinador';
+ const abreviar=n=>Number.isFinite(n)?n.toLocaleString('pt-BR'):'—';
+ return <section className="hf-marcos fm27-coach-profile" aria-label="Histórico do treinador">
    <span className="hf-eyebrow">ARQUIVO VIVO / TREINADORES</span><h2>{atual}</h2>
-   <p className="hf-nota">Histórico de comando disponível no save atual, sem completar temporadas não registradas.</p>
-   {t.clube&&<div className="hf-identidade"><img src={escudoDe(t.clube)} alt=""/>
-     <div><small>Clube atual</small><h3><LinkEntidade tipo="clube" nome={t.clube}/></h3></div></div>}
-   {temporadas.length?<ol className="hf-linha">{temporadas.map((t,i)=>
-     <li key={i}><time>{t.ano??t.temporada??'—'}</time><span><LinkEntidade tipo="clube" nome={t.clube||t.nome}/><small>{t.jogos??0} jogos registrados</small></span></li>)}</ol>
-    :<p className="hf-vazio">Ainda não há temporadas de treinador documentadas nesta carreira.</p>}
+   <p className="hf-nota">Acompanhamento da carreira no banco, com temporadas, clubes e títulos preservados no save.</p>
+   {tecnico.clube&&<div className="hf-identidade"><img src={escudoDe(tecnico.clube)} alt=""/>
+     <div><span className="hf-eyebrow">CLUBE ATUAL</span><h3><LinkEntidade tipo="clube" nome={tecnico.clube}/></h3></div></div>}
+   <div className="fm27-kpis">
+    {[[resumo.temporadas,'Temporadas'],[resumo.jogos,'Jogos'],[resumo.vitorias,'Vitórias'],
+      [resumo.aproveitamento+'%','Aproveitamento'],[titulos.length,'Títulos']].map(([valor,rotulo])=>
+      <div className="fm27-kpi" key={rotulo}><strong>{valor}</strong><span>{rotulo}</span></div>)}
+   </div>
+   <h3 className="hf-subtitulo">Passagens pelos clubes</h3>
+   {resumo.clubes.length?<div className="fm27-data-scroll"><table className="fm27-data">
+     <thead><tr><th>Clube</th><th>Temporadas</th><th>Jogos</th><th>Vitórias</th><th>Títulos</th><th>Melhor posição</th></tr></thead>
+     <tbody>{resumo.clubes.map(cl=><tr key={cl.nome}>
+       <td className="fm27-club-cell"><img src={escudoDe(cl.nome)} alt=""/><LinkEntidade tipo="clube" nome={cl.nome}/></td>
+       <td>{cl.temporadas}</td><td>{cl.jogos}</td><td>{cl.vitorias}</td><td>{cl.titulos}</td>
+       <td>{cl.melhorPosicao?cl.melhorPosicao+'º':'—'}</td>
+     </tr>)}</tbody></table></div>:<p className="hf-vazio">Ainda não há clubes registrados como treinador.</p>}
+   <h3 className="hf-subtitulo">Temporada por temporada</h3>
+   {temporadas.length?<div className="fm27-data-scroll"><table className="fm27-data">
+    <thead><tr><th>Ano</th><th>Clube</th><th>Jogos</th><th>V–E–D</th><th>Posição</th><th>Conquistas</th></tr></thead>
+    <tbody>{[...temporadas].reverse().map((t,i)=>{
+     const premiacoes=titulos.filter(x=>x.ano===t.ano&&x.clube===t.clube);
+     const jogos=Number.isFinite(t.jogos)?t.jogos:(t.vitorias||0)+(t.empates||0)+(t.derrotas||0);
+     return <tr key={[t.ano,t.clube,i].join('|')}><td>{t.ano??'—'}</td>
+      <td><LinkEntidade tipo="clube" nome={t.clube||''}>{t.clube||'Sem clube'}</LinkEntidade></td>
+      <td>{abreviar(jogos)}</td><td>{[t.vitorias,t.empates,t.derrotas].map(abreviar).join('–')}</td>
+      <td>{Number.isFinite(t.posicao)?t.posicao+'º':'—'}</td>
+      <td>{premiacoes.length?premiacoes.map((titulo,i)=><React.Fragment key={i}>{i>0?' · ':''}
+        <LinkEntidade tipo="competicao" nome={titulo.nome}/></React.Fragment>):'—'}</td>
+     </tr>;
+    })}</tbody></table></div>:<p className="hf-vazio">A primeira temporada concluída será arquivada aqui.</p>}
  </section>;
 }
 export function HistoriaDialog({c,nome,temporadas,onFechar,competicaoInicial,entradaInicial}){

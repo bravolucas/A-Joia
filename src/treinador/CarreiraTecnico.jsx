@@ -51,8 +51,8 @@ function PopUpTitulo({ temporada, titulo, indice, total, onFechar }) {
       <h2>CAMPEÃO!</h2>
       <div className="ct-champion-cup"><Lottie nome="taca" className="ct-champion-animation" /><span className="ct-champion-halo" aria-hidden="true" /><TacaCompeticao tipo={competicaoDoTitulo(titulo).tipo} nome={titulo} size={184} /></div>
       <span className="ct-champion-label">UMA NOVA TAÇA NA SUA HISTÓRIA</span>
-      <h3>{titulo}</h3>
-      <div className="ct-event-club"><Escudo nome={equipeTituloTecnico(temporada,titulo)} size={28} /><strong>{equipeTituloTecnico(temporada,titulo)}</strong></div>
+      <h3><LinkEntidade tipo="competicao" nome={titulo}/></h3>
+      <div className="ct-event-club"><Escudo nome={equipeTituloTecnico(temporada,titulo)} size={28} /><strong><LinkEntidade tipo={['copaMundo','continentalSelecao'].includes(competicaoDoTitulo(titulo).tipo)||temporada.tipoEquipe==='selecao'?'selecao':'clube'} nome={equipeTituloTecnico(temporada,titulo)}/></strong></div>
     </div>
     <div className="ct-champion-footer">
       {liga ? <div className="ct-champion-stats">{[[temporada.posicao + 'º', 'POSIÇÃO'], [temporada.pontos, 'PONTOS'], [temporada.vitorias, 'VITÓRIAS']].map(([valor, rotulo]) => <div key={rotulo}><strong>{valor}</strong><span>{rotulo}</span></div>)}</div> : <p className="ct-champion-message">O trabalho virou conquista. Mais um título para o legado do seu treinador.</p>}
@@ -70,8 +70,8 @@ function PopUpDivisao({ temporada, movimento, tipo, onFechar }) {
   return <JanelaTreinador titulo={acesso ? 'Acesso de divisão' : 'Rebaixamento'} onFechar={onFechar} classe={`ct-celebration ${acesso ? 'ct-celebration-green' : 'ct-celebration-red'}`}>
     <div className="ct-event-content ct-celebration-body" style={{backgroundImage:`linear-gradient(#17171b66,#17171bf5 65%),url(${CENARIOS.estadioMobile})`,backgroundSize:"cover",backgroundPosition:"center"}}><span className="ct-eyebrow">Temporada {temporada.ano}</span>
       <span className="ct-movement" aria-hidden="true">{acesso ? '↗' : '↘'}</span><h2>{acesso ? 'ACESSO!' : 'REBAIXADO'}</h2>
-      <div className="ct-event-club"><Escudo nome={temporada.clube} size={38} /><strong>{temporada.clube}</strong></div>
-      <h3>{acesso ? 'Sobe para ' : 'Cai para '}{competicaoTemporadaTecnico({ liga: movimento.para })}</h3>
+      <div className="ct-event-club"><Escudo nome={temporada.clube} size={38} /><strong><LinkEntidade tipo={temporada.tipoEquipe==='selecao'?'selecao':'clube'} nome={temporada.clube}/></strong></div>
+      <h3>{acesso ? 'Sobe para ' : 'Cai para '}<LinkEntidade tipo="competicao" nome={competicaoTemporadaTecnico({ liga: movimento.para })}/></h3>
       <p>{temporada.posicao}º lugar · {temporada.pontos} pontos</p>
       <button onClick={onFechar} className="ct-primary">Continuar carreira<span aria-hidden="true">→</span></button>
     </div>

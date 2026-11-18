@@ -1093,7 +1093,7 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   if (copaNome) torneios.push(simularCopaNacionalTecnico({
     clubes: CLUBES_CONVITES_TECNICO, nomeUsuario: t.clube, pais: t.pais,
     forcaUsuario: forcaClubeTecnico(t), nome: copaNome, bonusTecnico, tatica,
-    formato: t.regrasCompeticoes?.[copaNome]?.formato || {}, rng
+    formato: {...(t.regrasCompeticoes?.[copaNome]?.formato || {}),ano:t.ano}, rng
   }));
   const torneioAnterior = t.temporadas?.at(-1);
   const vagaCompartilhada=vagaTecnico(t);
@@ -1118,7 +1118,7 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
     const continental = simularCopaContinentalTecnico({
       clubes: CLUBES_CONVITES_TECNICO, nomeUsuario: t.clube, pais: t.pais,
       forcaUsuario: forcaClubeTecnico(t), nome: continentalNome,
-      participantesQualificados, bonusTecnico, tatica, formato: formatoContinental, rng
+      participantesQualificados, bonusTecnico, tatica, formato: {...formatoContinental,ano:t.ano}, rng
     });
     if (continental) torneios.push(continental);
   }

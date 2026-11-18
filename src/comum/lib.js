@@ -1,4 +1,5 @@
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
+import {resolverPlayoffsSerieB} from '../simulacao/playoffsSerieB.js';
 import { MINIMOS_ELENCO, diagnosticarElenco } from '../simulacao/profundidadeElenco.js';
 import {posicoesSecundariasNewgen} from '../simulacao/posicoesSecundariasNewgen.js';
 import {escalarVagasAptas} from '../simulacao/escalacaoApta.js';
@@ -1240,6 +1241,7 @@ export function girarLigas(estado, forcarClube = null, classificacoesMundo = nul
   // temporada, então ele é excluído do embaralhamento e encaixado à parte.
   const ordenar = (arr) => arr.map(([n, v]) => ({ n, v, pts: v.forca + rand(-9, 9) })).sort((a, b) => b.pts - a.pts);
   const rebaixadosTodos = [], promovidosTodos = [], porPais = [];
+  let playoffsSerieB = null;
 
   PIRAMIDE_LIGAS.forEach((div) => {
     const naElite = Object.entries(novo).filter(([, v]) => v.liga === div.elite);
@@ -1258,18 +1260,25 @@ export function girarLigas(estado, forcarClube = null, classificacoesMundo = nul
     const valida=(t,times,liga)=>Array.isArray(t)&&t.length===times.length&&new Set(t.map(x=>x.nome)).size===times.length&&t.every(x=>novo[x.nome]?.liga===liga);
     const cimaReal=valida(cima,naElite,div.elite),baixoReal=valida(baixo,naAcesso,div.acesso);
     const caem = cimaReal?cima.slice(-div.vagas).map(t=>t.nome):E.slice(-vagasCaem).map((x) => x.n);
-    const sobem = baixoReal?baixo.slice(0,div.vagas).map(t=>t.nome):A.slice(0, vagasSobem).map((x) => x.n);
+    let sobem = baixoReal ? baixo.slice(0, div.vagas).map(t => t.nome) : A.slice(0, vagasSobem).map(x => x.n);
+    // Série B 2026: somente líder/vice sobem direto; 3º a 6º disputam dois jogos.
+    if (div.elite === 'brasileirao' && div.acesso === 'serieB') {
+      const tabelaB = baixoReal ? baixo : ordenar(naAcesso).map(x => ({ nome: x.n }));
+      const forcasB = Object.fromEntries(naAcesso.map(([nome, clube]) => [nome, clube.forca]));
+      playoffsSerieB = resolverPlayoffsSerieB(tabelaB, forcasB, Math.random);
+      if (playoffsSerieB) sobem = playoffsSerieB.promovidos;
+    }
     if (!cimaReal && ehForcadoNaElite && forcarClube.desceu) caem.push(forcarClube.nome);
-    if (!baixoReal && ehForcadoNoAcesso && forcarClube.subiu) sobem.push(forcarClube.nome);
+    if (!playoffsSerieB && !baixoReal && ehForcadoNoAcesso && forcarClube.subiu) sobem.push(forcarClube.nome);
 
     caem.forEach((n) => { novo[n] = { ...novo[n], liga: div.acesso, forca: clampR(novo[n].forca - rand(1, 4), 40, 96) }; });
     sobem.forEach((n) => { novo[n] = { ...novo[n], liga: div.elite, forca: clampR(novo[n].forca + rand(1, 4), 40, 96) }; });
     rebaixadosTodos.push(...caem);
     promovidosTodos.push(...sobem);
-    porPais.push({ pais: div.nome, sobem, caem });
+    porPais.push({ pais: div.nome, sobem, caem, ...(playoffsSerieB && div.acesso === 'serieB' ? { playoffs: playoffsSerieB } : {}) });
   });
 
-  return { estado: novo, rebaixados: rebaixadosTodos, promovidos: promovidosTodos, porPais };
+  return { estado: novo, rebaixados: rebaixadosTodos, promovidos: promovidosTodos, porPais, playoffsSerieB };
 }
 
 export function continentalDaSelecao(nac) {

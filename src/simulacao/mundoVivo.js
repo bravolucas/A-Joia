@@ -1,6 +1,7 @@
 import {CLUBES_REGIONAIS_EXTRAS} from '../competicoes/estaduaisRapidos.js';
 import {jogosDaCampanha} from '../competicoes/jogosCampanha.js';
 import {registrarPartidasDetalhadasUsuario} from './historicoConfrontos.js';
+import {combinarConquistas,conquistasDoCadastroMundo,conquistasDaTemporadaUsuario} from './historicoConquistas.js';
 import { CLUBES, LIGAS } from '../dados/data.js';
 import { avaliarClubeNoMundo } from './forcaEquipe.js';
 import { EIXOS_REPUTACAO_CLUBE, evoluirReputacoesClube } from './reputacoesClube.js';
@@ -78,11 +79,17 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
     // Um aposentado já registrado não ganha mais uma temporada de estatísticas.
     if(p.aposentado&&(!velho||velho.aposentado))continue;
     const id=String(p.id),anteriorAtleta=u.atletas[id];
-    const linha={ano:a.ano,clube,liga:velho?.liga||p.liga,jogos:p.jogos||0,gols:p.gols||0,assist:p.assist||0,...(p.posicao==='GOL'?{defesas:p.defesas||0,cleanSheets:p.cleanSheets||0}:{}),...(p.porCompeticao?{porCompeticao:p.porCompeticao}:{}),titulos:titulos.filter(t=>t.clube===clube).map(t=>t.nome),...(clube!==p.clubeNome?{destino:p.clubeNome}:{}),...(p.aposentado?{aposentou:true}:{})};
-    u.atletas[id]={id,nome:p.nome,posicao:p.posicao,nac:p.nac,clube:p.clubeNome,aposentado:!!p.aposentado,historico:[...(anteriorAtleta?.historico||[]),compactarLinhaAtleta(linha)]};
+    const linha={ano:a.ano,clube,liga:velho?.liga||p.liga,jogos:p.jogos||0,gols:p.gols||0,assist:p.assist||0,...(p.posicao==='GOL'?{defesas:p.defesas||0,cleanSheets:p.cleanSheets||0}:{}),...(p.porCompeticao?{porCompeticao:p.porCompeticao}:{}),titulos:(p.titulosConquistados||[]).filter(r=>Array.isArray(r)&&r[1]===a.ano&&r[4]===clube).map(r=>r[3]),...(clube!==p.clubeNome?{destino:p.clubeNome}:{}),...(p.aposentado?{aposentou:true}:{})};
+    u.atletas[id]={id,nome:p.nome,posicao:p.posicao,nac:p.nac,clube:p.clubeNome,aposentado:!!p.aposentado,
+      historico:[...(anteriorAtleta?.historico||[]),compactarLinhaAtleta(linha)],
+      conquistas:combinarConquistas(anteriorAtleta?.conquistas,conquistasDoCadastroMundo(p))};
   }
   const eu={ano:a.ano,clube:typeof a.clube==='string'?a.clube:a.clube?.nome,jogos:a.jogos||0,gols:a.gols||0,assist:a.assist||0,...(Number.isFinite(a.defesas)?{defesas:a.defesas}:{}),...(Number.isFinite(a.cleanSheets)?{cleanSheets:a.cleanSheets}:{}),porCompeticao:a.porCompeticao||[],titulos:(a.titulos||[]).filter(t=>typeof t==='object').map(t=>t.nome)};
-  if(!c.tecnico||c.tecnico.fase!=='resultado')u.atletas.voce={id:'voce',nome:c.nome,posicao:c.posicao,nac:c.nac||c.nacionalidade,voce:true,clube:eu.clube,historico:[...(u.atletas.voce?.historico||[]),compactarLinhaAtleta(eu)]};
+  if(!c.tecnico||c.tecnico.fase!=='resultado')u.atletas.voce={
+    id:'voce',nome:c.nome,posicao:c.posicao,nac:c.nac||c.nacionalidade,voce:true,clube:eu.clube,
+    historico:[...(u.atletas.voce?.historico||[]),compactarLinhaAtleta(eu)],
+    conquistas:combinarConquistas(u.atletas.voce?.conquistas,conquistasDaTemporadaUsuario(a))
+  };
   // Edições completas existentes são arquivadas; dados antigos ausentes continuam ausentes.
   for(const [liga,t]of Object.entries(a.classificacoesMundo||{})){
     // A liga do treinador grava a tabela sem seus placares no calendario global.

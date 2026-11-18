@@ -332,7 +332,7 @@ export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, on
   const clubeAtual = primeira || semClube ? 'Sem clube' : t.clube;
 
   const podeNegociarElenco=!!(onAbrirElenco&&!primeira&&!semClube&&!encerrada&&t.tipoEquipe!=='selecao'&&((t.gestao?.cadastroUnificado&&t.gestao.clube===t.clube)||(t.fase==='pretemporada'&&!t.copasEmJogo&&!t.andamento?.jogos&&!t.andamento?.rodadas&&!t.temporadaPausada)));
-  const abrirElenco=()=>{if(podeNegociarElenco){onAbrirElenco();setAbaCentro('elenco');requestAnimationFrame(()=>document.querySelector('.ct-manager .ctm-page-heading')?.scrollIntoView({behavior:'instant',block:'start'}));}};
+  const abrirElenco=()=>{if(!podeNegociarElenco)return;onAbrirElenco();const jaNoElenco=abaCentro==='elenco';setAbaCentro('elenco');requestAnimationFrame(()=>{const alvo=(jaNoElenco&&document.querySelector('.ct-manager .ge-integrada'))||document.querySelector('.ct-manager .ctm-page-heading');alvo?.scrollIntoView({behavior:'instant',block:'start'});});};
   const mudarAbaCentro=aba=>{setAbaCentro(aba);requestAnimationFrame(()=>document.querySelector('.ct-manager .ctm-page-heading')?.scrollIntoView({behavior:'instant',block:'start'}));};
   const irParaDecisao=()=>{if(t.copasEmJogo){setCopasAbertas(true);return;}setAbaCentro('geral');requestAnimationFrame(()=>document.querySelector('.ct-manager .ct-actions')?.scrollIntoView({behavior:'instant',block:'center'}));};
   return <div className="ct ct-manager" aria-label="Carreira de treinador">

@@ -77,3 +77,18 @@ test('jogadores do mundo consultam partidas por adversário a partir dos totais 
  assert.equal(resumoConfrontosAtleta(arquivo,{jogadorId:'42',adversario:'Palmeiras'}).jogos,2);
  assert.equal(resumoConfrontosAtleta(arquivo,{jogadorId:'42',adversario:'Santos'}).jogos,0);
 });
+
+test('treinador: partidas parciais aparecem no retrospecto sem antecipar temporadas ou duplicar edição',()=>{
+ const andamento={confrontos:[{nome:'Palmeiras',casa:true,rodada:1,golsPro:2,golsContra:1},
+   {nome:'Santos',casa:false,rodada:2,golsPro:0,golsContra:0},
+   {nome:'Corinthians',casa:true,rodada:3,folga:true}]};
+ const c={universo:{edicoes:[],anos:[]},tecnico:{clube:'Fortaleza',liga:'brasileirao',ano:2029,andamento}};
+ const jogos=partidasHistoricas(c);
+ assert.equal(jogos.length,2);
+ assert.equal(jogos[0].competicao,'Brasileirão');
+ assert.equal(resumoConfrontosClubes(c,{clube:'Fortaleza'}).jogos,2);
+ const arquivado={...c,tecnico:{...c.tecnico,universo:{anos:[2029],edicoes:[
+  {ano:2029,nome:'Brasileirão',jogos:{nomes:['Fortaleza','Palmeiras'],
+    partidas:[[0,1,2,1,1,null,0]]}}]}}};
+ assert.equal(partidasHistoricas(arquivado).length,1);
+});

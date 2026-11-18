@@ -6,12 +6,12 @@ export default function EstatisticasPosPartida({jogo,className=''}) {
  const amarelos=Number(jogo.cartoesAmarelos??(jogo.amarelo?1:0))||0,vermelhos=Number(jogo.cartoesVermelhos??(jogo.vermelho?1:0))||0;
  const anulados=Number(jogo.golsAnulados??0)||0;
  const eventos=Array.isArray(jogo.eventos)?jogo.eventos:[];
- const varAnulados=eventos.filter(e=>e.tipo==='var'&&/anulad/i.test(e.texto||''));
+ const varAnulados=eventos.filter(e=>e.tipo==='var'&&e.meu===true&&/anulad/i.test(e.texto||''));
  const itens=[['⚽','Gols',gols],['🎯','Assistências',assist]];
  if(amarelos)itens.push(['🟨','Cartões amarelos',amarelos]);
  if(vermelhos)itens.push(['🟥','Cartões vermelhos',vermelhos]);
  if(anulados)itens.push(['📺','Gols anulados',anulados]);
- if(varAnulados.length&&!anulados)itens.push(['📺','Gols anulados no jogo (VAR)',varAnulados.length]);
+ if(varAnulados.length&&!anulados)itens.push(['📺','Gols anulados',varAnulados.length]);
  if(Number.isFinite(jogo.defesas))itens.push(['🧤','Defesas',jogo.defesas]);
  if(jogo.cleanSheets)itens.push(['🛡️','Sem sofrer gols',jogo.cleanSheets]);
  if(Number.isFinite(jogo.nota))itens.push(['⭐','Nota',jogo.nota]);

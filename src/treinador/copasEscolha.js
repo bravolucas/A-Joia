@@ -49,8 +49,15 @@ function completarTerceiroLugar(c){
  const j=jogoEliminatorio({nome:perdedores[0],forca:c.forcas[perdedores[0]]},{nome:perdedores[1],forca:c.forcas[perdedores[1]]},rng);
  c.terceiroLugar=j.vencedor;
  if(perdedores.includes(c.usuario))c.faseUsuario=j.vencedor===c.usuario?'3º lugar na Copa do Mundo':'4º lugar na Copa do Mundo';
- c.fases.push({fase:'Disputa de terceiro lugar',jogos:[{...j,fase:'Disputa de terceiro lugar'}]});
- if([j.casa,j.fora].includes(c.usuario))c.jogosUsuario.push({...j,fase:'Disputa de terceiro lugar'});
+ // A final deve permanecer como a última fase do torneio.
+ const ultimaFinal=c.fases.findIndex(f=>f.fase==='Final');
+ const disputa={fase:'Disputa de terceiro lugar',jogos:[{...j,fase:'Disputa de terceiro lugar'}]};
+ if(ultimaFinal>=0)c.fases.splice(ultimaFinal,0,disputa);
+ else c.fases.push(disputa);
+ if([j.casa,j.fora].includes(c.usuario)){
+  c.jogosUsuario.push({...j,fase:'Disputa de terceiro lugar'});
+  c.faseUsuario=j.vencedor===c.usuario?'3º lugar na Copa do Mundo':'4º lugar na Copa do Mundo';
+ }
 }
 export function criarCampanhaCopa({nome,tipo='continental',usuario,forcaUsuario,clubes,ano,formato='grupos',entrada='principal',seed,estado,interativoEstadual=false}){
  const rng=geradorTecnico(seed||`${ano}|${nome}|${usuario}`),eu={...(clubes.find(c=>c.nome===usuario)||{nome:usuario}),forca:forcaUsuario},outros=embaralhar(formato==='selecao48'?selecionarParticipantes(clubes.filter(c=>c.nome!==usuario),47,rng):clubes.filter(c=>c.nome!==usuario),rng);
@@ -146,6 +153,34 @@ function jogoDaChave(c,a,b,rng){
  const ida=partida(a,b,rng),volta=partida(b,a,rng),golsCasa=ida.golsCasa+volta.golsFora,golsFora=ida.golsFora+volta.golsCasa;
  return {casa:a.nome,fora:b.nome,golsCasa,golsFora,vencedor:golsCasa>golsFora?a.nome:golsFora>golsCasa?b.nome:rng()<chancePenaltis(nivel(a),nivel(b))?a.nome:b.nome,penaltis:golsCasa===golsFora,agregado:true,partidas:[{...ida,etapa:'Ida'},{...volta,etapa:'Volta'}]};
 }
+/** Sorteio da fase de 32: cabeças de grupo protegidos e sem revanche imediata
+ * contra adversários da mesma chave; sem privilegiar a seleção do usuário.
+ */
+function chaveInicialMundial48(c,rng){
+ const grupos=c.grupos||[];
+ if(grupos.length!==12)throw new Error('Copa do Mundo: esperados 12 grupos.');
+ const grupoPorEquipe=new Map(grupos.flatMap(g=>g.classificacao.map(t=>[t.nome,g.grupo])));
+ const vencedores=embaralhar(grupos.map(g=>g.classificacao[0].nome),rng);
+ const segundos=embaralhar(grupos.map(g=>g.classificacao[1].nome),rng);
+ const terceiros=embaralhar(c.melhoresTerceiros||[],rng);
+ if(vencedores.length!==12||segundos.length!==12||terceiros.length!==8)throw new Error('Copa do Mundo: classificação incompleta.');
+ const pares=[];
+ const escolherRival=(primeiro,pool)=>{
+  const opcoes=pool.filter(nome=>grupoPorEquipe.get(nome)!==grupoPorEquipe.get(primeiro));
+  if(!opcoes.length)throw new Error('Copa do Mundo: falta adversário de outro grupo.');
+  const nome=opcoes[Math.floor(rng()*opcoes.length)];
+  pool.splice(pool.indexOf(nome),1);
+  return nome;
+ };
+ for(let i=0;i<8;i++)pares.push([vencedores[i],escolherRival(vencedores[i],terceiros)]);
+ for(let i=8;i<12;i++)pares.push([vencedores[i],escolherRival(vencedores[i],segundos)]);
+ while(segundos.length){
+  const a=segundos.shift();
+  pares.push([a,escolherRival(a,segundos)]);
+ }
+ if(pares.length!==16||new Set(pares.flat()).size!==32)throw new Error('Copa do Mundo: fase de 32 inválida.');
+ return pares;
+}
 function reduzirQuadro(times,limite,rng){
  let lista=[...times];if(limite<=0)return [];
  while(lista.length>limite){lista.sort((a,b)=>nivel(b)-nivel(a));const a=lista.pop(),b=lista.pop(),j=jogoEliminatorio(a,b,rng);lista.push(j.vencedor===a.nome?a:b);}
@@ -153,6 +188,15 @@ function reduzirQuadro(times,limite,rng){
 }
 function prepararChave(c){
  const rng=geradorTecnico(`${c.seed}|chave|${c.etapa}|${c.tamanho}`);
+ if(c.formato==='selecao48'&&c.tamanho===32&&c.grupos?.length===12){
+  c.quadroMata=chaveInicialMundial48(c,rng);
+  c.sobreviventes=c.quadroMata.flat();
+  const meu=c.quadroMata.find(par=>par.includes(c.usuario));
+  const adversario=meu?.find(nome=>nome!==c.usuario);
+  c.adversario=c.pool.find(x=>x.nome===adversario);
+  if(!c.adversario)throw new Error('Copa do Mundo: adversário do mata-mata não encontrado.');
+  return;
+ }
  if(!c.sobreviventes?.includes(c.usuario)){
   let outros=c.pool.filter(x=>x.nome!==c.usuario&&!c.eliminados.includes(x.nome)&&(!c.candidatosMata||c.candidatosMata.includes(x.nome))&&(!c.estado||x.estado===c.estado));
   // Strong national entrants join at the round of 16; early rounds retain the lower tiers.
@@ -180,6 +224,13 @@ function registrarMata(c,jogo){
  const fase=c.preContinental?'Pré-classificação continental':c.playoff&&c.tamanho===32?'Playoff de acesso às oitavas':faseN(c.tamanho);
  const rng=geradorTecnico(`${c.seed}|chave-resultados|${c.etapa}|${c.tamanho}`),jogos=[{...jogo,fase}],vencedores=[jogo.vencedor];
  for(const par of c.quadroMata||[]){if(par.includes(c.usuario))continue;const [a,b]=par;if(!b){vencedores.push(a);continue;}const j=jogoDaChave(c,{nome:a,forca:c.forcas[a]},{nome:b,forca:c.forcas[b]},rng);jogos.push({...j,fase});vencedores.push(j.vencedor);c.eliminados.push(j.vencedor===a?b:a);}
+ if(c.formato==='selecao48'){
+  // A ordem do quadro define o próximo cruzamento, não a posição do jogador.
+  vencedores.splice(0,vencedores.length,...(c.quadroMata||[]).map(par=>{
+   if(!par[1])return par[0];
+   return jogos.find(j=>[j.casa,j.fora].includes(par[0])&&[j.casa,j.fora].includes(par[1]))?.vencedor;
+  }).filter(Boolean));
+ }
  c.fases.push({fase,jogos});c.jogosUsuario.push({...jogo,fase});
  c.eliminados.push(jogo.vencedor===jogo.casa?jogo.fora:jogo.casa);
  c.sobreviventes=vencedores;

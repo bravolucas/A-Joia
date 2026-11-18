@@ -60,7 +60,7 @@ function avancarLiga(c,jogoUsuario){
  c.jogosLiga.push(...jogos);for(const j of jogos)if([j.casa,j.fora].includes(c.usuario))c.jogosUsuario.push({...j,fase:c.fase==='liga'?'Fase de liga':'Fase de grupos',rodada:c.rodada+1});c.rodada++;c.classificacao=tabela(c.times,c.jogosLiga,c.usuario);
 }
 function concluirLiga(c){
- c.grupos=[{grupo:c.formato==='liga'?'Tabela única':c.formato==='estadual'?'Classificação estadual':c.selecao?'Grupo da seleção':'Grupo do seu clube',jogos:c.jogosLiga,classificacao:c.classificacao}];const pos=c.classificacao.find(x=>x.meuClube)?.posicao||99;c.posicaoInicial=pos;
+ c.grupos=[{grupo:c.formato==='liga'?'Tabela única':c.formato==='estadual'?'Classificação estadual':c.formato==='selecao48'?'Grupo A':c.selecao?'Grupo da seleção':'Grupo do seu clube',jogos:c.jogosLiga,classificacao:c.classificacao}];const pos=c.classificacao.find(x=>x.meuClube)?.posicao||99;c.posicaoInicial=pos;
  if(c.formato==='estadual'){
   c.candidatosMata=c.classificacao.slice(0,4).map(x=>x.nome);if(pos>4){c.faseUsuario='Eliminado na classificação estadual';concluirSemUsuario(c,c.candidatosMata);return;}c.tamanho=4;c.fase='mata';c.adversario=null;return;
  }

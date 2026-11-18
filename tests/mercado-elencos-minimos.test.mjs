@@ -92,3 +92,42 @@ test('se aposentadoria causa déficit real, surge apenas o necessário e com ID 
  assert.equal(proximo.jogadores.filter(p=>!ids.has(String(p.id))).length,1);
  assert.equal(diagnosticarElenco(proximo.jogadores,{clubeNome:clube.nome,contarSecundarias:true}).totalFaltante,0);
 });
+
+
+test('três vendas consecutivas na mesma janela seguem possíveis com comprador lotado',()=>{
+ let c=prepararGestaoTecnico(inicial());
+ const comprador=CLUBES.find(cl=>cl.nome==='Santos');
+ const titulares=completarCarenciasMundo([],[comprador],geradorTecnico('comprador-tres-vendas'))
+  .map((p,i)=>({...p,id:'comprador-multi:'+i,idade:24,ovr:40,contrato:3}));
+ const extra=Array.from({length:8},(_,i)=>({
+  ...titulares.find(p=>p.posicao==='ATA'),
+  id:'reserva-multi:'+i,idade:21,ovr:30,contrato:3,carreira:{...carreira},
+ }));
+ c={...c,mundo:{...c.mundo,
+  jogadores:[...c.mundo.jogadores.filter(p=>p.clubeNome!==comprador.nome),...titulares,...extra],
+  gestoesClubes:{...c.mundo.gestoesClubes,[comprador.nome]:{saldo:1000000}}},
+  tecnico:{...c.tecnico,universo:{clubes:Object.fromEntries(CLUBES.map(cl=>[
+   cl.nome,{financas:cl.nome===comprador.nome?80:0}
+  ]))}}
+ };
+ const atletas=c.tecnico.gestao.elenco.filter(j=>j.setor==='DEF').slice(0,3);
+ assert.equal(atletas.length,3);
+ const idsIniciais=c.mundo.jogadores.map(p=>String(p.id));
+ assert.equal(new Set(idsIniciais).size,idsIniciais.length);
+ const saldoInicial=c.tecnico.gestao.saldo;
+ const valorTotal=atletas.reduce((s,j)=>s+Math.round(j.valor*.8),0);
+ for(const [indice,alvo] of atletas.entries()){
+  const anterior=structuredClone(c);
+  c=venderJogadorTecnico(c,alvo.id);
+  assert.deepEqual(anterior.mundo.jogadores.find(p=>String(p.id)===String(alvo.mundoId)).clubeNome,'Avaí');
+  assert.equal(c.tecnico.gestao.elenco.some(j=>String(j.mundoId)===String(alvo.mundoId)),false);
+  assert.equal(c.mundo.jogadores.find(p=>String(p.id)===String(alvo.mundoId)).clubeNome,comprador.nome);
+  assert.equal(c.mundo.jogadores.filter(p=>!p.aposentado&&p.clubeNome===comprador.nome).length,30);
+  assert.equal(c.mundo.jogadores.filter(p=>p.clubeNome===null&&String(p.id).startsWith('reserva-multi:')).length,indice+1);
+  assert.equal(c.mundo.jogadores.length,anterior.mundo.jogadores.length);
+ }
+ assert.equal(c.tecnico.gestao.saldo,saldoInicial+valorTotal);
+ assert.equal(new Set(c.mundo.jogadores.map(p=>String(p.id))).size,c.mundo.jogadores.length);
+ assert.equal(diagnosticarElenco(c.mundo.jogadores,{clubeNome:comprador.nome,contarSecundarias:true}).totalFaltante,0);
+ assert.deepEqual(prepararGestaoTecnico(c),c);
+});

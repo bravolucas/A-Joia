@@ -48,6 +48,7 @@ function completarTerceiroLugar(c){
  const rng=geradorTecnico(`${c.seed}|disputa-terceiro-lugar`);
  const j=jogoEliminatorio({nome:perdedores[0],forca:c.forcas[perdedores[0]]},{nome:perdedores[1],forca:c.forcas[perdedores[1]]},rng);
  c.terceiroLugar=j.vencedor;
+ if(perdedores.includes(c.usuario))c.faseUsuario=j.vencedor===c.usuario?'3º lugar na Copa do Mundo':'4º lugar na Copa do Mundo';
  c.fases.push({fase:'Disputa de terceiro lugar',jogos:[{...j,fase:'Disputa de terceiro lugar'}]});
  if([j.casa,j.fora].includes(c.usuario))c.jogosUsuario.push({...j,fase:'Disputa de terceiro lugar'});
 }

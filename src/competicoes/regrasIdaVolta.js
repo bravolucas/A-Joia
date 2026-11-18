@@ -4,7 +4,7 @@
  * Não aplicamos a antiga regra de gols marcados fora de casa.
  * Copas não cadastradas ficam em partida única até que seu regulamento seja definido.
  */
-const normalizar = nome => String(nome || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+const normalizar = nome => String(nome || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ı/g,'i').toLowerCase().trim();
 const conhecido = n => /copa do brasil|copa del rey|copa do rei|coppa italia|copa da italia|taca de portugal|libertadores|sul-americana|sudamericana|champions league|europa league|conference league|concacaf.*(champions|campeones|campeoes)|afc champions|afc challenge|recopa|supercopa|copa do mundo|mundial|intercontinental|selecao|selecoes|copa argentina|fa cup|dfb.pokal|coupe de france|knvb beker|turkiye kupasi|king.s cup|mls cup|copa sao paulo/i.test(n);
 
 export const regulamentoConhecidoIdaVolta = nome => conhecido(normalizar(nome));

@@ -7243,7 +7243,7 @@ function resolverTemporada(c, extraStats) {
                   const Linha = ({ x, campo, sufixo }) => (
                     <div className={`flex items-center gap-2 text-[11px] py-1 px-1.5 rounded-sm ${x.voce ? "bg-emerald-500/15 border border-emerald-500/30" : ""}`}>
                       <span className={`font-mono w-6 text-right ${x.pos <= 3 ? "text-amber-400 font-bold" : "text-zinc-600"}`}>{x.pos}º</span>
-                      <span className={`flex-1 truncate ${x.voce ? "font-bold text-emerald-400" : "text-zinc-300"}`}>{x.voce ? "VOCÊ" : x.nome}</span>
+                      <span className={`flex-1 truncate ${x.voce ? "font-bold text-emerald-400" : "text-zinc-300"}`}><LinkEntidade tipo="jogador" id={x.voce?"voce":x.id??idJogadorPorNome({mundo,nome},x.nome)} nome={x.nome}>{x.voce?"VOCÊ":x.nome}</LinkEntidade></span>
                       <span className="text-[9px] text-zinc-600 truncate max-w-[80px]"><LinkEntidade tipo="clube" nome={x.clube}/></span>
                       <span className="font-mono text-zinc-200 w-10 text-right">{x[campo]}{sufixo}</span>
                     </div>
@@ -7378,7 +7378,7 @@ function resolverTemporada(c, extraStats) {
                                 {fila.slice(0, 6).map((x, i) => (
                                   <div key={i} className={`flex items-center gap-2 text-[10px] px-1.5 py-0.5 rounded-sm ${x.voce ? "bg-blue-500/15 border border-blue-500/30" : ""}`}>
                                     <span className={`font-mono w-4 ${x.pos <= 2 ? "text-blue-400" : "text-zinc-600"}`}>{x.pos}º</span>
-                                    <span className={`flex-1 truncate ${x.voce ? "font-bold text-blue-300" : "text-zinc-400"}`}>{x.voce ? "VOCÊ" : x.nome}</span>
+                                    <span className={`flex-1 truncate ${x.voce ? "font-bold text-blue-300" : "text-zinc-400"}`}><LinkEntidade tipo="jogador" id={x.voce?"voce":x.id??idJogadorPorNome({mundo,nome},x.nome)} nome={x.nome}>{x.voce?"VOCÊ":x.nome}</LinkEntidade></span>
                                     <span className="font-mono text-zinc-500">{x.ovr}</span>
                                   </div>
                                 ))}

@@ -8,7 +8,7 @@ const somenteNumero = n => Number.isFinite(n) ? Math.trunc(n) : null;
 const texto = n => String(n ?? '').trim();
 export const premioIndividual = tipo =>
   /bola.?de?.?ouro|bolaouro|bota.?de?.?ouro|botaouro|yashin|artilh|melhor.?jog|melhor.?da|revela[cç][aã]o|pr[eê]mio|premio|luva.?de?.?ouro|golden.?boot|golden.?ball/i.test(texto(tipo));
-const nomePremio = tipo => ({
+export const nomePremio = tipo => ({
   'bola-de-ouro':'Bola de Ouro','bolaOuro':'Bola de Ouro',
   'botaOuro':'Bota de Ouro','bota-de-ouro':'Bota de Ouro',
   'yashin':'Troféu Yashin','artilheiro':'Artilheiro',

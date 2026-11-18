@@ -8,7 +8,7 @@ import {HISTORICO_COPA_BRASIL,totalCopaBrasilHistoricas} from '../dados/copaBras
 import {CLUBES,LIGAS,NACIONALIDADES,anoRegistroTemporada,ESTADUAIS} from '../dados/data.js';
 import {eventosConhecidos,nomeCanonico,acervoInicial,galeriaClube} from './historiaFutebol.js';
 import {HISTORICO_SELECOES,totalTitulosHistoricosSelecao,nomeSelecaoHistorica} from '../dados/selecoesHistoricas.js';
-const nacional=nome=>/Copa do Mundo|Eurocopa|Copa América|Copa Africana|Copa da Ásia|Copa Ouro|Nações da Oceania/i.test(nome||'');
+const nacional=nome=>!/clubes/i.test(nome||'')&&/Copa do Mundo|Eurocopa|Copa América|Copa Africana|Copa da Ásia|Copa Ouro|Nações da Oceania/i.test(nome||'');
 const nomeComp=nome=>/^Copa do Mundo\b/i.test(nome||'')&&!/clubes/i.test(nome)?'Copa do Mundo':nomeCanonico(nome);
 /** Consulta os resultados já registrados, sem sortear campeões para lacunas do save. */
 export function campeoesRegistrados(c={},temporadas=c.temporadas||[]){

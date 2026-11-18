@@ -1,0 +1,27 @@
+name: Auditar nomes regionais de camisas de clubes
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/jogador/camisasCarreira.js'
+      - 'src/simulacao/nomesRegionais.js'
+      - 'tests/camisas-nomes-regionais.test.mjs'
+      - 'docs/CAMISAS_NOMES_REGIONAIS.md'
+      - '.github/workflows/auditar-camisas-nomes-regionais.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  nomes-camisas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Validar 24 nomes regionais, legado e regras de camisa
+        run: node --test tests/camisas-nomes-regionais.test.mjs tests/camisas-projetos-carreira.test.mjs
+      - name: Build de produção
+        run: GITHUB_PAGES=true npm run build

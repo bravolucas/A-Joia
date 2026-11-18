@@ -4,6 +4,7 @@ import {RevelacaoTela} from '../comum/efeitos/Movimento.jsx';
 import {BotaoMuseuPessoal,MuseuFimCarreira} from '../museu/MuseuPessoal.jsx';
 import BotaoHistoria from '../historia/HistoriaFutebol.jsx';
 import PortalHistorico from '../historia/PortalHistorico.jsx';
+import LinkEntidade from '../historia/LinkEntidade.jsx';
 import ApresentacaoOficial from '../comum/ApresentacaoOficial.jsx';
 import {ChegadaCarreira,PainelProgressaoCarreira,RetrospectivaCarreira} from './ProgressaoCarreiraUI.jsx';
 import {camisaInfo,escolherCamisa,sincronizarCamisasSelecao,prepararCamisaSelecao} from './camisasCarreira.js';
@@ -597,7 +598,7 @@ function Estante({ c, onFechar }) {
         </div>
         {c.lista.length > 0 && (
           <ul className="flex flex-col gap-1 mt-4">
-            {[...c.lista].reverse().map((t, i) => <li key={i} className="text-[15px] text-[#C9D9E8]"><span className="font-stat text-[#9EB5C9] mr-2">{t.ano}</span>{t.nome} <span className="text-[#7F918A]">· {t.clube}</span></li>)}
+            {[...c.lista].reverse().map((t, i) => <li key={i} className="text-[15px] text-[#C9D9E8]"><span className="font-stat text-[#9EB5C9] mr-2">{t.ano}</span><LinkEntidade tipo={ehPremioIndividual(t.tipo)?'premio':'competicao'} nome={t.nome}/> <span className="text-[#7F918A]">· <LinkEntidade tipo="clube" nome={t.clube}/></span></li>)}
           </ul>
         )}
         {(c.marcos || []).length > 0 && (
@@ -646,10 +647,10 @@ function Ficha({ c, semTopo = false }) {
           <span className="text-[10px] font-bold tracking-widest text-[#9EB5C9]">{c.posicao}</span>
         </div>
         <div className="min-w-0 flex-1">
-          <div className="display text-sm text-[#F2F5F3] truncate">{c.nome}</div>
+          <div className="display text-sm text-[#F2F5F3] truncate"><LinkEntidade tipo="jogador" id="voce" nome={c.nome}/></div>
           <div className="flex items-center gap-1.5 mt-1 text-[16px] font-semibold text-[#E1E6E3]">
             <ClubDot club={clube} size={18} />
-            <span className="truncate">{clube.nome}{c.emprestimo ? " (empréstimo)" : ""}</span>
+            <span className="truncate"><LinkEntidade tipo="clube" nome={clube.nome}/>{c.emprestimo ? " (empréstimo)" : ""}</span>
           </div>
           <div className="text-[13px] text-[#9EB5C9]">{ligaDe(clube.liga).nome} · {st.label}</div>
           <div className="text-[13px] text-[#9EB5C9]">Camisa <span className="font-stat text-[#E1E6E3]">{numeroDe(c)}</span> · {peDe(c.pe).nome}</div>
@@ -962,7 +963,7 @@ function PainelRival({ c, card }) {
         <span className="text-xl" aria-hidden="true">⚔️</span>
         <div className="min-w-0 flex-1">
           <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#F0A99E]">Seu rival de geração</div>
-          <div className="text-[16px] font-bold text-[#F2F5F3] truncate">{r.nome} <span className="font-normal text-[14px] text-[#9EB5C9]">· {nacDe(r.nac).label} · {r.posicao}</span></div>
+          <div className="text-[16px] font-bold text-[#F2F5F3] truncate"><LinkEntidade tipo="jogador" id={r.id} nome={r.nome}/> <span className="font-normal text-[14px] text-[#9EB5C9]">· {nacDe(r.nac).label} · {r.posicao}</span></div>
         </div>
         <ClubDot club={clubeDe(l.clube)} size={30} />
       </div>
@@ -1236,8 +1237,8 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
           {bola.top.map((r, i) => (
             <li key={i} className={`flex items-center gap-2 text-[16px] ${r.voce ? "text-[#EBC557] font-bold" : "text-[#C9D9E8]"}`}>
               <span className="font-stat w-5 text-[#9EB5C9]">{i + 1}</span>
-              <span className="truncate">{r.nome}</span>
-              <span className="ml-auto text-[13px] text-[#7F918A] truncate">{r.clube}</span>
+              <span className="truncate"><LinkEntidade tipo="jogador" id={r.voce?'voce':r.id} nome={r.nome}/></span>
+              <span className="ml-auto text-[13px] text-[#7F918A] truncate"><LinkEntidade tipo="clube" nome={r.clube}/></span>
             </li>
           ))}
         </ol>
@@ -1901,7 +1902,7 @@ function PopupPosCarreira({ c, onFechar }) {
             <div key={i} className="flex items-center gap-3 py-2 border-t border-white/[.06] first:border-0 cp-surge" style={{ animationDelay: `${0.25 + i * 0.08}s` }}>
               <span className="w-8 flex justify-center shrink-0">{x.band ? <Bandeira nac={x.band} size={26} /> : <ClubDot club={clubeDe(x.clube)} size={28} />}</span>
               <span className="flex-1 min-w-0">
-                <span className="block text-[15px] font-semibold text-[#E4E4E7] truncate">{x.clube}</span>
+                <span className="block text-[15px] font-semibold text-[#E4E4E7] truncate"><LinkEntidade tipo="clube" nome={x.clube}/></span>
                 <span className="block text-[12px] text-[#A1A1AA]">{x.de === x.ate ? x.de : `${x.de}–${x.ate}`} · {x.liga}</span>
               </span>
               <span className="flex items-center gap-0.5 shrink-0">

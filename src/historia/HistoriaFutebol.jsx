@@ -14,6 +14,10 @@ import {bloquearRolagem} from '../comum/bloqueioRolagem.js';
 import {galeriaClube,estatisticasHistoricas,lideresObservados} from './historiaFutebol.js';
 import './HistoriaFutebol.css';
 import './ArquivoFM.css';
+import LinkEntidade from './LinkEntidade.jsx';
+import HistoricoPremios from './HistoricoPremios.jsx';
+import {EVENTO_ENTIDADE,empilharPagina,paginaEntidade} from './navegacaoEntidades.js';
+
 
 export function GaleriaClube({c,nome,temporadas,onCompeticao}){
  const g=useMemo(()=>galeriaClube(c,nome,temporadas),[c,nome,temporadas]);
@@ -43,7 +47,7 @@ export function MarcosIndividuais({c,temporadas,clube}){
 }
 function RecordesSimulacao({c}){
  const [nac,N]=useState(c.nac||c.nacionalidade||''),[metrica,M]=useState('gols'),lideres=lideresObservados(c,{nac,metrica});
- return <section className="hf-recordes"><span className="hf-eyebrow">CADA SAVE TEM SEUS PROTAGONISTAS</span><h2>Recordistas deste universo</h2><p className="hf-nota">Números acumulados dos atletas observados em clubes, desde {c.historiaFutebol?.desde||'o início do registro'}. O filtro reúne jogadores da nacionalidade escolhida; não é um ranking de gols por seleções.</p><div className="hf-filtros"><label>Nacionalidade<select aria-label="Nacionalidade" value={nac} onChange={e=>N(e.target.value)}><option value="">Todas</option>{NACIONALIDADES.map(x=><option value={x.id} key={x.id}>{x.label}</option>)}</select></label><label>Recorde<select aria-label="Recorde" value={metrica} onChange={e=>M(e.target.value)}><option value="gols">Mais gols</option><option value="assist">Mais assistências</option><option value="jogos">Mais jogos</option><option value="defesas">Mais defesas</option><option value="defesasDecisivas">Mais defesas decisivas</option></select></label></div><ol className="hf-ranking">{lideres.map((p,i)=><li key={p.id}><b>{i+1}</b><span><strong>{p.nome}{p.voce?' · Você':''}</strong><small>{p.clube}</small></span><em>{p[metrica]}</em></li>)}</ol>{!lideres.length&&<p className="hf-vazio">Ainda não há dados registrados para este recorte.</p>}</section>;
+ return <section className="hf-recordes"><span className="hf-eyebrow">CADA SAVE TEM SEUS PROTAGONISTAS</span><h2>Recordistas deste universo</h2><p className="hf-nota">Números acumulados dos atletas observados em clubes, desde {c.historiaFutebol?.desde||'o início do registro'}. O filtro reúne jogadores da nacionalidade escolhida; não é um ranking de gols por seleções.</p><div className="hf-filtros"><label>Nacionalidade<select aria-label="Nacionalidade" value={nac} onChange={e=>N(e.target.value)}><option value="">Todas</option>{NACIONALIDADES.map(x=><option value={x.id} key={x.id}>{x.label}</option>)}</select></label><label>Recorde<select aria-label="Recorde" value={metrica} onChange={e=>M(e.target.value)}><option value="gols">Mais gols</option><option value="assist">Mais assistências</option><option value="jogos">Mais jogos</option><option value="defesas">Mais defesas</option><option value="defesasDecisivas">Mais defesas decisivas</option></select></label></div><ol className="hf-ranking">{lideres.map((p,i)=><li key={p.id}><b>{i+1}</b><span><strong><LinkEntidade tipo="jogador" id={p.voce?'voce':p.id} nome={p.nome}/>{p.voce?' · Você':''}</strong><small><LinkEntidade tipo="clube" nome={p.clube}/></small></span><em>{p[metrica]}</em></li>)}</ol>{!lideres.length&&<p className="hf-vazio">Ainda não há dados registrados para este recorte.</p>}</section>;
 }
 function EmblemaCampeao({nome,selecao}){const n=NACIONALIDADES.find(n=>n.label===nome||n.id===nome),src=selecao&&n?bandeiraDe(n.id):escudoDe(nome);return src?<img className="hf-emblema-campeao" src={src} alt=""/>:null;}
 export function GaleriaCompeticoes({c,temporadas,nome,onCompeticao,onClube}){
@@ -58,11 +62,89 @@ export function GaleriaCompeticoes({c,temporadas,nome,onCompeticao,onClube}){
  {dados.ranking.length?<ol className="hf-ranking hf-ranking-campeoes">{dados.ranking.map((t,i)=><li key={t.clube}><b>{i+1}</b><EmblemaCampeao nome={t.clube} selecao={dados.selecao}/><span>{dados.selecao?<strong>{t.clube}</strong>:<button onClick={()=>onClube(t.clube)}>{t.clube}</button>}<small>{t.inicial} na base · {t.simulacao} nesta carreira{t.legado?` · ${t.legado} sem ano no save`:''}</small></span><em>{t.total}×</em></li>)}</ol>:<p className="hf-vazio">As primeiras conquistas registradas formarão este ranking.</p>}
  </section>;
 }
-export function HistoriaDialog({c,nome,temporadas,onFechar,competicaoInicial}){
- const ref=useRef(null),[jogadorConfrontos,JC]=useState(null),[aba,A]=useState(competicaoInicial?'competicoes':'clubes'),[competicao,CP]=useState(competicaoInicial||'Champions League'),[clube,C]=useState(nome||c.tecnico?.clube||c.clubeNome||c.clube?.nome||'Corinthians'),[busca,B]=useState('');
- useEffect(()=>{const el=ref.current,antes=document.activeElement;el.showModal();const liberar=bloquearRolagem(document.body);return()=>{el.close();liberar();antes?.focus({preventScroll:true});};},[]);
- useEffect(()=>{ref.current?.querySelector('.hf-corpo')?.scrollTo({top:0});},[aba,competicao]);
- const clubes=[...new Map([...CLUBES,...CLUBES_REGIONAIS_EXTRAS,...clubesComHistoricoEstadual().map(nome=>({nome}))].map(c=>[c.nome,c])).values()].filter(x=>!busca||x.nome.toLocaleLowerCase('pt-BR').includes(busca.toLocaleLowerCase('pt-BR')));
- return createPortal(<dialog ref={ref} className="hf-dialog fm27-historico" aria-label="História do futebol" onCancel={e=>{e.preventDefault();onFechar();}}><header className="hf-cabecalho"><div><span className="hf-eyebrow">A JOIA · ARQUIVO VIVO</span><h1>Histórias que ficam.</h1></div><button onClick={onFechar} aria-label="Fechar história">×</button></header><nav className="hf-abas" aria-label="Seções da história">{[['clubes','Clubes'],['competicoes','Competições'],['confrontos','Confrontos'],['carreira','Sua carreira'],['atletas','Jogadores'],['recordes','Recordes']].map(([id,label])=><button key={id} aria-pressed={aba===id} onClick={()=>A(id)}>{label}</button>)}</nav><div className="hf-corpo">{aba==='clubes'?<><div className="hf-busca"><label>Encontre um clube<input type="search" placeholder="Buscar clube…" value={busca} onChange={e=>B(e.target.value)}/></label><select aria-label="Clube da galeria" value={clube} onChange={e=>C(e.target.value)}>{!clubes.some(x=>x.nome===clube)&&<option value={clube}>{clube}</option>}{clubes.map(x=><option key={x.nome}>{x.nome}</option>)}</select><div className="hf-sugestoes">{clubes.slice(0,6).map(x=><button aria-pressed={clube===x.nome} key={x.nome} onClick={()=>C(x.nome)}>{x.nome}</button>)}</div>{!clubes.length&&<small>Nenhum clube encontrado.</small>}</div><GaleriaClube c={c} nome={clube} temporadas={temporadas} onCompeticao={nome=>{CP(nome);A('competicoes');}}/></>:aba==='competicoes'?<GaleriaCompeticoes c={c} temporadas={temporadas} nome={competicao} onCompeticao={CP} onClube={nome=>{C(nome);A('clubes');}}/>:aba==='confrontos'?<HistoricoConfrontos c={c} jogadorInicial={jogadorConfrontos}/>:aba==='carreira'?<MarcosIndividuais c={c} temporadas={temporadas}/>:aba==='atletas'?<ArquivoAtletasFM c={c} onConfrontos={id=>{JC(id);A('confrontos');}}/>:<RecordesSimulacao c={c}/>}</div><footer><button onClick={onFechar}>Voltar ao jogo</button></footer></dialog>,document.body);
+function PerfilTreinador({c,nome}){
+ const t=c.tecnico||{};
+ const atual=nome||t.nome||'Seu treinador';
+ const temporadas=Array.isArray(t.historico)?t.historico:Array.isArray(t.temporadas)?t.temporadas:[];
+ return <section className="hf-marcos" aria-label="Histórico do treinador">
+   <span className="hf-eyebrow">ARQUIVO VIVO / TREINADORES</span><h2>{atual}</h2>
+   <p className="hf-nota">Histórico de comando disponível no save atual, sem completar temporadas não registradas.</p>
+   {t.clube&&<div className="hf-identidade"><img src={escudoDe(t.clube)} alt=""/>
+     <div><small>Clube atual</small><h3><LinkEntidade tipo="clube" nome={t.clube}/></h3></div></div>}
+   {temporadas.length?<ol className="hf-linha">{temporadas.map((t,i)=>
+     <li key={i}><time>{t.ano??t.temporada??'—'}</time><span><LinkEntidade tipo="clube" nome={t.clube||t.nome}/><small>{t.jogos??0} jogos registrados</small></span></li>)}</ol>
+    :<p className="hf-vazio">Ainda não há temporadas de treinador documentadas nesta carreira.</p>}
+ </section>;
+}
+export function HistoriaDialog({c,nome,temporadas,onFechar,competicaoInicial,entradaInicial}){
+ const ref=useRef(null),[busca,B]=useState('');
+ const clubePadrao=nome||c.tecnico?.clube||c.clubeNome||c.clube?.nome||'Corinthians';
+ const compPadrao=competicaoInicial||'Champions League';
+ const inicial=entradaInicial?paginaEntidade(entradaInicial,{clube:clubePadrao,competicao:compPadrao}):
+   competicaoInicial?paginaEntidade({tipo:'competicao',nome:competicaoInicial},{clube:clubePadrao}):
+   paginaEntidade({tipo:'clube',nome:clubePadrao},{competicao:compPadrao});
+ const [pilha,SetPilha]=useState(()=>[inicial]);
+ const pagina=pilha.at(-1)||inicial;
+ const aba=pagina.aba,clube=pagina.clube||clubePadrao,competicao=pagina.competicao||compPadrao;
+ const irPagina=proxima=>{SetPilha(p=>empilharPagina(p,proxima));};
+ const irEntidade=destino=>irPagina(paginaEntidade(destino,{clube,competicao}));
+ const mudarAba=id=>{
+   if(id==='clubes')irEntidade({tipo:'clube',nome:clube});
+   else if(id==='competicoes')irEntidade({tipo:'competicao',nome:competicao});
+   else if(id==='premios')irEntidade({tipo:'premio',nome:pagina.premio||'Bola de Ouro'});
+   else irPagina({...pagina,aba:id,jogadorId:id==='confrontos'?pagina.jogadorId:'',
+      nome:id==='treinadores'?(c.tecnico?.nome||c.nome||'Seu treinador'):''});
+ };
+ useEffect(()=>{const el=ref.current,antes=document.activeElement;el.showModal();const liberar=bloquearRolagem(document.body);
+   return()=>{el.close();liberar();antes?.focus?.({preventScroll:true});};},[]);
+ useEffect(()=>{
+   const ouvir=e=>{if(!ref.current?.open)return;const p=paginaEntidade(e.detail,{clube,competicao});if(p)irPagina(p);};
+   window.addEventListener(EVENTO_ENTIDADE,ouvir);
+   return()=>window.removeEventListener(EVENTO_ENTIDADE,ouvir);
+ },[clube,competicao]);
+ useEffect(()=>{ref.current?.querySelector('.hf-corpo')?.scrollTo({top:0});},[pagina]);
+ const clubes=[...new Map([...CLUBES,...CLUBES_REGIONAIS_EXTRAS,
+   ...clubesComHistoricoEstadual().map(nome=>({nome}))].map(c=>[c.nome,c])).values()]
+   .filter(x=>!busca||x.nome.toLocaleLowerCase('pt-BR').includes(busca.toLocaleLowerCase('pt-BR')));
+ const localizacao=aba==='atletas'?'Jogador':aba==='clubes'?clube:aba==='competicoes'?competicao:
+   aba==='premios'?pagina.premio:aba==='confrontos'?'Confrontos':aba==='treinadores'?pagina.nome:'Arquivo Vivo';
+ return createPortal(<dialog ref={ref} className="hf-dialog fm27-historico" aria-label="História do futebol"
+  onCancel={e=>{e.preventDefault();onFechar();}}>
+   <header className="hf-cabecalho"><div><span className="hf-eyebrow">A JOIA · ARQUIVO VIVO</span>
+    <h1>Histórias que ficam.</h1></div><button type="button" onClick={onFechar} aria-label="Fechar história">×</button></header>
+   <nav className="hf-abas" aria-label="Seções da história">
+    {[['clubes','Clubes'],['competicoes','Competições'],['confrontos','Confrontos'],
+      ['carreira','Sua carreira'],['atletas','Jogadores'],['premios','Prêmios'],
+      ['treinadores','Treinadores'],['recordes','Recordes']].map(([id,label])=>
+     <button type="button" key={id} aria-pressed={aba===id} onClick={()=>mudarAba(id)}>{label}</button>)}
+   </nav>
+   <div className="hf-nav-tools"><button type="button" className="hf-nav-back"
+     disabled={pilha.length<=1} onClick={()=>SetPilha(p=>p.length>1?p.slice(0,-1):p)}>← Voltar</button>
+     <span className="hf-nav-location">{localizacao}</span></div>
+   <div className="hf-corpo">
+    {aba==='clubes'?<><div className="hf-busca">
+     <label>Encontre um clube<input type="search" placeholder="Buscar clube…" value={busca} onChange={e=>B(e.target.value)}/></label>
+     <select aria-label="Clube da galeria" value={clube} onChange={e=>irEntidade({tipo:'clube',nome:e.target.value})}>
+      {!clubes.some(x=>x.nome===clube)&&<option value={clube}>{clube}</option>}
+      {clubes.map(x=><option key={x.nome}>{x.nome}</option>)}</select>
+     <div className="hf-sugestoes">{clubes.slice(0,6).map(x=>
+      <button aria-pressed={clube===x.nome} key={x.nome} onClick={()=>irEntidade({tipo:'clube',nome:x.nome})}>{x.nome}</button>)}</div>
+     {!clubes.length&&<small>Nenhum clube encontrado.</small>}</div>
+     <GaleriaClube c={c} nome={clube} temporadas={temporadas}
+       onCompeticao={nome=>irEntidade({tipo:'competicao',nome})}/></>:
+     aba==='competicoes'?<GaleriaCompeticoes c={c} temporadas={temporadas} nome={competicao}
+       onCompeticao={nome=>irEntidade({tipo:'competicao',nome})}
+       onClube={nome=>irEntidade({tipo:'clube',nome})}/>:
+     aba==='confrontos'?<HistoricoConfrontos key={pagina.jogadorId||'clubes'} c={c} jogadorInicial={pagina.jogadorId||null}/>:
+     aba==='carreira'?<MarcosIndividuais c={c} temporadas={temporadas}/>:
+     aba==='atletas'?<ArquivoAtletasFM key={pagina.jogadorId||'todos'} c={c} jogadorInicial={pagina.jogadorId||null}
+       onConfrontos={id=>irEntidade({tipo:'confrontos',id,nome:'Confrontos'})}/>:
+     aba==='premios'?<HistoricoPremios key={pagina.premio||'premios'} c={c}
+       premioInicial={pagina.premio} onPremio={nome=>irEntidade({tipo:'premio',nome})}/>:
+     aba==='treinadores'?<PerfilTreinador c={c} nome={pagina.nome}/>:
+     <RecordesSimulacao c={c}/>}
+   </div>
+   <footer><button type="button" onClick={onFechar}>Voltar ao jogo</button></footer>
+ </dialog>,document.body);
 }
 export default function BotaoHistoria({c,nome,temporadas,children,className='',competicao}){const [aberto,A]=useState(false);return <><button type="button" className={`hf-abrir ${className}`} aria-label={competicao?undefined:nome?`Ver história do ${nome}`:'Abrir história do futebol'} title={competicao?'Ver campeões desta competição':undefined} onClick={()=>A(true)}>{children||'História do futebol'}</button>{aberto&&<HistoriaDialog c={c} nome={nome} temporadas={temporadas} competicaoInicial={competicao} onFechar={()=>A(false)}/>}</>;}

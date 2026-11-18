@@ -63,3 +63,32 @@ test('duas temporadas seguidas mantêm 20 por divisão e trocam exatamente quatr
     assert.equal(new Set(clubes.map(c => c.nome)).size, 40);
   }
 });
+
+
+test('modo treinador por etapas preserva acesso decidido nos playoffs e a liga do ano seguinte', async () => {
+  const {
+    iniciarCarreiraTecnico, simularEtapaTecnico, QUANTIDADE_DECISOES_TECNICO,
+  } = await import('../src/treinador/tecnico.js');
+  const atleta = {
+    nome: 'Auditoria Série B', idade: 40, ano: 2026, clubeNome: 'Fortaleza',
+    aposentado: true, temporadas: [], totais: {}, legado: { pontos: 500 },
+  };
+  let carreira = iniciarCarreiraTecnico(atleta);
+  carreira = { ...carreira, tecnico: {
+    ...carreira.tecnico, clube: 'Fortaleza', liga: 'serieB', elenco: 64,
+    diretoria: 95, torcida: 95,
+    decisoes: Array(QUANTIDADE_DECISOES_TECNICO).fill({ carta: 'auditoria', opcao: 'neutra' }),
+  } };
+  for (let etapa = 0; etapa < 4; etapa++) {
+    carreira = simularEtapaTecnico(carreira, rngSeed(700 + etapa));
+  }
+  const temporada = carreira.tecnico.temporadas.at(-1);
+  assert.ok(temporada);
+  assert.equal(temporada.classificacao.length, 20);
+  assert.equal(temporada.classificacao.find(x => x.nome === 'Fortaleza')?.jogos, 38);
+  assert.equal(temporada.playoffsSerieB?.confrontos.length, 2);
+  const promovido = temporada.playoffsSerieB.promovidos.includes('Fortaleza');
+  assert.equal(Boolean(temporada.acesso), promovido);
+  assert.equal(carreira.tecnico.liga, promovido ? 'brasileirao' : 'serieB');
+  assert.equal(carreira.tecnico.ligasMundo.Fortaleza, carreira.tecnico.liga);
+});

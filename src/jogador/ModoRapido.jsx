@@ -1091,11 +1091,11 @@ function TabelaAnoAno({ c }) {
   );
 }
 
-function LinhaTime({ icone, nome, resultado, destaque }) {
+function LinhaTime({ icone, nome, resultado, destaque, entidadeNome }) {
   return (
     <div className="flex items-center gap-2.5 py-1.5 border-b border-white/5 last:border-0">
       <span className="w-6 flex justify-center shrink-0">{icone}</span>
-      <span className="text-[15px] text-[#C9D9E8] truncate flex-1">{nome}</span>
+      <span className="text-[15px] text-[#C9D9E8] truncate flex-1"><LinkEntidade tipo="competicao" nome={entidadeNome||nome}>{nome}</LinkEntidade></span>
       <span className={`font-stat text-[16px] shrink-0 ${destaque === "ouro" ? "text-[#EBC557]" : destaque === "ruim" ? "text-[#F0A99E]" : "text-[#F2F5F3]"}`}>{resultado}</span>
     </div>
   );
@@ -1164,7 +1164,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
           {card.copaNac && <LinhaTime icone={<TacaCompeticao tipo="copa" nome={card.copaNac.nome} size={18} />} nome={card.copaNac.nome} resultado={card.titulos.some(t=>t.tipo==="copa"&&t.nome===card.copaNac.nome)?"Campeão":card.copaNac.fase} destaque={card.titulos.some(t=>t.tipo==="copa"&&t.nome===card.copaNac.nome)||card.copaNac.fase === "Campeão" ? "ouro" : null} />}
           {card.continental && <LinhaTime icone={<TacaCompeticao tipo="continental" nome={card.continental.nome} size={18} />} nome={card.continental.nome} resultado={contRes} destaque={contRes === "Campeão" ? "ouro" : null} />}
           {card.mundialRes && <LinhaTime icone={<TacaCompeticao tipo="mundial" nome="Mundial de Clubes" size={18} />} nome="Mundial de Clubes" resultado={card.mundialRes} destaque={card.mundialRes === "Campeão" ? "ouro" : null} />}
-          {sel && <LinhaTime icone={<Bandeira nac={c.nac} size={18} />} nome={`${sel.nome} (seleção)`} resultado={sel.convocado ? (sel.campeao ? "Campeão" : sel.resultado) : "Fora da lista"} destaque={sel.campeao ? "ouro" : null} />}
+          {sel && <LinhaTime icone={<Bandeira nac={c.nac} size={18} />} nome={`${sel.nome} (seleção)`} entidadeNome={sel.nome} resultado={sel.convocado ? (sel.campeao ? "Campeão" : sel.resultado) : "Fora da lista"} destaque={sel.campeao ? "ouro" : null} />}
         </div>
         {/* taças e prêmios */}
         {card.titulos.length > 0 && (

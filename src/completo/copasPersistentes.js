@@ -7,6 +7,7 @@ import {clubesDoMundo} from '../simulacao/mundoVivo.js';
 import {criarCampanhaCopa,decisaoCopa,registrarPlacarCopa,continuarCopa,resumoCampanhaCopa,chancePenaltis} from '../treinador/copasEscolha.js';
 import {geradorTecnico} from '../treinador/momentosTecnico.js';
 import {temIdaVolta} from '../competicoes/regrasIdaVolta.js';
+import {regraDesempateCopa,vencedorPorGolsFora} from '../competicoes/desempatePorCompeticao.js';
 import {aplicarProrrogacao,aplicarProrrogacaoAgregado} from '../competicoes/prorrogacaoMata.js';
 export function prepararCopaPersistente(c,card,tipo,forcaUsuario){
  if(!card.copasPersistentesVersao)return null;
@@ -46,17 +47,21 @@ export function registrarJogoPersistente(card,tipo,{casa,fora,golsCasa,golsFora}
  if(idaVolta){
   if(!idaAnterior){card.pernasCopas[tipo]={...jogo,etapa:'Ida'};return {ida:true,decisao:d};}
   if(casa!==idaAnterior.fora||fora!==idaAnterior.casa)throw new Error('Adversário da volta difere da ida.');
-  const volta=aplicarProrrogacaoAgregado(idaAnterior,{...jogo,etapa:'Volta'},camp.forcas[casa],camp.forcas[fora],rng);
+  const volta90={...jogo,etapa:'Volta'},criterio=regraDesempateCopa(camp);
+  const venceuFora=vencedorPorGolsFora(idaAnterior,volta90,camp);
+  const volta=!venceuFora&&criterio.prorrogacao
+    ?aplicarProrrogacaoAgregado(idaAnterior,volta90,camp.forcas[casa],camp.forcas[fora],rng):volta90;
   jogo={casa:idaAnterior.casa,fora:idaAnterior.fora,
     golsCasa:idaAnterior.golsCasa+volta.golsFora,
     golsFora:idaAnterior.golsFora+volta.golsCasa,
     agregado:true,partidas:[idaAnterior,volta],
+    ...(venceuFora?{vencedor:venceuFora,criterio:'gols-fora'}:{}),
     ...(volta.prorrogacao?{prorrogacao:volta.prorrogacao}:{})};
- }else if(!d.grupo&&jogo.golsCasa===jogo.golsFora){
-  // Jogo único empatado: 30 minutos de prorrogação antes dos pênaltis.
+ }else if(!d.grupo&&jogo.golsCasa===jogo.golsFora&&regraDesempateCopa(camp).prorrogacao){
+  // Há copas que vão diretamente aos pênaltis; respeitar a edição e fase.
   jogo=aplicarProrrogacao(jogo,camp.forcas[casa],camp.forcas[fora],rng,{neutro:d.final});
  }
- if(!d.grupo&&jogo.golsCasa===jogo.golsFora){
+ if(!d.grupo&&jogo.golsCasa===jogo.golsFora&&!jogo.vencedor){
   const rngPenaltis=geradorTecnico(`${d.chave}|${jogo.golsCasa}|penaltis-completo`);
   jogo.vencedor=rngPenaltis()<chancePenaltis(camp.forcaUsuario,camp.forcas[d.adversario])?camp.usuario:d.adversario;
   jogo.penaltis=true;

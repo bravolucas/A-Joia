@@ -1160,7 +1160,15 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
         <div className="px-4 pt-3 pb-2">
           <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#9EB5C9] mb-0.5">O time na temporada</div>
           <LinhaTime icone={<TacaCompeticao tipo={ehSegundaDivisao(card.ligaId) ? "segunda" : "liga"} nome={card.ligaNome} size={18} />} nome={card.ligaNome}
-            resultado={card.acesso ? `${ligaRes} · acesso!` : card.rebaixado ? `${ligaRes} · rebaixado` : vagas && ehSegundaDivisao(card.ligaId) && card.posLiga <= vagas ? `${ligaRes} · acesso` : ligaRes} destaque={card.acesso ? "ouro" : corLiga} />
+            resultado={card.acesso ? `${ligaRes} · acesso!` : card.rebaixado ? `${ligaRes} · rebaixado` : card.ligaId === 'serieB' && card.posLiga >= 3 && card.posLiga <= 6 && card.playoffsSerieB ? `${ligaRes} · eliminado no playoff` : ligaRes} destaque={card.acesso ? "ouro" : corLiga} />
+          {card.ligaId === 'serieB' && card.playoffsSerieB && <details className="mt-2 rounded-lg border border-white/10 bg-[#071321]/60 p-2 text-[12px] text-[#C9D9E8]">
+            <summary className="cursor-pointer font-bold text-[#F2F5F3]">Playoffs de acesso · Série B</summary>
+            {card.playoffsSerieB.confrontos.map(confronto => <div key={confronto.chave} className="mt-2 border-t border-white/10 pt-2">
+              <div><LinkEntidade tipo="clube" nome={confronto.melhorCampanha}/> × <LinkEntidade tipo="clube" nome={confronto.adversario}/></div>
+              {confronto.jogos.map(jogo => <div key={jogo.fase}>{jogo.fase === 'ida' ? 'Ida' : 'Volta'}: {jogo.casa} {jogo.golsCasa} × {jogo.golsFora} {jogo.fora}</div>)}
+              <strong>Classificado: <LinkEntidade tipo="clube" nome={confronto.classificado}/>{confronto.criterio === 'melhor-campanha' ? ' (melhor campanha)' : ''}</strong>
+            </div>)}
+          </details>}
           {card.copaNac && <LinhaTime icone={<TacaCompeticao tipo="copa" nome={card.copaNac.nome} size={18} />} nome={card.copaNac.nome} resultado={card.titulos.some(t=>t.tipo==="copa"&&t.nome===card.copaNac.nome)?"Campeão":card.copaNac.fase} destaque={card.titulos.some(t=>t.tipo==="copa"&&t.nome===card.copaNac.nome)||card.copaNac.fase === "Campeão" ? "ouro" : null} />}
           {card.continental && <LinhaTime icone={<TacaCompeticao tipo="continental" nome={card.continental.nome} size={18} />} nome={card.continental.nome} resultado={contRes} destaque={contRes === "Campeão" ? "ouro" : null} />}
           {card.mundialRes && <LinhaTime icone={<TacaCompeticao tipo="mundial" nome="Mundial de Clubes" size={18} />} nome="Mundial de Clubes" resultado={card.mundialRes} destaque={card.mundialRes === "Campeão" ? "ouro" : null} />}

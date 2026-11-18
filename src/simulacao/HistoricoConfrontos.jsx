@@ -6,7 +6,7 @@ const resumoVazio='Nenhuma partida individual detalhada disponível neste save. 
 
 /** Consulta o mesmo arquivo de resultados por clube, rival, competição e ano. */
 export default function HistoricoConfrontos({c}){
- const [modo,M]=useState('clubes'),[clube,C]=useState(''),[atleta,P]=useState('voce'),[adversario,A]=useState(''),[competicao,K]=useState(''),[ano,Y]=useState('');
+ const [modo,M]=useState('clubes'),[clube,C]=useState(''),[atleta,P]=useState('voce'),[buscaAtleta,BA]=useState(''),[adversario,A]=useState(''),[competicao,K]=useState(''),[ano,Y]=useState('');
  const arquivo=useMemo(()=>partidasHistoricas(c),[c.universo,c.tecnico?.universo]);
  const clubes=useMemo(()=>[...new Set(arquivo.flatMap(j=>[j.casa,j.fora]))].sort((a,b)=>a.localeCompare(b,'pt-BR')),[arquivo]);
  const preferido=c.tecnico?.clube||c.clubeNome||c.clube?.nome||'';
@@ -15,8 +15,12 @@ export default function HistoricoConfrontos({c}){
  const atletas=useMemo(()=>{
   const disponiveis=new Set(Object.keys(u.partidasAtletas||{}));
   if((c.temporadas||[]).some(t=>t.jogosLista?.length||t.partidasCompeticoes?.length))disponiveis.add('voce');
-  return [...disponiveis].sort().map(id=>({id,nome:id==='voce'?(c.nome||'Seu jogador'):(u.atletas?.[id]?.nome||'Jogador '+id)}));
+  for(const [id,p] of Object.entries(u.atletas||{}))
+    if(p.historico?.some(t=>Array.isArray(t)?t[10]?.length:t.porCompeticao?.length))disponiveis.add(id);
+  return [...disponiveis].map(id=>({id,nome:id==='voce'?(c.nome||u.atletas?.voce?.nome||'Seu jogador'):(u.atletas?.[id]?.nome||'Jogador '+id)}))
+    .sort((a,b)=>(b.id==='voce')-(a.id==='voce')||a.nome.localeCompare(b.nome,'pt-BR'));
  },[u,c.temporadas,c.nome]);
+ const atletasFiltrados=atletas.filter(p=>p.id===atleta||!buscaAtleta||p.nome.toLocaleLowerCase('pt-BR').includes(buscaAtleta.toLocaleLowerCase('pt-BR'))).slice(0,80);
  const atletaAtual=atletas.some(p=>p.id===atleta)?atleta:atletas[0]?.id||'voce';
  const individuais=useMemo(()=>partidasDoAtleta(c,atletaAtual),[c,atletaAtual]);
  const universoPartidas=modo==='clubes'?arquivo.filter(j=>[j.casa,j.fora].includes(clubeAtual)):individuais;
@@ -37,7 +41,7 @@ export default function HistoricoConfrontos({c}){
     <option value="clubes">Clube × Clube</option><option value="jogadores">Jogador × Clube</option>
    </select></label>
    {modo==='clubes'?<label>Clube<select aria-label="Clube do confronto" value={clubeAtual} onChange={e=>{C(e.target.value);limpar();}}>{clubes.map(x=><option key={x}>{x}</option>)}</select></label>
-   :<label>Jogador com partidas detalhadas<select aria-label="Jogador do confronto" value={atletaAtual} onChange={e=>{P(e.target.value);limpar();}}>{atletas.map(p=><option key={p.id} value={p.id}>{p.nome}</option>)}</select></label>}
+   :<><label>Buscar jogador<input type="search" aria-label="Buscar jogador do confronto" value={buscaAtleta} onChange={e=>BA(e.target.value)} placeholder="Digite o nome do jogador…"/></label><label>Jogador<select aria-label="Jogador do confronto" value={atletaAtual} onChange={e=>{P(e.target.value);limpar();}}>{atletasFiltrados.map(p=><option key={p.id} value={p.id}>{p.nome}</option>)}</select></label></>}
    <label>Adversário<select aria-label="Adversário do confronto" value={rivalAtivo} onChange={e=>A(e.target.value)}>
     <option value="">Todos os adversários</option>{adversarios.map(x=><option key={x}>{x}</option>)}
    </select></label>

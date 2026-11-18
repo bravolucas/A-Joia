@@ -145,15 +145,22 @@ function ClassificacoesMundo({ classificacoes = {}, ligaAtual, clubeAtual }) {
   </details>;
 }
 function CartaoClube({ nome, liga, pais, rotulo, detalhe, nivel, salario, onClick, disabled, atual = false }) {
-  return <button type="button" className={`ct-offer ${atual ? 'ct-offer-stay' : ''}`} onClick={onClick} disabled={disabled}>
-    <span className="ct-offer-label">{rotulo}</span><strong>{nome}</strong>
-    <span className="ct-offer-crest"><Escudo nome={nome} size={64} /></span>
-    <span className="ct-offer-league">{liga?.startsWith('selecao:') ? `Seleção · ${liga.split(':')[1]}` : competicaoTemporadaTecnico({ clube: nome, liga })}</span>
-    <span className="ct-offer-country"><Bandeira pais={pais} /><span>{pais || 'Brasil'}</span></span>
-    {nivel!=null&&<span className="ct-offer-detail">Time {nivel} · {formatarVerbaRapida(salario||0)}/mês</span>}
-    {detalhe && <span className="ct-offer-detail">{detalhe}</span>}
-    {nivel!=null&&!liga?.startsWith('selecao:')&&!atual&&<span className="ct-offer-detail">Meta: {objetivoTecnico({clube:nome,liga,elenco:nivel}).nome}</span>}
-  </button>;
+  const selecao=liga?.startsWith('selecao:');
+  // O nome abre o Arquivo Vivo; a proposta permanece uma ação distinta.
+  // Nunca colocar um botão de navegação dentro do botão de contratação.
+  return <div className={`ct-offer ${atual ? 'ct-offer-stay' : ''}`}>
+    <span className="ct-offer-label">{rotulo}</span>
+    <strong className="ct-offer-name"><LinkEntidade tipo={selecao?'selecao':'clube'} nome={nome}/></strong>
+    <button type="button" className="ct-offer-pick" onClick={onClick} disabled={disabled} aria-label={`Escolher proposta de ${nome}`}>
+      <span className="ct-offer-crest"><Escudo nome={nome} size={64} /></span>
+      <span className="ct-offer-league">{selecao ? `Seleção · ${liga.split(':')[1]}` : competicaoTemporadaTecnico({ clube: nome, liga })}</span>
+      <span className="ct-offer-country"><Bandeira pais={pais} /><span>{pais || 'Brasil'}</span></span>
+      {nivel!=null&&<span className="ct-offer-detail">Time {nivel} · {formatarVerbaRapida(salario||0)}/mês</span>}
+      {detalhe && <span className="ct-offer-detail">{detalhe}</span>}
+      {nivel!=null&&!selecao&&!atual&&<span className="ct-offer-detail">Meta: {objetivoTecnico({clube:nome,liga,elenco:nivel}).nome}</span>}
+      <span className="ct-offer-action-label">{atual?'Permanecer':'Aceitar proposta'}</span>
+    </button>
+  </div>;
 }
 
 function LinhaTemporada({ a, idade, ativa, aberta, onClick }) {

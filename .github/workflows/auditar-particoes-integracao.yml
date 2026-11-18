@@ -1,0 +1,27 @@
+name: Auditar partições de integração Jogador Treinador
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tests/integracao-jogador-tecnico.test.mjs'
+      - 'tests/agregacao-integracao-32.test.mjs'
+      - 'scripts/agregar-integracao-32.mjs'
+      - '.github/workflows/ci.yml'
+      - '.github/workflows/auditar-particoes-integracao.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  indices-e-limites:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Testar agregação, faltas, duplicações e 32 cenários
+        run: node --test tests/agregacao-integracao-32.test.mjs
+      - name: Garantir build GitHub Pages
+        run: GITHUB_PAGES=true npm run build

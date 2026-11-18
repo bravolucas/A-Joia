@@ -46,21 +46,29 @@ jobs:
   carreiras-massivas:
     name: carreiras-massivas (${{ matrix.caso }})
     runs-on: ubuntu-latest
-    # Sete runners: integração 32 casos em 2x16; melhorias 24 casos em 4x6;
+    # Nove runners: integração 32 casos em 4x8; melhorias 24 casos em 4x6;
     # treinador e simulação massiva permanecem completos num runner.
     timeout-minutes: 75
     strategy:
       fail-fast: false
       matrix:
         include:
-          - caso: integracao-1-de-2
+          - caso: integracao-1-de-4
             arquivos: tests/integracao-jogador-tecnico.test.mjs
             parte: 1
-            partes: 2
-          - caso: integracao-2-de-2
+            partes: 4
+          - caso: integracao-2-de-4
             arquivos: tests/integracao-jogador-tecnico.test.mjs
             parte: 2
-            partes: 2
+            partes: 4
+          - caso: integracao-3-de-4
+            arquivos: tests/integracao-jogador-tecnico.test.mjs
+            parte: 3
+            partes: 4
+          - caso: integracao-4-de-4
+            arquivos: tests/integracao-jogador-tecnico.test.mjs
+            parte: 4
+            partes: 4
           - caso: jogador-melhorias-1-de-4
             arquivos: tests/jogador-melhorias.test.mjs
             parte: 1
@@ -108,6 +116,14 @@ jobs:
           read -r -a arquivos <<< "$ARQUIVOS_CARREIRAS"
           test "${#arquivos[@]}" -gt 0
           node --test "${arquivos[@]}"
+      - name: Publicar relatório das oito carreiras de integração
+        if: ${{ startsWith(matrix.caso, 'integracao-') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultados-${{ matrix.caso }}
+          path: resultados-auditoria/integracao-parte-*.json
+          if-no-files-found: error
+          retention-days: 14
       - name: Publicar relatórios das seis carreiras da partição
         if: ${{ startsWith(matrix.caso, 'jogador-melhorias-') }}
         uses: actions/upload-artifact@v4
@@ -115,6 +131,31 @@ jobs:
           name: resultados-${{ matrix.caso }}
           path: resultados-auditoria/jogador-melhorias-parte-*.json
           if-no-files-found: error
+          retention-days: 14
+
+  conferir-integracao-32:
+    name: conferir-integracao-32
+    needs: carreiras-massivas
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: resultados-integracao-*
+          merge-multiple: true
+          path: resultados-auditoria
+      - name: Exigir 32 carreiras únicas e os limiares globais originais
+        run: node scripts/agregar-integracao-32.mjs resultados-auditoria
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: integracao-jogador-treinador-32-validada
+          path: resultados-auditoria/integracao-32-validada.json
           retention-days: 14
 
   conferir-melhorias-24:

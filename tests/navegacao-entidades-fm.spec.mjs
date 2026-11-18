@@ -49,7 +49,7 @@ test('navegar entre clube, competição e jogador sem perder o retorno à carrei
  await expect(historia.locator('.hf-selecoes')).toContainText('Brasil');
  await historia.getByRole('button',{name:'Treinadores',exact:true}).click();
  await expect(historia.getByRole('heading',{name:'Passagens pelos clubes'})).toBeVisible();
- await expect(historia.locator('.fm27-coach-profile .fm27-data')).toContainText('Santos');
+ await expect(historia.locator('.fm27-coach-profile .fm27-data').first()).toContainText('Santos');
  await historia.getByRole('button',{name:'Prêmios',exact:true}).click();
  await expect(historia.locator('.hf-premios')).toContainText('Navegador FM');
  await historia.locator('.hf-premios .ajoia-entity-link').filter({hasText:'Navegador FM'}).first().click();

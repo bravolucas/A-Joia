@@ -2,15 +2,42 @@ import {sincronizarCamisasSelecao} from './camisasCarreira.js';
 import {NACIONALIDADES} from '../dados/data.js';
 import {calcOVR} from '../comum/lib.js';
 import {penalidadePosicao} from './posicoesCarreira.js';
+import {gerarNomeRegional} from '../simulacao/nomesRegionais.js';
 const clone=x=>JSON.parse(JSON.stringify(x));
 const limitar=(n,a,b)=>Math.max(a,Math.min(b,n));
 const hash=s=>[...String(s)].reduce((a,v)=>Math.imul(a^v.charCodeAt(0),16777619)>>>0,2166136261);
 const POSICOES=['GOL','GOL','GOL','LD','LD','LE','LE','ZAG','ZAG','ZAG','ZAG','VOL','VOL','MC','MC','MC','MEI','MEI','MD','ME','PD','PD','PE','PE','ATA','ATA'];
 export const grupoSelecao=p=>p==='GOL'?'GOL':['ZAG','LD','LE','ALE','ALD'].includes(p)?'DEF':['VOL','MC','MEI','ME','MD'].includes(p)?'MEI':'ATA';
 const vazio=()=>({jogos:0,minutos:0,gols:0,assist:0,semSofrer:0,notas:0});
+// Nome regional estável sem consumir o RNG de partidas / transferências.
+// Para não alterar o hash histórico de idade, OVR e ID, o cálculo existente
+// de h em criar() fica intacto. Apenas o nome do novo convocado muda.
+function nomeRegionalSelecao(c,ano,slot,usados){
+ const chave=`${c.codigo}:elenco:nome:${c.nac}:${ano}:${slot}`;
+ const sorteios=ramo=>{
+  let etapa=0;
+  return ()=>hash(`${chave}:${ramo}:${etapa++}`)/4294967296;
+ };
+ // Os pools de menor tamanho têm 25 pares possíveis. Tentativas extras
+ // cobrem elenco com nomes já usados sem atribuir apelidos brasileiros.
+ for(let tentativa=0;tentativa<256;tentativa++){
+  const candidato=gerarNomeRegional(c.nac,sorteios(tentativa));
+  if(!usados.has(candidato))return candidato;
+ }
+ // Se todos os pares simples estiverem ocupados, usar dois sobrenomes
+ // regionais. Preserva nomes compostos (ex.: Van Dijk, El Amrani).
+ for(let tentativa=0;tentativa<512;tentativa++){
+  const primeiro=gerarNomeRegional(c.nac,sorteios(`duplo-a-${tentativa}`));
+  const segundo=gerarNomeRegional(c.nac,sorteios(`duplo-b-${tentativa}`));
+  const sobrenomeAdicional=segundo.slice(segundo.indexOf(' ')+1);
+  const candidato=`${primeiro} ${sobrenomeAdicional}`;
+  if(!usados.has(candidato))return candidato;
+ }
+ throw new Error('Não foi possível gerar um nome regional único para a seleção.');
+}
 function criar(c,ano,slot,posicao,forca,usados){
- const h=hash(`${c.codigo}:elenco:${c.nac}:${ano}:${slot}`),nomes=['Caio','Mateo','André','Davi','Rafael','Gabriel','Nicolas','Bruno','Iago','Samuel','Leo','Daniel','Diego','Alex','Victor','Hugo'],sobrenomes=['Nunes','Duarte','Lemos','Monteiro','Vidal','Costa','Reis','Azevedo','Pires','Mendes','Ramos','Alves','Lima','Dias','Silva','Rocha'];
- let nome=`${nomes[h%16]} ${sobrenomes[(h>>>8)%16]}`;if(usados.has(nome))nome+=` ${sobrenomes[slot%16]}`;
+ const h=hash(`${c.codigo}:elenco:${c.nac}:${ano}:${slot}`);
+ const nome=nomeRegionalSelecao(c,ano,slot,usados);
  return{id:`convocado:${c.nac}:${ano}:${slot}:${posicao}`,nome,posicao,nascimento:ano-20-h%12,ovr:limitar(forca-6+(h>>>12)%13,45,94),desde:ano,estatisticas:vazio(),ficticio:true};
 }
 /** Elenco persistente, atualizado uma vez por ano. O atleta ocupa uma das 26 vagas. */

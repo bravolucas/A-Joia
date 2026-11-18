@@ -4567,7 +4567,7 @@ function resolverTemporada(c, extraStats) {
                       <div className="p-3 flex items-center gap-3 bg-gradient-to-r from-zinc-900 to-zinc-900/40">
                         <ClubDot club={c} size={34} />
                         <div className="flex-1">
-                          <div className="text-sm font-bold">{c.nome}</div>
+                          <div className="text-sm font-bold"><LinkEntidade tipo="jogador" id="voce" nome={c.nome}/></div>
                           <div className="text-[10px] text-zinc-500 mb-1">{LIGAS[c.liga].nome} · salário ${formatarDinheiro(salarioClube(c, ovrPotencial ? Math.round(ovrPotencial * 0.55) : 55))}/temporada</div>
                           <div className="h-1 bg-zinc-800 rounded-full overflow-hidden w-full"><div className="h-full rounded-full" style={{ width: `${c.forca}%`, background: c.cor }} /></div>
                         </div>
@@ -6014,7 +6014,7 @@ function resolverTemporada(c, extraStats) {
                             <button key={clube.nome} onClick={() => escolherClubeConcorrencia(clube)} className="text-left p-3 border border-zinc-800 rounded-sm hover:border-emerald-500 flex items-center gap-3">
                               <ClubDot club={clube} size={24} />
                               <div className="flex-1">
-                                <div className="font-bold text-sm">{clube.nome}</div>
+                                <div className="font-bold text-sm"><LinkEntidade tipo="clube" nome={clube.nome}/></div>
                                 <div className="text-[10px] text-zinc-500">força {clube.forca}{i === 0 && score > 1 ? " · parece bem interessado" : ""}</div>
                               </div>
                             </button>
@@ -6318,7 +6318,7 @@ function resolverTemporada(c, extraStats) {
                           <div className="flex items-center gap-3 mb-3">
                             <ClubDot club={janela.clausula.clube} size={34} />
                             <div>
-                              <div className="text-base font-bold">{janela.clausula.clube.nome}</div>
+                              <div className="text-base font-bold"><LinkEntidade tipo="clube" nome={janela.clausula.clube.nome}/></div>
                               <div className="text-[10px] text-zinc-500">{LIGAS[janela.clausula.clube.liga].nome} · força {janela.clausula.clube.forca}</div>
                             </div>
                           </div>
@@ -6346,7 +6346,7 @@ function resolverTemporada(c, extraStats) {
                       {janela.tipo === "compraDefinitiva" && (
                         <>
                           <div className="text-[10px] text-amber-400 uppercase tracking-widest mb-2 flex items-center gap-1.5"><ClubDot club={janela.ofertaCompra.clube} size={20} />Oferta de compra definitiva</div>
-                          <p className="text-sm mb-4">O {janela.ofertaCompra.clube.nome} quer bancar a compra definitiva do seu passe, encerrando o vínculo com o {janela.ofertaCompra.origem.nome}.</p>
+                          <p className="text-sm mb-4">O <LinkEntidade tipo="clube" nome={janela.ofertaCompra.clube.nome}/> quer bancar a compra definitiva do seu passe, encerrando o vínculo com o <LinkEntidade tipo="clube" nome={janela.ofertaCompra.origem.nome}/>.</p>
                           <div className="grid gap-2"><Button variant="gold" onClick={() => decidirCompraDefinitiva(true)}>Aceitar e ficar</Button><Button variant="ghost" onClick={() => decidirCompraDefinitiva(false)}>Recusar e voltar ao {janela.ofertaCompra.origem.nome}</Button></div>
                         </>
                       )}
@@ -6370,10 +6370,10 @@ function resolverTemporada(c, extraStats) {
                               const sal = Math.round(salarioClube(op.clube, ovrAtual) * (op.salarioMult || 1) * (empOferta.salarioMult??1));
                               const nivelInt = op.interesse == null ? null : op.interesse >= 1.4 ? { l: "Prioridade máxima", c: "#9BDEFF" } : op.interesse >= 0.8 ? { l: "Interesse forte", c: "#D8B44A" } : op.interesse >= 0.35 ? { l: "Sondagem", c: "#a1a1aa" } : { l: "Interesse discreto", c: "#71717a" };
                               return (
-                                <button key={op.clube.nome} aria-label={`Ver proposta ${op.tipo==="emprestimo"?"de empréstimo":"de transferência"} do ${op.clube.nome}`} onClick={() => escolherOfertaTransferencia(op)} className="mercado-oferta text-left p-3 border border-zinc-800 rounded-sm hover:border-emerald-500 flex items-start gap-3">
+                                <div key={op.clube.nome} className="min-w-0 rounded-sm border border-zinc-800"><div className="px-3 pt-2 text-sm font-bold"><LinkEntidade tipo="clube" nome={op.clube.nome}/></div><button aria-label={`Ver proposta ${op.tipo==="emprestimo"?"de empréstimo":"de transferência"} do ${op.clube.nome}`} onClick={() => escolherOfertaTransferencia(op)} className="mercado-oferta text-left p-3 border border-zinc-800 rounded-sm hover:border-emerald-500 flex items-start gap-3">
                                   <ClubDot club={op.clube} size={24} />
                                   <div className="flex-1">
-                                    <div className="text-sm font-bold flex items-center gap-2">{op.clube.nome} {op.tentadora && <span className="text-[9px] bg-amber-400 text-zinc-950 px-1.5 py-0.5 rounded-sm">{op.salarioMult}x salário</span>}</div>
+                                    <div className="text-sm font-bold flex items-center gap-2">Detalhes da proposta {op.tentadora && <span className="text-[9px] bg-amber-400 text-zinc-950 px-1.5 py-0.5 rounded-sm">{op.salarioMult}x salário</span>}</div>
                                     <span className="mercado-modalidade">{op.tipo==="emprestimo"?`Empréstimo · ${op.duracao||1} ${(op.duracao||1)===1?"temporada":"temporadas"}`:"Transferência definitiva"}</span>
                                     <div className="mercado-liga">{LIGAS[op.clube.liga].nome} · força {op.clube.forca}</div>
                                     <div className="mercado-salario"><small>Base anual para negociar</small><strong>${formatarDinheiro(sal)}</strong></div>
@@ -6386,7 +6386,7 @@ function resolverTemporada(c, extraStats) {
                                     })()}
                                     <div className="text-[10px] text-zinc-600">Torcida lá: {tierTorcida(getTorcida(carreira, op.clube.nome)).label}{nivelInt ? <> · <span style={{ color: nivelInt.c }}>{nivelInt.l}</span></> : null}</div>
                                   </div>
-                                </button>
+                                </button></div>
                               );
                             })}
                           </div>
@@ -7436,7 +7436,7 @@ function resolverTemporada(c, extraStats) {
                         <div className="grid gap-1">
                           {mundo.jogadores.filter((j) => !j.aposentado && j.carreira.jogos > 0).sort((a, b) => (b.carreira.gols + b.carreira.assist) - (a.carreira.gols + a.carreira.assist)).slice(0, 6).map((j) => (
                             <div key={j.id} className="flex items-center justify-between text-[11px] py-1">
-                              <span className="text-zinc-300 truncate flex-1">{j.nome} <span className="text-zinc-600">· {j.clubeNome}, {j.idade}a</span></span>
+                              <span className="text-zinc-300 truncate flex-1"><LinkEntidade tipo="jogador" id={j.id} nome={j.nome}/> <span className="text-zinc-600">· <LinkEntidade tipo="clube" nome={j.clubeNome}/>, {j.idade}a</span></span>
                               <span className="font-mono text-zinc-400">{j.carreira.gols}g {j.carreira.assist}a</span>
                             </div>
                           ))}

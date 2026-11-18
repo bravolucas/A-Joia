@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 import {instalarSave,lerSave} from './helpers/save-browser.mjs';
-import {criarJogador,iniciarNegociacao} from '../src/jogador/rapido.js';
+import {criarJogador,iniciarNegociacao,jogarTemporada} from '../src/jogador/rapido.js';
 
 function carreira(){
  const c=criarJogador({nome:'Contratos FM',nac:'BRA',posicao:'ATA',
@@ -34,5 +34,32 @@ for(const width of [390,1366]){
   expect(salvo.etapa).toBe('negociacao');
   expect(salvo.neg).toEqual(neg);
   expect(erros).toEqual([]);
+ });
+}
+
+for(const width of [390,1366]){
+ test(`liga e conquista do resumo anual abrem o histórico em ${width}px`,async({page})=>{
+  test.setTimeout(90000);
+  await page.setViewportSize({width,height:820});
+  await page.emulateMedia({reducedMotion:'reduce'});
+  const {c}=carreira();
+  const card=jogarTemporada(c).card;
+  card.titulos=[{tipo:'copa',nome:'Copa do Brasil'}];
+  await page.goto('http://127.0.0.1:4173/A-Joia/');
+  await instalarSave(page,{v:1,etapa:'resumo',c,card},'ajoia_rapido_v1');
+  await page.reload();
+  await page.getByRole('button',{name:/Continuar · Contratos FM/}).click();
+  const campeonato=page.getByRole('button',{name:card.ligaNome,exact:true}).first();
+  await expect(campeonato).toBeVisible();
+  await campeonato.click();
+  const historico=page.getByRole('dialog',{name:'História do futebol'});
+  await expect(historico.locator('.hf-competicoes')).toContainText(card.ligaNome);
+  await historico.getByRole('button',{name:'Fechar história'}).click();
+  const copa=page.getByRole('button',{name:'Copa do Brasil',exact:true}).first();
+  await expect(copa).toBeVisible();
+  await copa.click();
+  await expect(historico.locator('.hf-competicoes')).toContainText('Copa do Brasil');
+  await historico.getByRole('button',{name:'Fechar história'}).click();
+  expect((await lerSave(page,'ajoia_rapido_v1')).etapa).toBe('resumo');
  });
 }

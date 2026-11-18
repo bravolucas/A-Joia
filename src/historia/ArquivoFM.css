@@ -518,3 +518,13 @@
  .fm27-contract-strip{padding:9px 13px;display:block}
  .fm27-contract-strip p{white-space:normal}
 }
+
+.fm27-archive .fm27-roster-list.mv-atletas .fm27-roster-avatar{
+ display:grid;place-items:center;margin:0;color:#bbd7e6
+}
+.fm27-archive .fm27-roster-list.mv-atletas .is-selected .fm27-roster-avatar{
+ color:var(--fm-accent)
+}
+.fm27-archive .fm27-roster-list.mv-atletas .fm27-roster-copy strong{
+ display:block;margin:0
+}

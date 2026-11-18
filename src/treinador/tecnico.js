@@ -617,6 +617,7 @@ function classificacoesMundoDaTemporada(t, liga, classificacao, rng) {
     clubeTreinador: t.clube,
     forcaTreinador: forcaClubeTecnico(t),
     classificacaoTreinador: classificacao,
+    ano: t.ano,
     rng,
   });
 }
@@ -638,6 +639,7 @@ function atualizarLigasMundoDaTemporada(t, liga, classificacoesMundo, rng) {
     clubeTreinador: t.clube,
     ligaTreinador: liga,
     divisoes: DIVISOES_TECNICO,
+    ano: t.ano,
     rng,
   });
 }

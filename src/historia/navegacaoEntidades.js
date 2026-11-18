@@ -1,6 +1,6 @@
 /* Navegação interna do Arquivo Vivo: identidade pelo ID, nunca pelo nome. */
 export const EVENTO_ENTIDADE = 'ajoia:navegar-entidade';
-const TIPOS = new Set(['jogador','clube','competicao','premio','treinador','confrontos']);
+const TIPOS = new Set(['jogador','clube','selecao','competicao','premio','treinador','confrontos']);
 export function normalizarEntidade(valor) {
   if (!valor || !TIPOS.has(valor.tipo)) return null;
   const nome = String(valor.nome ?? '').trim();
@@ -12,10 +12,11 @@ export function normalizarEntidade(valor) {
 export function paginaEntidade(valor, contexto={}) {
   const destino = normalizarEntidade(valor);
   if (!destino) return null;
-  const base={aba:'clubes',clube:contexto.clube||'',competicao:contexto.competicao||'Champions League',jogadorId:'',premio:'',nome:''};
+  const base={aba:'clubes',clube:contexto.clube||'',competicao:contexto.competicao||'Champions League',selecao:contexto.selecao||'Brasil',jogadorId:'',premio:'',nome:''};
   switch(destino.tipo){
     case 'jogador':return {...base,aba:'atletas',jogadorId:destino.id,nome:destino.nome};
     case 'clube':return {...base,aba:'clubes',clube:destino.nome};
+    case 'selecao':return {...base,aba:'selecoes',selecao:destino.nome};
     case 'competicao':return {...base,aba:'competicoes',competicao:destino.nome};
     case 'premio':return {...base,aba:'premios',premio:destino.nome};
     case 'treinador':return {...base,aba:'treinadores',nome:destino.nome,jogadorId:destino.id};

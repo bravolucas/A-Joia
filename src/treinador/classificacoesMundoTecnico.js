@@ -149,7 +149,17 @@ export function simularClassificacoesMundoTecnico({
       continue;
     }
     const ordenados = [...participantes].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
-    if (liga === 'serieC' && ordenados.length === regulamentoSerieC(ano).participantes) {
+    if (liga === 'serieC') {
+      const esperados = regulamentoSerieC(ano).participantes;
+      if (ordenados.length !== esperados) {
+        // Saves legados podem ainda não ter recebido todos os acessos da D.
+        // Não inventar 38/46/54 rodadas de uma liga com regulamento inválido.
+        resultado[liga] = {
+          liga, origem: 'serie-c-pendente', classificacao: [], jogos: [],
+          ano, participantesAtuais: ordenados.length, participantesEsperados: esperados,
+        };
+        continue;
+      }
       const edicaoSerieC = simularSerieC({ clubes: ordenados, ano, rng });
       resultado[liga] = {
         liga, origem: 'serie-c-cbf',

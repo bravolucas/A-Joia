@@ -2072,7 +2072,7 @@ function GaleriaFim({ c }) {
             {badges.map(([nome, ok]) => <span key={nome} className={`text-[10.5px] font-bold px-1.5 py-0.5 rounded-md border ${ok ? "text-[#FDE68A] border-[#CA8A04]/70 bg-[#CA8A04]/15" : "text-white/25 border-white/10"}`}>{nome}</span>)}
           </div>
           <div className="flex-1 flex flex-wrap items-end justify-center gap-1.5 min-h-[36px]">
-            <ConquistasJogador titulos={premios} premios renderIcone={grupo => <IconeTitulo tipo={grupo.tipo} nome={grupo.nome} size={40} />} />
+            <ConquistasJogador titulos={premios} premios />
           </div>
         </div>
       </div>

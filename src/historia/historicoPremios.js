@@ -1,4 +1,5 @@
 import {expandirConquista,conquistasDoCadastroMundo,conquistasDoJogador,nomePremio} from '../simulacao/historicoConquistas.js';
+import {idJogadorPorNome} from './navegacaoEntidades.js';
 
 /** Usa os mesmos nomes do catálogo, inclusive quando o save usa chaves antigas. */
 export const chavePremio=s=>nomePremio(String(s||'').trim()).normalize('NFD')
@@ -25,5 +26,19 @@ export function vencedoresPremios(c={}) {
   registrar(p.id,p.nome,conquistasDoCadastroMundo(p));
  }
  if(c.nome)registrar('voce',c.nome,conquistasDoJogador(c,'voce'));
+ // O Hall da Fama do Modo Completo arquiva vencedores mesmo após aposentadoria.
+ // Mantém o vencedor registrado sem forçar link quando não há identidade inequívoca.
+ for(const linha of c.mundo?.historicoBolaDeOuro||[]){
+  const vencedor=String(linha?.nome||'').trim();
+  if(!vencedor)continue;
+  const id=linha.jogadorId??linha.id??idJogadorPorNome(c,vencedor);
+  const ano=Number.isFinite(Number(linha.temporada))?Number(linha.temporada):null;
+  const clube=String(linha.clube||'');
+  const chave=[chavePremio('Bola de Ouro'),ano,String(id??vencedor),clube].join('|');
+  if(!mapa.has(chave))mapa.set(chave,{
+   ano,categoria:'premio',nome:'Bola de Ouro',clube,tipo:'bola-de-ouro',
+   jogadorId:id==null?null:String(id),jogadorNome:vencedor,
+  });
+ }
  return [...mapa.values()].sort((a,b)=>(b.ano??0)-(a.ano??0)||a.nome.localeCompare(b.nome,'pt-BR'));
 }

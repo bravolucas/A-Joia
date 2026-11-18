@@ -1889,7 +1889,7 @@ export function gerarMundoJogadores(rng = Math.random) {
       }
     });
   });
-  return { jogadores: completarCarenciasMundo(jogadores, CLUBES, rng), elencosCompletos:true, temporada: 0, historicoBolaDeOuro: [] };
+  return { jogadores: completarCarenciasMundo(jogadores, CLUBES, rng), elencosCompletos:true, temporada: 0, historicoBolaDeOuro: [], calibracaoFortalezaElenco:'2026-v2' };
 }
 
 export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES, perfis = {}, clubeControlado = null, treinoClube = 0, ano = mundo.anoCalendario, registrarPremio = true} = {}) {

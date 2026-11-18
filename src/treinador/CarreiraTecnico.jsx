@@ -183,6 +183,27 @@ function LinhaTemporada({ a, idade, ativa, aberta, onClick }) {
           <p>Classificado: <LinkEntidade tipo="clube" nome={confronto.classificado}/>{confronto.criterio === 'melhor-campanha' ? ' (vantagem da melhor campanha)' : ''}</p>
         </div>)}
       </details>}
+      {a.liga === 'serieC' && a.classificacoesMundo?.serieC?.edicaoSerieC && <details className="ct-league-details">
+        <summary>Série C · quadrangulares, acessos e final</summary>
+        <p>Acesso à Série B: dois primeiros de cada quadrangular.</p>
+        {a.classificacoesMundo.serieC.edicaoSerieC.quadrangulares.map(grupo => <div key={grupo.nome} className="mt-2">
+          <strong>Quadrangular {grupo.nome}</strong>
+          <div className="ct-standings">
+            {grupo.classificacao.map((linha, i) => <div key={linha.nome} className={linha.nome === a.clube ? 'ct-positive' : ''}>
+              <span>{i + 1}º</span>
+              <strong><LinkEntidade tipo="clube" nome={linha.nome}/></strong>
+              <span>{linha.vitorias}V</span>
+              <span>{linha.pontos} pts {i < 2 ? '· Acesso' : ''}</span>
+            </div>)}
+          </div>
+        </div>)}
+        <p>Promovidos: {a.classificacoesMundo.serieC.edicaoSerieC.promovidos.map((nome, i) =>
+          <span key={nome}>{i ? ' · ' : ''}<LinkEntidade tipo="clube" nome={nome}/></span>)}</p>
+        <strong>Final em ida e volta</strong>
+        {a.classificacoesMundo.serieC.edicaoSerieC.final.jogos.map(jogo =>
+          <p key={jogo.fase}>{jogo.fase === 'ida' ? 'Ida' : 'Volta'}: <LinkEntidade tipo="clube" nome={jogo.casa}/> {jogo.golsCasa} × {jogo.golsFora} <LinkEntidade tipo="clube" nome={jogo.fora}/></p>)}
+        <p>Campeão: <LinkEntidade tipo="clube" nome={a.classificacoesMundo.serieC.edicaoSerieC.campeao}/></p>
+      </details>}
       {a.avaliacaoDiretoria&&<p className={a.avaliacaoDiretoria.pendente?'ct-warning':''}>{a.avaliacaoDiretoria.motivo}</p>}
       {a.pediuDemissao?<p>Saída por pedido de demissão. A campanha ficou interrompida.</p>:<p>Meta: {a.objetivo} · <span className={a.cumpriuObjetivo ? 'ct-positive' : 'ct-warning'}>{a.avaliacaoDiretoria?.pendente?'em avaliação':a.cumpriuObjetivo ? 'atingida' : 'não atingida'}</span></p>}
       {a.confrontos?.filter(j => j.intervencao).map(j => <p key={`intervencao-${j.rodada}`}>Jogo importante: {j.nome} · {j.golsPro} × {j.golsContra} · {INTERVENCOES_TECNICO.find(op => op.id === j.intervencao)?.nome}</p>)}

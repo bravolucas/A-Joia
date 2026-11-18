@@ -44,3 +44,10 @@ test('nomes de prêmios usam imagem específica já presente no acervo',()=>{
  assert.equal(chaveCompeticao('Bota de Ouro'),'bota-de-ouro');
  assert.equal(chaveCompeticao('botaOuro'),'bota-de-ouro');
 });
+
+test('valores do Modo Jogador mantêm a moeda de origem em euros',()=>{
+ const transferencias=historicoTransferenciasAtleta({voce:true,movimentos:[{ano:2028,tipo:'venda',de:'Santos',para:'Real Madrid',valor:50000}]},[]);
+ assert.equal(transferencias[0].moeda,'EUR');
+ assert.equal(valorTransferencia(transferencias[0].valor,transferencias[0].moeda),'€ 50.000 mil');
+ assert.equal(valorTransferencia(4000,'BRL'),'R$ 4.000 mil');
+});

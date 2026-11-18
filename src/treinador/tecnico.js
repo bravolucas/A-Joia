@@ -27,7 +27,7 @@ import { competicaoDoTitulo } from '../comum/tacas.js';
 import { simularCopaNacionalTecnico, simularCopaContinentalTecnico, classificarVagasContinentalTecnico } from './competicoesTecnico.js';
 import { atualizarLigasMundoTecnico, simularClassificacoesMundoTecnico } from './classificacoesMundoTecnico.js';
 import { ordenarTabelaBrasileira } from '../simulacao/desempateBrasileiro.js';
-import { regulamentoSerieC } from '../simulacao/serieC.js';
+import { regulamentoSerieC, calendarioSerieCClubes } from '../simulacao/serieC.js';
 import { reconciliarClubeLegadoTecnico } from './compatibilidadeDivisoes.js';
 import { FINAIS_TECNICO, chanceFinalTecnico, finalDoUsuarioTecnico, aplicarResultadoFinalTecnico, paradasDoRitmoTecnico, OPCOES_PARADA_TECNICO,
   ANO_SEM_CLUBE_TECNICO, evoluirPersonagensTecnico, definirRivalTecnico, atualizarRivalTecnico,
@@ -703,6 +703,11 @@ export function calendarioLigaTecnico(t = {}) {
     participantes.splice(0, participantes.length, ...grupo);
   }
   if (participantes.length < 2) return null;
+  if (liga === 'serieC') {
+    const turnoEVolta = regulamentoSerieC(t.ano ?? 2026).formato === 'dois-grupos';
+    return calendarioSerieCClubes(participantes.map(clubeC => clubeC.nome), turnoEVolta)
+      .map(rodada => rodada.map(({ casa, fora }) => ({ casa, fora })));
+  }
   // Método de círculo: ligas ímpares recebem uma vaga de folga por rodada.
   const times = [...participantes];
   if (times.length % 2) times.push(null);

@@ -1,4 +1,4 @@
-import {resolverPlayoffsSerieB} from '../simulacao/playoffsSerieB.js';
+import {resolverOuReusarPlayoffsSerieB} from '../simulacao/playoffsSerieB.js';
 
 const limitar = (valor, minimo, maximo) => Math.max(minimo, Math.min(maximo, valor));
 
@@ -166,7 +166,7 @@ export function atualizarLigasMundoTecnico({
   if (clubeTreinador && ligaTreinador) atribuicoes[clubeTreinador] = ligaTreinador;
   const movimentos = [];
   const forcas = Object.fromEntries(clubes.map(clube => [clube.nome, clube.elenco ?? clube.forca ?? 55]));
-  const playoffsSerieB = resolverPlayoffsSerieB(classificacoesMundo.serieB?.classificacao, forcas, rng);
+  const playoffsSerieB = resolverOuReusarPlayoffsSerieB(classificacoesMundo.serieB?.classificacao, forcas, rng, classificacoesMundo.serieB?.playoffs);
   if (playoffsSerieB) {
     classificacoesMundo.serieB = { ...classificacoesMundo.serieB, playoffs: playoffsSerieB };
   }

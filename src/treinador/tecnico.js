@@ -694,7 +694,7 @@ export function calendarioLigaTecnico(t = {}) {
   // A Série C não segue o turno/returno das Séries A e B.
   // Em 2026/2027 existe apenas um turno (19/23 rodadas); de 2028 em
   // diante, os 28 clubes são distribuídos em dois grupos de 14 (26 jogos).
-  if (liga === 'serieC' && (t.ano ?? 2026) >= 2028 && participantes.length === 28) {
+  if (liga === 'serieC' && regulamentoSerieC(t.ano ?? 2026).formato === 'dois-grupos' && participantes.length === 28) {
     const porNivel = [...participantes].sort((a, b) =>
       (b.elenco ?? 50) - (a.elenco ?? 50) || a.nome.localeCompare(b.nome, 'pt-BR'));
     const grupoA = [], grupoB = [];
@@ -720,7 +720,7 @@ export function calendarioLigaTecnico(t = {}) {
     rodadas.push(jogos);
     times.splice(1, 0, times.pop());
   }
-  if (liga === 'serieC' && (t.ano ?? 2026) <= 2027) return rodadas;
+  if (liga === 'serieC' && regulamentoSerieC(t.ano ?? 2026).formato === 'grupo-unico') return rodadas;
   return [...rodadas, ...rodadas.map(jogos => jogos.map(j => ({ casa: j.fora, fora: j.casa })))];
 }
 export function calendarioAdversariosTecnico(t = {}) {

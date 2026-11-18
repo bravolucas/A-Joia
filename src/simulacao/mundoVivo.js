@@ -122,7 +122,11 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
     }
     u.edicoes.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',
       classificacao:t.classificacao,jogos:compactarJogos([...jogosUnicos.values()]),
-      campeao:edicaoC?.campeao||t.classificacao?.[0]?.nome,
+      // Uma edição pendente (ex.: Série C ainda sem tabela) não tem campeão:
+      // omitir a propriedade evita gerar `campeao: undefined` no save, que é
+      // descartado na serialização JSON e quebra a idempotência da carreira.
+      ...((edicaoC?.campeao||t.classificacao?.[0]?.nome)
+        ? {campeao:edicaoC?.campeao||t.classificacao?.[0]?.nome} : {}),
       ...(t.playoffs ? { playoffs:t.playoffs } : {}),
       ...(edicaoC ? { serieC:{
         regulamento:edicaoC.regulamento, promovidos:edicaoC.promovidos,

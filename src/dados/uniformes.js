@@ -104,6 +104,32 @@ grupo('Cuiabá',G,Y,'lisa',Y);
 grupo('Atlético-GO',R,K,'horizontais');
 grupo('Athletic Club',K,W,'listras');
 grupo('São Bernardo',Y,K,'listras');
+// Modelos principais dos clubes incorporados à Série C e à Série D brasileiras.
+// Baseados nas cores institucionais do cadastro, com padrões clássicos dos clubes.
+grupo('Anápolis|América-RN|Aparecidense|Tombense|Cianorte',R,W);
+grupo('Barra-SC',B,W,'listras');
+grupo('Botafogo-PB|Inter de Limeira|Figueirense|ABC|ASA|Treze',W,K,'listras');
+grupo('Brusque',Y,R,'horizontais',G);
+grupo('Caxias','#751e36',W);
+grupo('Ferroviária','#8c1d40',W);
+grupo('Floresta|Gama|Uberlândia',G,W);
+grupo('Itabaiana',R,B,'horizontais');
+grupo('Ituano|Maranhão|Campinense',R,K,'listras');
+grupo('Maringá',K,G,'listras');
+grupo('Santa Cruz',W,R,'tricolor',K);
+grupo('Volta Redonda',Y,K,'listras');
+grupo('Ypiranga-RS',Y,G,'horizontais');
+grupo('Goiatuba|Nacional-AM|Águia de Marabá',B,W);
+grupo('CSA',W,B,'listras');
+grupo('Retrô',Y,B);
+grupo('Ferroviário',R,W,'listras');
+grupo('Porto Velho','#8b222e',W);
+grupo('Manaus',G,K,'listras');
+grupo('Sampaio Corrêa',R,G,'tricolor',Y);
+grupo('Altos',G,Y,'listras');
+grupo('São José-RS',G,W,'listras');
+grupo('Portuguesa-RJ',G,R,'listras');
+grupo('Brasiliense',Y,G);
 // Mantém também os uniformes de equipes históricas fora da Série B.
 export const UNIFORMES=mapa;
 export function uniformeDe(nome,cor='#147356'){

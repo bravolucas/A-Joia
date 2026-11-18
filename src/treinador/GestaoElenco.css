@@ -20,3 +20,13 @@
 .ge-eventos ul{list-style:none;margin:0;padding:0;max-height:155px;overflow:auto}
 .ge-eventos li{padding:8px 0;color:#b9cbd7;font-size:11px;border-bottom:1px solid #ffffff11;line-height:1.55}
 .ge-eventos li strong{color:#ecf5f1}
+
+/* Central e contratos compartilham a mesma interface de elenco. */
+.ctm-panel .ge-integrada{padding:0;overflow:visible;min-height:auto;background:transparent;color:inherit}
+.ctm-panel .ge-integrada .ge-financas{margin:16px 0 18px}
+.ctm-panel .ge-integrada .ge-financas article{background:#17263b;border-color:#2c3c53}
+.ctm-panel .ge-integrada .ge-tabela-scroll{max-height:52dvh;border-color:#2c3c53}
+.ctm-panel .ge-integrada .ge-tabela tbody tr{background:#121e30}
+.ctm-panel .ge-integrada .ge-tabela tbody tr:nth-child(even){background:#17263b}
+.ctm-panel .ge-integrada .ge-tabela thead th{background:#1d3047}
+.ctm-panel .ge-integrada .ge-abas{overflow-x:auto}

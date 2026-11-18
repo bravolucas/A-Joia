@@ -747,11 +747,8 @@ export const CLUBES = [
   { nome: "Treze", forca: 51, liga: "serieD", estado: "PB", cor: "#1F1F1F" },
   { nome: "Campinense", forca: 50, liga: "serieD", estado: "PB", cor: "#B82228" },
   { nome: "Cianorte", forca: 49, liga: "serieD", estado: "PR", cor: "#DB202C" },
-  // Banco de clubes reais da Série D de 2026 para a expansão simulada de 2028 em diante.
-  { nome: "CSA", forca: 55, liga: "serieD", estado: "AL", cor: "#004C97" },
+  // Clubes adicionais da Série D para expansão simulada após 2027, sem duplicar cadastros.
   { nome: "São José-RS", forca: 52, liga: "serieD", estado: "RS", cor: "#0E5E40" },
-  { nome: "Retrô", forca: 53, liga: "serieD", estado: "PE", cor: "#F2CA14" },
-  { nome: "Tombense", forca: 53, liga: "serieD", estado: "MG", cor: "#B01C32" },
   { nome: "Portuguesa-RJ", forca: 51, liga: "serieD", estado: "RJ", cor: "#006838" },
   { nome: "Brasiliense", forca: 53, liga: "serieD", estado: "DF", cor: "#E5C900" },
   // INGLATERRA - CHAMPIONSHIP

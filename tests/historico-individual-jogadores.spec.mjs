@@ -29,7 +29,7 @@ for (const width of [390, 1366]) test(`histórico individual no elenco: temporad
   await page.reload();
   await page.getByRole('button',{name:/Continuar · Histórico Vivo/}).click();
   await page.getByRole('button',{name:'Elenco e contratos →',exact:true}).click();
-  const painel=page.getByRole('dialog',{name:'Elenco e contratos',exact:true});
+  const painel=page.getByRole('region',{name:'Elenco e contratos',exact:true});
   const linha=painel.locator(`tr[data-atleta="${id}"]`);
   await expect(linha).toHaveCount(1);
   await linha.getByRole('button',{name:`Ver histórico de ${atleta.nome}`,exact:true}).click();

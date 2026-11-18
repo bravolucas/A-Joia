@@ -126,6 +126,9 @@ export function simularClassificacoesMundoTecnico({
 
   const resultado = {};
   for (const [liga, participantes] of porLiga) {
+    // A Série D serve como banco de clubes para acesso; não fingir uma liga
+    // de pontos corridos com 23 times quando a competição real tem 96.
+    if (liga === 'serieD' && liga !== ligaTreinador) continue;
     if (liga === ligaTreinador && Array.isArray(classificacaoTreinador) && classificacaoTreinador.length) {
       resultado[liga] = {
         liga,

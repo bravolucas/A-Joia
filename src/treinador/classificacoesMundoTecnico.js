@@ -1,3 +1,4 @@
+import { resolverPlayoffSerieB } from '../competicoes/playoffSerieB.js';
 const limitar = (valor, minimo, maximo) => Math.max(minimo, Math.min(maximo, valor));
 
 function sortearPoisson(media, rng) {
@@ -141,6 +142,13 @@ export function simularClassificacoesMundoTecnico({
     const ordenados = [...participantes].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
     resultado[liga] = { liga, origem: 'simulacao-global', ...simularLigaMundo(ordenados, rng) };
   }
+  if (resultado.serieB?.classificacao?.length >= 6) {
+    const forcas = Object.fromEntries(clubesUnicos.map(x => [x.nome, Number(x.elenco ?? x.forca ?? 55)]));
+    if (clubeTreinador) forcas[clubeTreinador] = forcaTreinador ?? forcas[clubeTreinador] ?? 55;
+    resultado.serieB.playoffAcesso = resolverPlayoffSerieB({
+      classificacao: resultado.serieB.classificacao, forcas, rng,
+    });
+  }
   return resultado;
 }
 
@@ -169,7 +177,14 @@ export function atualizarLigasMundoTecnico({
     const vagas = Math.max(0, Math.min(Number(divisao.vagas) || 0, tabelaCima.length, tabelaBaixo.length));
     if (!vagas) continue;
     const rebaixados = tabelaCima.slice(-vagas);
-    const promovidos = tabelaBaixo.slice(0, vagas);
+    // No Brasil, 1º e 2º sobem direto; as duas vagas restantes são dos
+    // vencedores do playoff, não necessariamente do 3º e do 4º colocados.
+    const playoff = divisao.baixo === 'serieB'
+      ? classificacoesMundo.serieB?.playoffAcesso || resolverPlayoffSerieB({ classificacao: tabelaBaixo })
+      : null;
+    const promovidos = playoff
+      ? (playoff.promovidos || []).map(nome => tabelaBaixo.find(linha => linha.nome === nome)).filter(Boolean)
+      : tabelaBaixo.slice(0, vagas);
     for (let i = 0; i < vagas; i++) {
       const rebaixado = rebaixados[i];
       const promovido = promovidos[i];

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CLUBES } from '../src/dados/data.js';
-import { resolverPlayoffsSerieB } from '../src/simulacao/playoffsSerieB.js';
+import { resolverPlayoffsSerieB, resolverOuReusarPlayoffsSerieB } from '../src/simulacao/playoffsSerieB.js';
 import { atualizarLigasMundoTecnico, simularLigaMundo } from '../src/treinador/classificacoesMundoTecnico.js';
 
 const tabelaB = Array.from({ length: 20 }, (_, i) => ({ nome: `Série B ${i + 1}`, posicao: i + 1 }));
@@ -87,4 +87,22 @@ test('mudança de divisão do treinador usa os vencedores reais do playoff', () 
   assert.equal(resultado.ligasMundo['Série B 3'], 'serieB');
   assert.deepEqual(resultado.playoffsSerieB.promovidos.slice(0, 2), ['Série B 1', 'Série B 2']);
   assert.equal(Object.values(resultado.ligasMundo).filter(liga => liga === 'brasileirao').length, 20);
+});
+
+
+test('retomar a temporada não sorteia novos playoffs e preserva o histórico', () => {
+  const resultado = resolverPlayoffsSerieB(tabelaB, forcas, () => 0.5);
+  const repetido = resolverOuReusarPlayoffsSerieB(tabelaB, forcas, () => {
+    throw new Error('Não pode sortear novamente uma temporada encerrada');
+  }, resultado);
+  assert.equal(repetido, resultado);
+  assert.deepEqual(repetido.promovidos, resultado.promovidos);
+});
+
+test('playoffs persistidos de tabela antiga não são aplicados a novos participantes', () => {
+  const anterior = resolverPlayoffsSerieB(tabelaB, forcas, () => 0.5);
+  const novaTabela = tabelaB.map((linha, i) => i === 2 ? { nome: 'Novo terceiro', posicao: 3 } : linha);
+  const refeito = resolverOuReusarPlayoffsSerieB(novaTabela, forcas, () => 0.5, anterior);
+  assert.notEqual(refeito, anterior);
+  assert.equal(refeito.confrontos[0].melhorCampanha, 'Novo terceiro');
 });

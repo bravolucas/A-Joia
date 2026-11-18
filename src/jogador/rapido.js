@@ -6,6 +6,8 @@ import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
 import {forcasDoMundo,clubesDoMundo,registrarMundoVivo,resumirTabelas} from '../simulacao/mundoVivo.js';
 import {AJUSTE_FORTALEZA,corrigirEquilibrioClubes} from '../dados/equilibrioClubes.js';
 import {primeiraFaseContinental} from '../competicoes/fasesSelecoes.js';
+import {simularPlacarRealista} from '../competicoes/motorPlacares.js';
+import {probabilidadesPlacar} from '../competicoes/motorPlacar.js';
 import {normalizarCampeaoLiga,corrigirCampeoesLiga,registrarAnoHistoria,registrarEstatisticasCompeticoes,registrarAtletasObservados,simularDefesas,novosMarcosIndividuais} from '../historia/historiaFutebol.js';
 import {ITENS_PESSOAIS} from './itensPessoais.js';
 import {iniciarCamisas,aposentarDonoCamisa,prepararCamisaSelecao,sincronizarCamisasSelecao} from './camisasCarreira.js';
@@ -1139,12 +1141,19 @@ function sortearSelecoes(nac, n, [min, max], evitar = [], paises = null) {
 }
 /* força do seu país em campo: um titular acima do nível da seleção puxa o time */
 const forcaNaCopa = (k) => k.fs + forcaElencoCopa(k.elenco,k.fs) + (k.titular ? clampR((k.ovr - k.fs) * 0.25, -2, 3) : 0);
-const chanceJogoCopa = (k, adv, extra = 0) => clampR(0.4 + (forcaNaCopa(k) - adv.forca) * 0.03 + extra, 0.1, 0.85);
-function placarCopa(res) {
-  const a = poisson(1.4), b = poisson(1.0);
+const chanceJogoCopa = (k, adv, extra = 0) => clampR(probabilidadesPlacar(forcaNaCopa(k),adv.forca,{neutro:true}).vitoria+extra,0.04,0.985);
+function placarCopa(res,forcaCasa=75,forcaFora=75) {
+  const {golsCasa:a,golsFora:b}=simularPlacarRealista(forcaCasa,forcaFora,rnd,{neutro:true});
   if (res === "V") { const x = Math.max(a, b), y = Math.min(a, b); return [x === y ? x + 1 : x, y]; }
   if (res === "D") { const x = Math.min(a, b), y = Math.max(a, b); return [x, x === y ? y + 1 : y]; }
   const g = Math.min(a, b); return [g, g];
+}
+/** Ocorrências pessoais registradas na simulação, independentes de gols válidos. */
+function ocorrenciasCopa(c,k,participou){
+ if(!participou)return {};
+ const amarelo=chance(.14),vermelho=chance(.012);
+ return {amarelo,vermelho,golsAnulados:c.posicao==='GOL'?0:(chance(.055)?1:0),
+  ...(c.posicao==='GOL'?{defesas:Math.max(0,poisson(3))}:{})};
 }
 /* seus gols e assistências num jogo, sem passar do placar */
 function participacaoCopa(c, k, golsPro, decidiu = false) {
@@ -1207,10 +1216,10 @@ export function opcoesCopa(c, card) {
   const grupo = k.etapa === "grupos", rodada = grupo ? jogosDoGrupo(k).length : null;
   const adv = grupo ? k.grupo[rodada] : k.adversario;
   const base = chanceJogoCopa(k, adv);
-  const decide = clampR(base + clampR((k.ovr - 84) * 0.012, -0.12, 0.08) + (grupo?0:somaTraco(c, "mataMata")) - (k.titular ? 0 : 0.03), 0.08, 0.92);
+  const decide = clampR(base + clampR((k.ovr - 84) * 0.012, -0.12, 0.08) + (grupo?0:somaTraco(c, "mataMata")) - (k.titular ? 0 : 0.03), 0.04, 0.99);
   const ops = [
     k.titular
-      ? { id: "coletivo", icone: "🤝", nome: "Jogar para o time", texto: "Disciplina tática e nada de heroísmo.", p: clampR(base + 0.03, 0.1, 0.92), faixa: "baixo" }
+      ? { id: "coletivo", icone: "🤝", nome: "Jogar para o time", texto: "Disciplina tática e nada de heroísmo.", p: clampR(base + 0.03, 0.04, 0.99), faixa: "baixo" }
       : { id: "coletivo", icone: "🙌", nome: "Apoiar do banco", texto: "O grupo decide; você empurra de fora.", p: base, faixa: "baixo" },
     k.titular
       ? { id: "decidir", icone: "🔥", nome: "Chamar a responsabilidade", texto: "Pedir a bola nos momentos quentes. Brilha ou some.", p: decide, faixa: "alto" }
@@ -1262,13 +1271,13 @@ function jogarCopaBase(c, card0, opId) {
     if(op.id==="arenga")k.arenga=false;
     const venceu=resultado==="V",decidiu=op.id==="decidir"&&venceu;
     if(op.id==="decidir"){if(venceu){k.craque++;k.efeitos.fama+=2;k.titular=true;}else if(resultado==="D")k.efeitos.moral-=3;}
-    const [gp,gc]=placarCopa(resultado),eu=participacaoCopa(c,k,gp,decidiu);
+    const [gp,gc]=placarCopa(resultado,forcaNaCopa(k),adv.forca),eu=participacaoCopa(c,k,gp,decidiu);
     k.gols+=eu.gols;k.assist+=eu.assist;
-    const jogo={fase:0,rodada:rodada+1,adv,gp,gc,res:resultado,escolha:op.id,mundial:k.tipo==='copaMundo',...eu};
+    const jogo={fase:0,rodada:rodada+1,adv,gp,gc,res:resultado,escolha:op.id,mundial:k.tipo==='copaMundo',...eu,...ocorrenciasCopa(c,k,k.titular)};
     registrarJogoElenco(k.elenco,jogo,{titular:k.titular,ano:k.ano});k.jogos.push(jogo);
     const [mandante,visitante]=k.grupo.filter(x=>x.id!==adv.id);
     const pV=clampR(.38+(mandante.forca-visitante.forca)*.025,.08,.78),r=rnd();
-    const [outGp,outGc]=placarCopa(r<pV?"V":r<pV+.26?"E":"D");
+    const [outGp,outGc]=placarCopa(r<pV?"V":r<pV+.26?"E":"D",mandante.forca,visitante.forca);
     const outro={rodada:rodada+1,mandante,visitante,gp:outGp,gc:outGc};
     k.jogosGrupoOutros=[...(k.jogosGrupoOutros||[]),outro];
     const tabela=tabelaGrupoCopa(k),pos=tabela.findIndex(t=>t.id===k.nac)+1,pts=tabela[pos-1].p;
@@ -1288,7 +1297,7 @@ function jogarCopaBase(c, card0, opId) {
   const venceu = op.id === "arenga" ? true : chance(op.p);
   if (op.id === "arenga") k.arenga = false;
   const penaltis = chance(0.25);
-  const [gp, gc] = penaltis ? placarCopa("E") : placarCopa(venceu ? "V" : "D");
+  const [gp, gc] = penaltis ? placarCopa("E",forcaNaCopa(k),adv.forca) : placarCopa(venceu ? "V" : "D",forcaNaCopa(k),adv.forca);
   const decidiu = op.id === "decidir" && venceu;
   if (op.id === "decidir") {
     if (venceu) { k.craque += 1; k.efeitos.fama += 2; if (!k.titular) k.titular = true; }
@@ -1296,7 +1305,7 @@ function jogarCopaBase(c, card0, opId) {
   }
   const eu = k.titular || op.id === "decidir" ? participacaoCopa(c, { ...k, titular: true }, gp, decidiu) : { gols: 0, assist: 0 };
   k.gols += eu.gols; k.assist += eu.assist;
-  const jogo = { fase: k.fase, adv, gp, gc, res: venceu ? "V" : "D", penaltis, mundial:k.tipo==='copaMundo', ...eu };
+  const jogo = { fase: k.fase, adv, gp, gc, res: venceu ? "V" : "D", penaltis, mundial:k.tipo==='copaMundo', ...eu,...ocorrenciasCopa(c,k,k.titular||op.id==='decidir') };
   registrarJogoElenco(k.elenco,jogo,{titular:k.titular,ano:k.ano});
   k.jogos.push(jogo);
   const fase = fasesDaCopa(k)[k.fase];

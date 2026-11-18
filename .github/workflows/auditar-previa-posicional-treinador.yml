@@ -1,0 +1,26 @@
+name: Auditar prévia de XI por posição exata
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/treinador/previsaoEscalacaoTecnico.js'
+      - 'src/treinador/escalacaoPosicionalTecnico.js'
+      - 'tests/previsao-escalacao-tecnico.test.mjs'
+      - '.github/workflows/auditar-previa-posicional-treinador.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  previa-precisa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Exigir titularidade posicional e banco sem duplicações
+        run: node --test tests/previsao-escalacao-tecnico.test.mjs
+      - name: Build de produção
+        run: GITHUB_PAGES=true npm run build

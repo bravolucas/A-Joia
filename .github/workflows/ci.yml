@@ -49,6 +49,8 @@ jobs:
           if [ "$codigo" -ne 0 ]; then
             echo "::error::Testes de lógica falharam (exit $codigo). Ocorrências relevantes:"
             grep -n -E 'not ok|^# (fail|tests|pass|cancelled|skipped)|ERR_|Error:|error:' "$saida" | tail -n 90 || true
+            echo "Detalhes dos testes reprovados (mensagem, asserção e pilha):"
+            awk '/^not ok [0-9]+ - / { linhas=42 } linhas>0 { print; linhas-- }' "$saida" | tail -n 460 || true
           fi
           echo "Resumo final da execução:"
           tail -n 110 "$saida"

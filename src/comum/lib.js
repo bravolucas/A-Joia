@@ -3,6 +3,7 @@ import { MINIMOS_ELENCO, diagnosticarElenco } from '../simulacao/profundidadeEle
 import {posicoesSecundariasNewgen} from '../simulacao/posicoesSecundariasNewgen.js';
 import {escalarVagasAptas} from '../simulacao/escalacaoApta.js';
 import { gerarNomeRegional, sortearNacionalidadeMundo } from '../simulacao/nomesRegionais.js';
+import {nacionalidadeInicialLiga, nacionalidadeNovoAtletaLiga} from '../simulacao/nacionalidadesLiga.js';
 import { metadadosAtletaReal, idadeAtletaReal } from '../dados/metadadosAtletasReais.js';
 import { registrarHistoricoTemporada, registrarPremioIndividual } from '../simulacao/historicoJogadorMundo.js';
 import { destinosTransferenciaIA, fatorMobilidadeVeteranoIA, duracaoContratoIA } from '../simulacao/mercadoIA.js';
@@ -979,7 +980,7 @@ export function efeitosOstentacao(c) {
 }
 
 export function gerarJogadorElenco(clube, posId, idBase) {
-  const nac = clube.liga === "brasileirao" || clube.liga === "serieB" ? (Math.random() < 0.85 ? "BRA" : sortearNacionalidadeMundo(Math.random)) : sortearNacionalidadeMundo(Math.random);
+  const nac = nacionalidadeInicialLiga(clube.liga, Math.random);
   const idade = rand(18, 34);
   const variacao = idade < 21 ? rand(-14, -4) : idade > 31 ? rand(-8, 2) : rand(-7, 6);
   return {
@@ -1798,11 +1799,7 @@ export function completarCarenciasMundo(jogadores, clubes = CLUBES, rng = Math.r
     idsExistentes.add(String(novoId));
     return novoId;
   };
-  const nacionalidade = clube => {
-    const ligaNac = { brasileiro:'BRA', brasileirao:'BRA', serieB:'BRA', inglaterra:'ENG', espanha:'ESP', italia:'ITA', alemanha:'ALE', franca:'FRA', portugal:'POR' };
-    const local = ligaNac[clube.liga];
-    return local && rng() < .85 ? local : sortearNacionalidadeMundo(rng);
-  };
+  const nacionalidade = clube => nacionalidadeNovoAtletaLiga(clube.liga, rng);
   // Índice de jogadores por clube: evita varrer todo o mundo para cada elenco.
   const porClube = new Map();
   for (const atleta of novos) {
@@ -1847,9 +1844,7 @@ export function gerarMundoJogadores(rng = Math.random) {
   const nomeMundo=nac=>gerarNomeRegional(nac,rng);
   const jogadores = [];
   let id = 1;
-  const nomeParaNac = (clube) => clube.liga === "brasileirao" || clube.liga === "serieB"
-    ? (rng() < 0.85 ? "BRA" : sortearNacionalidadeMundo(rng))
-    : (rng() < 0.55 ? { inglaterra: "ENG", espanha: "ESP", italia: "ITA", alemanha: "ALE", franca: "FRA", portugal: "POR" }[clube.liga] || sortearNacionalidadeMundo(rng) : sortearNacionalidadeMundo(rng));
+  const nomeParaNac = (clube) => nacionalidadeInicialLiga(clube.liga, rng);
   const clubesComElencoReal = new Set(JOGADORES_REAIS_BASE.map((j) => j.time));
 
   CLUBES.forEach((clube) => {
@@ -2019,13 +2014,8 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
   for (let i = 0; i < Math.max(0, aposentadosAgora); i++) {
     const aposentado=novasAposentadorias[i];
     const clube = clubesPorNome.get(aposentado?.clubeNome)||pick(mundo.cadastroElencos?clubes.filter(cl=>cl.nome!==clubeControlado&&(ocupacao.get(cl.nome)||0)<24):clubes)||{nome:null,forca:60,liga:null};
-    // A maioria das revelações acompanha o país da liga; estrangeiros continuam possíveis.
-    const nacionalidadeLiga = {
-      brasileirao:'BRA', serieB:'BRA', inglaterra:'ENG', espanha:'ESP',
-      italia:'ITA', alemanha:'ALE', franca:'FRA', portugal:'POR',
-    };
-    const nacLocal = nacionalidadeLiga[clube.liga];
-    const nac = nacLocal && rng() < .85 ? nacLocal : sortearNacionalidadeMundo(rng);
+    // As revelações usam a origem linguística da liga e permitem estrangeiros.
+    const nac = nacionalidadeNovoAtletaLiga(clube.liga, rng);
     const teto = clampR(Math.round(clube.forca + rand(-4, 12)), 60, 96);
     const novoAtleta={
       id: proximoIdAposentadoria(), nome: nomeMundo(nac), nac, posicao: aposentado?.posicao||pick(POSICOES).id,

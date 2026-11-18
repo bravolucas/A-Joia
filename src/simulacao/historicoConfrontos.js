@@ -1,3 +1,5 @@
+import {LIGAS} from '../dados/data.js';
+
 /** Lê o arquivo compacto sem acoplar o histórico ao motor de simulação. */
 function jogosDaEdicao(edicao) {
   if (Array.isArray(edicao?.jogos)) return edicao.jogos;
@@ -24,6 +26,30 @@ export function partidasHistoricas(c = {}) {
         ano: edicao.ano, competicao: edicao.nome,
         fase: typeof j.rodada === 'string' ? j.rodada : j.fase || null,
       });
+    }
+  }
+  // Durante a temporada do treinador, os confrontos concluídos já existem
+  // no save. Mostrá-los imediatamente não exige avançar a carreira.
+  const t=c.tecnico;
+  if(t){
+    const emJogo=t.andamento||t.temporadaPausada;
+    const finalizada=t.temporadas?.at(-1);
+    const origem=emJogo||finalizada;
+    const ano=emJogo?(emJogo.ano??t.ano):finalizada?.ano;
+    const clube=emJogo?t.clube:finalizada?.clube;
+    const liga=emJogo?t.liga:finalizada?.liga;
+    if(Number.isFinite(ano)&&clube&&!u.anos?.includes(ano)){
+      const nomeLiga=LIGAS[liga]?.nome||liga||'Liga';
+      for(const [i,j] of (origem?.confrontos||[]).entries()){
+        if(j?.folga||!j?.nome||!Number.isFinite(j.golsPro)||!Number.isFinite(j.golsContra))continue;
+        const casa=j.casa?clube:j.nome,fora=j.casa?j.nome:clube;
+        const golsCasa=j.casa?j.golsPro:j.golsContra,golsFora=j.casa?j.golsContra:j.golsPro;
+        // Evitar dupla contagem se um arquivo parcial já trouxe o jogo.
+        if(partidas.some(p=>p.ano===ano&&p.competicao===nomeLiga&&p.casa===casa&&p.fora===fora&&p.rodada===(j.rodada??i+1)))continue;
+        partidas.push({id:['etapa',ano,nomeLiga,casa,fora,j.rodada??i+1].join('|'),
+          ano,competicao:nomeLiga,casa,fora,golsCasa,golsFora,rodada:j.rodada??i+1,
+          fase:'Liga',origem:'temporada-em-andamento'});
+      }
     }
   }
   return partidas;
@@ -63,9 +89,9 @@ export function partidasDetalhadasUsuario(card = {}) {
   const liga = card.ligaNome || card.ligaId || 'Liga';
   const jogos = [];
   const salvar = (j, competicao, origem, indice, stats) => {
-    if (!valido(j) || !competicao) return;
+    if (!valido(j) || !competicao || (j.casa!==clube && j.fora!==clube)) return;
     jogos.push({
-      id: [ano,origem,competicao,indice].join('|'),ano,competicao,
+      id: [ano,origem,competicao,clube,indice].join('|'),ano,competicao,
       clube, adversario:j.casa === clube ? j.fora : j.casa,
       casa:j.casa,fora:j.fora,golsCasa:j.golsCasa,golsFora:j.golsFora,
       rodada:j.rodada ?? null,fase:j.fase || null,
@@ -89,7 +115,7 @@ export function partidasDetalhadasUsuario(card = {}) {
   for (const [i,j] of (card.partidasCompeticoes||[]).entries()) {
     if (j?.selecao || !j.competicao) continue;
     salvar(j,j.competicao,'copa',i,{
-      participou:j.naoEscalado?false:true,gols:j.gols,assistencias:j.assist,
+      participou:!(j.naoEscalado||j.suspenso||j.descansou||j.participou===false),gols:j.gols,assistencias:j.assist,
       defesas:j.defesas,cleanSheets:j.cleanSheets,nota:j.nota
     });
   }

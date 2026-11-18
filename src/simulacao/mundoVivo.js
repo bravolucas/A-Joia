@@ -31,7 +31,6 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
   const anterior=c.universo||c.tecnico?.universo||{versao:1,desde:a.ano,clubes:{},atletas:{},edicoes:[],anos:[]};
   if(anterior.anos?.includes(a.ano))return;
   let u={...anterior,versao:1,clubes:{...anterior.clubes},atletas:{...anterior.atletas},edicoes:[...(anterior.edicoes||[])],anos:[...(anterior.anos||[]),a.ano]};
-  u=registrarPartidasDetalhadasUsuario(u,a);
   const clubesRegistrados=[...CLUBES,...CLUBES_REGIONAIS_EXTRAS];
   // Só são considerados formados os atletas efetivamente marcados como base:
   // não inferir formação a partir do clube de nascimento ou do nome.
@@ -100,6 +99,9 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
   if(!a.classificacoesMundo?.[a.ligaId||a.liga]&&(a.classificacao?.length||a.tabelaLiga?.length))u.edicoes.push({ano:a.ano,nome:a.ligaNome||LIGAS[a.ligaId||a.liga]?.nome||a.liga,tipo:'liga',classificacao:a.classificacao||a.tabelaLiga.map((nome,i)=>({nome,posicao:i+1})),jogos:compactarJogos(a.jogosLiga||[]),campeao:a.vencedorLiga||a.classificacao?.[0]?.nome||a.tabelaLiga?.[0]});
   for(const t of [...(a.torneiosMundo||[]),...(a.torneios||[])])if(t.campeao&&!t.finalPendente)u.edicoes.push({ano:a.ano,nome:t.nome,tipo:t.tipo,campeao:t.campeao,vice:t.vice,classificacao:t.classificacao||[],grupos:(t.grupos||[]).map(g=>({grupo:g.grupo,classificacao:g.classificacao||[]})),jogos:compactarJogos(jogosTorneio(t))});
   u.edicoes=[...new Map(u.edicoes.map(e=>[`${e.ano}|${e.nome}`,e])).values()];
+  // Registrar depois de arquivar os placares: assim o Modo Rápido usa somente
+  // partidas finalizadas, com distribuição fixa e identificada por competição.
+  u=registrarPartidasDetalhadasUsuario(u,a);
   if(c.tecnico){delete c.universo;c.tecnico={...c.tecnico,universo:u,forcasMundo:forcasDoMundo({...c,universo:u})};}else c.universo=u;
 }
 

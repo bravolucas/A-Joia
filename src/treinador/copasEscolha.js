@@ -316,6 +316,15 @@ export function registrarPlacarCopa(c,chave,jogo) {
  if(jogo.partidas?.length){
   const ps=jogo.partidas;
   if(d.grupo||ps.length!==2||ps.some(p=>![p.golsCasa,p.golsFora].every(n=>Number.isInteger(n)&&n>=0))||ps[0].casa!==casa||ps[0].fora!==fora||ps[1].casa!==fora||ps[1].fora!==casa||ps[0].golsCasa+ps[1].golsFora!==jogo.golsCasa||ps[0].golsFora+ps[1].golsCasa!==jogo.golsFora)throw new Error('Agregado incompatível com os jogos de ida e volta.');
+  // Quando o regulamento prevê gols fora, a classificação não pode ser
+  // sobrescrita por um resultado externo ou por um save malformado.
+  const voltaRegular=ps[1].prorrogacao
+   ?{...ps[1],golsCasa:ps[1].prorrogacao.placar90.golsCasa,golsFora:ps[1].prorrogacao.placar90.golsFora}:ps[1];
+  const venceuFora=vencedorPorGolsFora(ps[0],voltaRegular,c);
+  if(venceuFora&&(jogo.vencedor!==venceuFora||jogo.penaltis||ps[1].prorrogacao))
+   throw new Error('Vencedor incompatível com o critério de gols fora.');
+  if(jogo.criterio==='gols-fora'&&!venceuFora)
+   throw new Error('Critério de gols fora não corresponde ao confronto.');
  }
  const vencedor=jogo.golsCasa>jogo.golsFora?casa:jogo.golsFora>jogo.golsCasa?fora:null;
  if(jogo.vencedor&&![casa,fora].includes(jogo.vencedor)||vencedor&&jogo.vencedor&&vencedor!==jogo.vencedor||d.grupo&&!vencedor&&jogo.vencedor)throw new Error('Vencedor incompatível com o placar.');

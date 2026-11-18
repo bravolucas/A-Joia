@@ -47,6 +47,18 @@ function confrontosCirculo(nomes, turnoEVolta = false) {
   return [...rodadas, ...volta];
 }
 
+/**
+ * Calendário público da Série C: compartilha a distribuição equilibrada de
+ * mandos com o motor do campeonato e com as carreiras do Modo Treinador.
+ * Recebe os nomes de um grupo já definido, sem selecionar adversários.
+ */
+export function calendarioSerieCClubes(nomes = [], idaVolta = false) {
+  if (!Array.isArray(nomes) || nomes.length < 2 ||
+      nomes.some(nome => typeof nome !== 'string' || !nome) ||
+      new Set(nomes).size !== nomes.length) return [];
+  return confrontosCirculo(nomes, idaVolta);
+}
+
 function poisson(media, rng) {
   let produto = 1, vezes = 0, limite = Math.exp(-Math.max(0.1, Math.min(4.5, media)));
   do {

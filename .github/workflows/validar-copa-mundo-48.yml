@@ -10,6 +10,8 @@ on:
       - 'tests/copa-48-*.test.mjs'
       - 'tests/regras-mundial-48-e-motor-2026.test.mjs'
       - 'tests/estatisticas-copa-jogador.test.mjs'
+      - 'tests/desempate-mundial-48.test.mjs'
+      - 'tests/chave-mundial-495.test.mjs'
       - '.github/workflows/validar-copa-mundo-48.yml'
   workflow_dispatch:
 jobs:
@@ -24,6 +26,6 @@ jobs:
       - name: Instalar dependências
         run: npm install --no-audit --no-fund
       - name: Testar formato, ida e volta, placares e estatísticas
-        run: node --test tests/copa-48-placares.test.mjs tests/copa-48-robustez.test.mjs tests/regras-mundial-48-e-motor-2026.test.mjs tests/estatisticas-copa-jogador.test.mjs
+        run: node --test tests/copa-48-placares.test.mjs tests/copa-48-robustez.test.mjs tests/regras-mundial-48-e-motor-2026.test.mjs tests/estatisticas-copa-jogador.test.mjs tests/desempate-mundial-48.test.mjs tests/chave-mundial-495.test.mjs
       - name: Verificar build de produção
         run: npm run build

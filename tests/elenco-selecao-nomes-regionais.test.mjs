@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {criarJogador} from '../src/jogador/rapido.js';
 import {atualizarElencoSelecao} from '../src/jogador/elencoSelecao.js';
+import {atualizarGeracaoSelecao} from '../src/jogador/jornadaJogador.js';
 import {gerarNomeRegional,origemNomes} from '../src/simulacao/nomesRegionais.js';
 import {NACIONALIDADES} from '../src/dados/data.js';
 
@@ -68,4 +69,43 @@ test('nomes de antigos convocados não mudam na progressão para o próximo ano'
  assert.equal(preservado.posicao,antes.posicao);
  const repetido=atualizarElencoSelecao(c);
  assert.deepEqual(repetido,atualizado);
+});
+
+
+test('XI de geração na jornada tem nomes regionais únicos em todas as seleções',()=>{
+ for(const {id:nac} of NACIONALIDADES){
+  const c=jogador(nac),j=atualizarGeracaoSelecao(c);
+  assert.equal(j.length,11,nac);
+  assert.equal(new Set(j.map(p=>p.nome)).size,11,nac);
+  assert.equal(new Set(j.map(p=>p.id)).size,11,nac);
+  const nomesProprios=new Set(Array.from({length:100},(_,i)=>
+   pares(gerarNomeRegional(nac,()=>i/100))[0]));
+  for(const p of j){
+   assert.ok(nomesProprios.has(pares(p.nome)[0]),`XI ${nac}: ${p.nome}`);
+   assert.ok(p.id.startsWith(`selecao:${nac}:`));
+  }
+ }
+});
+
+test('jornada mantém colegas antigos e não muda as idades/IDs na renovação',()=>{
+ const c=jogador('JAP');
+ let xi=atualizarGeracaoSelecao(c);
+ const antigo=xi[0],nomeOriginal='Nome Legado da Copa',nascimento=antigo.nascimento;
+ c.jornada.geracao.find(p=>p.id===antigo.id).nome=nomeOriginal;
+ c.ano=2031;c.idade=26;
+ xi=atualizarGeracaoSelecao(c);
+ assert.equal(xi.find(p=>p.id===antigo.id)?.nome,nomeOriginal);
+ assert.equal(xi.find(p=>p.id===antigo.id)?.nascimento,nascimento);
+ assert.deepEqual(atualizarGeracaoSelecao(c),xi);
+});
+
+test('goleadores criados em elencos e na jornada compartilham origem cultural, sem duplicar IDs',()=>{
+ const c=jogador('MAR');
+ const chamada=atualizarGeracaoSelecao(c);
+ const elenco=atualizarElencoSelecao(c);
+ const nomes=new Set(Array.from({length:100},(_,i)=>
+   pares(gerarNomeRegional('MAR',()=>i/100))[0]));
+ assert.ok(chamada.every(p=>nomes.has(pares(p.nome)[0])));
+ assert.ok(elenco.jogadores.every(p=>nomes.has(pares(p.nome)[0])));
+ assert.equal(new Set(elenco.jogadores.map(p=>p.id)).size,25);
 });

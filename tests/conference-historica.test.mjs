@@ -46,3 +46,22 @@ test('aliases e saves: simulação soma uma vez, sem regravar histórico ou edi�
  assert.equal(galeriaClube(c,'Roma').tacas.find(t=>t.nome==='Conference League').total,2);
  assert.deepEqual(c,antes);
 });
+
+test('Conference e Champions permanecem separadas quando Chelsea conquista as duas no mesmo ano',()=>{
+ const c={temporadas:[{ano:2037,clube:'Chelsea',torneios:[
+  {nome:'Champions League',campeao:'Chelsea',tipo:'continental'},
+  {nome:'Conference League',campeao:'Chelsea',tipo:'continental'},
+  {nome:'UEFA Conference League',campeao:'Chelsea',tipo:'continental'},
+ ]}]};
+ const antes=structuredClone(c);
+ const champions=galeriaCompeticao(c,'Champions League');
+ const conference=galeriaCompeticao(c,'Conference League');
+ assert.equal(champions.edicoes.length,1);
+ assert.equal(conference.edicoes.length,1,'aliases não duplicam a mesma edição da Conference');
+ assert.equal(champions.ranking.find(x=>x.clube==='Chelsea').inicial,2);
+ assert.equal(champions.ranking.find(x=>x.clube==='Chelsea').total,3);
+ assert.equal(conference.ranking.find(x=>x.clube==='Chelsea').inicial,1);
+ assert.equal(conference.ranking.find(x=>x.clube==='Chelsea').total,2);
+ assert.equal(galeriaClube(c,'Chelsea').tacas.find(x=>x.nome==='Conference League').total,2);
+ assert.deepEqual(c,antes);
+});

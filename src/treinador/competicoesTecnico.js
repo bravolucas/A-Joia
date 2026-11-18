@@ -1,6 +1,6 @@
 import { riscoEstiloTecnico } from './taticasTecnico.js';
 import {mediasGols,amostrarPoisson} from '../competicoes/motorPlacares.js';
-import {temIdaVolta} from '../competicoes/regrasIdaVolta.js';
+import {temIdaVolta,regulamentoConhecidoIdaVolta} from '../competicoes/regrasIdaVolta.js';
 const limitar = (n, min, max) => Math.max(min, Math.min(max, n));
 const sorteio = () => Math.random();
 const forca = (clube) => Number(clube?.forca ?? clube?.elenco ?? 50);
@@ -271,8 +271,12 @@ function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng, formato = {})
         jogos.push({ bye: casa.nome, vencedor: casa.nome, fase, rodada: rodadaNumero });
         continue;
       }
-      const idaVolta = rodada.length === 2 ? formato.finalIdaVolta === true : (formato.mataMataIdaVolta === true ||
-        formato.nomeCompeticao && temIdaVolta({nome:formato.nomeCompeticao,ano:formato.ano||2026,tamanho:rodada.length}));
+      // Regulamentos reconhecidos são a fonte de verdade: uma flag genérica
+      // jamais pode transformar uma fase de jogo único em ida e volta.
+      const regrasConhecidas=regulamentoConhecidoIdaVolta(formato.nomeCompeticao);
+      const idaVolta=regrasConhecidas
+        ?temIdaVolta({nome:formato.nomeCompeticao,ano:formato.ano||2026,tamanho:rodada.length,preContinental:formato.preContinental})
+        :rodada.length===2?formato.finalIdaVolta===true:formato.mataMataIdaVolta===true;
       const confronto = idaVolta ? criarConfrontoIdaVolta(casa, fora, nomeUsuario, bonusTecnico, rng)
         : criarPartida(casa, fora, nomeUsuario, bonusTecnico, rng, true, {
           campoNeutro: rodada.length === 2 && formato.finalCampoNeutro === true,
@@ -347,7 +351,8 @@ export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forca
   });
 
   const eliminatoria = jogarEliminatoria(classificados, nomeUsuario, bonusTecnico, rng, {
-    mataMataIdaVolta: /Libertadores|Champions League|Europa League|Conference League|Sul-Americana/i.test(nome),
+    // Somente torneios fictícios sem regulamento conhecido utilizam flags manuais.
+    mataMataIdaVolta: !regulamentoConhecidoIdaVolta(nome)&&/Libertadores|Champions League|Europa League|Conference League|Sul-Americana/i.test(nome),
     nomeCompeticao:nome,
     finalCampoNeutro: nome === 'Copa Libertadores', finalProrrogacao: nome === 'Copa Libertadores', ...formato
   });

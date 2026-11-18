@@ -4,6 +4,7 @@ import {anoPainelTecnico} from './painelTecnico.js';
 import {exigenciaClubeTecnico} from './exigenciasTecnico.js';
 import {MuseuFimCarreira} from '../museu/MuseuPessoal.jsx';
 import BotaoHistoria from '../historia/HistoriaFutebol.jsx';
+import LinkEntidade from '../historia/LinkEntidade.jsx';
 import {dadosVaga} from '../competicoes/vagasInternacionais.js';
 import {contextoAgenda} from '../competicoes/calendarioCopas.js';
 import CopaEscolha,{MarcoLiga} from './CopaEscolha.jsx';
@@ -50,8 +51,8 @@ function PopUpTitulo({ temporada, titulo, indice, total, onFechar }) {
       <h2>CAMPEÃO!</h2>
       <div className="ct-champion-cup"><Lottie nome="taca" className="ct-champion-animation" /><span className="ct-champion-halo" aria-hidden="true" /><TacaCompeticao tipo={competicaoDoTitulo(titulo).tipo} nome={titulo} size={184} /></div>
       <span className="ct-champion-label">UMA NOVA TAÇA NA SUA HISTÓRIA</span>
-      <h3>{titulo}</h3>
-      <div className="ct-event-club"><Escudo nome={equipeTituloTecnico(temporada,titulo)} size={28} /><strong>{equipeTituloTecnico(temporada,titulo)}</strong></div>
+      <h3><LinkEntidade tipo="competicao" nome={titulo}/></h3>
+      <div className="ct-event-club"><Escudo nome={equipeTituloTecnico(temporada,titulo)} size={28} /><strong><LinkEntidade tipo={['copaMundo','continentalSelecao'].includes(competicaoDoTitulo(titulo).tipo)||temporada.tipoEquipe==='selecao'?'selecao':'clube'} nome={equipeTituloTecnico(temporada,titulo)}/></strong></div>
     </div>
     <div className="ct-champion-footer">
       {liga ? <div className="ct-champion-stats">{[[temporada.posicao + 'º', 'POSIÇÃO'], [temporada.pontos, 'PONTOS'], [temporada.vitorias, 'VITÓRIAS']].map(([valor, rotulo]) => <div key={rotulo}><strong>{valor}</strong><span>{rotulo}</span></div>)}</div> : <p className="ct-champion-message">O trabalho virou conquista. Mais um título para o legado do seu treinador.</p>}
@@ -69,8 +70,8 @@ function PopUpDivisao({ temporada, movimento, tipo, onFechar }) {
   return <JanelaTreinador titulo={acesso ? 'Acesso de divisão' : 'Rebaixamento'} onFechar={onFechar} classe={`ct-celebration ${acesso ? 'ct-celebration-green' : 'ct-celebration-red'}`}>
     <div className="ct-event-content ct-celebration-body" style={{backgroundImage:`linear-gradient(#17171b66,#17171bf5 65%),url(${CENARIOS.estadioMobile})`,backgroundSize:"cover",backgroundPosition:"center"}}><span className="ct-eyebrow">Temporada {temporada.ano}</span>
       <span className="ct-movement" aria-hidden="true">{acesso ? '↗' : '↘'}</span><h2>{acesso ? 'ACESSO!' : 'REBAIXADO'}</h2>
-      <div className="ct-event-club"><Escudo nome={temporada.clube} size={38} /><strong>{temporada.clube}</strong></div>
-      <h3>{acesso ? 'Sobe para ' : 'Cai para '}{competicaoTemporadaTecnico({ liga: movimento.para })}</h3>
+      <div className="ct-event-club"><Escudo nome={temporada.clube} size={38} /><strong><LinkEntidade tipo={temporada.tipoEquipe==='selecao'?'selecao':'clube'} nome={temporada.clube}/></strong></div>
+      <h3>{acesso ? 'Sobe para ' : 'Cai para '}<LinkEntidade tipo="competicao" nome={competicaoTemporadaTecnico({ liga: movimento.para })}/></h3>
       <p>{temporada.posicao}º lugar · {temporada.pontos} pontos</p>
       <button onClick={onFechar} className="ct-primary">Continuar carreira<span aria-hidden="true">→</span></button>
     </div>
@@ -85,15 +86,15 @@ function PlacarCompeticao({ jogo }) {
       <PlacarCompeticao jogo={partida} />
     </div>)}
     <div className="text-[9px] text-[#D4D4D8] py-1">
-      Agregado: {jogo.casa} {jogo.golsCasa}–{jogo.golsFora} {jogo.fora}
-      <span className="block font-semibold text-white">Classificado: {jogo.vencedor}{jogo.penaltis ? ' · nos pênaltis' : ''}</span>
+      Agregado: <LinkEntidade tipo="clube" nome={jogo.casa}/> {jogo.golsCasa}–{jogo.golsFora} <LinkEntidade tipo="clube" nome={jogo.fora}/>
+      <span className="block font-semibold text-white">Classificado: <LinkEntidade tipo="clube" nome={jogo.vencedor}/>{jogo.penaltis ? ' · nos pênaltis' : ''}</span>
     </div>
   </div>;
   const placar = Number.isFinite(jogo.golsCasa) && Number.isFinite(jogo.golsFora) ? `${jogo.golsCasa}–${jogo.golsFora}` : '—';
   return <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 border-t border-white/[.05] py-1 text-[9px] text-[#A1A1AA]">
-    <span className={jogo.vencedor === jogo.casa ? 'truncate text-right text-white font-semibold' : 'truncate text-right'}>{jogo.casa || '—'}</span>
+    <span className={jogo.vencedor === jogo.casa ? 'truncate text-right text-white font-semibold' : 'truncate text-right'}><LinkEntidade tipo="clube" nome={jogo.casa||""}>{jogo.casa||"—"}</LinkEntidade></span>
     <strong className="text-white tabular-nums">{placar}{jogo.campoNeutro && <span className="block text-[8px] text-[#A1A1AA] font-normal">Campo neutro</span>}{jogo.prorrogacao && <span className="block text-[8px] text-[#A1A1AA] font-normal">Após prorrogação · 90 min: {jogo.prorrogacao.placar90.golsCasa}–{jogo.prorrogacao.placar90.golsFora}</span>}{jogo.penaltis ? <span className="block text-[8px] text-[#A1A1AA] font-normal">pênaltis</span> : null}</strong>
-    <span className={jogo.vencedor === jogo.fora ? 'truncate text-white font-semibold' : 'truncate'}>{jogo.fora || '—'}</span>
+    <span className={jogo.vencedor === jogo.fora ? 'truncate text-white font-semibold' : 'truncate'}><LinkEntidade tipo="clube" nome={jogo.fora||""}>{jogo.fora||"—"}</LinkEntidade></span>
   </div>;
 }
 
@@ -106,13 +107,13 @@ function CampanhasTemporada({ torneios = [], abertas = false }) {
       return <details key={`${torneio.nome}-${indice}`} className="rounded-xl border border-white/[.07] bg-black/10" open={abertas||undefined}>
       <summary className="cursor-pointer list-none flex items-center gap-2 p-2">
         <TacaCompeticao tipo={torneio.tipo || competicaoDoTitulo(torneio.nome).tipo} nome={torneio.nome} size={28} />
-        <strong className="min-w-0 flex-1 truncate text-[11px] text-white">{torneio.nome}</strong>
+        <strong className="min-w-0 flex-1 truncate text-[11px] text-white"><LinkEntidade tipo="competicao" nome={torneio.nome}/></strong>
         <span className={`text-[10px] font-bold ${torneio.faseUsuario === 'Campeão' ? 'text-[#FDE68A]' : 'text-[#A1A1AA]'}`}>{torneio.faseUsuario}</span>
       </summary>
       <div className="px-2 pb-2">
         {torneio.grupos?.map(grupo => <details key={`grupo-${grupo.grupo}`} className="mt-1 rounded-lg border border-white/[.06] bg-black/15">
           <summary className="cursor-pointer px-2 py-1.5 text-[9px] font-bold text-[#D4D4D8]">Grupo {grupo.grupo} · tabela e partidas</summary>
-          {grupo.classificacao?.length > 0 && <div className="overflow-x-auto px-2 pb-1"><div className="grid min-w-[250px] grid-cols-[1.5rem_minmax(6rem,1fr)_2rem_3.4rem_2rem] gap-1 border-b border-white/[.08] py-1 text-[8px] uppercase text-[#71717A]"><span>#</span><span>Clube</span><span className="text-right">Pts</span><span className="text-right">SG</span><span className="text-right">V</span></div>{grupo.classificacao.map((clube, posicao) => <div key={clube.nome} className={`grid min-w-[250px] grid-cols-[1.5rem_minmax(6rem,1fr)_2rem_3.4rem_2rem] gap-1 py-1 text-[9px] ${clube.nome === clubeUsuario ? 'font-bold text-[#FDE68A]' : 'text-[#A1A1AA]'}`}><span>{posicao + 1}</span><span className="truncate">{clube.nome}</span><span className="text-right">{clube.pontos}</span><span className="text-right">{(clube.golsPro || 0) - (clube.golsContra || 0)}</span><span className="text-right">{clube.vitorias}</span></div>)}</div>}
+          {grupo.classificacao?.length > 0 && <div className="overflow-x-auto px-2 pb-1"><div className="grid min-w-[250px] grid-cols-[1.5rem_minmax(6rem,1fr)_2rem_3.4rem_2rem] gap-1 border-b border-white/[.08] py-1 text-[8px] uppercase text-[#71717A]"><span>#</span><span>Clube</span><span className="text-right">Pts</span><span className="text-right">SG</span><span className="text-right">V</span></div>{grupo.classificacao.map((clube, posicao) => <div key={clube.nome} className={`grid min-w-[250px] grid-cols-[1.5rem_minmax(6rem,1fr)_2rem_3.4rem_2rem] gap-1 py-1 text-[9px] ${clube.nome === clubeUsuario ? 'font-bold text-[#FDE68A]' : 'text-[#A1A1AA]'}`}><span>{posicao + 1}</span><span className="truncate"><LinkEntidade tipo="clube" nome={clube.nome}/></span><span className="text-right">{clube.pontos}</span><span className="text-right">{(clube.golsPro || 0) - (clube.golsContra || 0)}</span><span className="text-right">{clube.vitorias}</span></div>)}</div>}
           <div className="px-2 pb-2">{(grupo.jogos || []).map((jogo, i) => <PlacarCompeticao key={`grupo-${grupo.grupo}-${i}`} jogo={jogo} />)}</div>
         </details>)}
         {torneio.fases?.filter((fase, faseIdx) => !(torneio.finalPendente && faseIdx === torneio.fases.length - 1)).map((fase, faseIdx) => <details key={`fase-${fase.rodada || faseIdx}-${fase.fase}`} className="mt-1 rounded-lg border border-white/[.06] bg-black/15">
@@ -134,25 +135,32 @@ function ClassificacoesMundo({ classificacoes = {}, ligaAtual, clubeAtual }) {
     <summary className="cursor-pointer px-2 py-1.5 text-[9px] font-bold text-[#D4D4D8]">Classificações das outras ligas ({ligas.length})</summary>
     <div className="px-2 pb-2">
       {ligas.map(([liga, dados]) => <details key={liga} className="mt-1 rounded-md border border-white/[.06] bg-black/15">
-        <summary className="cursor-pointer px-2 py-1.5 text-[9px] font-semibold text-[#A1A1AA]">{competicaoTemporadaTecnico({ liga })}</summary>
+        <summary className="cursor-pointer px-2 py-1.5 text-[9px] font-semibold text-[#A1A1AA]"><LinkEntidade tipo="competicao" nome={competicaoTemporadaTecnico({liga})}/></summary>
         <div className="max-h-48 overflow-y-auto px-2 pb-1">
           <div className="grid grid-cols-[1.5rem_minmax(0,1fr)_2rem_2rem_3rem] gap-1 border-b border-white/[.08] py-1 text-[8px] uppercase text-[#71717A]"><span>#</span><span>Clube</span><span className="text-right">J</span><span className="text-right">V</span><span className="text-right">Pts</span></div>
-          {dados.classificacao.map((clube, indice) => <div key={clube.nome} className={`grid grid-cols-[1.5rem_minmax(0,1fr)_2rem_2rem_3rem] gap-1 py-1 text-[9px] ${clube.nome === clubeAtual ? 'font-bold text-[#FDE68A]' : 'text-[#A1A1AA]'}`}><span>{clube.posicao || indice + 1}</span><span className="truncate">{clube.nome}</span><span className="text-right">{clube.jogos ?? '—'}</span><span className="text-right">{clube.vitorias ?? '—'}</span><span className="text-right">{clube.pontos ?? '—'}</span></div>)}
+          {dados.classificacao.map((clube, indice) => <div key={clube.nome} className={`grid grid-cols-[1.5rem_minmax(0,1fr)_2rem_2rem_3rem] gap-1 py-1 text-[9px] ${clube.nome === clubeAtual ? 'font-bold text-[#FDE68A]' : 'text-[#A1A1AA]'}`}><span>{clube.posicao || indice + 1}</span><span className="truncate"><LinkEntidade tipo="clube" nome={clube.nome}/></span><span className="text-right">{clube.jogos ?? '—'}</span><span className="text-right">{clube.vitorias ?? '—'}</span><span className="text-right">{clube.pontos ?? '—'}</span></div>)}
         </div>
       </details>)}
     </div>
   </details>;
 }
 function CartaoClube({ nome, liga, pais, rotulo, detalhe, nivel, salario, onClick, disabled, atual = false }) {
-  return <button type="button" className={`ct-offer ${atual ? 'ct-offer-stay' : ''}`} onClick={onClick} disabled={disabled}>
-    <span className="ct-offer-label">{rotulo}</span><strong>{nome}</strong>
-    <span className="ct-offer-crest"><Escudo nome={nome} size={64} /></span>
-    <span className="ct-offer-league">{liga?.startsWith('selecao:') ? `Seleção · ${liga.split(':')[1]}` : competicaoTemporadaTecnico({ clube: nome, liga })}</span>
-    <span className="ct-offer-country"><Bandeira pais={pais} /><span>{pais || 'Brasil'}</span></span>
-    {nivel!=null&&<span className="ct-offer-detail">Time {nivel} · {formatarVerbaRapida(salario||0)}/mês</span>}
-    {detalhe && <span className="ct-offer-detail">{detalhe}</span>}
-    {nivel!=null&&!liga?.startsWith('selecao:')&&!atual&&<span className="ct-offer-detail">Meta: {objetivoTecnico({clube:nome,liga,elenco:nivel}).nome}</span>}
-  </button>;
+  const selecao=liga?.startsWith('selecao:');
+  // O nome abre o Arquivo Vivo; a proposta permanece uma ação distinta.
+  // Nunca colocar um botão de navegação dentro do botão de contratação.
+  return <div className={`ct-offer ${atual ? 'ct-offer-stay' : ''}`}>
+    <span className="ct-offer-label">{rotulo}</span>
+    <strong className="ct-offer-name"><LinkEntidade tipo={selecao?'selecao':'clube'} nome={nome}/></strong>
+    <button type="button" className="ct-offer-pick" onClick={onClick} disabled={disabled} aria-label={`${rotulo} ${nome}`}>
+      <span className="ct-offer-crest"><Escudo nome={nome} size={64} /></span>
+      <span className="ct-offer-league">{selecao ? `Seleção · ${liga.split(':')[1]}` : competicaoTemporadaTecnico({ clube: nome, liga })}</span>
+      <span className="ct-offer-country"><Bandeira pais={pais} /><span>{pais || 'Brasil'}</span></span>
+      {nivel!=null&&<span className="ct-offer-detail">Time {nivel} · {formatarVerbaRapida(salario||0)}/mês</span>}
+      {detalhe && <span className="ct-offer-detail">{detalhe}</span>}
+      {nivel!=null&&!selecao&&!atual&&<span className="ct-offer-detail">Meta: {objetivoTecnico({clube:nome,liga,elenco:nivel}).nome}</span>}
+      <span className="ct-offer-action-label">{atual?'Permanecer':'Aceitar proposta'}</span>
+    </button>
+  </div>;
 }
 
 function LinhaTemporada({ a, idade, ativa, aberta, onClick }) {
@@ -164,7 +172,7 @@ function LinhaTemporada({ a, idade, ativa, aberta, onClick }) {
       <span className="ct-position">{a.posicao ? `${a.posicao}º` : '—'}</span><span className="ct-number">{a.pontos}</span><span className="ct-number">{a.vitorias}</span><span className="ct-number">{titulos.length}</span>
     </button>
     {aberta && <div className="ct-season-details">
-      <div className="ct-detail-title"><strong>{competicaoTemporadaTecnico(a)}</strong><span>{a.ano}</span></div>
+      <div className="ct-detail-title"><strong><LinkEntidade tipo="competicao" nome={competicaoTemporadaTecnico(a)}/></strong><span><LinkEntidade tipo={a.tipoEquipe==='selecao'?'selecao':'clube'} nome={a.clube}/> · {a.ano}</span></div>
       <p>{a.formato}</p><p>{a.vitorias}V · {a.empates}E · {a.derrotas}D · {a.pontos} pontos</p>
       {a.avaliacaoDiretoria&&<p className={a.avaliacaoDiretoria.pendente?'ct-warning':''}>{a.avaliacaoDiretoria.motivo}</p>}
       {a.pediuDemissao?<p>Saída por pedido de demissão. A campanha ficou interrompida.</p>:<p>Meta: {a.objetivo} · <span className={a.cumpriuObjetivo ? 'ct-positive' : 'ct-warning'}>{a.avaliacaoDiretoria?.pendente?'em avaliação':a.cumpriuObjetivo ? 'atingida' : 'não atingida'}</span></p>}
@@ -172,7 +180,7 @@ function LinhaTemporada({ a, idade, ativa, aberta, onClick }) {
       {a.decisoes?.some(d=>d.carta!=='simulacao_expressa')&&<details className="ct-quick-history"><summary>Decisões da temporada</summary>{a.decisoes.filter(d=>d.carta!=='simulacao_expressa').map((d,i)=><p key={i}><strong>{d.nome}</strong><br/>{d.resultado}</p>)}</details>}
       {a.vagasInternacionaisProxima?.[a.clube]&&<p>Próxima temporada: {dadosVaga(a.vagasInternacionaisProxima[a.clube])}. {a.vagasInternacionaisProxima[a.clube].motivo}.</p>}
       <CampanhasTemporada torneios={a.torneios} />
-      {a.classificacao?.length > 0 && <details className="ct-league-details"><summary>Ver classificação</summary><div className="ct-standings">{a.classificacao.map(l => <div key={l.nome} className={l.meuClube ? 'ct-positive' : ''}><span>{l.posicao}</span><strong>{l.nome}</strong><span>{l.vitorias}V</span><span>{l.pontos} pts</span></div>)}</div></details>}
+      {a.classificacao?.length > 0 && <details className="ct-league-details"><summary>Ver classificação</summary><div className="ct-standings">{a.classificacao.map(l => <div key={l.nome} className={l.meuClube ? 'ct-positive' : ''}><span>{l.posicao}</span><strong><LinkEntidade tipo={a.tipoEquipe==='selecao'?'selecao':'clube'} nome={l.nome}/></strong><span>{l.vitorias}V</span><span>{l.pontos} pts</span></div>)}</div></details>}
       <ClassificacoesMundo classificacoes={a.classificacoesMundo} ligaAtual={a.liga} clubeAtual={a.clube} />
     </div>}
   </div>;
@@ -330,7 +338,7 @@ export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, on
           <div className={`ct-rating ${ovr >= 80 ? 'ct-rating-gold' : ovr >= 70 ? 'ct-rating-silver' : ''}`}><span>OVR</span><strong>{ovr}</strong></div>
           <div className="ct-person">
             <div className="ct-badges"><span><Bandeira pais={c.nac || 'BRA'} />{c.nac || 'BRA'}</span><span className="ct-role">TREINADOR</span></div>
-            <h2>{c.nome}</h2><div className="ct-current-club"><Escudo nome={clubeAtual} size={22} /><BotaoHistoria c={c} nome={clubeAtual}><strong>{clubeAtual}</strong></BotaoHistoria></div>
+            <h2><LinkEntidade tipo="treinador" id="voce" nome={c.nome}/></h2><div className="ct-current-club"><Escudo nome={clubeAtual} size={22} /><BotaoHistoria c={c} nome={clubeAtual}><strong>{clubeAtual}</strong></BotaoHistoria></div>
           </div>
           <div className="ct-contract"><div><span>IDADE</span><strong>{idade}</strong></div><div><span>SALÁRIO/MÊS</span><strong>R$ {semClube || primeira ? 0 : (t.salario ?? salarioTecnico(t))}<small>mil</small></strong></div></div>
         </header>

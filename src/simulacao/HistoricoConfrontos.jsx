@@ -1,6 +1,7 @@
 import React,{useMemo,useState} from 'react';
 import {partidasHistoricas,partidasDoAtleta,resumoConfrontosClubes,resumoConfrontosAtleta} from './historicoConfrontos.js';
 import {escudoDe} from '../comum/arte.js';
+import LinkEntidade from '../historia/LinkEntidade.jsx';
 
 const numero=n=>Number.isFinite(n)?n.toLocaleString('pt-BR'):typeof n==='string'?n:'—';
 const ordenar=(lista)=>[...new Set(lista.filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'pt-BR'));
@@ -16,7 +17,7 @@ function ResumoCompeticoes({linhas,individual}){
    {individual?<><th>Gols</th><th>Assist.</th><th>Defesas</th></>:<><th>GP</th><th>GC</th></>}
   </tr></thead>
   <tbody>{linhas.map(x=><tr key={x.competicao}>
-   <td>{x.competicao}</td><td>{x.jogos}</td><td>{x.vitorias}</td><td>{x.empates}</td><td>{x.derrotas}</td>
+   <td><LinkEntidade tipo="competicao" nome={x.competicao}/></td><td>{x.jogos}</td><td>{x.vitorias}</td><td>{x.empates}</td><td>{x.derrotas}</td>
    {individual?<><td>{x.gols}</td><td>{x.assistencias}</td><td>{x.defesas}</td></>:<><td>{x.golsPro}</td><td>{x.golsContra}</td></>}
   </tr>)}</tbody>
  </table></div>;
@@ -28,11 +29,11 @@ function Partidas({linhas,individual}){
    {individual&&<><th>Gols</th><th>Assist.</th><th>Defesas</th><th>Nota</th></>}
   </tr></thead>
   <tbody>{linhas.map(j=><tr key={j.id}>
-   <td>{j.ano}</td><td>{j.competicao}<small className="fm27-cell-sub">{j.fase||j.rodada?typeof j.rodada==='number'?`Rodada ${j.rodada}`:j.fase||j.rodada:null}</small>
+   <td>{j.ano}</td><td><LinkEntidade tipo="competicao" nome={j.competicao}/><small className="fm27-cell-sub">{j.fase||j.rodada?typeof j.rodada==='number'?`Rodada ${j.rodada}`:j.fase||j.rodada:null}</small>
     {j.origem==='distribuicao-simulada'&&<small className="fm27-cell-sub">Estatísticas distribuídas</small>}</td>
-   <td className="fm27-club-cell"><img src={escudoDe(j.casa)} alt=""/>{j.casa}</td>
+   <td className="fm27-club-cell"><img src={escudoDe(j.casa)} alt=""/><LinkEntidade tipo="clube" nome={j.casa}/></td>
    <td><b className="fm27-score">{j.golsCasa} – {j.golsFora}</b></td>
-   <td className="fm27-club-cell"><img src={escudoDe(j.fora)} alt=""/>{j.fora}</td>
+   <td className="fm27-club-cell"><img src={escudoDe(j.fora)} alt=""/><LinkEntidade tipo="clube" nome={j.fora}/></td>
    {individual&&<><td>{numero(j.gols)}</td><td>{numero(j.assistencias)}</td><td>{numero(j.defesas)}</td><td>{numero(j.nota)}</td></>}
   </tr>)}</tbody>
  </table></div>;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { agruparConquistasTecnico } from '../treinador/conquistasTecnico.js';
 import { TacaCompeticao } from '../comum/trofeus.jsx';
+import LinkEntidade from '../historia/LinkEntidade.jsx';
 import './ConquistasJogador.css';
 
 // Os mesmos nomes canônicos e contadores da vitrine do treinador.
@@ -13,7 +14,7 @@ export default function ConquistasJogador({ titulos, renderIcone, premios = fals
         {renderIcone ? renderIcone(grupo) : <TacaCompeticao tipo={grupo.tipo} nome={grupo.nome} size={40} />}
         <b aria-hidden="true">×{grupo.quantidade}</b>
       </span>
-      <span className="cj-info"><strong>{grupo.nomeCurto || grupo.nome}</strong><span aria-label="Anos das conquistas">{grupo.conquistas.map(c => c.ano || 'Ano não informado').join(' · ')}</span></span>
+      <span className="cj-info"><strong><LinkEntidade tipo={premios?'premio':'competicao'} nome={grupo.nome}>{grupo.nomeCurto||grupo.nome}</LinkEntidade></strong><span aria-label="Anos das conquistas">{grupo.conquistas.map(c => c.ano || 'Ano não informado').join(' · ')}</span></span>
     </li>)}
   </ul>;
 }

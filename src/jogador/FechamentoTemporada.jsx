@@ -10,6 +10,7 @@ import {bloquearRolagem} from '../comum/bloqueioRolagem.js';
 import {escudoDe,bandeiraDe} from '../comum/arte.js';
 import {NACIONALIDADES} from '../dados/data.js';
 import './FechamentoTemporada.css';
+import LinkEntidade from '../historia/LinkEntidade.jsx';
 
 /** A carreira já foi fechada; esta tela apenas apresenta o registro salvo. */
 export default function FechamentoTemporada({c,card,onContinuar,celebracaoIndice=0,onCelebracao}){
@@ -40,11 +41,11 @@ export default function FechamentoTemporada({c,card,onContinuar,celebracaoIndice
   <header className="ft-cabecalho"><span>TEMPORADA {card.ano}</span><strong>{ganhou?'Uma conquista para a sua história':'Temporada concluída'}</strong></header>
   <div className="ft-corpo"><ImpactoJogador avaliacao={card.avaliacaoForca}/>
    <section className={`ft-palco ${selecionado?'':'ft-palco-curto'}`} aria-label="Conquistas da temporada">
-    <div className="ft-clube">{emblema&&<img src={emblema} alt={nacional?`Bandeira de ${nomeEquipe}`:''}/>}<span>{nomeEquipe}</span></div>
-    {selecionado?<><h1>{premio?'É SEU!':'CAMPEÃO!'}</h1><div className="ft-taca" key={selecionado.id}><div className="ft-halo"/>{Array.from({length:12},(_,i)=><i key={i} className="ft-papel" style={{'--i':i}}/>)}<TacaCompeticao nome={selecionado.nome} tipo={selecionado.tipo} size={112}/><b aria-label={`${n} conquistas na carreira`}>×{n}</b></div><h2>{selecionado.nome}</h2><p className="ft-anos">{carreira?.conquistas?.map(x=>x.ano).filter(Boolean).filter((a,i,v)=>v.indexOf(a)===i).sort((a,b)=>a-b).join(' · ')||card.ano}</p>{grupos.length>1&&<div className="ft-titulos" aria-label="Todas as conquistas desta temporada">{grupos.map((g,i)=><button key={g.id} aria-pressed={indice===i} onClick={()=>I(i)}>{g.nome}<small>×{historico.find(h=>h.id===g.id)?.quantidade||g.quantidade}</small></button>)}</div>}</>
+    <div className="ft-clube">{emblema&&<img src={emblema} alt={nacional?`Bandeira de ${nomeEquipe}`:''}/>}<span><LinkEntidade tipo={nacional?'selecao':'clube'} nome={nomeEquipe}/></span></div>
+    {selecionado?<><h1>{premio?'É SEU!':'CAMPEÃO!'}</h1><div className="ft-taca" key={selecionado.id}><div className="ft-halo"/>{Array.from({length:12},(_,i)=><i key={i} className="ft-papel" style={{'--i':i}}/>)}<TacaCompeticao nome={selecionado.nome} tipo={selecionado.tipo} size={112}/><b aria-label={`${n} conquistas na carreira`}>×{n}</b></div><h2><LinkEntidade tipo={premio?'premio':'competicao'} nome={selecionado.nome}/></h2><p className="ft-anos">{carreira?.conquistas?.map(x=>x.ano).filter(Boolean).filter((a,i,v)=>v.indexOf(a)===i).sort((a,b)=>a-b).join(' · ')||card.ano}</p>{grupos.length>1&&<div className="ft-titulos" aria-label="Todas as conquistas desta temporada">{grupos.map((g,i)=><button key={g.id} aria-pressed={indice===i} onClick={()=>I(i)}>{g.nome}<small>×{historico.find(h=>h.id===g.id)?.quantidade||g.quantidade}</small></button>)}</div>}</>
      :<div className="ft-sem-taca"><strong>{card.acesso?'ACESSO!':card.rebaixado?'REBAIXADO':'SEM TÍTULOS NESTE ANO'}</strong><p>{card.acesso?`O ${card.clube} sobe para ${card.acesso.para}.`:card.rebaixado?`O ${card.clube} vai jogar ${card.rebaixado.para}.`:'Veja abaixo como foi cada competição.'}</p></div>}
     <div className="ft-campanha-lista" aria-label="Campanha nas competições">{campanha.map(x=><div key={x.nome} className={`ft-comp ft-${x.tom}`}>
-     <TacaCompeticao nome={x.nome} tipo={x.tipo} size={24}/><span><strong>{x.nome}</strong>{x.detalhe&&<small>{x.detalhe}</small>}</span><b>{x.res}</b></div>)}</div>
+     <TacaCompeticao nome={x.nome} tipo={x.tipo} size={24}/><span><strong><LinkEntidade tipo="competicao" nome={x.nome}/></strong>{x.detalhe&&<small>{x.detalhe}</small>}</span><b>{x.res}</b></div>)}</div>
     {card.tabelaLiga?.length>0&&<MiniTabela card={card}/>}
     {card.amistososSelecao?.convocado&&<details className="ft-amistosos"><summary>Amistosos da seleção · {card.amistososSelecao.jogos} jogos · {card.amistososSelecao.gols} gols</summary>{card.amistososSelecao.partidas.map((j,i)=><p key={i}>{NACIONALIDADES.find(n=>n.id===c.nac)?.label} {j.gp} × {j.gc} {j.adv.label}<small>{j.gols} gols · {j.assist} assistências suas</small></p>)}</details>}
    </section>
@@ -86,7 +87,7 @@ export function campanhaDaTemporada(card,ganhouTipo=(tipo,nome)=>(card.titulos||
 function MiniTabela({card}){
  const ordem=card.tabelaLiga,minha=ordem.indexOf(card.clube);
  const idx=[...new Set([0,1,2,...(minha>2?[minha-1,minha]:[]),...(minha>=0&&minha<ordem.length-1&&minha>2?[minha+1]:[])])].filter(i=>i>=0&&i<ordem.length);
- return <ol className="ft-tabela" aria-label={`Classificação final · ${card.ligaNome}`}>{idx.map((i,k)=><React.Fragment key={i}>{k>0&&i-idx[k-1]>1&&<li className="ft-pula" aria-hidden="true">⋯</li>}<li className={i===minha?'ft-eu':''}><span>{i+1}º</span>{escudoDe(ordem[i])&&<img src={escudoDe(ordem[i])} alt=""/>}<strong>{ordem[i]}</strong></li></React.Fragment>)}</ol>;
+ return <ol className="ft-tabela" aria-label={`Classificação final · ${card.ligaNome}`}>{idx.map((i,k)=><React.Fragment key={i}>{k>0&&i-idx[k-1]>1&&<li className="ft-pula" aria-hidden="true">⋯</li>}<li className={i===minha?'ft-eu':''}><span>{i+1}º</span>{escudoDe(ordem[i])&&<img src={escudoDe(ordem[i])} alt=""/>}<strong><LinkEntidade tipo="clube" nome={ordem[i]}/></strong></li></React.Fragment>)}</ol>;
 }
 
 function ResultadoTemporada({evento:e,card,c}){
@@ -97,8 +98,8 @@ function ResultadoTemporada({evento:e,card,c}){
   <span className="ft-resultado-kicker">{premio?'RECONHECIMENTO MUNDIAL':titulo?'TÍTULO CONQUISTADO':'DESTINO DA TEMPORADA'}</span>
   <h1>{premio?e.posicao===1?'MELHOR DO MUNDO!':`${e.posicao}º MELHOR DO MUNDO`:e.titulo==='REBAIXADO'?'REBAIXADO':titulo?'CAMPEÃO!':'ACESSO!'}</h1>
   <div className="ft-resultado-arte">{(titulo||premio)?<div className="ft-taca"><div className="ft-halo"/>{positivo&&Array.from({length:12},(_,i)=><i key={i} className="ft-papel" style={{'--i':i}}/>)}<TacaCompeticao nome={e.titulo} tipo={e.taca} size={190}/>{premio&&<b>{e.posicao}º</b>}</div>:<span className="ft-divisao-simbolo" aria-hidden="true">{positivo?'↗':'↘'}</span>}</div>
-  <h2>{premio?'Bola de Ouro':titulo?e.titulo:e.destino}</h2>
-  <div className="ft-clube">{escudo&&<img src={escudo} alt={nacional?`Bandeira de ${equipe}`:''}/>}<span>{premio?c.nome:equipe}</span></div>
+  <h2>{premio?<LinkEntidade tipo="premio" nome="Bola de Ouro"/>:titulo?<LinkEntidade tipo="competicao" nome={e.titulo}/>:e.destino}</h2>
+  <div className="ft-clube">{escudo&&<img src={escudo} alt={nacional?`Bandeira de ${equipe}`:''}/>}<span>{premio?<LinkEntidade tipo="jogador" id="voce" nome={c.nome}/>:<LinkEntidade tipo={nacional?'selecao':'clube'} nome={equipe}/>}</span></div>
   <p>{premio?(e.posicao===1?'Seu nome no topo do futebol mundial.':'Você está entre os três melhores jogadores do mundo.'):titulo?'Uma nova taça na sua história.':positivo?`O ${equipe} conquistou a subida de divisão.`:`O ${equipe} caiu de divisão. É hora de reconstruir.`}</p>
  </section>;
 }

@@ -10,6 +10,7 @@ import { CENARIOS } from '../comum/arte.js';
 import { competicaoDoTitulo } from '../comum/tacas.js';
 import { FINAIS_TECNICO, chanceFinalTecnico, OPCOES_PARADA_TECNICO, ANO_SEM_CLUBE_TECNICO } from './momentosTecnico.js';
 import './MomentosTecnico.css';
+import LinkEntidade from '../historia/LinkEntidade.jsx';
 
 const semMovimento = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 const festejar = cores => { if (!semMovimento()) confetti({ particleCount: 130, spread: 85, origin: { y: .45 }, colors: cores, zIndex: 130 }); };
@@ -27,11 +28,11 @@ export function PopUpFinal({ final, moral, onEscolher, ocupado }) {
     <div className="mt-final" style={{ backgroundImage: `linear-gradient(#0d0f0ecc,#0d0f0ef7 70%),url(${CENARIOS.estadioMobile})` }}>
       <span className="mt-eyebrow">A FINAL · {final.ano}</span>
       <div className="mt-cup"><TacaCompeticao tipo={['copaMundo','continentalSelecao'].includes(final.tipo) ? 'copaMundo' : competicaoDoTitulo(final.nome).tipo} nome={final.nome} size={92} /></div>
-      <h3>{final.nome}</h3>
+      <h3><LinkEntidade tipo="competicao" nome={final.nome}/></h3>
       <div className="mt-versus">
-        <div><Emblema nome={final.lado} selecao={selecao} size={54} /><strong>{final.lado}</strong><span>força {final.forcaUsuario}</span></div>
+        <div><Emblema nome={final.lado} selecao={selecao} size={54} /><strong><LinkEntidade tipo={selecao?'selecao':'clube'} nome={final.lado}/></strong><span>força {final.forcaUsuario}</span></div>
         <b>x</b>
-        <div><Emblema nome={final.adversario} selecao={selecao} size={54} /><strong>{final.adversario}</strong><span>força {final.forcaAdv}</span></div>
+        <div><Emblema nome={final.adversario} selecao={selecao} size={54} /><strong><LinkEntidade tipo={selecao?'selecao':'clube'} nome={final.adversario}/></strong><span>força {final.forcaAdv}</span></div>
       </div>
       <p className="mt-hint">{diff >= 3 ? 'Seu time é favorito. Ir para cima pode decidir cedo.' : diff <= -3 ? 'O rival é mais forte. Um plano fechado equilibra o jogo.' : 'Jogo parelho. Os detalhes vão decidir.'}{final.campoNeutro ? ' Campo neutro.' : ''}</p>
       <div className="ct-decisions mt-options">{FINAIS_TECNICO.map(op => {
@@ -55,7 +56,7 @@ export function PopUpResultadoFinal({ uf, onFechar }) {
     <div className={`mt-result ${revelado ? (uf.venceu ? 'mt-win' : 'mt-loss') : ''}`}>
       <span className="mt-eyebrow">{uf.nome} · sua escolha: {uf.escolha}</span>
       <div className="mt-versus mt-versus-small">
-        <div><Emblema nome={uf.lado} selecao={selecao} size={40} /><strong>{uf.lado}</strong></div><b>x</b><div><Emblema nome={uf.adversario} selecao={selecao} size={40} /><strong>{uf.adversario}</strong></div>
+        <div><Emblema nome={uf.lado} selecao={selecao} size={40} /><strong><LinkEntidade tipo={selecao?'selecao':'clube'} nome={uf.lado}/></strong></div><b>x</b><div><Emblema nome={uf.adversario} selecao={selecao} size={40} /><strong><LinkEntidade tipo={selecao?'selecao':'clube'} nome={uf.adversario}/></strong></div>
       </div>
       <div className="mt-meter" role="img" aria-label={`Chance de título ${pct(uf.chance)}`}>
         <i className="mt-meter-win" style={{ width: pct(uf.chance) }}><span>Título {pct(uf.chance)}</span></i>
@@ -80,8 +81,8 @@ export function PainelParada({ p, onEscolher, ocupado }) {
     <h2>{p.crise ? 'Reunião de emergência' : `Parada na rodada ${p.rodada}`}</h2>
     <p>{p.crise ? `A diretoria quer respostas: ${p.posicao}º lugar, longe da meta (${p.objetivo.toLowerCase()}).` : `${p.posicao}º lugar com ${p.pontos} pontos em ${p.jogos} jogos. Meta: ${p.objetivo.toLowerCase()}.`}</p>
     <div className="mt-table" aria-label="Classificação parcial">
-      {p.tabela.map(l => <div key={l.nome} className={l.meuClube ? 'mt-me' : ''}><span>{l.posicao}</span><strong>{l.nome}</strong><span>{l.pontos} pts</span></div>)}
-      {p.minha && p.minha.posicao > p.tabela.length && <div className="mt-me"><span>{p.minha.posicao}</span><strong>{p.minha.nome}</strong><span>{p.minha.pontos} pts</span></div>}
+      {p.tabela.map(l => <div key={l.nome} className={l.meuClube ? 'mt-me' : ''}><span>{l.posicao}</span><strong><LinkEntidade tipo="clube" nome={l.nome}/></strong><span>{l.pontos} pts</span></div>)}
+      {p.minha && p.minha.posicao > p.tabela.length && <div className="mt-me"><span>{p.minha.posicao}</span><strong><LinkEntidade tipo="clube" nome={p.minha.nome}/></strong><span>{p.minha.pontos} pts</span></div>}
     </div>
     <div className="ct-decisions">{ops.map(op => <button key={op.id} disabled={ocupado} onClick={() => onEscolher(op.id)}><strong>{op.nome}</strong><span>{op.descricao}</span></button>)}</div>
   </>;
@@ -95,9 +96,9 @@ function PainelClassico({ p, onEscolher, ocupado }) {
     <h2>Clássico contra {r.nome}</h2>
     <p>{p.casa ? 'Em casa' : 'Fora de casa'} contra o {r.clube}.{r.rivalDeGeracao ? ' A rivalidade vem dos tempos de jogador.' : ''} O técnico rival {r.v + r.e + r.d ? `tem ${r.d}V ${r.e}E ${r.v}D contra você` : 'nunca enfrentou você'}. A torcida só fala desse jogo.</p>
     <div className="mt-versus mt-derby">
-      <div><Escudo nome={p.minha?.nome} size={44} /><strong>{p.minha?.nome}</strong><span>{p.posicao}º · força {p.forca}</span></div>
+      <div><Escudo nome={p.minha?.nome} size={44} /><strong><LinkEntidade tipo="clube" nome={p.minha?.nome}/></strong><span>{p.posicao}º · força {p.forca}</span></div>
       <b>x</b>
-      <div><Escudo nome={r.clube} size={44} /><strong>{r.clube}</strong><span>{r.posicao ? `${r.posicao}º · ` : ''}força {p.forcaAdv}</span></div>
+      <div><Escudo nome={r.clube} size={44} /><strong><LinkEntidade tipo="clube" nome={r.clube}/></strong><span>{r.posicao ? `${r.posicao}º · ` : ''}força {p.forcaAdv}</span></div>
     </div>
     <div className="ct-decisions">{OPCOES_PARADA_TECNICO.rival.map(op => <button key={op.id} disabled={ocupado} onClick={() => onEscolher(op.id)}><strong>{op.nome}</strong><span>{op.descricao}</span></button>)}</div>
   </>;
@@ -108,10 +109,10 @@ const textoClassico = k => `${k.resultado === 'V' ? 'vitória' : k.resultado ===
 function CaminhoCopa({ torneio: x, lado }) {
   const jogos = (x.jogosUsuario || []).filter(j => !j.bye);
   return <details className="mt-path">
-    <summary><TacaCompeticao tipo={x.tipo === 'copaMundo' ? 'copaMundo' : x.tipo || competicaoDoTitulo(x.nome).tipo} nome={x.nome} size={26} /><strong>{x.nome}</strong><span className={x.faseUsuario === 'Campeão' ? 'mt-v' : ''}>{x.faseUsuario}</span></summary>
+    <summary><TacaCompeticao tipo={x.tipo === 'copaMundo' ? 'copaMundo' : x.tipo || competicaoDoTitulo(x.nome).tipo} nome={x.nome} size={26} /><strong><LinkEntidade tipo="competicao" nome={x.nome}/></strong><span className={x.faseUsuario === 'Campeão' ? 'mt-v' : ''}>{x.faseUsuario}</span></summary>
     {jogos.length ? <div className="mt-games">{jogos.map((j, i) => {
       const adv = j.casa === lado ? j.fora : j.casa;
-      return <div key={i}><span>{(j.fase || `Jogo ${i + 1}`).replace('Fase de grupos · ', '')}</span><Escudo nome={j.casa} size={20} /><strong>{j.golsCasa ?? '–'} x {j.golsFora ?? '–'}</strong><Escudo nome={j.fora} size={20} /><em className={j.vencedor === lado ? 'mt-v' : j.vencedor ? 'mt-d' : ''}>{adv}{j.penaltis ? ' · pên.' : ''}</em></div>;
+      return <div key={i}><span>{(j.fase || `Jogo ${i + 1}`).replace('Fase de grupos · ', '')}</span><Escudo nome={j.casa} size={20} /><strong>{j.golsCasa ?? '–'} x {j.golsFora ?? '–'}</strong><Escudo nome={j.fora} size={20} /><em className={j.vencedor === lado ? 'mt-v' : j.vencedor ? 'mt-d' : ''}><LinkEntidade tipo={['copaMundo','continentalSelecao'].includes(x.tipo)?'selecao':'clube'} nome={adv}/>{j.penaltis ? ' · pên.' : ''}</em></div>;
     })}</div> : <p className="mt-note">Sem jogos registrados.</p>}
   </details>;
 }
@@ -122,7 +123,7 @@ export function PopUpConvite({ conv, onResponder, ocupado }) {
     <div className="ct-event-content mt-invite">
       <span className="mt-eyebrow">COPA DO MUNDO {conv.ano}</span>
       <span className="mt-flag mt-flag-big"><Bandeira pais={conv.selecao} /></span>
-      <h3>{conv.selecao} quer você no comando</h3>
+      <h3><LinkEntidade tipo="selecao" nome={conv.selecao}/> quer você no comando</h3>
       <p>A federação viu o seu trabalho e oferece a seleção para a Copa do Mundo. O vínculo é exclusivo: ao aceitar, você deixa seu clube e assume todo o calendário da seleção. Força da seleção: {conv.forca}.</p>
       <button className="ct-primary" disabled={ocupado} onClick={() => onResponder(true)}>Assumir a seleção<span aria-hidden="true">→</span></button>
       <button className="mt-secondary" disabled={ocupado} onClick={() => onResponder(false)}>Agradecer e ficar só no clube</button>
@@ -137,7 +138,7 @@ export function PopUpCopaSelecao({ torneio, onFechar }) {
     <div className="ct-event-content">
       <span className="mt-eyebrow">CAMPANHA COM {eu?.toUpperCase()}</span>
       <h3>{campeao ? 'Campeão do mundo!' : torneio.faseUsuario}</h3>
-      <div className="mt-games">{(torneio.jogosUsuario || []).map((j, i) => <div key={i}><span>{j.fase}</span><span className="mt-flag"><Bandeira pais={j.casa} /></span><strong>{j.golsCasa} x {j.golsFora}</strong><span className="mt-flag"><Bandeira pais={j.fora} /></span><em className={j.vencedor === eu ? 'mt-v' : j.vencedor ? 'mt-d' : ''}>{j.casa === eu ? j.fora : j.casa}{j.penaltis ? ' · pên.' : ''}</em></div>)}</div>
+      <div className="mt-games">{(torneio.jogosUsuario || []).map((j, i) => <div key={i}><span>{j.fase}</span><span className="mt-flag"><Bandeira pais={j.casa} /></span><strong>{j.golsCasa} x {j.golsFora}</strong><span className="mt-flag"><Bandeira pais={j.fora} /></span><em className={j.vencedor === eu ? 'mt-v' : j.vencedor ? 'mt-d' : ''}><LinkEntidade tipo="selecao" nome={j.casa === eu ? j.fora : j.casa}/>{j.penaltis ? ' · pên.' : ''}</em></div>)}</div>
       <button className="ct-primary" onClick={onFechar}>Continuar<span aria-hidden="true">→</span></button>
     </div>
   </JanelaTreinador>;
@@ -150,17 +151,17 @@ export function PopUpResumo({ temporada: a, metasNovas = [], rival, onFechar }) 
   const top = tabela.slice(0, 5);
   return <JanelaTreinador titulo={`Resumo da temporada ${a.ano}`} onFechar={onFechar} classe="mt-modal">
     <div className="ct-event-content mt-summary">
-      <div className="ct-event-club"><Escudo nome={a.clube} size={30} /><strong>{a.clube}</strong></div>
+      <div className="ct-event-club"><Escudo nome={a.clube} size={30} /><strong><LinkEntidade tipo={a.tipoEquipe==='selecao'?'selecao':'clube'} nome={a.clube}/></strong></div>
       <p className="mt-note">{a.formato}</p><p className={a.cumpriuObjetivo ? 'ct-positive' : 'ct-warning'}>Meta: {a.objetivo} · {a.cumpriuObjetivo ? 'cumprida' : 'não cumprida'}</p>
-      <div className="mt-table">{top.map(l => <div key={l.nome} className={l.meuClube ? 'mt-me' : ''}><span>{l.posicao}</span><strong>{l.nome}</strong><span>{l.pontos} pts</span></div>)}
-        {minha && minha.posicao > top.length && <div className="mt-me"><span>{minha.posicao}</span><strong>{minha.nome}</strong><span>{minha.pontos} pts</span></div>}</div>
+      <div className="mt-table">{top.map(l => <div key={l.nome} className={l.meuClube ? 'mt-me' : ''}><span>{l.posicao}</span><strong><LinkEntidade tipo={a.tipoEquipe==='selecao'?'selecao':'clube'} nome={l.nome}/></strong><span>{l.pontos} pts</span></div>)}
+        {minha && minha.posicao > top.length && <div className="mt-me"><span>{minha.posicao}</span><strong><LinkEntidade tipo={a.tipoEquipe==='selecao'?'selecao':'clube'} nome={minha.nome}/></strong><span>{minha.pontos} pts</span></div>}</div>
       {a.vagasInternacionaisProxima?.[a.clube]&&<p className="mt-note">Vaga para {a.ano+1}: {dadosVaga(a.vagasInternacionaisProxima[a.clube])}.</p>}
       {a.contratoCurto === 'renovado' && <p className="mt-note">✍️ Contrato de um ano cumprido: a diretoria renovou com você.</p>}
       {(a.torneios || []).length > 0 && <div className="mt-cups" aria-label="Caminho nas copas">{a.torneios.map(x => <CaminhoCopa key={x.nome} torneio={x} lado={x.tipo === 'copaMundo' ? x.selecao : a.clube} />)}</div>}
       {a.classico && <p className="mt-note">⚔️ Clássico contra {a.classico.rival} ({a.classico.clube}): {textoClassico(a.classico)}.</p>}
       {a.cobrancaGigante && <p className="mt-note">{a.cobrancaGigante === 'jejum' ? '🔥 Segundo ano sem título: a cobrança no clube grande ficou pesada.' : '👀 Em clube grande, só o título conta. A diretoria cobra.'}</p>}
       {(a.paradas || []).length > 0 && <p className="mt-note">Paradas: {a.paradas.map(p => `rodada ${p.rodada} — ${p.nome}${p.apostaDeuCerto === false ? ' (a diretoria não comprou)' : ''}`).join(' · ')}</p>}
-      {(a.finais || []).length > 0 && <p className="mt-note">Finais: {a.finais.map(f => `${f.nome}: ${f.venceu ? 'título' : 'vice'} (${f.escolhaNome})`).join(' · ')}</p>}
+      {(a.finais || []).length > 0 && <p className="mt-note">Finais: {a.finais.map((f,i) => <React.Fragment key={i}><LinkEntidade tipo="competicao" nome={f.nome}/>: {f.venceu?'título':'vice'} ({f.escolhaNome}){i<a.finais.length-1?' · ':''}</React.Fragment>)}</p>}
       {a.rival && <p className="mt-note">Duelo com {a.rival.nome} ({a.rival.clube}): {a.rival.v}V {a.rival.e}E {a.rival.d}D{a.rival.campeao ? ' · ele foi campeão' : ''}{rival ? ` · no total ${rival.v}V ${rival.e}E ${rival.d}D` : ''}</p>}
       {metasNovas.length > 0 && <div className="mt-goals-new">{metasNovas.map(m => <span key={m.id}>🏅 Meta cumprida: {m.nome}</span>)}</div>}
       <button className="ct-primary" onClick={onFechar}>Continuar<span aria-hidden="true">→</span></button>
@@ -175,7 +176,7 @@ export function PopUpDemissao({ temporada: a, t, onFechar }) {
       <div className="vf-hero-diretoria" style={{ backgroundImage: `url(${CENARIOS.diretoriaMobile})` }} />
       <span className="mt-eyebrow">{a.interrompida ? 'NO MEIO DA TEMPORADA' : `FIM DA TEMPORADA ${a.ano}`}</span>
       <h3>Você foi demitido</h3>
-      <div className="ct-event-club"><Escudo nome={a.clube} size={30} /><strong>{a.clube}</strong></div>
+      <div className="ct-event-club"><Escudo nome={a.clube} size={30} /><strong><LinkEntidade tipo={a.tipoEquipe==='selecao'?'selecao':'clube'} nome={a.clube}/></strong></div>
       <div className="mt-fired-stats">{[[`${a.posicao}º`, 'posição'], [`${t.diretoria ?? 0}%`, 'diretoria'], [`${t.torcida ?? 0}%`, 'torcida']].map(([v, r]) => <div key={r}><strong>{v}</strong><span>{r}</span></div>)}</div>
       {a.avaliacaoDiretoria?.motivo&&<p>{a.avaliacaoDiretoria.motivo}</p>}
       <p>Meta: {a.objetivo}. {a.contratoCurto === 'encerrado' ? 'O contrato de um ano terminou sem a meta e não foi renovado.' : a.cumpriuObjetivo ? 'A meta veio, mas a relação desgastou.' : 'O resultado ficou longe do combinado e a diretoria decidiu encerrar o trabalho.'} A carreira continua: há propostas, e você também pode tirar um ano para se preparar.</p>

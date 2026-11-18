@@ -2,6 +2,7 @@ import { riscoEstiloTecnico } from './taticasTecnico.js';
 import {mediasGols,amostrarPoisson} from '../competicoes/motorPlacares.js';
 import {temIdaVolta,regulamentoConhecidoIdaVolta} from '../competicoes/regrasIdaVolta.js';
 import {aplicarProrrogacaoAgregado} from '../competicoes/prorrogacaoMata.js';
+import {regraDesempateCopa,vencedorPorGolsFora} from '../competicoes/desempatePorCompeticao.js';
 const limitar = (n, min, max) => Math.max(min, Math.min(max, n));
 const sorteio = () => Math.random();
 const forca = (clube) => Number(clube?.forca ?? clube?.elenco ?? 50);
@@ -236,26 +237,26 @@ function nomeFaseEliminatoria(quantidadeClubes) {
   return nomes[quantidadeClubes] || `Fase preliminar · ${quantidadeClubes} clubes`;
 }
 
-function criarConfrontoIdaVolta(casa, fora, nomeUsuario, bonusTecnico, rng) {
-  const ida = criarPartida(casa, fora, nomeUsuario, bonusTecnico, rng);
-  // Em empate agregado, a prorrogação ocorre no estádio do mandante
-  // do segundo jogo. Só haverá pênaltis se o empate persistir após 120'.
-  const volta = aplicarProrrogacaoAgregado(ida,criarPartida(fora, casa, nomeUsuario, bonusTecnico, rng),
-    forca(fora),forca(casa),rng);
-  const golsCasa = ida.golsCasa + volta.golsFora;
-  const golsFora = ida.golsFora + volta.golsCasa;
-  let vencedor = golsCasa > golsFora ? casa.nome : golsFora > golsCasa ? fora.nome : null;
-  let penaltis = null;
-  if (!vencedor) {
-    const {diferenca}=mediasPartidaCopaTecnico(casa,fora,nomeUsuario,bonusTecnico,true);
-    vencedor = rng() < limitar(0.5 + diferenca * 0.003, 0.3, 0.7) ? casa.nome : fora.nome;
-    penaltis = vencedor === casa.nome ? 'Casa' : 'Fora';
-  }
-  // O vencedor pertence ao confronto; os resultados de cada partida permanecem intactos.
-  return { casa: casa.nome, fora: fora.nome, golsCasa, golsFora, vencedor, penaltis,
-    ...(ida.planoTatico ? { planoTatico: ida.planoTatico } : {}), agregado: true,
-    ...(volta.prorrogacao?{prorrogacao:volta.prorrogacao}:{}),
-    partidas: [{ ...ida, etapa: 'Ida' }, { ...volta, etapa: 'Volta' }] };
+function criarConfrontoIdaVolta(casa, fora, nomeUsuario, bonusTecnico, rng, competicao={}) {
+ const ida=criarPartida(casa,fora,nomeUsuario,bonusTecnico,rng);
+ const volta90=criarPartida(fora,casa,nomeUsuario,bonusTecnico,rng);
+ // A regra da Concacaf compara gols fora só nos 180 minutos regulamentares.
+ const venceuFora=vencedorPorGolsFora(ida,volta90,competicao);
+ const volta=!venceuFora&&regraDesempateCopa(competicao).prorrogacao
+  ?aplicarProrrogacaoAgregado(ida,volta90,forca(fora),forca(casa),rng):volta90;
+ const golsCasa=ida.golsCasa+volta.golsFora,golsFora=ida.golsFora+volta.golsCasa;
+ let vencedor=golsCasa>golsFora?casa.nome:golsFora>golsCasa?fora.nome:venceuFora;
+ let penaltis=null;
+ if(!vencedor){
+  const {diferenca}=mediasPartidaCopaTecnico(casa,fora,nomeUsuario,bonusTecnico,true);
+  vencedor=rng()<limitar(.5+diferenca*.003,.3,.7)?casa.nome:fora.nome;
+  penaltis=vencedor===casa.nome?'Casa':'Fora';
+ }
+ return {casa:casa.nome,fora:fora.nome,golsCasa,golsFora,vencedor,penaltis,
+  ...(ida.planoTatico?{planoTatico:ida.planoTatico}:{}),
+  ...(venceuFora?{criterio:'gols-fora'}:{}),
+  ...(volta.prorrogacao?{prorrogacao:volta.prorrogacao}:{}),
+  agregado:true,partidas:[{...ida,etapa:'Ida'},{...volta,etapa:'Volta'}]};
 }
 
 function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng, formato = {}) {
@@ -283,10 +284,12 @@ function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng, formato = {})
       const idaVolta=regrasConhecidas
         ?temIdaVolta({nome:formato.nomeCompeticao,ano:formato.ano||2026,tamanho:rodada.length,preContinental:formato.preContinental})
         :rodada.length===2?formato.finalIdaVolta===true:formato.mataMataIdaVolta===true;
-      const confronto = idaVolta ? criarConfrontoIdaVolta(casa, fora, nomeUsuario, bonusTecnico, rng)
+      const criterio={nome:formato.nomeCompeticao,ano:formato.ano||2026,tamanho:rodada.length};
+      const confronto = idaVolta ? criarConfrontoIdaVolta(casa, fora, nomeUsuario, bonusTecnico, rng,criterio)
         : criarPartida(casa, fora, nomeUsuario, bonusTecnico, rng, true, {
           campoNeutro: rodada.length === 2 && formato.finalCampoNeutro === true,
-          prorrogacao: rodada.length === 2 && formato.finalProrrogacao === true
+          prorrogacao: regrasConhecidas?regraDesempateCopa(criterio).prorrogacao
+           : rodada.length === 2 && formato.finalProrrogacao === true
         });
       jogos.push({ ...confronto, fase, rodada: rodadaNumero });
     }

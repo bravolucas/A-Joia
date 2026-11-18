@@ -28,7 +28,7 @@ function TabelaCarreira({linhas,conquistas}){
   <tbody>{[...linhas].reverse().map((r,i)=>{
    const registros=conquistas.todas.filter(x=>x.ano===r.ano&&(!x.clube||x.clube===r.clube||x.categoria==='premio'));
    return <tr key={String(r.ano)+'|'+r.clube+'|'+i}>
-    <td><strong>{r.ano??'—'}</strong></td><td className="fm27-club-cell"><img src={escudoDe(r.clube)} alt=""/><LinkEntidade tipo="clube" nome={r.clube||''}/></td>
+    <td><strong>{r.ano??'—'}</strong></td><td className="fm27-club-cell"><img src={escudoDe(r.clube)} alt=""/><LinkEntidade tipo="clube" nome={r.clube||""}>{r.clube||"Sem clube"}</LinkEntidade></td>
     <td>{n(r.jogos)}</td><td>{n(r.gols)}</td><td>{n(r.assist)}</td><td>{n(r.defesas)}</td>
     <td className="fm27-season-honours">{registros.length?registros.map((x,j)=><span key={j} className="fm27-mini-honour" title={x.categoria==='premio'?'Prêmio individual':'Título coletivo'}>{x.categoria==='premio'?'★':'◆'} <LinkEntidade tipo={x.categoria==='premio'?'premio':'competicao'} nome={x.nome}/></span>):'—'}</td>
    </tr>;
@@ -85,7 +85,7 @@ export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
     clube:p.clubeNome,aposentado:!!p.aposentado,contrato:p.contrato,movimentos:p.movimentos||[],
     historico:atual?.historico||[]});
   }
-  if((c.temporadas||[]).length&&!mapa.has('voce'))mapa.set('voce',{
+  if(c.nome&&!mapa.has('voce'))mapa.set('voce',{
    id:'voce',voce:true,nome:c.nome||'Seu jogador',posicao:c.posicao,nac:c.nac,
    clube:c.clubeNome||c.clube?.nome,aposentado:!!c.aposentado,
    historico:c.temporadas.map(t=>({ano:t.ano,clube:t.clube,jogos:t.jogos,gols:t.gols,assist:t.assist,defesas:t.defesas,cleanSheets:t.cleanSheets,titulos:(t.titulos||[]).map(x=>x.nome),porCompeticao:t.porCompeticao||[]}))
@@ -95,7 +95,7 @@ export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
  const clubes=useMemo(()=>[...new Set(todos.flatMap(p=>[p.clube,...historicoAtleta(p).map(x=>x.clube)]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')),[todos]);
  const filtrados=useMemo(()=>todos.filter(p=>(!busca||texto(p.nome).includes(texto(busca)))&&(!clube||p.clube===clube||historicoAtleta(p).some(x=>x.clube===clube)))
     .sort((a,b)=>Number(!!b.voce)-Number(!!a.voce)||a.nome.localeCompare(b.nome,'pt-BR')),[todos,busca,clube]);
- const selecionado=filtrados.find(p=>p.id===id)||filtrados[0]||null;
+ const selecionado=id&&!todos.some(p=>p.id===id)?null:filtrados.find(p=>p.id===id)||filtrados[0]||null;
  const linhas=useMemo(()=>selecionado?historicoAtleta(selecionado):[],[selecionado]);
  const conquistas=useMemo(()=>selecionado?resumoConquistas(c,selecionado.id):{todas:[],titulos:[],premios:[]},[c,selecionado?.id]);
  const selecionar=novo=>{I(novo);A('resumo');Q('todas');};
@@ -128,7 +128,7 @@ export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
       <div className="fm27-identity-symbol"><img src={escudoDe(selecionado.clube)} alt="" /></div>
       <div className="fm27-player-identity">
        <span className="fm27-eyebrow">FICHA DE CARREIRA {selecionado.voce?' / SEU JOGADOR':''}</span>
-       <h3>{selecionado.nome}</h3><p>{selecionado.posicao||'Jogador'} · <LinkEntidade tipo="clube" nome={selecionado.clube||''}/> · {selecionado.nac||'Nacionalidade não informada'}</p>
+       <h3>{selecionado.nome}</h3><p>{selecionado.posicao||'Jogador'} · <LinkEntidade tipo="clube" nome={selecionado.clube||""}>{selecionado.clube||"Sem clube"}</LinkEntidade> · {selecionado.nac||'Nacionalidade não informada'}</p>
       </div>
       <span className={'fm27-player-state '+(selecionado.aposentado?'is-retired':'')}>{selecionado.aposentado?'Aposentado':'Em atividade'}</span>
      </div>

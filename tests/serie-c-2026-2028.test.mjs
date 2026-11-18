@@ -65,7 +65,8 @@ test('universo 2026-2029 preserva 20 na A e B, expande C 20 → 24 → 28 e incl
   const clubes = CLUBES.filter(c => ['brasileirao', 'serieB', 'serieC', 'serieD'].includes(c.liga))
     .map(c => ({ ...c, elenco: c.forca }));
   const contagem = (mapa, liga) => clubes.filter(c => (mapa[c.nome] || c.liga) === liga).length;
-  assert.deepEqual(['brasileirao', 'serieB', 'serieC', 'serieD'].map(l => contagem({}, l)), [20, 20, 20, 20]);
+  assert.deepEqual(['brasileirao', 'serieB', 'serieC'].map(l => contagem({}, l)), [20, 20, 20]);
+  assert.ok(contagem({}, 'serieD') >= 12, 'a Série D é um banco de clubes, não um campeonato de 20 equipes');
   let mapa = {};
   for (const [ano, esperadoC] of [[2026, 24], [2027, 28], [2028, 28], [2029, 28]]) {
     const tabelas = simularClassificacoesMundoTecnico({
@@ -86,6 +87,6 @@ test('universo 2026-2029 preserva 20 na A e B, expande C 20 → 24 → 28 e incl
     assert.equal(contagem(mapa, 'brasileirao'), 20);
     assert.equal(contagem(mapa, 'serieB'), 20);
     assert.equal(contagem(mapa, 'serieC'), esperadoC);
-    assert.equal(contagem(mapa, 'serieD'), 80 - 40 - esperadoC);
+    assert.equal(contagem(mapa, 'serieD'), clubes.length - 40 - esperadoC);
   }
 });

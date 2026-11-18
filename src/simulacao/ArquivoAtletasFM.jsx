@@ -112,8 +112,8 @@ export default function ArquivoAtletasFM({c,onConfrontos}){
        <option value="">Todos os clubes</option>{clubes.map(nome=><option key={nome} value={nome}>{nome}</option>)}
       </select></label>
     </div>
-    <div className="fm27-roster-list">
-     {filtrados.slice(0,120).map(p=><button key={p.id} className={'fm27-roster-item '+(selecionado?.id===p.id?'is-selected':'')} type="button" onClick={()=>selecionar(p.id)}>
+    <div className="fm27-roster-list mv-atletas">
+     {filtrados.slice(0,120).map(p=><button key={p.id} className={'fm27-roster-item '+(selecionado?.id===p.id?'is-selected':'')} data-atleta={String(p.id)} type="button" onClick={()=>selecionar(p.id)}>
       <span className="fm27-roster-avatar">{(p.nome||'?').slice(0,1).toUpperCase()}</span>
       <span className="fm27-roster-copy"><strong>{p.nome||'Sem nome'}{p.voce?' · Você':''}</strong><small>{p.posicao||'Jogador'} · {p.clube||'Livre'}{p.aposentado?' · Aposentado':''}</small></span>
      </button>)}
@@ -122,7 +122,7 @@ export default function ArquivoAtletasFM({c,onConfrontos}){
     </div>
    </aside>
    <main className="fm27-player-main">
-    {!selecionado?<div className="fm27-empty">Selecione um jogador para abrir a ficha.</div>:<>
+    {!selecionado?<div className="fm27-empty">Selecione um jogador para abrir a ficha.</div>:<article className="fm27-player-sheet" aria-label={`Ficha de ${selecionado.nome}`}>
      <div className="fm27-player-hero">
       <div className="fm27-identity-symbol"><img src={escudoDe(selecionado.clube)} alt="" /></div>
       <div className="fm27-player-identity">
@@ -131,6 +131,15 @@ export default function ArquivoAtletasFM({c,onConfrontos}){
       </div>
       <span className={'fm27-player-state '+(selecionado.aposentado?'is-retired':'')}>{selecionado.aposentado?'Aposentado':'Em atividade'}</span>
      </div>
+     {(Number.isInteger(selecionado.contrato)||selecionado.movimentos?.length>0)&&
+      <section className="fm27-contract-strip" aria-label="Contratos e movimentações">
+       {Number.isInteger(selecionado.contrato)&&!selecionado.aposentado&&<p>Contrato: {selecionado.clube?`${selecionado.contrato} temporada(s)`:'Livre'}</p>}
+       {selecionado.movimentos?.length>0&&<details><summary>Movimentações da carreira ({selecionado.movimentos.length})</summary>
+        <ul aria-label={`Movimentações de ${selecionado.nome}`}>{selecionado.movimentos.map((m,i)=><li key={i}>
+         {m.ano??m.temporada??'—'} · {m.tipo==='renovacao'?'Contrato renovado':`${m.de||'Sem clube'} → ${m.para||'Sem clube'}`}
+        </li>)}</ul>
+       </details>}
+      </section>}
      <nav className="fm27-subtabs" aria-label="Seções do jogador">
       {[['resumo','Visão geral'],['carreira','Carreira'],['conquistas','Conquistas'],['confrontos','Adversários']].map(([key,label])=>
        <button type="button" key={key} aria-current={aba===key?'page':undefined} onClick={()=>A(key)}>{label}</button>)}
@@ -159,7 +168,7 @@ export default function ArquivoAtletasFM({c,onConfrontos}){
       </>}
       {aba==='confrontos'&&<RetrospectoJogador c={c} p={selecionado} onConfrontos={onConfrontos}/>}
      </div>
-    </>}
+    </article>}
    </main>
   </div>
   <p className="fm27-archive-footnote">O arquivo mantém apenas conquistas documentadas. Registros antigos com participação comprovada podem ser recuperados, mas resultados ausentes não são inventados.</p>

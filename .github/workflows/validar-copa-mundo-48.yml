@@ -15,7 +15,8 @@ on:
       - 'tests/desempate-mundial-48.test.mjs'
       - 'tests/chave-mundial-495.test.mjs'
       - 'tests/regulamentos-ida-volta-integrados.test.mjs'
-      - 'tests/desempate-por-competicao.test.mjs'
+      - 'tests/validar-resultado-regulamento.test.mjs'
+      - 'tests/desempate-por-competicao.test.mjs tests/validar-resultado-regulamento.test.mjs'
       - '.github/workflows/validar-copa-mundo-48.yml'
   workflow_dispatch:
 jobs:

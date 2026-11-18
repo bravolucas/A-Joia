@@ -165,7 +165,7 @@ function LinhaTemporada({ a, idade, ativa, aberta, onClick }) {
       <span className="ct-position">{a.posicao ? `${a.posicao}º` : '—'}</span><span className="ct-number">{a.pontos}</span><span className="ct-number">{a.vitorias}</span><span className="ct-number">{titulos.length}</span>
     </button>
     {aberta && <div className="ct-season-details">
-      <div className="ct-detail-title"><strong>{competicaoTemporadaTecnico(a)}</strong><span>{a.ano}</span></div>
+      <div className="ct-detail-title"><strong><LinkEntidade tipo="competicao" nome={competicaoTemporadaTecnico(a)}/></strong><span>{a.ano}</span></div>
       <p>{a.formato}</p><p>{a.vitorias}V · {a.empates}E · {a.derrotas}D · {a.pontos} pontos</p>
       {a.avaliacaoDiretoria&&<p className={a.avaliacaoDiretoria.pendente?'ct-warning':''}>{a.avaliacaoDiretoria.motivo}</p>}
       {a.pediuDemissao?<p>Saída por pedido de demissão. A campanha ficou interrompida.</p>:<p>Meta: {a.objetivo} · <span className={a.cumpriuObjetivo ? 'ct-positive' : 'ct-warning'}>{a.avaliacaoDiretoria?.pendente?'em avaliação':a.cumpriuObjetivo ? 'atingida' : 'não atingida'}</span></p>}
@@ -173,7 +173,7 @@ function LinhaTemporada({ a, idade, ativa, aberta, onClick }) {
       {a.decisoes?.some(d=>d.carta!=='simulacao_expressa')&&<details className="ct-quick-history"><summary>Decisões da temporada</summary>{a.decisoes.filter(d=>d.carta!=='simulacao_expressa').map((d,i)=><p key={i}><strong>{d.nome}</strong><br/>{d.resultado}</p>)}</details>}
       {a.vagasInternacionaisProxima?.[a.clube]&&<p>Próxima temporada: {dadosVaga(a.vagasInternacionaisProxima[a.clube])}. {a.vagasInternacionaisProxima[a.clube].motivo}.</p>}
       <CampanhasTemporada torneios={a.torneios} />
-      {a.classificacao?.length > 0 && <details className="ct-league-details"><summary>Ver classificação</summary><div className="ct-standings">{a.classificacao.map(l => <div key={l.nome} className={l.meuClube ? 'ct-positive' : ''}><span>{l.posicao}</span><strong>{l.nome}</strong><span>{l.vitorias}V</span><span>{l.pontos} pts</span></div>)}</div></details>}
+      {a.classificacao?.length > 0 && <details className="ct-league-details"><summary>Ver classificação</summary><div className="ct-standings">{a.classificacao.map(l => <div key={l.nome} className={l.meuClube ? 'ct-positive' : ''}><span>{l.posicao}</span><strong><LinkEntidade tipo="clube" nome={l.nome}/></strong><span>{l.vitorias}V</span><span>{l.pontos} pts</span></div>)}</div></details>}
       <ClassificacoesMundo classificacoes={a.classificacoesMundo} ligaAtual={a.liga} clubeAtual={a.clube} />
     </div>}
   </div>;

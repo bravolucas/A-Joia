@@ -2011,7 +2011,10 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
   };
   const idsAposentados=new Set(mundo.jogadores.filter(j=>j.aposentado).map(j=>j.id));
   const novasAposentadorias=jogadores.filter(j=>j.aposentado&&!idsAposentados.has(j.id));
-  for (let i = 0; i < Math.max(0, aposentadosAgora); i++) {
+  // No cadastro unificado, completarCarenciasMundo já promove jovens somente
+  // onde houver déficit real. Não substituir aposentados de elencos superlotados.
+  const reposicoesPorAposentadoria = mundo.cadastroElencos ? 0 : Math.max(0, aposentadosAgora);
+  for (let i = 0; i < reposicoesPorAposentadoria; i++) {
     const aposentado=novasAposentadorias[i];
     const clube = clubesPorNome.get(aposentado?.clubeNome)||pick(mundo.cadastroElencos?clubes.filter(cl=>cl.nome!==clubeControlado&&(ocupacao.get(cl.nome)||0)<24):clubes)||{nome:null,forca:60,liga:null};
     // As revelações usam a origem linguística da liga e permitem estrangeiros.

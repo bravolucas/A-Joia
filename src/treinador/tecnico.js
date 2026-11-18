@@ -27,6 +27,7 @@ import { competicaoDoTitulo } from '../comum/tacas.js';
 import { simularCopaNacionalTecnico, simularCopaContinentalTecnico, classificarVagasContinentalTecnico } from './competicoesTecnico.js';
 import { atualizarLigasMundoTecnico, simularClassificacoesMundoTecnico } from './classificacoesMundoTecnico.js';
 import { ordenarTabelaBrasileira } from '../simulacao/desempateBrasileiro.js';
+import { reconciliarClubeLegadoTecnico } from './compatibilidadeDivisoes.js';
 import { FINAIS_TECNICO, chanceFinalTecnico, finalDoUsuarioTecnico, aplicarResultadoFinalTecnico, paradasDoRitmoTecnico, OPCOES_PARADA_TECNICO,
   ANO_SEM_CLUBE_TECNICO, evoluirPersonagensTecnico, definirRivalTecnico, atualizarRivalTecnico,
   metasCarreiraTecnico, registrarMetasTecnico, geradorTecnico } from './momentosTecnico.js';
@@ -592,10 +593,26 @@ export function forcaClubeTecnico(t = {}) {
   const ajuste=g?avaliarForcaEquipe({base:g.forcaReferencia??g.forcaMercado??base,elenco:g.elenco,completo:true}).forca-(g.forcaReferencia??g.forcaMercado??base)-(g.ajusteNumerico||0):0;
   return limitar(base+ajuste+(perfil.fase||0)+bonusForcaLoja(t)+(t.ajusteTurno?.forca||0),10,99);
 }
-function classificacoesMundoDaTemporada(t, liga, classificacao, rng) {
-  return simularClassificacoesMundoTecnico({
+function participantesDaLigaLegadaTecnico(t, liga) {
+  const calendario = ['brasileirao', 'serieB'].includes(liga)
+    ? calendarioLigaTecnico({ ...t, liga }) : null;
+  const nomesCalendario = calendario
+    ? [...new Set(calendario.flatMap(rodada => rodada.flatMap(jogo => [jogo.casa, jogo.fora])))]
+    : [];
+  return reconciliarClubeLegadoTecnico({
     clubes: CLUBES_CONVITES_TECNICO.map(x=>({...x,elenco:t.forcasMundo?.[x.nome]??x.elenco})),
-    ligasMundo: t.ligasMundo,
+    ligasMundo: t.ligasMundo || {},
+    ligaTreinador: liga,
+    clubeTreinador: t.clube,
+    elencoTreinador: forcaClubeTecnico(t),
+    nomesCalendario,
+  });
+}
+function classificacoesMundoDaTemporada(t, liga, classificacao, rng) {
+  const { clubes, ligasMundo } = participantesDaLigaLegadaTecnico(t, liga);
+  return simularClassificacoesMundoTecnico({
+    clubes,
+    ligasMundo,
     ligaTreinador: liga,
     clubeTreinador: t.clube,
     forcaTreinador: forcaClubeTecnico(t),
@@ -613,10 +630,11 @@ const DIVISOES_TECNICO = [
   { baixo: 'portugal2', cima: 'portugal', vagas: 2 },
 ];
 function atualizarLigasMundoDaTemporada(t, liga, classificacoesMundo, rng) {
+  const { clubes, ligasMundo } = participantesDaLigaLegadaTecnico(t, liga);
   return atualizarLigasMundoTecnico({
-    clubes: CLUBES_CONVITES_TECNICO.map(clube => ({...clube, elenco: t.forcasMundo?.[clube.nome] ?? clube.elenco})),
+    clubes,
     classificacoesMundo,
-    ligasMundo: t.ligasMundo,
+    ligasMundo,
     clubeTreinador: t.clube,
     ligaTreinador: liga,
     divisoes: DIVISOES_TECNICO,

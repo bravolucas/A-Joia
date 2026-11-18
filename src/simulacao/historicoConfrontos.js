@@ -207,21 +207,34 @@ export function partidasDoAtleta(c, jogadorId = 'voce') {
   return [...mapa.values()].sort((a,b)=>a.ano-b.ano);
 }
 
-export function resumoConfrontosAtleta(c, {jogadorId = 'voce', adversario = '', competicao = '', ano = ''} = {}) {
+export function resumoConfrontosAtleta(c, {jogadorId = 'voce', adversario = '', competicao = '', ano = '', clube = '', local = ''} = {}) {
   const partidas = partidasDoAtleta(c,jogadorId).filter(j =>
     j.participou !== false &&
     (!adversario || j.adversario === adversario) &&
     (!competicao || j.competicao === competicao) &&
-    (!ano || String(j.ano) === String(ano)));
-  const total = {jogos:partidas.length,gols:0,assistencias:0,defesas:0,cleanSheets:0,notas:0,notasDisponiveis:0};
+    (!ano || String(j.ano) === String(ano)) &&
+    (!clube || j.clube === clube) &&
+    (!local || (local === 'casa' ? j.casa === j.clube : j.fora === j.clube)));
+  const resultadoVazio=()=>({jogos:0,vitorias:0,empates:0,derrotas:0,golsPro:0,golsContra:0,gols:0,assistencias:0,defesas:0,cleanSheets:0});
+  const total = {...resultadoVazio(),jogos:partidas.length,notas:0,notasDisponiveis:0};
   const porCompeticao = new Map();
   for (const j of partidas) {
     let s=porCompeticao.get(j.competicao);
-    if (!s){s={competicao:j.competicao,jogos:0,gols:0,assistencias:0,defesas:0,cleanSheets:0};porCompeticao.set(j.competicao,s);}
+    if (!s){s={competicao:j.competicao,...resultadoVazio()};porCompeticao.set(j.competicao,s);}
     s.jogos++;
-    for (const k of ['gols','assistencias','defesas','cleanSheets']) if (Number.isFinite(j[k])) {s[k]+=j[k];total[k]+=j[k];}
+    const pro=j.casa===j.clube?j.golsCasa:j.golsFora;
+    const contra=j.casa===j.clube?j.golsFora:j.golsCasa;
+    const resultado=pro>contra?'vitorias':pro<contra?'derrotas':'empates';
+    for(const alvo of [total,s]){
+      alvo[resultado]++;
+      alvo.golsPro+=pro;
+      alvo.golsContra+=contra;
+      for(const k of ['gols','assistencias','defesas','cleanSheets'])
+        if(Number.isFinite(j[k]))alvo[k]+=j[k];
+    }
     if (Number.isFinite(j.nota)){total.notas+=j.nota;total.notasDisponiveis++;}
   }
-  return {...total,notaMedia:total.notasDisponiveis ? Math.round(total.notas/total.notasDisponiveis*100)/100 : null,
+  return {...total,aproveitamento:total.jogos?Math.round(100*(3*total.vitorias+total.empates)/(3*total.jogos)):0,
+    notaMedia:total.notasDisponiveis ? Math.round(total.notas/total.notasDisponiveis*100)/100 : null,
     partidas:[...partidas].reverse(),porCompeticao:[...porCompeticao.values()].sort((a,b)=>b.jogos-a.jogos)};
 }

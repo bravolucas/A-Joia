@@ -5,6 +5,8 @@ on:
       - 'src/competicoes/**'
       - 'src/treinador/copasEscolha.js'
       - 'src/treinador/competicoesTecnico.js'
+      - 'src/treinador/tecnico.js'
+      - 'src/completo/copasPersistentes.js'
       - 'src/jogador/**'
       - 'src/comum/**'
       - 'tests/copa-48-*.test.mjs'
@@ -12,6 +14,7 @@ on:
       - 'tests/estatisticas-copa-jogador.test.mjs'
       - 'tests/desempate-mundial-48.test.mjs'
       - 'tests/chave-mundial-495.test.mjs'
+      - 'tests/regulamentos-ida-volta-integrados.test.mjs'
       - '.github/workflows/validar-copa-mundo-48.yml'
   workflow_dispatch:
 jobs:
@@ -26,6 +29,6 @@ jobs:
       - name: Instalar dependências
         run: npm install --no-audit --no-fund
       - name: Testar formato, ida e volta, placares e estatísticas
-        run: node --test tests/copa-48-placares.test.mjs tests/copa-48-robustez.test.mjs tests/regras-mundial-48-e-motor-2026.test.mjs tests/estatisticas-copa-jogador.test.mjs tests/desempate-mundial-48.test.mjs tests/chave-mundial-495.test.mjs
+        run: node --test tests/copa-48-placares.test.mjs tests/copa-48-robustez.test.mjs tests/regras-mundial-48-e-motor-2026.test.mjs tests/estatisticas-copa-jogador.test.mjs tests/desempate-mundial-48.test.mjs tests/chave-mundial-495.test.mjs tests/regulamentos-ida-volta-integrados.test.mjs tests/copas-persistentes.test.mjs tests/competicoes-tecnico.test.mjs
       - name: Verificar build de produção
         run: npm run build

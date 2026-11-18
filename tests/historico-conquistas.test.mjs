@@ -60,7 +60,7 @@ test('arquivo preserva os títulos e prêmios do jogador após sua transferênci
  const gravado=c.universo.atletas['1'];
  assert.equal(gravado.conquistas.length,2);
  assert.equal(gravado.historico.length,1);
- assert.equal(gravado.historico[0][7].length,0);
+ assert.deepEqual(gravado.historico[0][7],['Libertadores']);
  const aposentado={...c,mundo:{jogadores:[]}};
  const resumo=resumoConquistas(aposentado,'1');
  assert.equal(resumo.titulos[0].clube,'Fortaleza');

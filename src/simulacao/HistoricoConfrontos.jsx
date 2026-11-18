@@ -2,7 +2,7 @@ import React,{useMemo,useState} from 'react';
 import {partidasHistoricas,partidasDoAtleta,resumoConfrontosClubes,resumoConfrontosAtleta} from './historicoConfrontos.js';
 
 const valor=n=>Number.isFinite(n)?n.toLocaleString('pt-BR'):typeof n==='string'?n:'—';
-const resumoVazio='Nenhuma partida individual detalhada disponível neste save. Totais de temporada não são distribuídos artificialmente entre adversários.';
+const resumoVazio='Nenhuma partida individual disponível para estes filtros. As estatísticas só aparecem quando há placares registrados.';
 
 /** Consulta o mesmo arquivo de resultados por clube, rival, competição e ano. */
 export default function HistoricoConfrontos({c}){
@@ -59,7 +59,7 @@ export default function HistoricoConfrontos({c}){
   </div>}
   {resultado.porCompeticao.length>0&&<div className="hf-tabela-scroll"><table className="hf-tabela">
    <caption>Retrospecto por competição</caption><thead><tr><th>Competição</th><th>Jogos</th>{modo==='clubes'?<><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th></>:<><th>Gols</th><th>Ast.</th><th>Defesas</th><th>SG</th></>}</tr></thead>
-   <tbody>{resultado.porCompeticao.map(x=><tr key={x.competicao}><th>{x.competicao}</th><td>{x.jogos}</td>{modo==='clubes'?<><td>{x.vitorias}</td><td>{x.empates}</td><td>{x.derrotas}</td><td>{x.golsPro}</td><td>{x.golsContra}</>:<><td>{x.gols}</td><td>{x.assistencias}</td><td>{x.defesas}</td><td>{x.cleanSheets}</>}</tr>)}</tbody>
+   <tbody>{resultado.porCompeticao.map(x=><tr key={x.competicao}><th>{x.competicao}</th><td>{x.jogos}</td>{modo==='clubes'?<><td>{x.vitorias}</td><td>{x.empates}</td><td>{x.derrotas}</td><td>{x.golsPro}</td><td>{x.golsContra}</td></>:<><td>{x.gols}</td><td>{x.assistencias}</td><td>{x.defesas}</td><td>{x.cleanSheets}</td></>}</tr>)}</tbody>
   </table></div>}
   <h3>Partidas registradas</h3>
   {resultado.partidas.length?<div className="hf-tabela-scroll"><table className="hf-tabela">

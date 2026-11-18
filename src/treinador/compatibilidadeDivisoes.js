@@ -22,8 +22,7 @@ export function reconciliarClubeLegadoTecnico({
   // existir na base. Um save antigo que os mantinha na Série B ainda requer
   // reconciliação se não houver uma movimentação explícita em ligasMundo.
   const clubeLegado = !!(clubeTreinador && ehBrasil &&
-    (!cadastrado || (!ligasMundo[clubeTreinador] &&
-      cadastrado.liga !== ligaTreinador)));
+    (!cadastrado || cadastrado.liga !== ligaTreinador));
   const participantes = new Set(nomesCalendario);
   const ligas = { ...ligasMundo };
   let afastado = null;

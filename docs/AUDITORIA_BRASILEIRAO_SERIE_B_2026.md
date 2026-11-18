@@ -69,3 +69,44 @@ A suíte completa do projeto e o navegador são executados pela workflow `Valida
 3. Criar carreiras na Série A e Série B, avançar ao menos duas temporadas e verificar posição, subida/queda, chaves e histórico ao recarregar.
 4. Fazer teste de regressão com save legado que possua um dos quatro clubes substituídos.
 
+
+
+## Série C e integração das divisões nacionais — atualização
+
+A Série C agora está cadastrada com os 20 participantes de 2026, motor exclusivo de
+19 rodadas em 2026, 23 em 2027, e dois grupos de 14 (26 rodadas) a partir de
+2028. Há dois quadrangulares de seis rodadas com quatro acessos à B; a final em
+ida e volta define o campeão da Série C. O campeão é creditado ao vencedor
+da final, não ao líder da fase inicial.
+
+- Acesso/descenso integrado entre A ↔ B ↔ C ↔ D no simulador mundial.
+- A Série C passa de 20 para 24 clubes ao fim de 2026 e para 28 ao fim de
+  2027, permanecendo com 28 em 2028 e anos seguintes.
+- Com o formato de transição, apenas dois clubes descem da C em 2026/2027,
+  e seis a partir de 2028. Seis da D sobem a cada ano.
+- Os seis promovidos reais da Série D de 2026 estão cadastrados
+  (ABC, ASA, Gama, Goiatuba, Nacional-AM e Uberlândia); nos anos seguintes
+  a seleção é simulada a partir de um banco de clubes reais.
+- Modo Rápido e Modo Completo simulam a Série C em segundo plano; o Modo
+  Completo usa a mesma regra de movimentação da pirâmide.
+- A Série D **ainda não possui** sua competição completa de 96 clubes,
+  grupos, mata-matas e playoff de acesso: as seis vagas são resolvidas por
+  candidatos do banco, não por um torneio nacional completo.
+- As competições da Série C não devem utilizar uma falsa Série D de pontos
+  corridos com os poucos clubes armazenados.
+- Mandos corrigidos: 10/9 para metade dos clubes e 9/10 para a outra metade
+  em 2026; 12/11 e 11/12 em 2027; 13/13 por clube a partir de 2028.
+- Verificação isolada: nove temporadas seguidas (2026–2034) mantendo
+  Série A = 20, Série B = 20, Série C = 24/28; a contagem de confrontos
+  da primeira fase foi 190, 276 e 364 respectivamente.
+
+**Regressões adicionadas:** `tests/serie-c-piramide-integracao.test.mjs`
+e `tests/serie-c-mandos-2026-2028.test.mjs`.
+
+**Ainda pendente:** executar e confirmar a suíte integral no CI, confirmar o
+SHA efetivamente publicado, implementar uma Série D integral, assegurar
+calendário/fases adequados quando o usuário escolhe treinar um clube da Série C
+ou é rebaixado à divisão, e testar salvamentos legados end-to-end no navegador.
+
+Fontes: CBF, regulamento de 2026 e comunicado de expansão da Série C;
+ge.globo.com, relação dos seis acessos da Série D conhecidos em setembro de 2026.

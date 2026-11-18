@@ -47,6 +47,7 @@ import CarreiraTecnico from "../treinador/CarreiraTecnico.jsx";
 import { carreiraTecnicoEncerrada, pedirDemissaoTecnico, aposentarTecnico, responderParadaTecnico, resolverFinalTecnico, responderConviteSelecaoTecnico, comprarMelhoriaTecnico, iniciarCarreiraTecnico, iniciarNoClubeIdolo, atualizarPropostasCoerentesTecnico, escolherPretemporadaRapidaTecnico, responderIntervencaoTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico } from "../treinador/tecnico.js";
 import Lottie from "../comum/Lottie.jsx";
 import { tocar, apito, torcida, somLigado, alternarSom } from "../comum/som.js";
+import ResumoIndividualPartida from './ResumoIndividualPartida.jsx';
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import confetti from "canvas-confetti";
@@ -2545,7 +2546,7 @@ function DesafioOvr({ c, resultado, onEscolher, onContinuar }) {
 
 /* ---------- Copa do Mundo: tela própria, fase a fase ---------- */
 const FAIXA_COPA = { baixo: { txt: "Seguro", cor: "#4ADE80" }, alto: { txt: "Holofote", cor: "#FB923C" }, ouro: { txt: "1x por Copa", cor: "#EBC557" } };
-const CURTO_FASE = ["Grupos", "Oitavas", "Quartas", "Semi", "Final"];
+const CURTO_FASE = ["Grupos", "16 avos", "Oitavas", "Quartas", "Semi", "Final"];
 const CURTO_MUNDIAL_48 = ["Grupos", "16 avos", "Oitavas", "Quartas", "Semi", "Final"];
 const corRes = (r) => (r === "V" ? "#4ADE80" : r === "E" ? "#A1A1AA" : "#F87171");
 function LinhaJogoCopa({ j, nac, i = 0 }) {
@@ -2556,7 +2557,7 @@ function LinhaJogoCopa({ j, nac, i = 0 }) {
       <span className="text-[16px] font-black tabular-nums shrink-0" style={{ color: corRes(j.res) }}>{j.gp} x {j.gc}</span>
       <Bandeira nac={j.adv.id} size={18} />
       <span className="flex-1 min-w-0 truncate text-[14px] font-semibold text-[#E4E4E7]">{j.adv.label}{j.penaltis ? <span className="text-[#71717A] font-normal"> · pên.</span> : null}</span>
-      {(j.gols > 0 || j.assist > 0) && <span className="shrink-0 text-[12px] font-bold text-[#FDE68A]">{j.gols > 0 ? `${j.gols} gol${j.gols > 1 ? "s" : ""}` : ""}{j.gols > 0 && j.assist > 0 ? " · " : ""}{j.assist > 0 ? `${j.assist} assist.` : ""}</span>}
+      <ResumoIndividualPartida jogo={j} titulo={null}/>
     </div>
   );
 }
@@ -2684,7 +2685,7 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
           <ScannerChances chances={chancesResultado} alvo={alvoResultado} idx={indiceResultado} estatico={revelado} onFim={revelar} />
           {revelado && (
             <div className="cp-copa-resumo flex flex-col items-center gap-3 cp-surge" style={r.etapa === "grupos" ? { animationDelay: ".6s" } : undefined}>
-              {r.placar && <div className="display text-[34px] leading-none" style={{ color: r.venceu ? "#4ADE80" : r.empate?"#FDE047":"#F87171" }}>{r.placar}</div>}
+              {r.placar && <><div className="display text-[34px] leading-none" style={{ color: r.venceu ? "#4ADE80" : r.empate?"#FDE047":"#F87171" }}>{r.placar}</div><ResumoIndividualPartida jogo={r.jogo}/></>}
               {r.jogo&&<EstatisticasPosPartida jogo={r.jogo} className="w-full rounded-xl border border-white/10 bg-black/20 p-3"/>}
               <span className="cp-pop text-[14px] font-extrabold uppercase tracking-wide px-3 py-1 rounded-full" style={{ color: r.venceu ? "#1A1405" : "#fff", background: r.venceu ? "linear-gradient(90deg,#EAB308,#FDE047)" : r.empate?"#A16207":"#DC2626" }}>{jogada.card.copa.campeao ? "🏆 Campeão da competição" : r.marca}</span>
               <p className="text-[18px] leading-snug text-[#F4F4F5] text-center font-medium px-1">{r.texto}</p>

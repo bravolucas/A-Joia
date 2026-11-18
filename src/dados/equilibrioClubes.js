@@ -16,6 +16,7 @@ const limitar=(n,min,max)=>Math.max(min,Math.min(max,n));
 
 function migrarElencoFortaleza(c){
  if(c.ajustesCadastro?.[AJUSTE_ELENCO_FORTALEZA]||!Array.isArray(c.mundo?.jogadores))return c;
+ if(c.mundo.calibracaoFortalezaElenco==='2026-v2')return {...c,ajustesCadastro:{...c.ajustesCadastro,[AJUSTE_ELENCO_FORTALEZA]:true}};
  const alterados=new Map();
  const jogadores=c.mundo.jogadores.map(j=>{
   // Não afetar contratados, atletas transferidos (inclusive os que retornaram),
@@ -32,7 +33,7 @@ function migrarElencoFortaleza(c){
   alterados.set(String(j.id),novo);
   return novo;
  });
- const mundo=alterados.size?{...c.mundo,jogadores}:c.mundo;
+ const mundo={...c.mundo,jogadores,calibracaoFortalezaElenco:'2026-v2'};
  const novo={...c,mundo,ajustesCadastro:{...c.ajustesCadastro,[AJUSTE_ELENCO_FORTALEZA]:true}};
  if(!alterados.size)return novo;
  if(c.tecnico){

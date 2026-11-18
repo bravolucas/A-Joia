@@ -3,6 +3,7 @@ import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
 import {anoTemporadaCarreira,CLUBES,LIGAS,ESTADUAIS,nomeDosTitulos} from '../dados/data.js';
 import {clubesDoMundo} from '../simulacao/mundoVivo.js';
 import {simularClassificacoesMundoTecnico} from '../treinador/classificacoesMundoTecnico.js';
+import {resolverPlayoffSerieB} from '../competicoes/playoffSerieB.js';
 import {simularMundo,nomeCanonico} from '../historia/historiaFutebol.js';
 import {geradorTecnico} from '../treinador/momentosTecnico.js';
 import {registrarPremioIndividual} from '../simulacao/historicoJogadorMundo.js';
@@ -22,6 +23,15 @@ export function prepararMundoTemporada(c,card,mundo){
  const ligas=ligasDoCompleto(c),clubes=clubesDoCompleto(c,mundo);
  const classificacoesMundo=simularClassificacoesMundoTecnico({clubes:clubes.filter(cl=>cl.liga!==ligaId&&!LIGAS[cl.liga]?.naoJogavel),ligasMundo:ligas,rng:geradorTecnico(`${c.codigo||c.nome}|${ano}|ligas-completo`)});
  if(card.classificacao?.length)classificacoesMundo[ligaId]={liga:ligaId,origem:'partidas-jogador',classificacao:card.classificacao.map(t=>({...t})),jogos:(card.jogosLiga||[]).map(j=>({...j}))};
+ // A série disputada pelo usuário não entra na simulação global; portanto
+ // também precisa do seu playoff, calculado uma única vez com seed estável.
+ if(ligaId==='serieB' && classificacoesMundo.serieB?.classificacao?.length>=6) {
+   const forcas=Object.fromEntries(clubes.map(cl=>[cl.nome,cl.forca??cl.elenco??55]));
+   classificacoesMundo.serieB.playoffAcesso=resolverPlayoffSerieB({
+     classificacao:classificacoesMundo.serieB.classificacao,
+     forcas,rng:geradorTecnico(`${c.codigo||c.nome}|${ano}|playoff-serie-b`),
+   });
+ }
  const nomes=nomeDosTitulos(ligaId);
  const competicoesPreservadas=[COPAS_NACIONAIS[primeiraLiga(ligaId)],nomes.copa,card.copaNacional?.nome,card.continental?.nome,card.continentalPendente?.nome].filter(Boolean);
  const novo={...card,ano,ligaId,clube,ligaNome:LIGAS[ligaId]?.nome||card.ligaNome,ligaMult:LIGAS[ligaId]?.mult??card.ligaMult,calendarioMundoVersao:1,classificacoesMundo,torneiosMundo:[],competicoesPreservadas};

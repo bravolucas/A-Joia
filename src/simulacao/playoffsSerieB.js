@@ -38,8 +38,15 @@ export function resolverPlayoffsSerieB(classificacao, forcas = {}, rng = Math.ra
     const volta = partida(melhor, pior, forcas, rng, 'volta');
     const golsMelhor = ida.golsFora + volta.golsCasa;
     const golsPior = ida.golsCasa + volta.golsFora;
-    const empateAgregado = golsMelhor === golsPior;
-    const classificado = golsMelhor >= golsPior ? melhor : pior;
+    const pontosJogo = (pro, contra) => pro > contra ? 3 : pro === contra ? 1 : 0;
+    const pontosMelhor = pontosJogo(ida.golsFora, ida.golsCasa) + pontosJogo(volta.golsCasa, volta.golsFora);
+    const pontosPior = pontosJogo(ida.golsCasa, ida.golsFora) + pontosJogo(volta.golsFora, volta.golsCasa);
+    // REC Série B 2026, art. 13: primeiro pontos nos dois jogos, depois saldo,
+    // e somente persistindo o empate prevalece a posição na fase regular.
+    const criterio = pontosMelhor !== pontosPior ? 'pontos-playoff'
+      : golsMelhor !== golsPior ? 'saldo-agregado' : 'melhor-campanha';
+    const classificado = pontosMelhor !== pontosPior ? (pontosMelhor > pontosPior ? melhor : pior)
+      : golsMelhor >= golsPior ? melhor : pior;
     return {
       chave: indice + 1,
       confronto: `${melhorIndice + 1}º x ${piorIndice + 1}º`,
@@ -48,8 +55,9 @@ export function resolverPlayoffsSerieB(classificacao, forcas = {}, rng = Math.ra
       mandanteVolta: melhor,
       jogos: [ida, volta],
       agregado: { [melhor]: golsMelhor, [pior]: golsPior },
+      pontosPlayoff: { [melhor]: pontosMelhor, [pior]: pontosPior },
       classificado,
-      criterio: empateAgregado ? 'melhor-campanha' : 'saldo-agregado',
+      criterio,
     };
   });
 
@@ -82,7 +90,13 @@ export function resolverOuReusarPlayoffsSerieB(classificacao, forcas = {}, rng =
     if (!gols.every(n => Number.isInteger(n) && n >= 0)) return false;
     const golsMelhor = ida.golsFora + volta.golsCasa;
     const golsPior = ida.golsCasa + volta.golsFora;
-    return chave.classificado === (golsMelhor >= golsPior ? melhor : pior);
+    const pontos = (a, b) => a > b ? 3 : a === b ? 1 : 0;
+    const pontosMelhor = pontos(ida.golsFora, ida.golsCasa) + pontos(volta.golsCasa, volta.golsFora);
+    const pontosPior = pontos(ida.golsCasa, ida.golsFora) + pontos(volta.golsFora, volta.golsCasa);
+    const classificado = pontosMelhor !== pontosPior
+      ? (pontosMelhor > pontosPior ? melhor : pior)
+      : golsMelhor >= golsPior ? melhor : pior;
+    return chave.classificado === classificado;
   };
   if (nomes.length === 20 && new Set(nomes).size === 20 &&
       anterior?.regulamento === 'serie-b-2026' &&

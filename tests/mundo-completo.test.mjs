@@ -14,7 +14,7 @@ function fixture(){
 }
 test('outras ligas guardam todos os confrontos e a liga jogada preserva seus resultados',()=>{
  const {card,entrada}=fixture();assert.deepEqual(card.classificacoesMundo.brasileirao.jogos,entrada.jogosLiga);assert.deepEqual(card.classificacoesMundo.brasileirao.classificacao,entrada.classificacao);
- for(const [liga,t] of Object.entries(card.classificacoesMundo)){if(liga==='brasileirao')continue;const n=t.classificacao.length;assert.equal(t.jogos.length,n*(n-1));assert.ok(t.classificacao.every(x=>x.jogos===(n-1)*2));assert.equal(t.classificacao.reduce((a,b)=>a+b.golsPro,0),t.classificacao.reduce((a,b)=>a+b.golsContra,0));}
+ for(const [liga,t] of Object.entries(card.classificacoesMundo)){if(liga==='brasileirao')continue;if(liga==='serieC'){assert.ok(t.edicaoSerieC,'A Série C exige seu formato de grupos e mata-mata');assert.equal(t.jogos.length,t.edicaoSerieC.primeiraFase.grupos.reduce((n,g)=>n+g.jogos.length,0));continue;}const n=t.classificacao.length;assert.equal(t.jogos.length,n*(n-1));assert.ok(t.classificacao.every(x=>x.jogos===(n-1)*2));assert.equal(t.classificacao.reduce((a,b)=>a+b.golsPro,0),t.classificacao.reduce((a,b)=>a+b.golsContra,0));}
  assert.equal(card.ano,ANO_INICIO+8);assert.ok(card.classificacoesMundo.inglaterra);
 });
 test('copa efetivamente jogada não ganha segundo sorteio nem clube controlado joga outro continental',()=>{
@@ -46,10 +46,11 @@ test('acesso e rebaixamento seguem tabelas completas apesar da força ou do sort
  const estado=estadoInicialClubes(),nomes=liga=>Object.entries(estado).filter(([,c])=>c.liga===liga).map(([nome])=>({nome}));
  const cima=nomes('brasileirao'),baixo=nomes('serieB'),r=girarLigas(estado,null,{brasileirao:{classificacao:cima},serieB:{classificacao:baixo}});
  for(const x of cima.slice(-4))assert.equal(r.estado[x.nome].liga,'serieB');
- assert.equal(r.promovidos.length,4);
- assert.deepEqual(r.promovidos.slice(0,2),baixo.slice(0,2).map(x=>x.nome));
- for(const nome of r.promovidos)assert.equal(r.estado[nome].liga,'brasileirao');
- assert.ok(r.promovidos.every(nome=>baixo.slice(0,6).some(x=>x.nome===nome)));
+ const promovidosBrasil=r.porPais.find(x=>x.pais==='Brasil')?.sobem||[];
+ assert.equal(promovidosBrasil.length,4);
+ assert.deepEqual(promovidosBrasil.slice(0,2),baixo.slice(0,2).map(x=>x.nome));
+ for(const nome of promovidosBrasil){assert.equal(r.estado[nome].liga,'brasileirao');assert.ok(r.promovidos.includes(nome));}
+ assert.ok(promovidosBrasil.every(nome=>baixo.slice(0,6).some(x=>x.nome===nome)));
  assert.equal(r.playoffsSerieB.confrontos.length,2);
  assert.equal(Object.values(r.estado).filter(c=>c.liga==='brasileirao').length,cima.length);
 });
@@ -77,9 +78,10 @@ test('copa de clube da segunda divisão mantém o país e não é simulada outra
 test('tabela da segunda divisão vale mesmo quando a elite ainda usa a projeção anual',()=>{
  const estado=estadoInicialClubes(),baixo=Object.entries(estado).filter(([,c])=>c.liga==='serieB').map(([nome])=>({nome}));
  const r=girarLigas(estado,{nome:'Santos',liga:'brasileirao'}, {serieB:{classificacao:baixo}});
- assert.deepEqual(r.promovidos.slice(0,2),baixo.slice(0,2).map(x=>x.nome));
- assert.equal(r.promovidos.length,4);
- for(const nome of r.promovidos)assert.equal(r.estado[nome].liga,'brasileirao');
+ const promovidosBrasil=r.porPais.find(x=>x.pais==='Brasil')?.sobem||[];
+ assert.deepEqual(promovidosBrasil.slice(0,2),baixo.slice(0,2).map(x=>x.nome));
+ assert.equal(promovidosBrasil.length,4);
+ for(const nome of promovidosBrasil){assert.equal(r.estado[nome].liga,'brasileirao');assert.ok(r.promovidos.includes(nome));}
  assert.equal(r.estado.Santos.liga,'brasileirao');
 });
 import {vagasProximaTemporada,aplicarVagaTemporada} from '../src/completo/mundoTemporada.js';

@@ -1,0 +1,28 @@
+name: Auditar origem regional de ligas e newgens
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/simulacao/nacionalidadesLiga.js'
+      - 'src/comum/lib.js'
+      - 'src/jogador/camisasCarreira.js'
+      - 'tests/origens-ligas-mundo.test.mjs'
+      - 'tests/camisas-nomes-regionais.test.mjs'
+      - '.github/workflows/auditar-origem-ligas.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  origem-ligas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Verificar origem regional, seeds, camisas e newgens
+        run: node --test tests/origens-ligas-mundo.test.mjs tests/camisas-nomes-regionais.test.mjs tests/nomes-regionais.test.mjs tests/posicoes-newgens.test.mjs
+      - name: Compilar A JOIA para GitHub Pages
+        run: GITHUB_PAGES=true npm run build

@@ -1,12 +1,12 @@
 import React,{useState,useMemo} from 'react';
 import {gerarMercadoTecnico,resumoGestaoTecnico,elencoClubeTecnico,propostaRenovacaoTecnico,SETORES_ELENCO} from './mercadoTecnico.js';
 import {JanelaTreinador,Escudo} from './uiTreinador.jsx';
-import {lerHistoricoTemporadas,lerPremiosIndividuais,lerMovimentacoesJogador,lerTitulosAtleta} from '../simulacao/historicoJogadorMundo.js';
+import {lerHistoricoTemporadas,lerPremiosIndividuais,lerTitulosAtleta} from '../simulacao/historicoJogadorMundo.js';
 import './GestaoElenco.css';
 import LinkEntidade from '../historia/LinkEntidade.jsx';
 import MiniaturaConquista from '../comum/MiniaturaConquista.jsx';
 import {nomePremio} from '../simulacao/historicoConquistas.js';
-import {valorTransferencia,tipoTransferencia} from '../simulacao/historicoTransferencias.js';
+import {historicoTransferenciasAtleta,valorTransferencia,tipoTransferencia} from '../simulacao/historicoTransferencias.js';
 const dinheiro=n=>`R$ ${Math.round(n).toLocaleString('pt-BR')} mil`;
 const texto=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
 export default function GestaoElenco({c,onNegociar,integrada=false}){
@@ -27,7 +27,7 @@ export default function GestaoElenco({c,onNegociar,integrada=false}){
  const mudarAba=id=>{A(id);B('');S('');P(null);};
  const proposta=confirmar?.tipo==='renovacao'?propostaRenovacaoTecnico(confirmar.j,anos):null;
  const historicoPerfil=lerHistoricoTemporadas(perfil);
- const premiosPerfil=lerPremiosIndividuais(perfil),movimentosPerfil=lerMovimentacoesJogador(perfil);
+ const premiosPerfil=lerPremiosIndividuais(perfil),movimentosPerfil=historicoTransferenciasAtleta(perfil||{},historicoPerfil);
  const titulosPerfil=lerTitulosAtleta(perfil);
  const negociado=j=>g.movimentos.some(m=>m.ano===g.ano&&['compra','venda'].includes(m.tipo)&&String(m.mundoId??m.jogador)===String(j.mundoId??j.id));
  return <section className={`ge ${integrada?'ge-integrada':''}`} aria-label="Elenco e contratos">
@@ -45,7 +45,7 @@ export default function GestaoElenco({c,onNegociar,integrada=false}){
   {historicoPerfil.length?<div className="ge-historico-scroll" role="region" tabIndex={0} aria-label={`Temporadas de ${perfil.nome}`}><table className="ge-historico-tabela"><thead><tr><th>Ano</th><th>Clube</th><th>Idade</th><th>OVR</th><th>Jogos</th><th>Gols</th><th>Assist.</th><th>Nota</th></tr></thead><tbody>{[...historicoPerfil].reverse().map(r=><tr key={r.temporada}><td>{r.ano??`T${r.temporada}`}</td><td><LinkEntidade tipo="clube" nome={r.clube}/></td><td>{r.idadeInicial}</td><td>{r.ovrInicial} → {r.ovrFinal}</td><td>{r.jogos}</td><td>{r.gols}</td><td>{r.assistencias}</td><td>{r.nota.toFixed(2)}</td></tr>)}</tbody></table></div>:<p className="ge-historico-vazio">O histórico começará a aparecer após a primeira temporada simulada nesta versão.</p>}
   {!!titulosPerfil.length&&<div className="ge-eventos"><h4>Títulos conquistados · {titulosPerfil.length}</h4><ul>{[...titulosPerfil].reverse().map((t,i)=><li key={`${t.temporada}:${t.nome}:${i}`}><MiniaturaConquista nome={t.nome} size={28}/> <strong><LinkEntidade tipo="competicao" nome={t.nome}/></strong> · {t.ano??`Temporada ${t.temporada}`} · <LinkEntidade tipo="clube" nome={t.clube}/></li>)}</ul></div>}
   {!!premiosPerfil.length&&<div className="ge-eventos"><h4>Prêmios individuais</h4><ul>{[...premiosPerfil].reverse().map((p,i)=><li key={`${p.temporada}:${p.tipo}:${i}`}><MiniaturaConquista nome={nomePremio(p.tipo)} categoria="premio" size={28}/> <strong><LinkEntidade tipo="premio" nome={nomePremio(p.tipo)}/></strong> · {p.ano??`Temporada ${p.temporada}`}{p.clube?` · ${p.clube}`:''}</li>)}</ul></div>}
-  {!!movimentosPerfil.length&&<div className="ge-eventos"><h4>Transferências e saídas</h4><ul>{[...movimentosPerfil].reverse().map((m,i)=><li key={`${m.temporada??m.ano??'m'}:${i}`}><strong>{tipoTransferencia(m.tipo)}</strong> · {m.ano??'Ano não registrado'} · <LinkEntidade tipo="clube" nome={m.de||''}>{m.de||'Sem clube'}</LinkEntidade> → <LinkEntidade tipo="clube" nome={m.para||''}>{m.para||'Sem clube'}</LinkEntidade> · <strong>{valorTransferencia(m.valor)}</strong></li>)}</ul></div>}
+  {!!movimentosPerfil.length&&<div className="ge-eventos"><h4>Transferências e saídas</h4><ul>{[...movimentosPerfil].reverse().map((m,i)=><li key={`${m.temporada??m.ano??'m'}:${i}`}><strong>{tipoTransferencia(m.tipo)}</strong> · {m.ano??'Ano não registrado'} · <LinkEntidade tipo="clube" nome={m.de||''}>{m.de||'Sem clube'}</LinkEntidade> → <LinkEntidade tipo="clube" nome={m.para||''}>{m.para||'Sem clube'}</LinkEntidade> · <strong>{valorTransferencia(m.valor,m.moeda)}</strong></li>)}</ul></div>}
   <div className="ge-proposta-acoes"><button type="button" onClick={()=>P(null)}>Fechar histórico</button></div>
  </div></JanelaTreinador>}
  {confirmar&&<JanelaTreinador titulo="Confirmar negociação" classe="ge-negociacao" onFechar={()=>{if(!ocupado)C(null);}}><div className="ge-proposta"><span className="ge-sobretitulo">{confirmar.tipo==='compra'?'CONTRATAÇÃO':confirmar.tipo==='venda'?'VENDA':'RENOVAÇÃO DE CONTRATO'}</span><h3><LinkEntidade tipo="jogador" id={confirmar.j.mundoId??confirmar.j.id} nome={confirmar.j.nome}/></h3><p>{confirmar.j.setor} · {confirmar.j.idade} anos · Qualidade {confirmar.j.qualidade}</p><dl><div><dt>{confirmar.tipo==='compra'?'Clube de origem':'Clube'}</dt><dd>{confirmar.tipo==='compra'?confirmar.j.clubeVendedor||'Sem clube':g.clube}</dd></div>{proposta?<><div><dt>Novo salário mensal</dt><dd>{dinheiro(proposta.salario)}</dd></div><div><dt>Luvas</dt><dd>{dinheiro(proposta.luvas)}</dd></div></>:<><div><dt>{confirmar.tipo==='venda'?'Valor da venda':'Custo da contratação'}</dt><dd>{dinheiro(confirmar.tipo==='venda'?Math.round(confirmar.j.valor*.8):confirmar.j.valor)}</dd></div><div><dt>Salário mensal</dt><dd>{dinheiro(confirmar.j.salario)}</dd></div>{confirmar.tipo==='compra'&&<div><dt>Novo contrato</dt><dd>3 anos</dd></div>}</>}</dl>{proposta&&<label className="ge-duracao">Duração do contrato<select value={anos} disabled={ocupado} onChange={e=>Y(Number(e.target.value))}>{[1,2,3,4,5].map(n=><option value={n} key={n}>{n} {n===1?'ano':'anos'}</option>)}</select></label>}{erro&&<p className="ge-aviso ge-erro" role="alert">{erro}</p>}<div className="ge-proposta-acoes"><button disabled={ocupado} onClick={()=>C(null)}>Cancelar negociação</button><button className="ge-confirmar" disabled={ocupado} onClick={negociar}>{ocupado?'Processando…':'Confirmar negociação'}</button></div></div></JanelaTreinador>}

@@ -85,6 +85,7 @@ export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
    if(p.aposentado&&!atual)continue;
    mapa.set(String(p.id),{...atual,id:String(p.id),nome:p.nome,posicao:p.posicao,nac:p.nac,
     clube:p.clubeNome,aposentado:!!p.aposentado,contrato:p.contrato,movimentos:p.movimentos?.length?p.movimentos:atual?.movimentos||[],
+    historicoTemporadas:p.historicoTemporadas?.length?p.historicoTemporadas:atual?.historicoTemporadas||[],
     historico:atual?.historico||[]});
   }
   if(c.nome){

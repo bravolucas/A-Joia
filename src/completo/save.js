@@ -194,9 +194,17 @@ export function normalizarTemporada(t) {
 export function normalizarSave(save) {
   if (!save) return null;
   const carreira = normalizarCarreira(save.carreira);
+  // No modo completo, o mundo fica fora de carreira. Aplicar a calibração
+  // nesse objeto também, sem duplicar milhares de jogadores dentro do save.
+  const combinado=carreira&&save.mundo
+    ?corrigirEquilibrioClubes({...carreira,mundo:save.mundo})
+    :null;
+  const {mundo: mundoAjustado,...carreiraAjustada}=combinado||{};
+  const final=carreiraAjustada&&Object.keys(carreiraAjustada).length?carreiraAjustada:carreira;
   return {
     ...save,
-    carreira,
-    temporadas: (Array.isArray(save.temporadas) ? save.temporadas : []).map(normalizarTemporada).filter(Boolean).map(t => ({...t, ano: anoRegistroTemporada(carreira,t)})),
+    ...(combinado?{mundo:mundoAjustado}:{}),
+    carreira:final,
+    temporadas: (Array.isArray(save.temporadas) ? save.temporadas : []).map(normalizarTemporada).filter(Boolean).map(t => ({...t, ano: anoRegistroTemporada(final,t)})),
   };
 }

@@ -96,8 +96,56 @@ export function partidasDetalhadasUsuario(card = {}) {
   return jogos;
 }
 
+/** No Modo Rápido o motor gera totais anuais. Para NOVAS temporadas, distribui
+ * atuações apenas entre partidas com placar salvo, respeitando os gols do clube.
+ * Esta simulação é identificada como tal, nunca apresentada como súmula real. */
+export function partidasDistribuidasModoRapido(universo, card) {
+  if (!Number.isFinite(card?.ano) || !card?.clube || !Array.isArray(card.porCompeticao)) return [];
+  const edicoes=(universo.edicoes||[]).filter(e=>e.ano===card.ano);
+  const arquivo=partidasHistoricas({universo:{edicoes:edicoes}});
+  const clube=typeof card.clube==='string'?card.clube:card.clube.nome;
+  const hash=valor=>{let h=2166136261;for(const letra of String(valor)){h=Math.imul(h^letra.charCodeAt(0),16777619);}return h>>>0;};
+  const distribuir=(total,lista,capacidade)=>{
+    let resto=Math.max(0,Math.round(total||0));
+    const saida=lista.map(()=>0);
+    while(resto>0){
+      let mudou=false;
+      for(let i=0;i<lista.length&&resto>0;i++){
+        if(saida[i]<(capacidade?.[i]??Infinity)){saida[i]++;resto--;mudou=true;}
+      }
+      if(!mudou)break;
+    }
+    return saida;
+  };
+  const registros=[];
+  for(const comp of card.porCompeticao){
+    const jogos=arquivo.filter(j=>j.competicao===comp.nome&&(j.casa===clube||j.fora===clube));
+    if(!jogos.length)continue;
+    const ordenados=[...jogos].sort((a,b)=>hash(card.ano+'|'+comp.nome+'|'+a.id)-hash(card.ano+'|'+comp.nome+'|'+b.id));
+    const atuacoes=ordenados.slice(0,Math.min(ordenados.length,Math.max(0,Math.round(comp.jogos||0))));
+    if(!atuacoes.length)continue;
+    const golsTime=atuacoes.map(j=>j.casa===clube?j.golsCasa:j.golsFora);
+    const gols=distribuir(comp.gols,atuacoes,golsTime);
+    const assistencias=distribuir(comp.assist,atuacoes,golsTime.map((n,i)=>Math.max(0,n-gols[i])));
+    const defesas=distribuir(comp.defesas,atuacoes);
+    const cleanSheets=distribuir(comp.cleanSheets,atuacoes,atuacoes.map(j=>(j.casa===clube?j.golsFora:j.golsCasa)===0?1:0));
+    atuacoes.forEach((j,i)=>registros.push({
+      id:[card.ano,'simulado',comp.nome,j.id].join('|'),
+      ano:card.ano,competicao:comp.nome,clube,
+      adversario:j.casa===clube?j.fora:j.casa,casa:j.casa,fora:j.fora,
+      golsCasa:j.golsCasa,golsFora:j.golsFora,rodada:j.rodada,
+      fase:j.fase,participou:true,gols:gols[i],assistencias:assistencias[i],
+      defesas:Number.isFinite(comp.defesas)?defesas[i]:null,
+      cleanSheets:Number.isFinite(comp.cleanSheets)?cleanSheets[i]:null,
+      nota:null,origem:'distribuicao-simulada'
+    }));
+  }
+  return registros;
+}
+
 export function registrarPartidasDetalhadasUsuario(universo, card) {
-  const novos = partidasDetalhadasUsuario(card);
+  const detalhadas = partidasDetalhadasUsuario(card);
+  const novos = detalhadas.length ? detalhadas : partidasDistribuidasModoRapido(universo,card);
   if (!novos.length) return universo;
   const anteriores = universo.partidasAtletas?.voce || [];
   const ids = new Set(anteriores.map(j=>j.id));

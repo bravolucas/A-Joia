@@ -8,6 +8,7 @@ import {AJUSTE_FORTALEZA,corrigirEquilibrioClubes} from '../dados/equilibrioClub
 import {primeiraFaseContinental} from '../competicoes/fasesSelecoes.js';
 import {simularPlacarRealista} from '../competicoes/motorPlacares.js';
 import {probabilidadesPlacar} from '../competicoes/motorPlacar.js';
+import {ordenarGrupoMundial48} from '../competicoes/desempateMundial48.js';
 import {normalizarCampeaoLiga,corrigirCampeoesLiga,registrarAnoHistoria,registrarEstatisticasCompeticoes,registrarAtletasObservados,simularDefesas,novosMarcosIndividuais} from '../historia/historiaFutebol.js';
 import {ITENS_PESSOAIS} from './itensPessoais.js';
 import {iniciarCamisas,aposentarDonoCamisa,prepararCamisaSelecao,sincronizarCamisasSelecao} from './camisasCarreira.js';
@@ -1116,16 +1117,17 @@ function gruposParalelosMundial(nac,grupoUsuario){
  const evitar=[nac,...grupoUsuario.map(x=>x.id)],times=sortearSelecoes(nac,44,[0,100],evitar);
  const grupos=[],terceiros=[];
  for(let n=0;n<11;n++){
-  const grupo=times.slice(n*4,n*4+4),tabela=grupo.map(x=>({id:x.id,label:x.label,p:0,sg:0,gp:0,j:0}));
+  const grupo=times.slice(n*4,n*4+4),tabela=grupo.map(x=>({id:x.id,label:x.label,p:0,sg:0,gp:0,gc:0,j:0})),partidas=[];
   for(let i=0;i<grupo.length;i++)for(let j=i+1;j<grupo.length;j++){
    const a=grupo[i],b=grupo[j],pV=clampR(.40+(a.forca-b.forca)*.016,.10,.80),r=rnd();
    const [ga,gb]=placarCopa(r<pV?'V':r<pV+.25?'E':'D');
-   const x=tabela[i],y=tabela[j];x.j++;y.j++;x.gp+=ga;y.gp+=gb;x.sg+=ga-gb;y.sg+=gb-ga;
+   partidas.push({casa:a.id,fora:b.id,golsCasa:ga,golsFora:gb});
+   const x=tabela[i],y=tabela[j];x.j++;y.j++;x.gp+=ga;y.gp+=gb;x.gc+=gb;y.gc+=ga;x.sg=x.gp-x.gc;y.sg=y.gp-y.gc;
    x.p+=ga>gb?3:ga===gb?1:0;y.p+=gb>ga?3:ga===gb?1:0;
   }
-  tabela.sort((a,b)=>b.p-a.p||b.sg-a.sg||b.gp-a.gp||a.id.localeCompare(b.id));
-  grupos.push({grupo:String.fromCharCode(66+n),classificacao:tabela});
-  terceiros.push(tabela[2]);
+  const classificados=ordenarGrupoMundial48(tabela,partidas);
+  grupos.push({grupo:String.fromCharCode(66+n),classificacao:classificados,jogos:partidas});
+  terceiros.push(classificados[2]);
  }
  return {grupos,terceiros};
 }

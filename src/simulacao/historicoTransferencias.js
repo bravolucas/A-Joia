@@ -41,9 +41,11 @@ export const tipoTransferencia = tipo => ({
  contratacao:'Transferência',emprestimo:'Empréstimo',retornoEmprestimo:'Retorno de empréstimo',livre:'Chegada sem custos','fim-contrato':'Fim de contrato',dispensa:'Dispensa',
  rescisao:'Rescisão','mudanca-clube':'Mudança de clube'
 })[tipo] || 'Movimentação';
-export const valorTransferencia = (valor,moeda='BRL') => {
- if (valor === null || valor === undefined) return 'Não informado';
- if (valor === 0) return 'Sem custos';
- const simbolo = moeda === 'EUR' ? '€' : 'R' + String.fromCharCode(36);
- return simbolo + ' ' + Math.round(valor).toLocaleString('pt-BR') + ' mil';
-};
+export function valorTransferencia(valor,moeda='BRL') {
+ if(valor===null||valor===undefined||!Number.isFinite(Number(valor)))return 'Não informado';
+ const n=Number(valor),simbolo=moeda==='EUR'?'€':'R'+String.fromCharCode(36);
+ if(n===0)return 'Sem custos';
+ if(n>=1000)return simbolo+' '+(n/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+' mi';
+ if(n>=1)return simbolo+' '+Math.round(n).toLocaleString('pt-BR')+' mil';
+ return simbolo+' '+Math.round(n*1000).toLocaleString('pt-BR');
+}

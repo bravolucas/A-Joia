@@ -143,8 +143,15 @@ jobs:
           retention-days: 14
 
   navegador:
+    # Os shards Playwright são complementares: ambos são obrigatórios no CI.
+    # O --shard n/2 distribui todos os testes descobertos, sem pular spec.
+    name: navegador (${{ matrix.parte }}-de-2)
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        parte: [1, 2]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -154,17 +161,23 @@ jobs:
       - run: npm install --no-save @playwright/test wait-on
       - run: npx playwright install --with-deps chromium
       - run: GITHUB_PAGES=true npm run build
-      - name: Testes no navegador (todos os tests/*.spec.mjs)
+      - name: Testes no navegador (parte ${{ matrix.parte }}/2, todos os tests/*.spec.mjs)
+        env:
+          PARTE: ${{ matrix.parte }}
+        shell: bash
         run: |
           GITHUB_PAGES=true npm run preview -- --host 127.0.0.1 --port 4173 &
           npx wait-on http://127.0.0.1:4173/A-Joia/
-          # Exercita cedo os dois cenários que dependem do diálogo final da copa:
-          # se falharem, evita gastar ~17 min em todos os 399 testes antes de detectar.
-          npx playwright test tests/completo-copas-persistentes.spec.mjs --reporter=line
-          npx playwright test tests/*.spec.mjs --reporter=line
+          # Verificação precoce dos dois cenários sensíveis: só no primeiro runner.
+          # Eles continuam incluídos na suíte completa e em um dos dois shards.
+          if [ "$PARTE" = "1" ]; then
+            npx playwright test tests/completo-copas-persistentes.spec.mjs --reporter=line
+          fi
+          # Playwright particiona a suíte completa, sem duplicações entre shards.
+          npx playwright test tests/*.spec.mjs --shard="${PARTE}/2" --reporter=line
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: capturas-navegador
+          name: capturas-navegador-${{ matrix.parte }}-de-2
           path: test-results/
           retention-days: 7

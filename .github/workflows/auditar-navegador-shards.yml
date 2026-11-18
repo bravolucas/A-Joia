@@ -1,0 +1,25 @@
+name: Auditar divisão completa dos testes de navegador
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'tests/ci-browser-shards.test.mjs'
+      - '.github/workflows/auditar-navegador-shards.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  navegador-particionado:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Validar inclusão completa de ambos os shards e artefatos
+        run: node --test tests/ci-browser-shards.test.mjs
+      - name: Build compatível com GitHub Pages
+        run: GITHUB_PAGES=true npm run build

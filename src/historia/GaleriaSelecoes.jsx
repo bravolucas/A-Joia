@@ -24,7 +24,7 @@ export default function GaleriaSelecoes({c={},nome,temporadas,onSelecao}){
   const historicos=reais.filter(x=>x.competicao===nome);
   const doSave=simulados.filter(x=>x.nome===nome);
   return {nome,historicos,doSave,total:historicos.length+doSave.length};
- }).filter(g=>g.total>0);
+ }).filter(g=>g.total>0||g.nome==='Copa do Mundo');
  const bandeira=NACIONALIDADES.find(n=>nomePais(n.label)===pais);
  const soma=palmares.reduce((n,x)=>n+x.total,0);
  return <section className="hf-selecoes fm27-archive" aria-label={'Histórico da seleção '+pais}>
@@ -42,11 +42,11 @@ export default function GaleriaSelecoes({c={},nome,temporadas,onSelecao}){
     <p>{reais.length} títulos reais documentados · {simulados.length} conquistas na carreira · {soma} no acervo exibido</p></div>
    </header>
    <p className="hf-nota">Os títulos oficiais anteriores ao save são históricos; conquistas de temporadas simuladas aparecem separadamente. A Copa do Mundo e os torneios continentais fazem parte do mesmo acervo de seleções.</p>
-   <div className="hf-vitrine">{palmares.map(g=><article className="hf-taca" key={g.nome}>
+   <div className="hf-vitrine">{palmares.map(g=><article className={g.total?"hf-taca":"hf-taca hf-vazia"} key={g.nome}>
       <TacaCompeticao nome={g.nome} size={76}/><strong>{g.total}×</strong>
       <h3><LinkEntidade tipo="competicao" nome={g.nome}/></h3>
       <small>{g.historicos.length} títulos reais · +{g.doSave.length} nesta carreira</small>
-      <p>{g.historicos.map(x=>x.edicao||x.ano).join(' · ')}</p>
+      {g.historicos.length>0?<p>{g.historicos.map(x=>x.edicao||x.ano).join(' · ')}</p>:<p>Sem títulos oficiais nesta competição.</p>}
       {g.doSave.length>0&&<p>Na simulação: {g.doSave.map(x=>x.ano).join(' · ')}</p>}
      </article>)}</div>
    {!palmares.length&&<p className="hf-vazio">Ainda não há títulos registrados para esta seleção.</p>}

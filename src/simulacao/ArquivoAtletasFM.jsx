@@ -77,7 +77,7 @@ export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
  const [busca,B]=useState(''),[clube,C]=useState(''),[id,I]=useState(jogadorInicial),[aba,A]=useState(jogadorInicial?'carreira':'resumo');
  const [categoria,Q]=useState('todas');
  const todos=useMemo(()=>{
-  const mapa=new Map(Object.values(u.atletas||{}).map(p=>[String(p.id),{...p,id:String(p.id)}]));
+  const mapa=new Map(Object.entries(u.atletas||{}).filter(([,p])=>p&&typeof p==='object').map(([chave,p])=>[String(p.id??chave),{...p,id:String(p.id??chave)}]));
   for(const p of c.mundo?.jogadores||[]){
    const atual=mapa.get(String(p.id));
    if(p.aposentado&&!atual)continue;

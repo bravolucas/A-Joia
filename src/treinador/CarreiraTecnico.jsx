@@ -151,7 +151,7 @@ function CartaoClube({ nome, liga, pais, rotulo, detalhe, nivel, salario, onClic
   return <div className={`ct-offer ${atual ? 'ct-offer-stay' : ''}`}>
     <span className="ct-offer-label">{rotulo}</span>
     <strong className="ct-offer-name"><LinkEntidade tipo={selecao?'selecao':'clube'} nome={nome}/></strong>
-    <button type="button" className="ct-offer-pick" onClick={onClick} disabled={disabled} aria-label={`Escolher proposta de ${nome}`}>
+    <button type="button" className="ct-offer-pick" onClick={onClick} disabled={disabled} aria-label={`${rotulo} ${nome}`}>
       <span className="ct-offer-crest"><Escudo nome={nome} size={64} /></span>
       <span className="ct-offer-league">{selecao ? `Seleção · ${liga.split(':')[1]}` : competicaoTemporadaTecnico({ clube: nome, liga })}</span>
       <span className="ct-offer-country"><Bandeira pais={pais} /><span>{pais || 'Brasil'}</span></span>

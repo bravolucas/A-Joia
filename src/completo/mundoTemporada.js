@@ -28,7 +28,7 @@ export function prepararMundoTemporada(c,card,mundo){
  simularMundo({...c,mundo,ligas},novo,{preservarTorneios:true});
  const campeoes=new Map();
  const inserir=t=>{if(t.clube&&t.nome)campeoes.set(nomeCanonico(t.nome),{...t,ano,nome:nomeCanonico(t.nome)});};
- for(const [liga,t] of Object.entries(classificacoesMundo))inserir({nome:LIGAS[liga]?.nome||liga,tipo:'liga',liga,clube:t.classificacao[0]?.nome});
+ for(const [liga,t] of Object.entries(classificacoesMundo))inserir({nome:LIGAS[liga]?.nome||liga,tipo:'liga',liga,clube:t.edicaoSerieC?.campeao||t.classificacao[0]?.nome});
  for(const t of [...novo.torneiosMundo,...(novo.torneios||[])])if(t.campeao&&!t.finalPendente)inserir({nome:t.nome,tipo:t.tipo,clube:t.campeao});
  for(const [campo,tipo]of [['copaNacional','copa'],['continental','continental'],['mundial','mundial'],['estadual','estadual']])if(novo[campo]?.titulo)inserir({nome:novo[campo].nome||nomes[tipo]||(tipo==='estadual'?ESTADUAIS[c.clube.estado]:null),tipo,clube});
  if(novo.campeaoLiga===true&&!classificacoesMundo[ligaId])inserir({nome:novo.ligaNome,tipo:'liga',liga:ligaId,clube});

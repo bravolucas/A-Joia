@@ -13,7 +13,7 @@ for(const width of [390,1366])test(`elenco unificado: contratação, mundo, vend
  const erros=[];page.on('pageerror',e=>erros.push(e.message));await page.goto(url);await instalarSave(page,{v:1,etapa:'tecnico',c});await page.reload();
  await page.getByRole('button',{name:/Continuar · Treinador Unificado/}).click();
  await page.getByRole('button',{name:'Elenco e contratos →',exact:true}).click();
- const d=page.getByRole('dialog',{name:'Elenco e contratos',exact:true});await expect(d.getByRole('button',{name:'Mercado de jogadores',exact:true})).toBeVisible();
+ const d=page.getByRole('region',{name:'Elenco e contratos',exact:true});await expect(d.getByRole('button',{name:'Mercado de jogadores',exact:true})).toBeVisible();
  await d.getByRole('button',{name:'Mercado de jogadores',exact:true}).click();
  const linha=d.locator('.ge-tabela tbody tr').last(),nome=await linha.locator('strong').textContent(),id=await linha.getAttribute('data-atleta');
  await linha.getByRole('button',{name:`Contratar ${nome}`,exact:true}).click();
@@ -25,10 +25,10 @@ for(const width of [390,1366])test(`elenco unificado: contratação, mundo, vend
  await page.reload();await page.getByRole('button',{name:/Continuar · Treinador Unificado/}).click();await page.getByRole('button',{name:'Elenco e contratos →',exact:true}).click();await expect(contratado).toHaveCount(1);expect((await lerAtleta()).id).toBe(comprado.id);
  await contratado.getByRole('button',{name:`Vender ${nome}`,exact:true}).click();await expect(page.getByRole('dialog',{name:'Confirmar negociação',exact:true}).getByRole('button',{name:'Confirmar negociação',exact:true})).toBeInViewport();await page.getByRole('dialog',{name:'Confirmar negociação',exact:true}).getByRole('button',{name:'Confirmar negociação',exact:true}).click();await aguardarSave(page);await expect(contratado).toHaveCount(0);await expect(d.getByRole('status')).toHaveText('Venda concluída.');
  const vendido=await lerAtleta();expect(vendido.id).toBe(comprado.id);expect(vendido.clube).not.toBe('Avaí');expect(vendido.movimentos.at(-1).tipo).toBe('venda');
- await d.getByRole('button',{name:'Fechar janela',exact:true}).click();await page.getByRole('button',{name:'Ver história do Avaí',exact:true}).click();
+ await page.getByRole('navigation',{name:'Áreas do treinador'}).getByRole('button',{name:'Visão geral',exact:true}).click();await page.getByRole('button',{name:'Ver história do Avaí',exact:true}).click();
  const historia=page.getByRole('dialog',{name:'História do futebol'});await historia.getByRole('button',{name:'Jogadores',exact:true}).click();
  await historia.getByLabel('Buscar jogador',{exact:true}).fill(nome);await historia.locator(`.mv-atletas button[data-atleta="${id}"]`).click();
- const ficha=historia.getByRole('article',{name:`Ficha de ${nome}`});await expect(ficha.getByRole('list',{name:`Movimentações de ${nome}`})).toContainText(vendido.clube);await expect(ficha).toContainText('Contrato: 3 temporada(s)');
+ const ficha=historia.getByRole('article',{name:`Ficha de ${nome}`});await ficha.getByRole('button',{name:'Transferências'}).click();await expect(ficha.getByRole('table')).toContainText(vendido.clube);await expect(ficha).toContainText('Contrato: 3 temporada(s)');
  await page.screenshot({path:`test-results/elenco-unificado-${width}.png`,animations:'disabled'});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);expect(erros).toEqual([]);
 });
 
@@ -44,7 +44,7 @@ for(const width of [390,1366])test(`central do elenco: pop-up preserva lista, re
  const alvo=c.mundo.jogadores.find(p=>!p.aposentado&&p.clubeNome&&p.clubeNome!=='Avaí'&&!sugeridos.has(p.id)&&p.ovr<60);
  const erros=[];page.on('pageerror',e=>erros.push(e.message));await page.goto(url);await instalarSave(page,{v:1,etapa:'tecnico',c});await page.reload();
  await page.getByRole('button',{name:/Continuar · Gestão Moderna/}).click();await page.getByRole('button',{name:'Elenco e contratos →',exact:true}).click();
- const d=page.getByRole('dialog',{name:'Elenco e contratos',exact:true}),lista=d.getByRole('region',{name:'Lista de jogadores'});
+ const d=page.getByRole('region',{name:'Elenco e contratos',exact:true}),lista=d.getByRole('region',{name:'Lista de jogadores'});
  await d.getByLabel('Ordenar por').selectOption('nome');await lista.evaluate(el=>el.scrollTop=el.scrollHeight);
  const linha=d.locator('.ge-tabela tbody tr').last(),id=await linha.getAttribute('data-atleta');
  const scroll=await lista.evaluate(el=>el.scrollTop);expect(scroll).toBeGreaterThan(0);
@@ -77,7 +77,7 @@ test('negociação sem orçamento mantém o erro no pop-up e permite voltar ao e
  c.aposentado=true;c.idade=42;c.ano=2030;c=iniciarCarreiraTecnico(c);c.tecnico={...c.tecnico,clube:'Avaí',liga:'serieB',elenco:65,clubeInicialEscolhido:true};c=prepararGestaoTecnico(c);
  c.tecnico.gestao.saldo=0;c.universo={versao:1,desde:2030,anos:[],atletas:{},clubes:{},edicoes:[]};
  await page.goto(url);await instalarSave(page,{v:1,etapa:'tecnico',c});await page.reload();await page.getByRole('button',{name:/Continuar · Caixa Vazio/}).click();await page.getByRole('button',{name:'Elenco e contratos →',exact:true}).click();
- const d=page.getByRole('dialog',{name:'Elenco e contratos',exact:true});await d.getByRole('button',{name:'Mercado de jogadores',exact:true}).click();await d.locator('.ge-tabela tbody tr').first().getByRole('button',{name:/^Contratar /}).click();
+ const d=page.getByRole('region',{name:'Elenco e contratos',exact:true});await d.getByRole('button',{name:'Mercado de jogadores',exact:true}).click();await d.locator('.ge-tabela tbody tr').first().getByRole('button',{name:/^Contratar /}).click();
  const pop=page.getByRole('dialog',{name:'Confirmar negociação',exact:true});await pop.getByRole('button',{name:'Confirmar negociação',exact:true}).click();await expect(pop.getByRole('alert')).toContainText('Orçamento insuficiente');
  await expect(pop.getByRole('button',{name:'Confirmar negociação',exact:true})).toBeEnabled();await pop.getByRole('button',{name:'Cancelar negociação'}).click();await expect(d).toBeVisible();await expect(d.locator('.ge-tabela tbody tr')).toHaveCount(12);
 });

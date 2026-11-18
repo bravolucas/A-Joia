@@ -1,13 +1,30 @@
 import {CLUBES} from '../dados/data.js';
+import {gerarNomeRegionalUnico} from '../simulacao/nomesRegionais.js';
 const copiar=x=>structuredClone(x);
 const hash=s=>[...String(s)].reduce((n,v)=>Math.imul(n^v.charCodeAt(0),16777619)>>>0,2166136261);
 const valido=(n,max=99)=>Number.isInteger(Number(n))&&Number(n)>=1&&Number(n)<=max;
 const atual=c=>c.emprestimo?.destino||c.clubeNome;
-const nomes=['Caio Nunes','Rafael Costa','André Vidal','Mateo Duarte','Davi Reis','Bruno Lemos','Gabriel Alves','Nicolas Monteiro','Samuel Rocha','Enzo Vieira','Felipe Moura','Daniel Torres','João Almeida','Lucas Moreira','Pedro Freitas','Vitor Ribeiro','Henrique Dias','Miguel Azevedo','Gustavo Mendes','Arthur Barros','Diego Teixeira','Eduardo Martins','Thiago Carvalho','Leonardo Melo'];
+// Nomes exibidos no painel de camisas são representantes fictícios,
+// não equivalem ao plantel persistente do clube nem a contratações reais.
+// O país da liga define a referência cultural sem transformar todos em BRA.
+const NAC_LIGA_CAMISAS=Object.freeze({
+ brasileirao:'BRA',serieB:'BRA',argentina:'ARG',
+ inglaterra:'ENG',inglaterra2:'ENG',
+ espanha:'ESP',espanha2:'ESP',italia:'ITA',italia2:'ITA',
+ alemanha:'ALE',alemanha2:'ALE',franca:'FRA',franca2:'FRA',
+ portugal:'POR',portugal2:'POR',holanda:'HOL',
+ arabia:'ARS',mls:'EUA',turquia:'TUR',
+});
+const nacClube=nome=>NAC_LIGA_CAMISAS[CLUBES.find(cl=>cl.nome===nome)?.liga]||'INT';
 const faixa=max=>Array.from({length:max},(_,i)=>i+1);
 function elencoDoClube(c,nome){
  const nums=faixa(35).sort((a,b)=>hash(`${c.codigo}:${nome}:${a}`)-hash(`${c.codigo}:${nome}:${b}`));
- return nums.slice(0,24).map((numero,i)=>({id:`camisa:${nome}:${i}`,nome:nomes[(hash(nome)+i)%nomes.length],numero,ficticio:true}));
+ const nac=nacClube(nome),usados=new Set();
+ return nums.slice(0,24).map((numero,i)=>{
+  const nomeAtleta=gerarNomeRegionalUnico(nac,`${c.codigo}:camisa:${nome}:${i}`,usados);
+  usados.add(nomeAtleta);
+  return {id:`camisa:${nome}:${i}`,nome:nomeAtleta,numero,ficticio:true};
+ });
 }
 export function iniciarCamisas(c,{novo=false}={}){
  c.numeroFavorito=valido(c.numeroFavorito)?Number(c.numeroFavorito):valido(c.numero)?Number(c.numero):10;

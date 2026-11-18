@@ -169,6 +169,7 @@ export function atualizarLigasMundoTecnico({
   clubeTreinador,
   ligaTreinador,
   divisoes = [],
+  ano = 2026,
   rng = Math.random,
 }) {
   const atribuicoes = Object.fromEntries(clubes
@@ -212,6 +213,51 @@ export function atualizarLigasMundoTecnico({
         de: divisao.baixo,
         para: divisao.cima,
       });
+    }
+  }
+
+  // Escalonamento da pirâmide brasileira: a Série C não promove simplesmente
+  // os quatro melhores da primeira fase; o acesso é dos quadrangulares.
+  const edicaoC = classificacoesMundo.serieC?.edicaoSerieC;
+  const tabelaB = classificacoesMundo.serieB?.classificacao;
+  const serieCJaConfigurada = divisoes.some(divisao => divisao.cima === 'serieB' && divisao.baixo === 'serieC');
+  if (!serieCJaConfigurada && edicaoC && Array.isArray(tabelaB) && tabelaB.length === 20 &&
+      edicaoC.ano === ano && edicaoC.promovidos?.length === 4) {
+    const descidosB = tabelaB.slice(-4).map(linha => linha.nome);
+    const subidosC = edicaoC.promovidos;
+    const descidosC = edicaoC.rebaixados || [];
+    const favoritosD = ['ABC', 'ASA', 'Gama', 'Goiatuba', 'Nacional-AM', 'Uberlândia'];
+    const disponiveisD = clubes.filter(c => atribuicoes[c.nome] === 'serieD' && c.nome);
+    const nomesD = ano === 2026 && favoritosD.every(nome => disponiveisD.some(c => c.nome === nome))
+      ? favoritosD
+      : [...disponiveisD].map(c => ({
+          nome: c.nome,
+          nota: (Number(c.elenco ?? c.forca) || 50) + rng() * 16,
+        })).sort((a, b) => b.nota - a.nota || a.nome.localeCompare(b.nome, 'pt-BR'))
+        .slice(0, 6).map(c => c.nome);
+    const quatroUnicos = new Set([...descidosB, ...subidosC]).size === 8;
+    const outrosUnicos = new Set([...descidosC, ...nomesD]).size === descidosC.length + nomesD.length;
+    if (quatroUnicos && outrosUnicos && nomesD.length === 6 &&
+        descidosC.length === (ano >= 2028 ? 6 : 2) &&
+        subidosC.every(nome => atribuicoes[nome] === 'serieC') &&
+        descidosB.every(nome => atribuicoes[nome] === 'serieB') &&
+        descidosC.every(nome => atribuicoes[nome] === 'serieC')) {
+      for (const nome of descidosB) {
+        atribuicoes[nome] = 'serieC';
+        movimentos.push({ clube: nome, tipo: 'rebaixamento', de: 'serieB', para: 'serieC' });
+      }
+      for (const nome of subidosC) {
+        atribuicoes[nome] = 'serieB';
+        movimentos.push({ clube: nome, tipo: 'acesso', de: 'serieC', para: 'serieB' });
+      }
+      for (const nome of descidosC) {
+        atribuicoes[nome] = 'serieD';
+        movimentos.push({ clube: nome, tipo: 'rebaixamento', de: 'serieC', para: 'serieD' });
+      }
+      for (const nome of nomesD) {
+        atribuicoes[nome] = 'serieC';
+        movimentos.push({ clube: nome, tipo: 'acesso', de: 'serieD', para: 'serieC' });
+      }
     }
   }
 

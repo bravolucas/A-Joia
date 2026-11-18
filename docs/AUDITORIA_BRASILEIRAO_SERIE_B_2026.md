@@ -36,11 +36,21 @@ Foram executadas **10 verificações isoladas de lógica** contra funções extr
 - Verificações isoladas adicionais: 7/7 casos de classificação aprovados e 120 temporadas simuladas, com 240 confrontos de playoff, sem divergências no critério de classificação.
 - A versão pública do GitHub Pages e o resultado de todos os jobs do CI continuam sem confirmação por esta auditoria.
 
+## Compatibilidade com saves anteriores à atualização de 2026
+
+- `src/treinador/compatibilidadeDivisoes.js` reconcilia clubes controlados que saíram da base da Série B 2026, preserva o clube na carreira e não altera o objeto original de entrada.
+- O participante substituído pelo calendário da carreira é mantido no mapa do save sob `fora-piramide`, sem ser confundido com uma Série C simulada. Esse recurso é específico para a migração do treinador e não altera o cadastro inicial de 2026.
+- A passagem de temporada do Treinador usa a mesma composição do calendário para classificação, acesso e rebaixamento. A formação do calendário não remove outro participante quando a vaga já está livre.
+- Foram verificadas quatro temporadas consecutivas para cada um dos quatro clubes legados: Guarani, Amazonas FC, Paysandu e Confiança. Não apareceu divisão com 21 participantes.
+- Teste permanente: `tests/compatibilidade-serie-b-legada.test.mjs`.
+- **Escopo restante:** saves reais exportados do navegador e carreiras antigas do modo Jogador/Completo ainda requerem testes end-to-end; não inferir aprovação de todos os saves a partir dos testes isolados do Treinador.
+
 ## Testes permanentes no projeto
 
 - `tests/playoffs-serie-b-2026.test.mjs`
 - `tests/brasileirao-calendario-progressao-2026.test.mjs`
 - `tests/desempate-brasileiro-2026.test.mjs`
+- `tests/compatibilidade-serie-b-legada.test.mjs`
 - `tests/classificacoes-mundo-tecnico.test.mjs`
 - `tests/mundo-completo.test.mjs`
 
@@ -49,7 +59,7 @@ A suíte completa do projeto e o navegador são executados pela workflow `Valida
 ## Pendências fora do escopo desta correção
 
 1. A Série C ainda não foi integrada como divisão completa na pirâmide brasileira. Portanto, os quatro últimos da Série B **não são movimentados para uma Série C jogável** no modelo atual. Não atribuir conformidade integral à pirâmide do Brasil enquanto isso faltar.
-2. Compatibilidade de todas as carreiras antigas que continham Guarani, Amazonas FC, Paysandu ou Confiança na Série B ainda precisa de testes end-to-end. Os nomes continuam referenciáveis no catálogo regional, mas isso não garante restauração exata dos calendários legados.
+2. Os quatro clubes antigos passaram nos testes isolados do Modo Treinador. Ainda faltam provas com saves reais do navegador e com os fluxos Jogador/Completo; os nomes continuam referenciáveis no catálogo regional.
 3. Aprovação integral do GitHub Actions e publicação do Pages dependem de verificação dos jobs associados à revisão final.
 
 ## Como concluir o aceite

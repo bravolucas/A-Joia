@@ -107,11 +107,17 @@ for(const [apelido,oficial] of Object.entries(nomesSelecao))nomes.set(normalizar
 export const nomeSelecaoHistorica=valor=>nomes.get(normalizar(valor))||String(valor||'');
 export const competicoesHistoricasSelecoes=Object.freeze(Object.keys(COPAS));
 export const HISTORICO_SELECOES=Object.freeze(Object.fromEntries(
- Object.entries(COPAS).map(([nome,edicoes])=>[nome,Object.freeze(edicoes.map(([ano,pais,edicao])=>
-  Object.freeze({ano,edicao:edicao||String(ano),campeoes:Object.freeze([
-   Object.freeze({clube:pais,quantidade:1})]),
-   ...(nome==='Copa Africana de Nações'&&ano===2025?{nota:'Vencedor reconhecido pela CAF; recurso do Senegal pendente no TAS.'}:{})
-  })).sort((a,b)=>b.ano-a.ano||(b.edicao.localeCompare(a.edicao)))]),
+ Object.entries(COPAS).map(([nome,edicoes])=>{
+  const registros=edicoes.map(([ano,pais,edicao])=>{
+   const campeao=Object.freeze({clube:pais,quantidade:1});
+   return Object.freeze({
+    ano,edicao:edicao||String(ano),campeoes:Object.freeze([campeao]),
+    ...(nome==='Copa Africana de Nações'&&ano===2025
+     ?{nota:'Vencedor reconhecido pela CAF; recurso do Senegal pendente no TAS.'}:{})
+   });
+  }).sort((a,b)=>b.ano-a.ano||b.edicao.localeCompare(a.edicao));
+  return [nome,Object.freeze(registros)];
+ })
 ));
 export const edicoesHistoricasSelecao=competicao=>HISTORICO_SELECOES[competicao]||[];
 export const totalTitulosHistoricosSelecao=(competicao,pais)=>

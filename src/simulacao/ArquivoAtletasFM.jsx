@@ -134,7 +134,7 @@ export default function ArquivoAtletasFM({c,onConfrontos}){
      {(Number.isInteger(selecionado.contrato)||selecionado.movimentos?.length>0)&&
       <section className="fm27-contract-strip" aria-label="Contratos e movimentações">
        {Number.isInteger(selecionado.contrato)&&!selecionado.aposentado&&<p>Contrato: {selecionado.clube?`${selecionado.contrato} temporada(s)`:'Livre'}</p>}
-       {selecionado.movimentos?.length>0&&<details><summary>Movimentações da carreira ({selecionado.movimentos.length})</summary>
+       {selecionado.movimentos?.length>0&&<details open><summary>Movimentações da carreira ({selecionado.movimentos.length})</summary>
         <ul aria-label={`Movimentações de ${selecionado.nome}`}>{selecionado.movimentos.map((m,i)=><li key={i}>
          {m.ano??m.temporada??'—'} · {m.tipo==='renovacao'?'Contrato renovado':`${m.de||'Sem clube'} → ${m.para||'Sem clube'}`}
         </li>)}</ul>

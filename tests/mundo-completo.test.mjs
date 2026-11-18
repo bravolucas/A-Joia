@@ -14,7 +14,7 @@ function fixture(){
 }
 test('outras ligas guardam todos os confrontos e a liga jogada preserva seus resultados',()=>{
  const {card,entrada}=fixture();assert.deepEqual(card.classificacoesMundo.brasileirao.jogos,entrada.jogosLiga);assert.deepEqual(card.classificacoesMundo.brasileirao.classificacao,entrada.classificacao);
- for(const [liga,t] of Object.entries(card.classificacoesMundo)){if(liga==='brasileirao')continue;if(liga==='serieC'){assert.ok(t.edicaoSerieC,'A Série C exige seu formato de grupos e mata-mata');assert.equal(t.jogos.length,t.edicaoSerieC.primeiraFase.grupos.reduce((n,g)=>n+g.jogos.length,0));continue;}const n=t.classificacao.length;assert.equal(t.jogos.length,n*(n-1));assert.ok(t.classificacao.every(x=>x.jogos===(n-1)*2));assert.equal(t.classificacao.reduce((a,b)=>a+b.golsPro,0),t.classificacao.reduce((a,b)=>a+b.golsContra,0));}
+ for(const [liga,t] of Object.entries(card.classificacoesMundo)){if(liga==='brasileirao')continue;if(liga==='serieC'){if(t.origem==='serie-c-pendente'){assert.equal(t.jogos.length,0,'Não inventar calendário quando faltam clubes da Série C');assert.ok(t.participantesAtuais<t.participantesEsperados);}else{assert.ok(t.edicaoSerieC,'A Série C exige formato de grupos e mata-mata');assert.equal(t.jogos.length,t.edicaoSerieC.primeiraFase.grupos.reduce((n,g)=>n+g.jogos.length,0));}continue;}const n=t.classificacao.length;assert.equal(t.jogos.length,n*(n-1));assert.ok(t.classificacao.every(x=>x.jogos===(n-1)*2));assert.equal(t.classificacao.reduce((a,b)=>a+b.golsPro,0),t.classificacao.reduce((a,b)=>a+b.golsContra,0));}
  assert.equal(card.ano,ANO_INICIO+8);assert.ok(card.classificacoesMundo.inglaterra);
 });
 test('copa efetivamente jogada não ganha segundo sorteio nem clube controlado joga outro continental',()=>{

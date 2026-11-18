@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 import {instalarSave,lerSave} from './helpers/save-browser.mjs';
-import {criarJogador,iniciarNegociacao,jogarTemporada} from '../src/jogador/rapido.js';
+import {criarJogador,iniciarNegociacao,jogarTemporada,fecharTemporada} from '../src/jogador/rapido.js';
 
 function carreira(){
  const c=criarJogador({nome:'Contratos FM',nac:'BRA',posicao:'ATA',
@@ -43,10 +43,13 @@ for(const width of [390,1366]){
   await page.setViewportSize({width,height:820});
   await page.emulateMedia({reducedMotion:'reduce'});
   const {c}=carreira();
-  const card=jogarTemporada(c).card;
+  // O resumo só é válido após fechar a temporada: isso registra a Bola de Ouro
+  // e as estatísticas finais. O card bruto da simulação ainda não tem esses dados.
+  const r=jogarTemporada(c),fechada=fecharTemporada(r.c,r.card);
+  const card=fechada.card;
   card.titulos=[{tipo:'copa',nome:'Copa do Brasil'}];
   await page.goto('http://127.0.0.1:4173/A-Joia/');
-  await instalarSave(page,{v:1,etapa:'resumo',c,card},'ajoia_rapido_v1');
+  await instalarSave(page,{v:1,etapa:'resumo',c:fechada.c,card},'ajoia_rapido_v1');
   await page.reload();
   await page.getByRole('button',{name:/Continuar · Contratos FM/}).click();
   const campeonato=page.getByRole('button',{name:card.ligaNome,exact:true}).first();

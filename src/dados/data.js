@@ -522,6 +522,7 @@ export const LIGAS = {
   // primeira divisão e, em alguns países, o campeão de copa). "promocao" é
   // só um rótulo de referência pro acesso à elite, não uma competição real.
   serieB: { nome: "Brasileirão Série B", mult: 0.62, promocao: "Acesso à Série A" },
+  brasilOutros: { nome: "Clubes brasileiros fora das Séries A e B", mult: 0.48, naoJogavel: true },
   inglaterra2: { nome: "Championship", mult: 0.72, promocao: "Acesso à Premier League" },
   espanha2: { nome: "LaLiga 2", mult: 0.66, promocao: "Acesso à LaLiga" },
   italia2: { nome: "Serie B (Itália)", mult: 0.64, promocao: "Acesso à Serie A" },
@@ -662,7 +663,7 @@ export const CLUBES = [
   { nome: "Barcelona de Guayaquil", forca: 62, liga: "sulamericano", cor: "#FFD700" },
   // SÉRIE B
   { nome: "Ceará", forca: 58, liga: "serieB", estado: "CE", modesto: true, cor: "#1A1A1A" },
-  { nome: "Guarani", forca: 55, liga: "serieB", estado: "SP", modesto: true, cor: "#005C2E" },
+  { nome: "Guarani", forca: 55, liga: "brasilOutros", estado: "SP", modesto: true, cor: "#005C2E" },
   { nome: "Ponte Preta", forca: 54, liga: "serieB", estado: "SP", modesto: true, cor: "#1A1A1A" },
   { nome: "CRB", forca: 56, liga: "serieB", estado: "AL", modesto: true, cor: "#D2001F" },
   { nome: "Novorizontino", forca: 53, liga: "serieB", estado: "SP", modesto: true, cor: "#F3CE32" },
@@ -670,17 +671,22 @@ export const CLUBES = [
   { nome: "Avaí", forca: 52, liga: "serieB", estado: "SC", modesto: true, cor: "#0B4EA2" },
   { nome: "Chapecoense", forca: 54, liga: "brasileirao", estado: "SC", modesto: true, cor: "#1A7A3C" },
   { nome: "Operário-PR", forca: 50, liga: "serieB", estado: "PR", modesto: true, cor: "#1A1A1A" },
-  { nome: "Amazonas FC", forca: 49, liga: "serieB", estado: "AM", modesto: true, cor: "#F3CE32" },
-  { nome: "Paysandu", forca: 52, liga: "serieB", estado: "PA", modesto: true, cor: "#83C7E4" },
+  { nome: "Amazonas FC", forca: 49, liga: "brasilOutros", estado: "AM", modesto: true, cor: "#F3CE32" },
+  { nome: "Paysandu", forca: 52, liga: "brasilOutros", estado: "PA", modesto: true, cor: "#83C7E4" },
   { nome: "Vila Nova", forca: 55, liga: "serieB", estado: "GO", modesto: true, cor: "#C92536" },
   { nome: "Botafogo-SP", forca: 54, liga: "serieB", estado: "SP", modesto: true, cor: "#1A1A1A" },
   { nome: "América-MG", forca: 56, liga: "serieB", estado: "MG", modesto: true, cor: "#1A7A3C" },
   { nome: "Náutico", forca: 53, liga: "serieB", estado: "PE", modesto: true, cor: "#E4181C" },
   { nome: "Londrina", forca: 51, liga: "serieB", estado: "PR", modesto: true, cor: "#0033A0" },
-  { nome: "Confiança", forca: 50, liga: "serieB", estado: "SE", modesto: true, cor: "#1551A0" },
+  { nome: "Confiança", forca: 50, liga: "brasilOutros", estado: "SE", modesto: true, cor: "#1551A0" },
   { nome: "Remo", forca: 52, liga: "brasileirao", estado: "PA", modesto: true, cor: "#003DA5" },
   { nome: "Juventude", forca: 62, liga: "serieB", estado: "RS", modesto: true, cor: "#1A7A3C" },
   { nome: "Criciúma", forca: 60, liga: "serieB", estado: "SC", modesto: true, cor: "#F3CE32" },
+  // Integrantes da Série B 2026, conforme Conselho Técnico e REC da CBF.
+  { nome: "Athletic", forca: 52, liga: "serieB", estado: "MG", modesto: true, cor: "#181818" },
+  { nome: "Atlético-GO", forca: 57, liga: "serieB", estado: "GO", modesto: true, cor: "#D20A2E" },
+  { nome: "Cuiabá", forca: 57, liga: "serieB", estado: "MT", modesto: true, cor: "#087C40" },
+  { nome: "São Bernardo", forca: 53, liga: "serieB", estado: "SP", modesto: true, cor: "#F1C40F", escuro: true },
   // BRASILEIRÃO
   { nome: "Coritiba", forca: 64, liga: "brasileirao", estado: "PR", modesto: true, cor: "#1E9E5A" },
   { nome: "Vitória", forca: 65, liga: "brasileirao", estado: "BA", modesto: true, cor: "#B22222" },

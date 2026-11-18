@@ -92,3 +92,18 @@ test('treinador: partidas parciais aparecem no retrospecto sem antecipar tempora
     partidas:[[0,1,2,1,1,null,0]]}}]}}};
  assert.equal(partidasHistoricas(arquivado).length,1);
 });
+
+test('retrospecto do atleta separa clube defendido, casa/fora e desempenho nas partidas',()=>{
+ const u={...universo,partidasAtletas:{voce:[
+  {id:'1',ano:2027,clube:'Fortaleza',adversario:'Palmeiras',competicao:'Brasileirão',
+   casa:'Fortaleza',fora:'Palmeiras',golsCasa:2,golsFora:1,participou:true,gols:1,assistencias:0},
+  {id:'2',ano:2028,clube:'Corinthians',adversario:'Palmeiras',competicao:'Brasileirão',
+   casa:'Palmeiras',fora:'Corinthians',golsCasa:1,golsFora:1,participou:true,gols:0,assistencias:1}
+ ]}};
+ const c={universo:u};
+ const todo=resumoConfrontosAtleta(c,{adversario:'Palmeiras'});
+ assert.deepEqual([todo.jogos,todo.vitorias,todo.empates,todo.derrotas,todo.aproveitamento],[2,1,1,0,67]);
+ assert.equal(resumoConfrontosAtleta(c,{adversario:'Palmeiras',clube:'Corinthians'}).assistencias,1);
+ assert.equal(resumoConfrontosAtleta(c,{adversario:'Palmeiras',local:'casa'}).gols,1);
+ assert.equal(resumoConfrontosAtleta(c,{adversario:'Palmeiras',local:'fora'}).gols,0);
+});

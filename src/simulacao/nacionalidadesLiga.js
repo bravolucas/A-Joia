@@ -6,7 +6,7 @@ import {sortearNacionalidadeMundo} from './nomesRegionais.js';
  * Mapear aqui evita divergências entre mundo persistente e camisas fictícias.
  */
 export const NACIONALIDADE_LOCAL_LIGA = Object.freeze({
-  brasileirao:'BRA', serieB:'BRA', brasileiro:'BRA',
+  brasileirao:'BRA', serieB:'BRA', brasileiro:'BRA', brasilOutros:'BRA',
   argentina:'ARG',
   inglaterra:'ENG', inglaterra2:'ENG',
   espanha:'ESP', espanha2:'ESP',
@@ -32,7 +32,7 @@ export function nacionalidadeLocalLiga(liga) {
  */
 export function nacionalidadeInicialLiga(liga, rng = Math.random) {
   const local = nacionalidadeLocalLiga(liga);
-  if (liga === 'brasileirao' || liga === 'serieB' || liga === 'brasileiro') {
+  if (liga === 'brasileirao' || liga === 'serieB' || liga === 'brasileiro' || liga === 'brasilOutros') {
     return rng() < 0.85 ? 'BRA' : sortearNacionalidadeMundo(rng);
   }
   return rng() < 0.55 && local ? local : sortearNacionalidadeMundo(rng);

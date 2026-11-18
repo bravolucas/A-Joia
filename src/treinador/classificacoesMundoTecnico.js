@@ -1,3 +1,5 @@
+import {resolverPlayoffsSerieB} from '../simulacao/playoffsSerieB.js';
+
 const limitar = (valor, minimo, maximo) => Math.max(minimo, Math.min(maximo, valor));
 
 function sortearPoisson(media, rng) {
@@ -152,6 +154,7 @@ export function atualizarLigasMundoTecnico({
   clubeTreinador,
   ligaTreinador,
   divisoes = [],
+  rng = Math.random,
 }) {
   const atribuicoes = Object.fromEntries(clubes
     .filter(clube => clube?.nome)
@@ -162,6 +165,11 @@ export function atualizarLigasMundoTecnico({
   }
   if (clubeTreinador && ligaTreinador) atribuicoes[clubeTreinador] = ligaTreinador;
   const movimentos = [];
+  const forcas = Object.fromEntries(clubes.map(clube => [clube.nome, clube.elenco ?? clube.forca ?? 55]));
+  const playoffsSerieB = resolverPlayoffsSerieB(classificacoesMundo.serieB?.classificacao, forcas, rng);
+  if (playoffsSerieB) {
+    classificacoesMundo.serieB = { ...classificacoesMundo.serieB, playoffs: playoffsSerieB };
+  }
 
   for (const divisao of divisoes) {
     const tabelaCima = classificacoesMundo[divisao.cima]?.classificacao || [];
@@ -169,7 +177,9 @@ export function atualizarLigasMundoTecnico({
     const vagas = Math.max(0, Math.min(Number(divisao.vagas) || 0, tabelaCima.length, tabelaBaixo.length));
     if (!vagas) continue;
     const rebaixados = tabelaCima.slice(-vagas);
-    const promovidos = tabelaBaixo.slice(0, vagas);
+    const promovidos = divisao.baixo === 'serieB' && divisao.cima === 'brasileirao' && playoffsSerieB
+      ? playoffsSerieB.promovidos.map(nome => ({ nome }))
+      : tabelaBaixo.slice(0, vagas);
     for (let i = 0; i < vagas; i++) {
       const rebaixado = rebaixados[i];
       const promovido = promovidos[i];
@@ -190,7 +200,7 @@ export function atualizarLigasMundoTecnico({
     }
   }
 
-  return { ligasMundo: atribuicoes, movimentos };
+  return { ligasMundo: atribuicoes, movimentos, playoffsSerieB };
 }
 
 /** Reavalia a tabela quando um lance jogável altera um placar já registrado. */

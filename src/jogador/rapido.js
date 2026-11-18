@@ -1,4 +1,5 @@
 import {clonarEstado} from '../simulacao/clonarEstado.js';
+import {resolverPlayoffSerieB} from '../competicoes/playoffSerieB.js';
 import {estatisticasDasPartidas} from '../simulacao/estatisticasMundo.js';
 import {gravarPersistente,lerPersistente,apagarPersistente} from '../simulacao/armazenamentoMundo.js';
 import {simularClassificacoesMundoTecnico,classificacaoDosJogos} from '../treinador/classificacoesMundoTecnico.js';
@@ -1030,7 +1031,12 @@ function girarDivisoes(c, card) {
   PIRAMIDE.forEach(({ baixo, cima, vagas }) => {
     const b = ordemDaLiga(baixo, card), a = ordemDaLiga(cima, card);
     if (b.length < vagas || a.length < vagas * 2) return;
-    b.slice(0, vagas).forEach((n) => { ligas[n] = cima; subiram.push(n); });
+    const playoff = baixo === 'serieB'
+      ? card.classificacoesMundo?.serieB?.playoffAcesso ||
+        resolverPlayoffSerieB({ classificacao: b.map(nome => ({ nome })) })
+      : null;
+    const nomesPromovidos = playoff?.promovidos || b.slice(0, vagas);
+    nomesPromovidos.forEach((n) => { ligas[n] = cima; subiram.push(n); });
     a.slice(-vagas).forEach((n) => { ligas[n] = baixo; cairam.push(n); });
   });
   // quem voltou pra liga de origem do cadastro não precisa ficar registrado
@@ -1427,6 +1433,9 @@ function jogarTemporadaBase(c0) {
   const tab = simularLiga(c, clube, ovr, share, forcaTimeExtra);
   card.posLiga = tab.pos; card.totalLiga = tab.total; card.campeaoLiga = tab.pos===1; card.vencedorLiga = tab.campeao;
   card.classificacoesMundo=c.classificacoesEmCurso;delete c.classificacoesEmCurso;
+  if (card.ligaId === 'serieB' && card.classificacoesMundo?.serieB?.playoffAcesso) {
+    card.playoffAcesso = card.classificacoesMundo.serieB.playoffAcesso;
+  }
   card.tabelaLiga = tab.ordem; // a virada de divisões no fim da temporada usa a classificação inteira
   // só a briga pelo título vira desafio, e nem sempre; acesso e permanência saem da tabela
   const decisaoBruta = emCampo ? decisaoNaTabela(clube, tab) : null;
@@ -1499,12 +1508,13 @@ function decisaoNaTabela(clube, tab) {
   const nomeLiga = ligaDe(clube.liga).nome;
   const vagas = vagasDaLiga(clube.liga);
   const segunda = ehSegundaDivisao(clube.liga);
+  const limiteAcessoDireto = clube.liga === 'serieB' ? 2 : vagas;
   const apertado = (f) => pts[f - 1] != null && pts[f] != null && Math.abs(pts[f - 1] - pts[f]) < 3.2;
   // quem está do lado de cima garante vencendo (ou se o rival também tropeçar);
   // quem está atrás precisa vencer E torcer. O tropeço do rival já sai sorteado aqui.
   const base = (f) => ({ ligaNome: nomeLiga, segunda, fronteira: f, ladoCerto: p === f, rivalTropeca: chance(0.45) });
   if ((p === 1 || p === 2) && apertado(1)) return { ...base(1), tipo: "liga", titulo: `Última rodada do ${nomeLiga}` };
-  if (segunda && vagas && (p === vagas || p === vagas + 1) && apertado(vagas)) return { ...base(vagas), tipo: "acesso", titulo: `Jogo do acesso · ${nomeLiga}` };
+  if (segunda && limiteAcessoDireto && (p === limiteAcessoDireto || p === limiteAcessoDireto + 1) && apertado(limiteAcessoDireto)) return { ...base(vagas), tipo: "acesso", titulo: `Jogo do acesso · ${nomeLiga}` };
   if (!segunda && vagas && (p === total - vagas || p === total - vagas + 1) && apertado(total - vagas)) return { ...base(total - vagas), tipo: "permanencia", titulo: `Jogo da permanência · ${nomeLiga}` };
   return null;
 }

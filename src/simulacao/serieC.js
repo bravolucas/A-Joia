@@ -99,6 +99,25 @@ function jogarTabela(clubes, idaVolta, rng, fase) {
   return { rodadas: rodadas.length, jogos, classificacao };
 }
 
+/**
+ * Preserva a fase regular efetivamente disputada pelo treinador. Exige a
+ * composição inteira do grupo e a quantidade de jogos concluída por clube;
+ * saves parciais não sobrescrevem uma classificação de temporada completa.
+ */
+function faseDisputadaValida(fase, clubes, totalRodadas) {
+  const linhas = fase?.classificacao;
+  if (!Array.isArray(linhas) || linhas.length !== clubes.length) return null;
+  const nomes = new Set(clubes.map(c => c.nome));
+  if (new Set(linhas.map(l => l.nome)).size !== nomes.size ||
+      !linhas.every(l => nomes.has(l.nome) && l.jogos === totalRodadas &&
+        Number.isFinite(l.pontos) && Number.isFinite(l.golsPro) &&
+        Number.isFinite(l.golsContra))) return null;
+  const partidas = Array.isArray(fase.jogos) ? fase.jogos : [];
+  const classificacao = ordenarTabelaBrasileira(linhas, partidas)
+    .map((linha, indice) => ({ ...linha, posicao: indice + 1 }));
+  return { rodadas: totalRodadas, classificacao, jogos: partidas };
+}
+
 function gruposDeAcesso(classificacao, clubes) {
   const porNome = new Map(clubes.map(c => [c.nome, c]));
   // CBF 2026/2027: grupo B = 1º, 4º, 5º, 8º; grupo C = 2º, 3º, 6º, 7º.
@@ -138,7 +157,7 @@ function finalSerieC(liderB, liderC, clubes, rng, mandanteVolta = liderC) {
  * Para temporadas 2028+, a composição dos grupos usa distribuição técnica por
  * nível (substituível por sorteio/regionalização oficiais quando disponíveis).
  */
-export function simularSerieC({ clubes = [], ano = 2026, rng = Math.random } = {}) {
+export function simularSerieC({ clubes = [], ano = 2026, rng = Math.random, faseJogada = null } = {}) {
   const regras = regulamentoSerieC(ano);
   if (clubes.length !== regras.participantes || new Set(clubes.map(c => c?.nome)).size !== regras.participantes ||
     clubes.some(c => typeof c?.nome !== 'string' || !c.nome)) {
@@ -146,7 +165,8 @@ export function simularSerieC({ clubes = [], ano = 2026, rng = Math.random } = {
   }
   let primeiraFase, classificacao, rebaixados, times = clubes;
   if (regras.formato === 'grupo-unico') {
-    const unico = jogarTabela(times, false, rng, 'primeira-fase');
+    const unico = faseDisputadaValida(faseJogada, times, regras.rodadas) ||
+      jogarTabela(times, false, rng, 'primeira-fase');
     primeiraFase = { formato: regras.formato, grupos: [{ nome: 'A', ...unico }] };
     classificacao = unico.classificacao;
     rebaixados = classificacao.slice(-2).map(x => x.nome);
@@ -157,7 +177,17 @@ export function simularSerieC({ clubes = [], ano = 2026, rng = Math.random } = {
       a.nome.localeCompare(b.nome, 'pt-BR'));
     const a = [], b = [];
     porNivel.forEach((c, i) => ((i % 4 === 0 || i % 4 === 3) ? a : b).push(c));
-    const ga = jogarTabela(a, true, rng, 'primeira-fase-A');
+    // Em carreira de treinador, o grupo que o usuário disputou prevalece:
+    // seu calendário não pode ser refeito para gerar novos classificados.
+    const nomesDisputados = faseJogada?.classificacao?.map(linha => linha?.nome) || [];
+    const nomesUnicos = new Set(nomesDisputados);
+    if (nomesDisputados.length === 14 && nomesUnicos.size === 14 &&
+        nomesDisputados.every(nome => times.some(clube => clube.nome === nome))) {
+      a.splice(0, a.length, ...times.filter(clube => nomesUnicos.has(clube.nome)));
+      b.splice(0, b.length, ...times.filter(clube => !nomesUnicos.has(clube.nome)));
+    }
+    const ga = faseDisputadaValida(faseJogada, a, regras.rodadas) ||
+      jogarTabela(a, true, rng, 'primeira-fase-A');
     const gb = jogarTabela(b, true, rng, 'primeira-fase-B');
     primeiraFase = { formato: regras.formato, grupos: [{ nome: 'A', ...ga }, { nome: 'B', ...gb }] };
     // Os quatro de cada grupo avançam; os três últimos de cada um caem.

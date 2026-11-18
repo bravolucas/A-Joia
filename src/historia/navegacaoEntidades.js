@@ -35,3 +35,16 @@ export function abrirEntidade(valor) {
   window.dispatchEvent(new CustomEvent(EVENTO_ENTIDADE,{detail:destino}));
   return true;
 }
+
+/** Resolve vencedores legados por nome somente quando existe um único ID possível. */
+export function idJogadorPorNome(c={},nome='') {
+ const alvo=String(nome||'').trim();
+ if(!alvo)return null;
+ const universo=c.tecnico?.universo||c.universo||{};
+ const mapa=new Map();
+ for(const p of [...(c.mundo?.jogadores||[]),...Object.values(universo.atletas||{})]) {
+  if(p?.nome===alvo&&p.id!=null)mapa.set(String(p.id),true);
+ }
+ if(c.nome===alvo)mapa.set('voce',true);
+ return mapa.size===1?[...mapa.keys()][0]:null;
+}

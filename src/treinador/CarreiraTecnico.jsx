@@ -174,6 +174,15 @@ function LinhaTemporada({ a, idade, ativa, aberta, onClick }) {
     {aberta && <div className="ct-season-details">
       <div className="ct-detail-title"><strong><LinkEntidade tipo="competicao" nome={competicaoTemporadaTecnico(a)}/></strong><span><LinkEntidade tipo={a.tipoEquipe==='selecao'?'selecao':'clube'} nome={a.clube}/> · {a.ano}</span></div>
       <p>{a.formato}</p><p>{a.vitorias}V · {a.empates}E · {a.derrotas}D · {a.pontos} pontos</p>
+      {a.liga === 'serieB' && a.playoffsSerieB && <details className="ct-league-details">
+        <summary>Playoffs de acesso · Série B 2026</summary>
+        <p>1º e 2º acessam diretamente. 3º × 6º e 4º × 5º disputam ida e volta.</p>
+        {a.playoffsSerieB.confrontos.map(confronto => <div key={confronto.chave} className="mt-2">
+          <strong><LinkEntidade tipo="clube" nome={confronto.melhorCampanha}/> × <LinkEntidade tipo="clube" nome={confronto.adversario}/></strong>
+          {confronto.jogos.map(jogo => <p key={jogo.fase}>{jogo.fase === 'ida' ? 'Ida' : 'Volta'}: {jogo.casa} {jogo.golsCasa} × {jogo.golsFora} {jogo.fora}</p>)}
+          <p>Classificado: <LinkEntidade tipo="clube" nome={confronto.classificado}/>{confronto.criterio === 'melhor-campanha' ? ' (vantagem da melhor campanha)' : ''}</p>
+        </div>)}
+      </details>}
       {a.avaliacaoDiretoria&&<p className={a.avaliacaoDiretoria.pendente?'ct-warning':''}>{a.avaliacaoDiretoria.motivo}</p>}
       {a.pediuDemissao?<p>Saída por pedido de demissão. A campanha ficou interrompida.</p>:<p>Meta: {a.objetivo} · <span className={a.cumpriuObjetivo ? 'ct-positive' : 'ct-warning'}>{a.avaliacaoDiretoria?.pendente?'em avaliação':a.cumpriuObjetivo ? 'atingida' : 'não atingida'}</span></p>}
       {a.confrontos?.filter(j => j.intervencao).map(j => <p key={`intervencao-${j.rodada}`}>Jogo importante: {j.nome} · {j.golsPro} × {j.golsContra} · {INTERVENCOES_TECNICO.find(op => op.id === j.intervencao)?.nome}</p>)}

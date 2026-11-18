@@ -99,6 +99,12 @@ grupo('Monaco',R,W,'monaco');
 mapa['Botafogo-SP'].detalhe=R;
 mapa['Universidad de Chile'].detalhe=R;
 delete mapa.Celtic;
+// Titulares da Série B 2026. Modelos históricos, sem patrocínio.
+grupo('Cuiabá',G,Y,'lisa',Y);
+grupo('Atlético-GO',R,K,'horizontais');
+grupo('Athletic Club',K,W,'listras');
+grupo('São Bernardo',Y,K,'listras');
+// Mantém também os uniformes de equipes históricas fora da Série B.
 export const UNIFORMES=mapa;
 export function uniformeDe(nome,cor='#147356'){
  const u=mapa[nome];if(u)return{...u,nome};

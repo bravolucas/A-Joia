@@ -3,6 +3,7 @@ import {negociarElencoTecnico} from '../treinador/mercadoTecnico.js';
 import {RevelacaoTela} from '../comum/efeitos/Movimento.jsx';
 import {BotaoMuseuPessoal,MuseuFimCarreira} from '../museu/MuseuPessoal.jsx';
 import BotaoHistoria from '../historia/HistoriaFutebol.jsx';
+import PortalHistorico from '../historia/PortalHistorico.jsx';
 import ApresentacaoOficial from '../comum/ApresentacaoOficial.jsx';
 import {ChegadaCarreira,PainelProgressaoCarreira,RetrospectivaCarreira} from './ProgressaoCarreiraUI.jsx';
 import {camisaInfo,escolherCamisa,sincronizarCamisasSelecao,prepararCamisaSelecao} from './camisasCarreira.js';
@@ -3076,6 +3077,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
       {["fechamento","bolaOuro"].includes(etapa)&&card&&c&&!apresentacao&&<PopupTemporada key={card.ano} c={c} card={card} celebracaoIndice={estado.celebracaoIndice||0} onCelebracao={indice=>setEstado(st=>({...st,etapa:"fechamento",celebracaoIndice:indice,auto:false}))} onFechar={()=>{if(estado.retorno){return setEstado(estado.retorno);}if(card.titulos.length){setContadorPulsa(x=>x+1);vibrar(20);}return posTemporada(c,card);}}/>}
       {apresentacaoSelecao&&!apresentacao&&!chegadaPendente&&!["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa)&&!popup&&<PrimeiraSelecao c={apresentacaoSelecao.c} estreia={apresentacaoSelecao.estreia} onFim={()=>setApresentacaoSelecao(null)}/>}
       {popup && !["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa) && <PopupResultado key={popup.k} info={popup} onFechar={() => setPopup(null)} />}
+      <PortalHistorico c={c} />
     </div>
   );
 }

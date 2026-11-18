@@ -1249,7 +1249,12 @@ function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
   const classificacao = andamento.classificacao || tabelaClassificacaoTecnico(t, andamento);
   const ligaAtual = t.liga || CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga;
   const classificacoesMundo = classificacoesMundoDaTemporada(t, ligaAtual, classificacao, rng);
-  const progressaoMundo = atualizarLigasMundoDaTemporada(t, ligaAtual, classificacoesMundo);
+  const progressaoMundo = atualizarLigasMundoDaTemporada(t, ligaAtual, classificacoesMundo, rng);
+  const movimentoReal = progressaoMundo.movimentos.find(m => m.clube === t.clube && m.de === ligaAtual);
+  const ligaSeguinte = progressaoMundo.ligasMundo[t.clube] || ligaAtual;
+  const playoffsAcesso = ligaAtual === 'serieB'
+    ? progressaoMundo.playoffsSerieB?.confrontos.find(chave => chave.melhorCampanha === t.clube || chave.adversario === t.clube)
+    : null;
   const posicao = classificacao.find(x => x.meuClube)?.posicao || 18;
   const campeao = posicao === 1;
   const objetivo = objetivoTecnico(t);
@@ -1261,11 +1266,15 @@ function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
   const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivo.nome, cumpriuObjetivo,
     promessaDescumprida, idoloEmCasa, estilo: t.estilo, formacao: perfilTaticoTecnico(t).formacao, decisoes: t.decisoes,
     jogos: vitorias + empates + derrotas, vitorias, empates, derrotas, pontos, posicao, campeao, classificacao, classificacoesMundo,
+    ...(progressaoMundo.playoffsSerieB ? { playoffsSerieB: progressaoMundo.playoffsSerieB } : {}),
+    ...(playoffsAcesso ? { playoffsAcesso } : {}),
+    ...(movimentoReal?.tipo === 'acesso' ? { acesso: { de: movimentoReal.de, para: movimentoReal.para } } : {}),
+    ...(movimentoReal?.tipo === 'rebaixamento' ? { rebaixado: { de: movimentoReal.de, para: movimentoReal.para } } : {}),
     ...(progressaoMundo.movimentos.length ? { movimentosMundo: progressaoMundo.movimentos } : {}),
     confrontos: andamento.confrontos || [], partidasLiga: andamento.partidasLiga||[], avaliacoes: andamento.avaliacoes };
   temporada.demitido = demitido;temporada.avaliacaoDiretoria=avaliacao;temporada.liga=ligaAtual;
   const proximo = { ...t, idade:idadeAtualTecnico(c)+1, carteiraTecnico:creditarSalarioTecnico(t,t.ano,t.salario??salarioTecnico(t)), ano: t.ano + 1, fase: 'resultado', andamento: null,
-    ligasMundo: progressaoMundo.ligasMundo,
+    liga: ligaSeguinte, ligasMundo: progressaoMundo.ligasMundo,
     temporadas: [...t.temporadas, temporada], reuniaoPendente: false, vitorias: t.vitorias + vitorias,
     empates: t.empates + empates, derrotas: t.derrotas + derrotas,
     titulos: t.titulos + (campeao ? 1 : 0), demitido, promessaContrato: null,

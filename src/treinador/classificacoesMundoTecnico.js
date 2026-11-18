@@ -1,4 +1,5 @@
 import {resolverOuReusarPlayoffsSerieB} from '../simulacao/playoffsSerieB.js';
+import {ordenarTabelaBrasileira} from '../simulacao/desempateBrasileiro.js';
 
 const limitar = (valor, minimo, maximo) => Math.max(minimo, Math.min(maximo, valor));
 
@@ -54,14 +55,15 @@ function registrarPartida(tabela, casa, fora, golsCasa, golsFora) {
   }
 }
 
-function ordenarTabela(linhas) {
+function ordenarTabela(linhas, jogos = [], liga = null) {
   const jaClassificada = linhas.every(linha => Number.isFinite(linha.posicao));
-  return [...linhas].sort((a, b) => jaClassificada ? a.posicao - b.posicao :
-    b.pontos - a.pontos ||
-    b.vitorias - a.vitorias ||
-    b.saldoGols - a.saldoGols ||
-    a.nome.localeCompare(b.nome, 'pt-BR')
-  ).map((linha, indice) => ({ ...linha, posicao: jaClassificada ? linha.posicao : indice + 1 }));
+  const ordenadas = jaClassificada
+    ? [...linhas].sort((a, b) => a.posicao - b.posicao)
+    : (liga === 'serieB' || liga === 'brasileirao')
+      ? ordenarTabelaBrasileira(linhas, jogos)
+      : [...linhas].sort((a, b) => b.pontos - a.pontos || b.vitorias - a.vitorias ||
+          b.saldoGols - a.saldoGols || b.golsPro - a.golsPro || a.nome.localeCompare(b.nome, 'pt-BR'));
+  return ordenadas.map((linha, indice) => ({ ...linha, posicao: jaClassificada ? linha.posicao : indice + 1 }));
 }
 
 function simularPartida(casa, fora, tabela, rng, jogos, rodada) {
@@ -73,10 +75,10 @@ function simularPartida(casa, fora, tabela, rng, jogos, rodada) {
   jogos?.push({rodada,casa:casa.nome,fora:fora.nome,golsCasa,golsFora});
 }
 
-export function simularLigaMundo(clubes, rng = Math.random) {
+export function simularLigaMundo(clubes, rng = Math.random, liga = clubes[0]?.liga) {
   const tabela = criarTabela(clubes), jogos = [], primeiroTurno = [];
   const base = [...clubes];
-  if(base.length<2)return {classificacao:ordenarTabela([...tabela.values()]),jogos};
+  if(base.length<2)return {classificacao:ordenarTabela([...tabela.values()], jogos, liga),jogos};
   if(base.length%2)base.push(null);
   const rodadas=base.length-1;
   for(let rodada=0;rodada<rodadas;rodada++){
@@ -89,7 +91,7 @@ export function simularLigaMundo(clubes, rng = Math.random) {
     base.splice(1,0,base.pop());
   }
   for(const j of primeiroTurno)simularPartida(j.fora,j.casa,tabela,rng,jogos,j.rodada+rodadas);
-  return {classificacao:ordenarTabela([...tabela.values()]),jogos};
+  return {classificacao:ordenarTabela([...tabela.values()], jogos, liga),jogos};
 }
 
 /**
@@ -141,7 +143,7 @@ export function simularClassificacoesMundoTecnico({
       continue;
     }
     const ordenados = [...participantes].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
-    resultado[liga] = { liga, origem: 'simulacao-global', ...simularLigaMundo(ordenados, rng) };
+    resultado[liga] = { liga, origem: 'simulacao-global', ...simularLigaMundo(ordenados, rng, liga) };
   }
   return resultado;
 }

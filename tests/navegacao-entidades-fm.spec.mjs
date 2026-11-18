@@ -10,6 +10,7 @@ function carreiraFixture(){
   codigo:'NAVEGACAO-FM-TESTE'
  }),idade:40});
  const c=iniciarCarreiraTecnico(jogador);
+ c.lista=[...(c.lista||[]),{ano:c.ano,nome:'Bola de Ouro',clube:'Individual',tipo:'bolaOuro'}];
  c.tecnico={...c.tecnico,clube:'Santos',pais:'Brasil',liga:'brasileirao',
   fase:'resultado',clubeInicialEscolhido:true,
   temporadas:[{ano:c.tecnico.ano,clube:'Santos',liga:'brasileirao',
@@ -39,6 +40,10 @@ test('navegar entre clube, competição e jogador sem perder o retorno à carrei
  await historia.getByRole('button',{name:'Treinadores',exact:true}).click();
  await expect(historia.getByRole('heading',{name:'Passagens pelos clubes'})).toBeVisible();
  await expect(historia.locator('.fm27-coach-profile .fm27-data')).toContainText('Santos');
+ await historia.getByRole('button',{name:'Prêmios',exact:true}).click();
+ await expect(historia.locator('.hf-premios')).toContainText('Navegador FM');
+ await historia.locator('.hf-premios .ajoia-entity-link').filter({hasText:'Navegador FM'}).first().click();
+ await expect(historia.locator('.fm27-player-sheet')).toContainText('Navegador FM');
  await historia.getByRole('button',{name:'Jogadores',exact:true}).click();
  await expect(historia.locator('.fm27-player-sheet')).toContainText('Navegador FM');
  await expect(historia.getByRole('button',{name:'Carreira',exact:true})).toBeVisible();

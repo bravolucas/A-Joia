@@ -1,5 +1,6 @@
 import {edicoesEstaduaisHistoricas,HISTORICO_ESTADUAIS} from '../dados/estaduaisHistoricos.js';
 import {HISTORICO_LIBERTADORES,totalLibertadoresHistoricas} from '../dados/libertadoresHistorica.js';
+import {HISTORICO_SULAMERICANA,totalSulAmericanaHistoricas} from '../dados/sulamericanaHistorica.js';
 import {CLUBES,LIGAS,NACIONALIDADES,anoRegistroTemporada,ESTADUAIS} from '../dados/data.js';
 import {eventosConhecidos,nomeCanonico,acervoInicial,galeriaClube} from './historiaFutebol.js';
 const nacional=nome=>/Copa do Mundo|Eurocopa|Copa América|Copa Africana|Copa da Ásia|Copa Ouro|Nações da Oceania/i.test(nome||'');
@@ -23,7 +24,7 @@ export function campeoesRegistrados(c={},temporadas=c.temporadas||[]){
  return [...mapa.entries()].filter(([id])=>!pendentes.has(id)).map(([,e])=>e).sort((a,b)=>b.ano-a.ano||a.nome.localeCompare(b.nome));
 }
 export function competicoesDisponiveis(c={},temporadas){
- const nomes=new Set(['Champions League','Libertadores','Copa do Mundo','Eurocopa','Copa América','Copa Africana de Nações','Copa da Ásia','Copa Ouro','Copa das Nações da Oceania']);
+ const nomes=new Set(['Champions League','Libertadores','Copa Sul-Americana','Copa do Mundo','Eurocopa','Copa América','Copa Africana de Nações','Copa da Ásia','Copa Ouro','Copa das Nações da Oceania']);
  for(const estadual of Object.values(ESTADUAIS)){const nome=typeof estadual==='string'?estadual:estadual.nome;if(nome)nomes.add(nome);}
  for(const liga of Object.values(LIGAS))if(!liga.naoJogavel&&liga.nome)nomes.add(nomeComp(liga.nome));
  for(const clube of CLUBES)for(const t of acervoInicial(clube.nome).tacas)if(t.nome)nomes.add(nomeComp(t.nome));
@@ -31,10 +32,10 @@ export function competicoesDisponiveis(c={},temporadas){
  return [...nomes].filter(n=>n&&n!=='Títulos continentais').sort((a,b)=>a.localeCompare(b,'pt-BR'));
 }
 export function galeriaCompeticao(c={},nome,temporadas){
- nome=nomeComp(nome);const edicoes=campeoesRegistrados(c,temporadas).filter(e=>e.nome===nome),selecao=nacional(nome),libertadores=nome==='Libertadores',historicas=libertadores?HISTORICO_LIBERTADORES:edicoesEstaduaisHistoricas(nome),times=new Set([...edicoes.map(e=>e.clube),...historicas.flatMap(e=>e.campeoes.map(t=>t.clube))]);
+ nome=nomeComp(nome);const edicoes=campeoesRegistrados(c,temporadas).filter(e=>e.nome===nome),selecao=nacional(nome),libertadores=nome==='Libertadores',sulamericana=nome==='Copa Sul-Americana',historicas=libertadores?HISTORICO_LIBERTADORES:sulamericana?HISTORICO_SULAMERICANA:edicoesEstaduaisHistoricas(nome),times=new Set([...edicoes.map(e=>e.clube),...historicas.flatMap(e=>e.campeoes.map(t=>t.clube))]);
  // A Libertadores precisa usar seus vencedores reais, não só os clubes
  // brasileiros / elencos cadastrados no jogo.
- if(!selecao&&!libertadores)for(const clube of CLUBES){const a=acervoInicial(clube.nome);if(a.conhecido&&a.tacas.some(t=>nomeComp(t.nome)===nome&&t.inicial>0))times.add(clube.nome);}
- const ranking=[...times].map(clube=>{const a=acervoInicial(clube),g=!selecao?galeriaClube(c,clube,temporadas):null,t=g?.tacas.find(t=>nomeComp(t.nome)===nome),simulacao=edicoes.filter(e=>e.clube===clube).length,inicial=libertadores?totalLibertadoresHistoricas(clube):(a.conhecido?(t?.inicial||0):0),legado=t?.legado||0;return {clube,inicial,simulacao,legado,total:inicial+simulacao+legado,anos:edicoes.filter(e=>e.clube===clube).map(e=>e.ano)};}).filter(t=>t.total>0).sort((a,b)=>b.total-a.total||a.clube.localeCompare(b.clube,'pt-BR'));
- return {nome,selecao,edicoes,historicas,notaHistorica:libertadores?'Lista oficial de vencedores por edição (1960–2025), separada dos resultados desta carreira. A edição de 2026 ainda não foi concluída.':Object.values(HISTORICO_ESTADUAIS).find(r=>r.nome===nome)?.nota||null,ranking,ultima:edicoes[0]||(historicas[0]?{ano:historicas[0].ano,clube:historicas[0].campeoes.map(t=>t.clube).join(' / '),historica:true}:null),primeiroAno:edicoes.at(-1)?.ano??historicas.at(-1)?.ano??null};
+ if(!selecao&&!libertadores&&!sulamericana)for(const clube of CLUBES){const a=acervoInicial(clube.nome);if(a.conhecido&&a.tacas.some(t=>nomeComp(t.nome)===nome&&t.inicial>0))times.add(clube.nome);}
+ const ranking=[...times].map(clube=>{const a=acervoInicial(clube),g=!selecao?galeriaClube(c,clube,temporadas):null,t=g?.tacas.find(t=>nomeComp(t.nome)===nome),simulacao=edicoes.filter(e=>e.clube===clube).length,inicial=libertadores?totalLibertadoresHistoricas(clube):sulamericana?totalSulAmericanaHistoricas(clube):(a.conhecido?(t?.inicial||0):0),legado=t?.legado||0;return {clube,inicial,simulacao,legado,total:inicial+simulacao+legado,anos:edicoes.filter(e=>e.clube===clube).map(e=>e.ano)};}).filter(t=>t.total>0).sort((a,b)=>b.total-a.total||a.clube.localeCompare(b.clube,'pt-BR'));
+ return {nome,selecao,edicoes,historicas,notaHistorica:libertadores?'Vencedores reais por edição (1960–2025), separados dos resultados desta carreira. A edição de 2026 ainda não foi concluída.':sulamericana?'Vencedores reais por edição (2002–2025), separados dos resultados desta carreira. A edição de 2016 foi concedida à Chapecoense; 2026 ainda não tem campeão cadastrado.':Object.values(HISTORICO_ESTADUAIS).find(r=>r.nome===nome)?.nota||null,ranking,ultima:edicoes[0]||(historicas[0]?{ano:historicas[0].ano,clube:historicas[0].campeoes.map(t=>t.clube).join(' / '),historica:true}:null),primeiroAno:edicoes.at(-1)?.ano??historicas.at(-1)?.ano??null};
 }

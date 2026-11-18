@@ -126,3 +126,28 @@ test('modo treinador preserva exatamente os mesmos promovidos ao reabrir o ano',
   assert.deepEqual(antes.movimentos, depois.movimentos);
   assert.deepEqual(antes.ligasMundo, depois.ligasMundo);
 });
+
+
+test('art. 13: playoff considera pontos dos dois jogos antes do saldo e da campanha', () => {
+  for (let seed = 1; seed <= 25; seed++) {
+    let estado = seed;
+    const rng = () => ((estado = estado * 16807 % 2147483647) - 1) / 2147483646;
+    const resultado = resolverPlayoffsSerieB(tabelaB, forcas, rng);
+    for (const chave of resultado.confrontos) {
+      const [ida, volta] = chave.jogos;
+      const pontos = (pro, contra) => pro > contra ? 3 : pro === contra ? 1 : 0;
+      const melhor = chave.melhorCampanha, pior = chave.adversario;
+      const pontosMelhor = pontos(ida.golsFora, ida.golsCasa) + pontos(volta.golsCasa, volta.golsFora);
+      const pontosPior = pontos(ida.golsCasa, ida.golsFora) + pontos(volta.golsFora, volta.golsCasa);
+      assert.equal(chave.pontosPlayoff[melhor], pontosMelhor);
+      assert.equal(chave.pontosPlayoff[pior], pontosPior);
+      const esperado = pontosMelhor !== pontosPior ? 'pontos-playoff'
+        : chave.agregado[melhor] !== chave.agregado[pior] ? 'saldo-agregado'
+        : 'melhor-campanha';
+      assert.equal(chave.criterio, esperado);
+      assert.equal(chave.classificado, pontosMelhor !== pontosPior
+        ? (pontosMelhor > pontosPior ? melhor : pior)
+        : chave.agregado[melhor] >= chave.agregado[pior] ? melhor : pior);
+    }
+  }
+});

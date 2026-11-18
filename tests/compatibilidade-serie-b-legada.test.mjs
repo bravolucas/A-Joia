@@ -62,3 +62,40 @@ for (const antigo of ['Guarani', 'Amazonas FC', 'Paysandu', 'Confiança']) {
     assert.equal(nomesCalendario(t).length, 20);
   });
 }
+
+
+test('cadastro novo da Série C não duplica clube de um save legado da Série B', () => {
+  const universoCompleto = CLUBES.filter(c => ['brasileirao', 'serieB', 'serieC'].includes(c.liga))
+    .map(c => ({ ...c, elenco: c.forca }));
+  assert.equal(universoCompleto.length, 60);
+  for (const nome of ['Guarani', 'Amazonas FC', 'Paysandu', 'Confiança']) {
+    const carreiraLegada = { clube: nome, liga: 'serieB', elenco: 55,
+      ligasMundo: { [nome]: 'serieB' } };
+    const participantes = nomesCalendario(carreiraLegada);
+    assert.equal(participantes.length, 20, nome);
+    assert.ok(participantes.includes(nome));
+    const ajustado = reconciliarClubeLegadoTecnico({
+      clubes: universoCompleto, ligasMundo: carreiraLegada.ligasMundo,
+      ligaTreinador: 'serieB', clubeTreinador: nome, elencoTreinador: 55,
+      nomesCalendario: participantes,
+    });
+    assert.equal(ajustado.clubes.length, 60);
+    assert.equal(new Set(ajustado.clubes.map(c => c.nome)).size, 60);
+    assert.ok(ajustado.afastado, 'o excedente deve ser identificado');
+    assert.equal(ajustado.ligasMundo[nome], 'serieB');
+    assert.equal(ajustado.ligasMundo[ajustado.afastado], 'serieC');
+    for (const [liga, quantidade] of [['brasileirao', 20], ['serieB', 20], ['serieC', 20]]) {
+      assert.equal(ajustado.clubes.filter(c =>
+        (ajustado.ligasMundo[c.nome] || c.liga) === liga).length, quantidade,
+        nome + ' / ' + liga);
+    }
+    const classificacoesMundo = simularClassificacoesMundoTecnico({
+      clubes: ajustado.clubes, ligasMundo: ajustado.ligasMundo,
+      clubeTreinador: nome, ligaTreinador: 'serieB',
+      forcaTreinador: 55, ano: 2026, rng: rngSeed(1206),
+    });
+    assert.equal(classificacoesMundo.serieB.classificacao.length, 20);
+    assert.equal(classificacoesMundo.serieC.classificacao.length, 20);
+    assert.equal(classificacoesMundo.serieC.edicaoSerieC.primeiraFase.grupos[0].jogos.length, 190);
+  }
+});

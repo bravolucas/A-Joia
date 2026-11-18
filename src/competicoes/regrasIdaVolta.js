@@ -1,19 +1,45 @@
-/** Regulamento por competição e fase; não aplicar gol fora como desempate. */
+/**
+ * Regulamentos reais por competição, fase e edição.
+ * tamanho = número de equipes na chave desta rodada (2 = final).
+ * Não aplicamos a antiga regra de gols marcados fora de casa.
+ * Copas não cadastradas ficam em partida única até que seu regulamento seja definido.
+ */
+const normalizar = nome => String(nome || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+const conhecido = n => /copa do brasil|copa del rey|copa do rei|coppa italia|copa da italia|taca de portugal|libertadores|sul-americana|sudamericana|champions league|europa league|conference league|concacaf.*(champions|campeones|campeoes)|afc champions|afc challenge|recopa|supercopa|copa do mundo|mundial|intercontinental|selecao|selecoes|copa argentina|fa cup|dfb.pokal|coupe de france|knvb beker|turkiye kupasi|king.s cup|mls cup|copa sao paulo/i.test(n);
+
+export const regulamentoConhecidoIdaVolta = nome => conhecido(normalizar(nome));
+
 export function temIdaVolta({nome='',ano=2026,tamanho=2,preContinental=false}={}){
- const n=String(nome).toLowerCase();
- if(/copa do mundo|mundial|seleç|selec|supercopa|recopa/.test(n))return false;
+ const n=normalizar(nome);
+ const fase=Number(tamanho),edicao=Number(ano)||2026;
+ if(!Number.isFinite(fase)||fase<2)return false;
+
+ // CONMEBOL Recopa tem ida e volta mesmo sendo uma final entre dois clubes.
+ if(/recopa (sul.americana|sudamericana)|conmebol recopa/.test(n))return fase===2;
+ if(/copa do mundo|mundial|intercontinental|selecao|selecoes|supercopa|recopa/.test(n))return false;
+
  if(/copa do brasil/.test(n)){
-  // REC da CBF 2026: fases 5 a 8, desde 32 equipes até semifinal.
-  if(ano>=2026)return [32,16,8,4].includes(tamanho);
-  return tamanho>2&&tamanho<=16;
+  // CBF 2026: 5ª até 8ª fases em ida/volta, final única.
+  // Edições anteriores recentes: a partir da 3ª fase, inclusive final.
+  return edicao>=2026?[32,16,8,4].includes(fase):[32,16,8,4,2].includes(fase);
  }
- // Copa del Rey 2025/26 e 2026/27: somente as semifinais são em dois jogos.
- if(/copa del rey|copa do rei/.test(n))return tamanho===4;
- // Coppa Italia: semifinais em duas mãos, demais fases e final em jogo único.
- if(/coppa italia|copa da it[aá]lia/.test(n))return tamanho===4;
- // Taça de Portugal: mudança a partir da edição 2026/27 (final em 2027).
- if(/ta[çc]a de portugal/.test(n))return Number(ano)<=2026&&tamanho===4;
+ if(/copa del rey|copa do rei|coppa italia|copa da italia/.test(n))return fase===4;
+ // Na edição 2026/27 a Taça de Portugal passou a ter semifinal única.
+ if(/taca de portugal/.test(n))return edicao<=2026&&fase===4;
+
+ // AFC Champions League Elite: oitavas em ida/volta; quartas em diante
+ // são disputadas em fase final centralizada, em jogos únicos.
+ if(/afc champions league elite/.test(n))return fase===16;
+ if(/afc champions league two|afc challenge league/.test(n))return fase>2;
+ if(/afc champions league/.test(n))return fase>2;
+
+ // Concacaf Champions Cup: 1ª rodada, oitavas, quartas e semis em 2 jogos.
+ if(/concacaf.*(champions|campeones|campeoes)/.test(n))return fase>2;
+
+ // CONMEBOL e UEFA: eliminatórias em dois jogos, final única.
  if(/libertadores|sul-americana|sudamericana|champions league|europa league|conference league/.test(n))
-   return tamanho>2||preContinental;
+  return fase>2||(preContinental&&fase===2);
+
+ // Copas nacionais restantes cadastradas são em confronto único no motor.
  return false;
 }

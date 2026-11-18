@@ -58,7 +58,7 @@ A suíte completa do projeto e o navegador são executados pela workflow `Valida
 
 ## Pendências fora do escopo desta correção
 
-1. A Série C ainda não foi integrada como divisão completa na pirâmide brasileira. Portanto, os quatro últimos da Série B **não são movimentados para uma Série C jogável** no modelo atual. Não atribuir conformidade integral à pirâmide do Brasil enquanto isso faltar.
+1. A Série C está integrada à simulação da pirâmide e ao Modo Treinador, mas continua **não jogável no Modo Rápido**. A Série D mantém somente um banco de candidatos ao acesso, sem torneio integral de 96 clubes. A equivalência completa entre modos e a experiência no navegador ainda exigem testes.
 2. Os quatro clubes antigos passaram nos testes isolados do Modo Treinador. Ainda faltam provas com saves reais do navegador e com os fluxos Jogador/Completo; os nomes continuam referenciáveis no catálogo regional.
 3. Aprovação integral do GitHub Actions e publicação do Pages dependem de verificação dos jobs associados à revisão final.
 
@@ -104,9 +104,42 @@ da final, não ao líder da fase inicial.
 e `tests/serie-c-mandos-2026-2028.test.mjs`.
 
 **Ainda pendente:** executar e confirmar a suíte integral no CI, confirmar o
-SHA efetivamente publicado, implementar uma Série D integral, assegurar
-calendário/fases adequados quando o usuário escolhe treinar um clube da Série C
-ou é rebaixado à divisão, e testar salvamentos legados end-to-end no navegador.
+SHA efetivamente publicado, implementar uma Série D integral, validar na interface
+as campanhas do usuário na Série C após múltiplas temporadas e testar salvamentos
+legados end-to-end no navegador.
 
 Fontes: CBF, regulamento de 2026 e comunicado de expansão da Série C;
 ge.globo.com, relação dos seis acessos da Série D conhecidos em setembro de 2026.
+
+
+## Integração da Série C com o treinador — revisão complementar
+
+- `src/simulacao/serieC.js` publica `calendarioSerieCClubes` para manter a
+  distribuição equilibrada de mandos em ambas as simulações.
+- O Modo Treinador registra a **primeira fase efetivamente disputada**, sem
+  sorteá-la novamente. Os quadrangulares, os quatro acessos e a final são
+  simulados após a classificação real: 2026 (20 clubes/19 jogos),
+  2027 (24 clubes/23 jogos) e 2028+ (dois grupos/26 jogos).
+- Quando o treinador está na Série C, o campeão é o ganhador da final;
+  terminar em 1º na primeira fase **não** garante automaticamente a taça.
+  O acesso e a liga da temporada seguinte seguem os classificados dos
+  quadrangulares.
+- `src/treinador/CarreiraTecnico.jsx` exibe grupos, tabelas de seis rodadas,
+  classificados e placares da final no histórico clicável do treinador.
+- Carreiras incompletas não têm a primeira fase substituída por placares
+  independentes. Dados de uma Série C com participantes insuficientes recebem
+  `origem: serie-c-pendente`, sem fabricar calendário em pontos corridos.
+- Clubes registrados apenas como Série D não aparecem como propostas de
+  trabalho enquanto esta divisão não é jogável; clubes promovidos à Série C
+  voltam a ficar elegíveis pelo mapa de ligas da carreira.
+- Testes permanentes acrescentados:
+  `tests/serie-c-treinador-mandos.test.mjs`,
+  `tests/serie-c-treinador-fase-real.test.mjs`,
+  `tests/serie-c-treinador-carreira.test.mjs` e
+  `tests/treinador-convites-serie-d-2026.test.mjs`.
+- Verificações isoladas de lógica aprovadas para primeira fase preservada,
+  grupos, acesso, mandos 2026/27/28, e **nove temporadas sucessivas**
+  (2026 a 2034) com Série A/B em 20 e Série C passando para 24/28.
+
+**Ressalva:** os testes isolados não confirmam aprovação do CI ou deploy
+do último commit; a validação de interface e de saves reais permanece aberta.

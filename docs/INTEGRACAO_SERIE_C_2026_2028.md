@@ -17,6 +17,7 @@
 - `src/comum/lib.js` e `src/completo/mundoTemporada.js`: suporte à Série C no Modo Completo e progressão de divisões.
 - `src/simulacao/mundoVivo.js`: conserva placares de fase regular, quadrangulares e final no histórico da competição.
 - `src/treinador/compatibilidadeDivisoes.js` e `src/treinador/tecnico.js`: corrige caso de save anterior com Guarani, Amazonas FC, Paysandu ou Confiança na Série B; mantém 20 na divisão antiga sem duplicar clube.
+- `src/treinador/tecnico.js`: calendário presencial da Série C agora respeita as três configurações anuais de temporada.
 
 ## Cenários verificados com execução isolada das funções
 - Anos 2026, 2027, 2028, 2029, 2030: A=20, B=20, C=24/28/28/28/28 ao final do ano, após C=20 no início de 2026.
@@ -31,7 +32,7 @@
 - `tests/compatibilidade-serie-b-legada.test.mjs`: verificação de save anterior após cadastro novo da Série C.
 
 ## Pendências e limitações
-1. **Treinador comandando pessoalmente um clube da Série C**: o calendário interativo, a classificação e os quadrangulares devem ser integrados ao motor especializado para que o usuário não jogue 38/46/54 rodadas de liga indevidamente. O motor está integrado às tabelas mundiais, não a todos os confrontos interativos do usuário nesse cenário.
+1. **Treinador comandando pessoalmente um clube da Série C**: o calendário da fase regular já segue 19 rodadas em 2026, 23 em 2027 e 26 em grupos de 14 a partir de 2028. **Ainda falta integrar os quadrangulares e a final jogáveis ao desempenho real do treinador**, em vez de utilizar exclusivamente a edição simulada do universo para decidir o acesso.
 2. **Modo Completo e Rápido na Série C**: testes end-to-end com um clube rebaixado da Série B ainda são necessários para validar interfaces, progressão, salvamento e retorno após recarregar.
 3. **Série D**: banco de candidatos, ainda não simulação de regulamento próprio de competição; acessos da D pós-2026 são fictícios, ponderados por força.
 4. **2028+**: distribuição de participantes nos grupos e quadrangulares adaptada até publicação de regulamento específico.

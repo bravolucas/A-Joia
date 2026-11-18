@@ -611,14 +611,15 @@ const DIVISOES_TECNICO = [
   { baixo: 'franca2', cima: 'franca', vagas: 2 },
   { baixo: 'portugal2', cima: 'portugal', vagas: 2 },
 ];
-function atualizarLigasMundoDaTemporada(t, liga, classificacoesMundo) {
+function atualizarLigasMundoDaTemporada(t, liga, classificacoesMundo, rng) {
   return atualizarLigasMundoTecnico({
-    clubes: CLUBES_CONVITES_TECNICO,
+    clubes: CLUBES_CONVITES_TECNICO.map(clube => ({...clube, elenco: t.forcasMundo?.[clube.nome] ?? clube.elenco})),
     classificacoesMundo,
     ligasMundo: t.ligasMundo,
     clubeTreinador: t.clube,
     ligaTreinador: liga,
     divisoes: DIVISOES_TECNICO,
+    rng,
   });
 }
 function movimentoDivisaoTecnico(liga, posicao, total) {
@@ -1058,15 +1059,25 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   const idoloEmCasa = !!vinculoAtual?.idolatria;
   const cumpriuObjetivo = posicao <= objetivo.posicao;
   const promessaDescumprida = !!(t.promessaContrato && t.promessaContrato.clube === t.clube && posicao > t.promessaContrato.posicaoMaxima);
-  const movimento = movimentoDivisaoTecnico(ligaAtual, posicao, classificacao.length);
-  const ligaSeguinte = movimento?.para || ligaAtual;
   const classificacoesMundo = classificacoesMundoDaTemporada({ ...t, liga: ligaAtual }, ligaAtual, classificacao, rng);
-  const progressaoMundo = atualizarLigasMundoDaTemporada({ ...t, liga: ligaAtual }, ligaAtual, classificacoesMundo);
+  const progressaoMundo = atualizarLigasMundoDaTemporada({ ...t, liga: ligaAtual }, ligaAtual, classificacoesMundo, rng);
+  // O acesso do técnico é definido pelos confrontos efetivos, não pela posição 3º/4º.
+  const movimentoReal = progressaoMundo.movimentos.find(m => m.clube === t.clube && m.de === ligaAtual);
+  const movimento = movimentoReal ? {
+    tipo: movimentoReal.tipo === 'rebaixamento' ? 'rebaixado' : 'acesso',
+    de: movimentoReal.de, para: movimentoReal.para
+  } : null;
+  const ligaSeguinte = progressaoMundo.ligasMundo[t.clube] || ligaAtual;
+  const playoffsAcesso = ligaAtual === 'serieB'
+    ? progressaoMundo.playoffsSerieB?.confrontos.find(chave => chave.melhorCampanha === t.clube || chave.adversario === t.clube)
+    : null;
   const temporada = {
     ano: t.ano, clube: t.clube, liga: ligaAtual, idoloEmCasa,
     objetivo: objetivo.nome, cumpriuObjetivo, promessaDescumprida, estilo: t.estilo, formacao: perfilTaticoTecnico(t).formacao,
     decisoes: t.decisoes, jogos: jogosDisputados, vitorias, empates, derrotas, pontos, posicao, campeao,
     classificacao, classificacoesMundo,
+    ...(progressaoMundo.playoffsSerieB ? { playoffsSerieB: progressaoMundo.playoffsSerieB } : {}),
+    ...(playoffsAcesso ? { playoffsAcesso } : {}),
     ...(progressaoMundo.movimentos.length ? { movimentosMundo: progressaoMundo.movimentos } : {}),
     confrontos, partidasLiga, golsPro, golsContra, paradas: t.paradasTemporada || [], ...(classico ? { classico } : {}),
     ...(movimento?.tipo === 'rebaixado' ? { rebaixado: { de: movimento.de, para: movimento.para } } : {}),

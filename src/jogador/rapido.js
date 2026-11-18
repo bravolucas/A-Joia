@@ -2,6 +2,7 @@ import {clonarEstado} from '../simulacao/clonarEstado.js';
 import {estatisticasDasPartidas} from '../simulacao/estatisticasMundo.js';
 import {gravarPersistente,lerPersistente,apagarPersistente} from '../simulacao/armazenamentoMundo.js';
 import {simularClassificacoesMundoTecnico,classificacaoDosJogos} from '../treinador/classificacoesMundoTecnico.js';
+import {resolverPlayoffsSerieB} from '../simulacao/playoffsSerieB.js';
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
 import {forcasDoMundo,clubesDoMundo,registrarMundoVivo,resumirTabelas} from '../simulacao/mundoVivo.js';
 import {AJUSTE_FORTALEZA,corrigirEquilibrioClubes} from '../dados/equilibrioClubes.js';
@@ -1027,10 +1028,24 @@ function ordemDaLiga(ligaId, card) {
 function girarDivisoes(c, card) {
   const ligas = { ...(c.ligas || {}) };
   const subiram = [], cairam = [];
+  const classificacaoB = card.classificacoesMundo?.serieB?.classificacao;
+  const forcasB = Object.fromEntries(clubesDoMundo(c).map(clube => [clube.nome, clube.forca]));
+  const playoffsSerieB = resolverPlayoffsSerieB(classificacaoB, forcasB, rnd);
+  if (playoffsSerieB) {
+    card.playoffsSerieB = playoffsSerieB;
+    card.classificacoesMundo.serieB = { ...card.classificacoesMundo.serieB, playoffs: playoffsSerieB };
+    const confrontoUsuario = playoffsSerieB.confrontos.find(chave => [chave.melhorCampanha, chave.adversario].includes(card.clube));
+    if (card.ligaId === 'serieB' && confrontoUsuario) {
+      const venceu = confrontoUsuario.classificado === card.clube;
+      card.destaques.push(`Playoffs da Série B: ${venceu ? 'acesso conquistado' : 'acesso perdido'} contra o ${confrontoUsuario.melhorCampanha === card.clube ? confrontoUsuario.adversario : confrontoUsuario.melhorCampanha} (ida e volta).`);
+    }
+  }
   PIRAMIDE.forEach(({ baixo, cima, vagas }) => {
     const b = ordemDaLiga(baixo, card), a = ordemDaLiga(cima, card);
     if (b.length < vagas || a.length < vagas * 2) return;
-    b.slice(0, vagas).forEach((n) => { ligas[n] = cima; subiram.push(n); });
+    const promovidos = baixo === 'serieB' && cima === 'brasileirao' && playoffsSerieB
+      ? playoffsSerieB.promovidos : b.slice(0, vagas);
+    promovidos.forEach((n) => { ligas[n] = cima; subiram.push(n); });
     a.slice(-vagas).forEach((n) => { ligas[n] = baixo; cairam.push(n); });
   });
   // quem voltou pra liga de origem do cadastro não precisa ficar registrado

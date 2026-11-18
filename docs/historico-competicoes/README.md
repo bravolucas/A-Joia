@@ -118,3 +118,30 @@ Depois, `GITHUB_PAGES=true npm run build`.
 
 Dados documentais, sem migração ou regravação de saves existentes,
 sem inventar vice-campeões, placares ou resultados de carreira.
+
+## Copa da UEFA / Europa League — campeões reais até 2026
+
+O arquivo `src/dados/europaLeagueHistorica.js` documenta **55 finais
+de 1972 a 2026**, com **31 clubes campeões**. Não é incluída a Copa
+das Cidades com Feiras (torneio antecessor, com palmarés separado).
+A final de **2026 foi vencida pelo Aston Villa**, enquanto a edição
+2026/27 permanece sem campeão conhecido.
+
+O Sevilla lidera com **sete** troféus; Tottenham, Juventus,
+Inter de Milão, Atlético de Madrid e Liverpool têm **três** cada.
+O acervo registra também clubes não jogáveis e preserva os nomes
+portugueses usados pelo jogo em clubes como Inter de Milão e
+Bayern de Munique.
+
+A consulta aceita as variantes `Copa da UEFA`, `UEFA Cup`,
+`UEFA Europa League` e `Liga Europa`. Não mistura esse
+torneio com Champions League nem Conference League, e não
+reescreve os títulos nem os resultados salvos pelos jogadores.
+
+Fontes: [UEFA — 31 clubes e totais por equipe, 27/08/2026](https://www.uefa.com/uefaeuropaleague/news/0275-152d42886a65-efc6ff0e2d60-1000--which-teams-have-won-the-europa-league/);
+[RSSSF — finais de 1972 a 2026](https://www.rsssf.org/ec/ec3stats.html);
+[UEFA — Aston Villa campeão em maio de 2026](https://www.uefa.com/uefaeuropaleague/news/02a5-20ac3759bba4-7f91e47690b9-1000--freiburg-0-3-aston-villa-brilliant-villans-win-europa-leagu/).
+
+Testes: `node --test tests/europa-league-historica.test.mjs
+tests/champions-historica.test.mjs tests/sulamericana-historica.test.mjs
+tests/libertadores-historica.test.mjs` e build de produção Pages.

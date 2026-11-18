@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - 'src/jogador/elencoSelecao.js'
+      - 'src/jogador/jornadaJogador.js'
+      - 'src/simulacao/nomesRegionais.js'
       - 'tests/elenco-selecao-nomes-regionais.test.mjs'
       - 'docs/NOMES_REGIONAIS_SELECOES.md'
       - '.github/workflows/auditar-nomes-regionais-selecoes.yml'

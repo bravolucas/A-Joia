@@ -133,6 +133,16 @@ export function simularClassificacoesMundoTecnico({
     if (liga === 'serieC' && liga === ligaTreinador &&
         Array.isArray(classificacaoTreinador) && classificacaoTreinador.length &&
         participantes.length === regulamentoSerieC(ano).participantes) {
+      const regulamento = regulamentoSerieC(ano);
+      const clubesEsperados = regulamento.formato === 'dois-grupos' ? 14 : regulamento.participantes;
+      if (classificacaoTreinador.length !== clubesEsperados ||
+          !classificacaoTreinador.every(linha => linha.jogos === regulamento.rodadas)) {
+        resultado[liga] = {
+          liga, origem: 'serie-c-pendente', classificacao: classificacaoTreinador,
+          jogos: jogosTreinador, ano, fase: 'primeira-fase-incompleta',
+        };
+        continue;
+      }
       const edicaoSerieC = simularSerieC({
         clubes: participantes, ano, rng,
         faseJogada: { classificacao: classificacaoTreinador, jogos: jogosTreinador },

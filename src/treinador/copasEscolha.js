@@ -121,10 +121,30 @@ function concluirLiga(c){
 function concluirSemUsuario(c, nomes, {reservados=[],playoff=false}={}) {
  const rng=geradorTecnico(`${c.seed}|apos-grupos`);
  let vivos=[...new Set(nomes)].map(nome=>({nome,forca:c.forcas[nome]}));
+ let paresMundial=c.formato==='selecao48'&&vivos.length===32?chaveInicialMundial48(c,rng):null;
  while(vivos.length>1){
-  vivos.sort((a,b)=>nivel(b)-nivel(a));const tamanho=vivos.length,jogos=[],proximos=[];
-  while(vivos.length>1){const a=vivos.shift(),b=vivos.pop(),j=jogoDaChave({...c,tamanho},a,b,rng);jogos.push(j);proximos.push(j.vencedor===a.nome?a:b);c.eliminados.push(j.vencedor===a.nome?b.nome:a.nome);if(tamanho===2&&!reservados.length)c.vice=j.vencedor===a.nome?b.nome:a.nome;}
-  if(vivos.length)proximos.push(vivos[0]);
+  const tamanho=vivos.length,jogos=[],proximos=[];
+  if(paresMundial){
+   // Mesmo fora da Copa, o jogador acompanha o chaveamento correto.
+   for(const [nomeA,nomeB] of paresMundial){
+    const a=vivos.find(x=>x.nome===nomeA),b=vivos.find(x=>x.nome===nomeB);
+    if(!a||!b)throw new Error('Chave da Copa do Mundo inconsistente.');
+    const j=jogoDaChave({...c,tamanho},a,b,rng);
+    jogos.push(j);proximos.push(j.vencedor===a.nome?a:b);
+    c.eliminados.push(j.vencedor===a.nome?b.nome:a.nome);
+   }
+   paresMundial=null;
+  }else{
+   if(c.formato!=='selecao48')vivos.sort((a,b)=>nivel(b)-nivel(a));
+   while(vivos.length>1){
+    const a=vivos.shift(),b=c.formato==='selecao48'?vivos.shift():vivos.pop();
+    const j=jogoDaChave({...c,tamanho},a,b,rng);
+    jogos.push(j);proximos.push(j.vencedor===a.nome?a:b);
+    c.eliminados.push(j.vencedor===a.nome?b.nome:a.nome);
+    if(tamanho===2&&!reservados.length)c.vice=j.vencedor===a.nome?b.nome:a.nome;
+   }
+   if(vivos.length)proximos.push(vivos[0]);
+  }
   c.fases.push({fase:playoff?'Playoff de acesso às oitavas':faseN(tamanho),jogos});
   vivos=proximos;
   if(reservados.length){vivos.push(...reservados.map(nome=>({nome,forca:c.forcas[nome]})));reservados=[];playoff=false;}

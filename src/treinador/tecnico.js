@@ -26,6 +26,7 @@ import { EVENTOS_CONTEXTO_TECNICO } from './eventosTecnico.js';
 import { competicaoDoTitulo } from '../comum/tacas.js';
 import { simularCopaNacionalTecnico, simularCopaContinentalTecnico, classificarVagasContinentalTecnico } from './competicoesTecnico.js';
 import { atualizarLigasMundoTecnico, simularClassificacoesMundoTecnico } from './classificacoesMundoTecnico.js';
+import { ordenarTabelaBrasileira } from '../simulacao/desempateBrasileiro.js';
 import { FINAIS_TECNICO, chanceFinalTecnico, finalDoUsuarioTecnico, aplicarResultadoFinalTecnico, paradasDoRitmoTecnico, OPCOES_PARADA_TECNICO,
   ANO_SEM_CLUBE_TECNICO, evoluirPersonagensTecnico, definirRivalTecnico, atualizarRivalTecnico,
   metasCarreiraTecnico, registrarMetasTecnico, geradorTecnico } from './momentosTecnico.js';
@@ -828,10 +829,12 @@ export function zonaClassificacaoTecnico(posicao, total = 20) {
   if (posicao > total - 4) return 'rebaixamento';
   return 'meio';
 }
-export function ordenarClassificacaoTecnico(linhas) {
-  return [...linhas].sort((a, b) => b.pontos - a.pontos || b.vitorias - a.vitorias ||
-    b.saldoGols - a.saldoGols || a.nome.localeCompare(b.nome, 'pt-BR'))
-    .map((x, i, todos) => ({ ...x, posicao: i + 1, zona: zonaClassificacaoTecnico(i + 1, todos.length) }));
+export function ordenarClassificacaoTecnico(linhas, jogos = [], liga = null) {
+  const ordenadas = liga === 'serieB' || liga === 'brasileirao'
+    ? ordenarTabelaBrasileira(linhas, jogos)
+    : [...linhas].sort((a, b) => b.pontos - a.pontos || b.vitorias - a.vitorias ||
+        b.saldoGols - a.saldoGols || (b.golsPro ?? 0) - (a.golsPro ?? 0) || a.nome.localeCompare(b.nome, 'pt-BR'));
+  return ordenadas.map((x, i, todos) => ({ ...x, posicao: i + 1, zona: zonaClassificacaoTecnico(i + 1, todos.length) }));
 }
 export const ETAPAS_TEMPORADA_TECNICO = [10, 19, 29, 38];
 function etapasCalendarioTecnico(t, calendario) {
@@ -1051,7 +1054,7 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   const jogosDisputados = confrontos.filter(j => !j.folga).length;
   classificacao = ordenarClassificacaoTecnico(classificacao.map(x => x.meuClube
     ? { ...x, jogos: jogosDisputados, pontos, vitorias, empates, derrotas, golsPro, golsContra, saldoGols: golsPro - golsContra }
-    : x));
+    : x), partidasLiga, ligaAtual);
   const posicao = classificacao.find(x => x.meuClube)?.posicao || classificacao.length;
   const campeao = posicao === 1;
   const objetivo = objetivoTecnico({ ...t, liga: ligaAtual });
@@ -1246,8 +1249,8 @@ export function responderConviteSelecaoTecnico(c, aceitar, opcoes = {}) {
 function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
   const t = c.tecnico;
   const { vitorias, empates, derrotas, pontos } = andamento;
-  const classificacao = andamento.classificacao || tabelaClassificacaoTecnico(t, andamento);
   const ligaAtual = t.liga || CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga;
+  const classificacao = ordenarClassificacaoTecnico(andamento.classificacao || tabelaClassificacaoTecnico(t, andamento), andamento.partidasLiga || [], ligaAtual);
   const classificacoesMundo = classificacoesMundoDaTemporada(t, ligaAtual, classificacao, rng);
   const progressaoMundo = atualizarLigasMundoDaTemporada(t, ligaAtual, classificacoesMundo, rng);
   const movimentoReal = progressaoMundo.movimentos.find(m => m.clube === t.clube && m.de === ligaAtual);

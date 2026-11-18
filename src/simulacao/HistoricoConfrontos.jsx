@@ -6,7 +6,7 @@ const resumoVazio='Nenhuma partida individual disponível para estes filtros. As
 
 /** Consulta o mesmo arquivo de resultados por clube, rival, competição e ano. */
 export default function HistoricoConfrontos({c}){
- const [modo,M]=useState('clubes'),[clube,C]=useState(''),[atleta,P]=useState('voce'),[buscaAtleta,BA]=useState(''),[adversario,A]=useState(''),[competicao,K]=useState(''),[ano,Y]=useState('');
+ const [modo,M]=useState('clubes'),[clube,C]=useState(''),[atleta,P]=useState('voce'),[buscaAtleta,BA]=useState(''),[clubeAtuacao,CA]=useState(''),[local,L]=useState(''),[adversario,A]=useState(''),[competicao,K]=useState(''),[ano,Y]=useState('');
  const arquivo=useMemo(()=>partidasHistoricas(c),[c.universo,c.tecnico?.universo]);
  const clubes=useMemo(()=>[...new Set(arquivo.flatMap(j=>[j.casa,j.fora]))].sort((a,b)=>a.localeCompare(b,'pt-BR')),[arquivo]);
  const preferido=c.tecnico?.clube||c.clubeNome||c.clube?.nome||'';
@@ -23,15 +23,17 @@ export default function HistoricoConfrontos({c}){
  const atletasFiltrados=atletas.filter(p=>p.id===atleta||!buscaAtleta||p.nome.toLocaleLowerCase('pt-BR').includes(buscaAtleta.toLocaleLowerCase('pt-BR'))).slice(0,80);
  const atletaAtual=atletas.some(p=>p.id===atleta)?atleta:atletas[0]?.id||'voce';
  const individuais=useMemo(()=>partidasDoAtleta(c,atletaAtual),[c,atletaAtual]);
+ const clubesAtuacao=[...new Set(individuais.map(j=>j.clube).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+ const clubeDefendido=clubesAtuacao.includes(clubeAtuacao)?clubeAtuacao:'';
  const universoPartidas=modo==='clubes'?arquivo.filter(j=>[j.casa,j.fora].includes(clubeAtual)):individuais;
  const adversarios=[...new Set(universoPartidas.map(j=>modo==='clubes'?(j.casa===clubeAtual?j.fora:j.casa):j.adversario).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
  const competicoes=[...new Set(universoPartidas.map(j=>j.competicao).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
  const anos=[...new Set(universoPartidas.map(j=>j.ano).filter(Number.isFinite))].sort((a,b)=>b-a);
  const rivalAtivo=adversarios.includes(adversario)?adversario:'',compAtiva=competicoes.includes(competicao)?competicao:'',anoAtivo=anos.some(n=>String(n)===ano)?ano:'';
- const opcoes={adversario:rivalAtivo,competicao:compAtiva,ano:anoAtivo};
+ const opcoes={adversario:rivalAtivo,competicao:compAtiva,ano:anoAtivo,clube:clubeDefendido,local};
  const resultado=modo==='clubes'?resumoConfrontosClubes(c,{...opcoes,clube:clubeAtual}):resumoConfrontosAtleta(c,{...opcoes,jogadorId:atletaAtual});
- const trocarModo=x=>{M(x);A('');K('');Y('');};
- const limpar=()=>{A('');K('');Y('');};
+ const trocarModo=x=>{M(x);A('');K('');Y('');CA('');L('');};
+ const limpar=()=>{A('');K('');Y('');CA('');L('');};
  return <section className="mv-painel" aria-label="Histórico de confrontos">
   <span className="hf-eyebrow">MEMÓRIA DE CADA PARTIDA</span>
   <h2>Histórico de confrontos</h2>
@@ -42,6 +44,14 @@ export default function HistoricoConfrontos({c}){
    </select></label>
    {modo==='clubes'?<label>Clube<select aria-label="Clube do confronto" value={clubeAtual} onChange={e=>{C(e.target.value);limpar();}}>{clubes.map(x=><option key={x}>{x}</option>)}</select></label>
    :<><label>Buscar jogador<input type="search" aria-label="Buscar jogador do confronto" value={buscaAtleta} onChange={e=>BA(e.target.value)} placeholder="Digite o nome do jogador…"/></label><label>Jogador<select aria-label="Jogador do confronto" value={atletaAtual} onChange={e=>{P(e.target.value);limpar();}}>{atletasFiltrados.map(p=><option key={p.id} value={p.id}>{p.nome}</option>)}</select></label></>}
+   {modo==='jogadores'&&<>
+    <label>Atuando pelo clube<select aria-label="Clube defendido pelo jogador" value={clubeDefendido} onChange={e=>CA(e.target.value)}>
+     <option value="">Todos os clubes</option>{clubesAtuacao.map(x=><option key={x}>{x}</option>)}
+    </select></label>
+    <label>Local da partida<select aria-label="Local do confronto" value={local} onChange={e=>L(e.target.value)}>
+     <option value="">Casa e fora</option><option value="casa">Em casa</option><option value="fora">Fora de casa</option>
+    </select></label>
+   </>}
    <label>Adversário<select aria-label="Adversário do confronto" value={rivalAtivo} onChange={e=>A(e.target.value)}>
     <option value="">Todos os adversários</option>{adversarios.map(x=><option key={x}>{x}</option>)}
    </select></label>
@@ -55,11 +65,11 @@ export default function HistoricoConfrontos({c}){
   {modo==='clubes'?<div className="hf-numeros" aria-label="Resumo entre clubes">
    {[[resultado.jogos,'Jogos'],[resultado.vitorias,'Vitórias'],[resultado.empates,'Empates'],[resultado.derrotas,'Derrotas'],[resultado.golsPro,'Gols marcados'],[resultado.golsContra,'Gols sofridos'],[resultado.aproveitamento+'%','Aproveitamento']].map(([n,label])=><article key={label}><strong>{valor(n)}</strong><span>{label}</span></article>)}
   </div>:<div className="hf-numeros" aria-label="Resumo individual">
-   {[[resultado.jogos,'Jogos'],[resultado.gols,'Gols'],[resultado.assistencias,'Assistências'],[resultado.defesas,'Defesas'],[resultado.cleanSheets,'Jogos sem sofrer gols'],[resultado.notaMedia,'Nota média']].map(([n,label])=><article key={label}><strong>{valor(n)}</strong><span>{label}</span></article>)}
+   {[[resultado.jogos,'Jogos'],[resultado.vitorias,'Vitórias'],[resultado.empates,'Empates'],[resultado.derrotas,'Derrotas'],[resultado.gols,'Gols'],[resultado.assistencias,'Assistências'],[resultado.defesas,'Defesas'],[resultado.cleanSheets,'Jogos sem sofrer gols'],[resultado.aproveitamento+'%','Aproveitamento'],[resultado.notaMedia,'Nota média']].map(([n,label])=><article key={label}><strong>{valor(n)}</strong><span>{label}</span></article>)}
   </div>}
   {resultado.porCompeticao.length>0&&<div className="hf-tabela-scroll"><table className="hf-tabela">
-   <caption>Retrospecto por competição</caption><thead><tr><th>Competição</th><th>Jogos</th>{modo==='clubes'?<><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th></>:<><th>Gols</th><th>Ast.</th><th>Defesas</th><th>SG</th></>}</tr></thead>
-   <tbody>{resultado.porCompeticao.map(x=><tr key={x.competicao}><th>{x.competicao}</th><td>{x.jogos}</td>{modo==='clubes'?<><td>{x.vitorias}</td><td>{x.empates}</td><td>{x.derrotas}</td><td>{x.golsPro}</td><td>{x.golsContra}</td></>:<><td>{x.gols}</td><td>{x.assistencias}</td><td>{x.defesas}</td><td>{x.cleanSheets}</td></>}</tr>)}</tbody>
+   <caption>Retrospecto por competição</caption><thead><tr><th>Competição</th><th>Jogos</th>{modo==='clubes'?<><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th></>:<><th>V</th><th>E</th><th>D</th><th>Gols</th><th>Ast.</th><th>Defesas</th><th>SG</th></>}</tr></thead>
+   <tbody>{resultado.porCompeticao.map(x=><tr key={x.competicao}><th>{x.competicao}</th><td>{x.jogos}</td>{modo==='clubes'?<><td>{x.vitorias}</td><td>{x.empates}</td><td>{x.derrotas}</td><td>{x.golsPro}</td><td>{x.golsContra}</td></>:<><td>{x.vitorias}</td><td>{x.empates}</td><td>{x.derrotas}</td><td>{x.gols}</td><td>{x.assistencias}</td><td>{x.defesas}</td><td>{x.cleanSheets}</td></>}</tr>)}</tbody>
   </table></div>}
   <h3>Partidas registradas</h3>
   {resultado.partidas.length?<div className="hf-tabela-scroll"><table className="hf-tabela">

@@ -22,8 +22,9 @@ export function historicoTransferenciasAtleta(atleta = {}, temporadas = []) {
  const moedaPadrao=atleta.voce?'EUR':'BRL';
  const salvas=(Array.isArray(atleta.movimentos)?atleta.movimentos:[]).map(m=>normalizarTransferencia(m,moedaPadrao)).filter(Boolean);
  const registradas=Array.isArray(atleta.historicoTemporadas)?atleta.historicoTemporadas.filter(Array.isArray).map(r=>({ano:r[1],clube:r[2]})):[];
- const ordenadas=[...registradas,...temporadas].filter(t=>t&&nomeClube(t.clube)&&numeroAno(t.ano))
-  .sort((a,b)=>Number(a.ano)-Number(b.ano));
+ const porAno=new Map();
+ for(const t of [...registradas,...temporadas])if(t&&nomeClube(t.clube)&&numeroAno(t.ano))porAno.set(numeroAno(t.ano),{ano:numeroAno(t.ano),clube:nomeClube(t.clube)});
+ const ordenadas=[...porAno.values()].sort((a,b)=>a.ano-b.ano);
  for(let i=1;i<ordenadas.length;i++){
   const anterior=ordenadas[i-1],atual=ordenadas[i];
   if(anterior.clube===atual.clube)continue;

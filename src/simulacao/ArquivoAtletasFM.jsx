@@ -87,11 +87,16 @@ export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
     clube:p.clubeNome,aposentado:!!p.aposentado,contrato:p.contrato,movimentos:p.movimentos?.length?p.movimentos:atual?.movimentos||[],
     historico:atual?.historico||[]});
   }
-  if(c.nome&&!mapa.has('voce'))mapa.set('voce',{
-   id:'voce',voce:true,nome:c.nome||'Seu jogador',posicao:c.posicao,nac:c.nac,
-   clube:c.clubeNome||c.clube?.nome,aposentado:!!c.aposentado,movimentos:c.transferencias?.length?c.transferencias:c.movimentos||c.jogador?.movimentos||[],
-   historico:c.temporadas.map(t=>({ano:t.ano,clube:t.clube,jogos:t.jogos,gols:t.gols,assist:t.assist,defesas:t.defesas,cleanSheets:t.cleanSheets,titulos:(t.titulos||[]).map(x=>x.nome),porCompeticao:t.porCompeticao||[]}))
-  });
+  if(c.nome){
+   const existente=mapa.get('voce')||{};
+   mapa.set('voce',{
+    ...existente,id:'voce',voce:true,nome:c.nome||existente.nome||'Seu jogador',
+    posicao:c.posicao||existente.posicao,nac:c.nac||existente.nac,
+    clube:c.clubeNome||c.clube?.nome||existente.clube,aposentado:!!c.aposentado,
+    movimentos:c.transferencias?.length?c.transferencias:existente.movimentos?.length?existente.movimentos:c.movimentos||c.jogador?.movimentos||[],
+    historico:existente.historico?.length?existente.historico:c.temporadas.map(t=>({ano:t.ano,clube:t.clube,jogos:t.jogos,gols:t.gols,assist:t.assist,defesas:t.defesas,cleanSheets:t.cleanSheets,titulos:(t.titulos||[]).map(x=>x.nome),porCompeticao:t.porCompeticao||[]}))
+   });
+  }
   return [...mapa.values()];
  },[u,c.mundo,c.temporadas,c.nome,c.posicao,c.nac,c.clubeNome,c.aposentado]);
  const clubes=useMemo(()=>[...new Set(todos.flatMap(p=>[p.clube,...historicoAtleta(p).map(x=>x.clube)]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')),[todos]);

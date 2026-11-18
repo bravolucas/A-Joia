@@ -20,6 +20,7 @@ import {aplicarPretemporadaRapida,planoPretemporadaRapida,renovarVerbaPretempora
 import { vinculoAtivoTecnico, riscosIdolatriaTecnico, registrarRupturasTecnico } from './idolatriaTecnico.js';
 import { FORMACOES_TECNICO, perfilTaticoTecnico, riscoEstiloTecnico } from './taticasTecnico.js';
 import {elencoTaticoRapidoDoMundo} from './elencoRapidoMundo.js';
+import {escalacaoHistoricaTecnico} from './escalacaoHistoricaTecnico.js';
 import { CLUBES, CLASSICOS } from '../dados/data.js';
 import { EVENTOS_CONTEXTO_TECNICO } from './eventosTecnico.js';
 import { competicaoDoTitulo } from '../comum/tacas.js';
@@ -859,6 +860,7 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   if(carreiraTecnicoEncerrada(t,idadeAtualTecnico(c)))throw new Error('Carreira de treinador encerrada.');
   if ((t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) throw new Error('Conclua as decisões antes de jogar.');
   if (t.reuniaoPendente) throw new Error('Responda à reunião com a diretoria antes de avançar.');
+  const folhaJogo=escalacaoHistoricaTecnico(c,t);
   const anterior = t.andamento || { jogos: 0, rodadas: 0, vitorias: 0, empates: 0, derrotas: 0, pontos: 0, avaliacoes: [] };
   const calendario = anterior.calendario || calendarioAdversariosTecnico(t);
   const totalRodadas = calendario?.length || 38;
@@ -879,7 +881,7 @@ export function simularEtapaTecnico(c, rng = sorteio) {
     const resultado = r < pVitoria ? 'V' : r < pVitoria + pEmpate ? 'E' : 'D';
     if (resultado === 'V') v++; else if (resultado === 'E') e++; else d++;
     const placar = placarTecnico(resultado, rng, t.estilo);
-    confrontos.push({ ...adversario, estilo: perfilTaticoTecnico(t).estilo, formacao: perfilTaticoTecnico(t).formacao, resultado, golsPro: placar.pro, golsContra: placar.contra });
+    confrontos.push({ ...adversario, estilo: perfilTaticoTecnico(t).estilo, formacao: perfilTaticoTecnico(t).formacao, ...(folhaJogo?{escalacao:folhaJogo}:{}), resultado, golsPro: placar.pro, golsContra: placar.contra });
   }
   const pontos = v * 3 + e;
   const jogosDisputados = confrontos.filter(j => !j.folga).length;
@@ -957,6 +959,7 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   if(pausa&&!pausa.escolha)throw new Error('Escolha uma intervenção para continuar.');
   const t = {...c.tecnico,forcasMundo:forcasDoMundo(c),copasEscolhaHabilitadas:c.tecnico.copasEscolhaHabilitadas||!!opcoes.copasInterativas,temporadaPausada:null,intervencaoPendente:null};
   const elencoRapido=t.modoTreinadorRapido?elencoTaticoRapidoDoMundo(c.mundo,t.clube):null;
+  const folhaJogo=escalacaoHistoricaTecnico(c,t);
   if ((t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) throw new Error('Tome as decisões da temporada antes de simular.');
   if (t.andamento?.rodadas || t.andamento?.jogos) throw new Error('Temporada em andamento: avance pelas etapas.');
   if (t.tipoEquipe === 'selecao') {
@@ -1031,7 +1034,7 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
     const placar = placarTecnico(resultado, rng, estiloJogo);
     golsPro += placar.pro;
     golsContra += placar.contra;
-    confrontos.push({ ...adversario, estilo: perfilTaticoTecnico(planoJogo).estilo, formacao: perfilTaticoTecnico(planoJogo).formacao, ...(intervencao?{intervencao}:{}), resultado, golsPro: placar.pro, golsContra: placar.contra });
+    confrontos.push({ ...adversario, estilo: perfilTaticoTecnico(planoJogo).estilo, formacao: perfilTaticoTecnico(planoJogo).formacao, ...(folhaJogo?{escalacao:folhaJogo}:{}), ...(intervencao?{intervencao}:{}), resultado, golsPro: placar.pro, golsContra: placar.contra });
     if (pausa?.tipo === 'rival' && rodada === pausa.indice) classico = { rodada: rodada + 1, rival: rivalInicial?.nome, clube: adversario.nome, escolha: pausa.escolha, resultado, golsPro: placar.pro, golsContra: placar.contra };
     classificacao = simularRodadaRivaisTecnico({ ...t, liga: ligaAtual }, classificacao, adversario.nome, resultado, rng, rodada + 1, placar);
   }

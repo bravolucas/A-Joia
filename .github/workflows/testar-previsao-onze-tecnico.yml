@@ -1,0 +1,27 @@
+name: Validar escalação visível do treinador
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/treinador/previsaoEscalacaoTecnico.js'
+      - 'src/treinador/CentroTreinador.jsx'
+      - 'src/treinador/CentroTreinador.css'
+      - 'tests/previsao-escalacao-tecnico.test.mjs'
+      - '.github/workflows/testar-previsao-onze-tecnico.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  painel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Titulares, reservas, lesões e posições secundárias
+        run: node --test tests/previsao-escalacao-tecnico.test.mjs tests/alocacao-setores-secundarios.test.mjs
+      - name: Compilar interface para GitHub Pages
+        run: GITHUB_PAGES=true npm run build

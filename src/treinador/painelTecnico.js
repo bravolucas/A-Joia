@@ -18,7 +18,7 @@ export function competicoesPainelTecnico(t={}){
 }
 export function jogosPainelTecnico(t={}){
  const a=campanhaPainelTecnico(t),clube=a?.clube||t.clube,liga=LIGAS[a?.liga||t.liga]?.nome||'Liga';
- const jogos=(a?.confrontos||[]).filter(j=>!j.folga&&j.nome&&Number.isFinite(j.golsPro)&&Number.isFinite(j.golsContra)).map((j,i)=>({id:`liga-${i}`,competicao:liga,casa:j.casa?clube:j.nome,fora:j.casa?j.nome:clube,golsCasa:j.casa?j.golsPro:j.golsContra,golsFora:j.casa?j.golsContra:j.golsPro,rodada:j.rodada??i+1,ano:a.ano}));
+ const jogos=(a?.confrontos||[]).filter(j=>!j.folga&&j.nome&&Number.isFinite(j.golsPro)&&Number.isFinite(j.golsContra)).map((j,i)=>({id:`liga-${i}`,competicao:liga,casa:j.casa?clube:j.nome,fora:j.casa?j.nome:clube,golsCasa:j.casa?j.golsPro:j.golsContra,golsFora:j.casa?j.golsContra:j.golsPro,rodada:j.rodada??i+1,ano:a.ano,...(j.escalacao?{escalacao:j.escalacao}:{})}));
  for(const cp of competicoesPainelTecnico(t))for(const [i,j] of (cp.grupos?.length||cp.jogosLiga?.length||cp.fases?.length?jogosDaCampanha(cp.finalPendente?{...cp,fases:cp.fases?.slice(0,-1)}:cp):(cp.jogosUsuario||[]).flatMap(j=>j.partidas?.length?j.partidas:[j])).entries())if((j.casa===(cp.usuario||clube)||j.fora===(cp.usuario||clube))&&Number.isFinite(j.golsCasa)&&Number.isFinite(j.golsFora))jogos.push({...j,id:`${cp.nome}-${i}`,competicao:cp.nome,ano:cp.ano??a?.ano??anoPainelTecnico(t)});
  return jogos;
 }

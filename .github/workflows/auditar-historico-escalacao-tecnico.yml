@@ -1,0 +1,29 @@
+name: Auditar histórico de escalação do treinador
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/treinador/escalacaoHistoricaTecnico.js'
+      - 'src/treinador/escalacaoPosicionalTecnico.js'
+      - 'src/treinador/tecnico.js'
+      - 'src/treinador/painelTecnico.js'
+      - 'src/treinador/CentroTreinador.jsx'
+      - 'tests/escalacao-historica-tecnico.test.mjs'
+      - '.github/workflows/auditar-historico-escalacao-tecnico.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  historico-escalacao:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Auditar escalação histórica, disponibilidade e saves
+        run: node --test tests/escalacao-historica-tecnico.test.mjs tests/escalacao-posicional-tecnico.test.mjs
+      - name: Compilar interface de calendário
+        run: GITHUB_PAGES=true npm run build

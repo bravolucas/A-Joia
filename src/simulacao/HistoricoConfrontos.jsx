@@ -1,7 +1,7 @@
 import React,{useMemo,useState} from 'react';
 import {partidasHistoricas,partidasDoAtleta,resumoConfrontosClubes,resumoConfrontosAtleta} from './historicoConfrontos.js';
 
-const valor=n=>Number.isFinite(n)?n.toLocaleString('pt-BR'):'—';
+const valor=n=>Number.isFinite(n)?n.toLocaleString('pt-BR'):typeof n==='string'?n:'—';
 const resumoVazio='Nenhuma partida individual detalhada disponível neste save. Totais de temporada não são distribuídos artificialmente entre adversários.';
 
 /** Consulta o mesmo arquivo de resultados por clube, rival, competição e ano. */
@@ -60,8 +60,8 @@ export default function HistoricoConfrontos({c}){
   <h3>Partidas registradas</h3>
   {resultado.partidas.length?<div className="hf-tabela-scroll"><table className="hf-tabela">
    <thead><tr><th>Ano</th><th>Competição</th><th>Confronto</th><th>Placar</th>{modo==='jogadores'&&<><th>Gols</th><th>Ast.</th><th>Defesas</th><th>Nota</th></>}</tr></thead>
-   <tbody>{resultado.partidas.map(j=><tr key={j.id}><td>{j.ano}</td><td>{j.competicao}{j.fase&&<small>{j.fase}</small>}</td><th>{j.casa} × {j.fora}</th><td>{j.golsCasa} × {j.golsFora}</td>{modo==='jogadores'&&<><td>{valor(j.gols)}</td><td>{valor(j.assistencias)}</td><td>{valor(j.defesas)}</td><td>{valor(j.nota)}</td></>}</tr>)}</tbody>
+   <tbody>{resultado.partidas.map(j=><tr key={j.id}><td>{j.ano}</td><td>{j.competicao}{j.fase&&<small>{j.fase}</small>}{j.origem==='distribuicao-simulada'&&<small>Distribuição simulada</small>}</td><th>{j.casa} × {j.fora}</th><td>{j.golsCasa} × {j.golsFora}</td>{modo==='jogadores'&&<><td>{valor(j.gols)}</td><td>{valor(j.assistencias)}</td><td>{valor(j.defesas)}</td><td>{valor(j.nota)}</td></>}</tr>)}</tbody>
   </table></div>:<p className="hf-nota">{modo==='jogadores'?resumoVazio:'Ainda não há resultados registrados para estes filtros.'}</p>}
-  <p className="hf-nota">As partidas e estatísticas não registradas em temporadas antigas não são inventadas. Os dados ficam associados ao arquivo deste save.</p>
+  <p className="hf-nota">Dados detalhados são preservados como registrados. No Modo Rápido, novas temporadas podem distribuir os totais simulados entre partidas, identificados como distribuição simulada; jogos antigos não são inventados. Os dados acompanham este save.</p>
  </section>;
 }

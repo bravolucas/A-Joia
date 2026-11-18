@@ -2,6 +2,7 @@ import {sincronizarCamisasSelecao} from './camisasCarreira.js';
 import {NACIONALIDADES} from '../dados/data.js';
 import {calcOVR} from '../comum/lib.js';
 import {penalidadePosicao} from './posicoesCarreira.js';
+import {gerarNomeRegionalUnico} from '../simulacao/nomesRegionais.js';
 const clone=x=>JSON.parse(JSON.stringify(x));
 const limitar=(n,a,b)=>Math.max(a,Math.min(b,n));
 const hash=s=>[...String(s)].reduce((a,v)=>Math.imul(a^v.charCodeAt(0),16777619)>>>0,2166136261);
@@ -9,8 +10,8 @@ const POSICOES=['GOL','GOL','GOL','LD','LD','LE','LE','ZAG','ZAG','ZAG','ZAG','V
 export const grupoSelecao=p=>p==='GOL'?'GOL':['ZAG','LD','LE','ALE','ALD'].includes(p)?'DEF':['VOL','MC','MEI','ME','MD'].includes(p)?'MEI':'ATA';
 const vazio=()=>({jogos:0,minutos:0,gols:0,assist:0,semSofrer:0,notas:0});
 function criar(c,ano,slot,posicao,forca,usados){
- const h=hash(`${c.codigo}:elenco:${c.nac}:${ano}:${slot}`),nomes=['Caio','Mateo','André','Davi','Rafael','Gabriel','Nicolas','Bruno','Iago','Samuel','Leo','Daniel','Diego','Alex','Victor','Hugo'],sobrenomes=['Nunes','Duarte','Lemos','Monteiro','Vidal','Costa','Reis','Azevedo','Pires','Mendes','Ramos','Alves','Lima','Dias','Silva','Rocha'];
- let nome=`${nomes[h%16]} ${sobrenomes[(h>>>8)%16]}`;if(usados.has(nome))nome+=` ${sobrenomes[slot%16]}`;
+ const h=hash(`${c.codigo}:elenco:${c.nac}:${ano}:${slot}`);
+ const nome=gerarNomeRegionalUnico(c.nac,`${c.codigo}:elenco:nome:${c.nac}:${ano}:${slot}`,usados);
  return{id:`convocado:${c.nac}:${ano}:${slot}:${posicao}`,nome,posicao,nascimento:ano-20-h%12,ovr:limitar(forca-6+(h>>>12)%13,45,94),desde:ano,estatisticas:vazio(),ficticio:true};
 }
 /** Elenco persistente, atualizado uma vez por ano. O atleta ocupa uma das 26 vagas. */

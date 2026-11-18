@@ -3,6 +3,7 @@ import {TODAS_ESTRATEGIAS,NOVOS_PENALTIS,escolhasCopa} from './estrategiasCopas.
 import {geradorTecnico} from './momentosTecnico.js';
 import {simularPlacarRealista} from '../competicoes/motorPlacares.js';
 import {temIdaVolta} from '../competicoes/regrasIdaVolta.js';
+import {probabilidadesPlacar} from '../competicoes/motorPlacar.js';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const nivel=c=>Number(c?.forca??c?.elenco??60);
 export const PLANOS_COPA=[{id:'pressionar',nome:'Pressionar e atacar',texto:'Mais risco, menos empates.'},{id:'controlar',nome:'Controlar o jogo',texto:'Mais proteção; aceita levar a decisão adiante.'},{id:'contra',nome:'Explorar os espaços',texto:'Funciona melhor diante de um adversário superior.'}];
@@ -10,9 +11,7 @@ export const PLANOS_PENALTIS=[{id:'canto',nome:'Bater colocado',texto:'Precisão
 export function chancesCopa(forca,adversario,plano='controlar',final=false,perfil=null){
  const estrategia=TODAS_ESTRATEGIAS.find(x=>x.id===plano);
  const diff=forca-adversario,ajuste=estrategia?(estrategia.ajuste==='contra'?clamp(-diff*.24,-4,7):estrategia.ajuste):plano==='pressionar'?3:plano==='contra'?clamp(-diff*.18,-3,5):0;
- const empate=clamp(.27-Math.abs(diff)*.004+(estrategia?.empate??(plano==='controlar'?.06:plano==='pressionar'?-.07:0)),.12,.34);
- const vitoria=clamp((1-empate)/(1+Math.exp(-(diff+ajuste+ajustePlanoAdversario(plano,perfil))/(final?11:8))),.03,1-empate-.03);
- return {vitoria,empate,derrota:1-vitoria-empate};
+ return probabilidadesPlacar(forca+ajuste+ajustePlanoAdversario(plano,perfil),adversario,{neutro:final});
 }
 export function chancePenaltis(forca,adversario,plano='canto',final=false){const diff=forca-adversario;return clamp(.5+diff*(final?.003:.004)+(NOVOS_PENALTIS.find(x=>x.id===plano)?.ajuste??(plano==='canto'?.015:plano==='esperar'?clamp(-diff*.0008,-.015,.025):-.005)),.23,.77);}
 function embaralhar(lista,rng){return lista.map(x=>({x,d:rng()})).sort((a,b)=>a.d-b.d).map(x=>x.x);}
@@ -40,6 +39,18 @@ function tabela(times,jogos,usuario){const tab=new Map(times.map(c=>[c.nome,{nom
  return [...tab.values()].sort((a,b)=>b.pontos-a.pontos||(b.golsPro-b.golsContra)-(a.golsPro-a.golsContra)||b.golsPro-a.golsPro||b.vitorias-a.vitorias||a.nome.localeCompare(b.nome)).map((x,i)=>({...x,posicao:i+1,saldoGols:x.golsPro-x.golsContra}));}
 function calendario(times,rodadas){const anel=[...times],primeiro=[];if(anel.length%2)anel.push(null);const n=anel.length;for(let r=0;r<n-1;r++){const jogos=[];for(let i=0;i<n/2;i++){let a=anel[i],b=anel[n-1-i];if(!a||!b)continue;if(r%2)[a,b]=[b,a];jogos.push({casa:a.nome,fora:b.nome});}primeiro.push(jogos);anel.splice(1,0,anel.pop());}return Array.from({length:rodadas},(_,r)=>primeiro[r%primeiro.length].map(j=>Math.floor(r/primeiro.length)%2?{casa:j.fora,fora:j.casa}:{...j}));}
 const faseN=n=>n===2?'Final':n===4?'Semifinal':n===8?'Quartas de final':n===16?'Oitavas de final':n===32?'16 avos de final':'Fase preliminar';
+/** O jogo do 3º lugar integra a competição, mesmo após a eliminação do usuário. */
+function completarTerceiroLugar(c){
+ if(c.tipo!=='copaMundo'||c.fases.some(f=>/terceiro lugar/i.test(f.fase)))return;
+ const semifinal=c.fases.find(f=>/semifinal/i.test(f.fase));if(!semifinal||semifinal.jogos.length!==2)return;
+ const perdedores=semifinal.jogos.map(j=>j.vencedor===j.casa?j.fora:j.casa).filter(Boolean);
+ if(perdedores.length!==2)return;
+ const rng=geradorTecnico(`${c.seed}|disputa-terceiro-lugar`);
+ const j=jogoEliminatorio({nome:perdedores[0],forca:c.forcas[perdedores[0]]},{nome:perdedores[1],forca:c.forcas[perdedores[1]]},rng);
+ c.terceiroLugar=j.vencedor;
+ c.fases.push({fase:'Disputa de terceiro lugar',jogos:[{...j,fase:'Disputa de terceiro lugar'}]});
+ if([j.casa,j.fora].includes(c.usuario))c.jogosUsuario.push({...j,fase:'Disputa de terceiro lugar'});
+}
 export function criarCampanhaCopa({nome,tipo='continental',usuario,forcaUsuario,clubes,ano,formato='grupos',entrada='principal',seed,estado,interativoEstadual=false}){
  const rng=geradorTecnico(seed||`${ano}|${nome}|${usuario}`),eu={...(clubes.find(c=>c.nome===usuario)||{nome:usuario}),forca:forcaUsuario},outros=embaralhar(formato==='selecao48'?selecionarParticipantes(clubes.filter(c=>c.nome!==usuario),47,rng):clubes.filter(c=>c.nome!==usuario),rng);
  const c={nome,tipo,ano,usuario,selecao:null,seed:seed||`${ano}|${nome}|${usuario}`,forcaUsuario,forcas:Object.fromEntries([eu,...outros].map(c=>[c.nome,nivel(c)])),pool:[eu,...outros],fases:[],grupos:[],jogosUsuario:[],campeao:null,vice:null,faseUsuario:'Em disputa',etapa:0,rodada:0,resultado:null,eliminados:[],estado:estado||null};
@@ -110,7 +121,7 @@ function concluirSemUsuario(c, nomes, {reservados=[],playoff=false}={}) {
   vivos=proximos;
   if(reservados.length){vivos.push(...reservados.map(nome=>({nome,forca:c.forcas[nome]})));reservados=[];playoff=false;}
  }
- c.campeao=vivos[0]?.nome||null;c.fase='fim';c.adversario=null;
+ c.campeao=vivos[0]?.nome||null;completarTerceiroLugar(c);c.fase='fim';c.adversario=null;
 }
 function preparar(c){
  while(['liga','grupos'].includes(c.fase)&&c.rodada<c.totalRodadas&&!c.manual.includes(c.rodada))avancarLiga(c);
@@ -154,8 +165,9 @@ function prepararChave(c){
  if(c.tamanho===16&&c.reservados?.length){nomes=[...new Set([...nomes,...c.reservados])];c.reservados=[];const outros=reduzirQuadro(nomes.filter(n=>n!==c.usuario).map(nome=>({nome,forca:c.forcas[nome]})),15,rng);nomes=[c.usuario,...outros.map(x=>x.nome)];c.sobreviventes=nomes;}
  if(nomes.length<=2)c.tamanho=2;else if(c.tamanho<=16)c.tamanho=Math.min(c.tamanho,2**Math.ceil(Math.log2(nomes.length)));
  // Seed once, then keep every winner. An underdog must actually eliminate its opponents.
- const ordenados=nomes.map(nome=>({nome,forca:c.forcas[nome]})).sort((a,b)=>nivel(b)-nivel(a));
- const pares=[];while(ordenados.length>1){const a=ordenados.shift(),b=ordenados.pop();pares.push([a.nome,b.nome]);}if(ordenados.length)pares.push([ordenados[0].nome,null]);
+ const ordenados=nomes.map(nome=>({nome,forca:c.forcas[nome]}));
+ if(c.formato!=='selecao48')ordenados.sort((a,b)=>nivel(b)-nivel(a));
+ const pares=[];while(ordenados.length>1){const a=ordenados.shift(),b=c.formato==='selecao48'?ordenados.shift():ordenados.pop();pares.push([a.nome,b.nome]);}if(ordenados.length)pares.push([ordenados[0].nome,null]);
  let meu=pares.find(p=>p.includes(c.usuario));
  if(meu?.[1]===null){const outro=pares.find(p=>!p.includes(c.usuario)&&p[1]);if(outro){meu[1]=outro.pop();outro.push(null);}}
  c.quadroMata=pares;
@@ -171,14 +183,14 @@ function registrarMata(c,jogo){
  c.eliminados.push(jogo.vencedor===jogo.casa?jogo.fora:jogo.casa);
  c.sobreviventes=vencedores;
  if(c.preContinental){if(jogo.vencedor===c.usuario){c.preContinental=false;c.fase=c.faseAposPre;c.adversario=null;c.sobreviventes=null;}else{c.fase='fim';c.faseUsuario='Eliminado na pré-classificação';}return;}
- if(c.tamanho===2){c.campeao=jogo.vencedor;c.vice=jogo.vencedor===jogo.casa?jogo.fora:jogo.casa;c.faseUsuario=c.campeao===c.usuario?'Campeão':'Vice-campeão';c.fase='fim';return;}
+ if(c.tamanho===2){c.campeao=jogo.vencedor;c.vice=jogo.vencedor===jogo.casa?jogo.fora:jogo.casa;c.faseUsuario=c.campeao===c.usuario?'Campeão':'Vice-campeão';completarTerceiroLugar(c);c.fase='fim';return;}
  c.tamanho/=2;c.adversario=null;
  if(jogo.vencedor!==c.usuario){
   c.faseUsuario=`Eliminado: ${fase.toLowerCase()}`;c.fase='fim';let times=vencedores.map(nome=>({nome,forca:c.forcas[nome]}));
   // Continue the real remaining bracket, including stronger clubs joining after early national rounds.
   if(c.reservados?.length){times.push(...c.reservados.map(nome=>({nome,forca:c.forcas[nome]})));c.reservados=[];}
   while(times.length>1){const js=[],next=[];times.sort((a,b)=>nivel(b)-nivel(a));while(times.length>1){const a=times.shift(),b=times.pop(),j=jogoDaChave({...c,tamanho:times.length+next.length*2+2},a,b,rng);js.push(j);next.push(j.vencedor===a.nome?a:b);if(!times.length&&!next.slice(0,-1).length)c.vice=j.vencedor===a.nome?b.nome:a.nome;}if(times.length)next.push(times[0]);c.fases.push({fase:faseN(next.length*2),jogos:js});times=next;}
-  c.campeao=times[0]?.nome||null;
+  c.campeao=times[0]?.nome||null;completarTerceiroLugar(c);
  }
 }
 export function escolherCopa(c,chave,opcao){
@@ -231,4 +243,4 @@ export function continuarCopa(c){if(c?.fase==='fim'&&!c.resultado)return {...c};
 export function simularCampanhaCopa(opcoes){let c=criarCampanhaCopa(opcoes);for(let i=0;c.fase!=='fim'&&i<80;i++){const d=decisaoCopa(c);c=d?escolherCopa(c,d.chave,d.penaltis?'canto':'controlar'):continuarCopa(c);}return c;}
 
 /** Keep full public results; discard draw and animation state from historical seasons. */
-export function resumoCampanhaCopa(c){return {nome:c.nome,tipo:c.tipo,ano:c.ano,...(c.selecao?{selecao:c.selecao}:{}),participantes:c.participantes||c.pool?.length||0,campeao:c.campeao,vice:c.vice,faseUsuario:c.faseUsuario,formato:c.formato,grupos:c.grupos||[],classificacao:c.classificacao||[],fases:c.fases||[],jogosUsuario:c.jogosUsuario||[],...(c.repescagemSulamericana?{repescagemSulamericana:true}:{})};}
+export function resumoCampanhaCopa(c){return {nome:c.nome,tipo:c.tipo,ano:c.ano,...(c.selecao?{selecao:c.selecao}:{}),participantes:c.participantes||c.pool?.length||0,campeao:c.campeao,vice:c.vice,faseUsuario:c.faseUsuario,formato:c.formato,grupos:c.grupos||[],classificacao:c.classificacao||[],fases:c.fases||[],jogosUsuario:c.jogosUsuario||[],...(c.terceiroLugar?{terceiroLugar:c.terceiroLugar}:{}),...(c.repescagemSulamericana?{repescagemSulamericana:true}:{})};}

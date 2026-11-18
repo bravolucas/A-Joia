@@ -1,4 +1,3 @@
-import GestaoElenco from './GestaoElenco.jsx';
 import {MenuCentroTreinador,CabecalhoCentro,ConteudoCentro} from './CentroTreinador.jsx';
 import {anoPainelTecnico} from './painelTecnico.js';
 import {exigenciaClubeTecnico} from './exigenciasTecnico.js';
@@ -235,7 +234,6 @@ export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, on
   const primeira = !temporadas.length && !t.clubeInicialEscolhido && !!t.opcoesInicio?.length;
   const semClube = t.demitido || t.desempregado;
   const encerrada = carreiraTecnicoEncerrada(t,c.idade);
-  const [elencoAberto,setElencoAberto]=useState(false);
   const [abaCentro,setAbaCentro]=useState('geral'),[campanhaAberta,setCampanhaAberta]=useState(null);
   const [aposentadoriaAberta,setAposentadoriaAberta]=useState(false);
   const [demissaoAberta,setDemissaoAberta]=useState(false);
@@ -334,7 +332,7 @@ export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, on
   const clubeAtual = primeira || semClube ? 'Sem clube' : t.clube;
 
   const podeNegociarElenco=!!(onAbrirElenco&&!primeira&&!semClube&&!encerrada&&t.tipoEquipe!=='selecao'&&((t.gestao?.cadastroUnificado&&t.gestao.clube===t.clube)||(t.fase==='pretemporada'&&!t.copasEmJogo&&!t.andamento?.jogos&&!t.andamento?.rodadas&&!t.temporadaPausada)));
-  const abrirElenco=()=>{if(podeNegociarElenco){setElencoAberto(true);onAbrirElenco();}};
+  const abrirElenco=()=>{if(podeNegociarElenco){onAbrirElenco();setAbaCentro('elenco');requestAnimationFrame(()=>document.querySelector('.ct-manager .ctm-page-heading')?.scrollIntoView({behavior:'instant',block:'start'}));}};
   const mudarAbaCentro=aba=>{setAbaCentro(aba);requestAnimationFrame(()=>document.querySelector('.ct-manager .ctm-page-heading')?.scrollIntoView({behavior:'instant',block:'start'}));};
   const irParaDecisao=()=>{if(t.copasEmJogo){setCopasAbertas(true);return;}setAbaCentro('geral');requestAnimationFrame(()=>document.querySelector('.ct-manager .ct-actions')?.scrollIntoView({behavior:'instant',block:'center'}));};
   return <div className="ct ct-manager" aria-label="Carreira de treinador">
@@ -354,7 +352,6 @@ export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, on
     {(eventoAtual?.tipo === 'rebaixado' || eventoAtual?.tipo === 'acesso') && <PopUpDivisao temporada={ultima} movimento={eventoAtual.movimento} tipo={eventoAtual.tipo} onFechar={fecharEvento} />}
     {eventoAtual?.tipo === 'demissao' && <PopUpDemissao temporada={ultima} t={t} onFechar={fecharEvento} />}
     {vitrineAberta && <JanelaTreinador titulo="Conquistas como treinador" onFechar={() => setVitrineAberta(false)} classe="ct-trophy-modal"><VitrineConquistas grupos={gruposConquistas} total={titulos.length} selecionada={conquistaSelecionada} onSelecionar={setConquistaSelecionada}/></JanelaTreinador>}
-    {elencoAberto&&<JanelaTreinador classe="ct-elenco-modal" titulo="Elenco e contratos" onFechar={()=>setElencoAberto(false)}><GestaoElenco c={c} onNegociar={onNegociarElenco}/></JanelaTreinador>}
     {decisaoAberta && cartaRapida && <JanelaTreinador titulo="Decisão de pré-temporada" onFechar={() => setDecisaoAberta(false)} classe="ct-quick-modal"><div className="ct-quick-decision"><div className="ct-quick-heading"><span>ESCOLHA {cartaRapida.indice} DE {cartaRapida.total}</span><span>Verba: {formatarVerbaRapida(cartaRapida.verba)}</span></div><h3>{cartaRapida.titulo}</h3><p>{cartaRapida.texto}</p><p className="ct-quick-baseline">Força do time: {Math.round(forcaClubeTecnico(t))} · Moral: {Math.round(t.moral??50)}{bonusForcaLoja(t)>0?` · Inclui +${bonusForcaLoja(t)} da loja`:""}</p><div className="ct-decisions">{cartaRapida.opcoes.map(op=><button key={op.id} disabled={simulando||op.custo>cartaRapida.verba} onClick={()=>executar(()=>onEscolhaRapida?.(cartaRapida.chave,op.id))}><strong>{op.nome}</strong><span>{op.descricao}</span>{op.custo>0&&<small>Investimento: {formatarVerbaRapida(op.custo)}{op.custo>cartaRapida.verba?' · Sem verba':''}</small>}<b>{cartaRapida.indice<cartaRapida.total?'Escolher e continuar →':'Escolher e simular →'}</b></button>)}</div><p className="ct-quick-footnote">{cartaRapida.indice<cartaRapida.total?'Só mais uma escolha antes de jogar.':'Após a escolha, a temporada é simulada automaticamente.'}</p></div></JanelaTreinador>}
 
     {campanhaAberta&&<JanelaTreinador titulo={`Campanha · ${campanhaAberta.nome}`} onFechar={()=>setCampanhaAberta(null)} classe="ctm-campaign-modal"><div className="ctm-campaign-content"><CampanhasTemporada torneios={[campanhaAberta]} abertas/></div></JanelaTreinador>}
@@ -398,7 +395,7 @@ export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, on
 
       <TrajetoriaCentro temporadas={temporadas} idadeInicio={idadeInicio} aberta={aberta} setAberta={setAberta} encerrada={encerrada} atualRef={atualRef} idade={idade} simulando={simulando} primeira={primeira} faseResultado={faseResultado} t={t} historico={historico}/>
     </div>}
-    {abaCentro!=='geral'&&<ConteudoCentro key={abaCentro} c={c} aba={abaCentro} historico={historico} titulos={titulos} onVoltar={irParaDecisao} onRetomar={()=>setCopasAbertas(true)} onElenco={abrirElenco} podeNegociar={podeNegociarElenco} onCampanha={setCampanhaAberta} onHistorico={()=>mudarAbaCentro('carreira')} onConquistas={()=>abrirConquistas(null)}/>}
+    {abaCentro!=='geral'&&<ConteudoCentro key={abaCentro} c={c} aba={abaCentro} historico={historico} titulos={titulos} onVoltar={irParaDecisao} onRetomar={()=>setCopasAbertas(true)} onElenco={abrirElenco} podeNegociar={podeNegociarElenco} onNegociarElenco={onNegociarElenco} onCampanha={setCampanhaAberta} onHistorico={()=>mudarAbaCentro('carreira')} onConquistas={()=>abrirConquistas(null)}/>}
     {abaCentro==='carreira'&&<TrajetoriaCentro temporadas={temporadas} idadeInicio={idadeInicio} aberta={aberta} setAberta={setAberta} encerrada={encerrada} atualRef={atualRef} idade={idade} simulando={simulando} primeira={primeira} faseResultado={faseResultado} t={t} historico={historico}/>}
       </div>
     </div>

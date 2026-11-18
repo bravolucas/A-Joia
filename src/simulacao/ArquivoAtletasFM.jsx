@@ -3,6 +3,7 @@ import {historicoAtleta} from './mundoVivo.js';
 import {resumoConquistas} from './historicoConquistas.js';
 import {resumoConfrontosAtleta,partidasDoAtleta} from './historicoConfrontos.js';
 import {escudoDe} from '../comum/arte.js';
+import LinkEntidade from '../historia/LinkEntidade.jsx';
 
 const n=x=>Number.isFinite(x)?x.toLocaleString('pt-BR'):'—';
 const texto=x=>String(x||'').toLocaleLowerCase('pt-BR');
@@ -27,9 +28,9 @@ function TabelaCarreira({linhas,conquistas}){
   <tbody>{[...linhas].reverse().map((r,i)=>{
    const registros=conquistas.todas.filter(x=>x.ano===r.ano&&(!x.clube||x.clube===r.clube||x.categoria==='premio'));
    return <tr key={String(r.ano)+'|'+r.clube+'|'+i}>
-    <td><strong>{r.ano??'—'}</strong></td><td className="fm27-club-cell"><img src={escudoDe(r.clube)} alt=""/>{r.clube||'Sem clube'}</td>
+    <td><strong>{r.ano??'—'}</strong></td><td className="fm27-club-cell"><img src={escudoDe(r.clube)} alt=""/><LinkEntidade tipo="clube" nome={r.clube||''}/></td>
     <td>{n(r.jogos)}</td><td>{n(r.gols)}</td><td>{n(r.assist)}</td><td>{n(r.defesas)}</td>
-    <td className="fm27-season-honours">{registros.length?registros.map((x,j)=><span key={j} className="fm27-mini-honour" title={x.categoria==='premio'?'Prêmio individual':'Título coletivo'}>{x.categoria==='premio'?'★':'◆'} {x.nome}</span>):'—'}</td>
+    <td className="fm27-season-honours">{registros.length?registros.map((x,j)=><span key={j} className="fm27-mini-honour" title={x.categoria==='premio'?'Prêmio individual':'Título coletivo'}>{x.categoria==='premio'?'★':'◆'} <LinkEntidade tipo={x.categoria==='premio'?'premio':'competicao'} nome={x.nome}/></span>):'—'}</td>
    </tr>;
   })}</tbody>
  </table></div>;
@@ -39,7 +40,7 @@ function ListaConquistas({registros,categoria}){
  if(!lista.length)return <p className="fm27-empty">Ainda não há {categoria==='premio'?'premiações individuais':'conquistas'} documentadas neste save.</p>;
  return <div className="fm27-honours-list">{lista.map((x,i)=><article key={[x.ano,x.categoria,x.nome,x.clube,i].join('|')} className="fm27-honour">
   <span className={'fm27-honour-symbol '+(x.categoria==='premio'?'is-award':'')}>{x.categoria==='premio'?'★':'🏆'}</span>
-  <div><strong>{x.nome}</strong><span>{x.categoria==='premio'?'Prêmio individual':'Título coletivo'} · {tituloAno(x.ano,x.clube)}</span></div>
+  <div><strong><LinkEntidade tipo={x.categoria==='premio'?'premio':'competicao'} nome={x.nome}/></strong><span>{x.categoria==='premio'?'Prêmio individual':'Título coletivo'} · {x.ano??'Ano não registrado'} · <LinkEntidade tipo="clube" nome={x.clube||''}/></span></div>
   <b>{x.ano??'—'}</b>
  </article>)}</div>;
 }
@@ -65,15 +66,15 @@ function RetrospectoJogador({c,p,onConfrontos}){
   </div>
   {adversarios.length?<div className="fm27-data-scroll"><table className="fm27-data">
    <thead><tr><th>Adversário</th><th>Jogos</th><th>Gols</th><th>Assistências</th></tr></thead>
-   <tbody>{adversarios.map(x=><tr key={x.nome}><td>{x.nome}</td><td>{x.jogos}</td><td>{x.gols}</td><td>{x.assistencias}</td></tr>)}</tbody>
+   <tbody>{adversarios.map(x=><tr key={x.nome}><td><LinkEntidade tipo="clube" nome={x.nome}/></td><td>{x.jogos}</td><td>{x.gols}</td><td>{x.assistencias}</td></tr>)}</tbody>
   </table></div>:<p className="fm27-empty">Os confrontos detalhados aparecerão quando existirem partidas registradas.</p>}
  </>;
 }
 
 /** Arquivo persistente de atletas. Layout inspirado na navegação em tela cheia do FM27. */
-export default function ArquivoAtletasFM({c,onConfrontos}){
+export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
  const u=c.tecnico?.universo||c.universo||{};
- const [busca,B]=useState(''),[clube,C]=useState(''),[id,I]=useState(null),[aba,A]=useState('resumo');
+ const [busca,B]=useState(''),[clube,C]=useState(''),[id,I]=useState(jogadorInicial),[aba,A]=useState('resumo');
  const [categoria,Q]=useState('todas');
  const todos=useMemo(()=>{
   const mapa=new Map(Object.values(u.atletas||{}).map(p=>[String(p.id),{...p,id:String(p.id)}]));
@@ -127,7 +128,7 @@ export default function ArquivoAtletasFM({c,onConfrontos}){
       <div className="fm27-identity-symbol"><img src={escudoDe(selecionado.clube)} alt="" /></div>
       <div className="fm27-player-identity">
        <span className="fm27-eyebrow">FICHA DE CARREIRA {selecionado.voce?' / SEU JOGADOR':''}</span>
-       <h3>{selecionado.nome}</h3><p>{selecionado.posicao||'Jogador'} · {selecionado.clube||'Sem clube'} · {selecionado.nac||'Nacionalidade não informada'}</p>
+       <h3>{selecionado.nome}</h3><p>{selecionado.posicao||'Jogador'} · <LinkEntidade tipo="clube" nome={selecionado.clube||''}/> · {selecionado.nac||'Nacionalidade não informada'}</p>
       </div>
       <span className={'fm27-player-state '+(selecionado.aposentado?'is-retired':'')}>{selecionado.aposentado?'Aposentado':'Em atividade'}</span>
      </div>
@@ -150,7 +151,7 @@ export default function ArquivoAtletasFM({c,onConfrontos}){
        <div className="fm27-dashboard-columns">
         <article className="fm27-panel"><div className="fm27-panel-heading"><div><h3>Trajetória</h3><p>Últimas temporadas registradas</p></div></div>
          {linhas.length?<div className="fm27-timeline">{[...linhas].reverse().slice(0,7).map((x,i)=>
-          <div className="fm27-timeline-row" key={i}><time>{x.ano}</time><img src={escudoDe(x.clube)} alt=""/><span><strong>{x.clube}</strong><small>{n(x.jogos)} jogos · {n(x.gols)} gols · {n(x.assist)} assistências</small></span></div>)}</div>
+          <div className="fm27-timeline-row" key={i}><time>{x.ano}</time><img src={escudoDe(x.clube)} alt=""/><span><strong><LinkEntidade tipo="clube" nome={x.clube}/></strong><small>{n(x.jogos)} jogos · {n(x.gols)} gols · {n(x.assist)} assistências</small></span></div>)}</div>
           :<p className="fm27-empty">Sem histórico de temporadas concluídas.</p>}
         </article>
         <article className="fm27-panel"><div className="fm27-panel-heading"><div><h3>Vitrine de conquistas</h3><p>{conquistas.titulos.length} títulos · {conquistas.premios.length} prêmios individuais</p></div>

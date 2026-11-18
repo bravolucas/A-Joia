@@ -528,3 +528,13 @@
 .fm27-archive .fm27-roster-list.mv-atletas .fm27-roster-copy strong{
  display:block;margin:0
 }
+
+/* Miniaturas específicas dos títulos e distinções no Arquivo Vivo. */
+.fm27-honour-symbol{background:transparent!important;padding:0;overflow:hidden}
+.fm27-honour-symbol .miniatura-conquista{max-height:100%;max-width:100%}
+.fm27-mini-honour{display:inline-flex;align-items:center;gap:6px}
+.fm27-mini-honour .miniatura-conquista{vertical-align:middle}
+.fm27-mini-honour .miniatura-conquista-indisponivel,.fm27-honour-symbol .miniatura-conquista-indisponivel{border:1px dashed #56637a;border-radius:6px;background:#ffffff07}
+.fm27-transfers{min-width:610px}
+.fm27-transfers th:last-child,.fm27-transfers td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.fm27-transfer-note{display:block;margin-top:4px;color:#9cacc1;font-size:9px;font-weight:400}

@@ -125,3 +125,28 @@ test('treinador na Série C usa 19 rodadas (2026), 23 (2027) e grupo de 14 em 20
     }
   }
 });
+
+
+test('final da Série C tem a volta no campo do líder de melhor campanha acumulada', () => {
+  for (let rodada = 1; rodada <= 20; rodada++) {
+    const t = simularSerieC({ clubes: participantes, ano: 2026, rng: seed(rodada + 800) });
+    const nomes = t.quadrangulares.map(g => g.classificacao[0].nome);
+    const soma = nome => {
+      const primeira = t.classificacao.find(c => c.nome === nome);
+      const segunda = t.quadrangulares.flatMap(g => g.classificacao).find(c => c.nome === nome);
+      return [primeira, segunda].reduce((acc, x) => ({
+        pontos: acc.pontos + x.pontos,
+        vitorias: acc.vitorias + x.vitorias,
+        saldoGols: acc.saldoGols + x.saldoGols,
+        golsPro: acc.golsPro + x.golsPro,
+      }), { pontos: 0, vitorias: 0, saldoGols: 0, golsPro: 0 });
+    };
+    const [a, b] = nomes.map(soma);
+    const diferenca = a.pontos - b.pontos || a.vitorias - b.vitorias ||
+      a.saldoGols - b.saldoGols || a.golsPro - b.golsPro;
+    const mandoEsperado = diferenca > 0 ? nomes[0] : diferenca < 0 ? nomes[1]
+      : [...nomes].sort((x, y) => x.localeCompare(y, 'pt-BR'))[0];
+    assert.equal(t.final.mandanteVolta, mandoEsperado);
+    assert.equal(t.final.jogos[1].casa, mandoEsperado);
+  }
+});

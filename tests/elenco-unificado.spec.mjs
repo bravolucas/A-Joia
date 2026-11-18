@@ -14,6 +14,7 @@ for(const width of [390,1366])test(`elenco unificado: contratação, mundo, vend
  await page.getByRole('button',{name:/Continuar · Treinador Unificado/}).click();
  await page.getByRole('button',{name:'Elenco e contratos →',exact:true}).click();
  const d=page.getByRole('region',{name:'Elenco e contratos',exact:true});await expect(d.getByRole('button',{name:'Mercado de jogadores',exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Contratos e mercado',exact:true}).click();await expect(d).toBeInViewport();
  await d.getByRole('button',{name:'Mercado de jogadores',exact:true}).click();
  const linha=d.locator('.ge-tabela tbody tr').last(),nome=await linha.locator('strong').textContent(),id=await linha.getAttribute('data-atleta');
  await linha.getByRole('button',{name:`Contratar ${nome}`,exact:true}).click();

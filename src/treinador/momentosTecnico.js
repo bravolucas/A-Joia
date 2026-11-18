@@ -184,7 +184,7 @@ export function simularCopaSelecaoTecnico(convite,ovr,semente){
  const outras=NACIONALIDADES.filter(n=>n.id!==convite.nac&&n.forcaSelecao).map(n=>({nome:n.label,forca:n.forcaSelecao}));
  const participantes=[eu,...outras.map(x=>({x,p:x.forca-8*Math.log(-Math.log(Math.max(Number.EPSILON,rng())))})).sort((a,b)=>b.p-a.p).slice(0,47).map(y=>y.x)];
  const camp=simularCampanhaCopa({nome:'Copa do Mundo',tipo:'copaMundo',usuario:eu.nome,forcaUsuario:forca,
-   clubes:participantes,ano:2026,formato:'selecao48',seed:semente});
+   clubes:participantes,ano:convite.ano??2026,formato:'selecao48',seed:semente});
  camp.selecao=convite.selecao;
  return resumoCampanhaCopa(camp);
 }

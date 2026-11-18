@@ -162,6 +162,22 @@ export function partidasDoAtleta(c, jogadorId = 'voce') {
   const mapa = new Map();
   // Preferir os registros já gravados: uma temporada não deve ser contada duas vezes.
   for (const j of [...diretas,...arquivo]) if (j?.clube && j?.adversario) mapa.set(j.id,j);
+  if(!mapa.size && String(jogadorId)!=='voce'){
+    // Atletas do mundo já guardam totais por competição em cada ano.
+    // Repartição sob demanda é determinística e usa só placares arquivados;
+    // não replica milhões de registros de partidas no armazenamento do celular.
+    for(const linha of u.atletas?.[String(jogadorId)]?.historico||[]){
+      const ano=Array.isArray(linha)?linha[0]:linha.ano;
+      const clube=Array.isArray(linha)?linha[1]:linha.clube;
+      const comps=Array.isArray(linha)?linha[10]:linha.porCompeticao;
+      if(!Array.isArray(comps)||!clube)continue;
+      const porCompeticao=comps.map(t=>Array.isArray(t)?{
+        nome:t[0],jogos:t[1],gols:t[2],assist:t[3],defesas:t[4],cleanSheets:t[5]
+      }:t);
+      for(const j of partidasDistribuidasModoRapido(u,{ano,clube,porCompeticao}))
+        mapa.set(j.id,j);
+    }
+  }
   return [...mapa.values()].sort((a,b)=>a.ano-b.ano);
 }
 

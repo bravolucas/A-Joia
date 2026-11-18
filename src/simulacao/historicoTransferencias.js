@@ -1,5 +1,5 @@
 /**
- * Linha do tempo de transferências. Valores gravados no mercado são em R$ mil.
+ * Linha do tempo de transferências. Valores preservados em milhares da moeda de cada modo.
  * Nunca estimamos uma taxa a partir do valor de mercado do jogador.
  */
 const ANOTACOES = new Set(['transferencia','compra','venda','contratacao','emprestimo','retornoEmprestimo','livre','fim-contrato','dispensa','rescisao']);
@@ -7,19 +7,20 @@ const nomeClube = nome => typeof nome === 'string' && nome.trim() ? nome.trim() 
 const numeroAno = ano => Number.isInteger(Number(ano)) && Number(ano) > 1900 ? Number(ano) : null;
 const valorRegistrado = valor => valor !== null && valor !== undefined && valor !== '' && Number.isFinite(Number(valor)) && Number(valor) >= 0 ? Number(valor) : null;
 
-export function normalizarTransferencia(m) {
+export function normalizarTransferencia(m, moedaPadrao = 'BRL') {
  if (!m || typeof m !== 'object' || !ANOTACOES.has(m.tipo)) return null;
  return {
   ano:numeroAno(m.ano),tipo:m.tipo,
   de:nomeClube(m.de ?? m.origemClube ?? m.clubeOrigem),
   para:nomeClube(m.para ?? m.destino ?? m.clubeDestino),
-  valor:valorRegistrado(m.valor),fonte:'movimento'
+  valor:valorRegistrado(m.valor),moeda:m.moeda==='EUR'||m.moeda==='BRL'?m.moeda:moedaPadrao,fonte:'movimento'
  };
 }
 
 /** Mudança entre temporadas: histórico de clubes é comprovado, taxa e modalidade não. */
 export function historicoTransferenciasAtleta(atleta = {}, temporadas = []) {
- const salvas=(Array.isArray(atleta.movimentos)?atleta.movimentos:[]).map(normalizarTransferencia).filter(Boolean);
+ const moedaPadrao=atleta.voce?'EUR':'BRL';
+ const salvas=(Array.isArray(atleta.movimentos)?atleta.movimentos:[]).map(m=>normalizarTransferencia(m,moedaPadrao)).filter(Boolean);
  const ordenadas=[...temporadas].filter(t=>t&&nomeClube(t.clube)&&numeroAno(t.ano))
   .sort((a,b)=>Number(a.ano)-Number(b.ano));
  for(let i=1;i<ordenadas.length;i++){
@@ -27,7 +28,7 @@ export function historicoTransferenciasAtleta(atleta = {}, temporadas = []) {
   if(anterior.clube===atual.clube)continue;
   const ano=numeroAno(atual.ano),de=nomeClube(anterior.clube),para=nomeClube(atual.clube);
   if(salvas.some(m=>m.ano===ano&&m.de===de&&m.para===para))continue;
-  salvas.push({ano,tipo:'mudanca-clube',de,para,valor:null,fonte:'temporadas'});
+  salvas.push({ano,tipo:'mudanca-clube',de,para,valor:null,moeda:moedaPadrao,fonte:'temporadas'});
  }
  const vistos=new Set();
  return salvas.filter(m=>{
@@ -40,5 +41,6 @@ export const tipoTransferencia = tipo => ({
  contratacao:'Transferência',emprestimo:'Empréstimo',retornoEmprestimo:'Retorno de empréstimo',livre:'Chegada sem custos','fim-contrato':'Fim de contrato',dispensa:'Dispensa',
  rescisao:'Rescisão','mudanca-clube':'Mudança de clube'
 })[tipo] || 'Movimentação';
-export const valorTransferencia = valor => valor===null||valor===undefined
- ? 'Não informado' : valor===0 ? 'Sem custos' : `R$ ${Math.round(valor).toLocaleString('pt-BR')} mil`;
+export const valorTransferencia = (valor,moeda='BRL') => valor===null||valor===undefined
+ ? 'Não informado' : valor===0 ? 'Sem custos' : `${moeda==='EUR'?'€':'R
+} ${Math.round(valor).toLocaleString('pt-BR')} mil`;

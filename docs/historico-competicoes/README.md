@@ -145,3 +145,23 @@ Fontes: [UEFA — 31 clubes e totais por equipe, 27/08/2026](https://www.uefa.co
 Testes: `node --test tests/europa-league-historica.test.mjs
 tests/champions-historica.test.mjs tests/sulamericana-historica.test.mjs
 tests/libertadores-historica.test.mjs` e build de produção Pages.
+
+## Conference League — histórico completo 2022–2026
+
+A Conference League estreou na temporada 2021/22. Até a final de
+maio de **2026**, contabiliza **cinco edições e cinco campeões**:
+Roma (2022), West Ham (2023), Olympiacos (2024), Chelsea (2025)
+e Crystal Palace (2026). A edição 2026/27 permanece em disputa.
+
+Os campeões oficiais, no arquivo `src/dados/conferenceHistorica.js`,
+são consultáveis de forma separada da Europa League e da Champions
+League, com suporte a `UEFA Europa Conference League` (denominação
+anterior) e `Liga Conferência`. Olympiacos é preservado como campeão
+mesmo sem elenco jogável no A JOIA.
+
+Fontes: [UEFA — lista dos cinco clubes vencedores](https://www.uefa.com/uefaconferenceleague/news/02a5-20ba66bce46d-a5d5586eeda6-1000--which-teams-have-won-the-conference-league/);
+[UEFA — final de 2026, Crystal Palace campeão](https://www.uefa.com/uefaconferenceleague/news/029c-1e9ad66c8169-aaecb38941a7-1000--202526-conference-league-all-the-league-phase-fixtures/).
+
+Testes: `node --test tests/conference-historica.test.mjs
+tests/europa-league-historica.test.mjs tests/champions-historica.test.mjs`
+e build Pages. Mudança somente documental e de consulta: sem mutação de saves.

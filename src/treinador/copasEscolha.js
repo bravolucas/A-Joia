@@ -7,6 +7,7 @@ import {probabilidadesPlacar} from '../competicoes/motorPlacar.js';
 import {ordenarGrupoMundial48} from '../competicoes/desempateMundial48.js';
 import {montarChaveFifa48} from '../competicoes/chaveMundial48.js';
 import {aplicarProrrogacao,aplicarProrrogacaoAgregado} from '../competicoes/prorrogacaoMata.js';
+import {regraDesempateCopa,vencedorPorGolsFora} from '../competicoes/desempatePorCompeticao.js';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const nivel=c=>Number(c?.forca??c?.elenco??60);
 export const PLANOS_COPA=[{id:'pressionar',nome:'Pressionar e atacar',texto:'Mais risco, menos empates.'},{id:'controlar',nome:'Controlar o jogo',texto:'Mais proteção; aceita levar a decisão adiante.'},{id:'contra',nome:'Explorar os espaços',texto:'Funciona melhor diante de um adversário superior.'}];
@@ -168,20 +169,30 @@ export function decisaoCopa(c){
  return {chave:`${c.seed}|${c.etapa}|${c.rodada}|${c.resultado?.penaltisPendentes?'penaltis':'jogo'}`,fase:c.roteiroMundial?(c.roteiroMundial.length===1?'Final':c.roteiroMundial.length===3?'Derby das Américas':'Copa Challenger'):grupo?`${c.fase==='liga'?'Fase de liga':'Fase de grupos'} · jogo ${c.rodada+1}/${c.totalRodadas}`:c.preContinental?'Pré-classificação continental':c.playoff&&c.tamanho===32?'Playoff de acesso às oitavas':faseN(c.tamanho),adversario:adv,perfilAdversario:perfilAdversario(adv,c.ano),forcaUsuario:c.forcaUsuario,forcaAdv:c.forcas[adv],final:!grupo&&c.tamanho===2&&!c.preContinental,grupo,penaltis:!!c.resultado?.penaltisPendentes,casa:grupo?j.casa===c.usuario:true};
 }
 // All clubs play their side of the bracket. Later opponents are survivors, never fresh draws.
-export function jogoEliminatorio(a,b,rng){
+export function jogoEliminatorio(a,b,rng,c={}){
  let j=partida(a,b,rng,'pressionar');
  if(!j.vencedor){
-  j=aplicarProrrogacao(j,nivel(a),nivel(b),rng,{neutro:true});
+  if(regraDesempateCopa(c).prorrogacao)j=aplicarProrrogacao(j,nivel(a),nivel(b),rng,{neutro:true});
   j.vencedor=j.golsCasa>j.golsFora?a.nome:j.golsFora>j.golsCasa?b.nome:null;
   if(!j.vencedor){j.vencedor=rng()<chancePenaltis(nivel(a),nivel(b))?a.nome:b.nome;j.penaltis=true;}
  }
  return j;
 }
 function jogoDaChave(c,a,b,rng){
- if(!temIdaVolta(c))return jogoEliminatorio(a,b,rng);
- const ida=partida(a,b,rng),volta=aplicarProrrogacaoAgregado(ida,partida(b,a,rng),nivel(b),nivel(a),rng);
+ if(!temIdaVolta(c))return jogoEliminatorio(a,b,rng,c);
+ const ida=partida(a,b,rng),volta90=partida(b,a,rng);
+ const venceuFora=vencedorPorGolsFora(ida,volta90,c);
+ const criterio=regraDesempateCopa(c);
+ const volta=!venceuFora&&criterio.prorrogacao
+  ?aplicarProrrogacaoAgregado(ida,volta90,nivel(b),nivel(a),rng):volta90;
  const golsCasa=ida.golsCasa+volta.golsFora,golsFora=ida.golsFora+volta.golsCasa;
- return {casa:a.nome,fora:b.nome,golsCasa,golsFora,vencedor:golsCasa>golsFora?a.nome:golsFora>golsCasa?b.nome:rng()<chancePenaltis(nivel(a),nivel(b))?a.nome:b.nome,penaltis:golsCasa===golsFora,agregado:true,...(volta.prorrogacao?{prorrogacao:volta.prorrogacao}:{}),partidas:[{...ida,etapa:'Ida'},{...volta,etapa:'Volta'}]};
+ let vencedor=golsCasa>golsFora?a.nome:golsFora>golsCasa?b.nome:venceuFora;
+ const penaltis=!vencedor;
+ if(penaltis)vencedor=rng()<chancePenaltis(nivel(a),nivel(b))?a.nome:b.nome;
+ return {casa:a.nome,fora:b.nome,golsCasa,golsFora,vencedor,penaltis,agregado:true,
+  ...(venceuFora?{criterio:'gols-fora'}:{}),
+  ...(volta.prorrogacao?{prorrogacao:volta.prorrogacao}:{}),
+  partidas:[{...ida,etapa:'Ida'},{...volta,etapa:'Volta'}]};
 }
 /** Sorteio da fase de 32: cabeças de grupo protegidos e sem revanche imediata
  * contra adversários da mesma chave; sem privilegiar a seleção do usuário.
@@ -266,13 +277,18 @@ export function escolherCopa(c,chave,opcao){
  const eu={nome:novo.usuario,forca:d.forcaUsuario},adv={nome:d.adversario,forca:d.forcaAdv};
  let j=partida(eu,adv,rng,opcao,d.final,d.perfilAdversario);
  if(!d.grupo&&temIdaVolta(novo)){
-  const volta=aplicarProrrogacaoAgregado(j,partida(adv,eu,rng,opcao,d.final,d.perfilAdversario),nivel(adv),nivel(eu),rng);
-  j={casa:eu.nome,fora:adv.nome,golsCasa:j.golsCasa+volta.golsFora,golsFora:j.golsFora+volta.golsCasa,
-   vencedor:null,agregado:true,...(volta.prorrogacao?{prorrogacao:volta.prorrogacao}:{}),
-   partidas:[{...j,etapa:'Ida'},{...volta,etapa:'Volta'}]};
-  j.vencedor=j.golsCasa>j.golsFora?eu.nome:j.golsFora>j.golsCasa?adv.nome:null;
+  const ida=j,volta90=partida(adv,eu,rng,opcao,d.final,d.perfilAdversario);
+  const venceuFora=vencedorPorGolsFora(ida,volta90,novo);
+  const volta=!venceuFora&&regraDesempateCopa(novo).prorrogacao
+   ?aplicarProrrogacaoAgregado(ida,volta90,nivel(adv),nivel(eu),rng):volta90;
+  j={casa:eu.nome,fora:adv.nome,golsCasa:ida.golsCasa+volta.golsFora,golsFora:ida.golsFora+volta.golsCasa,
+   vencedor:null,agregado:true,...(venceuFora?{criterio:'gols-fora'}:{}),
+   ...(volta.prorrogacao?{prorrogacao:volta.prorrogacao}:{}),
+   partidas:[{...ida,etapa:'Ida'},{...volta,etapa:'Volta'}]};
+  j.vencedor=j.golsCasa>j.golsFora?eu.nome:j.golsFora>j.golsCasa?adv.nome:venceuFora;
  }else if(!d.grupo&&!j.vencedor){
-  j=aplicarProrrogacao(j,nivel(eu),nivel(adv),rng,{neutro:d.final});
+  if(regraDesempateCopa(novo).prorrogacao)
+   j=aplicarProrrogacao(j,nivel(eu),nivel(adv),rng,{neutro:d.final});
   j.vencedor=j.golsCasa>j.golsFora?eu.nome:j.golsFora>j.golsCasa?adv.nome:null;
  }else if(!d.casa){[j.casa,j.fora]=[j.fora,j.casa];[j.golsCasa,j.golsFora]=[j.golsFora,j.golsCasa];}
  novo.resultado={jogo:j,escolha:opcao,revelacao,penaltisPendentes:!d.grupo&&!j.vencedor,venceu:j.vencedor===novo.usuario,empate:!j.vencedor,fase:d.fase,final:d.final};
@@ -286,11 +302,16 @@ export function registrarPlacarCopa(c,chave,jogo) {
  if(jogo.casa!==casa||jogo.fora!==fora||![jogo.golsCasa,jogo.golsFora].every(n=>Number.isInteger(n)&&n>=0))throw new Error('Placar incompatível com a partida da chave.');
  if(!d.grupo&&temIdaVolta(c)&&!jogo.partidas?.length){
   const rng=geradorTecnico(`${chave}|volta-ao-vivo`);
-  const volta=partida({nome:fora,forca:c.forcas[fora]},{nome:casa,forca:c.forcas[casa]},rng);
-  const ida={...jogo,etapa:'Ida'};
+  const ida={...jogo,etapa:'Ida'},volta90=partida({nome:fora,forca:c.forcas[fora]},{nome:casa,forca:c.forcas[casa]},rng);
+  const venceuFora=vencedorPorGolsFora(ida,volta90,c);
+  const volta=!venceuFora&&regraDesempateCopa(c).prorrogacao
+   ?aplicarProrrogacaoAgregado(ida,volta90,c.forcas[fora],c.forcas[casa],rng):volta90;
   jogo={casa,fora,golsCasa:ida.golsCasa+volta.golsFora,golsFora:ida.golsFora+volta.golsCasa,
-    agregado:true,partidas:[ida,{...volta,etapa:'Volta'}]};
-  if(jogo.golsCasa===jogo.golsFora){jogo.penaltis=true;jogo.vencedor=rng()<chancePenaltis(c.forcas[casa],c.forcas[fora])?casa:fora;}
+    agregado:true,partidas:[ida,{...volta,etapa:'Volta'}],
+    ...(venceuFora?{criterio:'gols-fora'}:{}),
+    ...(volta.prorrogacao?{prorrogacao:volta.prorrogacao}:{})};
+  if(jogo.golsCasa===jogo.golsFora){jogo.vencedor=venceuFora;
+    if(!jogo.vencedor){jogo.penaltis=true;jogo.vencedor=rng()<chancePenaltis(c.forcas[casa],c.forcas[fora])?casa:fora;}}
  }
  if(jogo.partidas?.length){
   const ps=jogo.partidas;

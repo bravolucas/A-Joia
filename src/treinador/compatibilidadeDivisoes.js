@@ -16,8 +16,14 @@ export function reconciliarClubeLegadoTecnico({
   clubes = [], ligasMundo = {}, ligaTreinador, clubeTreinador,
   elencoTreinador = 50, nomesCalendario = [],
 } = {}) {
-  const clubeLegado = clubeTreinador && !clubes.some(clube => clube.nome === clubeTreinador);
   const ehBrasil = ligaTreinador === 'serieB' || ligaTreinador === 'brasileirao';
+  const cadastrado = clubes.find(clube => clube.nome === clubeTreinador);
+  // Após cadastrar a Série C, Guarani/Paysandu/Amazonas/Confiança passaram a
+  // existir na base. Um save antigo que os mantinha na Série B ainda requer
+  // reconciliação se não houver uma movimentação explícita em ligasMundo.
+  const clubeLegado = !!(clubeTreinador && ehBrasil &&
+    (!cadastrado || (!ligasMundo[clubeTreinador] &&
+      cadastrado.liga !== ligaTreinador)));
   const participantes = new Set(nomesCalendario);
   const ligas = { ...ligasMundo };
   let afastado = null;
@@ -29,13 +35,17 @@ export function reconciliarClubeLegadoTecnico({
     // Sem uma substituição inequívoca, não adivinhar o clube a ser afastado.
     if (ausentes.length === 1) {
       afastado = ausentes[0].nome;
-      ligas[afastado] = LIGA_FORA_PIRAMIDE;
+      // Quando o usuário já existe na Série C do cadastro novo, a troca
+      // preserva o tamanho das três divisões. Para clubes inexistentes na
+      // base continua valendo a quarentena do save legado.
+      ligas[afastado] = cadastrado?.liga === 'serieC' ? 'serieC' : LIGA_FORA_PIRAMIDE;
+      ligas[clubeTreinador] = ligaTreinador;
     }
   }
 
   const clubesAtivos = clubes
     .filter(clube => ligas[clube.nome] !== LIGA_FORA_PIRAMIDE);
-  if (clubeLegado && ehBrasil) clubesAtivos.push({
+  if (clubeLegado && ehBrasil && !cadastrado) clubesAtivos.push({
     nome: clubeTreinador, liga: ligaTreinador, elenco: elencoTreinador,
     forca: elencoTreinador,
   });

@@ -528,3 +528,33 @@
 .fm27-archive .fm27-roster-list.mv-atletas .fm27-roster-copy strong{
  display:block;margin:0
 }
+
+
+/* Links internos (sem navegação externa e sem recarregar a partida). */
+.ajoia-entity-link{
+ font:inherit;font-weight:inherit;letter-spacing:inherit;line-height:inherit;
+ border:0;border-radius:3px;background:transparent;color:#84e4dc;
+ padding:0;margin:0;text-align:inherit;display:inline;
+ text-decoration:underline;text-decoration-color:#84e4dc77;
+ text-decoration-thickness:1px;text-underline-offset:3px;
+ cursor:pointer;transition:color .15s ease,text-decoration-color .15s ease;
+}
+.ajoia-entity-link:hover{color:#c6fff8;text-decoration-color:currentColor}
+.ajoia-entity-link:focus-visible{outline:2px solid #a5f3fc;outline-offset:3px}
+.ajoia-entity-link:disabled{opacity:.55;cursor:default}
+.fm27-historico .hf-cabecalho .hf-history-actions{display:flex;align-items:center;gap:9px;flex:none}
+.fm27-historico .hf-history-actions button{
+ min-height:34px;cursor:pointer;border:1px solid #557087;
+ color:#eaf4fd;background:#ffffff12;border-radius:8px;padding:5px 12px;font-size:12px;
+}
+.fm27-historico .hf-history-actions button.hf-close{width:36px;padding:0;font-size:23px}
+.fm27-historico .hf-history-footer{display:flex;gap:10px}
+.fm27-historico .hf-history-footer button{flex:1;width:auto}
+.fm27-awards .fm27-award-filter{display:grid;gap:7px;max-width:370px;margin:18px 0;color:#b9cadc;font-size:12px}
+.fm27-awards .fm27-award-filter select{border:1px solid #466077;border-radius:8px;background:#101f32;color:#edf6ff;padding:9px}
+.fm27-historico .fm27-awards .hf-ranking{margin:14px 0}
+.fm27-historico .fm27-data .ajoia-entity-link{white-space:normal}
+@media(max-width:600px){
+ .fm27-historico .hf-history-actions button.hf-back{font-size:10px;padding:5px 8px}
+ .fm27-historico .hf-history-footer{flex-wrap:wrap}
+}

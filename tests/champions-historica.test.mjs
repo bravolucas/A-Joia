@@ -78,3 +78,13 @@ test('carreira adiciona só uma edição, nunca altera saves ou palmarés real',
  assert.equal(galeriaCompeticao({},'Libertadores').historicas.length,66);
  assert.equal(galeriaCompeticao({},'Copa Sul-Americana').historicas.length,24);
 });
+
+test('save legado do PSG com uma Champions antiga não cria título adicional falso',()=>{
+ const c={estadoClubes:{PSG:{palmares:{continental:1}}}};
+ const antes=structuredClone(c);
+ const t=galeriaClube(c,'PSG').tacas.find(t=>t.nome==='Champions League');
+ assert.equal(t.inicial,2,'PSG possui títulos reais em 2025 e 2026');
+ assert.equal(t.legado||0,0,'total antigo do save não deve inflar o palmarés');
+ assert.equal(t.total,2);
+ assert.deepEqual(c,antes);
+});

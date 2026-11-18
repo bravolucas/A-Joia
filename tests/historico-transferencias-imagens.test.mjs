@@ -12,7 +12,7 @@ test('movimentações vinculadas ao atleta registram clubes, valor e data de neg
  const r=historicoTransferenciasAtleta(atleta,[]);
  assert.equal(r.length,2);
  assert.deepEqual(r.map(x=>[x.de,x.para,x.valor]),[['Flamengo','Real Madrid',85500],['Boca Juniors','Flamengo',12000]]);
- assert.equal(valorTransferencia(r[0].valor),'R$ 85.500 mil');
+ assert.equal(valorTransferencia(r[0].valor),'R$ 85,5 mi');
  assert.equal(tipoTransferencia(r[1].tipo),'Transferência');
  assert.deepEqual(atleta,antes);
 });
@@ -48,6 +48,12 @@ test('nomes de prêmios usam imagem específica já presente no acervo',()=>{
 test('valores do Modo Jogador mantêm a moeda de origem em euros',()=>{
  const transferencias=historicoTransferenciasAtleta({voce:true,movimentos:[{ano:2028,tipo:'venda',de:'Santos',para:'Real Madrid',valor:50000}]},[]);
  assert.equal(transferencias[0].moeda,'EUR');
- assert.equal(valorTransferencia(transferencias[0].valor,transferencias[0].moeda),'€ 50.000 mil');
- assert.equal(valorTransferencia(4000,'BRL'),'R$ 4.000 mil');
+ assert.equal(valorTransferencia(transferencias[0].valor,transferencias[0].moeda),'€ 50 mi');
+ assert.equal(valorTransferencia(4000,'BRL'),'R$ 4 mi');
+});
+
+test('taxas elevadas e intermediarias usam unidade monetaria legivel',()=>{
+ assert.equal(valorTransferencia(785.4),'R$ 785 mil');
+ assert.equal(valorTransferencia(1200,'EUR'),'€ 1,2 mi');
+ assert.equal(valorTransferencia(0.4,'EUR'),'€ 400');
 });

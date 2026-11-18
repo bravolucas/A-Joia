@@ -2,6 +2,7 @@ import {CLUBES_REGIONAIS_EXTRAS} from '../competicoes/estaduaisRapidos.js';
 import {simularSelecoesMundo,simularMundiaisMundo,simularCopinhaMundo} from '../simulacao/copasExternasMundo.js';
 import {historicosEstaduaisDoClube} from '../dados/estaduaisHistoricos.js';
 import {totalLibertadoresHistoricas} from '../dados/libertadoresHistorica.js';
+import {totalSulAmericanaHistoricas} from '../dados/sulamericanaHistorica.js';
 import {simularEstaduaisMundo} from '../simulacao/estaduaisMundo.js';
 import {clubesDoMundo} from '../simulacao/mundoVivo.js';
 import {simularClassificacoesMundoTecnico} from '../treinador/classificacoesMundoTecnico.js';
@@ -13,7 +14,7 @@ import {geradorTecnico} from '../treinador/momentosTecnico.js';
 const clubeCanonico=nome=>({'Atlético Madrid':'Atlético de Madrid','Bayer Leverkusen':'Leverkusen'}[nome]||nome);
 const n=x=>Number.isFinite(x)?Math.max(0,x):0;
 const chave=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
-export function nomeCanonico(nome){if(!nome)return nome;nome=nome.replace(/^Campeão(?:\s+d[ao])?\s+/i,'');return ({copadorei:'Copa del Rey',copadafranca:'Coupe de France',copadaturquia:'Türkiye Kupası',uefachampionsleague:'Champions League',copalibertadores:'Libertadores',uefaeuropaleague:'Europa League',uefaconferenceleague:'Conference League',copasulamericana:'Copa Sul-Americana'})[chave(nome)]||nome;}
+export function nomeCanonico(nome){if(!nome)return nome;nome=nome.replace(/^Campeão(?:\s+d[ao])?\s+/i,'');return ({copadorei:'Copa del Rey',copadafranca:'Coupe de France',copadaturquia:'Türkiye Kupası',uefachampionsleague:'Champions League',copalibertadores:'Libertadores',uefaeuropaleague:'Europa League',uefaconferenceleague:'Conference League',copasulamericana:'Copa Sul-Americana',sulamericana:'Copa Sul-Americana',copasudamericana:'Copa Sul-Americana',sudamericana:'Copa Sul-Americana',conmebolsudamericana:'Copa Sul-Americana'})[chave(nome)]||nome;}
 const idEdicao=(ano,nome)=>`${ano}|${chave(nomeCanonico(nome))}`;
 const nacionais=new Set([...Object.values(COPAS_NACIONAIS),'Copa do Rei','Copa da França','Copa da Turquia']);
 const regionais=new Set(Object.values(ESTADUAIS).map(x=>typeof x==='string'?x:x?.nome));
@@ -28,7 +29,9 @@ export function acervoInicial(nome){
  if(!clube){
   const total=totalLibertadoresHistoricas(nome);
   const libertadores=total?[{nome:'Libertadores',tipo:'continental',inicial:total,historicoConhecido:true}]:[];
-  return {tacas:[...libertadores,...estaduais],conhecido:!!estaduais.length||total>0};
+  const sulamericana=totalSulAmericanaHistoricas(nome);
+  const copaSulamericana=sulamericana?[{nome:'Copa Sul-Americana',tipo:'continental',inicial:sulamericana,historicoConhecido:true}]:[];
+  return {tacas:[...libertadores,...copaSulamericana,...estaduais],conhecido:!!estaduais.length||total>0||sulamericana>0};
  }
  const p=palmaresInicialDe(clube),nomes=nomeDosTitulos(clube.liga),itens=[];
  for(const tipo of ['liga','copa','mundial'])if(nomes[tipo])itens.push({nome:nomes[tipo],tipo,inicial:n(p[tipo])});
@@ -39,10 +42,15 @@ export function acervoInicial(nome){
   if(!CONTINENTAIS[nome])delete continentais[nomes.continental||'Títulos continentais'];
   if(!CONTINENTAIS[nome]||totalLibertadoresHistoricas(nome)>0)continentais.Libertadores=totalLibertadoresHistoricas(nome);
  }
+ // O palmarés da Sul-Americana é independente da Libertadores e do total
+ // continental genérico. Aplica-se inclusive a times sem títulos da Libertadores.
+ const sulamericana=totalSulAmericanaHistoricas(nome);
+ if(sulamericana||Object.hasOwn(continentais,'Copa Sul-Americana'))
+   continentais['Copa Sul-Americana']=sulamericana;
  for(const [nome,quantidade]of Object.entries(continentais))itens.push({nome,tipo:'continental',inicial:quantidade});
  itens.push(...estaduais);
- for(const t of itens)if(t.tipo!=='estadual')t.historicoConhecido=!!(PALMARES_HISTORICO[nome]||CONTINENTAIS[nome]||totalLibertadoresHistoricas(nome)>0||PALMARES_HISTORICO[{'Atlético de Madrid':'Atlético Madrid',Leverkusen:'Bayer Leverkusen'}[nome]]);
- return {tacas:itens,conhecido:!!(PALMARES_HISTORICO[nome]||totalLibertadoresHistoricas(nome)>0||PALMARES_HISTORICO[{"Atlético de Madrid":"Atlético Madrid",Leverkusen:"Bayer Leverkusen"}[nome]])};
+ for(const t of itens)if(t.tipo!=='estadual')t.historicoConhecido=!!(PALMARES_HISTORICO[nome]||CONTINENTAIS[nome]||totalLibertadoresHistoricas(nome)>0||totalSulAmericanaHistoricas(nome)>0||PALMARES_HISTORICO[{'Atlético de Madrid':'Atlético Madrid',Leverkusen:'Bayer Leverkusen'}[nome]]);
+ return {tacas:itens,conhecido:!!(PALMARES_HISTORICO[nome]||totalLibertadoresHistoricas(nome)>0||totalSulAmericanaHistoricas(nome)>0||PALMARES_HISTORICO[{"Atlético de Madrid":"Atlético Madrid",Leverkusen:"Bayer Leverkusen"}[nome]])};
 }
 function inserir(mapa,e){if(e?.clube&&e?.nome&&Number.isFinite(e.ano)&&!e.pendente)mapa.set(idEdicao(e.ano,e.nome),{ano:e.ano,nome:nomeCanonico(e.nome),clube:clubeCanonico(e.clube),tipo:e.tipo||tipoTaca(e.nome),...(e.voce?{voce:true}:{})});}
 // No rápido antigo, campeaoLiga era o NOME do vencedor; no completo, é booleano.

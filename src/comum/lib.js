@@ -1855,12 +1855,18 @@ export function gerarMundoJogadores(rng = Math.random) {
         // todos os outros atletas quando um registro passa a ser verificado.
         const idadeSorteada = rand(18, 33);
         const metadados = metadadosAtletaReal(jr.nome, clube.nome);
-        const idade = idadeAtletaReal(metadados?.nascimento, ANO_INICIO) ?? idadeSorteada;
+        const idadeDocumentada = idadeAtletaReal(metadados?.nascimento, ANO_INICIO);
+        const idade = idadeDocumentada ?? idadeSorteada;
         const teto = clampR(jr.ovr + rand(0, idade < 23 ? 12 : 4), 58, 99);
         const nacSorteada = jr.nac ? null : nomeParaNac(clube);
         const nac = jr.nac || metadados?.nac || nacSorteada;
         jogadores.push({
           id: id++, nome: jr.nome, nac, posicao: jr.posicao,
+          // Cadastro real: idade e nacionalidade sem documento continuam
+          // simuladas pelo motor legado, jamais biografias verificadas.
+          origemCadastroReal: true,
+          ...(idadeDocumentada===null?{idadeEstimada:true}:{}),
+          ...(!jr.nac&&!metadados?.nac?{nacionalidadeEstimada:true}:{}),
           idade, ovr: jr.ovr, potencial: teto, picoIdade: rand(26, 30), clubeNome: clube.nome, clubeOrigem: clube.nome, liga: clube.liga,
           traco: pick(TRACOS_MUNDO).id, estilo: pick(ESTILOS_JOGO_MUNDO).id,
           gols: 0, assist: 0, jogos: 0, nota: 0,

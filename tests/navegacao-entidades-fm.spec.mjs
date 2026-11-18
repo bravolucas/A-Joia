@@ -37,6 +37,16 @@ test('navegar entre clube, competição e jogador sem perder o retorno à carrei
  await expect(historia.locator('.hf-competicoes')).toBeVisible();
  await historia.getByRole('button',{name:'← Voltar'}).click();
  await expect(historia.locator('.hf-galeria .hf-identidade h2')).toContainText('Santos');
+ await historia.getByRole('button',{name:'Seleções',exact:true}).click();
+ await expect(historia.locator('.hf-selecoes')).toBeVisible();
+ await historia.getByRole('combobox',{name:'Selecionar seleção'}).selectOption('Brasil');
+ await expect(historia.locator('.hf-selecoes')).toContainText('Copa do Mundo');
+ await expect(historia.locator('.hf-selecoes')).toContainText('1958');
+ await historia.locator('.hf-selecoes .hf-taca .ajoia-entity-link').filter({hasText:'Copa do Mundo'}).first().click();
+ await expect(historia.locator('.hf-competicoes')).toContainText('Espanha');
+ await expect(historia.locator('.hf-competicoes')).toContainText('2026');
+ await historia.getByRole('button',{name:'← Voltar'}).click();
+ await expect(historia.locator('.hf-selecoes')).toContainText('Brasil');
  await historia.getByRole('button',{name:'Treinadores',exact:true}).click();
  await expect(historia.getByRole('heading',{name:'Passagens pelos clubes'})).toBeVisible();
  await expect(historia.locator('.fm27-coach-profile .fm27-data')).toContainText('Santos');

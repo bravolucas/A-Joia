@@ -16,6 +16,7 @@ import CerimoniaBola from '../comum/CerimoniaBola.jsx';
 import {MuseuFimCarreira} from '../museu/MuseuPessoal.jsx';
 import {registrarAnoHistoria,simularDefesas,registrarAtletasObservados} from '../historia/historiaFutebol.js';
 import BotaoHistoria,{GaleriaClube,MarcosIndividuais} from '../historia/HistoriaFutebol.jsx';
+import PortalHistorico from '../historia/PortalHistorico.jsx';
 import TabelaCompeticoesTemporada from './TabelaCompeticoesTemporada.jsx';
 import { criarIdMuseu } from '../museu/museu.js';
 import React, { useState, useMemo, useEffect } from "react";
@@ -8650,6 +8651,7 @@ function resolverTemporada(c, extraStats) {
 
         </RevelacaoTela>
       </main>
+      <PortalHistorico c={carreira?{...carreira,nome,nacionalidade,temporadas,mundo}:null} temporadas={temporadas}/>
       </div>
     </div>
   );

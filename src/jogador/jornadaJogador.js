@@ -3,6 +3,7 @@ import {iniciarProjetoChegada,prepararProjetoTemporada,fecharProjetoTemporada,pr
 import {narrarEco,noticiaRival} from './narrativasContinuas.js';
 import {compararMarcasCopas} from './recordesHistoricos.js';
 import {consolidarElencoCopa} from './elencoSelecao.js';
+import {gerarNomeRegionalUnico} from '../simulacao/nomesRegionais.js';
 import {CLUBES,LIGAS} from '../dados/data.js';
 import {calcOVR} from '../comum/lib.js';
 import {IDENTIDADES_POSICAO,fecharAdaptacaoPosicao,penalidadePosicao} from './posicoesCarreira.js';
@@ -261,9 +262,10 @@ export function atualizarGeracaoSelecao(c,ano=c.ano){
  const usados=new Set(ativos.map(p=>p.slot).filter(Number.isInteger));
  ativos.forEach(p=>{if(!Number.isInteger(p.slot)){p.slot=funcoes.findIndex((_,i)=>!usados.has(i));usados.add(p.slot);}p.posicao=funcoes[p.slot];});
  for(let i=0;i<11;i++)if(!usados.has(i)){
-  const seed=hash(`${c.codigo}:${c.nac}:${ano}:${i}`),nomes=['Caio','Mateo','André','Davi','Rafael','Gabriel','Nicolas','Bruno','Iago','Samuel','Leo','Daniel'],sobrenomes=['Nunes','Duarte','Lemos','Monteiro','Vidal','Costa','Reis','Azevedo','Pires','Mendes','Ramos','Alves'];
-  let nome=`${nomes[seed%nomes.length]} ${sobrenomes[(seed>>>8)%sobrenomes.length]}`;
-  if(ativos.some(p=>p.nome===nome))nome+=` ${sobrenomes[i]}`;
+  // Mantém o hash histórico de nascimento e IDs: só o nome novo recebe
+  // a origem regional do país; colegas antigos jamais são renomeados.
+  const seed=hash(`${c.codigo}:${c.nac}:${ano}:${i}`);
+  const nome=gerarNomeRegionalUnico(c.nac,`${c.codigo}:geracao:${c.nac}:${ano}:${i}`,new Set(ativos.map(p=>p.nome)));
   ativos.push({id:`selecao:${c.nac}:${ano}:${i}`,slot:i,posicao:funcoes[i],nome,nascimento:ano-(saidas.length?18+seed%6:20+seed%12),desde:ano,ficticio:true});
  }
  j.geracao=ativos.sort((a,b)=>a.slot-b.slot);

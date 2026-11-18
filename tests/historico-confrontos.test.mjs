@@ -63,3 +63,17 @@ test('saves antigos sem arquivo de jogos permanecem legíveis',()=>{
  assert.deepEqual(partidasDoAtleta({},'voce'),[]);
  assert.equal(resumoConfrontosAtleta({},{jogadorId:'voce'}).jogos,0);
 });
+
+test('jogadores do mundo consultam partidas por adversário a partir dos totais salvos',()=>{
+ const arquivo={universo:{...universo,atletas:{'42':{
+  id:'42',nome:'Atacante do Fortaleza',historico:[
+   [2027,'Fortaleza',2,2,0,5,1,[],null,0,[['Brasileirão',2,2,0,5,1]]]
+  ]
+ }}}};
+ const jogos=partidasDoAtleta(arquivo,'42');
+ assert.equal(jogos.length,2);
+ assert.equal(jogos.reduce((n,j)=>n+j.gols,0),2);
+ assert.ok(jogos.every(j=>j.gols <= (j.casa===j.clube?j.golsCasa:j.golsFora)));
+ assert.equal(resumoConfrontosAtleta(arquivo,{jogadorId:'42',adversario:'Palmeiras'}).jogos,2);
+ assert.equal(resumoConfrontosAtleta(arquivo,{jogadorId:'42',adversario:'Santos'}).jogos,0);
+});

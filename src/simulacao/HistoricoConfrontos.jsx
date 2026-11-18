@@ -9,37 +9,37 @@ function SelectFiltro({titulo,valor,onChange,opcoes,todos}){
   <option value="">{todos}</option>{opcoes.map(s=><option key={s} value={String(s)}>{s}</option>)}
  </select></label>;
 }
-function ResumoCompeticoes({linhas,individual}){
+function ResumoCompeticoes({linhas,individual,onCompeticao}){
  if(!linhas.length)return <p className="fm27-empty">Não existem competições registradas para esta seleção.</p>;
  return <div className="fm27-data-scroll"><table className="fm27-data" aria-label="Retrospecto por competição">
   <thead><tr><th>Competição</th><th>J</th><th>V</th><th>E</th><th>D</th>
    {individual?<><th>Gols</th><th>Assist.</th><th>Defesas</th></>:<><th>GP</th><th>GC</th></>}
   </tr></thead>
   <tbody>{linhas.map(x=><tr key={x.competicao}>
-   <td>{x.competicao}</td><td>{x.jogos}</td><td>{x.vitorias}</td><td>{x.empates}</td><td>{x.derrotas}</td>
+   <td><button className="ajoia-entity-link" onClick={()=>onCompeticao?.(x.competicao)}>{x.competicao}</button></td><td>{x.jogos}</td><td>{x.vitorias}</td><td>{x.empates}</td><td>{x.derrotas}</td>
    {individual?<><td>{x.gols}</td><td>{x.assistencias}</td><td>{x.defesas}</td></>:<><td>{x.golsPro}</td><td>{x.golsContra}</td></>}
   </tr>)}</tbody>
  </table></div>;
 }
-function Partidas({linhas,individual}){
+function Partidas({linhas,individual,onClube,onCompeticao}){
  if(!linhas.length)return <p className="fm27-empty">Nenhuma partida disponível para os filtros escolhidos. Dados ausentes não serão inventados.</p>;
  return <div className="fm27-data-scroll"><table className="fm27-data" aria-label="Resultados dos confrontos">
   <thead><tr><th>Ano</th><th>Competição</th><th>Mandante</th><th>Placar</th><th>Visitante</th>
    {individual&&<><th>Gols</th><th>Assist.</th><th>Defesas</th><th>Nota</th></>}
   </tr></thead>
   <tbody>{linhas.map(j=><tr key={j.id}>
-   <td>{j.ano}</td><td>{j.competicao}<small className="fm27-cell-sub">{j.fase||j.rodada?typeof j.rodada==='number'?`Rodada ${j.rodada}`:j.fase||j.rodada:null}</small>
+   <td>{j.ano}</td><td><button className="ajoia-entity-link" onClick={()=>onCompeticao?.(j.competicao)}>{j.competicao}</button><small className="fm27-cell-sub">{j.fase||j.rodada?typeof j.rodada==='number'?`Rodada ${j.rodada}`:j.fase||j.rodada:null}</small>
     {j.origem==='distribuicao-simulada'&&<small className="fm27-cell-sub">Estatísticas distribuídas</small>}</td>
-   <td className="fm27-club-cell"><img src={escudoDe(j.casa)} alt=""/>{j.casa}</td>
+   <td className="fm27-club-cell"><img src={escudoDe(j.casa)} alt=""/><button className="ajoia-entity-link" onClick={()=>onClube?.(j.casa)}>{j.casa}</button></td>
    <td><b className="fm27-score">{j.golsCasa} – {j.golsFora}</b></td>
-   <td className="fm27-club-cell"><img src={escudoDe(j.fora)} alt=""/>{j.fora}</td>
+   <td className="fm27-club-cell"><img src={escudoDe(j.fora)} alt=""/><button className="ajoia-entity-link" onClick={()=>onClube?.(j.fora)}>{j.fora}</button></td>
    {individual&&<><td>{numero(j.gols)}</td><td>{numero(j.assistencias)}</td><td>{numero(j.defesas)}</td><td>{numero(j.nota)}</td></>}
   </tr>)}</tbody>
  </table></div>;
 }
-export default function HistoricoConfrontos({c,jogadorInicial=null}){
+export default function HistoricoConfrontos({c,jogadorInicial=null,clubeInicial=null,onClube,onJogador,onCompeticao}){
  const [modo,M]=useState(jogadorInicial?'jogadores':'clubes');
- const [clube,C]=useState(''),[atleta,P]=useState(jogadorInicial||'voce');
+ const [clube,C]=useState(clubeInicial||''),[atleta,P]=useState(jogadorInicial||'voce');
  const [buscaAtleta,BA]=useState(''),[clubeAtuacao,CA]=useState('');
  const [local,L]=useState(''),[adversario,A]=useState(''),[competicao,K]=useState(''),[ano,Y]=useState('');
  const u=c.tecnico?.universo||c.universo||{};
@@ -106,8 +106,8 @@ export default function HistoricoConfrontos({c,jogadorInicial=null}){
     <div className="fm27-match-title">
      <div className="fm27-match-crest">{!individual&&destaque?<img src={escudoDe(destaque)} alt=""/>: <span>★</span>}</div>
      <div><span className="fm27-eyebrow">{individual?'DESEMPENHO INDIVIDUAL':'CONFRONTOS DO CLUBE'}</span>
-      <h3>{destaque||'Sem resultados'}{rivalAtivo?` × ${rivalAtivo}`:''}</h3>
-      <p>{compAtiva||'Todas as competições'} · {anoAtivo||'Histórico completo'}</p></div>
+      <h3>{destaque?<button className="ajoia-entity-link" onClick={()=>individual?onJogador?.(atletaAtual):onClube?.(clubeAtual)}>{destaque}</button>:'Sem resultados'}{rivalAtivo?<> × <button className="ajoia-entity-link" onClick={()=>onClube?.(rivalAtivo)}>{rivalAtivo}</button></>:null}</h3>
+      <p>{compAtiva?<button className="ajoia-entity-link" onClick={()=>onCompeticao?.(compAtiva)}>{compAtiva}</button>:'Todas as competições'} · {anoAtivo||'Histórico completo'}</p></div>
     </div>
     <div className="fm27-kpis fm27-confront-kpis">
      {[[resumo.jogos,'Jogos'],[resumo.vitorias,'Vitórias'],[resumo.empates,'Empates'],[resumo.derrotas,'Derrotas'],
@@ -122,9 +122,9 @@ export default function HistoricoConfrontos({c,jogadorInicial=null}){
      <span>Nota média <b>{numero(resumo.notaMedia)}</b></span>
     </div>}
     <div className="fm27-panel-heading"><div><h3>Resumo por competição</h3><p>Comparação dos registros em cada torneio</p></div></div>
-    <ResumoCompeticoes linhas={resumo.porCompeticao} individual={individual}/>
+    <ResumoCompeticoes linhas={resumo.porCompeticao} individual={individual} onCompeticao={onCompeticao}/>
     <div className="fm27-panel-heading fm27-results-heading"><div><h3>Partidas registradas</h3><p>{resumo.partidas.length} jogos com placar arquivado</p></div></div>
-    <Partidas linhas={resumo.partidas} individual={individual}/>
+    <Partidas linhas={resumo.partidas} individual={individual} onClube={onClube} onCompeticao={onCompeticao}/>
     <p className="fm27-archive-footnote">As estatísticas distribuídas por simulação são identificadas nas partidas. Temporadas antigas sem placares disponíveis não são reconstruídas artificialmente.</p>
    </div>
   </div>

@@ -1,0 +1,27 @@
+name: Auditar procedência de atletas reais
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/comum/lib.js'
+      - 'src/simulacao/MundoVivo.jsx'
+      - 'src/dados/metadadosAtletasReais.js'
+      - 'tests/proveniencia-atletas-reais.test.mjs'
+      - '.github/workflows/auditar-proveniencia-atletas-reais.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  procedencia:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Verificar identidades, estimativas e saves
+        run: node --test tests/proveniencia-atletas-reais.test.mjs tests/metadados-atletas-reais.test.mjs
+      - name: Compilar a ficha do jogador no GitHub Pages
+        run: GITHUB_PAGES=true npm run build

@@ -1116,7 +1116,6 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
   const sel = card.selecao;
   const temFesta = card.titulos.length > 0;
   const pequenas = card.titulos.filter((t) => !TIPOS_GRANDES.includes(t.tipo));
-  const vagas = vagasDaLiga(card.ligaId);
   const ligaRes = `${card.posLiga}º de ${card.totalLiga}`;
   const corLiga = card.posLiga === 1 ? "ouro" : card.rebaixado ? "ruim" : null;
   const contRes = card.continental ? (card.titulos.some((t) => t.tipo === "continental") ? "Campeão" : card.continental.faseNome) : null;

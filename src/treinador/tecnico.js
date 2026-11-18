@@ -333,14 +333,16 @@ export function opcoesInicioTecnico(c) {
   const vinculos = vinculosComoJogador(c);
   const reputacao = limitar(Math.round(25 + (c.legado?.pontos || 0) / 22), 25, 85);
   const teto = calcularOvrTecnico({ reputacao }) + 18;
-  const elegiveis = vinculos.filter(v => v.torcida >= 90 && v.temporadas >= 4 && v.titulos >= 2).slice(0, 2);
+  const elegiveis = vinculos.filter(v => v.torcida >= 90 && v.temporadas >= 4 && v.titulos >= 2 &&
+    !['serieD', 'fora-piramide'].includes(CLUBES_CONVITES_TECNICO.find(c => c.nome === v.clube)?.liga)).slice(0, 2);
   const opcoes = elegiveis.map(v => {
     const dados = CLUBES_CONVITES_TECNICO.find(x => x.nome === v.clube);
     // Clube grande dá ao ídolo novato só um contrato de um ano: a meta precisa vir.
     return { ...v, pais:dados?.pais, liga:dados?.liga, elenco:dados?.elenco, salario:dados?.salario, contratoCurto: (dados?.elenco ?? 0) >= CONTRATO_CURTO_ELENCO, motivo: v.idolatria ? 'Ídolo do clube' : 'Ex-jogador com vínculo forte' };
   });
   const pais = CLUBES_CONVITES_TECNICO.find(x => x.nome === c.clubeNome)?.pais || 'Brasil';
-  const candidatos = CLUBES_CONVITES_TECNICO.filter(x => x.elenco <= teto && x.exigencia <= reputacao + 8 && !opcoes.some(o => o.clube === x.nome));
+  const candidatos = CLUBES_CONVITES_TECNICO.filter(x => !['serieD', 'fora-piramide'].includes(x.liga) &&
+    x.elenco <= teto && x.exigencia <= reputacao + 8 && !opcoes.some(o => o.clube === x.nome));
   const rng = geradorTecnico(`${c.nome}|${c.ano}|inicio-tecnico`);
   const ordem = candidatos.map(x => ({...x, ordem: rng() + (x.pais === pais ? 1 : 0)})).sort((a,b) => b.ordem-a.ordem);
   for (const x of ordem) {
@@ -421,7 +423,7 @@ export function gerarPropostasTecnico(t, rng = sorteio) {
   const clubesMundo = CLUBES_CONVITES_TECNICO.map(x => ({
     ...x,
     liga: x.nome === t.clube ? (t.liga || t.ligasMundo?.[x.nome] || x.liga) : (t.ligasMundo?.[x.nome] || x.liga),
-  }));
+  })).filter(x => !['serieD', 'fora-piramide'].includes(x.liga));
   const clubeAtual = clubesMundo.find(x => x.nome === t.clube);
   const referencia=clubesMundo.find(c=>c.nome===(t.clube||t.clubeReferencia))||clubesMundo.find(c=>c.nome===t.temporadas?.at(-1)?.clube);
   const anterior=t.temporadas?.at(-1),boa=!!(anterior?.cumpriuObjetivo||anterior?.campeao||(Number.isFinite(anterior?.posicao)&&anterior.posicao<=4));

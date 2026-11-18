@@ -19,6 +19,7 @@ import {bonusForcaLoja,creditarSalarioTecnico,comprarItemLojaTecnico} from "./lo
 import {aplicarPretemporadaRapida,planoPretemporadaRapida,renovarVerbaPretemporada} from './pretemporadaRapida.js';
 import { vinculoAtivoTecnico, riscosIdolatriaTecnico, registrarRupturasTecnico } from './idolatriaTecnico.js';
 import { FORMACOES_TECNICO, perfilTaticoTecnico, riscoEstiloTecnico } from './taticasTecnico.js';
+import {elencoTaticoRapidoDoMundo} from './elencoRapidoMundo.js';
 import { CLUBES, CLASSICOS } from '../dados/data.js';
 import { EVENTOS_CONTEXTO_TECNICO } from './eventosTecnico.js';
 import { competicaoDoTitulo } from '../comum/tacas.js';
@@ -690,8 +691,8 @@ export function calendarioAdversariosTecnico(t = {}) {
     return { rodada: i + 1, nome: rival.nome, forca: rival.elenco, casa: i < 19 };
   });
 }
-export function probabilidadesConfrontoTecnico(t, adversario) {
-  const tatica=perfilTaticoTecnico(t);
+export function probabilidadesConfrontoTecnico(t, adversario, elencoMundoRapido=null) {
+  const tatica=perfilTaticoTecnico(t,elencoMundoRapido);
   const bruta = forcaClubeTecnico(t) + tatica.ajuste - (adversario?.forca ?? 50);
   // Favoritismo enorme rende menos: o pequeno se fecha e o gigante não vence sempre.
   const diferenca = bruta > 12 ? 12 + (bruta - 12) * 0.6 : bruta;
@@ -852,6 +853,8 @@ export function reuniaoEmergenciaTecnico(c, escolha, rng = sorteio) {
 }
 export function simularEtapaTecnico(c, rng = sorteio) {
   const t = c?.tecnico;
+  // Projeção local; jamais adicionada a c.tecnico, andamento ou save.
+  const elencoRapido=t?.modoTreinadorRapido?elencoTaticoRapidoDoMundo(c.mundo,t.clube):null;
   if (!t || t.fase !== 'pretemporada') throw new Error('Etapa indisponível.');
   if(carreiraTecnicoEncerrada(t,idadeAtualTecnico(c)))throw new Error('Carreira de treinador encerrada.');
   if ((t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) throw new Error('Conclua as decisões antes de jogar.');
@@ -871,7 +874,7 @@ export function simularEtapaTecnico(c, rng = sorteio) {
       confrontos.push({ ...adversario });
       continue;
     }
-    const { vitoria: pVitoria, empate: pEmpate } = probabilidadesConfrontoTecnico(t, adversario);
+    const { vitoria: pVitoria, empate: pEmpate } = probabilidadesConfrontoTecnico(t, adversario, elencoRapido);
     const r = rng();
     const resultado = r < pVitoria ? 'V' : r < pVitoria + pEmpate ? 'E' : 'D';
     if (resultado === 'V') v++; else if (resultado === 'E') e++; else d++;
@@ -953,6 +956,7 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   const pausa=c.tecnico.temporadaPausada;
   if(pausa&&!pausa.escolha)throw new Error('Escolha uma intervenção para continuar.');
   const t = {...c.tecnico,forcasMundo:forcasDoMundo(c),copasEscolhaHabilitadas:c.tecnico.copasEscolhaHabilitadas||!!opcoes.copasInterativas,temporadaPausada:null,intervencaoPendente:null};
+  const elencoRapido=t.modoTreinadorRapido?elencoTaticoRapidoDoMundo(c.mundo,t.clube):null;
   if ((t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) throw new Error('Tome as decisões da temporada antes de simular.');
   if (t.andamento?.rodadas || t.andamento?.jogos) throw new Error('Temporada em andamento: avance pelas etapas.');
   if (t.tipoEquipe === 'selecao') {
@@ -1018,7 +1022,7 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
     const intervencao=pausa&&pausa.tipo!=='parada'&&rodada===pausa.indice?pausa.escolha:null;
     const estiloJogo=intervencao==='atacar'?'ofensivo':intervencao==='proteger'?'defensivo':t.estilo;
     const planoJogo={...t,liga:ligaAtual,estilo:estiloJogo};
-    const odds = probabilidadesConfrontoTecnico(planoJogo, adversario);
+    const odds = probabilidadesConfrontoTecnico(planoJogo, adversario, elencoRapido);
     const sorteioResultado = rng();
     const resultado = sorteioResultado < odds.vitoria ? 'V' : sorteioResultado < odds.vitoria + odds.empate ? 'E' : 'D';
     if (resultado === 'V') vitorias++;
@@ -1072,7 +1076,7 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
     alemanha2: null, arabia: 'AFC Champions League Elite', holanda: 'UEFA Champions League', mls: 'CONCACAF Champions Cup', turquia: 'UEFA Champions League'
   };
   const bonusTecnico = ((t.moral ?? 50) - 50) * 0.06 + 1;
-  const tatica=perfilTaticoTecnico(t);
+  const tatica=perfilTaticoTecnico(t,elencoRapido);
   const torneios = [];
   const copaNome = copasPorLiga[ligaAtual];
   if (copaNome) torneios.push(simularCopaNacionalTecnico({

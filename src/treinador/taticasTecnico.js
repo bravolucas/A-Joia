@@ -6,10 +6,14 @@ export const FORMACOES_TECNICO = [
  {id:'4-4-2',nome:'4-4-2',descricao:'Distribui o peso entre defesa e meio-campo.',pesos:{GOL:1,DEF:4,MEI:4,ATA:2}},
  {id:'3-5-2',nome:'3-5-2',descricao:'Valoriza o meio-campo e dá menos peso à defesa.',pesos:{GOL:1,DEF:3,MEI:5,ATA:2}},
 ];
-export function perfilTaticoTecnico(t={}){
+export function perfilTaticoTecnico(t={},elencoMundoRapido=null){
  const formacao=FORMACOES_TECNICO.find(f=>f.id===t.formacao)||FORMACOES_TECNICO[1];
  const estilo=['ofensivo','defensivo'].includes(t.estilo)?t.estilo:'equilibrado';
- const elenco=!t.modoTreinadorRapido&&t.gestao&&t.gestao.clube===t.clube?t.gestao.elenco:[];
+ // No modo rápido o elenco é recebido temporariamente: nunca armazenamos
+ // outra cópia do cadastro mundial dentro do save do técnico.
+ const elenco=t.modoTreinadorRapido
+  ? (Array.isArray(elencoMundoRapido)?elencoMundoRapido:[])
+  : t.gestao&&t.gestao.clube===t.clube?t.gestao.elenco:[];
  let ajuste=0;
  if(elenco?.length){
   // Matching exclusivo: um atleta só preenche um setor. Posição secundária

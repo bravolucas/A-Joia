@@ -1,5 +1,5 @@
 import { riscoEstiloTecnico } from './taticasTecnico.js';
-import {mediasGols} from '../competicoes/motorPlacares.js';
+import {mediasGols,amostrarPoisson} from '../competicoes/motorPlacares.js';
 import {temIdaVolta} from '../competicoes/regrasIdaVolta.js';
 const limitar = (n, min, max) => Math.max(min, Math.min(max, n));
 const sorteio = () => Math.random();
@@ -14,12 +14,7 @@ function embaralhar(lista, rng) {
   return out;
 }
 
-function poisson(media, rng) {
-  const limite = Math.exp(-limitar(media, 0.05, 8));
-  let produto = 1, gols = 0;
-  do { gols++; produto *= rng(); } while (produto > limite && gols < 12);
-  return gols - 1;
-}
+const poisson=amostrarPoisson;
 
 /** A tática pertence somente ao clube do usuário, inclusive quando visitante. */
 export function mediasPartidaCopaTecnico(casa,fora,clubeUsuario,bonusTecnico=0,campoNeutro=false){

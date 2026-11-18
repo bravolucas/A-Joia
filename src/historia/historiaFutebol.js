@@ -151,7 +151,7 @@ export function registrarAnoHistoria(c,a,{modo='rapido'}={}){
  const mapa=new Map(eventosConhecidos(c).map(e=>[idEdicao(e.ano,e.nome),e]));
  const anteriores=[...mapa.values()];
  if(modo==='rapido'){
-  if(!a.classificacoesMundo)a.classificacoesMundo=simularClassificacoesMundoTecnico({clubes:clubesDoMundo(c).filter(x=>!LIGAS[x.liga]?.naoJogavel),ligasMundo:c.tecnico?.ligasMundo||c.ligas,rng:geradorTecnico(`${c.codigo}|${a.ano}|ligas-arquivo`)});
+  if(!a.classificacoesMundo)a.classificacoesMundo=simularClassificacoesMundoTecnico({clubes:clubesDoMundo(c).filter(x=>x.liga==='serieC'||!LIGAS[x.liga]?.naoJogavel),ligasMundo:c.tecnico?.ligasMundo||c.ligas,ano:a.ano,rng:geradorTecnico(`${c.codigo}|${a.ano}|ligas-arquivo`)});
   a.torneiosMundo=[];
   for(const e of simularMundo(c,a))inserir(mapa,e);
  }

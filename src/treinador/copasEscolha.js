@@ -192,7 +192,20 @@ function chaveInicialMundial48(c,rng){
   pool.splice(pool.indexOf(nome),1);
   return nome;
  };
- for(let i=0;i<8;i++)pares.push([vencedores[i],escolherRival(vencedores[i],terceiros)]);
+ // Pareamento por busca evita sorteios que deixam o último cabeça de chave
+ // sem rival elegível, embora existam combinações válidas.
+ const parearTerceiros=(i,disponiveis)=>{
+  if(i===8)return [];
+  const opcoes=embaralhar(disponiveis.filter(nome=>grupoPorEquipe.get(nome)!==grupoPorEquipe.get(vencedores[i])),rng);
+  for(const nome of opcoes){
+   const demais=parearTerceiros(i+1,disponiveis.filter(x=>x!==nome));
+   if(demais)return [nome,...demais];
+  }
+  return null;
+ };
+ const distribuicaoTerceiros=parearTerceiros(0,terceiros);
+ if(!distribuicaoTerceiros)throw new Error('Copa do Mundo: não foi possível parear terceiros colocados.');
+ for(let i=0;i<8;i++)pares.push([vencedores[i],distribuicaoTerceiros[i]]);
  for(let i=8;i<12;i++)pares.push([vencedores[i],escolherRival(vencedores[i],segundos)]);
  while(segundos.length){
   const a=segundos.shift();
@@ -261,7 +274,7 @@ function registrarMata(c,jogo){
   c.faseUsuario=`Eliminado: ${fase.toLowerCase()}`;c.fase='fim';let times=vencedores.map(nome=>({nome,forca:c.forcas[nome]}));
   // Continue the real remaining bracket, including stronger clubs joining after early national rounds.
   if(c.reservados?.length){times.push(...c.reservados.map(nome=>({nome,forca:c.forcas[nome]})));c.reservados=[];}
-  while(times.length>1){const js=[],next=[];times.sort((a,b)=>nivel(b)-nivel(a));while(times.length>1){const a=times.shift(),b=times.pop(),j=jogoDaChave({...c,tamanho:times.length+next.length*2+2},a,b,rng);js.push(j);next.push(j.vencedor===a.nome?a:b);if(!times.length&&!next.slice(0,-1).length)c.vice=j.vencedor===a.nome?b.nome:a.nome;}if(times.length)next.push(times[0]);c.fases.push({fase:faseN(next.length*2),jogos:js});times=next;}
+  while(times.length>1){const js=[],next=[];if(c.formato!=='selecao48')times.sort((a,b)=>nivel(b)-nivel(a));while(times.length>1){const a=times.shift(),b=c.formato==='selecao48'?times.shift():times.pop(),j=jogoDaChave({...c,tamanho:times.length+next.length*2+2},a,b,rng);js.push(j);next.push(j.vencedor===a.nome?a:b);if(!times.length&&!next.slice(0,-1).length)c.vice=j.vencedor===a.nome?b.nome:a.nome;}if(times.length)next.push(times[0]);c.fases.push({fase:faseN(next.length*2),jogos:js});times=next;}
   c.campeao=times[0]?.nome||null;completarTerceiroLugar(c);
  }
 }

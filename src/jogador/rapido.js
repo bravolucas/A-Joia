@@ -2,7 +2,7 @@ import {clonarEstado} from '../simulacao/clonarEstado.js';
 import {estatisticasDasPartidas} from '../simulacao/estatisticasMundo.js';
 import {gravarPersistente,lerPersistente,apagarPersistente} from '../simulacao/armazenamentoMundo.js';
 import {simularClassificacoesMundoTecnico,classificacaoDosJogos} from '../treinador/classificacoesMundoTecnico.js';
-import {resolverPlayoffsSerieB} from '../simulacao/playoffsSerieB.js';
+import {resolverOuReusarPlayoffsSerieB} from '../simulacao/playoffsSerieB.js';
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
 import {forcasDoMundo,clubesDoMundo,registrarMundoVivo,resumirTabelas} from '../simulacao/mundoVivo.js';
 import {AJUSTE_FORTALEZA,corrigirEquilibrioClubes} from '../dados/equilibrioClubes.js';
@@ -1040,7 +1040,7 @@ function girarDivisoes(c, card) {
   const subiram = [], cairam = [];
   const classificacaoB = card.classificacoesMundo?.serieB?.classificacao;
   const forcasB = Object.fromEntries(clubesDoMundo(c).map(clube => [clube.nome, clube.forca]));
-  const playoffsSerieB = resolverPlayoffsSerieB(classificacaoB, forcasB, rnd);
+  const playoffsSerieB = resolverOuReusarPlayoffsSerieB(classificacaoB, forcasB, rnd, card.playoffsSerieB || card.classificacoesMundo?.serieB?.playoffs);
   if (playoffsSerieB) {
     card.playoffsSerieB = playoffsSerieB;
     card.classificacoesMundo.serieB = { ...card.classificacoesMundo.serieB, playoffs: playoffsSerieB };

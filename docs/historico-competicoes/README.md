@@ -85,3 +85,36 @@ e `GITHUB_PAGES=true npm run build`.
 As mudanças não migram saves, nem inventam placares, vices ou resultados
 históricos simulados. A edição de 2026 deve ser adicionada somente quando
 oficialmente concluída.
+
+## Champions League / Copa dos Campeões — histórico real (18/11/2026)
+
+A história das duas fases da principal competição europeia foi reunida
+sob o título **Champions League**: **71 finais, de 1956 a 2026**, com
+**24 clubes diferentes**. Cada ano indica a **final** da temporada:
+2026 corresponde a 2025/26; a edição 2026/27 ainda está em andamento
+e não recebe campeão adiantado.
+
+O banco fica em `src/dados/championsHistorica.js`.
+O Real Madrid lidera com 15 títulos; Milan tem 7; Bayern de Munique e
+Liverpool, 6 cada; Barcelona, 5; Ajax, 4. O PSG venceu **2025 e 2026**
+e, portanto, tem **dois** títulos históricos, substituindo o número
+antigo incompleto. O arquivo também inclui campeões sem elenco jogável,
+como Celtic, Steaua Bucareste e Estrela Vermelha.
+
+Na interface, `UEFA Champions League`, `Liga dos Campeões` e
+`Copa dos Campeões Europeus` abrem a mesma competição. Os títulos
+reais permanecem em lista distinta dos campeões gerados na carreira;
+conquistas no save são somadas sem alterar as 71 edições reais.
+
+### Fontes e verificação
+- [UEFA — quadro oficial de títulos, atualizado em 30/05/2026](https://www.uefa.com/uefachampionsleague/news/0275-1541637ad1db-88aeeefefefd-1000--all-time-european-cup-honours-board/)
+- [RSSSF — vencedores por final, 1956–2026](https://www.rsssf.org/ec/ec1stats.html)
+- [UEFA — PSG campeão de 2026](https://www.uefa.com/uefachampionsleague/news/02a5-20c02e59f219-15e92acdc717-1000/)
+
+**Validação:** `node --test tests/champions-historica.test.mjs
+tests/libertadores-historica.test.mjs tests/sulamericana-historica.test.mjs
+tests/competicoes-historicas.test.mjs tests/historia-futebol.test.mjs`.
+Depois, `GITHUB_PAGES=true npm run build`.
+
+Dados documentais, sem migração ou regravação de saves existentes,
+sem inventar vice-campeões, placares ou resultados de carreira.

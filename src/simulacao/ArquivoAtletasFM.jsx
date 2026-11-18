@@ -89,7 +89,7 @@ export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
   }
   if(c.nome&&!mapa.has('voce'))mapa.set('voce',{
    id:'voce',voce:true,nome:c.nome||'Seu jogador',posicao:c.posicao,nac:c.nac,
-   clube:c.clubeNome||c.clube?.nome,aposentado:!!c.aposentado,movimentos:c.movimentos||c.jogador?.movimentos||[],
+   clube:c.clubeNome||c.clube?.nome,aposentado:!!c.aposentado,movimentos:c.transferencias?.length?c.transferencias:c.movimentos||c.jogador?.movimentos||[],
    historico:c.temporadas.map(t=>({ano:t.ano,clube:t.clube,jogos:t.jogos,gols:t.gols,assist:t.assist,defesas:t.defesas,cleanSheets:t.cleanSheets,titulos:(t.titulos||[]).map(x=>x.nome),porCompeticao:t.porCompeticao||[]}))
   });
   return [...mapa.values()];

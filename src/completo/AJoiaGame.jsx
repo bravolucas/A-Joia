@@ -943,8 +943,7 @@ function gerarCalendarioLiga(clube, todosClubes, ligaAtual) {
 function simularPartidaLiga(casa, fora, clubeJogadorNome, forcaClubeJogador, ovrJogador) {
   let forcaCasa = casa.nome === clubeJogadorNome ? forcaClubeJogador : casa.forca;
   let forcaFora = fora.nome === clubeJogadorNome ? forcaClubeJogador : fora.forca;
-  forcaCasa += 4; // vantagem de mando de campo
-  const diferenca = forcaCasa - forcaFora;
+  // O motor estatístico já computa a vantagem do mandante.
   const {golsCasa,golsFora} = simularPlacarRealista(forcaCasa,forcaFora,Math.random);
   return { golsCasa, golsFora };
 }

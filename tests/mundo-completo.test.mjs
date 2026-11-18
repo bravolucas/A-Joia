@@ -45,7 +45,12 @@ test('divisões atuais entram no cadastro do calendário seguinte',()=>{
 test('acesso e rebaixamento seguem tabelas completas apesar da força ou do sorteio',()=>{
  const estado=estadoInicialClubes(),nomes=liga=>Object.entries(estado).filter(([,c])=>c.liga===liga).map(([nome])=>({nome}));
  const cima=nomes('brasileirao'),baixo=nomes('serieB'),r=girarLigas(estado,null,{brasileirao:{classificacao:cima},serieB:{classificacao:baixo}});
- for(const x of cima.slice(-4))assert.equal(r.estado[x.nome].liga,'serieB');for(const x of baixo.slice(0,4))assert.equal(r.estado[x.nome].liga,'brasileirao');
+ for(const x of cima.slice(-4))assert.equal(r.estado[x.nome].liga,'serieB');
+ assert.equal(r.promovidos.length,4);
+ assert.deepEqual(r.promovidos.slice(0,2),baixo.slice(0,2).map(x=>x.nome));
+ for(const nome of r.promovidos)assert.equal(r.estado[nome].liga,'brasileirao');
+ assert.ok(r.promovidos.every(nome=>baixo.slice(0,6).some(x=>x.nome===nome)));
+ assert.equal(r.playoffsSerieB.confrontos.length,2);
  assert.equal(Object.values(r.estado).filter(c=>c.liga==='brasileirao').length,cima.length);
 });
 const elenco=clube=>Object.entries({GOL:2,DEF:6,MEI:5,ATA:5}).flatMap(([setor,n])=>Array.from({length:n},(_,i)=>({id:`${clube}-${setor}-${i}`,nome:`${clube} ${setor} ${i}`,clubeNome:clube,posicao:setor==='DEF'?'ZAG':setor==='MEI'?'MC':setor,ovr:i?40:95,carreira:{gols:10,assist:10,jogos:10},gols:99,assist:99,jogos:99})));
@@ -72,7 +77,9 @@ test('copa de clube da segunda divisão mantém o país e não é simulada outra
 test('tabela da segunda divisão vale mesmo quando a elite ainda usa a projeção anual',()=>{
  const estado=estadoInicialClubes(),baixo=Object.entries(estado).filter(([,c])=>c.liga==='serieB').map(([nome])=>({nome}));
  const r=girarLigas(estado,{nome:'Santos',liga:'brasileirao'}, {serieB:{classificacao:baixo}});
- for(const x of baixo.slice(0,4))assert.equal(r.estado[x.nome].liga,'brasileirao');
+ assert.deepEqual(r.promovidos.slice(0,2),baixo.slice(0,2).map(x=>x.nome));
+ assert.equal(r.promovidos.length,4);
+ for(const nome of r.promovidos)assert.equal(r.estado[nome].liga,'brasileirao');
  assert.equal(r.estado.Santos.liga,'brasileirao');
 });
 import {vagasProximaTemporada,aplicarVagaTemporada} from '../src/completo/mundoTemporada.js';

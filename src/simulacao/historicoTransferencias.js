@@ -42,5 +42,5 @@ export const tipoTransferencia = tipo => ({
  rescisao:'Rescisão','mudanca-clube':'Mudança de clube'
 })[tipo] || 'Movimentação';
 export const valorTransferencia = (valor,moeda='BRL') => valor===null||valor===undefined
- ? 'Não informado' : valor===0 ? 'Sem custos' : `${moeda==='EUR'?'€':'R
+ ? 'Não informado' : valor===0 ? 'Sem custos' : `${moeda==='EUR'?'€':'R ${Math.round(valor).toLocaleString('pt-BR')} mil`;
 } ${Math.round(valor).toLocaleString('pt-BR')} mil`;

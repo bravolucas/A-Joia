@@ -77,5 +77,5 @@ test('a edição de 2026 não tem campeão oficial fabricado; edições de estad
  const paulista=galeriaCompeticao({},'Campeonato Paulista');
  assert.ok(paulista.historicas.length>0);
  assert.equal(paulista.historicas[0].ano,2024);
- assert.ok(!galeriaCompeticao({},'Champions League').historicas.length);
+ assert.equal(galeriaCompeticao({},'Champions League').historicas.length,71,'Champions tem histórico real próprio, independente da Libertadores');
 });

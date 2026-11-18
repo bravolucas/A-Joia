@@ -74,7 +74,7 @@ function RetrospectoJogador({c,p,onConfrontos}){
 /** Arquivo persistente de atletas. Layout inspirado na navegação em tela cheia do FM27. */
 export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
  const u=c.tecnico?.universo||c.universo||{};
- const [busca,B]=useState(''),[clube,C]=useState(''),[id,I]=useState(jogadorInicial),[aba,A]=useState('resumo');
+ const [busca,B]=useState(''),[clube,C]=useState(''),[id,I]=useState(jogadorInicial),[aba,A]=useState(jogadorInicial?'carreira':'resumo');
  const [categoria,Q]=useState('todas');
  const todos=useMemo(()=>{
   const mapa=new Map(Object.values(u.atletas||{}).map(p=>[String(p.id),{...p,id:String(p.id)}]));

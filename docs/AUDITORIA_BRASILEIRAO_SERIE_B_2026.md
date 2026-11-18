@@ -27,10 +27,20 @@ Referências: CBF (REC Série B 2026 e notícias de fevereiro/março/novembro de
 
 Foram executadas **10 verificações isoladas de lógica** contra funções extraídas dos arquivos atuais: 10/10 aprovadas. Foram ainda verificadas idempotência do resultado registrado e recomputação diante de tabela modificada.
 
+## Complemento — desempates e critério oficial dos playoffs
+
+- Art. 12 da Série B 2026: pontos; mais vitórias; saldo de gols; gols pró; confronto direto (apenas quando dois times seguem empatados); cartões vermelhos; cartões amarelos; sorteio.
+- `src/simulacao/desempateBrasileiro.js`: as tabelas calculadas usam vitórias, saldo, gols pró e, quando existem os dois jogos, confronto direto. Consideram cartões apenas quando seus totais estão disponíveis. Nos saves sem cartões, o recurso técnico estável é ordem alfabética, **não sorteio oficial**. A simulação completa de disciplina e do último critério ainda exige evolução do modelo.
+- O Modo Treinador aplica o desempate com as partidas registradas da temporada ao encerrar as rodadas.
+- Art. 13: disputa de playoffs por pontos ganhos nos dois jogos; empate por saldo de gols; persistindo a igualdade, melhor posicionamento na fase regular. `src/simulacao/playoffsSerieB.js` registra `pontosPlayoff`, saldo agregado e o critério aplicado.
+- Verificações isoladas adicionais: 7/7 casos de classificação aprovados e 120 temporadas simuladas, com 240 confrontos de playoff, sem divergências no critério de classificação.
+- A versão pública do GitHub Pages e o resultado de todos os jobs do CI continuam sem confirmação por esta auditoria.
+
 ## Testes permanentes no projeto
 
 - `tests/playoffs-serie-b-2026.test.mjs`
 - `tests/brasileirao-calendario-progressao-2026.test.mjs`
+- `tests/desempate-brasileiro-2026.test.mjs`
 - `tests/classificacoes-mundo-tecnico.test.mjs`
 - `tests/mundo-completo.test.mjs`
 

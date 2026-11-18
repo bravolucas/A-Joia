@@ -5,6 +5,7 @@ import {simularPlacarRealista} from '../competicoes/motorPlacares.js';
 import {temIdaVolta} from '../competicoes/regrasIdaVolta.js';
 import {probabilidadesPlacar} from '../competicoes/motorPlacar.js';
 import {ordenarGrupoMundial48} from '../competicoes/desempateMundial48.js';
+import {montarChaveFifa48} from '../competicoes/chaveMundial48.js';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const nivel=c=>Number(c?.forca??c?.elenco??60);
 export const PLANOS_COPA=[{id:'pressionar',nome:'Pressionar e atacar',texto:'Mais risco, menos empates.'},{id:'controlar',nome:'Controlar o jogo',texto:'Mais proteção; aceita levar a decisão adiante.'},{id:'contra',nome:'Explorar os espaços',texto:'Funciona melhor diante de um adversário superior.'}];
@@ -180,43 +181,9 @@ function jogoDaChave(c,a,b,rng){
  * contra adversários da mesma chave; sem privilegiar a seleção do usuário.
  */
 function chaveInicialMundial48(c,rng){
- const grupos=c.grupos||[];
- if(grupos.length!==12)throw new Error('Copa do Mundo: esperados 12 grupos.');
- const grupoPorEquipe=new Map(grupos.flatMap(g=>g.classificacao.map(t=>[t.nome,g.grupo])));
- const vencedores=embaralhar(grupos.map(g=>g.classificacao[0].nome),rng);
- const segundos=embaralhar(grupos.map(g=>g.classificacao[1].nome),rng);
- const terceiros=embaralhar(c.melhoresTerceiros||[],rng);
- if(vencedores.length!==12||segundos.length!==12||terceiros.length!==8)throw new Error('Copa do Mundo: classificação incompleta.');
- const pares=[];
- const escolherRival=(primeiro,pool)=>{
-  const opcoes=pool.filter(nome=>grupoPorEquipe.get(nome)!==grupoPorEquipe.get(primeiro));
-  if(!opcoes.length)throw new Error('Copa do Mundo: falta adversário de outro grupo.');
-  const nome=opcoes[Math.floor(rng()*opcoes.length)];
-  pool.splice(pool.indexOf(nome),1);
-  return nome;
- };
- // Pareamento por busca evita sorteios que deixam o último cabeça de chave
- // sem rival elegível, embora existam combinações válidas.
- const parearTerceiros=(i,disponiveis)=>{
-  if(i===8)return [];
-  const opcoes=embaralhar(disponiveis.filter(nome=>grupoPorEquipe.get(nome)!==grupoPorEquipe.get(vencedores[i])),rng);
-  for(const nome of opcoes){
-   const demais=parearTerceiros(i+1,disponiveis.filter(x=>x!==nome));
-   if(demais)return [nome,...demais];
-  }
-  return null;
- };
- const distribuicaoTerceiros=parearTerceiros(0,terceiros);
- if(!distribuicaoTerceiros)throw new Error('Copa do Mundo: não foi possível parear terceiros colocados.');
- for(let i=0;i<8;i++)pares.push([vencedores[i],distribuicaoTerceiros[i]]);
- for(let i=8;i<12;i++)pares.push([vencedores[i],escolherRival(vencedores[i],segundos)]);
- while(segundos.length){
-  const a=segundos.shift();
-  pares.push([a,escolherRival(a,segundos)]);
- }
- if(pares.length!==16||new Set(pares.flat()).size!==32)throw new Error('Copa do Mundo: fase de 32 inválida.');
- return pares;
+ return montarChaveFifa48(c.grupos,c.melhoresTerceiros);
 }
+
 function reduzirQuadro(times,limite,rng){
  let lista=[...times];if(limite<=0)return [];
  while(lista.length>limite){lista.sort((a,b)=>nivel(b)-nivel(a));const a=lista.pop(),b=lista.pop(),j=jogoEliminatorio(a,b,rng);lista.push(j.vencedor===a.nome?a:b);}

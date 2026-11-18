@@ -17,6 +17,7 @@ import CopaEscolha,{MarcoLiga} from '../treinador/CopaEscolha.jsx';
 import {chaveEstadualJogador,escolherEstadualJogador} from './estadualJogador.js';
 import {resolverCopaEscolhaTecnico} from '../treinador/tecnico.js';
 import {jogosDoGrupo,tabelaGrupoCopa,empateGrupo} from './gruposCopa.js';
+import EstatisticasPosPartida from '../comum/EstatisticasPosPartida.jsx';
 import FechamentoTemporada from './FechamentoTemporada.jsx';
 import {FasesTemporada,PainelJornada,EcosDaTemporada,ProjetoOferta,CenasClube,AlbumJornada,PrimeiraSelecao,CelebracaoLance,ReacaoAntigoClube,ConsultaElencoCopa} from './JornadaUI.jsx';
 import {mudarPosicao,reinventarVeterano} from './posicoesCarreira.js';
@@ -2545,11 +2546,12 @@ function DesafioOvr({ c, resultado, onEscolher, onContinuar }) {
 /* ---------- Copa do Mundo: tela própria, fase a fase ---------- */
 const FAIXA_COPA = { baixo: { txt: "Seguro", cor: "#4ADE80" }, alto: { txt: "Holofote", cor: "#FB923C" }, ouro: { txt: "1x por Copa", cor: "#EBC557" } };
 const CURTO_FASE = ["Grupos", "Oitavas", "Quartas", "Semi", "Final"];
+const CURTO_MUNDIAL_48 = ["Grupos", "16 avos", "Oitavas", "Quartas", "Semi", "Final"];
 const corRes = (r) => (r === "V" ? "#4ADE80" : r === "E" ? "#A1A1AA" : "#F87171");
 function LinhaJogoCopa({ j, nac, i = 0 }) {
   return (
     <div className="flex items-center gap-2.5 py-2 border-t border-white/[.06] first:border-0 cp-surge" style={{ animationDelay: `${i * 0.18}s` }}>
-      <span className="w-14 shrink-0 text-[11px] font-bold uppercase tracking-wide text-[#71717A]">{CURTO_FASE[j.fase]}</span>
+      <span className="w-14 shrink-0 text-[11px] font-bold uppercase tracking-wide text-[#71717A]">{(j.mundial?CURTO_MUNDIAL_48:CURTO_FASE)[j.fase]}</span>
       <Bandeira nac={nac} size={18} />
       <span className="text-[16px] font-black tabular-nums shrink-0" style={{ color: corRes(j.res) }}>{j.gp} x {j.gc}</span>
       <Bandeira nac={j.adv.id} size={18} />
@@ -2668,7 +2670,7 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
 
       {k.convocado&&(k.etapa==="grupos"||k.jogosGrupoOutros)&&<details className="cp-card copa-grupo" >
         <summary>Grupo · {jogosDoGrupo(jogada?.card?.copa||k).length}/3 jogos · {tabela.find(t=>t.id===k.nac)?.p||0} pts</summary>
-        <table aria-label="Classificação do grupo da Copa"><thead><tr><th>Seleção</th><th>J</th><th>PTS</th><th>SG</th></tr></thead><tbody>{tabela.map((t,i)=><tr key={t.id} data-jogador={t.id===k.nac}><td><span>{i+1}º</span> <Bandeira nac={t.id} size={16}/> {t.label}</td><td>{t.j}</td><td>{t.p}</td><td>{t.sg>0?"+":""}{t.sg}</td></tr>)}</tbody></table><small>Dois primeiros avançam. Desempate: saldo, gols marcados e sorteio fixo. Formato do jogo: quatro seleções por grupo.</small>
+        <table aria-label="Classificação do grupo da Copa"><thead><tr><th>Seleção</th><th>J</th><th>PTS</th><th>SG</th></tr></thead><tbody>{tabela.map((t,i)=><tr key={t.id} data-jogador={t.id===k.nac}><td><span>{i+1}º</span> <Bandeira nac={t.id} size={16}/> {t.label}</td><td>{t.j}</td><td>{t.p}</td><td>{t.sg>0?"+":""}{t.sg}</td></tr>)}</tbody></table><small>{k.tipo==='copaMundo'?'Avançam os dois primeiros e os oito melhores terceiros dos 12 grupos. Desempate: pontos, saldo e gols marcados.':'Dois primeiros avançam. Desempate: saldo, gols marcados e sorteio fixo.'}</small>
       </details>}
 
       {/* resultado da escolha */}
@@ -2683,6 +2685,7 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
           {revelado && (
             <div className="cp-copa-resumo flex flex-col items-center gap-3 cp-surge" style={r.etapa === "grupos" ? { animationDelay: ".6s" } : undefined}>
               {r.placar && <div className="display text-[34px] leading-none" style={{ color: r.venceu ? "#4ADE80" : r.empate?"#FDE047":"#F87171" }}>{r.placar}</div>}
+              {r.jogo&&<EstatisticasPosPartida jogo={r.jogo} className="w-full rounded-xl border border-white/10 bg-black/20 p-3"/>}
               <span className="cp-pop text-[14px] font-extrabold uppercase tracking-wide px-3 py-1 rounded-full" style={{ color: r.venceu ? "#1A1405" : "#fff", background: r.venceu ? "linear-gradient(90deg,#EAB308,#FDE047)" : r.empate?"#A16207":"#DC2626" }}>{jogada.card.copa.campeao ? "🏆 Campeão da competição" : r.marca}</span>
               <p className="text-[18px] leading-snug text-[#F4F4F5] text-center font-medium px-1">{r.texto}</p>
               {r.outro&&<p className="text-[12px] text-[#A1A1AA]">Outro jogo: {r.outro.mandante.label} {r.outro.gp} x {r.outro.gc} {r.outro.visitante.label}</p>}

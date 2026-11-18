@@ -39,7 +39,20 @@ jobs:
             esac
           done
           test "${#arquivos[@]}" -gt 0
-          node --test "${arquivos[@]}"
+          # A suíte extensa pode produzir logs superiores ao limite de leitura do GitHub.
+          # Capturar a saída preserva o código de falha e permite identificar erros reais.
+          saida="$RUNNER_TEMP/a-joia-testes-logica.log"
+          set +e
+          node --test "${arquivos[@]}" > "$saida" 2>&1
+          codigo=$?
+          set -e
+          if [ "$codigo" -ne 0 ]; then
+            echo "::error::Testes de lógica falharam (exit $codigo). Ocorrências relevantes:"
+            grep -n -E 'not ok|^# (fail|tests|pass|cancelled|skipped)|ERR_|Error:|error:' "$saida" | tail -n 90 || true
+          fi
+          echo "Resumo final da execução:"
+          tail -n 110 "$saida"
+          exit "$codigo"
       - name: Gerar versão de produção
         run: npm run build
 

@@ -106,14 +106,31 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
       (confronto.jogos || []).map((jogo, indice) => ({
         ...jogo, rodada: 39 + indice, fase: `playoff-${confronto.chave}-${jogo.fase}`
       })));
-    for(const jogo of [...(t.jogos||[]),...(a.liga===liga?a.partidasLiga||[]:[]),...jogosTreinador,...partidasPlayoffs]){
+    const edicaoC=t.edicaoSerieC;
+    const inicioQuadrangular=edicaoC?.regulamento?.rodadas??0;
+    const jogosQuadrangulares=(edicaoC?.quadrangulares||[]).flatMap(grupo=>
+      (grupo.jogos||[]).map(j=>({...j,rodada:inicioQuadrangular+j.rodada,
+        fase:`quadrangular-${grupo.nome}`})));
+    const jogosFinalC=(edicaoC?.final?.jogos||[]).map((j,i)=>({
+      ...j,rodada:inicioQuadrangular+7+i,fase:`final-serie-c-${j.fase}`
+    }));
+    for(const jogo of [...(t.jogos||[]),...(a.liga===liga?a.partidasLiga||[]:[]),...jogosTreinador,
+      ...partidasPlayoffs,...jogosQuadrangulares,...jogosFinalC]){
       if(!jogo?.casa||!jogo?.fora||!Number.isFinite(jogo.golsCasa)||!Number.isFinite(jogo.golsFora))continue;
       const chave=[jogo.rodada??jogo.fase??'',jogo.casa,jogo.fora].join('|');
       if(!jogosUnicos.has(chave))jogosUnicos.set(chave,jogo);
     }
     u.edicoes.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',
-      classificacao:t.classificacao,jogos:compactarJogos([...jogosUnicos.values()]),campeao:t.classificacao?.[0]?.nome,
-      ...(t.playoffs ? { playoffs:t.playoffs } : {})});
+      classificacao:t.classificacao,jogos:compactarJogos([...jogosUnicos.values()]),
+      campeao:edicaoC?.campeao||t.classificacao?.[0]?.nome,
+      ...(t.playoffs ? { playoffs:t.playoffs } : {}),
+      ...(edicaoC ? { serieC:{
+        regulamento:edicaoC.regulamento, promovidos:edicaoC.promovidos,
+        rebaixados:edicaoC.rebaixados, final:edicaoC.final,
+        quadrangulares:edicaoC.quadrangulares?.map(grupo=>({
+          nome:grupo.nome,classificacao:grupo.classificacao,
+        })),
+      }} : {})});
   }
   if(!a.classificacoesMundo?.[a.ligaId||a.liga]&&(a.classificacao?.length||a.tabelaLiga?.length))u.edicoes.push({ano:a.ano,nome:a.ligaNome||LIGAS[a.ligaId||a.liga]?.nome||a.liga,tipo:'liga',classificacao:a.classificacao||a.tabelaLiga.map((nome,i)=>({nome,posicao:i+1})),jogos:compactarJogos(a.jogosLiga||[]),campeao:a.vencedorLiga||a.classificacao?.[0]?.nome||a.tabelaLiga?.[0]});
   for(const t of [...(a.torneiosMundo||[]),...(a.torneios||[])])if(t.campeao&&!t.finalPendente)u.edicoes.push({ano:a.ano,nome:t.nome,tipo:t.tipo,campeao:t.campeao,vice:t.vice,classificacao:t.classificacao||[],grupos:(t.grupos||[]).map(g=>({grupo:g.grupo,classificacao:g.classificacao||[]})),jogos:compactarJogos(jogosTorneio(t))});

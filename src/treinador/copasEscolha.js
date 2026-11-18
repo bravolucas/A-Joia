@@ -4,6 +4,7 @@ import {geradorTecnico} from './momentosTecnico.js';
 import {simularPlacarRealista} from '../competicoes/motorPlacares.js';
 import {temIdaVolta} from '../competicoes/regrasIdaVolta.js';
 import {probabilidadesPlacar} from '../competicoes/motorPlacar.js';
+import {ordenarGrupoMundial48} from '../competicoes/desempateMundial48.js';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const nivel=c=>Number(c?.forca??c?.elenco??60);
 export const PLANOS_COPA=[{id:'pressionar',nome:'Pressionar e atacar',texto:'Mais risco, menos empates.'},{id:'controlar',nome:'Controlar o jogo',texto:'Mais proteção; aceita levar a decisão adiante.'},{id:'contra',nome:'Explorar os espaços',texto:'Funciona melhor diante de um adversário superior.'}];
@@ -35,8 +36,10 @@ function partida(a,b,rng,plano='controlar',final=false,perfil=null){
  const res=golsCasa>golsFora?'V':golsCasa<golsFora?'D':'E';
  return {casa:a.nome,fora:b.nome,golsCasa,golsFora,vencedor:res==='E'?null:res==='V'?a.nome:b.nome,res};
 }
-function tabela(times,jogos,usuario){const tab=new Map(times.map(c=>[c.nome,{nome:c.nome,jogos:0,pontos:0,vitorias:0,empates:0,derrotas:0,golsPro:0,golsContra:0,meuClube:c.nome===usuario}]));for(const j of jogos){const a=tab.get(j.casa),b=tab.get(j.fora);if(!a||!b)continue;a.jogos++;b.jogos++;a.golsPro+=j.golsCasa;a.golsContra+=j.golsFora;b.golsPro+=j.golsFora;b.golsContra+=j.golsCasa;if(j.vencedor){const v=tab.get(j.vencedor),d=tab.get(j.vencedor===a.nome?b.nome:a.nome);v.vitorias++;v.pontos+=3;d.derrotas++;}else{a.empates++;b.empates++;a.pontos++;b.pontos++;}}
- return [...tab.values()].sort((a,b)=>b.pontos-a.pontos||(b.golsPro-b.golsContra)-(a.golsPro-a.golsContra)||b.golsPro-a.golsPro||b.vitorias-a.vitorias||a.nome.localeCompare(b.nome)).map((x,i)=>({...x,posicao:i+1,saldoGols:x.golsPro-x.golsContra}));}
+function tabela(times,jogos,usuario,desempateMundial=false){const tab=new Map(times.map(c=>[c.nome,{nome:c.nome,jogos:0,pontos:0,vitorias:0,empates:0,derrotas:0,golsPro:0,golsContra:0,meuClube:c.nome===usuario}]));for(const j of jogos){const a=tab.get(j.casa),b=tab.get(j.fora);if(!a||!b)continue;a.jogos++;b.jogos++;a.golsPro+=j.golsCasa;a.golsContra+=j.golsFora;b.golsPro+=j.golsFora;b.golsContra+=j.golsCasa;if(j.vencedor){const v=tab.get(j.vencedor),d=tab.get(j.vencedor===a.nome?b.nome:a.nome);v.vitorias++;v.pontos+=3;d.derrotas++;}else{a.empates++;b.empates++;a.pontos++;b.pontos++;}}
+ const linhas=[...tab.values()];
+ const classificadas=desempateMundial?ordenarGrupoMundial48(linhas,jogos):linhas.sort((a,b)=>b.pontos-a.pontos||(b.golsPro-b.golsContra)-(a.golsPro-a.golsContra)||b.golsPro-a.golsPro||b.vitorias-a.vitorias||a.nome.localeCompare(b.nome));
+ return classificadas.map((x,i)=>({...x,posicao:i+1,saldoGols:x.golsPro-x.golsContra}));}
 function calendario(times,rodadas){const anel=[...times],primeiro=[];if(anel.length%2)anel.push(null);const n=anel.length;for(let r=0;r<n-1;r++){const jogos=[];for(let i=0;i<n/2;i++){let a=anel[i],b=anel[n-1-i];if(!a||!b)continue;if(r%2)[a,b]=[b,a];jogos.push({casa:a.nome,fora:b.nome});}primeiro.push(jogos);anel.splice(1,0,anel.pop());}return Array.from({length:rodadas},(_,r)=>primeiro[r%primeiro.length].map(j=>Math.floor(r/primeiro.length)%2?{casa:j.fora,fora:j.casa}:{...j}));}
 const faseN=n=>n===2?'Final':n===4?'Semifinal':n===8?'Quartas de final':n===16?'Oitavas de final':n===32?'16 avos de final':'Fase preliminar';
 /** O jogo do 3º lugar integra a competição, mesmo após a eliminação do usuário. */
@@ -76,7 +79,7 @@ export function criarCampanhaCopa({nome,tipo='continental',usuario,forcaUsuario,
 }
 function avancarLiga(c,jogoUsuario){
  const rodada=c.calendario[c.rodada],rng=geradorTecnico(`${c.seed}|liga|${c.rodada}`),jogos=rodada.map(j=>{if(jogoUsuario&&[j.casa,j.fora].includes(c.usuario))return jogoUsuario;return partida({nome:j.casa,forca:c.forcas[j.casa]},{nome:j.fora,forca:c.forcas[j.fora]},rng);});
- c.jogosLiga.push(...jogos);for(const j of jogos)if([j.casa,j.fora].includes(c.usuario))c.jogosUsuario.push({...j,fase:c.fase==='liga'?'Fase de liga':'Fase de grupos',rodada:c.rodada+1});c.rodada++;c.classificacao=tabela(c.times,c.jogosLiga,c.usuario);
+ c.jogosLiga.push(...jogos);for(const j of jogos)if([j.casa,j.fora].includes(c.usuario))c.jogosUsuario.push({...j,fase:c.fase==='liga'?'Fase de liga':'Fase de grupos',rodada:c.rodada+1});c.rodada++;c.classificacao=tabela(c.times,c.jogosLiga,c.usuario,c.formato==='selecao48');
 }
 function concluirLiga(c){
  c.grupos=[{grupo:c.formato==='liga'?'Tabela única':c.formato==='estadual'?'Classificação estadual':c.formato==='selecao48'?'Grupo A':c.selecao?'Grupo da seleção':'Grupo do seu clube',jogos:c.jogosLiga,classificacao:c.classificacao}];const pos=c.classificacao.find(x=>x.meuClube)?.posicao||99;c.posicaoInicial=pos;
@@ -98,7 +101,7 @@ function concluirLiga(c){
     js.push(partida(grupo[a],grupo[b],rng));
     if(!['selecao32','selecao48'].includes(c.formato))js.push(partida(grupo[b],grupo[a],rng));
    }
-   const tab=tabela(grupo,js,c.usuario);
+   const tab=tabela(grupo,js,c.usuario,mundial48);
    c.grupos.push({grupo:`Grupo ${String.fromCharCode(65+c.grupos.length)}`,jogos:js,classificacao:tab});
    classificados.push(...tab.slice(0,2).map(x=>x.nome));
    if(mundial48)terceiros.push(tab[2]);

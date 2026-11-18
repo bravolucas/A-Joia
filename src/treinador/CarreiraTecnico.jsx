@@ -86,15 +86,15 @@ function PlacarCompeticao({ jogo }) {
       <PlacarCompeticao jogo={partida} />
     </div>)}
     <div className="text-[9px] text-[#D4D4D8] py-1">
-      Agregado: {jogo.casa} {jogo.golsCasa}–{jogo.golsFora} {jogo.fora}
-      <span className="block font-semibold text-white">Classificado: {jogo.vencedor}{jogo.penaltis ? ' · nos pênaltis' : ''}</span>
+      Agregado: <LinkEntidade tipo="clube" nome={jogo.casa}/> {jogo.golsCasa}–{jogo.golsFora} <LinkEntidade tipo="clube" nome={jogo.fora}/>
+      <span className="block font-semibold text-white">Classificado: <LinkEntidade tipo="clube" nome={jogo.vencedor}/>{jogo.penaltis ? ' · nos pênaltis' : ''}</span>
     </div>
   </div>;
   const placar = Number.isFinite(jogo.golsCasa) && Number.isFinite(jogo.golsFora) ? `${jogo.golsCasa}–${jogo.golsFora}` : '—';
   return <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 border-t border-white/[.05] py-1 text-[9px] text-[#A1A1AA]">
-    <span className={jogo.vencedor === jogo.casa ? 'truncate text-right text-white font-semibold' : 'truncate text-right'}>{jogo.casa || '—'}</span>
+    <span className={jogo.vencedor === jogo.casa ? 'truncate text-right text-white font-semibold' : 'truncate text-right'}><LinkEntidade tipo="clube" nome={jogo.casa||""}>{jogo.casa||"—"}</LinkEntidade></span>
     <strong className="text-white tabular-nums">{placar}{jogo.campoNeutro && <span className="block text-[8px] text-[#A1A1AA] font-normal">Campo neutro</span>}{jogo.prorrogacao && <span className="block text-[8px] text-[#A1A1AA] font-normal">Após prorrogação · 90 min: {jogo.prorrogacao.placar90.golsCasa}–{jogo.prorrogacao.placar90.golsFora}</span>}{jogo.penaltis ? <span className="block text-[8px] text-[#A1A1AA] font-normal">pênaltis</span> : null}</strong>
-    <span className={jogo.vencedor === jogo.fora ? 'truncate text-white font-semibold' : 'truncate'}>{jogo.fora || '—'}</span>
+    <span className={jogo.vencedor === jogo.fora ? 'truncate text-white font-semibold' : 'truncate'}><LinkEntidade tipo="clube" nome={jogo.fora||""}>{jogo.fora||"—"}</LinkEntidade></span>
   </div>;
 }
 
@@ -107,7 +107,7 @@ function CampanhasTemporada({ torneios = [], abertas = false }) {
       return <details key={`${torneio.nome}-${indice}`} className="rounded-xl border border-white/[.07] bg-black/10" open={abertas||undefined}>
       <summary className="cursor-pointer list-none flex items-center gap-2 p-2">
         <TacaCompeticao tipo={torneio.tipo || competicaoDoTitulo(torneio.nome).tipo} nome={torneio.nome} size={28} />
-        <strong className="min-w-0 flex-1 truncate text-[11px] text-white">{torneio.nome}</strong>
+        <strong className="min-w-0 flex-1 truncate text-[11px] text-white"><LinkEntidade tipo="competicao" nome={torneio.nome}/></strong>
         <span className={`text-[10px] font-bold ${torneio.faseUsuario === 'Campeão' ? 'text-[#FDE68A]' : 'text-[#A1A1AA]'}`}>{torneio.faseUsuario}</span>
       </summary>
       <div className="px-2 pb-2">
@@ -135,10 +135,10 @@ function ClassificacoesMundo({ classificacoes = {}, ligaAtual, clubeAtual }) {
     <summary className="cursor-pointer px-2 py-1.5 text-[9px] font-bold text-[#D4D4D8]">Classificações das outras ligas ({ligas.length})</summary>
     <div className="px-2 pb-2">
       {ligas.map(([liga, dados]) => <details key={liga} className="mt-1 rounded-md border border-white/[.06] bg-black/15">
-        <summary className="cursor-pointer px-2 py-1.5 text-[9px] font-semibold text-[#A1A1AA]">{competicaoTemporadaTecnico({ liga })}</summary>
+        <summary className="cursor-pointer px-2 py-1.5 text-[9px] font-semibold text-[#A1A1AA]"><LinkEntidade tipo="competicao" nome={competicaoTemporadaTecnico({liga})}/></summary>
         <div className="max-h-48 overflow-y-auto px-2 pb-1">
           <div className="grid grid-cols-[1.5rem_minmax(0,1fr)_2rem_2rem_3rem] gap-1 border-b border-white/[.08] py-1 text-[8px] uppercase text-[#71717A]"><span>#</span><span>Clube</span><span className="text-right">J</span><span className="text-right">V</span><span className="text-right">Pts</span></div>
-          {dados.classificacao.map((clube, indice) => <div key={clube.nome} className={`grid grid-cols-[1.5rem_minmax(0,1fr)_2rem_2rem_3rem] gap-1 py-1 text-[9px] ${clube.nome === clubeAtual ? 'font-bold text-[#FDE68A]' : 'text-[#A1A1AA]'}`}><span>{clube.posicao || indice + 1}</span><span className="truncate">{clube.nome}</span><span className="text-right">{clube.jogos ?? '—'}</span><span className="text-right">{clube.vitorias ?? '—'}</span><span className="text-right">{clube.pontos ?? '—'}</span></div>)}
+          {dados.classificacao.map((clube, indice) => <div key={clube.nome} className={`grid grid-cols-[1.5rem_minmax(0,1fr)_2rem_2rem_3rem] gap-1 py-1 text-[9px] ${clube.nome === clubeAtual ? 'font-bold text-[#FDE68A]' : 'text-[#A1A1AA]'}`}><span>{clube.posicao || indice + 1}</span><span className="truncate"><LinkEntidade tipo="clube" nome={clube.nome}/></span><span className="text-right">{clube.jogos ?? '—'}</span><span className="text-right">{clube.vitorias ?? '—'}</span><span className="text-right">{clube.pontos ?? '—'}</span></div>)}
         </div>
       </details>)}
     </div>
@@ -165,7 +165,7 @@ function LinhaTemporada({ a, idade, ativa, aberta, onClick }) {
       <span className="ct-position">{a.posicao ? `${a.posicao}º` : '—'}</span><span className="ct-number">{a.pontos}</span><span className="ct-number">{a.vitorias}</span><span className="ct-number">{titulos.length}</span>
     </button>
     {aberta && <div className="ct-season-details">
-      <div className="ct-detail-title"><strong><LinkEntidade tipo="competicao" nome={competicaoTemporadaTecnico(a)}/></strong><span>{a.ano}</span></div>
+      <div className="ct-detail-title"><strong><LinkEntidade tipo="competicao" nome={competicaoTemporadaTecnico(a)}/></strong><span><LinkEntidade tipo="clube" nome={a.clube}/> · {a.ano}</span></div>
       <p>{a.formato}</p><p>{a.vitorias}V · {a.empates}E · {a.derrotas}D · {a.pontos} pontos</p>
       {a.avaliacaoDiretoria&&<p className={a.avaliacaoDiretoria.pendente?'ct-warning':''}>{a.avaliacaoDiretoria.motivo}</p>}
       {a.pediuDemissao?<p>Saída por pedido de demissão. A campanha ficou interrompida.</p>:<p>Meta: {a.objetivo} · <span className={a.cumpriuObjetivo ? 'ct-positive' : 'ct-warning'}>{a.avaliacaoDiretoria?.pendente?'em avaliação':a.cumpriuObjetivo ? 'atingida' : 'não atingida'}</span></p>}

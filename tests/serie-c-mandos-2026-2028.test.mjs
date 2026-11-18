@@ -34,7 +34,7 @@ for (const [ano, quantidade, mandosCasa, mandosFora, totalJogos] of [
       const chave = [jogo.casa, jogo.fora].sort().join('|');
       pares.set(chave, [...(pares.get(chave) || []), jogo]);
     }
-    assert.equal(pares.size, quantidade * (quantidade - 1) / 2 / (ano >= 2028 ? 2 : 1));
+    assert.equal(pares.size, ano >= 2028 ? quantidade * (quantidade / 2 - 1) / 2 : quantidade * (quantidade - 1) / 2);
     for (const jogosDoPar of pares.values()) {
       assert.equal(jogosDoPar.length, ano >= 2028 ? 2 : 1);
       if (ano >= 2028) {

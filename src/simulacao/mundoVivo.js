@@ -92,9 +92,16 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
       .map((j,i)=>({casa:j.casa?a.clube:j.nome,fora:j.casa?j.nome:a.clube,
         golsCasa:j.casa?j.golsPro:j.golsContra,golsFora:j.casa?j.golsContra:j.golsPro,
         rodada:j.rodada??i+1})):[];
-    const jogosArquivo=t.jogos?.length?t.jogos:jogosTreinador;
+    const jogosUnicos=new Map();
+    // Incluir tanto a rodada do técnico quanto todos os duelos da IA,
+    // preservando um resultado por par de clubes e rodada.
+    for(const jogo of [...(t.jogos||[]),...(a.liga===liga?a.partidasLiga||[]:[]),...jogosTreinador]){
+      if(!jogo?.casa||!jogo?.fora||!Number.isFinite(jogo.golsCasa)||!Number.isFinite(jogo.golsFora))continue;
+      const chave=[jogo.rodada??jogo.fase??'',jogo.casa,jogo.fora].join('|');
+      if(!jogosUnicos.has(chave))jogosUnicos.set(chave,jogo);
+    }
     u.edicoes.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',
-      classificacao:t.classificacao,jogos:compactarJogos(jogosArquivo),campeao:t.classificacao?.[0]?.nome});
+      classificacao:t.classificacao,jogos:compactarJogos([...jogosUnicos.values()]),campeao:t.classificacao?.[0]?.nome});
   }
   if(!a.classificacoesMundo?.[a.ligaId||a.liga]&&(a.classificacao?.length||a.tabelaLiga?.length))u.edicoes.push({ano:a.ano,nome:a.ligaNome||LIGAS[a.ligaId||a.liga]?.nome||a.liga,tipo:'liga',classificacao:a.classificacao||a.tabelaLiga.map((nome,i)=>({nome,posicao:i+1})),jogos:compactarJogos(a.jogosLiga||[]),campeao:a.vencedorLiga||a.classificacao?.[0]?.nome||a.tabelaLiga?.[0]});
   for(const t of [...(a.torneiosMundo||[]),...(a.torneios||[])])if(t.campeao&&!t.finalPendente)u.edicoes.push({ano:a.ano,nome:t.nome,tipo:t.tipo,campeao:t.campeao,vice:t.vice,classificacao:t.classificacao||[],grupos:(t.grupos||[]).map(g=>({grupo:g.grupo,classificacao:g.classificacao||[]})),jogos:compactarJogos(jogosTorneio(t))});

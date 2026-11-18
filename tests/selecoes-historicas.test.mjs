@@ -5,7 +5,7 @@ import {campeoesRegistrados,competicoesDisponiveis,galeriaCompeticao} from '../s
 import {normalizarEntidade,paginaEntidade,empilharPagina} from '../src/historia/navegacaoEntidades.js';
 
 test('todas as seleções têm acervo real independente do save',()=>{
- assert.deepEqual(competicoesHistoricasSelecoes.sort(),[
+ assert.deepEqual([...competicoesHistoricasSelecoes].sort(),[
  'Copa Africana de Nações','Copa América','Copa da Ásia','Copa das Nações da Oceania',
  'Copa do Mundo','Copa Ouro','Eurocopa'].sort());
  const completo=galeriaCompeticao({},'Copa do Mundo');

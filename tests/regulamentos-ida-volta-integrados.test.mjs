@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {temIdaVolta,regulamentoConhecidoIdaVolta} from '../src/competicoes/regrasIdaVolta.js';
+import {regraDesempateCopa,vencedorPorGolsFora} from '../src/competicoes/desempatePorCompeticao.js';
 import {simularCopaNacionalTecnico,simularCopaContinentalTecnico} from '../src/treinador/competicoesTecnico.js';
 import {prepararCopaPersistente,registrarJogoPersistente} from '../src/completo/copasPersistentes.js';
 import {CLUBES} from '../src/dados/data.js';
@@ -93,4 +94,28 @@ test('modo completo: um jogo de volta já iniciado em save antigo é preservado'
  assert.equal(r.ida,undefined);
  assert.equal(r.resumo.jogosUsuario[0].partidas.length,2);
  assert.equal(card.pernasCopas.copaNacional,undefined);
+});
+
+test('desempate real: CONMEBOL/CBF vão direto aos pênaltis; UEFA e Recopa usam prorrogação',()=>{
+ for(const nome of ['Copa do Brasil','Copa Libertadores','Copa Sul-Americana','Copa Argentina']){
+  assert.equal(regraDesempateCopa({nome,tamanho:8,ano:2026}).prorrogacao,false,nome);
+ }
+ assert.equal(regraDesempateCopa({nome:'Copa do Brasil',tamanho:2,ano:2026}).prorrogacao,false);
+ assert.equal(regraDesempateCopa({nome:'Copa Libertadores',tamanho:2,ano:2026}).prorrogacao,true);
+ assert.equal(regraDesempateCopa({nome:'CONMEBOL Recopa',tamanho:2,ano:2026}).prorrogacao,true);
+ assert.equal(regraDesempateCopa({nome:'UEFA Champions League',tamanho:16,ano:2026}).prorrogacao,true);
+ assert.equal(regraDesempateCopa({nome:'CONCACAF Champions Cup',tamanho:8,ano:2026}).golsFora,true);
+});
+test('Concacaf: gols fora desempata sem contar prorrogação; outros torneios ignoram essa regra',()=>{
+ const ida={casa:'A',fora:'B',golsCasa:0,golsFora:0};
+ const volta={casa:'B',fora:'A',golsCasa:1,golsFora:1};
+ assert.equal(vencedorPorGolsFora(ida,volta,{nome:'CONCACAF Champions Cup',tamanho:8}), 'A');
+ assert.equal(vencedorPorGolsFora(ida,volta,{nome:'Copa Libertadores',tamanho:8}),null);
+ assert.equal(vencedorPorGolsFora(ida,volta,{nome:'UEFA Champions League',tamanho:8}),null);
+ const idaB={casa:'A',fora:'B',golsCasa:2,golsFora:1};
+ const voltaB={casa:'B',fora:'A',golsCasa:1,golsFora:0};
+ assert.equal(vencedorPorGolsFora(idaB,voltaB,{nome:'CONCACAF Champions Cup',tamanho:8}),'B');
+ const idaIgual={casa:'A',fora:'B',golsCasa:1,golsFora:0};
+ const voltaIgual={casa:'B',fora:'A',golsCasa:1,golsFora:0};
+ assert.equal(vencedorPorGolsFora(idaIgual,voltaIgual,{nome:'CONCACAF Champions Cup',tamanho:8}),null);
 });

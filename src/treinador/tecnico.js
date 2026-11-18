@@ -1058,15 +1058,21 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   const idoloEmCasa = !!vinculoAtual?.idolatria;
   const cumpriuObjetivo = posicao <= objetivo.posicao;
   const promessaDescumprida = !!(t.promessaContrato && t.promessaContrato.clube === t.clube && posicao > t.promessaContrato.posicaoMaxima);
-  const movimento = movimentoDivisaoTecnico(ligaAtual, posicao, classificacao.length);
-  const ligaSeguinte = movimento?.para || ligaAtual;
   const classificacoesMundo = classificacoesMundoDaTemporada({ ...t, liga: ligaAtual }, ligaAtual, classificacao, rng);
   const progressaoMundo = atualizarLigasMundoDaTemporada({ ...t, liga: ligaAtual }, ligaAtual, classificacoesMundo);
+  // O resultado real do playoff também determina o destino do clube do treinador.
+  const movimentacao = progressaoMundo.movimentos.find(x => x.clube === t.clube);
+  const movimento = movimentacao
+    ? { tipo: movimentacao.tipo === 'rebaixamento' ? 'rebaixado' : movimentacao.tipo, de: movimentacao.de, para: movimentacao.para }
+    : null;
+  const ligaSeguinte = progressaoMundo.ligasMundo[t.clube] || ligaAtual;
   const temporada = {
     ano: t.ano, clube: t.clube, liga: ligaAtual, idoloEmCasa,
     objetivo: objetivo.nome, cumpriuObjetivo, promessaDescumprida, estilo: t.estilo, formacao: perfilTaticoTecnico(t).formacao,
     decisoes: t.decisoes, jogos: jogosDisputados, vitorias, empates, derrotas, pontos, posicao, campeao,
     classificacao, classificacoesMundo,
+    ...(ligaAtual === 'serieB' && classificacoesMundo.serieB?.playoffAcesso
+      ? { playoffAcesso: classificacoesMundo.serieB.playoffAcesso } : {}),
     ...(progressaoMundo.movimentos.length ? { movimentosMundo: progressaoMundo.movimentos } : {}),
     confrontos, partidasLiga, golsPro, golsContra, paradas: t.paradasTemporada || [], ...(classico ? { classico } : {}),
     ...(movimento?.tipo === 'rebaixado' ? { rebaixado: { de: movimento.de, para: movimento.para } } : {}),

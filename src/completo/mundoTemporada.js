@@ -20,7 +20,7 @@ export function prepararMundoTemporada(c,card,mundo){
  if(card.calendarioMundoVersao===1)return card;
  const ano=card.ano??anoTemporadaCarreira(c),ligaId=card.ligaId||c.clube.liga,clube=c.clube.nome;
  const ligas=ligasDoCompleto(c),clubes=clubesDoCompleto(c,mundo);
- const classificacoesMundo=simularClassificacoesMundoTecnico({clubes:clubes.filter(cl=>cl.liga!==ligaId&&!LIGAS[cl.liga]?.naoJogavel),ligasMundo:ligas,rng:geradorTecnico(`${c.codigo||c.nome}|${ano}|ligas-completo`)});
+ const classificacoesMundo=simularClassificacoesMundoTecnico({clubes:clubes.filter(cl=>cl.liga!==ligaId&&(cl.liga==='serieC'||!LIGAS[cl.liga]?.naoJogavel)),ligasMundo:ligas,ano,rng:geradorTecnico(`${c.codigo||c.nome}|${ano}|ligas-completo`)});
  if(card.classificacao?.length)classificacoesMundo[ligaId]={liga:ligaId,origem:'partidas-jogador',classificacao:card.classificacao.map(t=>({...t})),jogos:(card.jogosLiga||[]).map(j=>({...j}))};
  const nomes=nomeDosTitulos(ligaId);
  const competicoesPreservadas=[COPAS_NACIONAIS[primeiraLiga(ligaId)],nomes.copa,card.copaNacional?.nome,card.continental?.nome,card.continentalPendente?.nome].filter(Boolean);

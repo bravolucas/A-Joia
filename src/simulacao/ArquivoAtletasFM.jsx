@@ -172,7 +172,7 @@ export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
          <td>{m.ano??'—'}</td><td>{tipoTransferencia(m.tipo)}{m.fonte==='temporadas'&&<small className="fm27-transfer-note">Modalidade não registrada</small>}</td>
          <td><LinkEntidade tipo="clube" nome={m.de||''}>{m.de||'Sem clube'}</LinkEntidade></td>
          <td><LinkEntidade tipo="clube" nome={m.para||''}>{m.para||'Sem clube'}</LinkEntidade></td>
-         <td><strong>{valorTransferencia(m.valor)}</strong></td>
+         <td><strong>{valorTransferencia(m.valor,m.moeda)}</strong></td>
         </tr>)}</tbody>
        </table></div>:<p className="fm27-empty">Não há transferências registradas para este atleta. Mudanças de clube só aparecem quando comprovadas pelo histórico.</p>}
       </>}

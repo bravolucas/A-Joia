@@ -6,6 +6,7 @@ import {bloquearRolagem} from './bloqueioRolagem.js';
 import {BolaTrajeto} from './CenarioMini.jsx';
 import "./AnuncioClube.css";
 import { JogadorCampo, CampoPremium, SuperficieMini, CamisaPremium } from './VisualFutebol.jsx';
+import ResumoIndividualPartida from "../jogador/ResumoIndividualPartida.jsx";
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { ARTE, escudoDe } from "./arte.js";
 import { TacaCompeticao } from "./trofeus.jsx";
@@ -842,6 +843,7 @@ export function FichaPartida({ jogo, clubeNome, posicao, onClose }) {
           <span className="text-[10px] text-zinc-400 text-center truncate w-full">{jogo.casa === false ? clubeNome : jogo.adversario}</span>
         </div>
       </div>
+      <ResumoIndividualPartida jogo={jogo}/>
       {jogo.suspenso && <div className="text-center text-[11px] text-red-400 border border-red-500/30 bg-red-500/5 rounded-sm py-1.5 mb-3">🚫 Você cumpriu suspensão e não entrou em campo</div>}
       {(jogo.amarelo || jogo.vermelho) && (
         <div className="flex items-center justify-center gap-2 mb-3">

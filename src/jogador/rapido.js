@@ -292,6 +292,28 @@ export function opcoesClubeInicial(nac, origem) {
     const x = clubeInicial(nac, origem === "base");
     if (!vistos.has(x.nome)) { vistos.add(x.nome); out.push(x); }
   }
+  // Alguns países têm menos de três equipes no recorte inicial (ou o
+  // sorteio de 30 tentativas repete os mesmos clubes). A criação da carreira
+  // precisa SEMPRE oferecer três contratos válidos e diferentes.
+  // Preservar as opções sorteadas e completar com a liga de origem ou a
+  // divisão principal correspondente antes de procurar outras ligas.
+  if (out.length < 3) {
+    const ligas = LIGA_BASE_POR_NAC[nac] || ["portugal2", "inglaterra2", "franca2"];
+    const proximas = new Set(ligas.flatMap(l => [
+      l, l === "serieB" ? "brasileirao" : l.replace(/2$/, "")
+    ]));
+    const forcaAlvo = origem === "base" ? 76 : 60;
+    const candidatos = clubesJogaveis()
+      .filter(cl => !vistos.has(cl.nome))
+      .sort((a, b) =>
+        Number(!proximas.has(a.liga)) - Number(!proximas.has(b.liga)) ||
+        Math.abs(a.forca - forcaAlvo) - Math.abs(b.forca - forcaAlvo) ||
+        a.nome.localeCompare(b.nome, "pt-BR"));
+    for (const cl of candidatos) {
+      vistos.add(cl.nome); out.push(cl);
+      if (out.length === 3) break;
+    }
+  }
   return out;
 }
 

@@ -611,7 +611,7 @@ function participantesDaLigaLegadaTecnico(t, liga) {
     nomesCalendario,
   });
 }
-function classificacoesMundoDaTemporada(t, liga, classificacao, rng) {
+function classificacoesMundoDaTemporada(t, liga, classificacao, rng, jogosTreinador = []) {
   const { clubes, ligasMundo } = participantesDaLigaLegadaTecnico(t, liga);
   return simularClassificacoesMundoTecnico({
     clubes,
@@ -620,6 +620,7 @@ function classificacoesMundoDaTemporada(t, liga, classificacao, rng) {
     clubeTreinador: t.clube,
     forcaTreinador: forcaClubeTecnico(t),
     classificacaoTreinador: classificacao,
+    jogosTreinador,
     ano: t.ano,
     rng,
   });
@@ -1112,13 +1113,16 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
     ? { ...x, jogos: jogosDisputados, pontos, vitorias, empates, derrotas, golsPro, golsContra, saldoGols: golsPro - golsContra }
     : x), partidasLiga, ligaAtual);
   const posicao = classificacao.find(x => x.meuClube)?.posicao || classificacao.length;
-  const campeao = posicao === 1;
+  let campeao = posicao === 1;
   const objetivo = objetivoTecnico({ ...t, liga: ligaAtual });
   const vinculoAtual = vinculoAtivoTecnico(t,t.clube);
   const idoloEmCasa = !!vinculoAtual?.idolatria;
   const cumpriuObjetivo = posicao <= objetivo.posicao;
   const promessaDescumprida = !!(t.promessaContrato && t.promessaContrato.clube === t.clube && posicao > t.promessaContrato.posicaoMaxima);
-  const classificacoesMundo = classificacoesMundoDaTemporada({ ...t, liga: ligaAtual }, ligaAtual, classificacao, rng);
+  const classificacoesMundo = classificacoesMundoDaTemporada({ ...t, liga: ligaAtual }, ligaAtual, classificacao, rng, partidasLiga);
+  if (ligaAtual === 'serieC' && classificacoesMundo.serieC?.edicaoSerieC) {
+    campeao = classificacoesMundo.serieC.edicaoSerieC.campeao === t.clube;
+  }
   const progressaoMundo = atualizarLigasMundoDaTemporada({ ...t, liga: ligaAtual }, ligaAtual, classificacoesMundo, rng);
   // O acesso do técnico é definido pelos confrontos efetivos, não pela posição 3º/4º.
   const movimentoReal = progressaoMundo.movimentos.find(m => m.clube === t.clube && m.de === ligaAtual);
@@ -1307,7 +1311,7 @@ function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
   const { vitorias, empates, derrotas, pontos } = andamento;
   const ligaAtual = t.liga || CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga;
   const classificacao = ordenarClassificacaoTecnico(andamento.classificacao || tabelaClassificacaoTecnico(t, andamento), andamento.partidasLiga || [], ligaAtual);
-  const classificacoesMundo = classificacoesMundoDaTemporada(t, ligaAtual, classificacao, rng);
+  const classificacoesMundo = classificacoesMundoDaTemporada(t, ligaAtual, classificacao, rng, andamento.partidasLiga || []);
   const progressaoMundo = atualizarLigasMundoDaTemporada(t, ligaAtual, classificacoesMundo, rng);
   const movimentoReal = progressaoMundo.movimentos.find(m => m.clube === t.clube && m.de === ligaAtual);
   const ligaSeguinte = progressaoMundo.ligasMundo[t.clube] || ligaAtual;
@@ -1315,7 +1319,8 @@ function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
     ? progressaoMundo.playoffsSerieB?.confrontos.find(chave => chave.melhorCampanha === t.clube || chave.adversario === t.clube)
     : null;
   const posicao = classificacao.find(x => x.meuClube)?.posicao || 18;
-  const campeao = posicao === 1;
+  const campeao = ligaAtual === 'serieC' && classificacoesMundo.serieC?.edicaoSerieC
+    ? classificacoesMundo.serieC.edicaoSerieC.campeao === t.clube : posicao === 1;
   const objetivo = objetivoTecnico(t);
   const idoloEmCasa = !!vinculoAtivoTecnico(t,t.clube)?.idolatria;
   const cumpriuObjetivo = posicao <= objetivo.posicao;

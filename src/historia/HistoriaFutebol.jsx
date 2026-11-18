@@ -16,6 +16,8 @@ import './HistoriaFutebol.css';
 import './ArquivoFM.css';
 import LinkEntidade from './LinkEntidade.jsx';
 import HistoricoPremios from './HistoricoPremios.jsx';
+import GaleriaSelecoes from './GaleriaSelecoes.jsx';
+import {nomeSelecaoHistorica} from '../dados/selecoesHistoricas.js';
 import {EVENTO_ENTIDADE,empilharPagina,paginaEntidade} from './navegacaoEntidades.js';
 import {historicoProfissionalTecnico,titulosConquistadosTecnico} from '../treinador/tecnico.js';
 
@@ -50,17 +52,17 @@ function RecordesSimulacao({c}){
  const [nac,N]=useState(c.nac||c.nacionalidade||''),[metrica,M]=useState('gols'),lideres=lideresObservados(c,{nac,metrica});
  return <section className="hf-recordes"><span className="hf-eyebrow">CADA SAVE TEM SEUS PROTAGONISTAS</span><h2>Recordistas deste universo</h2><p className="hf-nota">Números acumulados dos atletas observados em clubes, desde {c.historiaFutebol?.desde||'o início do registro'}. O filtro reúne jogadores da nacionalidade escolhida; não é um ranking de gols por seleções.</p><div className="hf-filtros"><label>Nacionalidade<select aria-label="Nacionalidade" value={nac} onChange={e=>N(e.target.value)}><option value="">Todas</option>{NACIONALIDADES.map(x=><option value={x.id} key={x.id}>{x.label}</option>)}</select></label><label>Recorde<select aria-label="Recorde" value={metrica} onChange={e=>M(e.target.value)}><option value="gols">Mais gols</option><option value="assist">Mais assistências</option><option value="jogos">Mais jogos</option><option value="defesas">Mais defesas</option><option value="defesasDecisivas">Mais defesas decisivas</option></select></label></div><ol className="hf-ranking">{lideres.map((p,i)=><li key={p.id}><b>{i+1}</b><span><strong><LinkEntidade tipo="jogador" id={p.voce?'voce':p.id} nome={p.nome}/>{p.voce?' · Você':''}</strong><small><LinkEntidade tipo="clube" nome={p.clube}/></small></span><em>{p[metrica]}</em></li>)}</ol>{!lideres.length&&<p className="hf-vazio">Ainda não há dados registrados para este recorte.</p>}</section>;
 }
-function EmblemaCampeao({nome,selecao}){const n=NACIONALIDADES.find(n=>n.label===nome||n.id===nome),src=selecao&&n?bandeiraDe(n.id):escudoDe(nome);return src?<img className="hf-emblema-campeao" src={src} alt=""/>:null;}
-export function GaleriaCompeticoes({c,temporadas,nome,onCompeticao,onClube}){
+function EmblemaCampeao({nome,selecao}){const n=NACIONALIDADES.find(n=>nomeSelecaoHistorica(n.label)===nomeSelecaoHistorica(nome)||n.id===nome);const src=selecao?(n?bandeiraDe(n.id):null):escudoDe(nome);return src?<img className="hf-emblema-campeao" src={src} alt=""/>:selecao?<span aria-hidden="true" className="hf-emblema-campeao">🌐</span>:null;}
+export function GaleriaCompeticoes({c,temporadas,nome,onCompeticao,onClube,onSelecao}){
  const opcoes=useMemo(()=>competicoesDisponiveis(c,temporadas),[c,temporadas]),dados=useMemo(()=>galeriaCompeticao(c,nome,temporadas),[c,nome,temporadas]);
  return <section aria-label="Campeões das competições" className="hf-competicoes"><div className="hf-filtros"><label>Competição<select aria-label="Competição do histórico" value={dados.nome} onChange={e=>onCompeticao(e.target.value)}>{!opcoes.includes(dados.nome)&&<option>{dados.nome}</option>}{opcoes.map(n=><option key={n}>{n}</option>)}</select></label></div>
  <header className="hf-identidade"><TacaCompeticao nome={dados.nome} size={70}/><div><span className="hf-eyebrow">A HISTÓRIA DA COMPETIÇÃO</span><h2>{dados.nome}</h2><p>{dados.edicoes.length} {dados.edicoes.length===1?'edição registrada':'edições registradas'} nesta carreira</p></div></header>
- {dados.ultima&&<article className="hf-campeao-atual"><EmblemaCampeao nome={dados.ultima.clube} selecao={dados.selecao}/><div><small>{dados.ultima.historica?'ÚLTIMO CAMPEÃO HISTÓRICO':'ÚLTIMO CAMPEÃO DA CARREIRA'} · {dados.ultima.ano}</small><strong>{dados.ultima.clube}</strong>{dados.ultima.voce&&<span>Conquistado com você</span>}</div></article>}
+ {dados.ultima&&<article className="hf-campeao-atual"><EmblemaCampeao nome={dados.ultima.clube} selecao={dados.selecao}/><div><small>{dados.ultima.historica?'ÚLTIMO CAMPEÃO HISTÓRICO':'ÚLTIMO CAMPEÃO DA CARREIRA'} · {dados.ultima.ano}</small><strong>{dados.selecao?<LinkEntidade tipo="selecao" nome={dados.ultima.clube}/>:<LinkEntidade tipo="clube" nome={dados.ultima.clube}/>}</strong>{dados.ultima.voce&&<span>Conquistado com você</span>}</div></article>}
  <EdicoesCompeticao c={c} nome={dados.nome}/><h3 className="hf-subtitulo">Campeões por edição</h3><p className="hf-nota">Resultados registrados nesta carreira. Edições sem vencedor salvo ficam fora da lista.</p>
- {dados.edicoes.length?<ol className="hf-linha hf-campeoes">{dados.edicoes.map(e=><li key={e.ano}><time>{e.ano}</time><EmblemaCampeao nome={e.clube} selecao={dados.selecao}/><span>{dados.selecao?<b>{e.clube}</b>:<button onClick={()=>onClube(e.clube)}>{e.clube}</button>}<small>{e.voce?'Conquistado com você':'Campeão na simulação'}</small></span></li>)}</ol>:<p className="hf-vazio">Ainda não há campeão com ano registrado para esta competição.</p>}
- {dados.historicas.length>0&&<details className="hf-historico-estadual hf-historico-competicao"><summary>Histórico até {dados.historicas[0].ano} · {dados.historicas.length} edições documentadas</summary>{dados.notaHistorica&&<p className="hf-nota">{dados.notaHistorica}</p>}<ol className="hf-linha" aria-label={['Libertadores','Copa Sul-Americana','Champions League','Europa League','Conference League','Copa do Brasil'].includes(dados.nome)?`Campeões históricos da ${dados.nome}`:'Campeões estaduais anteriores à carreira'}>{dados.historicas.map(e=><li key={e.ano}><time>{e.ano}</time><span>{e.campeoes.map(t=><button key={t.clube} onClick={()=>onClube(t.clube)}>{t.clube}{t.quantidade>1?` · ${t.quantidade} títulos`:''}</button>)}</span></li>)}</ol></details>}
+ {dados.edicoes.length?<ol className="hf-linha hf-campeoes">{dados.edicoes.map(e=><li key={e.ano}><time>{e.ano}</time><EmblemaCampeao nome={e.clube} selecao={dados.selecao}/><span>{dados.selecao?<LinkEntidade tipo="selecao" nome={e.clube}/>:<button onClick={()=>onClube(e.clube)}>{e.clube}</button>}<small>{e.voce?'Conquistado com você':'Campeão na simulação'}</small></span></li>)}</ol>:<p className="hf-vazio">Ainda não há campeão com ano registrado para esta competição.</p>}
+ {dados.historicas.length>0&&<details className="hf-historico-estadual hf-historico-competicao"><summary>Histórico até {dados.historicas[0].ano} · {dados.historicas.length} edições documentadas</summary>{dados.notaHistorica&&<p className="hf-nota">{dados.notaHistorica}</p>}<ol className="hf-linha" aria-label={['Libertadores','Copa Sul-Americana','Champions League','Europa League','Conference League','Copa do Brasil'].includes(dados.nome)?`Campeões históricos da ${dados.nome}`:'Campeões estaduais anteriores à carreira'}>{dados.historicas.map(e=><li key={e.ano}><time>{e.ano}</time><span>{e.campeoes.map(t=><button key={t.clube} onClick={()=>dados.selecao?onSelecao?.(t.clube):onClube(t.clube)}>{t.clube}{t.quantidade>1?` · ${t.quantidade} títulos`:''}</button>)}</span></li>)}</ol></details>}
  <h3 className="hf-subtitulo">Maiores campeões do acervo</h3><p className="hf-nota">{['Libertadores','Copa Sul-Americana','Champions League','Europa League','Conference League','Copa do Brasil'].includes(dados.nome)?`Ranking dos campeões reais de ${dados.nome==='Libertadores'?'1960':dados.nome==='Copa Sul-Americana'?'2002':dados.nome==='Champions League'?'1956':dados.nome==='Europa League'?'1972':dados.nome==='Copa do Brasil'?'1989':'2022'} a ${['Champions League','Europa League','Conference League'].includes(dados.nome)?'2026':'2025'}, incluindo campeões sem elenco jogável, somado às conquistas desta carreira. O histórico real não é alterado pela simulação.`:'Base histórica cadastrada + títulos desta carreira. Os estaduais incluem os anos históricos documentados até 2024. As demais competições mantêm o acervo inicial cadastrado. Equipes sem base histórica cadastrada aparecem com suas conquistas registradas na simulação.'}</p>
- {dados.ranking.length?<ol className="hf-ranking hf-ranking-campeoes">{dados.ranking.map((t,i)=><li key={t.clube}><b>{i+1}</b><EmblemaCampeao nome={t.clube} selecao={dados.selecao}/><span>{dados.selecao?<strong>{t.clube}</strong>:<button onClick={()=>onClube(t.clube)}>{t.clube}</button>}<small>{t.inicial} na base · {t.simulacao} nesta carreira{t.legado?` · ${t.legado} sem ano no save`:''}</small></span><em>{t.total}×</em></li>)}</ol>:<p className="hf-vazio">As primeiras conquistas registradas formarão este ranking.</p>}
+ {dados.ranking.length?<ol className="hf-ranking hf-ranking-campeoes">{dados.ranking.map((t,i)=><li key={t.clube}><b>{i+1}</b><EmblemaCampeao nome={t.clube} selecao={dados.selecao}/><span>{dados.selecao?<LinkEntidade tipo="selecao" nome={t.clube}/>:<button onClick={()=>onClube(t.clube)}>{t.clube}</button>}<small>{t.inicial} na base · {t.simulacao} nesta carreira{t.legado?` · ${t.legado} sem ano no save`:''}</small></span><em>{t.total}×</em></li>)}</ol>:<p className="hf-vazio">As primeiras conquistas registradas formarão este ranking.</p>}
  </section>;
 }
 function PerfilTreinador({c,nome}){
@@ -107,16 +109,19 @@ export function HistoriaDialog({c,nome,temporadas,onFechar,competicaoInicial,ent
  const ref=useRef(null),[busca,B]=useState('');
  const clubePadrao=nome||c.tecnico?.clube||c.clubeNome||c.clube?.nome||'Corinthians';
  const compPadrao=competicaoInicial||'Champions League';
+ const selecaoPadrao=NACIONALIDADES.find(n=>n.id===(c.tecnico?.selecao||c.nac||c.nacionalidade))?.label||'Brasil';
+ const nomeEhSelecao=nome&&((c.tecnico?.tipoEquipe==='selecao'&&c.tecnico?.clube===nome)||NACIONALIDADES.some(n=>n.label===nome));
  const inicial=entradaInicial?paginaEntidade(entradaInicial,{clube:clubePadrao,competicao:compPadrao}):
    competicaoInicial?paginaEntidade({tipo:'competicao',nome:competicaoInicial},{clube:clubePadrao}):
-   paginaEntidade({tipo:'clube',nome:clubePadrao},{competicao:compPadrao});
+   paginaEntidade({tipo:nomeEhSelecao?'selecao':'clube',nome:nomeEhSelecao?nome:clubePadrao},{competicao:compPadrao,selecao:selecaoPadrao});
  const [pilha,SetPilha]=useState(()=>[inicial]);
  const pagina=pilha.at(-1)||inicial;
- const aba=pagina.aba,clube=pagina.clube||clubePadrao,competicao=pagina.competicao||compPadrao;
+ const aba=pagina.aba,clube=pagina.clube||clubePadrao,competicao=pagina.competicao||compPadrao,selecao=pagina.selecao||selecaoPadrao;
  const irPagina=proxima=>{SetPilha(p=>empilharPagina(p,proxima));};
- const irEntidade=destino=>irPagina(paginaEntidade(destino,{clube,competicao}));
+ const irEntidade=destino=>irPagina(paginaEntidade(destino,{clube,competicao,selecao}));
  const mudarAba=id=>{
    if(id==='clubes')irEntidade({tipo:'clube',nome:clube});
+   else if(id==='selecoes')irEntidade({tipo:'selecao',nome:selecao});
    else if(id==='competicoes')irEntidade({tipo:'competicao',nome:competicao});
    else if(id==='premios')irEntidade({tipo:'premio',nome:pagina.premio||'Bola de Ouro'});
    else irPagina({...pagina,aba:id,jogadorId:id==='confrontos'?pagina.jogadorId:'',
@@ -125,22 +130,22 @@ export function HistoriaDialog({c,nome,temporadas,onFechar,competicaoInicial,ent
  useEffect(()=>{const el=ref.current,antes=document.activeElement;el.showModal();const liberar=bloquearRolagem(document.body);
    return()=>{el.close();liberar();antes?.focus?.({preventScroll:true});};},[]);
  useEffect(()=>{
-   const ouvir=e=>{if(!ref.current?.open)return;const p=paginaEntidade(e.detail,{clube,competicao});if(p)irPagina(p);};
+   const ouvir=e=>{if(!ref.current?.open)return;const p=paginaEntidade(e.detail,{clube,competicao,selecao});if(p)irPagina(p);};
    window.addEventListener(EVENTO_ENTIDADE,ouvir);
    return()=>window.removeEventListener(EVENTO_ENTIDADE,ouvir);
- },[clube,competicao]);
+ },[clube,competicao,selecao]);
  useEffect(()=>{ref.current?.querySelector('.hf-corpo')?.scrollTo({top:0});},[pagina]);
  const clubes=[...new Map([...CLUBES,...CLUBES_REGIONAIS_EXTRAS,
    ...clubesComHistoricoEstadual().map(nome=>({nome}))].map(c=>[c.nome,c])).values()]
    .filter(x=>!busca||x.nome.toLocaleLowerCase('pt-BR').includes(busca.toLocaleLowerCase('pt-BR')));
  const localizacao=aba==='atletas'?'Jogador':aba==='clubes'?clube:aba==='competicoes'?competicao:
-   aba==='premios'?pagina.premio:aba==='confrontos'?'Confrontos':aba==='treinadores'?pagina.nome:'Arquivo Vivo';
+   aba==='premios'?pagina.premio:aba==='selecoes'?selecao:aba==='confrontos'?'Confrontos':aba==='treinadores'?pagina.nome:'Arquivo Vivo';
  return createPortal(<dialog ref={ref} className="hf-dialog fm27-historico" aria-label="História do futebol"
   onCancel={e=>{e.preventDefault();onFechar();}}>
    <header className="hf-cabecalho"><div><span className="hf-eyebrow">A JOIA · ARQUIVO VIVO</span>
     <h1>Histórias que ficam.</h1></div><button type="button" onClick={onFechar} aria-label="Fechar história">×</button></header>
    <nav className="hf-abas" aria-label="Seções da história">
-    {[['clubes','Clubes'],['competicoes','Competições'],['confrontos','Confrontos'],
+    {[['clubes','Clubes'],['selecoes','Seleções'],['competicoes','Competições'],['confrontos','Confrontos'],
       ['carreira','Sua carreira'],['atletas','Jogadores'],['premios','Prêmios'],
       ['treinadores','Treinadores'],['recordes','Recordes']].map(([id,label])=>
      <button type="button" key={id} aria-pressed={aba===id} onClick={()=>mudarAba(id)}>{label}</button>)}
@@ -159,9 +164,12 @@ export function HistoriaDialog({c,nome,temporadas,onFechar,competicaoInicial,ent
      {!clubes.length&&<small>Nenhum clube encontrado.</small>}</div>
      <GaleriaClube c={c} nome={clube} temporadas={temporadas}
        onCompeticao={nome=>irEntidade({tipo:'competicao',nome})}/></>:
+     aba==='selecoes'?<GaleriaSelecoes c={c} temporadas={temporadas} nome={selecao}
+       onSelecao={nome=>irEntidade({tipo:'selecao',nome})}/>:
      aba==='competicoes'?<GaleriaCompeticoes c={c} temporadas={temporadas} nome={competicao}
        onCompeticao={nome=>irEntidade({tipo:'competicao',nome})}
-       onClube={nome=>irEntidade({tipo:'clube',nome})}/>:
+       onClube={nome=>irEntidade({tipo:'clube',nome})}
+       onSelecao={nome=>irEntidade({tipo:'selecao',nome})}/>:
      aba==='confrontos'?<HistoricoConfrontos key={pagina.jogadorId||'clubes'} c={c} jogadorInicial={pagina.jogadorId||null}/>:
      aba==='carreira'?<MarcosIndividuais c={c} temporadas={temporadas}/>:
      aba==='atletas'?<ArquivoAtletasFM key={pagina.jogadorId||'todos'} c={c} jogadorInicial={pagina.jogadorId||null}

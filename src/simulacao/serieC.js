@@ -88,7 +88,7 @@ function gruposDeAcesso(classificacao, clubes) {
   ];
 }
 
-function finalSerieC(liderB, liderC, clubes, rng) {
+function finalSerieC(liderB, liderC, clubes, rng, mandanteVolta = liderC) {
   const porNome = new Map(clubes.map(c => [c.nome, Number(c.elenco ?? c.forca) || 55]));
   const placar = (casa, fora, fase) => {
     const diff = (porNome.get(casa) - porNome.get(fora)) * .03;
@@ -97,13 +97,17 @@ function finalSerieC(liderB, liderC, clubes, rng) {
       golsFora: poisson(1.05 - diff, rng),
     };
   };
-  const ida = placar(liderB, liderC, 'ida');
-  const volta = placar(liderC, liderB, 'volta');
-  const golsB = ida.golsCasa + volta.golsFora, golsC = ida.golsFora + volta.golsCasa;
+  const mandanteIda = mandanteVolta === liderB ? liderC : liderB;
+  const ida = placar(mandanteIda, mandanteVolta, 'ida');
+  const volta = placar(mandanteVolta, mandanteIda, 'volta');
+  const golsB = (ida.casa === liderB ? ida.golsCasa : ida.golsFora) +
+    (volta.casa === liderB ? volta.golsCasa : volta.golsFora);
+  const golsC = (ida.casa === liderC ? ida.golsCasa : ida.golsFora) +
+    (volta.casa === liderC ? volta.golsCasa : volta.golsFora);
   const empate = golsB === golsC;
   const campeao = empate ? (rng() < .5 ? liderB : liderC) : golsB > golsC ? liderB : liderC;
   return {
-    jogos: [ida, volta], agregado: { [liderB]: golsB, [liderC]: golsC },
+    jogos: [ida, volta], mandanteVolta, agregado: { [liderB]: golsB, [liderC]: golsC },
     campeao, vice: campeao === liderB ? liderC : liderB,
     criterio: empate ? 'penaltis' : 'saldo-agregado',
   };
@@ -146,7 +150,25 @@ export function simularSerieC({ clubes = [], ano = 2026, rng = Math.random } = {
     ...jogarTabela(chave.participantes, true, rng, 'quadrangular-' + chave.nome),
   }));
   const promovidos = chaves.flatMap(chave => chave.classificacao.slice(0, 2).map(x => x.nome));
-  const final = finalSerieC(chaves[0].classificacao[0].nome, chaves[1].classificacao[0].nome, times, rng);
+  // A volta da final cabe ao clube de melhor campanha nas duas fases.
+  const campanha = nome => {
+    const regular = primeiraFase.grupos.flatMap(g => g.classificacao).find(x => x.nome === nome);
+    const quadrangular = chaves.flatMap(g => g.classificacao).find(x => x.nome === nome);
+    return [regular, quadrangular].reduce((soma, linha) => ({
+      pontos: soma.pontos + (linha?.pontos || 0),
+      vitorias: soma.vitorias + (linha?.vitorias || 0),
+      saldo: soma.saldo + (linha?.saldoGols || 0),
+      gols: soma.gols + (linha?.golsPro || 0),
+    }), { pontos: 0, vitorias: 0, saldo: 0, gols: 0 });
+  };
+  const liderB = chaves[0].classificacao[0].nome, liderC = chaves[1].classificacao[0].nome;
+  const b = campanha(liderB), c = campanha(liderC);
+  const melhorCampanhaB = b.pontos !== c.pontos ? b.pontos > c.pontos
+    : b.vitorias !== c.vitorias ? b.vitorias > c.vitorias
+    : b.saldo !== c.saldo ? b.saldo > c.saldo
+    : b.gols !== c.gols ? b.gols > c.gols
+    : liderB.localeCompare(liderC, 'pt-BR') < 0;
+  const final = finalSerieC(liderB, liderC, times, rng, melhorCampanhaB ? liderB : liderC);
   return {
     liga: 'serieC', ano, regulamento: regras, primeiraFase,
     classificacao: primeiraFase.grupos.length === 1 ? classificacao : null,

@@ -165,3 +165,34 @@ Fontes: [UEFA — lista dos cinco clubes vencedores](https://www.uefa.com/uefaco
 Testes: `node --test tests/conference-historica.test.mjs
 tests/europa-league-historica.test.mjs tests/champions-historica.test.mjs`
 e build Pages. Mudança somente documental e de consulta: sem mutação de saves.
+
+## Copa do Brasil — histórico real 1989–2025
+
+A edição inaugural foi vencida pelo Grêmio em **1989** e a última
+edição concluída até 18/11/2026 foi a de **2025**, vencida pelo
+Corinthians. O arquivo `src/dados/copaBrasilHistorica.js` registra
+os **37 campeões de 1989 a 2025**, totalizando **17 clubes**.
+
+O Cruzeiro lidera com seis títulos. Flamengo e Grêmio têm cinco cada;
+Palmeiras e Corinthians têm quatro cada (o Corinthians conquistou
+seu quarto em **2025**); Atlético-MG tem dois. Todos os demais
+campeões ganharam uma taça.
+
+**Santo André (2004) e Paulista (2005)** permanecem no ranking e em
+suas vitrines de clube mesmo sem elenco jogável no A JOIA. Os nomes
+seguem o catálogo (Internacional, Sport Recife, Vasco da Gama e
+Athletico-PR).
+
+Consultas por `Copa Brasil` e `Copa do Brasil` apontam para o
+mesmo acervo. Os títulos históricos não se confundem com jogos do
+save; conquistas simuladas somam apenas uma vez e não reescrevem
+campeões reais. A edição **2026 ainda não tem vencedor cadastrado**,
+porque não havia sido concluída na data de referência.
+
+### Fontes
+- [ge — palmarés dos 37 anos, reproduzido da CBF (21/12/2025)](https://ge.globo.com/mg/futebol/copa-do-brasil/noticia/2025/12/21/maiores-campeoes-da-copa-do-brasil-corinthians-leva-o-tetra-e-sobe-no-ranking.ghtml)
+- [CBF — Corinthians tetracampeão em 2025](https://www.cbf.com.br/futebol-brasileiro/noticias/undefined/sport-recife-x-palmeiras/corinthians-vence-vasco-e-conquista-seu-quarto-titulo-da-copa-do-brasil)
+
+**Validação:** `node --test tests/copa-brasil-historica.test.mjs
+tests/competicoes-historicas.test.mjs tests/historia-futebol.test.mjs`
+e `GITHUB_PAGES=true npm run build`.

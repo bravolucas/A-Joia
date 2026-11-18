@@ -1,0 +1,28 @@
+name: Auditar integração completa de escalação do treinador
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/treinador/**'
+      - 'tests/previsao-escalacao-tecnico.test.mjs'
+      - 'tests/escalacao-posicional-tecnico.test.mjs'
+      - 'tests/escalacao-historica-tecnico.test.mjs'
+      - 'tests/centro-treinador.spec.mjs'
+      - '.github/workflows/auditar-integracao-escalacao-treinador.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integrar-xi-historico:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Matcher por posição, prévia visual e folha histórica na mesma versão
+        run: node --test tests/escalacao-posicional-tecnico.test.mjs tests/previsao-escalacao-tecnico.test.mjs tests/escalacao-historica-tecnico.test.mjs tests/tatica-mundo-treinador-rapido.test.mjs
+      - name: Build de produção
+        run: GITHUB_PAGES=true npm run build

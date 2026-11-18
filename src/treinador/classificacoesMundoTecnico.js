@@ -1,5 +1,6 @@
 import {resolverOuReusarPlayoffsSerieB} from '../simulacao/playoffsSerieB.js';
 import {ordenarTabelaBrasileira} from '../simulacao/desempateBrasileiro.js';
+import {simularSerieC, regulamentoSerieC} from '../simulacao/serieC.js';
 
 const limitar = (valor, minimo, maximo) => Math.max(minimo, Math.min(maximo, valor));
 
@@ -106,6 +107,7 @@ export function simularClassificacoesMundoTecnico({
   clubeTreinador,
   forcaTreinador,
   classificacaoTreinador,
+  ano = 2026,
   rng = Math.random,
 }) {
   const clubesUnicos = [...new Map(clubes.filter(clube => clube?.nome).map(clube => [clube.nome, clube])).values()];
@@ -143,6 +145,17 @@ export function simularClassificacoesMundoTecnico({
       continue;
     }
     const ordenados = [...participantes].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+    if (liga === 'serieC' && ordenados.length === regulamentoSerieC(ano).participantes) {
+      const edicaoSerieC = simularSerieC({ clubes: ordenados, ano, rng });
+      resultado[liga] = {
+        liga, origem: 'serie-c-cbf',
+        classificacao: edicaoSerieC.classificacao || edicaoSerieC.primeiraFase.grupos.flatMap(g =>
+          g.classificacao.map(linha => ({ ...linha, grupo: g.nome }))),
+        jogos: edicaoSerieC.primeiraFase.grupos.flatMap(g => g.jogos),
+        edicaoSerieC,
+      };
+      continue;
+    }
     resultado[liga] = { liga, origem: 'simulacao-global', ...simularLigaMundo(ordenados, rng, liga) };
   }
   return resultado;

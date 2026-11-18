@@ -15,7 +15,7 @@ import {prepararCopasJogador} from './copasJogador.js';
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
 import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternacionais.js';
 import {vagaJogador,nomeVaga,calcularVagasRapidas,clubesParaCopas,regiaoDaLiga,idContinental} from '../competicoes/regrasCopasRapidas.js';
-import {participantesEstadual} from '../competicoes/estaduaisRapidos.js';
+import {participantesEstadual,CLUBES_REGIONAIS_EXTRAS} from '../competicoes/estaduaisRapidos.js';
 import {simularCampanhaCopa,adversarioCopaPorFase} from '../treinador/copasEscolha.js';
 import {jogosDoGrupo,tabelaGrupoCopa,empateGrupo} from './gruposCopa.js';
 import {atualizarRecordesUniverso} from './recordesUniverso.js';
@@ -110,7 +110,11 @@ export function sincronizarLigas(c) { LIGAS_CARREIRA = { ...(c?.ligas || {}) }; 
 const comLigaAtual = (x) => ({...x,liga:LIGAS_CARREIRA[x.nome]||x.liga,forca:FORCAS_CARREIRA[x.nome]??x.forca});
 export const clubeDe = (nome) => {
   const x = CLUBES.find((y) => y.nome === nome);
-  return x ? comLigaAtual(x) : { nome, forca: 60, liga: "serieB", cor: "#12A876" };
+  if (x) return comLigaAtual(x);
+  // Saves legados: preserva estado e força dos clubes que deixaram a Série B.
+  const regional = CLUBES_REGIONAIS_EXTRAS.find(clube => clube.nome === nome);
+  return regional ? comLigaAtual({ ...regional, liga: LIGAS_CARREIRA[nome] || 'serieB', cor: '#12A876' })
+    : { nome, forca: 60, liga: "serieB", cor: "#12A876" };
 };
 export const ligaDe = (id) => LIGAS[id] || { nome: "Liga", mult: 0.7 };
 export const ehSegundaDivisao = (ligaId) => !!ligaDe(ligaId).promocao;
@@ -1006,6 +1010,12 @@ function simularLiga(c, clube, ovr, share, extra = 0) {
   const impacto = avaliarClubeNoMundo(c,CLUBES.find(x=>x.nome===clube.nome)||clube,{usuario:{posicao:c.posicao,ovr,forma:c.formaNivel||0},participacao:share}).impactoUsuario + somaTraco(c, "forcaTime") * share + extra;
   const equipes=clubesDoMundo(c,CLUBES.filter(x=>!ligaDe(c.ligas?.[x.nome]||x.liga).naoJogavel));
   const proprio=avaliarClubeNoMundo(c,CLUBES.find(x=>x.nome===clube.nome)||clube,{usuario:{posicao:c.posicao,ovr,forma:c.formaNivel||0},participacao:share,bonus:somaTraco(c,'forcaTime')*share+extra});
+  if (!equipes.some(x => x.nome === clube.nome)) {
+    // Compatibilidade: ao retomar carreira antiga, mantém 20 clubes na divisão.
+    const naLiga = equipes.filter(x => x.liga === clube.liga).sort((a,b)=>a.forca-b.forca);
+    if (naLiga.length) equipes.splice(equipes.findIndex(x => x.nome === naLiga[0].nome),1);
+    equipes.push({ ...clube, elenco: proprio.forca, ataque: proprio.ataque, defesa: proprio.defesa });
+  }
   const mundo=simularClassificacoesMundoTecnico({clubes:equipes.map(x=>x.nome===clube.nome?{...x,elenco:proprio.forca,ataque:proprio.ataque,defesa:proprio.defesa}:x),rng:rnd});
   c.classificacoesEmCurso=mundo;
   const tabela=mundo[clube.liga]?.classificacao||[];

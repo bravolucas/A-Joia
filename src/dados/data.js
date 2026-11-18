@@ -630,7 +630,7 @@ export function palmaresInicialDe(clube) {
 
 /* Nome bonito de cada tipo de taça, por liga */
 export function nomeDosTitulos(ligaId) {
-  const br = ligaId === "brasileirao" || ligaId === "serieB";
+  const br = ["brasileirao", "serieB", "serieC", "serieD"].includes(ligaId);
   return {
     liga: br ? "Brasileirão" : (LIGAS[ligaId]?.nome || "Liga"),
     copa: br ? "Copa do Brasil" : (COMPS_PAIS[ligaId]?.copa || "Copa Nacional"),

@@ -92,6 +92,9 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
   };
   // Edições completas existentes são arquivadas; dados antigos ausentes continuam ausentes.
   for(const [liga,t]of Object.entries(a.classificacoesMundo||{})){
+    // Série C pendente (save legado sem os 20 participantes) não tem tabela nem campeão:
+    // não arquivar uma edição vazia.
+    if(!t?.classificacao?.length&&!t?.edicaoSerieC?.campeao)continue;
     // A liga do treinador grava a tabela sem seus placares no calendario global.
     // Recupere apenas os resultados realmente disputados, nunca sorteie novamente.
     const jogosTreinador=c.tecnico&&a.liga===liga?(a.confrontos||[])

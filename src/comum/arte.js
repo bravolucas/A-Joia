@@ -54,7 +54,7 @@ export const temImagensOficiais = Object.keys(ESCUDOS).length + Object.keys(LOGO
 
 /* Foto de cabeçalho por evento do Modo Rápido (eventos sem foto ficam só com o ícone) */
 export const ARTE_EVENTO = {
-  idolo: estadioPremium, homenagem: estadioPremium, estatua: estadioPremium, demissao: diretoriaPremium, diretoria: diretoriaPremium,
+  idolo: estadioPremium, estatua: estadioPremium, demissao: diretoriaPremium, diretoria: diretoriaPremium,
   propostas: contrato, renovacao: contrato, fimContrato: contrato, livre: contrato, clausula: contrato, empresario: contrato, parceria: contrato,
   lesaoPre: recuperacaoPremium, voltaLesao: recuperacaoPremium, esgotamento: mentalPremium, machucado: recuperacaoPremium, infiltracao: recuperacaoPremium, recuperacao: recuperacaoPremium, veterano: lesao,
   emprestimo: aviao, forcarSaida: aviao, voltarCasa: aviao, excursao: aviao, saudade: aviao, idiomaImprensa: aviao, naturalizacao: aviao,

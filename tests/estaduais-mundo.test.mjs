@@ -38,7 +38,7 @@ test('galerias somam a conquista da carreira uma vez e não anunciam um primeiro
 });
 test('clubes regionais históricos aparecem no ranking e têm sua própria galeria',()=>{
  const r=galeriaCompeticao({},ESTADUAIS.SP);assert.equal(r.ranking.find(t=>t.clube==='Ituano').inicial,2);
- const g=galeriaClube({},'Ituano');assert.equal(g.tacas[0].total,2);assert.deepEqual(g.tacas[0].anosHistoricos,[2002,2014]);
+ const g=galeriaClube({},'Ituano'),paulista=g.tacas.find(t=>t.tipo==='estadual');assert.equal(paulista.total,2);assert.deepEqual(paulista.anosHistoricos,[2002,2014]);
  const zero=acervoInicial('Guarani').tacas.find(t=>t.tipo==='estadual');assert.equal(zero.inicial,0);assert.equal(zero.historicoConhecido,true);
  assert.equal(feitoEstadualHistoricoValido({id:'primeiro|Santos|paulista',nome:ESTADUAIS.SP,clube:'Santos'}),false);
  assert.equal(feitoEstadualHistoricoValido({id:'outro',nome:ESTADUAIS.SP,clube:'Santos'}),true);

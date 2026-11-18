@@ -50,7 +50,7 @@ export function acervoInicial(nome){
  const continentais={...(CONTINENTAIS[nome]||{[nomes.continental||'Títulos continentais']:n(p.continental)})};
  // A contagem da Libertadores é a oficial até 2025, não a estimativa
  // de força de um clube nem apenas os títulos brasileiros cadastrados.
- if(['brasileirao','serieB','argentina','sulamericano'].includes(clube.liga)){
+ if(['brasileirao','serieB','serieC','serieD','argentina','sulamericano'].includes(clube.liga)){
   if(!CONTINENTAIS[nome])delete continentais[nomes.continental||'Títulos continentais'];
   if(!CONTINENTAIS[nome]||totalLibertadoresHistoricas(nome)>0)continentais.Libertadores=totalLibertadoresHistoricas(nome);
  }

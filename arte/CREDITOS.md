@@ -92,7 +92,7 @@ O impacto da bola e da rede é sintetizado por Web Audio em `som.js`, sem amostr
 
 ## Criação por capítulos
 
-`criacao/inicio.webp` e `criacao/bairro.webp`: artes originais geradas com OpenAI, vestiário de início de carreira e campo de bairro. Sem uso de capturas ou marcas de PES. Camisa/nome são SVG dinâmico; caixa de presente e bandeira animadas em CSS. Cartas combinam essas imagens com cenários já creditados de treino, imprensa e preparação mental.
+`criacao/inicio.webp`: arte original gerada com OpenAI, vestiário de início de carreira. Sem uso de capturas ou marcas de PES. Camisa/nome são SVG dinâmico; caixa de presente e bandeira animadas em CSS. Cartas combinam essas imagens com cenários já creditados de treino, imprensa e preparação mental.
 
 ## Primeiro contrato da base
 
@@ -100,7 +100,6 @@ O impacto da bola e da rede é sintetizado por Web Audio em `som.js`, sem amostr
 
 ## Goleiro em mergulho
 
-`personagens/goleiro-mergulho.webp`: nova pose de ação gerada com OpenAI Image Generation a partir do goleiro fictício existente. Transparência preservada. Espelhamento em SVG para defesa à esquerda; pose de espera mantida antes da cobrança.
 
 ## Bola em 3D
 

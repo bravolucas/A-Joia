@@ -32,17 +32,22 @@ src/
   treinador/          → carreira de técnico pós-aposentadoria: tecnico.js, CarreiraTecnico.jsx, competições,
                         mercado, comissão, tática, loja e vitrine do treinador
   completo/           → Modo Carreira completo (jogo a jogo): AJoiaGame.jsx e save.js
+  simulacao/          → mundo vivo: ligas, Séries B/C/D, mercado da IA, estaduais, armazenamento do save
+  competicoes/        → copas, vagas internacionais, clubes extras (sul-americanos, europeus, regionais)
+  historia/           → galerias de clubes/competições e histórico real (Libertadores, Champions...)
   museu/              → museu permanente de taças e camisas entre carreiras
   desafios/           → desafios históricos
+  atualizacao/        → service worker (PWA)
   comum/              → peças usadas por vários modos: lib.js (simulação), components.jsx, arte.js,
                         taças, ícones, sons, animações, visual de campo e minigames
-  dados/              → data.js (clubes, ligas, posições...) e tabela histórica das Copas
+  dados/              → data.js (clubes, ligas, posições...) e tabelas históricas reais
 arte/                 → escudos, taças, bandeiras, fotos, fontes, sons e animações (com créditos)
 public/               → ícones do app (PWA)
 tests/                → *.test.mjs (lógica, `npm test`) e *.spec.mjs (navegador, Playwright)
 scripts/              → utilitários: gerar animações, atualizar acervo de taças, auditar gestão
-docs/                 → relatórios e capturas de cada entrega (histórico em docs/CONTINUIDADE.md)
-.github/workflows/    → ci.yml (testes + navegador) e deploy.yml (publica no GitHub Pages)
+docs/                 → relatórios e capturas de cada entrega (histórico em docs/CONTINUIDADE.md
+                        e contexto para retomar em docs/RESUMO_PARA_CONTINUAR.md)
+.github/workflows/    → ci.yml (testes + navegador), deploy.yml (GitHub Pages) e auditorias específicas
 ```
 
 Regra de dependência: `dados/` não depende de nada; `comum/lib.js` depende dos dados;
@@ -51,10 +56,17 @@ cada modo (`jogador/`, `treinador/`, `completo/`) usa `comum/` e `dados/`.
 ## Testes
 
 ```bash
-npm test                       # testes de lógica (node --test)
+npm run test:rapido            # testes de lógica sem as carreiras massivas (alguns minutos)
+npm test                       # todos os testes de lógica (bem mais lento)
 GITHUB_PAGES=true npm run build && GITHUB_PAGES=true npm run preview -- --port 4173 &
 npx playwright test tests/*.spec.mjs   # testes no navegador (precisa de @playwright/test)
 ```
+
+## Publicação
+
+Todo push na `main` publica o jogo pelo workflow `deploy.yml` (GitHub Pages, em **Settings → Pages → Source: GitHub Actions**):
+https://bravolucas.github.io/A-Joia/ — se o repositório mudar de nome, ajuste `base` em `vite.config.js`.
+Página em branco quase sempre é `base` errado (o console do navegador mostra 404 nos arquivos).
 
 ## O que o jogo tem
 

@@ -665,8 +665,10 @@ export function calendarioLigaTecnico(t = {}) {
         { nome, elenco: nome === t.clube ? forcaClubeTecnico(t) : 50 })
     : clubesBase.slice();
   if (!participantes.some(x => x.nome === t.clube)) {
-    // O clube do treinador substitui o participante mais fraco da nova divisão.
-    if (participantes.length >= 2) {
+    // Carreiras legadas podem já ter uma vaga livre: não remover mais um clube.
+    // Nos brasileiros, completar 19 + o treinador até os 20 oficiais.
+    const brasil = liga === 'brasileirao' || liga === 'serieB';
+    if (participantes.length >= 2 && (!brasil || participantes.length >= 20)) {
       const maisFraco = participantes.reduce((menor, atual, indice, lista) => atual.elenco < lista[menor].elenco ? indice : menor, 0);
       participantes.splice(maisFraco, 1);
     }

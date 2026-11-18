@@ -829,9 +829,9 @@ function SlideTitulo({ c, card, titulo }) {
       </div>
       <div className="relative mt-5 rp-sobe" style={{ animationDelay: ".35s" }}>
         <div className="display text-3xl text-[#F5D77A] tracking-wide">CAMPEÃO!</div>
-        <div className="display text-lg text-[#F2F5F3] mt-2">{titulo.nome}</div>
+        <div className="display text-lg text-[#F2F5F3] mt-2"><LinkEntidade tipo={ehPremioIndividual(titulo.tipo)?'premio':'competicao'} nome={titulo.nome}/></div>
         <div className="flex items-center justify-center gap-2 mt-2 text-[17px] font-semibold text-[#E1E6E3]">
-          {pelaSelecao ? <span>{nacDe(c.nac).label}</span> : <><ClubDot club={clubeDe(card.clube)} size={20} /><span>{card.clube}</span></>}
+          {pelaSelecao ? <span><LinkEntidade tipo="selecao" nome={nacDe(c.nac).label}/></span> : <><ClubDot club={clubeDe(card.clube)} size={20} /><span><LinkEntidade tipo="clube" nome={card.clube}/></span></>}
           <span className="text-[#9EB5C9]">· {card.ano}</span>
         </div>
         <div className="mt-3 rp-chip" style={{ color: "#EBC557", background: "rgba(216,180,74,.16)" }}>{contagem}</div>{!pelaSelecao&&bonusSuperacao([card])>0&&<p className="mt-2 text-sm text-[#EBC557]">Conquista de superação · mérito extra no legado</p>}
@@ -1091,11 +1091,11 @@ function TabelaAnoAno({ c }) {
   );
 }
 
-function LinhaTime({ icone, nome, resultado, destaque }) {
+function LinhaTime({ icone, nome, resultado, destaque, entidadeNome }) {
   return (
     <div className="flex items-center gap-2.5 py-1.5 border-b border-white/5 last:border-0">
       <span className="w-6 flex justify-center shrink-0">{icone}</span>
-      <span className="text-[15px] text-[#C9D9E8] truncate flex-1">{nome}</span>
+      <span className="text-[15px] text-[#C9D9E8] truncate flex-1"><LinkEntidade tipo="competicao" nome={entidadeNome||nome}>{nome}</LinkEntidade></span>
       <span className={`font-stat text-[16px] shrink-0 ${destaque === "ouro" ? "text-[#EBC557]" : destaque === "ruim" ? "text-[#F0A99E]" : "text-[#F2F5F3]"}`}>{resultado}</span>
     </div>
   );
@@ -1164,7 +1164,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
           {card.copaNac && <LinhaTime icone={<TacaCompeticao tipo="copa" nome={card.copaNac.nome} size={18} />} nome={card.copaNac.nome} resultado={card.titulos.some(t=>t.tipo==="copa"&&t.nome===card.copaNac.nome)?"Campeão":card.copaNac.fase} destaque={card.titulos.some(t=>t.tipo==="copa"&&t.nome===card.copaNac.nome)||card.copaNac.fase === "Campeão" ? "ouro" : null} />}
           {card.continental && <LinhaTime icone={<TacaCompeticao tipo="continental" nome={card.continental.nome} size={18} />} nome={card.continental.nome} resultado={contRes} destaque={contRes === "Campeão" ? "ouro" : null} />}
           {card.mundialRes && <LinhaTime icone={<TacaCompeticao tipo="mundial" nome="Mundial de Clubes" size={18} />} nome="Mundial de Clubes" resultado={card.mundialRes} destaque={card.mundialRes === "Campeão" ? "ouro" : null} />}
-          {sel && <LinhaTime icone={<Bandeira nac={c.nac} size={18} />} nome={`${sel.nome} (seleção)`} resultado={sel.convocado ? (sel.campeao ? "Campeão" : sel.resultado) : "Fora da lista"} destaque={sel.campeao ? "ouro" : null} />}
+          {sel && <LinhaTime icone={<Bandeira nac={c.nac} size={18} />} nome={`${sel.nome} (seleção)`} entidadeNome={sel.nome} resultado={sel.convocado ? (sel.campeao ? "Campeão" : sel.resultado) : "Fora da lista"} destaque={sel.campeao ? "ouro" : null} />}
         </div>
         {/* taças e prêmios */}
         {card.titulos.length > 0 && (
@@ -1177,7 +1177,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
               {card.titulos.map((t, i) => (
                 <div key={i} className="flex items-center gap-2 rp-sobe" style={{ animationDelay: `${0.15 + i * 0.12}s` }}>
                   <IconeTitulo tipo={t.tipo} nome={t.nome} size={30} />
-                  <div className="leading-tight"><div className="text-[14px] font-bold text-[#F5D77A]">{t.nome}</div><div className="text-[11px] text-[#C9D9E8]">{t.n > 1 ? `${t.n}º da carreira` : "1º da carreira"}</div></div>
+                  <div className="leading-tight"><div className="text-[14px] font-bold text-[#F5D77A]"><LinkEntidade tipo={ehPremioIndividual(t.tipo)?'premio':'competicao'} nome={t.nome}/></div><div className="text-[11px] text-[#C9D9E8]">{t.n > 1 ? `${t.n}º da carreira` : "1º da carreira"}</div></div>
                 </div>
               ))}
             </div>
@@ -1649,8 +1649,8 @@ function TelaNegociacao({ c, n, onAjustar, onAssinar, onSair }) {
           <ClubDot club={cl} size={44} />
           <div className="min-w-0 flex-1">
             <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9D9E8]">{n.tipo === "renovacao" ? "Renovação de contrato" : "Proposta de contrato"}</div>
-            <h2 className="display text-base text-[#F2F5F3] truncate">{cl.nome}</h2>
-            <div className="text-[14px] text-[#C9D9E8]">{ligaDe(cl.liga).nome} · sua fama: {fama_negociador(c).toLowerCase()}</div>
+            <h2 className="display text-base text-[#F2F5F3] truncate"><LinkEntidade tipo="clube" nome={cl.nome}/></h2>
+            <div className="text-[14px] text-[#C9D9E8]"><LinkEntidade tipo="competicao" nome={ligaDe(cl.liga).nome}/> · sua fama: {fama_negociador(c).toLowerCase()}</div>
           </div>
         </div>
         <div className="px-4 py-3 border-t border-white/5">
@@ -1812,7 +1812,7 @@ function CartaFinal({ c }) {
           </div>
           <Gema size={64} />
         </div>
-        <div className="display text-lg text-[#F2F5F3] mt-5 leading-tight relative">{c.nome}</div>
+        <div className="display text-lg text-[#F2F5F3] mt-5 leading-tight relative"><LinkEntidade tipo="jogador" id="voce" nome={c.nome}/></div>
         {c.apelidos.length > 0 && <div className="text-[14px] text-[#9EB5C9] italic">{c.apelidos.map((a) => `"${a.nome}"`).join(" · ")}</div>}
         {c.apelidos.some((a) => a.cantico) && <div className="text-[12px] text-[#9EB5C9] mt-0.5">"{c.apelidos.filter((a) => a.cantico).slice(-1)[0].cantico}"</div>}
         <div className="mt-2 inline-flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full text-[14px] font-bold relative" style={{ background: `${L.nivel.cor}22`, color: L.nivel.cor, border: `1px solid ${L.nivel.cor}55` }}>
@@ -3053,7 +3053,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           <Personalizacao/>
           <SeletorFoco c={c} onFoco={mudarFoco} />
           {etapa==='evento'&&!evento&&!estado.auto&&!resultado&&!c.emprestimo&&c.flags.baseEscolhida&&(c.contrato?.restantes??0)>0&&c.lojaAnoEmCurso!==c.ano&&<button className="rp-opcao px-4 py-3 text-left" onClick={pedirEmprestimo}>Pedir propostas por empréstimo</button>}
-          {c.emprestimo&&<p className="text-sm text-[#C9D9E8]">Empréstimo no {c.emprestimo.destino} · {c.emprestimo.restantes??1} temporada(s) restante(s). Retorno ao {c.clubeNome}.</p>}
+          {c.emprestimo&&<p className="text-sm text-[#C9D9E8]">Empréstimo no <LinkEntidade tipo="clube" nome={c.emprestimo.destino}/> · {c.emprestimo.restantes??1} temporada(s) restante(s). Retorno ao <LinkEntidade tipo="clube" nome={c.clubeNome}/>.</p>}
           <button onClick={() => { setGaveta(null); setPatrimonioAberto(true); }} className="rp-painel px-4 py-3 flex items-center gap-3 text-left hover:border-[#D8B44A]/50">
             <span className="text-2xl">💼</span>
             <span className="flex-1"><span className="block text-[13px] font-bold uppercase tracking-[0.15em] text-[#9EB5C9]">Loja e patrimônio</span><span className="font-stat text-lg text-[#EBC557]">{formatarValor(c.patrimonio || 0)}</span></span>

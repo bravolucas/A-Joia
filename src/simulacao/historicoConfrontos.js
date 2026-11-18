@@ -28,32 +28,38 @@ export function partidasHistoricas(c = {}) {
       });
     }
   }
-  // Durante a temporada do treinador, os confrontos concluídos já existem
-  // no save. Mostrá-los imediatamente não exige avançar a carreira.
+  // Os jogos em andamento são consultáveis antes do fechamento.
+  // Temporadas antigas sem arquivo global (por exemplo, demissão precoce)
+  // também continuam visíveis sem inventar resultados.
   const t=c.tecnico;
   if(t){
-    const emJogo=t.andamento||t.temporadaPausada;
-    const finalizada=t.temporadas?.at(-1);
-    const origem=emJogo||finalizada;
-    const ano=emJogo?(emJogo.ano??t.ano):finalizada?.ano;
-    const clube=emJogo?t.clube:finalizada?.clube;
-    const liga=emJogo?t.liga:finalizada?.liga;
-    if(Number.isFinite(ano)&&clube&&!u.anos?.includes(ano)){
+    const fontes=[...(t.temporadas||[])];
+    if(t.temporadaPausada)fontes.push({...t.temporadaPausada,
+      ano:t.temporadaPausada.ano??t.ano,
+      clube:t.temporadaPausada.clube??t.clube,
+      liga:t.temporadaPausada.liga??t.liga});
+    if(t.andamento)fontes.push({...t.andamento,ano:t.ano,clube:t.clube,liga:t.liga});
+    const chaves=new Set(partidas.map(j=>[j.ano,j.competicao,j.casa,j.fora,j.rodada].join('|')));
+    for(const fonte of fontes){
+      const ano=fonte?.ano,clube=fonte?.clube,liga=fonte?.liga;
+      if(!Number.isFinite(ano)||!clube||u.anos?.includes(ano))continue;
       const nomeLiga=LIGAS[liga]?.nome||liga||'Liga';
-      for(const [i,j] of (origem?.partidasLiga||[]).entries()){
-        if(!valido(j))continue;
-        partidas.push({...j,id:['etapa-completa',ano,nomeLiga,j.casa,j.fora,j.rodada??i+1].join('|'),
-          ano,competicao:nomeLiga,origem:'temporada-em-andamento'});
-      }
-      for(const [i,j] of (origem?.confrontos||[]).entries()){
+      const adicionar=(j,i,origem)=>{
+        if(!valido(j))return;
+        const rodada=j.rodada??i+1,chave=[ano,nomeLiga,j.casa,j.fora,rodada].join('|');
+        if(chaves.has(chave))return;
+        chaves.add(chave);
+        partidas.push({...j,id:['parcial',chave].join('|'),ano,competicao:nomeLiga,
+          rodada,origem});
+      };
+      for(const [i,j] of (fonte.partidasLiga||[]).entries())
+        adicionar(j,i,'temporada-em-andamento');
+      for(const [i,j] of (fonte.confrontos||[]).entries()){
         if(j?.folga||!j?.nome||!Number.isFinite(j.golsPro)||!Number.isFinite(j.golsContra))continue;
         const casa=j.casa?clube:j.nome,fora=j.casa?j.nome:clube;
-        const golsCasa=j.casa?j.golsPro:j.golsContra,golsFora=j.casa?j.golsContra:j.golsPro;
-        // Evitar dupla contagem se um arquivo parcial já trouxe o jogo.
-        if(partidas.some(p=>p.ano===ano&&p.competicao===nomeLiga&&p.casa===casa&&p.fora===fora&&p.rodada===(j.rodada??i+1)))continue;
-        partidas.push({id:['etapa',ano,nomeLiga,casa,fora,j.rodada??i+1].join('|'),
-          ano,competicao:nomeLiga,casa,fora,golsCasa,golsFora,rodada:j.rodada??i+1,
-          fase:'Liga',origem:'temporada-em-andamento'});
+        adicionar({casa,fora,golsCasa:j.casa?j.golsPro:j.golsContra,
+          golsFora:j.casa?j.golsContra:j.golsPro,rodada:j.rodada??i+1},i,
+          'temporada-sem-arquivo-global');
       }
     }
   }

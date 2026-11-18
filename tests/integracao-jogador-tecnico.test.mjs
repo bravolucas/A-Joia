@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {mkdirSync,writeFileSync} from 'node:fs';
 import {
   criarJogador, jogarTemporada, fecharTemporada, aposentar,
   aposentadoriaForcada, podeAposentar, noticiasDaTemporada,
@@ -20,7 +21,7 @@ function criar(i) {
     numero: (i % 20) + 1, ritmo: 'equilibrado', codigo: 'INTEGRACAO' + i });
 }
 // O comportamento local sem variáveis de ambiente continua executando as 32 carreiras.
-// No CI, duas partições complementares distribuem as mesmas 32 carreiras em runners.
+// No CI, quatro partições complementares distribuem as mesmas 32 carreiras em runners.
 const TOTAL_CARREIRAS = 32;
 const PARTES_CI = Number(process.env.A_JOIA_INTEGRACAO_PARTES || 1);
 const PARTE_CI = Number(process.env.A_JOIA_INTEGRACAO_PARTE || 1);
@@ -80,8 +81,16 @@ test(`carreiras de jogador até aposentadoria e transição para técnico — ${
     assert.ok(Number.isFinite(ovrDe(c)));
   }
   // O limiar proporcional preserva a exigência global original sem enfraquecê-la.
-  // Com duas partes, ambas precisam passar, cobrindo os mesmos índices 0..31.
+  // No CI, o agregador também verifica todos os índices 0..31 e o limiar GLOBAL.
   assert.equal(INDICES_CARREIRAS.length * PARTES_CI, TOTAL_CARREIRAS);
   assert.ok(totalTemporadas > 300 * INDICES_CARREIRAS.length / TOTAL_CARREIRAS);
   assert.ok(totalJogosTecnico >= 320 * INDICES_CARREIRAS.length / TOTAL_CARREIRAS);
+  if(PARTES_CI>1){
+    mkdirSync('resultados-auditoria',{recursive:true});
+    writeFileSync(`resultados-auditoria/integracao-parte-${PARTE_CI}.json`,JSON.stringify({
+      tipo:'integracao-jogador-tecnico-v1',total:TOTAL_CARREIRAS,
+      partes:PARTES_CI,parte:PARTE_CI,indices:INDICES_CARREIRAS,
+      temporadas:totalTemporadas,jogosTecnico:totalJogosTecnico,
+    },null,2));
+  }
 });

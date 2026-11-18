@@ -106,3 +106,23 @@ test('playoffs persistidos de tabela antiga não são aplicados a novos particip
   assert.notEqual(refeito, anterior);
   assert.equal(refeito.confrontos[0].melhorCampanha, 'Novo terceiro');
 });
+
+
+test('modo treinador preserva exatamente os mesmos promovidos ao reabrir o ano', () => {
+  const clubes = [
+    ...tabelaA.map(x => ({ nome: x.nome, liga: 'brasileirao', elenco: 70 })),
+    ...tabelaB.map(x => ({ nome: x.nome, liga: 'serieB', elenco: 60 })),
+  ];
+  const classificacoesMundo = {
+    brasileirao: { classificacao: tabelaA },
+    serieB: { classificacao: tabelaB },
+  };
+  const divisoes = [{ baixo: 'serieB', cima: 'brasileirao', vagas: 4 }];
+  const antes = atualizarLigasMundoTecnico({ clubes, classificacoesMundo, divisoes, rng: () => 0.5 });
+  const depois = atualizarLigasMundoTecnico({ clubes, classificacoesMundo, divisoes, rng: () => {
+    throw new Error('Playoff da mesma temporada não pode ser sorteado novamente');
+  } });
+  assert.equal(antes.playoffsSerieB, depois.playoffsSerieB);
+  assert.deepEqual(antes.movimentos, depois.movimentos);
+  assert.deepEqual(antes.ligasMundo, depois.ligasMundo);
+});

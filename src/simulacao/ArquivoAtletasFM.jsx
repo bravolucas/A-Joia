@@ -4,6 +4,8 @@ import {resumoConquistas} from './historicoConquistas.js';
 import {resumoConfrontosAtleta,partidasDoAtleta} from './historicoConfrontos.js';
 import {escudoDe} from '../comum/arte.js';
 import LinkEntidade from '../historia/LinkEntidade.jsx';
+import MiniaturaConquista from '../comum/MiniaturaConquista.jsx';
+import {historicoTransferenciasAtleta,tipoTransferencia,valorTransferencia} from './historicoTransferencias.js';
 
 const n=x=>Number.isFinite(x)?x.toLocaleString('pt-BR'):'—';
 const texto=x=>String(x||'').toLocaleLowerCase('pt-BR');
@@ -30,7 +32,7 @@ function TabelaCarreira({linhas,conquistas}){
    return <tr key={String(r.ano)+'|'+r.clube+'|'+i}>
     <td><strong>{r.ano??'—'}</strong></td><td className="fm27-club-cell"><img src={escudoDe(r.clube)} alt=""/><LinkEntidade tipo="clube" nome={r.clube||""}>{r.clube||"Sem clube"}</LinkEntidade></td>
     <td>{n(r.jogos)}</td><td>{n(r.gols)}</td><td>{n(r.assist)}</td><td>{n(r.defesas)}</td>
-    <td className="fm27-season-honours">{registros.length?registros.map((x,j)=><span key={j} className="fm27-mini-honour" title={x.categoria==='premio'?'Prêmio individual':'Título coletivo'}>{x.categoria==='premio'?'★':'◆'} <LinkEntidade tipo={x.categoria==='premio'?'premio':'competicao'} nome={x.nome}/></span>):'—'}</td>
+    <td className="fm27-season-honours">{registros.length?registros.map((x,j)=><span key={j} className="fm27-mini-honour" title={x.categoria==='premio'?'Prêmio individual':'Título coletivo'}><MiniaturaConquista nome={x.nome} categoria={x.categoria} size={20}/> <LinkEntidade tipo={x.categoria==='premio'?'premio':'competicao'} nome={x.nome}/></span>):'—'}</td>
    </tr>;
   })}</tbody>
  </table></div>;
@@ -39,7 +41,7 @@ function ListaConquistas({registros,categoria}){
  const lista=categoria==='todas'?registros:registros.filter(x=>x.categoria===categoria);
  if(!lista.length)return <p className="fm27-empty">Ainda não há {categoria==='premio'?'premiações individuais':'conquistas'} documentadas neste save.</p>;
  return <div className="fm27-honours-list">{lista.map((x,i)=><article key={[x.ano,x.categoria,x.nome,x.clube,i].join('|')} className="fm27-honour">
-  <span className={'fm27-honour-symbol '+(x.categoria==='premio'?'is-award':'')}>{x.categoria==='premio'?'★':'🏆'}</span>
+  <span className={'fm27-honour-symbol '+(x.categoria==='premio'?'is-award':'')}><MiniaturaConquista nome={x.nome} categoria={x.categoria} size={38}/></span>
   <div><strong><LinkEntidade tipo={x.categoria==='premio'?'premio':'competicao'} nome={x.nome}/></strong><span>{x.categoria==='premio'?'Prêmio individual':'Título coletivo'} · {x.ano??'Ano não registrado'} · <LinkEntidade tipo="clube" nome={x.clube||''}/></span></div>
   <b>{x.ano??'—'}</b>
  </article>)}</div>;
@@ -82,12 +84,12 @@ export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
    const atual=mapa.get(String(p.id));
    if(p.aposentado&&!atual)continue;
    mapa.set(String(p.id),{...atual,id:String(p.id),nome:p.nome,posicao:p.posicao,nac:p.nac,
-    clube:p.clubeNome,aposentado:!!p.aposentado,contrato:p.contrato,movimentos:p.movimentos||[],
+    clube:p.clubeNome,aposentado:!!p.aposentado,contrato:p.contrato,movimentos:p.movimentos?.length?p.movimentos:atual?.movimentos||[],
     historico:atual?.historico||[]});
   }
   if(c.nome&&!mapa.has('voce'))mapa.set('voce',{
    id:'voce',voce:true,nome:c.nome||'Seu jogador',posicao:c.posicao,nac:c.nac,
-   clube:c.clubeNome||c.clube?.nome,aposentado:!!c.aposentado,
+   clube:c.clubeNome||c.clube?.nome,aposentado:!!c.aposentado,movimentos:c.movimentos||c.jogador?.movimentos||[],
    historico:c.temporadas.map(t=>({ano:t.ano,clube:t.clube,jogos:t.jogos,gols:t.gols,assist:t.assist,defesas:t.defesas,cleanSheets:t.cleanSheets,titulos:(t.titulos||[]).map(x=>x.nome),porCompeticao:t.porCompeticao||[]}))
   });
   return [...mapa.values()];
@@ -98,6 +100,7 @@ export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
  const selecionado=id&&!todos.some(p=>p.id===id)?null:filtrados.find(p=>p.id===id)||filtrados[0]||null;
  const linhas=useMemo(()=>selecionado?historicoAtleta(selecionado):[],[selecionado]);
  const conquistas=useMemo(()=>selecionado?resumoConquistas(c,selecionado.id):{todas:[],titulos:[],premios:[]},[c,selecionado?.id]);
+ const transferencias=useMemo(()=>selecionado?historicoTransferenciasAtleta(selecionado,linhas):[],[selecionado,linhas]);
  const selecionar=novo=>{I(novo);A('resumo');Q('todas');};
  return <section className="fm27-archive" aria-label="Arquivo de jogadores">
   <header className="fm27-section-header">
@@ -132,17 +135,12 @@ export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
       </div>
       <span className={'fm27-player-state '+(selecionado.aposentado?'is-retired':'')}>{selecionado.aposentado?'Aposentado':'Em atividade'}</span>
      </div>
-     {(Number.isInteger(selecionado.contrato)||selecionado.movimentos?.length>0)&&
-      <section className="fm27-contract-strip" aria-label="Contratos e movimentações">
-       {Number.isInteger(selecionado.contrato)&&!selecionado.aposentado&&<p>Contrato: {selecionado.clube?`${selecionado.contrato} temporada(s)`:'Livre'}</p>}
-       {selecionado.movimentos?.length>0&&<details open><summary>Movimentações da carreira ({selecionado.movimentos.length})</summary>
-        <ul aria-label={`Movimentações de ${selecionado.nome}`}>{selecionado.movimentos.map((m,i)=><li key={i}>
-         {m.ano??m.temporada??'—'} · {m.tipo==='renovacao'?'Contrato renovado':`${m.de||'Sem clube'} → ${m.para||'Sem clube'}`}
-        </li>)}</ul>
-       </details>}
+     {Number.isInteger(selecionado.contrato)&&!selecionado.aposentado&&
+      <section className="fm27-contract-strip" aria-label="Contrato atual">
+       <p>Contrato: {selecionado.clube?`${selecionado.contrato} temporada(s)`:'Livre'}</p>
       </section>}
      <nav className="fm27-subtabs" aria-label="Seções do jogador">
-      {[['resumo','Visão geral'],['carreira','Carreira'],['conquistas','Conquistas'],['confrontos','Adversários']].map(([key,label])=>
+      {[['resumo','Visão geral'],['carreira','Carreira'],['transferencias','Transferências'],['conquistas','Conquistas'],['confrontos','Adversários']].map(([key,label])=>
        <button type="button" key={key} aria-current={aba===key?'page':undefined} onClick={()=>A(key)}>{label}</button>)}
      </nav>
      <div className="fm27-player-body">
@@ -161,6 +159,18 @@ export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
        </div>
       </>}
       {aba==='carreira'&&<><div className="fm27-panel-heading"><div><h3>Carreira por temporada</h3><p>Dados registrados no save, sem completar anos ausentes artificialmente.</p></div></div><TabelaCarreira linhas={linhas} conquistas={conquistas}/></>}
+      {aba==='transferencias'&&<>
+       <div className="fm27-panel-heading"><div><h3>Histórico de transferências</h3><p>Origem, destino e valor de cada movimentação registrada. Sem estimar valores ausentes.</p></div></div>
+       {transferencias.length?<div className="fm27-data-scroll"><table className="fm27-data fm27-transfers">
+        <thead><tr><th>Ano</th><th>Operação</th><th>Clube de origem</th><th>Clube de destino</th><th>Valor</th></tr></thead>
+        <tbody>{transferencias.map((m,i)=><tr key={[m.ano,m.tipo,m.de,m.para,i].join('|')}>
+         <td>{m.ano??'—'}</td><td>{tipoTransferencia(m.tipo)}{m.fonte==='temporadas'&&<small className="fm27-transfer-note">Modalidade não registrada</small>}</td>
+         <td><LinkEntidade tipo="clube" nome={m.de||''}>{m.de||'Sem clube'}</LinkEntidade></td>
+         <td><LinkEntidade tipo="clube" nome={m.para||''}>{m.para||'Sem clube'}</LinkEntidade></td>
+         <td><strong>{valorTransferencia(m.valor)}</strong></td>
+        </tr>)}</tbody>
+       </table></div>:<p className="fm27-empty">Não há transferências registradas para este atleta. Mudanças de clube só aparecem quando comprovadas pelo histórico.</p>}
+      </>}
       {aba==='conquistas'&&<>
        <div className="fm27-panel-heading"><div><h3>Conquistas e distinções</h3><p>Troféus coletivos e premiações individuais vinculados ao atleta.</p></div></div>
        <div className="fm27-segmented" role="group" aria-label="Filtrar conquistas">{[['todas','Todas'],['titulo','Títulos'],['premio','Prêmios']].map(([value,label])=>

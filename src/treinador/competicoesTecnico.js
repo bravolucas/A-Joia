@@ -1,6 +1,7 @@
 import { riscoEstiloTecnico } from './taticasTecnico.js';
 import {mediasGols,amostrarPoisson} from '../competicoes/motorPlacares.js';
 import {temIdaVolta,regulamentoConhecidoIdaVolta} from '../competicoes/regrasIdaVolta.js';
+import {aplicarProrrogacaoAgregado} from '../competicoes/prorrogacaoMata.js';
 const limitar = (n, min, max) => Math.max(min, Math.min(max, n));
 const sorteio = () => Math.random();
 const forca = (clube) => Number(clube?.forca ?? clube?.elenco ?? 50);
@@ -237,7 +238,10 @@ function nomeFaseEliminatoria(quantidadeClubes) {
 
 function criarConfrontoIdaVolta(casa, fora, nomeUsuario, bonusTecnico, rng) {
   const ida = criarPartida(casa, fora, nomeUsuario, bonusTecnico, rng);
-  const volta = criarPartida(fora, casa, nomeUsuario, bonusTecnico, rng);
+  // Em empate agregado, a prorrogação ocorre no estádio do mandante
+  // do segundo jogo. Só haverá pênaltis se o empate persistir após 120'.
+  const volta = aplicarProrrogacaoAgregado(ida,criarPartida(fora, casa, nomeUsuario, bonusTecnico, rng),
+    forca(fora),forca(casa),rng);
   const golsCasa = ida.golsCasa + volta.golsFora;
   const golsFora = ida.golsFora + volta.golsCasa;
   let vencedor = golsCasa > golsFora ? casa.nome : golsFora > golsCasa ? fora.nome : null;
@@ -249,7 +253,9 @@ function criarConfrontoIdaVolta(casa, fora, nomeUsuario, bonusTecnico, rng) {
   }
   // O vencedor pertence ao confronto; os resultados de cada partida permanecem intactos.
   return { casa: casa.nome, fora: fora.nome, golsCasa, golsFora, vencedor, penaltis,
-    ...(ida.planoTatico ? { planoTatico: ida.planoTatico } : {}), agregado: true, partidas: [{ ...ida, etapa: 'Ida' }, { ...volta, etapa: 'Volta' }] };
+    ...(ida.planoTatico ? { planoTatico: ida.planoTatico } : {}), agregado: true,
+    ...(volta.prorrogacao?{prorrogacao:volta.prorrogacao}:{}),
+    partidas: [{ ...ida, etapa: 'Ida' }, { ...volta, etapa: 'Volta' }] };
 }
 
 function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng, formato = {}) {

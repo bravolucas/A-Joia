@@ -39,6 +39,11 @@ for (const width of [390, 1366]) test(`histórico individual no elenco: temporad
   await expect(historico.getByRole('region',{name:`Temporadas de ${atleta.nome}`})).toContainText('7.45');
   await expect(historico).toContainText('Bola de Ouro');
   await expect(historico).toContainText('Brasileirão Série B');
+  const imagemTitulo=historico.getByRole('img',{name:'Imagem de Brasileirão Série B'});
+  const imagemPremio=historico.getByRole('img',{name:'Imagem de Bola de Ouro'});
+  await expect(imagemTitulo).toBeVisible();await expect(imagemPremio).toBeVisible();
+  await expect.poll(()=>imagemTitulo.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
+  await expect.poll(()=>imagemPremio.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
   await expect(historico).toContainText('Títulos conquistados');
   await expect(historico).toContainText('Figueirense');
   await expect(historico).toContainText('Transferência');

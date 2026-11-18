@@ -18,6 +18,7 @@ export function regulamentoSerieC(ano = 2026) {
 
 function confrontosCirculo(nomes, turnoEVolta = false) {
   const ordem = [...nomes];
+  const posicaoInicial = new Map(nomes.map((nome, indice) => [nome, indice]));
   if (ordem.length % 2) ordem.push(null);
   const rodadas = [];
   for (let rodada = 0; rodada < ordem.length - 1; rodada++) {
@@ -25,8 +26,15 @@ function confrontosCirculo(nomes, turnoEVolta = false) {
     for (let i = 0; i < ordem.length / 2; i++) {
       const a = ordem[i], b = ordem[ordem.length - 1 - i];
       if (!a || !b) continue;
-      const casa = (rodada + i) % 2 ? b : a;
-      const fora = casa === a ? b : a;
+      // Orientação circular de todos os pares: numa liga par cada clube
+      // recebe 9/10 (20 times), 11/12 (24) ou 13/13 (28 com volta) mandos.
+      // Alterar o mandante pela paridade da rodada gerava 18/1 em 2026.
+      const tamanhoReal = nomes.length;
+      const distancia = (posicaoInicial.get(b) - posicaoInicial.get(a) + tamanhoReal) % tamanhoReal;
+      const aManda = distancia < tamanhoReal / 2 ||
+        (distancia === tamanhoReal / 2 && posicaoInicial.get(a) < tamanhoReal / 2);
+      const casa = aManda ? a : b;
+      const fora = aManda ? b : a;
       confrontos.push({ casa, fora, rodada: rodada + 1 });
     }
     rodadas.push(confrontos);

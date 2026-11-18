@@ -1,5 +1,5 @@
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
-import {resolverPlayoffsSerieB} from '../simulacao/playoffsSerieB.js';
+import {resolverOuReusarPlayoffsSerieB} from '../simulacao/playoffsSerieB.js';
 import { MINIMOS_ELENCO, diagnosticarElenco } from '../simulacao/profundidadeElenco.js';
 import {posicoesSecundariasNewgen} from '../simulacao/posicoesSecundariasNewgen.js';
 import {escalarVagasAptas} from '../simulacao/escalacaoApta.js';
@@ -1265,7 +1265,7 @@ export function girarLigas(estado, forcarClube = null, classificacoesMundo = nul
     if (div.elite === 'brasileirao' && div.acesso === 'serieB') {
       const tabelaB = baixoReal ? baixo : ordenar(naAcesso).map(x => ({ nome: x.n }));
       const forcasB = Object.fromEntries(naAcesso.map(([nome, clube]) => [nome, clube.forca]));
-      playoffsSerieB = resolverPlayoffsSerieB(tabelaB, forcasB, Math.random);
+      playoffsSerieB = resolverOuReusarPlayoffsSerieB(tabelaB, forcasB, Math.random, classificacoesMundo?.serieB?.playoffs);
       if (playoffsSerieB) sobem = playoffsSerieB.promovidos;
     }
     if (!cimaReal && ehForcadoNaElite && forcarClube.desceu) caem.push(forcarClube.nome);

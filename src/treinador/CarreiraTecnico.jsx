@@ -126,6 +126,18 @@ function CampanhasTemporada({ torneios = [], abertas = false }) {
     })}</div>
   </div>;
 }
+function PlayoffSerieB({ playoff }) {
+ if (!playoff?.confrontos?.length) return null;
+ return <details className="mt-2 rounded-lg border border-[#D8B44A]/25 bg-[#D8B44A]/5 px-2 py-1.5">
+  <summary className="cursor-pointer text-[11px] font-semibold text-[#EBC557]">Playoffs de acesso · Série B · 3º × 6º e 4º × 5º</summary>
+  <p className="mt-1 text-[10px] text-[#A1A1AA]">1º e 2º sobem diretamente. Ida e volta; empate em pontos e saldo favorece a melhor campanha.</p>
+  {playoff.confrontos.map(confronto=><div key={confronto.superior} className="my-2 rounded-md border border-white/10 p-2 text-[11px]">
+    <strong className="text-[#E4E4E7]"><LinkEntidade tipo="clube" nome={confronto.superior}/> × <LinkEntidade tipo="clube" nome={confronto.inferior}/></strong>
+    {confronto.jogos.map((jogo,i)=><p key={i} className="mt-1 text-[#A1A1AA]">{i===0?'Ida':'Volta'}: <LinkEntidade tipo="clube" nome={jogo.casa}/> {jogo.golsCasa} × {jogo.golsFora} <LinkEntidade tipo="clube" nome={jogo.fora}/></p>)}
+    <p className="mt-1 font-semibold text-[#86EFAC]">Acesso: <LinkEntidade tipo="clube" nome={confronto.vencedor}/> · {confronto.criterio}</p>
+  </div>)}
+ </details>;
+}
 function ClassificacoesMundo({ classificacoes = {}, ligaAtual, clubeAtual }) {
   const ligas = Object.entries(classificacoes)
     .filter(([liga, dados]) => liga !== ligaAtual && dados?.classificacao?.length)
@@ -140,6 +152,7 @@ function ClassificacoesMundo({ classificacoes = {}, ligaAtual, clubeAtual }) {
           <div className="grid grid-cols-[1.5rem_minmax(0,1fr)_2rem_2rem_3rem] gap-1 border-b border-white/[.08] py-1 text-[8px] uppercase text-[#71717A]"><span>#</span><span>Clube</span><span className="text-right">J</span><span className="text-right">V</span><span className="text-right">Pts</span></div>
           {dados.classificacao.map((clube, indice) => <div key={clube.nome} className={`grid grid-cols-[1.5rem_minmax(0,1fr)_2rem_2rem_3rem] gap-1 py-1 text-[9px] ${clube.nome === clubeAtual ? 'font-bold text-[#FDE68A]' : 'text-[#A1A1AA]'}`}><span>{clube.posicao || indice + 1}</span><span className="truncate"><LinkEntidade tipo="clube" nome={clube.nome}/></span><span className="text-right">{clube.jogos ?? '—'}</span><span className="text-right">{clube.vitorias ?? '—'}</span><span className="text-right">{clube.pontos ?? '—'}</span></div>)}
         </div>
+        <PlayoffSerieB playoff={dados.playoffAcesso}/>
       </details>)}
     </div>
   </details>;
@@ -181,6 +194,7 @@ function LinhaTemporada({ a, idade, ativa, aberta, onClick }) {
       {a.vagasInternacionaisProxima?.[a.clube]&&<p>Próxima temporada: {dadosVaga(a.vagasInternacionaisProxima[a.clube])}. {a.vagasInternacionaisProxima[a.clube].motivo}.</p>}
       <CampanhasTemporada torneios={a.torneios} />
       {a.classificacao?.length > 0 && <details className="ct-league-details"><summary>Ver classificação</summary><div className="ct-standings">{a.classificacao.map(l => <div key={l.nome} className={l.meuClube ? 'ct-positive' : ''}><span>{l.posicao}</span><strong><LinkEntidade tipo={a.tipoEquipe==='selecao'?'selecao':'clube'} nome={l.nome}/></strong><span>{l.vitorias}V</span><span>{l.pontos} pts</span></div>)}</div></details>}
+      <PlayoffSerieB playoff={a.playoffAcesso}/>
       <ClassificacoesMundo classificacoes={a.classificacoesMundo} ligaAtual={a.liga} clubeAtual={a.clube} />
     </div>}
   </div>;

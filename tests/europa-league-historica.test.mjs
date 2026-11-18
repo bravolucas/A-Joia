@@ -74,3 +74,15 @@ test('carreira preservada: final simulada é contada uma vez, sem mexer na hist�
  assert.equal(galeriaClube(c,'Sevilla').tacas.find(t=>t.nome==='Europa League').total,8);
  assert.deepEqual(c,antes);
 });
+
+test('saves legados de Sevilla não transformam Europa League real em conquista duplicada',()=>{
+ const c={estadoClubes:{Sevilla:{palmares:{liga:1,copa:5,continental:7,mundial:0}}}};
+ const antes=structuredClone(c);
+ const real=galeriaClube(c,'Sevilla').tacas.find(t=>t.nome==='Europa League');
+ assert.equal(real.inicial,7);
+ assert.equal(real.total,7);
+ assert.equal(real.legado||0,0);
+ assert.equal(taca('Aston Villa','Champions League')?.inicial,1);
+ assert.equal(taca('Aston Villa','Europa League')?.inicial,1);
+ assert.deepEqual(c,antes);
+});

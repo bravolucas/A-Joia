@@ -676,6 +676,20 @@ export function calendarioLigaTecnico(t = {}) {
     }
     participantes.unshift({ nome: t.clube || 'Meu clube', elenco: forcaClubeTecnico(t) });
   }
+  // Saves anteriores ao cadastro da Série C podem manter um clube da C na
+  // Série B por mapeamento legado, produzindo 21 participantes. O campeonato
+  // brasileiro continua com 20; removemos provisoriamente o excedente menos
+  // forte (nunca o usuário), e a reconciliação mundial registra essa troca.
+  if ((liga === 'brasileirao' || liga === 'serieB') && participantes.length > 20) {
+    const excedentes = participantes.length - 20;
+    const remover = [...participantes].filter(x => x.nome !== t.clube)
+      .sort((a, b) => a.elenco - b.elenco || a.nome.localeCompare(b.nome, 'pt-BR'))
+      .slice(0, excedentes);
+    for (const clubeRemover of remover) {
+      const indice = participantes.findIndex(x => x.nome === clubeRemover.nome);
+      if (indice >= 0) participantes.splice(indice, 1);
+    }
+  }
   if (participantes.length < 2) return null;
   // Método de círculo: ligas ímpares recebem uma vaga de folga por rodada.
   const times = [...participantes];

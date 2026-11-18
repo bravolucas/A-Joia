@@ -466,3 +466,55 @@
  .fm27-match-filters{grid-template-columns:1fr 1fr}
  .fm27-confront-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+/* Compatibilidade com os seletores do Arquivo Vivo antigo sem resgatar seu grid. */
+.fm27-archive .fm27-roster-list.mv-atletas{
+ display:flex;flex-direction:column;gap:0;padding:0;list-style:none;
+ grid-template-columns:none;
+}
+.fm27-archive .fm27-roster-list.mv-atletas button.fm27-roster-item{
+ display:flex;align-items:center;gap:10px;
+ width:100%;height:auto;text-align:left;
+ background:transparent;color:var(--fm-text);
+ border:0;border-left:3px solid transparent;
+ border-bottom:1px solid #26364b;
+ border-radius:0;padding:12px 10px;
+}
+.fm27-archive .fm27-roster-list.mv-atletas button.fm27-roster-item.is-selected{
+ background:#194244;border-left-color:var(--fm-accent);
+}
+.fm27-archive .fm27-roster-list.mv-atletas button.fm27-roster-item:hover{background:#1a2c45}
+.fm27-archive .fm27-roster-copy span,
+.fm27-archive .fm27-roster-copy small{margin:0}
+.fm27-contract-strip{
+ display:flex;gap:15px;align-items:flex-start;
+ padding:9px 21px;background:#111e30;
+ border-bottom:1px solid var(--fm-border);color:var(--fm-muted);
+ font-size:11px
+}
+.fm27-contract-strip p{margin:5px 0;white-space:nowrap}
+.fm27-contract-strip details{flex:1;min-width:0}
+.fm27-contract-strip summary{
+ cursor:pointer;color:var(--fm-accent);font-weight:700;
+ padding:5px 0
+}
+.fm27-contract-strip ul{
+ list-style:none;display:flex;gap:5px 12px;flex-wrap:wrap;
+ margin:7px 0 3px;padding:0
+}
+.fm27-contract-strip li{
+ color:#d3ddeb;font-size:10px;
+ background:#21334b;padding:6px 9px;border-radius:5px
+}
+@media(max-width:700px){
+ .fm27-archive .fm27-roster-list.mv-atletas{flex-direction:row}
+ .fm27-archive .fm27-roster-list.mv-atletas button.fm27-roster-item{
+  width:195px;min-width:195px;border:0;
+  border-top:3px solid transparent;padding:11px 9px
+ }
+ .fm27-archive .fm27-roster-list.mv-atletas button.fm27-roster-item.is-selected{
+  border-top-color:var(--fm-accent);border-left:0
+ }
+ .fm27-contract-strip{padding:9px 13px;display:block}
+ .fm27-contract-strip p{white-space:normal}
+}

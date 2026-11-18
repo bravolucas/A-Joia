@@ -1,5 +1,6 @@
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
 import {resolverOuReusarPlayoffsSerieB} from '../simulacao/playoffsSerieB.js';
+import {progredirBrasilInferior} from '../simulacao/progressaoBrasilInferior.js';
 import { MINIMOS_ELENCO, diagnosticarElenco } from '../simulacao/profundidadeElenco.js';
 import {posicoesSecundariasNewgen} from '../simulacao/posicoesSecundariasNewgen.js';
 import {escalarVagasAptas} from '../simulacao/escalacaoApta.js';
@@ -1278,7 +1279,31 @@ export function girarLigas(estado, forcarClube = null, classificacoesMundo = nul
     porPais.push({ pais: div.nome, sobem, caem, ...(playoffsSerieB && div.acesso === 'serieB' ? { playoffs: playoffsSerieB } : {}) });
   });
 
-  return { estado: novo, rebaixados: rebaixadosTodos, promovidos: promovidosTodos, porPais, playoffsSerieB };
+  const edicaoC = classificacoesMundo?.serieC?.edicaoSerieC;
+  const progressoBrasilInferior = progredirBrasilInferior({
+    ligasAtuais: Object.fromEntries(Object.entries(estado).filter(([, c]) => c?.liga).map(([nome, c]) => [nome, c.liga])),
+    edicaoSerieC: edicaoC,
+    classificacaoB: classificacoesMundo?.serieB?.classificacao,
+    forcas: Object.fromEntries(Object.entries(estado).map(([nome, c]) => [nome, c?.forca ?? 50])),
+    ano: edicaoC?.ano,
+    rng: Math.random,
+  });
+  if (progressoBrasilInferior.validado) {
+    for (const movimento of progressoBrasilInferior.movimentos) {
+      const anterior = novo[movimento.clube];
+      if (!anterior) continue;
+      novo[movimento.clube] = { ...anterior, liga: movimento.para };
+      if (movimento.tipo === 'acesso') promovidosTodos.push(movimento.clube);
+      else rebaixadosTodos.push(movimento.clube);
+    }
+    porPais.push({
+      pais: 'Brasil — Séries B, C e D',
+      sobem: [...progressoBrasilInferior.promovidosSerieC, ...progressoBrasilInferior.promovidosSerieD],
+      caem: [...progressoBrasilInferior.rebaixadosSerieB, ...progressoBrasilInferior.rebaixadosSerieC],
+      edicaoSerieC: edicaoC,
+    });
+  }
+  return { estado: novo, rebaixados: rebaixadosTodos, promovidos: promovidosTodos, porPais, playoffsSerieB, progressoBrasilInferior };
 }
 
 export function continentalDaSelecao(nac) {

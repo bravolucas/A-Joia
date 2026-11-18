@@ -1,0 +1,26 @@
+name: Auditar nomes regionais das seleções
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/jogador/elencoSelecao.js'
+      - 'tests/elenco-selecao-nomes-regionais.test.mjs'
+      - 'docs/NOMES_REGIONAIS_SELECOES.md'
+      - '.github/workflows/auditar-nomes-regionais-selecoes.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  nomes-selecoes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Todas as nacionalidades, save antigo e elenco da Copa
+        run: node --test tests/elenco-selecao-nomes-regionais.test.mjs tests/elenco-selecao.test.mjs
+      - name: Build compatível com GitHub Pages
+        run: GITHUB_PAGES=true npm run build

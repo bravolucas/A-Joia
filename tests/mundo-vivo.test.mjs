@@ -46,6 +46,20 @@ test('arquivo anual é idempotente, guarda colocações e transferências no clu
  assert.equal(historicoAtleta(c.universo.atletas['1'])[0].clube,'Santos');assert.equal(historicoAtleta(c.universo.atletas['1'])[0].destino,'Milan');assert.equal(c.universo.clubes.Santos.historico[0].posicao,2);
  assert.deepEqual(lerCarreira(serializarCarreira(c)),JSON.parse(salvo));
 });
+test('Série C pendente não registra campeão indefinido nem altera o save após serializar',()=>{
+ const c={codigo:'serie-c-pendente',nome:'Atleta',posicao:'ATA'};
+ const card={ano:2034,clube:'Santos',ligaId:'brasileirao',
+  classificacoesMundo:{serieC:{liga:'serieC',origem:'serie-c-pendente',
+   classificacao:[],jogos:[],ano:2034}}};
+ registrarMundoVivo(c,card);
+ const edicao=c.universo.edicoes.find(e=>e.nome==='Brasileirão Série C');
+ assert.ok(edicao);
+ assert.equal(Object.hasOwn(edicao,'campeao'),false);
+ const serializado=JSON.parse(JSON.stringify(c));
+ assert.deepEqual(serializado.universo.edicoes,c.universo.edicoes);
+ registrarMundoVivo(c,card);
+ assert.deepEqual(c.universo.edicoes,serializado.universo.edicoes);
+});
 test('estatísticas principais do mundo conservam gols dos placares e nunca dão gol ao goleiro',()=>{
  const antes={jogadores:['A','B'].flatMap((clube,idx)=>plantel().map((p,i)=>({...p,id:idx*100+i,nome:`${clube}${i}`,posicao:p.setor==='GOL'?'GOL':p.setor==='DEF'?'ZAG':p.setor==='MEI'?'MC':'ATA',ovr:65,clubeNome:clube,carreira:{jogos:0,gols:0,assist:0}})))};
  const depois=structuredClone(antes),card={ano:2030,classificacoesMundo:{brasileirao:{jogos:[{casa:'A',fora:'B',golsCasa:3,golsFora:1}]}}};

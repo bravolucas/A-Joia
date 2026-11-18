@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {vagasInternacionais} from '../src/competicoes/vagasInternacionais.js';
 import {vagaJogador,calcularVagasRapidas,vagaTecnico} from '../src/competicoes/regrasCopasRapidas.js';
-import {participantesEstadual} from '../src/competicoes/estaduaisRapidos.js';
+import {participantesEstadual,CLUBES_REGIONAIS_EXTRAS} from '../src/competicoes/estaduaisRapidos.js';
 import {criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa,simularCampanhaCopa,chancesCopa,chancePenaltis} from '../src/treinador/copasEscolha.js';
 import {prepararCopasTecnico,chaveCopaTecnico} from '../src/treinador/copasCarreiraTecnico.js';
 import {CLUBES} from '../src/dados/data.js';
@@ -36,7 +36,7 @@ test('empate no mata-mata abre pênaltis separados; reload e duplo clique não s
  assert.ok(c.resultado.penaltisPendentes);assert.equal(c.jogosUsuario.length,0);const d=decisaoCopa(c),salvo=JSON.parse(JSON.stringify(c)),r=escolherCopa(c,d.chave,'canto');assert.deepEqual(r,escolherCopa(salvo,d.chave,'canto'));assert.equal(escolherCopa(r,d.chave,'canto'),r);assert.equal(r.jogosUsuario.length,1);assert.ok(r.jogosUsuario[0].penaltis);
 });
 test('Copa do Brasil começa por nível; estaduais nunca misturam estados',()=>{
- for(const [nome,fase] of [['Flamengo','Oitavas de final'],['Santos','Pré-oitavas'],['Confiança','Fase preliminar']]){const clube=CLUBES.find(x=>x.nome===nome),p=prepararCopasTecnico({clube:nome,elenco:clube.forca,ano:2030,liga:clube.liga,temporadas:[]},clube.forca),n=p.campeonatos.find(x=>x.nome==='Copa do Brasil');assert.equal(decisaoCopa(n).fase,fase);const e=p.campeonatos.find(x=>x.tipo==='estadual');assert.ok(e);assert.ok(e.pool.every(x=>x.estado===clube.estado));}
+ for(const [nome,fase] of [['Flamengo','Oitavas de final'],['Santos','Pré-oitavas'],['São Bernardo','Fase preliminar']]){const clube=CLUBES.find(x=>x.nome===nome),p=prepararCopasTecnico({clube:nome,elenco:clube.forca,ano:2030,liga:clube.liga,temporadas:[]},clube.forca),n=p.campeonatos.find(x=>x.nome==='Copa do Brasil');assert.equal(decisaoCopa(n).fase,fase);const e=p.campeonatos.find(x=>x.tipo==='estadual');assert.ok(e);assert.ok(e.pool.every(x=>x.estado===clube.estado));}
  assert.equal(participantesEstadual(CLUBES.find(c=>c.nome==='Real Madrid')),null);
 });
 test('vaga do segundo colocado existe no ano seguinte e pertence ao clube após troca de empregado',()=>{
@@ -52,7 +52,7 @@ test('saves antigos sem tabela mundial preservam posição conhecida, inclusive 
  const jogador={ano:2029,temporadas:[{ano:2028,clube:'Confiança',ligaId:'brasileirao',posLiga:3,titulos:[]}],ligas:{Confiança:'brasileirao'}};assert.equal(vagaJogador(jogador,{nome:'Confiança',liga:'brasileirao'}).competicao,'libertadores');
 });
 test('histórico final não carrega o estado transitório pesado do sorteio',async()=>{const {resumoCampanhaCopa}=await import('../src/treinador/copasEscolha.js'),c=simularCampanhaCopa({nome:'Champions League',usuario:'Real Madrid',forcaUsuario:90,clubes:europeus,ano:2030,formato:'liga'}),r=resumoCampanhaCopa(c);assert.equal(r.calendario,undefined);assert.equal(r.pool,undefined);assert.equal(r.campeao,c.campeao);assert.deepEqual(r.grupos,c.grupos);assert.deepEqual(r.jogosUsuario,c.jogosUsuario);assert.ok(JSON.stringify(r).length<JSON.stringify(c).length*.7);});
-test('estaduais têm classificação regional antes de semifinal/final',()=>{const clube=CLUBES.find(x=>x.nome==='Confiança'),e=participantesEstadual(clube),c=criarCampanhaCopa({nome:e.nome,tipo:'estadual',usuario:clube.nome,forcaUsuario:55,clubes:e.clubes,ano:2031,formato:'estadual',estado:clube.estado});assert.ok(c.classificacao.length>=4);assert.ok(c.classificacao.every(x=>x.jogos>0));assert.ok(c.pool.every(x=>x.estado==='SE'));if(c.fase!=='fim'){assert.equal(decisaoCopa(c).fase,'Semifinal');assert.ok(c.candidatosMata.includes(decisaoCopa(c).adversario));}});
+test('estaduais têm classificação regional antes de semifinal/final',()=>{const clube=CLUBES_REGIONAIS_EXTRAS.find(x=>x.nome==='Confiança'),e=participantesEstadual(clube),c=criarCampanhaCopa({nome:e.nome,tipo:'estadual',usuario:clube.nome,forcaUsuario:55,clubes:e.clubes,ano:2031,formato:'estadual',estado:clube.estado});assert.ok(c.classificacao.length>=4);assert.ok(c.classificacao.every(x=>x.jogos>0));assert.ok(c.pool.every(x=>x.estado==='SE'));if(c.fase!=='fim'){assert.equal(decisaoCopa(c).fase,'Semifinal');assert.ok(c.candidatosMata.includes(decisaoCopa(c).adversario));}});
 test('jogador vice da Copa do Brasil na Série B recebe a Libertadores seguinte sem depender do booleano antigo',async()=>{
  const R=await import('../src/jogador/rapido.js');let c=R.criarJogador({nome:'Vice',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:9,codigo:'VICE-VAGA'});c.clubeNome='Confiança';c.flags.baseEscolhida=true;const r=R.jogarTemporada(c);r.card.pendente=null;r.card.filaMomentos=[];r.card.titulos=[];r.card.posLiga=10;r.card.copaNac={nome:'Copa do Brasil',fase:'Vice-campeão',campeao:'Flamengo',vice:'Confiança'};const f=R.fecharTemporada(r.c,r.card);assert.equal(f.c.vagasInternacionaisClubes.Confiança.competicao,'libertadores');assert.equal(f.c.vagasInternacionaisClubes.Confiança.entrada,'pre');const n=R.jogarTemporada({...f.c,vagaContinental:false});assert.equal(n.card.continental.nome,'Libertadores');
 });

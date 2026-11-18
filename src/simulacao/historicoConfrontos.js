@@ -40,6 +40,11 @@ export function partidasHistoricas(c = {}) {
     const liga=emJogo?t.liga:finalizada?.liga;
     if(Number.isFinite(ano)&&clube&&!u.anos?.includes(ano)){
       const nomeLiga=LIGAS[liga]?.nome||liga||'Liga';
+      for(const [i,j] of (origem?.partidasLiga||[]).entries()){
+        if(!valido(j))continue;
+        partidas.push({...j,id:['etapa-completa',ano,nomeLiga,j.casa,j.fora,j.rodada??i+1].join('|'),
+          ano,competicao:nomeLiga,origem:'temporada-em-andamento'});
+      }
       for(const [i,j] of (origem?.confrontos||[]).entries()){
         if(j?.folga||!j?.nome||!Number.isFinite(j.golsPro)||!Number.isFinite(j.golsContra))continue;
         const casa=j.casa?clube:j.nome,fora=j.casa?j.nome:clube;

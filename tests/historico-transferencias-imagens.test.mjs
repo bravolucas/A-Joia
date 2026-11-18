@@ -33,6 +33,11 @@ test('mudanças de clube por temporada são documentadas sem inventar taxa ou mo
  assert.equal(r[0].de,'Palmeiras');assert.equal(r[0].para,'Grêmio');
  assert.equal(r[1].valor,1000);
 });
+test('carreira do jogador conserva transferências livres e retornos de empréstimo',()=>{
+ const linhas=historicoTransferenciasAtleta({movimentos:[{ano:2028,tipo:'livre',de:'A',para:'B',valor:0},{ano:2029,tipo:'retornoEmprestimo',de:'C',para:'B',valor:0}]},[]);
+ assert.equal(linhas.length,2);assert.equal(tipoTransferencia(linhas[0].tipo),'Retorno de empréstimo');
+ assert.equal(valorTransferencia(linhas[1].valor),'Sem custos');
+});
 test('nomes de prêmios usam imagem específica já presente no acervo',()=>{
  assert.equal(chaveCompeticao('Bola de Ouro'),'bola-de-ouro');
  assert.equal(chaveCompeticao('bolaOuro'),'bola-de-ouro');

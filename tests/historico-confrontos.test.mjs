@@ -1,4 +1,6 @@
 import test from 'node:test';
+import {CLUBES} from '../src/dados/data.js';
+import {simularRodadaRivaisTecnico,tabelaClassificacaoTecnico,calendarioLigaTecnico} from '../src/treinador/tecnico.js';
 import assert from 'node:assert/strict';
 import {
   partidasHistoricas,resumoConfrontosClubes,partidasDetalhadasUsuario,
@@ -106,4 +108,25 @@ test('retrospecto do atleta separa clube defendido, casa/fora e desempenho nas p
  assert.equal(resumoConfrontosAtleta(c,{adversario:'Palmeiras',clube:'Corinthians'}).assistencias,1);
  assert.equal(resumoConfrontosAtleta(c,{adversario:'Palmeiras',local:'casa'}).gols,1);
  assert.equal(resumoConfrontosAtleta(c,{adversario:'Palmeiras',local:'fora'}).gols,0);
+});
+
+test('modo treinador arquiva toda rodada da liga, não apenas os jogos do clube controlado',()=>{
+ const time=CLUBES.find(c=>c.liga==='brasileirao');
+ assert.ok(time,'Liga brasileira simulável');
+ const t={clube:time.nome,liga:time.liga,elenco:time.forca};
+ const calendario=calendarioLigaTecnico(t),rodada=calendario[0];
+ assert.ok(rodada.length>=2);
+ const usuario=rodada.find(j=>j.casa===time.nome||j.fora===time.nome);
+ const adversario=usuario.casa===time.nome?usuario.fora:usuario.casa;
+ const jogos=[],tabela=tabelaClassificacaoTecnico(t,{jogos:0});
+ simularRodadaRivaisTecnico(t,tabela,adversario,'V',()=>0.4,1,
+  {pro:2,contra:1},j=>jogos.push(j));
+ assert.equal(jogos.length,rodada.length);
+ assert.equal(new Set(jogos.map(j=>j.casa+'|'+j.fora)).size,jogos.length);
+ const meu=jogos.find(j=>j.casa===time.nome||j.fora===time.nome);
+ assert.equal(meu.casa===time.nome?meu.golsCasa:meu.golsFora,2);
+ assert.equal(meu.casa===time.nome?meu.golsFora:meu.golsCasa,1);
+ const outro=jogos.find(j=>j.casa!==time.nome&&j.fora!==time.nome);
+ const estado={tecnico:{...t,ano:2029,andamento:{partidasLiga:jogos,confrontos:[]}}};
+ assert.equal(resumoConfrontosClubes(estado,{clube:outro.casa,adversario:outro.fora}).jogos,1);
 });

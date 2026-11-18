@@ -1,4 +1,12 @@
-import {jogosDaEdicao} from './mundoVivo.js';
+/** Lê o arquivo compacto sem acoplar o histórico ao motor de simulação. */
+function jogosDaEdicao(edicao) {
+  if (Array.isArray(edicao?.jogos)) return edicao.jogos;
+  const {nomes=[],partidas=[]}=edicao?.jogos||{};
+  return partidas.map(([a,b,golsCasa,golsFora,rodada,v,penaltis])=>({
+    casa:nomes[a],fora:nomes[b],golsCasa,golsFora,rodada,
+    vencedor:v==null?null:nomes[v],penaltis:!!penaltis
+  }));
+}
 
 /** Leitura do arquivo de partidas do save. Não cria placares nem números ausentes. */
 const valido = j => !!j?.casa && !!j?.fora && Number.isFinite(j.golsCasa) && Number.isFinite(j.golsFora);

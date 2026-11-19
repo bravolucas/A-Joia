@@ -1,6 +1,7 @@
 import {NACIONALIDADES} from '../dados/data.js';
 import {REFERENCIAS_RECORDES_FUTEBOL} from '../dados/recordesFutebolReais.js';
 import {recordesReaisTitulosCompeticao} from './recordesTitulosReais.js';
+import {recordesTreinador} from './recordesTreinador.js';
 
 /** Recordes calculados dos fatos arquivados, sem novos sorteios nem alterar o save. */
 export const METRICAS_RECORDES = Object.freeze([
@@ -322,6 +323,6 @@ export function consultarRecordesFutebol(c={},tipo='clube',nome='',temporadas=c?
   return {id:m.id,rotulo:m.rotulo,categoria:m.categoria,real,simulado,
    status:real?.cobertura==='recorte'?'Referência de período documentado':ultrapassou?'Superado no save':igualou?'Igualado no save':real?'Recorde real preservado':'Recorde do save'};
  });
- return {tipo,nome,recordes,desde:arquivo.desde??temporadas?.[0]?.ano??null,
+ return {tipo,nome,recordes:[...recordes,...recordesTreinador(c,tipo,nome)],desde:arquivo.desde??temporadas?.[0]?.ano??null,
   cobertura:'Referências reais auditadas e partidas/temporadas armazenadas neste save. Lacunas não são preenchidas por estimativas.'};
 }

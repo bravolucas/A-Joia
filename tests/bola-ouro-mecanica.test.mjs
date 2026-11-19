@@ -58,6 +58,15 @@ test('prêmio não é registrado antecipadamente quando o calendário ainda ser�
  assert.equal(registrarPremioCalendario(final,candidatos[0]),final);
 });
 
+test('histórico da Bola de Ouro do rival não introduz ID indefinido nos saves',()=>{
+ const mundo={temporada:3,jogadores:[],historicoBolaDeOuro:[]};
+ const premio=registrarPremioCalendario(mundo,{nome:'Rival',clube:'Milan',
+   ovr:91,gols:23,assist:12,ano:2030,rival:true});
+ assert.equal(premio.historicoBolaDeOuro[0].id,undefined);
+ assert.ok(!Object.hasOwn(premio.historicoBolaDeOuro[0],'id'));
+ assert.deepEqual(JSON.parse(JSON.stringify(premio)),premio);
+});
+
 test('Modo Rápido: registro mundial e rival usam um único campeão por temporada',()=>{
  const c=criarJogador({nome:'Teste Premiação',nac:'BRA',posicao:'ATA',
    personalidade:'equilibrado',origem:'base',pe:'destro',numero:9,

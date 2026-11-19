@@ -67,7 +67,7 @@ import {
   comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
   bonusPrecisaoLoja, chanceMomento, miniDaPosicao, ehPremioIndividual, vagasDaLiga, ehSegundaDivisao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
   eventoDaJanela, segundoEvento, anoDeDecisao, eventoImpasse, valorAtual, comparaSalario, textoEmoji, efeitosDaDecisao, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, resolverDesafio, desafioPendente, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
-  noticiasDaTemporada, retrospectoRivalidade, caminhoSelecao, interesseMercado, sinalizarInteresse,
+  noticiasDaTemporada, retrospectoRivalidade, caminhoSelecao, interesseMercado, sinalizarInteresse, receberRetornosEmpresario,
   copaPendente, opcoesCopa, jogarCopa,
 } from "./rapido.js";
 
@@ -2839,7 +2839,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   // proposta: tocar assina direto (contrato que o clube oferece); "negociar" abre a mesa
   const acaoJornada=(tipo,valor)=>{
     if(tipo==='retorno'){const ev=sortearEvento(c,{somente:'voltarCasa'});if(!ev)throw new Error('O retorno exige condições esportivas e uma relação preservada com o clube.');setEstado(st=>({...st,evento:ev,resultado:null,auto:false}));return;}
-    const fn={posicao:mudarPosicao,veterano:reinventarVeterano,assinatura:ativarAssinatura,preferencia:definirPreferenciaMercado,interesse:sinalizarInteresse}[tipo];
+    const fn={posicao:mudarPosicao,veterano:reinventarVeterano,assinatura:ativarAssinatura,preferencia:definirPreferenciaMercado,interesse:sinalizarInteresse,retornos:receberRetornosEmpresario}[tipo];
     if(!fn) return;
     const novo=fn(c,valor);setEstado(st=>({...st,c:novo,...(tipo==='posicao'&&st.evento?{evento:sortearEvento(novo,{somente:st.evento.id}),auto:false}:{})}));
   };

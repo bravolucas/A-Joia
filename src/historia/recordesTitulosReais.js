@@ -92,7 +92,7 @@ export function recordesReaisTitulosCompeticao(tipo,nome){
   observacao:registro.observacao||registro.nota||''};
  const maior=[...contagens.values()].sort(comparar)[0];
  return [
-  ...(maior?[{...base,id:'titulosTotal',...maior}]:[]),
-  ...(maxSequencia?[{...base,id:'titulosConsecutivos',...maxSequencia}]:[])
+  ...(maior?[{...base,id:'titulosTotal',...maior,equipe:maior.atleta}]:[]),
+  ...(maxSequencia?[{...base,id:'titulosConsecutivos',...maxSequencia,equipe:maxSequencia.atleta}]:[])
  ];
 }

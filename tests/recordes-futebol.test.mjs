@@ -60,3 +60,15 @@ test('dados historicos preservam a fonte e nao sao alterados pelas temporadas do
  assert.equal(registro(consultarRecordesFutebol(c,'clube','Santos'),'golsCarreira').simulado.valor,38);
  assert.equal(consultarRecordesFutebol({},'clube','Clube Sem Fonte').recordes.length,0);
 });
+
+test('modo completo: usa temporadas externas e separa Copa do Mundo de continental sem duplicar',()=>{
+ const c={nome:'Lucas',nacionalidade:'BRA',selecao:{historico:[
+  {ano:2030,idade:22,comp:'copa',nomeComp:'Copa do Mundo',jogos:7,gols:4,assist:1},
+  {ano:2030,idade:22,comp:'continental',nomeComp:'Copa América',jogos:4,gols:3,assist:1}
+ ]}};
+ const temporadas=[{ano:2030,clube:'Santos',jogos:31,gols:29,assist:9,
+  selecaoTemporada:{jogos:11,gols:7,assist:2,nomeComp:'Copa do Mundo · Copa América'}}];
+ assert.equal(registro(consultarRecordesFutebol(c,'clube','Santos',temporadas),'golsCarreira').simulado.valor,29);
+ assert.equal(registro(consultarRecordesFutebol(c,'selecao','Brasil',temporadas),'golsCarreira').simulado.valor,7);
+ assert.equal(registro(consultarRecordesFutebol(c,'competicao','Copa do Mundo',temporadas),'golsCarreira').simulado.valor,4);
+});

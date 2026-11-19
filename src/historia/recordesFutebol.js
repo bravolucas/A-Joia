@@ -72,6 +72,16 @@ function participacoesDaSelecao(c,nome,competicao,temporadas=c?.temporadas||[]){
  const meuPais=paisId(c?.nac||c?.nacionalidade);
  if(!eIgual(meuPais,nome)&&!competicao)return [];
  const linhas=[];
+ // No Modo Completo, selecaoTemporada resume varias competicoes do ano.
+ // O historico detalhado e a fonte autoritativa para separar Copa/continental.
+ const eventosDetalhados=(c?.selecao?.historico||[]).filter(r=>
+  (r.comp==='copa'||r.comp==='continental')&&Number.isFinite(r.ano));
+ if(eventosDetalhados.length&&(temporadas||[]).some(t=>t.selecaoTemporada)){
+  return eventosDetalhados.filter(r=>!competicao||
+    competicaoIgual(r.nomeComp|| (r.comp==='copa'?'Copa do Mundo':''),competicao))
+   .map(r=>({ano:r.ano,clube:meuPais,jogos:r.jogos,gols:r.gols,assist:r.assist,
+     defesas:r.defesas,cleanSheets:r.cleanSheets}));
+ }
  for(const t of temporadas||[]){
   // O modo completo arquiva o evento como selecaoTemporada; o rapido usa selecao.
   for(const r of [t.selecao,t.amistososSelecao,t.selecaoTemporada]){

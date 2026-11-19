@@ -1,7 +1,8 @@
+import {analisarClubeEmpresario,respostaClubeEmpresario,viraPropostaSondagem} from '../src/jogador/mercadoEmpresario.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {criarJogador,jogarTemporada,iniciarNegociacao,ajustarNegociacao,fecharNegociacao,contratoPadrao,papelEsperado,papelMaximo,shareGarantido,
- interesseMercado,sinalizarInteresse,gerarOfertas,segundoEvento,janelaExtra,PAPEIS_CONTRATO} from '../src/jogador/rapido.js';
+ interesseMercado,sinalizarInteresse,receberRetornosEmpresario,catalogoMercadoJogador,diagnosticoMercadoJogador,gerarOfertas,segundoEvento,janelaExtra,PAPEIS_CONTRATO} from '../src/jogador/rapido.js';
 
 const atleta=(ovr=80,clube='Flamengo',codigo='PAPEL')=>{const c=criarJogador({nome:'Papel',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:9,codigo});
  for(const a of Object.keys(c.attrs)){c.attrs[a]=ovr;c.potencial[a]=Math.max(ovr,c.potencial[a]);}c.clubeNome=clube;c.idade=24;c.flags.baseEscolhida=true;c.contrato=contratoPadrao(c,clube);return c;};
@@ -35,13 +36,57 @@ test('janela de propostas abre também fora dos anos de decisão',()=>{
  assert.ok(abriu>=10,`propostas em anos sem decisão (${abriu}/40)`);
 });
 
-test('empresário mostra clubes interessados e sinalizar inclui o clube nas ofertas',()=>{
- const c=atleta(78,'Santos','EMPRESARIO');const interesses=interesseMercado(c);
- assert.ok(interesses.length>=2);assert.ok(interesses.every(x=>x.clube&&x.nivel&&!x.sinalizado));
- const alvo=interesses.at(-1).clube,depois=sinalizarInteresse(c,alvo);
- assert.equal(depois.interesseSinalizado.clube,alvo);assert.equal(depois.torcida.Santos,(c.torcida.Santos??30)-3);
- assert.throws(()=>sinalizarInteresse(depois,interesses[0].clube),/já sinalizou/);
- assert.throws(()=>sinalizarInteresse(c,'Clube Inexistente'),/não está acompanhando/);
- assert.ok(interesseMercado(depois).some(x=>x.sinalizado&&x.clube===alvo));
- assert.ok(gerarOfertas(depois,2).some(x=>x.clube===alvo),'clube sinalizado entra nas ofertas');
+test('empresário permite procurar qualquer clube jogável e obter devolutiva, sem oferta automática',()=>{
+ const c=atleta(78,'Santos','EMPRESARIO');
+ const interesses=interesseMercado(c),catalogo=catalogoMercadoJogador(c);
+ assert.ok(interesses.length>=2);
+ assert.ok(catalogo.length>interesses.length);
+ assert.ok(catalogo.some(x=>x.liga==='inglaterra2'),'inclui também divisões inferiores');
+ const alvo=catalogo.find(x=>x.nome!=='Santos'&&!interesses.some(o=>o.clube===x.nome));
+ assert.ok(alvo,'permite sondar quem ainda não acompanha o atleta');
+ const sondado=sinalizarInteresse(c,alvo.nome);
+ assert.equal(sondado.sondagensEmpresario[0].status,'aguardando');
+ assert.equal(sondado.torcida.Santos,(c.torcida.Santos??30)-2);
+ assert.equal(c.sondagensEmpresario,undefined,'não altera save de entrada');
+ assert.throws(()=>sinalizarInteresse(sondado,alvo.nome),/já procurou/);
+ assert.throws(()=>sinalizarInteresse(c,'Clube Inexistente'),/não encontrado/);
+ assert.throws(()=>sinalizarInteresse(c,'Santos'),/já tem contrato/);
+ const retornado=receberRetornosEmpresario(sondado);
+ assert.ok(['positivo','negativo'].includes(retornado.sondagensEmpresario[0].status));
+ assert.ok(retornado.sondagensEmpresario[0].texto.length>=30);
+ assert.deepEqual(receberRetornosEmpresario(sondado).sondagensEmpresario,retornado.sondagensEmpresario,'resposta determinística');
+ assert.equal(sondado.sondagensEmpresario[0].status,'aguardando','retorno não altera save anterior');
+ assert.throws(()=>receberRetornosEmpresario(retornado),/Nenhuma sondagem/);
+});
+
+test('avaliação usa caixa real do mundo e a concorrência na posição',()=>{
+ const c=atleta(80,'Santos','CAIXA-EMPRESARIO'),flamengo=catalogoMercadoJogador(c).find(x=>x.nome==='Flamengo');
+ const alterado={...c,mundo:{jogadores:[
+  {nome:'Titular forte',clubeNome:'Flamengo',posicao:'ATA',ovr:94,idade:26},
+  {nome:'Meia',clubeNome:'Flamengo',posicao:'MEI',ovr:96,idade:27}
+ ],caixaClubes:{Flamengo:30}}};
+ const info=analisarClubeEmpresario(alterado,flamengo,80);
+ assert.equal(info.concorrencia,'Alta');
+ assert.equal(info.melhor.nome,'Titular forte');
+ assert.equal(info.caixa,30);
+ assert.equal(info.caixaConhecido,true);
+ assert.equal(info.semVerba,true,'caixa não cobre contratação');
+ assert.deepEqual(diagnosticoMercadoJogador(alterado,'Flamengo').melhor?.nome,'Titular forte');
+ const semTitular={...alterado,mundo:{jogadores:[],caixaClubes:{Flamengo:500000}}};
+ const favoravel=analisarClubeEmpresario(semTitular,flamengo,80);
+ assert.equal(favoravel.posicaoOcupada,false);
+ assert.equal(favoravel.semVerba,false);
+});
+
+test('sondagens improváveis tendem a recusa; recusa não entra nas ofertas do ano',()=>{
+ const c=atleta(46,'Santos','NIVEL-SINALIZADO'),real=catalogoMercadoJogador(c).find(x=>x.nome==='Real Madrid');
+ let negativas=0;
+ for(let i=0;i<30;i++)if(respostaClubeEmpresario({...c,codigo:'NIVEL-SONDAGEM-'+i},real,46).status==='negativo')negativas++;
+ assert.ok(negativas>=27,'atleta muito abaixo do clube quase sempre recebe resposta negativa');
+ const s=sinalizarInteresse(c,'Real Madrid');
+ s.sondagensEmpresario[0]={...s.sondagensEmpresario[0],status:'negativo'};
+ const ofertas=gerarOfertas(s,4);
+ assert.ok(!ofertas.some(o=>o.clube==='Real Madrid'));
+ const probabilidades=Array.from({length:30},(_,i)=>viraPropostaSondagem({...c,codigo:'SONDAGEM-'+i},'Real Madrid'));
+ assert.ok(probabilidades.some(Boolean)&&probabilidades.some(x=>!x),'sinal verde não assegura proposta');
 });

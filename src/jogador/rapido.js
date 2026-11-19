@@ -537,12 +537,36 @@ function opcoesPretemporadaBase(c) {
    return atributoUtil||['gols','assist','nota','minutos','lesao','moral','desafio','forcaTime','declinio'].some(a=>!!efeitos[a]);
  };
  const elegiveis=CARTAS_PRETEMPORADA.filter(x=>x.planoReal&&(!x.posicoes||x.posicoes.includes(c.posicao))&&(!x.minIdade||c.idade>=x.minIdade)&&temEfeito(x));
- const pool=elegiveis.filter(x=>!recentes.has(x.id));
- const out=[];const usada=c.pretemporada?.ano===c.ano?cartaDe(c.pretemporada.id):null;
- while(out.length<3){const ids=new Set(out.map(x=>x.id)),grupos=new Set(out.map(grupoTreino));let disponiveis=pool.filter(x=>!ids.has(x.id)&&!grupos.has(grupoTreino(x)));
- if(!disponiveis.length)disponiveis=pool.filter(x=>!ids.has(x.id));if(!disponiveis.length)disponiveis=elegiveis.filter(x=>!ids.has(x.id));if(!disponiveis.length)break;
- const raridades=Object.entries(RARIDADES).filter(([id])=>disponiveis.some(x=>x.raridade===id));let r=rnd()*raridades.reduce((n,[,v])=>n+v.peso,0),rar=raridades[0][0];for(const[id,v]of raridades){r-=v.peso;if(r<=0){rar=id;break;}}out.push(pick(disponiveis.filter(x=>x.raridade===rar)));
- }return usada&&!out.some(x=>x.id===usada.id)?[usada,...out].slice(0,3):out;
+ const grupos=['tecnica','leitura','fisico','recuperacao','mental'].filter(g=>elegiveis.some(x=>grupoTreino(x)===g));
+ const rodada=c.pretemporadaTroca?.ano===c.ano?c.pretemporadaTroca.rodada||0:0;
+ const primeira=Math.max(0,(c.ano||ANO_INICIAL)-ANO_INICIAL)*3+rodada*3;
+ const out=[],usada=c.pretemporada?.ano===c.ano?cartaDe(c.pretemporada.id):null;
+ // Giro por grupo e por ano: três objetivos distintos, sem o sorteio de raridade.
+ // A ordem por código é estável e a rotação cobre o catálogo ao longo da carreira.
+ for(let passo=0;passo<grupos.length*3&&out.length<3;passo++){
+   const indice=primeira+passo,grupo=grupos[indice%grupos.length];
+   if(out.some(x=>grupoTreino(x)===grupo))continue;
+   const candidatos=elegiveis.filter(x=>grupoTreino(x)===grupo).sort((a,b)=>hashTexto(`${c.codigo}:${a.id}`)-hashTexto(`${c.codigo}:${b.id}`));
+   if(!candidatos.length)continue;
+   const inicio=Math.floor(indice/grupos.length)%candidatos.length;
+   // Não repetir cartas recentes: procurar a próxima ainda não vista.
+   const escolhido=Array.from({length:candidatos.length},(_,i)=>candidatos[(inicio+i)%candidatos.length]).find(x=>!recentes.has(x.id)&&!out.some(y=>y.id===x.id));
+   if(escolhido)out.push(escolhido);
+ }
+ // Fallback para históricos excepcionais, tetos de atributos ou catálogos curtos.
+ if(out.length<3)for(const x of elegiveis){
+   if(out.length>=3)break;
+   if(!out.some(y=>y.id===x.id)&&!recentes.has(x.id)&&!out.some(y=>grupoTreino(y)===grupoTreino(x)))out.push(x);
+ }
+ if(out.length<3)for(const x of elegiveis){
+   if(out.length>=3)break;
+   if(!out.some(y=>y.id===x.id)&&!out.some(y=>grupoTreino(y)===grupoTreino(x)))out.push(x);
+ }
+ if(out.length<3)for(const x of elegiveis){
+   if(out.length>=3)break;
+   if(!out.some(y=>y.id===x.id))out.push(x);
+ }
+ return usada&&!out.some(x=>x.id===usada.id)?[usada,...out].slice(0,3):out;
 }
 export function opcoesPretemporada(c){const rodada=c.pretemporadaTroca?.ano===c.ano?c.pretemporadaTroca.rodada||0:0;return comSemente(c.codigo,`pretemp:${c.ano}:${rodada}`,()=>opcoesPretemporadaBase(c));}
 export function trocarTreinos(c){if(c.lojaAnoEmCurso===c.ano||c.pretemporada?.ano===c.ano||c.pretemporadaTroca?.ano===c.ano)return c;const novo=clone(c);novo.pretemporadaTroca={ano:c.ano,rodada:1,anteriores:opcoesPretemporada(c).map(x=>x.id)};return novo;}

@@ -51,5 +51,5 @@ test('a segunda temporada não apaga os acumulados dos atletas',()=>{
 });
 
 test('título da Série B do modo completo não vira um Brasileirão de primeira divisão',()=>{
- const c={temporadas:[{idade:22,clube:'Santos',ligaNome:'Brasileirão Série B',campeaoLiga:true,titulosLista:['Campeão Brasileirão Série B']}]};const g=galeriaClube(c,'Santos');assert.equal(g.tacas.find(t=>t.nome==='Brasileirão').total,8);assert.equal(g.tacas.find(t=>t.nome==='Brasileirão Série B').total,1);assert.equal(g.eventos.length,1);
+ const c={temporadas:[{idade:22,clube:'Santos',ligaNome:'Brasileirão Série B',campeaoLiga:true,titulosLista:['Campeão Brasileirão Série B']}]};const g=galeriaClube(c,'Santos');assert.equal(g.tacas.find(t=>t.nome==='Brasileirão').total,8);assert.equal(g.tacas.find(t=>t.nome==='Brasileirão Série B').inicial,1);assert.equal(g.tacas.find(t=>t.nome==='Brasileirão Série B').total,2);assert.equal(g.eventos.length,1);
 });

@@ -571,15 +571,15 @@ export const PALMARES_HISTORICO = {
   "Fortaleza":        { liga: 0, copa: 0, continental: 0, mundial: 0 },
   // ---- Espanha ----
   "Real Madrid":      { liga: 36, copa: 20, continental: 15, mundial: 8 },
-  "Barcelona":        { liga: 27, copa: 31, continental: 5, mundial: 3 },
+  "Barcelona":        { liga: 29, copa: 31, continental: 5, mundial: 3 },
   "Atlético Madrid":  { liga: 11, copa: 10, continental: 0, mundial: 0 },
   "Valencia":         { liga: 6, copa: 8, continental: 0, mundial: 0 },
   "Athletic Bilbao":  { liga: 8, copa: 24, continental: 0, mundial: 0 },
   "Sevilla":          { liga: 1, copa: 5, continental: 7, mundial: 0 },
   // ---- Inglaterra ----
   "Manchester United":{ liga: 20, copa: 12, continental: 3, mundial: 1 },
-  "Liverpool":        { liga: 19, copa: 8, continental: 6, mundial: 1 },
-  "Arsenal":          { liga: 13, copa: 14, continental: 0, mundial: 0 },
+  "Liverpool":        { liga: 20, copa: 8, continental: 6, mundial: 1 },
+  "Arsenal":          { liga: 14, copa: 14, continental: 0, mundial: 0 },
   "Chelsea":          { liga: 6, copa: 8, continental: 2, mundial: 2 },
   "Manchester City":  { liga: 10, copa: 7, continental: 1, mundial: 1 },
   "Tottenham":        { liga: 2, copa: 8, continental: 0, mundial: 0 },
@@ -590,7 +590,7 @@ export const PALMARES_HISTORICO = {
   // ---- Itália ----
   "Juventus":         { liga: 36, copa: 15, continental: 2, mundial: 2 },
   "Milan":            { liga: 19, copa: 5, continental: 7, mundial: 4 },
-  "Inter de Milão":   { liga: 20, copa: 9, continental: 3, mundial: 3 },
+  "Inter de Milão":   { liga: 21, copa: 9, continental: 3, mundial: 3 },
   "Napoli":           { liga: 4, copa: 6, continental: 0, mundial: 0 },
   "Roma":             { liga: 3, copa: 9, continental: 0, mundial: 0 },
   "Lazio":            { liga: 2, copa: 7, continental: 0, mundial: 0 },
@@ -598,14 +598,14 @@ export const PALMARES_HISTORICO = {
   "Sampdoria":        { liga: 1, copa: 4, continental: 0, mundial: 0 },
   "Parma":            { liga: 0, copa: 3, continental: 2, mundial: 0 },
   // ---- Alemanha ----
-  "Bayern de Munique":{ liga: 33, copa: 20, continental: 6, mundial: 2 },
+  "Bayern de Munique":{ liga: 35, copa: 20, continental: 6, mundial: 2 },
   "Borussia Dortmund":{ liga: 8, copa: 5, continental: 1, mundial: 1 },
   "Bayer Leverkusen": { liga: 1, copa: 1, continental: 0, mundial: 0 },
   "RB Leipzig":       { liga: 0, copa: 2, continental: 0, mundial: 0 },
   "Hamburgo":         { liga: 6, copa: 3, continental: 1, mundial: 1 },
   "Schalke 04":       { liga: 7, copa: 5, continental: 1, mundial: 0 },
   // ---- França ----
-  "PSG":              { liga: 12, copa: 15, continental: 1, mundial: 0 },
+  "PSG":              { liga: 14, copa: 15, continental: 1, mundial: 0 },
   "Marseille":        { liga: 9, copa: 10, continental: 1, mundial: 0 },
   "Lyon":             { liga: 7, copa: 5, continental: 0, mundial: 0 },
   "Monaco":           { liga: 8, copa: 5, continental: 0, mundial: 0 },
@@ -613,8 +613,8 @@ export const PALMARES_HISTORICO = {
   "Saint-Étienne":    { liga: 10, copa: 6, continental: 0, mundial: 0 },
   // ---- Portugal ----
   "Benfica":          { liga: 38, copa: 26, continental: 2, mundial: 0 },
-  "Porto":            { liga: 30, copa: 20, continental: 2, mundial: 2 },
-  "Sporting":         { liga: 20, copa: 17, continental: 0, mundial: 0 },
+  "Porto":            { liga: 31, copa: 20, continental: 2, mundial: 2 },
+  "Sporting":         { liga: 21, copa: 17, continental: 0, mundial: 0 },
 };
 /* Clubes sem palmarés escrito à mão recebem um histórico plausível pela força */
 export function palmaresInicialDe(clube) {
@@ -632,7 +632,7 @@ export function palmaresInicialDe(clube) {
 export function nomeDosTitulos(ligaId) {
   const br = ["brasileirao", "serieB", "serieC", "serieD"].includes(ligaId);
   return {
-    liga: br ? "Brasileirão" : (LIGAS[ligaId]?.nome || "Liga"),
+    liga: ligaId === "brasileirao" ? "Brasileirão" : (LIGAS[ligaId]?.nome || "Liga"),
     copa: br ? "Copa do Brasil" : (COMPS_PAIS[ligaId]?.copa || "Copa Nacional"),
     continental: LIGAS[ligaId]?.continental || (ligaId === "brasileirao" ? "Libertadores" : ""),
     mundial: "Mundial de Clubes",

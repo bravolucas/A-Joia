@@ -196,3 +196,91 @@ porque não havia sido concluída na data de referência.
 **Validação:** `node --test tests/copa-brasil-historica.test.mjs
 tests/competicoes-historicas.test.mjs tests/historia-futebol.test.mjs`
 e `GITHUB_PAGES=true npm run build`.
+
+
+## Ligas nacionais — acervo real por edição (19/11/2026)
+
+A partir desta atualização, todas as **21 ligas identificáveis do cadastro** passam a ter
+campeões reais por ano em `src/dados/ligasHistoricas.js`, com nome do campeão,
+identificação da edição, URL da fonte, período coberto e sinalização de
+`cobertura: 'completa' | 'recorte'`. São **649 registros de campeão** no
+acervo de ligas, além dos acervos previamente existentes para copas, estaduais
+e torneios de seleções.
+
+Nas fichas de clubes ingleses, os títulos da antiga **Football League First Division**
+são separados das conquistas da **Premier League** a partir de 1992/93.
+Por exemplo, os 14 títulos nacionais do Arsenal são 10 da antiga primeira
+divisão e 4 da Premier League até 2026.
+
+As páginas de competição exibem o acervo documental separado das temporadas
+jogadas na carreira. O ranking histórico de cada liga é calculado **somente
+com as edições documentadas**, sem usar os números estimados por força do clube.
+Para ligas com recorte parcial, o ranking é do **período coberto**, não o
+número absoluto de campeonatos ao longo de toda a história da modalidade.
+As fichas de clubes também passam a recuperar a relação de anos históricos
+comprovados, inclusive para clubes sem elenco jogável e campeões de divisões
+inferiores. A consulta não modifica saves nem reescreve resultados da carreira.
+
+### Inventário coberto
+
+- Brasil: Brasileirão, Série B, Série C e Série D.
+- Inglaterra: Premier League e Championship.
+- Espanha: La Liga e LaLiga 2.
+- Itália: Serie A e Serie B (Itália).
+- Alemanha: Bundesliga e 2. Bundesliga.
+- França: Ligue 1 e Ligue 2.
+- Portugal: Liga Portugal e Liga Portugal 2.
+- Países Baixos: Eredivisie.
+- Turquia: Süper Lig.
+- Arábia Saudita: Liga Saudita.
+- Estados Unidos: MLS (a lista corresponde à **MLS Cup**, e não ao
+  Supporters' Shield).
+- Argentina: Liga Profesional; o campeão da tabela anual oficial de 2025
+  (Rosario Central) e 2026 (Boca Juniors) **não** representa vencedor de
+  Apertura/Clausura, que são competições distintas.
+
+`Outras Ligas Sul-Americanas` é um **agrupamento de clubes**, não uma
+competição com campeão único; portanto, não foi inventado um palmarés para
+esse identificador. As Séries C e D brasileiras passaram a ser consultáveis no
+histórico mesmo quando não jogáveis no simulador.
+
+### Recortes e anos ainda sem campeão
+
+Algumas ligas têm cobertura integral desde a criação da **denominação/era
+especificada** (por exemplo Premier League, MLS Cup, Eredivisie, Saudi Pro
+League e Liga Portugal 2); outras contêm intervalos documentados, explicitamente
+marcados como **recorte parcial**. Uma lista parcial não deve ser usada para
+afirmar a quantidade absoluta de títulos de cada clube. A base ainda necessita
+ampliar os períodos antigos e as competições nacionais de copa que não possuem
+cadastro por edição.
+
+**Não há campeão cadastrado da Série A brasileira de 2026 nem da MLS Cup de
+2026**, pois seus títulos não estavam oficialmente definidos em 19/11/2026.
+Eredivisie 2020, Liga Portugal 2 de 2019/20 e Serie A italiana 2004/05
+permanecem sem campeão na lista, conforme as decisões das respectivas
+organizações. Anos sem disputa não são preenchidos.
+
+Os registros usam o ano civil para ligas brasileiras e MLS, e o ano **final**
+da temporada nas ligas europeias (2026 = 2025/26). A separação entre Série A,
+B, C e D foi ajustada também no rótulo da taça via `nomeDosTitulos`.
+
+### Referências principais
+
+- [Premier League — lista oficial de campeões](https://www.premierleague.com/en/premier-league-explained)
+- [KNVB — vencedores da Eredivisie](https://www.knvb.com/node/56)
+- [RSSSF — Campeonato Brasileiro](https://www.rsssf.org/tablesb/brazchamp.html)
+- [CBF — Novorizontino campeão da Série B 2026](https://www.cbf.com.br/futebol-brasileiro/noticias/campeonato-brasileiro-serie-b/a/novorizontino-e-campeao-da-serie-b)
+- [CBF — Maringá campeão da Série C 2026](https://www.cbf.com.br/futebol-brasileiro/noticias/campeonato-brasileiro-serie-c/a/maringa-e-campeao-da-serie-c-2026)
+- [CBF — Uberlândia campeão da Série D 2026](https://www.cbf.com.br/futebol-brasileiro/noticias/campeonato-brasileiro-serie-d/a/uberlandia-e-campeao-da-serie-d-2026)
+- [AFA — Boca campeão da tabela anual de 2026](https://www.afa.com.ar/es/posts/boca-se-corono-campeon-de-la-liga-2026)
+- Demais fontes ficam anotadas em cada registro de `src/dados/ligasHistoricas.js`.
+
+### Teste de regressão
+
+`node --test tests/ligas-historicas.test.mjs tests/competicoes-historicas.test.mjs tests/historia-futebol.test.mjs`
+
+`npm run build`
+
+**Critério de aceitação:** a consulta de cada liga lista seu campeão real,
+as conquistas criadas no save permanecem separadas, clubes fora da lista jogável
+não desaparecem, e os torneios pendentes permanecem sem vencedor.

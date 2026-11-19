@@ -59,7 +59,9 @@ test('clubes exibem títulos comprovados mesmo quando não fazem parte do elenco
  const perfil=galeriaClube({},'Blackburn Rovers');
  assert.equal(perfil.tacas.find(t=>t.nome==='Premier League').inicial,1);
  assert.equal(perfil.tacas.find(t=>t.nome==='Premier League').anosHistoricos[0],1995);
- assert.equal(galeriaClube({},'Arsenal').tacas.find(t=>t.nome==='Premier League').inicial,14);
+ assert.equal(galeriaClube({},'Arsenal').tacas.find(t=>t.nome==='Premier League').inicial,4);
+ assert.equal(galeriaClube({},'Arsenal').tacas.find(t=>t.nome==='Football League First Division').inicial,10);
+ assert.equal(galeriaClube({},'Liverpool').tacas.find(t=>t.nome==='Football League First Division').inicial,18);
  assert.ok(galeriaClube({},'Palmeiras').tacas.find(t=>t.nome==='Brasileirão').anosHistoricos.includes(2023));
  assert.equal(nomeDosTitulos('serieB').liga,'Brasileirão Série B');
  assert.equal(nomeDosTitulos('serieC').liga,'Brasileirão Série C');

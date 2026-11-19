@@ -25,6 +25,21 @@ const prioridade=e=>(e.historico?100:0)+(e.atletaId==='voce'?25:0)+
   (['golsCarreira','golsTemporada','jogosCarreira','golsAtletaPartida'].includes(e.metrica)?10:0)+
   (['tecnicoVitorias','tecnicoTitulos'].includes(e.metrica)?35:
    ['tecnicoJogos','tecnicoVitoriasAno','tecnicoAproveitamento'].includes(e.metrica)?20:0);
+/** Acumulados do mesmo recordista crescem naturalmente a cada ano.
+ * Anunciar apenas marcos relevantes, mudanças de líder ou superação real. */
+const MARCOS_ACUMULADOS={
+ jogosCarreira:[50,100,200,500,750,1000],golsCarreira:[25,50,100,200,300,500,1000],
+ assistCarreira:[25,50,100,200,300],defesasCarreira:[50,100,200,500,1000],
+ semSofrerCarreira:[25,50,100,200,500],titulosTotal:[2,5,10,20,30],
+ vicesTotal:[2,5,10,20],tecnicoJogos:[50,100,200,500,1000],
+ tecnicoVitorias:[25,50,100,200,500],tecnicoPontos:[100,250,500,1000,2000],
+ tecnicoTemporadas:[5,10,20,30],tecnicoTitulos:[2,5,10,20],
+ tecnicoAcessos:[2,5,10],tecnicoMetas:[5,10,20,30],
+ tecnicoRebaixamentos:[],tecnicoDemissoes:[],tecnicoAproveitamento:[]
+};
+const identidade=r=>r?.atletaId!=null?String(r.atletaId):String(r?.atleta||'');
+const marcoCruzado=(id,antes,depois)=>[...(MARCOS_ACUMULADOS[id]||[])]
+ .filter(n=>antes<n&&depois>=n).at(-1)||null;
 /** Compara dois snapshots do mesmo save sem mutacao. Sem baseline no save nao
  * produz noticias, exceto ao igualar ou superar marca real verificavel. */
 export function detectarQuebrasRecordesFutebol(antes={},depois={},{
@@ -45,12 +60,17 @@ export function detectarQuebrasRecordesFutebol(antes={},depois={},{
    const superouReal=!!real&&novo.valor>real.valor&&(velho?.valor??0)<=real.valor;
    const igualouReal=!!real&&novo.valor===real.valor&&(velho?.valor??0)<real.valor;
    const superouSave=!!velho&&novo.valor>velho.valor;
-   if(!superouReal&&!igualouReal&&!superouSave)continue;
+   const mesmoRecordista=!!velho&&identidade(novo)===identidade(velho);
+   const marco=superouSave&&mesmoRecordista
+    ?marcoCruzado(r.id,velho.valor,novo.valor):null;
+   if(!superouReal&&!igualouReal&&(!superouSave||
+     (mesmoRecordista&&Object.hasOwn(MARCOS_ACUMULADOS,r.id)&&!marco)))continue;
    const historico=superouReal||igualouReal;
    const tipoMarca=superouReal?'superou':igualouReal?'igualou':'quebrou';
    const protagonista=novo.atleta||((r.categoria==='Partidas'||r.categoria==='Sequências')?nome:'Um atleta');
    const titulo=historico?
     protagonista+' '+tipoMarca+' recorde histórico de '+r.rotulo.toLowerCase():
+    marco?protagonista+' alcança marco de '+marco+' em '+r.rotulo.toLowerCase()+' · '+nome:
     'Novo recorde de '+r.rotulo.toLowerCase()+' em '+nome;
    const anteriorValor=historico?real.valor:velho.valor;
    const detalhe=protagonista+': '+novo.valor+' ('+nome+', '+ano+'). '+
@@ -61,6 +81,7 @@ export function detectarQuebrasRecordesFutebol(antes={},depois={},{
     ano,tipo,entidade:nome,metrica:r.id,rotulo:r.rotulo,
     atleta:novo.atleta||protagonista,atletaId:novo.atletaId||null,
     valor:novo.valor,anterior:anteriorValor,anteriorAtleta:historico?real.atleta:velho.atleta,
+    ...(marco&&!historico?{marco}:{}),
     historico,igualou:igualouReal,fonte:historico?real.fonte:null,
     titulo,detalhe,prioridade:prioridade({historico,atletaId:novo.atletaId,metrica:r.id})
    });

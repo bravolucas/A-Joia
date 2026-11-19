@@ -67,3 +67,14 @@ test('Artilheiro genérico é ocultado do arquivo de distinções, sem apagar os
  assert.equal(premiacoes.filter(x=>x.nome==='Revelação'&&x.ano===2030).length,1);
  assert.equal(premiacoes.find(x=>x.nome==='Revelação'&&x.ano===2030).origem,'simulacao');
 });
+
+test('Hall da Fama usa ano civil, não o número ordinal da temporada',()=>{
+ const jogo={mundo:{temporada:5,anoCalendario:2031,jogadores:[],historicoBolaDeOuro:[
+  {temporada:2,id:'antigo-7',nome:'Vencedor Aposentado',clube:'Roma'}
+ ]}};
+ const premiacoes=vencedoresPremiosComHistorico(jogo);
+ const linha=premiacoes.find(x=>x.jogadorNome==='Vencedor Aposentado');
+ assert.equal(linha.ano,2027);
+ assert.equal(linha.origem,'simulacao');
+ assert.ok(!premiacoes.some(x=>x.jogadorNome==='Vencedor Aposentado'&&x.ano===2));
+});

@@ -26,7 +26,7 @@ export default function RecordesFutebol({c,tipo,nome,temporadas=c?.temporadas||[
    <h3>Recordes de {nome}</h3></div><span className="rf-periodo">{dados.desde?'Save desde '+dados.desde:'Acervo histórico e save'}</span></div>
   <p className="hf-nota">As marcas reais e as deste universo são mostradas separadamente. Só há comparações onde existem dados verificáveis; partidas e temporadas não registradas não são inventadas.</p>
   <div className="rf-filtros" role="group" aria-label="Categorias de recordes">
-   {['Todos','Carreira','Temporada','Partidas'].map(s=><button key={s} type="button" aria-pressed={filtro===s} onClick={()=>F(s)}>{s}</button>)}
+   {['Todos','Carreira','Temporada','Partidas','Sequências'].map(s=><button key={s} type="button" aria-pressed={filtro===s} onClick={()=>F(s)}>{s}</button>)}
   </div>
   {itens.length?<div className="rf-tabela-scroll"><table className="rf-tabela">
     <thead><tr><th scope="col">Recorde</th><th scope="col">Futebol real</th><th scope="col">Neste save</th></tr></thead>

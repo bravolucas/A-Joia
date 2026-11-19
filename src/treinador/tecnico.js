@@ -10,6 +10,7 @@ export {IDADE_MAXIMA_TECNICO,idadeTecnico,carreiraTecnicoEncerrada} from './long
 import {avaliarForcaEquipe} from '../simulacao/forcaEquipe.js';
 import {forcasDoMundo,clubesDoMundo,registrarMundoVivo,resumirTabelas} from '../simulacao/mundoVivo.js';
 import {registrarAnoHistoria} from '../historia/historiaFutebol.js';
+import {detectarQuebrasRecordesFutebol,escoposRecordesDaTemporada,guardarQuebrasRecordesFutebol} from '../historia/noticiasRecordes.js';
 import {resumoCampanhaCopa} from './copasEscolha.js';
 import {prepararCopasTecnico,aplicarCopaTecnico,estadualAutomaticoTecnico} from './copasCarreiraTecnico.js';
 import {vagaTecnico,nomeVaga,calcularVagasRapidas,idContinental,classificacoesHistoricas} from '../competicoes/regrasCopasRapidas.js';
@@ -124,7 +125,7 @@ function registrarHistoriaTecnico(c){
  const t=c?.tecnico,a=t?.temporadas?.at(-1);if(!a||t.fase!=='resultado'||t.copasEmJogo||t.finaisPendentes?.length)return c;
  if(c.historiaFutebol?.anos?.includes(a.ano)&&!(c.tecnico?.universo||c.universo)?.anos?.includes(a.ano))return c;
  const anual={...a},novo=registrarUniversoAno(c,anual);
- const temporadas=[...novo.tecnico.temporadas];const {partidasLiga:placaresArquivados,...resumoAno}=a;temporadas[temporadas.length-1]={...resumoAno,classificacoesMundo:resumirTabelas(anual.classificacoesMundo),...(anual.movimentosMundo?{movimentosMundo:anual.movimentosMundo}:{}),...(anual.feitosHistoricos?{feitosHistoricos:anual.feitosHistoricos}:{})};
+ const temporadas=[...novo.tecnico.temporadas];const {partidasLiga:placaresArquivados,...resumoAno}=a;temporadas[temporadas.length-1]={...resumoAno,classificacoesMundo:resumirTabelas(anual.classificacoesMundo),...(anual.movimentosMundo?{movimentosMundo:anual.movimentosMundo}:{}),...(anual.feitosHistoricos?{feitosHistoricos:anual.feitosHistoricos}:{}),...(anual.recordesEventos?{recordesEventos:anual.recordesEventos}:{})};
  return {...novo,tecnico:{...novo.tecnico,temporadas}};
 }
 function registrarUniversoAno(c,ano){
@@ -136,6 +137,15 @@ function registrarUniversoAno(c,ano){
  if(!(c.tecnico?.universo||c.universo)?.anos?.includes(a.ano))novo.mundo=estatisticasDasPartidas(simularTemporadaMundo(antesMundo,geradorTecnico(`${c.codigo||c.nome}|${a.ano}|evolucao-mundo`),{clubes:clubesDoMundo({...c,mundo:antesMundo}),perfis:(c.universo||c.tecnico?.universo)?.clubes,treinoClube:c.tecnico?.gestao?.cadastroUnificado&&c.tecnico.gestao.comissao?.some(p=>p.id==='preparador'&&p.ano===a.ano)?1:0,clubeControlado:a.tipoEquipe==='selecao'?null:a.clube||null,ano:a.ano}),antesMundo,ano,c.codigo);
  if(a.tipoEquipe==='selecao')novo.mundo={...novo.mundo,jogadores:novo.mundo.jogadores.map(p=>p.clubeNome&&novo.tecnico.ligasMundo?.[p.clubeNome]?{...p,liga:novo.tecnico.ligasMundo[p.clubeNome]}:p)};
  registrarMundoVivo(novo,ano,{antesMundo});
+ const eventos=detectarQuebrasRecordesFutebol(c,novo,{
+  ano:ano.ano,escopos:escoposRecordesDaTemporada(c,{...ano,ligaNome:competicaoTemporadaTecnico(ano)}),
+  temporadasAntes:c.tecnico?.temporadas||[],
+  temporadasDepois:novo.tecnico?.temporadas||[]
+ });
+ if(eventos.length){
+  novo.recordesEventos=guardarQuebrasRecordesFutebol(c,eventos).recordesEventos;
+  ano.recordesEventos=eventos;
+ }
  return atualizarProjecaoGestao(novo);
 }
 const NOMES_COMPETICOES_TECNICO = { brasileirao: 'Brasileirão', serieB: 'Brasileirão Série B', argentina: 'Liga Profesional', portugal: 'Liga Portugal', portugal2: 'Liga Portugal 2', espanha: 'La Liga', espanha2: 'LaLiga 2', inglaterra: 'Premier League', inglaterra2: 'Championship', italia: 'Serie A', italia2: 'Serie B (Itália)', alemanha: 'Bundesliga', alemanha2: '2. Bundesliga', franca: 'Ligue 1', franca2: 'Ligue 2', arabia: 'Saudi Pro League', holanda: 'Eredivisie', mls: 'MLS', turquia: 'Süper Lig', sulamericano: 'Campeonato Sul-Americano' };

@@ -1,6 +1,6 @@
 import {consultarPersistente} from '../simulacao/armazenamentoMundo.js';
 import { equipeTituloTecnico } from '../treinador/selecoesTecnico.js';
-import {compararMarcasCopas} from '../jogador/recordesHistoricos.js';
+import {compararMarcasCopas,marcaLegadaKlose} from '../jogador/recordesHistoricos.js';
 import { CLUBES, LIGAS, COMPS_PAIS, ESTADUAIS } from '../dados/data.js';
 import { competicaoDoTitulo } from '../comum/tacas.js';
 import { slugCompeticao } from '../comum/arteCompeticoes.js';
@@ -120,11 +120,11 @@ export function extrairConquistasMuseu(c, { modo = 'rapido', temporadas = [] } =
     'cinco-clubes': new Set(jogadas.map(t => t.clube).filter(Boolean)).size >= 5,
     'treinador-campeao': tacasTecnico.length > 0, 'trinta-treinador': (tecnico?.temporadas?.length || 0) >= 30,
   };
-  const marcas=compararMarcasCopas(c);feitos['marca-klose']=marcas[0].atual>=16;feitos['marca-fontaine']=marcas[1].atual>=13;
+  const marcas=compararMarcasCopas(c),klose=marcaLegadaKlose(c);feitos['marca-klose']=klose.atual>=16;feitos['marca-fontaine']=marcas[1].atual>=13;
   const primeiros=c.jornada?.primeiros||{};
   Object.assign(feitos,{'memoria-contrato':!!primeiros.contrato,'memoria-estreia':!!primeiros.estreia,'primeiro-gol':!!primeiros['primeiro-gol'],'primeira-assistencia':!!primeiros['primeira-assistencia'],'primeira-defesa':!!primeiros['primeira-defesa'],'primeira-recuperacao':!!primeiros['primeira-recuperacao'],'primeiro-cruzamento':!!primeiros['primeiro-cruzamento'],'memoria-convocacao':!!primeiros.convocacao,'memoria-estreia-selecao':!!primeiros['estreia-selecao'],'jogador-reinventado':!!c.jornada?.trocas?.length,'dupla-marcante':c.jornada?.duplas?.some(d=>d.temporadas>=2),'assinatura-tecnica':Object.values(c.jornada?.assinaturas||{}).some(a=>a.anos?.length>=3),'lider-vestiario':c.jornada?.memorias?.some(m=>m.tipo==='capitao')});
   for (const f of FEITOS_MUSEU) if (feitos[f.id]) {
-    const chave={'memoria-contrato':'contrato','memoria-estreia':'estreia','memoria-convocacao':'convocacao','memoria-estreia-selecao':'estreia-selecao'}[f.id]||f.id,marca=f.id==='marca-klose'?marcas[0]:f.id==='marca-fontaine'?marcas[1]:null,m=primeiros[chave]||(marca?{ano:marca.anoIgualou,clube:'Seleção',texto:`${marca.nome}: igualou a referência histórica de ${marca.valor} gols (base até 2022).`}:null);
+    const chave={'memoria-contrato':'contrato','memoria-estreia':'estreia','memoria-convocacao':'convocacao','memoria-estreia-selecao':'estreia-selecao'}[f.id]||f.id,marca=f.id==='marca-klose'?klose:f.id==='marca-fontaine'?marcas[1]:null,m=primeiros[chave]||(marca?{ano:marca.anoIgualou,clube:'Seleção',texto:`${marca.nome}: igualou a referência histórica de ${marca.valor} gols (base até 2022).`}:null);
     adicionar('feitos', {...f,...(m?{ano:m.ano,clube:m.clube,historia:{anos:[m.ano],numeros:[m.numero].filter(Number.isFinite),posicoes:[m.posicao].filter(Boolean),feito:m.texto}}:{})});
   }
   for (const [id, ano] of Object.entries(tecnico?.metasConcluidas || {})) {
@@ -204,7 +204,7 @@ export function progressoFeitoMuseu(c,id){
  if(!c)return null;
  const titulo=(c.lista||[]).filter(t=>!['bolaOuro','botaOuro'].includes(t.tipo)).length;
  const marcas=compararMarcasCopas(c);
- const mapas={'marca-klose':[marcas[0].atual,16],'marca-fontaine':[marcas[1].atual,13],'primeira-taca':[titulo,1],'dez-tacas':[titulo,10],'cem-gols':[c.totais?.gols||0,100],'quinhentos-gols':[c.totais?.gols||0,500],'cem-assistencias':[c.totais?.assist||0,100],'quinhentos-jogos':[c.totais?.jogos||0,500],'vinte-temporadas':[c.temporadas?.length||0,20],'cinco-clubes':[new Set((c.temporadas||[]).map(t=>t.clube)).size,5],'dupla-marcante':[Math.max(0,...(c.jornada?.duplas||[]).map(d=>d.temporadas)),2],'assinatura-tecnica':[Math.max(0,...Object.values(c.jornada?.assinaturas||{}).map(a=>a.anos?.length||0)),3],'jogador-reinventado':[c.jornada?.trocas?.length||0,1]};
+ const mapas={'marca-klose':[marcaLegadaKlose(c).atual,16],'marca-fontaine':[marcas[1].atual,13],'primeira-taca':[titulo,1],'dez-tacas':[titulo,10],'cem-gols':[c.totais?.gols||0,100],'quinhentos-gols':[c.totais?.gols||0,500],'cem-assistencias':[c.totais?.assist||0,100],'quinhentos-jogos':[c.totais?.jogos||0,500],'vinte-temporadas':[c.temporadas?.length||0,20],'cinco-clubes':[new Set((c.temporadas||[]).map(t=>t.clube)).size,5],'dupla-marcante':[Math.max(0,...(c.jornada?.duplas||[]).map(d=>d.temporadas)),2],'assinatura-tecnica':[Math.max(0,...Object.values(c.jornada?.assinaturas||{}).map(a=>a.anos?.length||0)),3],'jogador-reinventado':[c.jornada?.trocas?.length||0,1]};
  const p=mapas[id];if(p)return{atual:Math.min(p[0],p[1]),meta:p[1]};
  return FEITOS_MUSEU.some(f=>f.id===id)?{atual:extrairConquistasMuseu(c).some(r=>r.categoria==='feitos'&&r.id===id)?1:0,meta:1}:null;
 }

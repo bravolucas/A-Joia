@@ -5,6 +5,7 @@ import {campeoesRegistrados} from './competicoesHistoricas.js';
 import {competicoesHistoricasSelecoes,historicoDaSelecao,HISTORICO_SELECOES,nomeSelecaoHistorica} from '../dados/selecoesHistoricas.js';
 import {TacaCompeticao} from '../comum/trofeus.jsx';
 import LinkEntidade from './LinkEntidade.jsx';
+import RecordesFutebol from './RecordesFutebol.jsx';
 
 const nomePais=nome=>nomeSelecaoHistorica(nome);
 export function nomesSelecoesHistoricas(){
@@ -50,6 +51,7 @@ export default function GaleriaSelecoes({c={},nome,temporadas,onSelecao}){
       {g.doSave.length>0&&<p>Na simulação: {g.doSave.map(x=>x.ano).join(' · ')}</p>}
      </article>)}</div>
    {!palmares.length&&<p className="hf-vazio">Ainda não há títulos registrados para esta seleção.</p>}
+   <RecordesFutebol c={c} tipo="selecao" nome={pais} temporadas={temporadas}/>
    <h3 className="hf-subtitulo">Títulos oficiais por edição</h3>
    {reais.length?<ol className="hf-linha hf-campeoes">{reais.map((e,i)=><li key={e.competicao+'|'+e.edicao+'|'+i}>
       <time>{e.edicao||e.ano}</time><span><b><LinkEntidade tipo="competicao" nome={e.competicao}/></b>

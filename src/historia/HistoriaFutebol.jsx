@@ -16,6 +16,7 @@ import './HistoriaFutebol.css';
 import './ArquivoFM.css';
 import LinkEntidade from './LinkEntidade.jsx';
 import HistoricoPremios from './HistoricoPremios.jsx';
+import RecordesFutebol from './RecordesFutebol.jsx';
 import GaleriaSelecoes from './GaleriaSelecoes.jsx';
 import {nomeSelecaoHistorica} from '../dados/selecoesHistoricas.js';
 import {EVENTO_ENTIDADE,empilharPagina,paginaEntidade} from './navegacaoEntidades.js';
@@ -29,7 +30,7 @@ export function GaleriaClube({c,nome,temporadas,onCompeticao}){
   <p className="hf-nota">Acervo inicial do jogo + conquistas desta carreira. Cada taça da simulação aparece com seu ano.</p>
   {g.primeiros.length>0&&<div className="hf-primeiros">{g.primeiros.map(t=><p key={t.nome}><b>Uma página inédita</b><span>Primeira {t.nome} · {t.ano}{t.suas.includes(t.ano)?' · Você fez parte dessa conquista.':''}</span></p>)}</div>}
   <div className="hf-vitrine">{g.tacas.filter(t=>t.total>0).map(t=><article key={t.nome} className="hf-taca"><TacaCompeticao nome={t.nome} tipo={t.tipo} size={76}/><strong>{t.total}×</strong><h3>{onCompeticao?<button className="hf-competicao-link" title="Ver campeões desta competição" onClick={()=>onCompeticao(t.nome)}>{t.nome}</button>:<BotaoHistoria className="hf-competicao-link" c={c} temporadas={temporadas} competicao={t.nome}>{t.nome}</BotaoHistoria>}</h3><small>{t.inicial} no acervo inicial{t.anos.length?` · +${t.anos.length} nesta carreira`:''}{t.legado?` · ${t.legado} do save anterior`:''}</small>{t.anos.length>0&&<p>{[...t.anos].sort((a,b)=>a-b).join(' · ')}</p>}{t.anosHistoricos?.length>0&&<details className="hf-historico-estadual"><summary>Títulos até 2024 · {t.inicial}</summary><p>{[...new Map(t.anosHistoricos.map(ano=>[ano,t.anosHistoricos.filter(a=>a===ano).length]))].map(([ano,q])=>`${ano}${q>1?` (${q} títulos)`:''}`).join(' · ')}</p>{t.fontes?.map((fonte,i)=><a key={fonte} href={fonte} target="_blank" rel="noreferrer">Fonte {i+1}</a>)}</details>}</article>)}{g.total===0&&<p className="hf-vazio">Este clube ainda não possui títulos registrados no acervo ou nesta carreira.</p>}</div>
-  <EvolucaoClube c={c} nome={nome}/><h3 className="hf-subtitulo">Capítulos da simulação</h3>
+  <EvolucaoClube c={c} nome={nome}/><RecordesFutebol c={c} tipo="clube" nome={nome} temporadas={temporadas}/><h3 className="hf-subtitulo">Capítulos da simulação</h3>
   {g.eventos.length?<ol className="hf-linha">{g.eventos.map(e=><li key={`${e.ano}|${e.nome}`}><time>{e.ano}</time><span><b><LinkEntidade tipo="competicao" nome={e.nome}/></b><small>{e.voce?'Conquistado com você':'Campeão na simulação'}</small></span></li>)}</ol>:<p className="hf-vazio">Nenhum título com ano registrado nesta carreira ainda.</p>}
  </section>;
 }
@@ -52,13 +53,37 @@ function RecordesSimulacao({c}){
  const [nac,N]=useState(c.nac||c.nacionalidade||''),[metrica,M]=useState('gols'),lideres=lideresObservados(c,{nac,metrica});
  return <section className="hf-recordes"><span className="hf-eyebrow">CADA SAVE TEM SEUS PROTAGONISTAS</span><h2>Recordistas deste universo</h2><p className="hf-nota">Números acumulados dos atletas observados em clubes, desde {c.historiaFutebol?.desde||'o início do registro'}. O filtro reúne jogadores da nacionalidade escolhida; não é um ranking de gols por seleções.</p><div className="hf-filtros"><label>Nacionalidade<select aria-label="Nacionalidade" value={nac} onChange={e=>N(e.target.value)}><option value="">Todas</option>{NACIONALIDADES.map(x=><option value={x.id} key={x.id}>{x.label}</option>)}</select></label><label>Recorde<select aria-label="Recorde" value={metrica} onChange={e=>M(e.target.value)}><option value="gols">Mais gols</option><option value="assist">Mais assistências</option><option value="jogos">Mais jogos</option><option value="defesas">Mais defesas</option><option value="defesasDecisivas">Mais defesas decisivas</option></select></label></div><ol className="hf-ranking">{lideres.map((p,i)=><li key={p.id}><b>{i+1}</b><span><strong><LinkEntidade tipo="jogador" id={p.voce?'voce':p.id} nome={p.nome}/>{p.voce?' · Você':''}</strong><small><LinkEntidade tipo="clube" nome={p.clube}/></small></span><em>{p[metrica]}</em></li>)}</ol>{!lideres.length&&<p className="hf-vazio">Ainda não há dados registrados para este recorte.</p>}</section>;
 }
+function CentralRecordes({c,temporadas,clube,selecao,competicao}){
+ const [tipo,T]=useState('clube');
+ const [selecionados,S]=useState({clube,selecao,competicao});
+ const opcoes=tipo==='clube'
+  ?[...new Set([...CLUBES,...CLUBES_REGIONAIS_EXTRAS].map(x=>x.nome))]
+  :tipo==='selecao'?NACIONALIDADES.map(x=>x.label)
+  :competicoesDisponiveis(c,temporadas);
+ const nome=selecionados[tipo]||({clube,selecao,competicao})[tipo]||opcoes[0]||'';
+ return <section className="hf-central-recordes" aria-label="Central de recordes do futebol">
+   <h2>Livro de recordes</h2>
+   <p className="hf-nota">Pesquise uma entidade e acompanhe as marcas reais ao lado das novas marcas conquistadas neste universo.</p>
+   <div className="hf-filtros">
+    <label>Categoria<select value={tipo} onChange={e=>T(e.target.value)}>
+      <option value="clube">Clubes</option><option value="selecao">Seleções</option><option value="competicao">Competições</option>
+    </select></label>
+    <label>Pesquisar recordes de<select value={nome} onChange={e=>S(x=>({...x,[tipo]:e.target.value}))}>
+      {!opcoes.includes(nome)&&<option value={nome}>{nome}</option>}
+      {opcoes.map(x=><option key={x} value={x}>{x}</option>)}
+    </select></label>
+   </div>
+   <RecordesFutebol c={c} tipo={tipo} nome={nome} temporadas={temporadas}/>
+   <RecordesSimulacao c={c}/>
+  </section>;
+}
 function EmblemaCampeao({nome,selecao}){const n=NACIONALIDADES.find(n=>nomeSelecaoHistorica(n.label)===nomeSelecaoHistorica(nome)||n.id===nome);const src=selecao?(n?bandeiraDe(n.id):null):escudoDe(nome);return src?<img className="hf-emblema-campeao" src={src} alt=""/>:selecao?<span aria-hidden="true" className="hf-emblema-campeao">🌐</span>:null;}
 export function GaleriaCompeticoes({c,temporadas,nome,onCompeticao,onClube,onSelecao}){
  const opcoes=useMemo(()=>competicoesDisponiveis(c,temporadas),[c,temporadas]),dados=useMemo(()=>galeriaCompeticao(c,nome,temporadas),[c,nome,temporadas]);
  return <section aria-label="Campeões das competições" className="hf-competicoes"><div className="hf-filtros"><label>Competição<select aria-label="Competição do histórico" value={dados.nome} onChange={e=>onCompeticao(e.target.value)}>{!opcoes.includes(dados.nome)&&<option>{dados.nome}</option>}{opcoes.map(n=><option key={n}>{n}</option>)}</select></label></div>
  <header className="hf-identidade"><TacaCompeticao nome={dados.nome} size={70}/><div><span className="hf-eyebrow">A HISTÓRIA DA COMPETIÇÃO</span><h2>{dados.nome}</h2><p>{dados.historicas.length} edições históricas documentadas · {dados.edicoes.length} nesta carreira</p></div></header>
  {dados.ultima&&<article className="hf-campeao-atual"><EmblemaCampeao nome={dados.ultima.clube} selecao={dados.selecao}/><div><small>{dados.ultima.historica?'ÚLTIMO CAMPEÃO HISTÓRICO':'ÚLTIMO CAMPEÃO DA CARREIRA'} · {dados.ultima.ano}</small><strong>{dados.selecao?<LinkEntidade tipo="selecao" nome={dados.ultima.clube}/>:<LinkEntidade tipo="clube" nome={dados.ultima.clube}/>}</strong>{dados.ultima.voce&&<span>Conquistado com você</span>}</div></article>}
- <EdicoesCompeticao c={c} nome={dados.nome}/><h3 className="hf-subtitulo">Campeões por edição</h3><p className="hf-nota">Resultados registrados nesta carreira. Edições sem vencedor salvo ficam fora da lista.</p>
+ <EdicoesCompeticao c={c} nome={dados.nome}/><RecordesFutebol c={c} tipo="competicao" nome={dados.nome} temporadas={temporadas}/><h3 className="hf-subtitulo">Campeões por edição</h3><p className="hf-nota">Resultados registrados nesta carreira. Edições sem vencedor salvo ficam fora da lista.</p>
  {dados.edicoes.length?<ol className="hf-linha hf-campeoes">{dados.edicoes.map(e=><li key={e.ano}><time>{e.ano}</time><EmblemaCampeao nome={e.clube} selecao={dados.selecao}/><span>{dados.selecao?<LinkEntidade tipo="selecao" nome={e.clube}/>:<button onClick={()=>onClube(e.clube)}>{e.clube}</button>}<small>{e.voce?'Conquistado com você':'Campeão na simulação'}</small></span></li>)}</ol>:<p className="hf-vazio">Ainda não há campeão com ano registrado para esta competição.</p>}
  {dados.historicas.length>0&&<details className="hf-historico-estadual hf-historico-competicao" open={dados.selecao||undefined}><summary>Histórico até {dados.historicas[0].ano} · {dados.historicas.length} edições documentadas</summary>{dados.notaHistorica&&<p className="hf-nota">{dados.notaHistorica}</p>}<ol className="hf-linha" aria-label={dados.selecao?`Campeões históricos da ${dados.nome}`:['Libertadores','Copa Sul-Americana','Champions League','Europa League','Conference League','Copa do Brasil'].includes(dados.nome)?`Campeões históricos da ${dados.nome}`:'Campeões estaduais anteriores à carreira'}>{dados.historicas.map(e=><li key={e.edicao||e.ano}><time>{e.edicao||e.ano}</time><span>{e.campeoes.map(t=><button key={t.clube} onClick={()=>dados.selecao?onSelecao?.(t.clube):onClube(t.clube)}>{t.clube}{t.quantidade>1?` · ${t.quantidade} títulos`:''}</button>)}</span></li>)}</ol></details>}
  <h3 className="hf-subtitulo">Maiores campeões do acervo</h3><p className="hf-nota">{dados.selecao?`Ranking dos campeões oficiais de ${dados.nome}, separado dos títulos conquistados neste save. Os vencedores antigos também podem ser consultados por seleção.`:['Libertadores','Copa Sul-Americana','Champions League','Europa League','Conference League','Copa do Brasil'].includes(dados.nome)?`Ranking dos campeões reais de ${dados.nome==='Libertadores'?'1960':dados.nome==='Copa Sul-Americana'?'2002':dados.nome==='Champions League'?'1956':dados.nome==='Europa League'?'1972':dados.nome==='Copa do Brasil'?'1989':'2022'} a ${['Champions League','Europa League','Conference League'].includes(dados.nome)?'2026':'2025'}, incluindo campeões sem elenco jogável, somado às conquistas desta carreira. O histórico real não é alterado pela simulação.`:'Base histórica cadastrada + títulos desta carreira. Os estaduais incluem os anos históricos documentados até 2024. As demais competições mantêm o acervo inicial cadastrado. Equipes sem base histórica cadastrada aparecem com suas conquistas registradas na simulação.'}</p>
@@ -177,7 +202,7 @@ export function HistoriaDialog({c,nome,temporadas,onFechar,competicaoInicial,ent
      aba==='premios'?<HistoricoPremios key={pagina.premio||'premios'} c={c}
        premioInicial={pagina.premio} onPremio={nome=>irEntidade({tipo:'premio',nome})}/>:
      aba==='treinadores'?<PerfilTreinador c={c} nome={pagina.nome}/>:
-     <RecordesSimulacao c={c}/>}
+     <CentralRecordes c={c} temporadas={temporadas} clube={clube} selecao={selecao} competicao={competicao}/>}
    </div>
    <footer><button type="button" onClick={onFechar}>Voltar ao jogo</button></footer>
  </dialog>,document.body);

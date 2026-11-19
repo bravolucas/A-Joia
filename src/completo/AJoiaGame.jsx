@@ -15,6 +15,7 @@ import {fasesMataSelecao} from '../competicoes/fasesSelecoes.js';
 import CerimoniaBola from '../comum/CerimoniaBola.jsx';
 import {MuseuFimCarreira} from '../museu/MuseuPessoal.jsx';
 import {registrarAnoHistoria,simularDefesas,registrarAtletasObservados} from '../historia/historiaFutebol.js';
+import {detectarQuebrasRecordesFutebol,escoposRecordesDaTemporada,guardarQuebrasRecordesFutebol} from '../historia/noticiasRecordes.js';
 import BotaoHistoria,{GaleriaClube,MarcosIndividuais} from '../historia/HistoriaFutebol.jsx';
 import PortalHistorico from '../historia/PortalHistorico.jsx';
 import LinkEntidade from '../historia/LinkEntidade.jsx';
@@ -2594,7 +2595,20 @@ function resolverTemporada(c, extraStats) {
       trocaTecnico, movimentoLigas,
       valorMercado: valorAtual, valorAnterior,
     };
-    {const arquivo={...c,nome,nac:nacionalidade,mundo:mundoAtualizado||mundo};registrarAtletasObservados(arquivo,{...registro,ano:anoTemporadaCarreira(c)});registrarMundoVivo(arquivo,{...registro,classificacoesMundo:card.classificacoesMundo,torneiosMundo:card.torneiosMundo,ano:anoTemporadaCarreira(c)},{antesMundo:mundo});c.historiaFutebol=arquivo.historiaFutebol;c.universo=arquivo.universo;}
+    let recordesNovos=[];
+    {const arquivo={...c,nome,nac:nacionalidade,mundo:mundoAtualizado||mundo};
+      registrarAtletasObservados(arquivo,{...registro,ano:anoTemporadaCarreira(c)});
+      registrarMundoVivo(arquivo,{...registro,classificacoesMundo:card.classificacoesMundo,torneiosMundo:card.torneiosMundo,ano:anoTemporadaCarreira(c)},{antesMundo:mundo});
+      recordesNovos=detectarQuebrasRecordesFutebol({...c,nome,nac:nacionalidade},arquivo,{
+        ano:registro.ano,escopos:escoposRecordesDaTemporada(arquivo,registro),
+        temporadasAntes:temporadas,temporadasDepois:[...temporadas,registro]
+      });
+      c.historiaFutebol=arquivo.historiaFutebol;c.universo=arquivo.universo;
+      if(recordesNovos.length){
+        c.recordesEventos=guardarQuebrasRecordesFutebol(c,recordesNovos).recordesEventos;
+        registro.recordesEventos=recordesNovos;
+      }
+    }
     setTemporadas((t) => [...t, registro]);
     // autosave: a virada de temporada é o ponto mais seguro pra gravar
     setTimeout(async () => {
@@ -2610,7 +2624,9 @@ function resolverTemporada(c, extraStats) {
     // ---- INBOX: as notícias da temporada ----
     {
       const novas = gerarNoticias(c, registro, mundoAtualizado || mundo, nome).map((x) => ({ ...x, idade: c.idade, temporada: registro.temporadaLabel, clube: registro.clube, clubeObj: registro.clubeObj }));
-      c.inbox = [...novas, ...(c.inbox || [])].slice(0, 60);
+      const manchetesRecordes=recordesNovos.slice(0,2).map(e=>
+        noticiaDoMomento(c,'clube',e.titulo,e.detalhe,e.historico?2:1));
+      c.inbox = [...manchetesRecordes,...novas, ...(c.inbox || [])].slice(0, 60);
     }
 
     let ofertaCompra = null;

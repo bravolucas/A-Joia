@@ -258,7 +258,7 @@ const eventsOrdenados=e=>[...e].sort((a,b)=>b.ano-a.ano);
 export const REFERENCIAS_INDIVIDUAIS=[
  {id:'ucl-gols',nome:'Artilheiro histórico da Champions',atleta:'Cristiano Ronaldo',valor:140,metrica:'gols',competicao:'Champions League',data:'2024-06',fonte:'https://www.uefa.com/uefachampionsleague/history/rankings/players/goals/'},
  {id:'ucl-jogos',nome:'Mais jogos na Champions',atleta:'Cristiano Ronaldo',valor:183,metrica:'jogos',competicao:'Champions League',data:'2024-06',fonte:'https://www.uefa.com/uefachampionsleague/history/rankings/players/appearances/'},
- {id:'bra-gols',nome:'Artilheiro histórico do Brasil',atleta:'Neymar',valor:79,metrica:'gols',nac:'BRA',data:'2023-10',fonte:'https://www.cbf.com.br/'},
+ {id:'bra-gols',nome:'Artilheiro histórico do Brasil',atleta:'Neymar',valor:80,metrica:'gols',nac:'BRA',data:'2026-11',fonte:'https://www.cbf.com.br/selecao-brasileira/noticias/noticias/selecao-masculina/selecao-brasileira-tem-2700-gols-marcados-na-historia'},
  {id:'ale-gols',nome:'Artilheiro histórico da Alemanha',atleta:'Miroslav Klose',valor:71,metrica:'gols',nac:'ALE',data:'2014-07',fonte:'https://www.dfb.de/'},
  {id:'ita-gols',nome:'Artilheiro histórico da Itália',atleta:'Luigi Riva',valor:35,metrica:'gols',nac:'ITA',data:'2024-06',fonte:'https://www.figc.it/'},
  {id:'esp-gols',nome:'Artilheiro histórico da Espanha',atleta:'David Villa',valor:59,metrica:'gols',nac:'ESP',data:'2024-06',fonte:'https://rfef.es/'},

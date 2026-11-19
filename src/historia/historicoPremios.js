@@ -33,7 +33,14 @@ export function vencedoresPremios(c={}) {
   const vencedor=String(linha?.nome||'').trim();
   if(!vencedor)continue;
   const id=linha.jogadorId??linha.id??idJogadorPorNome(c,vencedor);
-  const ano=Number.isFinite(Number(linha.temporada))?Number(linha.temporada):null;
+  // 'temporada' no Hall da Fama é ordinal (1, 2...), não o ano civil.
+  // Nos saves atuais, anoCalendario já aponta para o ano seguinte ao último simulado.
+  const anoRegistrado=Number(linha.ano),temporada=Number(linha.temporada);
+  const anoAtual=Number(c.mundo?.anoCalendario),temporadaAtual=Number(c.mundo?.temporada);
+  const ano=Number.isInteger(anoRegistrado)&&anoRegistrado>=1900?anoRegistrado
+   :Number.isInteger(anoAtual)&&anoAtual>=1900&&Number.isInteger(temporada)
+     &&Number.isInteger(temporadaAtual)&&temporadaAtual>=temporada
+    ?anoAtual-(temporadaAtual-temporada)-1:null;
   const clube=String(linha.clube||'');
   const chave=[chavePremio('Bola de Ouro'),ano,String(id??vencedor),clube].join('|');
   if(!mapa.has(chave))mapa.set(chave,{

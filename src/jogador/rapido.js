@@ -2334,7 +2334,7 @@ export function gerarOfertas(c, n, opts = {}) {
   if (!opts.observacao) {
     const negativas = new Set((c.sondagensEmpresario||[]).filter(s=>s.ano===c.ano&&s.status==='negativo').map(s=>s.clube));
     for (let i=escolhidas.length-1;i>=0;i--)if(negativas.has(escolhidas[i].nome))escolhidas.splice(i,1);
-    for (const sondagem of (c.sondagensEmpresario||[]).filter(s=>s.ano===c.ano&&s.status==='positivo')) {
+    for (const sondagem of (c.sondagensEmpresario||[]).filter(s=>s.ano<=c.ano&&s.ano>=c.ano-1&&s.status==='positivo')) {
       const alvo=clubesJogaveis().find(x=>x.nome===sondagem.clube);
       if (!alvo||alvo.nome===c.clubeNome||escolhidas.some(x=>x.nome===alvo.nome)||!viraPropostaSondagem(c,alvo.nome))continue;
       if (analisarClubeEmpresario(c,alvo,ovr).semVerba)continue;
@@ -3719,7 +3719,7 @@ export function janelaExtra(c, idJaVisto) {
   const nota = ult?.nota || 0, idade = c.idade;
   const fase = idade >= 19 && idade <= 27 ? 0.05 : idade >= 32 ? -0.15 : 0;
   const base = clampR(0.45 + (dif >= 4 ? 0.2 : 0) + (nota >= 7.3 ? 0.15 : nota >= 6.9 ? 0.07 : 0) + ((c.fama ?? 20) >= 60 ? 0.1 : 0) + fase
-    + (c.mod?.ofertasExtra ? 0.3 : 0) + (c.interesseSinalizado?.ano === c.ano ? 0.2 : 0) - (dif <= -6 ? 0.15 : 0) - ((ult?.jogos || 0) < 12 && c.temporadas.length ? 0.1 : 0), 0.2, 0.95);
+    + (c.mod?.ofertasExtra ? 0.3 : 0) + ((c.sondagensEmpresario||[]).some(s=>s.status==='positivo'&&s.ano<=c.ano&&s.ano>=c.ano-1) ? 0.15 : 0) - (dif <= -6 ? 0.15 : 0) - ((ult?.jogos || 0) < 12 && c.temporadas.length ? 0.1 : 0), 0.2, 0.95);
   const p = anoDeDecisao(c) ? base : base * (c.ritmo === "expresso" ? 0.5 : 0.8);
   if (!comSemente(c.codigo, `mercado:${c.ano}`, () => chance(p))) return null;
   return sortearEvento(c, { somente: "propostas" });

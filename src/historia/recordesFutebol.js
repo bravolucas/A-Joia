@@ -42,6 +42,7 @@ const eIgual=(a,b)=>canon(a)===canon(b);
 const ligaAlias={ligadoscampeoes:'championsleague',uefachampionsleague:'championsleague',
  copadomundofifa:'copadomundo',fifaworldcup:'copadomundo',premierleagueinglesa:'premierleague'};
 const competicaoIgual=(a,b)=>((x,y)=>(ligaAlias[x]||x)===(ligaAlias[y]||y))(canon(a),canon(b));
+const chaveCompeticao=x=>ligaAlias[canon(x)]||canon(x);
 const paisId=nac=>{
  const encontrado=NACIONALIDADES.find(p=>p.id===nac||eIgual(p.label,nac));
  return encontrado?.label||nac||'';
@@ -215,7 +216,7 @@ function medirCampanhasETitulos(mapa,arquivo,tipo,nome){
    }
   }
   // Apenas uma edicao por temporada e competicao.
-  const chaveEdicao=edicao.ano+'|'+canon(edicao.nome);
+  const chaveEdicao=edicao.ano+'|'+chaveCompeticao(edicao.nome);
   if(edicao.campeao&&!vistos.has(chaveEdicao)){
    vistos.add(chaveEdicao);
    const campeao=edicao.campeao;
@@ -228,9 +229,9 @@ function medirCampanhasETitulos(mapa,arquivo,tipo,nome){
     const anual=porAno.get(anoChave)||{valor:0,ano:edicao.ano,atleta:campeao};
     porAno.set(anoChave,{...anual,valor:anual.valor+1});
    }
-   if(!edicoesPorCompeticao.has(canon(edicao.nome)))
-    edicoesPorCompeticao.set(canon(edicao.nome),{nome:edicao.nome,edicoes:[]});
-   edicoesPorCompeticao.get(canon(edicao.nome)).edicoes.push({ano:edicao.ano,campeao});
+   if(!edicoesPorCompeticao.has(chaveCompeticao(edicao.nome)))
+    edicoesPorCompeticao.set(chaveCompeticao(edicao.nome),{nome:edicao.nome,edicoes:[]});
+   edicoesPorCompeticao.get(chaveCompeticao(edicao.nome)).edicoes.push({ano:edicao.ano,campeao});
   }
   if(edicao.vice&&!vicesVistos.has(chaveEdicao)){
    vicesVistos.add(chaveEdicao);

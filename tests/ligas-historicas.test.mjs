@@ -50,7 +50,7 @@ test('temporada e ano civil são diferenciados e rankings não recebem títulos 
  assert.equal(ranking.ranking.find(r=>r.clube==='Coventry City').inicial,1);
  assert.equal(ranking.ranking.find(r=>r.clube==='Leeds United').inicial,2);
  assert.equal(totalLigaHistorica('Brasileirão Série B','Coritiba'),3);
- assert.equal(galeriaCompeticao({},'Brasileirão Série B').historicas.length,45);
+ assert.equal(galeriaCompeticao({},'Brasileirão Série B').historicas.length,46);
  assert.equal(galeriaCompeticao({},'Premier League').historicas.length,34);
  assert.match(galeriaCompeticao({},'La Liga').notaHistorica,/recorte parcial/);
 });

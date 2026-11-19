@@ -8,7 +8,12 @@ const deduplicar=lista=>[...new Map(lista.filter(x=>x?.nome).map(x=>[x.tipo+'|'+
 export function escoposRecordesDaTemporada(c={},a={}){
  const clube=a.clube?.nome||a.clube||a.clubeNome;
  const pais=a.tipoEquipe==='selecao'?clube:nomePais(c.nac||c.nacionalidade);
- const comp=[a.ligaNome,...(a.porCompeticao||[]).filter(x=>(x.jogos||0)>0).sort((x,y)=>(y.jogos||0)-(x.jogos||0)).map(x=>x.nome)];
+ const comp=[a.ligaNome,
+  ...(a.porCompeticao||[]).filter(x=>(x.jogos||0)>0)
+   .sort((x,y)=>(y.jogos||0)-(x.jogos||0)).map(x=>x.nome),
+  // O Modo Treinador registra copas em torneios, nao em porCompeticao.
+  ...(a.torneios||[]).filter(x=>x?.nome&&(x.faseUsuario||x.jogosUsuario?.length||x.campeao===clube))
+   .map(x=>x.nome)];
  if(a.selecao?.convocado)comp.push(a.selecao.nome||a.selecao.competicao);
  return deduplicar([
   ...(clube&&a.tipoEquipe!=='selecao'?[{tipo:'clube',nome:clube}]:[]),

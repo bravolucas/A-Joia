@@ -18,10 +18,21 @@ export function clubesDoMundo(c={},clubes=CLUBES) {
   for(const p of c.mundo?.jogadores||[]){if(!porClube.has(p.clubeNome))porClube.set(p.clubeNome,[]);porClube.get(p.clubeNome).push(p);}
   return clubes.map(cl=>{const a=avaliarClubeNoMundo(c,cl,{elenco:porClube.get(cl.nome)||[]});return {...cl,forca:a.forca,elenco:a.forca,ataque:a.ataque,defesa:a.defesa,liga:ligas[cl.nome]||cl.liga};});
 }
-function campanhaClube(a,nome){
+/** Índice da rodada montado uma vez: evita procurar cada clube em todas as ligas. */
+function indexarCampanhas(a){
+  const porClube=new Map();
   for(const [liga,t] of Object.entries(a.classificacoesMundo||{})){
-    const linha=t.classificacao?.find(x=>x.nome===nome);if(linha)return {liga,posicao:linha.posicao||t.classificacao.indexOf(linha)+1,total:t.classificacao.length,pontos:linha.pontos};
+    const linhas=t.classificacao||[];
+    for(let i=0;i<linhas.length;i++){
+      const linha=linhas[i];
+      // A primeira classificação prevalece, como na antiga busca sequencial.
+      if(linha&&!porClube.has(linha.nome))porClube.set(linha.nome,{liga,posicao:linha.posicao||i+1,total:linhas.length,pontos:linha.pontos});
+    }
   }
+  return porClube;
+}
+function campanhaClube(a,nome,porClube){
+  if(porClube.has(nome))return porClube.get(nome);
   if((typeof a.clube==='string'?a.clube:a.clube?.nome)===nome)return {liga:a.ligaId||a.liga,posicao:a.posLiga||a.posicao,total:a.totalLiga||a.classificacao?.length||a.tabelaLiga?.length||20,pontos:a.pontos};
   return null;
 }
@@ -43,14 +54,25 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
       (formadosPorClube.get(jogador.clubeOrigem) || 0) + 1);
   }
   const forcasAntes=forcasDoMundo({...c,universo:anterior,mundo:antesMundo||c.mundo},clubesRegistrados);
-  const titulos=c.historiaFutebol?.titulos?.filter(t=>t.ano===a.ano)||[];
+  const campanhas=indexarCampanhas(a);
+  const titulosPorClube=new Map();
+  for(const titulo of c.historiaFutebol?.titulos||[]){
+    if(titulo.ano!==a.ano)continue;
+    if(!titulosPorClube.has(titulo.clube))titulosPorClube.set(titulo.clube,[]);
+    titulosPorClube.get(titulo.clube).push(titulo);
+  }
+  const movimentosPorClube=new Map();
+  for(const movimento of a.movimentosMundo||[]){
+    if(!movimentosPorClube.has(movimento.clube))movimentosPorClube.set(movimento.clube,movimento);
+  }
+  const subiram=new Set(a.subiram||[]),cairam=new Set(a.cairam||[]);
   for(const cl of clubesRegistrados){
     const p=u.clubes[cl.nome]||{mercado:0,estrutura:0,fase:0,reputacao:cl.forca,financas:50,historico:[]};
-    const campanha=campanhaClube(a,cl.nome),titulosClube=titulos.filter(t=>t.clube===cl.nome),tacas=titulosClube.map(t=>t.nome);
+    const campanha=campanhaClube(a,cl.nome,campanhas),titulosClube=titulosPorClube.get(cl.nome)||[],tacas=titulosClube.map(t=>t.nome);
     const rng=geradorTecnico(`${c.codigo||'carreira'}|${a.ano}|${cl.nome}|gestao-mundo`);
     const esperado=limitar(1-(cl.forca-40)/65,.08,.85);
     const desempenho=campanha?limitar(esperado-campanha.posicao/Math.max(1,campanha.total),-.8,.8):0;
-    const movimento=a.movimentosMundo?.find(m=>m.clube===cl.nome)?.tipo||(a.subiram?.includes(cl.nome)?'acesso':a.cairam?.includes(cl.nome)?'rebaixamento':null);
+    const movimento=movimentosPorClube.get(cl.nome)?.tipo||(subiram.has(cl.nome)?'acesso':cairam.has(cl.nome)?'rebaixamento':null);
     const receita=limitar(desempenho*8+Math.min(3,tacas.length)*2+(movimento==='acesso'?4:movimento==='rebaixamento'?-6:0),-10,10);
     const financas=limitar(p.financas*.85+50*.15+receita,5,95);
     // Acertos e erros de gestão existem também fora do clube do usuário. Não inventam transferências nominais.

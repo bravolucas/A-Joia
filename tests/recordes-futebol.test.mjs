@@ -113,3 +113,56 @@ test('sem rodadas comprovadas nao inventa sequencias',()=>{
  assert.equal(registro(consultarRecordesFutebol(c,'clube','Santos'),'invencibilidade'),undefined);
  assert.equal(registro(consultarRecordesFutebol(c,'competicao','Copa do Brasil'),'golsEquipePartida').simulado.valor,3);
 });
+
+
+test('campanhas de liga usam classificacao oficial sem estimar placares faltantes',()=>{
+ const e=ano=>({ano,nome:'Brasileirão',tipo:'liga',campeao:'Santos',
+  classificacao:[{nome:'Santos',pontos:ano===2028?77:75,vitorias:ano===2028?23:21,
+   golsPro:ano===2028?74:70,saldoGols:ano===2028?40:37,
+   jogos:38,derrotas:ano===2028?3:0}],jogos:{nomes:[],partidas:[]}});
+ const c={universo:{edicoes:[e(2027),e(2028)]}};
+ const d=consultarRecordesFutebol(c,'clube','Santos');
+ assert.equal(registro(d,'pontosEdicao').simulado.valor,77);
+ assert.equal(registro(d,'vitoriasTabelaEdicao').simulado.valor,23);
+ assert.equal(registro(d,'golsTabelaEdicao').simulado.valor,74);
+ assert.equal(registro(d,'saldoTabelaEdicao').simulado.valor,40);
+ assert.equal(registro(d,'invictoTabelaEdicao').simulado.valor,38);
+ assert.equal(registro(d,'golsEquipeEdicao'),undefined);
+ assert.equal(registro(consultarRecordesFutebol(c,'competicao','Brasileirão'),'pontosEdicao').simulado.atleta,'Santos');
+});
+test('titulos e vices separados por clube e competicao, com marcos da mesma temporada',()=>{
+ const e=(ano,nome,campeao,vice)=>({ano,nome,tipo:nome==='Brasileirão'?'liga':'copa',
+  campeao,vice,jogos:{nomes:[],partidas:[]}});
+ const c={universo:{edicoes:[
+  e(2027,'Brasileirão','Santos','Palmeiras'),
+  e(2028,'Brasileirão','Santos','Palmeiras'),
+  e(2028,'Copa do Brasil','Santos','Flamengo'),
+  e(2029,'Brasileirão','Palmeiras','Santos'),
+  e(2030,'Brasileirão','Santos','Palmeiras')
+ ]}};
+ const clube=consultarRecordesFutebol(c,'clube','Santos');
+ assert.equal(registro(clube,'titulosTotal').simulado.valor,4);
+ assert.equal(registro(clube,'titulosTotal').simulado.ano,2030);
+ assert.equal(registro(clube,'titulosAno').simulado.valor,2);
+ assert.equal(registro(clube,'titulosAno').simulado.ano,2028);
+ assert.equal(registro(clube,'titulosConsecutivos').simulado.valor,2);
+ assert.equal(registro(clube,'vicesTotal').simulado.valor,1);
+ const liga=consultarRecordesFutebol(c,'competicao','Brasileirão');
+ assert.equal(registro(liga,'titulosTotal').simulado.valor,3);
+ assert.equal(registro(liga,'titulosTotal').simulado.atleta,'Santos');
+ assert.equal(registro(liga,'vicesTotal').simulado.valor,3);
+ assert.equal(registro(liga,'vicesTotal').simulado.atleta,'Palmeiras');
+ assert.equal(registro(liga,'titulosAno'),undefined);
+});
+test('sequencia de campeoes requer edicoes anuais completas, ou ciclos quadrienais internacionais',()=>{
+ const e=(ano,nome,campeao,tipo)=>({ano,nome,campeao,tipo,vice:'Brasil'});
+ const c={universo:{edicoes:[
+  e(2027,'Brasileirão','Santos','liga'),e(2029,'Brasileirão','Santos','liga'),
+  e(2026,'Copa do Mundo','Argentina','copaMundo'),e(2030,'Copa do Mundo','Argentina','copaMundo'),
+  e(2034,'Copa do Mundo','França','copaMundo')
+ ]}};
+ assert.equal(registro(consultarRecordesFutebol(c,'clube','Santos'),'titulosConsecutivos'),undefined);
+ assert.equal(registro(consultarRecordesFutebol(c,'selecao','Argentina'),'titulosConsecutivos').simulado.valor,2);
+ assert.equal(registro(consultarRecordesFutebol(c,'competicao','Copa do Mundo'),'titulosConsecutivos').simulado.valor,2);
+ assert.equal(registro(consultarRecordesFutebol(c,'selecao','Brasil'),'vicesTotal').simulado.valor,3);
+});

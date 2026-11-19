@@ -53,6 +53,30 @@ function RecordesSimulacao({c}){
  const [nac,N]=useState(c.nac||c.nacionalidade||''),[metrica,M]=useState('gols'),lideres=lideresObservados(c,{nac,metrica});
  return <section className="hf-recordes"><span className="hf-eyebrow">CADA SAVE TEM SEUS PROTAGONISTAS</span><h2>Recordistas deste universo</h2><p className="hf-nota">Números acumulados dos atletas observados em clubes, desde {c.historiaFutebol?.desde||'o início do registro'}. O filtro reúne jogadores da nacionalidade escolhida; não é um ranking de gols por seleções.</p><div className="hf-filtros"><label>Nacionalidade<select aria-label="Nacionalidade" value={nac} onChange={e=>N(e.target.value)}><option value="">Todas</option>{NACIONALIDADES.map(x=><option value={x.id} key={x.id}>{x.label}</option>)}</select></label><label>Recorde<select aria-label="Recorde" value={metrica} onChange={e=>M(e.target.value)}><option value="gols">Mais gols</option><option value="assist">Mais assistências</option><option value="jogos">Mais jogos</option><option value="defesas">Mais defesas</option><option value="defesasDecisivas">Mais defesas decisivas</option></select></label></div><ol className="hf-ranking">{lideres.map((p,i)=><li key={p.id}><b>{i+1}</b><span><strong><LinkEntidade tipo="jogador" id={p.voce?'voce':p.id} nome={p.nome}/>{p.voce?' · Você':''}</strong><small><LinkEntidade tipo="clube" nome={p.clube}/></small></span><em>{p[metrica]}</em></li>)}</ol>{!lideres.length&&<p className="hf-vazio">Ainda não há dados registrados para este recorte.</p>}</section>;
 }
+function CentralRecordes({c,temporadas,clube,selecao,competicao}){
+ const [tipo,T]=useState('clube');
+ const [selecionados,S]=useState({clube,selecao,competicao});
+ const opcoes=tipo==='clube'
+  ?[...new Set([...CLUBES,...CLUBES_REGIONAIS_EXTRAS].map(x=>x.nome))]
+  :tipo==='selecao'?NACIONALIDADES.map(x=>x.label)
+  :competicoesDisponiveis(c,temporadas);
+ const nome=selecionados[tipo]||({clube,selecao,competicao})[tipo]||opcoes[0]||'';
+ return <section className="hf-central-recordes" aria-label="Central de recordes do futebol">
+   <h2>Livro de recordes</h2>
+   <p className="hf-nota">Pesquise uma entidade e acompanhe as marcas reais ao lado das novas marcas conquistadas neste universo.</p>
+   <div className="hf-filtros">
+    <label>Categoria<select value={tipo} onChange={e=>T(e.target.value)}>
+      <option value="clube">Clubes</option><option value="selecao">Seleções</option><option value="competicao">Competições</option>
+    </select></label>
+    <label>Pesquisar recordes de<select value={nome} onChange={e=>S(x=>({...x,[tipo]:e.target.value}))}>
+      {!opcoes.includes(nome)&&<option value={nome}>{nome}</option>}
+      {opcoes.map(x=><option key={x} value={x}>{x}</option>)}
+    </select></label>
+   </div>
+   <RecordesFutebol c={c} tipo={tipo} nome={nome}/>
+   <RecordesSimulacao c={c}/>
+  </section>;
+}
 function EmblemaCampeao({nome,selecao}){const n=NACIONALIDADES.find(n=>nomeSelecaoHistorica(n.label)===nomeSelecaoHistorica(nome)||n.id===nome);const src=selecao?(n?bandeiraDe(n.id):null):escudoDe(nome);return src?<img className="hf-emblema-campeao" src={src} alt=""/>:selecao?<span aria-hidden="true" className="hf-emblema-campeao">🌐</span>:null;}
 export function GaleriaCompeticoes({c,temporadas,nome,onCompeticao,onClube,onSelecao}){
  const opcoes=useMemo(()=>competicoesDisponiveis(c,temporadas),[c,temporadas]),dados=useMemo(()=>galeriaCompeticao(c,nome,temporadas),[c,nome,temporadas]);
@@ -178,7 +202,7 @@ export function HistoriaDialog({c,nome,temporadas,onFechar,competicaoInicial,ent
      aba==='premios'?<HistoricoPremios key={pagina.premio||'premios'} c={c}
        premioInicial={pagina.premio} onPremio={nome=>irEntidade({tipo:'premio',nome})}/>:
      aba==='treinadores'?<PerfilTreinador c={c} nome={pagina.nome}/>:
-     <RecordesSimulacao c={c}/>}
+     <CentralRecordes c={c} temporadas={temporadas} clube={clube} selecao={selecao} competicao={competicao}/>}
    </div>
    <footer><button type="button" onClick={onFechar}>Voltar ao jogo</button></footer>
  </dialog>,document.body);

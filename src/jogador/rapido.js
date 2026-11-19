@@ -2132,6 +2132,18 @@ function fecharTemporadaBase(c0, card0) {
   card.feitosHistoricos=[...(card.feitosHistoricos||[]),...novosMarcosIndividuais(antes,c,card)];
   for(const feito of card.feitosHistoricos||[]){card.destaques.push(feito.titulo);card.marcos.push({...feito,icone:"🏛️"});c.marcos.push({...feito,icone:"🏛️"});}
   registrarAtletasObservados(c,card);
+  // O empresário volta com as devolutivas ao fim da temporada, inclusive
+  // quando o jogador não consulta manualmente o mercado. Não altera os eventos.
+  if((c.sondagensEmpresario||[]).some(s=>s.status==='aguardando'&&s.ano<=c.ano)){
+    const anterior=c.sondagensEmpresario;
+    const devolutivas=receberRetornosEmpresario(c).sondagensEmpresario;
+    const novas=devolutivas.filter(s=>s.status!=='aguardando'&&anterior.some(a=>a.ano===s.ano&&a.clube===s.clube&&a.status==='aguardando'));
+    c.sondagensEmpresario=devolutivas;
+    c.ultimaDevolutivaEmpresario={
+      ano:c.ano,total:novas.length,positivas:novas.filter(x=>x.status==='positivo').length
+    };
+    if(novas.length)card.destaques.push(`Seu empresário retornou com ${novas.length} resposta(s): ${c.ultimaDevolutivaEmpresario.positivas} clube(s) aberto(s) a negociar. Consulte o Mercado de clubes.`);
+  }
   c.temporadas.push(card);
   return { c, card };
 }
@@ -4159,14 +4171,14 @@ export function sinalizarInteresse(c0,clube){
  return c;
 }
 export function receberRetornosEmpresario(c0){
- const pendentes=(c0.sondagensEmpresario||[]).filter(s=>s.ano===c0.ano&&s.status==='aguardando');
+ const pendentes=(c0.sondagensEmpresario||[]).filter(s=>s.ano<=c0.ano&&s.status==='aguardando');
  if(!pendentes.length)throw new Error('Nenhuma sondagem aguardando retorno nesta temporada.');
  const c=clone(c0),clubes=catalogoMercadoJogador(c);
  c.sondagensEmpresario=(c.sondagensEmpresario||[]).map(s=>{
-  if(s.ano!==c.ano||s.status!=='aguardando')return s;
+  if(s.ano>c.ano||s.status!=='aguardando')return s;
   const alvo=clubes.find(x=>x.nome===s.clube);
   if(!alvo)return {...s,status:'negativo',texto:'O clube não está disponível para negociar nesta temporada.'};
-  const resposta=respostaClubeEmpresario(c,alvo,ovrDe(c));
+  const resposta=respostaClubeEmpresario({...c,ano:s.ano},alvo,ovrDe(c));
   return {...s,status:resposta.status,texto:resposta.motivo,analise:{
    distancia:resposta.analise.distancia,concorrencia:resposta.analise.concorrencia,
    semVerba:resposta.analise.semVerba

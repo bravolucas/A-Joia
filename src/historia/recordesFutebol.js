@@ -287,7 +287,9 @@ function medirAtuacoes(mapa,arquivo,tipo,nome,atletaNome){
 }
 /** Formato estável: não grava nada, portanto reabrir, importar ou voltar não duplica marcas. */
 export function consultarRecordesFutebol(c={},tipo='clube',nome='',temporadas=c?.temporadas||[]){
- if(!['clube','selecao','competicao'].includes(tipo))return {tipo,nome,recordes:[],desde:null};
+ if(!['clube','selecao','competicao','treinador'].includes(tipo))return {tipo,nome,recordes:[],desde:null};
+ if(tipo==='treinador')return {tipo,nome,recordes:recordesTreinador(c,tipo,nome),
+  desde:c.tecnico?.temporadas?.[0]?.ano??null,cobertura:'Somente resultados documentados deste treinador no save.'};
  const arquivo=arquivoDe(c),mapa=new Map();
  if(tipo==='clube'||tipo==='competicao'){
   const atletas=Object.values(arquivo.atletas||{});
@@ -299,9 +301,12 @@ export function consultarRecordesFutebol(c={},tipo='clube',nome='',temporadas=c?
    medirAtleta(mapa,{id:p.id,nome:p.nome||'Jogador'},linhas);
   }
   // Saves anteriores ao Arquivo Vivo e carreira ainda não arquivada.
-  if(!temUsuario&&temporadas?.length){
+  // Modo Treinador guarda campanhas com jogos e vitórias, NÃO jogos do
+  // atleta. Nunca computar temporadas do técnico como partidas do jogador.
+  const temporadasAtleta=c.tecnico?(c.temporadas||[]):temporadas;
+  if(!temUsuario&&temporadasAtleta?.length){
    medirAtleta(mapa,{id:'voce',nome:c.nome||'Você'},
-    selecionarPorEscopo(temporadas,tipo,nome));
+    selecionarPorEscopo(temporadasAtleta,tipo,nome));
   }
   if(tipo==='competicao'&&competicaoIgual(nome,'Copa do Mundo'))
    medirAtleta(mapa,{id:'voce',nome:c.nome||'Você'},

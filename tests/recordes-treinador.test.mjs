@@ -129,3 +129,21 @@ test('participação em copa sem título não fabrica vitórias de mata-mata',()
  assert.equal(marca(copa,'tecnicoJogos'),undefined);
  assert.equal(marca(copa,'tecnicoTitulos'),undefined);
 });
+
+test('temporada mista não credita título da seleção ao clube nem jogos da liga à seleção',()=>{
+ const c={nome:'Treinador',tecnico:{universo:{anos:[2028],edicoes:[]},temporadas:[
+  temporada(2028,'Santos',20,10,8,['Brasileirão','Copa do Mundo'],{
+   torneios:[{nome:'Copa do Mundo',selecao:'Brasil',campeao:'Brasil'}],
+   cumpriuObjetivo:true
+  })
+ ]}};
+ assert.equal(marca(recordesTreinador(c,'clube','Santos'),'tecnicoTitulos').valor,1);
+ const brasil=recordesTreinador(c,'selecao','Brasil');
+ assert.equal(marca(brasil,'tecnicoTitulos').valor,1);
+ assert.equal(marca(brasil,'tecnicoJogos'),undefined);
+ assert.equal(marca(brasil,'tecnicoMetas'),undefined);
+ const copa=recordesTreinador(c,'competicao','Copa do Mundo');
+ assert.equal(marca(copa,'tecnicoTitulos').valor,1);
+ assert.equal(marca(copa,'tecnicoPontos'),undefined);
+ assert.equal(marca(recordesTreinador(c,'treinador','Treinador'),'tecnicoTitulos').valor,2);
+});

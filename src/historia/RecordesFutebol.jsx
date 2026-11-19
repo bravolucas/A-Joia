@@ -23,7 +23,8 @@ export default function RecordesFutebol({c,tipo,nome,temporadas=c?.temporadas||[
  const [filtro,F]=useState('Todos');
  const dados=useMemo(()=>consultarRecordesFutebol(c,tipo,nome,temporadas),[c,tipo,nome,temporadas]);
  const itens=dados.recordes.filter(r=>filtro==='Todos'||r.categoria===filtro);
- const filtros=['Todos','Carreira','Temporada','Campanhas','Títulos','Partidas','Sequências',...(dados.recordes.some(x=>x.categoria==='Treinador')?['Treinador']:[])];
+ const categorias=new Set(dados.recordes.map(r=>r.categoria));
+ const filtros=['Todos',...['Carreira','Temporada','Campanhas','Títulos','Partidas','Sequências','Treinador'].filter(x=>categorias.has(x))];
  const eventos=(c?.recordesEventos||[]).filter(e=>e.tipo===tipo&&e.entidade===nome).slice(-12).reverse();
  return <section className="rf-painel" aria-label={'Recordes de '+nome}>
   <div className="rf-topo"><div><span className="hf-eyebrow">ARQUIVO VIVO / RECORDES</span>
@@ -33,9 +34,9 @@ export default function RecordesFutebol({c,tipo,nome,temporadas=c?.temporadas||[
    {filtros.map(s=><button key={s} type="button" aria-pressed={filtro===s} onClick={()=>F(s)}>{s}</button>)}
   </div>
   {itens.length?<div className="rf-tabela-scroll"><table className="rf-tabela">
-    <thead><tr><th scope="col">Recorde</th><th scope="col">Futebol real</th><th scope="col">Neste save</th></tr></thead>
+    <thead>{tipo==='treinador'?<tr><th scope="col">Marca do treinador</th><th scope="col">Carreira no save</th></tr>:<tr><th scope="col">Recorde</th><th scope="col">Futebol real</th><th scope="col">Neste save</th></tr>}</thead>
     <tbody>{itens.map(r=><tr key={r.id}><th scope="row"><strong>{r.rotulo}</strong><small>{r.categoria} · {r.status}</small></th>
-      <td><Valor registro={r.real} real/></td><td><Valor registro={r.simulado}/></td></tr>)}</tbody>
+      {tipo!=='treinador'&&<td><Valor registro={r.real} real/></td>}<td><Valor registro={r.simulado}/></td></tr>)}</tbody>
    </table></div>:<p className="hf-vazio">{filtro==='Todos'?'Nenhum recorde disponível para esta entidade. A tabela será preenchida quando surgirem resultados arquivados.':'Nenhuma marca registrada nesta categoria.'}</p>}
   {!!eventos.length&&<div className="rf-eventos" aria-label="Quebras de recordes desta carreira">
     <h4>Recordes quebrados na carreira</h4>

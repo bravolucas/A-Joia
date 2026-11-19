@@ -24,7 +24,7 @@ export default function MercadoEmpresario({c,onAcao,interesses=[]}){
  const pendentes=sondagensAno.filter(s=>s.status==='aguardando');
  const statusDe=nome=>sondagensAno.find(s=>s.clube===nome)?.status;
  const avisar=(tipo,valor)=>{
-  try{onAcao(tipo,valor);V(tipo==='retornos'?'O empresário trouxe as respostas dos clubes.':'Seu empresário recebeu o pedido de sondagem.');}
+  try{onAcao(tipo,valor);V(tipo==='retornos'?'O empresário trouxe as respostas dos clubes.':tipo==='negociarSondagem'?'O empresário verificou as propostas da janela.':'Seu empresário recebeu o pedido de sondagem.');}
   catch(e){V(e?.message||'Não foi possível enviar a solicitação.');}
  };
  const mudarPais=valor=>{P(valor);L('todas');G(1);S('');};
@@ -61,7 +61,7 @@ export default function MercadoEmpresario({c,onAcao,interesses=[]}){
     <div><small>Custo de transferência</small><strong>{analise.custo?formatarEuro(analise.custo):'Sem taxa'}</strong><span>Verba para uma contratação: {formatarEuro(analise.investimentoMaximo)} {analise.caixaConhecido?'(caixa do save)':'(estimativa)'}</span></div>
    </div>
    <p className="me-incerteza">Esses fatores ajudam o empresário a avaliar a sondagem. A decisão cabe ao clube: nenhum resultado é garantido.</p>
-   {alvo.nome===c.clubeNome?<span className="me-proprio">Você já defende este clube.</span>:statusDe(alvo.nome)?<span className={'me-estado me-'+statusDe(alvo.nome)}>{estadoRotulo[statusDe(alvo.nome)]}</span>:<button className="me-sondar" disabled={indisponivel} type="button" onClick={()=>avisar('interesse',alvo.nome)}>Pedir ao empresário para sondar este clube</button>}
+   {alvo.nome===c.clubeNome?<span className="me-proprio">Você já defende este clube.</span>:statusDe(alvo.nome)?<div className="me-acoes-retorno"><span className={'me-estado me-'+statusDe(alvo.nome)}>{estadoRotulo[statusDe(alvo.nome)]}</span>{statusDe(alvo.nome)==='positivo'&&<button className="me-sondar" type="button" onClick={()=>avisar('negociarSondagem',alvo.nome)}>Consultar proposta formal</button>}</div>:<button className="me-sondar" disabled={indisponivel} type="button" onClick={()=>avisar('interesse',alvo.nome)}>Pedir ao empresário para sondar este clube</button>}
   </article>}
   <div className="me-retornos">
    <header><div><h4>Conversas do empresário</h4><small>Respostas desta temporada e histórico recente</small></div>{pendentes.length>0&&<button type="button" className="me-retornar" onClick={()=>avisar('retornos')}>Receber retorno ({pendentes.length})</button>}</header>

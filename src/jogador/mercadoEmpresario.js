@@ -15,7 +15,7 @@ const PAIS_DA_LIGA = {
  arabia:'Arábia Saudita',mls:'Estados Unidos',
 };
 const limitar=(n,min,max)=>Math.max(min,Math.min(max,n));
-const numero=(v,padrao)=>Number.isFinite(Number(v))?Number(v):padrao;
+const numero=(v,padrao)=>(v===null||v===undefined||v==='')?padrao:Number.isFinite(Number(v))?Number(v):padrao;
 const indiceEstavel=texto=>{
  let h=2166136261;
  for(const ch of String(texto))h=Math.imul(h^ch.charCodeAt(0),16777619);

@@ -4,7 +4,7 @@ test.setTimeout(90000);
 import {test,expect} from '@playwright/test';
 import {criarJogador,jogarTemporada,aposentar} from '../src/jogador/rapido.js';
 import {iniciarCarreiraTecnico} from '../src/treinador/tecnico.js';
-import {criarCampanhaCopa,decisaoCopa,escolherCopa} from '../src/treinador/copasEscolha.js';
+import {criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa} from '../src/treinador/copasEscolha.js';
 import {escolhasCopa} from '../src/treinador/estrategiasCopas.js';
 import {criarAgenda} from '../src/competicoes/calendarioCopas.js';
 function base(cp){const c=iniciarCarreiraTecnico(aposentar({...criarJogador({nome:'Copa Teste',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:10,ritmo:'expresso',codigo:'COPA-ESCOLHA'}),idade:40}));c.tecnico={...c.tecnico,clube:cp.usuario,ano:cp.ano+1,fase:'resultado',clubeInicialEscolhido:true,propostasCoerentesVersao:3,elenco:cp.forcaUsuario,temporadas:[{ano:cp.ano,clube:cp.usuario,liga:'brasileirao',posicao:2,pontos:72,vitorias:22,empates:6,derrotas:10,titulosConquistados:[],torneios:[cp]}],copasEmJogo:{ano:cp.ano,clube:cp.usuario,campeonatos:[cp],indice:0}};return c;}
@@ -13,7 +13,10 @@ async function abrir(page,c){await page.goto('http://127.0.0.1:4173/A-Joia/');aw
 function disputa(venceu){
  for(let i=0;i<150;i++){
  const cp=criarCampanhaCopa({nome:'Copa do Brasil',tipo:'copa',usuario:'Santos',forcaUsuario:75,clubes:[{nome:'Santos',forca:75},{nome:'Flamengo',forca:75}],ano:2030,formato:'mata',seed:'ARTE-PENAL-'+i});
- const d=decisaoCopa(cp),draw=escolherCopa(cp,d.chave,'controlar');if(!draw.resultado.penaltisPendentes)continue;
+ const ida=decisaoCopa(cp),parcial=escolherCopa(cp,ida.chave,'controlar');
+ if(parcial.resultado.penaltisPendentes)throw Error('Pênaltis não podem ocorrer na ida');
+ const paraVolta=continuarCopa(parcial),volta=decisaoCopa(paraVolta),draw=escolherCopa(paraVolta,volta.chave,'controlar');
+ if(!draw.resultado.penaltisPendentes)continue;
  const dp=decisaoCopa(draw),op=escolhasCopa(draw,dp).opcoes[0];if(escolherCopa(draw,dp.chave,op.id).resultado.venceu===venceu)return draw;
  }throw Error('Sem fixture de disputa');
 }

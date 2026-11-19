@@ -9,12 +9,16 @@ export const METRICAS_TREINADOR=Object.freeze([
  {id:'tecnicoJogos',rotulo:'Mais jogos dirigidos por um treinador',categoria:'Treinador'},
  {id:'tecnicoVitorias',rotulo:'Mais vitórias como treinador',categoria:'Treinador'},
  {id:'tecnicoPontos',rotulo:'Mais pontos conquistados como treinador',categoria:'Treinador'},
- {id:'tecnicoAproveitamento',rotulo:'Melhor aproveitamento como treinador (mín. 20 jogos)',categoria:'Treinador'},
+ {id:'tecnicoAproveitamento',rotulo:'Aproveitamento acumulado como treinador (mín. 20 jogos)',categoria:'Treinador'},
  {id:'tecnicoTemporadas',rotulo:'Mais temporadas comandadas',categoria:'Treinador'},
  {id:'tecnicoVitoriasAno',rotulo:'Mais vitórias em uma temporada como treinador',categoria:'Treinador'},
  {id:'tecnicoPontosAno',rotulo:'Mais pontos em uma temporada como treinador',categoria:'Treinador'},
  {id:'tecnicoTitulos',rotulo:'Mais títulos conquistados como treinador',categoria:'Treinador'},
- {id:'tecnicoTitulosAno',rotulo:'Mais títulos em um ano como treinador',categoria:'Treinador'}
+ {id:'tecnicoTitulosAno',rotulo:'Mais títulos em um ano como treinador',categoria:'Treinador'},
+ {id:'tecnicoAcessos',rotulo:'Acessos de divisão como treinador',categoria:'Treinador'},
+ {id:'tecnicoRebaixamentos',rotulo:'Rebaixamentos como treinador',categoria:'Treinador'},
+ {id:'tecnicoMetas',rotulo:'Metas de temporada cumpridas',categoria:'Treinador'},
+ {id:'tecnicoDemissoes',rotulo:'Demissões registradas como treinador',categoria:'Treinador'}
 ]);
 const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
 const mesmo=(a,b)=>norm(a)===norm(b);
@@ -55,7 +59,7 @@ export function recordesTreinador(c={},tipo='clube',nome=''){
  if(!linhas.length)return [];
  const mapa=new Map(),treinador=c.nome||t.nome||'Você',primeira=linhas[0];
  const base=a=>({ano:a.ano,atleta:treinador,destaque:equipeDe(a)+' · '+(nomeLiga(a)||'temporada'),origem:'save'});
- let jogos=0,vitorias=0,pontos=0,temporadas=0,titulos=0,ultimo=primeira;
+ let jogos=0,vitorias=0,pontos=0,temporadas=0,titulos=0,acessos=0,rebaixamentos=0,metas=0,demissoes=0,ultimo=primeira;
  for(const a of linhas){
   const j=inteiro(a.jogos),v=inteiro(a.vitorias),e=inteiro(a.empates),d=inteiro(a.derrotas);
   const completos=v!==null&&e!==null&&d!==null&&(j===null||v+e+d===j);
@@ -66,10 +70,14 @@ export function recordesTreinador(c={},tipo='clube',nome=''){
    atualizar(mapa,'tecnicoVitoriasAno',v,base(a));
    atualizar(mapa,'tecnicoPontosAno',v*3+e,base(a));
   }
-  const trofeus=listaTitulos(a);
+  const trofeus=[...new Map(listaTitulos(a).filter(Boolean).map(x=>[norm(x),x])).values()];
   const doEscopo=tipo==='competicao'?trofeus.filter(x=>tituloIgual(x,nome)):[...trofeus];
   titulos+=doEscopo.length;
   atualizar(mapa,'tecnicoTitulosAno',doEscopo.length,base(a));
+  if(a.tipoEquipe!=='selecao'&&a.acesso)acessos++;
+  if(a.tipoEquipe!=='selecao'&&a.rebaixado)rebaixamentos++;
+  if(a.cumpriuObjetivo===true)metas++;
+  if(a.demitido===true)demissoes++;
   temporadas++;if(a.ano>ultimo.ano)ultimo=a;
  }
  const fim=base(ultimo);
@@ -78,6 +86,10 @@ export function recordesTreinador(c={},tipo='clube',nome=''){
  atualizar(mapa,'tecnicoPontos',pontos,fim);
  atualizar(mapa,'tecnicoTemporadas',temporadas,fim);
  atualizar(mapa,'tecnicoTitulos',titulos,fim);
+ atualizar(mapa,'tecnicoAcessos',acessos,fim);
+ atualizar(mapa,'tecnicoRebaixamentos',rebaixamentos,fim);
+ atualizar(mapa,'tecnicoMetas',metas,fim);
+ atualizar(mapa,'tecnicoDemissoes',demissoes,fim);
  if(jogos>=20)atualizar(mapa,'tecnicoAproveitamento',Math.round((pontos/(jogos*3))*10000)/100,
   {...fim,unidade:'%',destaque:treinador+' · '+jogos+' jogos encerrados'});
  return METRICAS_TREINADOR.filter(x=>mapa.has(x.id)).map(x=>({

@@ -39,13 +39,20 @@ const aliasCompeticao={
 const chaveCompeticao=nome=>aliasCompeticao[norm(nome)]||norm(nome);
 const tituloIgual=(a,b)=>chaveCompeticao(a)===chaveCompeticao(b);
 const torneioDaTemporada=(a,nome)=>(a.torneios||[]).some(x=>tituloIgual(x?.nome,nome));
+const tituloSelecao=(a,titulo)=>{
+ const torneio=(a.torneios||[]).find(x=>tituloIgual(x?.nome,titulo));
+ return torneio?.selecao||(a.tipoEquipe==='selecao'?equipeDe(a):null);
+};
 const titulosDoEscopo=(a,tipo,nome)=>[...new Map(listaTitulos(a).filter(Boolean)
- .filter(x=>tipo!=='competicao'||tituloIgual(x,nome))
+ .filter(x=>tipo==='competicao'?tituloIgual(x,nome):
+  tipo==='clube'?!tituloSelecao(a,x):
+  tipo==='selecao'?mesmo(tituloSelecao(a,x),nome):true)
  .map(x=>[chaveCompeticao(x),x])).values()];
 function recorte(a,tipo,nome){
  if(tipo==='treinador')return true;
  if(tipo==='clube')return a.tipoEquipe!=='selecao'&&mesmo(equipeDe(a),nome);
- if(tipo==='selecao')return a.tipoEquipe==='selecao'&&mesmo(equipeDe(a),nome);
+ if(tipo==='selecao')return a.tipoEquipe==='selecao'&&mesmo(equipeDe(a),nome)||
+  (a.torneios||[]).some(x=>mesmo(x?.selecao,nome));
  if(tipo==='competicao')return tituloIgual(nomeLiga(a),nome)||
   torneioDaTemporada(a,nome)||titulosDoEscopo(a,tipo,nome).length>0;
  return false;
@@ -77,7 +84,8 @@ export function recordesTreinador(c={},tipo='clube',nome=''){
   const completos=v!==null&&e!==null&&d!==null&&(j===null||v+e+d===j);
   // Numa copa, os totais gerais da temporada pertencem à liga.
   // Somente jogos de liga podem gerar recordes de partidas e pontos da liga.
-  const jogosDoEscopo=tipo!=='competicao'||tituloIgual(nomeLiga(a),nome);
+  const jogosDoEscopo=tipo==='competicao'?tituloIgual(nomeLiga(a),nome):
+   tipo==='selecao'?a.tipoEquipe==='selecao':true;
   // O numero de partidas deve ser congruente com vitórias, empates e derrotas.
   if(completos&&jogosDoEscopo){
    const anoJogos=j??v+e+d;

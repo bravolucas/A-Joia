@@ -207,6 +207,11 @@ identificação da edição, URL da fonte, período coberto e sinalização de
 acervo de ligas, além dos acervos previamente existentes para copas, estaduais
 e torneios de seleções.
 
+Nas fichas de clubes ingleses, os títulos da antiga **Football League First Division**
+são separados das conquistas da **Premier League** a partir de 1992/93.
+Por exemplo, os 14 títulos nacionais do Arsenal são 10 da antiga primeira
+divisão e 4 da Premier League até 2026.
+
 As páginas de competição exibem o acervo documental separado das temporadas
 jogadas na carreira. O ranking histórico de cada liga é calculado **somente
 com as edições documentadas**, sem usar os números estimados por força do clube.

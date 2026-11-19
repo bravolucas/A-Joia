@@ -67,7 +67,7 @@ export function recordesReaisTitulosCompeticao(tipo,nome){
  const registro=HISTORICOS.get(chave(nome));
  if(!registro?.edicoes?.length||!registro.fonte)return [];
  const contagens=new Map(),ordem=[...registro.edicoes].sort((a,b)=>a.ano-b.ano||String(a.edicao||'').localeCompare(String(b.edicao||'')));
- let sequencia=0,ultimaEquipe=null,maxSequencia=null;
+ let sequencia=0,ultimaEquipe=null,ultimoAno=null,maxSequencia=null;
  for(const edicao of ordem){
   const campeoes=edicao.campeoes||[];
   for(const item of campeoes){
@@ -80,9 +80,12 @@ export function recordesReaisTitulosCompeticao(tipo,nome){
   // Empates no título ou duas edições no mesmo ano não são convertidos em
   // uma série artificial. Para séries, uma edição precisa ter um campeão só.
   const campeao=campeoes.length===1?campeoes[0]?.clube:null;
-  if(!campeao){ultimaEquipe=null;sequencia=0;continue;}
-  sequencia=ultimaEquipe===normalizar(campeao)?sequencia+1:1;
-  ultimaEquipe=normalizar(campeao);
+  if(!campeao){ultimaEquipe=null;ultimoAno=edicao.ano;sequencia=0;continue;}
+  // Em fontes documentadas apenas por recorte, nao presumir que anos
+  // ausentes representem edicoes consecutivas.
+  const semLacuna=registro.cobertura==='completa'||ultimoAno!==null&&edicao.ano-ultimoAno===1;
+  sequencia=semLacuna&&ultimaEquipe===normalizar(campeao)?sequencia+1:1;
+  ultimaEquipe=normalizar(campeao);ultimoAno=edicao.ano;
   if(sequencia>=2&&(!maxSequencia||sequencia>maxSequencia.valor))
    maxSequencia={atleta:campeao,valor:sequencia,ano:edicao.ano};
  }

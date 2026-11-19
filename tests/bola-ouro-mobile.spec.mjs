@@ -8,7 +8,16 @@ let servidor;
 test.beforeAll(async()=>{try{if((await fetch('http://127.0.0.1:4177/A-Joia/')).ok)return;}catch{}servidor=spawn('npm',['run','dev','--','--host','127.0.0.1','--port','4177','--strictPort'],{cwd:fileURLToPath(new URL('../',import.meta.url)),env:{...process.env,GITHUB_PAGES:'true'},stdio:'ignore',detached:true});for(let i=0;i<100;i++){try{if((await fetch('http://127.0.0.1:4177/A-Joia/')).ok)return;}catch{}await new Promise(r=>setTimeout(r,150));}throw Error('Prévia da premiação não iniciou');});
 test.afterAll(()=>{if(servidor)try{process.kill(-servidor.pid,'SIGTERM');}catch{}});
 for(const modo of ['rapido','completo'])for(const [width,height] of [[320,568],[844,390]])for(const pos of [1,2,3])test(`Bola de Ouro ${modo} ${pos}º: rolar e sair em ${width}×${height}`,async({page})=>{
- await page.setViewportSize({width,height});await page.emulateMedia({reducedMotion:'reduce'});const erros=[];page.on('pageerror',e=>erros.push(e.message));await page.goto(`http://127.0.0.1:4177/A-Joia/tests/fixtures/premiacao-mobile.html?modo=${modo}&pos=${pos}`);const abrir=page.getByRole('button',{name:'Abrir premiação'});await abrir.click();const d=page.getByRole('dialog');await expect(d).toBeVisible();const corpo=d.locator(modo==='rapido'?'.cb-bola':'.premiacao-corpo');const botao=d.getByRole('button',{name:modo==='rapido'?/Ver resumo da temporada/:'Continuar',exact:modo!=='rapido'});
+ await page.setViewportSize({width,height});await page.emulateMedia({reducedMotion:'reduce'});const erros=[];page.on('pageerror',e=>erros.push(e.message));await page.goto(`http://127.0.0.1:4177/A-Joia/tests/fixtures/premiacao-mobile.html?modo=${modo}&pos=${pos}`);const abrir=page.getByRole('button',{name:'Abrir premiação'});await abrir.click();const d=page.getByRole('dialog');await expect(d).toBeVisible();
+ const cena=d.locator('.cb-bola[data-animacao-bola="cinematografica"]');await expect(cena).toBeVisible();
+ const foto=cena.locator('img.cb-cinema-foto');await expect(foto).toBeVisible();
+ await expect.poll(()=>foto.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
+ await expect(cena.locator('.cb-cinema-informacao strong')).toHaveText(pos+'º LUGAR');
+ await expect(cena.locator('.cb-cinema-confetes i')).toHaveCount(pos===1?22:0);
+ const src=await foto.getAttribute('src');
+ await cena.getByRole('button',{name:'Repetir animação da cerimônia'}).click();
+ await expect(cena.locator('img.cb-cinema-foto')).toHaveAttribute('src',src);
+ const corpo=d.locator(modo==='rapido'?'.cb-bola':'.premiacao-corpo');const botao=d.getByRole('button',{name:modo==='rapido'?/Ver resumo da temporada/:'Continuar',exact:modo!=='rapido'});
  const conferir=async()=>{const b=await botao.boundingBox();expect(b.y).toBeGreaterThanOrEqual(0);expect(b.y+b.height).toBeLessThanOrEqual(height);expect(b.height).toBeGreaterThanOrEqual(44);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);};
  await conferir();expect(await corpo.evaluate(e=>e.scrollHeight>e.clientHeight)).toBe(true);await corpo.evaluate(e=>e.scrollTop=e.scrollHeight);await conferir();await corpo.evaluate(e=>e.scrollTop=0);await conferir();await page.screenshot({path:`test-results/bola-ouro-saida-${modo}-${pos}-${width}.png`});await botao.click();
  if(modo==='rapido'){await expect(d.getByRole('region',{name:'Resumo da temporada'})).toBeVisible();const continuar=d.getByRole('button',{name:/Continuar carreira/});const b=await continuar.boundingBox();expect(b.y+b.height).toBeLessThanOrEqual(height);await continuar.click();}

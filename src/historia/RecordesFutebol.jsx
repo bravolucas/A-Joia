@@ -24,7 +24,7 @@ export default function RecordesFutebol({c,tipo,nome,temporadas=c?.temporadas||[
  const dados=useMemo(()=>consultarRecordesFutebol(c,tipo,nome,temporadas),[c,tipo,nome,temporadas]);
  const itens=dados.recordes.filter(r=>filtro==='Todos'||r.categoria===filtro);
  const eventos=(c?.recordesEventos||[]).filter(e=>e.tipo===tipo&&e.entidade===nome).slice(-12).reverse();
- return <section className="rf-painel" aria-label={'Recordes individuais de '+nome}>
+ return <section className="rf-painel" aria-label={'Recordes de '+nome}>
   <div className="rf-topo"><div><span className="hf-eyebrow">ARQUIVO VIVO / RECORDES</span>
    <h3>Recordes de {nome}</h3></div><span className="rf-periodo">{dados.desde?'Save desde '+dados.desde:'Acervo histórico e save'}</span></div>
   <p className="hf-nota">As marcas reais e as deste universo são mostradas separadamente. Só há comparações onde existem dados verificáveis; partidas e temporadas não registradas não são inventadas.</p>
@@ -35,7 +35,7 @@ export default function RecordesFutebol({c,tipo,nome,temporadas=c?.temporadas||[
     <thead><tr><th scope="col">Recorde</th><th scope="col">Futebol real</th><th scope="col">Neste save</th></tr></thead>
     <tbody>{itens.map(r=><tr key={r.id}><th scope="row"><strong>{r.rotulo}</strong><small>{r.categoria} · {r.status}</small></th>
       <td><Valor registro={r.real} real/></td><td><Valor registro={r.simulado}/></td></tr>)}</tbody>
-   </table></div>:<p className="hf-vazio">{filtro==='Todos'?'Nenhum recorde individual disponível para esta entidade. A tabela será preenchida quando surgirem resultados arquivados.':'Nenhuma marca registrada nesta categoria.'}</p>}
+   </table></div>:<p className="hf-vazio">{filtro==='Todos'?'Nenhum recorde disponível para esta entidade. A tabela será preenchida quando surgirem resultados arquivados.':'Nenhuma marca registrada nesta categoria.'}</p>}
   {!!eventos.length&&<div className="rf-eventos" aria-label="Quebras de recordes desta carreira">
     <h4>Recordes quebrados na carreira</h4>
     <ol>{eventos.map(e=><li key={e.id}>

@@ -1903,7 +1903,7 @@ function fecharTemporadaBase(c0, card0) {
     ligaMult:ligaDe(card.ligaId).mult,jogos:card.jogos,
     defesas:card.defesas,cleanSheets:card.cleanSheets};
   let ranking = rankingBolaDeOuro(c.mundo,meuCard,c.nome,pesoTit);
-  const rivalTemporada = c.rival ? temporadaDoRival(c.rival,card.idade,{ano:card.ano}) : null;
+  const rivalTemporada = c.rival ? temporadaDoRival(c.rival,card.idade,{ano:card.ano,ganhouCopa:card.titulos.some(t=>t.tipo==='copaMundo')}) : null;
   if (rivalTemporada?.linha?.jogos >= 10 &&
       !ranking.some(p=>!p.voce&&p.nome===rivalTemporada.r.nome)) {
     const r = rivalTemporada.r, linha = rivalTemporada.linha;
@@ -1927,7 +1927,7 @@ function fecharTemporadaBase(c0, card0) {
     pos:eu?.pos??999,
     top:ranking.slice(0,3).map(r=>({nome:r.nome,clube:r.clube,voce:r.voce,id:r.id})),
   };
-  c.mundo = registrarPremioCalendario(c.mundo,ranking[0]);
+  c.mundo = registrarPremioCalendario(c.mundo,ranking[0]?{...ranking[0],ano:card.ano}:null);
   if (card.bola.pos === 1) card.titulos.push({tipo:"bolaOuro",nome:"Bola de Ouro"});
   // Bota de Ouro: gols × peso da liga contra o artilheiro do resto da Europa/mundo
   if (c.posicao !== "GOL" && card.jogos >= 10) {

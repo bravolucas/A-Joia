@@ -12,7 +12,7 @@ async function abrir(page,c,extras={}){await page.goto(base);await instalarSave(
 for(const width of[390,1366])test(`troca real de posição mostra prazo, altera o save e retoma em ${width}px`,async({page})=>{
  await page.setViewportSize({width,height:760});await page.emulateMedia({reducedMotion:'reduce'});await abrir(page,jogador());
  await expect(page.getByRole('navigation',{name:'Fases da temporada'})).toContainText('Preparação');
- await page.locator('.jr-painel>details>summary').click();await page.getByRole('button',{name:'Mudar de posição',exact:true}).click();
+ await page.locator('.jr-painel>details>summary').first().click();await page.getByRole('button',{name:'Mudar de posição',exact:true}).click();
  const modal=page.getByRole('dialog',{name:'Mudar de posição de verdade'});await expect(modal).toContainText('temporários');
  await modal.getByRole('button',{name:/ATA → MEI/}).click();await expect(modal).toHaveCount(0);
  const salvo=await lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo));expect(salvo.c.posicao).toBe('MEI');expect(salvo.c.jornada.transicao.restantes).toBe(2);
@@ -23,7 +23,7 @@ for(const width of[390,1366])test(`troca real de posição mostra prazo, altera 
 
 test('preferência e assinatura são opcionais, persistem e não concedem OVR ao clicar',async({page})=>{
  const c=jogador();c.jornada.assinaturas={vertical:{anos:[2037,2038,2039]},decisivo:{anos:[2037,2038,2039]}};
- await abrir(page,c);await page.locator('.jr-painel>details>summary').click();await page.getByRole('button',{name:'Disputar títulos',exact:true}).click();
+ await abrir(page,c);await page.locator('.jr-painel>details>summary').first().click();await page.getByRole('button',{name:'Disputar títulos',exact:true}).click();
  await page.getByRole('button',{name:'Assinatura técnica',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:/Passe que quebra linhas/}).click();
  const salvo=await lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo.c));expect(salvo.jornada.preferencia).toBe('titulos');expect(salvo.jornada.assinaturaAtiva).toBe('vertical');expect(ovrDe(salvo)).toBe(ovrDe(c));
 });
@@ -36,7 +36,7 @@ test('UP comprado continua visível na preparação sem abrir a loja',async({pag
 
 test('álbum usa os três marcos escolhidos e não exige continuar uma decisão',async({page})=>{
  const c=jogador();c.jornada.memorias=[{id:'m1',ano:2026,clube:'Santos',titulo:'Primeiro contrato',texto:'Sua primeira assinatura.'},{id:'m2',ano:2028,clube:'Santos',titulo:'Primeiro título',texto:'Copa do Brasil.'},{id:'m3',ano:2030,clube:'Milan',titulo:'Uma nova casa',texto:'Contrato assinado.'},{id:'m4',ano:2038,clube:'Santos',titulo:'A volta',texto:'Retorno ao clube formador.'}];
- await abrir(page,c);await page.locator('.jr-painel>details>summary').click();await page.getByRole('button',{name:'Meu álbum',exact:true}).click();const modal=page.getByRole('dialog',{name:'Seu álbum de momentos'});
+ await abrir(page,c);await page.locator('.jr-painel>details>summary').first().click();await page.getByRole('button',{name:'Meu álbum',exact:true}).click();const modal=page.getByRole('dialog',{name:'Seu álbum de momentos'});
  await expect(modal.locator('.jr-poster article')).toHaveCount(3);await expect(modal.getByRole('checkbox').last()).toBeDisabled();await modal.getByRole('checkbox').first().uncheck();await modal.getByRole('checkbox').last().check();await expect(modal.locator('.jr-poster')).toContainText('A volta');await expect(modal.locator('.jr-poster')).not.toContainText('Primeiro contrato');const baixou=page.waitForEvent('download');await modal.getByRole('button',{name:'Salvar meus três momentos'}).click();expect((await baixou).suggestedFilename()).toBe('a-joia-meus-momentos.png');
 });
 
@@ -69,7 +69,7 @@ for(const width of[390,1366])test(`reencontro opcional mostra consequência e pe
 
 test('história das duplas mostra rota e memórias registradas com acesso por teclado',async({page})=>{
  const c=jogador();c.jornada.duplas=[{id:'dupla1',nome:'Caio Nunes',clube:'Milan',conexao:3,temporadas:4,reencontros:1,nascimento:2010,rota:[{ano:2034,clube:'Santos'},{ano:2039,clube:'Milan'}]}];c.jornada.memorias=[{id:'dupla:t1',tipo:'dupla',ano:2037,titulo:'Uma taça em parceria',texto:'Você e Caio Nunes dividiram o Brasileirão.'}];
- await abrir(page,c);await page.locator('.jr-painel>details>summary').click();await page.getByRole('button',{name:'História das duplas'}).click();const modal=page.getByRole('dialog',{name:'Quem dividiu o caminho'});await expect(modal).toContainText('2034');await expect(modal).toContainText('2039');await expect(modal).toContainText('Brasileirão');await page.keyboard.press('Escape');await expect(modal).toHaveCount(0);
+ await abrir(page,c);await page.locator('.jr-painel>details>summary').first().click();await page.getByRole('button',{name:'História das duplas'}).click();const modal=page.getByRole('dialog',{name:'Quem dividiu o caminho'});await expect(modal).toContainText('2034');await expect(modal).toContainText('2039');await expect(modal).toContainText('Brasileirão');await page.keyboard.press('Escape');await expect(modal).toHaveCount(0);
 });
 
 for(const [width,height]of[[320,568],[1366,640]])test(`comemoração bem sucedida mantém continuar na tela em ${width}×${height}`,async({page})=>{
@@ -80,5 +80,5 @@ for(const [width,height]of[[320,568],[1366,640]])test(`comemoração bem sucedid
 
 test('história do rival diferencia lances, transferência e prêmio sem presumir resultado antigo',async({page})=>{
  const c=jogador();c.jornada={...c.jornada,rivalMemorias:[{ano:2037,clube:'Porto',confronto:true},{ano:2038,clube:'Porto',confronto:true,acertou:false},{ano:2039,clube:'Santos',transferencia:{de:'Porto',para:'Santos'},premio:5,gols:12,assist:7}]};
- await page.setViewportSize({width:320,height:568});await abrir(page,c);await page.locator('.jr-painel>details>summary').click();const historia=page.getByText('Seu rival tem história',{exact:true}).locator('..');await historia.locator('summary').click();await expect(historia).toContainText('confronto registrado');await expect(historia).toContainText('sua oportunidade escapou');await expect(historia).toContainText('Porto → Santos');await expect(historia).toContainText('5º na Bola de Ouro');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.setViewportSize({width:320,height:568});await abrir(page,c);await page.locator('.jr-painel>details>summary').first().click();const historia=page.getByText('Seu rival tem história',{exact:true}).locator('..');await historia.locator('summary').click();await expect(historia).toContainText('confronto registrado');await expect(historia).toContainText('sua oportunidade escapou');await expect(historia).toContainText('Porto → Santos');await expect(historia).toContainText('5º na Bola de Ouro');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });

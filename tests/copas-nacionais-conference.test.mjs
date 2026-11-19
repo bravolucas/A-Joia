@@ -63,7 +63,7 @@ test('clubes não jogáveis aparecem no ranking e na vitrine com o título exato
   assert.ok(t&&t.anosHistoricos.includes(ano),clube);
   assert.equal(galeriaCompeticao({},copa).historicas[0].campeoes[0].clube===clube,ano===2026&&copa!=='Copa Argentina');
  }
- assert.equal(totalCopaNacionalHistorica('FA Cup','Arsenal'),6);
+ assert.equal(totalCopaNacionalHistorica('FA Cup','Arsenal'),7);
  assert.ok(galeriaClube({},'Galatasaray').tacas.some(t=>t.nome==='Türkiye Kupası'));
  assert.equal(galeriaClube({},'Galatasaray').tacas.filter(t=>t.nome==='Türkiye Kupası').length,1);
 });

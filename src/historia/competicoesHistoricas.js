@@ -36,7 +36,7 @@ export function competicoesDisponiveis(c={},temporadas){
  for(const nome of nomesLigasHistoricas)nomes.add(nome);
  for(const clube of CLUBES)for(const t of acervoInicial(clube.nome).tacas)if(t.nome)nomes.add(nomeComp(t.nome));
  for(const e of campeoesRegistrados(c,temporadas))nomes.add(e.nome);
- return [...nomes].filter(n=>n&&n!=='Títulos continentais').sort((a,b)=>a.localeCompare(b,'pt-BR'));
+ return [...nomes].filter(n=>n&&n!=='Títulos continentais'&&n!=='Outras Ligas Sul-Americanas').sort((a,b)=>a.localeCompare(b,'pt-BR'));
 }
 export function galeriaCompeticao(c={},nome,temporadas){
  nome=nomeComp(nome);const edicoes=campeoesRegistrados(c,temporadas).filter(e=>e.nome===nome),ligaHistorica=HISTORICO_LIGAS[nome]||null,selecao=nacional(nome),libertadores=nome==='Libertadores', sulamericana=nome==='Copa Sul-Americana',champions=nome==='Champions League',europa=nome==='Europa League',conference=nome==='Conference League',copaBrasil=nome==='Copa do Brasil',historicas=libertadores?HISTORICO_LIBERTADORES:sulamericana?HISTORICO_SULAMERICANA:champions?HISTORICO_CHAMPIONS:europa?HISTORICO_EUROPA_LEAGUE:conference?HISTORICO_CONFERENCE:copaBrasil?HISTORICO_COPA_BRASIL:ligaHistorica?edicoesLigasHistoricas(nome):HISTORICO_SELECOES[nome]||edicoesEstaduaisHistoricas(nome),times=new Set([...edicoes.map(e=>e.clube),...historicas.flatMap(e=>e.campeoes.map(t=>t.clube))]);

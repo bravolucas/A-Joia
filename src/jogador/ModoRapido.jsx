@@ -2838,6 +2838,13 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
 
   // proposta: tocar assina direto (contrato que o clube oferece); "negociar" abre a mesa
   const acaoJornada=(tipo,valor)=>{
+    if(tipo==='negociarSondagem'){
+      const contato=(c.sondagensEmpresario||[]).find(s=>s.clube===valor&&s.status==='positivo'&&s.ano<=c.ano&&s.ano>=c.ano-1);
+      if(!contato)throw new Error('Seu empresário ainda não obteve sinal verde desse clube.');
+      const ev=sortearEvento(c,{somente:'propostas'});
+      if(!ev?.opcoes?.some(op=>op.oferta?.clube===valor))throw new Error('O clube demonstrou interesse, mas ainda não formalizou uma proposta nesta janela.');
+      setEstado(st=>({...st,etapa:'evento',evento:ev,resultado:null,auto:false}));return;
+    }
     if(tipo==='retorno'){const ev=sortearEvento(c,{somente:'voltarCasa'});if(!ev)throw new Error('O retorno exige condições esportivas e uma relação preservada com o clube.');setEstado(st=>({...st,evento:ev,resultado:null,auto:false}));return;}
     const fn={posicao:mudarPosicao,veterano:reinventarVeterano,assinatura:ativarAssinatura,preferencia:definirPreferenciaMercado,interesse:sinalizarInteresse,retornos:receberRetornosEmpresario}[tipo];
     if(!fn) return;

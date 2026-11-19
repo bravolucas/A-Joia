@@ -1,0 +1,35 @@
+name: Auditar copas nacionais e taça da Conference
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/dados/copasNacionaisHistoricas.js'
+      - 'src/historia/competicoesHistoricas.js'
+      - 'src/historia/historiaFutebol.js'
+      - 'src/comum/tacas.js'
+      - 'src/comum/arteCompeticoes.js'
+      - 'arte/competicoes/conference-league.svg'
+      - 'tests/copas-nacionais-conference.test.mjs'
+      - '.github/workflows/auditar-copas-nacionais-conference.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/dados/copasNacionaisHistoricas.js'
+      - 'src/comum/arteCompeticoes.js'
+      - 'arte/competicoes/conference-league.svg'
+  workflow_dispatch:
+jobs:
+  copas-e-conference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar dependências
+        run: npm install --no-audit --no-fund
+      - name: Validar campeões e troféus
+        run: node --test tests/copas-nacionais-conference.test.mjs tests/competicoes-historicas.test.mjs tests/historia-futebol.test.mjs
+      - name: Build de produção
+        run: npm run build

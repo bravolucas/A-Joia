@@ -8,10 +8,10 @@ function Valor({registro,real=false}){
  if(!registro)return <span className="rf-sem-dado">Não cadastrado</span>;
  return <div className="rf-valor">
   <strong>{numero(registro.valor)}</strong>
-  {registro.destaque?<small>{registro.destaque}</small>:
-   <small>{!real&&registro.atletaId!=null
+  <small>{!real&&registro.atletaId!=null
     ?<LinkEntidade tipo="jogador" id={String(registro.atletaId)} nome={registro.atleta||'Jogador'}/>
-    :registro.atleta||'Jogador'}{registro.ano!=null?' · '+registro.ano:''}</small>}
+    :registro.atleta||'Registro'}{registro.ano!=null?' · '+registro.ano:''}</small>
+  {registro.destaque&&<small>{registro.destaque}</small>}
   {real&&registro.fonte&&<a href={registro.fonte} target="_blank" rel="noopener noreferrer">Ver fonte · {registro.data||'histórico'}</a>}
  </div>;
 }

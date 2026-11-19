@@ -40,17 +40,18 @@ export function detectarQuebrasRecordesFutebol(antes={},depois={},{
    if(!superouReal&&!igualouReal&&!superouSave)continue;
    const historico=superouReal||igualouReal;
    const tipoMarca=superouReal?'superou':igualouReal?'igualou':'quebrou';
+   const protagonista=novo.atleta||((r.categoria==='Partidas'||r.categoria==='Sequências')?nome:'Um atleta');
    const titulo=historico?
-    (novo.atleta||'Um atleta')+' '+tipoMarca+' recorde histórico de '+r.rotulo.toLowerCase():
+    protagonista+' '+tipoMarca+' recorde histórico de '+r.rotulo.toLowerCase():
     'Novo recorde de '+r.rotulo.toLowerCase()+' em '+nome;
    const anteriorValor=historico?real.valor:velho.valor;
-   const detalhe=(novo.atleta||'Jogador')+': '+novo.valor+' ('+nome+', '+ano+'). '+
+   const detalhe=protagonista+': '+novo.valor+' ('+nome+', '+ano+'). '+
     (historico?'Referência real: '+real.atleta+', '+real.valor+'.':
      'Marca anterior do save: '+(velho.atleta||'atleta')+', '+velho.valor+'.');
    candidatos.push({
     id:[ano,tipo,nome,r.id,novo.atletaId||novo.atleta||'registro'].join('|'),
     ano,tipo,entidade:nome,metrica:r.id,rotulo:r.rotulo,
-    atleta:novo.atleta||null,atletaId:novo.atletaId||null,
+    atleta:novo.atleta||protagonista,atletaId:novo.atletaId||null,
     valor:novo.valor,anterior:anteriorValor,anteriorAtleta:historico?real.atleta:velho.atleta,
     historico,igualou:igualouReal,fonte:historico?real.fonte:null,
     titulo,detalhe,prioridade:prioridade({historico,atletaId:novo.atletaId,metrica:r.id})

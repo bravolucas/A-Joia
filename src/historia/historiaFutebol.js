@@ -74,8 +74,12 @@ export function acervoInicial(nome){
    continentais['Conference League']=conference;
  for(const [nome,quantidade]of Object.entries(continentais))itens.push({nome,tipo:'continental',inicial:quantidade});
  itens.push(...estaduais);
+ // Clubes promovidos ao catálogo jogável não perdem o reconhecimento dos
+ // estaduais históricos: quando são suas únicas taças, mostre-as em primeiro lugar.
+ if(estaduais.some(t=>t.inicial>0)&&!itens.some(t=>t.tipo!=='estadual'&&t.inicial>0))
+  itens.splice(0,itens.length,...estaduais,...itens.filter(t=>t.tipo!=='estadual'));
  for(const t of itens)if(t.tipo!=='estadual')t.historicoConhecido=!!(PALMARES_HISTORICO[nome]||CONTINENTAIS[nome]||totalLibertadoresHistoricas(nome)>0||totalSulAmericanaHistoricas(nome)>0||totalChampionsHistoricas(nome)>0||totalEuropaLeagueHistoricas(nome)>0||totalConferenceHistoricas(nome)>0||totalCopaBrasilHistoricas(nome)>0||PALMARES_HISTORICO[{'Atlético de Madrid':'Atlético Madrid',Leverkusen:'Bayer Leverkusen'}[nome]]);
- return {tacas:itens,conhecido:!!(PALMARES_HISTORICO[nome]||totalLibertadoresHistoricas(nome)>0||totalSulAmericanaHistoricas(nome)>0||totalChampionsHistoricas(nome)>0||totalEuropaLeagueHistoricas(nome)>0||totalConferenceHistoricas(nome)>0||totalCopaBrasilHistoricas(nome)>0||PALMARES_HISTORICO[{"Atlético de Madrid":"Atlético Madrid",Leverkusen:"Bayer Leverkusen"}[nome]])};
+ return {tacas:itens,conhecido:!!(estaduais.some(t=>t.inicial>0)||PALMARES_HISTORICO[nome]||totalLibertadoresHistoricas(nome)>0||totalSulAmericanaHistoricas(nome)>0||totalChampionsHistoricas(nome)>0||totalEuropaLeagueHistoricas(nome)>0||totalConferenceHistoricas(nome)>0||totalCopaBrasilHistoricas(nome)>0||PALMARES_HISTORICO[{"Atlético de Madrid":"Atlético Madrid",Leverkusen:"Bayer Leverkusen"}[nome]])};
 }
 function inserir(mapa,e){if(e?.clube&&e?.nome&&Number.isFinite(e.ano)&&!e.pendente)mapa.set(idEdicao(e.ano,e.nome),{ano:e.ano,nome:nomeCanonico(e.nome),clube:clubeCanonico(e.clube),tipo:e.tipo||tipoTaca(e.nome),...(e.voce?{voce:true}:{})});}
 // No rápido antigo, campeaoLiga era o NOME do vencedor; no completo, é booleano.
@@ -105,7 +109,7 @@ function eventosTemporada(c,a,treinador=false){
  for(const valor of [...(a.titulosConquistados||[]),...(a.titulosLista||[])]){const limpo=nomeCanonico(valor),nome=limpo==='Copa Nacional'?nomes.copa:limpo;if(!/Copa do Mundo|Eurocopa|Copa América|Bola de Ouro|Bota de Ouro/i.test(nome))out.push({ano:a.ano,nome,clube,voce:true});}
  const vencedor=vencedorLigaRegistrado(a,treinador);if(vencedor)out.push({ano:a.ano,nome:a.ligaNome||LIGAS[a.ligaId||a.liga]?.nome||nomes.liga,clube:vencedor,tipo:'liga',voce:clubeCanonico(clube)===vencedor});
  for(const [campo,tipo]of [['copaNacional','copa'],['continental','continental'],['mundial','mundial'],['estadual','estadual']])if(a[campo]?.titulo)out.push({ano:a.ano,nome:a[campo].nome||nomes[tipo]||(tipo==='estadual'?ESTADUAIS[CLUBES.find(cl=>cl.nome===clube)?.estado]:null),clube,tipo,voce:true});
- for(const [liga,t]of Object.entries(a.classificacoesMundo||{})){const campeao=t.classificacao?.[0]?.nome;if(campeao)out.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',clube:campeao,voce:campeao===clube});}
+ for(const [liga,t]of Object.entries(a.classificacoesMundo||{})){const campeao=t.edicaoSerieC?.campeao||t.classificacao?.[0]?.nome;if(campeao)out.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',clube:campeao,voce:campeao===clube});}
  return out;
 }
 export function eventosConhecidos(c,temporadas=c.temporadas||[]){
@@ -151,7 +155,7 @@ export function registrarAnoHistoria(c,a,{modo='rapido'}={}){
  const mapa=new Map(eventosConhecidos(c).map(e=>[idEdicao(e.ano,e.nome),e]));
  const anteriores=[...mapa.values()];
  if(modo==='rapido'){
-  if(!a.classificacoesMundo)a.classificacoesMundo=simularClassificacoesMundoTecnico({clubes:clubesDoMundo(c).filter(x=>!LIGAS[x.liga]?.naoJogavel),ligasMundo:c.tecnico?.ligasMundo||c.ligas,rng:geradorTecnico(`${c.codigo}|${a.ano}|ligas-arquivo`)});
+  if(!a.classificacoesMundo)a.classificacoesMundo=simularClassificacoesMundoTecnico({clubes:clubesDoMundo(c).filter(x=>x.liga==='serieC'||!LIGAS[x.liga]?.naoJogavel),ligasMundo:c.tecnico?.ligasMundo||c.ligas,ano:a.ano,rng:geradorTecnico(`${c.codigo}|${a.ano}|ligas-arquivo`)});
   a.torneiosMundo=[];
   for(const e of simularMundo(c,a))inserir(mapa,e);
  }

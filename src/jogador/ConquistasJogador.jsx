@@ -1,6 +1,6 @@
 import React from 'react';
 import { agruparConquistasTecnico } from '../treinador/conquistasTecnico.js';
-import { TacaCompeticao } from '../comum/trofeus.jsx';
+import MiniaturaConquista from '../comum/MiniaturaConquista.jsx';
 import LinkEntidade from '../historia/LinkEntidade.jsx';
 import './ConquistasJogador.css';
 
@@ -11,7 +11,7 @@ export default function ConquistasJogador({ titulos, renderIcone, premios = fals
   return <ul className="cj-conquistas" aria-label={premios ? 'Prêmios individuais' : 'Conquistas por competição'}>
     {grupos.map(grupo => <li key={grupo.id}>
       <span className="cj-taca" aria-label={`${grupo.quantidade} ${premios ? (grupo.quantidade === 1 ? 'prêmio' : 'prêmios') : (grupo.quantidade === 1 ? 'título' : 'títulos')}`}>
-        {renderIcone ? renderIcone(grupo) : <TacaCompeticao tipo={grupo.tipo} nome={grupo.nome} size={40} />}
+        {renderIcone ? renderIcone(grupo) : <MiniaturaConquista categoria={premios?'premio':'titulo'} nome={grupo.nome} size={40} />}
         <b aria-hidden="true">×{grupo.quantidade}</b>
       </span>
       <span className="cj-info"><strong><LinkEntidade tipo={premios?'premio':'competicao'} nome={grupo.nome}>{grupo.nomeCurto||grupo.nome}</LinkEntidade></strong><span aria-label="Anos das conquistas">{grupo.conquistas.map(c => c.ano || 'Ano não informado').join(' · ')}</span></span>

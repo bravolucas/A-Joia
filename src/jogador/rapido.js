@@ -1,7 +1,8 @@
 import {clonarEstado} from '../simulacao/clonarEstado.js';
 import {estatisticasDasPartidas} from '../simulacao/estatisticasMundo.js';
 import {gravarPersistente,lerPersistente,apagarPersistente} from '../simulacao/armazenamentoMundo.js';
-import {simularClassificacoesMundoTecnico,classificacaoDosJogos} from '../treinador/classificacoesMundoTecnico.js';
+import {simularClassificacoesMundoTecnico,classificacaoDosJogos,atualizarLigasMundoTecnico} from '../treinador/classificacoesMundoTecnico.js';
+import {resolverOuReusarPlayoffsSerieB} from '../simulacao/playoffsSerieB.js';
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
 import {forcasDoMundo,clubesDoMundo,registrarMundoVivo,resumirTabelas} from '../simulacao/mundoVivo.js';
 import {AJUSTE_FORTALEZA,corrigirEquilibrioClubes} from '../dados/equilibrioClubes.js';
@@ -17,7 +18,7 @@ import {prepararCopasJogador} from './copasJogador.js';
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
 import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternacionais.js';
 import {vagaJogador,nomeVaga,calcularVagasRapidas,clubesParaCopas,regiaoDaLiga,idContinental} from '../competicoes/regrasCopasRapidas.js';
-import {participantesEstadual} from '../competicoes/estaduaisRapidos.js';
+import {participantesEstadual,CLUBES_REGIONAIS_EXTRAS} from '../competicoes/estaduaisRapidos.js';
 import {simularCampanhaCopa,adversarioCopaPorFase} from '../treinador/copasEscolha.js';
 import {jogosDoGrupo,tabelaGrupoCopa,empateGrupo} from './gruposCopa.js';
 import {atualizarRecordesUniverso} from './recordesUniverso.js';
@@ -112,7 +113,11 @@ export function sincronizarLigas(c) { LIGAS_CARREIRA = { ...(c?.ligas || {}) }; 
 const comLigaAtual = (x) => ({...x,liga:LIGAS_CARREIRA[x.nome]||x.liga,forca:FORCAS_CARREIRA[x.nome]??x.forca});
 export const clubeDe = (nome) => {
   const x = CLUBES.find((y) => y.nome === nome);
-  return x ? comLigaAtual(x) : { nome, forca: 60, liga: "serieB", cor: "#12A876" };
+  if (x) return comLigaAtual(x);
+  // Saves legados: preserva estado e força dos clubes que deixaram a Série B.
+  const regional = CLUBES_REGIONAIS_EXTRAS.find(clube => clube.nome === nome);
+  return regional ? comLigaAtual({ ...regional, liga: LIGAS_CARREIRA[nome] || 'serieB', cor: '#12A876' })
+    : { nome, forca: 60, liga: "serieB", cor: "#12A876" };
 };
 export const ligaDe = (id) => LIGAS[id] || { nome: "Liga", mult: 0.7 };
 export const ehSegundaDivisao = (ligaId) => !!ligaDe(ligaId).promocao;
@@ -1006,9 +1011,18 @@ const forcaSelecao = (c) => nacDe(c.nac).forcaSelecao;
 function simularLiga(c, clube, ovr, share, extra = 0) {
   const rivais = clubesJogaveis().filter((x) => x.liga === clube.liga);
   const impacto = avaliarClubeNoMundo(c,CLUBES.find(x=>x.nome===clube.nome)||clube,{usuario:{posicao:c.posicao,ovr,forma:c.formaNivel||0},participacao:share}).impactoUsuario + somaTraco(c, "forcaTime") * share + extra;
-  const equipes=clubesDoMundo(c,CLUBES.filter(x=>!ligaDe(c.ligas?.[x.nome]||x.liga).naoJogavel));
+  const equipes=clubesDoMundo(c,CLUBES.filter(x=>{
+    const ligaAtual=c.ligas?.[x.nome]||x.liga;
+    return ligaAtual==='serieC'||!ligaDe(ligaAtual).naoJogavel;
+  }));
   const proprio=avaliarClubeNoMundo(c,CLUBES.find(x=>x.nome===clube.nome)||clube,{usuario:{posicao:c.posicao,ovr,forma:c.formaNivel||0},participacao:share,bonus:somaTraco(c,'forcaTime')*share+extra});
-  const mundo=simularClassificacoesMundoTecnico({clubes:equipes.map(x=>x.nome===clube.nome?{...x,elenco:proprio.forca,ataque:proprio.ataque,defesa:proprio.defesa}:x),rng:rnd});
+  if (!equipes.some(x => x.nome === clube.nome)) {
+    // Compatibilidade: ao retomar carreira antiga, mantém 20 clubes na divisão.
+    const naLiga = equipes.filter(x => x.liga === clube.liga).sort((a,b)=>a.forca-b.forca);
+    if (naLiga.length) equipes.splice(equipes.findIndex(x => x.nome === naLiga[0].nome),1);
+    equipes.push({ ...clube, elenco: proprio.forca, ataque: proprio.ataque, defesa: proprio.defesa });
+  }
+  const mundo=simularClassificacoesMundoTecnico({clubes:equipes.map(x=>x.nome===clube.nome?{...x,elenco:proprio.forca,ataque:proprio.ataque,defesa:proprio.defesa}:x),ano:c.ano,rng:rnd});
   c.classificacoesEmCurso=mundo;
   const tabela=mundo[clube.liga]?.classificacao||[];
   const pos=tabela.findIndex(x=>x.nome===clube.nome)+1;
@@ -1030,12 +1044,42 @@ function ordemDaLiga(ligaId, card) {
 function girarDivisoes(c, card) {
   const ligas = { ...(c.ligas || {}) };
   const subiram = [], cairam = [];
+  const classificacaoB = card.classificacoesMundo?.serieB?.classificacao;
+  const forcasB = Object.fromEntries(clubesDoMundo(c).map(clube => [clube.nome, clube.forca]));
+  const playoffsSerieB = resolverOuReusarPlayoffsSerieB(classificacaoB, forcasB, rnd, card.playoffsSerieB || card.classificacoesMundo?.serieB?.playoffs);
+  if (playoffsSerieB) {
+    card.playoffsSerieB = playoffsSerieB;
+    card.classificacoesMundo.serieB = { ...card.classificacoesMundo.serieB, playoffs: playoffsSerieB };
+    const confrontoUsuario = playoffsSerieB.confrontos.find(chave => [chave.melhorCampanha, chave.adversario].includes(card.clube));
+    if (card.ligaId === 'serieB' && confrontoUsuario) {
+      const venceu = confrontoUsuario.classificado === card.clube;
+      card.destaques.push(`Playoffs da Série B: ${venceu ? 'acesso conquistado' : 'acesso perdido'} contra o ${confrontoUsuario.melhorCampanha === card.clube ? confrontoUsuario.adversario : confrontoUsuario.melhorCampanha} (ida e volta).`);
+    }
+  }
   PIRAMIDE.forEach(({ baixo, cima, vagas }) => {
     const b = ordemDaLiga(baixo, card), a = ordemDaLiga(cima, card);
     if (b.length < vagas || a.length < vagas * 2) return;
-    b.slice(0, vagas).forEach((n) => { ligas[n] = cima; subiram.push(n); });
+    const promovidos = baixo === 'serieB' && cima === 'brasileirao' && playoffsSerieB
+      ? playoffsSerieB.promovidos : b.slice(0, vagas);
+    promovidos.forEach((n) => { ligas[n] = cima; subiram.push(n); });
     a.slice(-vagas).forEach((n) => { ligas[n] = baixo; cairam.push(n); });
   });
+  // Rebaixamentos da Série B e acessos dos quadrangulares da Série C, com
+  // expansão 20 → 24 → 28. As demais divisões já foram tratadas acima.
+  const mudancasBrasil = atualizarLigasMundoTecnico({
+    clubes: clubesDoMundo(c), ligasMundo: ligas,
+    classificacoesMundo: card.classificacoesMundo || {},
+    divisoes: [], ano: c.ano, rng: rnd,
+  });
+  for (const movimento of mudancasBrasil.movimentos) {
+    ligas[movimento.clube] = movimento.para;
+    if (movimento.tipo === 'acesso') subiram.push(movimento.clube);
+    else cairam.push(movimento.clube);
+  }
+  if (mudancasBrasil.movimentos.length) {
+    card.movimentosSerieC = mudancasBrasil.movimentos;
+    card.edicaoSerieC = card.classificacoesMundo?.serieC?.edicaoSerieC;
+  }
   // quem voltou pra liga de origem do cadastro não precisa ficar registrado
   Object.keys(ligas).forEach((n) => { if (CLUBES.find((x) => x.nome === n)?.liga === ligas[n]) delete ligas[n]; });
   c.ligas = ligas;

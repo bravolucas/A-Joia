@@ -20,7 +20,7 @@ export function prepararMundoTemporada(c,card,mundo){
  if(card.calendarioMundoVersao===1)return card;
  const ano=card.ano??anoTemporadaCarreira(c),ligaId=card.ligaId||c.clube.liga,clube=c.clube.nome;
  const ligas=ligasDoCompleto(c),clubes=clubesDoCompleto(c,mundo);
- const classificacoesMundo=simularClassificacoesMundoTecnico({clubes:clubes.filter(cl=>cl.liga!==ligaId&&!LIGAS[cl.liga]?.naoJogavel),ligasMundo:ligas,rng:geradorTecnico(`${c.codigo||c.nome}|${ano}|ligas-completo`)});
+ const classificacoesMundo=simularClassificacoesMundoTecnico({clubes:clubes.filter(cl=>cl.liga!==ligaId&&(cl.liga==='serieC'||!LIGAS[cl.liga]?.naoJogavel)),ligasMundo:ligas,ano,rng:geradorTecnico(`${c.codigo||c.nome}|${ano}|ligas-completo`)});
  if(card.classificacao?.length)classificacoesMundo[ligaId]={liga:ligaId,origem:'partidas-jogador',classificacao:card.classificacao.map(t=>({...t})),jogos:(card.jogosLiga||[]).map(j=>({...j}))};
  const nomes=nomeDosTitulos(ligaId);
  const competicoesPreservadas=[COPAS_NACIONAIS[primeiraLiga(ligaId)],nomes.copa,card.copaNacional?.nome,card.continental?.nome,card.continentalPendente?.nome].filter(Boolean);
@@ -28,7 +28,7 @@ export function prepararMundoTemporada(c,card,mundo){
  simularMundo({...c,mundo,ligas},novo,{preservarTorneios:true});
  const campeoes=new Map();
  const inserir=t=>{if(t.clube&&t.nome)campeoes.set(nomeCanonico(t.nome),{...t,ano,nome:nomeCanonico(t.nome)});};
- for(const [liga,t] of Object.entries(classificacoesMundo))inserir({nome:LIGAS[liga]?.nome||liga,tipo:'liga',liga,clube:t.classificacao[0]?.nome});
+ for(const [liga,t] of Object.entries(classificacoesMundo))inserir({nome:LIGAS[liga]?.nome||liga,tipo:'liga',liga,clube:t.edicaoSerieC?.campeao||t.classificacao[0]?.nome});
  for(const t of [...novo.torneiosMundo,...(novo.torneios||[])])if(t.campeao&&!t.finalPendente)inserir({nome:t.nome,tipo:t.tipo,clube:t.campeao});
  for(const [campo,tipo]of [['copaNacional','copa'],['continental','continental'],['mundial','mundial'],['estadual','estadual']])if(novo[campo]?.titulo)inserir({nome:novo[campo].nome||nomes[tipo]||(tipo==='estadual'?ESTADUAIS[c.clube.estado]:null),tipo,clube});
  if(novo.campeaoLiga===true&&!classificacoesMundo[ligaId])inserir({nome:novo.ligaNome,tipo:'liga',liga:ligaId,clube});

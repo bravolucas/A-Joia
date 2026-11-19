@@ -1,0 +1,145 @@
+# Auditoria — Brasileirão Série A e Série B (regulamento de 2026)
+
+Data da revisão: 18/11/2026. Escopo: quantidade de clubes, tabela, playoffs de acesso e passagem de temporada nos modos do jogo.
+
+## Regulamento aplicado
+
+- Série A: 20 clubes, 38 rodadas, turno e returno. Quatro últimos rebaixados à Série B.
+- Série B: 20 clubes, 38 rodadas, turno e returno.
+- 1º e 2º colocados da Série B: acesso direto.
+- 3º x 6º e 4º x 5º: ida e volta. O 3º e o 4º colocados decidem em casa.
+- Sem prorrogação/pênaltis; empate no placar agregado classifica o clube de melhor campanha.
+- Dois ganhadores dos playoffs completam quatro clubes promovidos à Série A.
+- A classificação final da fase regular continua determinando o campeão da Série B; campeão do playoff não recebe taça da liga.
+
+Referências: CBF (REC Série B 2026 e notícias de fevereiro/março/novembro de 2026).
+
+## Resultados verificados
+
+- Cadastro `src/dados/data.js`: 20 clubes na Série A e 20 na Série B, sem nomes duplicados. A edição 2026 contém Athletic Club, Atlético-GO, Cuiabá e São Bernardo.
+- Calendário `calendarioLigaTecnico` e `simularLigaMundo`: 38 rodadas e 380 confrontos por divisão, cada par de clubes duas vezes com mandos alternados.
+- `src/simulacao/playoffsSerieB.js`: confrontos e critérios oficiais; acessos por vencedores reais, nunca promoção automática do 3º e 4º.
+- `src/treinador/classificacoesMundoTecnico.js`: oito movimentos no conjunto Série A/Série B (quatro acessos, quatro quedas); divisões permanecem com 20 clubes após duas temporadas.
+- `src/jogador/rapido.js`, `src/comum/lib.js` e `src/treinador/tecnico.js`: resultado dos playoffs compartilhado pelos fluxos de carreira.
+- Revisita/retomada: um playoff já registrado e coerente com a classificação **não é sorteado novamente**.
+- O resumo de temporada do Treinador por etapas registra o playoff, acesso, rebaixamento e a divisão do ano seguinte.
+- `src/simulacao/mundoVivo.js`: placares dos playoffs incorporados ao histórico persistente da edição.
+
+Foram executadas **10 verificações isoladas de lógica** contra funções extraídas dos arquivos atuais: 10/10 aprovadas. Foram ainda verificadas idempotência do resultado registrado e recomputação diante de tabela modificada.
+
+## Complemento — desempates e critério oficial dos playoffs
+
+- Art. 12 da Série B 2026: pontos; mais vitórias; saldo de gols; gols pró; confronto direto (apenas quando dois times seguem empatados); cartões vermelhos; cartões amarelos; sorteio.
+- `src/simulacao/desempateBrasileiro.js`: as tabelas calculadas usam vitórias, saldo, gols pró e, quando existem os dois jogos, confronto direto. Consideram cartões apenas quando seus totais estão disponíveis. Nos saves sem cartões, o recurso técnico estável é ordem alfabética, **não sorteio oficial**. A simulação completa de disciplina e do último critério ainda exige evolução do modelo.
+- O Modo Treinador aplica o desempate com as partidas registradas da temporada ao encerrar as rodadas.
+- Art. 13: disputa de playoffs por pontos ganhos nos dois jogos; empate por saldo de gols; persistindo a igualdade, melhor posicionamento na fase regular. `src/simulacao/playoffsSerieB.js` registra `pontosPlayoff`, saldo agregado e o critério aplicado.
+- Verificações isoladas adicionais: 7/7 casos de classificação aprovados e 120 temporadas simuladas, com 240 confrontos de playoff, sem divergências no critério de classificação.
+- A versão pública do GitHub Pages e o resultado de todos os jobs do CI continuam sem confirmação por esta auditoria.
+
+## Compatibilidade com saves anteriores à atualização de 2026
+
+- `src/treinador/compatibilidadeDivisoes.js` reconcilia clubes controlados que saíram da base da Série B 2026, preserva o clube na carreira e não altera o objeto original de entrada.
+- O participante substituído pelo calendário da carreira é mantido no mapa do save sob `fora-piramide`, sem ser confundido com uma Série C simulada. Esse recurso é específico para a migração do treinador e não altera o cadastro inicial de 2026.
+- A passagem de temporada do Treinador usa a mesma composição do calendário para classificação, acesso e rebaixamento. A formação do calendário não remove outro participante quando a vaga já está livre.
+- Foram verificadas quatro temporadas consecutivas para cada um dos quatro clubes legados: Guarani, Amazonas FC, Paysandu e Confiança. Não apareceu divisão com 21 participantes.
+- Teste permanente: `tests/compatibilidade-serie-b-legada.test.mjs`.
+- **Escopo restante:** saves reais exportados do navegador e carreiras antigas do modo Jogador/Completo ainda requerem testes end-to-end; não inferir aprovação de todos os saves a partir dos testes isolados do Treinador.
+
+## Testes permanentes no projeto
+
+- `tests/playoffs-serie-b-2026.test.mjs`
+- `tests/brasileirao-calendario-progressao-2026.test.mjs`
+- `tests/desempate-brasileiro-2026.test.mjs`
+- `tests/compatibilidade-serie-b-legada.test.mjs`
+- `tests/classificacoes-mundo-tecnico.test.mjs`
+- `tests/mundo-completo.test.mjs`
+
+A suíte completa do projeto e o navegador são executados pela workflow `Validar A JOIA` em push para `main`. **Ainda não há confirmação nesta auditoria de que a última execução passou**, nem confirmação de que o GitHub Pages recebeu o último SHA. Não confundir verificações isoladas com aprovação integral do CI.
+
+## Pendências fora do escopo desta correção
+
+1. A Série C está integrada à simulação da pirâmide e ao Modo Treinador, mas continua **não jogável no Modo Rápido**. A Série D mantém somente um banco de candidatos ao acesso, sem torneio integral de 96 clubes. A equivalência completa entre modos e a experiência no navegador ainda exigem testes.
+2. Os quatro clubes antigos passaram nos testes isolados do Modo Treinador. Ainda faltam provas com saves reais do navegador e com os fluxos Jogador/Completo; os nomes continuam referenciáveis no catálogo regional.
+3. Aprovação integral do GitHub Actions e publicação do Pages dependem de verificação dos jobs associados à revisão final.
+
+## Como concluir o aceite
+
+1. Conferir `Actions > Validar A JOIA` na branch `main`, na revisão mais recente, exigindo todos os jobs verdes.
+2. Conferir `Publicar no GitHub Pages` vinculado ao mesmo SHA e validar manualmente o site publicado.
+3. Criar carreiras na Série A e Série B, avançar ao menos duas temporadas e verificar posição, subida/queda, chaves e histórico ao recarregar.
+4. Fazer teste de regressão com save legado que possua um dos quatro clubes substituídos.
+
+
+
+## Série C e integração das divisões nacionais — atualização
+
+A Série C agora está cadastrada com os 20 participantes de 2026, motor exclusivo de
+19 rodadas em 2026, 23 em 2027, e dois grupos de 14 (26 rodadas) a partir de
+2028. Há dois quadrangulares de seis rodadas com quatro acessos à B; a final em
+ida e volta define o campeão da Série C. O campeão é creditado ao vencedor
+da final, não ao líder da fase inicial.
+
+- Acesso/descenso integrado entre A ↔ B ↔ C ↔ D no simulador mundial.
+- A Série C passa de 20 para 24 clubes ao fim de 2026 e para 28 ao fim de
+  2027, permanecendo com 28 em 2028 e anos seguintes.
+- Com o formato de transição, apenas dois clubes descem da C em 2026/2027,
+  e seis a partir de 2028. Seis da D sobem a cada ano.
+- Os seis promovidos reais da Série D de 2026 estão cadastrados
+  (ABC, ASA, Gama, Goiatuba, Nacional-AM e Uberlândia); nos anos seguintes
+  a seleção é simulada a partir de um banco de clubes reais.
+- Modo Rápido e Modo Completo simulam a Série C em segundo plano; o Modo
+  Completo usa a mesma regra de movimentação da pirâmide.
+- A Série D **ainda não possui** sua competição completa de 96 clubes,
+  grupos, mata-matas e playoff de acesso: as seis vagas são resolvidas por
+  candidatos do banco, não por um torneio nacional completo.
+- As competições da Série C não devem utilizar uma falsa Série D de pontos
+  corridos com os poucos clubes armazenados.
+- Mandos corrigidos: 10/9 para metade dos clubes e 9/10 para a outra metade
+  em 2026; 12/11 e 11/12 em 2027; 13/13 por clube a partir de 2028.
+- Verificação isolada: nove temporadas seguidas (2026–2034) mantendo
+  Série A = 20, Série B = 20, Série C = 24/28; a contagem de confrontos
+  da primeira fase foi 190, 276 e 364 respectivamente.
+
+**Regressões adicionadas:** `tests/serie-c-piramide-integracao.test.mjs`
+e `tests/serie-c-mandos-2026-2028.test.mjs`.
+
+**Ainda pendente:** executar e confirmar a suíte integral no CI, confirmar o
+SHA efetivamente publicado, implementar uma Série D integral, validar na interface
+as campanhas do usuário na Série C após múltiplas temporadas e testar salvamentos
+legados end-to-end no navegador.
+
+Fontes: CBF, regulamento de 2026 e comunicado de expansão da Série C;
+ge.globo.com, relação dos seis acessos da Série D conhecidos em setembro de 2026.
+
+
+## Integração da Série C com o treinador — revisão complementar
+
+- `src/simulacao/serieC.js` publica `calendarioSerieCClubes` para manter a
+  distribuição equilibrada de mandos em ambas as simulações.
+- O Modo Treinador registra a **primeira fase efetivamente disputada**, sem
+  sorteá-la novamente. Os quadrangulares, os quatro acessos e a final são
+  simulados após a classificação real: 2026 (20 clubes/19 jogos),
+  2027 (24 clubes/23 jogos) e 2028+ (dois grupos/26 jogos).
+- Quando o treinador está na Série C, o campeão é o ganhador da final;
+  terminar em 1º na primeira fase **não** garante automaticamente a taça.
+  O acesso e a liga da temporada seguinte seguem os classificados dos
+  quadrangulares.
+- `src/treinador/CarreiraTecnico.jsx` exibe grupos, tabelas de seis rodadas,
+  classificados e placares da final no histórico clicável do treinador.
+- Carreiras incompletas não têm a primeira fase substituída por placares
+  independentes. Dados de uma Série C com participantes insuficientes recebem
+  `origem: serie-c-pendente`, sem fabricar calendário em pontos corridos.
+- Clubes registrados apenas como Série D não aparecem como propostas de
+  trabalho enquanto esta divisão não é jogável; clubes promovidos à Série C
+  voltam a ficar elegíveis pelo mapa de ligas da carreira.
+- Testes permanentes acrescentados:
+  `tests/serie-c-treinador-mandos.test.mjs`,
+  `tests/serie-c-treinador-fase-real.test.mjs`,
+  `tests/serie-c-treinador-carreira.test.mjs` e
+  `tests/treinador-convites-serie-d-2026.test.mjs`.
+- Verificações isoladas de lógica aprovadas para primeira fase preservada,
+  grupos, acesso, mandos 2026/27/28, e **nove temporadas sucessivas**
+  (2026 a 2034) com Série A/B em 20 e Série C passando para 24/28.
+
+**Ressalva:** os testes isolados não confirmam aprovação do CI ou deploy
+do último commit; a validação de interface e de saves reais permanece aberta.

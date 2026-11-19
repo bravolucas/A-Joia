@@ -1,4 +1,3 @@
-import GestaoElenco from './GestaoElenco.jsx';
 import {MenuCentroTreinador,CabecalhoCentro,ConteudoCentro} from './CentroTreinador.jsx';
 import {anoPainelTecnico} from './painelTecnico.js';
 import {exigenciaClubeTecnico} from './exigenciasTecnico.js';
@@ -174,6 +173,36 @@ function LinhaTemporada({ a, idade, ativa, aberta, onClick }) {
     {aberta && <div className="ct-season-details">
       <div className="ct-detail-title"><strong><LinkEntidade tipo="competicao" nome={competicaoTemporadaTecnico(a)}/></strong><span><LinkEntidade tipo={a.tipoEquipe==='selecao'?'selecao':'clube'} nome={a.clube}/> · {a.ano}</span></div>
       <p>{a.formato}</p><p>{a.vitorias}V · {a.empates}E · {a.derrotas}D · {a.pontos} pontos</p>
+      {a.liga === 'serieB' && a.playoffsSerieB && <details className="ct-league-details">
+        <summary>Playoffs de acesso · Série B 2026</summary>
+        <p>1º e 2º acessam diretamente. 3º × 6º e 4º × 5º disputam ida e volta.</p>
+        {a.playoffsSerieB.confrontos.map(confronto => <div key={confronto.chave} className="mt-2">
+          <strong><LinkEntidade tipo="clube" nome={confronto.melhorCampanha}/> × <LinkEntidade tipo="clube" nome={confronto.adversario}/></strong>
+          {confronto.jogos.map(jogo => <p key={jogo.fase}>{jogo.fase === 'ida' ? 'Ida' : 'Volta'}: {jogo.casa} {jogo.golsCasa} × {jogo.golsFora} {jogo.fora}</p>)}
+          <p>Classificado: <LinkEntidade tipo="clube" nome={confronto.classificado}/>{confronto.criterio === 'melhor-campanha' ? ' (vantagem da melhor campanha)' : ''}</p>
+        </div>)}
+      </details>}
+      {a.liga === 'serieC' && a.classificacoesMundo?.serieC?.edicaoSerieC && <details className="ct-league-details">
+        <summary>Série C · quadrangulares, acessos e final</summary>
+        <p>Acesso à Série B: dois primeiros de cada quadrangular.</p>
+        {a.classificacoesMundo.serieC.edicaoSerieC.quadrangulares.map(grupo => <div key={grupo.nome} className="mt-2">
+          <strong>Quadrangular {grupo.nome}</strong>
+          <div className="ct-standings">
+            {grupo.classificacao.map((linha, i) => <div key={linha.nome} className={linha.nome === a.clube ? 'ct-positive' : ''}>
+              <span>{i + 1}º</span>
+              <strong><LinkEntidade tipo="clube" nome={linha.nome}/></strong>
+              <span>{linha.vitorias}V</span>
+              <span>{linha.pontos} pts {i < 2 ? '· Acesso' : ''}</span>
+            </div>)}
+          </div>
+        </div>)}
+        <p>Promovidos: {a.classificacoesMundo.serieC.edicaoSerieC.promovidos.map((nome, i) =>
+          <span key={nome}>{i ? ' · ' : ''}<LinkEntidade tipo="clube" nome={nome}/></span>)}</p>
+        <strong>Final em ida e volta</strong>
+        {a.classificacoesMundo.serieC.edicaoSerieC.final.jogos.map(jogo =>
+          <p key={jogo.fase}>{jogo.fase === 'ida' ? 'Ida' : 'Volta'}: <LinkEntidade tipo="clube" nome={jogo.casa}/> {jogo.golsCasa} × {jogo.golsFora} <LinkEntidade tipo="clube" nome={jogo.fora}/></p>)}
+        <p>Campeão: <LinkEntidade tipo="clube" nome={a.classificacoesMundo.serieC.edicaoSerieC.campeao}/></p>
+      </details>}
       {a.avaliacaoDiretoria&&<p className={a.avaliacaoDiretoria.pendente?'ct-warning':''}>{a.avaliacaoDiretoria.motivo}</p>}
       {a.pediuDemissao?<p>Saída por pedido de demissão. A campanha ficou interrompida.</p>:<p>Meta: {a.objetivo} · <span className={a.cumpriuObjetivo ? 'ct-positive' : 'ct-warning'}>{a.avaliacaoDiretoria?.pendente?'em avaliação':a.cumpriuObjetivo ? 'atingida' : 'não atingida'}</span></p>}
       {a.confrontos?.filter(j => j.intervencao).map(j => <p key={`intervencao-${j.rodada}`}>Jogo importante: {j.nome} · {j.golsPro} × {j.golsContra} · {INTERVENCOES_TECNICO.find(op => op.id === j.intervencao)?.nome}</p>)}
@@ -205,7 +234,6 @@ export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, on
   const primeira = !temporadas.length && !t.clubeInicialEscolhido && !!t.opcoesInicio?.length;
   const semClube = t.demitido || t.desempregado;
   const encerrada = carreiraTecnicoEncerrada(t,c.idade);
-  const [elencoAberto,setElencoAberto]=useState(false);
   const [abaCentro,setAbaCentro]=useState('geral'),[campanhaAberta,setCampanhaAberta]=useState(null);
   const [aposentadoriaAberta,setAposentadoriaAberta]=useState(false);
   const [demissaoAberta,setDemissaoAberta]=useState(false);
@@ -304,7 +332,7 @@ export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, on
   const clubeAtual = primeira || semClube ? 'Sem clube' : t.clube;
 
   const podeNegociarElenco=!!(onAbrirElenco&&!primeira&&!semClube&&!encerrada&&t.tipoEquipe!=='selecao'&&((t.gestao?.cadastroUnificado&&t.gestao.clube===t.clube)||(t.fase==='pretemporada'&&!t.copasEmJogo&&!t.andamento?.jogos&&!t.andamento?.rodadas&&!t.temporadaPausada)));
-  const abrirElenco=()=>{if(podeNegociarElenco){setElencoAberto(true);onAbrirElenco();}};
+  const abrirElenco=()=>{if(!podeNegociarElenco)return;onAbrirElenco();const jaNoElenco=abaCentro==='elenco';setAbaCentro('elenco');requestAnimationFrame(()=>{const alvo=(jaNoElenco&&document.querySelector('.ct-manager .ge-integrada'))||document.querySelector('.ct-manager .ctm-page-heading');alvo?.scrollIntoView({behavior:'instant',block:'start'});});};
   const mudarAbaCentro=aba=>{setAbaCentro(aba);requestAnimationFrame(()=>document.querySelector('.ct-manager .ctm-page-heading')?.scrollIntoView({behavior:'instant',block:'start'}));};
   const irParaDecisao=()=>{if(t.copasEmJogo){setCopasAbertas(true);return;}setAbaCentro('geral');requestAnimationFrame(()=>document.querySelector('.ct-manager .ct-actions')?.scrollIntoView({behavior:'instant',block:'center'}));};
   return <div className="ct ct-manager" aria-label="Carreira de treinador">
@@ -324,7 +352,6 @@ export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, on
     {(eventoAtual?.tipo === 'rebaixado' || eventoAtual?.tipo === 'acesso') && <PopUpDivisao temporada={ultima} movimento={eventoAtual.movimento} tipo={eventoAtual.tipo} onFechar={fecharEvento} />}
     {eventoAtual?.tipo === 'demissao' && <PopUpDemissao temporada={ultima} t={t} onFechar={fecharEvento} />}
     {vitrineAberta && <JanelaTreinador titulo="Conquistas como treinador" onFechar={() => setVitrineAberta(false)} classe="ct-trophy-modal"><VitrineConquistas grupos={gruposConquistas} total={titulos.length} selecionada={conquistaSelecionada} onSelecionar={setConquistaSelecionada}/></JanelaTreinador>}
-    {elencoAberto&&<JanelaTreinador classe="ct-elenco-modal" titulo="Elenco e contratos" onFechar={()=>setElencoAberto(false)}><GestaoElenco c={c} onNegociar={onNegociarElenco}/></JanelaTreinador>}
     {decisaoAberta && cartaRapida && <JanelaTreinador titulo="Decisão de pré-temporada" onFechar={() => setDecisaoAberta(false)} classe="ct-quick-modal"><div className="ct-quick-decision"><div className="ct-quick-heading"><span>ESCOLHA {cartaRapida.indice} DE {cartaRapida.total}</span><span>Verba: {formatarVerbaRapida(cartaRapida.verba)}</span></div><h3>{cartaRapida.titulo}</h3><p>{cartaRapida.texto}</p><p className="ct-quick-baseline">Força do time: {Math.round(forcaClubeTecnico(t))} · Moral: {Math.round(t.moral??50)}{bonusForcaLoja(t)>0?` · Inclui +${bonusForcaLoja(t)} da loja`:""}</p><div className="ct-decisions">{cartaRapida.opcoes.map(op=><button key={op.id} disabled={simulando||op.custo>cartaRapida.verba} onClick={()=>executar(()=>onEscolhaRapida?.(cartaRapida.chave,op.id))}><strong>{op.nome}</strong><span>{op.descricao}</span>{op.custo>0&&<small>Investimento: {formatarVerbaRapida(op.custo)}{op.custo>cartaRapida.verba?' · Sem verba':''}</small>}<b>{cartaRapida.indice<cartaRapida.total?'Escolher e continuar →':'Escolher e simular →'}</b></button>)}</div><p className="ct-quick-footnote">{cartaRapida.indice<cartaRapida.total?'Só mais uma escolha antes de jogar.':'Após a escolha, a temporada é simulada automaticamente.'}</p></div></JanelaTreinador>}
 
     {campanhaAberta&&<JanelaTreinador titulo={`Campanha · ${campanhaAberta.nome}`} onFechar={()=>setCampanhaAberta(null)} classe="ctm-campaign-modal"><div className="ctm-campaign-content"><CampanhasTemporada torneios={[campanhaAberta]} abertas/></div></JanelaTreinador>}
@@ -368,7 +395,7 @@ export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, on
 
       <TrajetoriaCentro temporadas={temporadas} idadeInicio={idadeInicio} aberta={aberta} setAberta={setAberta} encerrada={encerrada} atualRef={atualRef} idade={idade} simulando={simulando} primeira={primeira} faseResultado={faseResultado} t={t} historico={historico}/>
     </div>}
-    {abaCentro!=='geral'&&<ConteudoCentro key={abaCentro} c={c} aba={abaCentro} historico={historico} titulos={titulos} onVoltar={irParaDecisao} onRetomar={()=>setCopasAbertas(true)} onElenco={abrirElenco} podeNegociar={podeNegociarElenco} onCampanha={setCampanhaAberta} onHistorico={()=>mudarAbaCentro('carreira')} onConquistas={()=>abrirConquistas(null)}/>}
+    {abaCentro!=='geral'&&<ConteudoCentro key={abaCentro} c={c} aba={abaCentro} historico={historico} titulos={titulos} onVoltar={irParaDecisao} onRetomar={()=>setCopasAbertas(true)} onElenco={abrirElenco} podeNegociar={podeNegociarElenco} onNegociarElenco={onNegociarElenco} onCampanha={setCampanhaAberta} onHistorico={()=>mudarAbaCentro('carreira')} onConquistas={()=>abrirConquistas(null)}/>}
     {abaCentro==='carreira'&&<TrajetoriaCentro temporadas={temporadas} idadeInicio={idadeInicio} aberta={aberta} setAberta={setAberta} encerrada={encerrada} atualRef={atualRef} idade={idade} simulando={simulando} primeira={primeira} faseResultado={faseResultado} t={t} historico={historico}/>}
       </div>
     </div>

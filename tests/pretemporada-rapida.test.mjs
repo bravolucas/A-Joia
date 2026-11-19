@@ -48,8 +48,8 @@ test('venda, rival e esquema têm efeitos reais e cartas não repetem as quatro 
  assert.ok(planoPretemporadaRapida({...c.tecnico,historicoRapido:recentes},2).cartas.every(id=>!recentes.includes(id)));
 });
 test('convites respeitam o patamar local e explicam o interesse',()=>{
- const atual=CLUBES_CONVITES_TECNICO.find(c=>c.nome==='Confiança');
- const t={clube:'Confiança',pais:'Brasil',liga:'serieB',elenco:atual.elenco,reputacao:60,temporadas:[{clube:'Confiança',liga:'serieB',posicao:12,cumpriuObjetivo:false}]};
+ const atual=CLUBES_CONVITES_TECNICO.find(c=>c.nome==='São Bernardo');
+ const t={clube:'São Bernardo',pais:'Brasil',liga:'serieB',elenco:atual.elenco,reputacao:60,temporadas:[{clube:'São Bernardo',liga:'serieB',posicao:12,cumpriuObjetivo:false}]};
  const propostas=gerarPropostasTecnico(t,()=>0);
  assert.ok(propostas.length>0);assert.ok(propostas.every(p=>p.pais==='Brasil'&&p.elenco<=atual.elenco+6&&p.motivo));
  assert.ok(!propostas.some(p=>['Real Madrid','Paris Saint-Germain','Manchester City'].includes(p.nome)));

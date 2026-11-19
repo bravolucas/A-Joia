@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="210" viewBox="0 0 160 210" role="img" aria-labelledby="t d">
+<title id="t">Atlético-GO</title><desc id="d">Escudo vetorial simplificado em vermelho, preto e branco para identificação no jogo.</desc>
+<path d="M80 8 149 28v91c0 43-28 67-69 85-41-18-69-42-69-85V28Z" fill="#141414" stroke="#141414" stroke-width="6"/>
+<path d="M80 17 140 35v83c0 36-24 59-60 75-36-16-60-39-60-75V35Z" fill="#e7e7e7"/>
+<path d="M80 28 131 43v76c0 25-15 46-51 64-36-18-51-39-51-64V43Z" fill="#cf172e"/>
+<path d="M37 84h86v24H37z" fill="#111"/><path d="M39 114h82v15H39z" fill="#fff"/>
+<text x="80" y="78" fill="white" text-anchor="middle" font-size="33" font-family="Arial,sans-serif" font-weight="900" letter-spacing="-2">ACG</text>
+<path d="M80 128v52" stroke="#111" stroke-width="15"/>
+</svg>

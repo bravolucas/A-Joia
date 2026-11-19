@@ -18,7 +18,7 @@ const PESO_ASSIST={MEI:.3,PE:.24,PD:.24,ME:.22,MD:.22,MC:.2,SA:.2,ATA:.14,LD:.12
  */
 export function lancesJogadorCopa(card,campanha,chave){
  const r=campanha?.resultado;if(!r?.jogo||r.penaltisPendentes)return null;
- const rng=geradorTecnico(`${card.ano}|${chave}|lances-jogador`),j=r.jogo,doTime=j.casa===campanha.usuario?j.golsCasa:j.golsFora;
+ const rng=geradorTecnico(`${card.ano}|${chave}|lances-jogador`),j=r.jogoExibido||r.jogo,doTime=j.casa===campanha.usuario?j.golsCasa:j.golsFora;
  const usados=Object.values(card.copaLances||{}).reduce((s,x)=>({gols:s.gols+x.gols,assist:s.assist+x.assist}),{gols:0,assist:0});
  const share=Number.isFinite(card.share)?card.share:.7;
  if(rng()>Math.min(.98,share+.08))return {jogou:false,minutos:0,eventos:[]};

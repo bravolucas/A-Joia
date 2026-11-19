@@ -4162,7 +4162,8 @@ export function sinalizarInteresse(c0,clube){
  if(!alvo)throw new Error('Clube não encontrado entre as ligas jogáveis.');
  if(alvo.nome===c0.clubeNome)throw new Error('Você já tem contrato com esse clube.');
  if((c0.sondagensEmpresario||[]).some(s=>s.ano===c0.ano&&s.clube===clube))throw new Error('Seu empresário já procurou esse clube nesta temporada.');
- const c=clone(c0);
+ // Copiar somente os campos alterados evita clonar milhares de atletas do mundo.
+ const c={...c0,torcida:{...(c0.torcida||{})}};
  const sondagem={ano:c.ano,clube,liga:alvo.liga, status:'aguardando',texto:'Seu empresário entrou em contato e aguarda uma resposta.'};
  c.sondagensEmpresario=[...(c.sondagensEmpresario||[]),sondagem].slice(-80);
  // A primeira sondagem gera repercussão discreta, sem punir cada busca adicional.
@@ -4173,7 +4174,8 @@ export function sinalizarInteresse(c0,clube){
 export function receberRetornosEmpresario(c0){
  const pendentes=(c0.sondagensEmpresario||[]).filter(s=>s.ano<=c0.ano&&s.status==='aguardando');
  if(!pendentes.length)throw new Error('Nenhuma sondagem aguardando retorno nesta temporada.');
- const c=clone(c0),clubes=catalogoMercadoJogador(c);
+ // A resolução é imutável, mas só a lista de sondagens será substituída.
+ const c={...c0},clubes=catalogoMercadoJogador(c);
  c.sondagensEmpresario=(c.sondagensEmpresario||[]).map(s=>{
   if(s.ano>c.ano||s.status!=='aguardando')return s;
   const alvo=clubes.find(x=>x.nome===s.clube);

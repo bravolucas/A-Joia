@@ -20,12 +20,23 @@ export async function prepararArmazenamento(){
   }
  }
 }
-export function lerPersistente(chave,storage=globalThis.localStorage){
- const txt=storage?.getItem(chave);if(!txt)return null;
+function resolverPersistente(chave,storage){
+ const txt=storage?.getItem(chave);if(!txt)return {valor:null,arquivo:false};
  const cabecalho=lerCarreira(txt);
- if(!cabecalho?.arquivoMundo)return cabecalho;
+ if(!cabecalho?.arquivoMundo)return {valor:cabecalho,arquivo:false};
  const salvo=cache.get(chave);if(!salvo)throw new Error('Não foi possível abrir o arquivo desta carreira. Recarregue o jogo para tentar novamente.');
- return structuredClone(salvo);
+ return {valor:salvo,arquivo:true};
+}
+export function lerPersistente(chave,storage=globalThis.localStorage){
+ const {valor,arquivo}=resolverPersistente(chave,storage);
+ return arquivo?structuredClone(valor):valor;
+}
+/** Consulta SOMENTE LEITURA do snapshot do IndexedDB.
+ * Evita clonar milhares de atletas para extrair as conquistas do museu.
+ * Nunca passar esse objeto para código que altere o save ou dados internos.
+ */
+export function consultarPersistente(chave,storage=globalThis.localStorage){
+ return resolverPersistente(chave,storage).valor;
 }
 function restaurarCacheSeUltima(chave,snapshot){
  if(cache.get(chave)!==snapshot)return;

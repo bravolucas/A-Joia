@@ -14,3 +14,16 @@ test('nova temporada guarda campeão da liga separado do indicador de título do
 test('decisão de acesso não transforma o quarto colocado em campeão',()=>{const c={clube:'Ponte Preta',tabelaLiga:['Sport','Goiás','Ceará','América-MG','Ponte Preta'],posLiga:5,campeaoLiga:false,vencedorLiga:'Sport',titulos:[],destaques:[],momentos:[],pendente:{tipo:'acesso',fronteira:4,ladoCerto:false,rivalTropeca:true,mini:'penalti',ligaNome:liga,segunda:true}};const r=aplicarMomento(c,true);assert.equal(r.posLiga,4);assert.equal(r.campeaoLiga,false);assert.equal(r.vencedorLiga,'Sport');assert.equal(r.titulos.length,0);});
 test('museu do completo não exibe troféu pessoal só porque há nome de campeão no registro',()=>{const c=cenario();assert.equal(construirMuseuPessoal(c,{modo:'completo'}).totais.tacas,0);c.temporadas.push({ano:2027,clube:'Atlético Madrid',ligaId:'espanha',campeaoLiga:true});assert.equal(construirMuseuPessoal(c,{modo:'completo'}).totais.tacas,1);});
 test('carregar e salvar carreira antiga persiste a correção sem apagar o progresso',()=>{const itens=new Map(),anterior=globalThis.localStorage;globalThis.localStorage={getItem:k=>itens.get(k)||null,setItem:(k,v)=>itens.set(k,v)};try{const c=criarJogador({nome:'Ponte Antiga',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:9,codigo:'PONTE-SAVE'});Object.assign(c,cenario(),{attrs:c.attrs,clubeNome:'Ponte Preta'});itens.set('ajoia_rapido_v1',JSON.stringify({v:1,etapa:'evento',c}));const s=carregarRapido();assert.ok(s);assert.equal(s.c.temporadas[0].posLiga,6);assert.equal(total(s.c),0);assert.equal(salvarRapido(s),true);const r=JSON.parse(itens.get('ajoia_rapido_v1'));assert.equal(r.c.temporadas[1].campeaoLiga,false);assert.equal(r.c.temporadas[1].posLiga,5);assert.equal(total(r.c),0);}finally{if(anterior===undefined)delete globalThis.localStorage;else globalThis.localStorage=anterior;}});
+
+test('save com indicador booleano e título legado inválido é corrigido sem apagar outra taça',()=>{
+ const c=cenario();
+ c.temporadas=c.temporadas.map(t=>({...t,vencedorLiga:t.campeaoLiga,campeaoLiga:false}));
+ c.historiaFutebol.titulos.push({ano:2025,nome:'Campeonato Paulista',clube:'Ponte Preta',tipo:'estadual',voce:true});
+ const antes=structuredClone(c),ajustado=corrigirCampeoesLiga(c);
+ assert.deepEqual(c,antes);
+ assert.notEqual(ajustado,c);
+ assert.ok(!ajustado.historiaFutebol.titulos.some(x=>x.nome===liga&&x.clube==='Ponte Preta'));
+ assert.ok(ajustado.historiaFutebol.titulos.some(x=>x.nome==='Campeonato Paulista'));
+ assert.equal(total(ajustado),0);
+ assert.equal(corrigirCampeoesLiga(ajustado),ajustado);
+});

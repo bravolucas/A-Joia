@@ -40,13 +40,52 @@ test('Copa do Brasil: dois jogos a partir de 32 clubes, inclusive na final; FA C
  assert.ok(fa.fases.every(f=>f.jogos.every(j=>!j.partidas)));
 });
 
-test('empate no agregado do usuário vai para os pênaltis com os dois jogos preservados',()=>{
+test('ida e volta são duas decisões separadas, com continuidade no save e mandos invertidos',()=>{
+ let c=criarCampanhaCopa({nome:'Libertadores',tipo:'continental',usuario:'Flamengo',forcaUsuario:86,clubes:clubes(['brasileirao','argentina','sulamericano']),ano:2030,formato:'mata',seed:'decisoes-independentes'});
+ const ida=decisaoCopa(c);assert.equal(ida.perna,'ida');assert.ok(ida.chave.includes('ida'));
+ c=escolherCopa(c,ida.chave,'controlar');
+ assert.equal(c.resultado.jogoIda,true);assert.ok(c.pernaIda);assert.equal(c.jogosUsuario.length,0,'não encerra a chave depois da ida');
+ assert.equal(c.resultado.jogo.partidas,undefined,'não simula uma volta escondida');
+ assert.equal(decisaoCopa(c),null,'mostra primeiro o resultado da ida');
+ const golIda=JSON.parse(JSON.stringify(c.resultado.jogo)),salvo=JSON.parse(JSON.stringify(c));
+ c=await_continuar.continuarCopa(salvo);
+ const volta=decisaoCopa(c);assert.equal(volta.perna,'volta');assert.notEqual(volta.chave,ida.chave);
+ assert.deepEqual({...volta.idaAnterior,etapa:undefined,escolha:undefined}, {...golIda,etapa:undefined,escolha:undefined});
+ assert.equal(volta.casa,!ida.casa,'mando de campo invertido');
+ assert.equal(c.jogosUsuario.length,0);
+ c=escolherCopa(c,volta.chave,'pressionar');
+ assert.equal(c.resultado.jogo.partidas.length,2);
+ assert.equal(c.resultado.jogoExibido.etapa,'Volta');
+ assert.deepEqual(c.resultado.jogo.partidas[0].casa,c.resultado.jogo.partidas[1].fora);
+ assert.deepEqual(c.resultado.jogo.partidas[0].fora,c.resultado.jogo.partidas[1].casa);
+ const [p1,p2]=c.resultado.jogo.partidas;
+ const gols=(p,time)=>p.casa===time?p.golsCasa:p.golsFora;
+ assert.equal(c.resultado.jogo.golsCasa,gols(p1,c.usuario)+gols(p2,c.usuario));
+ assert.equal(c.resultado.jogo.golsFora,gols(p1,volta.adversario)+gols(p2,volta.adversario));
+ if(c.resultado.penaltisPendentes){
+  assert.equal(c.jogosUsuario.length,0);
+  const d=decisaoCopa(c);assert.equal(d.penaltis,true);c=escolherCopa(c,d.chave,'canto');
+ }
+ assert.equal(c.jogosUsuario.length,1,'apenas após a volta a chave é encerrada');
+ assert.equal(c.pernaIda,undefined,'estado transitório removido');
+ assert.equal(c.jogosUsuario[0].partidas.length,2);
+});
+
+test('empate no agregado do usuário vai para os pênaltis apenas depois da volta, preservando as partidas',()=>{
  let achou=false;
  for(let i=0;i<60&&!achou;i++){
   let c=criarCampanhaCopa({nome:'Champions League',tipo:'continental',usuario:'Real Madrid',forcaUsuario:80,clubes:clubes(['espanha','inglaterra','italia','alemanha','franca']),ano:2030,formato:'mata',seed:'agregado-'+i});
-  for(let k=0;k<6&&c.fase!=='fim'&&!achou;k++){const d=decisaoCopa(c);if(!d)break;assert.ok(idaVoltaNaFase(c)||c.tamanho===2);c=escolherCopa(c,d.chave,'controlar');
-   if(c.resultado?.penaltisPendentes){achou=true;assert.equal(c.resultado.jogo.partidas.length,2);const p=decisaoCopa(c);c=escolherCopa(c,p.chave,'canto');assert.equal(c.resultado.jogo.partidas.length,2);assert.equal(c.resultado.jogo.penaltis,true);}
-   else if(c.resultado){const {continuarCopa}=await_continuar;c=continuarCopa(c);}}
+  for(let k=0;k<18&&c.fase!=='fim'&&!achou;k++){
+   const d=decisaoCopa(c);
+   if(!d){c=await_continuar.continuarCopa(c);continue;}
+   c=escolherCopa(c,d.chave,d.penaltis?'canto':'controlar');
+   if(d.perna==='ida')assert.equal(c.resultado.penaltisPendentes,false,'ida empatada não abre pênaltis');
+   if(c.resultado?.penaltisPendentes){
+    achou=true;assert.equal(d.perna,'volta');assert.equal(c.resultado.jogo.partidas.length,2);
+    const p=decisaoCopa(c);c=escolherCopa(c,p.chave,'canto');
+    assert.equal(c.resultado.jogo.partidas.length,2);assert.equal(c.resultado.jogo.penaltis,true);
+   }else if(c.resultado)c=await_continuar.continuarCopa(c);
+  }
  }
  assert.ok(achou,'algum confronto empatou no agregado');
 });

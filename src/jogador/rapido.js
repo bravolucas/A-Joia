@@ -1939,7 +1939,7 @@ function fecharTemporadaBase(c0, card0) {
   const eu = ranking.find(r=>r.voce);
   card.bola = {
     pos:eu?.pos??999,
-    top:ranking.slice(0,3).map(r=>({nome:r.nome,clube:r.clube,voce:r.voce,id:r.id})),
+    top:ranking.slice(0,3).map(r=>({nome:r.nome,clube:r.clube,voce:r.voce,...(r.id!=null?{id:r.id}:{})})),
   };
   c.mundo = registrarPremioCalendario(c.mundo,ranking[0]?{...ranking[0],ano:card.ano}:null);
   if (card.bola.pos === 1) card.titulos.push({tipo:"bolaOuro",nome:"Bola de Ouro"});

@@ -1,0 +1,27 @@
+name: Auditar origem regional da base do treinador
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/treinador/mercadoTecnico.js'
+      - 'src/simulacao/elencoUnificado.js'
+      - 'src/simulacao/nacionalidadesLiga.js'
+      - 'tests/treinador-base-origem-regional.test.mjs'
+      - '.github/workflows/auditar-base-regional-treinador.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  base-regional:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Base, nacionalidades, legado e cadastros
+        run: node --test tests/treinador-base-origem-regional.test.mjs tests/elenco-unificado.test.mjs tests/origens-ligas-mundo.test.mjs
+      - name: Build do site
+        run: GITHUB_PAGES=true npm run build

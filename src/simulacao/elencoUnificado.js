@@ -17,7 +17,9 @@ export function conectarElencoMundo(c,g,{legado=false}={}){
  if(!c.mundo?.jogadores)return {...c,tecnico:{...c.tecnico,gestao:g}};
  let mundo={...c.mundo,jogadores:c.mundo.jogadores.map(({qualidade,mundoId,...p})=>({...p,...financeiro(p)})),cadastroElencos:1};
  if(!g.cadastroUnificado&&legado){
-  const importados=g.elenco.map(j=>({...j,idLegadoGestao:j.id,id:j.mundoId??`gestao:${g.clube}:${g.ano}:${j.id}`,ovr:j.qualidade,posicao:j.posicao||({GOL:'GOL',DEF:'ZAG',MEI:'MC',ATA:'ATA'}[j.setor]),nac:j.nac||'BRA',clubeNome:g.clube,clubeOrigem:g.clube,liga:c.tecnico.liga||CLUBES.find(p=>p.nome===g.clube)?.liga,picoIdade:28,aposentado:false,carreira:{jogos:0,gols:0,assist:0,temporadas:0},...j.carreira&&{carreira:j.carreira}}));
+  // Legados sem nacionalidade não viram brasileiros por ausência de dados.
+  // O campo desconhecido permanece null, sem alterar atletas já importados.
+  const importados=g.elenco.map(j=>({...j,idLegadoGestao:j.id,id:j.mundoId??`gestao:${g.clube}:${g.ano}:${j.id}`,ovr:j.qualidade,posicao:j.posicao||({GOL:'GOL',DEF:'ZAG',MEI:'MC',ATA:'ATA'}[j.setor]),nac:j.nac||null,clubeNome:g.clube,clubeOrigem:g.clube,liga:c.tecnico.liga||CLUBES.find(p=>p.nome===g.clube)?.liga,picoIdade:28,aposentado:false,carreira:{jogos:0,gols:0,assist:0,temporadas:0},...j.carreira&&{carreira:j.carreira}}));
   for(const p of importados)delete p.qualidade;
   const ids=new Set(importados.map(p=>chave(p.id)));
   mundo.jogadores=mundo.jogadores.filter(p=>!ids.has(chave(p.id))).map(p=>p.clubeNome===g.clube&&!p.aposentado?{...p,clubeNome:null,contrato:0,migracaoCadastro:{ano:g.ano,clube:g.clube}}:p).concat(importados);

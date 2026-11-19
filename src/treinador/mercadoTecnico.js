@@ -6,7 +6,7 @@ import { comissaoAtivaGestao, propostaComissaoTecnico } from './comissaoTecnico.
 import { CLUBES } from '../dados/data.js';
 import {diagnosticarElenco} from '../simulacao/profundidadeElenco.js';
 import {nacionalidadeNovoAtletaLiga} from '../simulacao/nacionalidadesLiga.js';
-import {gerarNomeRegional} from '../simulacao/nomesRegionais.js';
+import {gerarNomeRegionalUnico} from '../simulacao/nomesRegionais.js';
 const limitar=(n,min,max)=>Math.max(min,Math.min(max,n));
 const mediaElenco=g=>g.elenco.reduce((n,j)=>n+j.qualidade,0)/Math.max(1,g.elenco.length);
 const NOMES=['André','Bruno','Caio','Daniel','Eduardo','Felipe','Gabriel','Henrique','Igor','João','Lucas','Matheus'];
@@ -186,6 +186,7 @@ export function prepararGestaoTecnico(c){
  const g=unido.tecnico.gestao;
  if(g.baseIntegradaAno!==g.ano){
   const rng=gerador(`${g.clube}|${g.ano}|base-unificada`),novos=[];
+  const nomesOcupados=new Set(g.elenco.map(j=>j.nome).filter(Boolean));
   // Só promove atletas para cobrir carências reais por posição (22 vagas
   // mínimas), nunca para deixar todo elenco artificialmente em 24 ou 30.
   if(!legado){
@@ -197,10 +198,13 @@ export function prepararGestaoTecnico(c){
      ['VOL','MC','MEI'].includes(posicao)?'MEI':'ATA';
     for(let i=0;i<quantidade;i++){
      const jovem=jogador(rng,`base:${g.clube}:${g.ano}:${posicao}:${i}`,setor,Math.max(30,g.forcaMercado-7));
-     const nac=nacionalidadeNovoAtletaLiga(liga,rng);
+     const rngRegional=gerador(`${jovem.id}|origem-base-v1`);
+     const nac=nacionalidadeNovoAtletaLiga(liga,rngRegional);
+     const nome=gerarNomeRegionalUnico(nac,`${jovem.id}|nome-base-v1`,nomesOcupados);
+     nomesOcupados.add(nome);
      jovem.qualidade=Math.min(95,jovem.qualidade+(g.bonusBase||0));
      jovem.salario=Math.max(3,Math.round(jovem.qualidade**2/220));
-     novos.push({...jovem,nome:gerarNomeRegional(nac,rng),idade:18,
+     novos.push({...jovem,nome,idade:18,
       potencial:Math.min(99,jovem.qualidade+10),valor:Math.max(100,Math.round(jovem.qualidade**3/180*1.2)),
       ovr:jovem.qualidade,posicao,nac,clubeNome:g.clube,clubeOrigem:g.clube,
       liga,picoIdade:28,contrato:3,origem:'base',aposentado:false,

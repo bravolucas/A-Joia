@@ -43,7 +43,7 @@ test('partida sem gol da equipe não produz gols nem assistências do atleta na 
 });
 
 test('rótulos do modo completo não duplicam o mesmo campeonato',()=>{
- const c={temporadas:[{idade:20,clube:'Corinthians',campeaoLiga:true,ligaNome:'Brasileirão',ligaId:'brasileirao',continental:{titulo:true,nome:'Libertadores'},copaNacional:{titulo:true,nome:'Copa do Brasil'},titulosLista:['Campeão Brasileirão','Campeão da Libertadores','Campeão da Copa Nacional']}]};const g=galeriaClube(c,'Corinthians');assert.equal(g.tacas.find(t=>t.nome==='Brasileirão').total,8);assert.equal(g.tacas.find(t=>t.nome==='Libertadores').total,2);assert.equal(g.tacas.find(t=>t.nome==='Copa do Brasil').total,4);assert.equal(g.eventos.length,3);
+ const c={temporadas:[{idade:20,clube:'Corinthians',campeaoLiga:true,ligaNome:'Brasileirão',ligaId:'brasileirao',continental:{titulo:true,nome:'Libertadores'},copaNacional:{titulo:true,nome:'Copa do Brasil'},titulosLista:['Campeão Brasileirão','Campeão da Libertadores','Campeão da Copa Nacional']}]};const g=galeriaClube(c,'Corinthians');assert.equal(g.tacas.find(t=>t.nome==='Brasileirão').total,8);assert.equal(g.tacas.find(t=>t.nome==='Libertadores').total,2);assert.equal(g.tacas.find(t=>t.nome==='Copa do Brasil').total,5);assert.equal(g.eventos.length,3);
 });
 
 test('a segunda temporada não apaga os acumulados dos atletas',()=>{

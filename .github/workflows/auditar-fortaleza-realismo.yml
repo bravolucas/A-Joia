@@ -1,0 +1,30 @@
+name: Auditar força realista do Fortaleza
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/dados/data.js'
+      - 'src/dados/equilibrioClubes.js'
+      - 'src/comum/lib.js'
+      - 'src/completo/save.js'
+      - 'tests/fortaleza-elenco-calibracao.test.mjs'
+      - 'tests/fortaleza-forca.test.mjs'
+      - 'tests/fortaleza-forca.spec.mjs'
+      - '.github/workflows/auditar-fortaleza-realismo.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  calibracao:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Fortaleza, força de elenco, migração e regressões
+        run: node --test tests/fortaleza-elenco-calibracao.test.mjs tests/fortaleza-forca.test.mjs tests/elenco-unificado.test.mjs tests/mundo-vivo.test.mjs tests/mercado-tecnico.test.mjs tests/profundidade-elenco.test.mjs
+      - name: Build de produção para GitHub Pages
+        run: GITHUB_PAGES=true npm run build

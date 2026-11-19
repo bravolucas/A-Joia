@@ -1,0 +1,13 @@
+.ajoia-entity-link{font:inherit;color:inherit;text-align:inherit;background:none;border:0;padding:0;margin:0;display:inline;cursor:pointer;text-decoration:none;text-underline-offset:3px;transition:color .14s ease}
+.ajoia-entity-link:hover{color:#54d3c1;text-decoration:underline}
+.ajoia-entity-link:focus-visible{outline:2px solid #54d3c1;outline-offset:3px;border-radius:2px}
+.fm27-archive .ajoia-entity-link,.fm27-historico .ajoia-entity-link{color:#95e1df}
+.fm27-archive .ajoia-entity-link:hover,.fm27-historico .ajoia-entity-link:hover{color:#e6fffa}
+.hf-dialog .hf-nav-back{border:1px solid #527087;background:#20344a;color:#f0f7fc;padding:7px 12px;border-radius:8px;font-size:13px}
+.hf-dialog .hf-nav-back:disabled{opacity:.45;cursor:default}
+.hf-dialog .hf-nav-location{color:#a6bbd0;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hf-dialog .hf-nav-tools{display:flex;align-items:center;gap:10px;padding:8px 24px;border-bottom:1px solid #263a50;background:#132238}
+.hf-dialog .hf-nav-tools .hf-nav-location{flex:1}
+.hf-premios{padding:18px 8px}
+.hf-premios .fm27-data-scroll{margin-top:18px}
+.hf-premios .hf-vazio{padding:18px}

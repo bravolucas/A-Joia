@@ -665,7 +665,37 @@ export function contratoPadrao(c, clubeNome, { base = false } = {}) {
     clube: clubeNome, anos, restantes: anos, salario,
     multa: Math.round(Math.max(valorAtual(c) * 1.6, salario * 4) * (emp.multaMult ?? 1)),
     bonusGol: Math.max(1, Math.round(salario * 0.012)),
+    papel: papelEsperado(c, clubeNome),
   };
+}
+
+/* ---------- tempo de jogo no contrato ----------
+   O atleta negocia como vai atuar. O papel garante uma participação mínima enquanto
+   durar o contrato com aquele clube; o clube só aceita até um nível acima do que o
+   nível do atleta justifica, e "Intocável" exige ser a estrela do time. */
+export const PAPEIS_CONTRATO = [
+  { id: "reserva", label: "Reserva", share: 0.32 },
+  { id: "rotacao", label: "Rotação", share: 0.6 },
+  { id: "titular", label: "Titular", share: 0.86 },
+  { id: "intocavel", label: "Intocável", share: 0.97 },
+];
+export const papelDe = (id) => PAPEIS_CONTRATO.find((p) => p.id === id) || null;
+export function papelEsperado(c, clubeNome = c.clubeNome) {
+  const st = statusPorDiff(ovrDe(c) - clubeDe(clubeNome).forca, c.idade);
+  return st.id === "estrela" || st.id === "titular" ? "titular" : st.id === "rotacao" ? "rotacao" : "reserva";
+}
+/** Nível máximo que o clube aceita prometer. */
+export function papelMaximo(c, clubeNome = c.clubeNome) {
+  const st = statusPorDiff(ovrDe(c) - clubeDe(clubeNome).forca, c.idade);
+  if (st.id === "estrela") return "intocavel";
+  const i = PAPEIS_CONTRATO.findIndex((p) => p.id === papelEsperado(c, clubeNome));
+  return PAPEIS_CONTRATO[Math.min(2, i + 1)].id;
+}
+/** Participação mínima garantida pelo contrato no clube atual (0 se não houver promessa). */
+export function shareGarantido(c, clubeNome = c.clubeNome) {
+  const k = c.contrato;
+  if (!k?.papel || k.clube !== clubeNome || c.emprestimo) return 0;
+  return papelDe(k.papel)?.share || 0;
 }
 
 /* ---------- mesa de negociação ---------- */
@@ -674,9 +704,10 @@ export const CAMPOS_NEGOCIACAO = [
   { id: "anos", label: "Duração", icone: "📅", pedirMais: "Mais anos", ceder: "Menos anos" },
   { id: "multa", label: "Cláusula de rescisão", icone: "🔓", pedirMais: "Cláusula maior", ceder: "Cláusula menor" },
   { id: "bonusGol", label: "Bônus por gol", icone: "⚽", pedirMais: "Pedir mais", ceder: "Aceitar menos" },
+  { id: "papel", label: "Tempo de jogo", icone: "⏱️", pedirMais: "Mais minutos", ceder: "Aceitar menos" },
 ];
 /* Desgasta a diretoria: pedir mais salário, bônus ou anos, ou pedir cláusula menor (sair fica fácil). */
-const ehDesgastante = (campo, dir) => (["salario", "bonusGol", "anos"].includes(campo) && dir > 0) || (campo === "multa" && dir < 0);
+const ehDesgastante = (campo, dir) => (["salario", "bonusGol", "anos", "papel"].includes(campo) && dir > 0) || (campo === "multa" && dir < 0);
 
 export function iniciarNegociacao(c, { clube, tipo = "transferencia", luvas = 0, contexto = null }) {
   const ovr = ovrDe(c);
@@ -686,7 +717,7 @@ export function iniciarNegociacao(c, { clube, tipo = "transferencia", luvas = 0,
   const relevancia = clamp((ovr - cl.forca + ((c.fama ?? 20) - 40) / 4) / 40, -0.5, 0.6);
   const afeto = tipo === "renovacao" ? ((c.torcida[clube] ?? 30) - 50) / 5 : 0;
   const paciencia = clampR(Math.round(60 + relevancia * 60 - (c.repNeg || 0) / 8 + afeto), 20, 95);
-  return { clube, tipo, termos, original: { ...termos }, paciencia, pacienciaInicial: paciencia, pedidos: 4, colapsou: false, luvas, contexto, historico: [], duro: 0, cedeu: 0, codigo: c.codigo || null, ano: c.ano };
+  return { clube, tipo, termos, original: { ...termos }, paciencia, pacienciaInicial: paciencia, pedidos: 4, colapsou: false, luvas, contexto, historico: [], duro: 0, cedeu: 0, codigo: c.codigo || null, ano: c.ano, papelMaximo: papelMaximo(c, clube) };
 }
 
 export function ajustarNegociacao(n0, campo, dir) {
@@ -699,9 +730,12 @@ function ajustarNegociacaoBase(n0, campo, dir) {
   const novo = campo === "anos" ? clampR(t.anos + dir, 1, 5)
     : campo === "salario" ? Math.max(10, Math.round(t.salario * (1 + dir * 0.1)))
     : campo === "multa" ? Math.max(Math.round(t.salario * 1.5), Math.round(t.multa * (1 + dir * 0.18)))
+    : campo === "papel" ? PAPEIS_CONTRATO[clampR(PAPEIS_CONTRATO.findIndex((p) => p.id === (t.papel || "rotacao")) + dir, 0, PAPEIS_CONTRATO.length - 1)].id
     : Math.max(0, Math.round(t.bonusGol * (1 + dir * 0.25)) + (dir > 0 && t.bonusGol < 4 ? 1 : 0));
   const desg = ehDesgastante(campo, dir);
-  const aceitou = desg ? chance(clamp(n.paciencia / 100, 0.15, 0.95)) : true;
+  // Tempo de jogo acima do que o clube aceita prometer é recusado de saída.
+  const acimaDoLimite = campo === "papel" && dir > 0 && PAPEIS_CONTRATO.findIndex((p) => p.id === novo) > PAPEIS_CONTRATO.findIndex((p) => p.id === (n.papelMaximo || "titular"));
+  const aceitou = acimaDoLimite ? false : desg ? chance(clamp(n.paciencia / 100, 0.15, 0.95)) : true;
   n.paciencia = clampR(n.paciencia - (desg ? rand(6, 14) : -rand(2, 5)), 0, 100);
   n.pedidos -= 1;
   if (desg) n.duro += aceitou ? 1 : 0; else n.cedeu += 1;
@@ -1429,7 +1463,9 @@ function jogarTemporadaBase(c0) {
   // idioma, consultoria e família por perto reduzem a queda (itens da loja).
   const clubeNovo = c.temporadas.length > 0 && c.temporadas.at(-1)?.clube !== clubeNome;
   const adaptacao = clubeNovo && longeDeCasa(c) ? clampR(1 - somaInv(c, "adaptacao"), 0, 1) : 0;
-  let share = clampR((st.share + (mod.shareAdd || 0) + somaInv(c,"shareAdd")) * (mod.shareMult ?? 1) * (fx.shareMult ?? 1) * (moral < 25 ? 0.9 : 1) * (1 - 0.06 * adaptacao), 0.04, 1);
+  // O papel negociado no contrato garante a base de minutos no clube (Intocável ~97%).
+  const garantido = shareGarantido(c, clubeNome);
+  let share = clampR((Math.max(st.share, garantido) + (mod.shareAdd || 0) + somaInv(c,"shareAdd")) * (mod.shareMult ?? 1) * (fx.shareMult ?? 1) * (moral < 25 ? 0.9 : 1) * (1 - 0.06 * adaptacao), 0.04, 1);
 
   // lesão durante a temporada
   const corpoPronto = c.origem === "tardio" && c.idade <= 21 ? 0.5 : 1;
@@ -2259,6 +2295,12 @@ export function gerarOfertas(c, n, opts = {}) {
     // permitir múltiplos clubes daquela liga na mesma janela.
     if (!opts.ligas) pool = pool.filter((y) => y.liga !== x.liga || pool.length < 4);
     escolhidas.push(x);
+  }
+  // Interesse sinalizado ao empresário: o clube entra nas ofertas se puder contratar.
+  const alvo = !opts.observacao && c.interesseSinalizado?.ano === c.ano ? clubesJogaveis().find((x) => x.nome === c.interesseSinalizado.clube) : null;
+  if (alvo && alvo.nome !== c.clubeNome && !escolhidas.some((x) => x.nome === alvo.nome) && grandeAceita(c, alvo, ovr, prest) && !(c.flags?.traidor || []).includes(alvo.nome)) {
+    if (escolhidas.length >= Math.max(1, n)) escolhidas.pop();
+    escolhidas.push(alvo);
   }
   return escolhidas.sort((a, b) => b.forca - a.forca).map((x) => ({
     clube: x.nome, forca: x.forca, cor: x.cor, ligaId: x.liga, ligaNome: ligaDe(x.liga).nome,
@@ -3632,7 +3674,13 @@ export function janelaExtra(c, idJaVisto) {
   // nem toda janela tem proposta: depende de quanto você está aparecendo
   const ovr = ovrDe(c), dif = ovr - clubeDe(c.clubeNome).forca;
   const ult = c.temporadas[c.temporadas.length - 1];
-  const p = clampR(0.5 + (dif >= 4 ? 0.25 : 0) + ((ult?.nota || 0) >= 7.3 ? 0.15 : 0) + (c.mod?.ofertasExtra ? 0.3 : 0) - (dif <= -6 ? 0.15 : 0), 0.25, 0.95);
+  // Mercado como na vida real: quem joga bem, aparece e está no auge recebe sondagens todo ano;
+  // veteranos e quem joga pouco atraem menos. Fora dos anos de decisão a janela é mais curta.
+  const nota = ult?.nota || 0, idade = c.idade;
+  const fase = idade >= 19 && idade <= 27 ? 0.05 : idade >= 32 ? -0.15 : 0;
+  const base = clampR(0.45 + (dif >= 4 ? 0.2 : 0) + (nota >= 7.3 ? 0.15 : nota >= 6.9 ? 0.07 : 0) + ((c.fama ?? 20) >= 60 ? 0.1 : 0) + fase
+    + (c.mod?.ofertasExtra ? 0.3 : 0) + (c.interesseSinalizado?.ano === c.ano ? 0.2 : 0) - (dif <= -6 ? 0.15 : 0) - ((ult?.jogos || 0) < 12 && c.temporadas.length ? 0.1 : 0), 0.2, 0.95);
+  const p = anoDeDecisao(c) ? base : base * (c.ritmo === "expresso" ? 0.5 : 0.8);
   if (!comSemente(c.codigo, `mercado:${c.ano}`, () => chance(p))) return null;
   return sortearEvento(c, { somente: "propostas" });
 }
@@ -3700,7 +3748,8 @@ export function eventoDaJanela(c) {
 }
 /* Depois da decisão: a janela de transferências, quando ela abre */
 export function segundoEvento(c, idJaVisto) {
-  if (!anoDeDecisao(c) || idJaVisto === "base") return null;
+  // A janela de transferências abre todo ano (antes, só nos anos de decisão).
+  if (idJaVisto === "base") return null;
   return janelaExtra(c, idJaVisto);
 }
 
@@ -4036,4 +4085,23 @@ function simularCarreiraAutomaticaBase(dados, escolher, escolherFoco) {
 }
 
 export function caminhoSelecao(c){const forca=forcaSelecao(c),corte=forca-6+(c.flags?.selecaoFria||0)*2-(c.foco==='vitrine'?2:0),ovr=ovrDe(c);return{forca,corte,ovr,elegivel:c.idade>=18&&!c.flags?.semSelecao,distancia:Math.max(0,corte-ovr),rotulo:ovr>=corte?'Na disputa pela convocação':ovr>=corte-4?'Perto da lista':'Construindo espaço',aviso:'Referência do torneio. Forma, momento e decisão da seleção ainda contam.'};}
-export function interesseMercado(c){if(c.idade<18||c.emprestimo)return [];return comSemente(c.codigo,`observacao:${c.ano}`,()=>gerarOfertas(c,2)).map(x=>({clube:x.clube,liga:x.ligaNome,texto:'Em observação · interesse não garante proposta'}));}
+/* ---------- empresário: clubes interessados ----------
+   O empresário mostra quem acompanha o atleta nesta janela. Sinalizar interesse em
+   um clube (uma vez por janela) aumenta a chance de proposta e garante que ele esteja
+   entre as ofertas se o clube puder contratar; a torcida atual percebe o movimento. */
+export function interesseMercado(c){
+ if(c.idade<18||c.emprestimo)return [];
+ const ovr=ovrDe(c),emp=empresarioDe(c),n=Math.min(5,2+Math.round((emp.alcance||10)/12));
+ return comSemente(c.codigo,`observacao:${c.ano}`,()=>gerarOfertas(c,n,{observacao:true})).map(x=>{
+  const gap=ovr-x.forca,nivel=gap>=4?'Muito interessado':gap>=-2?'Interessado':'Observando';
+  return {clube:x.clube,liga:x.ligaNome,nivel,sinalizado:c.interesseSinalizado?.ano===c.ano&&c.interesseSinalizado.clube===x.clube,
+   texto:`${nivel} · interesse não garante proposta`};
+ });
+}
+export function sinalizarInteresse(c0,clube){
+ if(c0.interesseSinalizado?.ano===c0.ano)throw new Error('Você já sinalizou interesse em um clube nesta janela.');
+ if(!interesseMercado(c0).some(x=>x.clube===clube))throw new Error('Esse clube não está acompanhando você agora.');
+ const c=clone(c0);c.interesseSinalizado={ano:c.ano,clube};
+ if(c.clubeNome)c.torcida[c.clubeNome]=clampR((c.torcida[c.clubeNome]??30)-3,0,100);
+ return c;
+}

@@ -10,7 +10,10 @@ test('favoritos têm vantagem clara, mas uma zebra ainda pode ganhar o confronto
  // O motor Poisson unificado produz ~78,5% de avanço com mando para 90 x 70;
  // manter vantagem expressiva sem exigir o patamar do cálculo anterior.
  assert.ok(avanco>.75&&avanco<.95,`favorito: ${(100*avanco).toFixed(1)}%`);assert.ok(chancesCopa(70,90).vitoria>0);
- const iguais=chancesCopa(80,80);assert.ok(Math.abs(iguais.vitoria-iguais.derrota)<1e-10);
+ const iguaisComMando=chancesCopa(80,80);
+ assert.ok(iguaisComMando.vitoria>iguaisComMando.derrota,'mandante deve ter vantagem mesmo com forças iguais');
+ const iguaisNeutros=chancesCopa(80,80,'controlar',true);
+ assert.ok(Math.abs(iguaisNeutros.vitoria-iguaisNeutros.derrota)<1e-10,'equilíbrio de forças em campo neutro');
 });
 
 test('momentos resumidos ficam mais difíceis por fase, com zebras raras e reprodução estável',()=>{

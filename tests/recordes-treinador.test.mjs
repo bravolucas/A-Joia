@@ -83,3 +83,19 @@ test('metas, acesso, rebaixamento e demissao sao contabilizados apenas quando do
  assert.equal(marca(flamengo,'tecnicoDemissoes'),undefined);
  assert.equal(marca(flamengo,'tecnicoMetas').valor,1);
 });
+
+test('campanha do treinador não vira partida de jogador por engano',()=>{
+ const c=fixture();
+ const perfil=consultarRecordesFutebol(c,'clube','Santos',c.tecnico.temporadas);
+ assert.equal(perfil.recordes.find(r=>r.id==='jogosCarreira'),undefined);
+ assert.equal(perfil.recordes.find(r=>r.id==='golsCarreira'),undefined);
+ assert.equal(marca(perfil.recordes,'tecnicoJogos').valor,76);
+});
+test('ficha do treinador agrega passagens por clubes e seleções sem misturar atletas',()=>{
+ const c=fixture();c.tecnico.universo.anos=[2027,2028,2029,2030];
+ const perfil=consultarRecordesFutebol(c,'treinador','Lucas');
+ assert.equal(marca(perfil.recordes,'tecnicoJogos').valor,121);
+ assert.equal(marca(perfil.recordes,'tecnicoTemporadas').valor,4);
+ assert.equal(marca(perfil.recordes,'tecnicoTitulos').valor,5);
+ assert.ok(perfil.recordes.every(r=>r.categoria==='Treinador'));
+});

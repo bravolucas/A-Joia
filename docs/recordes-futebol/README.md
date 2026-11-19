@@ -52,3 +52,14 @@ Use apenas IDs já definidos em \`METRICAS_RECORDES\`, e registre fonte confiáv
 - Notícias no instante do lance (a primeira entrega notifica no fechamento anual).
 - Ampliar a base com recordes de idade, contratos, transferências, treinadores, pontuações de ligas e sequências interanuais, apenas quando os jogos armazenarem a informação necessária.
 - Validação integral em CI e publicação GitHub Pages.
+
+
+## Expansão de campanhas e recordes de títulos
+
+- As classificações arquivadas nas edições de **liga** alimentam recordes de pontos, vitórias, gols marcados, saldo e campanhas sem derrota. Esses números vêm da tabela oficial simulada; não são estimados somando apenas partidas parciais.
+- Os campeões e vices arquivados geram total de títulos, vice-campeonatos, títulos numa temporada e séries de conquistas consecutivas. Série anual exige anos consecutivos; nas competições quadrienais reconhecidas, a janela respeita quatro anos. Lacunas no acervo simulado interrompem a sequência.
+- Criado \`src/historia/recordesTitulosReais.js\`, que lê os **dados históricos de campeões já cadastrados no projeto** (ligas, copas nacionais, torneios da UEFA, CONMEBOL, seleções e estaduais). Não há estatísticas fictícias nem resultados inseridos retroativamente no save.
+- Referências com cobertura \`recorte\` exibem um alerta explícito, **não são comparadas como recorde histórico absoluto e não disparam manchetes de quebra mundial**. Um período documentado é diferente do recorde de todos os tempos.
+- As equipes recordistas podem ser abertas pelo link no Arquivo Vivo, e a interface oferece filtros **Campanhas** e **Títulos**, além das categorias individuais.
+- Adicionados três testes de classificação/títulos (\`tests/recordes-futebol.test.mjs\`) e quatro testes do acervo real (\`tests/recordes-titulos-reais.test.mjs\`).
+- O fluxo CI já existente em \`.github/workflows/ci.yml\` executa automaticamente os arquivos \`tests/*.test.mjs\` e o build; \`.github/workflows/deploy.yml\` só publica uma versão aprovada e correspondente ao último commit. O histórico de execução dos jobs e o deploy não foram confirmados nesta sessão.

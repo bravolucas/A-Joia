@@ -7,6 +7,9 @@ import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
 import {forcasDoMundo,clubesDoMundo,registrarMundoVivo,resumirTabelas} from '../simulacao/mundoVivo.js';
 import {AJUSTE_FORTALEZA,corrigirEquilibrioClubes} from '../dados/equilibrioClubes.js';
 import {primeiraFaseContinental} from '../competicoes/fasesSelecoes.js';
+import {simularPlacarRealista} from '../competicoes/motorPlacares.js';
+import {probabilidadesPlacar} from '../competicoes/motorPlacar.js';
+import {ordenarGrupoMundial48} from '../competicoes/desempateMundial48.js';
 import {normalizarCampeaoLiga,corrigirCampeoesLiga,registrarAnoHistoria,registrarEstatisticasCompeticoes,registrarAtletasObservados,simularDefesas,novosMarcosIndividuais} from '../historia/historiaFutebol.js';
 import {ITENS_PESSOAIS} from './itensPessoais.js';
 import {iniciarCamisas,aposentarDonoCamisa,prepararCamisaSelecao,sincronizarCamisasSelecao} from './camisasCarreira.js';
@@ -1151,7 +1154,28 @@ export function simularAmistososSelecao(c,ovr,quantidade=6){
    o "discurso no vestiário" garante uma fase, uma vez por Copa, e não vale na
    final. A final, se você for titular, vira o momento decisivo da sua posição. */
 export const FASES_COPA = ["Fase de grupos", "Oitavas", "Quartas", "Semifinal", "Final"];
-const FAIXA_ADV = { 1: [74, 84], 2: [79, 89], 3: [83, 92], 4: [86, 93] };
+export const FASES_COPA_MUNDIAL_48 = ["Fase de grupos", "16 avos de final", "Oitavas", "Quartas", "Semifinal", "Final"];
+const fasesDaCopa=k=>k.tipo==='copaMundo'?FASES_COPA_MUNDIAL_48:FASES_COPA;
+const finalDaCopa=k=>fasesDaCopa(k).length-1;
+function gruposParalelosMundial(nac,grupoUsuario){
+ const evitar=[nac,...grupoUsuario.map(x=>x.id)],times=sortearSelecoes(nac,44,[0,100],evitar);
+ const grupos=[],terceiros=[];
+ for(let n=0;n<11;n++){
+  const grupo=times.slice(n*4,n*4+4),tabela=grupo.map(x=>({id:x.id,label:x.label,p:0,sg:0,gp:0,gc:0,j:0})),partidas=[];
+  for(let i=0;i<grupo.length;i++)for(let j=i+1;j<grupo.length;j++){
+   const a=grupo[i],b=grupo[j],pV=clampR(.40+(a.forca-b.forca)*.016,.10,.80),r=rnd();
+   const [ga,gb]=placarCopa(r<pV?'V':r<pV+.25?'E':'D');
+   partidas.push({casa:a.id,fora:b.id,golsCasa:ga,golsFora:gb});
+   const x=tabela[i],y=tabela[j];x.j++;y.j++;x.gp+=ga;y.gp+=gb;x.gc+=gb;y.gc+=ga;x.sg=x.gp-x.gc;y.sg=y.gp-y.gc;
+   x.p+=ga>gb?3:ga===gb?1:0;y.p+=gb>ga?3:ga===gb?1:0;
+  }
+  const classificados=ordenarGrupoMundial48(tabela,partidas);
+  grupos.push({grupo:String.fromCharCode(66+n),classificacao:classificados,jogos:partidas});
+  terceiros.push(classificados[2]);
+ }
+ return {grupos,terceiros};
+}
+const FAIXA_ADV = { 1: [69, 82], 2: [74, 84], 3: [79, 89], 4: [83, 92], 5: [86, 93] };
 function sortearSelecoes(nac, n, [min, max], evitar = [], paises = null) {
   const livre = (x) => x.id !== nac && !evitar.includes(x.id) && (!paises || paises.includes(x.id));
   let pool = NACIONALIDADES.filter((x) => livre(x) && x.forcaSelecao >= min && x.forcaSelecao <= max);
@@ -1163,12 +1187,19 @@ function sortearSelecoes(nac, n, [min, max], evitar = [], paises = null) {
 }
 /* força do seu país em campo: um titular acima do nível da seleção puxa o time */
 const forcaNaCopa = (k) => k.fs + forcaElencoCopa(k.elenco,k.fs) + (k.titular ? clampR((k.ovr - k.fs) * 0.25, -2, 3) : 0);
-const chanceJogoCopa = (k, adv, extra = 0) => clampR(0.4 + (forcaNaCopa(k) - adv.forca) * 0.03 + extra, 0.1, 0.85);
-function placarCopa(res) {
-  const a = poisson(1.4), b = poisson(1.0);
+const chanceJogoCopa = (k, adv, extra = 0) => clampR(probabilidadesPlacar(forcaNaCopa(k),adv.forca,{neutro:true}).vitoria+extra,0.04,0.985);
+function placarCopa(res,forcaCasa=75,forcaFora=75) {
+  const {golsCasa:a,golsFora:b}=simularPlacarRealista(forcaCasa,forcaFora,rnd,{neutro:true});
   if (res === "V") { const x = Math.max(a, b), y = Math.min(a, b); return [x === y ? x + 1 : x, y]; }
   if (res === "D") { const x = Math.min(a, b), y = Math.max(a, b); return [x, x === y ? y + 1 : y]; }
   const g = Math.min(a, b); return [g, g];
+}
+/** Ocorrências pessoais registradas na simulação, independentes de gols válidos. */
+function ocorrenciasCopa(c,k,participou){
+ if(!participou)return {};
+ const amarelo=chance(.14),vermelho=chance(.012);
+ return {amarelo,vermelho,golsAnulados:c.posicao==='GOL'?0:(chance(.055)?1:0),
+  ...(c.posicao==='GOL'?{defesas:Math.max(0,poisson(3))}:{})};
 }
 /* seus gols e assistências num jogo, sem passar do placar */
 function participacaoCopa(c, k, golsPro, decidiu = false) {
@@ -1202,11 +1233,13 @@ export function iniciarCopa(c, ovr, torneio={nome:"Copa do Mundo",tipo:"copaMund
   };
   const conf=CONFEDERACAO_POR_NACAO[c.nac];
   copa.primeiraFaseMata=torneio.tipo==='copaMundo'?1:primeiraFaseContinental(c.nac);
+  copa.faseFinal=finalDaCopa(copa);copa.totalSelecoes=torneio.tipo==='copaMundo'?48:null;
   copa.participantes=torneio.tipo==='continentalSelecao'?NACIONALIDADES.filter(n=>CONFEDERACAO_POR_NACAO[n.id]===conf).map(n=>n.id):null;
   copa.elenco=prepararElencoSelecao(c,c.ano,torneio.tipo,torneio.nome);
   copa.grupo = [];
   for(const faixa of [[85,93],[76,84],[62,77]])copa.grupo.push(...sortearSelecoes(c.nac,1,faixa,copa.grupo.map(x=>x.id),copa.participantes));
   copa.enfrentados = copa.grupo.map((x) => x.id);
+  if(torneio.tipo==='copaMundo')copa.gruposParalelos=gruposParalelosMundial(c.nac,copa.grupo);
   return { selecao, copa };
 }
 export const copaPendente = (card) => !!(card?.copa && !card.copa.fim);
@@ -1229,18 +1262,18 @@ export function opcoesCopa(c, card) {
   const grupo = k.etapa === "grupos", rodada = grupo ? jogosDoGrupo(k).length : null;
   const adv = grupo ? k.grupo[rodada] : k.adversario;
   const base = chanceJogoCopa(k, adv);
-  const decide = clampR(base + clampR((k.ovr - 84) * 0.012, -0.12, 0.08) + (grupo?0:somaTraco(c, "mataMata")) - (k.titular ? 0 : 0.03), 0.08, 0.92);
+  const decide = clampR(base + clampR((k.ovr - 84) * 0.012, -0.12, 0.08) + (grupo?0:somaTraco(c, "mataMata")) - (k.titular ? 0 : 0.03), 0.04, 0.99);
   const ops = [
     k.titular
-      ? { id: "coletivo", icone: "🤝", nome: "Jogar para o time", texto: "Disciplina tática e nada de heroísmo.", p: clampR(base + 0.03, 0.1, 0.92), faixa: "baixo" }
+      ? { id: "coletivo", icone: "🤝", nome: "Jogar para o time", texto: "Disciplina tática e nada de heroísmo.", p: clampR(base + 0.03, 0.04, 0.99), faixa: "baixo" }
       : { id: "coletivo", icone: "🙌", nome: "Apoiar do banco", texto: "O grupo decide; você empurra de fora.", p: base, faixa: "baixo" },
     k.titular
       ? { id: "decidir", icone: "🔥", nome: "Chamar a responsabilidade", texto: "Pedir a bola nos momentos quentes. Brilha ou some.", p: decide, faixa: "alto" }
       : { id: "decidir", icone: "🔥", nome: "Pedir para entrar", texto: "Entrar no segundo tempo e mudar o jogo. Se der certo, vira titular.", p: decide, faixa: "alto" },
   ];
-  if (k.arenga && k.fase < 4) ops.push({ id: "arenga", icone: "📣", nome: "Discurso no vestiário", texto: "Uma vez por Copa: garante a vitória. Não vale na final.", p: 1, faixa: "ouro" });
+  if (k.arenga && k.fase < finalDaCopa(k)) ops.push({ id: "arenga", icone: "📣", nome: "Discurso no vestiário", texto: "Uma vez por Copa: garante a vitória. Não vale na final.", p: 1, faixa: "ouro" });
   if(grupo)return {etapa:k.etapa,rodada:rodada+1,titulo:`Fase de grupos · Jogo ${rodada+1} de 3`,texto:`${k.label} x ${adv.label}. ${rodada===0?"Estreia: a primeira chance de somar pontos.":rodada===1?"Segunda rodada: cada ponto conta para a classificação.":`Última rodada: sua seleção entra com ${tabelaGrupoCopa(k).find(t=>t.id===k.nac).p} pontos.`} Os dois primeiros avançam após os três jogos.`,adversario:adv,opcoes:ops};
-  return { etapa: k.etapa, titulo: `${FASES_COPA[k.fase]} · ${k.label} x ${adv.label}`, texto: k.fase === 4 ? `A final da ${k.nome}. Noventa minutos para entrar na história.` : `Mata-mata: quem perde volta para casa.`, adversario: adv, opcoes: ops };
+  return { etapa: k.etapa, titulo: `${fasesDaCopa(k)[k.fase]} · ${k.label} x ${adv.label}`, texto: k.fase === finalDaCopa(k) ? `A final da ${k.nome}. Noventa minutos para entrar na história.` : `Mata-mata: quem perde volta para casa.`, adversario: adv, opcoes: ops };
 }
 
 function finalizarCopa(card, campeao) {
@@ -1250,8 +1283,8 @@ function finalizarCopa(card, campeao) {
   t.convocado = k.convocado; t.titular = k.titular; t.fase = k.fase; t.gols = k.gols; t.assist = k.assist; t.jogos = k.jogos.length;
   if (!k.convocado) { t.resultado = "Fora da convocação"; return card; }
   if (campeao) { t.campeao = true; t.resultado = "Campeão"; k.campeao = true; }
-  else t.resultado = k.fase === 0 ? "Eliminado na fase de grupos" : k.fase === 4 ? "Vice-campeão" : k.fase === 3 ? "Eliminado na semifinal" : `Eliminado nas ${FASES_COPA[k.fase].toLowerCase()}`;
-  if (k.titular && k.fase >= 3 && (k.craque >= 2 || k.gols >= 5)) { k.craqueCopa = true; card.destaques.push(`⭐ Eleito o craque da ${k.nome}`); k.efeitos.fama += 6; }
+  else t.resultado = k.fase === 0 ? "Eliminado na fase de grupos" : k.fase === finalDaCopa(k) ? "Vice-campeão" : k.fase === finalDaCopa(k)-1 ? "Eliminado na semifinal" : `Eliminado nas ${fasesDaCopa(k)[k.fase].toLowerCase()}`;
+  if (k.titular && k.fase >= finalDaCopa(k)-1 && (k.craque >= 2 || k.gols >= 5)) { k.craqueCopa = true; card.destaques.push(`⭐ Eleito o craque da ${k.nome}`); k.efeitos.fama += 6; }
   if (k.gols >= 6) card.destaques.push(`👟 Artilheiro da ${k.nome}, com ${k.gols} gols`);
   else if (k.gols >= 3) card.destaques.push(`${k.gols} gols na ${k.nome}`);
   return card;
@@ -1284,20 +1317,23 @@ function jogarCopaBase(c, card0, opId) {
     if(op.id==="arenga")k.arenga=false;
     const venceu=resultado==="V",decidiu=op.id==="decidir"&&venceu;
     if(op.id==="decidir"){if(venceu){k.craque++;k.efeitos.fama+=2;k.titular=true;}else if(resultado==="D")k.efeitos.moral-=3;}
-    const [gp,gc]=placarCopa(resultado),eu=participacaoCopa(c,k,gp,decidiu);
+    const [gp,gc]=placarCopa(resultado,forcaNaCopa(k),adv.forca),eu=participacaoCopa(c,k,gp,decidiu);
     k.gols+=eu.gols;k.assist+=eu.assist;
-    const jogo={fase:0,rodada:rodada+1,adv,gp,gc,res:resultado,escolha:op.id,...eu};
+    const jogo={fase:0,rodada:rodada+1,adv,gp,gc,res:resultado,escolha:op.id,mundial:k.tipo==='copaMundo',...eu,...ocorrenciasCopa(c,k,k.titular)};
     registrarJogoElenco(k.elenco,jogo,{titular:k.titular,ano:k.ano});k.jogos.push(jogo);
     const [mandante,visitante]=k.grupo.filter(x=>x.id!==adv.id);
     const pV=clampR(.38+(mandante.forca-visitante.forca)*.025,.08,.78),r=rnd();
-    const [outGp,outGc]=placarCopa(r<pV?"V":r<pV+.26?"E":"D");
+    const [outGp,outGc]=placarCopa(r<pV?"V":r<pV+.26?"E":"D",mandante.forca,visitante.forca);
     const outro={rodada:rodada+1,mandante,visitante,gp:outGp,gc:outGc};
     k.jogosGrupoOutros=[...(k.jogosGrupoOutros||[]),outro];
     const tabela=tabelaGrupoCopa(k),pos=tabela.findIndex(t=>t.id===k.nac)+1,pts=tabela[pos-1].p;
-    const encerrada=rodada===2,passa=encerrada&&pos<=2;
+    const encerrada=rodada===2,linha=tabela.find(t=>t.id===k.nac);
+    const terceiros=k.gruposParalelos?.terceiros||[];
+    const posTerceiros=pos===3?[...terceiros,linha].sort((a,b)=>b.p-a.p||b.sg-a.sg||b.gp-a.gp||a.id.localeCompare(b.id)).findIndex(t=>t.id===k.nac)+1:null;
+    const passa=encerrada&&(pos<=2||(k.tipo==='copaMundo'&&pos===3&&posTerceiros<=8));
     let texto=`${gp} x ${gc} contra ${adv.label}. ${pts} ${pts===1?"ponto":"pontos"} após ${rodada+1} ${rodada===0?"jogo":"jogos"}.`;
     if(encerrada){
-      if(passa){k.etapa="mata";k.fase=k.primeiraFaseMata||1;k.adversario=sortearSelecoes(c.nac,1,FAIXA_ADV[k.fase],k.enfrentados,k.participantes)[0];k.enfrentados.push(k.adversario.id);texto+=` ${pos}º lugar: classificado para ${FASES_COPA[k.fase].toLowerCase()} contra ${k.adversario.label}.`;}
+      if(passa){k.etapa="mata";k.fase=k.primeiraFaseMata||1;k.adversario=sortearSelecoes(c.nac,1,FAIXA_ADV[k.fase],k.enfrentados,k.participantes)[0];k.enfrentados.push(k.adversario.id);texto+=` ${pos}º lugar: classificado para ${fasesDaCopa(k)[k.fase].toLowerCase()} contra ${k.adversario.label}.`;}
       else{finalizarCopa(card,false);texto+=` ${pos}º lugar: eliminado na fase de grupos.`;}
     }else texto+=` Próxima partida: ${k.grupo[rodada+1].label}.`;
     return {card,res:{etapa:"grupos",rodada:rodada+1,adv,escolha:op.nome,p:op.p,jogo,jogos:[jogo],outro,pts,pos,tabela,classificacaoEncerrada:encerrada,classificado:passa,venceu,empate:resultado==="E",marca:venceu?"Vitória":resultado==="E"?"Empate":"Derrota",placar:`${gp} x ${gc}`,texto}};
@@ -1307,7 +1343,7 @@ function jogarCopaBase(c, card0, opId) {
   const venceu = op.id === "arenga" ? true : chance(op.p);
   if (op.id === "arenga") k.arenga = false;
   const penaltis = chance(0.25);
-  const [gp, gc] = penaltis ? placarCopa("E") : placarCopa(venceu ? "V" : "D");
+  const [gp, gc] = penaltis ? placarCopa("E",forcaNaCopa(k),adv.forca) : placarCopa(venceu ? "V" : "D",forcaNaCopa(k),adv.forca);
   const decidiu = op.id === "decidir" && venceu;
   if (op.id === "decidir") {
     if (venceu) { k.craque += 1; k.efeitos.fama += 2; if (!k.titular) k.titular = true; }
@@ -1315,23 +1351,23 @@ function jogarCopaBase(c, card0, opId) {
   }
   const eu = k.titular || op.id === "decidir" ? participacaoCopa(c, { ...k, titular: true }, gp, decidiu) : { gols: 0, assist: 0 };
   k.gols += eu.gols; k.assist += eu.assist;
-  const jogo = { fase: k.fase, adv, gp, gc, res: venceu ? "V" : "D", penaltis, ...eu };
+  const jogo = { fase: k.fase, adv, gp, gc, res: venceu ? "V" : "D", penaltis, mundial:k.tipo==='copaMundo', ...eu,...ocorrenciasCopa(c,k,k.titular||op.id==='decidir') };
   registrarJogoElenco(k.elenco,jogo,{titular:k.titular,ano:k.ano});
   k.jogos.push(jogo);
-  const fase = FASES_COPA[k.fase];
+  const fase = fasesDaCopa(k)[k.fase];
   const placarTxt = `${gp} x ${gc}${penaltis ? " (pên.)" : ""}`;
   let texto;
   if (venceu) {
     texto = op.id === "arenga" ? `O discurso incendiou o vestiário. ${placarTxt} sobre ${adv.label}.`
       : decidiu ? (eu.gols ? `Você chamou o jogo e marcou. ${placarTxt} sobre ${adv.label}.` : `Você chamou o jogo e decidiu. ${placarTxt} sobre ${adv.label}.`)
       : `${placarTxt} sobre ${adv.label}. ${k.label} segue viva.`;
-    if (k.fase === 4) { finalizarCopa(card, true); card.titulos.push({ tipo: k.tipo||"copaMundo", nome: k.nome||"Copa do Mundo" }); card.destaques.push(`🏆 Campeão da ${k.nome} com ${k.label}`); texto = `CAMPEÃO DA ${k.nome.toUpperCase()}! ${placarTxt} na final contra ${adv.label}.`; }
+    if (k.fase === finalDaCopa(k)) { finalizarCopa(card, true); card.titulos.push({ tipo: k.tipo||"copaMundo", nome: k.nome||"Copa do Mundo" }); card.destaques.push(`🏆 Campeão da ${k.nome} com ${k.label}`); texto = `CAMPEÃO DA ${k.nome.toUpperCase()}! ${placarTxt} na final contra ${adv.label}.`; }
     else {
       k.fase += 1;
       k.adversario = sortearSelecoes(c.nac, 1, FAIXA_ADV[k.fase], k.enfrentados,k.participantes)[0];
       k.enfrentados.push(k.adversario.id);
-      texto += ` ${k.fase === 4 ? "Na final" : k.fase === 3 ? "Na semifinal" : `Nas ${FASES_COPA[k.fase].toLowerCase()}`}: ${k.adversario.label}.`;
-      if (k.fase === 4 && k.titular) {
+      texto += ` ${k.fase === finalDaCopa(k) ? "Na final" : k.fase === finalDaCopa(k)-1 ? "Na semifinal" : `Nas ${fasesDaCopa(k)[k.fase].toLowerCase()}`}: ${k.adversario.label}.`;
+      if (k.fase === finalDaCopa(k) && k.titular) {
         const mini = miniParaMomento(c,{tipo:'selecao'});
         const m = { tipo: "selecao", titulo: `Final da ${k.nome} ${k.ano} · contra ${k.adversario.label}`, mini, adversario:{tipo:"selecao",id:k.adversario.id,nome:k.adversario.label}, ordem: 1, total: 1 };
         m.texto = textoDoMomento(mini, m, c);
@@ -1341,7 +1377,7 @@ function jogarCopaBase(c, card0, opId) {
   } else {
     texto = op.id === "decidir" ? `Você pediu a bola, mas não foi a sua noite. ${placarTxt} para ${adv.label}.` : `${placarTxt} para ${adv.label}. Fim da linha na ${fase.toLowerCase()}.`;
     finalizarCopa(card, false);
-    card.destaques.push(k.fase === 4 ? `Vice-campeão da ${k.nome} com ${k.label}` : `${k.label} caiu ${k.fase === 1 ? "nas oitavas" : k.fase === 2 ? "nas quartas" : "na semifinal"} da Copa`);
+    card.destaques.push(k.fase === finalDaCopa(k) ? `Vice-campeão da ${k.nome} com ${k.label}` : `${k.label} caiu ${fasesDaCopa(k)[k.fase].toLowerCase()} da Copa`);
   }
   return { card, res: { etapa: "mata", fase, adv, escolha: op.nome, p: op.p, venceu, marca: venceu ? (k.campeao ? "Campeão" : "Vitória") : "Eliminado", placar: placarTxt, jogo, texto } };
 }
@@ -1349,7 +1385,7 @@ function jogarCopaBase(c, card0, opId) {
 /* simulação automática: escolhas aleatórias, arenga guardada para quartas ou semi */
 export function resolverCopaAuto(c, card0) {
   let card = card0, guard = 0;
-  while (copaPendente(card) && guard++ < 10) {
+  while (copaPendente(card) && guard++ < 12) {
     if (card.pendente) { card = aplicarMomento(card, chance(chanceMomento(c, card.pendente.mini))); continue; }
     const ops = opcoesCopa(c, card).opcoes;
     const ar = ops.find((o) => o.id === "arenga");

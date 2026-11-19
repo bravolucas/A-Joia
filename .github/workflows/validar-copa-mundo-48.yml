@@ -1,0 +1,36 @@
+name: Validar Mundial 48 e estatísticas de partidas
+on:
+  pull_request:
+    paths:
+      - 'src/competicoes/**'
+      - 'src/treinador/copasEscolha.js'
+      - 'src/treinador/competicoesTecnico.js'
+      - 'src/treinador/tecnico.js'
+      - 'src/completo/copasPersistentes.js'
+      - 'src/jogador/**'
+      - 'src/comum/**'
+      - 'tests/copa-48-*.test.mjs'
+      - 'tests/regras-mundial-48-e-motor-2026.test.mjs'
+      - 'tests/estatisticas-copa-jogador.test.mjs'
+      - 'tests/desempate-mundial-48.test.mjs'
+      - 'tests/chave-mundial-495.test.mjs'
+      - 'tests/regulamentos-ida-volta-integrados.test.mjs'
+      - 'tests/validar-resultado-regulamento.test.mjs'
+      - 'tests/desempate-por-competicao.test.mjs tests/validar-resultado-regulamento.test.mjs'
+      - '.github/workflows/validar-copa-mundo-48.yml'
+  workflow_dispatch:
+jobs:
+  regressao-mundial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar dependências
+        run: npm install --no-audit --no-fund
+      - name: Testar formato, ida e volta, placares e estatísticas
+        run: node --test tests/copa-48-placares.test.mjs tests/copa-48-robustez.test.mjs tests/regras-mundial-48-e-motor-2026.test.mjs tests/estatisticas-copa-jogador.test.mjs tests/desempate-mundial-48.test.mjs tests/chave-mundial-495.test.mjs tests/regulamentos-ida-volta-integrados.test.mjs tests/desempate-por-competicao.test.mjs tests/copas-persistentes.test.mjs tests/competicoes-tecnico.test.mjs
+      - name: Verificar build de produção
+        run: npm run build

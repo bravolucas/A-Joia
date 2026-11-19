@@ -2,6 +2,7 @@
    da temporada, ano sem clube, Copa do Mundo com a seleção, personagens que voltam,
    técnico rival e metas de carreira. Tudo aqui é determinístico a partir do save. */
 import { NACIONALIDADES } from '../dados/data.js';
+import {simularCampanhaCopa,resumoCampanhaCopa} from './copasEscolha.js';
 
 const limitar = (n, min, max) => Math.max(min, Math.min(max, n));
 export const hashTecnico = s => [...String(s)].reduce((n, c) => Math.imul(n ^ c.charCodeAt(0), 16777619) >>> 0, 2166136261);
@@ -175,40 +176,17 @@ function partidaSelecao(a, b, rng, mataMata) {
   const [ga, gb] = res === 'E' ? [gp, gp] : res === 'V' ? [gv, gp] : [gp, gv];
   return { casa: a.nome, fora: b.nome, golsCasa: ga, golsFora: gb, vencedor: res === 'E' ? null : res === 'V' ? a.nome : b.nome, penaltis };
 }
-/** Copa do Mundo da seleção comandada pelo treinador: grupo de 4 e mata-mata de 16. */
-export function simularCopaSelecaoTecnico(convite, ovr, semente) {
-  const rng = geradorTecnico(semente);
-  const forca = limitar(convite.forca + Math.round((ovr - 60) * 0.1), 50, 99);
-  const eu = { nome: convite.selecao, forca };
-  const outras = NACIONALIDADES.filter(n => n.id !== convite.nac && n.forcaSelecao).map(n => ({ nome: n.label, forca: n.forcaSelecao }));
-  const sortear = (min, max, usados) => { const pool = outras.filter(x => x.forca >= min && x.forca <= max && !usados.has(x.nome)); const x = pool[Math.floor(rng() * pool.length)] || outras.find(o => !usados.has(o.nome)); usados.add(x.nome); return x; };
-  const usados = new Set();
-  const grupo = [eu, sortear(84, 95, usados), sortear(74, 84, usados), sortear(55, 75, usados)];
-  const tabela = new Map(grupo.map(x => [x.nome, { nome: x.nome, pontos: 0, golsPro: 0, golsContra: 0, vitorias: 0 }]));
-  const jogosGrupo = [];
-  for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) {
-    const jogo = { ...partidaSelecao(grupo[i], grupo[j], rng, false), fase: 'Fase de grupos', rodada: 1 };
-    jogosGrupo.push(jogo);
-    const a = tabela.get(jogo.casa), b = tabela.get(jogo.fora);
-    a.golsPro += jogo.golsCasa; a.golsContra += jogo.golsFora; b.golsPro += jogo.golsFora; b.golsContra += jogo.golsCasa;
-    if (!jogo.vencedor) { a.pontos++; b.pontos++; } else { const w = tabela.get(jogo.vencedor); w.pontos += 3; w.vitorias++; }
-  }
-  const classificacao = [...tabela.values()].sort((a, b) => b.pontos - a.pontos || (b.golsPro - b.golsContra) - (a.golsPro - a.golsContra) || b.golsPro - a.golsPro);
-  const forcas = Object.fromEntries([eu, ...outras].map(x => [x.nome, x.forca]));
-  const torneio = { nome: 'Copa do Mundo', tipo: 'copaMundo', selecao: convite.selecao, participantes: 32, forcas,
-    grupos: [{ grupo: 'A', jogos: jogosGrupo, classificacao }], fases: [], campeao: null, faseUsuario: 'Eliminado na fase de grupos', jogosUsuario: jogosGrupo.filter(j => j.casa === eu.nome || j.fora === eu.nome) };
-  if (classificacao.findIndex(x => x.nome === eu.nome) > 1) return torneio;
-  const nomesFase = ['Oitavas de final', 'Quartas de final', 'Semifinal', 'Final'];
-  const faixas = [[74, 86], [80, 90], [84, 95], [86, 99]];
-  for (let f = 0; f < 4; f++) {
-    const adv = sortear(faixas[f][0], faixas[f][1], usados);
-    const jogo = { ...partidaSelecao(eu, adv, rng, true), fase: nomesFase[f], rodada: f + 1 };
-    torneio.fases.push({ fase: nomesFase[f], rodada: f + 1, jogos: [jogo] });
-    torneio.jogosUsuario.push(jogo);
-    if (jogo.vencedor !== eu.nome) { torneio.faseUsuario = nomesFase[f] === 'Final' ? 'Final' : `Eliminado: ${nomesFase[f].toLowerCase()}`; torneio.campeao = f === 3 ? adv.nome : null; return torneio; }
-  }
-  torneio.campeao = eu.nome; torneio.faseUsuario = 'Campeão';
-  return torneio;
+/** Copa de 48 seleções, com 12 grupos reais e quadro completo de 32 classificados. */
+export function simularCopaSelecaoTecnico(convite,ovr,semente){
+ const forca=limitar(convite.forca+Math.round((ovr-60)*.1),50,99);
+ const eu={nome:convite.selecao,forca};
+ const rng=geradorTecnico(semente);
+ const outras=NACIONALIDADES.filter(n=>n.id!==convite.nac&&n.forcaSelecao).map(n=>({nome:n.label,forca:n.forcaSelecao}));
+ const participantes=[eu,...outras.map(x=>({x,p:x.forca-8*Math.log(-Math.log(Math.max(Number.EPSILON,rng())))})).sort((a,b)=>b.p-a.p).slice(0,47).map(y=>y.x)];
+ const camp=simularCampanhaCopa({nome:'Copa do Mundo',tipo:'copaMundo',usuario:eu.nome,forcaUsuario:forca,
+   clubes:participantes,ano:convite.ano??2026,formato:'selecao48',seed:semente});
+ camp.selecao=convite.selecao;
+ return resumoCampanhaCopa(camp);
 }
 
 /* ---------- Metas de carreira ---------- */

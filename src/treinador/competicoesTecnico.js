@@ -1,4 +1,8 @@
 import { riscoEstiloTecnico } from './taticasTecnico.js';
+import {mediasGols,amostrarPoisson} from '../competicoes/motorPlacares.js';
+import {temIdaVolta,regulamentoConhecidoIdaVolta} from '../competicoes/regrasIdaVolta.js';
+import {aplicarProrrogacaoAgregado} from '../competicoes/prorrogacaoMata.js';
+import {regraDesempateCopa,vencedorPorGolsFora} from '../competicoes/desempatePorCompeticao.js';
 const limitar = (n, min, max) => Math.max(min, Math.min(max, n));
 const sorteio = () => Math.random();
 const forca = (clube) => Number(clube?.forca ?? clube?.elenco ?? 50);
@@ -12,12 +16,7 @@ function embaralhar(lista, rng) {
   return out;
 }
 
-function poisson(media, rng) {
-  const limite = Math.exp(-limitar(media, 0.05, 5));
-  let produto = 1, gols = 0;
-  do { gols++; produto *= rng(); } while (produto > limite && gols < 12);
-  return gols - 1;
-}
+const poisson=amostrarPoisson;
 
 /** A tática pertence somente ao clube do usuário, inclusive quando visitante. */
 export function mediasPartidaCopaTecnico(casa,fora,clubeUsuario,bonusTecnico=0,campoNeutro=false){
@@ -29,8 +28,9 @@ export function mediasPartidaCopaTecnico(casa,fora,clubeUsuario,bonusTecnico=0,c
  const risco=tatica?riscoEstiloTecnico(tatica.estilo,diferencaUsuario)/.008:0;
  const diferenca=diferencaBase+(usuarioCasa?risco:usuarioFora?-risco:0);
  const ritmo=tatica?.estilo==='ofensivo'?1.2:tatica?.estilo==='defensivo'?.8:1;
- const mediaCasa=(campoNeutro?limitar(1.235+diferenca*.0105,.275,2.6):limitar(1.35+diferenca*.012,.3,2.8))*ritmo;
- const mediaFora=(campoNeutro?limitar(1.235-diferenca*.0105,.275,2.6):limitar(1.12-diferenca*.009,.25,2.4))*ritmo;
+ const m=mediasGols(forca(casa)+(usuarioCasa?bonusTecnico+ajuste:0)+(usuarioCasa?risco:usuarioFora?-risco:0),
+  forca(fora)+(usuarioFora?bonusTecnico+ajuste:0),{neutro:campoNeutro,ritmo});
+ const mediaCasa=m.casa,mediaFora=m.fora;
  return {mediaCasa,mediaFora,diferenca,...(tatica?{planoTatico:{estilo:tatica.estilo,formacao:tatica.formacao}}:{})};
 }
 function criarPartida(casa, fora, clubeUsuario, bonusTecnico, rng, desempatar = false, opcoes = {}) {
@@ -237,21 +237,26 @@ function nomeFaseEliminatoria(quantidadeClubes) {
   return nomes[quantidadeClubes] || `Fase preliminar · ${quantidadeClubes} clubes`;
 }
 
-function criarConfrontoIdaVolta(casa, fora, nomeUsuario, bonusTecnico, rng) {
-  const ida = criarPartida(casa, fora, nomeUsuario, bonusTecnico, rng);
-  const volta = criarPartida(fora, casa, nomeUsuario, bonusTecnico, rng);
-  const golsCasa = ida.golsCasa + volta.golsFora;
-  const golsFora = ida.golsFora + volta.golsCasa;
-  let vencedor = golsCasa > golsFora ? casa.nome : golsFora > golsCasa ? fora.nome : null;
-  let penaltis = null;
-  if (!vencedor) {
-    const {diferenca}=mediasPartidaCopaTecnico(casa,fora,nomeUsuario,bonusTecnico,true);
-    vencedor = rng() < limitar(0.5 + diferenca * 0.003, 0.3, 0.7) ? casa.nome : fora.nome;
-    penaltis = vencedor === casa.nome ? 'Casa' : 'Fora';
-  }
-  // O vencedor pertence ao confronto; os resultados de cada partida permanecem intactos.
-  return { casa: casa.nome, fora: fora.nome, golsCasa, golsFora, vencedor, penaltis,
-    ...(ida.planoTatico ? { planoTatico: ida.planoTatico } : {}), agregado: true, partidas: [{ ...ida, etapa: 'Ida' }, { ...volta, etapa: 'Volta' }] };
+function criarConfrontoIdaVolta(casa, fora, nomeUsuario, bonusTecnico, rng, competicao={}) {
+ const ida=criarPartida(casa,fora,nomeUsuario,bonusTecnico,rng);
+ const volta90=criarPartida(fora,casa,nomeUsuario,bonusTecnico,rng);
+ // A regra da Concacaf compara gols fora só nos 180 minutos regulamentares.
+ const venceuFora=vencedorPorGolsFora(ida,volta90,competicao);
+ const volta=!venceuFora&&regraDesempateCopa(competicao).prorrogacao
+  ?aplicarProrrogacaoAgregado(ida,volta90,forca(fora),forca(casa),rng):volta90;
+ const golsCasa=ida.golsCasa+volta.golsFora,golsFora=ida.golsFora+volta.golsCasa;
+ let vencedor=golsCasa>golsFora?casa.nome:golsFora>golsCasa?fora.nome:venceuFora;
+ let penaltis=null;
+ if(!vencedor){
+  const {diferenca}=mediasPartidaCopaTecnico(casa,fora,nomeUsuario,bonusTecnico,true);
+  vencedor=rng()<limitar(.5+diferenca*.003,.3,.7)?casa.nome:fora.nome;
+  penaltis=vencedor===casa.nome?'Casa':'Fora';
+ }
+ return {casa:casa.nome,fora:fora.nome,golsCasa,golsFora,vencedor,penaltis,
+  ...(ida.planoTatico?{planoTatico:ida.planoTatico}:{}),
+  ...(venceuFora?{criterio:'gols-fora'}:{}),
+  ...(volta.prorrogacao?{prorrogacao:volta.prorrogacao}:{}),
+  agregado:true,partidas:[{...ida,etapa:'Ida'},{...volta,etapa:'Volta'}]};
 }
 
 function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng, formato = {}) {
@@ -273,11 +278,18 @@ function jogarEliminatoria(clubes, nomeUsuario, bonusTecnico, rng, formato = {})
         jogos.push({ bye: casa.nome, vencedor: casa.nome, fase, rodada: rodadaNumero });
         continue;
       }
-      const idaVolta = rodada.length === 2 ? formato.finalIdaVolta === true : formato.mataMataIdaVolta === true;
-      const confronto = idaVolta ? criarConfrontoIdaVolta(casa, fora, nomeUsuario, bonusTecnico, rng)
+      // Regulamentos reconhecidos são a fonte de verdade: uma flag genérica
+      // jamais pode transformar uma fase de jogo único em ida e volta.
+      const regrasConhecidas=regulamentoConhecidoIdaVolta(formato.nomeCompeticao);
+      const idaVolta=regrasConhecidas
+        ?temIdaVolta({nome:formato.nomeCompeticao,ano:formato.ano||2026,tamanho:rodada.length,preContinental:formato.preContinental})
+        :rodada.length===2?formato.finalIdaVolta===true:formato.mataMataIdaVolta===true;
+      const criterio={nome:formato.nomeCompeticao,ano:formato.ano||2026,tamanho:rodada.length};
+      const confronto = idaVolta ? criarConfrontoIdaVolta(casa, fora, nomeUsuario, bonusTecnico, rng,criterio)
         : criarPartida(casa, fora, nomeUsuario, bonusTecnico, rng, true, {
           campoNeutro: rodada.length === 2 && formato.finalCampoNeutro === true,
-          prorrogacao: rodada.length === 2 && formato.finalProrrogacao === true
+          prorrogacao: regrasConhecidas?regraDesempateCopa(criterio).prorrogacao
+           : rodada.length === 2 && formato.finalProrrogacao === true
         });
       jogos.push({ ...confronto, fase, rodada: rodadaNumero });
     }
@@ -300,7 +312,7 @@ export function simularCopaNacionalTecnico({ clubes, nomeUsuario, pais, forcaUsu
   if (participantes.length < 2 || !participantes.some(c => c.nome === nomeUsuario)) {
     return { nome, tipo: 'copa', participantes: 0, campeao: null, faseUsuario: 'Não classificado', fases: [], jogosUsuario: [] };
   }
-  return { nome, tipo: 'copa', participantes: participantes.length, ...jogarEliminatoria(participantes, nomeUsuario, bonusTecnico, rng, formato) };
+  return { nome, tipo: 'copa', participantes: participantes.length, ...jogarEliminatoria(participantes, nomeUsuario, bonusTecnico, rng, {...formato,nomeCompeticao:nome}) };
 }
 
 export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forcaUsuario, nome, bonusTecnico = 0, tatica = null, participantesQualificados = [], formato = {}, rng = sorteio }) {
@@ -348,7 +360,9 @@ export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forca
   });
 
   const eliminatoria = jogarEliminatoria(classificados, nomeUsuario, bonusTecnico, rng, {
-    mataMataIdaVolta: nome === 'Copa Libertadores',
+    // Somente torneios fictícios sem regulamento conhecido utilizam flags manuais.
+    mataMataIdaVolta: !regulamentoConhecidoIdaVolta(nome)&&/Libertadores|Champions League|Europa League|Conference League|Sul-Americana/i.test(nome),
+    nomeCompeticao:nome,
     finalCampoNeutro: nome === 'Copa Libertadores', finalProrrogacao: nome === 'Copa Libertadores', ...formato
   });
   const faseUsuario = eliminatoria.faseUsuario === 'Não participou' && grupos.length

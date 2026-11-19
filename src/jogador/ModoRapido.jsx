@@ -17,6 +17,7 @@ import CopaEscolha,{MarcoLiga} from '../treinador/CopaEscolha.jsx';
 import {chaveEstadualJogador,escolherEstadualJogador} from './estadualJogador.js';
 import {resolverCopaEscolhaTecnico} from '../treinador/tecnico.js';
 import {jogosDoGrupo,tabelaGrupoCopa,empateGrupo} from './gruposCopa.js';
+import EstatisticasPosPartida from '../comum/EstatisticasPosPartida.jsx';
 import FechamentoTemporada from './FechamentoTemporada.jsx';
 import {FasesTemporada,PainelJornada,EcosDaTemporada,ProjetoOferta,CenasClube,AlbumJornada,PrimeiraSelecao,CelebracaoLance,ReacaoAntigoClube,ConsultaElencoCopa} from './JornadaUI.jsx';
 import {mudarPosicao,reinventarVeterano} from './posicoesCarreira.js';
@@ -46,6 +47,7 @@ import CarreiraTecnico from "../treinador/CarreiraTecnico.jsx";
 import { carreiraTecnicoEncerrada, pedirDemissaoTecnico, aposentarTecnico, responderParadaTecnico, resolverFinalTecnico, responderConviteSelecaoTecnico, comprarMelhoriaTecnico, iniciarCarreiraTecnico, iniciarNoClubeIdolo, atualizarPropostasCoerentesTecnico, escolherPretemporadaRapidaTecnico, responderIntervencaoTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico } from "../treinador/tecnico.js";
 import Lottie from "../comum/Lottie.jsx";
 import { tocar, apito, torcida, somLigado, alternarSom } from "../comum/som.js";
+import ResumoIndividualPartida from './ResumoIndividualPartida.jsx';
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import confetti from "canvas-confetti";
@@ -2552,16 +2554,17 @@ function DesafioOvr({ c, resultado, onEscolher, onContinuar }) {
 /* ---------- Copa do Mundo: tela própria, fase a fase ---------- */
 const FAIXA_COPA = { baixo: { txt: "Seguro", cor: "#4ADE80" }, alto: { txt: "Holofote", cor: "#FB923C" }, ouro: { txt: "1x por Copa", cor: "#EBC557" } };
 const CURTO_FASE = ["Grupos", "Oitavas", "Quartas", "Semi", "Final"];
+const CURTO_MUNDIAL_48 = ["Grupos", "16 avos", "Oitavas", "Quartas", "Semi", "Final"];
 const corRes = (r) => (r === "V" ? "#4ADE80" : r === "E" ? "#A1A1AA" : "#F87171");
 function LinhaJogoCopa({ j, nac, i = 0 }) {
   return (
-    <div className="flex items-center gap-2.5 py-2 border-t border-white/[.06] first:border-0 cp-surge" style={{ animationDelay: `${i * 0.18}s` }}>
-      <span className="w-14 shrink-0 text-[11px] font-bold uppercase tracking-wide text-[#71717A]">{CURTO_FASE[j.fase]}</span>
+    <div className="flex flex-wrap items-center gap-2.5 py-2 border-t border-white/[.06] first:border-0 cp-surge" style={{ animationDelay: `${i * 0.18}s` }}>
+      <span className="w-14 shrink-0 text-[11px] font-bold uppercase tracking-wide text-[#71717A]">{(j.mundial?CURTO_MUNDIAL_48:CURTO_FASE)[j.fase]}</span>
       <Bandeira nac={nac} size={18} />
       <span className="text-[16px] font-black tabular-nums shrink-0" style={{ color: corRes(j.res) }}>{j.gp} x {j.gc}</span>
       <Bandeira nac={j.adv.id} size={18} />
       <span className="flex-1 min-w-0 truncate text-[14px] font-semibold text-[#E4E4E7]">{j.adv.label}{j.penaltis ? <span className="text-[#71717A] font-normal"> · pên.</span> : null}</span>
-      {(j.gols > 0 || j.assist > 0) && <span className="shrink-0 text-[12px] font-bold text-[#FDE68A]">{j.gols > 0 ? `${j.gols} gol${j.gols > 1 ? "s" : ""}` : ""}{j.gols > 0 && j.assist > 0 ? " · " : ""}{j.assist > 0 ? `${j.assist} assist.` : ""}</span>}
+      <div className="basis-full"><ResumoIndividualPartida jogo={j} titulo={null}/></div>
     </div>
   );
 }
@@ -2588,6 +2591,7 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
   };
   const seguir = () => { const novo = jogada.card; setJogada(null); onAvancar(novo); };
   const faseAtual = k.etapa === "convocacao" ? -1 : k.etapa === "grupos" ? 0 : k.fase;
+  const fasesVisiveis=k.tipo==="copaMundo"?CURTO_MUNDIAL_48:CURTO_FASE;
   const chancesDe = (op, r) => k.etapa==="grupos" ? [{p:op.p,d:1,marca:"Vitória"},{p:empateGrupo(op.p),d:0,marca:"Empate"},{p:Math.max(0,1-op.p-empateGrupo(op.p)),d:-1,marca:"Derrota"}].filter(x=>x.p>0) : (op.p >= 1 ? [{ p: 1, d: 1, marca: r.venceu ? "Vitória" : "Vence" }]
     : [{ p: op.p, d: 1, marca: k.etapa === "convocacao" ? "Convocado" : "Vence" }, { p: 1 - op.p, d: -1, marca: k.etapa === "convocacao" ? "Fora" : "Cai" }]);
   const r = jogada?.res;
@@ -2618,8 +2622,8 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
 
       {k.convocado&&<ConsultaElencoCopa elenco={jogada?.card?.copa?.elenco||k.elenco}/>}
       {/* caminho até a taça */}
-      <div className="grid gap-1" style={{gridTemplateColumns:`repeat(${6-(k.primeiraFaseMata||1)},minmax(0,1fr))`}} aria-label="Fases da Copa">
-        {CURTO_FASE.map((f, i) => {
+      <div className="grid gap-1" style={{gridTemplateColumns:`repeat(${fasesVisiveis.length-(k.primeiraFaseMata||1)+1},minmax(0,1fr))`}} aria-label="Fases da Copa">
+        {fasesVisiveis.map((f, i) => {
           if(i>0&&i<(k.primeiraFaseMata||1))return null;
           const feito = i < faseAtual, agora = i === faseAtual;
           return (
@@ -2675,7 +2679,7 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
 
       {k.convocado&&(k.etapa==="grupos"||k.jogosGrupoOutros)&&<details className="cp-card copa-grupo" >
         <summary>Grupo · {jogosDoGrupo(jogada?.card?.copa||k).length}/3 jogos · {tabela.find(t=>t.id===k.nac)?.p||0} pts</summary>
-        <table aria-label="Classificação do grupo da Copa"><thead><tr><th>Seleção</th><th>J</th><th>PTS</th><th>SG</th></tr></thead><tbody>{tabela.map((t,i)=><tr key={t.id} data-jogador={t.id===k.nac}><td><span>{i+1}º</span> <Bandeira nac={t.id} size={16}/> {t.label}</td><td>{t.j}</td><td>{t.p}</td><td>{t.sg>0?"+":""}{t.sg}</td></tr>)}</tbody></table><small>Dois primeiros avançam. Desempate: saldo, gols marcados e sorteio fixo. Formato do jogo: quatro seleções por grupo.</small>
+        <table aria-label="Classificação do grupo da Copa"><thead><tr><th>Seleção</th><th>J</th><th>PTS</th><th>SG</th></tr></thead><tbody>{tabela.map((t,i)=><tr key={t.id} data-jogador={t.id===k.nac}><td><span>{i+1}º</span> <Bandeira nac={t.id} size={16}/> {t.label}</td><td>{t.j}</td><td>{t.p}</td><td>{t.sg>0?"+":""}{t.sg}</td></tr>)}</tbody></table><small>{k.tipo==='copaMundo'?'Avançam os dois primeiros e os oito melhores terceiros dos 12 grupos. Desempate: pontos, saldo e gols marcados.':'Dois primeiros avançam. Desempate: saldo, gols marcados e sorteio fixo.'}</small>
       </details>}
 
       {/* resultado da escolha */}
@@ -2690,6 +2694,7 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
           {revelado && (
             <div className="cp-copa-resumo flex flex-col items-center gap-3 cp-surge" style={r.etapa === "grupos" ? { animationDelay: ".6s" } : undefined}>
               {r.placar && <div className="display text-[34px] leading-none" style={{ color: r.venceu ? "#4ADE80" : r.empate?"#FDE047":"#F87171" }}>{r.placar}</div>}
+              {r.jogo&&<EstatisticasPosPartida jogo={r.jogo} className="w-full rounded-xl border border-white/10 bg-black/20 p-3"/>}
               <span className="cp-pop text-[14px] font-extrabold uppercase tracking-wide px-3 py-1 rounded-full" style={{ color: r.venceu ? "#1A1405" : "#fff", background: r.venceu ? "linear-gradient(90deg,#EAB308,#FDE047)" : r.empate?"#A16207":"#DC2626" }}>{jogada.card.copa.campeao ? "🏆 Campeão da competição" : r.marca}</span>
               <p className="text-[18px] leading-snug text-[#F4F4F5] text-center font-medium px-1">{r.texto}</p>
               {r.outro&&<p className="text-[12px] text-[#A1A1AA]">Outro jogo: {r.outro.mandante.label} {r.outro.gp} x {r.outro.gc} {r.outro.visitante.label}</p>}

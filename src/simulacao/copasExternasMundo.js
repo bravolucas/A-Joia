@@ -18,7 +18,7 @@ export function simularSelecoesMundo(c,a){
   torneios.push({...resumoCampanhaCopa(camp),selecao:true,origem:'calendario-mundo'});
  };
  const eliminada=c.tecnico?.tipoEquipe==='selecao'&&c.tecnico.classificacaoSelecao?.copa===a.ano&&!c.tecnico.classificacaoSelecao.classificado?c.tecnico.selecao:null;
- if(a.ano%4===2)simular('Copa do Mundo','copaMundo',SELECOES_TECNICO.filter(n=>n.nac!==eliminada).sort((a,b)=>b.elenco-a.elenco||a.nome.localeCompare(b.nome)).slice(0,32),'selecao32');
+ if(a.ano%4===2)simular('Copa do Mundo','copaMundo',SELECOES_TECNICO.filter(n=>n.nac!==eliminada).sort((a,b)=>b.elenco-a.elenco||a.nome.localeCompare(b.nome)).slice(0,48),'selecao48');
  for(const [conf,nome] of Object.entries(CONTINENTAIS_TECNICO))if(continentalAno(conf,a.ano))simular(nome,'continentalSelecao',SELECOES_TECNICO.filter(n=>n.confederacao===conf),'mata');
  return torneios;
 }

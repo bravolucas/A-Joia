@@ -12,5 +12,13 @@ for(const [nome,usuario,adversario] of [['Libertadores','Flamengo','Bolívar'],[
  await page.setViewportSize({width:390,height:844});await page.emulateMedia({reducedMotion:'reduce'});const erros=[];page.on('pageerror',e=>erros.push(e.message));const c=criarJogador({nome:'Novo Continente',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',codigo:'EXTRAS-UI'});c.clubeNome=usuario;c.ano=2030;c.flags.baseEscolhida=true;c.desafioAno=c.ano;
  const rival=clubeInternacional(adversario),eu=CLUBES.find(x=>x.nome===usuario),cp=criarCampanhaCopa({nome,usuario,forcaUsuario:eu.forca,clubes:[eu,rival],ano:c.ano,formato:'mata',seed:'EXTRAS-UI'});const card={ano:c.ano,clube:usuario,ovr:90,titulos:[],destaques:[],calendarioCopas:criarAgenda([cp],{ano:c.ano,clube:usuario})};
  await page.goto(url);await instalarSave(page,((s)=>(s))({v:1,etapa:'copasClubes',c,card,auto:false}),"ajoia_rapido_v1");await page.reload();await page.getByRole('button',{name:/Continuar · Novo Continente/}).click();const d=page.getByRole('dialog',{name:`Copa em jogo · ${nome}`});await expect(d.locator('.cce-confronto')).toContainText(adversario);await expect(d.locator('.cce-confronto')).toContainText(`Força ${rival.forca}`);const escudo=d.locator('.cce-confronto > div').last().locator('img');await expect(escudo).toBeVisible();await expect.poll(()=>escudo.evaluate(e=>e.complete&&e.naturalWidth>0)).toBe(true);
- await page.reload();await page.getByRole('button',{name:/Continuar · Novo Continente/}).click();await expect(d.locator('.cce-confronto')).toContainText(adversario);await d.locator('.cce-opcoes button').first().click();await expect(d.getByRole('status')).toBeVisible();const salvo=await lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo));expect(salvo.card.calendarioCopas.campeonatos[0].forcas[adversario]).toBe(rival.forca);expect(erros).toEqual([]);await page.screenshot({path:`test-results/clubes-extras-${adversario}.png`,fullPage:true});
+ await page.reload();await page.getByRole('button',{name:/Continuar · Novo Continente/}).click();await expect(d.locator('.cce-confronto')).toContainText(adversario);await d.locator('.cce-opcoes button').first().click();
+ await expect(d.locator('.cce-cinematica')).toHaveCount(0,{timeout:15000});
+ // Um empate no mata-mata pode exigir uma decisão separada por pênaltis.
+ if(!(await d.getByRole('status').count())){
+  await expect(d.locator('.cce-pressao')).toContainText('PÊNALTIS');
+  await d.locator('.cce-opcoes button').first().click();
+  await expect(d.locator('.cce-cinematica')).toHaveCount(0,{timeout:15000});
+ }
+ await expect(d.getByRole('status')).toBeVisible();const salvo=await lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo));expect(salvo.card.calendarioCopas.campeonatos[0].forcas[adversario]).toBe(rival.forca);expect(erros).toEqual([]);await page.screenshot({path:`test-results/clubes-extras-${adversario}.png`,fullPage:true});
 });

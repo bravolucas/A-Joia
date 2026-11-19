@@ -1,4 +1,6 @@
 import {COPAS_NACIONAIS} from '../competicoes/regrasCopasRapidas.js';
+import {simularPlacarRealista} from '../competicoes/motorPlacares.js';
+import EstatisticasPosPartida from '../comum/EstatisticasPosPartida.jsx';
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
 import {prepararMundoTemporada,creditarCampeoesCalendario,registrarPremioCalendario,clubesDoCompleto,vagasProximaTemporada,aplicarVagaTemporada,ajustarCardNovoClube} from './mundoTemporada.js';
 import {estatisticasDasPartidas} from '../simulacao/estatisticasMundo.js';
@@ -941,10 +943,8 @@ function gerarCalendarioLiga(clube, todosClubes, ligaAtual) {
 function simularPartidaLiga(casa, fora, clubeJogadorNome, forcaClubeJogador, ovrJogador) {
   let forcaCasa = casa.nome === clubeJogadorNome ? forcaClubeJogador : casa.forca;
   let forcaFora = fora.nome === clubeJogadorNome ? forcaClubeJogador : fora.forca;
-  forcaCasa += 4; // vantagem de mando de campo
-  const diferenca = forcaCasa - forcaFora;
-  const golsCasa = poisson(clamp(1.35 + diferenca * 0.045, 0.25, 4));
-  const golsFora = poisson(clamp(1.35 - diferenca * 0.045, 0.25, 4));
+  // O motor estatístico já computa a vantagem do mandante.
+  const {golsCasa,golsFora} = simularPlacarRealista(forcaCasa,forcaFora,Math.random);
   return { golsCasa, golsFora };
 }
 function criarTabelaZerada(liga, clubes = CLUBES) {
@@ -2882,7 +2882,7 @@ function resolverTemporada(c, extraStats) {
     const anulado = Math.random() < 0.5;
     if (!anulado) return { estado, evento: { ...evento, texto: `${evento.texto} 📺 O VAR revisou e confirmou o lance.` } };
     const estadoCorrigido = { ...estado, golsMeu: estado.golsMeu - (evento.meuTime ? 1 : 0), golsAdv: estado.golsAdv - (evento.meuTime ? 0 : 1) };
-    return { estado: estadoCorrigido, evento: { ...evento, tipo: "var", texto: `📺 VAR chamado — o gol aos ${evento.minuto}' foi ANULADO após revisão!` } };
+    return { estado: estadoCorrigido, evento: { ...evento, tipo: "var", golAnulado:true, meuTime:!!evento.meuTime, meu:!!evento.meu, texto: `📺 VAR chamado — o gol aos ${evento.minuto}' foi ANULADO após revisão!` } };
   }
   function processarProximoLance(decisaoId) {
     setPartidaAoVivo((pv) => {
@@ -3114,6 +3114,7 @@ function resolverTemporada(c, extraStats) {
       golsMinha, assistMinha, ...(c.posicao === "GOL" ? {defesas: eventos.filter(e => e.tipo === "defesa" && e.meu).length, cleanSheets: estado.golsAdv === 0 ? 1 : 0} : {}), numero: ta.rodadaAtual + 1,
       casa: ctx.souCasa, competicao: "liga", classico: ctx.classico, postura: post,
       amarelo, vermelho, segundoAmarelo,
+      golsAnulados:eventos.filter(e=>e.tipo==='var'&&e.golAnulado&&e.meu).length,
       suspensaoGerada: susp.suspendeu, motivoSuspensao: susp.motivo,
       nota: clamp(nota - (vermelho ? 1.2 : 0), 4.5, 10), eventos,
     };
@@ -4765,9 +4766,7 @@ function resolverTemporada(c, extraStats) {
                         <div className="mt-3 pt-2.5 border-t border-white/10">
                           {ta ? (<>
                             <div className="text-xs text-zinc-400">Último jogo: {carreira.temporadaAndamento.ultimoResultado ? `${carreira.temporadaAndamento.ultimoResultado.golsMeu}x${carreira.temporadaAndamento.ultimoResultado.golsAdv} x ${carreira.temporadaAndamento.ultimoResultado.adversario}` : "—"}</div>
-                            {carreira.temporadaAndamento.ultimoResultado && (carreira.temporadaAndamento.ultimoResultado.golsMinha > 0 || carreira.temporadaAndamento.ultimoResultado.assistMinha > 0) && (
-                              <div className="text-[10px] text-emerald-400 mt-0.5">{carreira.temporadaAndamento.ultimoResultado.golsMinha > 0 ? `⚽${carreira.temporadaAndamento.ultimoResultado.golsMinha} ` : ""}{carreira.temporadaAndamento.ultimoResultado.assistMinha > 0 ? `🎯${carreira.temporadaAndamento.ultimoResultado.assistMinha}` : ""}</div>
-                            )}
+                            {carreira.temporadaAndamento.ultimoResultado&&<EstatisticasPosPartida jogo={carreira.temporadaAndamento.ultimoResultado} className="mt-2 rounded-md bg-zinc-900/70 p-2"/>}
                           </>) : (
                             <div className="text-xs text-zinc-400">Última temporada: {ultima ? `${ultima.jogos} jogos · nota ${ultima.nota}` : "—"}</div>
                           )}

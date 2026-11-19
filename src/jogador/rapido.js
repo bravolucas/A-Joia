@@ -1890,6 +1890,12 @@ function fecharTemporadaBase(c0, card0) {
   simularDefesas(c,card);
   registrarEstatisticasCompeticoes(c,card);
   registrarAnoHistoria(c,card);
+  // Entregue ao elenco da IA os títulos apurados pelo próprio calendário.
+  // O crédito individual exige participação efetiva na competição campeã.
+  card.campeoesCalendarioMundo=(c.historiaFutebol?.titulos||[])
+    .filter(t=>t.ano===card.ano&&t.clube&&t.nome&&
+      ['liga','copa','continental','mundial','estadual'].includes(t.tipo))
+    .map(t=>({ano:t.ano,nome:t.nome,clube:t.clube,tipo:t.tipo}));
   // O calendário fecha primeiro. Só depois dos placares definitivos
   // registramos o único vencedor oficial (inclusive quando é o usuário).
   c.mundo = estatisticasDasPartidas(simularTemporadaMundo(c.mundo,Math.random,{
@@ -1898,10 +1904,18 @@ function fecharTemporadaBase(c0, card0) {
   }),antes.mundo,card,c.codigo);
   atualizarRecordesUniverso(c,card,antes.mundo);
   const pesoTit = pesoTitulosBolaDeOuro(card.titulos);
+  const jogosDoClube=(card.classificacoesMundo?.[card.ligaId]?.jogos||[])
+    .filter(j=>j.casa===card.clube||j.fora===card.clube);
+  const csLiga=jogosDoClube.filter(j=>j.casa===card.clube
+    ?j.golsFora===0:j.golsCasa===0).length;
+  const csJogador=c.posicao==='GOL'
+    ?(Number.isFinite(card.cleanSheets)?card.cleanSheets
+      :Math.min(card.jogos,Math.round(csLiga*(card.share??0))))
+    :0;
   const meuCard = {porCompeticao:card.porCompeticao,clube:card.clube,posicao:c.posicao,
     ovr:card.ovr,gols:card.gols,assist:card.assist,nota:card.nota||6,
     ligaMult:ligaDe(card.ligaId).mult,jogos:card.jogos,
-    defesas:card.defesas,cleanSheets:card.cleanSheets};
+    defesas:card.defesas,cleanSheets:csJogador};
   let ranking = rankingBolaDeOuro(c.mundo,meuCard,c.nome,pesoTit);
   const rivalTemporada = c.rival ? temporadaDoRival(c.rival,card.idade,{ano:card.ano,ganhouCopa:card.titulos.some(t=>t.tipo==='copaMundo')}) : null;
   if (rivalTemporada?.linha?.jogos >= 10 &&

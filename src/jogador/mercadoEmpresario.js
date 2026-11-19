@@ -44,7 +44,8 @@ export function analisarClubeEmpresario(c,clube,ovr){
  const restantes=c.contrato?.restantes??0;
  const valorBase=1000*Math.pow(1.173,ovr-60);
  const fatorIdade=c.idade<=21?1.5:c.idade<=24?1.25:c.idade<=28?1:c.idade<=31?0.65:0.35;
- const valorAtual=Math.max(50,Math.round(valorBase*fatorIdade*(1+numero(c.fama,0)/400)*numero(c.formaMercado,1)));
+ const valorMercado=Math.max(50,Math.round(valorBase*fatorIdade*(1+numero(c.fama,0)/400)));
+ const valorAtual=Math.max(50,Math.round(valorMercado*numero(c.formaMercado,1)));
  const pedido=valorAtual*(0.75+0.1*Math.min(restantes,4))*(clube.forca>=85?1.15:1);
  const custo=restantes>0?Math.max(50,Math.round(Math.min(pedido,c.contrato?.multa||pedido)/50)*50):0;
  const verbaDerivada=verbaTransferenciasEuro(elenco.map(j=>({

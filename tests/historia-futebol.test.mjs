@@ -25,7 +25,7 @@ test('distribuição por competição conserva jogos, gols e assistências sem t
 });
 test('saves antigos ficam parciais; números de seleção usam os acumuladores existentes',()=>{
  const c={nac:'BRA',selecao:{jogos:150,gols:80,assist:20},temporadas:[{ano:2028,clube:'Santos',jogos:30,gols:12,assist:9},{ano:2029,clube:'Real Madrid',jogos:40,gols:20,assist:10,porCompeticao:[{nome:'Champions League',jogos:10,gols:5,assist:2}]}]};
- const d=estatisticasHistoricas(c);assert.equal(d.incompleto,true);assert.equal(d.competicoes[0].gols,5);assert.equal(d.selecao.gols,80);assert.equal(d.referencias.find(x=>x.id==='bra-gols').estado,'Superou na simulação');assert.equal(d.clubes.find(x=>x.nome==='Santos').gols,12);assert.equal(d.competicoes[0].temDefesas,false);
+ const d=estatisticasHistoricas(c);assert.equal(d.incompleto,true);assert.equal(d.competicoes[0].gols,5);assert.equal(d.selecao.gols,80);assert.equal(d.referencias.find(x=>x.id==='bra-gols').estado,'Igualou na simulação');assert.equal(d.clubes.find(x=>x.nome==='Santos').gols,12);assert.equal(d.competicoes[0].temDefesas,false);
 });
 test('ranking de atletas acumula sem duplicação anual e respeita o país e a métrica',()=>{
  const c={nome:'Você',nac:'BRA',historiaFutebol:{desde:2030},mundo:{jogadores:[{id:'a',nome:'Rival',nac:'BRA',gols:20,assist:5,jogos:30},{id:'b',nome:'Outro',nac:'ARG',gols:50,assist:30,jogos:40}]}},a={ano:2030,clube:'Santos',gols:10,assist:12,jogos:32};registrarAtletasObservados(c,a);const antes=JSON.stringify(c);registrarAtletasObservados(c,a);assert.equal(JSON.stringify(c),antes);assert.equal(lideresObservados(c,{nac:'BRA'})[0].nome,'Rival');assert.equal(lideresObservados(c,{nac:'BRA',metrica:'assist'})[0].nome,'Você');

@@ -21,8 +21,9 @@ export default function MercadoEmpresario({c,onAcao,interesses=[]}){
  const analise=useMemo(()=>alvo?diagnosticoMercadoJogador(c,alvo.nome):null,[c,alvo?.nome]);
  const sondagens=c.sondagensEmpresario||[];
  const sondagensAno=sondagens.filter(s=>s.ano===c.ano);
- const pendentes=sondagensAno.filter(s=>s.status==='aguardando');
- const statusDe=nome=>sondagensAno.find(s=>s.clube===nome)?.status;
+ const pendentes=sondagens.filter(s=>s.ano<=c.ano&&s.status==='aguardando');
+ const contatoDe=nome=>sondagensAno.find(s=>s.clube===nome)||sondagens.find(s=>s.ano===c.ano-1&&s.clube===nome&&s.status==='positivo');
+ const statusDe=nome=>contatoDe(nome)?.status;
  const avisar=(tipo,valor)=>{
   try{onAcao(tipo,valor);V(tipo==='retornos'?'O empresário trouxe as respostas dos clubes.':tipo==='negociarSondagem'?'O empresário verificou as propostas da janela.':'Seu empresário recebeu o pedido de sondagem.');}
   catch(e){V(e?.message||'Não foi possível enviar a solicitação.');}
@@ -64,6 +65,7 @@ export default function MercadoEmpresario({c,onAcao,interesses=[]}){
    {alvo.nome===c.clubeNome?<span className="me-proprio">Você já defende este clube.</span>:statusDe(alvo.nome)?<div className="me-acoes-retorno"><span className={'me-estado me-'+statusDe(alvo.nome)}>{estadoRotulo[statusDe(alvo.nome)]}</span>{statusDe(alvo.nome)==='positivo'&&<button className="me-sondar" type="button" onClick={()=>avisar('negociarSondagem',alvo.nome)}>Consultar proposta formal</button>}</div>:<button className="me-sondar" disabled={indisponivel} type="button" onClick={()=>avisar('interesse',alvo.nome)}>Pedir ao empresário para sondar este clube</button>}
   </article>}
   <div className="me-retornos">
+   {c.ultimaDevolutivaEmpresario?.ano===c.ano&&<p className="me-ultima-devolutiva" role="status">Seu empresário retornou com {c.ultimaDevolutivaEmpresario.total} resposta(s) após a temporada, sendo {c.ultimaDevolutivaEmpresario.positivas} positiva(s).</p>}
    <header><div><h4>Conversas do empresário</h4><small>Respostas desta temporada e histórico recente</small></div>{pendentes.length>0&&<button type="button" className="me-retornar" onClick={()=>avisar('retornos')}>Receber retorno ({pendentes.length})</button>}</header>
    {!sondagens.length&&<p className="me-vazio">Você ainda não procurou clubes. Escolha uma equipe acima e peça a primeira sondagem.</p>}
    {sondagens.slice(-12).reverse().map((s,i)=><article key={s.ano+'-'+s.clube+'-'+i} className="me-conversa"><div><strong><LinkEntidade tipo="clube" nome={s.clube}/></strong><small>Temporada {s.ano} · {estadoRotulo[s.status]||'Sondagem'}</small></div><p>{s.texto}</p></article>)}

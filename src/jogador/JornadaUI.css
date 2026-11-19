@@ -50,3 +50,7 @@
 .jr-sinalizado{margin-left:auto;font-size:11px;color:#f5d77a}
 .jr-interesses p{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
 .jr-interesse-nota{display:block;margin-top:6px;font-size:11px;color:#9eb5c9}
+
+/* A aba do empresário é um painel irmão sem criar outro details direto da jornada. */
+.jr-mercado-envoltura{border-top:1px solid #b8cba52b}
+.jr-mercado-envoltura>details{padding:13px}

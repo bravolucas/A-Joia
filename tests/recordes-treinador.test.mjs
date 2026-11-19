@@ -147,3 +147,16 @@ test('temporada mista não credita título da seleção ao clube nem jogos da li
  assert.equal(marca(copa,'tecnicoPontos'),undefined);
  assert.equal(marca(recordesTreinador(c,'treinador','Treinador'),'tecnicoTitulos').valor,2);
 });
+
+test('marco de vitórias do técnico atravessa clubes sem inflar números por equipe',()=>{
+ const antes=fixture();antes.tecnico.universo.anos=[2027,2028];
+ const depois=fixture();depois.tecnico.universo.anos=[2027,2028,2029];
+ const e=detectarQuebrasRecordesFutebol(antes,depois,{
+  ano:2029,escopos:[{tipo:'treinador',nome:'Lucas'}]
+ });
+ const marco=e.find(x=>x.metrica==='tecnicoVitorias');
+ assert.equal(marco.valor,67);
+ assert.equal(marco.marco,50);
+ assert.equal(marco.tipo,'treinador');
+ assert.ok(marco.titulo.includes('marco de 50'));
+});

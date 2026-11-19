@@ -46,8 +46,14 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
   const clubesRegistrados=[...CLUBES,...CLUBES_REGIONAIS_EXTRAS];
   // Só são considerados formados os atletas efetivamente marcados como base:
   // não inferir formação a partir do clube de nascimento ou do nome.
-  const formadosPorClube = new Map();
+  const formadosPorClube=new Map(),elencosPorClube=new Map();
   for (const jogador of c.mundo?.jogadores || []) {
+    // avaliarClubeNoMundo usava .filter() sobre TODOS os jogadores em cada
+    // clube. Montar os plantéis uma vez evita clubes × atletas varreduras.
+    if(jogador&&!jogador.aposentado&&jogador.clubeNome){
+      if(!elencosPorClube.has(jogador.clubeNome))elencosPorClube.set(jogador.clubeNome,[]);
+      elencosPorClube.get(jogador.clubeNome).push(jogador);
+    }
     if (!jogador?.daBase || !jogador.clubeOrigem ||
         !((jogador.carreira?.temporadas || 0) > 0)) continue;
     formadosPorClube.set(jogador.clubeOrigem,
@@ -89,7 +95,7 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
       atletasFormados:formadosPorClube.get(cl.nome)||0
     });
     const perfil={...p,mercado:red(mercado),estrutura:red(estrutura),fase:red(fase),financas:red(financas),reputacao:red(limitar(p.reputacao+receita*.2,20,99)),reputacoes};
-    const depois=avaliarClubeNoMundo({...c,universo:{clubes:{[cl.nome]:perfil}}},cl).forca;
+    const depois=avaliarClubeNoMundo({...c,universo:{clubes:{[cl.nome]:perfil}}},cl,{elenco:elencosPorClube.get(cl.nome)||[]}).forca;
     u.clubes[cl.nome]={...perfil,historico:[...p.historico,{ano:a.ano,...campanha,titulos:tacas,forcaAntes:antes,forca:depois,financas:perfil.financas,motivos,
       // Snapshot compacto por ordem dos 8 eixos; não inventar histórico legado.
       reputacoesEixos:EIXOS_REPUTACAO_CLUBE.map(eixo=>reputacoes[eixo]),

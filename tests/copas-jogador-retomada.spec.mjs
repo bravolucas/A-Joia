@@ -14,7 +14,7 @@ for(const ritmo of ['normal','expresso','intenso'])for(const width of [320,1366]
   await aguardarSave(page);
   const d=page.getByRole('dialog');if(await page.getByRole('dialog',{name:'Calendário · Brasileirão'}).count())liga=true;
   if(await page.getByRole('dialog',{name:'Copa em jogo · Libertadores'}).count()){lib=true;await expect(d.locator('.cce-corpo')).toHaveAttribute('data-tema','libertadores');await expect(d.locator('.cce-topo small')).toContainText('MODO RÁPIDO · JOGADOR');await expect(d.locator('.cce-opcoes button').nth(1)).toBeVisible();await expect(d.locator('.cce-opcoes button')).toHaveCount(3);await page.screenshot({path:`test-results/jogador-libertadores-${ritmo}-${width}.png`});break;}
-  const next=d.getByRole('button',{name:/Continuar campanha|Concluir campanha|Continuar temporada/});if(await next.count())await next.click();else await d.locator('.cce-opcoes button').first().click();
+  const next=d.getByRole('button',{name:/Ir para jogo de volta|Continuar campanha|Concluir campanha|Continuar temporada/});if(await next.count())await next.click();else await d.locator('.cce-opcoes button').first().click();
  }
  expect(liga).toBe(true);expect(lib).toBe(true);const salvo=await lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo));expect(salvo.c.tecnico).toBeUndefined();expect(salvo.c.temporadas).toHaveLength(0);expect(salvo.c.ano).toBe(c.ano);expect(erros).toEqual([]);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });

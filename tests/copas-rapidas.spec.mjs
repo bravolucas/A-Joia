@@ -5,7 +5,7 @@ import {escolhasCopa} from '../src/treinador/estrategiasCopas.js';
 import {test,expect} from '@playwright/test';
 import {criarJogador,aposentar} from '../src/jogador/rapido.js';
 import {iniciarCarreiraTecnico} from '../src/treinador/tecnico.js';
-import {criarCampanhaCopa,decisaoCopa,escolherCopa} from '../src/treinador/copasEscolha.js';
+import {criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa} from '../src/treinador/copasEscolha.js';
 import {CLUBES} from '../src/dados/data.js';
 function base(cp){const c=iniciarCarreiraTecnico(aposentar({...criarJogador({nome:'Copa Teste',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:10,ritmo:'expresso',codigo:'COPA-ESCOLHA'}),idade:40}));c.tecnico={...c.tecnico,clube:cp.usuario,ano:cp.ano+1,fase:'resultado',clubeInicialEscolhido:true,propostasCoerentesVersao:3,elenco:cp.forcaUsuario,temporadas:[{ano:cp.ano,clube:cp.usuario,liga:'brasileirao',posicao:2,pontos:72,vitorias:22,empates:6,derrotas:10,titulosConquistados:[],torneios:[cp]}],copasEmJogo:{ano:cp.ano,clube:cp.usuario,campeonatos:[cp],indice:0}};return c;}
 async function abrir(page,c){await page.goto('http://127.0.0.1:4173/A-Joia/');await instalarSave(page,((c)=>({v:1,etapa:'tecnico',c}))(c),"ajoia_rapido_v1");await page.reload();await page.getByRole('button',{name:/Continuar · Copa Teste/}).click();}
@@ -16,8 +16,30 @@ for(const [width,height] of [[320,568],[390,844],[1366,768]])test(`copa: três e
  const last=await dialog.locator('.cce-opcoes button').last().boundingBox();expect(last.y+last.height).toBeLessThanOrEqual((await dialog.locator('.cce-corpo').boundingBox()).y+(await dialog.locator('.cce-corpo').boundingBox()).height+1);await page.screenshot({path:`test-results/copas-escolha-${width}.png`});await dialog.locator('.cce-opcoes button').nth(1).click();await expect(dialog.locator('.cce-cinematica')).toBeVisible();await expect(dialog.locator('.cce-cinematica .cce-revelacao')).toContainText('%');await expect(dialog.getByRole('status')).toBeVisible();await expect(dialog.locator('.cce-revelacao')).toContainText('%');const before=await salvo(page);await page.reload();await page.getByRole('button',{name:/Continuar · Copa Teste/}).click();await expect(dialog.getByRole('status')).toBeVisible();expect((await salvo(page)).tecnico.copasEmJogo).toEqual(before.tecnico.copasEmJogo);await dialog.getByRole('button',{name:'Continuar campanha'}).click();await expect(dialog).toContainText('jogo 8/8');expect((await salvo(page)).tecnico.temporadas).toHaveLength(1);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
 });
 test('final empatada exige outra escolha de pênaltis, com pressão e sem repetir a temporada',async({page})=>{
- let cp;for(let i=0;i<80;i++){const c=criarCampanhaCopa({nome:'Copa do Brasil',tipo:'copa',usuario:'Santos',forcaUsuario:75,clubes:[{nome:'Santos',forca:75},{nome:'Flamengo',forca:75}],ano:2030,formato:'mata',seed:'final-'+i});c.tamanho=2;const d=decisaoCopa(c);if(escolherCopa(c,d.chave,escolhasCopa(c,d).opcoes[1].id).resultado.penaltisPendentes){cp=c;break;}}
- await abrir(page,base(cp));const dialog=page.getByRole('dialog',{name:'Copa em jogo · Copa do Brasil'});await expect(dialog).toContainText('PRESSÃO MÁXIMA');await dialog.locator('.cce-opcoes button').nth(1).click();await expect(dialog).toContainText('EMPATE · DECISÃO NOS PÊNALTIS');await expect(dialog.locator('.cce-opcoes button')).toHaveCount(3);const s=await salvo(page);await page.reload();await page.getByRole('button',{name:/Continuar · Copa Teste/}).click();expect((await salvo(page)).tecnico.copasEmJogo).toEqual(s.tecnico.copasEmJogo);await dialog.locator('.cce-opcoes button').first().click();await expect(dialog.getByRole('status')).toContainText('PÊNALTIS');await dialog.getByRole('button',{name:'Concluir campanha'}).click();expect((await salvo(page)).tecnico.copasEmJogo).toBeNull();expect((await salvo(page)).tecnico.temporadas).toHaveLength(1);
+ let cp;for(let i=0;i<120;i++){
+  const c=criarCampanhaCopa({nome:'Copa do Brasil',tipo:'copa',usuario:'Santos',forcaUsuario:75,clubes:[{nome:'Santos',forca:75},{nome:'Flamengo',forca:75}],ano:2030,formato:'mata',seed:'final-'+i});
+  c.tamanho=2;const ida=decisaoCopa(c),j=escolherCopa(c,ida.chave,escolhasCopa(c,ida).opcoes[1].id);
+  const parcial=continuarCopa(j),volta=decisaoCopa(parcial);
+  const agregado=escolherCopa(parcial,volta.chave,escolhasCopa(parcial,volta).opcoes[1].id);
+  if(agregado.resultado.penaltisPendentes){cp=c;break;}
+ }
+ expect(cp).toBeTruthy();
+ await abrir(page,base(cp));const dialog=page.getByRole('dialog',{name:'Copa em jogo · Copa do Brasil'});
+ await expect(dialog).toContainText('JOGO DE IDA');
+ await dialog.locator('.cce-opcoes button').nth(1).click();
+ await expect(dialog.getByRole('status')).toContainText('IDA');
+ await dialog.getByRole('button',{name:'Ir para jogo de volta'}).click();
+ await expect(dialog).toContainText('JOGO DE VOLTA');
+ await expect(dialog.locator('.cce-placar-anterior')).toContainText('JOGO DE IDA');
+ await dialog.locator('.cce-opcoes button').nth(1).click();
+ await expect(dialog).toContainText('EMPATE · DECISÃO NOS PÊNALTIS');
+ await expect(dialog.locator('.cce-opcoes button')).toHaveCount(3);
+ const s=await salvo(page);await page.reload();await page.getByRole('button',{name:/Continuar · Copa Teste/}).click();
+ expect((await salvo(page)).tecnico.copasEmJogo).toEqual(s.tecnico.copasEmJogo);
+ await dialog.locator('.cce-opcoes button').first().click();
+ await expect(dialog.getByRole('status')).toContainText('PÊNALTIS');
+ await dialog.getByRole('button',{name:'Concluir campanha'}).click();
+ expect((await salvo(page)).tecnico.copasEmJogo).toBeNull();expect((await salvo(page)).tecnico.temporadas).toHaveLength(1);
 });
 test('fechar a janela deixa retomar a copa e não libera ofertas antes do fim',async({page})=>{const cp=criarCampanhaCopa({nome:'Copa do Brasil',tipo:'copa',usuario:'Santos',forcaUsuario:75,clubes:CLUBES.filter(c=>['brasileirao','serieB'].includes(c.liga)),ano:2030,formato:'mata'});await abrir(page,base(cp));const d=page.getByRole('dialog',{name:'Copa em jogo · Copa do Brasil'});await d.getByRole('button',{name:'Fechar janela'}).click();await expect(d).toHaveCount(0);await expect(page.getByRole('button',{name:/Retomar copas/})).toBeVisible();await expect(page.getByRole('heading',{name:'Seu próximo projeto'})).toHaveCount(0);await page.getByRole('button',{name:/Retomar copas/}).click();await expect(d).toBeVisible();expect((await salvo(page)).tecnico.copasEmJogo.campeonatos[0].etapa).toBe(0);});
 test('eliminação automática no estadual ainda permite concluir a campanha',async({page})=>{const {participantesEstadual}=await import('../src/competicoes/estaduaisRapidos.js');const e=participantesEstadual(CLUBES.find(c=>c.nome==='Santos'));let cp;for(let i=0;i<40;i++){const c=criarCampanhaCopa({nome:e.nome,tipo:'estadual',usuario:'Santos',forcaUsuario:10,clubes:e.clubes,ano:2030,formato:'estadual',estado:'SP',seed:'fora-'+i});if(c.fase==='fim'){cp=c;break;}}expect(cp).toBeTruthy();await abrir(page,base(cp));const d=page.getByRole('dialog',{name:/Copa em jogo/});await expect(d).toContainText('Eliminado na classificação estadual');await d.getByRole('button',{name:'Concluir campanha'}).click();expect((await salvo(page)).tecnico.copasEmJogo).toBeNull();});

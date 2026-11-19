@@ -29,14 +29,25 @@ const listaTitulos=a=>Array.isArray(a.titulosConquistados)&&a.titulosConquistado
  ?a.titulosConquistados:Array.isArray(a.titulosLista)&&a.titulosLista.length
  ?a.titulosLista.map(x=>typeof x==='string'?x:x?.nome).filter(Boolean)
  :a.campeao?[nomeLiga(a)]:[];
-const tituloIgual=(a,b)=>mesmo(a,b)||(
- (norm(a)==='championsleague'||norm(a)==='uefachampionsleague')&&norm(b)==='ligadoscampeoes'
-);
+const aliasCompeticao={
+ uefachampionsleague:'championsleague',ligadoscampeoes:'championsleague',
+ copalibertadores:'libertadores',uefaeuropaleague:'europaleague',
+ uefaconferenceleague:'conferenceleague',uefaeuropaconferenceleague:'conferenceleague',
+ copadobrasil:'copabrasil',copasulamericana:'sulamericana',
+ copadomundofifa:'copadomundo',fifaworldcup:'copadomundo'
+};
+const chaveCompeticao=nome=>aliasCompeticao[norm(nome)]||norm(nome);
+const tituloIgual=(a,b)=>chaveCompeticao(a)===chaveCompeticao(b);
+const torneioDaTemporada=(a,nome)=>(a.torneios||[]).some(x=>tituloIgual(x?.nome,nome));
+const titulosDoEscopo=(a,tipo,nome)=>[...new Map(listaTitulos(a).filter(Boolean)
+ .filter(x=>tipo!=='competicao'||tituloIgual(x,nome))
+ .map(x=>[chaveCompeticao(x),x])).values()];
 function recorte(a,tipo,nome){
  if(tipo==='treinador')return true;
  if(tipo==='clube')return a.tipoEquipe!=='selecao'&&mesmo(equipeDe(a),nome);
  if(tipo==='selecao')return a.tipoEquipe==='selecao'&&mesmo(equipeDe(a),nome);
- if(tipo==='competicao')return a.tipoEquipe!=='selecao'&&tituloIgual(nomeLiga(a),nome);
+ if(tipo==='competicao')return tituloIgual(nomeLiga(a),nome)||
+  torneioDaTemporada(a,nome)||titulosDoEscopo(a,tipo,nome).length>0;
  return false;
 }
 function atualizar(m,id,valor,base){
@@ -64,21 +75,27 @@ export function recordesTreinador(c={},tipo='clube',nome=''){
  for(const a of linhas){
   const j=inteiro(a.jogos),v=inteiro(a.vitorias),e=inteiro(a.empates),d=inteiro(a.derrotas);
   const completos=v!==null&&e!==null&&d!==null&&(j===null||v+e+d===j);
+  // Numa copa, os totais gerais da temporada pertencem à liga.
+  // Somente jogos de liga podem gerar recordes de partidas e pontos da liga.
+  const jogosDoEscopo=tipo!=='competicao'||tituloIgual(nomeLiga(a),nome);
   // O numero de partidas deve ser congruente com vitórias, empates e derrotas.
-  if(completos){
+  if(completos&&jogosDoEscopo){
    const anoJogos=j??v+e+d;
    jogos+=anoJogos;vitorias+=v;pontos+=v*3+e;
    atualizar(mapa,'tecnicoVitoriasAno',v,base(a));
    atualizar(mapa,'tecnicoPontosAno',v*3+e,base(a));
   }
-  const trofeus=[...new Map(listaTitulos(a).filter(Boolean).map(x=>[norm(x),x])).values()];
-  const doEscopo=tipo==='competicao'?trofeus.filter(x=>tituloIgual(x,nome)):[...trofeus];
+  const doEscopo=titulosDoEscopo(a,tipo,nome);
   titulos+=doEscopo.length;
   atualizar(mapa,'tecnicoTitulosAno',doEscopo.length,base(a));
-  if(a.tipoEquipe!=='selecao'&&a.acesso)acessos++;
-  if(a.tipoEquipe!=='selecao'&&a.rebaixado)rebaixamentos++;
-  if(a.cumpriuObjetivo===true)metas++;
-  if(a.demitido===true)demissoes++;
+  // Acesso, rebaixamento, meta e demissao sao eventos da campanha
+  // principal; nunca atribuir esses acontecimentos a uma copa paralela.
+  if(jogosDoEscopo){
+   if(a.tipoEquipe!=='selecao'&&a.acesso)acessos++;
+   if(a.tipoEquipe!=='selecao'&&a.rebaixado)rebaixamentos++;
+   if(a.cumpriuObjetivo===true)metas++;
+   if(a.demitido===true)demissoes++;
+  }
   temporadas++;if(a.ano>ultimo.ano)ultimo=a;
  }
  const fim=base(ultimo);

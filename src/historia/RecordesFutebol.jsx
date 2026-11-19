@@ -14,6 +14,7 @@ function Valor({registro,real=false}){
     ?<LinkEntidade tipo="jogador" id={String(registro.atletaId)} nome={registro.atleta||'Jogador'}/>
     :registro.equipe?<LinkEntidade tipo={tipoEquipe(registro.equipe)} nome={registro.equipe}/>:registro.atleta||'Registro'}{registro.ano!=null?' · '+registro.ano:''}</small>
   {registro.destaque&&<small>{registro.destaque}</small>}
+  {real&&registro.cobertura==='recorte'&&<small>Somente o período documentado no acervo — não é recorde absoluto.</small>}
   {real&&registro.fonte&&<a href={registro.fonte} target="_blank" rel="noopener noreferrer">Ver fonte · {registro.data||'histórico'}</a>}
  </div>;
 }

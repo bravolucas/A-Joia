@@ -1892,7 +1892,7 @@ function fecharTemporadaBase(c0, card0) {
   registrarAnoHistoria(c,card);
   // Entregue ao elenco da IA os títulos apurados pelo próprio calendário.
   // O crédito individual exige participação efetiva na competição campeã.
-  card.campeoesCalendarioMundo=(c.historiaFutebol?.titulos||[])
+  const campeoesCalendarioMundo=(c.historiaFutebol?.titulos||[])
     .filter(t=>t.ano===card.ano&&t.clube&&t.nome&&
       ['liga','copa','continental','mundial','estadual'].includes(t.tipo))
     .map(t=>({ano:t.ano,nome:t.nome,clube:t.clube,tipo:t.tipo}));
@@ -1901,7 +1901,7 @@ function fecharTemporadaBase(c0, card0) {
   c.mundo = estatisticasDasPartidas(simularTemporadaMundo(c.mundo,Math.random,{
     clubes:clubesDoMundo(antes),perfis:antes.universo?.clubes,ano:card.ano,
     registrarPremio:false,
-  }),antes.mundo,card,c.codigo);
+  }),antes.mundo,{...card,campeoesCalendarioMundo},c.codigo);
   atualizarRecordesUniverso(c,card,antes.mundo);
   const pesoTit = pesoTitulosBolaDeOuro(card.titulos);
   const jogosDoClube=(card.classificacoesMundo?.[card.ligaId]?.jogos||[])

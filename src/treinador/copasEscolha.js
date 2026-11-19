@@ -99,7 +99,10 @@ function preparar(c){
 export function decisaoCopa(c){
  if(!c||c.fase==='fim'||c.resultado&&!c.resultado.penaltisPendentes)return null;
  const grupo=['liga','grupos'].includes(c.fase),j=grupo?c.calendario[c.rodada]?.find(j=>[j.casa,j.fora].includes(c.usuario)):null,adv=grupo?(j.casa===c.usuario?j.fora:j.casa):c.adversario?.nome;
- return {chave:`${c.seed}|${c.etapa}|${c.rodada}|${c.resultado?.penaltisPendentes?'penaltis':'jogo'}`,fase:c.roteiroMundial?(c.roteiroMundial.length===1?'Final':c.roteiroMundial.length===3?'Derby das Américas':'Copa Challenger'):grupo?`${c.fase==='liga'?'Fase de liga':'Fase de grupos'} · jogo ${c.rodada+1}/${c.totalRodadas}`:c.preContinental?'Pré-classificação continental':c.playoff&&c.tamanho===32?'Playoff de acesso às oitavas':faseN(c.tamanho),adversario:adv,perfilAdversario:perfilAdversario(adv,c.ano),forcaUsuario:c.forcaUsuario,forcaAdv:c.forcas[adv],final:!grupo&&c.tamanho===2&&!c.preContinental,grupo,penaltis:!!c.resultado?.penaltisPendentes,casa:grupo?j.casa===c.usuario:true};
+ const perna=!grupo&&idaVoltaNaFase(c)?(c.pernaIda?'volta':'ida'):null;
+ const decideEmCasa=c.forcaUsuario>=c.forcas[adv];
+ const casa=grupo?j.casa===c.usuario:perna==='ida'?!decideEmCasa:perna==='volta'?decideEmCasa:true;
+ return {chave:`${c.seed}|${c.etapa}|${c.rodada}|${c.resultado?.penaltisPendentes?'penaltis':perna||'jogo'}`,fase:c.roteiroMundial?(c.roteiroMundial.length===1?'Final':c.roteiroMundial.length===3?'Derby das Américas':'Copa Challenger'):grupo?`${c.fase==='liga'?'Fase de liga':'Fase de grupos'} · jogo ${c.rodada+1}/${c.totalRodadas}`:c.preContinental?'Pré-classificação continental':c.playoff&&c.tamanho===32?'Playoff de acesso às oitavas':faseN(c.tamanho),adversario:adv,perfilAdversario:perfilAdversario(adv,c.ano),forcaUsuario:c.forcaUsuario,forcaAdv:c.forcas[adv],final:!grupo&&c.tamanho===2&&!c.preContinental,grupo,penaltis:!!c.resultado?.penaltisPendentes,casa,perna,idaAnterior:c.pernaIda||null};
 }
 // All clubs play their side of the bracket. Later opponents are survivors, never fresh draws.
 export function jogoEliminatorio(a,b,rng){
@@ -169,16 +172,29 @@ export function escolherCopa(c,chave,opcao){
  // Campaigns saved before full brackets keep the opponent already shown on screen.
  if(!d.grupo&&!novo.quadroMata&&!novo.roteiroMundial){const outros=reduzirQuadro(novo.pool.filter(x=>x.nome!==novo.usuario&&x.nome!==d.adversario&&!novo.eliminados.includes(x.nome)&&(!novo.candidatosMata||novo.candidatosMata.includes(x.nome))),Math.max(0,novo.tamanho-2),geradorTecnico(`${novo.seed}|migracao-chave`)).sort((a,b)=>nivel(b)-nivel(a));novo.quadroMata=[[novo.usuario,d.adversario]];while(outros.length>1)novo.quadroMata.push([outros.shift().nome,outros.pop().nome]);if(outros.length)novo.quadroMata.push([outros[0].nome,null]);}
 
- if(d.penaltis){const j={...novo.resultado.jogo,penaltis:true,vencedor:rng()<chancePenaltis(d.forcaUsuario,d.forcaAdv,opcao,d.final)?novo.usuario:d.adversario};novo.resultado={jogo:j,escolha:opcao,revelacao,penaltisPendentes:false,venceu:j.vencedor===novo.usuario,fase:d.fase,final:d.final};registrarMata(novo,j);novo.etapa++;return novo;}
+ if(d.penaltis){
+  const j={...novo.resultado.jogo,penaltis:true,vencedor:rng()<chancePenaltis(d.forcaUsuario,d.forcaAdv,opcao,d.final)?novo.usuario:d.adversario};
+  novo.resultado={...novo.resultado,jogo:j,escolha:opcao,revelacao,penaltisPendentes:false,venceu:j.vencedor===novo.usuario,empate:false,fase:d.fase,final:d.final};
+  delete novo.pernaIda;registrarMata(novo,j);novo.etapa++;return novo;
+ }
  let j=partida({nome:novo.usuario,forca:d.forcaUsuario},{nome:d.adversario,forca:d.forcaAdv},rng,opcao,d.final,d.perfilAdversario);
- if(!d.grupo&&idaVoltaNaFase(novo)){
-  // Ida e volta: a estratégia vale para os dois jogos; quem tem a melhor campanha (mais forte) decide em casa.
-  const volta=partida({nome:novo.usuario,forca:d.forcaUsuario},{nome:d.adversario,forca:d.forcaAdv},rng,opcao,d.final,d.perfilAdversario);
-  const meus=j.golsCasa+volta.golsCasa,deles=j.golsFora+volta.golsFora,decideEmCasa=d.forcaUsuario>=d.forcaAdv;
-  const inverter=x=>({...x,casa:x.fora,fora:x.casa,golsCasa:x.golsFora,golsFora:x.golsCasa});
-  const ida={...(decideEmCasa?inverter(j):j),etapa:'Ida'},segunda={...(decideEmCasa?volta:inverter(volta)),etapa:'Volta'};
-  j={casa:novo.usuario,fora:d.adversario,golsCasa:meus,golsFora:deles,vencedor:meus>deles?novo.usuario:deles>meus?d.adversario:null,agregado:true,partidas:[ida,segunda]};
- }else if(!d.casa){[j.casa,j.fora]=[j.fora,j.casa];[j.golsCasa,j.golsFora]=[j.golsFora,j.golsCasa];}
+ if(!d.casa){j={...j,casa:j.fora,fora:j.casa,golsCasa:j.golsFora,golsFora:j.golsCasa};}
+ if(d.perna==='ida'){
+  // A ida fica salva no estado da campanha. Não simular a volta nem avançar a chave.
+  novo.pernaIda={...j,etapa:'Ida',escolha:opcao};
+  novo.resultado={jogo:j,escolha:opcao,revelacao,jogoIda:true,penaltisPendentes:false,venceu:j.vencedor===novo.usuario,empate:!j.vencedor,fase:d.fase,final:false};
+  return novo;
+ }
+ if(d.perna==='volta'){
+  const ida=novo.pernaIda,volta={...j,etapa:'Volta',escolha:opcao};
+  const golsDe=(p,time)=>p.casa===time?p.golsCasa:p.golsFora;
+  const meus=golsDe(ida,novo.usuario)+golsDe(volta,novo.usuario);
+  const deles=golsDe(ida,d.adversario)+golsDe(volta,d.adversario);
+  const agregado={casa:novo.usuario,fora:d.adversario,golsCasa:meus,golsFora:deles,vencedor:meus>deles?novo.usuario:deles>meus?d.adversario:null,agregado:true,partidas:[ida,volta]};
+  novo.resultado={jogo:agregado,jogoExibido:volta,escolha:opcao,revelacao,penaltisPendentes:!agregado.vencedor,venceu:agregado.vencedor===novo.usuario,empate:!agregado.vencedor,fase:d.fase,final:d.final};
+  if(novo.resultado.penaltisPendentes)return novo;
+  delete novo.pernaIda;registrarMata(novo,agregado);novo.etapa++;return novo;
+ }
  novo.resultado={jogo:j,escolha:opcao,revelacao,penaltisPendentes:!d.grupo&&!j.vencedor,venceu:j.vencedor===novo.usuario,empate:!j.vencedor,fase:d.fase,final:d.final};
  if(novo.resultado.penaltisPendentes)return novo;
  if(d.grupo)avancarLiga(novo,j);else registrarMata(novo,j);novo.etapa++;return novo;

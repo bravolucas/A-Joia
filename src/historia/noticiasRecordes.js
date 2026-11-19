@@ -17,6 +17,8 @@ export function escoposRecordesDaTemporada(c={},a={}){
  if(a.selecao?.convocado)comp.push(a.selecao.nome||a.selecao.competicao);
  return deduplicar([
   ...(clube&&a.tipoEquipe!=='selecao'?[{tipo:'clube',nome:clube}]:[]),
+  ...(c.tecnico&&(c.nome||c.tecnico.nome)
+    ?[{tipo:'treinador',nome:c.nome||c.tecnico.nome}]:[]),
   ...(pais?[{tipo:'selecao',nome:pais}]:[]),
   ...comp.filter(Boolean).map(nome=>({tipo:'competicao',nome}))
  ]).slice(0,8);

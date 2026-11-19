@@ -1,7 +1,8 @@
-import {conectarElencoMundo,aplicarNegociacaoMundo,destinoDaVenda,jogadorDaGestao} from '../simulacao/elencoUnificado.js';
+import {conectarElencoMundo,aplicarNegociacaoMundo,destinoDaVenda,jogadorDaGestao,converterGestaoEconomia,migrarEconomiaMundo} from '../simulacao/elencoUnificado.js';
+import {VERSAO_ECONOMIA,valorMercadoEuro,salarioMensalEuro,verbaTransferenciasEuro} from '../simulacao/economia.js';
 import {carreiraTecnicoEncerrada} from './longevidadeTecnico.js';
 import { comissaoAtivaGestao, propostaComissaoTecnico } from './comissaoTecnico.js';
-/* Base de gestão do treinador. Valores em R$ mil; salários por mês.
+/* Base de gestão do treinador. Valores em € mil; salários por mês.
    O gerador é próprio, para não consumir a aleatoriedade da simulação existente. */
 import { CLUBES } from '../dados/data.js';
 import {diagnosticarElenco} from '../simulacao/profundidadeElenco.js';
@@ -16,13 +17,15 @@ function gerador(semente){
  let n=2166136261;for(const c of String(semente))n=Math.imul(n^c.charCodeAt(0),16777619);
  return ()=>{n=(Math.imul(n,1664525)+1013904223)>>>0;return n/4294967296;};
 }
-function jogador(rng,id,setor,forca){
+const ligaDoClube=(clube,liga)=>liga||CLUBES.find(c=>c.nome===clube)?.liga;
+/** Recalcula salário e valor (€ mil) de um atleta da gestão na liga do clube. */
+const comFinancas=(j,liga)=>({...j,salario:salarioMensalEuro({...j,liga}),valor:valorMercadoEuro({...j,liga})});
+function jogador(rng,id,setor,forca,liga){
  const idade=18+Math.floor(rng()*17);
  const qualidade=limitar(Math.round(forca-7+rng()*14),30,95);
- return {id,nome:`${NOMES[Math.floor(rng()*NOMES.length)]} ${SOBRENOMES[Math.floor(rng()*SOBRENOMES.length)]}`,setor,idade,qualidade,
+ return comFinancas({id,nome:`${NOMES[Math.floor(rng()*NOMES.length)]} ${SOBRENOMES[Math.floor(rng()*SOBRENOMES.length)]}`,setor,idade,qualidade,
   potencial:limitar(qualidade+Math.max(0,28-idade)+Math.floor(rng()*5),qualidade,99),
-  contrato:1+Math.floor(rng()*4),salario:Math.max(3,Math.round(qualidade**2/220)),
-  valor:Math.max(100,Math.round(qualidade**3/180*(idade<24?1.2:idade>30?.7:1))),origem:'elenco'};
+  contrato:1+Math.floor(rng()*4),origem:'elenco'},liga);
 }
 /** Aplica cada virada uma única vez. O ano processado acompanha o save. */
 export function atualizarGestaoAnual(gestao, anoAlvo){
@@ -42,19 +45,19 @@ export function atualizarGestaoAnual(gestao, anoAlvo){
   g.elenco=g.elenco.filter(j=>j.contrato>1).map(j=>{
    const idade=j.idade+1;
    const qualidade=limitar(j.qualidade+(idade<24?1:idade>32?-1:0)+(idade<30?treino:0),30,j.potencial);
-   return {...j,idade,qualidade,contrato:j.contrato-1,valor:Math.max(100,Math.round(j.valor*(idade>30?.94:1.02)))};
+   const novo={...j,idade,qualidade,contrato:j.contrato-1};
+   return {...novo,valor:valorMercadoEuro({...novo,liga:ligaDoClube(g.clube,g.liga)})};
   });
   for(const j of expirados)g.movimentos.push({tipo:'fim-contrato',jogador:j.id,nome:j.nome,valor:0,ano});
   const rng=gerador(`${g.clube}|${ano}|reposicao-v1`);
   for(const setor of SETORES_ELENCO){
    const faltam=Math.max(0,setor.quantidade-g.elenco.filter(j=>j.setor===setor.id).length);
    for(let i=0;i<faltam;i++){
-    const jovem=jogador(rng,`${g.clube}:base:${ano}:${setor.id}:${i}`,setor.id,Math.max(30,referenciaBase-7));
+    let jovem=jogador(rng,`${g.clube}:base:${ano}:${setor.id}:${i}`,setor.id,Math.max(30,referenciaBase-7));
     jovem.idade=18+Math.floor(rng()*3);jovem.contrato=3;jovem.origem='base';
     jovem.qualidade=Math.min(95,jovem.qualidade+observacao);
-    jovem.salario=Math.max(3,Math.round(jovem.qualidade**2/220));
-    jovem.valor=Math.max(100,Math.round(jovem.qualidade**3/180*1.2));
-    jovem.potencial=Math.min(99,jovem.qualidade+10);g.elenco.push(jovem);
+    jovem.potencial=Math.min(99,jovem.qualidade+10);
+    jovem=comFinancas(jovem,ligaDoClube(g.clube,g.liga));g.elenco.push(jovem);
     g.movimentos.push({tipo:'base',jogador:jovem.id,nome:jovem.nome,valor:0,ano});
    }
   }
@@ -72,14 +75,22 @@ export function atualizarGestaoAnual(gestao, anoAlvo){
 export function criarGestaoTecnico(t){
  if(!t?.clube)throw new Error('Escolha um clube antes de administrar o elenco.');
  if(t.gestao?.versao===1&&t.gestao.clube===t.clube){
-  const g=t.fase==='pretemporada'?atualizarGestaoAnual(t.gestao,t.ano):structuredClone(t.gestao);
+  // Saves da economia antiga (R$ mil) são convertidos para euros uma única vez.
+  const liga=ligaDoClube(t.clube,t.liga);
+  let salva=t.gestao;
+  if(salva.economia!==VERSAO_ECONOMIA){
+   const elenco=salva.cadastroUnificado?salva.elenco:salva.elenco.map(j=>comFinancas(j,liga));
+   salva={...converterGestaoEconomia(salva,salva.elenco.map(j=>({...j,liga})),liga),elenco};
+  }
+  const g=t.fase==='pretemporada'?atualizarGestaoAnual({...salva,liga},t.ano):structuredClone({...salva,liga});
   g.forcaMercado ??= Number(t.elenco)||50;g.forcaReferencia ??= g.forcaMercado;return g;
  }
  const forca=limitar(Number(t.elenco)||CLUBES.find(c=>c.nome===t.clube)?.forca||50,30,95);
+ const liga=ligaDoClube(t.clube,t.liga);
  const rng=gerador(`${t.clube}|${t.ano}|gestao-v1`);const elenco=[];
- for(const setor of SETORES_ELENCO)for(let i=0;i<setor.quantidade;i++)elenco.push(jogador(rng,`${t.clube}:${setor.id}:${i}`,setor.id,forca));
- const folha=elenco.reduce((n,j)=>n+j.salario,0);
- return {versao:1,clube:t.clube,ano:t.ano,forcaReferencia:forca,forcaMercado:forca,orcamentoInicial:Math.round((forca-25)**2*8),saldo:Math.round((forca-25)**2*8),tetoSalarial:Math.ceil(folha*1.25),elenco,movimentos:[]};
+ for(const setor of SETORES_ELENCO)for(let i=0;i<setor.quantidade;i++)elenco.push(jogador(rng,`${t.clube}:${setor.id}:${i}`,setor.id,forca,liga));
+ const folha=elenco.reduce((n,j)=>n+j.salario,0),verba=verbaTransferenciasEuro(elenco);
+ return {versao:1,economia:VERSAO_ECONOMIA,clube:t.clube,liga,ano:t.ano,forcaReferencia:forca,forcaMercado:forca,orcamentoInicial:verba,saldo:verba,tetoSalarial:Math.ceil(folha*1.25),elenco,movimentos:[]};
 }
 export function resumoGestaoTecnico(g){
  const setores=SETORES_ELENCO.map(s=>{const jogadores=g.elenco.filter(j=>j.setor===s.id);return {...s,jogadores:jogadores.length,media:jogadores.length?Math.round(jogadores.reduce((n,j)=>n+j.qualidade,0)/jogadores.length):0};});
@@ -90,7 +101,7 @@ export function resumoGestaoTecnico(g){
 }
 export function gerarMercadoTecnico(t){
  const g=criarGestaoTecnico(t);if(g.cadastroUnificado)return g.mercado||[];const rng=gerador(`${g.clube}|${g.ano}|mercado-v1`);
- return SETORES_ELENCO.flatMap(s=>Array.from({length:3},(_,i)=>({...jogador(rng,`mercado:${g.clube}:${g.ano}:${s.id}:${i}`,s.id,g.forcaMercado),origem:'mercado'}))).filter(j=>!g.movimentos.some(m=>m.ano===g.ano&&m.jogador===j.id&&(m.tipo==='compra'||m.tipo==='venda')));
+ return SETORES_ELENCO.flatMap(s=>Array.from({length:3},(_,i)=>({...jogador(rng,`mercado:${g.clube}:${g.ano}:${s.id}:${i}`,s.id,g.forcaMercado,g.liga),origem:'mercado'}))).filter(j=>!g.movimentos.some(m=>m.ano===g.ano&&m.jogador===j.id&&(m.tipo==='compra'||m.tipo==='venda')));
 }
 /** Elencos reais do cadastro; a consulta não cria atletas nem altera o save. */
 export function elencoClubeTecnico(c,clube){
@@ -117,7 +128,7 @@ export function contratarJogadorTecnico(c,id){
  if(g.elenco.length>=30)throw new Error('O elenco já tem 30 jogadores.');
  if(g.saldo<alvo.valor)throw new Error('Orçamento insuficiente para esta contratação.');
  if(resumoGestaoTecnico(g).folha+alvo.salario>g.tetoSalarial)throw new Error('A contratação ultrapassa o teto salarial.');
- const gestao={...g,saldo:g.saldo-alvo.valor,elenco:[...g.elenco,{...alvo,contrato:3}],movimentos:[...g.movimentos,{tipo:'compra',jogador:id,mundoId:alvo.mundoId,nome:alvo.nome,valor:alvo.valor,ano:g.ano}]};
+ const gestao={...g,saldo:g.saldo-alvo.valor,elenco:[...g.elenco,{...alvo,contrato:3}],movimentos:[...g.movimentos,{tipo:'compra',jogador:id,mundoId:alvo.mundoId,nome:alvo.nome,valor:alvo.valor,moeda:'EUR',ano:g.ano}]};
  return aplicarNegociacaoMundo(c,gestao,{tipo:'compra',alvo});
 }
 export function venderJogadorTecnico(c,id){
@@ -128,11 +139,11 @@ export function venderJogadorTecnico(c,id){
  if(g.elenco.filter(j=>j.setor===alvo.setor).length<=minimo[alvo.setor])throw new Error('A venda deixaria o setor sem jogadores suficientes.');
  const valor=Math.round(alvo.valor*.8);
  const destino=g.cadastroUnificado?destinoDaVenda(c,alvo):null;
- const gestao={...g,saldo:g.saldo+valor,elenco:g.elenco.filter(j=>j.id!==id),movimentos:[...g.movimentos,{tipo:'venda',jogador:id,mundoId:alvo.mundoId,nome:alvo.nome,valor,ano:g.ano,...(destino?{destino:destino.nome}:{})}]};
+ const gestao={...g,saldo:g.saldo+valor,elenco:g.elenco.filter(j=>j.id!==id),movimentos:[...g.movimentos,{tipo:'venda',jogador:id,mundoId:alvo.mundoId,nome:alvo.nome,valor,moeda:'EUR',ano:g.ano,...(destino?{destino:destino.nome}:{})}]};
  return aplicarNegociacaoMundo(c,gestao,{tipo:'venda',alvo,destino});
 }
 
-/** Proposta exibida na confirmação; valores em R$ mil. */
+/** Proposta exibida na confirmação; valores em € mil. */
 export function propostaRenovacaoTecnico(j,anos=3){
  if(!Number.isInteger(anos)||anos<1||anos>5)throw new Error('Escolha um contrato de 1 a 5 anos.');
  const salario=Math.ceil(j.salario*1.1);
@@ -150,7 +161,7 @@ export function renovarJogadorTecnico(c,id,anos=3){
  if(resumoGestaoTecnico(g).folha-alvo.salario+proposta.salario>g.tetoSalarial)throw new Error('A renovação ultrapassa o teto salarial.');
  const gestao={...g,saldo:g.saldo-proposta.luvas,
   elenco:g.elenco.map(j=>j.id===id?{...j,salario:proposta.salario,contrato:proposta.contrato}:j),
-  movimentos:[...g.movimentos,{tipo:'renovacao',jogador:id,nome:alvo.nome,valor:proposta.luvas,salario:proposta.salario,contrato:proposta.contrato,ano:g.ano}]};
+  movimentos:[...g.movimentos,{tipo:'renovacao',jogador:id,nome:alvo.nome,valor:proposta.luvas,moeda:'EUR',salario:proposta.salario,contrato:proposta.contrato,ano:g.ano}]};
  return aplicarNegociacaoMundo(c,gestao,{tipo:'renovacao',alvo});
 }
 
@@ -163,7 +174,7 @@ export function contratarComissaoTecnico(c,id){
  if(resumoGestaoTecnico(g).folha+proposta.salario>g.tetoSalarial)throw new Error('A contratação ultrapassa o teto salarial.');
  const gestao={...g,saldo:g.saldo-proposta.custo,
   comissao:[...ativos,{id,ano:g.ano,salario:proposta.salario,custo:proposta.custo}],
-  movimentos:[...g.movimentos,{tipo:'comissao',cargo:id,nome:proposta.nome,valor:proposta.custo,ano:g.ano}]};
+  movimentos:[...g.movimentos,{tipo:'comissao',cargo:id,nome:proposta.nome,valor:proposta.custo,moeda:'EUR',ano:g.ano}]};
  return aplicarNegociacaoMundo(c,gestao);
 }
 
@@ -171,6 +182,7 @@ export function contratarComissaoTecnico(c,id){
 export function prepararGestaoTecnico(c){
  const t=c?.tecnico;
  if(!t?.clube||t.tipoEquipe==='selecao'||t.demitido||t.desempregado||t.fase!=='pretemporada')return c;
+ if(c.mundo?.jogadores&&c.mundo.economia!==VERSAO_ECONOMIA)c={...c,mundo:migrarEconomiaMundo(c.mundo)};
  const salva=c.mundo?.gestoesClubes?.[t.clube];
  const referencia=salva&&t.gestao?.clube!==t.clube?{...t,gestao:{...salva,elenco:c.mundo.jogadores.filter(p=>!p.aposentado&&p.clubeNome===t.clube).map(p=>jogadorDaGestao(p))}}:t;
  const gestao=criarGestaoTecnico(referencia);
@@ -196,12 +208,14 @@ export function prepararGestaoTecnico(c){
     const setor=posicao==='GOL'?'GOL':['LD','LE','ZAG'].includes(posicao)?'DEF':
      ['VOL','MC','MEI'].includes(posicao)?'MEI':'ATA';
     for(let i=0;i<quantidade;i++){
-     const jovem=jogador(rng,`base:${g.clube}:${g.ano}:${posicao}:${i}`,setor,Math.max(30,g.forcaMercado-7));
+     const jovem=jogador(rng,`base:${g.clube}:${g.ano}:${posicao}:${i}`,setor,Math.max(30,g.forcaMercado-7),liga);
      const nac=nacionalidadeNovoAtletaLiga(liga,rng);
      jovem.qualidade=Math.min(95,jovem.qualidade+(g.bonusBase||0));
-     jovem.salario=Math.max(3,Math.round(jovem.qualidade**2/220));
-     novos.push({...jovem,nome:gerarNomeRegional(nac,rng),idade:18,
-      potencial:Math.min(99,jovem.qualidade+10),valor:Math.max(100,Math.round(jovem.qualidade**3/180*1.2)),
+     const potencialJovem=Math.min(99,jovem.qualidade+10);
+     const financas={qualidade:jovem.qualidade,idade:18,potencial:potencialJovem,contrato:3,liga};
+     jovem.salario=salarioMensalEuro(financas);
+     novos.push({...jovem,nome:gerarNomeRegional(nac,rng),idade:18,economia:VERSAO_ECONOMIA,
+      potencial:potencialJovem,valor:valorMercadoEuro(financas),
       ovr:jovem.qualidade,posicao,nac,clubeNome:g.clube,clubeOrigem:g.clube,
       liga,picoIdade:28,contrato:3,origem:'base',aposentado:false,
       jogos:0,gols:0,assist:0,carreira:{jogos:0,gols:0,assist:0,temporadas:0}});

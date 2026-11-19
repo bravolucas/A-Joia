@@ -1,7 +1,8 @@
 /** Base de acesso por edição; bônus UEFA (EPS) podem ser informados, nunca sorteados. */
 export const TORNEIOS_INTERNACIONAIS={libertadores:'Libertadores',sulamericana:'Copa Sul-Americana',champions:'Champions League',europa:'Europa League',conference:'Conference League',asia:'Champions Asiática',concacaf:'Concacaf'};
 const EUROPEIAS={inglaterra:[4,1,1],espanha:[4,1,1],italia:[4,1,1],alemanha:[4,1,1],franca:[4,1,1],portugal:[2,1,1],holanda:[3,1,1],turquia:[2,1,1]};
-export const primeiraLiga=liga=>liga==='serieB'?'brasileirao':String(liga||'').replace(/2$/,'');
+// Séries B, C e D pertencem ao futebol brasileiro: disputam a Copa do Brasil e herdam as regras da Série A.
+export const primeiraLiga=liga=>['serieB','serieC','serieD'].includes(liga)?'brasileirao':String(liga||'').replace(/2$/,'');
 const nomeDe=x=>typeof x==='string'?x:x?.nome;
 export function vagasInternacionais({liga,tabela=[],ano=2026,campeaoCopa,viceCopa,campeoesContinentais=[],campeaoEuropa,campeaoConference,campeaoCopaLiga,vagasExtrasChampions=0}={}){
  const base=primeiraLiga(liga),nomes=tabela.map(nomeDe).filter(Boolean),vagas={};

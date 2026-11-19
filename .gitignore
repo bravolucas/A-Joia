@@ -6,3 +6,4 @@ dist
 package-lock.json
 test-results
 playwright-report
+resultados-auditoria

@@ -1,11 +1,47 @@
 import {CLUBES} from '../dados/data.js';
 import {avaliarClubeNoMundo,setorJogador} from './forcaEquipe.js';
 import {diagnosticarElenco,normalizarPosicao} from './profundidadeElenco.js';
+import {VERSAO_ECONOMIA,valorMercadoEuro,salarioMensalEuro,verbaTransferenciasEuro} from './economia.js';
 const chave=id=>String(id);
 const idMundo=j=>j.mundoId??j.id;
 export const metadadosGestao=g=>{const {elenco,mercado,...meta}=g;return meta;};
 const ativos=(mundo,clube)=>mundo.jogadores.filter(p=>!p.aposentado&&p.clubeNome===clube);
-const financeiro=p=>({contrato:Number.isInteger(p.contrato)?p.contrato:2+(String(p.id).length%3),salario:p.salario??Math.max(3,Math.round(p.ovr**2/220)),valor:p.valor??Math.max(100,Math.round(p.ovr**3/180*(p.idade<24?1.2:p.idade>30?.7:1)))});
+// Valores em € mil. O valor de mercado é sempre recalculado (idade, nível, liga e
+// contrato mudam); o salário fica salvo a partir da economia em euros (renovações).
+const financeiro=p=>{
+ const contrato=Number.isInteger(p.contrato)?p.contrato:2+(String(p.id).length%3);
+ const salario=p.economia===VERSAO_ECONOMIA&&Number.isFinite(p.salario)?p.salario:salarioMensalEuro(p);
+ return {contrato,salario,valor:valorMercadoEuro({...p,contrato}),economia:VERSAO_ECONOMIA};
+};
+/** Verba estimada de um clube da IA sem gestão salva: 20% do valor do próprio elenco. */
+export const verbaEstimadaClube=elenco=>verbaTransferenciasEuro(elenco.map(p=>({valor:financeiro(p).valor})));
+/**
+ * Converte uma gestão salva na economia antiga (R$ mil) para euros, uma única vez.
+ * Preserva a proporção entre saldo e verba anual; teto e comissão acompanham a nova folha.
+ * `elenco`: atletas atuais do clube (cadastro do mundo ou elenco da gestão).
+ */
+export function converterGestaoEconomia(g,elenco,liga){
+ if(!g||g.economia===VERSAO_ECONOMIA)return g;
+ const fin=(elenco||[]).map(p=>financeiro({...p,ovr:p.ovr??p.qualidade,liga:p.liga??liga,economia:undefined}));
+ const verba=verbaTransferenciasEuro(fin),folha=fin.reduce((n,j)=>n+j.salario,0);
+ const antigo=Number(g.orcamentoInicial)>0?Number(g.orcamentoInicial):0;
+ const proporcao=antigo?Math.max(0,Math.min(3,(Number(g.saldo)||0)/antigo)):1,fator=antigo?verba/antigo:1;
+ return {...g,saldo:Math.round(verba*proporcao),orcamentoInicial:verba,
+  tetoSalarial:Math.max(Math.ceil(folha*1.25),Math.ceil((Number(g.tetoSalarial)||0)*fator)),
+  ...(g.comissao?{comissao:g.comissao.map(p=>({...p,salario:Math.max(2,Math.ceil((p.salario||0)*fator)),custo:Math.max(24,Math.ceil((p.custo||0)*fator))}))}:{}),
+  economia:VERSAO_ECONOMIA};
+}
+/** Converte uma única vez os valores do mundo salvos na economia antiga (R$ mil) para euros. */
+export function migrarEconomiaMundo(mundo){
+ if(!mundo?.jogadores||mundo.economia===VERSAO_ECONOMIA)return mundo;
+ const porClube=new Map();
+ for(const p of mundo.jogadores)if(!p.aposentado&&p.clubeNome){if(!porClube.has(p.clubeNome))porClube.set(p.clubeNome,[]);porClube.get(p.clubeNome).push(p);}
+ const fator=nome=>{const cl=CLUBES.find(x=>x.nome===nome);const antigo=Math.round(((cl?.forca??50)-25)**2*8);return antigo>0?verbaEstimadaClube(porClube.get(nome)||[])/antigo:1;};
+ const receitasMercado=Object.fromEntries(Object.entries(mundo.receitasMercado||{}).map(([nome,v])=>[nome,Math.round(v*fator(nome))]));
+ const gestoesClubes=Object.fromEntries(Object.entries(mundo.gestoesClubes||{}).map(([nome,g])=>
+  [nome,converterGestaoEconomia(g,porClube.get(nome)||[],CLUBES.find(x=>x.nome===nome)?.liga)]));
+ return {...mundo,receitasMercado,gestoesClubes,economia:VERSAO_ECONOMIA};
+}
 export function jogadorDaGestao(p,anterior){return {...p,id:anterior?.id??p.idLegadoGestao??p.id,mundoId:p.id,setor:setorJogador(p),qualidade:p.ovr,...financeiro(p),origem:p.origem||'elenco'};}
 export function mercadoDoMundo(mundo,g){
  const usados=new Set(g.movimentos.filter(m=>m.ano===g.ano&&['compra','venda'].includes(m.tipo)).map(m=>chave(m.mundoId??m.jogador)));
@@ -15,7 +51,10 @@ export function mercadoDoMundo(mundo,g){
  * permanecem disponíveis, com suas identidades e histórias, sem inventar vendas. */
 export function conectarElencoMundo(c,g,{legado=false}={}){
  if(!c.mundo?.jogadores)return {...c,tecnico:{...c.tecnico,gestao:g}};
- let mundo={...c.mundo,jogadores:c.mundo.jogadores.map(({qualidade,mundoId,...p})=>({...p,...financeiro(p)})),cadastroElencos:1};
+ let mundo={...migrarEconomiaMundo(c.mundo),cadastroElencos:1};
+ // O elenco do treinador joga a liga atual do clube: o valor de mercado usa essa liga.
+ const ligaClube=c.tecnico?.liga;
+ mundo.jogadores=mundo.jogadores.map(({qualidade,mundoId,...p})=>{const q=ligaClube&&!p.aposentado&&p.clubeNome===g.clube?{...p,liga:ligaClube}:p;return {...q,...financeiro(q)};});
  if(!g.cadastroUnificado&&legado){
   const importados=g.elenco.map(j=>({...j,idLegadoGestao:j.id,id:j.mundoId??`gestao:${g.clube}:${g.ano}:${j.id}`,ovr:j.qualidade,posicao:j.posicao||({GOL:'GOL',DEF:'ZAG',MEI:'MC',ATA:'ATA'}[j.setor]),nac:j.nac||'BRA',clubeNome:g.clube,clubeOrigem:g.clube,liga:c.tecnico.liga||CLUBES.find(p=>p.nome===g.clube)?.liga,picoIdade:28,aposentado:false,carreira:{jogos:0,gols:0,assist:0,temporadas:0},...j.carreira&&{carreira:j.carreira}}));
   for(const p of importados)delete p.qualidade;
@@ -50,9 +89,10 @@ export function destinoDaVenda(c,j){
   if(cl.nome===g.clube)return [];
   const perfil=c.tecnico.universo?.clubes?.[cl.nome]||c.universo?.clubes?.[cl.nome];
   if((perfil?.financas??50)<=15)return [];
-  const saldoSalvo=c.mundo.gestoesClubes?.[cl.nome]?.saldo;
-  const saldo=Number.isFinite(saldoSalvo)?saldoSalvo:
-   Math.max(0,Math.round((cl.forca-25)**2*8)+(c.mundo.receitasMercado?.[cl.nome]||0));
+  const salva=c.mundo.gestoesClubes?.[cl.nome];
+  // Gestão guardada na economia antiga (R$) não é comparável: usar a verba estimada.
+  const saldo=(salva?.economia===VERSAO_ECONOMIA||c.mundo.economia===VERSAO_ECONOMIA)&&Number.isFinite(salva?.saldo)?salva.saldo:
+   Math.max(0,verbaEstimadaClube(porClube.get(cl.nome)||[])+(c.mundo.economia===VERSAO_ECONOMIA?(c.mundo.receitasMercado?.[cl.nome]||0):0));
   if(saldo<preco)return [];
   const elenco=porClube.get(cl.nome)||[];
   const necessidades=diagnosticarElenco(elenco,{contarSecundarias:true});
@@ -87,17 +127,18 @@ export function aplicarNegociacaoMundo(c,g,{tipo,alvo,destino}={}){
  const elenco=new Map(g.elenco.map(j=>[chave(idMundo(j)),j]));
  let encontrado=!alvo;
  const jogadores=c.mundo.jogadores.map(p=>{
-  const j=elenco.get(chave(p.id));let novo=j?{...p,ovr:j.qualidade,idade:j.idade,contrato:j.contrato,salario:j.salario,valor:j.valor,clubeNome:clube,liga:c.tecnico.liga||p.liga}:p;
+  const j=elenco.get(chave(p.id));let novo=j?{...p,ovr:j.qualidade,idade:j.idade,contrato:j.contrato,salario:j.salario,valor:j.valor,economia:VERSAO_ECONOMIA,clubeNome:clube,liga:c.tecnico.liga||p.liga}:p;
   if(venda&&destino?.dispensarIds?.some(x=>chave(x)===chave(p.id))&&p.clubeNome===destino.nome){
    novo={...novo,clubeNome:null,contrato:0,
-    movimentos:[...(p.movimentos||[]),{ano,tipo:'dispensa',de:destino.nome,para:null,valor:0}]};
+    movimentos:[...(p.movimentos||[]),{ano,tipo:'dispensa',de:destino.nome,para:null,valor:0,moeda:'EUR'}]};
   }
   if(alvo&&chave(p.id)===chave(id)){
    encontrado=true;const para=venda?destino.nome:clube;
-   const movimento={ano,tipo,de:p.clubeNome||null,para,valor:venda?Math.round(alvo.valor*.8):tipo==='compra'?alvo.valor:0};
+   const movimento={ano,tipo,de:p.clubeNome||null,para,valor:venda?Math.round(alvo.valor*.8):tipo==='compra'?alvo.valor:0,moeda:'EUR'};
    novo={...novo,clubeNome:para,liga:venda?destino.liga:(c.tecnico.liga||CLUBES.find(cl=>cl.nome===clube)?.liga),contrato:tipo==='renovacao'?novo.contrato:tipo==='compra'||venda?3:novo.contrato,movimentos:[...(p.movimentos||[]),movimento]};
   }
-  return novo;
+  // Liga e contrato podem ter mudado nesta negociação: o valor acompanha.
+  return novo===p?p:{...novo,valor:valorMercadoEuro({...novo,contrato:novo.contrato})};
  });
  if(!encontrado)throw new Error('O jogador não está mais disponível no cadastro do mundo.');
  const mundo={...c.mundo,jogadores,gestoesClubes:{...c.mundo.gestoesClubes},receitasMercado:{...c.mundo.receitasMercado}};
@@ -113,11 +154,13 @@ export function aplicarNegociacaoMundo(c,g,{tipo,alvo,destino}={}){
  return atualizarProjecaoGestao({...c,mundo,tecnico:{...c.tecnico,gestao:g,forcasMundo}});
 }
 export function atualizarProjecaoGestao(c){
- const t=c.tecnico,g=t?.gestao;if(!g?.cadastroUnificado||!c.mundo?.jogadores)return c;
+ const t=c.tecnico;let g=t?.gestao;if(!g?.cadastroUnificado||!c.mundo?.jogadores)return c;
  // Uma gestão de um emprego anterior não pode sobrescrever o novo clube.
  if(g.clube!==t.clube)return c;
+ const mundo=migrarEconomiaMundo(c.mundo);
+ g=converterGestaoEconomia(g,ativos(mundo,g.clube),t.liga);
  const antigos=new Map(g.elenco.map(j=>[chave(idMundo(j)),j]));
- const gestao={...g,elenco:ativos(c.mundo,g.clube).map(p=>jogadorDaGestao(p,antigos.get(chave(p.id))))};
- gestao.mercado=mercadoDoMundo(c.mundo,gestao);
- return {...c,tecnico:{...t,gestao}};
+ const gestao={...g,elenco:ativos(mundo,g.clube).map(p=>jogadorDaGestao(p,antigos.get(chave(p.id))))};
+ gestao.mercado=mercadoDoMundo(mundo,gestao);
+ return {...c,mundo,tecnico:{...t,gestao}};
 }

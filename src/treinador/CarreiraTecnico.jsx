@@ -367,7 +367,7 @@ export default function CarreiraTecnico({ c, onAbrirElenco, onNegociarElenco, on
             <div className="ct-badges"><span><Bandeira pais={c.nac || 'BRA'} />{c.nac || 'BRA'}</span><span className="ct-role">TREINADOR</span></div>
             <h2><LinkEntidade tipo="treinador" id="voce" nome={c.nome}/></h2><div className="ct-current-club"><Escudo nome={clubeAtual} size={22} /><BotaoHistoria c={c} nome={clubeAtual}><strong>{clubeAtual}</strong></BotaoHistoria></div>
           </div>
-          <div className="ct-contract"><div><span>IDADE</span><strong>{idade}</strong></div><div><span>SALÁRIO/MÊS</span><strong>R$ {semClube || primeira ? 0 : (t.salario ?? salarioTecnico(t))}<small>mil</small></strong></div></div>
+          <div className="ct-contract"><div><span>IDADE</span><strong>{idade}</strong></div><div><span>SALÁRIO/MÊS</span><strong>€ {semClube || primeira ? 0 : (t.salario ?? salarioTecnico(t))}<small>mil</small></strong></div></div>
         </header>
         <div className="ct-stats">{[[historico.jogos, 'JOGOS', '▣'], [historico.vitorias, 'VITÓRIAS', '✦'], [titulos.length, 'TÍTULOS', '♜']].map(([valor, rotulo, icone]) => <div key={rotulo}><span>{rotulo}</span><strong><i aria-hidden="true">{icone}</i>{valor}</strong></div>)}</div>
         <ResumoConquistas grupos={gruposConquistas} total={titulos.length} onAbrir={abrirConquistas}/>

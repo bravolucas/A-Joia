@@ -76,3 +76,41 @@
 .ctm-match-lineup ol{margin:0 0 8px 17px;padding:0}
 .ctm-match-lineup li{padding:2px 0;overflow-wrap:anywhere}
 .ctm-match-lineup li span{display:inline-block;min-width:26px;color:#91adbf;font-weight:650}
+
+/* Celular: barra de áreas fixa no rodapé (todas as 7 visíveis), cabeçalho do clube
+   compacto fora da visão geral e textos com tamanho mínimo legível. */
+.ctm-nav-curto{display:none}
+@media(max-width:650px){
+ .ct.ct-manager{padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+ .ctm-sidebar{position:fixed;top:auto;bottom:0;left:0;right:0;z-index:60;margin:0;min-height:0;border:0;border-top:1px solid #2b3d50;border-radius:16px 16px 0 0;padding:6px 4px calc(6px + env(safe-area-inset-bottom));background:#0c1622f5;box-shadow:0 -10px 30px #0009;backdrop-filter:blur(10px)}
+ .ctm-sidebar nav{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;overflow:visible;padding:0;scroll-snap-type:none}
+ .ctm-sidebar nav button{flex-direction:column;justify-content:center;align-items:center;gap:4px;width:100%;min-width:0;min-height:56px;padding:6px 0;font-size:10px;text-align:center;border-radius:10px}
+ .ctm-sidebar nav button svg{width:21px;height:21px}
+ .ctm-sidebar nav button[aria-current=page]{background:#73d4ae1c}
+ .ctm-nav-nome{display:none}
+ .ctm-nav-curto{display:block;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+ .ctm-page-heading{scroll-margin-top:72px}
+ .ct-manager-main:not(.ctm-view-geral) .ctm-hero,.ct-manager-main:not(.ctm-view-geral) .ctm-hero-content{min-height:0}
+ .ct-manager-main:not(.ctm-view-geral) .ctm-hero-content{padding:12px 14px}
+ .ct-manager-main:not(.ctm-view-geral) .ctm-hero-club{margin:6px 0 0;gap:10px}
+ .ct-manager-main:not(.ctm-view-geral) .ctm-hero-club>img{width:38px!important;height:38px!important}
+ .ct-manager-main:not(.ctm-view-geral) .ctm-hero-club h2{font-size:20px}
+ .ct-manager-main:not(.ctm-view-geral) .ctm-hero-bottom{display:none}
+ .ctm-eyebrow{font-size:9px}
+ .ctm-season-tag{font-size:10px}
+ .ctm-page-heading>.ctm-decision-button{font-size:11px!important;padding:10px 12px}
+ .ct-manager .ct-contract span{font-size:9px}
+ .ct-manager .ct-contract small{font-size:10px}
+ .ctm-competition-card small{font-size:10px}
+ .ct-manager .ct-timeline-heading{font-size:9px}
+ .ctm-table{font-size:12px}
+}
+/* Celular: escalação provável em duas colunas para não afastar o mercado. */
+@media(max-width:650px){
+ .ctm-lineup-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .ctm-lineup-list li{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"pos ovr" "nome nome";gap:2px 6px;padding:7px 8px}
+ .ctm-lineup-role{grid-area:pos;min-width:0}
+ .ctm-lineup-ovr{grid-area:ovr;justify-self:end}
+ .ctm-lineup-player{grid-area:nome;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;overflow-wrap:normal}
+ .ctm-lineup-player small{white-space:normal}
+}

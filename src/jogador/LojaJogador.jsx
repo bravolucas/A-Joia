@@ -11,9 +11,9 @@ import {impedimentoLojaJogador,upsAtivosJogador,upJogadorDe} from './lojaJogador
 import {bloquearRolagem} from '../comum/bloqueioRolagem.js';
 import './LojaJogador.css';
 
-const categorias=['Todos','UPs temporários','Treino','Saúde','Carreira','Pessoal','Estilo de vida','Meus itens'];
+const categorias=['Todos','UPs temporários','Treino','Saúde','Adaptação','Carreira','Vida pessoal','Estilo de vida','Meus itens'];
 const normalizar=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
-const beneficios={psicologo:'+3 mental/ano · quedas pela metade',personal:'20% menos risco de lesão',nutri:'12% menos declínio',fisio:'Trata lesão crônica · −10% risco',imagem:'+3 fama por ano',analista:'+0,08 na nota média',ct:'+8% na evolução',instituto:'+2 torcida/ano · legado social',origem:'+20 torcida no clube de origem',carro:'+4 fama',mansao:'+6 fama',iate:'+8 fama',equipamento:'+3% na evolução',finalizador:'+4% nos gols',criador:'+5% nas assistências','treino-goleiro':'Até +2 p.p. em defesas','bola-parada-pro':'Mais precisão em pênaltis e faltas','recuperacao-pro':'5% menos risco de lesão','media-training':'+1 fama e mental por ano','projeto-social':'+1 torcida/ano · legado social'};
+const beneficios={'kit-sono':'3% menos risco de lesão','recuperacao-casa':'5% menos risco de lesão','chef-particular':'5% menos declínio','academia-casa':'+2% na evolução','curso-idioma-pessoal':'−50% na queda do 1º ano fora · +2 moral','consultoria-adaptacao':'−30% na queda do 1º ano fora','familia-perto':'−30% na queda do 1º ano fora · +3 moral',psicologo:'+3 mental/ano · quedas pela metade',personal:'20% menos risco de lesão',nutri:'12% menos declínio',fisio:'Trata lesão crônica · −10% risco',imagem:'+3 fama por ano',analista:'+0,08 na nota média',ct:'+8% na evolução',instituto:'+2 torcida/ano · legado social',origem:'+20 torcida no clube de origem',carro:'+4 fama',mansao:'+6 fama',iate:'+8 fama',equipamento:'+3% na evolução',finalizador:'+4% nos gols',criador:'+5% nas assistências','treino-goleiro':'Até +2 p.p. em defesas','bola-parada-pro':'Mais precisão em pênaltis e faltas','recuperacao-pro':'5% menos risco de lesão','media-training':'+1 fama e mental por ano','projeto-social':'+1 torcida/ano · legado social'};
 function fotoItem(i){
  if(i.id==='psicologo'||i.id==='up-cabeca')return ARTE.mental;
  if(i.id==='carro')return ARTE.carro;
@@ -57,7 +57,7 @@ export default function LojaJogador({c,etapa,onComprar,onFechar}){
  const comprado=i=>i.temporario?!!ativo(i):(c.investimentos||[]).includes(i.id);
  const impedimento=i=>impedimentoLojaJogador(c,i,!entreTemporadas);
  const recomendar=CATALOGO_LOJA_JOGADOR.filter(i=>!impedimento(i)&&i.custo<=(c.patrimonio||0)).sort((a,b)=>{const score=i=>(i.temporario?2:0)+(c.posicao==='GOL'&&/goleiro|defesa|reflex/.test(i.id)?5:0)+(['ME','MD','ALE','ALD','MC','MEI'].includes(c.posicao)&&/assist|passe|criador/.test(i.id)?4:0)+(c.idade>=30&&/fisio|recuper|nutri/.test(i.id)?4:0)+(c.idade<24&&/evolucao|ct|equipamento/.test(i.id)?3:0);return score(b)-score(a)||a.custo-b.custo;}).slice(0,3).map(i=>i.id);
- const lista=CATALOGO_LOJA_JOGADOR.filter(i=>(categoria==='Todos'||categoria==='Meus itens'&&comprado(i)||i.categoria===categoria)&&(!soSaldo||!impedimento(i))&&normalizar(`${i.nome} ${i.desc}`).includes(normalizar(busca))).sort((a,b)=>ordem==='menor'?a.custo-b.custo:ordem==='maior'?b.custo-a.custo:categoria==='Todos'?(recomendar.includes(b.id)?1:0)-(recomendar.includes(a.id)?1:0):0);
+ const lista=CATALOGO_LOJA_JOGADOR.filter(i=>(!i.descontinuado||comprado(i))&&(categoria==='Todos'||categoria==='Meus itens'&&comprado(i)||i.categoria===categoria)&&(!soSaldo||!impedimento(i))&&normalizar(`${i.nome} ${i.desc}`).includes(normalizar(busca))).sort((a,b)=>ordem==='menor'?a.custo-b.custo:ordem==='maior'?b.custo-a.custo:categoria==='Todos'?(recomendar.includes(b.id)?1:0)-(recomendar.includes(a.id)?1:0):0);
  const comprar=i=>{
   try{
    onComprar(i.id);

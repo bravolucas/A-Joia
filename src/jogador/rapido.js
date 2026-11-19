@@ -1425,7 +1425,11 @@ function jogarTemporadaBase(c0) {
   // a arquibancada pesa: ídolo joga embalado, desafeto joga pressionado
   const torcidaAqui = c.torcida?.[clubeNome] ?? 30;
   const efTorcida = torcidaAqui >= 75 ? 0.12 : torcidaAqui >= 60 ? 0.05 : torcidaAqui <= 20 ? -0.15 : torcidaAqui <= 35 ? -0.05 : 0;
-  let share = clampR((st.share + (mod.shareAdd || 0) + somaInv(c,"shareAdd")) * (mod.shareMult ?? 1) * (fx.shareMult ?? 1) * (moral < 25 ? 0.9 : 1), 0.04, 1);
+  // Adaptação: na primeira temporada num clube de outro país o rendimento cai um pouco;
+  // idioma, consultoria e família por perto reduzem a queda (itens da loja).
+  const clubeNovo = c.temporadas.length > 0 && c.temporadas.at(-1)?.clube !== clubeNome;
+  const adaptacao = clubeNovo && longeDeCasa(c) ? clampR(1 - somaInv(c, "adaptacao"), 0, 1) : 0;
+  let share = clampR((st.share + (mod.shareAdd || 0) + somaInv(c,"shareAdd")) * (mod.shareMult ?? 1) * (fx.shareMult ?? 1) * (moral < 25 ? 0.9 : 1) * (1 - 0.06 * adaptacao), 0.04, 1);
 
   // lesão durante a temporada
   const corpoPronto = c.origem === "tardio" && c.idade <= 21 ? 0.5 : 1;
@@ -1448,7 +1452,7 @@ function jogarTemporadaBase(c0) {
   const nota = jogos === 0 ? 0 : +clamp(6.2 + (ovr - ovrEsperado) * 0.035 + (ovr - clube.forca) * 0.02 + ((gols + assist) / Math.max(1, jogos)) * 1.2
     + defBonus + somaTraco(c, "notaBonus") + somaInv(c, "notaBonus") + (mod.notaBonus || 0) + (moral - 60) * 0.008 + efTorcida
     // mais variação: a fase do jogador, os minutos e um pouco de sorte (soma de dois sorteios = mais perto do meio, mas com pontas)
-    + (c.formaNivel || 0) * 0.12 + (share - 0.6) * 0.5 - 0.25 + (rnd() + rnd() - 1) * 0.8 * (fx.notaRuido || 1), 5.2, 9.7).toFixed(2);
+    + (c.formaNivel || 0) * 0.12 + (share - 0.6) * 0.5 - 0.25 - 0.15 * adaptacao + (rnd() + rnd() - 1) * 0.8 * (fx.notaRuido || 1), 5.2, 9.7).toFixed(2);
 
   const card = {
     idx: c.temporadas.length, ano: c.ano, idade: c.idade, posicao:c.posicao, numero:numeroDe(c), forcaClube:clube.forca, clube: clube.nome, cor: clube.cor, ligaId: clube.liga, ligaNome: liga.nome,
@@ -1456,6 +1460,9 @@ function jogarTemporadaBase(c0) {
     status: st.label, foco: c.foco, jogos, gols, assist, nota, lesao: lesao?.nome || null, share,
     titulos: [], destaques: [],
   };
+  if (clubeNovo && longeDeCasa(c)) card.adaptacao = { queda: adaptacao };
+  if (jogos > 0 && adaptacao >= 0.5) card.destaques.push("Primeiro ano em outro país: idioma, clima e rotina novos pesaram no rendimento");
+  else if (jogos > 0 && clubeNovo && longeDeCasa(c) && adaptacao < 0.5) card.destaques.push("Adaptação rápida ao novo país: idioma e rotina organizados desde a chegada");
   if (jogos > 0 && efTorcida >= 0.12) card.destaques.push("A arquibancada te empurrou o ano inteiro: jogar em casa virou vantagem");
   else if (jogos > 0 && efTorcida <= -0.15) card.destaques.push("Vaia a cada toque errado: a própria torcida pesou contra você");
   const forcaTimeExtra = (fx.forcaTime || 0) * share;

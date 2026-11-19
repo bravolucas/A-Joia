@@ -72,9 +72,14 @@ export function acervoInicial(nome){
   // O número cadastrado manualmente é do campeonato nacional completo;
   // para clubes sem esse registro, nunca exibir estimativas de força
   // como se fossem títulos reais: usar somente as edições comprovadas.
+  // Nas divisões de acesso, o palmarés genérico baseado na força do clube
+  // não é evidência de campeão. Usar apenas edições documentadas, inclusive
+  // quando o clube tem cadastro manual de outros títulos (ex.: Ponte Preta).
+  const divisaoAcesso=tipo==='liga'&&/^(Brasileirão Série [BCD]|Championship|LaLiga 2|Serie B \(Itália\)|2\. Bundesliga|Ligue 2|Liga Portugal 2)$/.test(nomes.liga);
   const inicial=tipo==='copa'&&nomes[tipo]==='Copa do Brasil'
    ?totalCopaBrasilHistoricas(nome):tipo==='copa'&&HISTORICO_COPAS_NACIONAIS[nomes.copa]
-   ?(copaDoc?.inicial||0):tipo==='liga'&&HISTORICO_LIGAS[nomes.liga]?.cobertura==='completa'
+   ?(copaDoc?.inicial||0):divisaoAcesso
+   ?(ligaDoc?.inicial||0):tipo==='liga'&&HISTORICO_LIGAS[nomes.liga]?.cobertura==='completa'
    ?(ligaDoc?.inicial||0):tipo==='liga'&&ligaDoc&&!temCadastroOficial
    ?ligaDoc.inicial:tipo==='liga'&&!temCadastroOficial?0:n(p[tipo]);
   itens.push({nome:nomes[tipo],tipo,inicial,

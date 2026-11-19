@@ -61,7 +61,7 @@ test('clubes não jogáveis aparecem no ranking e na vitrine com o título exato
   const perfil=galeriaClube({},clube);
   const t=perfil.tacas.find(t=>t.nome===copa);
   assert.ok(t&&t.anosHistoricos.includes(ano),clube);
-  assert.equal(galeriaCompeticao({},copa).historicas[0].campeoes[0].clube===clube,ano===2026&&copa!=='Copa Argentina');
+  assert.ok(galeriaCompeticao({},copa).historicas.some(e=>e.ano===ano&&e.campeoes[0].clube===clube),`${copa} ${ano} ${clube}`);
  }
  assert.equal(totalCopaNacionalHistorica('FA Cup','Arsenal'),7);
  assert.ok(galeriaClube({},'Galatasaray').tacas.some(t=>t.nome==='Türkiye Kupası'));

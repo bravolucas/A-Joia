@@ -9,9 +9,13 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Em push na main, NÃO cancelar uma validação longa a cada novo commit:
+# o GitHub mantém a atual em execução e substitui a pendente pela revisão
+# mais recente. O deploy confere SHA e nunca publica commit ultrapassado.
+# Em PR, continua cancelando testes obsoletos da mesma branch.
 concurrency:
   group: validar-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   testes-e-build:

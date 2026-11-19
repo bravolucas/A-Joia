@@ -284,3 +284,59 @@ B, C e D foi ajustada também no rótulo da taça via `nomeDosTitulos`.
 **Critério de aceitação:** a consulta de cada liga lista seu campeão real,
 as conquistas criadas no save permanecem separadas, clubes fora da lista jogável
 não desaparecem, e os torneios pendentes permanecem sem vencedor.
+
+
+## Copas nacionais — acervo documental (19/11/2026)
+
+Foram acrescentadas **273 edições reais em 11 copas nacionais** ao
+`src/dados/copasNacionaisHistoricas.js`, preservando o histórico existente
+da **Copa do Brasil** (1989–2025, 37 edições).
+
+O inventário atual de copas principais inclui FA Cup, Copa del Rey,
+Coppa Italia, DFB-Pokal, Coupe de France, Taça de Portugal,
+KNVB Beker, Türkiye Kupası, King's Cup saudita, US Open Cup,
+Copa Argentina e Copa do Brasil.
+
+- A consulta de **Histórico → Competições** apresenta os campeões reais
+  em uma lista distinta dos campeões simulados, com ranking documental.
+- Cada registro inclui edição, ano, clube vencedor e fonte auditável.
+- Os clubes podem mostrar conquistas históricas mesmo sem elenco
+  jogável no universo (ex.: Torreense, Wigan Athletic, Patronato).
+- As edições anteriores ao recorte de cada copa **não são inventadas**;
+  a cobertura documental está marcada como **parcial**. Isso significa
+  que o ranking é relativo ao período cadastrado, não uma relação de
+  todas as taças vencidas desde a fundação do torneio.
+- Sem vencedores fictícios para a Copa Argentina 2026, para a KNVB Beker
+  2020, ou para a US Open Cup 2020 e 2021.
+- A Copa del Rey 2019/20 conserva o nome da temporada (2020),
+  mesmo com a final adiada para 2021; Copa Argentina 2020 usa o
+  ano oficial da edição, embora decidida em 2021.
+- A Copa da Turquia e Türkiye Kupası são a mesma competição; não
+  se devem criar duas taças ou somar os títulos duas vezes.
+
+As fontes utilizadas são consultáveis por `HISTORICO_COPAS_NACIONAIS[nome].fontes`.
+Entre elas: [The FA](https://www.thefa.com/news/2026/may/16/emirates-fa-cup-final-chelsea-v-manchester-city-report-20261605),
+[LaLiga](https://www.laliga.com/noticias/palmares-copa-del-rey),
+[DFB](https://www.dfb.de/maenner/wettbewerbe/dfb-pokal/statistik/bisherige-sieger),
+[FFF](https://www.fff.fr/473-palmares-de-la-coupe-de-france.html),
+[KNVB](https://www.knvb.com/dutch-football/mens-football/knvb-cup),
+[TFF](https://www.tff.org/default.aspx?pageID=411),
+[Copa Argentina](https://www.copaargentina.org/es/la-copa/17_Todos-los-ganadores-de-las-Copas-Nacionales.html)
+e [U.S. Soccer](https://www.ussoccer.com/stories/2026/10/usoc/match-recap-st-louis-city-vs-columbus-crew-open-cup-final).
+
+### Taça da UEFA Conference League
+
+O recurso `arte/competicoes/conference-league.svg` adiciona uma
+**ilustração vetorial original**, inspirada nas 32 colunas espiraladas
+da taça da Conference League. **Não é foto licenciada nem arte oficial
+da UEFA.** A interface prioriza o arquivo local, que funciona offline,
+sem depender de CDN e é usado tanto em Modo Jogador como Treinador.
+Aliases `UEFA Conference League`, `UEFA Europa Conference League`,
+`Liga Conferência` e `Conference League` são resolvidos para o
+mesmo recurso; se necessário, o fallback SVG do jogo também é fixo.
+
+Referência de formato: [UEFA — apresentação e dimensões](https://www.uefa.com/uefaconferenceleague/news/0269-125a11b2e4f9-8459a7575502-1000--uefa-europa-conference-league-trophy-unveiled/).
+
+**Testes:** `node --test tests/copas-nacionais-conference.test.mjs tests/competicoes-historicas.test.mjs tests/historia-futebol.test.mjs` e `npm run build`.
+
+O conteúdo não altera saves antigos e não cria partidas inexistentes.

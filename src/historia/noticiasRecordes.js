@@ -52,7 +52,7 @@ export function detectarQuebrasRecordesFutebol(antes={},depois={},{
     id:[ano,tipo,nome,r.id,novo.atletaId||novo.atleta||'registro'].join('|'),
     ano,tipo,entidade:nome,metrica:r.id,rotulo:r.rotulo,
     atleta:novo.atleta||protagonista,atletaId:novo.atletaId||null,
-    valor:novo.valor,anterior:anteriorValor,anteriorAtleta:historico?real.atleta:velho.atleta,
+    valor:novo.valor,anterior:anteriorValor,anteriorAtleta:(historico?real.atleta:velho.atleta)??null,
     historico,igualou:igualouReal,fonte:historico?real.fonte:null,
     titulo,detalhe,prioridade:prioridade({historico,atletaId:novo.atletaId,metrica:r.id})
    });

@@ -63,6 +63,8 @@ export function acervoInicial(nome){
   return {tacas:[...libertadores,...copaSulamericana,...campeoesEuropa,...campeoesUEFA,...campeoesConference,...copaBrasil,...copasDocumentadas,...ligasDocumentadas,...estaduais],conhecido:!!copasDocumentadas.length||!!ligasDocumentadas.length||!!estaduais.length||total>0||sulamericana>0||champions>0||europa>0||conference>0||brasil>0};
  }
  const p=palmaresInicialDe(clube),nomes=nomeDosTitulos(clube.liga),itens=[];
+ // O identificador oficial da copa deve ser igual ao usado pelos campeões da base.
+ nomes.copa=nomeCanonico(nomes.copa);
  const temCadastroOficial=!!(PALMARES_HISTORICO[nome]||PALMARES_HISTORICO[{'Atlético de Madrid':'Atlético Madrid',Leverkusen:'Bayer Leverkusen'}[nome]]);
  for(const tipo of ['liga','copa','mundial'])if(nomes[tipo]){
   const ligaDoc=tipo==='liga'?ligasDocumentadas.find(t=>t.nome===nomes.liga):null;

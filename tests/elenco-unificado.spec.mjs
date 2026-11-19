@@ -45,19 +45,23 @@ for(const width of [390,1366])test(`central do elenco: pop-up preserva lista, re
  const alvo=c.mundo.jogadores.find(p=>!p.aposentado&&p.clubeNome&&p.clubeNome!=='Avaí'&&!sugeridos.has(p.id)&&p.ovr<60);
  const erros=[];page.on('pageerror',e=>erros.push(e.message));await page.goto(url);await instalarSave(page,{v:1,etapa:'tecnico',c});await page.reload();
  await page.getByRole('button',{name:/Continuar · Gestão Moderna/}).click();await page.getByRole('button',{name:'Elenco e contratos →',exact:true}).click();
- const d=page.getByRole('region',{name:'Elenco e contratos',exact:true}),lista=d.getByRole('region',{name:'Lista de jogadores'});
- await d.getByLabel('Ordenar por').selectOption('nome');await lista.evaluate(el=>el.scrollTop=el.scrollHeight);
+ const d=page.getByRole('region',{name:'Elenco e contratos',exact:true}),listaTabela=d.getByRole('region',{name:'Lista de jogadores'});
+ // No celular a lista vira cartões e usa a rolagem da página; no computador, a da tabela.
+ // Celular: o cartão do atleta continua no mesmo ponto da tela; computador: rolagem da tabela.
+ const posicao=()=>width<=650?linha.evaluate(el=>Math.round(el.getBoundingClientRect().top)):listaTabela.evaluate(el=>el.scrollTop);
+ await d.getByLabel('Ordenar por').selectOption('nome');
+ if(width<=650)await d.locator('.ge-tabela tbody tr').last().scrollIntoViewIfNeeded();else await listaTabela.evaluate(el=>el.scrollTop=el.scrollHeight);
  const linha=d.locator('.ge-tabela tbody tr').last(),id=await linha.getAttribute('data-atleta');
- const scroll=await lista.evaluate(el=>el.scrollTop);expect(scroll).toBeGreaterThan(0);
+ const scroll=await posicao();if(width>650)expect(scroll).toBeGreaterThan(0);else expect(await page.evaluate(()=>window.scrollY)).toBeGreaterThan(0);
  await linha.getByRole('button',{name:/^Renovar /}).click();
  const pop=page.getByRole('dialog',{name:'Confirmar negociação',exact:true});await expect(pop).toBeVisible();
  await pop.getByLabel('Duração do contrato').selectOption('5');
  await page.keyboard.press('Escape');await expect(pop).toHaveCount(0);await expect(d).toBeVisible();
- expect(await lista.evaluate(el=>el.scrollTop)).toBe(scroll);
+ expect(await posicao()).toBe(scroll);
  await linha.getByRole('button',{name:/^Renovar /}).click();await pop.getByLabel('Duração do contrato').selectOption('5');
  await page.screenshot({path:`test-results/elenco-renovacao-${width}.png`,animations:'disabled'});
  await pop.getByRole('button',{name:'Confirmar negociação',exact:true}).click();await expect(pop).toHaveCount(0);await expect(d.getByRole('status')).toHaveText('Contrato renovado.');await aguardarSave(page);
- expect(await lista.evaluate(el=>el.scrollTop)).toBe(scroll);
+ expect(await posicao()).toBe(scroll);
  const lerContrato=()=>page.evaluate(async id=>{const db=await new Promise(resolve=>{const r=indexedDB.open('ajoia-carreiras',1);r.onsuccess=()=>resolve(r.result);});const s=await new Promise(resolve=>{const r=db.transaction('saves').objectStore('saves').get('ajoia_rapido_v1');r.onsuccess=()=>resolve(r.result);});db.close();return s.c.mundo.jogadores.find(p=>String(p.id)===id).contrato;},id);
  expect(await lerContrato()).toBe(5);
  await d.getByRole('button',{name:'Outros clubes',exact:true}).click();await d.getByRole('combobox',{name:'Clube',exact:true}).selectOption(alvo.clubeNome);

@@ -30,3 +30,22 @@
 .ctm-panel .ge-integrada .ge-tabela tbody tr:nth-child(even){background:#17263b}
 .ctm-panel .ge-integrada .ge-tabela thead th{background:#1d3047}
 .ctm-panel .ge-integrada .ge-abas{overflow-x:auto}
+
+/* Celular: cada atleta vira um cartão com todas as informações e ações visíveis,
+   sem rolagem lateral da tabela. */
+@media(max-width:650px){
+ .ge-tabela-scroll,.ctm-panel .ge-integrada .ge-tabela-scroll{max-height:none;overflow:visible;border:0}
+ .ge-tabela{min-width:0;display:block}
+ .ge-tabela thead,.ge-legenda .ge-dica{display:none}
+ .ge-tabela tbody{display:grid;gap:8px}
+ .ge-tabela tbody tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 10px;padding:12px;border:1px solid #ffffff17;border-radius:10px}
+ .ge-tabela tbody tr>th:first-child{grid-column:1/-1;position:static;min-width:0;padding:0 0 2px;border:0;text-align:left;background:transparent}
+ .ge-tabela tbody tr:hover>th:first-child{background:transparent}
+ .ge-tabela th strong{font-size:14px;max-width:none}
+ .ge-tabela th small{font-size:11px}
+ .ge-tabela td{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:0;border:0;white-space:normal;text-align:left;font-size:13px}
+ .ge-tabela td[data-rotulo]::before{content:attr(data-rotulo);font-size:10px;color:#8da3b0;text-transform:uppercase;letter-spacing:.04em}
+ .ge-tabela td.ge-td-acoes{grid-column:1/-1;margin-top:4px}
+ .ge-acoes{justify-content:stretch;width:100%}
+ .ge-acoes button{flex:1;min-height:42px;font-size:12px}
+}

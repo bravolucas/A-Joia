@@ -229,8 +229,8 @@ function medirCampanhasETitulos(mapa,arquivo,tipo,nome){
     porAno.set(anoChave,{...anual,valor:anual.valor+1});
    }
    if(!edicoesPorCompeticao.has(canon(edicao.nome)))
-    edicoesPorCompeticao.set(canon(edicao.nome),[]);
-   edicoesPorCompeticao.get(canon(edicao.nome)).push({ano:edicao.ano,campeao});
+    edicoesPorCompeticao.set(canon(edicao.nome),{nome:edicao.nome,edicoes:[]});
+   edicoesPorCompeticao.get(canon(edicao.nome)).edicoes.push({ano:edicao.ano,campeao});
   }
   if(edicao.vice&&!vicesVistos.has(chaveEdicao)){
    vicesVistos.add(chaveEdicao);
@@ -249,13 +249,14 @@ function medirCampanhasETitulos(mapa,arquivo,tipo,nome){
   atualizar(mapa,'titulosAno',{...reg,equipe:reg.atleta,origem:'save'});
  for(const reg of vices.values())
   atualizar(mapa,'vicesTotal',{...reg,equipe:reg.atleta,origem:'save'});
- for(const [competicao,edicoes]of edicoesPorCompeticao){
+ for(const {nome:competicao,edicoes}of edicoesPorCompeticao.values()){
   edicoes.sort((a,b)=>a.ano-b.ano);
-  let anterior=null,serie=0;
+  let anterior=null,anoAnterior=null,serie=0;
   for(const edicao of edicoes){
-   if(anterior&&eIgual(anterior,edicao.campeao))serie++;
+   const intervalo=/^(copadomundo|copaamerica|eurocopa|mundialdeclubes)$/.test(canon(competicao))?4:1;
+   if(anterior&&eIgual(anterior,edicao.campeao)&&edicao.ano===anoAnterior+intervalo)serie++;
    else serie=1;
-   anterior=edicao.campeao;
+   anterior=edicao.campeao;anoAnterior=edicao.ano;
    if(serie<2)continue;
    if(tipo!=='competicao'&&!eIgual(edicao.campeao,nome))continue;
    atualizar(mapa,'titulosConsecutivos',{valor:serie,ano:edicao.ano,

@@ -1,0 +1,62 @@
+/* Convocação da Copa — sprites cinematográficos no mesmo padrão das despedidas. */
+.cp-convocacao-pop .janela-estrutura{width:100%;max-width:900px!important;min-height:100svh;padding:clamp(10px,2vw,22px);gap:7px}
+.cp-convocacao-pop .janela-contexto{font-size:11px;letter-spacing:.15em;color:#b8c4d9}
+.cp-convocacao-pop .janela-conteudo{min-height:0;justify-content:flex-start}
+.cp-convocacao-pop .janela-estrutura>button{align-self:center;max-width:650px;min-height:48px;margin-top:8px;background:linear-gradient(95deg,#cd9f43,#f7d37b);color:#182037;border:1px solid #f6e5ac;font-weight:900;border-radius:12px}
+.cs-cinema{--cs-cor:#dcc370;--cs-cor2:#46749a;color:#f1eddf;font-family:Inter,system-ui,sans-serif;display:flex;flex-direction:column;gap:10px;min-width:0}
+.cs-cabecalho{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0 7px;border-bottom:1px solid color-mix(in srgb,var(--cs-cor) 40%,transparent)}
+.cs-marca{font:bold italic clamp(16px,3vw,32px)/1 Georgia,serif;color:#e8cb81;white-space:nowrap;text-shadow:0 2px 8px #0009}
+.cs-marca small{display:block;font:600 8px/1.1 system-ui,sans-serif;letter-spacing:.14em;margin-top:5px;color:#acb6c7}
+.cs-selecao{display:flex;align-items:center;gap:10px;min-width:0;justify-content:center}
+.cs-selecao img{width:clamp(31px,6vw,60px);height:auto;max-height:40px;object-fit:cover;border:1px solid #ffffff4d;border-radius:2px;box-shadow:0 0 13px #000}
+.cs-selecao span{min-width:0}
+.cs-selecao small{display:block;font-weight:700;letter-spacing:.15em;font-size:clamp(7px,1.1vw,10px);color:#b3bace}
+.cs-selecao b{display:block;font-size:clamp(12px,2vw,18px);overflow-wrap:anywhere}
+.cs-edicao{font-size:clamp(9px,1.4vw,13px);text-align:right;max-width:25%;color:#c5cbd3;line-height:1.2}
+.cs-edicao b{display:block;color:var(--cs-cor);font-size:clamp(15px,2.6vw,22px)}
+.cs-visor{position:relative;isolation:isolate;overflow:hidden;aspect-ratio:1.25;min-height:240px;background:#0a1425;border:1px solid color-mix(in srgb,var(--cs-cor) 53%,#273a53);border-radius:16px;box-shadow:0 16px 40px #0009,inset 0 0 24px #0008}
+.cs-fotograma{position:absolute;inset:0;background-repeat:no-repeat;transition:background-position .4s ease;filter:saturate(1.01);transform:scale(1.015);animation:cs-enquadre .85s ease-out both}
+.cs-visor::after{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(180deg,#060a1000 68%,#08152a70 100%);border-radius:inherit}
+.cs-iluminacao{position:absolute;inset:-20% -50%;z-index:3;background:linear-gradient(100deg,transparent 35%,#ffee9522 47%,transparent 58%);pointer-events:none;mix-blend-mode:screen;animation:cs-holofote 6s ease-in-out infinite alternate}
+.cs-tv{position:absolute;z-index:4;right:4%;top:13%;width:55%;height:59%;background:radial-gradient(circle at 83% 20%,color-mix(in srgb,var(--cs-cor2) 35%,transparent),transparent 50%),linear-gradient(145deg,#0e2853f7,#06152ef8);border:2px solid #ccab5899;box-shadow:0 9px 27px #000b,0 0 23px #142d6e7c;border-radius:5px;display:flex;flex-direction:column;overflow:hidden;transform:perspective(500px) rotateY(-3deg)}
+.cs-tv-federacao{display:flex;align-items:center;gap:8px;padding:clamp(5px,1vw,11px);border-bottom:1px solid #ffffff34;flex-shrink:0;background:linear-gradient(90deg,#082a5d,#071932)}
+.cs-tv-federacao img{width:clamp(25px,3.5vw,42px);height:clamp(17px,2.4vw,28px);object-fit:cover}
+.cs-tv-federacao div{min-width:0}
+.cs-tv-federacao small{display:block;font-size:clamp(7px,1vw,10px);letter-spacing:.1em;color:#a3c6df;font-weight:700}
+.cs-tv-federacao b{display:block;font-size:clamp(10px,1.6vw,20px);overflow-wrap:anywhere}
+.cs-tv-boletim,.cs-tv-lista{padding:9px;display:flex;flex:1;align-items:center;justify-content:center;flex-direction:column;gap:5px;min-height:0;text-align:center}
+.cs-tv-boletim>span{color:#e9c96a;font-size:clamp(12px,2.2vw,25px);font-weight:900;line-height:1.1}
+.cs-tv-boletim>strong{font-size:clamp(10px,1.7vw,17px)}
+.cs-tv-boletim>small{font-size:clamp(7px,1.1vw,13px);color:#dce6ed}
+.cs-tv-lista>strong{display:block;color:var(--cs-cor);letter-spacing:.14em;font-size:clamp(9px,1.35vw,16px)}
+.cs-tv-lista ul{list-style:none;padding:0 4px;margin:0;align-self:stretch;display:flex;flex-direction:column;gap:4px;overflow:hidden;text-align:left}
+.cs-tv-lista li{font-weight:600;font-size:clamp(8px,1.28vw,14px);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-bottom:1px solid #ffffff20;padding-bottom:3px;animation:cs-entrada .4s ease-out both}
+.cs-tv-lista em{display:inline-block;font-size:10px;color:#afc0d9;background:#ffffff16;border-radius:3px;padding:2px;margin-right:7px;font-style:normal;letter-spacing:.03em}
+.cs-tv-lista>span{font-size:clamp(7px,.9vw,11px);letter-spacing:.08em;color:#e3d6b7}
+.cs-banner{position:absolute;z-index:5;left:12%;right:8%;bottom:7%;text-align:center;display:flex;flex-direction:column;gap:7px;align-items:center;padding:clamp(12px,2vw,24px) 8px;border-radius:12px;border:1px solid var(--cs-cor);box-shadow:0 9px 35px #000d;background:linear-gradient(100deg,#0a1935f4,#133c58ef);animation:cs-anuncia .62s ease-out both}
+.cs-banner small{font-size:clamp(8px,1.3vw,13px);color:#cadce0;letter-spacing:.14em;font-weight:700}
+.cs-banner strong{font:bold italic clamp(27px,6vw,65px)/1 system-ui,sans-serif;letter-spacing:.02em;color:#f7d77a;text-shadow:0 2px 16px #000b}
+.cs-banner span{font-size:clamp(13px,2.25vw,22px);font-weight:800;overflow-wrap:anywhere}
+.cs-banner-tristeza{border-color:#c86764;background:linear-gradient(100deg,#2c1318ed,#111d36f5)}
+.cs-banner-tristeza strong{color:#f4a4a0}
+.cs-confetes{position:absolute;inset:0;z-index:6;pointer-events:none}
+.cs-confetes i{position:absolute;top:-12px;left:var(--x);width:6px;height:11px;background:var(--cs-cor);animation:cs-confete 2.8s var(--d) ease-in forwards}
+.cs-confetes i:nth-child(3n){background:#fff9e6}
+.cs-confetes i:nth-child(4n){background:var(--cs-cor2)}
+.cs-faixa-status{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.cs-etapa{display:flex;align-items:center;gap:12px;min-width:0}
+.cs-etapa>span{color:var(--cs-cor);font-weight:900;font-size:11px;white-space:nowrap}
+.cs-etapa strong{font:600 clamp(13px,2vw,19px)/1.25 Georgia,serif;overflow-wrap:anywhere}
+.cs-progresso{display:flex;gap:4px;min-width:70px;width:32%;max-width:150px}
+.cs-progresso i{display:block;flex:1;height:5px;border-radius:6px;background:#ffffff21}
+.cs-progresso i.cs-ativo{background:var(--cs-cor);box-shadow:0 0 9px #b4914599}
+.cs-legenda{border-left:2px solid var(--cs-cor);padding:2px 11px;color:#bfc7d3;min-height:30px}
+.cs-legenda p{margin:0;font-size:clamp(12px,1.6vw,15px);line-height:1.45}
+@keyframes cs-enquadre{from{opacity:.2;transform:scale(1.04);filter:blur(2px)}to{opacity:1;transform:scale(1.015);filter:none}}
+@keyframes cs-holofote{0%{opacity:.2;transform:translateX(-15%)}100%{opacity:.65;transform:translateX(15%)}}
+@keyframes cs-entrada{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes cs-anuncia{0%{opacity:0;transform:translateY(22px) scale(.94)}100%{opacity:1;transform:none}}
+@keyframes cs-confete{0%{opacity:0;transform:translateY(-10px) rotate(0)}10%,80%{opacity:1}100%{opacity:0;transform:translateY(520px) rotate(440deg)}}
+@media(max-width:560px){.cp-convocacao-pop .janela-estrutura{padding:8px;gap:4px}.cs-cabecalho{padding:3px 0}.cs-selecao{gap:5px}.cs-marca{font-size:15px}.cs-marca small{font-size:7px;letter-spacing:0}.cs-selecao b{font-size:12px}.cs-selecao small{font-size:7px;letter-spacing:0}.cs-edicao{font-size:9px}.cs-visor{aspect-ratio:1.16;min-height:250px;border-radius:9px}.cs-tv{top:14%;right:2%;width:62%;height:58%;border-width:1px}.cs-tv-federacao{padding:5px;gap:5px}.cs-tv-federacao small{font-size:7px;letter-spacing:0}.cs-tv-federacao b{font-size:11px}.cs-tv-federacao img{width:24px;height:16px}.cs-tv-boletim>span{font-size:12px}.cs-tv-boletim>small{font-size:8px}.cs-tv-boletim>strong{font-size:9px}.cs-tv-lista{padding:5px;gap:2px}.cs-tv-lista>strong{font-size:9px}.cs-tv-lista ul{gap:2px}.cs-tv-lista li{font-size:9px}.cs-tv-lista em{font-size:7px;padding:1px;margin-right:4px}.cs-tv-lista>span{font-size:8px}.cs-banner{left:5%;right:4%;bottom:7%;padding:13px 5px}.cs-banner strong{font-size:clamp(23px,7vw,37px)}.cs-banner span{font-size:12px}.cs-banner small{font-size:8px}.cs-faixa-status{gap:5px}.cs-etapa{gap:6px}.cs-etapa strong{font-size:13px}.cs-progresso{width:27%}.cs-legenda p{font-size:12px}}
+@media(max-height:560px) and (min-width:561px){.cs-visor{aspect-ratio:2;min-height:200px}.cs-tv{height:63%}}
+@media(prefers-reduced-motion:reduce){.cs-cinema *,.cs-cinema *::before,.cs-cinema *::after{animation:none!important;transition:none!important}.cs-iluminacao{display:none}.cs-confetes{display:none}}

@@ -18,6 +18,7 @@ import {chaveEstadualJogador,escolherEstadualJogador} from './estadualJogador.js
 import {resolverCopaEscolhaTecnico} from '../treinador/tecnico.js';
 import {jogosDoGrupo,tabelaGrupoCopa,empateGrupo} from './gruposCopa.js';
 import FechamentoTemporada from './FechamentoTemporada.jsx';
+import ConvocacaoSelecaoCinema from './ConvocacaoSelecaoCinema.jsx';
 import CerimoniaBola from '../comum/CerimoniaBola.jsx';
 import {FasesTemporada,PainelJornada,EcosDaTemporada,ProjetoOferta,CenasClube,AlbumJornada,PrimeiraSelecao,CelebracaoLance,ReacaoAntigoClube,ConsultaElencoCopa} from './JornadaUI.jsx';
 import {mudarPosicao,reinventarVeterano} from './posicoesCarreira.js';
@@ -2536,6 +2537,7 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
   const [jogada, setJogada] = useState(jogadaSalva||null); // resultado fica salvo antes de continuar
   const [revelado, setRevelado] = useState(!!jogadaSalva);
   const escolhaFeita=useRef(!!jogadaSalva);
+  const efeitoResultado=useRef(!!jogadaSalva);
   const taca = logoCompeticao(k.nome||"Copa do Mundo");
   useEffect(() => { torcida(1.4, 0.1); }, []);
   const escolher = (op) => {
@@ -2545,6 +2547,8 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
     setJogada(r);onRegistrar(r);setRevelado(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches||false);
   };
   const revelar = () => {
+    if(efeitoResultado.current)return;
+    efeitoResultado.current=true;
     setRevelado(true);
     const v = jogada.res.venceu;
     vibrar(jogada.res.empate?15:v ? [30, 50, 30] : 60); tocar(jogada.res.empate?"clique":v ? "sobe" : "desce", 0.55);
@@ -2556,6 +2560,7 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
   const chancesDe = (op, r) => k.etapa==="grupos" ? [{p:op.p,d:1,marca:"Vitória"},{p:empateGrupo(op.p),d:0,marca:"Empate"},{p:Math.max(0,1-op.p-empateGrupo(op.p)),d:-1,marca:"Derrota"}].filter(x=>x.p>0) : (op.p >= 1 ? [{ p: 1, d: 1, marca: r.venceu ? "Vitória" : "Vence" }]
     : [{ p: op.p, d: 1, marca: k.etapa === "convocacao" ? "Convocado" : "Vence" }, { p: 1 - op.p, d: -1, marca: k.etapa === "convocacao" ? "Fora" : "Cai" }]);
   const r = jogada?.res;
+  const cenaConvocacao=r?.etapa==='convocacao'&&k.tipo==='copaMundo';
   const chancesResultado=jogada?chancesDe(jogada.op,r):[];
   const indiceResultado=r?.etapa==="grupos"?(r.venceu?0:r.empate?1:2):(jogada?.op.p>=1||r?.venceu?0:1);
   const alvoResultado=chancesResultado.slice(0,indiceResultado).reduce((n,x)=>n+x.p,0)+(chancesResultado[indiceResultado]?.p||0)/2;
@@ -2645,7 +2650,8 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
 
       {/* resultado da escolha */}
       {jogada && (
-        <TelaCheia classe="cp-resultado-copa" rotulo={`${k.nome||"Copa do Mundo"} ${k.ano}`} cor={corTela} centro botao={revelado ? "Continuar" : "Pular sorteio"} bloqueado={!revelado} onFechar={() => (revelado ? seguir() : revelar())}>
+        <TelaCheia classe={cenaConvocacao?'cp-resultado-copa cp-convocacao-pop':'cp-resultado-copa'} rotulo={`${k.nome||"Copa do Mundo"} ${k.ano}`} cor={corTela} centro botao={revelado ? "Continuar" : cenaConvocacao ? "Pular cerimônia" : "Pular sorteio"} bloqueado={!revelado} onFechar={() => (revelado ? seguir() : revelar())}>
+          {cenaConvocacao ? <ConvocacaoSelecaoCinema jogador={c} copa={k} resultado={r} revelado={revelado} onRevelar={revelar}/> : <>
           <div className="cp-copa-intro flex flex-col items-center text-center pt-2">
             <div className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.2em] text-[#A1A1AA]"><Bandeira nac={k.nac} size={16} /> {k.nome||"Copa do Mundo"} {k.ano}</div>
             <div className="text-[22px] font-extrabold text-white leading-tight mt-2">{r.etapa === "grupos" ? `Jogo ${r.rodada} de 3 · ${r.adv.label}` : r.etapa === "convocacao" ? "A convocação" : `${r.fase} · ${r.adv.label}`}</div>
@@ -2661,6 +2667,7 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
               {jogada.card.copa.craqueCopa && <div className="cp-card px-4 py-2.5 text-center text-[15px] font-bold text-[#FDE68A]">⭐ Eleito o craque da Copa</div>}
             </div>
           )}
+          </>}
         </TelaCheia>
       )}
     </div>

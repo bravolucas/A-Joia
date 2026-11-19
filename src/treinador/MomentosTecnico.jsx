@@ -164,6 +164,7 @@ export function PopUpResumo({ temporada: a, metasNovas = [], rival, onFechar }) 
       {(a.finais || []).length > 0 && <p className="mt-note">Finais: {a.finais.map((f,i) => <React.Fragment key={i}><LinkEntidade tipo="competicao" nome={f.nome}/>: {f.venceu?'título':'vice'} ({f.escolhaNome}){i<a.finais.length-1?' · ':''}</React.Fragment>)}</p>}
       {a.rival && <p className="mt-note">Duelo com {a.rival.nome} ({a.rival.clube}): {a.rival.v}V {a.rival.e}E {a.rival.d}D{a.rival.campeao ? ' · ele foi campeão' : ''}{rival ? ` · no total ${rival.v}V ${rival.e}E ${rival.d}D` : ''}</p>}
       {metasNovas.length > 0 && <div className="mt-goals-new">{metasNovas.map(m => <span key={m.id}>🏅 Meta cumprida: {m.nome}</span>)}</div>}
+      {!!a.recordesEventos?.length&&<div className="mt-goals-new" aria-label="Recordes da temporada">{a.recordesEventos.map(e=><span key={e.id}>🏆 {e.titulo} · {e.valor} (antes: {e.anterior})</span>)}</div>}
       <button className="ct-primary" onClick={onFechar}>Continuar<span aria-hidden="true">→</span></button>
     </div>
   </JanelaTreinador>;

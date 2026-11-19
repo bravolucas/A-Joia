@@ -1468,7 +1468,7 @@ export function jogarTemporadaExpressaTecnico(c, opcaoId, rng = sorteio, opcoes 
 
 export function comprarMelhoriaTecnico(c,id){
  if(!c?.tecnico)throw new Error('Carreira de treinador indisponível.');
- return comprarItemLojaTecnico(c,id,calcularOvrTecnico(c.tecnico),forcaClubeTecnico(c.tecnico));
+ return comprarItemLojaTecnico(c,id,calcularOvrTecnico(c.tecnico),forcaClubeTecnico(c.tecnico),c.tecnico.salario??salarioTecnico(c.tecnico));
 }
 
 /** Escolhas de copa só atualizam a campanha guardada; nunca simulam outra liga. */

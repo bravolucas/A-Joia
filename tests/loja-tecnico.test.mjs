@@ -71,3 +71,18 @@ test('demissão em campanha interrompida paga apenas os meses trabalhados',()=>{
  assert.equal(pagamento.valor,100*pagamento.meses);
  assert.equal(carteiraTecnico(fim.tecnico).saldo,3000+pagamento.valor);
 });
+test('loja ampliada: preço em meses de salário, efeitos moderados e mentoria única',async()=>{
+  const {precoItemLojaTecnico,ITENS_LOJA_TECNICO}=await import('../src/treinador/lojaTecnico.js');
+  const item=id=>ITENS_LOJA_TECNICO.find(x=>x.id===id);
+  assert.equal(precoItemLojaTecnico(item('preparacao'),100),300);
+  assert.equal(precoItemLojaTecnico(item('preparacao'),1000),3000,'gigante paga proporcional ao salário');
+  assert.equal(precoItemLojaTecnico(item('vestiario'),2),3,'piso mínimo');
+  let c=base();const antes=c.tecnico;
+  c=comprarMelhoriaTecnico(c,'diretoria');c=comprarMelhoriaTecnico(c,'torcida');c=comprarMelhoriaTecnico(c,'vestiario');c=comprarMelhoriaTecnico(c,'imprensa');
+  assert.equal(c.tecnico.diretoria,Math.min(100,(antes.diretoria??50)+6));assert.equal(c.tecnico.torcida,Math.min(100,(antes.torcida??50)+6));
+  assert.equal(c.tecnico.moral,Math.min(100,(antes.moral??50)+8));assert.equal(c.tecnico.reputacao,Math.min(99,(antes.reputacao??50)+2));
+  assert.equal(c.tecnico.carteiraTecnico.saldo,3000-100-100-50-150);
+  const ovr=calcularOvrTecnico(c.tecnico);c=comprarMelhoriaTecnico(c,'mentoria');assert.equal(calcularOvrTecnico(c.tecnico),ovr+1);
+  assert.throws(()=>comprarMelhoriaTecnico({...c,tecnico:{...c.tecnico,ano:2031}},'mentoria'),/uma vez na carreira/);
+  assert.equal(bonusForcaLoja(c.tecnico),0,'relações e formação não dão força ao time');
+});

@@ -1,5 +1,19 @@
 import {MARCAS_COPAS} from '../dados/marcasCopas.js';
 const numero=x=>Number.isFinite(x)?Math.max(0,x):0;
+/** Meta histórica legada de Klose (16 gols até 2022). Não se confunde
+ * com o recorde mundial vigente, que pode mudar sem apagar troféus antigos. */
+export function marcaLegadaKlose(c){
+ const porAno=new Map();
+ for(const t of c?.temporadas||[])if(t?.ano!=null)porAno.set(t.ano,t);
+ let gols=0,anoIgualou=null;
+ for(const t of [...porAno.values()].sort((a,b)=>a.ano-b.ano)){
+  if(t.selecao?.tipo!=='copaMundo'&&!(t.copa?.convocado&&(t.copa.tipo||t.selecao?.tipo||'copaMundo')==='copaMundo'))continue;
+  gols+=numero(t.selecao?.gols??t.copa?.gols);
+  if(gols>=16&&anoIgualou===null)anoIgualou=t.ano;
+ }
+ return {atual:gols,anoIgualou,valor:16,nome:'Gols em Copas'};
+}
+
 export function compararMarcasCopas(c,atual){
  const temporadas=new Map();for(const t of [...(c.temporadas||[]),...(atual?[atual]:[])])if(t?.ano!=null)temporadas.set(t.ano,t);
  const copas=[...temporadas.values()].filter(t=>t.selecao?.tipo==='copaMundo'||t.copa?.convocado&&(t.copa.tipo||t.selecao?.tipo||'copaMundo')==='copaMundo').sort((a,b)=>a.ano-b.ano);

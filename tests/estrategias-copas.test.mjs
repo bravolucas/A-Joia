@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {CENARIOS_COPA,TODAS_ESTRATEGIAS,NOVOS_PENALTIS,escolhasCopa} from '../src/treinador/estrategiasCopas.js';
-import {criarCampanhaCopa,decisaoCopa,escolherCopa,chancesCopa,chancePenaltis} from '../src/treinador/copasEscolha.js';
+import {criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa,chancesCopa,chancePenaltis} from '../src/treinador/copasEscolha.js';
 const campanha=()=>criarCampanhaCopa({nome:'Copa do Brasil',usuario:'A',forcaUsuario:76,clubes:[{nome:'A',forca:76},{nome:'B',forca:82}],ano:2030,formato:'mata',seed:'VARIACOES'});
 test('oito cenários e 24 estratégias rotacionam sem mudar ao reabrir',()=>{
  const c=campanha(),d=decisaoCopa(c),vistos=new Set();
@@ -21,7 +21,7 @@ test('cada carta oferecida persiste a mesma probabilidade usada no sorteio e nã
  assert.deepEqual(c,antes);assert.throws(()=>escolherCopa(c,d.chave,'inexistente'));
 });
 test('pênaltis têm três opções variadas e chance persistida ao retomar',()=>{
- let c;for(let i=0;i<100;i++){const cp={...campanha(),seed:'PENAL-'+i};const d=decisaoCopa(cp);const r=escolherCopa(cp,d.chave,'controlar');if(r.resultado.penaltisPendentes){c=r;break;}}
+ let c;for(let i=0;i<100;i++){let cp={...campanha(),seed:'PENAL-'+i};const ida=decisaoCopa(cp);cp=escolherCopa(cp,ida.chave,'controlar');assert.equal(cp.resultado.penaltisPendentes,false,'a ida não pode antecipar pênaltis');cp=continuarCopa(cp);const volta=decisaoCopa(cp);cp=escolherCopa(cp,volta.chave,'controlar');if(cp.resultado.penaltisPendentes){c=cp;break;}}
  assert.ok(c);const d=decisaoCopa(c),opcoes=escolhasCopa(c,d).opcoes;assert.equal(new Set(opcoes.map(x=>x.id)).size,3);
  for(const op of opcoes){const r=escolherCopa(c,d.chave,op.id);assert.equal(r.resultado.revelacao.probabilidades.classificacao,chancePenaltis(d.forcaUsuario,d.forcaAdv,op.id,d.final));assert.equal(r.resultado.penaltisPendentes,false);}
  assert.equal(NOVOS_PENALTIS.length,6);

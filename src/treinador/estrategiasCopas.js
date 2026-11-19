@@ -15,7 +15,7 @@ export const TODAS_ESTRATEGIAS=CENARIOS_COPA.flatMap(c=>c.opcoes);
 export function escolhasCopa(c,d){
  // A rotação garante cenários distintos em partidas consecutivas, inclusive nos grupos.
  let hash=0;for(const letra of String(c.seed||c.nome))hash=(Math.imul(hash,31)+letra.charCodeAt(0))>>>0;
- const indice=(hash+(c.etapa||0))%CENARIOS_COPA.length;
+ const indice=(hash+(c.etapa||0)+(d.perna==='volta'?1:0))%CENARIOS_COPA.length;
  if(d.penaltis){const inicio=(hash+(c.etapa||0))%NOVOS_PENALTIS.length;return {titulo:'Como encarar a marca do pênalti?',opcoes:Array.from({length:3},(_,i)=>NOVOS_PENALTIS[(inicio+i*2)%NOVOS_PENALTIS.length])};}
  return CENARIOS_COPA[indice];
 }

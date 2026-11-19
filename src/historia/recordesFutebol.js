@@ -68,22 +68,24 @@ function selecionarPorEscopo(linhas,tipo,nome){
  return linhas.flatMap(t=>(t.porCompeticao||[]).map(r=>({...r,ano:t.ano,clube:t.clube})))
   .filter(r=>competicaoIgual(r.nome,nome));
 }
-function participacoesDaSelecao(c,nome,competicao){
+function participacoesDaSelecao(c,nome,competicao,temporadas=c?.temporadas||[]){
  const meuPais=paisId(c?.nac||c?.nacionalidade);
  if(!eIgual(meuPais,nome)&&!competicao)return [];
  const linhas=[];
- for(const t of c?.temporadas||[]){
-  for(const r of [t.selecao,t.amistososSelecao]){
+ for(const t of temporadas||[]){
+  // O modo completo arquiva o evento como selecaoTemporada; o rapido usa selecao.
+  for(const r of [t.selecao,t.amistososSelecao,t.selecaoTemporada]){
    if(!r?.convocado&&!Number.isFinite(r?.jogos))continue;
-   const nomeTorneio=r.nome||r.competicao||
-     (r.tipo==='copaMundo'?'Copa do Mundo':r.tipo==='continentalSelecao'?'Continental de seleções':'Amistosos');
+   const nomeTorneio=r.tipo==='copaMundo'||r.comp==='copaMundo'?'Copa do Mundo':
+     r.tipo==='continentalSelecao'?r.nome||'Continental de seleções':
+     r.nomeComp||r.nome||r.competicao||'Amistosos';
    if(competicao&&!competicaoIgual(nomeTorneio,competicao))continue;
    if(!competicao&&!eIgual(meuPais,nome))continue;
    linhas.push({ano:t.ano,clube:meuPais,jogos:r.jogos,gols:r.gols,assist:r.assist,
     defesas:r.defesas,cleanSheets:r.cleanSheets});
   }
   // Compatibilidade: saves antigos guardavam gols de Copa em t.copa.
-  if(competicao&&competicaoIgual(competicao,'Copa do Mundo')&&!t.selecao?.convocado&&t.copa?.convocado){
+  if(competicao&&competicaoIgual(competicao,'Copa do Mundo')&&!t.selecao?.convocado&&!t.selecaoTemporada&&t.copa?.convocado){
    linhas.push({ano:t.ano,clube:meuPais,jogos:t.copa.jogos,gols:t.copa.gols,
     assist:t.copa.assist,defesas:t.copa.defesas,cleanSheets:t.copa.cleanSheets});
   }
@@ -121,7 +123,7 @@ function medirPartidas(mapa,arquivo,tipo,nome){
  }
 }
 /** Formato estável: não grava nada, portanto reabrir, importar ou voltar não duplica marcas. */
-export function consultarRecordesFutebol(c={},tipo='clube',nome=''){
+export function consultarRecordesFutebol(c={},tipo='clube',nome='',temporadas=c?.temporadas||[]){
  if(!['clube','selecao','competicao'].includes(tipo))return {tipo,nome,recordes:[],desde:null};
  const arquivo=arquivoDe(c),mapa=new Map();
  if(tipo==='clube'||tipo==='competicao'){
@@ -134,15 +136,15 @@ export function consultarRecordesFutebol(c={},tipo='clube',nome=''){
    medirAtleta(mapa,{id:p.id,nome:p.nome||'Jogador'},linhas);
   }
   // Saves anteriores ao Arquivo Vivo e carreira ainda não arquivada.
-  if(!temUsuario&&c?.temporadas?.length){
+  if(!temUsuario&&temporadas?.length){
    medirAtleta(mapa,{id:'voce',nome:c.nome||'Você'},
-    selecionarPorEscopo(c.temporadas,tipo,nome));
+    selecionarPorEscopo(temporadas,tipo,nome));
   }
   if(tipo==='competicao'&&competicaoIgual(nome,'Copa do Mundo'))
    medirAtleta(mapa,{id:'voce',nome:c.nome||'Você'},
-    participacoesDaSelecao(c,'',nome));
+    participacoesDaSelecao(c,'',nome,temporadas));
  }else{
-  medirAtleta(mapa,{id:'voce',nome:c.nome||'Você'},participacoesDaSelecao(c,nome,null));
+  medirAtleta(mapa,{id:'voce',nome:c.nome||'Você'},participacoesDaSelecao(c,nome,null,temporadas));
  }
  medirPartidas(mapa,arquivo,tipo,nome);
  const referencias=REFERENCIAS_RECORDES_FUTEBOL.filter(r=>
@@ -155,6 +157,6 @@ export function consultarRecordesFutebol(c={},tipo='clube',nome=''){
   return {id:m.id,rotulo:m.rotulo,categoria:m.categoria,real,simulado,
    status:ultrapassou?'Superado no save':igualou?'Igualado no save':real?'Recorde real preservado':'Recorde do save'};
  });
- return {tipo,nome,recordes,desde:arquivo.desde??c?.temporadas?.[0]?.ano??null,
+ return {tipo,nome,recordes,desde:arquivo.desde??temporadas?.[0]?.ano??null,
   cobertura:'Referências reais auditadas e partidas/temporadas armazenadas neste save. Lacunas não são preenchidas por estimativas.'};
 }

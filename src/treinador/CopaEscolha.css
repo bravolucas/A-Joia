@@ -40,3 +40,15 @@
 .cce-lances-fora{font-size:12px;color:#a8bbcb;text-align:center}
 .cce-ida-volta{display:grid;gap:3px;margin:6px auto 0;font-size:12px;color:#c9d6e0}
 .cce-ida-volta small{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#93a9ba}
+
+/* Cada partida da eliminatória tem sua própria decisão e apresentação. */
+.cce-etapa{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0 0}
+.cce-etapa span{border:1px solid #ffffff20;border-radius:10px;padding:9px 10px;text-align:center;font-size:10px;letter-spacing:.08em;font-weight:700;color:#91a2b4;background:#ffffff08}
+.cce-etapa span.atual{border-color:var(--cce-cor);background:color-mix(in srgb,var(--cce-cor) 12%,transparent);color:var(--cce-cor)}
+.cce-placar-anterior{margin:12px 0 0;padding:13px 16px;border:1px solid #ffffff30;border-radius:12px;background:#080d17c9;text-align:center}
+.cce-placar-anterior small{display:block;letter-spacing:.1em;font-size:10px;font-weight:700;color:var(--cce-cor)}
+.cce-placar-anterior strong{display:block;font-size:clamp(14px,3vw,19px);margin:7px 0;color:#fff}
+.cce-placar-anterior p{font-size:11px;margin:0;color:#b7c5d4;line-height:1.4}
+.cce-ida-volta{max-width:520px;margin:18px auto;padding:12px;border:1px solid #ffffff24;border-radius:12px;background:#ffffff08;line-height:1.5}
+.cce-ida-volta strong{color:var(--cce-cor);font-size:13px;margin-top:4px;border-top:1px solid #ffffff20;padding-top:8px}
+@media(max-width:600px){.cce-etapa{margin-top:12px}.cce-placar-anterior{padding:11px}.cce-ida-volta{padding:10px}}

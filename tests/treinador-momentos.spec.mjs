@@ -36,7 +36,7 @@ for (const width of [390, 1366]) {
     for(let i=0;i<70;i++){
       const c=await salvo(page),p=c.tecnico.copasEmJogo;expect(p).toBeTruthy();expect(p.dataAtual).toBeGreaterThanOrEqual(data);data=p.dataAtual;
       if(p.pausa?.id==='metade'){achou=true;break;}
-      const d=page.getByRole('dialog'),continuar=d.getByRole('button',{name:/Continuar campanha|Concluir campanha|Continuar temporada/});if(await continuar.count())await continuar.click();else await d.locator('.cce-opcoes button').first().click();
+      const d=page.getByRole('dialog'),continuar=d.getByRole('button',{name:/Ir para jogo de volta|Continuar campanha|Concluir campanha|Continuar temporada/});if(await continuar.count())await continuar.click();else await d.locator('.cce-opcoes button').first().click();
     }
     expect(achou).toBe(true);await expect(page.getByLabel('Campanha parcial')).toContainText('Confiança');
     const antes=await salvo(page),partidas=antes.tecnico.temporadas[0].confrontos.filter(j=>!j.folga),metade=partidas.slice(0,Math.floor(partidas.length/2)),pontos=metade.reduce((n,j)=>n+(j.resultado==='V'?3:j.resultado==='E'?1:0),0);

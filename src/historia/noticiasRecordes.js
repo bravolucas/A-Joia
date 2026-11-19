@@ -20,6 +20,9 @@ export function escoposRecordesDaTemporada(c={},a={}){
   ...(c.tecnico&&(c.nome||c.tecnico.nome)
     ?[{tipo:'treinador',nome:c.nome||c.tecnico.nome}]:[]),
   ...(pais?[{tipo:'selecao',nome:pais}]:[]),
+  ...(a.torneios||[]).filter(x=>x?.selecao&&
+   (x.faseUsuario||x.jogosUsuario?.length||x.campeao===x.selecao))
+   .map(x=>({tipo:'selecao',nome:x.selecao})),
   ...comp.filter(Boolean).map(nome=>({tipo:'competicao',nome}))
  ]).slice(0,8);
 }

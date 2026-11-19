@@ -34,7 +34,8 @@ test('consulta ao clube mantém identidade e permite avaliar os atletas da base 
    assert.ok(original);
    assert.equal(j.mundoId,original.id);
    assert.equal(j.clubeVendedor,'Equipe B');
-   assert.equal(j.valor,original.valor);
+   // O preço pedido pelo vendedor pode ter ágio; o valor de mercado é o do cadastro.
+   assert.equal(j.valorMercado,original.valor);assert.ok(j.valor>=j.valorMercado);
  }
 });
 

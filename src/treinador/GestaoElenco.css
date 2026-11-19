@@ -49,3 +49,22 @@
  .ge-acoes{justify-content:stretch;width:100%}
  .ge-acoes button{flex:1;min-height:42px;font-size:12px}
 }
+
+/* Ofertas recebidas, lista de transferências e empréstimos. */
+.ge-tag{display:inline-block;margin:4px 6px 0 0;padding:2px 7px;border-radius:999px;background:#ffffff12;color:#bfe7d8;font-size:10px;font-weight:600}
+.ge-tag-venda{background:#f5d77a22;color:#f5d77a}
+.ge-mercado{display:block;color:#8da3b0;font-size:10px;margin-top:3px}
+.ge-ofertas{display:grid;gap:10px;margin-top:6px}
+.ge-oferta{padding:14px;border:1px solid #2c3c53;border-radius:11px;background:#142332}
+.ge-oferta-topo{display:flex;align-items:center;gap:10px}
+.ge-oferta-topo>div{flex:1;min-width:0}
+.ge-oferta-topo small{display:block;color:#93a9ba;font-size:10px;margin-top:2px}
+.ge-oferta-tipo{padding:4px 9px;border-radius:999px;font-size:10px;font-weight:700;background:#73d4ae1c;color:#98e7ca;white-space:nowrap}
+.ge-oferta-tipo.ge-emprestimo{background:#7aa7f51f;color:#a9c6ff}
+.ge-oferta-atleta{margin:10px 0 6px;font-size:13px;color:#e7edf1}
+.ge-oferta dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:0 0 12px}
+.ge-oferta dt{font-size:10px;color:#8da3b0;text-transform:uppercase;letter-spacing:.04em}
+.ge-oferta dd{margin:2px 0 0;font-size:15px;font-weight:650;color:#f0f5fa}
+.ge-oferta .ge-acoes{flex-wrap:wrap;justify-content:flex-end}
+.ge-oferta .ge-acoes .ge-confirmar{background:#73d4ae;color:#071321;border-color:#73d4ae;font-weight:700}
+@media(max-width:650px){.ge-oferta .ge-acoes button{flex:1 1 45%}}

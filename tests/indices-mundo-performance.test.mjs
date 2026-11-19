@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {registrarMundoVivo} from '../src/simulacao/mundoVivo.js';
 import {gerarMundoJogadores} from '../src/comum/lib.js';
+import {avaliarClubeNoMundo} from '../src/simulacao/forcaEquipe.js';
+import {CLUBES} from '../src/dados/data.js';
 import {geradorTecnico} from '../src/treinador/momentosTecnico.js';
 
 test('índice anual mantém ordem das classificações, títulos e primeiro movimento',()=>{
@@ -31,6 +33,24 @@ test('índice anual mantém ordem das classificações, títulos e primeiro movi
   const anterior=JSON.stringify(c);
   registrarMundoVivo(c,ano);
   assert.equal(JSON.stringify(c),anterior,'registrar o mesmo ano não reprocessa o arquivo');
+});
+
+test('força anual usa apenas titulares ativos do clube e conserva cálculo original',()=>{
+  const santos=CLUBES.find(c=>c.nome==='Santos');
+  assert.ok(santos);
+  const base={codigo:'elencos-por-clube',nome:'Atleta',posicao:'ATA',
+    mundo:{elencosCompletos:true,jogadores:[
+      {id:1,clubeNome:'Santos',posicao:'ATA',ovr:91,aposentado:false},
+      {id:2,clubeNome:'Santos',posicao:'ZAG',ovr:78,aposentado:false},
+      {id:3,clubeNome:'Flamengo',posicao:'ATA',ovr:94,aposentado:false},
+      {id:4,clubeNome:'Santos',posicao:'GOL',ovr:98,aposentado:true}
+    ]}};
+  const ano={ano:2033,clube:'Santos',ligaId:'brasileirao'};
+  registrarMundoVivo(base,ano);
+  const perfil=base.universo.clubes.Santos,historico=perfil.historico[0];
+  const resultadoSemIndice=avaliarClubeNoMundo({...base,universo:{clubes:{Santos:perfil}}},santos);
+  assert.equal(historico.forca,resultadoSemIndice.forca);
+  assert.equal(historico.forcaAntes,avaliarClubeNoMundo({mundo:base.mundo},santos).forca);
 });
 
 test('elencos mundiais conservam IDs e resultados para a mesma seed',()=>{

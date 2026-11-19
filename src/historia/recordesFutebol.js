@@ -24,7 +24,16 @@ export const METRICAS_RECORDES = Object.freeze([
  {id:'golsEquipeEdicao',rotulo:'Mais gols de uma equipe em uma edição (jogos arquivados)',categoria:'Temporada'},
  {id:'vitoriasEquipeEdicao',rotulo:'Mais vitórias de uma equipe em uma edição (jogos arquivados)',categoria:'Temporada'},
  {id:'invencibilidade',rotulo:'Maior sequência invicta registrada na edição',categoria:'Sequências'},
- {id:'vitoriasSeguidas',rotulo:'Mais vitórias consecutivas registradas na edição',categoria:'Sequências'}
+ {id:'vitoriasSeguidas',rotulo:'Mais vitórias consecutivas registradas na edição',categoria:'Sequências'},
+ {id:'pontosEdicao',rotulo:'Mais pontos em uma edição de liga',categoria:'Campanhas'},
+ {id:'vitoriasTabelaEdicao',rotulo:'Mais vitórias em uma edição de liga',categoria:'Campanhas'},
+ {id:'golsTabelaEdicao',rotulo:'Mais gols em uma edição de liga (classificação)',categoria:'Campanhas'},
+ {id:'saldoTabelaEdicao',rotulo:'Maior saldo de gols em uma edição de liga',categoria:'Campanhas'},
+ {id:'invictoTabelaEdicao',rotulo:'Mais jogos em campanha invicta de liga',categoria:'Campanhas'},
+ {id:'titulosTotal',rotulo:'Mais títulos conquistados no universo',categoria:'Títulos'},
+ {id:'titulosAno',rotulo:'Mais títulos em uma temporada',categoria:'Títulos'},
+ {id:'titulosConsecutivos',rotulo:'Mais títulos consecutivos na mesma competição',categoria:'Títulos'},
+ {id:'vicesTotal',rotulo:'Mais vice-campeonatos no universo',categoria:'Títulos'}
 ]);
 const numeros=['jogos','gols','assist','defesas','cleanSheets'];
 const n=x=>Number.isFinite(x)&&x>=0?x:0;
@@ -177,6 +186,85 @@ function medirPartidas(mapa,arquivo,tipo,nome){
   }
  }
 }
+
+/** Tabelas oficiais do universo e edicoes com campeao/vice registrado.
+ * Os dados de ligas utilizam apenas a classificacao salva; jogos parciais
+ * nao sao convertidos em totais supostamente oficiais. */
+function medirCampanhasETitulos(mapa,arquivo,tipo,nome){
+ const titulos=new Map(),vices=new Map(),porAno=new Map(),edicoesPorCompeticao=new Map();
+ const vistos=new Set(),vicesVistos=new Set();
+ for(const edicao of arquivo.edicoes||[]){
+  if(!edicao||!Number.isFinite(edicao.ano)||!edicao.nome)continue;
+  if(tipo==='competicao'&&!competicaoIgual(edicao.nome,nome))continue;
+  if(tipo==='selecao'&&edicao.tipo==='liga')continue;
+  const comum={ano:edicao.ano,competicao:edicao.nome,origem:'save'};
+  if(edicao.tipo==='liga'&&Array.isArray(edicao.classificacao)&&tipo!=='selecao'){
+   for(const linha of edicao.classificacao){
+    if(!linha?.nome||(tipo==='clube'&&!eIgual(linha.nome,nome)))continue;
+    const equipe={...comum,atleta:linha.nome,equipe:linha.nome};
+    for(const [campo,id]of [['pontos','pontosEdicao'],['vitorias','vitoriasTabelaEdicao'],
+     ['golsPro','golsTabelaEdicao'],['saldoGols','saldoTabelaEdicao']]){
+     if(Number.isFinite(linha[campo])&&linha[campo]>0)
+      atualizar(mapa,id,{...equipe,valor:linha[campo],destaque:'Classificacao de '+edicao.nome});
+    }
+    // Regra rigorosa: nao concluir invencibilidade sem jogos e derrotas
+    // registrados na classificacao oficial desta edicao.
+    if(Number.isFinite(linha.jogos)&&linha.jogos>0&&linha.derrotas===0)
+     atualizar(mapa,'invictoTabelaEdicao',{...equipe,valor:linha.jogos,
+      destaque:'Campanha sem derrotas · '+edicao.nome});
+   }
+  }
+  // Apenas uma edicao por temporada e competicao.
+  const chaveEdicao=edicao.ano+'|'+canon(edicao.nome);
+  if(edicao.campeao&&!vistos.has(chaveEdicao)){
+   vistos.add(chaveEdicao);
+   const campeao=edicao.campeao;
+   const relevante=tipo==='competicao'||eIgual(campeao,nome);
+   if(relevante){
+    const key=canon(campeao);
+    const atual=titulos.get(key)||{valor:0,ano:null,atleta:campeao};
+    titulos.set(key,{...atual,valor:atual.valor+1,ano:edicao.ano});
+    const anoChave=key+'|'+edicao.ano;
+    const anual=porAno.get(anoChave)||{valor:0,ano:edicao.ano,atleta:campeao};
+    porAno.set(anoChave,{...anual,valor:anual.valor+1});
+   }
+   if(!edicoesPorCompeticao.has(canon(edicao.nome)))
+    edicoesPorCompeticao.set(canon(edicao.nome),[]);
+   edicoesPorCompeticao.get(canon(edicao.nome)).push({ano:edicao.ano,campeao});
+  }
+  if(edicao.vice&&!vicesVistos.has(chaveEdicao)){
+   vicesVistos.add(chaveEdicao);
+   const vice=edicao.vice;
+   if(tipo==='competicao'||eIgual(vice,nome)){
+    const key=canon(vice),atual=vices.get(key)||{valor:0,atleta:vice};
+    vices.set(key,{...atual,valor:atual.valor+1,ano:edicao.ano});
+   }
+  }
+ }
+ for(const reg of titulos.values())
+  atualizar(mapa,'titulosTotal',{...reg,equipe:reg.atleta,origem:'save'});
+ // O numero de titulos em um ano so faz sentido para uma equipe, nao para
+ // uma competicao que por definicao produz apenas um campeao por edicao.
+ if(tipo!=='competicao')for(const reg of porAno.values())
+  atualizar(mapa,'titulosAno',{...reg,equipe:reg.atleta,origem:'save'});
+ for(const reg of vices.values())
+  atualizar(mapa,'vicesTotal',{...reg,equipe:reg.atleta,origem:'save'});
+ for(const [competicao,edicoes]of edicoesPorCompeticao){
+  edicoes.sort((a,b)=>a.ano-b.ano);
+  let anterior=null,serie=0;
+  for(const edicao of edicoes){
+   if(anterior&&eIgual(anterior,edicao.campeao))serie++;
+   else serie=1;
+   anterior=edicao.campeao;
+   if(serie<2)continue;
+   if(tipo!=='competicao'&&!eIgual(edicao.campeao,nome))continue;
+   atualizar(mapa,'titulosConsecutivos',{valor:serie,ano:edicao.ano,
+    atleta:edicao.campeao,equipe:edicao.campeao,competicao,origem:'save',
+    destaque:'Edicoes consecutivas da mesma competicao'});
+  }
+ }
+}
+
 /** Atuações individuais arquivadas por partida: sem preencher estatisticas ausentes. */
 function medirAtuacoes(mapa,arquivo,tipo,nome,atletaNome){
  if(tipo==='selecao')return;
@@ -218,6 +306,7 @@ export function consultarRecordesFutebol(c={},tipo='clube',nome='',temporadas=c?
   medirAtleta(mapa,{id:'voce',nome:c.nome||'Você'},participacoesDaSelecao(c,nome,null,temporadas));
  }
  medirPartidas(mapa,arquivo,tipo,nome);
+ medirCampanhasETitulos(mapa,arquivo,tipo,nome);
  medirAtuacoes(mapa,arquivo,tipo,nome,c?.nome||'Você');
  const referencias=REFERENCIAS_RECORDES_FUTEBOL.filter(r=>
   r.tipo===tipo&&(tipo==='competicao'?competicaoIgual(r.nome,nome):eIgual(r.nome,nome)));

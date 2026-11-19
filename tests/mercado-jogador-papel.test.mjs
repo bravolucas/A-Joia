@@ -75,6 +75,8 @@ test('avaliação usa caixa real do mundo e a concorrência na posição',()=>{
  const semTitular={...alterado,mundo:{jogadores:[],caixaClubes:{Flamengo:500000}}};
  const favoravel=analisarClubeEmpresario(semTitular,flamengo,80);
  assert.equal(favoravel.posicaoOcupada,false);
+ assert.equal(favoravel.qualidadeConcorrente,null,'sem jogador não existe concorrente de OVR zero');
+ assert.equal(favoravel.concorrencia,'Sem referência');
  assert.equal(favoravel.semVerba,false);
 });
 
@@ -89,4 +91,13 @@ test('sondagens improváveis tendem a recusa; recusa não entra nas ofertas do a
  assert.ok(!ofertas.some(o=>o.clube==='Real Madrid'));
  const probabilidades=Array.from({length:30},(_,i)=>viraPropostaSondagem({...c,codigo:'SONDAGEM-'+i},'Real Madrid'));
  assert.ok(probabilidades.some(Boolean)&&probabilidades.some(x=>!x),'sinal verde não assegura proposta');
+});
+
+test('ofertas formais não são criadas com caixa comprovadamente insuficiente',()=>{
+ const c=atleta(80,'Santos','CAIXA-SEM-PROPOSTAS');
+ const clubes=catalogoMercadoJogador(c).filter(x=>x.nome!=='Santos');
+ c.mundo={jogadores:[],caixaClubes:Object.fromEntries(clubes.map(x=>[x.nome,0]))};
+ assert.equal(gerarOfertas(c,5).length,0,'nenhum destino pode pagar a transferência');
+ // A lista de observadores ainda pode existir sem implicar contratação imediata.
+ assert.ok(interesseMercado(c).length>=2);
 });

@@ -33,7 +33,8 @@ export function detectarQuebrasRecordesFutebol(antes={},depois={},{
   for(const r of atual.recordes){
    const novo=r.simulado,velho=antigos.get(r.id)?.simulado;
    if(!novo||!Number.isFinite(novo.valor)||novo.valor<=0||novo.ano!==ano)continue;
-   const real=r.real;
+   // Um recorte documental nao autoriza manchete de recorde mundial quebrado.
+   const real=r.real?.cobertura==='recorte'?null:r.real;
    const superouReal=!!real&&novo.valor>real.valor&&(velho?.valor??0)<=real.valor;
    const igualouReal=!!real&&novo.valor===real.valor&&(velho?.valor??0)<real.valor;
    const superouSave=!!velho&&novo.valor>velho.valor;

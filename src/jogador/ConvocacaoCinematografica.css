@@ -1,0 +1,132 @@
+/* Cerimônia de convocação da Copa — cena reativa e independente de nacionalidade. */
+.cp-convocacao-pop{--cc-ouro:#edcd79}
+.cp-convocacao-pop .janela-estrutura{max-width:1120px;width:100%;min-height:100svh;padding:clamp(8px,1.5vw,22px);gap:8px}
+.cp-convocacao-pop .janela-contexto{font-size:11px;letter-spacing:.17em}
+.cp-convocacao-pop .janela-conteudo{min-height:0;display:flex;justify-content:flex-start;flex:1}
+.cp-convocacao-pop .janela-estrutura>button{align-self:center;width:min(100%,560px);margin-top:8px;min-height:48px;background:linear-gradient(96deg,#ddb357,#f5db8d);color:#121b2a;font-weight:900}
+.cc-raiz{width:100%;color:#f7f5ef;min-width:0;display:flex;flex-direction:column;gap:10px;--cc-principal:#d6b960;--cc-secundaria:#4d79a5;font-family:Inter,system-ui,sans-serif}
+.cc-abertura{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:7px 12px 4px;min-width:0}
+.cc-abertura-identidade{display:flex;align-items:center;gap:12px;min-width:0}
+.cc-abertura-identidade>img{width:60px;height:40px;object-fit:cover;border:1px solid #ffffff45;border-radius:5px;box-shadow:0 2px 12px #0008}
+.cc-abertura-identidade>span{min-width:0}
+.cc-abertura-identidade small,.cc-abertura-copa small{display:block;font-size:10px;font-weight:800;letter-spacing:.18em;color:#d7cba6}
+.cc-abertura-identidade strong{display:block;font:600 clamp(15px,2.4vw,25px)/1.18 Georgia,serif;overflow-wrap:anywhere}
+.cc-abertura-copa{text-align:right;min-width:0}
+.cc-abertura-copa strong{display:block;font:600 clamp(11px,1.45vw,17px)/1.3 system-ui,sans-serif;color:#e7cd87;overflow-wrap:anywhere}
+.cc-cenario{position:relative;isolation:isolate;overflow:hidden;min-height:260px;aspect-ratio:16/8.3;background:
+ radial-gradient(ellipse at 55% 44%,#39588975 0%,transparent 63%),
+ repeating-linear-gradient(90deg,transparent 0 64px,#ffffff07 65px 67px,transparent 68px 131px),
+ linear-gradient(146deg,#0a172c,#101f36 52%,#060c19);
+ border-radius:16px;border:1px solid color-mix(in srgb,var(--cc-principal) 50%,#293d62);
+ box-shadow:0 17px 55px #000b,inset 0 0 65px #090e20}
+.cc-cenario:before{content:'';position:absolute;inset:0 0 58% 0;background:linear-gradient(180deg,#070b1cd9,transparent);pointer-events:none;z-index:1}
+.cc-cenario:after{content:'';position:absolute;left:0;right:0;bottom:0;height:25%;background:linear-gradient(0deg,#060c1ff5,transparent);z-index:6;pointer-events:none}
+.cc-luzes{position:absolute;inset:0;pointer-events:none;z-index:3;mix-blend-mode:screen}
+.cc-luzes i{position:absolute;top:-55%;left:13%;width:22%;height:185%;transform:rotate(-24deg);background:linear-gradient(90deg,transparent,#fff4ba10,transparent);animation:cc-luz 7s ease-in-out infinite alternate}
+.cc-luzes i:nth-child(2){left:46%;animation-delay:-2s;transform:rotate(17deg)}
+.cc-luzes i:nth-child(3){left:79%;animation-delay:-3s;transform:rotate(-10deg)}
+.cc-faixas{position:absolute;top:4%;left:2%;bottom:13%;width:15%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;border:1px solid #e1cc754b;padding:20px 4px 4px;opacity:.7;transform:skewY(-2deg);background:linear-gradient(180deg,var(--cc-secundaria),#071022ad 65%);z-index:1}
+.cc-faixas span{font-weight:800;letter-spacing:.1em;font-size:clamp(9px,1.3vw,15px);text-align:center;overflow-wrap:anywhere}
+.cc-faixas img{width:42px;max-width:90%;height:auto}
+.cc-tela{position:absolute;top:7%;left:35%;right:3%;height:66%;background:radial-gradient(circle at 85% 50%,color-mix(in srgb,var(--cc-principal) 20%,transparent),transparent 53%),linear-gradient(145deg,#102f5a,#07152d);border:3px solid #c7ae6a90;border-radius:9px;box-shadow:0 9px 34px #000a,0 0 35px color-mix(in srgb,var(--cc-secundaria) 40%,transparent);z-index:2;display:flex;flex-direction:column}
+.cc-tela-topo{padding:clamp(5px,1.1vw,13px);display:flex;align-items:center;gap:10px;border-bottom:1px solid #ffffff24}
+.cc-tela-topo img{width:39px;height:26px;object-fit:cover;border-radius:2px}
+.cc-tela-topo small{display:block;color:#9bc1e7;font-size:clamp(7px,1vw,10px);letter-spacing:.22em}
+.cc-tela-topo strong{display:block;font-size:clamp(12px,2vw,20px)}
+.cc-tela-corpo{min-height:0;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4px 10px;gap:clamp(2px,1vw,13px)}
+.cc-tela-corpo>span{font-size:clamp(8px,1.14vw,14px);letter-spacing:.14em;color:#dad2af}
+.cc-tela-corpo>strong{font:italic 800 clamp(20px,4.3vw,51px)/1.02 Georgia,serif;text-transform:uppercase;overflow-wrap:anywhere;max-width:100%;animation:cc-nome .43s cubic-bezier(.2,.8,.2,1) both;text-shadow:0 4px 22px #0007}
+.cc-resultado-positiva .cc-tela-corpo>strong{color:var(--cc-principal);text-shadow:0 0 30px #ffe7937d,0 2px 8px #000a}
+.cc-resultado-negativa .cc-tela-corpo>strong{color:#c9d3e3}
+.cc-tela-corpo>small{font-size:clamp(8px,1.2vw,12px);letter-spacing:.14em;color:#adcbec}
+.cc-tela-rodape{display:flex;align-items:center;justify-content:center;gap:10px;padding:4px 8px;color:#b2b9cb;font-size:9px;letter-spacing:.08em}
+.cc-tela-rodape i{width:30px;height:1px;background:var(--cc-principal)}
+.cc-tecnico{position:absolute;left:43%;bottom:13%;width:22%;z-index:4;text-align:center;filter:drop-shadow(0 4px 12px #000d)}
+.cc-tecnico svg{width:100%;height:auto;display:block}
+.cc-tecnico span{display:block;margin:-1px auto 0;color:#e0c880;font-size:clamp(7px,.8vw,10px);letter-spacing:.08em;background:#141a28;border:1px solid #c1a16667;width:80%;padding:3px}
+.cc-boca{transform-origin:50% 54%;animation:cc-fala .5s ease-in-out infinite}
+.cc-atleta{position:absolute;left:-1%;bottom:4%;width:clamp(110px,27%,305px);height:77%;z-index:5;filter:drop-shadow(6px 2px 11px #000b)}
+.cc-atleta svg{height:100%;width:100%;object-fit:contain;object-position:bottom}
+.cc-resultado-positiva .cc-atleta{animation:cc-alegria .75s .2s cubic-bezier(.17,.83,.3,1) both}
+.cc-resultado-negativa .cc-atleta{animation:cc-decepcao .9s .15s ease-out both;filter:grayscale(.55) drop-shadow(6px 2px 11px #000b)}
+.cc-imprensa{position:absolute;bottom:0;right:0;left:31%;height:27%;display:flex;justify-content:space-around;align-items:flex-end;z-index:4;opacity:.75}
+.cc-imprensa i{display:block;border-radius:100% 100% 0 0;background:#0b1325;width:11%;height:75%;box-shadow:0 -13px 0 -6px #1e2d44}
+.cc-imprensa i:nth-child(2n){height:52%;background:#18233a}
+.cc-coletiva-legenda{position:absolute;bottom:6%;left:30%;right:2%;padding:11px 12px;z-index:7;min-height:56px;border-left:3px solid var(--cc-principal);background:linear-gradient(90deg,#050d20ef,#0b1826b0);display:flex;flex-direction:column;gap:2px}
+.cc-coletiva-legenda small{font-size:9px;font-weight:800;letter-spacing:.15em;color:var(--cc-principal)}
+.cc-coletiva-legenda strong{font-size:clamp(11px,1.75vw,19px);line-height:1.2;animation:cc-legenda .35s ease-out both}
+.cc-festa{position:absolute;inset:0;z-index:8;pointer-events:none}
+.cc-festa i{position:absolute;top:-10px;left:var(--cc-x);width:5px;height:9px;background:var(--cc-principal);animation:cc-confete 3s var(--cc-d) ease-in both}
+.cc-festa i:nth-child(even){background:#eee9ff;width:4px}
+.cc-carimbo{position:absolute;z-index:9;top:39%;left:35%;right:3%;transform:translateY(-50%);padding:clamp(5px,1.7vw,18px);display:flex;flex-direction:column;gap:5px;align-items:center;text-align:center;animation:cc-carimbo .7s cubic-bezier(.1,.72,.23,1) both;border:2px solid #d0b564;border-radius:9px;box-shadow:0 0 35px #000e;background:#081327ed}
+.cc-carimbo strong{font:italic 900 clamp(21px,4vw,51px)/1.1 system-ui,sans-serif;letter-spacing:.02em}
+.cc-carimbo span{font-size:clamp(9px,1.45vw,16px);font-weight:600}
+.cc-carimbo-sim strong{color:#f1d27a}.cc-carimbo-nao{border-color:#98a3b5;background:#172235eb}.cc-carimbo-nao strong{color:#d0d8e6}
+.cc-rodape{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:12px}
+.cc-lista,.cc-emocao{border:1px solid #b7a47d3a;background:linear-gradient(160deg,#15223bcc,#101827);border-radius:12px;padding:clamp(10px,1.5vw,17px);min-width:0;min-height:154px}
+.cc-lista>strong{display:flex;justify-content:space-between;gap:10px;align-items:center;color:#d9c185;font-size:12px;letter-spacing:.1em}
+.cc-lista>strong small{font-size:11px;color:#c6d1dc}
+.cc-lista ol{padding:0;margin:8px 0 0;list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 10px}
+.cc-lista li{font-size:clamp(10px,1.24vw,13px);line-height:1.28;color:#d5dbe4;overflow-wrap:anywhere}
+.cc-lista li span{display:inline-block;font-size:9px;font-weight:800;color:#9fb3cd;border:1px solid #9fb3cd5e;border-radius:4px;padding:2px 4px;margin-right:5px}
+.cc-lista li.cc-seu-nome{color:#edcf80;font-weight:900}
+.cc-lista>p{font-size:11px;margin:10px 0 0;color:#b8bac9}
+.cc-batimento{color:#f4c958;display:inline-block;animation:cc-pulso 1s infinite}
+.cc-emocao small{font-size:10px;color:#dcc587;font-weight:800;letter-spacing:.14em}
+.cc-emocao h2{font:600 clamp(18px,2.3vw,28px)/1.08 Georgia,serif;margin:8px 0;color:#f3f0e8}
+.cc-emocao p{font-size:clamp(12px,1.4vw,14px);line-height:1.5;color:#b6c5d3;margin:5px 0 0}
+.cc-resultado-negativa .cc-emocao h2{color:#bdc8db}
+@keyframes cc-luz{from{opacity:.25;transform:translateX(-15%) rotate(-17deg)}to{opacity:.8;transform:translateX(25%) rotate(3deg)}}
+@keyframes cc-nome{from{opacity:0;transform:translateY(12px) scale(.94);filter:blur(5px)}to{opacity:1;transform:none;filter:none}}
+@keyframes cc-fala{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.45)}}
+@keyframes cc-legenda{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+@keyframes cc-pulso{50%{opacity:.3;transform:scale(1.2)}}
+@keyframes cc-alegria{0%{transform:translateY(0)}35%{transform:translateY(-18px) rotate(-5deg)}75%{transform:translateY(5px) rotate(4deg)}100%{transform:none}}
+@keyframes cc-decepcao{0%{transform:none}100%{transform:translateY(17px) rotate(-3deg)}}
+@keyframes cc-confete{0%{opacity:0;transform:translateY(-10px) rotate(0)}10%,85%{opacity:1}100%{opacity:0;transform:translateY(570px) rotate(520deg)}}
+@keyframes cc-carimbo{0%{opacity:0;transform:translateY(-50%) scale(1.18);filter:blur(6px)}100%{opacity:1;transform:translateY(-50%) scale(1);filter:blur(0)}}
+@media(max-width:560px){
+ .cc-abertura{padding:4px 2px 2px;align-items:flex-start}
+ .cc-abertura-identidade>img{width:40px;height:28px}
+ .cc-abertura-identidade small,.cc-abertura-copa small{font-size:8px;letter-spacing:.07em}
+ .cc-abertura-identidade strong{font-size:15px}
+ .cc-abertura-copa strong{font-size:11px}
+ .cc-cenario{min-height:210px;aspect-ratio:4/3}
+ .cc-faixas{width:17%;opacity:.8;top:8%;padding-top:14px}
+ .cc-faixas span{font-size:9px}
+ .cc-tela{left:34%;right:2%;top:10%;height:63%;border-width:2px}
+ .cc-tela-topo{gap:5px;padding:5px}
+ .cc-tela-topo img{width:25px;height:17px}
+ .cc-tela-topo strong{font-size:11px}
+ .cc-tela-topo small{font-size:7px;letter-spacing:.04em}
+ .cc-tela-corpo{padding:3px 5px}
+ .cc-tela-corpo>span{font-size:8px;letter-spacing:0}
+ .cc-tela-corpo>strong{font-size:clamp(16px,5vw,25px)}
+ .cc-tela-corpo>small{font-size:8px;letter-spacing:0}
+ .cc-tela-rodape{font-size:7px;padding:2px}
+ .cc-tela-rodape i{width:12px}
+ .cc-tecnico{left:45%;bottom:20%;width:29%}
+ .cc-atleta{left:-3%;bottom:11%;height:75%;width:38%}
+ .cc-coletiva-legenda{left:21%;right:1%;bottom:2%;min-height:42px;padding:7px}
+ .cc-coletiva-legenda small{font-size:7px}
+ .cc-coletiva-legenda strong{font-size:11px}
+ .cc-imprensa{left:25%}
+ .cc-carimbo{left:25%;right:2%;top:41%;padding:7px}
+ .cc-carimbo strong{font-size:clamp(17px,5.6vw,25px)}
+ .cc-carimbo span{font-size:9px}
+ .cc-rodape{grid-template-columns:1fr;gap:8px}
+ .cc-lista,.cc-emocao{min-height:unset;padding:10px}
+ .cc-emocao h2{font-size:19px;margin:4px 0}
+ .cc-emocao p{font-size:12px}
+}
+@media(max-height:600px) and (min-width:561px){
+ .cc-cenario{aspect-ratio:16/5.4;min-height:190px}
+ .cc-lista,.cc-emocao{min-height:130px}
+ .cc-abertura{padding:3px}
+ .cp-convocacao-pop .janela-estrutura{gap:3px}
+}
+@media(prefers-reduced-motion:reduce){
+ .cc-raiz *,.cc-raiz *:before,.cc-raiz *:after{animation:none!important;transition:none!important}
+ .cc-boca{transform:none}
+ .cc-atleta{transform:none!important}
+}

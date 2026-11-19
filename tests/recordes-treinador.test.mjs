@@ -66,3 +66,20 @@ test('notícias de treinador são geradas somente depois de arquivar a nova temp
  assert.ok(e.every(x=>x.ano===2028));
  assert.deepEqual(detectarQuebrasRecordesFutebol(depois,depois,{ano:2028,escopos}),[]);
 });
+
+test('metas, acesso, rebaixamento e demissao sao contabilizados apenas quando documentados',()=>{
+ const c={nome:'Técnica',tecnico:{temporadas:[
+  temporada(2027,'Santos',20,10,8,['Brasileirão','Brasileirão'],{acesso:{de:'B',para:'A'},cumpriuObjetivo:true}),
+  temporada(2028,'Santos',12,10,16,[],{rebaixado:{de:'A',para:'B'},demitido:true,cumpriuObjetivo:false}),
+  temporada(2029,'Flamengo',24,8,6,[],{cumpriuObjetivo:true})
+ ]}};
+ const santos=recordesTreinador(c,'clube','Santos');
+ assert.equal(marca(santos,'tecnicoAcessos').valor,1);
+ assert.equal(marca(santos,'tecnicoRebaixamentos').valor,1);
+ assert.equal(marca(santos,'tecnicoDemissoes').valor,1);
+ assert.equal(marca(santos,'tecnicoMetas').valor,1);
+ assert.equal(marca(santos,'tecnicoTitulos').valor,1);
+ const flamengo=recordesTreinador(c,'clube','Flamengo');
+ assert.equal(marca(flamengo,'tecnicoDemissoes'),undefined);
+ assert.equal(marca(flamengo,'tecnicoMetas').valor,1);
+});

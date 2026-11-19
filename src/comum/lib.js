@@ -1883,12 +1883,18 @@ export function gerarMundoJogadores(rng = Math.random) {
   const jogadores = [];
   let id = 1;
   const nomeParaNac = (clube) => nacionalidadeInicialLiga(clube.liga, rng);
-  const clubesComElencoReal = new Set(JOGADORES_REAIS_BASE.map((j) => j.time));
+  // A base real é percorrida uma vez; manter a ordem original preserva IDs e seeds.
+  const atletasReaisPorClube=new Map();
+  for(const jogador of JOGADORES_REAIS_BASE){
+    if(!atletasReaisPorClube.has(jogador.time))atletasReaisPorClube.set(jogador.time,[]);
+    atletasReaisPorClube.get(jogador.time).push(jogador);
+  }
 
   CLUBES.forEach((clube) => {
     // clube coberto pela base real (planilha) — usa nome/posição/OVR de verdade em vez de sortear
-    if (clubesComElencoReal.has(clube.nome)) {
-      JOGADORES_REAIS_BASE.filter((j) => j.time === clube.nome).forEach((jr) => {
+    const elencoReal=atletasReaisPorClube.get(clube.nome);
+    if (elencoReal) {
+      elencoReal.forEach((jr) => {
         // Mantém as chamadas antigas ao RNG para não deslocar as seeds de
         // todos os outros atletas quando um registro passa a ser verificado.
         const idadeSorteada = rand(18, 33);

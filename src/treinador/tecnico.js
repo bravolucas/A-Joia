@@ -125,7 +125,7 @@ function registrarHistoriaTecnico(c){
  const t=c?.tecnico,a=t?.temporadas?.at(-1);if(!a||t.fase!=='resultado'||t.copasEmJogo||t.finaisPendentes?.length)return c;
  if(c.historiaFutebol?.anos?.includes(a.ano)&&!(c.tecnico?.universo||c.universo)?.anos?.includes(a.ano))return c;
  const anual={...a},novo=registrarUniversoAno(c,anual);
- const temporadas=[...novo.tecnico.temporadas];const {partidasLiga:placaresArquivados,...resumoAno}=a;temporadas[temporadas.length-1]={...resumoAno,classificacoesMundo:resumirTabelas(anual.classificacoesMundo),...(anual.movimentosMundo?{movimentosMundo:anual.movimentosMundo}:{}),...(anual.feitosHistoricos?{feitosHistoricos:anual.feitosHistoricos}:{})};
+ const temporadas=[...novo.tecnico.temporadas];const {partidasLiga:placaresArquivados,...resumoAno}=a;temporadas[temporadas.length-1]={...resumoAno,classificacoesMundo:resumirTabelas(anual.classificacoesMundo),...(anual.movimentosMundo?{movimentosMundo:anual.movimentosMundo}:{}),...(anual.feitosHistoricos?{feitosHistoricos:anual.feitosHistoricos}:{}),...(anual.recordesEventos?{recordesEventos:anual.recordesEventos}:{})};
  return {...novo,tecnico:{...novo.tecnico,temporadas}};
 }
 function registrarUniversoAno(c,ano){

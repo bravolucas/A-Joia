@@ -1,4 +1,4 @@
-// Custos em R$ mil. Contrato de uma temporada, pago antecipadamente.
+// Custos em € mil. Contrato de uma temporada, pago antecipadamente.
 export const CARGOS_COMISSAO_TECNICO=[
  {id:'auxiliar',nome:'Auxiliar técnico',taxa:.06,descricao:'+1 de força nos jogos da liga e das copas.'},
  {id:'preparador',nome:'Preparador de desenvolvimento',taxa:.05,descricao:'+1 de qualidade na virada para atletas com menos de 30 anos após envelhecer, respeitando o potencial.'},

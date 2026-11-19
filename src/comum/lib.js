@@ -12,6 +12,7 @@ import { destinosTransferenciaIA, fatorMobilidadeVeteranoIA, duracaoContratoIA }
 import {ampliarParticipantesInternacionais,clubeInternacional} from '../competicoes/clubesInternacionais.js';
 import {adversarioCopaPorFase} from '../treinador/copasEscolha.js';
 import { ANO_INICIO, anoTemporadaCarreira, AFINIDADE_MERCADO, APELIDOS_TORCIDA, CARTAO_POR_POSICAO, CATEGORIAS_INFLACAO_SALARIAL, CLASSICOS, CLUBES, COMPETICOES_SELECAO, COMPS_PAIS, CONDICOES_CLIMA, CONFEDERACAO_POR_NACAO, CRITERIOS_MEMORAVEL, EMOJI_CLUBES, EMPRESARIOS, ESPECIALIDADES_LISTA, ESTADUAIS, ESTILOS_JOGO_MUNDO, ESTILOS_TECNICO, EVENTOS_CLUBE, FALTA_BONECO_POS, FALTA_GOAL, FALTA_SPOT, FALTA_ZONE_X, FASES_COPA_MUNDO, FASES_POR_COMPETICAO, FORMACAO_433, FORMACOES_TATICAS, JANELAS_BRASIL, JOGADORES_REAIS_BASE, LIGAS, LIGAS_ESPECIALISTA, MARCOS_ESPECIAIS, METAS_COMPETICAO, NACIONALIDADES, NIVEIS, NIVEIS_INSIGNIA, NOMES_MUNDO, NUM_ATTRS, OFERTAS_PATROCINIO, PAPEIS_TATICOS, PASSE_W, PEN_GOAL, PEN_SPOT, PEN_ZONE_X, PERSONALIDADES, PESO_OSTENTACAO, POSICOES, POSTURAS_JOGO, PREPARACOES_SEMANA, PROMESSAS_TECNICO, REGRAS_CARTAO, RIVAIS_POR_TIER, RIVAIS_PREMIO, ROTINAS_FISICAS, SOBRENOMES_TECNICO, TIERS_TORCIDA, TIPOS_LESAO, TODOS_ATTRS, TRACOS_MUNDO, TRAITS_DISPONIVEIS, multEfeitoInsignia, nomeDosTitulos, palmaresInicialDe, somaEfeitoInsignia } from "../dados/data.js";
+import {VERSAO_ECONOMIA,valorMercadoEuro,salarioMensalEuro} from '../simulacao/economia.js';
 
 export function potencialDaOrigem(origem, posicao) {
   const base = { velocidade: 64, finalizacao: 64, passe: 64, drible: 64, defesa: 64, fisico: 64, fintas: 3, pernaRuim: 3 };
@@ -1859,9 +1860,11 @@ export function completarCarenciasMundo(jogadores, clubes = CLUBES, rng = Math.r
           gols:0, assist:0, jogos:0, nota:0,
           carreira:{gols:0,assist:0,jogos:0,titulos:0,bolasDeOuro:0,premios:0,temporadas:0},
           aposentado:false, contrato:3,
-          salario:Math.max(3,Math.round(ovr**2/220)),
-          valor:Math.max(100,Math.round(ovr**3/180*1.2)),
         };
+        // Economia em euros (€ mil), a mesma usada pela gestão do treinador.
+        novoAtleta.salario=salarioMensalEuro(novoAtleta);
+        novoAtleta.valor=valorMercadoEuro(novoAtleta);
+        novoAtleta.economia=VERSAO_ECONOMIA;
         const alternativas=posicoesSecundariasNewgen(novoAtleta);
         if(alternativas.length)novoAtleta.posicoesSecundarias=alternativas;
         novos.push(novoAtleta);

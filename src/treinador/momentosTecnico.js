@@ -77,7 +77,7 @@ export const OPCOES_PARADA_TECNICO = {
 /* ---------- Ano sem clube ---------- */
 export const ANO_SEM_CLUBE_TECNICO = [
   { id: 'curso', nome: 'Curso de treinador', descricao: 'OVR +1 permanente (até +5 por carreira). Reputação −1: você some do noticiário.' },
-  { id: 'comentarista', nome: 'Comentarista de TV', descricao: 'Reputação +3 e R$ 480 mil no seu saldo. Você continua em evidência.' },
+  { id: 'comentarista', nome: 'Comentarista de TV', descricao: 'Reputação +3 e € 480 mil no seu saldo. Você continua em evidência.' },
   { id: 'estagio', nome: 'Estágio no exterior', descricao: 'Reputação +1 e portas abertas para propostas de outros países.' },
   { id: 'esperar', nome: 'Esperar o telefone tocar', descricao: 'Sem custo, mas a reputação cai 2 pontos.' },
 ];
@@ -120,8 +120,8 @@ export function evoluirPersonagensTecnico(t) {
     if (p.tipo === 'promessa' && idade >= 21 && nivel >= base + 4 && r() < 0.45) {
       const valor = Math.round(nivel * nivel / 4.5);
       verba += valor;
-      noticias.push(`${p.nome}, aquela aposta de ${p.idade - (t.ano - p.desde)} anos, foi vendido para a Europa. Verba +R$ ${valor.toLocaleString('pt-BR')} mil.`);
-      return { ...atual, status: 'vendido', historia: [...atual.historia, `${t.ano}: vendido por R$ ${valor} mil`] };
+      noticias.push(`${p.nome}, aquela aposta de ${p.idade - (t.ano - p.desde)} anos, foi vendido para a Europa. Verba +€ ${valor.toLocaleString('pt-BR')} mil.`);
+      return { ...atual, status: 'vendido', historia: [...atual.historia, `${t.ano}: vendido por € ${valor} mil`] };
     }
     if (nivel > p.nivel + 2) noticias.push(`${p.nome} evoluiu e já é nível ${nivel}.`);
     return atual;

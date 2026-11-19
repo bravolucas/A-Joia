@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import {criarJogador,CATALOGO_LOJA_JOGADOR,comprarInvestimento,jogarTemporada,fecharTemporada,chanceMomento,chancePenalti} from '../src/jogador/rapido.js';
 import {comprarUpJogador,upsAtivosJogador} from '../src/jogador/lojaJogador.js';
 const base=()=>({...criarJogador({nome:'Loja',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,ritmo:'normal',codigo:'LOJA-UP'}),patrimonio:50000});
-test('catálogo tem 58 opções únicas, incluindo 14 UPs e 44 permanentes',()=>{
- assert.equal(CATALOGO_LOJA_JOGADOR.length,58);assert.equal(new Set(CATALOGO_LOJA_JOGADOR.map(x=>x.id)).size,58);
+test('catálogo à venda tem 57 opções únicas, incluindo 14 UPs; itens fora de linha ficam só para quem comprou',()=>{
+ const venda=CATALOGO_LOJA_JOGADOR.filter(x=>!x.descontinuado);
+ assert.equal(venda.length,57);assert.equal(new Set(CATALOGO_LOJA_JOGADOR.map(x=>x.id)).size,CATALOGO_LOJA_JOGADOR.length);
+ assert.equal(CATALOGO_LOJA_JOGADOR.filter(x=>x.descontinuado).length,7);
  assert.equal(CATALOGO_LOJA_JOGADOR.filter(x=>x.temporario).length,14);
  assert.ok(CATALOGO_LOJA_JOGADOR.every(x=>x.custo>0&&x.desc&&x.categoria));
 });

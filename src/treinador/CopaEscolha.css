@@ -30,3 +30,11 @@
 @media(max-width:600px){.cce-prancheta svg{height:100px}.cce-veredito{padding:10px 12px}.cce-veredito>strong{font-size:23px}.cce-veredito-placar>span{flex-direction:column;gap:4px}.cce-veredito-placar em{font-size:30px}.cce-veredito-placar b{font-size:10px}.cce-veredito p{font-size:10px}.cce-partida-inteira{padding:12px;gap:8px}}
 @media(prefers-reduced-motion:reduce){.cce-veredito{animation:none}}
 @media(max-height:650px) and (max-width:600px){.cce-partida-inteira{padding:9px 11px;gap:6px}.cce-prancheta svg{height:78px;margin:2px 0}.cce-prancheta>span{font-size:9px}.cce-simulacao-partida{gap:7px}.cce-veredito{padding:9px 11px}.cce-veredito>strong{font-size:22px;margin:4px 0 7px}.cce-veredito p{margin-top:6px}.cce-partida-inteira>.cce-revelacao{padding:8px;margin:0}}
+
+/* Lances do jogador abaixo do placar. */
+.cce-lances{margin:10px auto 0;max-width:340px;padding:10px 12px;border:1px solid #ffffff22;border-radius:10px;background:#ffffff0a;text-align:left}
+.cce-lances small{display:block;font-size:11px;color:#a8bbcb;margin-bottom:6px}
+.cce-lances ul{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:13px}
+.cce-lances b{display:inline-block;min-width:32px;color:#f5d77a}
+.cce-lances p{margin:0;font-size:12px;color:#c9d6e0}
+.cce-lances-fora{font-size:12px;color:#a8bbcb;text-align:center}

@@ -1,4 +1,5 @@
 import {ImpactoJogador} from '../simulacao/MundoVivo.jsx';
+import {porCompeticaoTemporada} from './FechamentoTemporadaDados.js';
 import CerimoniaBola from '../comum/CerimoniaBola.jsx';
 import {nomeVaga} from '../competicoes/regrasCopasRapidas.js';
 import {celebracoesTemporada} from './celebracoesTemporada.js';
@@ -54,6 +55,7 @@ export default function FechamentoTemporada({c,card,onContinuar,celebracaoIndice
     <div className="ft-numeros">{[['Jogos',card.jogos],['Gols',card.gols],['Assistências',card.assist]].map(([rotulo,valor])=><div key={rotulo}><strong>{valor??0}</strong><span>{rotulo}</span></div>)}</div>
     <div className="ft-evolucao"><div><span>OVR</span><strong>{antes}<i>→</i>{depois}</strong><small>{delta>0?'+':''}{delta} na temporada</small></div><div><span>Nota</span><strong>{Number.isFinite(card.nota)?card.nota.toFixed(1):'—'}</strong><small>{card.status||'Temporada registrada'}</small></div></div>
     {fatos.length>0&&<div className="ft-fatos">{fatos.map(f=><span key={f.texto}><i aria-hidden="true">{f.icone}</i>{f.texto}</span>)}</div>}
+    {porCompeticaoTemporada(card).length>1&&<div className="ft-por-competicao" aria-label="Seus números por competição">{porCompeticaoTemporada(card).map(x=><p key={x.nome}><strong>{x.nome}</strong><span>{x.jogos} jogos · {x.gols} gols · {x.assist} assist.</span></p>)}</div>}
     {card.selecao?.convocado&&<p className="ft-internacional">Seleção · {card.selecao.jogos||0} jogos · {card.selecao.gols||0} gols · {card.selecao.assist||0} assistências</p>}
     {destaques.length>0&&<><h2 className="ft-sub">O que marcou o ano</h2><ul className="ft-destaques">{destaques.slice(0,3).map((t,i)=><li key={i}>{t}</li>)}</ul></>}
     {card.jornada?.mensagens?.[0]&&<aside className="ft-mensagem"><small>{card.jornada.mensagens[0].de}{card.jornada.mensagens[0].ficticio?' · personagem fictício':''}</small><p>{card.jornada.mensagens[0].texto}</p></aside>}

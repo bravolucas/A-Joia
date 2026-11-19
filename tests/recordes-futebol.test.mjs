@@ -88,3 +88,28 @@ test('recordes de atuacao por partida respeitam clube, torneio, participacao e n
  assert.equal(registro(consultarRecordesFutebol(c,'competicao','Brasileirão'),'assistAtletaPartida').simulado.valor,2);
  assert.equal(JSON.stringify(c),original);
 });
+
+test('separacao por edicao impede somar campanhas e identifica as sequencias reais',()=>{
+ const c={universo:{edicoes:[
+  {ano:2030,nome:'Brasileirão',tipo:'liga',jogos:{nomes:['Santos','Palmeiras','Corinthians'],
+   partidas:[[0,1,2,0,1],[2,0,0,1,2],[0,1,1,1,3],[0,2,3,0,5],[0,1,0,2,6]]}},
+  {ano:2031,nome:'Brasileirão',tipo:'liga',jogos:{nomes:['Santos','Palmeiras'],
+   partidas:[[0,1,1,0,1],[1,0,1,2,2]]}}
+ ]}};
+ const dados=consultarRecordesFutebol(c,'competicao','Brasileirão');
+ assert.equal(registro(dados,'invencibilidade').simulado.valor,3);
+ assert.equal(registro(dados,'vitoriasSeguidas').simulado.valor,2);
+ assert.equal(registro(dados,'golsEquipeEdicao').simulado.valor,6);
+ assert.equal(registro(dados,'vitoriasEquipeEdicao').simulado.valor,3);
+ assert.equal(registro(dados,'golsEquipePartida').simulado.valor,3);
+ const clube=consultarRecordesFutebol(c,'clube','Santos');
+ assert.equal(registro(clube,'invencibilidade').simulado.valor,3);
+ assert.equal(registro(clube,'vitoriasSeguidas').simulado.valor,2);
+});
+test('sem rodadas comprovadas nao inventa sequencias',()=>{
+ const c={universo:{edicoes:[{ano:2030,nome:'Copa do Brasil',tipo:'copa',jogos:{
+  nomes:['Santos','Palmeiras'],partidas:[[0,1,3,0,'oitavas'],[1,0,0,2,'quartas']]
+ }}]}};
+ assert.equal(registro(consultarRecordesFutebol(c,'clube','Santos'),'invencibilidade'),undefined);
+ assert.equal(registro(consultarRecordesFutebol(c,'competicao','Copa do Brasil'),'golsEquipePartida').simulado.valor,3);
+});

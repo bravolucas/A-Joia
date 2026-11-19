@@ -16,9 +16,9 @@ function Valor({registro,real=false}){
  </div>;
 }
 /** Visual comparativo, reutilizado diretamente nos três perfis do Arquivo Vivo. */
-export default function RecordesFutebol({c,tipo,nome}){
+export default function RecordesFutebol({c,tipo,nome,temporadas=c?.temporadas||[]}){
  const [filtro,F]=useState('Todos');
- const dados=useMemo(()=>consultarRecordesFutebol(c,tipo,nome),[c,tipo,nome]);
+ const dados=useMemo(()=>consultarRecordesFutebol(c,tipo,nome,temporadas),[c,tipo,nome,temporadas]);
  const itens=dados.recordes.filter(r=>filtro==='Todos'||r.categoria===filtro);
  return <section className="rf-painel" aria-label={'Recordes individuais de '+nome}>
   <div className="rf-topo"><div><span className="hf-eyebrow">ARQUIVO VIVO / RECORDES</span>

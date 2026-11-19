@@ -24,6 +24,7 @@ import {prepararElencoCopa,prepararElencoSelecao,forcaElencoCopa,registrarJogoEl
 import {iniciarJornada,memorizar,registrarEscolhaJornada,registrarTransferenciaJornada,prepararJornada,fecharJornada,pesoProjeto,projetoOferta,legadoNarrativo} from './jornadaJogador.js';
 import {penalidadePosicao,posicoesCompativeis,mudarPosicao,sugestaoVeterano} from './posicoesCarreira.js';
 import {NOVOS_TREINOS,grupoTreino} from './catalogoTreinos.js';
+import {PLANOS_PRETEMPORADA} from './planosPretemporada.js';
 import {bonusSuperacao,baseMini,poolMinis} from './progressaoRapida.js';
 import {MELHORIAS_JOGADOR,UPS_JOGADOR,upsAtivosJogador,upJogadorDe,impedimentoLojaJogador} from "./lojaJogador.js";
 import { registrarMuseu } from '../museu/museu.js';
@@ -496,7 +497,8 @@ export const CARTAS_PRETEMPORADA = [
   { id: "corpoNovo", raridade: "epica", icone: "🧬", nome: "Corpo novo", desc: "Nutrição, sono e fisiologia de ponta: o tempo para.", ganhos: { fisico: 2, velocidade: 1 }, lesao: -0.05, declinio: 0.4 },
   { id: "salto", raridade: "epica", icone: "🚀", nome: "Salto de qualidade", desc: "Tudo clicou de uma vez.", ganhos: {}, principal: 3, segundo: 2 },
 ];
-CARTAS_PRETEMPORADA.push(...NOVOS_TREINOS);
+// Saves antigos ainda podem consultar seus IDs; apenas planos realistas entram nas novas ofertas.
+CARTAS_PRETEMPORADA.push(...NOVOS_TREINOS,...PLANOS_PRETEMPORADA);
 export const cartaDe = (id) => CARTAS_PRETEMPORADA.find((x) => x.id === id) || null;
 export const textoCarta = (carta, posicao) => (posicao === "GOL" && carta.gol ? { ...carta, ...carta.gol, ganhos: carta.gol.ganhos || carta.ganhos } : carta);
 /* atributos que a carta vai mexer para esta posição (os dinâmicos viram números) */
@@ -517,8 +519,9 @@ export function efeitosDaCarta(carta, posicao) {
   if (k.assist) out.push(`+${Math.round((k.assist - 1) * 100)}% assist.`);
   if (k.desafio) out.push(`+${Math.round(k.desafio * 100)}% nos desafios`);
   if (k.nota) out.push(`+${k.nota.toFixed(2).replace(/0$/, "")} de nota`);
-  if (k.minutos) out.push("mais jogos");
-  if (k.lesao) out.push(`${Math.round(k.lesao * 100)}% lesão`);
+  if (k.minutos) out.push(`${k.minutos>0?'+':''}${+(k.minutos*100).toFixed(1)} p.p. participação`);
+  if (k.lesao) out.push(`${k.lesao>0?'+':''}${+(k.lesao*100).toFixed(1)} p.p. risco base de lesão`);
+  if (k.forcaTime) out.push(`+${+(k.forcaTime).toFixed(2)} no entrosamento coletivo`);
   if (k.moral) out.push(`+${k.moral} cabeça`);
   if (k.torcida) out.push(`+${k.torcida} torcida`);
   if (k.fama) out.push(`+${k.fama} fama`);
@@ -528,7 +531,12 @@ export function efeitosDaCarta(carta, posicao) {
 }
 function opcoesPretemporadaBase(c) {
  const recentes=new Set([...(c.pretemporadaVistas||[]),...(c.historicoPretemporada||[]).slice(-2).flatMap(x=>x.cartas||[]),...(c.pretemporadaTroca?.ano===c.ano?c.pretemporadaTroca.anteriores||[]:[])]);
- const elegiveis=CARTAS_PRETEMPORADA.filter(x=>(!x.posicoes||x.posicoes.includes(c.posicao))&&(!x.minIdade||c.idade>=x.minIdade));
+ const temEfeito=x=>{
+   const efeitos=textoCarta(x,c.posicao);
+   const atributoUtil=Object.entries(ganhosDaCarta(x,c.posicao)).some(([a,n])=>n<0?(c.attrs?.[a]??40)>40:(c.attrs?.[a]??99)<99);
+   return atributoUtil||['gols','assist','nota','minutos','lesao','moral','desafio','forcaTime','declinio'].some(a=>!!efeitos[a]);
+ };
+ const elegiveis=CARTAS_PRETEMPORADA.filter(x=>x.planoReal&&(!x.posicoes||x.posicoes.includes(c.posicao))&&(!x.minIdade||c.idade>=x.minIdade)&&temEfeito(x));
  const pool=elegiveis.filter(x=>!recentes.has(x.id));
  const out=[];const usada=c.pretemporada?.ano===c.ano?cartaDe(c.pretemporada.id):null;
  while(out.length<3){const ids=new Set(out.map(x=>x.id)),grupos=new Set(out.map(grupoTreino));let disponiveis=pool.filter(x=>!ids.has(x.id)&&!grupos.has(grupoTreino(x)));
@@ -1501,7 +1509,7 @@ function jogarTemporadaBase(c0) {
   else if (jogos > 0 && clubeNovo && longeDeCasa(c) && adaptacao < 0.5) card.destaques.push("Adaptação rápida ao novo país: idioma e rotina organizados desde a chegada");
   if (jogos > 0 && efTorcida >= 0.12) card.destaques.push("A arquibancada te empurrou o ano inteiro: jogar em casa virou vantagem");
   else if (jogos > 0 && efTorcida <= -0.15) card.destaques.push("Vaia a cada toque errado: a própria torcida pesou contra você");
-  const forcaTimeExtra = (fx.forcaTime || 0) * share;
+  const forcaTimeExtra = ((fx.forcaTime || 0) + (carta?.forcaTime || 0)) * share;
   card.avaliacaoForca=avaliarClubeNoMundo(c,CLUBES.find(x=>x.nome===clube.nome)||clube,{usuario:{posicao:c.posicao,ovr,forma:c.formaNivel||0},participacao:share,bonus:forcaTimeExtra+somaTraco(c,'forcaTime')*share});
   card.forcaClube=card.avaliacaoForca.forca;
 

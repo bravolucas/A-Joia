@@ -4,3 +4,14 @@
 .rf-filtros{display:flex;gap:7px;overflow-x:auto;margin-bottom:14px}.rf-filtros button{border-radius:8px;background:#0c1e14;border:1px solid #c9cfaa35;color:#cbd4c5;padding:8px 12px;min-height:38px;cursor:pointer;font-size:11px;white-space:nowrap}.rf-filtros button[aria-pressed=true]{background:#d8c88d;color:#172c1e;font-weight:700}
 .rf-tabela-scroll{overflow-x:auto;border:1px solid #d7c58e2c;border-radius:10px}.rf-tabela{width:100%;border-collapse:collapse;min-width:490px;font-size:11px}.rf-tabela th,.rf-tabela td{padding:12px 11px;text-align:left;vertical-align:middle;border-bottom:1px solid #e4d9ae1b}.rf-tabela thead th{font-size:10px;color:#d5c79e;background:#081810}.rf-tabela tbody th{width:35%;font-weight:600}.rf-tabela tbody th>strong,.rf-tabela tbody th>small{display:block}.rf-tabela tbody th>small{color:#a4bb9e;font-size:9px;margin-top:5px;font-weight:400}.rf-valor strong{display:block;color:#f3d997;font-size:19px;line-height:1.25;font-variant-numeric:tabular-nums}.rf-valor small{display:block;color:#cad6c6;line-height:1.45;margin-top:4px}.rf-valor a{display:inline-block;color:#d4ddad;text-decoration:underline;text-underline-offset:3px;font-size:10px;margin-top:5px}.rf-sem-dado{color:#8ca88e;font-size:10px}
 @media(max-width:600px){.rf-painel{padding:12px;margin:18px 0}.rf-topo{display:block}.rf-periodo{display:block;margin:7px 0}.rf-tabela th,.rf-tabela td{padding:11px 8px}.rf-tabela tbody th{width:32%}}
+
+.rf-eventos{margin-top:20px;padding-top:15px;border-top:1px solid #d7c58e35}
+.rf-eventos h4{font-size:14px;line-height:1.25;letter-spacing:-.01em;margin:0 0 12px;color:#f3d997}
+.rf-eventos ol{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.rf-eventos li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;padding:11px 12px;border:1px solid #c9cfaa26;border-radius:9px;background:#0a2015}
+.rf-eventos li .rf-ano{color:#f3d997;font-variant-numeric:tabular-nums;font-size:12px;font-weight:700}
+.rf-eventos li div{min-width:0;overflow-wrap:anywhere}
+.rf-eventos li strong{display:block;color:#f4f1db;font-size:12px;line-height:1.35}
+.rf-eventos li small{display:block;margin-top:5px;color:#b8c9b4;font-size:11px;line-height:1.45}
+.rf-eventos li a{color:#dfc889;text-underline-offset:3px;font-size:11px}
+@media(max-width:600px){.rf-eventos li{grid-template-columns:38px minmax(0,1fr);padding:10px 8px}}

@@ -1,5 +1,6 @@
 import {NACIONALIDADES} from '../dados/data.js';
 import {REFERENCIAS_RECORDES_FUTEBOL} from '../dados/recordesFutebolReais.js';
+import {recordesReaisTitulosCompeticao} from './recordesTitulosReais.js';
 
 /** Recordes calculados dos fatos arquivados, sem novos sorteios nem alterar o save. */
 export const METRICAS_RECORDES = Object.freeze([
@@ -312,13 +313,14 @@ export function consultarRecordesFutebol(c={},tipo='clube',nome='',temporadas=c?
  medirAtuacoes(mapa,arquivo,tipo,nome,c?.nome||'Você');
  const referencias=REFERENCIAS_RECORDES_FUTEBOL.filter(r=>
   r.tipo===tipo&&(tipo==='competicao'?competicaoIgual(r.nome,nome):eIgual(r.nome,nome)));
- const historicas=new Map(referencias.map(r=>[r.id,r]));
+ const historicas=new Map([...referencias,...recordesReaisTitulosCompeticao(tipo,nome)].map(r=>[r.id,r]));
  const recordes=METRICAS_RECORDES.filter(m=>mapa.has(m.id)||historicas.has(m.id)).map(m=>{
   const real=historicas.get(m.id)||null,simulado=mapa.get(m.id)||null;
-  const ultrapassou=!!real&&!!simulado&&simulado.valor>real.valor;
-  const igualou=!!real&&!!simulado&&simulado.valor===real.valor;
+  const comparavel=real?.cobertura!=='recorte';
+  const ultrapassou=!!real&&comparavel&&!!simulado&&simulado.valor>real.valor;
+  const igualou=!!real&&comparavel&&!!simulado&&simulado.valor===real.valor;
   return {id:m.id,rotulo:m.rotulo,categoria:m.categoria,real,simulado,
-   status:ultrapassou?'Superado no save':igualou?'Igualado no save':real?'Recorde real preservado':'Recorde do save'};
+   status:real?.cobertura==='recorte'?'Referência de período documentado':ultrapassou?'Superado no save':igualou?'Igualado no save':real?'Recorde real preservado':'Recorde do save'};
  });
  return {tipo,nome,recordes,desde:arquivo.desde??temporadas?.[0]?.ano??null,
   cobertura:'Referências reais auditadas e partidas/temporadas armazenadas neste save. Lacunas não são preenchidas por estimativas.'};

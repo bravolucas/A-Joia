@@ -24,7 +24,7 @@ const LINHAS = Object.freeze({
 });
 const edicoes = Object.entries(LINHAS).flatMap(([nome, texto]) => texto.split('\n').filter(Boolean).map(linha => {
   const [ano, jogadorNome, clube] = linha.split('|');
-  if (!/^\\d{4}$/.test(ano) || !jogadorNome || !clube) throw new Error('Palmarés inválido: '+nome+' '+linha);
+  if (!/^\d{4}$/.test(ano) || !jogadorNome || !clube) throw new Error('Palmarés inválido: '+nome+' '+linha);
   return Object.freeze({ano:Number(ano),categoria:'premio',nome,jogadorId:null,jogadorNome,clube,tipo:'historico-real',origem:'real'});
 }));
 export const HISTORICO_REAL_PREMIOS = Object.freeze(edicoes);

@@ -48,8 +48,8 @@ test('Copa real do motor registra os mesmos gols e jogos e salva uma única vez'
 });
 test('referência histórica só conta Copas masculinas registradas, deduplica o card e diferencia empate/superação',()=>{
  const c=atleta();c.temporadas=[{ano:2030,selecao:{tipo:'copaMundo',gols:10}},{ano:2032,selecao:{tipo:'continentalSelecao',gols:100}},{ano:2034,selecao:{tipo:'copaMundo',gols:6}}];
- let a=compararMarcasCopas(c,c.temporadas.at(-1));assert.equal(a[0].atual,16);assert.equal(a[0].anoIgualou,2034);assert.equal(a[0].anoSuperou,null);assert.equal(a[1].atual,10);
- a=compararMarcasCopas(c,{ano:2038,selecao:{tipo:'copaMundo',gols:13}});assert.equal(a[0].atual,29);assert.equal(a[0].anoSuperou,2038);assert.equal(a[1].anoIgualou,2038);assert.equal(progressoFeitoMuseu(c,'marca-klose').atual,16);assert.equal(extrairConquistasMuseu(c).find(x=>x.id==='marca-klose').ano,2034);
+ let a=compararMarcasCopas(c,c.temporadas.at(-1));assert.equal(a[0].atual,16);assert.equal(a[0].anoIgualou,null,'16 gols ainda não igualam a referência atualizada de 2026');assert.equal(a[0].anoSuperou,null);assert.equal(a[1].atual,10);
+ a=compararMarcasCopas(c,{ano:2038,selecao:{tipo:'copaMundo',gols:13}});assert.equal(a[0].atual,29);assert.equal(a[0].anoIgualou,2038);assert.equal(a[0].anoSuperou,2038);assert.equal(a[1].anoIgualou,2038);assert.equal(progressoFeitoMuseu(c,'marca-klose').atual,16);assert.equal(extrairConquistasMuseu(c).find(x=>x.id==='marca-klose').ano,2034);
 });
 
 test('final decidida no minigame registra o autor do lance sem contar desempate no placar',()=>{

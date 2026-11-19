@@ -1,6 +1,7 @@
 import {criarCampanhaCopa,resumoCampanhaCopa} from './copasEscolha.js';
 import {criarAgenda} from '../competicoes/calendarioCopas.js';
 import { NACIONALIDADES } from '../dados/data.js';
+import {salarioBaseSelecaoTecnico} from './contratoTecnico.js';
 import { geradorTecnico, simularCopaSelecaoTecnico, finalDoUsuarioTecnico } from './momentosTecnico.js';
 
 const grupos = {
@@ -12,7 +13,7 @@ const grupos = {
 export const confederacaoTecnico = id => Object.keys(grupos).find(k=>grupos[k].split(' ').includes(id)) || 'UEFA';
 export const CONTINENTAIS_TECNICO = {UEFA:'Eurocopa',CONMEBOL:'Copa América',CAF:'Copa Africana de Nações',AFC:'Copa da Ásia',CONCACAF:'Copa Ouro',OFC:'Copa das Nações da Oceania'};
 const extras = [{id:'FIJ',label:'Fiji',forcaSelecao:48},{id:'TAH',label:'Taiti',forcaSelecao:50},{id:'SOL',label:'Ilhas Salomão',forcaSelecao:49}];
-export const SELECOES_TECNICO = [...NACIONALIDADES,...extras].map(n=>({nome:n.label,pais:n.label,nac:n.id,tipo:'selecao',liga:`selecao:${confederacaoTecnico(n.id)}`,confederacao:confederacaoTecnico(n.id),elenco:n.forcaSelecao,exigencia:Math.max(30,n.forcaSelecao-17),salario:Math.round(n.forcaSelecao*n.forcaSelecao/110),motivo:`Seleção · ${confederacaoTecnico(n.id)} · vínculo exclusivo; deixa o clube atual`}));
+export const SELECOES_TECNICO = [...NACIONALIDADES,...extras].map(n=>({nome:n.label,pais:n.label,nac:n.id,tipo:'selecao',liga:`selecao:${confederacaoTecnico(n.id)}`,confederacao:confederacaoTecnico(n.id),elenco:n.forcaSelecao,exigencia:Math.max(30,n.forcaSelecao-17),salario:salarioBaseSelecaoTecnico(n.forcaSelecao),motivo:`Seleção · ${confederacaoTecnico(n.id)} · vínculo exclusivo; deixa o clube atual`}));
 /** On taking an existing national team in a World Cup year, inherit its qualifying result. */
 export function vagaHerdadaSelecaoTecnico(nac,ano){
  if(ano%4!==2)return null;

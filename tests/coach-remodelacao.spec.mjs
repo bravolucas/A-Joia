@@ -112,6 +112,7 @@ test('treinador: começar temporada ignora a preparação opcional e não duplic
 test('trocar de clube simula a próxima temporada uma única vez', async ({ page }) => {
   await abrir(page, comResultado());
   await page.getByRole('button', { name: /Assinar com Flamengo/ }).click();
+  await page.getByRole('dialog', { name: 'Negociar contrato' }).getByRole('button', { name: 'Fechar contrato' }).click();
   await expect.poll(async () => (await salvo(page)).tecnico.clube).toBe('Flamengo');
 
   await expect(page.getByRole('button', { name: 'Começar temporada', exact: true })).toBeVisible();
@@ -182,6 +183,7 @@ for(const width of [390,1366]){
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.screenshot({path:`/tmp/idolatria-${width}.png`,fullPage:true});
   await aviso.getByRole('button',{name:'Confirmar transferência'}).click();
+  await page.getByRole('dialog',{name:'Negociar contrato'}).getByRole('button',{name:'Fechar contrato'}).click();
   await expect.poll(async()=>(await salvo(page)).tecnico.clube).toBe('Palmeiras');
   const novo=await salvo(page);expect(novo.tecnico.rupturasIdolo.map(r=>r.clube)).toEqual(['Santos']);
   expect(novo.temporadas).toEqual(antes.temporadas);

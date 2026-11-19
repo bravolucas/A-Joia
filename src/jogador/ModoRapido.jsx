@@ -3008,7 +3008,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           onJogar={() => setEstado((st) => ({ ...st, c: simularEtapaTecnico(st.c) }))}
           onEscolherClubeInicial={(nome) => setEstado((st) => ({ ...st, c: iniciarNoClubeIdolo(st.c, nome) }))}
           onEsperar={(escolha) => setEstado((st) => ({ ...st, c: passarAnoDesempregado(st.c, undefined, escolha) }))}
-          onAceitarProposta={(nome, estrategia) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia); if (!negociado.tecnico.ultimaNegociacao?.aceita) return { ...st, c: negociado }; return { ...st, c: proximaTemporadaTecnico(negociado) }; })}
+          onAceitarProposta={(nome, estrategia, opcoes) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia, undefined, opcoes); if (!negociado.tecnico.ultimaNegociacao?.aceita) return { ...st, c: negociado }; return { ...st, c: proximaTemporadaTecnico(negociado) }; })}
           onAvancar={() => setEstado((st) => ({ ...st, c: proximaTemporadaTecnico(st.c) }))}
           onAvancarESimular={() => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(proximaTemporadaTecnico(st.c), null, undefined, { interativo: true, copasInterativas: true }) }))}
           onPedirDemissao={()=>setEstado(st=>({...st,c:pedirDemissaoTecnico(st.c)}))}

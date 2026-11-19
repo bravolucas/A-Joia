@@ -11,13 +11,15 @@ test('salário anual entra uma vez, não consome verba e desemprego não paga',(
   const c=base(),carta=cartaPretemporadaRapida(c.tecnico),op=carta.opcoes.find(o=>o.custo<=carta.verba);
   const fim=escolherPretemporadaRapidaTecnico(c,carta.chave,op.id,()=>.4);
   assert.equal(fim.tecnico.propostasCoerentesVersao,3);
-  assert.equal(carteiraTecnico(fim.tecnico).saldo,4200);
-  assert.equal(carteiraTecnico(fim.tecnico).pagamentos[0].valor,1200);
+  // Salário de 12 meses uma única vez, mais o bônus de desempenho da temporada (se houver).
+  const pagamentos=carteiraTecnico(fim.tecnico).pagamentos,bonus=pagamentos.filter(p=>p.bonus).reduce((n,p)=>n+p.valor,0);
+  assert.equal(pagamentos[0].valor,1200);assert.equal(pagamentos.filter(p=>!p.bonus).length,1);
+  assert.equal(carteiraTecnico(fim.tecnico).saldo,4200+bonus);
   assert.equal(creditarSalarioTecnico({...fim.tecnico,clube:c.tecnico.clube},2030,100),fim.tecnico.carteiraTecnico);
   const avancado=proximaTemporadaTecnico({...fim,tecnico:{...fim.tecnico,demitido:false}});
-  assert.equal(carteiraTecnico(avancado.tecnico).saldo,4200);
+  assert.equal(carteiraTecnico(avancado.tecnico).saldo,4200+bonus);
   const desempregado=passarAnoDesempregado({...fim,tecnico:{...fim.tecnico,demitido:true}},()=>.5);
-  assert.equal(carteiraTecnico(desempregado.tecnico).saldo,4200);
+  assert.equal(carteiraTecnico(desempregado.tecnico).saldo,4200+bonus);
   assert.equal(carteiraTecnico(c.tecnico).saldo,3000);
 });
 test('compras debitam uma vez, são salvas e bônus expira por ano e clube',()=>{

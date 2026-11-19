@@ -13,7 +13,7 @@ async function abrir(page,c){await page.goto('http://127.0.0.1:4173/A-Joia/');aw
 for(const viewport of [{width:390,height:844},{width:1440,height:900}]){
  test(`oferta de seleção usa os cartões de mercado e assume vínculo exclusivo ${viewport.width}`,async({page})=>{
  await page.setViewportSize(viewport);const erros=[];page.on('pageerror',e=>erros.push(e.message));await abrir(page,base());
- const oferta=page.getByRole('button',{name:/Comandar seleção Portugal/});await expect(oferta).toBeVisible();await expect(oferta).toContainText('vínculo exclusivo');await oferta.click();
+ const oferta=page.getByRole('button',{name:/Comandar seleção Portugal/});await expect(oferta).toBeVisible();await expect(oferta).toContainText('vínculo exclusivo');await oferta.click();await page.getByRole('dialog',{name:'Negociar contrato'}).getByRole('button',{name:'Fechar contrato'}).click();
  await expect.poll(()=>lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo.c.tecnico.selecao))).toBe('POR');
  const salvo=await lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo.c.tecnico));expect(salvo.clube).toBe('Portugal');expect(salvo.tipoEquipe).toBe('selecao');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBeTruthy();expect(erros).toEqual([]);

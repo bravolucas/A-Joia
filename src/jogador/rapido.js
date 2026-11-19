@@ -2354,7 +2354,18 @@ export function gerarOfertas(c, n, opts = {}) {
       escolhidas.push(alvo);
     }
   }
-  return escolhidas.sort((a, b) => b.forca - a.forca).map((x) => ({
+  // Propostas espontâneas também respeitam caixa confirmado e concorrência
+  // muito superior na posição. A observação preliminar não é oferta formal.
+  const finais=opts.observacao?escolhidas:escolhidas.filter(x=>{
+    const a=analisarClubeEmpresario(c,x,ovr);
+    if(a.caixaConhecido&&a.semVerba)return false;
+    if(a.qualidadeConcorrente!==null&&a.qualidadeConcorrente>=ovr+8){
+      const excepcional=hashTexto(`${c.codigo||c.nome}|${c.ano}|${x.nome}|vaga-posicao`)%100<20;
+      return excepcional;
+    }
+    return true;
+  });
+  return finais.sort((a, b) => b.forca - a.forca).map((x) => ({
     clube: x.nome, forca: x.forca, cor: x.cor, ligaId: x.liga, ligaNome: ligaDe(x.liga).nome,
     status: statusPorDiff(ovr - x.forca, c.idade).label, projeto:{...projetoOferta({...c,_ovrProjeto:ovr},x.nome),salario:contratoPadrao(c,x.nome).salario,anos:contratoPadrao(c,x.nome).anos},
   }));

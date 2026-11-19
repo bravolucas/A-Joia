@@ -72,3 +72,19 @@ test('modo completo: usa temporadas externas e separa Copa do Mundo de continent
  assert.equal(registro(consultarRecordesFutebol(c,'selecao','Brasil',temporadas),'golsCarreira').simulado.valor,7);
  assert.equal(registro(consultarRecordesFutebol(c,'competicao','Copa do Mundo',temporadas),'golsCarreira').simulado.valor,4);
 });
+
+test('recordes de atuacao por partida respeitam clube, torneio, participacao e nao reescrevem o save',()=>{
+ const c=fixture(),jogos=[
+  {id:'2030|liga|1',ano:2030,clube:'Santos',competicao:'Brasileirão',
+    adversario:'Palmeiras',participou:true,gols:3,assistencias:2,defesas:0},
+  {id:'2031|copa|2',ano:2031,clube:'Milan',competicao:'Champions League',
+    adversario:'Inter',participou:true,gols:4,assistencias:0,defesas:0},
+  {id:'2030|liga|3',ano:2030,clube:'Santos',competicao:'Brasileirão',
+    adversario:'Flamengo',participou:false,gols:9,assistencias:6,defesas:0}
+ ];
+ c.universo.partidasAtletas={voce:jogos};const original=JSON.stringify(c);
+ assert.equal(registro(consultarRecordesFutebol(c,'clube','Santos'),'golsAtletaPartida').simulado.valor,3);
+ assert.equal(registro(consultarRecordesFutebol(c,'competicao','Champions League'),'golsAtletaPartida').simulado.valor,4);
+ assert.equal(registro(consultarRecordesFutebol(c,'competicao','Brasileirão'),'assistAtletaPartida').simulado.valor,2);
+ assert.equal(JSON.stringify(c),original);
+});

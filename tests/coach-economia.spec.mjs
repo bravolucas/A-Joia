@@ -45,7 +45,7 @@ for(const width of [390,1366])test(`loja: confirmação, saldo e salário sem du
   await decisao.locator('.ct-decisions button:enabled').first().click();
   await concluirMomentos(page);
   await expect.poll(async()=>(await salvo()).tecnico.fase).toBe('resultado');
-  const fim=await salvo();expect(fim.tecnico.carteiraTecnico.saldo).toBe(3900);expect(fim.tecnico.carteiraTecnico.pagamentos).toHaveLength(1);
-  await abrir();expect((await salvo()).tecnico.carteiraTecnico.saldo).toBe(3900);
+  const fim=await salvo();const bonus=fim.tecnico.carteiraTecnico.pagamentos.filter(p=>p.bonus).reduce((n,p)=>n+p.valor,0);expect(fim.tecnico.carteiraTecnico.saldo).toBe(3900+bonus);expect(fim.tecnico.carteiraTecnico.pagamentos.filter(p=>!p.bonus)).toHaveLength(1);
+  await abrir();expect((await salvo()).tecnico.carteiraTecnico.saldo).toBe(3900+bonus);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });

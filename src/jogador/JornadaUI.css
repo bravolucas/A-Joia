@@ -44,3 +44,9 @@
 
 .cp-resultado-copa .cp-scanner{flex-shrink:0}
 @media(max-height:700px){.cp-resultado-copa .janela-conteudo{gap:8px}.cp-resultado-copa .janela-contexto{padding-bottom:8px;margin-bottom:8px}.cp-resultado-copa .cp-copa-intro{padding-top:0}.cp-copa-intro>div:first-child{display:none}.cp-copa-intro>div:nth-child(2){font-size:18px;margin-top:0}.cp-copa-intro>div:last-child>span:first-child{display:none}.cp-copa-intro>div:last-child>span:last-child{font-size:14px}.cp-resultado-copa .cp-scanner{padding:8px}.cp-resultado-copa .cp-scanner>svg{width:min(150px,22dvh)}.cp-resultado-copa .cp-scanner>div:last-child{margin-top:4px;gap:4px}.cp-resultado-copa .cp-scanner>div:last-child>span{font-size:9px;padding:3px 5px}.cp-resultado-copa .cp-copa-resumo{gap:7px}.cp-copa-resumo>.display{font-size:28px}.cp-copa-resumo>.cp-pop{font-size:12px}.cp-copa-resumo>p:first-of-type{font-size:14px;line-height:1.35}.cp-copa-resumo>p:last-of-type{font-size:11px}}
+
+/* Empresário: sinalizar interesse em um clube. */
+.jr-sinalizar{margin-left:auto;min-height:36px;padding:6px 10px;border:1px solid #73d4ae66;border-radius:8px;background:#73d4ae14;color:#bff3df;font-size:12px;font-weight:600}
+.jr-sinalizado{margin-left:auto;font-size:11px;color:#f5d77a}
+.jr-interesses p{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.jr-interesse-nota{display:block;margin-top:6px;font-size:11px;color:#9eb5c9}

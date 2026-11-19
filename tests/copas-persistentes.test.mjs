@@ -56,7 +56,7 @@ test('copa do modo completo guarda ida, volta e os outros confrontos até o camp
  let r=registrarJogoPersistente(salvo,'copaNacional',{casa:adversario,fora:'Santos',golsCasa:4,golsFora:0});
  assert.equal(r.decisao,null);assert.ok(r.resumo.campeao&&r.resumo.campeao!=='Santos');
  const jogos=jogosDaCampanha(r.resumo),meus=jogos.filter(j=>[j.casa,j.fora].includes('Santos'));
- assert.equal(meus.length,2);assert.equal(jogos.length,29);
+ assert.equal(meus.length,2);assert.equal(jogos.length,30);// 15 confrontos em ida e volta: a final da Copa do Brasil também tem dois jogos
  assert.deepEqual(meus.map(j=>[j.golsCasa,j.golsFora]),[[1,0],[4,0]]);
  assert.equal(salvo.torneios[0].campeao,r.resumo.campeao);
  assert.equal(card.pernasCopas.copaNacional.golsCasa,1);

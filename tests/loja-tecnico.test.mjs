@@ -11,13 +11,15 @@ test('salário anual entra uma vez, não consome verba e desemprego não paga',(
   const c=base(),carta=cartaPretemporadaRapida(c.tecnico),op=carta.opcoes.find(o=>o.custo<=carta.verba);
   const fim=escolherPretemporadaRapidaTecnico(c,carta.chave,op.id,()=>.4);
   assert.equal(fim.tecnico.propostasCoerentesVersao,3);
-  assert.equal(carteiraTecnico(fim.tecnico).saldo,4200);
-  assert.equal(carteiraTecnico(fim.tecnico).pagamentos[0].valor,1200);
+  // Salário de 12 meses uma única vez, mais o bônus de desempenho da temporada (se houver).
+  const pagamentos=carteiraTecnico(fim.tecnico).pagamentos,bonus=pagamentos.filter(p=>p.bonus).reduce((n,p)=>n+p.valor,0);
+  assert.equal(pagamentos[0].valor,1200);assert.equal(pagamentos.filter(p=>!p.bonus).length,1);
+  assert.equal(carteiraTecnico(fim.tecnico).saldo,4200+bonus);
   assert.equal(creditarSalarioTecnico({...fim.tecnico,clube:c.tecnico.clube},2030,100),fim.tecnico.carteiraTecnico);
   const avancado=proximaTemporadaTecnico({...fim,tecnico:{...fim.tecnico,demitido:false}});
-  assert.equal(carteiraTecnico(avancado.tecnico).saldo,4200);
+  assert.equal(carteiraTecnico(avancado.tecnico).saldo,4200+bonus);
   const desempregado=passarAnoDesempregado({...fim,tecnico:{...fim.tecnico,demitido:true}},()=>.5);
-  assert.equal(carteiraTecnico(desempregado.tecnico).saldo,4200);
+  assert.equal(carteiraTecnico(desempregado.tecnico).saldo,4200+bonus);
   assert.equal(carteiraTecnico(c.tecnico).saldo,3000);
 });
 test('compras debitam uma vez, são salvas e bônus expira por ano e clube',()=>{
@@ -68,4 +70,19 @@ test('demissão em campanha interrompida paga apenas os meses trabalhados',()=>{
  assert.ok(pagamento.meses>0&&pagamento.meses<12);
  assert.equal(pagamento.valor,100*pagamento.meses);
  assert.equal(carteiraTecnico(fim.tecnico).saldo,3000+pagamento.valor);
+});
+test('loja ampliada: preço em meses de salário, efeitos moderados e mentoria única',async()=>{
+  const {precoItemLojaTecnico,ITENS_LOJA_TECNICO}=await import('../src/treinador/lojaTecnico.js');
+  const item=id=>ITENS_LOJA_TECNICO.find(x=>x.id===id);
+  assert.equal(precoItemLojaTecnico(item('preparacao'),100),300);
+  assert.equal(precoItemLojaTecnico(item('preparacao'),1000),3000,'gigante paga proporcional ao salário');
+  assert.equal(precoItemLojaTecnico(item('vestiario'),2),3,'piso mínimo');
+  let c=base();const antes=c.tecnico;
+  c=comprarMelhoriaTecnico(c,'diretoria');c=comprarMelhoriaTecnico(c,'torcida');c=comprarMelhoriaTecnico(c,'vestiario');c=comprarMelhoriaTecnico(c,'imprensa');
+  assert.equal(c.tecnico.diretoria,Math.min(100,(antes.diretoria??50)+6));assert.equal(c.tecnico.torcida,Math.min(100,(antes.torcida??50)+6));
+  assert.equal(c.tecnico.moral,Math.min(100,(antes.moral??50)+8));assert.equal(c.tecnico.reputacao,Math.min(99,(antes.reputacao??50)+2));
+  assert.equal(c.tecnico.carteiraTecnico.saldo,3000-100-100-50-150);
+  const ovr=calcularOvrTecnico(c.tecnico);c=comprarMelhoriaTecnico(c,'mentoria');assert.equal(calcularOvrTecnico(c.tecnico),ovr+1);
+  assert.throws(()=>comprarMelhoriaTecnico({...c,tecnico:{...c.tecnico,ano:2031}},'mentoria'),/uma vez na carreira/);
+  assert.equal(bonusForcaLoja(c.tecnico),0,'relações e formação não dão força ao time');
 });

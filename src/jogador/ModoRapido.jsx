@@ -24,7 +24,7 @@ import {mudarPosicao,reinventarVeterano} from './posicoesCarreira.js';
 import {ativarAssinatura,definirPreferenciaMercado,legadoNarrativo,projetoOferta,cenaDespedida,reagirReencontro,celebracaoMomento} from './jornadaJogador.js';
 import {GeometriaCampo,QuadroMini,BolaTrajeto} from '../comum/CenarioMini.jsx';
 import TreinosPretemporada from './TreinosPretemporada.jsx';
-import {trocarTreinos} from './rapido.js';
+import {trocarTreinos,papelDe} from './rapido.js';
 import Idolatria from './Idolatria.jsx';
 import Personalizacao from '../comum/Personalizacao.jsx';
 import LancesCriativos from './LancesCriativos.jsx';
@@ -66,7 +66,7 @@ import {
   comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
   bonusPrecisaoLoja, chanceMomento, miniDaPosicao, ehPremioIndividual, vagasDaLiga, ehSegundaDivisao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
   eventoDaJanela, segundoEvento, anoDeDecisao, eventoImpasse, valorAtual, comparaSalario, textoEmoji, efeitosDaDecisao, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, resolverDesafio, desafioPendente, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
-  noticiasDaTemporada, retrospectoRivalidade, caminhoSelecao, interesseMercado,
+  noticiasDaTemporada, retrospectoRivalidade, caminhoSelecao, interesseMercado, sinalizarInteresse,
   copaPendente, opcoesCopa, jogarCopa,
 } from "./rapido.js";
 
@@ -1611,7 +1611,7 @@ function TelaNegociacao({ c, n, onAjustar, onAssinar, onSair }) {
   const t = n.termos, o = n.original;
   const corPac = n.paciencia >= 60 ? "#BCEAFF" : n.paciencia >= 30 ? "#EBC557" : "#E36B5B";
   const humor = n.colapsou ? "Saiu da mesa" : n.paciencia >= 60 ? "Tranquila" : n.paciencia >= 30 ? "Impaciente" : "No limite";
-  const fmt = { salario: (v) => `${formatarValor(v)}/ano`, anos: (v) => `${v} ano${v > 1 ? "s" : ""}`, multa: (v) => formatarValor(v), bonusGol: (v) => `${formatarValor(v)}/gol` };
+  const fmt = { salario: (v) => `${formatarValor(v)}/ano`, anos: (v) => `${v} ano${v > 1 ? "s" : ""}`, multa: (v) => formatarValor(v), bonusGol: (v) => `${formatarValor(v)}/gol`, papel: (v) => papelDe(v)?.label || "A definir" };
   const luvas = n.luvas ? Math.round(t.salario * 0.5) : 0;
   return (
     <div className="max-w-xl mx-auto px-4 py-5 flex flex-col gap-4 rp-entra">
@@ -1652,6 +1652,7 @@ function TelaNegociacao({ c, n, onAjustar, onAssinar, onSair }) {
           );
         })}
         <p className="text-[13px] text-[#9EB5C9] px-2 pt-2 pb-1">Cláusula baixa facilita sair no futuro, mas um clube grande pode pagá-la sem te consultar.</p>
+        <p className="text-[13px] text-[#9EB5C9] px-2 pb-1">Tempo de jogo garante minutos enquanto durar o contrato: Titular ≈ 86% dos jogos, Intocável ≈ 97%. O clube aceita prometer até {papelDe(n.papelMaximo)?.label || "Titular"}.</p>
       </div>
 
       {n.historico.length > 0 && (
@@ -2773,7 +2774,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const abrirJanela = (cc, k, voar = false) => {
     let ev = eventoDaJanela(cc);
     let fl = true;
-    if (!ev && anoDeDecisao(cc)) { ev = segundoEvento(cc, null); fl = false; }
+    if (!ev) { ev = segundoEvento(cc, null); fl = false; }
     return setEstado({ etapa: "evento", c: cc, evento: ev, resultado: null, fila: fl, ultimo: k, voar, auto: !ev && !anoDeDecisao(cc) });
   };
   // tocar numa carta de treino já joga a temporada
@@ -2825,7 +2826,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   // proposta: tocar assina direto (contrato que o clube oferece); "negociar" abre a mesa
   const acaoJornada=(tipo,valor)=>{
     if(tipo==='retorno'){const ev=sortearEvento(c,{somente:'voltarCasa'});if(!ev)throw new Error('O retorno exige condições esportivas e uma relação preservada com o clube.');setEstado(st=>({...st,evento:ev,resultado:null,auto:false}));return;}
-    const fn={posicao:mudarPosicao,veterano:reinventarVeterano,assinatura:ativarAssinatura,preferencia:definirPreferenciaMercado}[tipo];
+    const fn={posicao:mudarPosicao,veterano:reinventarVeterano,assinatura:ativarAssinatura,preferencia:definirPreferenciaMercado,interesse:sinalizarInteresse}[tipo];
     if(!fn) return;
     const novo=fn(c,valor);setEstado(st=>({...st,c:novo,...(tipo==='posicao'&&st.evento?{evento:sortearEvento(novo,{somente:st.evento.id}),auto:false}:{})}));
   };
@@ -3008,7 +3009,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           onJogar={() => setEstado((st) => ({ ...st, c: simularEtapaTecnico(st.c) }))}
           onEscolherClubeInicial={(nome) => setEstado((st) => ({ ...st, c: iniciarNoClubeIdolo(st.c, nome) }))}
           onEsperar={(escolha) => setEstado((st) => ({ ...st, c: passarAnoDesempregado(st.c, undefined, escolha) }))}
-          onAceitarProposta={(nome, estrategia) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia); if (!negociado.tecnico.ultimaNegociacao?.aceita) return { ...st, c: negociado }; return { ...st, c: proximaTemporadaTecnico(negociado) }; })}
+          onAceitarProposta={(nome, estrategia, opcoes) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia, undefined, opcoes); if (!negociado.tecnico.ultimaNegociacao?.aceita) return { ...st, c: negociado }; return { ...st, c: proximaTemporadaTecnico(negociado) }; })}
           onAvancar={() => setEstado((st) => ({ ...st, c: proximaTemporadaTecnico(st.c) }))}
           onAvancarESimular={() => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(proximaTemporadaTecnico(st.c), null, undefined, { interativo: true, copasInterativas: true }) }))}
           onPedirDemissao={()=>setEstado(st=>({...st,c:pedirDemissaoTecnico(st.c)}))}

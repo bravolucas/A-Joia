@@ -2,6 +2,7 @@ import {CLUBES} from '../dados/data.js';
 import {avaliarClubeNoMundo,setorJogador} from './forcaEquipe.js';
 import {diagnosticarElenco,normalizarPosicao} from './profundidadeElenco.js';
 import {VERSAO_ECONOMIA,valorMercadoEuro,salarioMensalEuro,verbaTransferenciasEuro} from './economia.js';
+import {registroCentral,podarCentral} from './transferenciasMundo.js';
 const chave=id=>String(id);
 const idMundo=j=>j.mundoId??j.id;
 export const metadadosGestao=g=>{const {elenco,mercado,...meta}=g;return meta;};
@@ -43,9 +44,25 @@ export function migrarEconomiaMundo(mundo){
  return {...mundo,receitasMercado,gestoesClubes,economia:VERSAO_ECONOMIA};
 }
 export function jogadorDaGestao(p,anterior){return {...p,id:anterior?.id??p.idLegadoGestao??p.id,mundoId:p.id,setor:setorJogador(p),qualidade:p.ovr,...financeiro(p),origem:p.origem||'elenco'};}
+/**
+ * Preço pedido pelo clube vendedor (€ mil): titulares, contratos longos e jovens
+ * promessas custam mais; um titular de clube bem mais forte não é negociável.
+ * Jovens fora do time titular podem ser cedidos por empréstimo.
+ */
+export function precoPedidoMundo(mundo,p,compradorForca){
+ const fin=financeiro(p);
+ if(!p.clubeNome)return {valor:fin.salario*2,valorMercado:fin.valor,negociavel:true,titular:false,emprestavel:false};
+ const notas=mundo.jogadores.filter(x=>!x.aposentado&&x.clubeNome===p.clubeNome).map(x=>x.ovr??0).sort((a,b)=>b-a);
+ const titular=notas.length<=11||(p.ovr??0)>=notas[10];
+ let fator=1;if(titular)fator*=1.25;if(fin.contrato>=3)fator*=1.1;if(p.idade<=23&&(p.potencial??p.ovr)-p.ovr>=6)fator*=1.15;
+ const forcaVendedor=CLUBES.find(cl=>cl.nome===p.clubeNome)?.forca??60;
+ return {valor:Math.round(fin.valor*fator),valorMercado:fin.valor,titular,
+  negociavel:!(titular&&forcaVendedor>=(compradorForca??0)+8),
+  emprestavel:!titular&&p.idade<=23&&!p.emprestimo};
+}
 export function mercadoDoMundo(mundo,g){
- const usados=new Set(g.movimentos.filter(m=>m.ano===g.ano&&['compra','venda'].includes(m.tipo)).map(m=>chave(m.mundoId??m.jogador)));
- return ['GOL','DEF','MEI','ATA'].flatMap(setor=>mundo.jogadores.filter(p=>!p.aposentado&&p.clubeNome!==g.clube&&setorJogador(p)===setor&&!usados.has(chave(p.id))).sort((a,b)=>Math.abs(a.ovr-g.forcaMercado)-Math.abs(b.ovr-g.forcaMercado)||chave(a.id).localeCompare(chave(b.id))).slice(0,3).map(p=>({...jogadorDaGestao(p),id:p.id,clubeVendedor:p.clubeNome||null,valor:p.clubeNome?financeiro(p).valor:financeiro(p).salario*2,origem:'mercado'})));
+ const usados=new Set(g.movimentos.filter(m=>m.ano===g.ano&&['compra','venda','emprestimo-entrada'].includes(m.tipo)).map(m=>chave(m.mundoId??m.jogador)));
+ return ['GOL','DEF','MEI','ATA'].flatMap(setor=>mundo.jogadores.filter(p=>!p.aposentado&&p.clubeNome!==g.clube&&setorJogador(p)===setor&&!usados.has(chave(p.id))&&!p.emprestimo).sort((a,b)=>Math.abs(a.ovr-g.forcaMercado)-Math.abs(b.ovr-g.forcaMercado)||chave(a.id).localeCompare(chave(b.id))).slice(0,3).map(p=>({...jogadorDaGestao(p),id:p.id,clubeVendedor:p.clubeNome||null,...precoPedidoMundo(mundo,p,g.forcaMercado),origem:'mercado'})));
 }
 /** Migração explícita: o elenco administrado prevalece; atletas do cadastro antigo
  * permanecem disponíveis, com suas identidades e histórias, sem inventar vendas. */
@@ -92,6 +109,7 @@ export function destinoDaVenda(c,j){
   const salva=c.mundo.gestoesClubes?.[cl.nome];
   // Gestão guardada na economia antiga (R$) não é comparável: usar a verba estimada.
   const saldo=(salva?.economia===VERSAO_ECONOMIA||c.mundo.economia===VERSAO_ECONOMIA)&&Number.isFinite(salva?.saldo)?salva.saldo:
+   Number.isFinite(c.mundo.caixaClubes?.[cl.nome])?Math.max(0,c.mundo.caixaClubes[cl.nome]):
    Math.max(0,verbaEstimadaClube(porClube.get(cl.nome)||[])+(c.mundo.economia===VERSAO_ECONOMIA?(c.mundo.receitasMercado?.[cl.nome]||0):0));
   if(saldo<preco)return [];
   const elenco=porClube.get(cl.nome)||[];
@@ -121,31 +139,44 @@ export function destinoDaVenda(c,j){
   dispensarIds:escolhido.dispensarIds};
 }
 /** Uma negociação altera o mesmo atleta, sem recriá-lo nem perder estatísticas. */
-export function aplicarNegociacaoMundo(c,g,{tipo,alvo,destino}={}){
+export function aplicarNegociacaoMundo(c,g,{tipo,alvo,destino,valor}={}){
  if(!g.cadastroUnificado)return {...c,tecnico:{...c.tecnico,gestao:g}};
  const clube=g.clube,ano=g.ano,id=alvo&&idMundo(alvo),venda=tipo==='venda';
+ // Empréstimos: o atleta joga a próxima temporada fora e volta ao clube dono depois dela.
+ const emprestimo=tipo==='emprestimo-saida'||tipo==='emprestimo-entrada',saida=venda||tipo==='emprestimo-saida';
+ const temporadaEmprestimo=(c.mundo.temporada||0)+1;
+ const valorNegocio=Number.isFinite(valor)?valor:venda?Math.round((alvo?.valor||0)*.8):tipo==='compra'?(alvo?.valor||0):0;
  const elenco=new Map(g.elenco.map(j=>[chave(idMundo(j)),j]));
  let encontrado=!alvo;
  const jogadores=c.mundo.jogadores.map(p=>{
   const j=elenco.get(chave(p.id));let novo=j?{...p,ovr:j.qualidade,idade:j.idade,contrato:j.contrato,salario:j.salario,valor:j.valor,economia:VERSAO_ECONOMIA,clubeNome:clube,liga:c.tecnico.liga||p.liga}:p;
-  if(venda&&destino?.dispensarIds?.some(x=>chave(x)===chave(p.id))&&p.clubeNome===destino.nome){
+  if(saida&&destino?.dispensarIds?.some(x=>chave(x)===chave(p.id))&&p.clubeNome===destino.nome){
    novo={...novo,clubeNome:null,contrato:0,
     movimentos:[...(p.movimentos||[]),{ano,tipo:'dispensa',de:destino.nome,para:null,valor:0,moeda:'EUR'}]};
   }
   if(alvo&&chave(p.id)===chave(id)){
-   encontrado=true;const para=venda?destino.nome:clube;
-   const movimento={ano,tipo,de:p.clubeNome||null,para,valor:venda?Math.round(alvo.valor*.8):tipo==='compra'?alvo.valor:0,moeda:'EUR'};
-   novo={...novo,clubeNome:para,liga:venda?destino.liga:(c.tecnico.liga||CLUBES.find(cl=>cl.nome===clube)?.liga),contrato:tipo==='renovacao'?novo.contrato:tipo==='compra'||venda?3:novo.contrato,movimentos:[...(p.movimentos||[]),movimento]};
+   encontrado=true;const para=saida?destino.nome:clube;
+   const movimento={ano,tipo:emprestimo?'emprestimo':tipo,de:p.clubeNome||null,para,valor:emprestimo?0:valorNegocio,moeda:'EUR'};
+   const dono=tipo==='emprestimo-saida'?clube:tipo==='emprestimo-entrada'?p.clubeNome:null;
+   novo={...novo,clubeNome:para,liga:saida?destino.liga:(c.tecnico.liga||CLUBES.find(cl=>cl.nome===clube)?.liga),contrato:emprestimo||tipo==='renovacao'?novo.contrato:tipo==='compra'||venda?3:novo.contrato,movimentos:[...(p.movimentos||[]),movimento]};
+   if(dono)novo.emprestimo={dono,ateTemporada:temporadaEmprestimo};else if(tipo==='compra'||venda)delete novo.emprestimo;
   }
   // Liga e contrato podem ter mudado nesta negociação: o valor acompanha.
   return novo===p?p:{...novo,valor:valorMercadoEuro({...novo,contrato:novo.contrato})};
  });
  if(!encontrado)throw new Error('O jogador não está mais disponível no cadastro do mundo.');
- const mundo={...c.mundo,jogadores,gestoesClubes:{...c.mundo.gestoesClubes},receitasMercado:{...c.mundo.receitasMercado}};
- if(alvo&&['compra','venda'].includes(tipo)){
+ const mundo={...c.mundo,jogadores,gestoesClubes:{...c.mundo.gestoesClubes},receitasMercado:{...c.mundo.receitasMercado},
+  ...(c.mundo.caixaClubes?{caixaClubes:{...c.mundo.caixaClubes}}:{})};
+ if(alvo&&['compra','venda','emprestimo-saida','emprestimo-entrada'].includes(tipo)){
   const original=c.mundo.jogadores.find(p=>chave(p.id)===chave(id)),outro=venda?destino.nome:original.clubeNome;
-  const quantia=venda?-Math.round(alvo.valor*.8):alvo.valor;
-  if(outro){if(mundo.gestoesClubes[outro])mundo.gestoesClubes[outro]={...mundo.gestoesClubes[outro],saldo:mundo.gestoesClubes[outro].saldo+quantia};else mundo.receitasMercado[outro]=(mundo.receitasMercado[outro]||0)+quantia;}
+  const quantia=venda?-valorNegocio:valorNegocio;
+  if(outro&&!emprestimo){if(mundo.gestoesClubes[outro])mundo.gestoesClubes[outro]={...mundo.gestoesClubes[outro],saldo:mundo.gestoesClubes[outro].saldo+quantia};else mundo.receitasMercado[outro]=(mundo.receitasMercado[outro]||0)+quantia;
+   // O caixa da IA usado pelo mercado do mundo também acompanha o negócio.
+   if(mundo.caixaClubes&&Number.isFinite(mundo.caixaClubes[outro]))mundo.caixaClubes[outro]+=quantia;}
+  // Negócios do treinador aparecem na central de transferências do mundo.
+  const atleta=jogadores.find(p=>chave(p.id)===chave(id));
+  if(atleta)mundo.transferencias=podarCentral([...(c.mundo.transferencias||[]),registroCentral({ano,temporada:(c.mundo.temporada||0)+1,p:atleta,
+   de:saida?clube:original.clubeNome||null,para:saida?destino.nome:clube,valor:emprestimo?0:valorNegocio,tipo:emprestimo?'emprestimo':!venda&&!original.clubeNome?'livre':'transferencia'})],(c.mundo.temporada||0)+1);
  }
  g={...g,mercado:mercadoDoMundo(mundo,g)};
  mundo.gestoesClubes[g.clube]=metadadosGestao(g);

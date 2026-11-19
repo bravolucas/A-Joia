@@ -32,3 +32,9 @@
 .ft-modal>.ft-cabecalho,.ft-modal>footer{flex:none}
 .ft-modal>:is(.cb-bola,.ft-resultado,.ft-corpo){flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 .ft-modal>.cb-bola{border-radius:0;border-inline:0;scrollbar-gutter:stable}
+
+/* Números por competição no resumo da temporada. */
+.ft-por-competicao{display:grid;gap:6px;margin:12px 0}
+.ft-por-competicao p{display:flex;justify-content:space-between;gap:10px;margin:0;padding:8px 10px;border-radius:8px;background:#ffffff0a;font-size:12px}
+.ft-por-competicao strong{font-weight:650}
+.ft-por-competicao span{color:#c9d6e0;white-space:nowrap}

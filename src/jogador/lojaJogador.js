@@ -33,6 +33,7 @@ export function impedimentoLojaJogador(c,item,emTemporada=false){
  if(item.somenteGoleiro&&c.posicao!=='GOL')return 'Exclusivo para goleiros';
  if(item.somenteLinha&&c.posicao==='GOL')return 'Exclusivo para jogadores de linha';
  if(!item.temporario&&(c.investimentos||[]).includes(item.id))return 'Adquirido';
+ if(item.descontinuado)return 'Fora de linha';
  const ativos=upsAtivosJogador(c);
  if(item.temporario&&ativos.some(x=>upJogadorDe(x.id).familia===item.familia))return 'Já há um UP deste tipo ativo';
  if(item.temporario&&ativos.length>=3)return 'Limite de 3 UPs ativos';

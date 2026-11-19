@@ -6,6 +6,36 @@ import {participantesEstadual} from '../competicoes/estaduaisRapidos.js';
 import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternacionais.js';
 import {eCampeaoPrincipal,criarMundialAnual,criarMundial32} from '../competicoes/mundialRapido.js';
 import {criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa,resumoCampanhaCopa} from '../treinador/copasEscolha.js';
+import {geradorTecnico} from '../treinador/momentosTecnico.js';
+
+// Participação esperada em gols e assistências do time, por função.
+const PESO_GOL={ATA:.36,SA:.3,PE:.24,PD:.24,ME:.18,MD:.18,MEI:.2,MC:.1,VOL:.06,ZAG:.05,LD:.04,LE:.04,GOL:0};
+const PESO_ASSIST={MEI:.3,PE:.24,PD:.24,ME:.22,MD:.22,MC:.2,SA:.2,ATA:.14,LD:.12,LE:.12,VOL:.1,ZAG:.03,GOL:.01};
+/**
+ * Lances do atleta numa partida de copa, coerentes com a temporada: dependem da
+ * participação (minutos), da produção do ano e dos gols do time no jogo, e nunca
+ * ultrapassam os totais da temporada já contados em outras copas.
+ */
+export function lancesJogadorCopa(card,campanha,chave){
+ const r=campanha?.resultado;if(!r?.jogo||r.penaltisPendentes)return null;
+ const rng=geradorTecnico(`${card.ano}|${chave}|lances-jogador`),j=r.jogo,doTime=j.casa===campanha.usuario?j.golsCasa:j.golsFora;
+ const usados=Object.values(card.copaLances||{}).reduce((s,x)=>({gols:s.gols+x.gols,assist:s.assist+x.assist}),{gols:0,assist:0});
+ const share=Number.isFinite(card.share)?card.share:.7;
+ if(rng()>Math.min(.98,share+.08))return {jogou:false,minutos:0,eventos:[]};
+ const titular=rng()<share,minutos=titular?90:15+Math.floor(rng()*30),fracao=minutos/90;
+ const taxa=card.jogos>0?Math.min(1.2,(card.gols||0)/card.jogos):0,taxaA=card.jogos>0?Math.min(1.2,(card.assist||0)/card.jogos):0;
+ const pg=Math.min(.85,Math.max(PESO_GOL[card.posicao]??.1,taxa/1.6))*fracao,pa=Math.min(.7,Math.max(PESO_ASSIST[card.posicao]??.1,taxaA/1.6))*fracao;
+ const eventos=[];let gols=0,assist=0;
+ for(let g=0;g<doTime;g++){
+  const x=rng();
+  if(x<pg&&usados.gols+gols<(card.gols||0)){gols++;eventos.push({tipo:'gol'});}
+  else if(x<pg+pa&&usados.assist+assist<(card.assist||0)){assist++;eventos.push({tipo:'assistencia'});}
+ }
+ const inicio=titular?1:91-minutos;
+ for(const e of eventos)e.minuto=inicio+Math.floor(rng()*(90-inicio+1));
+ eventos.sort((a,b)=>a.minuto-b.minuto);
+ return {jogou:true,titular,minutos,gols,assist,eventos};
+}
 export function prepararCopasJogador(c,card){
  if(card.calendarioCopas||(c.temporadas||[]).some(a=>a.ano===card.ano))return card;
  const clubes=clubesDoMundo(c,clubesParaCopas(c.ligas)),clube=clubes.find(x=>x.nome===card.clube);if(!clube)return card;
@@ -29,6 +59,13 @@ export function escolherCopaJogador(card,chave,opcao){
  const p=card.calendarioCopas;if(!p||chave!==chaveCopaJogador(card))return card;
  if(p.pausa)return opcao==='continuar'?concluirEventoJogador(card):card;
  const cp=p.campeonatos[p.indice],nova=opcao==='continuar'?continuarCopa(cp):escolherCopa(cp,chave,opcao);if(nova===cp)return card;
+ // Partida decidida agora: registra os lances do atleta uma única vez.
+ if(nova.resultado&&!nova.resultado.penaltisPendentes&&!nova.resultado.lancesJogador&&!cp.resultado?.lancesJogador&&nova.resultado!==cp.resultado){
+  const lances=lancesJogadorCopa(card,nova,chave);
+  if(lances){nova.resultado={...nova.resultado,lancesJogador:lances};
+   const atual=card.copaLances?.[nova.nome]||{jogos:0,gols:0,assist:0};
+   card={...card,copaLances:{...card.copaLances,[nova.nome]:{jogos:atual.jogos+(lances.jogou?1:0),gols:atual.gols+(lances.gols||0),assist:atual.assist+(lances.assist||0)}}};}
+ }
  const novo=structuredClone(p);novo.campeonatos[p.indice]=nova;let k={...card,calendarioCopas:novo};
  if(nova.fase==='fim'&&!nova.resultado){
   const ganhou=nova.campeao===card.clube;k.torneios=[...(card.torneios||[]).filter(x=>x.nome!==nova.nome), {...resumoCampanhaCopa(nova),celebrado:ganhou}];

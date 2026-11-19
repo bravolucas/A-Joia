@@ -102,3 +102,16 @@
 .ct-prep-optional{display:block;width:100%;margin-top:10px;min-height:44px;border:1px solid #57534e;border-radius:999px;padding:10px 14px;background:transparent;color:#e4e4e7;font-size:12px;font-weight:650;text-align:center;transition:background .2s,border-color .2s}
 .ct-prep-optional:hover:not(:disabled){background:#27272c;border-color:#a8a29e}
 .ct-prep-optional:disabled{cursor:wait;opacity:.55}
+
+/* Negociação do contrato do técnico. */
+.ct-negociacao-opcoes{display:grid;gap:8px;margin:14px 0}
+.ct-negociacao-opcoes button{display:grid;gap:3px;text-align:left;padding:12px 14px;border:1px solid #ffffff22;border-radius:10px;background:#ffffff08;color:#e7edf1}
+.ct-negociacao-opcoes button.ativo{border-color:#73d4ae;background:#73d4ae18}
+.ct-negociacao-opcoes strong{font-size:13px}
+.ct-negociacao-opcoes span{font-size:15px;font-weight:700;color:#f5d77a}
+.ct-negociacao-opcoes small{font-size:11px;color:#a8bbcb}
+.ct-negociacao-clausula{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid #ffffff1a;border-radius:10px;margin-bottom:10px;cursor:pointer}
+.ct-negociacao-clausula input{margin-top:3px;width:18px;height:18px}
+.ct-negociacao-clausula strong{display:block;font-size:13px}
+.ct-negociacao-clausula small{display:block;font-size:11px;color:#a8bbcb;margin-top:3px;line-height:1.5}
+.ct-negociacao-bonus{font-size:11px;color:#a8bbcb;line-height:1.6}

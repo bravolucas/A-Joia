@@ -3,3 +3,8 @@
 @media(max-width:900px){.ct-wallet-button{order:2}}
 
 .ct-board .ct-elenco-button{order:3}
+
+/* Categorias da loja. */
+.lt-categorias{display:grid;gap:16px}
+.lt-categoria-titulo{margin:0;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#bfe7d8}
+.lt-categoria-texto{margin:4px 0 8px;font-size:12px;color:#a8bbcb}

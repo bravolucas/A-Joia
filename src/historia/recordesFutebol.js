@@ -31,7 +31,7 @@ export const METRICAS_RECORDES = Object.freeze([
  {id:'golsTabelaEdicao',rotulo:'Mais gols em uma edição de liga (classificação)',categoria:'Campanhas'},
  {id:'saldoTabelaEdicao',rotulo:'Maior saldo de gols em uma edição de liga',categoria:'Campanhas'},
  {id:'invictoTabelaEdicao',rotulo:'Mais jogos em campanha invicta de liga',categoria:'Campanhas'},
- {id:'titulosTotal',rotulo:'Mais títulos conquistados no universo',categoria:'Títulos'},
+ {id:'titulosTotal',rotulo:'Maior número de títulos conquistados',categoria:'Títulos'},
  {id:'titulosAno',rotulo:'Mais títulos em uma temporada',categoria:'Títulos'},
  {id:'titulosConsecutivos',rotulo:'Mais títulos consecutivos na mesma competição',categoria:'Títulos'},
  {id:'vicesTotal',rotulo:'Mais vice-campeonatos no universo',categoria:'Títulos'}

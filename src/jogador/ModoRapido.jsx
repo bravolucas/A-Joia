@@ -1104,6 +1104,12 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
           <Stat label="GOLS" valor={card.gols} />
           <Stat label="ASSIST." valor={card.assist} />
         </div>
+        {card.pretemporada && <div className="mx-3 mt-2 rounded-xl border border-[#72B9B0]/25 bg-[#071321]/70 px-3 py-2.5" aria-label="Resultado da pré-temporada">
+          <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#9FD9CD]">Preparação escolhida</div>
+          <div className="text-[14px] font-bold text-[#F2F5F3]">{card.pretemporada.nome}</div>
+          {card.pretemporada.efeitos?.length > 0 && <p className="mt-1 text-[12px] text-[#C9D9E8]">{card.pretemporada.efeitos.join(' · ')}</p>}
+          <p className="mt-1 text-[11px] text-[#9EB5C9]">Risco de lesão na temporada: {card.pretemporada.riscoLesao != null ? `${card.pretemporada.riscoLesao}%` : 'não registrado'} · Ganhos em atributos incluídos no overall.</p>
+        </div>}
         {/* overall, torcida e valor logo abaixo */}
         <div className="grid grid-cols-3 gap-2 px-3 pt-2">
           <div className="rounded-xl bg-[#071321]/70 px-2.5 py-2"><div className="text-[10px] font-bold tracking-wider text-[#9EB5C9]">OVERALL</div><div className="font-stat text-[19px] text-[#F2F5F3] leading-tight">{card.ovrDepois}<Delta v={delta} /></div></div>

@@ -17,7 +17,9 @@ export function escoposRecordesDaTemporada(c={},a={}){
  ]).slice(0,8);
 }
 const prioridade=e=>(e.historico?100:0)+(e.atletaId==='voce'?25:0)+
-  (['golsCarreira','golsTemporada','jogosCarreira','golsAtletaPartida'].includes(e.metrica)?10:0);
+  (['golsCarreira','golsTemporada','jogosCarreira','golsAtletaPartida'].includes(e.metrica)?10:0)+
+  (['tecnicoVitorias','tecnicoTitulos'].includes(e.metrica)?35:
+   ['tecnicoJogos','tecnicoVitoriasAno','tecnicoAproveitamento'].includes(e.metrica)?20:0);
 /** Compara dois snapshots do mesmo save sem mutacao. Sem baseline no save nao
  * produz noticias, exceto ao igualar ou superar marca real verificavel. */
 export function detectarQuebrasRecordesFutebol(antes={},depois={},{

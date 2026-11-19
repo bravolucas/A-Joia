@@ -51,7 +51,10 @@ export function PainelJornada({c,onAcao,caminho,interesses=[]}){
  {j.mentor&&<p className="jr-lembranca">Primeiro orientador: {j.mentor.nome} · <LinkEntidade tipo="clube" nome={j.mentor.clube}/> · personagem fictício</p>}
  {!!j.rivalMemorias?.length&&<details><summary>Seu rival tem história</summary>{j.rivalMemorias.slice(-3).map((m,i)=><p key={i}>{descreverMemoriaRival(m)}</p>)}</details>}
  {!!j.relatoriosEmprestimo?.length&&<details><summary>Como foram seus empréstimos</summary>{j.relatoriosEmprestimo.map((r,i)=><p key={i}><LinkEntidade tipo="clube" nome={r.clube}/>: {r.jogos} jogos em {r.temporadas} temporada(s){r.esperados?` · projeção ${r.esperados.join('–')}`:''}. Retorno ao <LinkEntidade tipo="clube" nome={r.origem}/>.</p>)}</details>}
- <MercadoEmpresario c={c} onAcao={onAcao} interesses={interesses}/>
+ </details>
+ <details className="jr-mercado-aba">
+  <summary><span><b>Mercado de clubes · seu empresário</b><small>Explore países e ligas, escolha um destino e acompanhe as negociações</small></span><i>+</i></summary>
+  <MercadoEmpresario c={c} onAcao={onAcao} interesses={interesses}/>
  </details>
  {!!ups.length&&<div className="jr-ups" aria-label="Impulsos ativos na temporada">{ups.map(u=><span key={u.id}><b>{upJogadorDe(u.id)?.nome||u.id}</b>{Math.max(0,u.fim-c.ano)} temporada(s) restante(s)<small>{upJogadorDe(u.id)?.desc}</small></span>)}</div>}
  {aviso&&<p role="status">{aviso}</p>}

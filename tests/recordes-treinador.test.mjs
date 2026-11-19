@@ -38,7 +38,10 @@ test('treinador: nacionalidade e ligas mantêm escopos separados',()=>{
  assert.equal(recordesTreinador(c,'selecao','Argentina').length,0);
  assert.equal(marca(recordesTreinador(c,'competicao','Brasileirão'),'tecnicoTemporadas').valor,3);
  assert.equal(marca(recordesTreinador(c,'competicao','Brasileirão'),'tecnicoTitulos').valor,2);
- assert.equal(recordesTreinador(c,'competicao','Copa do Brasil').length,0);
+ const copa=recordesTreinador(c,'competicao','Copa do Brasil');
+ assert.equal(marca(copa,'tecnicoTitulos').valor,2);
+ assert.equal(marca(copa,'tecnicoJogos'),undefined);
+ assert.equal(marca(copa,'tecnicoPontos'),undefined);
 });
 test('treinador: temporada com placares incongruentes nao fabrica jogos ou pontos',()=>{
  const c={nome:'Lucas',tecnico:{temporadas:[
@@ -98,4 +101,31 @@ test('ficha do treinador agrega passagens por clubes e seleções sem misturar a
  assert.equal(marca(perfil.recordes,'tecnicoTemporadas').valor,4);
  assert.equal(marca(perfil.recordes,'tecnicoTitulos').valor,5);
  assert.ok(perfil.recordes.every(r=>r.categoria==='Treinador'));
+});
+
+test('copa continental usa alias sem transportar pontos ou acesso do campeonato nacional',()=>{
+ const c={nome:'Treinadora',tecnico:{universo:{anos:[2030],edicoes:[]},temporadas:[
+  temporada(2030,'Santos',22,10,6,['Brasileirão','UEFA Champions League'],
+   {torneios:[{nome:'UEFA Champions League',faseUsuario:'Campeão',campeao:'Santos'}],
+    acesso:{de:'B',para:'A'},demitido:true,cumpriuObjetivo:true})
+ ]}};
+ const copa=recordesTreinador(c,'competicao','Champions League');
+ assert.equal(marca(copa,'tecnicoTitulos').valor,1);
+ assert.equal(marca(copa,'tecnicoTemporadas').valor,1);
+ for(const id of ['tecnicoJogos','tecnicoPontos','tecnicoVitorias','tecnicoAcessos',
+   'tecnicoMetas','tecnicoDemissoes'])assert.equal(marca(copa,id),undefined);
+ const liga=recordesTreinador(c,'competicao','Brasileirão');
+ assert.equal(marca(liga,'tecnicoJogos').valor,38);
+ assert.equal(marca(liga,'tecnicoAcessos').valor,1);
+});
+test('participação em copa sem título não fabrica vitórias de mata-mata',()=>{
+ const c={nome:'Treinador',tecnico:{temporadas:[
+  temporada(2031,'Santos',15,10,13,[],{torneios:[
+   {nome:'Copa do Brasil',faseUsuario:'Eliminado nas oitavas',jogosUsuario:[{casa:'Santos',fora:'Palmeiras',golsCasa:0,golsFora:1}]}
+  ]})
+ ]}};
+ const copa=recordesTreinador(c,'competicao','Copa do Brasil');
+ assert.equal(marca(copa,'tecnicoTemporadas').valor,1);
+ assert.equal(marca(copa,'tecnicoJogos'),undefined);
+ assert.equal(marca(copa,'tecnicoTitulos'),undefined);
 });

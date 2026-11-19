@@ -2,6 +2,7 @@ import {CLUBES} from '../dados/data.js';
 import {avaliarClubeNoMundo,setorJogador} from './forcaEquipe.js';
 import {diagnosticarElenco,normalizarPosicao} from './profundidadeElenco.js';
 import {VERSAO_ECONOMIA,valorMercadoEuro,salarioMensalEuro,verbaTransferenciasEuro} from './economia.js';
+import {registroCentral,podarCentral} from './transferenciasMundo.js';
 const chave=id=>String(id);
 const idMundo=j=>j.mundoId??j.id;
 export const metadadosGestao=g=>{const {elenco,mercado,...meta}=g;return meta;};
@@ -92,6 +93,7 @@ export function destinoDaVenda(c,j){
   const salva=c.mundo.gestoesClubes?.[cl.nome];
   // Gestão guardada na economia antiga (R$) não é comparável: usar a verba estimada.
   const saldo=(salva?.economia===VERSAO_ECONOMIA||c.mundo.economia===VERSAO_ECONOMIA)&&Number.isFinite(salva?.saldo)?salva.saldo:
+   Number.isFinite(c.mundo.caixaClubes?.[cl.nome])?Math.max(0,c.mundo.caixaClubes[cl.nome]):
    Math.max(0,verbaEstimadaClube(porClube.get(cl.nome)||[])+(c.mundo.economia===VERSAO_ECONOMIA?(c.mundo.receitasMercado?.[cl.nome]||0):0));
   if(saldo<preco)return [];
   const elenco=porClube.get(cl.nome)||[];
@@ -141,11 +143,18 @@ export function aplicarNegociacaoMundo(c,g,{tipo,alvo,destino}={}){
   return novo===p?p:{...novo,valor:valorMercadoEuro({...novo,contrato:novo.contrato})};
  });
  if(!encontrado)throw new Error('O jogador não está mais disponível no cadastro do mundo.');
- const mundo={...c.mundo,jogadores,gestoesClubes:{...c.mundo.gestoesClubes},receitasMercado:{...c.mundo.receitasMercado}};
+ const mundo={...c.mundo,jogadores,gestoesClubes:{...c.mundo.gestoesClubes},receitasMercado:{...c.mundo.receitasMercado},
+  ...(c.mundo.caixaClubes?{caixaClubes:{...c.mundo.caixaClubes}}:{})};
  if(alvo&&['compra','venda'].includes(tipo)){
   const original=c.mundo.jogadores.find(p=>chave(p.id)===chave(id)),outro=venda?destino.nome:original.clubeNome;
   const quantia=venda?-Math.round(alvo.valor*.8):alvo.valor;
-  if(outro){if(mundo.gestoesClubes[outro])mundo.gestoesClubes[outro]={...mundo.gestoesClubes[outro],saldo:mundo.gestoesClubes[outro].saldo+quantia};else mundo.receitasMercado[outro]=(mundo.receitasMercado[outro]||0)+quantia;}
+  if(outro){if(mundo.gestoesClubes[outro])mundo.gestoesClubes[outro]={...mundo.gestoesClubes[outro],saldo:mundo.gestoesClubes[outro].saldo+quantia};else mundo.receitasMercado[outro]=(mundo.receitasMercado[outro]||0)+quantia;
+   // O caixa da IA usado pelo mercado do mundo também acompanha o negócio.
+   if(mundo.caixaClubes&&Number.isFinite(mundo.caixaClubes[outro]))mundo.caixaClubes[outro]+=quantia;}
+  // Negócios do treinador aparecem na central de transferências do mundo.
+  const atleta=jogadores.find(p=>chave(p.id)===chave(id));
+  if(atleta)mundo.transferencias=podarCentral([...(c.mundo.transferencias||[]),registroCentral({ano,temporada:(c.mundo.temporada||0)+1,p:atleta,
+   de:venda?clube:original.clubeNome||null,para:venda?destino.nome:clube,valor:venda?Math.round(alvo.valor*.8):alvo.valor,tipo:!venda&&!original.clubeNome?'livre':'transferencia'})],(c.mundo.temporada||0)+1);
  }
  g={...g,mercado:mercadoDoMundo(mundo,g)};
  mundo.gestoesClubes[g.clube]=metadadosGestao(g);

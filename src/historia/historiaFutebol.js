@@ -165,19 +165,37 @@ function eventosTemporada(c,a,treinador=false){
  for(const [liga,t]of Object.entries(a.classificacoesMundo||{})){const campeao=t.edicaoSerieC?.campeao||t.classificacao?.[0]?.nome;if(campeao)out.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',clube:campeao,voce:campeao===clube});}
  return out;
 }
+/** Um título legado da liga não pode contrariar a posição efetiva do clube na edição. */
+function tituloLigaLegadoInvalido(c,e,temporadas=c.temporadas||[]){
+ if(!e?.clube||!e?.nome||!Number.isFinite(e.ano))return false;
+ return [...(temporadas||[]),...(c.tecnico?.temporadas||[])].some(a=>{
+  if(!a||a.ano!==e.ano)return false;
+  const clube=clubeCanonico(typeof a.clube==='string'?a.clube:a.clube?.nome||c.clubeNome);
+  if(clube!==clubeCanonico(e.clube))return false;
+  const nomeLiga=a.ligaNome||LIGAS[a.ligaId||a.liga]?.nome;
+  if(!nomeLiga||chave(nomeCanonico(nomeLiga))!==chave(nomeCanonico(e.nome)))return false;
+  return (Number.isFinite(a.posLiga)&&a.posLiga!==1)||a.campeaoLiga===false
+   ||(typeof a.campeaoLiga==='string'&&clubeCanonico(a.campeaoLiga)!==clube)
+   ||(typeof a.vencedorLiga==='string'&&clubeCanonico(a.vencedorLiga)!==clube);
+ });
+}
 export function eventosConhecidos(c,temporadas=c.temporadas||[]){
- const mapa=new Map();for(const e of c.historiaFutebol?.titulos||[])inserir(mapa,e);
+ const mapa=new Map();for(const e of c.historiaFutebol?.titulos||[])if(!tituloLigaLegadoInvalido(c,e,temporadas))inserir(mapa,e);
  for(const a of temporadas)for(const e of eventosTemporada(c,a))inserir(mapa,e);
  for(const a of Array.isArray(c.tecnico?.temporadas)?c.tecnico.temporadas:[])for(const e of eventosTemporada(c,a,true))inserir(mapa,e);
- for(const t of c.lista||[])if(t.clube&&t.clube!=='Individual'&&CLUBES.some(x=>x.nome===clubeCanonico(t.clube)))inserir(mapa,t);
+ for(const t of c.lista||[])if(t.clube&&t.clube!=='Individual'&&CLUBES.some(x=>x.nome===clubeCanonico(t.clube))&&!tituloLigaLegadoInvalido(c,t,temporadas))inserir(mapa,t);
  return [...mapa.values()].sort((a,b)=>a.ano-b.ano||a.nome.localeCompare(b.nome));
 }
 /** Repara apenas a interpretação ambígua da liga, preservando as demais conquistas e estatísticas. */
 export function corrigirCampeoesLiga(c){
- if(!Array.isArray(c?.temporadas)||!c.temporadas.some(t=>typeof t.campeaoLiga==='string'))return c;
- const novo={...c,temporadas:c.temporadas.map(normalizarCampeaoLiga)};
- if(c.historiaFutebol?.titulos)novo.historiaFutebol={...c.historiaFutebol,titulos:eventosConhecidos(novo)};
- return novo;
+ if(!Array.isArray(c?.temporadas))return c;
+ const legado=c.temporadas.some(t=>typeof t.campeaoLiga==='string');
+ const temporadas=legado?c.temporadas.map(normalizarCampeaoLiga):c.temporadas;
+ const normalizado=legado?{...c,temporadas}:c;
+ const titulos=c.historiaFutebol?.titulos;
+ const corrigidos=Array.isArray(titulos)?titulos.filter(e=>!tituloLigaLegadoInvalido(normalizado,e,temporadas)):null;
+ if(!legado&&(!corrigidos||corrigidos.length===titulos.length))return c;
+ return {...normalizado,...(corrigidos?{historiaFutebol:{...c.historiaFutebol,titulos:corrigidos}}:{})};
 }
 export function simularMundo(c,a,{preservarTorneios=false}={}){
  const clubes=clubesDoMundo(c,clubesParaCopas(c.tecnico?.ligasMundo||c.ligas)),vagas=(c.vagasInternacionaisAno===a.ano?c.vagasInternacionaisClubes:null)||(Array.isArray(c.tecnico?.temporadas)?c.tecnico.temporadas.find(t=>t.ano===a.ano-1)?.vagasInternacionaisProxima:null)||calcularVagasRapidas({ano:a.ano-1,ligasMundo:c.tecnico?.ligasMundo||c.ligas,seed:'mundo'}),out=[];

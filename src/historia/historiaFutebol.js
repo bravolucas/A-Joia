@@ -62,7 +62,8 @@ export function acervoInicial(nome){
   // para clubes sem esse registro, nunca exibir estimativas de força
   // como se fossem títulos reais: usar somente as edições comprovadas.
   const inicial=tipo==='copa'&&nomes[tipo]==='Copa do Brasil'
-   ?totalCopaBrasilHistoricas(nome):tipo==='liga'&&ligaDoc&&!temCadastroOficial
+   ?totalCopaBrasilHistoricas(nome):tipo==='liga'&&HISTORICO_LIGAS[nomes.liga]?.cobertura==='completa'
+   ?(ligaDoc?.inicial||0):tipo==='liga'&&ligaDoc&&!temCadastroOficial
    ?ligaDoc.inicial:tipo==='liga'&&!temCadastroOficial?0:n(p[tipo]);
   itens.push({nome:nomes[tipo],tipo,inicial,
    ...(ligaDoc?{anosHistoricos:ligaDoc.anosHistoricos,fontes:ligaDoc.fontes,
@@ -70,6 +71,14 @@ export function acervoInicial(nome){
  }
  for(const ligaDoc of ligasDocumentadas)
   if(!itens.some(t=>t.nome===ligaDoc.nome))itens.push(ligaDoc);
+ // Os títulos da antiga primeira divisão inglesa são distintos da Premier
+ // League (iniciada em 1992/93); clubes conservam todo o palmarés nacional.
+ if(clube.liga==='inglaterra'&&temCadastroOficial){
+  const pl=totalLigaHistorica('Premier League',nome),anteriores=Math.max(0,n(p.liga)-pl);
+  if(anteriores)itens.push({nome:'Football League First Division',tipo:'liga',
+   inicial:anteriores,historicoConhecido:true,historicoParcial:true,
+   fontes:['https://www.premierleague.com/en/premier-league-explained']});
+ }
  const continentais={...(CONTINENTAIS[nome]||{[nomes.continental||'Títulos continentais']:n(p.continental)})};
  // A contagem da Libertadores é a oficial até 2025, não a estimativa
  // de força de um clube nem apenas os títulos brasileiros cadastrados.

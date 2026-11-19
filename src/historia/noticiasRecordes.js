@@ -8,13 +8,13 @@ const deduplicar=lista=>[...new Map(lista.filter(x=>x?.nome).map(x=>[x.tipo+'|'+
 export function escoposRecordesDaTemporada(c={},a={}){
  const clube=a.clube?.nome||a.clube||a.clubeNome;
  const pais=a.tipoEquipe==='selecao'?clube:nomePais(c.nac||c.nacionalidade);
- const comp=[a.ligaNome,...(a.porCompeticao||[]).filter(x=>(x.jogos||0)>0).map(x=>x.nome)];
+ const comp=[a.ligaNome,...(a.porCompeticao||[]).filter(x=>(x.jogos||0)>0).sort((x,y)=>(y.jogos||0)-(x.jogos||0)).map(x=>x.nome)];
  if(a.selecao?.convocado)comp.push(a.selecao.nome||a.selecao.competicao);
  return deduplicar([
   ...(clube&&a.tipoEquipe!=='selecao'?[{tipo:'clube',nome:clube}]:[]),
   ...(pais?[{tipo:'selecao',nome:pais}]:[]),
   ...comp.filter(Boolean).map(nome=>({tipo:'competicao',nome}))
- ]).slice(0,12);
+ ]).slice(0,8);
 }
 const prioridade=e=>(e.historico?100:0)+(e.atletaId==='voce'?25:0)+
   (['golsCarreira','golsTemporada','jogosCarreira','golsAtletaPartida'].includes(e.metrica)?10:0);

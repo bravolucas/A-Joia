@@ -35,3 +35,20 @@ Cada entrada de \`REFERENCIAS_RECORDES_FUTEBOL\` contém:
 \`{ tipo, nome, id, valor, atleta, ano?, fonte, data }\`.
 
 Use apenas IDs já definidos em \`METRICAS_RECORDES\`, e registre fonte confiável com período específico. Quando o dado não for demonstrável, **não invente** o valor.
+
+
+## Continuação: recordes e noticias de temporada (19/11/2026)
+
+- Novo motor em \`src/historia/noticiasRecordes.js\`: compara o universo antes e depois da temporada, registra apenas recordes efetivamente quebrados/igualados e preserva marca antiga, titular, entidade, ano e fonte real quando aplicável.
+- Integrado aos fechamentos do **Modo Rápido**, **Modo Treinador** e **Modo Carreira completo**. O Modo Rápido acrescenta manchetes ao seu feed, o Modo Treinador apresenta os feitos no resumo anual e o Modo Completo registra as manchetes na caixa de notícias.
+- \`recordesEventos\` na raiz do save mantém os últimos 80 eventos, deduplicados por identificador. Cada temporada também mantém as próprias ocorrências. A lista histórica é apresentada nas páginas de recordes.
+- Em \`recordesFutebol.js\`, os acumulados passam a referenciar o **ano mais recente** da marca, não o primeiro ano do atleta. Foram incluídas marcas de gols e vitórias por edição, gols de uma equipe em uma partida, sequência invicta e vitórias consecutivas.
+- Sequências exigem **rodadas inteiras e consecutivas** registradas no arquivo de partidas. Em caso de lacuna, o contador recomeça; não se presume resultado ausente. As estatísticas de edição identificam explicitamente a cobertura restrita aos jogos arquivados.
+- A avaliação de notícias é limitada a oito escopos relevantes para evitar varreduras desnecessárias ao fechar a temporada. Os recordes de outras equipes continuam acessíveis por consulta.
+- Testes isolados de motor/estatísticas adicionados em \`tests/noticias-recordes.test.mjs\` e \`tests/recordes-futebol.test.mjs\`. Não equivalem à compilação integral nem aos testes de navegador.
+
+### Permanecem pendentes
+- Importar referências históricas abrangentes de todas as entidades com fonte independente e data de corte.
+- Notícias no instante do lance (a primeira entrega notifica no fechamento anual).
+- Ampliar a base com recordes de idade, contratos, transferências, treinadores, pontuações de ligas e sequências interanuais, apenas quando os jogos armazenarem a informação necessária.
+- Validação integral em CI e publicação GitHub Pages.

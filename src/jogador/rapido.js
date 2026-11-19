@@ -1500,7 +1500,7 @@ function jogarTemporadaBase(c0) {
 
   const card = {
     idx: c.temporadas.length, ano: c.ano, idade: c.idade, posicao:c.posicao, numero:numeroDe(c), forcaClube:clube.forca, clube: clube.nome, cor: clube.cor, ligaId: clube.liga, ligaNome: liga.nome,
-    emprestado: !!c.emprestimo, ovr, ovrAntes, pretemporada: preInfo ? { ...preInfo, deltaOvr: ovr - ovrAntes } : null,
+    emprestado: !!c.emprestimo, ovr, ovrAntes, pretemporada: preInfo ? { ...preInfo, deltaOvr: ovr - ovrAntes, riscoLesao: +((riscoLesao)*100).toFixed(1) } : null,
     status: st.label, foco: c.foco, jogos, gols, assist, nota, lesao: lesao?.nome || null, share,
     titulos: [], destaques: [],
   };

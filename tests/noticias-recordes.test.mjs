@@ -76,3 +76,13 @@ test('escopo de encerramento do treinador contempla copas realmente disputadas',
  assert.ok(escopos.some(x=>x.tipo==='competicao'&&x.nome==='Libertadores'));
  assert.equal(escopos.some(x=>x.nome==='Copa fictícia'),false);
 });
+
+test('temporada mista de treinador inclui também a seleção efetivamente comandada',()=>{
+ const escopos=escoposRecordesDaTemporada({nome:'Técnico',nac:'ARG',tecnico:{nome:'Técnico'}},{
+  clube:'Santos',tipoEquipe:'clube',ligaNome:'Brasileirão',
+  torneios:[{nome:'Copa América',selecao:'Brasil',faseUsuario:'Campeão'}]
+ });
+ assert.ok(escopos.some(x=>x.tipo==='treinador'&&x.nome==='Técnico'));
+ assert.ok(escopos.some(x=>x.tipo==='selecao'&&x.nome==='Brasil'));
+ assert.ok(escopos.some(x=>x.tipo==='competicao'&&x.nome==='Copa América'));
+});

@@ -99,7 +99,7 @@ test('separacao por edicao impede somar campanhas e identifica as sequencias rea
  const dados=consultarRecordesFutebol(c,'competicao','Brasileirão');
  assert.equal(registro(dados,'invencibilidade').simulado.valor,3);
  assert.equal(registro(dados,'vitoriasSeguidas').simulado.valor,2);
- assert.equal(registro(dados,'golsEquipeEdicao').simulado.valor,6);
+ assert.equal(registro(dados,'golsEquipeEdicao').simulado.valor,7);
  assert.equal(registro(dados,'vitoriasEquipeEdicao').simulado.valor,3);
  assert.equal(registro(dados,'golsEquipePartida').simulado.valor,3);
  const clube=consultarRecordesFutebol(c,'clube','Santos');

@@ -20,6 +20,7 @@ import {participantesEstadual,CLUBES_REGIONAIS_EXTRAS} from '../competicoes/esta
 import {simularCampanhaCopa,adversarioCopaPorFase} from '../treinador/copasEscolha.js';
 import {jogosDoGrupo,tabelaGrupoCopa,empateGrupo} from './gruposCopa.js';
 import {atualizarRecordesUniverso} from './recordesUniverso.js';
+import {detectarQuebrasRecordesFutebol,escoposRecordesDaTemporada,guardarQuebrasRecordesFutebol} from '../historia/noticiasRecordes.js';
 import {registrarCampanhaContinental,registrarFinalContinental} from './torneioContinental.js';
 import {prepararElencoCopa,prepararElencoSelecao,forcaElencoCopa,registrarJogoElenco} from './elencoSelecao.js';
 import {iniciarJornada,memorizar,registrarEscolhaJornada,registrarTransferenciaJornada,prepararJornada,fecharJornada,pesoProjeto,projetoOferta,legadoNarrativo} from './jornadaJogador.js';
@@ -2143,6 +2144,22 @@ function fecharTemporadaBase(c0, card0) {
       ano:c.ano,total:novas.length,positivas:novas.filter(x=>x.status==='positivo').length
     };
     if(novas.length)card.destaques.push(`Seu empresário retornou com ${novas.length} resposta(s): ${c.ultimaDevolutivaEmpresario.positivas} clube(s) aberto(s) a negociar. Consulte o Mercado de clubes.`);
+  }
+  // Registra somente quebras efetivas a partir de dois snapshots do mesmo
+  // universo. O fechamento de um mesmo ano continua idempotente.
+  const recordesNovos=detectarQuebrasRecordesFutebol(antes,c,{
+    ano:card.ano,escopos:escoposRecordesDaTemporada(c,card),
+    temporadasAntes:antes.temporadas||[],
+    temporadasDepois:[...(c.temporadas||[]),card]
+  });
+  if(recordesNovos.length){
+    c.recordesEventos=guardarQuebrasRecordesFutebol(c,recordesNovos).recordesEventos;
+    card.recordesEventos=recordesNovos;
+    card.jornada={...(card.jornada||{}),noticias:[
+      ...recordesNovos.slice(0,2).map(e=>({tipo:'recorde',titulo:e.titulo,detalhe:e.detalhe})),
+      ...(card.jornada?.noticias||[])
+    ].slice(0,12)};
+    card.destaques=[...(card.destaques||[]),...recordesNovos.slice(0,2).map(e=>'🏅 '+e.titulo)];
   }
   c.temporadas.push(card);
   return { c, card };

@@ -27,6 +27,6 @@ jobs:
           node-version: '22'
       - run: npm install --no-audit --no-fund
       - name: Validar ligas e compatibilidade de históricos
-        run: node --test tests/ligas-historicas.test.mjs tests/competicoes-historicas.test.mjs tests/historia-futebol.test.mjs
+        run: node --test tests/ligas-historicas.test.mjs tests/competicoes-historicas.test.mjs tests/historia-futebol.test.mjs tests/galeria-titulos-conquistados.test.mjs
       - name: Validar build
         run: npm run build

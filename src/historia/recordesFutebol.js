@@ -50,9 +50,9 @@ function atualizar(mapa,id,candidato){
 function medirAtleta(mapa,atleta,linhas){
  if(!linhas.length)return;
  const totais=Object.fromEntries(numeros.map(campo=>[campo,0]));
- let primeira=null;
+ let ultima=null;
  for(const linha of linhas){
-  if(!primeira||Number(linha.ano||99999)<Number(primeira))primeira=linha.ano;
+  if(Number.isFinite(linha.ano)&&(ultima===null||linha.ano>ultima))ultima=linha.ano;
   for(const campo of numeros){
    if(!Number.isFinite(linha[campo])||linha[campo]<0)continue;
    totais[campo]+=linha[campo];
@@ -62,7 +62,7 @@ function medirAtleta(mapa,atleta,linhas){
  }
  for(const campo of numeros){
   const id=campo==='cleanSheets'?'semSofrerCarreira':campo+'Carreira';
-  atualizar(mapa,id,{valor:totais[campo],atleta:atleta.nome,atletaId:atleta.id,ano:primeira,origem:'save'});
+  atualizar(mapa,id,{valor:totais[campo],atleta:atleta.nome,atletaId:atleta.id,ano:ultima,origem:'save'});
  }
 }
 function selecionarPorEscopo(linhas,tipo,nome){

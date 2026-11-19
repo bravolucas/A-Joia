@@ -59,3 +59,5 @@
 .me-painel .me-aviso{border-style:solid;color:#d1eddc}
 @media(max-width:630px){.me-painel{padding:10px}.me-filtros{grid-template-columns:repeat(2,minmax(0,1fr))}.me-filtros label:last-child{grid-column:1/-1}.me-cabecalho{flex-wrap:wrap}.me-dados{grid-template-columns:1fr}.me-clube{gap:6px}.me-clube .me-forca{font-size:9px}.me-clube .me-estado{max-width:90px;font-size:9px}.me-retornos>header{flex-wrap:wrap}}
 @media(max-width:370px){.me-filtros{grid-template-columns:1fr}.me-filtros label:last-child{grid-column:auto}.me-clube .me-forca{display:none}}
+
+.me-acoes-retorno{display:flex;flex-wrap:wrap;align-items:center;gap:8px}

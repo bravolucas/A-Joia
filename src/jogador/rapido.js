@@ -1,4 +1,5 @@
 import {clonarEstado} from '../simulacao/clonarEstado.js';
+import {catalogoClubesEmpresario,analisarClubeEmpresario,respostaClubeEmpresario,viraPropostaSondagem} from './mercadoEmpresario.js';
 import {estatisticasDasPartidas} from '../simulacao/estatisticasMundo.js';
 import {gravarPersistente,lerPersistente,apagarPersistente} from '../simulacao/armazenamentoMundo.js';
 import {simularClassificacoesMundoTecnico,classificacaoDosJogos,atualizarLigasMundoTecnico} from '../treinador/classificacoesMundoTecnico.js';
@@ -2328,11 +2329,18 @@ export function gerarOfertas(c, n, opts = {}) {
     if (!opts.ligas) pool = pool.filter((y) => y.liga !== x.liga || pool.length < 4);
     escolhidas.push(x);
   }
-  // Interesse sinalizado ao empresário: o clube entra nas ofertas se puder contratar.
-  const alvo = !opts.observacao && c.interesseSinalizado?.ano === c.ano ? clubesJogaveis().find((x) => x.nome === c.interesseSinalizado.clube) : null;
-  if (alvo && alvo.nome !== c.clubeNome && !escolhidas.some((x) => x.nome === alvo.nome) && grandeAceita(c, alvo, ovr, prest) && !(c.flags?.traidor || []).includes(alvo.nome)) {
-    if (escolhidas.length >= Math.max(1, n)) escolhidas.pop();
-    escolhidas.push(alvo);
+  // Sondagens recusadas não podem reaparecer como proposta na mesma janela.
+  // Um sinal verde apenas abre uma possibilidade realista, sem proposta garantida.
+  if (!opts.observacao) {
+    const negativas = new Set((c.sondagensEmpresario||[]).filter(s=>s.ano===c.ano&&s.status==='negativo').map(s=>s.clube));
+    for (let i=escolhidas.length-1;i>=0;i--)if(negativas.has(escolhidas[i].nome))escolhidas.splice(i,1);
+    for (const sondagem of (c.sondagensEmpresario||[]).filter(s=>s.ano===c.ano&&s.status==='positivo')) {
+      const alvo=clubesJogaveis().find(x=>x.nome===sondagem.clube);
+      if (!alvo||alvo.nome===c.clubeNome||escolhidas.some(x=>x.nome===alvo.nome)||!viraPropostaSondagem(c,alvo.nome))continue;
+      if (analisarClubeEmpresario(c,alvo,ovr).semVerba)continue;
+      if(escolhidas.length>=Math.max(1,n))escolhidas.pop();
+      escolhidas.push(alvo);
+    }
   }
   return escolhidas.sort((a, b) => b.forca - a.forca).map((x) => ({
     clube: x.nome, forca: x.forca, cor: x.cor, ligaId: x.liga, ligaNome: ligaDe(x.liga).nome,
@@ -4117,23 +4125,52 @@ function simularCarreiraAutomaticaBase(dados, escolher, escolherFoco) {
 }
 
 export function caminhoSelecao(c){const forca=forcaSelecao(c),corte=forca-6+(c.flags?.selecaoFria||0)*2-(c.foco==='vitrine'?2:0),ovr=ovrDe(c);return{forca,corte,ovr,elegivel:c.idade>=18&&!c.flags?.semSelecao,distancia:Math.max(0,corte-ovr),rotulo:ovr>=corte?'Na disputa pela convocação':ovr>=corte-4?'Perto da lista':'Construindo espaço',aviso:'Referência do torneio. Forma, momento e decisão da seleção ainda contam.'};}
-/* ---------- empresário: clubes interessados ----------
-   O empresário mostra quem acompanha o atleta nesta janela. Sinalizar interesse em
-   um clube (uma vez por janela) aumenta a chance de proposta e garante que ele esteja
-   entre as ofertas se o clube puder contratar; a torcida atual percebe o movimento. */
+/* ---------- empresário: procura ativa, sondagem e devolutiva ---------- */
+export function catalogoMercadoJogador(c){
+ return catalogoClubesEmpresario(c,clubesJogaveis());
+}
+export function diagnosticoMercadoJogador(c,nome){
+ const clube=catalogoMercadoJogador(c).find(x=>x.nome===nome);
+ if(!clube)throw new Error('Clube indisponível no mercado desta carreira.');
+ return analisarClubeEmpresario(c,clube,ovrDe(c));
+}
 export function interesseMercado(c){
  if(c.idade<18||c.emprestimo)return [];
  const ovr=ovrDe(c),emp=empresarioDe(c),n=Math.min(5,2+Math.round((emp.alcance||10)/12));
- return comSemente(c.codigo,`observacao:${c.ano}`,()=>gerarOfertas(c,n,{observacao:true})).map(x=>{
+ return comSemente(c.codigo,'observacao:'+c.ano,()=>gerarOfertas(c,n,{observacao:true})).map(x=>{
   const gap=ovr-x.forca,nivel=gap>=4?'Muito interessado':gap>=-2?'Interessado':'Observando';
-  return {clube:x.clube,liga:x.ligaNome,nivel,sinalizado:c.interesseSinalizado?.ano===c.ano&&c.interesseSinalizado.clube===x.clube,
-   texto:`${nivel} · interesse não garante proposta`};
+  const sondagem=(c.sondagensEmpresario||[]).find(s=>s.ano===c.ano&&s.clube===x.clube);
+  return {clube:x.clube,liga:x.ligaNome,nivel,sinalizado:!!sondagem,
+   texto:nivel+' · observação não garante proposta'};
  });
 }
 export function sinalizarInteresse(c0,clube){
- if(c0.interesseSinalizado?.ano===c0.ano)throw new Error('Você já sinalizou interesse em um clube nesta janela.');
- if(!interesseMercado(c0).some(x=>x.clube===clube))throw new Error('Esse clube não está acompanhando você agora.');
- const c=clone(c0);c.interesseSinalizado={ano:c.ano,clube};
- if(c.clubeNome)c.torcida[c.clubeNome]=clampR((c.torcida[c.clubeNome]??30)-3,0,100);
+ if(c0.idade<18||c0.emprestimo)throw new Error('O empresário só pode sondar clubes após os 18 anos e fora de um empréstimo.');
+ const alvo=catalogoMercadoJogador(c0).find(x=>x.nome===clube);
+ if(!alvo)throw new Error('Clube não encontrado entre as ligas jogáveis.');
+ if(alvo.nome===c0.clubeNome)throw new Error('Você já tem contrato com esse clube.');
+ if((c0.sondagensEmpresario||[]).some(s=>s.ano===c0.ano&&s.clube===clube))throw new Error('Seu empresário já procurou esse clube nesta temporada.');
+ const c=clone(c0);
+ const sondagem={ano:c.ano,clube,liga:alvo.liga, status:'aguardando',texto:'Seu empresário entrou em contato e aguarda uma resposta.'};
+ c.sondagensEmpresario=[...(c.sondagensEmpresario||[]),sondagem].slice(-80);
+ // A primeira sondagem gera repercussão discreta, sem punir cada busca adicional.
+ if(c.clubeNome&&!c.sondagensEmpresario.some(s=>s.ano===c.ano&&s.clube!==clube))
+  c.torcida[c.clubeNome]=clampR((c.torcida[c.clubeNome]??30)-2,0,100);
+ return c;
+}
+export function receberRetornosEmpresario(c0){
+ const pendentes=(c0.sondagensEmpresario||[]).filter(s=>s.ano===c0.ano&&s.status==='aguardando');
+ if(!pendentes.length)throw new Error('Nenhuma sondagem aguardando retorno nesta temporada.');
+ const c=clone(c0),clubes=catalogoMercadoJogador(c);
+ c.sondagensEmpresario=(c.sondagensEmpresario||[]).map(s=>{
+  if(s.ano!==c.ano||s.status!=='aguardando')return s;
+  const alvo=clubes.find(x=>x.nome===s.clube);
+  if(!alvo)return {...s,status:'negativo',texto:'O clube não está disponível para negociar nesta temporada.'};
+  const resposta=respostaClubeEmpresario(c,alvo,ovrDe(c));
+  return {...s,status:resposta.status,texto:resposta.motivo,analise:{
+   distancia:resposta.analise.distancia,concorrencia:resposta.analise.concorrencia,
+   semVerba:resposta.analise.semVerba
+  }};
+ });
  return c;
 }

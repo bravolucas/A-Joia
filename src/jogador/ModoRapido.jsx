@@ -18,6 +18,7 @@ import {chaveEstadualJogador,escolherEstadualJogador} from './estadualJogador.js
 import {resolverCopaEscolhaTecnico} from '../treinador/tecnico.js';
 import {jogosDoGrupo,tabelaGrupoCopa,empateGrupo} from './gruposCopa.js';
 import FechamentoTemporada from './FechamentoTemporada.jsx';
+import CerimoniaBola from '../comum/CerimoniaBola.jsx';
 import {FasesTemporada,PainelJornada,EcosDaTemporada,ProjetoOferta,CenasClube,AlbumJornada,PrimeiraSelecao,CelebracaoLance,ReacaoAntigoClube,ConsultaElencoCopa} from './JornadaUI.jsx';
 import {mudarPosicao,reinventarVeterano} from './posicoesCarreira.js';
 import {ativarAssinatura,definirPreferenciaMercado,legadoNarrativo,projetoOferta,cenaDespedida,reagirReencontro,celebracaoMomento} from './jornadaJogador.js';
@@ -841,51 +842,14 @@ function SlideTitulo({ c, card, titulo }) {
 }
 
 function SlideBolaDeOuro({ c, card }) {
-  const [revelados, setRevelados] = useState(0);
-  const top = card.bola.top;
-  const ordem = [2, 1, 0]; // revela do 3º ao 1º
-  useEffect(() => {
-    if (revelados >= top.length) return undefined;
-    const t = setTimeout(() => setRevelados((r) => r + 1), revelados === 0 ? 700 : 1100);
-    return () => clearTimeout(t);
-  }, [revelados, top.length]);
-  const ganhou = card.bola.pos === 1;
-  const fim = revelados >= top.length;
-  useEffect(() => { if (fim && ganhou) { festejar("fogos", ["#FFF1B8", "#E3B93B", "#FFFFFF"]); setTimeout(() => festejar("estrelas", ["#F5D77A", "#FFFFFF"]), 900); } }, [fim, ganhou]);
-  return (
-    <div className="relative overflow-hidden rounded-[28px] min-h-[440px] flex flex-col items-center justify-center text-center px-5 py-8 border border-[#D8B44A]/30"
-      style={{ background: `radial-gradient(circle at 50% 25%, rgba(216,180,74,.35) 0%, rgba(7,19,33,.6) 70%), url(${ARTE.confete}) center/cover, #071321` }}>
-      {fim && ganhou && <Confetti />}
-      <BolaDourada size={84} />
-      <div className="display text-lg text-[#F5D77A] mt-3">Bola de Ouro {card.ano}</div>
-      <p className="text-[16px] text-[#9EB5C9]">Você está entre os três melhores do mundo.</p>
-      <div className="grid grid-cols-3 gap-2 w-full mt-5 items-end">
-        {[1, 0, 2].map((idx) => {
-          const r = top[idx];
-          const visivel = ordem.indexOf(idx) < revelados;
-          const altura = idx === 0 ? 150 : idx === 1 ? 122 : 104;
-          return (
-            <div key={idx} className="flex flex-col items-center gap-1">
-              <div className={`text-[14px] font-bold leading-tight min-h-[36px] ${visivel && r?.voce ? "text-[#F5D77A]" : "text-[#E1E6E3]"}`} style={visivel ? { animation: "popIn .35s ease-out" } : undefined}>
-                {visivel ? (r?.voce ? `${r.nome} (você)` : r?.nome) : "?"}
-              </div>
-              <div className="w-full rounded-t-xl flex items-start justify-center pt-2 font-stat text-2xl"
-                style={{ height: altura, background: idx === 0 ? "linear-gradient(#D8B44A,#8E6F00)" : idx === 1 ? "linear-gradient(#C7CDD6,#6C7470)" : "linear-gradient(#D2915B,#6B4320)", color: "#071321", boxShadow: visivel && r?.voce ? "0 0 26px rgba(245,215,122,.7)" : "none" }}>
-                {idx + 1}º
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      {fim && <div className={`display text-xl mt-5 rp-sobe ${ganhou ? "text-[#F5D77A]" : "text-[#E1E6E3]"}`}>{ganhou ? "O MELHOR DO MUNDO É VOCÊ!" : `${card.bola.pos}º lugar no mundo`}</div>}
-    </div>
-  );
+  // O ranking vem da temporada; a cena apenas apresenta a colocação já apurada.
+  return <CerimoniaBola nome={c.nome} posicao={card.bola?.pos} finalistas={card.bola?.top||[]} ano={card.ano}/>;
 }
 
 /* Cerimônia da Bola de Ouro: quando você fica entre os três, o pódio é revelado do 3º ao 1º. */
 function TelaBolaDeOuro({ c, card, onFim }) {
   const [pronto, setPronto] = useState(false);
-  useEffect(() => { const t = setTimeout(() => setPronto(true), 3200); return () => clearTimeout(t); }, []);
+  useEffect(() => { const t = setTimeout(() => setPronto(true), 4500); return () => clearTimeout(t); }, []);
   return (
     <div className="max-w-xl mx-auto px-4 py-6 flex flex-col gap-4" aria-label={`Cerimônia da Bola de Ouro ${card.ano}`}>
       <SlideBolaDeOuro c={c} card={card} />

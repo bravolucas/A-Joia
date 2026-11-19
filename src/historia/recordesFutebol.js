@@ -19,7 +19,12 @@ export const METRICAS_RECORDES = Object.freeze([
  {id:'golsAtletaPartida',rotulo:'Mais gols de um jogador em uma partida',categoria:'Partidas'},
  {id:'assistAtletaPartida',rotulo:'Mais assistências de um jogador em uma partida',categoria:'Partidas'},
  {id:'defesasAtletaPartida',rotulo:'Mais defesas de um jogador em uma partida',categoria:'Partidas'},
- {id:'goleadaPartida',rotulo:'Maior diferença de gols',categoria:'Partidas'}
+ {id:'goleadaPartida',rotulo:'Maior diferença de gols',categoria:'Partidas'},
+ {id:'golsEquipePartida',rotulo:'Mais gols marcados por uma equipe em uma partida',categoria:'Partidas'},
+ {id:'golsEquipeEdicao',rotulo:'Mais gols de uma equipe em uma edição (jogos arquivados)',categoria:'Temporada'},
+ {id:'vitoriasEquipeEdicao',rotulo:'Mais vitórias de uma equipe em uma edição (jogos arquivados)',categoria:'Temporada'},
+ {id:'invencibilidade',rotulo:'Maior sequência invicta registrada na edição',categoria:'Sequências'},
+ {id:'vitoriasSeguidas',rotulo:'Mais vitórias consecutivas registradas na edição',categoria:'Sequências'}
 ]);
 const numeros=['jogos','gols','assist','defesas','cleanSheets'];
 const n=x=>Number.isFinite(x)&&x>=0?x:0;
@@ -109,17 +114,17 @@ function participacoesDaSelecao(c,nome,competicao,temporadas=c?.temporadas||[]){
 function partidasDaEdicao(e){
  if(Array.isArray(e.jogos))return e.jogos;
  const {nomes=[],partidas=[]}=e.jogos||{};
- return partidas.map(p=>({casa:nomes[p[0]],fora:nomes[p[1]],golsCasa:p[2],golsFora:p[3]}));
+ return partidas.map(p=>({casa:nomes[p[0]],fora:nomes[p[1]],golsCasa:p[2],golsFora:p[3],rodada:p[4]}));
 }
 /** Apenas placares existentes. Em seleções, ignora ligas de clubes. */
 function medirPartidas(mapa,arquivo,tipo,nome){
  for(const edicao of arquivo.edicoes||[]){
   if(tipo==='competicao'&&!competicaoIgual(edicao.nome,nome))continue;
   if(tipo==='selecao'&&edicao.tipo==='liga')continue;
-  if(tipo!=='competicao'&&!Array.isArray(edicao.jogos)&&
-      !edicao.jogos?.nomes?.some(x=>eIgual(x,nome)))continue;
-  for(const j of partidasDaEdicao(edicao)){
-   if(!Number.isFinite(j.golsCasa)||!Number.isFinite(j.golsFora))continue;
+  const partidas=partidasDaEdicao(edicao);
+  const series=new Map();
+  for(const j of partidas){
+   if(!j?.casa||!j?.fora||!Number.isFinite(j.golsCasa)||!Number.isFinite(j.golsFora))continue;
    const envolvidos=tipo==='competicao'||eIgual(j.casa,nome)||eIgual(j.fora,nome);
    if(!envolvidos)continue;
    const descricao=j.casa+' '+j.golsCasa+' × '+j.golsFora+' '+j.fora;
@@ -127,11 +132,47 @@ function medirPartidas(mapa,arquivo,tipo,nome){
    if(tipo==='competicao'){
     atualizar(mapa,'golsPartida',{...comum,valor:j.golsCasa+j.golsFora});
     atualizar(mapa,'goleadaPartida',{...comum,valor:Math.abs(j.golsCasa-j.golsFora)});
-   }else{
-    const meus=eIgual(j.casa,nome)?j.golsCasa:j.golsFora;
-    const outro=eIgual(j.casa,nome)?j.golsFora:j.golsCasa;
-    if(meus>outro)atualizar(mapa,'maiorVitoria',{...comum,valor:meus-outro});
-    if(outro>meus)atualizar(mapa,'maiorDerrota',{...comum,valor:outro-meus});
+   }
+   const participantes=tipo==='competicao'?[j.casa,j.fora]:[eIgual(j.casa,nome)?j.casa:j.fora];
+   for(const equipe of participantes){
+    const proprio=eIgual(j.casa,equipe)?j.golsCasa:j.golsFora;
+    const contra=eIgual(j.casa,equipe)?j.golsFora:j.golsCasa;
+    const p=series.get(equipe)||{gols:0,vitorias:0,partidas:[]};
+    p.gols+=proprio;
+    if(proprio>contra)p.vitorias++;
+    p.partidas.push({rodada:j.rodada,proprio,contra,destaque:descricao});
+    series.set(equipe,p);
+    atualizar(mapa,'golsEquipePartida',{...comum,atleta:equipe,valor:proprio});
+    if(tipo!=='competicao'){
+     if(proprio>contra)atualizar(mapa,'maiorVitoria',{...comum,valor:proprio-contra});
+     if(contra>proprio)atualizar(mapa,'maiorDerrota',{...comum,valor:contra-proprio});
+    }
+   }
+  }
+  for(const [equipe,p]of series){
+   if(tipo==='competicao'){
+    atualizar(mapa,'golsEquipeEdicao',{valor:p.gols,atleta:equipe,ano:edicao.ano,
+     competicao:edicao.nome,origem:'save',destaque:'Gols nos confrontos arquivados'});
+    atualizar(mapa,'vitoriasEquipeEdicao',{valor:p.vitorias,atleta:equipe,ano:edicao.ano,
+     competicao:edicao.nome,origem:'save',destaque:'Vitórias nos confrontos arquivados'});
+   }
+   // Sequencias exigem rodadas inteiras, sem ambiguidade e consecutivas.
+   // Resultados sem ordinal confiavel nao entram e uma lacuna reinicia a serie.
+   const validas=p.partidas.filter(j=>Number.isInteger(j.rodada)&&j.rodada>0)
+    .sort((a,b)=>a.rodada-b.rodada);
+   let anterior=null,invicto=0,vitorias=0;
+   for(let i=0;i<validas.length;i++){
+    const jogo=validas[i];
+    if(jogo.rodada===anterior)continue;
+    if(anterior!==null&&jogo.rodada!==anterior+1){invicto=0;vitorias=0;}
+    anterior=jogo.rodada;
+    if(jogo.proprio>jogo.contra){invicto++;vitorias++;}
+    else if(jogo.proprio===jogo.contra){invicto++;vitorias=0;}
+    else {invicto=0;vitorias=0;}
+    const comum={ano:edicao.ano,atleta:equipe,competicao:edicao.nome,
+     destaque:equipe+' · rodada '+jogo.rodada,origem:'save'};
+    atualizar(mapa,'invencibilidade',{...comum,valor:invicto});
+    atualizar(mapa,'vitoriasSeguidas',{...comum,valor:vitorias});
    }
   }
  }

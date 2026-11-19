@@ -2132,26 +2132,74 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
   return { ...mundo,...(Number.isFinite(ano)?{anoCalendario:ano+1}:{}), jogadores: jogadoresLimpos, temporada: temporadaNova, historicoBolaDeOuro, transferencias: podarCentral(central,temporadaNova), caixaClubes: caixa };
 }
 
-export function scoreBolaDeOuro({ ovr, gols, assist, nota, ligaMult, titulos = 0 }) {
-  return ovr * ligaMult + (gols + assist) * ligaMult * 0.6 + (nota - 7) * 10 + titulos * 9;
+/** Peso da conquista esportiva (não soma todos os títulos como iguais). */
+export const PESOS_TITULOS_BOLA_DE_OURO = Object.freeze({
+  copaMundo:3, continentalSelecao:2, continental:2, mundial:1.5,
+  liga:1, copa:0.8, estadual:0.2, segunda:0.1,
+});
+export function pesoTitulosBolaDeOuro(titulos = []) {
+  if (!Array.isArray(titulos)) return 0;
+  return titulos.reduce((total, t) => {
+    const tipo = typeof t === 'string' ? t : Array.isArray(t) ? t[2] : t?.tipo;
+    if (!tipo || ['bolaOuro', 'botaOuro', 'premio'].includes(tipo)) return total;
+    return total + (PESOS_TITULOS_BOLA_DE_OURO[tipo] ?? 1);
+  }, 0);
 }
 
-export function scoreJogadorMundo(j) {
-  const liga = LIGAS[j.ligaTemporada||j.liga] || { mult: 0.8 };
-  return scoreBolaDeOuro({ ovr: j.ovr, gols: j.gols, assist: j.assist, nota: j.nota, ligaMult: liga.mult });
+/** Mesma régua para o usuário, rivais e todos os jogadores do mundo. */
+export function scoreBolaDeOuro({ ovr = 0, gols = 0, assist = 0, nota = 7, ligaMult = 1, titulos = 0,
+  posicao = null, jogos = 0, defesas = 0, cleanSheets = 0 } = {}) {
+  const n = (v, padrao = 0) => Number.isFinite(Number(v)) ? Number(v) : padrao;
+  const avaliacao = n(nota, 7), partidas = Math.max(0, n(jogos));
+  const liga = Math.max(0.1, n(ligaMult, 1));
+  // O goleiro pode disputar o prêmio por defesas e jogos sem sofrer gols.
+  const contribuicaoGoleiro = posicao === 'GOL'
+    ? Math.min(32, Math.max(0, n(defesas)) * 0.085 + Math.max(0, n(cleanSheets)) * 1.3)
+    : 0;
+  // Defensores não precisam fazer 30 gols para serem considerados.
+  const contribuicaoDefensiva = ['ZAG', 'LD', 'LE', 'VOL', 'ALE', 'ALD'].includes(posicao)
+    ? Math.max(0, avaliacao - 6.7) * Math.min(partidas, 48) * 0.45
+    : 0;
+  const contribuicaoMeia = ['MC', 'MEI'].includes(posicao)
+    ? Math.max(0, avaliacao - 7) * Math.min(partidas, 48) * 0.2
+    : 0;
+  return n(ovr) * liga + (n(gols) + n(assist)) * liga * 0.6
+    + (avaliacao - 7) * 10 + n(titulos) * 9
+    + (contribuicaoGoleiro + contribuicaoDefensiva + contribuicaoMeia) * liga;
+}
+
+export function scoreJogadorMundo(j, temporada = j.temporadaEstatisticas ?? j.historicoTemporadas?.at(-1)?.[0]) {
+  const liga = LIGAS[j.ligaTemporada || j.liga] || { mult: 0.8 };
+  const conquistas = (j.titulosConquistados || [])
+    .filter(t => Array.isArray(t) && t[0] === temporada)
+    .map(t => ({ tipo: t[2] }));
+  return scoreBolaDeOuro({
+    ovr:j.ovr, gols:j.gols, assist:j.assist, nota:j.nota,
+    ligaMult:liga.mult, posicao:j.posicao, jogos:j.jogos,
+    defesas:j.defesas, cleanSheets:j.cleanSheets,
+    titulos:pesoTitulosBolaDeOuro(conquistas),
+  });
 }
 
 export function rankingBolaDeOuro(mundo, meuCard, meuNome, titulosMeus) {
   if (!mundo) return [];
-  const lista = mundo.jogadores.filter((j) => !j.aposentado && j.jogos > 0).map((j) => ({
-    id:j.id, nome: j.nome, clube: j.clubeTemporada || j.clubeNome, posicao: j.posicao, ovr: j.ovr, gols: j.gols, assist: j.assist, nota: j.nota,
-    score: scoreJogadorMundo(j), voce: false,
+  const lista = mundo.jogadores.filter(j => j.jogos >= 10 &&
+    (!j.aposentado || j.temporadaEstatisticas === mundo.temporada)).map(j => ({
+    id:j.id, nome:j.nome, clube:j.clubeTemporada || j.clubeNome, posicao:j.posicao,
+    ovr:j.ovr, gols:j.gols, assist:j.assist, nota:j.nota,
+    score:scoreJogadorMundo(j, mundo.temporada), voce:false,
   }));
-  if (meuCard) lista.push({
-    nome: meuNome, clube: meuCard.clube, posicao: meuCard.posicao, ovr: meuCard.ovr, gols: meuCard.gols, assist: meuCard.assist, nota: meuCard.nota,
-    score: scoreBolaDeOuro({ ovr: meuCard.ovr, gols: meuCard.gols, assist: meuCard.assist, nota: meuCard.nota, ligaMult: meuCard.ligaMult, titulos: titulosMeus || 0 }), voce: true,
+  if (meuCard && (meuCard.jogos == null || meuCard.jogos >= 10)) lista.push({
+    nome:meuNome, clube:meuCard.clube, posicao:meuCard.posicao, ovr:meuCard.ovr,
+    gols:meuCard.gols, assist:meuCard.assist, nota:meuCard.nota,
+    score:scoreBolaDeOuro({
+      ovr:meuCard.ovr, gols:meuCard.gols, assist:meuCard.assist, nota:meuCard.nota,
+      ligaMult:meuCard.ligaMult, titulos:titulosMeus || 0,
+      posicao:meuCard.posicao, jogos:meuCard.jogos,
+      defesas:meuCard.defesas, cleanSheets:meuCard.cleanSheets,
+    }), voce:true,
   });
-  return lista.sort((a, b) => b.score - a.score).map((x, i) => ({ ...x, pos: i + 1 }));
+  return lista.sort((a, b) => b.score - a.score).map((x, i) => ({ ...x, pos:i + 1 }));
 }
 
 export function artilhariaLiga(mundo, ligaId, meuCard, meuNome) {

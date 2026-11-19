@@ -33,6 +33,7 @@ const tituloIgual=(a,b)=>mesmo(a,b)||(
  (norm(a)==='championsleague'||norm(a)==='uefachampionsleague')&&norm(b)==='ligadoscampeoes'
 );
 function recorte(a,tipo,nome){
+ if(tipo==='treinador')return true;
  if(tipo==='clube')return a.tipoEquipe!=='selecao'&&mesmo(equipeDe(a),nome);
  if(tipo==='selecao')return a.tipoEquipe==='selecao'&&mesmo(equipeDe(a),nome);
  if(tipo==='competicao')return a.tipoEquipe!=='selecao'&&tituloIgual(nomeLiga(a),nome);

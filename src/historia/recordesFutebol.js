@@ -16,6 +16,9 @@ export const METRICAS_RECORDES = Object.freeze([
  {id:'maiorVitoria',rotulo:'Maior vitória',categoria:'Partidas'},
  {id:'maiorDerrota',rotulo:'Maior derrota',categoria:'Partidas'},
  {id:'golsPartida',rotulo:'Mais gols em uma partida',categoria:'Partidas'},
+ {id:'golsAtletaPartida',rotulo:'Mais gols de um jogador em uma partida',categoria:'Partidas'},
+ {id:'assistAtletaPartida',rotulo:'Mais assistências de um jogador em uma partida',categoria:'Partidas'},
+ {id:'defesasAtletaPartida',rotulo:'Mais defesas de um jogador em uma partida',categoria:'Partidas'},
  {id:'goleadaPartida',rotulo:'Maior diferença de gols',categoria:'Partidas'}
 ]);
 const numeros=['jogos','gols','assist','defesas','cleanSheets'];
@@ -132,6 +135,22 @@ function medirPartidas(mapa,arquivo,tipo,nome){
   }
  }
 }
+/** Atuações individuais arquivadas por partida: sem preencher estatisticas ausentes. */
+function medirAtuacoes(mapa,arquivo,tipo,nome,atletaNome){
+ if(tipo==='selecao')return;
+ for(const partida of arquivo.partidasAtletas?.voce||[]){
+  if(!partida?.participou)continue;
+  if(tipo==='clube'&&!eIgual(partida.clube,nome))continue;
+  if(tipo==='competicao'&&!competicaoIgual(partida.competicao,nome))continue;
+  for(const [campo,id]of [['gols','golsAtletaPartida'],['assistencias','assistAtletaPartida'],['defesas','defesasAtletaPartida']]){
+   const valor=partida[campo];
+   if(!Number.isFinite(valor)||valor<=0)continue;
+   atualizar(mapa,id,{valor,ano:partida.ano,atleta:atletaNome||'Você',atletaId:'voce',
+    clube:partida.clube,competicao:partida.competicao,
+    destaque:partida.clube+' × '+partida.adversario+' · '+partida.competicao,origem:'save'});
+  }
+ }
+}
 /** Formato estável: não grava nada, portanto reabrir, importar ou voltar não duplica marcas. */
 export function consultarRecordesFutebol(c={},tipo='clube',nome='',temporadas=c?.temporadas||[]){
  if(!['clube','selecao','competicao'].includes(tipo))return {tipo,nome,recordes:[],desde:null};
@@ -157,6 +176,7 @@ export function consultarRecordesFutebol(c={},tipo='clube',nome='',temporadas=c?
   medirAtleta(mapa,{id:'voce',nome:c.nome||'Você'},participacoesDaSelecao(c,nome,null,temporadas));
  }
  medirPartidas(mapa,arquivo,tipo,nome);
+ medirAtuacoes(mapa,arquivo,tipo,nome,c?.nome||'Você');
  const referencias=REFERENCIAS_RECORDES_FUTEBOL.filter(r=>
   r.tipo===tipo&&(tipo==='competicao'?competicaoIgual(r.nome,nome):eIgual(r.nome,nome)));
  const historicas=new Map(referencias.map(r=>[r.id,r]));

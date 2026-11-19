@@ -1,0 +1,28 @@
+name: Auditar campeões históricos da Europa League
+on:
+  pull_request:
+    branches: [main, feat/champions-historica-1956-2026]
+    paths:
+      - 'src/dados/europaLeagueHistorica.js'
+      - 'src/historia/competicoesHistoricas.js'
+      - 'src/historia/historiaFutebol.js'
+      - 'src/historia/HistoriaFutebol.jsx'
+      - 'tests/europa-league-historica.test.mjs'
+      - '.github/workflows/auditar-europa-league-historica.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  campeoes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Históricos europeus, regressões sul-americanas e saves
+        run: node --test tests/europa-league-historica.test.mjs tests/champions-historica.test.mjs tests/sulamericana-historica.test.mjs tests/libertadores-historica.test.mjs tests/competicoes-historicas.test.mjs tests/historia-futebol.test.mjs
+      - name: Build de produção Pages
+        run: GITHUB_PAGES=true npm run build

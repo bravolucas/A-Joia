@@ -1,0 +1,28 @@
+name: Auditar campeões históricos da Copa do Brasil
+on:
+  pull_request:
+    branches: [main, feat/conference-historica-2022-2026]
+    paths:
+      - 'src/dados/copaBrasilHistorica.js'
+      - 'src/historia/competicoesHistoricas.js'
+      - 'src/historia/historiaFutebol.js'
+      - 'src/historia/HistoriaFutebol.jsx'
+      - 'tests/copa-brasil-historica.test.mjs'
+      - '.github/workflows/auditar-copa-brasil-historica.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  campeoes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Campeões Copa Brasil, clubes não jogáveis, simulação e regressões continentais
+        run: node --test tests/copa-brasil-historica.test.mjs tests/conference-historica.test.mjs tests/europa-league-historica.test.mjs tests/champions-historica.test.mjs tests/sulamericana-historica.test.mjs tests/libertadores-historica.test.mjs tests/competicoes-historicas.test.mjs tests/historia-futebol.test.mjs
+      - name: Build de produção Pages
+        run: GITHUB_PAGES=true npm run build

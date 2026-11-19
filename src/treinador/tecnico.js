@@ -26,6 +26,9 @@ import { EVENTOS_CONTEXTO_TECNICO } from './eventosTecnico.js';
 import { competicaoDoTitulo } from '../comum/tacas.js';
 import { simularCopaNacionalTecnico, simularCopaContinentalTecnico, classificarVagasContinentalTecnico } from './competicoesTecnico.js';
 import { atualizarLigasMundoTecnico, simularClassificacoesMundoTecnico } from './classificacoesMundoTecnico.js';
+import { ordenarTabelaBrasileira } from '../simulacao/desempateBrasileiro.js';
+import { regulamentoSerieC, calendarioSerieCClubes } from '../simulacao/serieC.js';
+import { reconciliarClubeLegadoTecnico } from './compatibilidadeDivisoes.js';
 import { FINAIS_TECNICO, chanceFinalTecnico, finalDoUsuarioTecnico, aplicarResultadoFinalTecnico, paradasDoRitmoTecnico, OPCOES_PARADA_TECNICO,
   ANO_SEM_CLUBE_TECNICO, evoluirPersonagensTecnico, definirRivalTecnico, atualizarRivalTecnico,
   metasCarreiraTecnico, registrarMetasTecnico, geradorTecnico } from './momentosTecnico.js';
@@ -115,7 +118,7 @@ function registrarHistoriaTecnico(c){
  const t=c?.tecnico,a=t?.temporadas?.at(-1);if(!a||t.fase!=='resultado'||t.copasEmJogo||t.finaisPendentes?.length)return c;
  if(c.historiaFutebol?.anos?.includes(a.ano)&&!(c.tecnico?.universo||c.universo)?.anos?.includes(a.ano))return c;
  const anual={...a},novo=registrarUniversoAno(c,anual);
- const temporadas=[...novo.tecnico.temporadas];temporadas[temporadas.length-1]={...a,classificacoesMundo:resumirTabelas(anual.classificacoesMundo),...(anual.movimentosMundo?{movimentosMundo:anual.movimentosMundo}:{}),...(anual.feitosHistoricos?{feitosHistoricos:anual.feitosHistoricos}:{})};
+ const temporadas=[...novo.tecnico.temporadas];const {partidasLiga:placaresArquivados,...resumoAno}=a;temporadas[temporadas.length-1]={...resumoAno,classificacoesMundo:resumirTabelas(anual.classificacoesMundo),...(anual.movimentosMundo?{movimentosMundo:anual.movimentosMundo}:{}),...(anual.feitosHistoricos?{feitosHistoricos:anual.feitosHistoricos}:{})};
  return {...novo,tecnico:{...novo.tecnico,temporadas}};
 }
 function registrarUniversoAno(c,ano){
@@ -330,14 +333,16 @@ export function opcoesInicioTecnico(c) {
   const vinculos = vinculosComoJogador(c);
   const reputacao = limitar(Math.round(25 + (c.legado?.pontos || 0) / 22), 25, 85);
   const teto = calcularOvrTecnico({ reputacao }) + 18;
-  const elegiveis = vinculos.filter(v => v.torcida >= 90 && v.temporadas >= 4 && v.titulos >= 2).slice(0, 2);
+  const elegiveis = vinculos.filter(v => v.torcida >= 90 && v.temporadas >= 4 && v.titulos >= 2 &&
+    !['serieD', 'fora-piramide'].includes(CLUBES_CONVITES_TECNICO.find(c => c.nome === v.clube)?.liga)).slice(0, 2);
   const opcoes = elegiveis.map(v => {
     const dados = CLUBES_CONVITES_TECNICO.find(x => x.nome === v.clube);
     // Clube grande dá ao ídolo novato só um contrato de um ano: a meta precisa vir.
     return { ...v, pais:dados?.pais, liga:dados?.liga, elenco:dados?.elenco, salario:dados?.salario, contratoCurto: (dados?.elenco ?? 0) >= CONTRATO_CURTO_ELENCO, motivo: v.idolatria ? 'Ídolo do clube' : 'Ex-jogador com vínculo forte' };
   });
   const pais = CLUBES_CONVITES_TECNICO.find(x => x.nome === c.clubeNome)?.pais || 'Brasil';
-  const candidatos = CLUBES_CONVITES_TECNICO.filter(x => x.elenco <= teto && x.exigencia <= reputacao + 8 && !opcoes.some(o => o.clube === x.nome));
+  const candidatos = CLUBES_CONVITES_TECNICO.filter(x => !['serieD', 'fora-piramide'].includes(x.liga) &&
+    x.elenco <= teto && x.exigencia <= reputacao + 8 && !opcoes.some(o => o.clube === x.nome));
   const rng = geradorTecnico(`${c.nome}|${c.ano}|inicio-tecnico`);
   const ordem = candidatos.map(x => ({...x, ordem: rng() + (x.pais === pais ? 1 : 0)})).sort((a,b) => b.ordem-a.ordem);
   for (const x of ordem) {
@@ -418,7 +423,7 @@ export function gerarPropostasTecnico(t, rng = sorteio) {
   const clubesMundo = CLUBES_CONVITES_TECNICO.map(x => ({
     ...x,
     liga: x.nome === t.clube ? (t.liga || t.ligasMundo?.[x.nome] || x.liga) : (t.ligasMundo?.[x.nome] || x.liga),
-  }));
+  })).filter(x => !['serieD', 'fora-piramide'].includes(x.liga));
   const clubeAtual = clubesMundo.find(x => x.nome === t.clube);
   const referencia=clubesMundo.find(c=>c.nome===(t.clube||t.clubeReferencia))||clubesMundo.find(c=>c.nome===t.temporadas?.at(-1)?.clube);
   const anterior=t.temporadas?.at(-1),boa=!!(anterior?.cumpriuObjetivo||anterior?.campeao||(Number.isFinite(anterior?.posicao)&&anterior.posicao<=4));
@@ -591,14 +596,32 @@ export function forcaClubeTecnico(t = {}) {
   const ajuste=g?avaliarForcaEquipe({base:g.forcaReferencia??g.forcaMercado??base,elenco:g.elenco,completo:true}).forca-(g.forcaReferencia??g.forcaMercado??base)-(g.ajusteNumerico||0):0;
   return limitar(base+ajuste+(perfil.fase||0)+bonusForcaLoja(t)+(t.ajusteTurno?.forca||0),10,99);
 }
-function classificacoesMundoDaTemporada(t, liga, classificacao, rng) {
-  return simularClassificacoesMundoTecnico({
+function participantesDaLigaLegadaTecnico(t, liga) {
+  const calendario = ['brasileirao', 'serieB'].includes(liga)
+    ? calendarioLigaTecnico({ ...t, liga }) : null;
+  const nomesCalendario = calendario
+    ? [...new Set(calendario.flatMap(rodada => rodada.flatMap(jogo => [jogo.casa, jogo.fora])))]
+    : [];
+  return reconciliarClubeLegadoTecnico({
     clubes: CLUBES_CONVITES_TECNICO.map(x=>({...x,elenco:t.forcasMundo?.[x.nome]??x.elenco})),
-    ligasMundo: t.ligasMundo,
+    ligasMundo: t.ligasMundo || {},
+    ligaTreinador: liga,
+    clubeTreinador: t.clube,
+    elencoTreinador: forcaClubeTecnico(t),
+    nomesCalendario,
+  });
+}
+function classificacoesMundoDaTemporada(t, liga, classificacao, rng, jogosTreinador = []) {
+  const { clubes, ligasMundo } = participantesDaLigaLegadaTecnico(t, liga);
+  return simularClassificacoesMundoTecnico({
+    clubes,
+    ligasMundo,
     ligaTreinador: liga,
     clubeTreinador: t.clube,
     forcaTreinador: forcaClubeTecnico(t),
     classificacaoTreinador: classificacao,
+    jogosTreinador,
+    ano: t.ano,
     rng,
   });
 }
@@ -611,14 +634,17 @@ const DIVISOES_TECNICO = [
   { baixo: 'franca2', cima: 'franca', vagas: 2 },
   { baixo: 'portugal2', cima: 'portugal', vagas: 2 },
 ];
-function atualizarLigasMundoDaTemporada(t, liga, classificacoesMundo) {
+function atualizarLigasMundoDaTemporada(t, liga, classificacoesMundo, rng) {
+  const { clubes, ligasMundo } = participantesDaLigaLegadaTecnico(t, liga);
   return atualizarLigasMundoTecnico({
-    clubes: CLUBES_CONVITES_TECNICO,
+    clubes,
     classificacoesMundo,
-    ligasMundo: t.ligasMundo,
+    ligasMundo,
     clubeTreinador: t.clube,
     ligaTreinador: liga,
     divisoes: DIVISOES_TECNICO,
+    ano: t.ano,
+    rng,
   });
 }
 function movimentoDivisaoTecnico(liga, posicao, total) {
@@ -645,14 +671,46 @@ export function calendarioLigaTecnico(t = {}) {
         { nome, elenco: nome === t.clube ? forcaClubeTecnico(t) : 50 })
     : clubesBase.slice();
   if (!participantes.some(x => x.nome === t.clube)) {
-    // O clube do treinador substitui o participante mais fraco da nova divisão.
-    if (participantes.length >= 2) {
+    // Carreiras legadas podem já ter uma vaga livre: não remover mais um clube.
+    // Nos brasileiros, completar 19 + o treinador até os 20 oficiais.
+    const brasil = liga === 'brasileirao' || liga === 'serieB';
+    if (participantes.length >= 2 && (!brasil || participantes.length >= 20)) {
       const maisFraco = participantes.reduce((menor, atual, indice, lista) => atual.elenco < lista[menor].elenco ? indice : menor, 0);
       participantes.splice(maisFraco, 1);
     }
     participantes.unshift({ nome: t.clube || 'Meu clube', elenco: forcaClubeTecnico(t) });
   }
+  // Saves anteriores ao cadastro da Série C podem manter um clube da C na
+  // Série B por mapeamento legado, produzindo 21 participantes. O campeonato
+  // brasileiro continua com 20; removemos provisoriamente o excedente menos
+  // forte (nunca o usuário), e a reconciliação mundial registra essa troca.
+  if ((liga === 'brasileirao' || liga === 'serieB') && participantes.length > 20) {
+    const excedentes = participantes.length - 20;
+    const remover = [...participantes].filter(x => x.nome !== t.clube)
+      .sort((a, b) => a.elenco - b.elenco || a.nome.localeCompare(b.nome, 'pt-BR'))
+      .slice(0, excedentes);
+    for (const clubeRemover of remover) {
+      const indice = participantes.findIndex(x => x.nome === clubeRemover.nome);
+      if (indice >= 0) participantes.splice(indice, 1);
+    }
+  }
+  // A Série C não segue o turno/returno das Séries A e B.
+  // Em 2026/2027 existe apenas um turno (19/23 rodadas); de 2028 em
+  // diante, os 28 clubes são distribuídos em dois grupos de 14 (26 jogos).
+  if (liga === 'serieC' && regulamentoSerieC(t.ano ?? 2026).formato === 'dois-grupos' && participantes.length === 28) {
+    const porNivel = [...participantes].sort((a, b) =>
+      (b.elenco ?? 50) - (a.elenco ?? 50) || a.nome.localeCompare(b.nome, 'pt-BR'));
+    const grupoA = [], grupoB = [];
+    porNivel.forEach((clubeC, i) => ((i % 4 === 0 || i % 4 === 3) ? grupoA : grupoB).push(clubeC));
+    const grupo = grupoA.some(clubeC => clubeC.nome === t.clube) ? grupoA : grupoB;
+    participantes.splice(0, participantes.length, ...grupo);
+  }
   if (participantes.length < 2) return null;
+  if (liga === 'serieC') {
+    const turnoEVolta = regulamentoSerieC(t.ano ?? 2026).formato === 'dois-grupos';
+    return calendarioSerieCClubes(participantes.map(clubeC => clubeC.nome), turnoEVolta)
+      .map(rodada => rodada.map(({ casa, fora }) => ({ casa, fora })));
+  }
   // Método de círculo: ligas ímpares recebem uma vaga de folga por rodada.
   const times = [...participantes];
   if (times.length % 2) times.push(null);
@@ -670,6 +728,7 @@ export function calendarioLigaTecnico(t = {}) {
     rodadas.push(jogos);
     times.splice(1, 0, times.pop());
   }
+  if (liga === 'serieC' && regulamentoSerieC(t.ano ?? 2026).formato === 'grupo-unico') return rodadas;
   return [...rodadas, ...rodadas.map(jogos => jogos.map(j => ({ casa: j.fora, fora: j.casa })))];
 }
 export function calendarioAdversariosTecnico(t = {}) {
@@ -717,7 +776,7 @@ export function registrarGolsTecnico(linha, pro, contra) {
   linha.golsContra = (linha.golsContra || 0) + contra;
   linha.saldoGols = linha.golsPro - linha.golsContra;
 }
-export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario, resultado, rng = sorteio, rodada = 1, placarTreinador = null) {
+export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario, resultado, rng = sorteio, rodada = 1, placarTreinador = null, registrarJogo = null) {
   const linhas = classificacaoAnterior.map(x => ({ ...x }));
   const calendario = calendarioLigaTecnico(t);
   const partidas = calendario?.[rodada - 1];
@@ -738,6 +797,9 @@ export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario,
         const rival = casa.meuClube ? fora : casa;
         const placar = placarTreinador || placarTecnico(resultado, rng);
         registrarGolsTecnico(rival, placar.contra, placar.pro);
+        registrarJogo?.({rodada,casa:casa.nome,fora:fora.nome,
+          golsCasa:casa.meuClube?placar.pro:placar.contra,
+          golsFora:casa.meuClube?placar.contra:placar.pro});
         rival.jogos++;
         if (resultado === 'E') { rival.empates++; rival.pontos++; }
         else if (resultado === 'V') rival.derrotas++;
@@ -746,6 +808,8 @@ export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario,
         const placar = placarTecnico(desfecho, rng);
         registrarGolsTecnico(casa, placar.pro, placar.contra);
         registrarGolsTecnico(fora, placar.contra, placar.pro);
+        registrarJogo?.({rodada,casa:casa.nome,fora:fora.nome,
+          golsCasa:placar.pro,golsFora:placar.contra});
         casa.jogos++; fora.jogos++;
         if (desfecho === 'V') { casa.vitorias++; fora.derrotas++; casa.pontos += 3; }
         else if (desfecho === 'E') { casa.empates++; fora.empates++; casa.pontos++; fora.pontos++; }
@@ -777,6 +841,7 @@ export function simularRodadaRivaisTecnico(t, classificacaoAnterior, adversario,
     const placar = placarTecnico(desfecho, rng);
     registrarGolsTecnico(a, placar.pro, placar.contra);
     registrarGolsTecnico(b, placar.contra, placar.pro);
+    registrarJogo?.({rodada,casa:a.nome,fora:b.nome,golsCasa:placar.pro,golsFora:placar.contra});
     if (r < chanceA) { a.vitorias++; b.derrotas++; a.pontos += 3; }
     else if (r < chanceA + 0.25) { a.empates++; b.empates++; a.pontos++; b.pontos++; }
     else { b.vitorias++; a.derrotas++; b.pontos += 3; }
@@ -821,10 +886,12 @@ export function zonaClassificacaoTecnico(posicao, total = 20) {
   if (posicao > total - 4) return 'rebaixamento';
   return 'meio';
 }
-export function ordenarClassificacaoTecnico(linhas) {
-  return [...linhas].sort((a, b) => b.pontos - a.pontos || b.vitorias - a.vitorias ||
-    b.saldoGols - a.saldoGols || a.nome.localeCompare(b.nome, 'pt-BR'))
-    .map((x, i, todos) => ({ ...x, posicao: i + 1, zona: zonaClassificacaoTecnico(i + 1, todos.length) }));
+export function ordenarClassificacaoTecnico(linhas, jogos = [], liga = null) {
+  const ordenadas = liga === 'serieB' || liga === 'brasileirao'
+    ? ordenarTabelaBrasileira(linhas, jogos)
+    : [...linhas].sort((a, b) => b.pontos - a.pontos || b.vitorias - a.vitorias ||
+        b.saldoGols - a.saldoGols || (b.golsPro ?? 0) - (a.golsPro ?? 0) || a.nome.localeCompare(b.nome, 'pt-BR'));
+  return ordenadas.map((x, i, todos) => ({ ...x, posicao: i + 1, zona: zonaClassificacaoTecnico(i + 1, todos.length) }));
 }
 export const ETAPAS_TEMPORADA_TECNICO = [10, 19, 29, 38];
 function etapasCalendarioTecnico(t, calendario) {
@@ -869,6 +936,7 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   if (!limite) throw new Error('Temporada já concluída.');
   // Copia cada partida para não alterar saves anteriores por referência.
   const confrontos = (anterior.confrontos || []).map(jogo => ({ ...jogo }));
+  const partidasLiga = [...(anterior.partidasLiga || [])];
   let v = anterior.vitorias, e = anterior.empates, d = anterior.derrotas;
   for (let i = rodadasAnteriores; i < limite; i++) {
     const adversario = calendario?.[i] || { rodada: i + 1, nome: 'Adversário', forca: 50, casa: i % 2 === 0 };
@@ -898,7 +966,7 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   const avaliacao = { rodada: limite, pontos, aproveitamento: Math.round(aproveitamento * 100),
     situacao: demitido ? 'Demitido durante a temporada' : ruim ? 'Diretoria insatisfeita' : otimo ? 'Diretoria satisfeita' : 'Diretoria acompanha os resultados',
     diretoria, torcida, pressao };
-  const andamento = { jogos: jogosDisputados, rodadas: limite, calendario, confrontos, vitorias: v, empates: e, derrotas: d, pontos,
+  const andamento = { jogos: jogosDisputados, rodadas: limite, calendario, confrontos, partidasLiga, vitorias: v, empates: e, derrotas: d, pontos,
     avaliacoes: [...anterior.avaliacoes, avaliacao] };
   // Saves anteriores à introdução dos placares preservam resultados e recebem gols coerentes.
   for (const jogo of confrontos) {
@@ -912,7 +980,7 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   const base = anterior.classificacao || tabelaClassificacaoTecnico(t, { jogos: anterior.jogos, pontos: anterior.pontos, vitorias: anterior.vitorias, empates: anterior.empates, derrotas: anterior.derrotas });
   let classificacao = base;
   for (let rodada = rodadasAnteriores; rodada < limite; rodada++) {
-    classificacao = simularRodadaRivaisTecnico(t, classificacao, confrontos[rodada]?.nome, confrontos[rodada]?.resultado, rng, rodada + 1, { pro: confrontos[rodada]?.golsPro, contra: confrontos[rodada]?.golsContra });
+    classificacao = simularRodadaRivaisTecnico(t, classificacao, confrontos[rodada]?.nome, confrontos[rodada]?.resultado, rng, rodada + 1, { pro: confrontos[rodada]?.golsPro, contra: confrontos[rodada]?.golsContra }, jogo => partidasLiga.push(jogo));
   }
   const golsPro = confrontos.reduce((n, j) => n + (j.golsPro || 0), 0);
   const golsContra = confrontos.reduce((n, j) => n + (j.golsContra || 0), 0);
@@ -922,7 +990,7 @@ export function simularEtapaTecnico(c, rng = sorteio) {
     const posicao = andamento.classificacao.find(x => x.meuClube)?.posicao || 18;
     const temporada = { ano: t.ano, clube: t.clube, ...(CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga || t.liga ? { liga: CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga || t.liga } : {}), objetivo: objetivoTecnico(t).nome,
       cumpriuObjetivo: false, posicao, pontos, vitorias: v, empates: e, derrotas: d,
-      jogos: jogosDisputados, interrompida: true, demitido: true, confrontos, classificacao: andamento.classificacao, avaliacoes: andamento.avaliacoes };
+      jogos: jogosDisputados, interrompida: true, demitido: true, confrontos, partidasLiga, classificacao: andamento.classificacao, avaliacoes: andamento.avaliacoes };
     const novo = { ...t, idade:idadeAtualTecnico(c)+1, carteiraTecnico:creditarSalarioTecnico(t,t.ano,t.salario??salarioTecnico(t),Math.max(1,Math.ceil(jogosDisputados/totalRodadas*12))), diretoria, torcida, demitido: true, reuniaoPendente: false, andamento: null,
       propostasCoerentesVersao:3, fase: 'resultado', temporadas: [...t.temporadas, temporada],
       vitorias: t.vitorias + v, empates: t.empates + e, derrotas: t.derrotas + d,
@@ -975,6 +1043,7 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   let {vitorias=0,empates=0,derrotas=0,golsPro=0,golsContra=0}=pausa||{};
   let classificacao = pausa?structuredClone(pausa.classificacao):tabelaClassificacaoTecnico({ ...t, liga: ligaAtual }, { jogos: 0 });
   const confrontos = pausa?structuredClone(pausa.confrontos):[];
+  const partidasLiga = pausa?.partidasLiga?[...pausa.partidasLiga]:[];
   const chaveJogo=calendario.map((j,i)=>({...j,indice:i})).filter(j=>!j.folga&&j.indice>=Math.floor(calendario.length/2)).sort((a,b)=>b.forca-a.forca||a.indice-b.indice)[0];
   // Paradas da temporada (só na tela do jogo): metade no ritmo normal, dois terços no intenso, nenhuma no expresso.
   const paradas = opcoes.interativo && !t.copasEscolhaHabilitadas ? paradasDoRitmoTecnico(c.ritmo, calendario.length) : [];
@@ -989,7 +1058,7 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
     const adversario = calendario[rodada];
     if (adversario.folga) {
       confrontos.push({ ...adversario });
-      classificacao = simularRodadaRivaisTecnico({ ...t, liga: ligaAtual }, classificacao, null, null, rng, rodada + 1);
+      classificacao = simularRodadaRivaisTecnico({ ...t, liga: ligaAtual }, classificacao, null, null, rng, rodada + 1, null, jogo=>partidasLiga.push(jogo));
       continue;
     }
     if (paradas.includes(rodada) && !(pausa?.paradasFeitas || []).includes(rodada)) {
@@ -1002,7 +1071,7 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
       return { ...c, tecnico: { ...t, fase: 'parada',
         paradaPendente: { chave, rodada, total: calendario.length, jogos: jogosAte, pontos: pontosAte, vitorias, empates, derrotas, golsPro, golsContra,
           posicao: minha?.posicao || tabela.length, objetivo: objetivoAtual.nome, objetivoPosicao: objetivoAtual.posicao, crise, tabela: tabela.slice(0, 5), minha },
-        temporadaPausada: { tipo: 'parada', ano: t.ano, clube: t.clube, indice: rodada, calendario: structuredClone(calendario), confrontos, classificacao, vitorias, empates, derrotas, golsPro, golsContra,
+        temporadaPausada: { tipo: 'parada', ano: t.ano, clube: t.clube, indice: rodada, calendario: structuredClone(calendario), confrontos, partidasLiga, classificacao, vitorias, empates, derrotas, golsPro,
           paradasFeitas: [...(pausa?.paradasFeitas || []), rodada], ...pausaComum, ...(classico ? { classico } : {}) } } };
     }
     if (rodada === rodadaClassico && !pausa?.classicoFeito && !(pausa?.tipo === 'rival' && pausa.indice === rodada)) {
@@ -1014,13 +1083,13 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
         paradaPendente: { chave, tipo: 'rival', rodada: rodada + 1, total: calendario.length, jogos: jogosAte, pontos: pontosAte, posicao: minha?.posicao || tabela.length,
           rival: { nome: rivalInicial.nome, clube: rivalInicial.clube, rivalDeGeracao: !!rivalInicial.rivalDeGeracao, v: rivalInicial.v, e: rivalInicial.e, d: rivalInicial.d, posicao: dele?.posicao, pontos: dele?.pontos },
           casa: !!adversario.casa, forca: Math.round(forcaClubeTecnico(t)), forcaAdv: adversario.forca, tabela: tabela.slice(0, 5), minha },
-        temporadaPausada: { tipo: 'rival', ano: t.ano, clube: t.clube, indice: rodada, calendario: structuredClone(calendario), confrontos, classificacao, vitorias, empates, derrotas, golsPro, golsContra,
+        temporadaPausada: { tipo: 'rival', ano: t.ano, clube: t.clube, indice: rodada, calendario: structuredClone(calendario), confrontos, partidasLiga, classificacao, vitorias, empates, derrotas, golsPro,
           paradasFeitas: [...(pausa?.paradasFeitas || [])], ...(classico ? { classico } : {}), classicoFeito: true } } };
     }
     if(t.acompanharJogo&&!t.copasEscolhaHabilitadas&&!pausa&&rodada===chaveJogo?.indice){
       const chave=`${t.clube}|${t.ano}|${rodada}`;
       return {...c,tecnico:{...t,fase:'intervencao',intervencaoPendente:{chave,adversario,rodada:rodada+1,pontos:vitorias*3+empates,jogos:confrontos.filter(j=>!j.folga).length},
-        temporadaPausada:{ano:t.ano,clube:t.clube,indice:rodada,calendario:structuredClone(calendario),confrontos,classificacao,vitorias,empates,derrotas,golsPro,golsContra}}};
+        temporadaPausada:{ano:t.ano,clube:t.clube,indice:rodada,calendario:structuredClone(calendario),confrontos,partidasLiga,classificacao,vitorias,empates,derrotas,golsPro,golsContra}}};
     }
     const intervencao=pausa&&pausa.tipo!=='parada'&&rodada===pausa.indice?pausa.escolha:null;
     const estiloJogo=intervencao==='atacar'?'ofensivo':intervencao==='proteger'?'defensivo':t.estilo;
@@ -1036,31 +1105,44 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
     golsContra += placar.contra;
     confrontos.push({ ...adversario, estilo: perfilTaticoTecnico(planoJogo).estilo, formacao: perfilTaticoTecnico(planoJogo).formacao, ...(folhaJogo?{escalacao:folhaJogo}:{}), ...(intervencao?{intervencao}:{}), resultado, golsPro: placar.pro, golsContra: placar.contra });
     if (pausa?.tipo === 'rival' && rodada === pausa.indice) classico = { rodada: rodada + 1, rival: rivalInicial?.nome, clube: adversario.nome, escolha: pausa.escolha, resultado, golsPro: placar.pro, golsContra: placar.contra };
-    classificacao = simularRodadaRivaisTecnico({ ...t, liga: ligaAtual }, classificacao, adversario.nome, resultado, rng, rodada + 1, placar);
+    classificacao = simularRodadaRivaisTecnico({ ...t, liga: ligaAtual }, classificacao, adversario.nome, resultado, rng, rodada + 1, placar, jogo=>partidasLiga.push(jogo));
   }
   const pontos = vitorias * 3 + empates;
   const jogosDisputados = confrontos.filter(j => !j.folga).length;
   classificacao = ordenarClassificacaoTecnico(classificacao.map(x => x.meuClube
     ? { ...x, jogos: jogosDisputados, pontos, vitorias, empates, derrotas, golsPro, golsContra, saldoGols: golsPro - golsContra }
-    : x));
+    : x), partidasLiga, ligaAtual);
   const posicao = classificacao.find(x => x.meuClube)?.posicao || classificacao.length;
-  const campeao = posicao === 1;
+  let campeao = posicao === 1;
   const objetivo = objetivoTecnico({ ...t, liga: ligaAtual });
   const vinculoAtual = vinculoAtivoTecnico(t,t.clube);
   const idoloEmCasa = !!vinculoAtual?.idolatria;
   const cumpriuObjetivo = posicao <= objetivo.posicao;
   const promessaDescumprida = !!(t.promessaContrato && t.promessaContrato.clube === t.clube && posicao > t.promessaContrato.posicaoMaxima);
-  const movimento = movimentoDivisaoTecnico(ligaAtual, posicao, classificacao.length);
-  const ligaSeguinte = movimento?.para || ligaAtual;
-  const classificacoesMundo = classificacoesMundoDaTemporada({ ...t, liga: ligaAtual }, ligaAtual, classificacao, rng);
-  const progressaoMundo = atualizarLigasMundoDaTemporada({ ...t, liga: ligaAtual }, ligaAtual, classificacoesMundo);
+  const classificacoesMundo = classificacoesMundoDaTemporada({ ...t, liga: ligaAtual }, ligaAtual, classificacao, rng, partidasLiga);
+  if (ligaAtual === 'serieC' && classificacoesMundo.serieC?.edicaoSerieC) {
+    campeao = classificacoesMundo.serieC.edicaoSerieC.campeao === t.clube;
+  }
+  const progressaoMundo = atualizarLigasMundoDaTemporada({ ...t, liga: ligaAtual }, ligaAtual, classificacoesMundo, rng);
+  // O acesso do técnico é definido pelos confrontos efetivos, não pela posição 3º/4º.
+  const movimentoReal = progressaoMundo.movimentos.find(m => m.clube === t.clube && m.de === ligaAtual);
+  const movimento = movimentoReal ? {
+    tipo: movimentoReal.tipo === 'rebaixamento' ? 'rebaixado' : 'acesso',
+    de: movimentoReal.de, para: movimentoReal.para
+  } : null;
+  const ligaSeguinte = progressaoMundo.ligasMundo[t.clube] || ligaAtual;
+  const playoffsAcesso = ligaAtual === 'serieB'
+    ? progressaoMundo.playoffsSerieB?.confrontos.find(chave => chave.melhorCampanha === t.clube || chave.adversario === t.clube)
+    : null;
   const temporada = {
     ano: t.ano, clube: t.clube, liga: ligaAtual, idoloEmCasa,
     objetivo: objetivo.nome, cumpriuObjetivo, promessaDescumprida, estilo: t.estilo, formacao: perfilTaticoTecnico(t).formacao,
     decisoes: t.decisoes, jogos: jogosDisputados, vitorias, empates, derrotas, pontos, posicao, campeao,
     classificacao, classificacoesMundo,
+    ...(progressaoMundo.playoffsSerieB ? { playoffsSerieB: progressaoMundo.playoffsSerieB } : {}),
+    ...(playoffsAcesso ? { playoffsAcesso } : {}),
     ...(progressaoMundo.movimentos.length ? { movimentosMundo: progressaoMundo.movimentos } : {}),
-    confrontos, golsPro, golsContra, paradas: t.paradasTemporada || [], ...(classico ? { classico } : {}),
+    confrontos, partidasLiga, golsPro, golsContra, paradas: t.paradasTemporada || [], ...(classico ? { classico } : {}),
     ...(movimento?.tipo === 'rebaixado' ? { rebaixado: { de: movimento.de, para: movimento.para } } : {}),
     ...(movimento?.tipo === 'acesso' ? { acesso: { de: movimento.de, para: movimento.para } } : {})
   };
@@ -1227,12 +1309,18 @@ export function responderConviteSelecaoTecnico(c, aceitar, opcoes = {}) {
 function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
   const t = c.tecnico;
   const { vitorias, empates, derrotas, pontos } = andamento;
-  const classificacao = andamento.classificacao || tabelaClassificacaoTecnico(t, andamento);
   const ligaAtual = t.liga || CLUBES_CONVITES_TECNICO.find(x => x.nome === t.clube)?.liga;
-  const classificacoesMundo = classificacoesMundoDaTemporada(t, ligaAtual, classificacao, rng);
-  const progressaoMundo = atualizarLigasMundoDaTemporada(t, ligaAtual, classificacoesMundo);
+  const classificacao = ordenarClassificacaoTecnico(andamento.classificacao || tabelaClassificacaoTecnico(t, andamento), andamento.partidasLiga || [], ligaAtual);
+  const classificacoesMundo = classificacoesMundoDaTemporada(t, ligaAtual, classificacao, rng, andamento.partidasLiga || []);
+  const progressaoMundo = atualizarLigasMundoDaTemporada(t, ligaAtual, classificacoesMundo, rng);
+  const movimentoReal = progressaoMundo.movimentos.find(m => m.clube === t.clube && m.de === ligaAtual);
+  const ligaSeguinte = progressaoMundo.ligasMundo[t.clube] || ligaAtual;
+  const playoffsAcesso = ligaAtual === 'serieB'
+    ? progressaoMundo.playoffsSerieB?.confrontos.find(chave => chave.melhorCampanha === t.clube || chave.adversario === t.clube)
+    : null;
   const posicao = classificacao.find(x => x.meuClube)?.posicao || 18;
-  const campeao = posicao === 1;
+  const campeao = ligaAtual === 'serieC' && classificacoesMundo.serieC?.edicaoSerieC
+    ? classificacoesMundo.serieC.edicaoSerieC.campeao === t.clube : posicao === 1;
   const objetivo = objetivoTecnico(t);
   const idoloEmCasa = !!vinculoAtivoTecnico(t,t.clube)?.idolatria;
   const cumpriuObjetivo = posicao <= objetivo.posicao;
@@ -1242,11 +1330,15 @@ function finalizarTemporadaTecnico(c, andamento, rng = sorteio) {
   const temporada = { ano: t.ano, clube: t.clube, objetivo: objetivo.nome, cumpriuObjetivo,
     promessaDescumprida, idoloEmCasa, estilo: t.estilo, formacao: perfilTaticoTecnico(t).formacao, decisoes: t.decisoes,
     jogos: vitorias + empates + derrotas, vitorias, empates, derrotas, pontos, posicao, campeao, classificacao, classificacoesMundo,
+    ...(progressaoMundo.playoffsSerieB ? { playoffsSerieB: progressaoMundo.playoffsSerieB } : {}),
+    ...(playoffsAcesso ? { playoffsAcesso } : {}),
+    ...(movimentoReal?.tipo === 'acesso' ? { acesso: { de: movimentoReal.de, para: movimentoReal.para } } : {}),
+    ...(movimentoReal?.tipo === 'rebaixamento' ? { rebaixado: { de: movimentoReal.de, para: movimentoReal.para } } : {}),
     ...(progressaoMundo.movimentos.length ? { movimentosMundo: progressaoMundo.movimentos } : {}),
-    confrontos: andamento.confrontos || [], avaliacoes: andamento.avaliacoes };
+    confrontos: andamento.confrontos || [], partidasLiga: andamento.partidasLiga||[], avaliacoes: andamento.avaliacoes };
   temporada.demitido = demitido;temporada.avaliacaoDiretoria=avaliacao;temporada.liga=ligaAtual;
   const proximo = { ...t, idade:idadeAtualTecnico(c)+1, carteiraTecnico:creditarSalarioTecnico(t,t.ano,t.salario??salarioTecnico(t)), ano: t.ano + 1, fase: 'resultado', andamento: null,
-    ligasMundo: progressaoMundo.ligasMundo,
+    liga: ligaSeguinte, ligasMundo: progressaoMundo.ligasMundo,
     temporadas: [...t.temporadas, temporada], reuniaoPendente: false, vitorias: t.vitorias + vitorias,
     empates: t.empates + empates, derrotas: t.derrotas + derrotas,
     titulos: t.titulos + (campeao ? 1 : 0), demitido, promessaContrato: null,

@@ -4,8 +4,9 @@ import { comissaoAtivaGestao, propostaComissaoTecnico } from './comissaoTecnico.
 /* Base de gestão do treinador. Valores em R$ mil; salários por mês.
    O gerador é próprio, para não consumir a aleatoriedade da simulação existente. */
 import { CLUBES } from '../dados/data.js';
-import {gerarNomeRegionalUnico} from '../simulacao/nomesRegionais.js';
+import {diagnosticarElenco} from '../simulacao/profundidadeElenco.js';
 import {nacionalidadeNovoAtletaLiga} from '../simulacao/nacionalidadesLiga.js';
+import {gerarNomeRegionalUnico} from '../simulacao/nomesRegionais.js';
 const limitar=(n,min,max)=>Math.max(min,Math.min(max,n));
 const mediaElenco=g=>g.elenco.reduce((n,j)=>n+j.qualidade,0)/Math.max(1,g.elenco.length);
 const NOMES=['André','Bruno','Caio','Daniel','Eduardo','Felipe','Gabriel','Henrique','Igor','João','Lucas','Matheus'];
@@ -185,20 +186,30 @@ export function prepararGestaoTecnico(c){
  const g=unido.tecnico.gestao;
  if(g.baseIntegradaAno!==g.ano){
   const rng=gerador(`${g.clube}|${g.ano}|base-unificada`),novos=[];
-  const ligaBase=t.liga||CLUBES.find(cl=>cl.nome===g.clube)?.liga;
   const nomesOcupados=new Set(g.elenco.map(j=>j.nome).filter(Boolean));
-  if(!legado)for(const setor of SETORES_ELENCO){
-   const faltam=Math.min(Math.max(0,setor.quantidade-g.elenco.filter(j=>j.setor===setor.id).length),Math.max(0,24-g.elenco.length-novos.length));
-   for(let i=0;i<faltam;i++){
-    const jovem=jogador(rng,`base:${g.clube}:${g.ano}:${setor.id}:${i}`,setor.id,Math.max(30,g.forcaMercado-7));
-    jovem.qualidade=Math.min(95,jovem.qualidade+(g.bonusBase||0));jovem.salario=Math.max(3,Math.round(jovem.qualidade**2/220));
-    // Sorteios independentes por identidade: não deslocam os sorteios de
-    // qualidade, idade, propostas nem resultados do modo treinador.
-    const rngRegional=gerador(`${jovem.id}|origem-base-v1`);
-    const nac=nacionalidadeNovoAtletaLiga(ligaBase,rngRegional);
-    const nome=gerarNomeRegionalUnico(nac,`${jovem.id}|nome-base-v1`,nomesOcupados);
-    nomesOcupados.add(nome);
-    novos.push({...jovem,nome,idade:18,potencial:Math.min(99,jovem.qualidade+10),valor:Math.max(100,Math.round(jovem.qualidade**3/180*1.2)),ovr:jovem.qualidade,posicao:({GOL:'GOL',DEF:'ZAG',MEI:'MC',ATA:'ATA'}[setor.id]),nac,clubeNome:g.clube,clubeOrigem:g.clube,liga:ligaBase,picoIdade:28,contrato:3,origem:'base',aposentado:false,jogos:0,gols:0,assist:0,carreira:{jogos:0,gols:0,assist:0,temporadas:0}});
+  // Só promove atletas para cobrir carências reais por posição (22 vagas
+  // mínimas), nunca para deixar todo elenco artificialmente em 24 ou 30.
+  if(!legado){
+   const faltantes=diagnosticarElenco(unido.mundo.jogadores,
+     {clubeNome:g.clube,contarSecundarias:true}).faltantes;
+   const liga=t.liga||CLUBES.find(cl=>cl.nome===g.clube)?.liga;
+   for(const [posicao,quantidade] of Object.entries(faltantes)){
+    const setor=posicao==='GOL'?'GOL':['LD','LE','ZAG'].includes(posicao)?'DEF':
+     ['VOL','MC','MEI'].includes(posicao)?'MEI':'ATA';
+    for(let i=0;i<quantidade;i++){
+     const jovem=jogador(rng,`base:${g.clube}:${g.ano}:${posicao}:${i}`,setor,Math.max(30,g.forcaMercado-7));
+     const rngRegional=gerador(`${jovem.id}|origem-base-v1`);
+     const nac=nacionalidadeNovoAtletaLiga(liga,rngRegional);
+     const nome=gerarNomeRegionalUnico(nac,`${jovem.id}|nome-base-v1`,nomesOcupados);
+     nomesOcupados.add(nome);
+     jovem.qualidade=Math.min(95,jovem.qualidade+(g.bonusBase||0));
+     jovem.salario=Math.max(3,Math.round(jovem.qualidade**2/220));
+     novos.push({...jovem,nome,idade:18,
+      potencial:Math.min(99,jovem.qualidade+10),valor:Math.max(100,Math.round(jovem.qualidade**3/180*1.2)),
+      ovr:jovem.qualidade,posicao,nac,clubeNome:g.clube,clubeOrigem:g.clube,
+      liga,picoIdade:28,contrato:3,origem:'base',aposentado:false,
+      jogos:0,gols:0,assist:0,carreira:{jogos:0,gols:0,assist:0,temporadas:0}});
+    }
    }
   }
   const elenco=[...g.elenco,...novos.map(p=>jogadorDaGestao(p))],atual={...g,elenco,baseIntegradaAno:g.ano,...(!legado&&!salva&&(!t.gestao?.cadastroUnificado||t.gestao.clube!==t.clube)?{tetoSalarial:Math.ceil(elenco.reduce((n,j)=>n+j.salario,0)*1.25)}:{})};

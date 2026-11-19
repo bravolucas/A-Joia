@@ -1,3 +1,8 @@
+import {resolverOuReusarPlayoffsSerieB} from '../simulacao/playoffsSerieB.js';
+import {ordenarTabelaBrasileira} from '../simulacao/desempateBrasileiro.js';
+import {simularSerieC, regulamentoSerieC} from '../simulacao/serieC.js';
+import {progredirBrasilInferior} from '../simulacao/progressaoBrasilInferior.js';
+
 const limitar = (valor, minimo, maximo) => Math.max(minimo, Math.min(maximo, valor));
 
 function sortearPoisson(media, rng) {
@@ -52,14 +57,15 @@ function registrarPartida(tabela, casa, fora, golsCasa, golsFora) {
   }
 }
 
-function ordenarTabela(linhas) {
+function ordenarTabela(linhas, jogos = [], liga = null) {
   const jaClassificada = linhas.every(linha => Number.isFinite(linha.posicao));
-  return [...linhas].sort((a, b) => jaClassificada ? a.posicao - b.posicao :
-    b.pontos - a.pontos ||
-    b.vitorias - a.vitorias ||
-    b.saldoGols - a.saldoGols ||
-    a.nome.localeCompare(b.nome, 'pt-BR')
-  ).map((linha, indice) => ({ ...linha, posicao: jaClassificada ? linha.posicao : indice + 1 }));
+  const ordenadas = jaClassificada
+    ? [...linhas].sort((a, b) => a.posicao - b.posicao)
+    : (liga === 'serieB' || liga === 'brasileirao')
+      ? ordenarTabelaBrasileira(linhas, jogos)
+      : [...linhas].sort((a, b) => b.pontos - a.pontos || b.vitorias - a.vitorias ||
+          b.saldoGols - a.saldoGols || b.golsPro - a.golsPro || a.nome.localeCompare(b.nome, 'pt-BR'));
+  return ordenadas.map((linha, indice) => ({ ...linha, posicao: jaClassificada ? linha.posicao : indice + 1 }));
 }
 
 function simularPartida(casa, fora, tabela, rng, jogos, rodada) {
@@ -71,10 +77,10 @@ function simularPartida(casa, fora, tabela, rng, jogos, rodada) {
   jogos?.push({rodada,casa:casa.nome,fora:fora.nome,golsCasa,golsFora});
 }
 
-export function simularLigaMundo(clubes, rng = Math.random) {
+export function simularLigaMundo(clubes, rng = Math.random, liga = clubes[0]?.liga) {
   const tabela = criarTabela(clubes), jogos = [], primeiroTurno = [];
   const base = [...clubes];
-  if(base.length<2)return {classificacao:ordenarTabela([...tabela.values()]),jogos};
+  if(base.length<2)return {classificacao:ordenarTabela([...tabela.values()], jogos, liga),jogos};
   if(base.length%2)base.push(null);
   const rodadas=base.length-1;
   for(let rodada=0;rodada<rodadas;rodada++){
@@ -87,7 +93,7 @@ export function simularLigaMundo(clubes, rng = Math.random) {
     base.splice(1,0,base.pop());
   }
   for(const j of primeiroTurno)simularPartida(j.fora,j.casa,tabela,rng,jogos,j.rodada+rodadas);
-  return {classificacao:ordenarTabela([...tabela.values()]),jogos};
+  return {classificacao:ordenarTabela([...tabela.values()], jogos, liga),jogos};
 }
 
 /**
@@ -102,6 +108,8 @@ export function simularClassificacoesMundoTecnico({
   clubeTreinador,
   forcaTreinador,
   classificacaoTreinador,
+  jogosTreinador = [],
+  ano = 2026,
   rng = Math.random,
 }) {
   const clubesUnicos = [...new Map(clubes.filter(clube => clube?.nome).map(clube => [clube.nome, clube])).values()];
@@ -119,6 +127,35 @@ export function simularClassificacoesMundoTecnico({
 
   const resultado = {};
   for (const [liga, participantes] of porLiga) {
+    // A Série D serve como banco de clubes para acesso; não fingir uma liga
+    // de pontos corridos com 23 times quando a competição real tem 96.
+    if (liga === 'serieD' && liga !== ligaTreinador) continue;
+    if (liga === 'serieC' && liga === ligaTreinador &&
+        Array.isArray(classificacaoTreinador) && classificacaoTreinador.length &&
+        participantes.length === regulamentoSerieC(ano).participantes) {
+      const regulamento = regulamentoSerieC(ano);
+      const clubesEsperados = regulamento.formato === 'dois-grupos' ? 14 : regulamento.participantes;
+      if (classificacaoTreinador.length !== clubesEsperados ||
+          !classificacaoTreinador.every(linha => linha.jogos === regulamento.rodadas)) {
+        resultado[liga] = {
+          liga, origem: 'serie-c-pendente', classificacao: classificacaoTreinador,
+          jogos: jogosTreinador, ano, fase: 'primeira-fase-incompleta',
+        };
+        continue;
+      }
+      const edicaoSerieC = simularSerieC({
+        clubes: participantes, ano, rng,
+        faseJogada: { classificacao: classificacaoTreinador, jogos: jogosTreinador },
+      });
+      resultado[liga] = {
+        liga, origem: 'serie-c-treinador',
+        classificacao: edicaoSerieC.classificacao || edicaoSerieC.primeiraFase.grupos.flatMap(g =>
+          g.classificacao.map(linha => ({ ...linha, grupo: g.nome }))),
+        jogos: edicaoSerieC.primeiraFase.grupos.flatMap(g => g.jogos),
+        edicaoSerieC,
+      };
+      continue;
+    }
     if (liga === ligaTreinador && Array.isArray(classificacaoTreinador) && classificacaoTreinador.length) {
       resultado[liga] = {
         liga,
@@ -139,7 +176,28 @@ export function simularClassificacoesMundoTecnico({
       continue;
     }
     const ordenados = [...participantes].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
-    resultado[liga] = { liga, origem: 'simulacao-global', ...simularLigaMundo(ordenados, rng) };
+    if (liga === 'serieC') {
+      const esperados = regulamentoSerieC(ano).participantes;
+      if (ordenados.length !== esperados) {
+        // Saves legados podem ainda não ter recebido todos os acessos da D.
+        // Não inventar 38/46/54 rodadas de uma liga com regulamento inválido.
+        resultado[liga] = {
+          liga, origem: 'serie-c-pendente', classificacao: [], jogos: [],
+          ano, participantesAtuais: ordenados.length, participantesEsperados: esperados,
+        };
+        continue;
+      }
+      const edicaoSerieC = simularSerieC({ clubes: ordenados, ano, rng });
+      resultado[liga] = {
+        liga, origem: 'serie-c-cbf',
+        classificacao: edicaoSerieC.classificacao || edicaoSerieC.primeiraFase.grupos.flatMap(g =>
+          g.classificacao.map(linha => ({ ...linha, grupo: g.nome }))),
+        jogos: edicaoSerieC.primeiraFase.grupos.flatMap(g => g.jogos),
+        edicaoSerieC,
+      };
+      continue;
+    }
+    resultado[liga] = { liga, origem: 'simulacao-global', ...simularLigaMundo(ordenados, rng, liga) };
   }
   return resultado;
 }
@@ -152,6 +210,8 @@ export function atualizarLigasMundoTecnico({
   clubeTreinador,
   ligaTreinador,
   divisoes = [],
+  ano = 2026,
+  rng = Math.random,
 }) {
   const atribuicoes = Object.fromEntries(clubes
     .filter(clube => clube?.nome)
@@ -161,7 +221,13 @@ export function atualizarLigasMundoTecnico({
     if (!atribuicoes[nome] && liga) atribuicoes[nome] = liga;
   }
   if (clubeTreinador && ligaTreinador) atribuicoes[clubeTreinador] = ligaTreinador;
+  const ligasOriginais = { ...atribuicoes };
   const movimentos = [];
+  const forcas = Object.fromEntries(clubes.map(clube => [clube.nome, clube.elenco ?? clube.forca ?? 55]));
+  const playoffsSerieB = resolverOuReusarPlayoffsSerieB(classificacoesMundo.serieB?.classificacao, forcas, rng, classificacoesMundo.serieB?.playoffs);
+  if (playoffsSerieB) {
+    classificacoesMundo.serieB = { ...classificacoesMundo.serieB, playoffs: playoffsSerieB };
+  }
 
   for (const divisao of divisoes) {
     const tabelaCima = classificacoesMundo[divisao.cima]?.classificacao || [];
@@ -169,7 +235,9 @@ export function atualizarLigasMundoTecnico({
     const vagas = Math.max(0, Math.min(Number(divisao.vagas) || 0, tabelaCima.length, tabelaBaixo.length));
     if (!vagas) continue;
     const rebaixados = tabelaCima.slice(-vagas);
-    const promovidos = tabelaBaixo.slice(0, vagas);
+    const promovidos = divisao.baixo === 'serieB' && divisao.cima === 'brasileirao' && playoffsSerieB
+      ? playoffsSerieB.promovidos.map(nome => ({ nome }))
+      : tabelaBaixo.slice(0, vagas);
     for (let i = 0; i < vagas; i++) {
       const rebaixado = rebaixados[i];
       const promovido = promovidos[i];
@@ -190,7 +258,26 @@ export function atualizarLigasMundoTecnico({
     }
   }
 
-  return { ligasMundo: atribuicoes, movimentos };
+  // Os acessos da Série C vêm dos quadrangulares; a movimentação C-D
+  // usa o mesmo motor do Modo Completo, com participantes do ano corrente.
+  const edicaoC = classificacoesMundo.serieC?.edicaoSerieC;
+  const serieCJaConfigurada = divisoes.some(divisao =>
+    divisao.cima === 'serieB' && divisao.baixo === 'serieC');
+  const progressoBrasilInferior = serieCJaConfigurada ? { validado: false, movimentos: [], alteracoes: {} }
+    : progredirBrasilInferior({
+      ligasAtuais: ligasOriginais,
+      edicaoSerieC: edicaoC,
+      classificacaoB: classificacoesMundo.serieB?.classificacao,
+      forcas,
+      ano,
+      rng,
+    });
+  if (progressoBrasilInferior.validado) {
+    Object.assign(atribuicoes, progressoBrasilInferior.alteracoes);
+    movimentos.push(...progressoBrasilInferior.movimentos);
+  }
+
+  return { ligasMundo: atribuicoes, movimentos, playoffsSerieB, progressoBrasilInferior };
 }
 
 /** Reavalia a tabela quando um lance jogável altera um placar já registrado. */

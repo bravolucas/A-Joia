@@ -1,6 +1,12 @@
 import {CLUBES_REGIONAIS_EXTRAS} from '../competicoes/estaduaisRapidos.js';
 import {simularSelecoesMundo,simularMundiaisMundo,simularCopinhaMundo} from '../simulacao/copasExternasMundo.js';
 import {historicosEstaduaisDoClube} from '../dados/estaduaisHistoricos.js';
+import {totalLibertadoresHistoricas} from '../dados/libertadoresHistorica.js';
+import {totalSulAmericanaHistoricas} from '../dados/sulamericanaHistorica.js';
+import {totalChampionsHistoricas} from '../dados/championsHistorica.js';
+import {totalEuropaLeagueHistoricas} from '../dados/europaLeagueHistorica.js';
+import {totalConferenceHistoricas} from '../dados/conferenceHistorica.js';
+import {totalCopaBrasilHistoricas} from '../dados/copaBrasilHistorica.js';
 import {simularEstaduaisMundo} from '../simulacao/estaduaisMundo.js';
 import {clubesDoMundo} from '../simulacao/mundoVivo.js';
 import {simularClassificacoesMundoTecnico} from '../treinador/classificacoesMundoTecnico.js';
@@ -12,7 +18,7 @@ import {geradorTecnico} from '../treinador/momentosTecnico.js';
 const clubeCanonico=nome=>({'Atlético Madrid':'Atlético de Madrid','Bayer Leverkusen':'Leverkusen'}[nome]||nome);
 const n=x=>Number.isFinite(x)?Math.max(0,x):0;
 const chave=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
-export function nomeCanonico(nome){if(!nome)return nome;nome=nome.replace(/^Campeão(?:\s+d[ao])?\s+/i,'');return ({copadorei:'Copa del Rey',copadafranca:'Coupe de France',copadaturquia:'Türkiye Kupası',uefachampionsleague:'Champions League',copalibertadores:'Libertadores',uefaeuropaleague:'Europa League',uefaconferenceleague:'Conference League',copasulamericana:'Copa Sul-Americana'})[chave(nome)]||nome;}
+export function nomeCanonico(nome){if(!nome)return nome;nome=nome.replace(/^Campeão(?:\s+d[ao])?\s+/i,'');return ({copabrasil:'Copa do Brasil',copadobrasil:'Copa do Brasil',copadorei:'Copa del Rey',copadafranca:'Coupe de France',copadaturquia:'Türkiye Kupası',uefachampionsleague:'Champions League',ligadoscampeoes:'Champions League',copadoscampeoeseuropeus:'Champions League',copadosclubescampeoeseuropeus:'Champions League',europeancup:'Champions League',copalibertadores:'Libertadores',uefaeuropaleague:'Europa League',copadauefa:'Europa League',uefacup:'Europa League',ligaeuropa:'Europa League',uefaconferenceleague:'Conference League',uefaeuropaconferenceleague:'Conference League',ligaconferencia:'Conference League',copasulamericana:'Copa Sul-Americana',sulamericana:'Copa Sul-Americana',copasudamericana:'Copa Sul-Americana',sudamericana:'Copa Sul-Americana',conmebolsudamericana:'Copa Sul-Americana'})[chave(nome)]||nome;}
 const idEdicao=(ano,nome)=>`${ano}|${chave(nomeCanonico(nome))}`;
 const nacionais=new Set([...Object.values(COPAS_NACIONAIS),'Copa do Rei','Copa da França','Copa da Turquia']);
 const regionais=new Set(Object.values(ESTADUAIS).map(x=>typeof x==='string'?x:x?.nome));
@@ -24,14 +30,56 @@ export function acervoInicial(nome){
  const clube=CLUBES.find(x=>x.nome===nome),regional=CLUBES_REGIONAIS_EXTRAS.find(x=>x.nome===nome),estado=clube?.estado||regional?.estado;
  const estaduais=historicosEstaduaisDoClube(nome).map(h=>({nome:h.nome,tipo:'estadual',inicial:h.quantidade,anosHistoricos:[...h.anos],fontes:h.fontes,historicoConhecido:true}));
  if(!estaduais.length&&estado)estaduais.push({nome:ESTADUAIS[estado],tipo:'estadual',inicial:0,anosHistoricos:[],historicoConhecido:true});
- if(!clube)return {tacas:estaduais,conhecido:!!estaduais.length};
+ if(!clube){
+  const total=totalLibertadoresHistoricas(nome);
+  const libertadores=total?[{nome:'Libertadores',tipo:'continental',inicial:total,historicoConhecido:true}]:[];
+  const sulamericana=totalSulAmericanaHistoricas(nome);
+  const copaSulamericana=sulamericana?[{nome:'Copa Sul-Americana',tipo:'continental',inicial:sulamericana,historicoConhecido:true}]:[];
+  const champions=totalChampionsHistoricas(nome);
+  const campeoesEuropa=champions?[{nome:'Champions League',tipo:'continental',inicial:champions,historicoConhecido:true}]:[];
+  const europa=totalEuropaLeagueHistoricas(nome);
+  const campeoesUEFA=europa?[{nome:'Europa League',tipo:'continental',inicial:europa,historicoConhecido:true}]:[];
+  const conference=totalConferenceHistoricas(nome);
+  const campeoesConference=conference?[{nome:'Conference League',tipo:'continental',inicial:conference,historicoConhecido:true}]:[];
+  const brasil=totalCopaBrasilHistoricas(nome);
+  const copaBrasil=brasil?[{nome:'Copa do Brasil',tipo:'copa',inicial:brasil,historicoConhecido:true}]:[];
+  return {tacas:[...libertadores,...copaSulamericana,...campeoesEuropa,...campeoesUEFA,...campeoesConference,...copaBrasil,...estaduais],conhecido:!!estaduais.length||total>0||sulamericana>0||champions>0||europa>0||conference>0||brasil>0};
+ }
  const p=palmaresInicialDe(clube),nomes=nomeDosTitulos(clube.liga),itens=[];
- for(const tipo of ['liga','copa','mundial'])if(nomes[tipo])itens.push({nome:nomes[tipo],tipo,inicial:n(p[tipo])});
- const continentais=CONTINENTAIS[nome]||{[nomes.continental||'Títulos continentais']:n(p.continental)};
+ for(const tipo of ['liga','copa','mundial'])if(nomes[tipo])itens.push({nome:nomes[tipo],tipo,inicial:tipo==='copa'&&nomes[tipo]==='Copa do Brasil'?totalCopaBrasilHistoricas(nome):n(p[tipo])});
+ const continentais={...(CONTINENTAIS[nome]||{[nomes.continental||'Títulos continentais']:n(p.continental)})};
+ // A contagem da Libertadores é a oficial até 2025, não a estimativa
+ // de força de um clube nem apenas os títulos brasileiros cadastrados.
+ if(['brasileirao','serieB','argentina','sulamericano'].includes(clube.liga)){
+  if(!CONTINENTAIS[nome])delete continentais[nomes.continental||'Títulos continentais'];
+  if(!CONTINENTAIS[nome]||totalLibertadoresHistoricas(nome)>0)continentais.Libertadores=totalLibertadoresHistoricas(nome);
+ }
+ // O palmarés da Sul-Americana é independente da Libertadores e do total
+ // continental genérico. Aplica-se inclusive a times sem títulos da Libertadores.
+ const sulamericana=totalSulAmericanaHistoricas(nome);
+ if(sulamericana||Object.hasOwn(continentais,'Copa Sul-Americana'))
+   continentais['Copa Sul-Americana']=sulamericana;
+ // Inclui o torneio desde 1956 e substitui totais antigos (ex.: PSG=1)
+ // apenas para a Champions; demais continentais têm registro separado.
+ const champions=totalChampionsHistoricas(nome);
+ if(champions||nomes.continental==='Champions League'||Object.hasOwn(continentais,'Champions League'))
+   continentais['Champions League']=champions;
+ // A Copa UEFA/Europa League é outro torneio, não se soma na Champions.
+ const europa=totalEuropaLeagueHistoricas(nome);
+ if(europa||Object.hasOwn(continentais,'Europa League'))
+   continentais['Europa League']=europa;
+ // Conference independente das outras duas competições UEFA.
+ const conference=totalConferenceHistoricas(nome);
+ if(conference||Object.hasOwn(continentais,'Conference League'))
+   continentais['Conference League']=conference;
  for(const [nome,quantidade]of Object.entries(continentais))itens.push({nome,tipo:'continental',inicial:quantidade});
  itens.push(...estaduais);
- for(const t of itens)if(t.tipo!=='estadual')t.historicoConhecido=!!(PALMARES_HISTORICO[nome]||CONTINENTAIS[nome]||PALMARES_HISTORICO[{'Atlético de Madrid':'Atlético Madrid',Leverkusen:'Bayer Leverkusen'}[nome]]);
- return {tacas:itens,conhecido:!!(PALMARES_HISTORICO[nome]||PALMARES_HISTORICO[{"Atlético de Madrid":"Atlético Madrid",Leverkusen:"Bayer Leverkusen"}[nome]])};
+ // Clubes promovidos ao catálogo jogável não perdem o reconhecimento dos
+ // estaduais históricos: quando são suas únicas taças, mostre-as em primeiro lugar.
+ if(estaduais.some(t=>t.inicial>0)&&!itens.some(t=>t.tipo!=='estadual'&&t.inicial>0))
+  itens.splice(0,itens.length,...estaduais,...itens.filter(t=>t.tipo!=='estadual'));
+ for(const t of itens)if(t.tipo!=='estadual')t.historicoConhecido=!!(PALMARES_HISTORICO[nome]||CONTINENTAIS[nome]||totalLibertadoresHistoricas(nome)>0||totalSulAmericanaHistoricas(nome)>0||totalChampionsHistoricas(nome)>0||totalEuropaLeagueHistoricas(nome)>0||totalConferenceHistoricas(nome)>0||totalCopaBrasilHistoricas(nome)>0||PALMARES_HISTORICO[{'Atlético de Madrid':'Atlético Madrid',Leverkusen:'Bayer Leverkusen'}[nome]]);
+ return {tacas:itens,conhecido:!!(estaduais.some(t=>t.inicial>0)||PALMARES_HISTORICO[nome]||totalLibertadoresHistoricas(nome)>0||totalSulAmericanaHistoricas(nome)>0||totalChampionsHistoricas(nome)>0||totalEuropaLeagueHistoricas(nome)>0||totalConferenceHistoricas(nome)>0||totalCopaBrasilHistoricas(nome)>0||PALMARES_HISTORICO[{"Atlético de Madrid":"Atlético Madrid",Leverkusen:"Bayer Leverkusen"}[nome]])};
 }
 function inserir(mapa,e){if(e?.clube&&e?.nome&&Number.isFinite(e.ano)&&!e.pendente)mapa.set(idEdicao(e.ano,e.nome),{ano:e.ano,nome:nomeCanonico(e.nome),clube:clubeCanonico(e.clube),tipo:e.tipo||tipoTaca(e.nome),...(e.voce?{voce:true}:{})});}
 // No rápido antigo, campeaoLiga era o NOME do vencedor; no completo, é booleano.
@@ -61,7 +109,7 @@ function eventosTemporada(c,a,treinador=false){
  for(const valor of [...(a.titulosConquistados||[]),...(a.titulosLista||[])]){const limpo=nomeCanonico(valor),nome=limpo==='Copa Nacional'?nomes.copa:limpo;if(!/Copa do Mundo|Eurocopa|Copa América|Bola de Ouro|Bota de Ouro/i.test(nome))out.push({ano:a.ano,nome,clube,voce:true});}
  const vencedor=vencedorLigaRegistrado(a,treinador);if(vencedor)out.push({ano:a.ano,nome:a.ligaNome||LIGAS[a.ligaId||a.liga]?.nome||nomes.liga,clube:vencedor,tipo:'liga',voce:clubeCanonico(clube)===vencedor});
  for(const [campo,tipo]of [['copaNacional','copa'],['continental','continental'],['mundial','mundial'],['estadual','estadual']])if(a[campo]?.titulo)out.push({ano:a.ano,nome:a[campo].nome||nomes[tipo]||(tipo==='estadual'?ESTADUAIS[CLUBES.find(cl=>cl.nome===clube)?.estado]:null),clube,tipo,voce:true});
- for(const [liga,t]of Object.entries(a.classificacoesMundo||{})){const campeao=t.classificacao?.[0]?.nome;if(campeao)out.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',clube:campeao,voce:campeao===clube});}
+ for(const [liga,t]of Object.entries(a.classificacoesMundo||{})){const campeao=t.edicaoSerieC?.campeao||t.classificacao?.[0]?.nome;if(campeao)out.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',clube:campeao,voce:campeao===clube});}
  return out;
 }
 export function eventosConhecidos(c,temporadas=c.temporadas||[]){
@@ -107,7 +155,7 @@ export function registrarAnoHistoria(c,a,{modo='rapido'}={}){
  const mapa=new Map(eventosConhecidos(c).map(e=>[idEdicao(e.ano,e.nome),e]));
  const anteriores=[...mapa.values()];
  if(modo==='rapido'){
-  if(!a.classificacoesMundo)a.classificacoesMundo=simularClassificacoesMundoTecnico({clubes:clubesDoMundo(c).filter(x=>!LIGAS[x.liga]?.naoJogavel),ligasMundo:c.tecnico?.ligasMundo||c.ligas,rng:geradorTecnico(`${c.codigo}|${a.ano}|ligas-arquivo`)});
+  if(!a.classificacoesMundo)a.classificacoesMundo=simularClassificacoesMundoTecnico({clubes:clubesDoMundo(c).filter(x=>x.liga==='serieC'||!LIGAS[x.liga]?.naoJogavel),ligasMundo:c.tecnico?.ligasMundo||c.ligas,ano:a.ano,rng:geradorTecnico(`${c.codigo}|${a.ano}|ligas-arquivo`)});
   a.torneiosMundo=[];
   for(const e of simularMundo(c,a))inserir(mapa,e);
  }

@@ -1,0 +1,28 @@
+name: Auditar campeões históricos da Champions League
+on:
+  pull_request:
+    branches: [main, fix/sudamericana-historical-champions-2002-2025]
+    paths:
+      - 'src/dados/championsHistorica.js'
+      - 'src/historia/competicoesHistoricas.js'
+      - 'src/historia/historiaFutebol.js'
+      - 'src/historia/HistoriaFutebol.jsx'
+      - 'tests/champions-historica.test.mjs'
+      - '.github/workflows/auditar-champions-historica.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  campeoes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Campeões, aliases, saves e regressões continentais
+        run: node --test tests/champions-historica.test.mjs tests/sulamericana-historica.test.mjs tests/libertadores-historica.test.mjs tests/competicoes-historicas.test.mjs tests/historia-futebol.test.mjs
+      - name: Build de produção Pages
+        run: GITHUB_PAGES=true npm run build

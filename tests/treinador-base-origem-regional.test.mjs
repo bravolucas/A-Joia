@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {prepararGestaoTecnico,criarGestaoTecnico} from '../src/treinador/mercadoTecnico.js';
 import {gerarNomeRegionalUnico,origemNomes} from '../src/simulacao/nomesRegionais.js';
 import {nacionalidadeNovoAtletaLiga} from '../src/simulacao/nacionalidadesLiga.js';
+import {TOTAL_MINIMO_ELENCO} from '../src/simulacao/profundidadeElenco.js';
 
 const carreira=(clube,liga)=>({
  nome:'Treinador de teste',idade:40,ano:2030,
@@ -17,7 +18,7 @@ function gerador(semente){
 }
 const novos=r=>r.mundo.jogadores.filter(p=>p.origem==='base');
 
-test('base da gestão cria espanhóis/estrangeiros em clube espanhol, com nomes regionais e 24 IDs únicos',()=>{
+test('base da gestão cria espanhóis/estrangeiros em clube espanhol, com nomes regionais e IDs únicos',()=>{
  const c=carreira('Real Madrid','espanha');
  const original=structuredClone(c);
  const a=prepararGestaoTecnico(c);
@@ -25,7 +26,7 @@ test('base da gestão cria espanhóis/estrangeiros em clube espanhol, com nomes 
  assert.deepEqual(c,original);
  assert.deepEqual(a,b,'reprodutível sem deslocar a RNG compartilhada');
  const atletas=novos(a);
- assert.equal(atletas.length,24);
+ assert.equal(atletas.length,TOTAL_MINIMO_ELENCO);
  assert.equal(new Set(atletas.map(p=>String(p.id))).size,atletas.length);
  assert.equal(new Set(atletas.map(p=>p.nome)).size,atletas.length);
  assert.ok(atletas.some(p=>p.nac==='ESP'),'não transformar todos os espanhóis em BRA');
@@ -45,7 +46,7 @@ test('a divisão inglesa e uma liga mista recebem novas identidades coerentes, s
   const c=carreira(clube,liga);
   const a=prepararGestaoTecnico(c);
   const atletas=novos(a);
-  assert.equal(atletas.length,24);
+  assert.equal(atletas.length,TOTAL_MINIMO_ELENCO);
   for(const p of atletas){
    assert.equal(p.nac,nacionalidadeNovoAtletaLiga(liga,gerador(`${p.id}|origem-base-v1`)));
    assert.ok(p.nome?.includes(' '));

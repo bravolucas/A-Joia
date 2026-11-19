@@ -54,7 +54,7 @@ for (const width of [390, 1366]) {
     await abrir(page, c);
     const final = page.getByRole('dialog', { name: 'Final · Copa do Brasil' });
     await expect(final).toBeVisible();
-    await expect(final.getByRole('button')).toHaveCount(4); // três planos e o fechar
+    await expect(final.locator('.ct-decisions button')).toHaveCount(3); // três planos de jogo; nomes de clubes e da copa também são navegáveis
     await page.screenshot({ path: `test-results/treinador-final-${width}.png`, fullPage: false });
     await final.getByRole('button', { name: /Fechar e contra-atacar/ }).click();
     const resultado = page.getByRole('dialog', { name: 'Resultado da final' });

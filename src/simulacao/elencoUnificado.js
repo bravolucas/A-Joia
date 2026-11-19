@@ -1,5 +1,6 @@
 import {CLUBES} from '../dados/data.js';
 import {avaliarClubeNoMundo,setorJogador} from './forcaEquipe.js';
+import {diagnosticarElenco,normalizarPosicao} from './profundidadeElenco.js';
 const chave=id=>String(id);
 const idMundo=j=>j.mundoId??j.id;
 export const metadadosGestao=g=>{const {elenco,mercado,...meta}=g;return meta;};
@@ -33,10 +34,53 @@ export function conectarElencoMundo(c,g,{legado=false}={}){
  const clube=CLUBES.find(cl=>cl.nome===g.clube)||{nome:g.clube,forca:g.forcaMercado};forcasMundo[g.clube]=avaliarClubeNoMundo({...c,mundo},clube).forca;
  return {...c,mundo,tecnico:{...c.tecnico,gestao:g,forcasMundo}};
 }
+/**
+ * A IA aceita compras quando há orçamento e espaço, ou quando consegue
+ * liberar excedentes sem prejudicar a cobertura mínima por posição.
+ * Não elimina jogadores do cadastro: excedentes viram agentes livres.
+ */
 export function destinoDaVenda(c,j){
- const g=c.tecnico.gestao,ocupacao=new Map();for(const p of c.mundo.jogadores)if(!p.aposentado&&p.clubeNome)ocupacao.set(p.clubeNome,(ocupacao.get(p.clubeNome)||0)+1);
- const destino=CLUBES.filter(cl=>cl.nome!==g.clube&&(ocupacao.get(cl.nome)||0)<30&&(c.tecnico.universo?.clubes?.[cl.nome]?.financas??50)>15&&(c.mundo.gestoesClubes?.[cl.nome]?.saldo??(Math.round((cl.forca-25)**2*8)+(c.mundo.receitasMercado?.[cl.nome]||0)))>=Math.round(j.valor*.8)).sort((a,b)=>Math.abs(a.forca-j.qualidade)-Math.abs(b.forca-j.qualidade)||a.nome.localeCompare(b.nome))[0];
- if(!destino)throw new Error('Nenhum clube pode receber este jogador nesta janela.');return {...destino,liga:c.tecnico.ligasMundo?.[destino.nome]||destino.liga};
+ const g=c.tecnico.gestao,porClube=new Map(),preco=Math.round(j.valor*.8);
+ const qualidade=Number.isFinite(j.qualidade)?j.qualidade:j.ovr;
+ for(const p of c.mundo.jogadores){
+  if(p.aposentado||!p.clubeNome)continue;
+  if(!porClube.has(p.clubeNome))porClube.set(p.clubeNome,[]);
+  porClube.get(p.clubeNome).push(p);
+ }
+ const posicao=normalizarPosicao(j.posicao);
+ const candidatos=CLUBES.flatMap(cl=>{
+  if(cl.nome===g.clube)return [];
+  const perfil=c.tecnico.universo?.clubes?.[cl.nome]||c.universo?.clubes?.[cl.nome];
+  if((perfil?.financas??50)<=15)return [];
+  const saldoSalvo=c.mundo.gestoesClubes?.[cl.nome]?.saldo;
+  const saldo=Number.isFinite(saldoSalvo)?saldoSalvo:
+   Math.max(0,Math.round((cl.forca-25)**2*8)+(c.mundo.receitasMercado?.[cl.nome]||0));
+  if(saldo<preco)return [];
+  const elenco=porClube.get(cl.nome)||[];
+  const necessidades=diagnosticarElenco(elenco,{contarSecundarias:true});
+  const dispensarIds=[],reserva=[...elenco];
+  const chegada={...j,posicao:j.posicao,aposentado:false,clubeNome:cl.nome};
+  // Saves antigos podem ter clubes acima do limite: abrem quantas vagas
+  // forem necessárias, sem perder cobertura e sem remover identidades.
+  while(reserva.length>=30){
+   const excedente=reserva
+    .filter(p=>(p.ovr??0)<=qualidade+5)
+    .sort((a,b)=>(a.ovr??0)-(b.ovr??0)||String(a.id).localeCompare(String(b.id)))
+    .find(p=>diagnosticarElenco([...reserva.filter(outro=>outro!==p),chegada],
+      {contarSecundarias:true}).totalFaltante<=necessidades.totalFaltante);
+   if(!excedente)return [];
+   dispensarIds.push(excedente.id);
+   reserva.splice(reserva.indexOf(excedente),1);
+  }
+  const carencia=posicao?(necessidades.faltantes[posicao]||0):0;
+  const afinidade=Math.abs(cl.forca-qualidade);
+  const prioridade=carencia*100+Math.max(0,26-elenco.length)*2-afinidade*3-dispensarIds.length*9;
+  return [{cl,prioridade,dispensarIds}];
+ }).sort((a,b)=>b.prioridade-a.prioridade||a.cl.nome.localeCompare(b.cl.nome));
+ const escolhido=candidatos[0];
+ if(!escolhido)throw new Error('Nenhum clube apresentou proposta viável nesta janela.');
+ return {...escolhido.cl,liga:c.tecnico.ligasMundo?.[escolhido.cl.nome]||escolhido.cl.liga,
+  dispensarIds:escolhido.dispensarIds};
 }
 /** Uma negociação altera o mesmo atleta, sem recriá-lo nem perder estatísticas. */
 export function aplicarNegociacaoMundo(c,g,{tipo,alvo,destino}={}){
@@ -46,6 +90,10 @@ export function aplicarNegociacaoMundo(c,g,{tipo,alvo,destino}={}){
  let encontrado=!alvo;
  const jogadores=c.mundo.jogadores.map(p=>{
   const j=elenco.get(chave(p.id));let novo=j?{...p,ovr:j.qualidade,idade:j.idade,contrato:j.contrato,salario:j.salario,valor:j.valor,clubeNome:clube,liga:c.tecnico.liga||p.liga}:p;
+  if(venda&&destino?.dispensarIds?.some(x=>chave(x)===chave(p.id))&&p.clubeNome===destino.nome){
+   novo={...novo,clubeNome:null,contrato:0,
+    movimentos:[...(p.movimentos||[]),{ano,tipo:'dispensa',de:destino.nome,para:null,valor:0}]};
+  }
   if(alvo&&chave(p.id)===chave(id)){
    encontrado=true;const para=venda?destino.nome:clube;
    const movimento={ano,tipo,de:p.clubeNome||null,para,valor:venda?Math.round(alvo.valor*.8):tipo==='compra'?alvo.valor:0};

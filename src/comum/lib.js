@@ -1,4 +1,6 @@
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
+import {resolverOuReusarPlayoffsSerieB} from '../simulacao/playoffsSerieB.js';
+import {progredirBrasilInferior} from '../simulacao/progressaoBrasilInferior.js';
 import { MINIMOS_ELENCO, diagnosticarElenco } from '../simulacao/profundidadeElenco.js';
 import {posicoesSecundariasNewgen} from '../simulacao/posicoesSecundariasNewgen.js';
 import {escalarVagasAptas} from '../simulacao/escalacaoApta.js';
@@ -1240,6 +1242,7 @@ export function girarLigas(estado, forcarClube = null, classificacoesMundo = nul
   // temporada, então ele é excluído do embaralhamento e encaixado à parte.
   const ordenar = (arr) => arr.map(([n, v]) => ({ n, v, pts: v.forca + rand(-9, 9) })).sort((a, b) => b.pts - a.pts);
   const rebaixadosTodos = [], promovidosTodos = [], porPais = [];
+  let playoffsSerieB = null;
 
   PIRAMIDE_LIGAS.forEach((div) => {
     const naElite = Object.entries(novo).filter(([, v]) => v.liga === div.elite);
@@ -1258,18 +1261,49 @@ export function girarLigas(estado, forcarClube = null, classificacoesMundo = nul
     const valida=(t,times,liga)=>Array.isArray(t)&&t.length===times.length&&new Set(t.map(x=>x.nome)).size===times.length&&t.every(x=>novo[x.nome]?.liga===liga);
     const cimaReal=valida(cima,naElite,div.elite),baixoReal=valida(baixo,naAcesso,div.acesso);
     const caem = cimaReal?cima.slice(-div.vagas).map(t=>t.nome):E.slice(-vagasCaem).map((x) => x.n);
-    const sobem = baixoReal?baixo.slice(0,div.vagas).map(t=>t.nome):A.slice(0, vagasSobem).map((x) => x.n);
+    let sobem = baixoReal ? baixo.slice(0, div.vagas).map(t => t.nome) : A.slice(0, vagasSobem).map(x => x.n);
+    // Série B 2026: somente líder/vice sobem direto; 3º a 6º disputam dois jogos.
+    if (div.elite === 'brasileirao' && div.acesso === 'serieB') {
+      const tabelaB = baixoReal ? baixo : ordenar(naAcesso).map(x => ({ nome: x.n }));
+      const forcasB = Object.fromEntries(naAcesso.map(([nome, clube]) => [nome, clube.forca]));
+      playoffsSerieB = resolverOuReusarPlayoffsSerieB(tabelaB, forcasB, Math.random, classificacoesMundo?.serieB?.playoffs);
+      if (playoffsSerieB) sobem = playoffsSerieB.promovidos;
+    }
     if (!cimaReal && ehForcadoNaElite && forcarClube.desceu) caem.push(forcarClube.nome);
-    if (!baixoReal && ehForcadoNoAcesso && forcarClube.subiu) sobem.push(forcarClube.nome);
+    if (!playoffsSerieB && !baixoReal && ehForcadoNoAcesso && forcarClube.subiu) sobem.push(forcarClube.nome);
 
     caem.forEach((n) => { novo[n] = { ...novo[n], liga: div.acesso, forca: clampR(novo[n].forca - rand(1, 4), 40, 96) }; });
     sobem.forEach((n) => { novo[n] = { ...novo[n], liga: div.elite, forca: clampR(novo[n].forca + rand(1, 4), 40, 96) }; });
     rebaixadosTodos.push(...caem);
     promovidosTodos.push(...sobem);
-    porPais.push({ pais: div.nome, sobem, caem });
+    porPais.push({ pais: div.nome, sobem, caem, ...(playoffsSerieB && div.acesso === 'serieB' ? { playoffs: playoffsSerieB } : {}) });
   });
 
-  return { estado: novo, rebaixados: rebaixadosTodos, promovidos: promovidosTodos, porPais };
+  const edicaoC = classificacoesMundo?.serieC?.edicaoSerieC;
+  const progressoBrasilInferior = progredirBrasilInferior({
+    ligasAtuais: Object.fromEntries(Object.entries(estado).filter(([, c]) => c?.liga).map(([nome, c]) => [nome, c.liga])),
+    edicaoSerieC: edicaoC,
+    classificacaoB: classificacoesMundo?.serieB?.classificacao,
+    forcas: Object.fromEntries(Object.entries(estado).map(([nome, c]) => [nome, c?.forca ?? 50])),
+    ano: edicaoC?.ano,
+    rng: Math.random,
+  });
+  if (progressoBrasilInferior.validado) {
+    for (const movimento of progressoBrasilInferior.movimentos) {
+      const anterior = novo[movimento.clube];
+      if (!anterior) continue;
+      novo[movimento.clube] = { ...anterior, liga: movimento.para };
+      if (movimento.tipo === 'acesso') promovidosTodos.push(movimento.clube);
+      else rebaixadosTodos.push(movimento.clube);
+    }
+    porPais.push({
+      pais: 'Brasil — Séries B, C e D',
+      sobem: [...progressoBrasilInferior.promovidosSerieC, ...progressoBrasilInferior.promovidosSerieD],
+      caem: [...progressoBrasilInferior.rebaixadosSerieB, ...progressoBrasilInferior.rebaixadosSerieC],
+      edicaoSerieC: edicaoC,
+    });
+  }
+  return { estado: novo, rebaixados: rebaixadosTodos, promovidos: promovidosTodos, porPais, playoffsSerieB, progressoBrasilInferior };
 }
 
 export function continentalDaSelecao(nac) {
@@ -1889,7 +1923,7 @@ export function gerarMundoJogadores(rng = Math.random) {
       }
     });
   });
-  return { jogadores: completarCarenciasMundo(jogadores, CLUBES, rng), elencosCompletos:true, temporada: 0, historicoBolaDeOuro: [] };
+  return { jogadores: completarCarenciasMundo(jogadores, CLUBES, rng), elencosCompletos:true, temporada: 0, historicoBolaDeOuro: [], calibracaoFortalezaElenco:'2026-v2' };
 }
 
 export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES, perfis = {}, clubeControlado = null, treinoClube = 0, ano = mundo.anoCalendario, registrarPremio = true} = {}) {
@@ -2011,7 +2045,10 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
   };
   const idsAposentados=new Set(mundo.jogadores.filter(j=>j.aposentado).map(j=>j.id));
   const novasAposentadorias=jogadores.filter(j=>j.aposentado&&!idsAposentados.has(j.id));
-  for (let i = 0; i < Math.max(0, aposentadosAgora); i++) {
+  // No cadastro unificado, completarCarenciasMundo já promove jovens somente
+  // onde houver déficit real. Não substituir aposentados de elencos superlotados.
+  const reposicoesPorAposentadoria = mundo.cadastroElencos ? 0 : Math.max(0, aposentadosAgora);
+  for (let i = 0; i < reposicoesPorAposentadoria; i++) {
     const aposentado=novasAposentadorias[i];
     const clube = clubesPorNome.get(aposentado?.clubeNome)||pick(mundo.cadastroElencos?clubes.filter(cl=>cl.nome!==clubeControlado&&(ocupacao.get(cl.nome)||0)<24):clubes)||{nome:null,forca:60,liga:null};
     // As revelações usam a origem linguística da liga e permitem estrangeiros.

@@ -8,6 +8,10 @@ export const slugCompeticao = (nome) => (nome || "")
 
 const ALIASES = Object.freeze({
   'mundial-de-clubes-fifa':'mundial-de-clubes',
+  'bolaouro':'bola-de-ouro',
+  'bola-ouro':'bola-de-ouro',
+  'botaouro':'bota-de-ouro',
+  'bota-ouro':'bota-de-ouro',
   'copa-intercontinental-da-fifa':'copa-intercontinental-fifa',
   'copa-intercontinental':'copa-intercontinental-fifa',
   'copa-das-nacoes-da-oceania':'copa-das-nacoes-da-ofc',

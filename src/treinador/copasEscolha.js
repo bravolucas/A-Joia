@@ -202,7 +202,8 @@ export function escolherCopa(c,chave,opcao){
 /** Insere o resultado do motor ao vivo na mesma chave dos demais clubes. */
 export function registrarPlacarCopa(c,chave,jogo) {
  const d=decisaoCopa(c);if(!d||d.chave!==chave||c.resultado)return c;
- const casa=d.casa?c.usuario:d.adversario,fora=d.casa?d.adversario:c.usuario;
+ const casa=d.grupo?(d.casa?c.usuario:d.adversario):jogo.casa,fora=d.grupo?(d.casa?d.adversario:c.usuario):jogo.fora;
+ if(!d.grupo&&![c.usuario,d.adversario].includes(casa)||!d.grupo&&![c.usuario,d.adversario].includes(fora)||casa===fora)throw new Error('Times incompatíveis com a chave.');
  if(jogo.casa!==casa||jogo.fora!==fora||![jogo.golsCasa,jogo.golsFora].every(n=>Number.isInteger(n)&&n>=0))throw new Error('Placar incompatível com a partida da chave.');
  if(jogo.partidas?.length){
   const ps=jogo.partidas;

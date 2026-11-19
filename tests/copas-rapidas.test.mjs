@@ -36,7 +36,7 @@ test('empate no mata-mata abre pênaltis separados; reload e duplo clique não s
  assert.ok(c.resultado.penaltisPendentes);assert.equal(c.jogosUsuario.length,0);const d=decisaoCopa(c),salvo=JSON.parse(JSON.stringify(c)),r=escolherCopa(c,d.chave,'canto');assert.deepEqual(r,escolherCopa(salvo,d.chave,'canto'));assert.equal(escolherCopa(r,d.chave,'canto'),r);assert.equal(r.jogosUsuario.length,1);assert.ok(r.jogosUsuario[0].penaltis);
 });
 test('Copa do Brasil começa por nível; estaduais nunca misturam estados',()=>{
- for(const [nome,fase] of [['Flamengo','Oitavas de final'],['Santos','Pré-oitavas'],['Confiança','Fase preliminar']]){const clube=CLUBES.find(x=>x.nome===nome),p=prepararCopasTecnico({clube:nome,elenco:clube.forca,ano:2030,liga:clube.liga,temporadas:[]},clube.forca),n=p.campeonatos.find(x=>x.nome==='Copa do Brasil');assert.equal(decisaoCopa(n).fase,fase);const e=p.campeonatos.find(x=>x.tipo==='estadual');assert.ok(e);assert.ok(e.pool.every(x=>x.estado===clube.estado));}
+ for(const [nome,fase] of [['Flamengo','Oitavas de final'],['Santos','16 avos de final'],['Confiança','Fase preliminar']]){const clube=CLUBES.find(x=>x.nome===nome),p=prepararCopasTecnico({clube:nome,elenco:clube.forca,ano:2030,liga:clube.liga,temporadas:[]},clube.forca),n=p.campeonatos.find(x=>x.nome==='Copa do Brasil');assert.equal(decisaoCopa(n).fase,fase);const e=p.campeonatos.find(x=>x.tipo==='estadual');assert.ok(e);assert.ok(e.pool.every(x=>x.estado===clube.estado));}
  assert.equal(participantesEstadual(CLUBES.find(c=>c.nome==='Real Madrid')),null);
 });
 test('vaga do segundo colocado existe no ano seguinte e pertence ao clube após troca de empregado',()=>{

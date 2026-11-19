@@ -28,3 +28,14 @@ Veja `CREDITOS.md` para a origem de cada grupo de arquivos.
 Oito estaduais possuem **imagem local** específica: Paulista, Carioca, Mineiro, Gaúcho, Paranaense, Catarinense, Goiano e Alagoano. Outros quatro — **Baiano, Cearense, Pernambucano e Amazonense** — usam, quando há conexão, **ilustrações de troféus publicadas por Guigoma (Gmttos) no Wikimedia Commons** sob licenças Creative Commons, sem modificações. A CDN não está embutida no app e pode ficar indisponível; nesse caso, `TacaCompeticao` mantém a silhueta original do A JOIA. Essas ilustrações **não são fotos oficiais** das federações. Créditos individuais, links e licenças estão em `estaduais-fontes.json`.
 
 **Sergipano e Paraense** permanecem com fallback original: os arquivos encontrados com bandeiras estaduais não comprovam reproduzir o troféu do campeonato. Não confundimos esse material com imagem oficial. A afirmação de cobertura do catálogo acima não incluía estaduais: há um erro anterior na construção desse catálogo (`ESTADUAIS` contém strings). Essa cobertura não significa que todos os troféus sejam fotografias reais.
+
+
+## Conference League
+
+`conference-league.svg` é uma **ilustração vetorial original local**
+da taça metálica espiralada da Conference League, não uma fotografia nem
+reprodução licenciada oficial. Foi criada para evitar o fallback genérico
+em ambas as carreiras, inclusive offline. Os nomes antigos UEFA Europa
+Conference League e Liga Conferência são resolvidos em
+`src/comum/arteCompeticoes.js`. Referência visual:
+[UEFA — descrição da taça](https://www.uefa.com/uefaconferenceleague/news/0269-125a11b2e4f9-8459a7575502-1000--uefa-europa-conference-league-trophy-unveiled/).

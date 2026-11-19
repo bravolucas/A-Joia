@@ -5,6 +5,7 @@ import { test, expect } from '@playwright/test';
 import {criarGestaoTecnico,resumoGestaoTecnico} from '../src/treinador/mercadoTecnico.js';
 import { criarJogador, aposentar } from '../src/jogador/rapido.js';
 import { iniciarCarreiraTecnico, jogarTemporadaExpressaTecnico, calcularOvrTecnico, CLUBES_CONVITES_TECNICO } from '../src/treinador/tecnico.js';
+import {regulamentoSerieC} from '../src/simulacao/serieC.js';
 
 function carreira() {
   const jogador = aposentar({ ...criarJogador({ nome: 'Treinador de teste', nac: 'BRA', posicao: 'ATA', personalidade: 'equilibrado', origem: 'base', pe: 'destro', numero: 10, ritmo: 'equilibrado', codigo: 'COACH-REMODELACAO' }), idade: 40 });
@@ -77,7 +78,9 @@ for (const width of [390, 1366]) {
     await expect.poll(async () => (await salvo(page)).tecnico.temporadas.length).toBe(1);
     const resultado = await salvo(page);
     expect(resultado.tecnico.decisoes[0].carta).not.toBe('simulacao_expressa');
-    expect(resultado.tecnico.temporadas[0].vitorias + resultado.tecnico.temporadas[0].empates + resultado.tecnico.temporadas[0].derrotas).toBe(38);
+    // A Confiança inicia a carreira na Série C de 2026, com 19 rodadas;
+    // não exigir 38 rodadas da Série B em um clube cadastrado na Série C.
+    expect(resultado.tecnico.temporadas[0].vitorias + resultado.tecnico.temporadas[0].empates + resultado.tecnico.temporadas[0].derrotas).toBe(regulamentoSerieC(resultado.tecnico.temporadas[0].ano).rodadas);
     await fecharEventos(page);
     await page.getByRole('button', { name: /Temporada .*Confiança/ }).click();
     await expect(page.getByText('Ver classificação', { exact: true })).toBeVisible();

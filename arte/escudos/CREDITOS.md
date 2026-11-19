@@ -24,3 +24,17 @@ Emblemas e marcas pertencem aos clubes e respectivos titulares; são usados para
 ### Estaduais adicionados em 15/11/2026
 
 Os 52 arquivos listados em [acervo-estaduais-2026-11-15.json](acervo-estaduais-2026-11-15.json) foram obtidos, sem edição, nas coleções públicas football-logos (JoseArroyave), Escudos FC, Logo de Times e Escudos Futebol API (washingtonos). Cada emblema mantém sua fonte, referência e SHA-256 no manifesto. Uso para identificação dos clubes nas competições.
+
+### Ferroviária de Araraquara — 18/11/2026
+
+Escudo próprio `ferroviaria.svg` obtido em [JoseArroyave/football-logos](https://github.com/JoseArroyave/football-logos/blob/main/logos/brazil/Ferroviaria.svg), cuja referência original é [football-logos.cc](https://football-logos.cc/brazil/ferroviaria/). O símbolo é o da Associação Ferroviária de Esportes de Araraquara, não o do Ferroviário Atlético Clube ou da Desportiva Ferroviária. [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Associa%C3%A7%C3%A3o_Ferrovi%C3%A1ria_de_Esportes_logo.svg) também cataloga o emblema como `PD-textlogo`, sujeito às regras de marcas. Uso apenas identificativo no simulador.
+
+### Complementação da Série C/D — 18/11/2026
+
+Escudos vetoriais específicos acrescentados para clubes que haviam entrado no catálogo sem imagem própria:
+
+- `figueirense.svg`: [JoseArroyave/football-logos](https://github.com/JoseArroyave/football-logos/blob/main/logos/brazil/Figueirense.svg) (referência `football-logos.cc`).
+- `goiatuba.svg`: [limaalef/limaalef.github.io](https://github.com/limaalef/limaalef.github.io/blob/main/teams_logos/goiatuba.svg).
+- `uberlandia.svg`: [limaalef/limaalef.github.io](https://github.com/limaalef/limaalef.github.io/blob/main/teams_logos/uberlandia.svg).
+
+Os repositórios de origem informam licença MIT para seus arquivos de código; as marcas e emblemas dos clubes permanecem sujeitos a seus respectivos titulares. Arquivos SVG foram verificados para ausência de scripts e atributos de evento.

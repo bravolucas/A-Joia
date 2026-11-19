@@ -92,9 +92,6 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
   };
   // Edições completas existentes são arquivadas; dados antigos ausentes continuam ausentes.
   for(const [liga,t]of Object.entries(a.classificacoesMundo||{})){
-    // Série C pendente (save legado sem os 20 participantes) não tem tabela nem campeão:
-    // não arquivar uma edição vazia.
-    if(!t?.classificacao?.length&&!t?.edicaoSerieC?.campeao)continue;
     // A liga do treinador grava a tabela sem seus placares no calendario global.
     // Recupere apenas os resultados realmente disputados, nunca sorteie novamente.
     const jogosTreinador=c.tecnico&&a.liga===liga?(a.confrontos||[])
@@ -125,7 +122,11 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
     }
     u.edicoes.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',
       classificacao:t.classificacao,jogos:compactarJogos([...jogosUnicos.values()]),
-      campeao:edicaoC?.campeao||t.classificacao?.[0]?.nome,
+      // Uma edição pendente (ex.: Série C ainda sem tabela) não tem campeão:
+      // omitir a propriedade evita gerar `campeao: undefined` no save, que é
+      // descartado na serialização JSON e quebra a idempotência da carreira.
+      ...((edicaoC?.campeao||t.classificacao?.[0]?.nome)
+        ? {campeao:edicaoC?.campeao||t.classificacao?.[0]?.nome} : {}),
       ...(t.playoffs ? { playoffs:t.playoffs } : {}),
       ...(edicaoC ? { serieC:{
         regulamento:edicaoC.regulamento, promovidos:edicaoC.promovidos,

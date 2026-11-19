@@ -13,6 +13,7 @@ import {CamisaPremium} from '../comum/VisualFutebol.jsx';
 import {TacaCompeticao} from '../comum/trofeus.jsx';
 import {agruparConquistasTecnico} from '../treinador/conquistasTecnico.js';
 import {bloquearRolagem} from '../comum/bloqueioRolagem.js';
+import MercadoEmpresario from './MercadoEmpresario.jsx';
 import './JornadaUI.css';
 import despedidas from '../../arte/jornada/despedidas.webp';
 import gestos from '../../arte/jornada/gestos.webp';
@@ -50,7 +51,7 @@ export function PainelJornada({c,onAcao,caminho,interesses=[]}){
  {j.mentor&&<p className="jr-lembranca">Primeiro orientador: {j.mentor.nome} · <LinkEntidade tipo="clube" nome={j.mentor.clube}/> · personagem fictício</p>}
  {!!j.rivalMemorias?.length&&<details><summary>Seu rival tem história</summary>{j.rivalMemorias.slice(-3).map((m,i)=><p key={i}>{descreverMemoriaRival(m)}</p>)}</details>}
  {!!j.relatoriosEmprestimo?.length&&<details><summary>Como foram seus empréstimos</summary>{j.relatoriosEmprestimo.map((r,i)=><p key={i}><LinkEntidade tipo="clube" nome={r.clube}/>: {r.jogos} jogos em {r.temporadas} temporada(s){r.esperados?` · projeção ${r.esperados.join('–')}`:''}. Retorno ao <LinkEntidade tipo="clube" nome={r.origem}/>.</p>)}</details>}
- {!!interesses.length&&<div className="jr-interesses"><h3>Clubes interessados · seu empresário</h3>{interesses.map(x=><p key={x.clube}><LinkEntidade tipo="clube" nome={x.clube}/><small>{x.liga} · {x.texto}</small>{x.sinalizado?<b className="jr-sinalizado">Interesse sinalizado</b>:!interesses.some(y=>y.sinalizado)&&<button type="button" className="jr-sinalizar" onClick={()=>onAcao('interesse',x.clube)} aria-label={`Sinalizar interesse no ${x.clube}`}>Sinalizar interesse</button>}</p>)}<small className="jr-interesse-nota">Sinalizar aumenta a chance de proposta nesta janela; a torcida do seu clube percebe o movimento.</small></div>}
+ <MercadoEmpresario c={c} onAcao={onAcao} interesses={interesses}/>
  </details>
  {!!ups.length&&<div className="jr-ups" aria-label="Impulsos ativos na temporada">{ups.map(u=><span key={u.id}><b>{upJogadorDe(u.id)?.nome||u.id}</b>{Math.max(0,u.fim-c.ano)} temporada(s) restante(s)<small>{upJogadorDe(u.id)?.desc}</small></span>)}</div>}
  {aviso&&<p role="status">{aviso}</p>}

@@ -38,3 +38,5 @@
 .cce-lances b{display:inline-block;min-width:32px;color:#f5d77a}
 .cce-lances p{margin:0;font-size:12px;color:#c9d6e0}
 .cce-lances-fora{font-size:12px;color:#a8bbcb;text-align:center}
+.cce-ida-volta{display:grid;gap:3px;margin:6px auto 0;font-size:12px;color:#c9d6e0}
+.cce-ida-volta small{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#93a9ba}

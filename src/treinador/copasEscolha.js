@@ -1,4 +1,5 @@
 import {perfilAdversario,ajustePlanoAdversario} from '../competicoes/perfilAdversario.js';
+import {idaEVolta} from '../competicoes/formatoMataMata.js';
 import {TODAS_ESTRATEGIAS,NOVOS_PENALTIS,escolhasCopa} from './estrategiasCopas.js';
 import {geradorTecnico} from './momentosTecnico.js';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -106,8 +107,10 @@ export function jogoEliminatorio(a,b,rng){
  if(!j.vencedor){j.vencedor=rng()<chancePenaltis(nivel(a),nivel(b))?a.nome:b.nome;j.penaltis=true;}
  return j;
 }
+/** Esta fase do mata-mata é disputada em ida e volta? (regra por competição) */
+export const idaVoltaNaFase=c=>!!c&&!c.roteiroMundial&&idaEVolta({nome:c.nome,tipo:c.tipo,tamanho:c.tamanho,preliminar:!!c.preContinental});
 function jogoDaChave(c,a,b,rng){
- if(!c.idaVolta||c.tamanho===2)return jogoEliminatorio(a,b,rng);
+ if(!idaVoltaNaFase(c))return jogoEliminatorio(a,b,rng);
  const ida=partida(a,b,rng),volta=partida(b,a,rng),golsCasa=ida.golsCasa+volta.golsFora,golsFora=ida.golsFora+volta.golsCasa;
  return {casa:a.nome,fora:b.nome,golsCasa,golsFora,vencedor:golsCasa>golsFora?a.nome:golsFora>golsCasa?b.nome:rng()<chancePenaltis(nivel(a),nivel(b))?a.nome:b.nome,penaltis:golsCasa===golsFora,partidas:[ida,volta]};
 }
@@ -167,8 +170,15 @@ export function escolherCopa(c,chave,opcao){
  if(!d.grupo&&!novo.quadroMata&&!novo.roteiroMundial){const outros=reduzirQuadro(novo.pool.filter(x=>x.nome!==novo.usuario&&x.nome!==d.adversario&&!novo.eliminados.includes(x.nome)&&(!novo.candidatosMata||novo.candidatosMata.includes(x.nome))),Math.max(0,novo.tamanho-2),geradorTecnico(`${novo.seed}|migracao-chave`)).sort((a,b)=>nivel(b)-nivel(a));novo.quadroMata=[[novo.usuario,d.adversario]];while(outros.length>1)novo.quadroMata.push([outros.shift().nome,outros.pop().nome]);if(outros.length)novo.quadroMata.push([outros[0].nome,null]);}
 
  if(d.penaltis){const j={...novo.resultado.jogo,penaltis:true,vencedor:rng()<chancePenaltis(d.forcaUsuario,d.forcaAdv,opcao,d.final)?novo.usuario:d.adversario};novo.resultado={jogo:j,escolha:opcao,revelacao,penaltisPendentes:false,venceu:j.vencedor===novo.usuario,fase:d.fase,final:d.final};registrarMata(novo,j);novo.etapa++;return novo;}
- const j=partida({nome:novo.usuario,forca:d.forcaUsuario},{nome:d.adversario,forca:d.forcaAdv},rng,opcao,d.final,d.perfilAdversario);
- if(!d.casa){[j.casa,j.fora]=[j.fora,j.casa];[j.golsCasa,j.golsFora]=[j.golsFora,j.golsCasa];}
+ let j=partida({nome:novo.usuario,forca:d.forcaUsuario},{nome:d.adversario,forca:d.forcaAdv},rng,opcao,d.final,d.perfilAdversario);
+ if(!d.grupo&&idaVoltaNaFase(novo)){
+  // Ida e volta: a estratégia vale para os dois jogos; quem tem a melhor campanha (mais forte) decide em casa.
+  const volta=partida({nome:novo.usuario,forca:d.forcaUsuario},{nome:d.adversario,forca:d.forcaAdv},rng,opcao,d.final,d.perfilAdversario);
+  const meus=j.golsCasa+volta.golsCasa,deles=j.golsFora+volta.golsFora,decideEmCasa=d.forcaUsuario>=d.forcaAdv;
+  const inverter=x=>({...x,casa:x.fora,fora:x.casa,golsCasa:x.golsFora,golsFora:x.golsCasa});
+  const ida={...(decideEmCasa?inverter(j):j),etapa:'Ida'},segunda={...(decideEmCasa?volta:inverter(volta)),etapa:'Volta'};
+  j={casa:novo.usuario,fora:d.adversario,golsCasa:meus,golsFora:deles,vencedor:meus>deles?novo.usuario:deles>meus?d.adversario:null,agregado:true,partidas:[ida,segunda]};
+ }else if(!d.casa){[j.casa,j.fora]=[j.fora,j.casa];[j.golsCasa,j.golsFora]=[j.golsFora,j.golsCasa];}
  novo.resultado={jogo:j,escolha:opcao,revelacao,penaltisPendentes:!d.grupo&&!j.vencedor,venceu:j.vencedor===novo.usuario,empate:!j.vencedor,fase:d.fase,final:d.final};
  if(novo.resultado.penaltisPendentes)return novo;
  if(d.grupo)avancarLiga(novo,j);else registrarMata(novo,j);novo.etapa++;return novo;

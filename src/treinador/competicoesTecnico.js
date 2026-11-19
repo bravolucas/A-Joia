@@ -1,4 +1,5 @@
 import { riscoEstiloTecnico } from './taticasTecnico.js';
+import { formatoEliminatoriaAntigo } from '../competicoes/formatoMataMata.js';
 const limitar = (n, min, max) => Math.max(min, Math.min(max, n));
 const sorteio = () => Math.random();
 const forca = (clube) => Number(clube?.forca ?? clube?.elenco ?? 50);
@@ -300,7 +301,7 @@ export function simularCopaNacionalTecnico({ clubes, nomeUsuario, pais, forcaUsu
   if (participantes.length < 2 || !participantes.some(c => c.nome === nomeUsuario)) {
     return { nome, tipo: 'copa', participantes: 0, campeao: null, faseUsuario: 'Não classificado', fases: [], jogosUsuario: [] };
   }
-  return { nome, tipo: 'copa', participantes: participantes.length, ...jogarEliminatoria(participantes, nomeUsuario, bonusTecnico, rng, formato) };
+  return { nome, tipo: 'copa', participantes: participantes.length, ...jogarEliminatoria(participantes, nomeUsuario, bonusTecnico, rng, { ...formatoEliminatoriaAntigo(nome, 'copa'), ...formato }) };
 }
 
 export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forcaUsuario, nome, bonusTecnico = 0, tatica = null, participantesQualificados = [], formato = {}, rng = sorteio }) {
@@ -348,7 +349,7 @@ export function simularCopaContinentalTecnico({ clubes, nomeUsuario, pais, forca
   });
 
   const eliminatoria = jogarEliminatoria(classificados, nomeUsuario, bonusTecnico, rng, {
-    mataMataIdaVolta: nome === 'Copa Libertadores',
+    ...formatoEliminatoriaAntigo(nome, 'continental'),
     finalCampoNeutro: nome === 'Copa Libertadores', finalProrrogacao: nome === 'Copa Libertadores', ...formato
   });
   const faseUsuario = eliminatoria.faseUsuario === 'Não participou' && grupos.length

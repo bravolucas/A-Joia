@@ -1,5 +1,6 @@
 import {expandirConquista,conquistasDoCadastroMundo,conquistasDoJogador,nomePremio} from '../simulacao/historicoConquistas.js';
 import {idJogadorPorNome} from './navegacaoEntidades.js';
+import {HISTORICO_REAL_PREMIOS} from './premiosHistoricosReais.js';
 
 /** Usa os mesmos nomes do catálogo, inclusive quando o save usa chaves antigas. */
 export const chavePremio=s=>nomePremio(String(s||'').trim()).normalize('NFD')
@@ -41,4 +42,22 @@ export function vencedoresPremios(c={}) {
   });
  }
  return [...mapa.values()].sort((a,b)=>(b.ano??0)-(a.ano??0)||a.nome.localeCompare(b.nome,'pt-BR'));
+}
+
+
+/**
+ * Palmarés mostrado no Arquivo Vivo: vencedores reais anteriores + vencedores
+ * efetivamente registrados pelo jogo. Um prêmio ganho no save ocupa o ano
+ * correspondente sem alterar o banco histórico e sem inventar conquistas.
+ * Prêmios genéricos de artilharia seguem nas estatísticas das competições,
+ * mas não constam mais no catálogo global de distinções individuais.
+ */
+export function vencedoresPremiosComHistorico(c={}) {
+ const simulados=vencedoresPremios(c).filter(x=>chavePremio(x.nome)!=='artilheiro')
+  .map(x=>({...x,origem:'simulacao'}));
+ const anosDoSave=new Set(simulados.filter(x=>Number.isFinite(x.ano))
+  .map(x=>chavePremio(x.nome)+'|'+x.ano));
+ const reais=HISTORICO_REAL_PREMIOS.filter(x=>!anosDoSave.has(chavePremio(x.nome)+'|'+x.ano));
+ return [...simulados,...reais].sort((a,b)=>(b.ano??0)-(a.ano??0)
+  ||a.nome.localeCompare(b.nome,'pt-BR')||a.jogadorNome.localeCompare(b.jogadorNome,'pt-BR'));
 }

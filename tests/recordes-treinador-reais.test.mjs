@@ -53,3 +53,23 @@ test('nova temporada que supera Ferguson gera notícia histórica com fonte',()=
   ano:2049,escopos:[{tipo:'competicao',nome:'Premier League'}]
  }),[]);
 });
+
+test('UEFA exibe recordes de Ancelotti sem inventar jogos por copa ausentes do save',()=>{
+ const escopo='Champions League';
+ const consulta=c=>consultarRecordesFutebol(c,'competicao',escopo).recordes;
+ const real=consulta({});
+ assert.equal(real.find(x=>x.id==='tecnicoJogos').real.valor,218);
+ assert.equal(real.find(x=>x.id==='tecnicoVitorias').real.valor,124);
+ assert.equal(real.find(x=>x.id==='tecnicoTitulos').real.valor,5);
+ const c={nome:'Técnica',tecnico:{temporadas:Array.from({length:6},(_,i)=>({
+  ano:2028+i,clube:'Milan',liga:'italia',ligaNome:'Serie A',tipoEquipe:'clube',
+  jogos:38,vitorias:25,empates:10,derrotas:3,
+  titulosConquistados:['UEFA Champions League'],
+  torneios:[{nome:'UEFA Champions League',campeao:'Milan'}]
+ }))}};
+ const atual=consulta(c);
+ assert.equal(atual.find(x=>x.id==='tecnicoTitulos').simulado.valor,6);
+ assert.equal(atual.find(x=>x.id==='tecnicoTitulos').status,'Superado no save');
+ assert.equal(atual.find(x=>x.id==='tecnicoJogos').simulado,null);
+ assert.equal(atual.find(x=>x.id==='tecnicoVitorias').simulado,null);
+});

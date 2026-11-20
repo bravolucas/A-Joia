@@ -35,7 +35,12 @@ export const METRICAS_RECORDES = Object.freeze([
  {id:'titulosTotal',rotulo:'Maior número de títulos conquistados',categoria:'Títulos'},
  {id:'titulosAno',rotulo:'Mais títulos em uma temporada',categoria:'Títulos'},
  {id:'titulosConsecutivos',rotulo:'Mais títulos consecutivos na mesma competição',categoria:'Títulos'},
- {id:'vicesTotal',rotulo:'Mais vice-campeonatos no universo',categoria:'Títulos'}
+ {id:'vicesTotal',rotulo:'Mais vice-campeonatos no universo',categoria:'Títulos'},
+ {id:'golsClassicosCarreira',rotulo:'Mais gols em clássicos',categoria:'Carreira'},
+ {id:'jogosSelecao',rotulo:'Mais jogos pela seleção',categoria:'Carreira'},
+ {id:'golsSelecao',rotulo:'Mais gols pela seleção',categoria:'Carreira'},
+ {id:'maiorVenda',rotulo:'Maior venda do clube',categoria:'Mercado'},
+ {id:'maiorCompra',rotulo:'Maior contratação do clube',categoria:'Mercado'}
 ]);
 const numeros=['jogos','gols','assist','defesas','cleanSheets'];
 const n=x=>Number.isFinite(x)&&x>=0?x:0;
@@ -54,7 +59,7 @@ function linhaAtleta(linha){
  return {ano:linha[0],clube:linha[1],jogos:linha[2],gols:linha[3],assist:linha[4],
   defesas:linha[5],cleanSheets:linha[6],
   porCompeticao:(linha[10]||[]).map(t=>Array.isArray(t)
-   ?{nome:t[0],jogos:t[1],gols:t[2],assist:t[3],defesas:t[4],cleanSheets:t[5]}
+   ?{nome:t[0],jogos:t[1],gols:t[2],assist:t[3],defesas:t[4],cleanSheets:t[5],golsClassicos:t[7]||0}
    :t)};
 }
 const arquivoDe=c=>c?.tecnico?.universo||c?.universo||{};
@@ -81,6 +86,8 @@ function medirAtleta(mapa,atleta,linhas){
   const id=campo==='cleanSheets'?'semSofrerCarreira':campo+'Carreira';
   atualizar(mapa,id,{valor:totais[campo],atleta:atleta.nome,atletaId:atleta.id,ano:ultima,origem:'save'});
  }
+ const classicos=linhas.reduce((s,l)=>s+(l.porCompeticao||[]).reduce((x,t)=>x+(Number(t.golsClassicos)||0),0),0);
+ atualizar(mapa,'golsClassicosCarreira',{valor:classicos,atleta:atleta.nome,atletaId:atleta.id,ano:ultima,origem:'save'});
 }
 function selecionarPorEscopo(linhas,tipo,nome){
  if(tipo==='clube')return linhas.filter(t=>eIgual(t.clube,nome));
@@ -360,6 +367,19 @@ export function consultarRecordesFutebol(c={},tipo='clube',nome='',temporadas=c?
   medirAtleta(mapa,{id:'voce',nome:c.nome||'Você'},participacoesDaSelecao(c,nome,null,temporadas));
  }
  medirPartidas(mapa,arquivo,tipo,nome);
+ // Mercado (maior venda e contratação) e números pela seleção, preservados pelo arquivo vivo.
+ if(tipo==='clube'){
+  const m=arquivo.mercadoClubes?.[nome];
+  for(const [id,r,txt] of [['maiorVenda',m?.maiorVenda,'para o'],['maiorCompra',m?.maiorCompra,'vindo do']])if(r)
+   atualizar(mapa,id,{valor:Math.round(r.valor/100)/10,unidade:' mi de euros',atleta:r.nome,atletaId:r.id,ano:r.ano,destaque:r.clube?`${txt[0].toUpperCase()+txt.slice(1)} ${r.clube}`:null,origem:'save'});
+ }
+ if(tipo==='selecao'){
+  for(const r of Object.values(arquivo.selecoes?.[nome]?.atletas||{})){
+   const ano=Math.max(...(r.anos||[0]));
+   atualizar(mapa,'jogosSelecao',{valor:r.jogos,atleta:r.nome,atletaId:r.id,ano,origem:'save'});
+   atualizar(mapa,'golsSelecao',{valor:r.gols,atleta:r.nome,atletaId:r.id,ano,origem:'save'});
+  }
+ }
  medirCampanhasETitulos(mapa,arquivo,tipo,nome);
  medirAtuacoes(mapa,arquivo,tipo,nome,c?.nome||'Você');
  const referencias=REFERENCIAS_RECORDES_FUTEBOL.filter(r=>

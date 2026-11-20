@@ -1,0 +1,31 @@
+.pi-palco{display:flex;flex-direction:column;gap:14px;margin:22px 0;padding:18px;border:1px solid #ffffff16;border-radius:16px;background:linear-gradient(160deg,#ffffff0a,#ffffff03)}
+.pi-topo h3{margin:6px 0 4px;font-size:clamp(18px,2.6vw,24px);line-height:1.15}
+.pi-topo p{margin:0;font-size:12px;color:#a9b6c6}
+.pi-criterios{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
+.pi-criterios button{flex:none;min-height:36px;padding:7px 13px;border-radius:999px;border:1px solid #ffffff22;background:#ffffff08;color:#dbe4ee;font-size:12px;font-weight:600;cursor:pointer}
+.pi-criterios button[aria-selected=true]{background:#e6c06a;color:#1b1406;border-color:#e6c06a}
+.pi-podio{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:end}
+.pi-podio li{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;padding:16px 10px 14px;border:1px solid #ffffff18;border-radius:14px;background:#0f1824;min-width:0}
+.pi-podio .pi-posicao-1{order:2;padding-top:24px;border-color:#e6c06a88;background:linear-gradient(180deg,#3a2f12,#121a25)}
+.pi-podio .pi-posicao-2{order:1;border-color:#c9d3df55}
+.pi-podio .pi-posicao-3{order:3;border-color:#c98b5a55}
+.pi-lugar{font-size:11px;font-weight:800;letter-spacing:.06em;color:#e6c06a}
+.pi-avatar{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:#ffffff14;font-size:20px;font-weight:800;color:#fff}
+.pi-posicao-1 .pi-avatar{width:58px;height:58px;font-size:25px;background:#e6c06a33;box-shadow:0 0 0 2px #e6c06a88}
+.pi-podio strong{font-size:14px;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.pi-valor{font-size:26px;line-height:1;color:#fff}.pi-valor small{display:block;font-size:10px;font-weight:500;color:#a9b6c6;margin-top:3px}
+.pi-numeros,.pi-periodo{font-size:11px;color:#a9b6c6;line-height:1.35}
+.pi-selo{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.04em;padding:3px 8px;border-radius:999px;background:#ffffff14;color:#dbe4ee;white-space:nowrap}
+.pi-lenda{background:#e6c06a;color:#1b1406}.pi-idolo{background:#7cdbaf33;color:#a6f0cf}.pi-favorito{background:#7aa7ff26;color:#bcd2ff}
+.pi-lista{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.pi-lista li{display:grid;grid-template-columns:34px 1fr auto 52px;gap:10px;align-items:center;padding:9px 12px;border:1px solid #ffffff12;border-radius:11px}
+.pi-lista li>span:nth-child(2){display:flex;flex-direction:column;min-width:0}
+.pi-lista strong{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pi-lista b{text-align:right;font-size:16px}
+.pi-voce{box-shadow:inset 0 0 0 1px #a7e9ad88}
+.pi-hall{padding:12px 14px;border-radius:12px;background:#ffffff08;border:1px dashed #e6c06a55}
+.pi-hall span{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#e6c06a;font-weight:700}
+.pi-hall p{margin:6px 0 0;font-size:13px;color:#e3e9f1}
+.pi-como summary{cursor:pointer;font-size:12px;color:#a7e9ad;min-height:32px}
+.pi-como p{font-size:12px;color:#a9b6c6;line-height:1.5;margin:4px 0 0}
+@media (max-width:560px){.pi-palco{padding:14px}.pi-podio{grid-template-columns:1fr}.pi-podio li{order:0!important;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left;padding:12px}.pi-podio .pi-posicao-1{padding-top:12px}.pi-valor{margin-left:auto;text-align:right}.pi-lista li{grid-template-columns:30px 1fr 44px}.pi-lista .pi-selo{display:none}}

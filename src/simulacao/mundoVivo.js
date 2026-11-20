@@ -6,7 +6,8 @@ import { CLUBES, LIGAS } from '../dados/data.js';
 import { avaliarClubeNoMundo } from './forcaEquipe.js';
 import { EIXOS_REPUTACAO_CLUBE, evoluirReputacoesClube } from './reputacoesClube.js';
 import { geradorTecnico } from '../treinador/momentosTecnico.js';
-import {avaliarTecnicoClube,manchetesDoAno} from './tecnicosMundo.js';
+import {avaliarTecnicoClube,manchetesDoAno,registrarMercadoDoAno} from './tecnicosMundo.js';
+import {registrarSelecoesDoAno} from './selecoesAtletas.js';
 const limitar=(n,a,b)=>Math.max(a,Math.min(b,n));
 const red=n=>Math.round(n*10)/10||0;
 /** Snapshot serializável: o cadastro nunca é modificado e os mundos de saves distintos não se misturam. */
@@ -181,6 +182,8 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
   // partidas finalizadas, com distribuição fixa e identificada por competição.
   u=registrarPartidasDetalhadasUsuario(u,a);
   u.tecnicos=tecnicos;
+  u.selecoes=registrarSelecoesDoAno(anterior.selecoes,a,c.mundo?.jogadores||[],semente);
+  u.mercadoClubes=registrarMercadoDoAno(anterior.mercadoClubes,(c.mundo?.transferencias||[]).filter(t=>t.temporada===c.mundo?.temporada),a.ano);
   const forcasManchetes=Object.fromEntries(Object.entries(forcasAntes).map(([n,v])=>[n,typeof v==='number'?v:v?.forca]).filter(([,v])=>Number.isFinite(v)));
   const manchetes=manchetesDoAno(a,{forcas:forcasManchetes,transferencias:(c.mundo?.transferencias||[]).filter(t=>t.temporada===c.mundo?.temporada),trocas,cairam:[...cairam]});
   u.noticias=[...manchetes,...(anterior.noticias||[]).filter(n=>n.ano!==a.ano)].slice(0,70);
@@ -202,11 +205,11 @@ export function resumirTabelas(classificacoes) {
 }
 
 // Linhas compactas mantêm décadas de carreiras pequenas também durante a simulação.
-function compactarLinhaAtleta(a){return [a.ano,a.clube,a.jogos,a.gols,a.assist,a.defesas??null,a.cleanSheets??null,a.titulos||[],a.destino||null,a.aposentou?1:0,(a.porCompeticao||[]).map(t=>[t.nome,t.jogos,t.gols,t.assist,t.defesas||0,t.cleanSheets||0])];}
+function compactarLinhaAtleta(a){return [a.ano,a.clube,a.jogos,a.gols,a.assist,a.defesas??null,a.cleanSheets??null,a.titulos||[],a.destino||null,a.aposentou?1:0,(a.porCompeticao||[]).map(t=>[t.nome,t.jogos,t.gols,t.assist,t.defesas||0,t.cleanSheets||0,...(t.jogosClassicos?[t.jogosClassicos,t.golsClassicos||0]:[])])];}
 const historicosLidos=new WeakMap();
 export function historicoAtleta(p){
  if(!p)return [];
  if(historicosLidos.has(p))return historicosLidos.get(p);
- const linhas=(p.historico||[]).map(a=>!Array.isArray(a)?a:{ano:a[0],clube:a[1],jogos:a[2],gols:a[3],assist:a[4],defesas:a[5],cleanSheets:a[6],titulos:a[7],destino:a[8],aposentou:!!a[9],porCompeticao:(a[10]||[]).map(t=>({nome:t[0],jogos:t[1],gols:t[2],assist:t[3],defesas:t[4],cleanSheets:t[5]}))});
+ const linhas=(p.historico||[]).map(a=>!Array.isArray(a)?a:{ano:a[0],clube:a[1],jogos:a[2],gols:a[3],assist:a[4],defesas:a[5],cleanSheets:a[6],titulos:a[7],destino:a[8],aposentou:!!a[9],porCompeticao:(a[10]||[]).map(t=>({nome:t[0],jogos:t[1],gols:t[2],assist:t[3],defesas:t[4],cleanSheets:t[5],...(t.length>6?{jogosClassicos:t[6],golsClassicos:t[7]}:{})}))});
  historicosLidos.set(p,linhas);return linhas;
 }

@@ -24,7 +24,7 @@ export default function RecordesFutebol({c,tipo,nome,temporadas=c?.temporadas||[
  const dados=useMemo(()=>consultarRecordesFutebol(c,tipo,nome,temporadas),[c,tipo,nome,temporadas]);
  const itens=dados.recordes.filter(r=>filtro==='Todos'||r.categoria===filtro);
  const categorias=new Set(dados.recordes.map(r=>r.categoria));
- const filtros=['Todos',...['Carreira','Temporada','Campanhas','Títulos','Partidas','Sequências','Treinador'].filter(x=>categorias.has(x))];
+ const filtros=['Todos',...['Carreira','Temporada','Campanhas','Títulos','Partidas','Sequências','Mercado','Treinador'].filter(x=>categorias.has(x))];
  const eventos=(c?.recordesEventos||[]).filter(e=>e.tipo===tipo&&e.entidade===nome).slice(-12).reverse();
  return <section className="rf-painel" aria-label={'Recordes de '+nome}>
   <div className="rf-topo"><div><span className="hf-eyebrow">ARQUIVO VIVO / RECORDES</span>

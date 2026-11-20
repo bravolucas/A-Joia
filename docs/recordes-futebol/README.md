@@ -94,3 +94,11 @@ Use apenas IDs já definidos em \`METRICAS_RECORDES\`, e registre fonte confiáv
 - As comparações dos treinadores com marcas reais aparecem também quando o save ainda não tem carreira como técnico. Nenhuma referência é criada para uma competição sem fonte.
 - Cobertura de regressão: `tests/indice-recordes.test.mjs`, `tests/recordes-treinador-reais.test.mjs`, `tests/recordes-premier-league.test.mjs` e demais testes de recordes.
 - A verificação isolada feita durante a edição **não equivale** ao `npm test`, ao build do Vite, à execução dos testes Playwright ou à publicação em GitHub Pages.
+
+
+### Treinadores na Champions League — referências UEFA
+
+- Em 04/11/2026, a UEFA registrava **218 jogos e 124 vitórias** de Carlo Ancelotti como treinador na Champions League (fase de grupos/league phase até a final, desde 1992/93): https://www.uefa.com/uefachampionsleague/news/0281-18096ab833ba-60100b78b635-1000--most-champions-league-games-and-/
+- A UEFA identifica **5 títulos** de Carlo Ancelotti como treinador da competição: https://www.uefa.com/news/0275-15407684c988-5b733e851bf5-1000--champions-league-coach-records/
+- O jogo só compara títulos de Champions realmente arquivados do técnico; **não atribui partidas, vitórias e pontos de sua liga nacional às copas**. Essas marcas de jogos/vitórias UEFA aparecem no acervo real até existir estatística verificável de cada jogo de copa dirigido no save.
+- Com estas três referências, a rodada incluiu **18 novas entradas históricas** de técnicos, clubes e jogadores nas bases oficiais da Premier League e UEFA, além das referências já existentes. O acervo continua parcial para outras competições.

@@ -87,3 +87,15 @@ test('temporada mista de treinador inclui também a seleção efetivamente coman
  assert.ok(escopos.some(x=>x.tipo==='selecao'&&x.nome==='Brasil'));
  assert.ok(escopos.some(x=>x.tipo==='competicao'&&x.nome==='Copa América'));
 });
+
+test('persistencia elimina eventos novos repetidos e tolera estrutura de save antigo',()=>{
+ const e={id:'2030|clube|Santos|golsCarreira|voce',ano:2030,titulo:'Novo recorde'};
+ const segundo={id:'2030|clube|Santos|jogosCarreira|voce',ano:2030};
+ const c=guardarQuebrasRecordesFutebol({recordesEventos:[e,null]},[e,segundo,segundo,null,{}]);
+ assert.equal(c.recordesEventos.filter(x=>x?.id===segundo.id).length,1);
+ assert.equal(c.recordesEventos.filter(x=>x?.id===e.id).length,1);
+ assert.equal(c.recordesEventos.length,3);
+ const outra=guardarQuebrasRecordesFutebol({recordesEventos:null},[e,e]);
+ assert.equal(outra.recordesEventos.length,1);
+ assert.deepEqual(guardarQuebrasRecordesFutebol(outra,[e]),outra);
+});

@@ -58,3 +58,4 @@
 /* Nomes longos (ex.: Universidad Católica de Quito) não empurram as escolhas para fora da tela pequena. */
 @media(max-width:420px){.cce-confronto strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:15px;max-width:100%}}
 @media(max-height:650px) and (max-width:600px){.cce-pressao{padding:4px 0}.cce-situacao{margin-bottom:8px}}
+@media(max-height:600px) and (max-width:360px){.cce-situacao>span{display:none}}

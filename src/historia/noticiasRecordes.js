@@ -100,7 +100,12 @@ export function detectarQuebrasRecordesFutebol(antes={},depois={},{
  }).slice(0,Math.max(0,limite));
 }
 export function guardarQuebrasRecordesFutebol(depois,novos=[]){
- const anteriores=depois.recordesEventos||[],ids=new Set(anteriores.map(e=>e.id));
- const adicionados=novos.filter(e=>e?.id&&!ids.has(e.id));
+ const anteriores=Array.isArray(depois.recordesEventos)?depois.recordesEventos:[];
+ const ids=new Set(anteriores.filter(e=>e?.id).map(e=>e.id)),adicionados=[];
+ for(const evento of novos||[]){
+  if(!evento?.id||ids.has(evento.id))continue;
+  ids.add(evento.id);
+  adicionados.push(evento);
+ }
  return {...depois,recordesEventos:[...anteriores,...adicionados].slice(-80)};
 }

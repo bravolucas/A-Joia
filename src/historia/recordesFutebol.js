@@ -1,5 +1,7 @@
 import {NACIONALIDADES} from '../dados/data.js';
 import {REFERENCIAS_RECORDES_FUTEBOL} from '../dados/recordesFutebolReais.js';
+import {recordesReaisTitulosCompeticao} from './recordesTitulosReais.js';
+import {recordesTreinador} from './recordesTreinador.js';
 
 /** Recordes calculados dos fatos arquivados, sem novos sorteios nem alterar o save. */
 export const METRICAS_RECORDES = Object.freeze([
@@ -30,7 +32,7 @@ export const METRICAS_RECORDES = Object.freeze([
  {id:'golsTabelaEdicao',rotulo:'Mais gols em uma edição de liga (classificação)',categoria:'Campanhas'},
  {id:'saldoTabelaEdicao',rotulo:'Maior saldo de gols em uma edição de liga',categoria:'Campanhas'},
  {id:'invictoTabelaEdicao',rotulo:'Mais jogos em campanha invicta de liga',categoria:'Campanhas'},
- {id:'titulosTotal',rotulo:'Mais títulos conquistados no universo',categoria:'Títulos'},
+ {id:'titulosTotal',rotulo:'Maior número de títulos conquistados',categoria:'Títulos'},
  {id:'titulosAno',rotulo:'Mais títulos em uma temporada',categoria:'Títulos'},
  {id:'titulosConsecutivos',rotulo:'Mais títulos consecutivos na mesma competição',categoria:'Títulos'},
  {id:'vicesTotal',rotulo:'Mais vice-campeonatos no universo',categoria:'Títulos'}
@@ -42,6 +44,7 @@ const eIgual=(a,b)=>canon(a)===canon(b);
 const ligaAlias={ligadoscampeoes:'championsleague',uefachampionsleague:'championsleague',
  copadomundofifa:'copadomundo',fifaworldcup:'copadomundo',premierleagueinglesa:'premierleague'};
 const competicaoIgual=(a,b)=>((x,y)=>(ligaAlias[x]||x)===(ligaAlias[y]||y))(canon(a),canon(b));
+const chaveCompeticao=x=>ligaAlias[canon(x)]||canon(x);
 const paisId=nac=>{
  const encontrado=NACIONALIDADES.find(p=>p.id===nac||eIgual(p.label,nac));
  return encontrado?.label||nac||'';
@@ -215,7 +218,7 @@ function medirCampanhasETitulos(mapa,arquivo,tipo,nome){
    }
   }
   // Apenas uma edicao por temporada e competicao.
-  const chaveEdicao=edicao.ano+'|'+canon(edicao.nome);
+  const chaveEdicao=edicao.ano+'|'+chaveCompeticao(edicao.nome);
   if(edicao.campeao&&!vistos.has(chaveEdicao)){
    vistos.add(chaveEdicao);
    const campeao=edicao.campeao;
@@ -228,9 +231,9 @@ function medirCampanhasETitulos(mapa,arquivo,tipo,nome){
     const anual=porAno.get(anoChave)||{valor:0,ano:edicao.ano,atleta:campeao};
     porAno.set(anoChave,{...anual,valor:anual.valor+1});
    }
-   if(!edicoesPorCompeticao.has(canon(edicao.nome)))
-    edicoesPorCompeticao.set(canon(edicao.nome),[]);
-   edicoesPorCompeticao.get(canon(edicao.nome)).push({ano:edicao.ano,campeao});
+   if(!edicoesPorCompeticao.has(chaveCompeticao(edicao.nome)))
+    edicoesPorCompeticao.set(chaveCompeticao(edicao.nome),{nome:edicao.nome,edicoes:[]});
+   edicoesPorCompeticao.get(chaveCompeticao(edicao.nome)).edicoes.push({ano:edicao.ano,campeao});
   }
   if(edicao.vice&&!vicesVistos.has(chaveEdicao)){
    vicesVistos.add(chaveEdicao);
@@ -249,13 +252,14 @@ function medirCampanhasETitulos(mapa,arquivo,tipo,nome){
   atualizar(mapa,'titulosAno',{...reg,equipe:reg.atleta,origem:'save'});
  for(const reg of vices.values())
   atualizar(mapa,'vicesTotal',{...reg,equipe:reg.atleta,origem:'save'});
- for(const [competicao,edicoes]of edicoesPorCompeticao){
+ for(const {nome:competicao,edicoes}of edicoesPorCompeticao.values()){
   edicoes.sort((a,b)=>a.ano-b.ano);
-  let anterior=null,serie=0;
+  let anterior=null,anoAnterior=null,serie=0;
   for(const edicao of edicoes){
-   if(anterior&&eIgual(anterior,edicao.campeao))serie++;
+   const intervalo=/^(copadomundo|copaamerica|eurocopa|mundialdeclubes)$/.test(canon(competicao))?4:1;
+   if(anterior&&eIgual(anterior,edicao.campeao)&&edicao.ano===anoAnterior+intervalo)serie++;
    else serie=1;
-   anterior=edicao.campeao;
+   anterior=edicao.campeao;anoAnterior=edicao.ano;
    if(serie<2)continue;
    if(tipo!=='competicao'&&!eIgual(edicao.campeao,nome))continue;
    atualizar(mapa,'titulosConsecutivos',{valor:serie,ano:edicao.ano,
@@ -283,7 +287,9 @@ function medirAtuacoes(mapa,arquivo,tipo,nome,atletaNome){
 }
 /** Formato estável: não grava nada, portanto reabrir, importar ou voltar não duplica marcas. */
 export function consultarRecordesFutebol(c={},tipo='clube',nome='',temporadas=c?.temporadas||[]){
- if(!['clube','selecao','competicao'].includes(tipo))return {tipo,nome,recordes:[],desde:null};
+ if(!['clube','selecao','competicao','treinador'].includes(tipo))return {tipo,nome,recordes:[],desde:null};
+ if(tipo==='treinador')return {tipo,nome,recordes:recordesTreinador(c,tipo,nome),
+  desde:c.tecnico?.temporadas?.[0]?.ano??null,cobertura:'Somente resultados documentados deste treinador no save.'};
  const arquivo=arquivoDe(c),mapa=new Map();
  if(tipo==='clube'||tipo==='competicao'){
   const atletas=Object.values(arquivo.atletas||{});
@@ -295,9 +301,12 @@ export function consultarRecordesFutebol(c={},tipo='clube',nome='',temporadas=c?
    medirAtleta(mapa,{id:p.id,nome:p.nome||'Jogador'},linhas);
   }
   // Saves anteriores ao Arquivo Vivo e carreira ainda não arquivada.
-  if(!temUsuario&&temporadas?.length){
+  // Modo Treinador guarda campanhas com jogos e vitórias, NÃO jogos do
+  // atleta. Nunca computar temporadas do técnico como partidas do jogador.
+  const temporadasAtleta=c.tecnico?(c.temporadas||[]):temporadas;
+  if(!temUsuario&&temporadasAtleta?.length){
    medirAtleta(mapa,{id:'voce',nome:c.nome||'Você'},
-    selecionarPorEscopo(temporadas,tipo,nome));
+    selecionarPorEscopo(temporadasAtleta,tipo,nome));
   }
   if(tipo==='competicao'&&competicaoIgual(nome,'Copa do Mundo'))
    medirAtleta(mapa,{id:'voce',nome:c.nome||'Você'},
@@ -310,14 +319,15 @@ export function consultarRecordesFutebol(c={},tipo='clube',nome='',temporadas=c?
  medirAtuacoes(mapa,arquivo,tipo,nome,c?.nome||'Você');
  const referencias=REFERENCIAS_RECORDES_FUTEBOL.filter(r=>
   r.tipo===tipo&&(tipo==='competicao'?competicaoIgual(r.nome,nome):eIgual(r.nome,nome)));
- const historicas=new Map(referencias.map(r=>[r.id,r]));
+ const historicas=new Map([...referencias,...recordesReaisTitulosCompeticao(tipo,nome)].map(r=>[r.id,r]));
  const recordes=METRICAS_RECORDES.filter(m=>mapa.has(m.id)||historicas.has(m.id)).map(m=>{
   const real=historicas.get(m.id)||null,simulado=mapa.get(m.id)||null;
-  const ultrapassou=!!real&&!!simulado&&simulado.valor>real.valor;
-  const igualou=!!real&&!!simulado&&simulado.valor===real.valor;
+  const comparavel=real?.cobertura!=='recorte';
+  const ultrapassou=!!real&&comparavel&&!!simulado&&simulado.valor>real.valor;
+  const igualou=!!real&&comparavel&&!!simulado&&simulado.valor===real.valor;
   return {id:m.id,rotulo:m.rotulo,categoria:m.categoria,real,simulado,
-   status:ultrapassou?'Superado no save':igualou?'Igualado no save':real?'Recorde real preservado':'Recorde do save'};
+   status:real?.cobertura==='recorte'?'Referência de período documentado':ultrapassou?'Superado no save':igualou?'Igualado no save':real?'Recorde real preservado':'Recorde do save'};
  });
- return {tipo,nome,recordes,desde:arquivo.desde??temporadas?.[0]?.ano??null,
+ return {tipo,nome,recordes:[...recordes,...recordesTreinador(c,tipo,nome)],desde:arquivo.desde??temporadas?.[0]?.ano??null,
   cobertura:'Referências reais auditadas e partidas/temporadas armazenadas neste save. Lacunas não são preenchidas por estimativas.'};
 }

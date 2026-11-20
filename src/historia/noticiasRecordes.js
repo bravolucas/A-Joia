@@ -8,16 +8,43 @@ const deduplicar=lista=>[...new Map(lista.filter(x=>x?.nome).map(x=>[x.tipo+'|'+
 export function escoposRecordesDaTemporada(c={},a={}){
  const clube=a.clube?.nome||a.clube||a.clubeNome;
  const pais=a.tipoEquipe==='selecao'?clube:nomePais(c.nac||c.nacionalidade);
- const comp=[a.ligaNome,...(a.porCompeticao||[]).filter(x=>(x.jogos||0)>0).sort((x,y)=>(y.jogos||0)-(x.jogos||0)).map(x=>x.nome)];
+ const comp=[a.ligaNome,
+  ...(a.porCompeticao||[]).filter(x=>(x.jogos||0)>0)
+   .sort((x,y)=>(y.jogos||0)-(x.jogos||0)).map(x=>x.nome),
+  // O Modo Treinador registra copas em torneios, nao em porCompeticao.
+  ...(a.torneios||[]).filter(x=>x?.nome&&(x.faseUsuario||x.jogosUsuario?.length||x.campeao===clube))
+   .map(x=>x.nome)];
  if(a.selecao?.convocado)comp.push(a.selecao.nome||a.selecao.competicao);
  return deduplicar([
   ...(clube&&a.tipoEquipe!=='selecao'?[{tipo:'clube',nome:clube}]:[]),
+  ...(c.tecnico&&(c.nome||c.tecnico.nome)
+    ?[{tipo:'treinador',nome:c.nome||c.tecnico.nome}]:[]),
   ...(pais?[{tipo:'selecao',nome:pais}]:[]),
+  ...(a.torneios||[]).filter(x=>x?.selecao&&
+   (x.faseUsuario||x.jogosUsuario?.length||x.campeao===x.selecao))
+   .map(x=>({tipo:'selecao',nome:x.selecao})),
   ...comp.filter(Boolean).map(nome=>({tipo:'competicao',nome}))
  ]).slice(0,8);
 }
 const prioridade=e=>(e.historico?100:0)+(e.atletaId==='voce'?25:0)+
-  (['golsCarreira','golsTemporada','jogosCarreira','golsAtletaPartida'].includes(e.metrica)?10:0);
+  (['golsCarreira','golsTemporada','jogosCarreira','golsAtletaPartida'].includes(e.metrica)?10:0)+
+  (['tecnicoVitorias','tecnicoTitulos'].includes(e.metrica)?35:
+   ['tecnicoJogos','tecnicoVitoriasAno','tecnicoAproveitamento'].includes(e.metrica)?20:0);
+/** Acumulados do mesmo recordista crescem naturalmente a cada ano.
+ * Anunciar apenas marcos relevantes, mudanças de líder ou superação real. */
+const MARCOS_ACUMULADOS={
+ jogosCarreira:[50,100,200,500,750,1000],golsCarreira:[25,50,100,200,300,500,1000],
+ assistCarreira:[25,50,100,200,300],defesasCarreira:[50,100,200,500,1000],
+ semSofrerCarreira:[25,50,100,200,500],titulosTotal:[2,5,10,20,30],
+ vicesTotal:[2,5,10,20],tecnicoJogos:[50,100,200,500,1000],
+ tecnicoVitorias:[25,50,100,200,500],tecnicoPontos:[100,250,500,1000,2000],
+ tecnicoTemporadas:[5,10,20,30],tecnicoTitulos:[2,5,10,20],
+ tecnicoAcessos:[2,5,10],tecnicoMetas:[5,10,20,30],
+ tecnicoRebaixamentos:[],tecnicoDemissoes:[],tecnicoAproveitamento:[]
+};
+const identidade=r=>r?.atletaId!=null?String(r.atletaId):String(r?.atleta||'');
+const marcoCruzado=(id,antes,depois)=>[...(MARCOS_ACUMULADOS[id]||[])]
+ .filter(n=>antes<n&&depois>=n).at(-1)||null;
 /** Compara dois snapshots do mesmo save sem mutacao. Sem baseline no save nao
  * produz noticias, exceto ao igualar ou superar marca real verificavel. */
 export function detectarQuebrasRecordesFutebol(antes={},depois={},{
@@ -33,16 +60,22 @@ export function detectarQuebrasRecordesFutebol(antes={},depois={},{
   for(const r of atual.recordes){
    const novo=r.simulado,velho=antigos.get(r.id)?.simulado;
    if(!novo||!Number.isFinite(novo.valor)||novo.valor<=0||novo.ano!==ano)continue;
-   const real=r.real;
+   // Um recorte documental nao autoriza manchete de recorde mundial quebrado.
+   const real=r.real?.cobertura==='recorte'?null:r.real;
    const superouReal=!!real&&novo.valor>real.valor&&(velho?.valor??0)<=real.valor;
    const igualouReal=!!real&&novo.valor===real.valor&&(velho?.valor??0)<real.valor;
    const superouSave=!!velho&&novo.valor>velho.valor;
-   if(!superouReal&&!igualouReal&&!superouSave)continue;
+   const mesmoRecordista=!!velho&&identidade(novo)===identidade(velho);
+   const marco=superouSave&&mesmoRecordista
+    ?marcoCruzado(r.id,velho.valor,novo.valor):null;
+   if(!superouReal&&!igualouReal&&(!superouSave||
+     (mesmoRecordista&&Object.hasOwn(MARCOS_ACUMULADOS,r.id)&&!marco)))continue;
    const historico=superouReal||igualouReal;
    const tipoMarca=superouReal?'superou':igualouReal?'igualou':'quebrou';
    const protagonista=novo.atleta||((r.categoria==='Partidas'||r.categoria==='Sequências')?nome:'Um atleta');
    const titulo=historico?
     protagonista+' '+tipoMarca+' recorde histórico de '+r.rotulo.toLowerCase():
+    marco?protagonista+' alcança marco de '+marco+' em '+r.rotulo.toLowerCase()+' · '+nome:
     'Novo recorde de '+r.rotulo.toLowerCase()+' em '+nome;
    const anteriorValor=historico?real.valor:velho.valor;
    const detalhe=protagonista+': '+novo.valor+' ('+nome+', '+ano+'). '+
@@ -53,6 +86,7 @@ export function detectarQuebrasRecordesFutebol(antes={},depois={},{
     ano,tipo,entidade:nome,metrica:r.id,rotulo:r.rotulo,
     atleta:novo.atleta||protagonista,atletaId:novo.atletaId||null,
     valor:novo.valor,anterior:anteriorValor,anteriorAtleta:(historico?real.atleta:velho.atleta)??null,
+    ...(marco&&!historico?{marco}:{}),
     historico,igualou:igualouReal,fonte:historico?(real.fonte??null):null,
     titulo,detalhe,prioridade:prioridade({historico,atletaId:novo.atletaId,metrica:r.id})
    });

@@ -52,3 +52,31 @@ Use apenas IDs já definidos em \`METRICAS_RECORDES\`, e registre fonte confiáv
 - Notícias no instante do lance (a primeira entrega notifica no fechamento anual).
 - Ampliar a base com recordes de idade, contratos, transferências, treinadores, pontuações de ligas e sequências interanuais, apenas quando os jogos armazenarem a informação necessária.
 - Validação integral em CI e publicação GitHub Pages.
+
+
+## Expansão de campanhas e recordes de títulos
+
+- As classificações arquivadas nas edições de **liga** alimentam recordes de pontos, vitórias, gols marcados, saldo e campanhas sem derrota. Esses números vêm da tabela oficial simulada; não são estimados somando apenas partidas parciais.
+- Os campeões e vices arquivados geram total de títulos, vice-campeonatos, títulos numa temporada e séries de conquistas consecutivas. Série anual exige anos consecutivos; nas competições quadrienais reconhecidas, a janela respeita quatro anos. Lacunas no acervo simulado interrompem a sequência.
+- Criado \`src/historia/recordesTitulosReais.js\`, que lê os **dados históricos de campeões já cadastrados no projeto** (ligas, copas nacionais, torneios da UEFA, CONMEBOL, seleções e estaduais). Não há estatísticas fictícias nem resultados inseridos retroativamente no save.
+- Referências com cobertura \`recorte\` exibem um alerta explícito, **não são comparadas como recorde histórico absoluto e não disparam manchetes de quebra mundial**. Um período documentado é diferente do recorde de todos os tempos.
+- As equipes recordistas podem ser abertas pelo link no Arquivo Vivo, e a interface oferece filtros **Campanhas** e **Títulos**, além das categorias individuais.
+- Adicionados três testes de classificação/títulos (\`tests/recordes-futebol.test.mjs\`) e quatro testes do acervo real (\`tests/recordes-titulos-reais.test.mjs\`).
+- O fluxo CI já existente em \`.github/workflows/ci.yml\` executa automaticamente os arquivos \`tests/*.test.mjs\` e o build; \`.github/workflows/deploy.yml\` só publica uma versão aprovada e correspondente ao último commit. O histórico de execução dos jobs e o deploy não foram confirmados nesta sessão.
+
+
+## Revisão de recordes do treinador e manchetes (19/11/2026)
+
+- `src/historia/recordesTreinador.js` calcula estatísticas de temporadas efetivamente arquivadas, separando a **carreira do treinador** dos jogos de atletas e dos demais treinadores do clube.
+- O perfil do treinador no Arquivo Vivo mostra jogos, vitórias, pontos, aproveitamento acumulado, temporadas, títulos, acessos, rebaixamentos, metas e demissões efetivamente registrados.
+- Consultas por **competição** distinguem jogos de liga de conquistas em copas: uma taça da Copa do Brasil, Champions League ou Libertadores não herda vitórias e pontos do Brasileirão.
+- Numa temporada mista, os títulos de seleção são atribuídos à respectiva seleção, não ao clube em que o técnico trabalhava. Estatísticas de liga tampouco são transferidas para a seleção.
+- `src/historia/noticiasRecordes.js` acompanha as copas disputadas pelo treinador e também o acumulado de sua carreira entre diferentes clubes. O reconhecimento de países comandados leva em conta os torneios internacionais arquivados.
+- Como acumulados tendem a subir todo ano, manchetes sobre o **mesmo recordista** requerem marcos relevantes (por exemplo, 25, 50 e 100 vitórias ou gols, conforme a métrica); superar um recordista anterior ou uma marca histórica continua sendo noticiável normalmente.
+- `tests/recordes-treinador.test.mjs` e `tests/noticias-recordes.test.mjs` incluem regressões de separação de escopos, temporadas mistas, marcos de carreira e notícias sem duplicações. Testes isolados não garantem build integral ou aprovação da publicação, que dependem da CI.
+
+### Pendências
+
+- Manter o cadastro de recordes de jogadores e treinadores reais atualizado com fontes verificáveis e recortes históricos.
+- Validar o build de produção e o navegador (desktop e celular) em GitHub Actions / GitHub Pages.
+- Conferir custo computacional de uma carreira longa no dispositivo real e verificar o tempo de encerramento de temporada.

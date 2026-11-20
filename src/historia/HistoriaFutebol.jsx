@@ -128,6 +128,7 @@ function PerfilTreinador({c,nome}){
         <LinkEntidade tipo="competicao" nome={titulo.nome}/></React.Fragment>):'—'}</td>
      </tr>;
     })}</tbody></table></div>:<p className="hf-vazio">A primeira temporada concluída será arquivada aqui.</p>}
+   <RecordesFutebol c={c} tipo="treinador" nome={atual} temporadas={temporadas}/>
  </section>;
 }
 export function HistoriaDialog({c,nome,temporadas,onFechar,competicaoInicial,entradaInicial}){

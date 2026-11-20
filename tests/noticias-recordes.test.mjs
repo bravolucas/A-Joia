@@ -49,3 +49,41 @@ test('escopos priorizam clube, pais e competicoes efetivamente disputadas',()=>{
  assert.deepEqual(e,[{tipo:'clube',nome:'Santos'},{tipo:'selecao',nome:'Brasil'},
   {tipo:'competicao',nome:'Brasileirão'},{tipo:'competicao',nome:'Copa do Brasil'}]);
 });
+
+test('acumulados do mesmo atleta não geram notícias todos os anos sem marco significativo',()=>{
+ const antes=arquivo([linha(2027,'Santos',10)]);
+ const depois=arquivo([linha(2027,'Santos',10),linha(2028,'Santos',11)]);
+ const eventos=detectarQuebrasRecordesFutebol(antes,depois,opts);
+ assert.equal(eventos.some(x=>x.metrica==='golsCarreira'),false);
+ assert.ok(eventos.some(x=>x.metrica==='golsTemporada'));
+});
+test('centenários e marcos de carreira preservam notícia sem inventar novo líder',()=>{
+ const antes=arquivo([linha(2027,'Santos',24)]);
+ const depois=arquivo([linha(2027,'Santos',24),linha(2028,'Santos',2)]);
+ const eventos=detectarQuebrasRecordesFutebol(antes,depois,opts);
+ const marco=eventos.find(x=>x.metrica==='golsCarreira');
+ assert.equal(marco.marco,25);
+ assert.ok(marco.titulo.includes('marco de 25'));
+ assert.equal(marco.valor,26);
+});
+test('escopo de encerramento do treinador contempla copas realmente disputadas',()=>{
+ const escopos=escoposRecordesDaTemporada({nome:'Técnico',nac:'BRA'},{
+  clube:'Santos',tipoEquipe:'clube',ligaNome:'Brasileirão',
+  torneios:[{nome:'Copa do Brasil',faseUsuario:'Quartas'},
+   {nome:'Libertadores',campeao:'Santos'},
+   {nome:'Copa fictícia',faseUsuario:null}]
+ });
+ assert.ok(escopos.some(x=>x.tipo==='competicao'&&x.nome==='Copa do Brasil'));
+ assert.ok(escopos.some(x=>x.tipo==='competicao'&&x.nome==='Libertadores'));
+ assert.equal(escopos.some(x=>x.nome==='Copa fictícia'),false);
+});
+
+test('temporada mista de treinador inclui também a seleção efetivamente comandada',()=>{
+ const escopos=escoposRecordesDaTemporada({nome:'Técnico',nac:'ARG',tecnico:{nome:'Técnico'}},{
+  clube:'Santos',tipoEquipe:'clube',ligaNome:'Brasileirão',
+  torneios:[{nome:'Copa América',selecao:'Brasil',faseUsuario:'Campeão'}]
+ });
+ assert.ok(escopos.some(x=>x.tipo==='treinador'&&x.nome==='Técnico'));
+ assert.ok(escopos.some(x=>x.tipo==='selecao'&&x.nome==='Brasil'));
+ assert.ok(escopos.some(x=>x.tipo==='competicao'&&x.nome==='Copa América'));
+});

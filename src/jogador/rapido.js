@@ -42,8 +42,9 @@ import {
 } from "../dados/data.js";
 import {
   rand, pick, clampR, clamp, poisson, calcOVR, evoluirAtributos,
-  gerarMundoJogadores, simularTemporadaMundo, rankingBolaDeOuro, nomeMundo,
+  gerarMundoJogadores, simularTemporadaMundo, rankingBolaDeOuro, scoreBolaDeOuro, pesoTitulosBolaDeOuro, nomeMundo,
 } from "../comum/lib.js";
+import {registrarPremioCalendario} from '../completo/mundoTemporada.js';
 
 export const VERSAO_RAPIDO = 1;
 export const CHAVE_SAVE_RAPIDO = "ajoia_rapido_v1";
@@ -414,15 +415,16 @@ function temporadaDoRival(r0, idade, meu) {
   if (chance(clampR(0.05 + (clube.forca - 76) * 0.01, 0.02, 0.2))) { titulos.push("copa"); r.titulos.copa += 1; }
   if (clube.forca >= 82 && chance(clampR((clube.forca - 82) * 0.025, 0.02, 0.2))) { titulos.push("continental"); r.titulos.continental += 1; }
   if (anoDeCopa(meu.ano) && r.ovr >= 82 && !meu.ganhouCopa && chance(clampR((r.ovr - 82) * 0.012, 0, 0.12))) { titulos.push("copaMundo"); r.titulos.copaMundo += 1; }
-  // Bola de Ouro: só se você não levou
-  let bola = null;
-  if (jogos >= 20 && r.ovr >= 85) {
-    const score = r.ovr + gols * 0.12 + titulos.length * 2 + rnd() * 4;
-    if (meu.bolaPos !== 1 && score >= 96 && chance(0.45)) { bola = 1; r.titulos.bolaOuro += 1; r.top3 += 1; } else if (score >= 92) { bola = rand(2, 3); r.top3 += 1; } else if (score >= 88) bola = rand(4, 10);
-  }
+  // O rival disputa a MESMA classificação de todos os atletas. Nenhum
+  // sorteio independente pode criar um segundo campeão da Bola de Ouro.
+  const nota = +clampR(6.1 + (r.ovr - 70) * 0.045
+    + (gols + assist) / Math.max(1, jogos) * 1.4, 5.3, 9.6).toFixed(2);
+  const cleanSheets = r.posicao === 'GOL' ? Math.round(jogos * 0.3) : 0;
+  const defesas = r.posicao === 'GOL' ? Math.round(jogos * 3.4) : 0;
   r.totais.jogos += jogos; r.totais.gols += gols; r.totais.assist += assist;
   if ((idade >= 35 && r.ovr < 80) || idade >= 38) r.aposentado = true;
-  return { r, linha: { clube: r.clube, mudou, ovr: r.ovr, jogos, gols, assist, titulos, bola, aposentou: r.aposentado } };
+  return { r, linha: { clube:r.clube, mudou, ovr:r.ovr, jogos, gols, assist,
+    nota, defesas, cleanSheets, titulos, bola:null, aposentou:r.aposentado } };
 }
 
 export function pontosRival(r) {
@@ -1889,17 +1891,59 @@ function fecharTemporadaBase(c0, card0) {
   simularDefesas(c,card);
   registrarEstatisticasCompeticoes(c,card);
   registrarAnoHistoria(c,card);
-  c.mundo = estatisticasDasPartidas(simularTemporadaMundo(c.mundo,Math.random,{clubes:clubesDoMundo(antes),perfis:antes.universo?.clubes,ano:card.ano}),antes.mundo,card,c.codigo);
+  // Entregue ao elenco da IA os títulos apurados pelo próprio calendário.
+  // O crédito individual exige participação efetiva na competição campeã.
+  const campeoesCalendarioMundo=(c.historiaFutebol?.titulos||[])
+    .filter(t=>t.ano===card.ano&&t.clube&&t.nome&&
+      ['liga','copa','continental','mundial','estadual'].includes(t.tipo))
+    .map(t=>({ano:t.ano,nome:t.nome,clube:t.clube,tipo:t.tipo}));
+  // O calendário fecha primeiro. Só depois dos placares definitivos
+  // registramos o único vencedor oficial (inclusive quando é o usuário).
+  c.mundo = estatisticasDasPartidas(simularTemporadaMundo(c.mundo,Math.random,{
+    clubes:clubesDoMundo(antes),perfis:antes.universo?.clubes,ano:card.ano,
+    registrarPremio:false,
+  }),antes.mundo,{...card,campeoesCalendarioMundo},c.codigo);
   atualizarRecordesUniverso(c,card,antes.mundo);
-  const PESO_BOLA = { estadual:0.2, copaMundo: 3, continental: 2, continentalSelecao: 2, mundial: 1, segunda: 0 };
-  const pesoTit = card.titulos.reduce((s, t) => s + (PESO_BOLA[t.tipo] ?? 1), 0);
-  const meuCard = { porCompeticao:card.porCompeticao,clube: card.clube, posicao: c.posicao, ovr: card.ovr, gols: card.gols, assist: card.assist, nota: card.nota || 6, ligaMult: ligaDe(card.ligaId).mult };
-  let ranking = rankingBolaDeOuro(c.mundo, meuCard, c.nome, pesoTit);
-  const bonusFama = somaTraco(c, "bolaBonus") + c.fama * 0.04 + (fx.bola || 0) + (card.copa?.craqueCopa ? 3 : 0);
-  ranking = ranking.map((r) => (r.voce ? { ...r, score: r.score + bonusFama } : r)).sort((a, b) => b.score - a.score).map((x, i) => ({ ...x, pos: i + 1 }));
-  const eu = ranking.find((r) => r.voce);
-  card.bola = { pos: card.jogos >= 10 ? eu?.pos ?? 999 : 999, top: ranking.filter((r) => card.jogos >= 10 || !r.voce).slice(0, 3).map((r) => ({ nome: r.voce ? c.nome : r.nome, clube: r.clube, voce: r.voce })) };
-  if (card.bola.pos === 1) card.titulos.push({ tipo: "bolaOuro", nome: "Bola de Ouro" });
+  const pesoTit = pesoTitulosBolaDeOuro(card.titulos);
+  const jogosDoClube=(card.classificacoesMundo?.[card.ligaId]?.jogos||[])
+    .filter(j=>j.casa===card.clube||j.fora===card.clube);
+  const csLiga=jogosDoClube.filter(j=>j.casa===card.clube
+    ?j.golsFora===0:j.golsCasa===0).length;
+  const csJogador=c.posicao==='GOL'
+    ?(Number.isFinite(card.cleanSheets)?card.cleanSheets
+      :Math.min(card.jogos,Math.round(csLiga*(card.share??0))))
+    :0;
+  const meuCard = {porCompeticao:card.porCompeticao,clube:card.clube,posicao:c.posicao,
+    ovr:card.ovr,gols:card.gols,assist:card.assist,nota:card.nota||6,
+    ligaMult:ligaDe(card.ligaId).mult,jogos:card.jogos,
+    defesas:card.defesas,cleanSheets:csJogador};
+  let ranking = rankingBolaDeOuro(c.mundo,meuCard,c.nome,pesoTit);
+  const rivalTemporada = c.rival ? temporadaDoRival(c.rival,card.idade,{ano:card.ano,ganhouCopa:card.titulos.some(t=>t.tipo==='copaMundo')}) : null;
+  if (rivalTemporada?.linha?.jogos >= 10 &&
+      !ranking.some(p=>!p.voce&&p.nome===rivalTemporada.r.nome)) {
+    const r = rivalTemporada.r, linha = rivalTemporada.linha;
+    ranking.push({
+      nome:r.nome,clube:linha.clube,posicao:r.posicao,ovr:linha.ovr,
+      gols:linha.gols,assist:linha.assist,nota:linha.nota,rival:true,voce:false,
+      score:scoreBolaDeOuro({
+        ovr:linha.ovr,gols:linha.gols,assist:linha.assist,nota:linha.nota,
+        jogos:linha.jogos,defesas:linha.defesas,cleanSheets:linha.cleanSheets,
+        posicao:r.posicao,ligaMult:ligaDe(clubeDe(linha.clube).liga).mult,
+        titulos:pesoTitulosBolaDeOuro(linha.titulos.map(tipo=>({tipo}))),
+      }),
+    });
+  }
+  const bonusFama = somaTraco(c,"bolaBonus") + c.fama * 0.04
+    + (fx.bola||0) + (card.copa?.craqueCopa?3:0);
+  ranking = ranking.map(r=>r.voce?{...r,score:r.score+bonusFama}:r)
+    .sort((a,b)=>b.score-a.score).map((r,i)=>({...r,pos:i+1}));
+  const eu = ranking.find(r=>r.voce);
+  card.bola = {
+    pos:eu?.pos??999,
+    top:ranking.slice(0,3).map(r=>({nome:r.nome,clube:r.clube,voce:r.voce,...(r.id!=null?{id:r.id}:{})})),
+  };
+  c.mundo = registrarPremioCalendario(c.mundo,ranking[0]?{...ranking[0],ano:card.ano}:null);
+  if (card.bola.pos === 1) card.titulos.push({tipo:"bolaOuro",nome:"Bola de Ouro"});
   // Bota de Ouro: gols × peso da liga contra o artilheiro do resto da Europa/mundo
   if (c.posicao !== "GOL" && card.jogos >= 10) {
     const multLiga = ligaDe(card.ligaId).mult;
@@ -2081,15 +2125,17 @@ function fecharTemporadaBase(c0, card0) {
   if (card.ovrDepois >= c.picoOvr || !c.picoAttrs) c.picoAttrs = { ...c.attrs };
   c.picoOvr = Math.max(c.picoOvr, card.ovr, card.ovrDepois);
 
-  // o rival também jogou a temporada dele
-  if (c.rival) {
-    const ganhouCopa = card.titulos.some((t) => t.tipo === "copaMundo");
-    const { r, linha } = temporadaDoRival(c.rival, card.idade, { ano: card.ano, bolaPos: card.bola.pos, ganhouCopa });
-    c.rival = r;
-    if (linha) {
-      card.rival = linha;
-      if (linha.bola === 1) card.destaques.push(`${r.nome}, seu rival de geração, ganhou a Bola de Ouro`);
-      else if (linha.bola && card.bola.pos < linha.bola) card.destaques.push(`Você terminou à frente de ${r.nome} na Bola de Ouro`);
+  // O histórico da rivalidade recebe a classificação REAL do mesmo ranking.
+  if (rivalTemporada) {
+    const {r,linha} = rivalTemporada;
+    const posRival = ranking.find(p=>p.rival || (!p.voce&&p.nome===r.nome))?.pos??null;
+    if(posRival===1)r.titulos.bolaOuro=(r.titulos.bolaOuro||0)+1;
+    if(posRival!=null&&posRival<=3)r.top3=(r.top3||0)+1;
+    c.rival=r;
+    if(linha){
+      card.rival={...linha,bola:posRival};
+      if(posRival===1)card.destaques.push(`${r.nome}, seu rival de geração, ganhou a Bola de Ouro`);
+      else if(posRival&&card.bola.pos<posRival)card.destaques.push(`Você terminou à frente de ${r.nome} na Bola de Ouro`);
     }
   }
   card.valorAntes = valorAtual(c0);

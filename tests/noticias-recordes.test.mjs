@@ -18,6 +18,7 @@ test('recordes simulados quebrados aparecem uma vez, com marca anterior, autor e
  assert.ok(eventos.some(x=>x.metrica==='golsCarreira'&&x.valor===25&&x.anterior===10));
  assert.ok(eventos.some(x=>x.metrica==='golsTemporada'&&x.anterior===10));
  assert.ok(eventos.every(x=>x.ano===2028&&x.entidade==='Santos'&&x.titulo&&x.detalhe));
+ assert.deepEqual(JSON.parse(JSON.stringify(eventos)),eventos,'eventos de recordes devem sobreviver ao JSON sem perda de campos');
  assert.deepEqual(detectarQuebrasRecordesFutebol(depois,depois,opts),[]);
  const salvo=guardarQuebrasRecordesFutebol({recordesEventos:eventos},eventos);
  assert.equal(salvo.recordesEventos.length,eventos.length);

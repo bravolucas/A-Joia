@@ -41,7 +41,9 @@ export function creditarCampeoesCalendario(estado,card){
 /** O prêmio usa o ranking recalculado após distribuir as estatísticas dos jogos. */
 export function registrarPremioCalendario(mundo,vencedor){
  if(!mundo||!vencedor||mundo.historicoBolaDeOuro?.some(t=>t.temporada===mundo.temporada))return mundo;
- const registro={temporada:mundo.temporada,nome:vencedor.nome,clube:vencedor.clube,ovr:vencedor.ovr,gols:vencedor.gols,assist:vencedor.assist,...(vencedor.voce?{voce:true}:{id:vencedor.id})};
+ const anoAtleta=mundo.jogadores?.find(p=>vencedor.id!=null&&p.id===vencedor.id)?.historicoTemporadas?.find(r=>Array.isArray(r)&&r[0]===mundo.temporada)?.[1];
+ const ano=Number.isInteger(vencedor.ano)?vencedor.ano:Number.isInteger(anoAtleta)?anoAtleta:mundo.anoCalendario;
+ const registro={temporada:mundo.temporada,ano,nome:vencedor.nome,clube:vencedor.clube,ovr:vencedor.ovr,gols:vencedor.gols,assist:vencedor.assist,...(vencedor.voce?{voce:true}:vencedor.id!=null?{id:vencedor.id}:{})};
  const historicoBolaDeOuro=[...(mundo.historicoBolaDeOuro||[]).filter(t=>t.temporada!==mundo.temporada),registro].slice(-30);
  return {...mundo,historicoBolaDeOuro,jogadores:mundo.jogadores.map(p=>vencedor.id!=null&&p.id===vencedor.id&&!vencedor.voce?{
   ...p,
@@ -50,7 +52,7 @@ export function registrarPremioCalendario(mundo,vencedor){
     temporada:mundo.temporada,
     // A simulação pode já ter avançado anoCalendario para o próximo ano.
     // Prefira o ano efetivamente registrado na temporada do vencedor.
-    ano:p.historicoTemporadas?.find(r=>Array.isArray(r)&&r[0]===mundo.temporada)?.[1]??mundo.anoCalendario,
+    ano:p.historicoTemporadas?.find(r=>Array.isArray(r)&&r[0]===mundo.temporada)?.[1]??ano,
     tipo:'bola-de-ouro', clube:vencedor.clube,
   }),
 }:p)};

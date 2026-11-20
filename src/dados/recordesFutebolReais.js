@@ -35,4 +35,8 @@ export const REFERENCIAS_RECORDES_FUTEBOL = Object.freeze([
  {tipo:'competicao',nome:'Premier League',id:'goleadaPartida',valor:9,atleta:'Manchester United',equipe:'Manchester United',ano:1995,destaque:'Manchester United 9 × 0 Ipswich Town',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
  {tipo:'competicao',nome:'Premier League',id:'golsEquipePartida',valor:9,atleta:'Manchester United',equipe:'Manchester United',ano:1995,destaque:'Manchester United 9 × 0 Ipswich Town',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
  {tipo:'competicao',nome:'Premier League',id:'golsAtletaPartida',valor:5,atleta:'Andrew Cole',ano:1995,destaque:'Manchester United 9 × 0 Ipswich Town',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
+ // UEFA: recordes de treinadores da Champions League (dados em 04/11/2026).
+ {tipo:'competicao',nome:'Champions League',id:'tecnicoJogos',valor:218,atleta:'Carlo Ancelotti',fonte:'https://www.uefa.com/uefachampionsleague/news/0281-18096ab833ba-60100b78b635-1000--most-champions-league-games-and-/',data:'2026-11-04'},
+ {tipo:'competicao',nome:'Champions League',id:'tecnicoVitorias',valor:124,atleta:'Carlo Ancelotti',fonte:'https://www.uefa.com/uefachampionsleague/news/0281-18096ab833ba-60100b78b635-1000--most-champions-league-games-and-/',data:'2026-11-04'},
+ {tipo:'competicao',nome:'Champions League',id:'tecnicoTitulos',valor:5,atleta:'Carlo Ancelotti',fonte:'https://www.uefa.com/news/0275-15407684c988-5b733e851bf5-1000--champions-league-coach-records/',data:'2026-05-30'},
 ]);

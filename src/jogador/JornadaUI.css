@@ -54,3 +54,44 @@
 /* A aba do empresário é um painel irmão sem criar outro details direto da jornada. */
 .jr-mercado-envoltura{border-top:1px solid #b8cba52b}
 .jr-mercado-envoltura>details{padding:13px}
+/* Perfil do jogador (estilo ficha do FM): resumo, próximos passos e abas. */
+.jr-painel summary .jr-sinal{margin-left:auto;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#e0838b;color:#2a0b0e;font-style:normal;font-weight:800;font-size:12px}
+.jr-perfil{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;margin-top:12px;align-items:stretch}
+.jr-minicampo{position:relative;width:96px;aspect-ratio:60/84;border-radius:8px;background:#1b3a25;overflow:hidden}
+.jr-minicampo svg{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke:#ffffff2e;stroke-width:.8}
+.jr-pos{position:absolute;transform:translate(-50%,-50%);padding:1px 4px;border-radius:5px;font-size:8.5px;font-weight:800;line-height:1.4;white-space:nowrap}
+.jr-pos-natural{background:#7ee0a8;color:#06210f;z-index:1}
+.jr-pos-possivel{background:#e6c06a33;color:#f0d994;border:1px solid #e6c06a88}
+.jr-fichas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}
+.jr-fichas>div{display:flex;flex-direction:column;gap:2px;min-width:0;padding:8px 10px;border-radius:10px;background:#0d1e15;border:1px solid #b8cba51f}
+.jr-fichas dt{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8fa892}
+.jr-fichas dd{margin:0;font-size:14px;font-weight:700;color:#efe6c6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jr-fichas small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jr-sat-satisfeito,.jr-moral-alta{color:#9de6b4!important}.jr-sat-incomodado,.jr-moral-media{color:#f0d994!important}.jr-sat-insatisfeito,.jr-moral-baixa{color:#f3a2a8!important}
+.jr-escala{display:block;height:6px;margin-top:4px;border-radius:999px;background:#ffffff14;overflow:hidden}
+.jr-escala i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#c9a24c,#7ee0a8)}
+.jr-passos ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.jr-passo{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:10px;background:#0d1e15;border-left:3px solid #8ca075}
+.jr-passo>span{display:flex;flex-direction:column;min-width:0}
+.jr-passo strong{font-size:12px;color:#efe6c6}
+.jr-passo button{flex:none;min-height:34px;padding:6px 10px;border-radius:8px;border:1px solid #b7c48b55;background:#1e3525;color:#e9e3c4;font-size:11px;font-weight:600;cursor:pointer}
+.jr-passo-alerta{border-left-color:#e0838b}.jr-passo-atencao{border-left-color:#e6c06a}.jr-passo-oportunidade{border-left-color:#7ee0a8}.jr-passo-positivo{border-left-color:#7dd3fc}
+.jr-abas{display:flex;gap:6px;margin:14px 0 4px;overflow-x:auto;scrollbar-width:none;scroll-margin-top:70px}
+.jr-abas button{flex:none;min-height:36px;padding:7px 13px;border-radius:999px;border:1px solid #b7c48b44;background:transparent;color:#cfd8c3;font-size:12px;font-weight:600;cursor:pointer}
+.jr-abas button[aria-selected=true]{background:#e6cf86;border-color:#e6cf86;color:#1c2410}
+.jr-aba-conteudo{min-width:0}
+
+.jr-contrato{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0 0}
+.jr-contrato>div{padding:8px 10px;border-radius:9px;background:#0d1e15;min-width:0}
+.jr-contrato dt{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#8fa892}
+.jr-contrato dd{margin:2px 0 0;color:#efe6c6;font-weight:600;font-size:12px;overflow-wrap:anywhere}
+.jr-sat{padding:8px 10px;border-radius:9px;background:#0d1e15}
+.jr-torcidas{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px}
+.jr-torcidas li{display:grid;grid-template-columns:22px minmax(0,1fr) 90px 28px;gap:8px;align-items:center;padding:7px 9px;border-radius:9px;background:#0d1e15}
+.jr-torcidas img{width:22px;height:22px}
+.jr-torcidas li>span:not(.jr-escala){display:flex;flex-direction:column;min-width:0;color:#efe6c6;font-weight:600}
+.jr-torcidas .jr-escala{margin:0}
+.jr-torcidas b{text-align:right;color:#efe6c6;font-variant-numeric:tabular-nums}
+.jr-aba-conteudo>details{margin-top:12px}
+.jr-aba-conteudo>details>summary{min-height:34px;color:#e6cf86}
+@media (max-width:600px){.jr-perfil{grid-template-columns:72px minmax(0,1fr);gap:8px}.jr-minicampo{width:72px}.jr-pos{font-size:7.5px}.jr-fichas{gap:6px}.jr-fichas>div{padding:7px 8px}.jr-fichas dd{font-size:13px}.jr-contrato{grid-template-columns:repeat(2,minmax(0,1fr))}.jr-torcidas li{grid-template-columns:22px minmax(0,1fr) 54px 26px}.jr-passo{flex-wrap:wrap}.jr-passo button{margin-left:auto}.jr-abas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible}.jr-abas button{padding:7px 8px}}

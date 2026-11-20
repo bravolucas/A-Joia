@@ -80,3 +80,17 @@ Use apenas IDs já definidos em \`METRICAS_RECORDES\`, e registre fonte confiáv
 - Manter o cadastro de recordes de jogadores e treinadores reais atualizado com fontes verificáveis e recortes históricos.
 - Validar o build de produção e o navegador (desktop e celular) em GitHub Actions / GitHub Pages.
 - Conferir custo computacional de uma carreira longa no dispositivo real e verificar o tempo de encerramento de temporada.
+
+
+## Otimização e referências oficiais da Premier League (19/11/2026)
+
+- `prepararIndiceAtletasRecordes` (em `src/historia/recordesFutebol.js`) cria um **índice temporário por escopo de clube e competição**, lendo o histórico compacto de cada jogador uma vez por snapshot. `detectarQuebrasRecordesFutebol` reutiliza esse índice nas comparações antes/depois da temporada, sem alterar ou persistir dados no save.
+- A consulta direta sem índice continua disponível e os testes comparam resultados de ambas as abordagens para clubes, transferências, competições equivalentes e saves distintos.
+- Em cenário sintético isolado com 1.200 atletas, 23 temporadas e cinco escopos, o tempo observado foi de ~469 ms (consultas diretas) para ~295 ms (índice). **Esses números não são uma medição de desempenho em celular nem comprovam ganho igual no jogo real.**
+- `guardarQuebrasRecordesFutebol` elimina eventos novos duplicados no mesmo lote, ignora entradas novas sem identificador e mantém o limite de 80 eventos históricos.
+- Foram cadastradas **15 referências da Premier League** em `src/dados/recordesFutebolReais.js`: cinco recordes de treinadores e dez marcas de equipes/jogadores, todos com links das publicações oficiais da liga.
+- Para treinadores: 828 jogos e 22 temporadas de Arsène Wenger; 528 vitórias, 1.752 pontos e 13 títulos de Sir Alex Ferguson. Para vitórias, prevalece o registro consolidado de 528 da ficha oficial do Hall of Fame, que não corresponde ao número parcial exibido em uma seção do painel de recordes da liga.
+- Entre as marcas de campanha: 100 pontos, 32 vitórias, 106 gols e saldo +79 do Manchester City (2017/18); campanha invicta do Arsenal (2003/04); 18 vitórias consecutivas e marcas oficiais de partidas e gols.
+- As comparações dos treinadores com marcas reais aparecem também quando o save ainda não tem carreira como técnico. Nenhuma referência é criada para uma competição sem fonte.
+- Cobertura de regressão: `tests/indice-recordes.test.mjs`, `tests/recordes-treinador-reais.test.mjs`, `tests/recordes-premier-league.test.mjs` e demais testes de recordes.
+- A verificação isolada feita durante a edição **não equivale** ao `npm test`, ao build do Vite, à execução dos testes Playwright ou à publicação em GitHub Pages.

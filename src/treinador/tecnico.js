@@ -1,4 +1,5 @@
 import {prepararGestaoTecnico} from './mercadoTecnico.js';
+import {manchetesDoTecnico} from '../jogador/manchetesJogador.js';
 import {atualizarProjecaoGestao} from '../simulacao/elencoUnificado.js';
 import {clonarEstado} from '../simulacao/clonarEstado.js';
 import {gerarMundoJogadores,simularTemporadaMundo} from '../comum/lib.js';
@@ -136,6 +137,7 @@ function registrarUniversoAno(c,ano){
  // A população avança uma única vez por temporada concluída, depois de todas as copas.
  if(!(c.tecnico?.universo||c.universo)?.anos?.includes(a.ano))novo.mundo=estatisticasDasPartidas(simularTemporadaMundo(antesMundo,geradorTecnico(`${c.codigo||c.nome}|${a.ano}|evolucao-mundo`),{clubes:clubesDoMundo({...c,mundo:antesMundo}),perfis:(c.universo||c.tecnico?.universo)?.clubes,treinoClube:c.tecnico?.gestao?.cadastroUnificado&&c.tecnico.gestao.comissao?.some(p=>p.id==='preparador'&&p.ano===a.ano)?1:0,clubeControlado:a.tipoEquipe==='selecao'?null:a.clube||null,ano:a.ano}),antesMundo,ano,c.codigo);
  if(a.tipoEquipe==='selecao')novo.mundo={...novo.mundo,jogadores:novo.mundo.jogadores.map(p=>p.clubeNome&&novo.tecnico.ligasMundo?.[p.clubeNome]?{...p,liga:novo.tecnico.ligasMundo[p.clubeNome]}:p)};
+ if(!ano.manchetes)ano.manchetes=manchetesDoTecnico(c.nome||'O técnico',ano);
  registrarMundoVivo(novo,ano,{antesMundo});
  const eventos=detectarQuebrasRecordesFutebol(c,novo,{
   ano:ano.ano,escopos:escoposRecordesDaTemporada(c,{...ano,ligaNome:competicaoTemporadaTecnico(ano)}),

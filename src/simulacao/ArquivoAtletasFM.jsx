@@ -76,6 +76,19 @@ function RetrospectoJogador({c,p,onConfrontos}){
  </>;
 }
 
+/** Comparação lado a lado de dois atletas: números de carreira, médias, títulos e prêmios. */
+function Comparacao({c,a,b,onTrocar,onFechar}){
+ const dados=[a,b].map(p=>{const h=historicoAtleta(p),q=resumoConquistas(c,p.id);return {p,jogos:total(h,'jogos'),gols:total(h,'gols'),assist:total(h,'assist'),titulos:q.titulos.length,premios:q.premios.length,temporadas:h.length,clubes:new Set(h.map(x=>x.clube).filter(Boolean)).size};});
+ const linhas=[['Jogos','jogos'],['Gols','gols'],['Assistências','assist'],['Gols por jogo','media'],['Participações em gol','participacoes'],['Títulos','titulos'],['Prêmios','premios'],['Temporadas','temporadas'],['Clubes defendidos','clubes']];
+ for(const d of dados){d.media=d.jogos?Math.round(d.gols/d.jogos*100)/100:0;d.participacoes=d.gols+d.assist;}
+ return <section className="pj-comparacao" aria-label={`Comparação: ${a.nome} × ${b.nome}`}>
+  <header>{dados.map(({p},i)=><div key={p.id} className={i?'pj-comp-b':'pj-comp-a'}><strong>{p.nome}{p.voce?' · Você':''}</strong><small>{p.posicao||'—'} · {p.clube||'Sem clube'}{!p.aposentado&&Number.isFinite(p.idade)?` · ${p.idade} anos`:''}{!p.aposentado&&Number.isFinite(p.ovr)?` · OVR ${p.ovr}`:''}</small></div>)}<b>×</b></header>
+  <ul>{linhas.map(([rotulo,campo])=>{const [x,y]=dados.map(d=>d[campo]||0),t=Math.max(x+y,0.0001);return <li key={campo}>
+   <span className={x>y?'pj-ganha':''}>{n(x)}</span><div><small>{rotulo}</small><i className="pj-barra"><b style={{flexGrow:x/t}}/><em style={{flexGrow:y/t}}/></i></div><span className={y>x?'pj-ganha':''}>{n(y)}</span>
+  </li>;})}</ul>
+  <footer><button type="button" className="fm27-text-button" onClick={onTrocar}>Trocar a base da comparação</button><button type="button" className="fm27-text-button" onClick={onFechar}>Encerrar comparação</button></footer>
+ </section>;
+}
 const SETORES=[['','Todas'],['GOL','Goleiros'],['DEF','Defensores'],['MEI','Meio-campo'],['ATA','Atacantes']];
 const ORDENS=[['relevancia','Relevância'],['gols','Gols na carreira'],['jogos','Jogos'],['titulos','Títulos'],['jovens','Mais jovens'],['nome','Nome']];
 const POR_PAGINA=40;
@@ -86,7 +99,7 @@ export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
  const u=c.tecnico?.universo||c.universo||{};
  const [busca,B]=useState(''),[clube,C]=useState(''),[id,I]=useState(jogadorInicial),[aba,A]=useState(jogadorInicial?'carreira':'resumo');
  const [categoria,Q]=useState('todas'),[setor,S]=useState(''),[situacao,SI]=useState(''),[nac,N]=useState(''),[ordem,O]=useState('relevancia'),[limite,LI]=useState(POR_PAGINA);
- const [fichaAberta,F]=useState(!!jogadorInicial);
+ const [fichaAberta,F]=useState(!!jogadorInicial),[comparar,CP]=useState(null);
  const todos=useMemo(()=>{
   const mapa=new Map(Object.entries(u.atletas||{}).filter(([,p])=>p&&typeof p==='object').map(([chave,p])=>[String(p.id??chave),{...p,id:String(p.id??chave)}]));
   for(const p of c.mundo?.jogadores||[]){
@@ -168,7 +181,10 @@ export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
        <h3>{selecionado.nome}</h3><p>{selecionado.posicao||'Jogador'} · <LinkEntidade tipo="clube" nome={selecionado.clube||""}>{selecionado.clube||"Sem clube"}</LinkEntidade> · {NACIONALIDADES.find(x=>x.id===selecionado.nac)?.label||selecionado.nac||'Nacionalidade não informada'}{!selecionado.aposentado&&Number.isFinite(selecionado.idade)?` · ${selecionado.idade} anos`:''}{Number.isFinite(selecionado.ovr)&&!selecionado.aposentado?` · OVR ${selecionado.ovr}`:''}</p>
       </div>
       <span className={'fm27-player-state '+(selecionado.aposentado?'is-retired':'')}>{selecionado.aposentado?'Aposentado':'Em atividade'}</span>
+      <button type="button" className="pj-comparar" onClick={()=>{CP(selecionado.id);A('resumo');}} aria-pressed={comparar===selecionado.id}>{comparar===selecionado.id?'Base da comparação':'Comparar'}</button>
      </div>
+     {comparar&&comparar===selecionado.id&&<p className="pj-dica">Escolha outro jogador na lista para comparar com {selecionado.nome}.</p>}
+     {comparar&&comparar!==selecionado.id&&todos.find(p=>p.id===comparar)&&<Comparacao c={c} a={todos.find(p=>p.id===comparar)} b={selecionado} onTrocar={()=>CP(selecionado.id)} onFechar={()=>CP(null)}/>}
      {Number.isInteger(selecionado.contrato)&&!selecionado.aposentado&&
       <section className="fm27-contract-strip" aria-label="Contrato atual">
        <p>Contrato: {selecionado.clube?`${selecionado.contrato} temporada(s)`:'Livre'}</p>

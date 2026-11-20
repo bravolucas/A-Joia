@@ -4,6 +4,8 @@ import {avaliarClubeNoMundo} from './forcaEquipe.js';
 import {EIXOS_REPUTACAO_CLUBE,NOMES_REPUTACAO_CLUBE} from './reputacoesClube.js';
 import {CLUBES} from '../dados/data.js';
 import LinkEntidade from '../historia/LinkEntidade.jsx';
+import PremiosTemporada from '../historia/PremiosTemporada.jsx';
+import LinhaDoTempoClube from '../historia/LinhaDoTempoClube.jsx';
 const universo=c=>c.tecnico?.universo||c.universo;
 const sinal=n=>n>0?`+${n}`:String(n);
 export function EvolucaoClube({c,nome}){
@@ -11,7 +13,7 @@ export function EvolucaoClube({c,nome}){
  const cl=CLUBES.find(x=>x.nome===nome)||{nome,forca:60},atual=avaliarClubeNoMundo(c,cl);
  return <section className="mv-painel" aria-label={`Evolução do ${nome}`}><span className="hf-eyebrow">UM CLUBE EM MOVIMENTO</span><h3>O momento do <LinkEntidade tipo="clube" nome={nome}/></h3><div className="hf-numeros"><article><strong>{atual.forca}</strong><span>força do elenco</span></article><article><strong>{p?.reputacao??cl.forca}</strong><span>reputação</span></article><article><strong>{p?.financas??50}/100</strong><span>saúde financeira</span></article></div><p className="hf-nota">A força acompanha a qualidade dos jogadores, o equilíbrio dos setores e a fase. Reputação e estrutura mudam mais devagar.</p>{u?.tecnicos?.[nome]&&<p className="hf-nota">Técnico: <strong>{u.tecnicos[nome].nome}</strong> · no cargo desde {u.tecnicos[nome].desde}</p>}
  {p?.reputacoes&&<section aria-label="Oito dimensões de reputação do clube"><h4>Reputação em oito dimensões</h4><dl style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(120px,1fr))',gap:'0.6rem'}}>{EIXOS_REPUTACAO_CLUBE.map(eixo=><div key={eixo}><dt>{NOMES_REPUTACAO_CLUBE[eixo]}</dt><dd><strong>{Number.isFinite(p.reputacoes[eixo])?p.reputacoes[eixo]:'—'}</strong><small>/99</small></dd></div>)}</dl><p className="hf-nota">Indicadores calculados a partir das temporadas registradas. Não alteram, por enquanto, a força do elenco nem o dinheiro do clube.</p></section>}
- {p?.historico?.length?<div className="hf-tabela-scroll"><table className="hf-tabela"><thead><tr><th>Ano</th><th>Colocação</th><th>Força</th><th>O que aconteceu</th></tr></thead><tbody>{[...historicoAtleta(p)].reverse().map(a=><tr key={a.ano}><th>{a.ano}</th><td>{a.posicao?`${a.posicao}º / ${a.total}`:'—'}</td><td>{a.forcaAntes} → {a.forca}</td><td>{a.motivos.join(' · ')}{a.titulos.length>0&&<small className="mv-titulos">{a.titulos.map((nome,i)=><React.Fragment key={nome+i}>{i>0?' · ':''}<LinkEntidade tipo="competicao" nome={nome}/></React.Fragment>)}</small>}</td></tr>)}</tbody></table></div>:<p className="hf-vazio">A evolução será registrada a partir da próxima temporada concluída.</p>}</section>;
+ <h4 className="lt-titulo-secao">Linha do tempo</h4><LinhaDoTempoClube historico={historicoAtleta(p||{})}/></section>;
 }
 export function ImpactoJogador({avaliacao}){
  if(!avaliacao)return null;
@@ -47,11 +49,12 @@ export function EdicoesCompeticao({c,nome}){
  return <section className="mv-painel" aria-label="Edições da competição"><h3>Por dentro da temporada</h3><div className="hf-filtros"><label>Edição<select value={edicao.ano} onChange={e=>{A(e.target.value);E('');G('');}}>{edicoes.map(e=><option key={e.ano}>{e.ano}</option>)}</select></label><label>Filtrar partidas por clube<select value={equipe} onChange={e=>E(e.target.value)}><option value="">Todos</option>{[...new Set(jogos.flatMap(j=>[j.casa,j.fora]))].sort().map(n=><option key={n}>{n}</option>)}</select></label></div>
  {edicao.grupos?.length>1&&<label className="hf-filtros">Classificação do grupo<select value={grupoAtual.grupo} onChange={e=>G(e.target.value)}>{edicao.grupos.map(g=><option key={g.grupo}>{g.grupo}</option>)}</select></label>}
  {classificacao?.length>0&&<div className="hf-tabela-scroll"><table className="hf-tabela"><thead><tr><th>Pos.</th><th>Clube</th><th>J</th><th>Pts</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th></tr></thead><tbody>{classificacao.map((t,i)=><tr key={t.nome}><td>{t.posicao||i+1}º</td><th><LinkEntidade tipo="clube" nome={t.nome}/></th>{['jogos','pontos','vitorias','empates','derrotas','golsPro','golsContra'].map(k=><td key={k}>{t[k]??'—'}</td>)}</tr>)}</tbody></table></div>}
+ <PremiosTemporada premios={u?.premiosLigas?.[edicao.ano]?.[nome]} ano={edicao.ano}/>
  {destaques.length>0&&<div className="mv-lideres">{[['gols','Artilheiros'],['assist','Assistências'],['defesas','Defesas']].map(([campo,titulo])=>{const lista=destaques.filter(p=>p[campo]>0).sort((a,b)=>b[campo]-a[campo]||a.nome.localeCompare(b.nome)).slice(0,5);return lista.length>0&&<article key={campo}><h4>{titulo}</h4><ol>{lista.map(p=><li key={p.id}><span><LinkEntidade tipo="jogador" id={p.id} nome={p.nome}/><small><LinkEntidade tipo="clube" nome={p.clube}/></small></span><b>{p[campo]}</b></li>)}</ol></article>;})}</div>}
  {jogos.length>0?<><p className="hf-nota">{jogos.length} partidas registradas nesta edição.</p><ol className="mv-jogos">{jogos.filter(j=>!equipe||[j.casa,j.fora].includes(equipe)).map((j,i)=><li key={i}><small>{typeof j.rodada==='number'?`Rodada ${j.rodada}`:j.rodada}</small><span><LinkEntidade tipo="clube" nome={j.casa}/></span><b>{j.golsCasa} × {j.golsFora}</b><span><LinkEntidade tipo="clube" nome={j.fora}/></span>{j.penaltis&&<small>Pênaltis · {j.vencedor}</small>}</li>)}</ol></>:<p className="hf-nota">Esta edição preserva a classificação registrada; os placares individuais não estavam disponíveis.</p>}</section>;
 }
 
-const ICONES_NOTICIA={titulo:'🏆',zebra:'⚡',liga:'🥇',mercado:'💶',tecnico:'🔁',queda:'⬇️'};
+const ICONES_NOTICIA={voce:'⭐',titulo:'🏆',zebra:'⚡',liga:'🥇',mercado:'💶',tecnico:'🔁',queda:'⬇️'};
 /** Manchetes do mundo simulado: campeões, zebras, mercado e trocas de técnico. */
 export function NoticiasMundo({c,limite=0,compacto=false}){
  const u=universo(c),lista=u?.noticias||[];
@@ -61,7 +64,7 @@ export function NoticiasMundo({c,limite=0,compacto=false}){
  return <section className={compacto?'mv-noticias mv-noticias-compacto':'mv-noticias'} aria-label="Notícias do mundo">
   {!compacto&&<><span className="hf-eyebrow">O MUNDO NÃO PARA</span><h3>Manchetes da temporada</h3>
    {anos.length>1&&<label className="mv-noticias-ano">Temporada<select value={ano} onChange={e=>setAno(Number(e.target.value))}>{anos.map(a=><option key={a} value={a}>{a}</option>)}</select></label>}</>}
-  <ul>{itens.map((n,i)=><li key={i} data-tipo={n.tipo}><span aria-hidden="true">{ICONES_NOTICIA[n.tipo]||'📰'}</span><p>{n.texto}</p></li>)}</ul>
+  <ul>{itens.map((n,i)=><li key={i} data-tipo={n.tipo}><span aria-hidden="true">{ICONES_NOTICIA[n.tipo]||'📰'}</span><p>{n.texto}{n.torcida?<small className={n.torcida>0?'mv-reacao-boa':'mv-reacao-ruim'}> · torcida {n.torcida>0?'+':''}{n.torcida}</small>:null}</p></li>)}</ul>
  </section>;
 }
 /** Técnico atual de um clube da IA. */

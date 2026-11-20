@@ -19,3 +19,5 @@
 .mv-noticias li[data-tipo=zebra]{border-color:#e6c06a55}
 .mv-noticias-ano{display:inline-flex;gap:8px;align-items:center;font-size:12px;margin-top:6px}
 .mv-noticias-compacto li{padding:8px 10px}
+.mv-noticias li[data-tipo=voce]{border-color:#a7e9ad66;background:#a7e9ad0d}
+.mv-reacao-boa{color:#a6f0cf;font-size:11px}.mv-reacao-ruim{color:#f3b4b9;font-size:11px}

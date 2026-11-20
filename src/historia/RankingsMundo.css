@@ -1,0 +1,31 @@
+.rk-rankings{display:flex;flex-direction:column;gap:14px}
+.rk-rankings header h2{margin:6px 0 4px;font-size:clamp(22px,3vw,30px)}
+.rk-rankings header p{margin:0;font-size:12px;color:#a9b6c6;line-height:1.5}
+.rk-abas{display:flex;gap:6px;overflow-x:auto}
+.rk-abas button{flex:none;min-height:36px;padding:7px 14px;border-radius:999px;border:1px solid #ffffff22;background:#ffffff08;color:#dbe4ee;font-size:12px;font-weight:600;cursor:pointer}
+.rk-abas button[aria-selected=true]{background:#7dd3fc;color:#04121c;border-color:#7dd3fc}
+.rk-tabela td,.rk-tabela th{white-space:nowrap}
+.rk-tabela td small{display:block;font-size:11px;color:#8fa3b8;white-space:normal}
+.rk-equipe{display:flex;align-items:center;gap:8px}
+.rk-equipe img{width:20px;height:20px}
+.rk-var{font-size:11px;font-weight:700;color:#8fa3b8}
+.rk-sobe{color:#5fd3a0}.rk-desce{color:#e0838b}.rk-novo{color:#7dd3fc}
+.rk-voce td{background:#a7e9ad14}
+.rk-mais{align-self:center;min-height:40px;padding:8px 18px;border-radius:10px;border:1px solid #344d5c;background:#132131;color:#a5d9c8;font-size:12px;font-weight:600;cursor:pointer}
+@media (max-width:600px){.rk-ano{display:none}}
+.rk-tabela{width:100%;table-layout:auto}
+.rk-tabela th,.rk-tabela td{text-align:right}
+.rk-tabela th:first-child,.rk-tabela td:first-child{width:36px;text-align:left}
+.rk-tabela td:nth-child(2):not(.rk-nome),.rk-tabela th:nth-child(2):not(.rk-nome){width:44px;text-align:left}
+.rk-tabela .rk-nome{text-align:left;width:auto;white-space:normal}
+.rk-tabela td.rk-equipe{display:table-cell}
+.rk-tabela td.rk-equipe img{vertical-align:middle;margin-right:8px}
+@media (max-width:600px){.rk-opcional{display:none}}
+.rk-tabela .rk-equipe{display:inline-flex;align-items:center;gap:8px}
+.rk-tabela .rk-equipe img{display:block;margin:0;flex:none}
+.rk-tabela .rk-nome strong{white-space:normal}
+@media (max-width:600px){.rk-tabela{table-layout:fixed}.rk-tabela th:first-child,.rk-tabela td:first-child{width:30px}.rk-tabela th:last-child,.rk-tabela td:last-child{width:58px}.rk-tabela td:nth-child(2):not(.rk-nome),.rk-tabela th:nth-child(2):not(.rk-nome){width:40px}}
+/* A tabela base do arquivo tem largura mínima e última coluna larga; aqui as colunas são compactas. */
+.rk-tabela.hf-tabela{min-width:0}
+.rk-tabela.hf-tabela td:last-child{min-width:0;white-space:nowrap}
+.rk-tabela.hf-tabela th:first-child{min-width:0}

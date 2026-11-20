@@ -269,6 +269,45 @@ function medirCampanhasETitulos(mapa,arquivo,tipo,nome){
  }
 }
 
+/**
+ * Indice descartavel dos atletas nos escopos consultados no fechamento do ano.
+ * Reduz varias leituras completas do Arquivo Vivo a uma passagem por snapshot.
+ * Nunca fica em cache global nem e serializado, evitando vazamento entre saves.
+ */
+export function prepararIndiceAtletasRecordes(c={},escopos=[]){
+ const grupos=new Map(),procuradosClube=new Map(),procuradosCompeticao=new Map();
+ const chave=(tipo,nome)=>tipo+'|'+(tipo==='competicao'?chaveCompeticao(nome):canon(nome));
+ for(const escopo of escopos){
+  if(!escopo?.nome||!['clube','competicao'].includes(escopo.tipo))continue;
+  const id=chave(escopo.tipo,escopo.nome);
+  if(grupos.has(id))continue;
+  const mapa=new Map();
+  grupos.set(id,mapa);
+  (escopo.tipo==='clube'?procuradosClube:procuradosCompeticao).set(
+   escopo.tipo==='clube'?canon(escopo.nome):chaveCompeticao(escopo.nome),mapa);
+ }
+ let temUsuario=false;
+ if(!grupos.size)return {grupos,temUsuario};
+ for(const p of Object.values(arquivoDe(c).atletas||{})){
+  if(!p?.historico?.length)continue;
+  if(String(p.id)==='voce')temUsuario=true;
+  const adicionar=(mapa,linha)=>{
+   if(!mapa.has(p))mapa.set(p,[]);
+   mapa.get(p).push(linha);
+  };
+  for(const raw of p.historico){
+   const linha=linhaAtleta(raw);
+   const clube=procuradosClube.get(canon(linha.clube));
+   if(clube)adicionar(clube,linha);
+   for(const registro of linha.porCompeticao||[]){
+    const competicao=procuradosCompeticao.get(chaveCompeticao(registro.nome));
+    if(competicao)adicionar(competicao,{...registro,ano:linha.ano,clube:linha.clube});
+   }
+  }
+ }
+ return {grupos,temUsuario};
+}
+
 /** Atuações individuais arquivadas por partida: sem preencher estatisticas ausentes. */
 function medirAtuacoes(mapa,arquivo,tipo,nome,atletaNome){
  if(tipo==='selecao')return;
@@ -286,19 +325,25 @@ function medirAtuacoes(mapa,arquivo,tipo,nome,atletaNome){
  }
 }
 /** Formato estável: não grava nada, portanto reabrir, importar ou voltar não duplica marcas. */
-export function consultarRecordesFutebol(c={},tipo='clube',nome='',temporadas=c?.temporadas||[]){
+export function consultarRecordesFutebol(c={},tipo='clube',nome='',temporadas=c?.temporadas||[],indiceAtletas=null){
  if(!['clube','selecao','competicao','treinador'].includes(tipo))return {tipo,nome,recordes:[],desde:null};
  if(tipo==='treinador')return {tipo,nome,recordes:recordesTreinador(c,tipo,nome),
   desde:c.tecnico?.temporadas?.[0]?.ano??null,cobertura:'Somente resultados documentados deste treinador no save.'};
  const arquivo=arquivoDe(c),mapa=new Map();
  if(tipo==='clube'||tipo==='competicao'){
-  const atletas=Object.values(arquivo.atletas||{});
-  let temUsuario=false;
-  for(const p of atletas){
-   if(!p?.historico?.length)continue;
-   if(String(p.id)==='voce')temUsuario=true;
-   const linhas=selecionarPorEscopo(p.historico.map(linhaAtleta),tipo,nome);
-   medirAtleta(mapa,{id:p.id,nome:p.nome||'Jogador'},linhas);
+  const grupo=indiceAtletas?.grupos?.get(tipo+'|'+
+   (tipo==='competicao'?chaveCompeticao(nome):canon(nome)));
+  let temUsuario=indiceAtletas?.temUsuario||false;
+  if(grupo){
+   for(const [p,linhas] of grupo)
+    medirAtleta(mapa,{id:p.id,nome:p.nome||'Jogador'},linhas);
+  }else{
+   for(const p of Object.values(arquivo.atletas||{})){
+    if(!p?.historico?.length)continue;
+    if(String(p.id)==='voce')temUsuario=true;
+    const linhas=selecionarPorEscopo(p.historico.map(linhaAtleta),tipo,nome);
+    medirAtleta(mapa,{id:p.id,nome:p.nome||'Jogador'},linhas);
+   }
   }
   // Saves anteriores ao Arquivo Vivo e carreira ainda não arquivada.
   // Modo Treinador guarda campanhas com jogos e vitórias, NÃO jogos do

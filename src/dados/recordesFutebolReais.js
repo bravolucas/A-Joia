@@ -24,4 +24,15 @@ export const REFERENCIAS_RECORDES_FUTEBOL = Object.freeze([
  {tipo:'competicao',nome:'Premier League',id:'tecnicoPontos',valor:1752,atleta:'Sir Alex Ferguson',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
  {tipo:'competicao',nome:'Premier League',id:'tecnicoTemporadas',valor:22,atleta:'Arsène Wenger',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
  {tipo:'competicao',nome:'Premier League',id:'tecnicoTitulos',valor:13,atleta:'Sir Alex Ferguson',fonte:'https://www.premierleague.com/en/news/4660971/every-premier-league-title-winning-manager-in-history',data:'2026-05'},
+ // Marcas coletivas e individuais por edição da Premier League: dados oficiais.
+ {tipo:'competicao',nome:'Premier League',id:'pontosEdicao',valor:100,atleta:'Manchester City',equipe:'Manchester City',ano:'2017/18',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
+ {tipo:'competicao',nome:'Premier League',id:'vitoriasTabelaEdicao',valor:32,atleta:'Manchester City',equipe:'Manchester City',ano:'2017/18',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
+ {tipo:'competicao',nome:'Premier League',id:'golsTabelaEdicao',valor:106,atleta:'Manchester City',equipe:'Manchester City',ano:'2017/18',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
+ {tipo:'competicao',nome:'Premier League',id:'saldoTabelaEdicao',valor:79,atleta:'Manchester City',equipe:'Manchester City',ano:'2017/18',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
+ {tipo:'competicao',nome:'Premier League',id:'invictoTabelaEdicao',valor:38,atleta:'Arsenal',equipe:'Arsenal',ano:'2003/04',fonte:'https://www.premierleague.com/en/news/4660971/every-premier-league-title-winning-manager-in-history',data:'2026-05'},
+ {tipo:'competicao',nome:'Premier League',id:'vitoriasSeguidas',valor:18,atleta:'Manchester City',equipe:'Manchester City',ano:'2017/18',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
+ {tipo:'competicao',nome:'Premier League',id:'golsPartida',valor:11,atleta:'Portsmouth × Reading',ano:2007,destaque:'Portsmouth 7 × 4 Reading',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
+ {tipo:'competicao',nome:'Premier League',id:'goleadaPartida',valor:9,atleta:'Manchester United',equipe:'Manchester United',ano:1995,destaque:'Manchester United 9 × 0 Ipswich Town',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
+ {tipo:'competicao',nome:'Premier League',id:'golsEquipePartida',valor:9,atleta:'Manchester United',equipe:'Manchester United',ano:1995,destaque:'Manchester United 9 × 0 Ipswich Town',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
+ {tipo:'competicao',nome:'Premier League',id:'golsAtletaPartida',valor:5,atleta:'Andrew Cole',ano:1995,destaque:'Manchester United 9 × 0 Ipswich Town',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
 ]);

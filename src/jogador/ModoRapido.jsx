@@ -2980,7 +2980,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
               <button className="lj-atalho" onClick={()=>setPatrimonioAberto(true)}><span>Loja do jogador<small>{upsAtivosJogador(c).length} UPs ativos · melhorias permanentes e temporárias</small></span><strong>{formatarValor(c.patrimonio||0)} →</strong></button>
               {ultimo && !evento && <><ResumoCompacto c={c} card={ultimo} onDetalhes={() => setGaveta("resumo")} /><EcosDaTemporada card={ultimo}/></>}
               {!estado.desafioResultado&&<PainelProgressaoCarreira c={c} onNumero={receberNumero}/>}
-              {!estado.desafioResultado&&<PainelJornada c={c} onAcao={acaoJornada} caminho={caminhoSelecao(c)} interesses={interesseMercado(c)}/>}
+              {!estado.desafioResultado&&<PainelJornada c={c} onAcao={acaoJornada} caminho={caminhoSelecao(c)} interesses={interesseMercado(c)} onAbrirLoja={()=>setPatrimonioAberto(true)}/>}
               {estado.aviso && <div className="rp-painel px-4 py-2.5 text-[15px] text-[#F0A99E]" style={{ borderColor: "rgba(227,107,91,.35)" }}>{estado.aviso}</div>}
               {estado.forcada ? (
                 <div className="rp-painel p-4 flex flex-col gap-3 rp-entra">

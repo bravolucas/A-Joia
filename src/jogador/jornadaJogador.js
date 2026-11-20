@@ -6,6 +6,7 @@ import {consolidarElencoCopa} from './elencoSelecao.js';
 import {gerarNomeRegionalUnico} from '../simulacao/nomesRegionais.js';
 import {CLUBES,LIGAS} from '../dados/data.js';
 import {calcOVR} from '../comum/lib.js';
+import {progressoAssinatura,registrarAssinaturasLoja} from './lojaJogador.js';
 import {IDENTIDADES_POSICAO,fecharAdaptacaoPosicao,penalidadePosicao} from './posicoesCarreira.js';
 
 const copiar=x=>JSON.parse(JSON.stringify(x));
@@ -25,6 +26,7 @@ export const ASSINATURAS=[
  {id:'paredao',nome:'Mãos decisivas',meta:3,descricao:'Três temporadas de goleiro com boa nota ou defesas decisivas.',efeito:'+0,06 na nota · uma assinatura ativa.'},
  {id:'aereo',nome:'Tempo de bola',meta:3,descricao:'Decidir cabeceios em três temporadas diferentes.',efeito:'Mais tolerância no tempo do cabeceio · uma assinatura ativa.'},
 ];
+registrarAssinaturasLoja(ASSINATURAS);
 export function iniciarJornada(c){
  if(!c.jornada||typeof c.jornada!=='object')c.jornada={};
  iniciarCamisas(c);
@@ -66,7 +68,7 @@ export function registrarEscolhaJornada(c,evento,opcao,texto){
 }
 export function ativarAssinatura(c0,id){
  const c=copiar(c0),j=iniciarJornada(c);
- if(id!==null&&!ASSINATURAS.some(s=>s.id===id&&(j.assinaturas[id]?.anos||[]).length>=s.meta))throw new Error('Assinatura ainda não conquistada.');
+ if(id!==null&&!ASSINATURAS.some(s=>s.id===id&&progressoAssinatura(j.assinaturas[id])>=s.meta))throw new Error('Assinatura ainda não conquistada.');
  if(c.lojaAnoEmCurso===c.ano)throw new Error('Troque a assinatura entre temporadas.');
  j.assinaturaAtiva=id;return c;
 }
@@ -208,7 +210,7 @@ export function fecharJornada(c,card){
   n.geracao=atualizarGeracaoSelecao(c,card.ano);
  }
  const contrib={cruzador:['LD','LE','ALE','ALD','ME','MD','PE','PD'].includes(card.posicao||c.posicao)&&card.assist>=3||momentos.some(m=>m.mini==='cruzamento'&&m.acertou),vertical:card.assist>=5||momentos.some(m=>m.mini==='passe'&&m.acertou),antecipador:['ZAG','VOL'].includes(card.posicao||c.posicao)&&card.nota>=7||momentos.some(m=>m.mini==='interceptacao'&&m.acertou),decisivo:card.gols>=10||momentos.some(m=>['penalti','falta'].includes(m.mini)&&m.acertou),paredao:(card.posicao||c.posicao)==='GOL'&&(card.nota>=7||momentos.some(m=>['defesa','reflexo'].includes(m.mini)&&m.acertou)),aereo:momentos.some(m=>m.mini==='cabeceio'&&m.acertou)};
- for(const s of ASSINATURAS){if(!contrib[s.id])continue;const a=j.assinaturas[s.id]||{anos:[]};if(!a.anos.includes(card.ano))a.anos=[...a.anos,card.ano];j.assinaturas[s.id]=a;if(a.anos.length===s.meta){n.assinaturas.push(s.nome);if(!j.assinaturaAtiva)j.assinaturaAtiva=s.id;memorizar(c,'assinatura',s.nome,'Uma marca técnica conquistada em três temporadas distintas.',{ano:card.ano,id:`assinatura:${s.id}`});}}
+ for(const s of ASSINATURAS){if(!contrib[s.id])continue;const a=j.assinaturas[s.id]||{anos:[]},novo=!a.anos.includes(card.ano);if(novo)a.anos=[...a.anos,card.ano];j.assinaturas[s.id]=a;if(novo&&progressoAssinatura(a)>=s.meta&&progressoAssinatura(a)-1<s.meta){n.assinaturas.push(s.nome);if(!j.assinaturaAtiva)j.assinaturaAtiva=s.id;memorizar(c,'assinatura',s.nome,'Uma marca técnica conquistada em três temporadas distintas.',{ano:card.ano,id:`assinatura:${s.id}`});}}
  atualizarDuplas(c,card);
  const anosNoClube=(c.temporadas||[]).filter(a=>a.clube===card.clube).length+1;
  if(!(j.recusaCapitania?.ano===card.ano&&j.recusaCapitania?.clube===card.clube)&&anosNoClube>=3&&c.idade>=24&&(c.moral??65)>=50&&(c.torcida?.[card.clube]??0)>=60&&card.jogos>=20){

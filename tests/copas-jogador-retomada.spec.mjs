@@ -6,6 +6,8 @@ import {test,expect} from '@playwright/test';
 import {criarJogador,jogarTemporada} from '../src/jogador/rapido.js';
 import {prepararEstadualJogador} from '../src/jogador/estadualJogador.js';
 import {decisaoCopa,escolherCopa} from '../src/treinador/copasEscolha.js';
+// O sorteio animado das copas tem teste próprio (sorteio-copas.spec); aqui as decisões vêm direto.
+test.beforeEach(async({page})=>{await page.addInitScript(()=>localStorage.setItem('a-joia:pular-sorteios','1'));});
 function jogador(clube='Flamengo',ritmo='normal'){const c=criarJogador({nome:'Jogador em campo',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:9,codigo:'JOGADOR-COPAS',ritmo});c.clubeNome=clube;c.flags.baseEscolhida=true;c.desafioAno=c.ano;return c;}
 async function abrir(page,s){await page.goto('http://127.0.0.1:4173/A-Joia/');await instalarSave(page,((s)=>({v:1,auto:false,...s}))(s),"ajoia_rapido_v1");await page.reload();await page.getByRole('button',{name:/Continuar · Jogador em campo/}).click();}
 for(const ritmo of ['normal','expresso','intenso'])for(const width of [320,1366])test(`jogador ${ritmo}: treino, estadual, Brasileiro e Libertadores com tema e escolhas em ${width}px`,async({page})=>{

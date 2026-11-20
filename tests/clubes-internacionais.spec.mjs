@@ -7,6 +7,8 @@ import {CLUBES} from '../src/dados/data.js';
 import {clubeInternacional} from '../src/competicoes/clubesInternacionais.js';
 import {criarCampanhaCopa} from '../src/treinador/copasEscolha.js';
 import {criarAgenda} from '../src/competicoes/calendarioCopas.js';
+// O sorteio animado das copas tem teste próprio (sorteio-copas.spec); aqui as decisões vêm direto.
+test.beforeEach(async({page})=>{await page.addInitScript(()=>localStorage.setItem('a-joia:pular-sorteios','1'));});
 const url='http://127.0.0.1:4173/A-Joia/';
 for(const [nome,usuario,adversario] of [['Libertadores','Flamengo','Bolívar'],['Champions League','Real Madrid','Panathinaikos']])test(`adversário extra ${adversario} joga, guarda força e retoma na ${nome}`,async({page})=>{
  await page.setViewportSize({width:390,height:844});await page.emulateMedia({reducedMotion:'reduce'});const erros=[];page.on('pageerror',e=>erros.push(e.message));const c=criarJogador({nome:'Novo Continente',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',codigo:'EXTRAS-UI'});c.clubeNome=usuario;c.ano=2030;c.flags.baseEscolhida=true;c.desafioAno=c.ano;

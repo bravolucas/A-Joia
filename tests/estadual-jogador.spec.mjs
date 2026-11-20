@@ -4,6 +4,8 @@ test.setTimeout(90000);
 import {escolhasCopa} from '../src/treinador/estrategiasCopas.js';
 import {test,expect} from '@playwright/test';
 import {criarJogador} from '../src/jogador/rapido.js';
+// O sorteio animado das copas tem teste próprio (sorteio-copas.spec); aqui as decisões vêm direto.
+test.beforeEach(async({page})=>{await page.addInitScript(()=>localStorage.setItem('a-joia:pular-sorteios','1'));});
 for(const clube of ['Mirassol','Ponte Preta'])for(const [width,height]of[[320,568],[1366,768]])test(`jogador ${clube} disputa o Paulista antes da temporada em ${width}px`,async({page})=>{
  await page.setViewportSize({width,height});const erros=[];page.on('pageerror',e=>erros.push(e.message));const c=criarJogador({nome:'Disputa Paulista',nac:'BRA',posicao:'ATA',personalidade:'ascensao',origem:'base',pe:'destro',numero:9,codigo:'ESTADO-'+clube});c.clubeNome=clube;c.flags.baseEscolhida=true;c.desafioAno=c.ano;
  await page.goto('http://127.0.0.1:4173/A-Joia/');await instalarSave(page,((c)=>({v:1,etapa:'evento',c,auto:false}))(c),"ajoia_rapido_v1");await page.reload();await page.getByRole('button',{name:/Continuar · Disputa Paulista/}).click();await page.locator('.tp-carta').first().click();

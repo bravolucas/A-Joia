@@ -1,0 +1,32 @@
+.sct{display:flex;flex-direction:column;gap:14px;margin-top:18px}
+.sct-topo small{font-size:10px;letter-spacing:.11em;color:var(--cce-cor,#a7e9ad);font-weight:700;text-transform:uppercase}
+.sct-topo h3{font-size:clamp(19px,3vw,26px);font-weight:800;letter-spacing:-.03em;margin:4px 0;color:#fff}
+.sct-topo p{font-size:12px;color:#b3bbc7;margin:0;line-height:1.45}
+.sct-urna{display:flex;align-items:center;gap:12px;min-height:44px;padding:8px 14px;border:1px solid #ffffff18;border-radius:14px;background:#ffffff08;font-size:12px;color:#d8dfeb}
+.sct-bola{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#c9d3df 45%,#7d8999);box-shadow:0 0 0 3px #ffffff14;animation:sctBola .5s both}
+.sct-grupos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.sct-grupo{display:flex;flex-direction:column;gap:5px;padding:10px;border:1px solid #ffffff14;border-radius:12px;background:#ffffff06;min-width:0}
+.sct-grupo>b{font-size:11px;letter-spacing:.06em;color:var(--cce-cor,#a7e9ad)}
+.sct-grupo>span{display:flex;align-items:center;gap:6px;font-size:12px;min-height:20px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.sct-vazio{color:#5d6878}
+.sct-entrou{animation:sctEntra .35s both;color:#eef2f7}
+.sct-meu{border-color:var(--cce-cor,#a7e9ad);background:color-mix(in srgb,var(--cce-cor,#a7e9ad) 10%,transparent)}
+.sct-potes{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:6px}
+.sct-potes>div{padding:7px;border:1px solid #ffffff14;border-radius:10px;text-align:center;font-size:11px;color:#b3bbc7}
+.sct-potes b{display:block;color:#fff;font-size:12px}
+.sct-adversarios,.sct-confrontos{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.sct-adversarios li{display:grid;grid-template-columns:48px 24px 1fr auto;gap:8px;align-items:center;padding:8px 10px;border:1px solid #ffffff12;border-radius:10px;animation:sctEntra .35s both;font-size:13px}
+.sct-adversarios small{font-size:10px;color:var(--cce-cor,#a7e9ad)}
+.sct-adversarios strong{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sct-adversarios em{font-style:normal;font-size:11px;color:#a7b2c4}
+.sct-confrontos li{display:flex;flex-direction:column;gap:3px;padding:8px 10px;border:1px solid #ffffff12;border-radius:10px;animation:sctEntra .35s both}
+.sct-confrontos li>span{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px}
+.sct-confrontos li>span.sct-meu{color:var(--cce-cor,#a7e9ad);font-weight:700;background:none}
+.sct-confrontos i{font-style:normal;color:#7d8999;margin:0 4px}
+.sct-confrontos small{font-size:11px;color:#a7b2c4}
+.sct-rodape{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.sct-rodape button{margin:0;min-height:42px;border-radius:12px}
+@keyframes sctBola{from{transform:translateY(-14px) scale(.6);opacity:0}to{transform:none;opacity:1}}
+@keyframes sctEntra{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.sct-bola,.sct-entrou,.sct-adversarios li,.sct-confrontos li{animation:none}}
+@media (max-width:600px){.sct-grupos{grid-template-columns:repeat(2,minmax(0,1fr))}.sct-rodape button{flex:1}}

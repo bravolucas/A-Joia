@@ -11,6 +11,7 @@ import {chancesCopa,chancePenaltis,decisaoCopa} from './copasEscolha.js';
 import {temaCopa} from '../competicoes/temasCopas.js';
 import './CopaEscolha.css';
 import LinkEntidade from '../historia/LinkEntidade.jsx';
+import SorteioCopa,{sorteioPendente} from './SorteioCopa.jsx';
 const pct=n=>`${Math.round(n*100)}%`;
 function Trajeto({tipo}){return <svg className="cce-trajeto" viewBox="0 0 72 38" fill="none" aria-hidden="true"><path d="M1 36H71M16 36V19H56V36M30 36V28H42V36" stroke="currentColor" opacity=".22"/>{tipo===0?<><path d="M25 30L20 10M47 30L52 10M36 26V5" stroke="currentColor" strokeWidth="2"/><path d="M31 10L36 5L41 10" stroke="currentColor" strokeWidth="2"/></>:tipo===1?<><path d="M22 23Q36 4 50 23Q36 38 22 23Z" stroke="currentColor" strokeWidth="2" strokeDasharray="4 3"/><circle cx="36" cy="12" r="3" fill="currentColor"/></>:<><path d="M17 31L30 21L43 26L58 7" stroke="currentColor" strokeWidth="2"/><path d="M49 8L58 7L59 16" stroke="currentColor" strokeWidth="2"/></>}</svg>;}
 /** Seus lances na partida, abaixo do placar (modo jogador). */
@@ -26,13 +27,16 @@ export default function CopaEscolha({campanha:c,chave,onEscolher,ocupado,onMinim
  const nomePerna=d?.perna&&!penaltis?d.perna==='ida'?'JOGO DE IDA':'JOGO DE VOLTA':r?.jogoIda?'JOGO DE IDA':r?.jogo?.agregado?'JOGO DE VOLTA':null;
  const [revelando,R]=useState(false),[revelacao,S]=useState(null),[cobranca,C]=useState(false),[movimentoReduzido,MR]=useState(false),[planoAnimado,P]=useState(null),timer=useRef(null),lock=useRef(false);
  useEffect(()=>()=>clearTimeout(timer.current),[]);
- const escolher=op=>{if(lock.current||ocupado)return;lock.current=true;C(!!penaltis);P(op);const plano=escolhasCopa(c,d).opcoes.find(x=>x.id===op);S({nome:plano.nome,probabilidades:penaltis?{classificacao:chancePenaltis(d.forcaUsuario,d.forcaAdv,op,final)}:chancesCopa(d.forcaUsuario,d.forcaAdv,op,final,d.perfilAdversario)});const reduzir=window.matchMedia('(prefers-reduced-motion: reduce)').matches;MR(reduzir);R(!reduzir||!penaltis);onEscolher(chave,op);if(reduzir&&penaltis)lock.current=false;else timer.current=setTimeout(()=>{R(false);lock.current=false;},penaltis?1350:TEMPO_PRE_RESULTADO_COPA);};
+ // Sorteio animado (potes, grupos, confrontos) antes da próxima decisão; pode ser pulado.
+ const [sorteio,setSorteio]=useState(()=>sorteioPendente(c));
+ useEffect(()=>{setSorteio(sorteioPendente(c));},[c]);
+ const escolher=op=>{if(lock.current||ocupado)return;lock.current=true;C(!!penaltis);P(op);const plano=escolhasCopa(c,d).opcoes.find(x=>x.id===op);S({nome:plano.nome,probabilidades:penaltis?{classificacao:chancePenaltis(d.forcaUsuario,d.forcaAdv,op,final)}:chancesCopa(d.forcaUsuario,d.forcaAdv,op,final,d.perfilAdversario,d.mando)});const reduzir=window.matchMedia('(prefers-reduced-motion: reduce)').matches;MR(reduzir);R(!reduzir||!penaltis);onEscolher(chave,op);if(reduzir&&penaltis)lock.current=false;else timer.current=setTimeout(()=>{R(false);lock.current=false;},penaltis?1350:TEMPO_PRE_RESULTADO_COPA);};
  return <JanelaTreinador titulo={`Copa em jogo · ${c.nome}`} onFechar={onMinimizar} classe={`cce-modal cce-${tema.id}`}>
   <div className="cce-corpo" style={{'--cce-cor':tema.cor,'--cce-fundo':tema.fundo}} data-penaltis={disputaPenaltis} data-tema={tema.id} data-motivo={tema.motivo} aria-busy={revelando}>
    <CenaFotografica className="cce-foto" cena={cenaCopa(c,d)}/><div className="cce-ambiente" aria-hidden="true"><i/><i/><i/><i/><i/></div>
    <div className="cce-topo"><TacaCompeticao nome={c.nome} tipo={c.tipo} size={62}/><div><small>{calendario?.data||`TEMPORADA ${c.ano}`} · {modoJogador?'MODO RÁPIDO · JOGADOR':tema.lema}</small><h2><LinkEntidade tipo="competicao" nome={c.nome}/></h2><p>{d?.fase||r?.fase||c.faseUsuario}{nomePerna?` · ${nomePerna}`:''}</p></div></div>
    {calendario?.liga&&<div className="cce-agenda"><span>Calendário da temporada</span><b>{calendario.data}</b><span>Entre as rodadas de {calendario.liga}</span></div>}
-   <div className={revelando?'cce-conteudo cce-oculto':'cce-conteudo'}>
+   {sorteio?<SorteioCopa campanha={c} sorteio={sorteio} onConcluir={()=>setSorteio(null)}/>:<div className={revelando?'cce-conteudo cce-oculto':'cce-conteudo'}>
    {d&&<>
     {d.perna&&!penaltis&&<div className="cce-etapa" aria-label="Etapa do confronto"><span className={d.perna==='ida'?'atual':''}>1 · JOGO DE IDA</span><span className={d.perna==='volta'?'atual':''}>2 · JOGO DE VOLTA</span></div>}
     {d.perna==='volta'&&d.idaAnterior&&!penaltis&&<div className="cce-placar-anterior" aria-label="Resultado do jogo de ida"><small>JOGO DE IDA · RESULTADO CONFIRMADO</small><strong>{d.idaAnterior.casa} {d.idaAnterior.golsCasa} × {d.idaAnterior.golsFora} {d.idaAnterior.fora}</strong><p>Agora é uma nova partida: escolha a estratégia para os 90 minutos da volta.</p></div>}
@@ -50,7 +54,7 @@ export default function CopaEscolha({campanha:c,chave,onEscolher,ocupado,onMinim
     <div className="cce-placar"><Escudo estado={c.estado} nome={jogoExibido.casa} size={48}/><strong>{jogoExibido.golsCasa}<i>:</i>{jogoExibido.golsFora}</strong><Escudo estado={c.estado} nome={jogoExibido.fora} size={48}/></div>
     {c.campeao===c.usuario&&!r.jogoIda&&!r.jogo.penaltis&&<TacaCompeticao nome={c.nome} tipo={c.tipo} size={82}/>}
     <h3>{r.jogoIda?(partidaVencida?'VITÓRIA NA IDA!':r.empate?'EMPATE NA IDA':'DERROTA NA IDA'):r.jogo.penaltis?r.venceu?(c.campeao===c.usuario?'CAMPEÃO NOS PÊNALTIS!':'PASSOU NOS PÊNALTIS!'):c.vice===c.usuario?'VICE-CAMPEÃO NOS PÊNALTIS':'ELIMINADO NOS PÊNALTIS':r.jogo.agregado?r.venceu?(c.campeao===c.usuario?'CAMPEÃO!':'CLASSIFICADO!'):c.vice===c.usuario?'VICE-CAMPEÃO':'ELIMINADO':r.venceu?c.campeao===c.usuario?'CAMPEÃO!':'VITÓRIA!':r.empate?'EMPATE':'DERROTA'}</h3>
-    <p>{jogoExibido.casa} <strong>{jogoExibido.golsCasa} × {jogoExibido.golsFora}</strong> {jogoExibido.fora}{r.jogo.penaltis?' · pênaltis no agregado':''}</p>
+    <p>{jogoExibido.casa} <strong>{jogoExibido.golsCasa} × {jogoExibido.golsFora}</strong> {jogoExibido.fora}{jogoExibido.prorrogacao?' · após a prorrogação':''}{r.jogo.penaltis?' · pênaltis no agregado':''}</p>
     {r.jogoIda&&<p className="cce-info">A vaga ainda está em disputa. A volta terá outra tela e uma nova escolha tática.</p>}
     {r.jogo.partidas?.length===2&&<div className="cce-ida-volta" aria-label="Resultados e placar agregado">{r.jogo.partidas.map(p=><span key={p.etapa}>{p.etapa}: {p.casa} {p.golsCasa} × {p.golsFora} {p.fora}</span>)}<strong>Agregado · {r.jogo.casa} {r.jogo.golsCasa} × {r.jogo.golsFora} {r.jogo.fora}</strong></div>}
     {modoJogador&&r.lancesJogador&&<LancesJogador lances={r.lancesJogador}/>}
@@ -58,10 +62,10 @@ export default function CopaEscolha({campanha:c,chave,onEscolher,ocupado,onMinim
    </div>}
    {!r&&c.fase==='fim'&&<div className="cce-resultado"><h3>Campanha encerrada</h3><p>{c.faseUsuario}</p></div>}
    {c.classificacao?.length>0&&<details className="cce-tabela"><summary>Ver classificação · {c.classificacao.find(x=>x.meuClube)?.posicao}º</summary>{c.classificacao.filter((x,i)=>i<8||x.meuClube).map(x=><div key={x.nome} className={x.meuClube?'cce-eu':''}><span>{x.posicao}º</span><strong><LinkEntidade tipo={['copaMundo','continentalSelecao'].includes(c.tipo)?'selecao':'clube'} nome={x.nome}/></strong><span>{x.jogos}J</span><b>{x.pontos} pts</b></div>)}</details>}
-   </div>
+   </div>}
    {revelando&&<div className={`cce-cinematica ${cobranca?'':'cce-partida-inteira'}`} aria-live="polite"><>{cobranca?<div className="cce-penalti-filme"><CenaPenaltis lado={c.etapa%2?"esquerda":"direita"} animar venceu={r?.venceu}/><span>DECISÃO NOS PÊNALTIS</span></div>:<SimulacaoCopa reduzirMovimento={movimentoReduzido} estado={c.estado} plano={planoAnimado} resultado={r?.escolha===planoAnimado?resultadoAnimacao:null} usuario={c.usuario}/>}</>{cobranca&&<><strong>SANGUE FRIO.</strong><small>Estratégia definida. Estas são as suas chances.</small></>}{revelacao&&<Revelacao dados={revelacao}/>}</div>}
   </div>
-  {((r&&!r.penaltisPendentes)||(!r&&c.fase==='fim'))&&<footer className="cce-rodape"><button disabled={ocupado||revelando} className="ct-primary" onClick={()=>onEscolher(chave,'continuar')}>{r?.jogoIda?'Ir para jogo de volta':c.fase==='fim'?'Concluir campanha':'Continuar campanha'} <span>→</span></button></footer>}
+  {!sorteio&&((r&&!r.penaltisPendentes)||(!r&&c.fase==='fim'))&&<footer className="cce-rodape"><button disabled={ocupado||revelando} className="ct-primary" onClick={()=>onEscolher(chave,'continuar')}>{r?.jogoIda?'Ir para jogo de volta':c.fase==='fim'?'Concluir campanha':'Continuar campanha'} <span>→</span></button></footer>}
  </JanelaTreinador>;
 }
 function Revelacao({dados}){

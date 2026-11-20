@@ -1,6 +1,9 @@
-import {criarCampanhaCopa,resumoCampanhaCopa} from './copasEscolha.js';
+import {criarCampanhaCopa,resumoCampanhaCopa,jogoEliminatorio} from './copasEscolha.js';
+import {golsEsperados,sortearPlacar} from '../competicoes/motorPartida.js';
 import {criarAgenda} from '../competicoes/calendarioCopas.js';
-import { NACIONALIDADES } from '../dados/data.js';
+import {classificadosCopaDoMundo,participantesContinentalSelecoes} from '../competicoes/copaDoMundo.js';
+import {torneiosDoHistorico} from '../competicoes/sorteio.js';
+import { NACIONALIDADES, CONFEDERACAO_POR_NACAO } from '../dados/data.js';
 import {salarioBaseSelecaoTecnico} from './contratoTecnico.js';
 import { geradorTecnico, simularCopaSelecaoTecnico, finalDoUsuarioTecnico } from './momentosTecnico.js';
 
@@ -10,10 +13,10 @@ const grupos = {
  CAF:'MAR SNE NIG CMR ALG CSC EGI TUN GAN AFS ANG TOG RDC',
  CONCACAF:'EUA MEX CRC CAN JAM HON PAN TRI HAI ELS', OFC:'NZL FIJ TAH SOL',
 };
-export const confederacaoTecnico = id => Object.keys(grupos).find(k=>grupos[k].split(' ').includes(id)) || 'UEFA';
+export const confederacaoTecnico = id => CONFEDERACAO_POR_NACAO[id] || Object.keys(grupos).find(k=>grupos[k].split(' ').includes(id)) || 'UEFA';
 export const CONTINENTAIS_TECNICO = {UEFA:'Eurocopa',CONMEBOL:'Copa América',CAF:'Copa Africana de Nações',AFC:'Copa da Ásia',CONCACAF:'Copa Ouro',OFC:'Copa das Nações da Oceania'};
 const extras = [{id:'FIJ',label:'Fiji',forcaSelecao:48},{id:'TAH',label:'Taiti',forcaSelecao:50},{id:'SOL',label:'Ilhas Salomão',forcaSelecao:49}];
-export const SELECOES_TECNICO = [...NACIONALIDADES,...extras].map(n=>({nome:n.label,pais:n.label,nac:n.id,tipo:'selecao',liga:`selecao:${confederacaoTecnico(n.id)}`,confederacao:confederacaoTecnico(n.id),elenco:n.forcaSelecao,exigencia:Math.max(30,n.forcaSelecao-17),salario:salarioBaseSelecaoTecnico(n.forcaSelecao),motivo:`Seleção · ${confederacaoTecnico(n.id)} · vínculo exclusivo; deixa o clube atual`}));
+export const SELECOES_TECNICO = [...NACIONALIDADES,...extras.filter(x=>!NACIONALIDADES.some(n=>n.id===x.id))].map(n=>({nome:n.label,pais:n.label,nac:n.id,tipo:'selecao',liga:`selecao:${confederacaoTecnico(n.id)}`,confederacao:confederacaoTecnico(n.id),elenco:n.forcaSelecao,exigencia:Math.max(30,n.forcaSelecao-17),salario:salarioBaseSelecaoTecnico(n.forcaSelecao),motivo:`Seleção · ${confederacaoTecnico(n.id)} · vínculo exclusivo; deixa o clube atual`}));
 /** On taking an existing national team in a World Cup year, inherit its qualifying result. */
 export function vagaHerdadaSelecaoTecnico(nac,ano){
  if(ano%4!==2)return null;
@@ -41,16 +44,41 @@ function partida(a,b,rng,mata=false) {
  const penaltis=mata&&ga===gb;
  return {casa:a.nome,fora:b.nome,golsCasa:ga,golsFora:gb,penaltis,vencedor:ga===gb?(mata?(rng()<.5?a.nome:b.nome):null):ga>gb?a.nome:b.nome};
 }
+/** Jogo de eliminatórias com o motor das copas: força, mando e sorte. */
+function jogoEliminatorias(a,b,rng){
+ const {golsA,golsB}=sortearPlacar(golsEsperados(a.elenco,b.elenco,{mando:1}),rng);
+ return {casa:a.nome,fora:b.nome,golsCasa:golsA,golsFora:golsB,vencedor:golsA>golsB?a.nome:golsB>golsA?b.nome:null};
+}
+/**
+ * Eliminatórias por confederação, como no ciclo atual (Copa de 48):
+ * - CONMEBOL: todos contra todos em ida e volta; 6 primeiros classificados, 7º na repescagem.
+ * - UEFA: grupos de quatro; o líder se classifica, o 2º disputa o playoff (semifinal e final).
+ * - Demais: grupo de quatro com os dois primeiros classificados.
+ */
 function eliminatorias(t,eu,pool,rng) {
- const rivais=pool.filter(n=>n.nac!==eu.nac).map(n=>({...n,ordem:rng()})).sort((a,b)=>a.ordem-b.ordem).slice(0,3);
+ const conmebol=eu.confederacao==='CONMEBOL';
+ const rivais=conmebol?pool.filter(n=>n.nac!==eu.nac):pool.filter(n=>n.nac!==eu.nac).map(n=>({...n,ordem:rng()})).sort((a,b)=>a.ordem-b.ordem).slice(0,3);
  const times=[eu,...rivais], jogos=[],tabela=new Map(times.map(n=>[n.nome,{nome:n.nome,pontos:0,vitorias:0,golsPro:0,golsContra:0,meuClube:n.nome===eu.nome}]));
  for(let i=0;i<times.length;i++)for(let j=i+1;j<times.length;j++)for(const [a,b] of [[times[i],times[j]],[times[j],times[i]]]){
-  const jogo=partida(a,b,rng);jogos.push(jogo);
+  const jogo=jogoEliminatorias(a,b,rng);jogos.push(jogo);
   const x=tabela.get(a.nome),y=tabela.get(b.nome);x.golsPro+=jogo.golsCasa;x.golsContra+=jogo.golsFora;y.golsPro+=jogo.golsFora;y.golsContra+=jogo.golsCasa;
   if(jogo.vencedor){const v=tabela.get(jogo.vencedor);v.pontos+=3;v.vitorias++;}else{x.pontos++;y.pontos++;}
  }
- const classificacao=[...tabela.values()].sort((a,b)=>b.pontos-a.pontos||(b.golsPro-b.golsContra)-(a.golsPro-a.golsContra)||b.golsPro-a.golsPro||a.nome.localeCompare(b.nome)).map((x,i)=>({...x,posicao:i+1}));
- return {nome:`Eliminatórias da Copa · ${eu.confederacao}`,tipo:'eliminatorias',selecao:eu.nome,campeao:null,faseUsuario:classificacao.find(x=>x.meuClube).posicao<=2?'Vaga para a Copa':'Fora da zona de classificação',classificacao,grupos:[{grupo:'Grupo classificatório',jogos,classificacao}],fases:[],jogosUsuario:jogos.filter(j=>j.casa===eu.nome||j.fora===eu.nome)};
+ const classificacao=[...tabela.values()].sort((a,b)=>b.pontos-a.pontos||(b.golsPro-b.golsContra)-(a.golsPro-a.golsContra)||b.golsPro-a.golsPro||a.nome.localeCompare(b.nome)).map((x,i)=>({...x,posicao:i+1,saldoGols:x.golsPro-x.golsContra}));
+ const pos=classificacao.find(x=>x.meuClube).posicao,diretas=conmebol?6:eu.confederacao==='UEFA'?1:2;
+ const fases=[];let classificado=pos<=diretas,faseUsuario=classificado?'Vaga para a Copa':'Fora da zona de classificação';
+ // Playoff europeu (2º do grupo) ou repescagem intercontinental (7º da CONMEBOL): jogos únicos.
+ if(!classificado&&((eu.confederacao==='UEFA'&&pos===2)||(conmebol&&pos===7))){
+  const outros=SELECOES_TECNICO.filter(n=>n.nac!==eu.nac&&!times.some(x=>x.nac===n.nac)&&(conmebol?n.confederacao!=='UEFA':n.confederacao==='UEFA')&&n.elenco<=eu.elenco+8).map(n=>({...n,ordem:rng()})).sort((a,b)=>a.ordem-b.ordem).slice(0,2);
+  classificado=true;
+  for(const [i,rival] of outros.entries()){
+   const fase=i?'Final do playoff':'Semifinal do playoff',j={...jogoEliminatorio({nome:eu.nome,forca:eu.elenco},{nome:rival.nome,forca:rival.elenco},rng,{nome:'Playoff',tipo:'eliminatorias',final:!!i,neutro:conmebol}),fase};
+   fases.push({fase,jogos:[j]});jogos.push(j);
+   if(j.vencedor!==eu.nome){classificado=false;break;}
+  }
+  faseUsuario=classificado?'Vaga para a Copa · playoff':'Eliminado no playoff';
+ }
+ return {nome:`Eliminatórias da Copa · ${eu.confederacao}`,tipo:'eliminatorias',selecao:eu.nome,campeao:null,classificado,faseUsuario,classificacao,grupos:[{grupo:conmebol?'Tabela única':'Grupo classificatório',jogos:jogos.filter(j=>!j.fase),classificacao}],fases,jogosUsuario:jogos.filter(j=>j.casa===eu.nome||j.fora===eu.nome)};
 }
 function continental(eu,pool,rng){
  let vivos=[eu,...pool.filter(n=>n.nac!==eu.nac).map(n=>({...n,ordem:rng()})).sort((a,b)=>a.ordem-b.ordem).slice(0,7)];
@@ -67,18 +95,18 @@ export function simularAnoSelecaoTecnico(t,ovr,forca,rng,opcoes={}){
  const eu={...base,elenco:limitar(forca+Math.round((ovr-60)*.1),30,99)},pool=SELECOES_TECNICO.filter(n=>n.confederacao===eu.confederacao),ano=t.ano;
  const torneios=[],finaisPendentes=[],campanhas=[];
  const interativa=!!opcoes.copasInterativas;
- const criarCopa=(nome,tipo,participantes,formato)=>{const cp=criarCampanhaCopa({nome,tipo,usuario:eu.nome,forcaUsuario:eu.elenco,clubes:participantes.map(n=>({...n,forca:n.elenco})),ano,formato,seed:`${ano}|${eu.nac}|${nome}|treinador`});cp.selecao=eu.nome;campanhas.push(cp);return resumoCampanhaCopa(cp);};
+ const criarCopa=(nome,tipo,participantes,formato)=>{const cp=criarCampanhaCopa({nome,tipo,usuario:eu.nome,forcaUsuario:eu.elenco,clubes:participantes.map(n=>({...n,forca:n.elenco})),ano,formato,seed:`${ano}|${eu.nac}|${nome}|treinador`,historico:torneiosDoHistorico(t.temporadas)});cp.selecao=eu.nome;campanhas.push(cp);return resumoCampanhaCopa(cp);};
  const copaAno=ano%4===2, continentalAno=['UEFA','CONMEBOL','OFC'].includes(eu.confederacao)?ano%4===0:eu.confederacao==='AFC'?ano%4===3:ano%2===1;
  let classificacaoSelecao=t.classificacaoSelecao || vagaHerdadaSelecaoTecnico(eu.nac,ano);
- if(!copaAno){const e=eliminatorias(t,eu,pool,rng);torneios.push(e);classificacaoSelecao={nac:eu.nac,copa:ano+(6-ano%4)%4,classificado:e.classificacao.find(x=>x.meuClube).posicao<=2};}
- if(continentalAno)torneios.push(interativa?criarCopa(CONTINENTAIS_TECNICO[eu.confederacao],'continentalSelecao',[eu,...pool.filter(n=>n.nac!==eu.nac).map(n=>({...n,ordem:rng()})).sort((a,b)=>a.ordem-b.ordem).slice(0,7)],'mata'):continental(eu,pool,rng));
- if(copaAno && classificacaoSelecao?.copa===ano && classificacaoSelecao?.nac===eu.nac && classificacaoSelecao.classificado){const participantes=[eu,...SELECOES_TECNICO.filter(n=>n.nac!==eu.nac).map(n=>({...n,nota:n.elenco+rng()*20})).sort((a,b)=>b.nota-a.nota).slice(0,31)];torneios.push(interativa?criarCopa('Copa do Mundo','copaMundo',participantes,'selecao32'):simularCopaSelecaoTecnico({nac:eu.nac,selecao:eu.nome,forca:eu.elenco},ovr,`${ano}|${eu.nac}|mundial`));}
+ if(!copaAno){const e=eliminatorias(t,eu,pool,rng);torneios.push(e);classificacaoSelecao={nac:eu.nac,copa:ano+(6-ano%4)%4,classificado:e.classificado};}
+ if(continentalAno)torneios.push(interativa?criarCopa(CONTINENTAIS_TECNICO[eu.confederacao],'continentalSelecao',[eu,...participantesContinentalSelecoes(eu.confederacao,SELECOES_TECNICO).filter(n=>n.nac!==eu.nac)],'selecaoGrupos'):continental(eu,pool,rng));
+ if(copaAno && classificacaoSelecao?.copa===ano && classificacaoSelecao?.nac===eu.nac && classificacaoSelecao.classificado){const participantes=[eu,...classificadosCopaDoMundo(ano,{garantidas:[eu.nac],selecoes:SELECOES_TECNICO}).classificadas.filter(n=>n.nac!==eu.nac)];torneios.push(interativa?criarCopa('Copa do Mundo','copaMundo',participantes,'copa48'):simularCopaSelecaoTecnico({nac:eu.nac,selecao:eu.nome,forca:eu.elenco},ovr,`${ano}|${eu.nac}|mundial`));}
  if(!torneios.length){const jogos=pool.filter(n=>n.nac!==eu.nac).slice(0,3).map(n=>partida(eu,n,rng));torneios.push({nome:'Amistosos internacionais',tipo:'amistoso',selecao:eu.nome,faseUsuario:'Preparação · sem vaga na Copa',fases:[{fase:'Amistosos',jogos}],jogosUsuario:jogos});}
  for(const copa of torneios){if(['eliminatorias','amistoso'].includes(copa.tipo)||campanhas.some(cp=>cp.nome===copa.nome))continue;const f=opcoes.interativo?finalDoUsuarioTecnico(copa,eu.nome):null;if(f){finaisPendentes.push({...f,ano,tipo:copa.tipo,forcaUsuario:eu.elenco,forcaAdv:copa.forcas?.[f.adversario]??80,dado:rng()});copa.campeao=null;copa.finalPendente=true;copa.faseUsuario='Final';}}
  const titulosConquistados=torneios.filter(x=>x.campeao===eu.nome).map(x=>x.nome),jogos=torneios.flatMap(x=>x.jogosUsuario||[]);
  const vitorias=jogos.filter(x=>x.vencedor===eu.nome).length,empates=jogos.filter(x=>!x.vencedor).length,derrotas=jogos.length-vitorias-empates;
  const cumpriuObjetivo=titulosConquistados.length>0 || (copaAno?torneios.some(x=>x.nome==='Copa do Mundo'&&(x.jogosUsuario?.length||0)>=3&&!/grupo/.test(x.faseUsuario)):classificacaoSelecao?.classificado);
  const aguardando=campanhas.length>0;
- const temporada={avaliacaoSelecaoPendente:aguardando,baseAvaliacaoSelecao:{diretoria:t.diretoria??60,torcida:t.torcida??55},ano,clube:eu.nome,selecaoNome:eu.nome,tipoEquipe:'selecao',liga:eu.liga,competicao:torneios.map(x=>x.nome).join(' · '),objetivo:copaAno?'Avançar na Copa do Mundo':'Conquistar uma vaga na Copa',cumpriuObjetivo,jogos:jogos.length,vitorias,empates,derrotas,pontos:vitorias*3+empates,posicao:torneios[0].classificacao?.find(x=>x.meuClube)?.posicao??(titulosConquistados.length?1:null),campeao:false,titulosConquistados,torneios,decisoes:t.decisoes,classificacao:torneios[0].classificacao||[],formato:interativa?'Calendário internacional: decisões partida a partida nas copas; Mundial com 32 seleções, três jogos de grupo e mata-mata.':'Calendário internacional resumido: eliminatórias anuais em grupo de quatro; torneios continentais em mata-mata reduzido.'};
+ const temporada={avaliacaoSelecaoPendente:aguardando,baseAvaliacaoSelecao:{diretoria:t.diretoria??60,torcida:t.torcida??55},ano,clube:eu.nome,selecaoNome:eu.nome,tipoEquipe:'selecao',liga:eu.liga,competicao:torneios.map(x=>x.nome).join(' · '),objetivo:copaAno?'Avançar na Copa do Mundo':'Conquistar uma vaga na Copa',cumpriuObjetivo,jogos:jogos.length,vitorias,empates,derrotas,pontos:vitorias*3+empates,posicao:torneios[0].classificacao?.find(x=>x.meuClube)?.posicao??(titulosConquistados.length?1:null),campeao:false,titulosConquistados,torneios,decisoes:t.decisoes,classificacao:torneios[0].classificacao||[],formato:interativa?'Calendário internacional: decisões partida a partida nas copas; Copa do Mundo com 48 seleções, três jogos de grupo, 16 avos e mata-mata.':'Calendário internacional resumido: eliminatórias anuais em grupo de quatro; torneios continentais em mata-mata reduzido.'};
  return {copasEmJogo:campanhas.length?criarAgenda(campanhas,{ano,clube:eu.nome}):null,ofertasRecentes:[...(t.ofertasRecentes||[]),...(t.propostas||[]).map(p=>p.nome)].slice(-18),ano:ano+1,fase:'resultado',temporadas:[...(t.temporadas||[]),temporada],classificacaoSelecao,finaisPendentes,conviteSelecao:null,reputacao:aguardando?t.reputacao:limitar(t.reputacao+(titulosConquistados.length?8:cumpriuObjetivo?3:-3),10,99),titulos:(t.titulos||0)+titulosConquistados.length,vitorias:(t.vitorias||0)+vitorias,empates:(t.empates||0)+empates,derrotas:(t.derrotas||0)+derrotas,diretoria:aguardando?(t.diretoria??60):limitar((t.diretoria??60)+(cumpriuObjetivo?5:-10),0,100),torcida:aguardando?(t.torcida??55):limitar((t.torcida??55)+(cumpriuObjetivo?5:-6),0,100),demitido:!aguardando&&(t.diretoria??60)<20,ultimaFinal:null,propostasCoerentesVersao:3};
 }

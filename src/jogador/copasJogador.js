@@ -7,6 +7,7 @@ import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternaci
 import {eCampeaoPrincipal,criarMundialAnual,criarMundial32} from '../competicoes/mundialRapido.js';
 import {criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa,resumoCampanhaCopa} from '../treinador/copasEscolha.js';
 import {geradorTecnico} from '../treinador/momentosTecnico.js';
+import {torneiosDoHistorico} from '../competicoes/sorteio.js';
 
 // Participação esperada em gols e assistências do time, por função.
 const PESO_GOL={ATA:.36,SA:.3,PE:.24,PD:.24,ME:.18,MD:.18,MEI:.2,MC:.1,VOL:.06,ZAG:.05,LD:.04,LE:.04,GOL:0};
@@ -39,11 +40,11 @@ export function lancesJogadorCopa(card,campanha,chave){
 export function prepararCopasJogador(c,card){
  if(card.calendarioCopas||(c.temporadas||[]).some(a=>a.ano===card.ano))return card;
  const clubes=clubesDoMundo(c,clubesParaCopas(c.ligas)),clube=clubes.find(x=>x.nome===card.clube);if(!clube)return card;
- const campeonatos=[],regiao=regiaoDaLiga(clube.liga),regional=participantesEstadual(clube),forca=Math.round(card.forcaClube??card.estadual?.forcaUsuario??clube.forca),criar=o=>criarCampanhaCopa({usuario:clube.nome,forcaUsuario:forca,ano:card.ano,seed:`${c.codigo}|${card.ano}|${o.nome}|jogador`,...o});
+ const campeonatos=[],regiao=regiaoDaLiga(clube.liga),regional=participantesEstadual(clube),forca=Math.round(card.forcaClube??card.estadual?.forcaUsuario??clube.forca),historico=torneiosDoHistorico(c.temporadas),criar=o=>criarCampanhaCopa({usuario:clube.nome,forcaUsuario:forca,ano:card.ano,seed:`${c.codigo}|${card.ano}|${o.nome}|jogador`,historico,...o});
  if(regional)campeonatos.push(criar({nome:regional.nome,tipo:'estadual',clubes:clubesDoMundo(c,regional.clubes),formato:'estadual',estado:regional.estado,interativoEstadual:true}));
  const nacional=COPAS_NACIONAIS[primeiraLiga(clube.liga)];if(nacional)campeonatos.push(criar({nome:nacional,tipo:'copa',clubes:clubes.filter(x=>x.pais===clube.pais),formato:'mata',entrada:nacional==='Copa do Brasil'?(clube.forca>=80?'principal':clube.forca>=65?'pre':'preliminar'):'principal'}));
  const vaga=vagaJogador(c,clube)||card.continental?.vaga||(card.continental?{competicao:regiao==='europa'?'champions':regiao==='sul'?'libertadores':regiao==='arabia'?'asia':'concacaf',entrada:'principal'}:null);
- if(vaga){const vagas=c.vagasInternacionaisAno===card.ano?c.vagasInternacionaisClubes:calcularVagasRapidas({ano:card.ano-1,ligasMundo:c.ligas}),pool=clubes.filter(x=>x.nome===clube.nome||vagas[x.nome]?.competicao===vaga.competicao);pool.splice(0,pool.length,...ampliarParticipantesInternacionais(pool,vaga.competicao,card.ano,clubesParaCopas(c.ligas)));campeonatos.push(criar({nome:nomeVaga(vaga.competicao),tipo:'continental',clubes:pool,formato:regiao==='europa'?'liga':'grupos',entrada:vaga.entrada}));}
+ if(vaga){const vagas=c.vagasInternacionaisAno===card.ano?c.vagasInternacionaisClubes:calcularVagasRapidas({ano:card.ano-1,ligasMundo:c.ligas}),pool=clubes.filter(x=>x.nome===clube.nome||vagas[x.nome]?.competicao===vaga.competicao);pool.splice(0,pool.length,...ampliarParticipantesInternacionais(pool,vaga.competicao,card.ano,clubesParaCopas(c.ligas)));const repescagem=vaga.competicao==='sulamericana'?ampliarParticipantesInternacionais(clubes.filter(x=>vagas[x.nome]?.competicao==='libertadores'),'libertadores',card.ano,clubesParaCopas(c.ligas)):[];campeonatos.push(criar({nome:nomeVaga(vaga.competicao),tipo:'continental',clubes:pool,formato:regiao==='europa'?'liga':'grupos',entrada:vaga.entrada,repescagem}));}
  const mundial=criarMundial32({usuario:clube.nome,forcaUsuario:forca,ano:card.ano,historico:c.lista||[],seed:c.codigo});if(mundial)campeonatos.push(mundial);
  campeonatos.forEach(cp=>{cp.regiao=regiao;});
  const momentos=[card.pendente,...(card.filaMomentos||[])].filter(m=>m&&!['continental','copa','mundial'].includes(m.tipo));

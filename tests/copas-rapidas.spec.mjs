@@ -7,6 +7,8 @@ import {criarJogador,aposentar} from '../src/jogador/rapido.js';
 import {iniciarCarreiraTecnico} from '../src/treinador/tecnico.js';
 import {criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa} from '../src/treinador/copasEscolha.js';
 import {CLUBES} from '../src/dados/data.js';
+// O sorteio animado das copas tem teste próprio (sorteio-copas.spec); aqui as decisões vêm direto.
+test.beforeEach(async({page})=>{await page.addInitScript(()=>localStorage.setItem('a-joia:pular-sorteios','1'));});
 function base(cp){const c=iniciarCarreiraTecnico(aposentar({...criarJogador({nome:'Copa Teste',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:10,ritmo:'expresso',codigo:'COPA-ESCOLHA'}),idade:40}));c.tecnico={...c.tecnico,clube:cp.usuario,ano:cp.ano+1,fase:'resultado',clubeInicialEscolhido:true,propostasCoerentesVersao:3,elenco:cp.forcaUsuario,temporadas:[{ano:cp.ano,clube:cp.usuario,liga:'brasileirao',posicao:2,pontos:72,vitorias:22,empates:6,derrotas:10,titulosConquistados:[],torneios:[cp]}],copasEmJogo:{ano:cp.ano,clube:cp.usuario,campeonatos:[cp],indice:0}};return c;}
 async function abrir(page,c){await page.goto('http://127.0.0.1:4173/A-Joia/');await instalarSave(page,((c)=>({v:1,etapa:'tecnico',c}))(c),"ajoia_rapido_v1");await page.reload();await page.getByRole('button',{name:/Continuar · Copa Teste/}).click();}
 async function salvo(page){return lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo.c));}

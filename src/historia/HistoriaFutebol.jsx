@@ -19,6 +19,7 @@ import HistoricoPremios from './HistoricoPremios.jsx';
 import RecordesFutebol from './RecordesFutebol.jsx';
 import GaleriaSelecoes from './GaleriaSelecoes.jsx';
 import PalcoIdolos from './PalcoIdolos.jsx';
+import RankingsMundo from './RankingsMundo.jsx';
 import {nomeSelecaoHistorica} from '../dados/selecoesHistoricas.js';
 import {EVENTO_ENTIDADE,empilharPagina,paginaEntidade} from './navegacaoEntidades.js';
 import {historicoProfissionalTecnico,titulosConquistadosTecnico} from '../treinador/tecnico.js';
@@ -166,7 +167,7 @@ export function HistoriaDialog({c,nome,temporadas,onFechar,competicaoInicial,ent
    ...clubesComHistoricoEstadual().map(nome=>({nome}))].map(c=>[c.nome,c])).values()]
    .filter(x=>!busca||x.nome.toLocaleLowerCase('pt-BR').includes(busca.toLocaleLowerCase('pt-BR')));
  const localizacao=aba==='atletas'?'Jogador':aba==='clubes'?clube:aba==='competicoes'?competicao:
-   aba==='premios'?pagina.premio:aba==='selecoes'?selecao:aba==='confrontos'?'Confrontos':aba==='treinadores'?pagina.nome:aba==='noticias'?'Notícias do mundo':'Arquivo Vivo';
+   aba==='premios'?pagina.premio:aba==='selecoes'?selecao:aba==='confrontos'?'Confrontos':aba==='treinadores'?pagina.nome:aba==='noticias'?'Notícias do mundo':aba==='rankings'?'Rankings':'Arquivo Vivo';
  return createPortal(<dialog ref={ref} className="hf-dialog fm27-historico" aria-label="História do futebol"
   onCancel={e=>{e.preventDefault();onFechar();}}>
    <header className="hf-cabecalho"><div><span className="hf-eyebrow">A JOIA · ARQUIVO VIVO</span>
@@ -174,7 +175,7 @@ export function HistoriaDialog({c,nome,temporadas,onFechar,competicaoInicial,ent
    <nav className="hf-abas" aria-label="Seções da história">
     {[['clubes','Clubes'],['selecoes','Seleções'],['competicoes','Competições'],['confrontos','Confrontos'],
       ['carreira','Sua carreira'],['atletas','Jogadores'],['premios','Prêmios'],
-      ['treinadores','Treinadores'],['recordes','Recordes'],['noticias','Notícias']].map(([id,label])=>
+      ['treinadores','Treinadores'],['recordes','Recordes'],['rankings','Rankings'],['noticias','Notícias']].map(([id,label])=>
      <button type="button" key={id} aria-pressed={aba===id} onClick={()=>mudarAba(id)}>{label}</button>)}
    </nav>
    <div className="hf-nav-tools"><button type="button" className="hf-nav-back"
@@ -199,6 +200,7 @@ export function HistoriaDialog({c,nome,temporadas,onFechar,competicaoInicial,ent
        onSelecao={nome=>irEntidade({tipo:'selecao',nome})}/>:
      aba==='confrontos'?<HistoricoConfrontos key={pagina.jogadorId||'clubes'} c={c} jogadorInicial={pagina.jogadorId||null}/>:
      aba==='noticias'?<NoticiasMundo c={c}/>:
+     aba==='rankings'?<RankingsMundo c={c}/>:
      aba==='carreira'?<MarcosIndividuais c={c} temporadas={temporadas}/>:
      aba==='atletas'?<ArquivoAtletasFM key={pagina.jogadorId||'todos'} c={c} jogadorInicial={pagina.jogadorId||null}
        onConfrontos={id=>irEntidade({tipo:'confrontos',id,nome:'Confrontos'})}/>:

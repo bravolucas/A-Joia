@@ -58,3 +58,22 @@ button.pj-linha:hover{background:#16273a}
 .pj-pesquisa .mv-atletas .pj-jogador{display:flex;align-items:center}
 .pj-pesquisa .mv-atletas .pj-jogador>span{flex-direction:column}
 @media (max-width:900px){.pj-pesquisa .mv-atletas .pj-linha>span[data-rotulo=Idade]{display:none}.pj-pesquisa .mv-atletas .pj-clube{padding-left:44px}}
+.pj-comparar{align-self:center;margin-left:8px;min-height:34px;padding:6px 14px;border-radius:999px;border:1px solid #5fd3b0;background:transparent;color:#a6f0cf;font-size:12px;font-weight:700;cursor:pointer}
+.pj-comparar[aria-pressed=true]{background:#5fd3b0;color:#062018}
+.pj-dica{margin:10px 16px 0;font-size:12px;color:#a6f0cf}
+.pj-comparacao{margin:14px 16px 0;padding:14px;border:1px solid #2c3d4d;border-radius:14px;background:#0f1823}
+.pj-comparacao header{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin-bottom:12px}
+.pj-comparacao header>b{grid-column:2;grid-row:1;font-size:22px;color:#5fd3b0}
+.pj-comp-a{grid-column:1;grid-row:1}.pj-comp-b{grid-column:3;grid-row:1;text-align:right}
+.pj-comparacao header strong{display:block;font-size:15px}
+.pj-comparacao header small{font-size:11px;color:#8fa3b8}
+.pj-comparacao ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.pj-comparacao li{display:grid;grid-template-columns:60px 1fr 60px;gap:10px;align-items:center}
+.pj-comparacao li>span{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:#9fb1c3}
+.pj-comparacao li>span:last-child{text-align:right}
+.pj-comparacao li>span.pj-ganha{color:#fff}
+.pj-comparacao li small{display:block;text-align:center;font-size:11px;color:#8fa3b8;margin-bottom:4px}
+.pj-barra{display:flex;height:8px;border-radius:999px;overflow:hidden;background:#1d2b3a}
+.pj-barra b{display:block;background:#5fd3b0}.pj-barra em{display:block;background:#7aa7ff}
+.pj-comparacao footer{display:flex;gap:14px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+@media (max-width:600px){.pj-pesquisa .fm27-player-hero{flex-wrap:wrap}.pj-comparar{margin:8px 0 0;width:100%}}

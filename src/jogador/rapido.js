@@ -19,6 +19,7 @@ import {vagaJogador,nomeVaga,calcularVagasRapidas,clubesParaCopas,regiaoDaLiga,i
 import {participantesEstadual,CLUBES_REGIONAIS_EXTRAS} from '../competicoes/estaduaisRapidos.js';
 import {simularCampanhaCopa,adversarioCopaPorFase} from '../treinador/copasEscolha.js';
 import {jogosDoGrupo,tabelaGrupoCopa,empateGrupo} from './gruposCopa.js';
+import {aplicarManchetesJogador} from './manchetesJogador.js';
 import {atualizarRecordesUniverso} from './recordesUniverso.js';
 import {detectarQuebrasRecordesFutebol,escoposRecordesDaTemporada,guardarQuebrasRecordesFutebol} from '../historia/noticiasRecordes.js';
 import {registrarCampanhaContinental,registrarFinalContinental} from './torneioContinental.js';
@@ -2050,6 +2051,8 @@ function fecharTemporadaBase(c0, card0) {
     card.destaques.push(`⬇️ Rebaixado: o ${tc} vai jogar a ${card.rebaixado.para} em ${card.ano + 1}`);
     c.torcida[tc] = clampR((c.torcida[tc] ?? 30) - 6, 0, 100);
   }
+  // Manchetes sobre você: clássicos, artilharia, crises e prêmios mexem com a torcida e a moral.
+  aplicarManchetesJogador(c, card, mexerMoral);
   card.torcida = c.torcida[tc];
   card.torcidaDelta = c.torcida[tc] - tAntes;
 

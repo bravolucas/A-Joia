@@ -38,3 +38,6 @@
 .ft-por-competicao p{display:flex;justify-content:space-between;gap:10px;margin:0;padding:8px 10px;border-radius:8px;background:#ffffff0a;font-size:12px}
 .ft-por-competicao strong{font-weight:650}
 .ft-por-competicao span{color:#c9d6e0;white-space:nowrap}
+.ft-manchetes{list-style:none;margin:0 0 6px;padding:0;display:grid;gap:6px}
+.ft-manchetes li{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-left:3px solid #e6c06a;border-radius:6px;background:#ffffff08;font-size:13px}
+.ft-manchetes small{font-size:11px;color:#a9b6c6}

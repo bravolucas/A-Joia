@@ -6,6 +6,8 @@ import {iniciarCarreiraTecnico,simularTemporadaTecnico} from '../src/treinador/t
 import {criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa} from '../src/treinador/copasEscolha.js';
 import {criarAgenda,avancarPausa} from '../src/competicoes/calendarioCopas.js';
 import {CLUBES} from '../src/dados/data.js';
+// O sorteio animado das copas tem teste próprio (sorteio-copas.spec); aqui as decisões vêm direto.
+test.beforeEach(async({page})=>{await page.addInitScript(()=>localStorage.setItem('a-joia:pular-sorteios','1'));});
 function atleta(){const c=criarJogador({nome:'Calendário Visual',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:9,codigo:'VISUAL-COPAS'});c.clubeNome='Flamengo';c.flags.baseEscolhida=true;return c;}
 async function abrir(page,save){await page.goto('http://127.0.0.1:4173/A-Joia/');await instalarSave(page,((save)=>({v:1,...save}))(save),"ajoia_rapido_v1");await page.reload();await page.getByRole('button',{name:/Continuar · Calendário Visual/}).click();}
 function cpTema(nome,tipo='continental'){let cp;for(let i=0;i<40;i++){cp=criarCampanhaCopa({nome,tipo,usuario:'Flamengo',forcaUsuario:90,clubes:CLUBES.filter(x=>['brasileirao','serieB'].includes(x.liga)),ano:2026,formato:'mata',seed:'TEMA-'+i});const d=decisaoCopa(cp);if(!escolherCopa(cp,d.chave,escolhasCopa(cp,d).opcoes[0].id).resultado.penaltisPendentes)return cp;}return cp;}

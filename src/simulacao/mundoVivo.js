@@ -6,6 +6,7 @@ import { CLUBES, LIGAS } from '../dados/data.js';
 import { avaliarClubeNoMundo } from './forcaEquipe.js';
 import { EIXOS_REPUTACAO_CLUBE, evoluirReputacoesClube } from './reputacoesClube.js';
 import { geradorTecnico } from '../treinador/momentosTecnico.js';
+import {avaliarTecnicoClube,manchetesDoAno} from './tecnicosMundo.js';
 const limitar=(n,a,b)=>Math.max(a,Math.min(b,n));
 const red=n=>Math.round(n*10)/10||0;
 /** Snapshot serializável: o cadastro nunca é modificado e os mundos de saves distintos não se misturam. */
@@ -72,6 +73,9 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
     if(!movimentosPorClube.has(movimento.clube))movimentosPorClube.set(movimento.clube,movimento);
   }
   const subiram=new Set(a.subiram||[]),cairam=new Set(a.cairam||[]);
+  // Técnicos da IA: o clube do usuário (jogador ou treinador) não troca de comando por aqui.
+  const tecnicos={...(anterior.tecnicos||{})},trocas=[],semente=c.codigo||c.nome||'carreira';
+  const clubeUsuario=c.tecnico?.clube||(typeof a.clube==='string'?a.clube:a.clube?.nome);
   for(const cl of clubesRegistrados){
     const p=u.clubes[cl.nome]||{mercado:0,estrutura:0,fase:0,reputacao:cl.forca,financas:50,historico:[]};
     const campanha=campanhaClube(a,cl.nome,campanhas),titulosClube=titulosPorClube.get(cl.nome)||[],tacas=titulosClube.map(t=>t.nome);
@@ -85,7 +89,13 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
     const ajusteMercado=(rng()+rng()-1)*1.8+(financas-50)*.012;
     const mercado=limitar(p.mercado*.92+ajusteMercado,-12,12);
     const estrutura=limitar(p.estrutura+receita*.025,-3,3);
-    const fase=limitar(desempenho*2,-1.5,1.5);
+    let fase=limitar(desempenho*2,-1.5,1.5);
+    if(campanha&&cl.nome!==clubeUsuario){
+      const r=avaliarTecnicoClube(tecnicos[cl.nome],{clube:cl,ano:a.ano,desempenho,movimento,semente});
+      // Técnico novo: o vestiário reage e a fase ruim é parcialmente recuperada.
+      if(r.demitido){trocas.push({clube:cl.nome,sai:r.demitido.nome,entra:r.tecnico.nome});fase=limitar(fase+0.8,-1.5,1.5);}
+      tecnicos[cl.nome]=r.tecnico;
+    }
     const motivos=[...(movimento?[movimento==='acesso'?'Acesso de divisão':'Rebaixamento']:[]),...(tacas.length?[`${tacas.length} título${tacas.length>1?'s':''} na temporada`]:[]),ajusteMercado>.45?'Planejamento do elenco fortaleceu o clube':ajusteMercado<-.45?'Planejamento do elenco deixou perdas':'Elenco passou por ajustes pontuais'];
     const antes=forcasAntes[cl.nome];
     // Indicadores adicionais não substituem os atributos legados de força,
@@ -170,6 +180,10 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
   // Registrar depois de arquivar os placares: assim o Modo Rápido usa somente
   // partidas finalizadas, com distribuição fixa e identificada por competição.
   u=registrarPartidasDetalhadasUsuario(u,a);
+  u.tecnicos=tecnicos;
+  const forcasManchetes=Object.fromEntries(Object.entries(forcasAntes).map(([n,v])=>[n,typeof v==='number'?v:v?.forca]).filter(([,v])=>Number.isFinite(v)));
+  const manchetes=manchetesDoAno(a,{forcas:forcasManchetes,transferencias:(c.mundo?.transferencias||[]).filter(t=>t.temporada===c.mundo?.temporada),trocas,cairam:[...cairam]});
+  u.noticias=[...manchetes,...(anterior.noticias||[]).filter(n=>n.ano!==a.ano)].slice(0,70);
   if(c.tecnico){delete c.universo;c.tecnico={...c.tecnico,universo:u,forcasMundo:forcasDoMundo({...c,universo:u})};}else c.universo=u;
 }
 

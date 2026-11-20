@@ -1,3 +1,5 @@
+import {simularLigaMundo} from '../treinador/classificacoesMundoTecnico.js';
+import {geradorTecnico} from '../treinador/momentosTecnico.js';
 import {CLUBES_EUROPEUS_EXTRAS} from './clubesEuropeusExtras.js';
 
 /** Adversários reais, sem vagas de carreira/mercado. Forças são estimativas do jogo. */
@@ -15,15 +17,33 @@ export const CLUBES_SULAMERICANOS_EXTRAS=sul.flatMap(([pais,times])=>times.map((
 const paisSul={
  'Peñarol':'Uruguai','Nacional de Montevidéu':'Uruguai','Atlético Nacional':'Colômbia','Millonarios':'Colômbia','Junior de Barranquilla':'Colômbia','Colo-Colo':'Chile','Universidad de Chile':'Chile','Universidad Católica':'Chile','Olimpia':'Paraguai','Cerro Porteño':'Paraguai','LDU de Quito':'Equador','Independiente del Valle':'Equador','Barcelona de Guayaquil':'Equador',
 };
+/** País de um clube sul-americano do catálogo (fora de Brasil e Argentina). */
+export const paisClubeSul=nome=>paisSul[nome]||null;
 const hash=s=>[...s].reduce((h,c)=>Math.imul(h^c.charCodeAt(0),16777619)>>>0,2166136261);
 const ruido=(ano,nome)=>((hash(`${ano}|${nome}|classificacao-internacional`)%100001)/100000-.5)*14;
 const unicos=times=>[...new Map(times.map(c=>[c.nome,c])).values()];
-const ordemAno=(times,ano)=>[...times].sort((a,b)=>(b.forca+ruido(ano,b.nome))-(a.forca+ruido(ano,a.nome))||a.nome.localeCompare(b.nome));
+const cacheLigas=new Map();
+/**
+ * Campeonato nacional simulado dos países sem liga jogável: todos contra todos
+ * em ida e volta, com o mesmo motor de partidas das ligas. A tabela decide as
+ * vagas continentais e é a mesma ao recarregar.
+ */
+export function ligaEstrangeiraSimulada(times,ano,pais){
+ const chave=`${ano}|${pais}|${times.map(t=>`${t.nome}:${t.forca}`).join(',')}`;
+ if(cacheLigas.has(chave))return cacheLigas.get(chave);
+ const r=simularLigaMundo(times.map(t=>({...t,elenco:t.forca})),geradorTecnico(`${ano}|${pais}|liga-estrangeira`),`estrangeira-${pais}`);
+ if(cacheLigas.size>400)cacheLigas.clear();
+ cacheLigas.set(chave,r);return r;
+}
+const ordemAno=(times,ano)=>{
+ const pais=times[0]?.pais||'?',tabela=ligaEstrangeiraSimulada(times,ano,pais).classificacao,pos=new Map(tabela.map((x,i)=>[x.nome,i]));
+ return [...times].sort((a,b)=>(pos.get(a.nome)??99)-(pos.get(b.nome)??99)||a.nome.localeCompare(b.nome));
+};
 
 // Edições variam sem sortear de novo ao recarregar. Um clube só disputa um continental.
 export function classificacaoInternacionalSul(ano=2026,catalogo=[]){
  const clubes=unicos([...catalogo.filter(c=>paisSul[c.nome]).map(c=>({...c,pais:paisSul[c.nome]})),...CLUBES_SULAMERICANOS_EXTRAS]);
- return Object.fromEntries([...new Set(clubes.map(c=>c.pais))].flatMap(pais=>ordemAno(clubes.filter(c=>c.pais===pais),ano).slice(0,8).map((c,i)=>[c.nome,{competicao:i<4?'libertadores':'sulamericana',entrada:i<2||i>=4?'principal':'pre',motivo:`Classificação simulada em ${pais}`,ano:ano+1}])));
+ return Object.fromEntries([...new Set(clubes.map(c=>c.pais))].flatMap(pais=>ordemAno(clubes.filter(c=>c.pais===pais),ano).slice(0,8).map((c,i)=>[c.nome,{competicao:i<4?'libertadores':'sulamericana',entrada:i<2||i>=4?'principal':'pre',motivo:`Campeonato de ${pais} simulado`,ano:ano+1}])));
 }
 export function extrasInternacionais(competicao,ano=2026,catalogo=[]){
  if(['libertadores','sulamericana'].includes(competicao)){

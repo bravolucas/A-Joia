@@ -2,6 +2,8 @@ import {instalarSave,lerSave} from './helpers/save-browser.mjs';
 import { test, expect } from '@playwright/test';
 import { criarJogador, aposentar } from '../src/jogador/rapido.js';
 import { iniciarCarreiraTecnico, CLUBES_CONVITES_TECNICO } from '../src/treinador/tecnico.js';
+// O sorteio animado das copas tem teste próprio (sorteio-copas.spec); aqui as decisões vêm direto.
+test.beforeEach(async({page})=>{await page.addInitScript(()=>localStorage.setItem('a-joia:pular-sorteios','1'));});
 
 function carreira(ritmo = 'normal') {
   const jogador = aposentar({ ...criarJogador({ nome: 'Treinador momentos', nac: 'BRA', posicao: 'ATA', personalidade: 'equilibrado', origem: 'base', pe: 'destro', numero: 10, ritmo: 'normal', codigo: 'COACH-MOMENTOS' }), idade: 40 });

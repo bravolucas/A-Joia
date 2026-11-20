@@ -1221,6 +1221,8 @@ export function simularAmistososSelecao(c,ovr,quantidade=6){
    o "discurso no vestiário" garante uma fase, uma vez por Copa, e não vale na
    final. A final, se você for titular, vira o momento decisivo da sua posição. */
 export const FASES_COPA = ["Fase de grupos", "Oitavas", "Quartas", "Semifinal", "Final"];
+/** Nome da fase atual da Copa do jogador (a de 48 seleções começa o mata-mata nos 16 avos). */
+export const nomeFaseCopa = k => k?.dezesseisAvos ? "16 avos de final" : FASES_COPA[k?.fase ?? 0];
 const FAIXA_ADV = { 1: [74, 84], 2: [79, 89], 3: [83, 92], 4: [86, 93] };
 function sortearSelecoes(nac, n, [min, max], evitar = [], paises = null) {
   const livre = (x) => x.id !== nac && !evitar.includes(x.id) && (!paises || paises.includes(x.id));
@@ -1310,7 +1312,7 @@ export function opcoesCopa(c, card) {
   ];
   if (k.arenga && k.fase < 4) ops.push({ id: "arenga", icone: "📣", nome: "Discurso no vestiário", texto: "Uma vez por Copa: garante a vitória. Não vale na final.", p: 1, faixa: "ouro" });
   if(grupo)return {etapa:k.etapa,rodada:rodada+1,titulo:`Fase de grupos · Jogo ${rodada+1} de 3`,texto:`${k.label} x ${adv.label}. ${rodada===0?"Estreia: a primeira chance de somar pontos.":rodada===1?"Segunda rodada: cada ponto conta para a classificação.":`Última rodada: sua seleção entra com ${tabelaGrupoCopa(k).find(t=>t.id===k.nac).p} pontos.`} Os dois primeiros avançam após os três jogos.`,adversario:adv,opcoes:ops};
-  return { etapa: k.etapa, titulo: `${FASES_COPA[k.fase]} · ${k.label} x ${adv.label}`, texto: k.fase === 4 ? `A final da ${k.nome}. Noventa minutos para entrar na história.` : `Mata-mata: quem perde volta para casa.`, adversario: adv, opcoes: ops };
+  return { etapa: k.etapa, titulo: `${nomeFaseCopa(k)} · ${k.label} x ${adv.label}`, texto: k.fase === 4 ? `A final da ${k.nome}. Noventa minutos para entrar na história.` : `Mata-mata: quem perde volta para casa.`, adversario: adv, opcoes: ops };
 }
 
 function finalizarCopa(card, campeao) {
@@ -1320,7 +1322,7 @@ function finalizarCopa(card, campeao) {
   t.convocado = k.convocado; t.titular = k.titular; t.fase = k.fase; t.gols = k.gols; t.assist = k.assist; t.jogos = k.jogos.length;
   if (!k.convocado) { t.resultado = "Fora da convocação"; return card; }
   if (campeao) { t.campeao = true; t.resultado = "Campeão"; k.campeao = true; }
-  else t.resultado = k.fase === 0 ? "Eliminado na fase de grupos" : k.fase === 4 ? "Vice-campeão" : k.fase === 3 ? "Eliminado na semifinal" : `Eliminado nas ${FASES_COPA[k.fase].toLowerCase()}`;
+  else t.resultado = k.fase === 0 ? "Eliminado na fase de grupos" : k.dezesseisAvos ? "Eliminado nos 16 avos de final" : k.fase === 4 ? "Vice-campeão" : k.fase === 3 ? "Eliminado na semifinal" : `Eliminado nas ${FASES_COPA[k.fase].toLowerCase()}`;
   if (k.titular && k.fase >= 3 && (k.craque >= 2 || k.gols >= 5)) { k.craqueCopa = true; card.destaques.push(`⭐ Eleito o craque da ${k.nome}`); k.efeitos.fama += 6; }
   if (k.gols >= 6) card.destaques.push(`👟 Artilheiro da ${k.nome}, com ${k.gols} gols`);
   else if (k.gols >= 3) card.destaques.push(`${k.gols} gols na ${k.nome}`);
@@ -1364,10 +1366,12 @@ function jogarCopaBase(c, card0, opId) {
     const outro={rodada:rodada+1,mandante,visitante,gp:outGp,gc:outGc};
     k.jogosGrupoOutros=[...(k.jogosGrupoOutros||[]),outro];
     const tabela=tabelaGrupoCopa(k),pos=tabela.findIndex(t=>t.id===k.nac)+1,pts=tabela[pos-1].p;
-    const encerrada=rodada===2,passa=encerrada&&pos<=2;
+    // Copa de 48 seleções (2026+): os oito melhores terceiros também avançam (na prática, 4 pontos ou 3 sem saldo negativo).
+    const copa48=k.tipo==='copaMundo'&&k.ano>=2026,terceiroBom=copa48&&pos===3&&(pts>=4||(pts===3&&tabela[2].sg>=0));
+    const encerrada=rodada===2,passa=encerrada&&(pos<=2||terceiroBom);
     let texto=`${gp} x ${gc} contra ${adv.label}. ${pts} ${pts===1?"ponto":"pontos"} após ${rodada+1} ${rodada===0?"jogo":"jogos"}.`;
     if(encerrada){
-      if(passa){k.etapa="mata";k.fase=k.primeiraFaseMata||1;k.adversario=sortearSelecoes(c.nac,1,FAIXA_ADV[k.fase],k.enfrentados,k.participantes)[0];k.enfrentados.push(k.adversario.id);texto+=` ${pos}º lugar: classificado para ${FASES_COPA[k.fase].toLowerCase()} contra ${k.adversario.label}.`;}
+      if(passa){k.etapa="mata";k.fase=k.primeiraFaseMata||1;k.dezesseisAvos=copa48;k.adversario=sortearSelecoes(c.nac,1,FAIXA_ADV[k.fase],k.enfrentados,k.participantes)[0];k.enfrentados.push(k.adversario.id);texto+=` ${pos}º lugar${pos===3?' (entre os melhores terceiros)':''}: classificado para ${nomeFaseCopa(k).toLowerCase()} contra ${k.adversario.label}.`;}
       else{finalizarCopa(card,false);texto+=` ${pos}º lugar: eliminado na fase de grupos.`;}
     }else texto+=` Próxima partida: ${k.grupo[rodada+1].label}.`;
     return {card,res:{etapa:"grupos",rodada:rodada+1,adv,escolha:op.nome,p:op.p,jogo,jogos:[jogo],outro,pts,pos,tabela,classificacaoEncerrada:encerrada,classificado:passa,venceu,empate:resultado==="E",marca:venceu?"Vitória":resultado==="E"?"Empate":"Derrota",placar:`${gp} x ${gc}`,texto}};
@@ -1388,14 +1392,20 @@ function jogarCopaBase(c, card0, opId) {
   const jogo = { fase: k.fase, adv, gp, gc, res: venceu ? "V" : "D", penaltis, ...eu };
   registrarJogoElenco(k.elenco,jogo,{titular:k.titular,ano:k.ano});
   k.jogos.push(jogo);
-  const fase = FASES_COPA[k.fase];
+  const fase = nomeFaseCopa(k);
   const placarTxt = `${gp} x ${gc}${penaltis ? " (pên.)" : ""}`;
   let texto;
   if (venceu) {
     texto = op.id === "arenga" ? `O discurso incendiou o vestiário. ${placarTxt} sobre ${adv.label}.`
       : decidiu ? (eu.gols ? `Você chamou o jogo e marcou. ${placarTxt} sobre ${adv.label}.` : `Você chamou o jogo e decidiu. ${placarTxt} sobre ${adv.label}.`)
       : `${placarTxt} sobre ${adv.label}. ${k.label} segue viva.`;
-    if (k.fase === 4) { finalizarCopa(card, true); card.titulos.push({ tipo: k.tipo||"copaMundo", nome: k.nome||"Copa do Mundo" }); card.destaques.push(`🏆 Campeão da ${k.nome} com ${k.label}`); texto = `CAMPEÃO DA ${k.nome.toUpperCase()}! ${placarTxt} na final contra ${adv.label}.`; }
+    if (k.dezesseisAvos) {
+      // 16 avos vencidos: as oitavas vêm a seguir.
+      k.dezesseisAvos = false;
+      k.adversario = sortearSelecoes(c.nac, 1, FAIXA_ADV[k.fase], k.enfrentados,k.participantes)[0];
+      k.enfrentados.push(k.adversario.id);
+      texto += ` Nas oitavas: ${k.adversario.label}.`;
+    } else if (k.fase === 4) { finalizarCopa(card, true); card.titulos.push({ tipo: k.tipo||"copaMundo", nome: k.nome||"Copa do Mundo" }); card.destaques.push(`🏆 Campeão da ${k.nome} com ${k.label}`); texto = `CAMPEÃO DA ${k.nome.toUpperCase()}! ${placarTxt} na final contra ${adv.label}.`; }
     else {
       k.fase += 1;
       k.adversario = sortearSelecoes(c.nac, 1, FAIXA_ADV[k.fase], k.enfrentados,k.participantes)[0];
@@ -1411,7 +1421,7 @@ function jogarCopaBase(c, card0, opId) {
   } else {
     texto = op.id === "decidir" ? `Você pediu a bola, mas não foi a sua noite. ${placarTxt} para ${adv.label}.` : `${placarTxt} para ${adv.label}. Fim da linha na ${fase.toLowerCase()}.`;
     finalizarCopa(card, false);
-    card.destaques.push(k.fase === 4 ? `Vice-campeão da ${k.nome} com ${k.label}` : `${k.label} caiu ${k.fase === 1 ? "nas oitavas" : k.fase === 2 ? "nas quartas" : "na semifinal"} da Copa`);
+    card.destaques.push(k.fase === 4 ? `Vice-campeão da ${k.nome} com ${k.label}` : `${k.label} caiu ${k.dezesseisAvos ? "nos 16 avos" : k.fase === 1 ? "nas oitavas" : k.fase === 2 ? "nas quartas" : "na semifinal"} da Copa`);
   }
   return { card, res: { etapa: "mata", fase, adv, escolha: op.nome, p: op.p, venceu, marca: venceu ? (k.campeao ? "Campeão" : "Vitória") : "Eliminado", placar: placarTxt, jogo, texto } };
 }

@@ -1,3 +1,4 @@
+import {torneiosDoHistorico} from '../competicoes/sorteio.js';
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
 import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternacionais.js';
 import {anoTemporadaCarreira,COMPS_PAIS} from '../dados/data.js';
@@ -18,7 +19,7 @@ export function prepararCopaPersistente(c,card,tipo,forcaUsuario){
   const limite=continental?(ligaContinental?36:32):tipo==='copinha'?32:tipo==='estadual'?8:16;
   const participantes=[eu||c.clube,...pool.filter(x=>x.nome!==c.clube.nome).sort((a,b)=>b.forca-a.forca).slice(0,limite-1)];
   const nome=(continental?card.continentalPendente.nome:null)||regional?.nome||(tipo==='copinha'?'Copa São Paulo de Futebol Júnior':COPAS_NACIONAIS[primeiraLiga(c.clube.liga)]||COMPS_PAIS[c.clube.liga]?.copa||'Copa Nacional');
-  const camp=criarCampanhaCopa({nome,tipo:tipo==='copaNacional'?'copa':tipo,usuario:c.clube.nome,forcaUsuario,clubes:participantes,ano:anoTemporadaCarreira(c),entrada:continental?card.continentalPendente?.entrada||'principal':'principal',formato:continental?(ligaContinental?'liga':'grupos'):tipo==='estadual'?'estadual':tipo==='copinha'?'grupos':'mata',seed:`${c.codigo||c.nome}|${c.idade}|completo|${tipo}`,interativoEstadual:true});
+  const camp=criarCampanhaCopa({historico:torneiosDoHistorico(c.temporadas),nome,tipo:tipo==='copaNacional'?'copa':tipo,usuario:c.clube.nome,forcaUsuario,clubes:participantes,ano:anoTemporadaCarreira(c),entrada:continental?card.continentalPendente?.entrada||'principal':'principal',formato:continental?(ligaContinental?'liga':'grupos'):tipo==='estadual'?'estadual':tipo==='copinha'?'grupos':'mata',seed:`${c.codigo||c.nome}|${c.idade}|completo|${tipo}`,interativoEstadual:true});
   if(tipo==='estadual'||continental)camp.manual=camp.calendario.flatMap((js,i)=>js.some(j=>j.casa===c.clube.nome||j.fora===c.clube.nome)?[i]:[]);
   camp.idaVolta=tipo==='copaNacional'||continental;
   card.campanhasCompletas[tipo]=camp;

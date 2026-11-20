@@ -1,6 +1,7 @@
 import {SELECOES_TECNICO,CONTINENTAIS_TECNICO} from '../treinador/selecoesTecnico.js';
 import {simularCampanhaCopa,resumoCampanhaCopa,jogoEliminatorio} from '../treinador/copasEscolha.js';
 import {geradorTecnico} from '../treinador/momentosTecnico.js';
+import {classificadosCopaDoMundo,participantesContinentalSelecoes} from '../competicoes/copaDoMundo.js';
 import {CLUBES_MUNDIAIS_EXTRAS,NOME_MUNDIAL_ANUAL} from '../competicoes/mundialRapido.js';
 const semente=(c,a,nome)=>`${c.codigoMundo||c.codigo||c.nome||'mundo'}|${a.ano}|calendario-externo|${nome}`;
 const ocupadas=a=>new Set([...(a.torneios||[]),...(a.torneiosMundo||[]),a.copa,a.copaResultado,a.continentalSelecaoResultado,a.mundial].filter(Boolean).map(t=>t.nome));
@@ -18,8 +19,8 @@ export function simularSelecoesMundo(c,a){
   torneios.push({...resumoCampanhaCopa(camp),selecao:true,origem:'calendario-mundo'});
  };
  const eliminada=c.tecnico?.tipoEquipe==='selecao'&&c.tecnico.classificacaoSelecao?.copa===a.ano&&!c.tecnico.classificacaoSelecao.classificado?c.tecnico.selecao:null;
- if(a.ano%4===2)simular('Copa do Mundo','copaMundo',SELECOES_TECNICO.filter(n=>n.nac!==eliminada).sort((a,b)=>b.elenco-a.elenco||a.nome.localeCompare(b.nome)).slice(0,32),'selecao32');
- for(const [conf,nome] of Object.entries(CONTINENTAIS_TECNICO))if(continentalAno(conf,a.ano))simular(nome,'continentalSelecao',SELECOES_TECNICO.filter(n=>n.confederacao===conf),'mata');
+ if(a.ano%4===2)simular('Copa do Mundo','copaMundo',classificadosCopaDoMundo(a.ano,{semente:semente(c,a,'eliminatorias'),fora:eliminada?[eliminada]:[],selecoes:SELECOES_TECNICO}).classificadas,'copa48');
+ for(const [conf,nome] of Object.entries(CONTINENTAIS_TECNICO))if(continentalAno(conf,a.ano))simular(nome,'continentalSelecao',participantesContinentalSelecoes(conf,SELECOES_TECNICO),'selecaoGrupos');
  return torneios;
 }
 const principal=t=>t.campeao&&['Champions League','Libertadores','Champions Asiática','Concacaf Champions','Concacaf'].includes(t.nome);

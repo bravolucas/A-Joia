@@ -114,3 +114,5 @@
  .ctm-lineup-player{grid-area:nome;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;overflow-wrap:normal}
  .ctm-lineup-player small{white-space:normal}
 }
+.ctm-mundo-noticias .mv-noticias{padding:0 24px 20px}.ctm-mundo-noticias .mv-noticias li{border-color:#2c3d4d;background:#0f1a26}.ctm-mundo-noticias .mv-noticias li>p{font-size:12px;color:#d6e0ea}
+.mv-noticias ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}.mv-noticias li{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start;padding:9px 11px;border:1px solid #ffffff14;border-radius:11px}.mv-noticias li>span{font-size:17px;line-height:1.2}.mv-noticias li>p{margin:0;line-height:1.45}

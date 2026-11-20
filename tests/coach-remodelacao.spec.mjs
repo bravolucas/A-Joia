@@ -6,6 +6,8 @@ import {criarGestaoTecnico,resumoGestaoTecnico} from '../src/treinador/mercadoTe
 import { criarJogador, aposentar } from '../src/jogador/rapido.js';
 import { iniciarCarreiraTecnico, jogarTemporadaExpressaTecnico, calcularOvrTecnico, CLUBES_CONVITES_TECNICO } from '../src/treinador/tecnico.js';
 import {regulamentoSerieC} from '../src/simulacao/serieC.js';
+// O sorteio animado das copas tem teste próprio (sorteio-copas.spec); aqui as decisões vêm direto.
+test.beforeEach(async({page})=>{await page.addInitScript(()=>localStorage.setItem('a-joia:pular-sorteios','1'));});
 
 function carreira() {
   const jogador = aposentar({ ...criarJogador({ nome: 'Treinador de teste', nac: 'BRA', posicao: 'ATA', personalidade: 'equilibrado', origem: 'base', pe: 'destro', numero: 10, ritmo: 'equilibrado', codigo: 'COACH-REMODELACAO' }), idade: 40 });

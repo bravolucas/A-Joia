@@ -6,6 +6,8 @@ import {criarJogador,aposentar} from '../src/jogador/rapido.js';
 import {iniciarCarreiraTecnico} from '../src/treinador/tecnico.js';
 import {simularAnoSelecaoTecnico} from '../src/treinador/selecoesTecnico.js';
 import {geradorTecnico} from '../src/treinador/momentosTecnico.js';
+// O sorteio animado das copas tem teste próprio (sorteio-copas.spec); aqui as decisões vêm direto.
+test.beforeEach(async({page})=>{await page.addInitScript(()=>localStorage.setItem('a-joia:pular-sorteios','1'));});
 function carreira(){let c=iniciarCarreiraTecnico(aposentar({...criarJogador({nome:'Mundial do treinador',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',codigo:'MUNDIAL-UI'}),idade:40}));c.tecnico={...c.tecnico,ano:2030,clube:'Brasil',selecao:'BRA',tipoEquipe:'selecao',liga:'selecao:CONMEBOL',elenco:90,reputacao:85,clubeInicialEscolhido:true,decisoes:[],classificacaoSelecao:{nac:'BRA',copa:2030,classificado:true}};const r=simularAnoSelecaoTecnico(c.tecnico,85,95,geradorTecnico('copa'),{interativo:true,copasInterativas:true});c.tecnico={...c.tecnico,...r};return c;}
 for(const width of [320,1366])test(`Copa do Mundo do treinador tem decisões e retoma o resultado em ${width}px`,async({page})=>{
  await page.setViewportSize({width,height:844});await page.emulateMedia({reducedMotion:'reduce'});const erros=[];page.on('pageerror',e=>erros.push(e.message));

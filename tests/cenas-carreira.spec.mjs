@@ -6,6 +6,8 @@ import {criarAgenda} from '../src/competicoes/calendarioCopas.js';
 import {cenaTreino} from '../src/comum/direcaoCenas.js';
 import {grupoTreino} from '../src/jogador/catalogoTreinos.js';
 import {CLUBES} from '../src/dados/data.js';
+// O sorteio animado das copas tem teste próprio (sorteio-copas.spec); aqui as decisões vêm direto.
+test.beforeEach(async({page})=>{await page.addInitScript(()=>localStorage.setItem('a-joia:pular-sorteios','1'));});
 function jogador(clube='Flamengo'){const c=criarJogador({nome:'Cenas da carreira',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:9,codigo:'CENAS-CARREIRA'});c.clubeNome=clube;c.flags.baseEscolhida=true;return c;}
 async function abrir(page,s){await page.goto('http://127.0.0.1:4173/A-Joia/');await instalarSave(page,((s)=>({v:1,auto:false,...s}))(s),"ajoia_rapido_v1");await page.reload();await page.getByRole('button',{name:/Continuar · Cenas da carreira/}).click();}
 async function artePronta(el){await expect.poll(()=>el.evaluate(async s=>{const i=s.querySelector('image'),img=new Image();img.src=i.href.baseVal;try{await img.decode();return img.naturalWidth>500&&img.naturalWidth===img.naturalHeight;}catch{return false;}})).toBe(true);const vb=await el.evaluate(s=>({w:s.viewBox.baseVal.width,h:s.viewBox.baseVal.height}));expect(vb.w).toBeLessThan(3);expect(vb.h).toBeLessThan(2);}

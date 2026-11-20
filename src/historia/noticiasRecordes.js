@@ -1,5 +1,5 @@
 import {NACIONALIDADES} from '../dados/data.js';
-import {consultarRecordesFutebol} from './recordesFutebol.js';
+import {consultarRecordesFutebol,prepararIndiceAtletasRecordes} from './recordesFutebol.js';
 
 const nomePais=id=>NACIONALIDADES.find(n=>n.id===id||n.label===id)?.label||id||null;
 const deduplicar=lista=>[...new Map(lista.filter(x=>x?.nome).map(x=>[x.tipo+'|'+x.nome,x])).values()];
@@ -52,10 +52,12 @@ export function detectarQuebrasRecordesFutebol(antes={},depois={},{
  temporadasDepois=depois.temporadas||[],limite=6
 }={}){
  if(!Number.isFinite(ano)||!Array.isArray(escopos))return [];
- const candidatos=[];
- for(const {tipo,nome} of deduplicar(escopos)){
-  const anterior=consultarRecordesFutebol(antes,tipo,nome,temporadasAntes);
-  const atual=consultarRecordesFutebol(depois,tipo,nome,temporadasDepois);
+ const candidatos=[],unicos=deduplicar(escopos);
+ const indiceAntes=prepararIndiceAtletasRecordes(antes,unicos);
+ const indiceDepois=prepararIndiceAtletasRecordes(depois,unicos);
+ for(const {tipo,nome} of unicos){
+  const anterior=consultarRecordesFutebol(antes,tipo,nome,temporadasAntes,indiceAntes);
+  const atual=consultarRecordesFutebol(depois,tipo,nome,temporadasDepois,indiceDepois);
   const antigos=new Map(anterior.recordes.map(r=>[r.id,r]));
   for(const r of atual.recordes){
    const novo=r.simulado,velho=antigos.get(r.id)?.simulado;

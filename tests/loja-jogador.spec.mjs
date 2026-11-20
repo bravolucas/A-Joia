@@ -2,7 +2,8 @@ import {instalarSave,lerSave} from './helpers/save-browser.mjs';
 // Full-world fixtures include thousands of players and IndexedDB hydration.
 test.setTimeout(90000);
 import {test,expect} from '@playwright/test';
-import {criarJogador} from '../src/jogador/rapido.js';
+import {criarJogador,CATALOGO_LOJA_JOGADOR} from '../src/jogador/rapido.js';
+import {precoItemJogador} from '../src/jogador/lojaJogador.js';
 for(const width of [390,1366])test(`loja do jogador: compra direta, UP e recarga em ${width}px`,async({page})=>{
  await page.setViewportSize({width,height:844});
  const c={...criarJogador({nome:'Jogador da loja',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,ritmo:'normal',codigo:'LOJA-ROBUSTA'}),patrimonio:10000};
@@ -10,9 +11,9 @@ for(const width of [390,1366])test(`loja do jogador: compra direta, UP e recarga
  const abrir=async()=>{await page.reload();await page.getByRole('button',{name:/Continuar · Jogador da loja/}).click();await page.getByRole('button',{name:/Loja do jogador/}).click();};
  await page.goto('http://127.0.0.1:4173/A-Joia/');await instalarSave(page,((c)=>({v:1,etapa:'evento',c}))(c),"ajoia_rapido_v1");await abrir();
  const loja=page.getByRole('dialog',{name:'Loja do jogador'});
- await expect(loja.locator('article')).toHaveCount(57);
- await loja.getByRole('button',{name:'UPs temporários',exact:true}).click();await expect(loja.locator('article')).toHaveCount(14);
- const item=nome=>loja.locator('article').filter({has:page.getByRole('heading',{name:nome,exact:true})});
+ await expect(loja.locator('.lj-grid article')).toHaveCount(58);
+ await loja.getByRole('button',{name:'UPs temporários',exact:true}).click();await expect(loja.locator('.lj-grid article')).toHaveCount(17);
+ const item=nome=>loja.locator('.lj-grid article').filter({has:page.getByRole('heading',{name:nome,exact:true})});
  await expect(loja.getByRole('button',{name:'Confirmar compra'})).toHaveCount(0);
  const antes=await item('UP de finalização').boundingBox();
  await item('UP de finalização').getByRole('button',{name:/^Comprar/}).dblclick();
@@ -21,9 +22,9 @@ for(const width of [390,1366])test(`loja do jogador: compra direta, UP e recarga
  expect((await salvo()).patrimonio).toBe(9880);await expect(item('UP de finalização')).toContainText('1 temporada restante');
  await expect(item('UP de finalização').getByRole('button')).toBeDisabled();
  await abrir();expect((await salvo()).upsTemporarios).toHaveLength(1);await expect(item('UP de finalização')).toContainText('1 temporada restante');
- await loja.getByRole('searchbox',{name:'Buscar melhoria'}).fill('Equipamento profissional');await expect(loja.locator('article')).toHaveCount(1);
- await item('Equipamento profissional').getByRole('button',{name:/^Comprar/}).click();
- const fim=await salvo();expect(fim.patrimonio).toBe(9380);expect(fim.investimentos).toContain('equipamento');expect(fim.attrs).toEqual(c.attrs);
+ await loja.getByRole('searchbox',{name:'Buscar melhoria'}).fill('Treino técnico');await expect(loja.locator('.lj-grid article')).toHaveCount(1);
+ await item('Treino técnico · nível 1').getByRole('button',{name:/^Comprar/}).click();await expect(item('Treino técnico · nível 2')).toBeVisible();
+ const fim=await salvo();expect(fim.patrimonio).toBe(9880-precoItemJogador(c,CATALOGO_LOJA_JOGADOR.find(i=>i.id==='dep-tecnico-1')));expect(fim.investimentos).toContain('dep-tecnico-1');expect(fim.attrs).toEqual(c.attrs);
  await page.keyboard.press('Escape');await expect(loja).toHaveCount(0);expect(await page.evaluate(()=>document.body.style.overflow)).not.toBe('hidden');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });

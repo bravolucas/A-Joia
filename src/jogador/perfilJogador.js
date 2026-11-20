@@ -6,6 +6,7 @@
 import {PAPEIS_CONTRATO} from './rapido.js';
 import {idolatria} from './progressaoRapida.js';
 import {ASSINATURAS} from './jornadaJogador.js';
+import {progressoAssinatura} from './lojaJogador.js';
 
 /** Papel efetivo pela participação na última temporada no clube atual. */
 export function papelReal(c) {
@@ -65,15 +66,15 @@ export function proximosPassos(c, {caminho = null, possiveis = []} = {}) {
     const falta = caminho.corte - caminho.ovr;
     if (falta > 0 && falta <= 6) add(2, 'oportunidade', 'Seleção à vista', `Faltam ${falta} de OVR para a referência da convocação.`, {aba: 'desenvolvimento', rotulo: 'Ver caminho'});
   }
-  if (nivelMoral(c.moral).valor < 40) add(2, 'alerta', 'Moral baixa', 'A confiança pesa na nota. Rotina, recuperação e bons jogos ajudam a virar a chave.');
+  if (nivelMoral(c.moral).valor < 40) add(2, 'alerta', 'Moral baixa', 'A confiança pesa na nota. Rotina, recuperação e bons jogos ajudam a virar a chave.', {loja: true, rotulo: 'Ver na loja'});
   const torcida = c.torcida?.[clube] ?? 0;
   if (torcida < 25 && (c.temporadas || []).some(t => t.clube === clube))
     add(3, 'atencao', 'Torcida ainda desconfiada', 'Gols em clássicos, títulos e regularidade aproximam a arquibancada.', {aba: 'relacoes', rotulo: 'Ver torcidas'});
   const j = c.jornada || {};
-  const pronta = ASSINATURAS.find(s => (j.assinaturas?.[s.id]?.anos?.length || 0) >= s.meta && j.assinaturaAtiva !== s.id);
+  const pronta = ASSINATURAS.find(s => progressoAssinatura(j.assinaturas?.[s.id]) >= s.meta && j.assinaturaAtiva !== s.id);
   if (pronta && !j.assinaturaAtiva) add(2, 'oportunidade', 'Assinatura técnica disponível', `“${pronta.nome}” já pode ser ativada.`, {modal: 'assinatura', rotulo: 'Ativar'});
   if (c.idade >= 30 && !j.veterano) add(3, 'oportunidade', 'Hora de se reinventar?', 'A partir dos 30, trocar velocidade por leitura de jogo prolonga a carreira.', {modal: 'veterano', rotulo: 'Ver estilos'});
-  if (possiveis.length && j.transicao?.restantes > 0) add(3, 'info', 'Adaptando-se à nova função', `${j.transicao.restantes} temporada(s) de adaptação pela frente.`);
+  if (possiveis.length && j.transicao?.restantes > 0) add(3, 'info', 'Adaptando-se à nova função', `${j.transicao.restantes} temporada(s) de adaptação pela frente.`, {loja: true, rotulo: 'Treino específico'});
   if (j.capitao?.clube === clube) add(4, 'positivo', 'Capitão do time', 'A braçadeira reforça sua liderança e o vínculo com a torcida.');
   return lista.sort((a, b) => a.prioridade - b.prioridade).slice(0, 4);
 }

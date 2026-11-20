@@ -29,7 +29,7 @@ import {penalidadePosicao,posicoesCompativeis,mudarPosicao,sugestaoVeterano} fro
 import {NOVOS_TREINOS,grupoTreino} from './catalogoTreinos.js';
 import {PLANOS_PRETEMPORADA} from './planosPretemporada.js';
 import {bonusSuperacao,baseMini,poolMinis} from './progressaoRapida.js';
-import {MELHORIAS_JOGADOR,UPS_JOGADOR,upsAtivosJogador,upJogadorDe,impedimentoLojaJogador} from "./lojaJogador.js";
+import {MELHORIAS_JOGADOR,UPS_JOGADOR,DEPARTAMENTOS_JOGADOR,ACOES_CARREIRA_JOGADOR,TETOS_LOJA,upsAtivosJogador,upJogadorDe,impedimentoLojaJogador,precoItemJogador,limitarEfeitoLoja,aplicarAcaoCarreira} from "./lojaJogador.js";
 import { registrarMuseu } from '../museu/museu.js';
 /* ===================== MODO RÁPIDO — LÓGICA =====================
    Carreira inteira em 5 a 10 minutos: cada temporada vira uma tela
@@ -793,34 +793,61 @@ export const fama_negociador = (c) => ((c.repNeg || 0) >= 15 ? "Osso duro" : (c.
 
 /* ---------- investimentos e luxos ---------- */
 export const INVESTIMENTOS = [
-  { id: "psicologo", nome: "Psicólogo do esporte", icone: "🧠", custo: 600, desc: "Cabeça mais estável: +3 de estado mental por ano e metade das quedas.", moralAno: 3, moralQueda: 0.5 },
-  { id: "personal", nome: "Personal trainer", icone: "🏋️", custo: 400, desc: "20% menos risco de lesão.", lesaoMult: 0.8 },
-  { id: "nutri", nome: "Nutricionista particular", icone: "🥗", custo: 900, desc: "Envelhece 12% mais devagar.", declinio: 0.88 },
-  { id: "fisio", nome: "Fisioterapeuta particular", icone: "🩺", custo: 1500, desc: "Cura lesão crônica e reduz o risco de lesão.", lesaoMult: 0.9, curaCronica: true },
-  { id: "imagem", nome: "Assessoria de imagem", icone: "🗞️", custo: 1200, desc: "+3 de fama todo ano.", famaAno: 3 },
-  { id: "analista", nome: "Analista de desempenho", icone: "📊", custo: 2000, desc: "Notas um pouco mais altas.", notaBonus: 0.08 },
-  { id: "ct", nome: "Centro de treinamento próprio", icone: "🏟️", custo: 8000, desc: "Evolui 8% mais rápido.", evolucao: 1.08 },
+  { id: "psicologo", descontinuado: true, nome: "Psicólogo do esporte", icone: "🧠", custo: 600, desc: "Cabeça mais estável: +3 de estado mental por ano e metade das quedas.", moralAno: 3, moralQueda: 0.5 },
+  { id: "personal", descontinuado: true, nome: "Personal trainer", icone: "🏋️", custo: 400, desc: "20% menos risco de lesão.", lesaoMult: 0.8 },
+  { id: "nutri", descontinuado: true, nome: "Nutricionista particular", icone: "🥗", custo: 900, desc: "Envelhece 12% mais devagar.", declinio: 0.88 },
+  { id: "fisio", descontinuado: true, nome: "Fisioterapeuta particular", icone: "🩺", custo: 1500, desc: "Cura lesão crônica e reduz o risco de lesão.", lesaoMult: 0.9, curaCronica: true },
+  { id: "imagem", descontinuado: true, nome: "Assessoria de imagem", icone: "🗞️", custo: 1200, desc: "+3 de fama todo ano.", famaAno: 3 },
+  { id: "analista", descontinuado: true, nome: "Analista de desempenho", icone: "📊", custo: 2000, desc: "Notas um pouco mais altas.", notaBonus: 0.08 },
+  { id: "ct", descontinuado: true, nome: "Centro de treinamento próprio", icone: "🏟️", custo: 8000, desc: "Evolui 8% mais rápido.", evolucao: 1.08 },
   { id: "instituto", nome: "Instituto com seu nome", icone: "🤝", custo: 5000, desc: "Legado fora de campo e +2 de torcida por ano.", torcidaAno: 2, social: true },
   { id: "origem", nome: "Reformar a base do clube que te revelou", icone: "🏠", custo: 12000, desc: "Vira benfeitor: +20 de torcida no seu primeiro clube e pontos de legado.", benfeitor: true },
   { id: "carro", nome: "Coleção de carros esportivos", icone: "🏎️", custo: 2500, desc: "+4 de fama. Luxo: custa manutenção e incomoda torcida de clube pequeno.", luxo: true, fama: 4 },
   { id: "mansao", nome: "Mansão com piscina", icone: "🏡", custo: 9000, desc: "+6 de fama. Luxo: custa manutenção e incomoda torcida de clube pequeno.", luxo: true, fama: 6 },
   { id: "iate", nome: "Iate", icone: "🛥️", custo: 25000, desc: "+8 de fama. Luxo de verdade — e polêmica.", luxo: true, fama: 8 },
 ];
-INVESTIMENTOS.push(...MELHORIAS_JOGADOR,...ITENS_PESSOAIS);
+INVESTIMENTOS.push(...MELHORIAS_JOGADOR,...ITENS_PESSOAIS,...DEPARTAMENTOS_JOGADOR,...ACOES_CARREIRA_JOGADOR);
 const CATEGORIAS_INV={psicologo:"Saúde",personal:"Saúde",nutri:"Saúde",fisio:"Saúde",imagem:"Carreira",analista:"Treino",ct:"Treino",instituto:"Carreira",origem:"Carreira",carro:"Estilo de vida",mansao:"Estilo de vida",iate:"Estilo de vida"};
 export const CATALOGO_LOJA_JOGADOR=[...INVESTIMENTOS.map(i=>({...i,categoria:i.categoria||CATEGORIAS_INV[i.id]})),...UPS_JOGADOR];
 export const investimentoDe = (id) => INVESTIMENTOS.find((i) => i.id === id);
-const efeitosInv = (c) => [...(c.investimentos || []).map(investimentoDe).filter(Boolean),...upsAtivosJogador(c).map(x=>upJogadorDe(x.id))];
-const multInv = (c, k) => efeitosInv(c).reduce((m, i) => m * (i[k] ?? 1), 1);
-const somaInv = (c, k) => efeitosInv(c).reduce((s, i) => s + (i[k] ?? 0), 0);
+// Staff pessoal: só o nível mais alto de cada departamento conta.
+const efeitosInv = (c, extra = null) => {
+  const inv = [...(c.investimentos || []), ...(extra && !extra.temporario ? [extra.id] : [])].map(investimentoDe).filter(Boolean);
+  const topo = {};
+  for (const i of inv) if (i.departamento) topo[i.departamento] = Math.max(topo[i.departamento] || 0, i.nivel);
+  return [...inv.filter((i) => !i.departamento || i.nivel === topo[i.departamento]), ...upsAtivosJogador(c).map(x=>upJogadorDe(x.id)), ...(extra?.temporario ? [extra] : [])];
+};
+const multInvBruto = (c, k, extra) => efeitosInv(c, extra).reduce((m, i) => m * (i[k] ?? 1), 1);
+const somaInvBruto = (c, k, extra) => efeitosInv(c, extra).reduce((s, i) => s + (i[k] ?? 0), 0);
+const multInv = (c, k) => limitarEfeitoLoja(k, multInvBruto(c, k));
+const somaInv = (c, k) => limitarEfeitoLoja(k, somaInvBruto(c, k));
+const ehMult = (k) => ["lesaoMult", "declinio", "evolucao", "golsMult", "assistMult", "moralQueda"].includes(k);
+/** Efeitos somados da loja (com teto) e, opcionalmente, como ficariam com mais um item. */
+export function resumoEfeitosLoja(c, extra = null) {
+  return Object.entries(TETOS_LOJA).map(([k, t]) => {
+    const bruto = ehMult(k) ? multInvBruto(c, k, extra) : somaInvBruto(c, k, extra);
+    const valor = limitarEfeitoLoja(k, bruto), neutro = ehMult(k) ? 1 : 0;
+    return { chave: k, rotulo: t.rotulo, valor, ativo: valor !== neutro, noTeto: bruto !== valor || valor === (t.min ?? t.max), mult: ehMult(k) };
+  });
+}
+/** Multa que um clube precisa pagar: com cláusula de tempo de jogo, cai se o papel prometido não foi cumprido. */
+export function multaEfetiva(c) {
+  const k = c.contrato;
+  if (!k) return Infinity;
+  if (!k.clausulaTempoJogo || !k.papel || k.clube !== c.clubeNome) return k.multa;
+  const t = [...(c.temporadas || [])].reverse().find((x) => x.clube === k.clube);
+  const garantido = papelDe(k.papel)?.share || 0;
+  return t && Number.isFinite(t.share) && t.share < garantido - 0.2 ? Math.round(Math.max(k.salario * 1.5, k.multa * 0.4)) : k.multa;
+}
 
 export function comprarInvestimento(c0, id) {
   const item=investimentoDe(id),motivo=impedimentoLojaJogador(c0,item);
   if(motivo)return {c:c0,ok:false,motivo};
   const c = clone(c0);
-  const inv = investimentoDe(id);
-  if (!inv || (c.investimentos || []).includes(id) || c.patrimonio < inv.custo) return { c, ok: false };
-  c.patrimonio = Math.round((c.patrimonio-inv.custo)*1000)/1000;
+  const inv = investimentoDe(id), preco = precoItemJogador(c0, inv);
+  if (!inv || (c.investimentos || []).includes(id) || c.patrimonio < preco) return { c, ok: false };
+  c.patrimonio = Math.round((c.patrimonio-preco)*1000)/1000;
+  if (inv.consumivel) { aplicarAcaoCarreira(c, id); return { c, ok: true }; }
   c.investimentos = [...(c.investimentos || []), id];
   if (inv.curaCronica) c.flags.cronica = false;
   if(inv.moral)mexerMoral(c,inv.moral);
@@ -1178,7 +1205,7 @@ function simularContinental(c, clube, ovr, share, extra = 0, vaga = null) {
 function simularTorneioSelecao(c, ovr, { nome, tipo }) {
   const fs = forcaSelecao(c);
   const vitrine = c.foco === "vitrine" ? 2 : 0;
-  const corte = fs - 6 + (c.flags.selecaoFria || 0) * 2 - vitrine;
+  const corte = fs - 6 + (c.flags.selecaoFria || 0) * 2 - vitrine - somaInv(c, "selecaoCorte");
   if (c.idade < 18 || c.flags.semSelecao) return null;
   const convocado = ovr >= corte ? chance(0.92) : ovr >= corte - 4 ? chance(0.35) : false;
   if (!convocado) return { ano: c.ano, nome, tipo, convocado: false, resultado: "Fora da convocação" };
@@ -1202,7 +1229,7 @@ function simularTorneioSelecao(c, ovr, { nome, tipo }) {
 
 export function simularAmistososSelecao(c,ovr,quantidade=6){
  if(c.idade<18||c.flags.semSelecao)return null;
- const fs=forcaSelecao(c),convocado=ovr>=fs-6?true:ovr>=fs-10&&chance(.45);
+ const fs=forcaSelecao(c),convocado=ovr>=fs-6-somaInv(c,'selecaoCorte')?true:ovr>=fs-10&&chance(.45);
  if(!convocado)return null;
  const titular=ovr>=fs-2,elenco=prepararElencoSelecao(c,c.ano,'amistosos','Amistosos da seleção'),partidas=[];
  const adversarios=sortearSelecoes(c.nac,quantidade,[Math.max(50,fs-18),Math.min(94,fs+4)]);
@@ -1568,7 +1595,7 @@ function jogarTemporadaBase(c0) {
   if (decisaoLiga) momentos.push(decisaoLiga);
   // Clássico: nem todo ano o lance decisivo cai no seu pé contra o maior rival. Vale mais para a torcida.
   const rivalClassico = emCampo && !c.emprestimo ? CLASSICOS.find((p) => p.includes(clube.nome))?.find((x) => x !== clube.nome) : null;
-  if (rivalClassico && chance(0.4)) momentos.push({ tipo: "classico", titulo: `Clássico contra o ${rivalClassico}`, adversario: { tipo: "clube", nome: rivalClassico } });
+  if (rivalClassico && (somaInv(c, "classicoGarantido") > 0 || chance(0.4))) momentos.push({ tipo: "classico", titulo: `Clássico contra o ${rivalClassico}`, adversario: { tipo: "clube", nome: rivalClassico } });
   if (tab.pos === 1 && decisaoLiga?.tipo !== "liga") {
     card.titulos.push({ tipo: ehSegundaDivisao(clube.liga) ? "segunda" : "liga", nome: liga.nome });
     card.destaques.push(`Título do ${liga.nome} com ${tab.pontos && tab.pontos[1] != null && tab.pontos[0] - tab.pontos[1] < 3.2 ? "emoção até o fim" : "folga na tabela"}`);
@@ -2001,7 +2028,7 @@ function fecharTemporadaBase(c0, card0) {
   const luxos = efeitosInv(c).filter((i) => i.luxo).length;
   const ostentacao = luxos && clubeDe(tc).forca < 80 ? luxos * 3 : 0;
   if (ostentacao) card.destaques.push("Seu padrão de vida destoa do clube: a torcida estranha a ostentação");
-  const delta = ((card.nota ? (card.nota - 6.6) * 9 : -4) + nTit * 7 + (card.jogos >= 30 ? 3 : 0) + somaTraco(c, "torcidaAno") + somaInv(c, "torcidaAno") - ostentacao - (c.foco === "vitrine" ? 3 : 0)) * (card.nota >= 6.6 ? multTraco(c, "torcidaMult") : 1);
+  const delta = ((card.nota ? (card.nota - 6.6) * 9 : -4) + nTit * 7 + (card.jogos >= 30 ? 3 : 0) + somaTraco(c, "torcidaAno") + somaInv(c, "torcidaAno") + (card.classico?.acertou ? somaInv(c, "torcidaClassico") : 0) - ostentacao - (c.foco === "vitrine" ? 3 : 0)) * (card.nota >= 6.6 ? multTraco(c, "torcidaMult") : 1);
   c.torcida[tc] = clampR(Math.round(tAntes + delta), 0, 100);
   // Fidelidade: a partir do 4º ano seguido no clube, a torcida reconhece quem ficou.
   const seguidos = anosSeguidosNoClube(c, tc) + (card.emprestado ? 0 : 1);
@@ -2453,7 +2480,7 @@ export function valorTransferencia(c, comprador) {
   const restantes = c.contrato?.restantes ?? 0;
   if (restantes <= 0) return 0;
   const base = valorAtual(c) * (0.75 + 0.1 * Math.min(restantes, 4)) * (clubeDe(comprador).forca >= 85 ? 1.15 : 1);
-  const teto = c.contrato?.multa || base;
+  const teto = Math.min(multaEfetiva(c), c.contrato?.multa || base);
   return Math.max(50, Math.round(Math.min(base, teto) / 50) * 50);
 }
 
@@ -2467,7 +2494,7 @@ function marcarResistencia(c, ofertas) {
   const atual = clubeDe(c.clubeNome);
   const o = ofertas[0]; // a mais forte (as ofertas vêm ordenadas por força)
   const valor = valorTransferencia(c, o.clube);
-  const multa = c.contrato?.multa ?? Infinity;
+  const multa = multaEfetiva(c);
   const pedida = Math.round(Math.min(multa, valor * 1.35) / 50) * 50;
   if (c.idade < 19 || !valor || pedida < valor * 1.15) return ofertas; // base, ou cláusula baixa: pagariam a multa
   const p = (st === "estrela" ? 0.5 : 0.28) + (o.ligaId === atual.liga ? 0.15 : 0) - (o.forca - atual.forca >= 8 ? 0.15 : 0) + (c.idade <= 23 ? 0.05 : 0);
@@ -2561,7 +2588,7 @@ export const EVENTOS = [
       // 1, 2 ou 3 propostas, sorteado; estrela e empresário forte puxam pra cima
       const dif = ovrDe(c) - clubeDe(c.clubeNome).forca;
       const r0 = rnd() + (dif >= 6 ? 0.2 : 0) + (emp.nOfertas >= 5 ? 0.1 : 0);
-      const n = Math.min(4, (r0 < 0.45 ? 1 : r0 < 0.8 ? 2 : 3) + somaTraco(c, "ofertasExtra") + (c.mod.ofertasExtra || 0));
+      const n = Math.min(4, (r0 < 0.45 ? 1 : r0 < 0.8 ? 2 : 3) + somaTraco(c, "ofertasExtra") + (c.mod.ofertasExtra || 0) + somaInv(c, "ofertasExtra"));
       if (!c.ligaAlvo) return { ofertas: marcarResistencia(c, gerarOfertas(c, n)) };
       // liga pedida ao empresário: a maior parte das propostas vem de lá, com faixa de nível mais larga
       const ovr = ovrDe(c);
@@ -2955,7 +2982,7 @@ export const EVENTOS_EXTRAS = [
     preparar: (c) => {
       const ovr = ovrDe(c);
       const atual = clubeDe(c.clubeNome);
-      const multa = c.contrato?.multa ?? Infinity;
+      const multa = multaEfetiva(c);
       const barata = multa <= valorAtual(c) * 1.15;
       if (!barata) return {};
       const op = clubesJogaveis().filter((x) => x.forca >= atual.forca + 4 && x.forca <= ovr + 8 && !ehSegundaDivisao(x.liga) && !(c.flags.traidor || []).includes(x.nome));
@@ -4213,7 +4240,7 @@ function simularCarreiraAutomaticaBase(dados, escolher, escolherFoco) {
     if (ex) c = resolverAuto(c, ex, escolher);
     imp = eventoImpasse(c);
     if (imp) c = resolverAuto(c, imp, escolher);
-    const compra = INVESTIMENTOS.filter((i) => !(c.investimentos || []).includes(i.id) && i.custo <= c.patrimonio * 0.5);
+    const compra = INVESTIMENTOS.filter((i) => !impedimentoLojaJogador(c, i) && precoItemJogador(c, i) <= c.patrimonio * 0.5);
     if (compra.length && chance(0.4)) c = comprarInvestimento(c, pick(compra).id).c;
     c = definirFoco(c, escolherFoco(c));
     if (desafioPendente(c)) c = resolverDesafio(c, pick(desafiosDaTemporada(c)).id).c;
@@ -4223,7 +4250,7 @@ function simularCarreiraAutomaticaBase(dados, escolher, escolherFoco) {
   return c;
 }
 
-export function caminhoSelecao(c){const forca=forcaSelecao(c),corte=forca-6+(c.flags?.selecaoFria||0)*2-(c.foco==='vitrine'?2:0),ovr=ovrDe(c);return{forca,corte,ovr,elegivel:c.idade>=18&&!c.flags?.semSelecao,distancia:Math.max(0,corte-ovr),rotulo:ovr>=corte?'Na disputa pela convocação':ovr>=corte-4?'Perto da lista':'Construindo espaço',aviso:'Referência do torneio. Forma, momento e decisão da seleção ainda contam.'};}
+export function caminhoSelecao(c){const forca=forcaSelecao(c),corte=forca-6+(c.flags?.selecaoFria||0)*2-(c.foco==='vitrine'?2:0)-somaInv(c,'selecaoCorte'),ovr=ovrDe(c);return{forca,corte,ovr,elegivel:c.idade>=18&&!c.flags?.semSelecao,distancia:Math.max(0,corte-ovr),rotulo:ovr>=corte?'Na disputa pela convocação':ovr>=corte-4?'Perto da lista':'Construindo espaço',aviso:'Referência do torneio. Forma, momento e decisão da seleção ainda contam.'};}
 /* ---------- empresário: procura ativa, sondagem e devolutiva ---------- */
 export function catalogoMercadoJogador(c){
  return catalogoClubesEmpresario(c,clubesJogaveis());
@@ -4235,7 +4262,7 @@ export function diagnosticoMercadoJogador(c,nome){
 }
 export function interesseMercado(c){
  if(c.idade<18||c.emprestimo)return [];
- const ovr=ovrDe(c),emp=empresarioDe(c),n=Math.min(5,2+Math.round((emp.alcance||10)/12));
+ const ovr=ovrDe(c),emp=empresarioDe(c),n=Math.min(7,2+Math.round((emp.alcance||10)/12)+somaInv(c,'interesseExtra'));
  return comSemente(c.codigo,'observacao:'+c.ano,()=>gerarOfertas(c,n,{observacao:true})).map(x=>{
   const gap=ovr-x.forca,nivel=gap>=4?'Muito interessado':gap>=-2?'Interessado':'Observando';
   const sondagem=(c.sondagensEmpresario||[]).find(s=>s.ano===c.ano&&s.clube===x.clube);

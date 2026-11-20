@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import {criarJogador,CATALOGO_LOJA_JOGADOR,comprarInvestimento,jogarTemporada,fecharTemporada,chanceMomento,chancePenalti} from '../src/jogador/rapido.js';
 import {comprarUpJogador,upsAtivosJogador} from '../src/jogador/lojaJogador.js';
 const base=()=>({...criarJogador({nome:'Loja',nac:'BRA',posicao:'ATA',personalidade:'equilibrado',origem:'base',pe:'destro',numero:10,ritmo:'normal',codigo:'LOJA-UP'}),patrimonio:50000});
-test('catálogo à venda tem 57 opções únicas, incluindo 14 UPs; itens fora de linha ficam só para quem comprou',()=>{
+test('catálogo à venda tem 70 opções únicas, incluindo 17 UPs; itens fora de linha ficam só para quem comprou',()=>{
  const venda=CATALOGO_LOJA_JOGADOR.filter(x=>!x.descontinuado);
- assert.equal(venda.length,57);assert.equal(new Set(CATALOGO_LOJA_JOGADOR.map(x=>x.id)).size,CATALOGO_LOJA_JOGADOR.length);
- assert.equal(CATALOGO_LOJA_JOGADOR.filter(x=>x.descontinuado).length,7);
- assert.equal(CATALOGO_LOJA_JOGADOR.filter(x=>x.temporario).length,14);
+ assert.equal(venda.length,70);assert.equal(new Set(CATALOGO_LOJA_JOGADOR.map(x=>x.id)).size,CATALOGO_LOJA_JOGADOR.length);
+ assert.equal(CATALOGO_LOJA_JOGADOR.filter(x=>x.descontinuado).length,20);
+ assert.equal(CATALOGO_LOJA_JOGADOR.filter(x=>x.temporario).length,17);
  assert.ok(CATALOGO_LOJA_JOGADOR.every(x=>x.custo>0&&x.desc&&x.categoria));
 });
 test('compra desconta uma vez sem alterar atributos e respeita saldo e posição',()=>{
@@ -49,5 +49,6 @@ test('precisão temporária aumenta chances e desaparece depois da validade',()=
  assert.equal(chancePenalti({...up,ano:up.ano+1}),chancePenalti({...c,ano:c.ano+1}));
  const goleiro={...c,posicao:'GOL'},reflexo=comprarUpJogador(goleiro,'up-defesa').c;
  assert.ok(chanceMomento(reflexo,'defesa')>chanceMomento(goleiro,'defesa'));
- const novo=comprarInvestimento(c,'equipamento');assert.equal(novo.ok,true);assert.equal(comprarInvestimento(novo.c,'equipamento').ok,false);
+ assert.equal(comprarInvestimento(c,'equipamento').ok,false);
+ const novo=comprarInvestimento(c,'dep-tecnico-1');assert.equal(novo.ok,true);assert.equal(comprarInvestimento(novo.c,'dep-tecnico-1').ok,false);
 });

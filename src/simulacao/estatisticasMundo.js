@@ -2,6 +2,7 @@ import {jogosDaCampanha} from '../competicoes/jogosCampanha.js';
 import {LIGAS} from '../dados/data.js';
 import {geradorTecnico} from '../treinador/momentosTecnico.js';
 import {setorJogador} from './forcaEquipe.js';
+import {ehClassico} from './classicos.js';
 import {registrarHistoricoTemporada,creditarTitulosAtleta} from './historicoJogadorMundo.js';
 const chaveJogo=(nome,j)=>`${nome}|${j.casa}|${j.fora}|${j.golsCasa}|${j.golsFora}`;
 function participacoesUsuario(card){
@@ -12,7 +13,7 @@ function participacoesUsuario(card){
  for(const j of card.partidasCompeticoes||[])if(!j.selecao)inserir(j.competicao,j,{presente:true,gols:j.gols||0,assist:j.assist||0});
  return {mapa,competicoes};
 }
-const vazio=()=>({jogos:0,gols:0,assist:0,defesas:0,cleanSheets:0,golsSofridos:0});
+const vazio=()=>({jogos:0,gols:0,assist:0,defesas:0,cleanSheets:0,golsSofridos:0,jogosClassicos:0,golsClassicos:0});
 function escolher(lista,rng,peso){const total=lista.reduce((s,p)=>s+peso(p),0);let sorteio=rng()*total;return lista.find(p=>(sorteio-=peso(p))<0)||lista.at(-1);}
 /** As estatísticas principais dos atletas do mundo vêm dos placares salvos.
  * Os números já conquistados pelo usuário são reservados antes de distribuir
@@ -38,8 +39,8 @@ export function estatisticasDasPartidas(mundo,antes,card,seed='mundo',{zerarSemP
     const elenco=(times.get(clube)||[]).filter(p=>comp.tipo!=='copinha'||p.idade<=20);if(!elenco.length)continue;
     const titulares=[];
     for(const [setor,vagas]of Object.entries(posicoes))titulares.push(...elenco.filter(p=>setorJogador(p)===setor).map(p=>({p,peso:p.ovr+rng()*10})).sort((a,b)=>b.peso-a.peso).slice(0,Math.max(0,vagas-(clube===card.clube&&participacao?.presente&&setorJogador({posicao:card.posicao})===setor?1:0))).map(x=>x.p));
-    const stats=new Map();
-    for(const p of titulares){const k=String(p.id);if(!linhas.has(k))linhas.set(k,new Map());const comps=linhas.get(k);if(!comps.has(comp.nome))comps.set(comp.nome,{nome:comp.nome,...vazio()});const s=comps.get(comp.nome);s.jogos++;stats.set(k,s);}
+    const stats=new Map(),classico=ehClassico(jogo.casa,jogo.fora);
+    for(const p of titulares){const k=String(p.id);if(!linhas.has(k))linhas.set(k,new Map());const comps=linhas.get(k);if(!comps.has(comp.nome))comps.set(comp.nome,{nome:comp.nome,...vazio()});const s=comps.get(comp.nome);s.jogos++;if(classico)s.jogosClassicos=(s.jogosClassicos||0)+1;stats.set(k,s);}
     if(!titulares.length)continue;
     const goleiro=titulares.find(p=>p.posicao==='GOL');
     if(goleiro){const s=stats.get(String(goleiro.id));s.golsSofridos+=sofridos;s.defesas+=Math.floor(1+rng()*6);s.cleanSheets+=sofridos===0?1:0;}
@@ -50,7 +51,7 @@ export function estatisticasDasPartidas(mundo,antes,card,seed='mundo',{zerarSemP
     reserva.gols=(reserva.gols||0)-seusGols;reserva.assist=(reserva.assist||0)-suasAssist;
     for(let gol=0;gol<gols;gol++){
      const autor=gol<seusGols?null:escolher(campo,rng,p=>({ATA:7,MEI:3,DEF:1}[setorJogador(p)]||1)*Math.max(1,p.ovr-30));
-     if(autor)stats.get(String(autor.id)).gols++;
+     if(autor){const s=stats.get(String(autor.id));s.gols++;if(classico)s.golsClassicos=(s.golsClassicos||0)+1;}
      if(gol>=seusGols&&gol<seusGols+suasAssist)continue;
      const parceiros=campo.filter(p=>p.id!==autor?.id);
      if(parceiros.length&&rng()<.72){const garcom=escolher(parceiros,rng,p=>({ATA:3,MEI:6,DEF:2}[setorJogador(p)]||1)*Math.max(1,p.ovr-30));stats.get(String(garcom.id)).assist++;}

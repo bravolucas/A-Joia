@@ -6,6 +6,9 @@ import {escudoDe} from '../comum/arte.js';
 import LinkEntidade from '../historia/LinkEntidade.jsx';
 import MiniaturaConquista from '../comum/MiniaturaConquista.jsx';
 import {historicoTransferenciasAtleta,tipoTransferencia,valorTransferencia} from './historicoTransferencias.js';
+import {setorJogador} from './forcaEquipe.js';
+import {NACIONALIDADES} from '../dados/data.js';
+import './PesquisaJogadores.css';
 
 const n=x=>Number.isFinite(x)?x.toLocaleString('pt-BR'):'—';
 const texto=x=>String(x||'').toLocaleLowerCase('pt-BR');
@@ -73,17 +76,23 @@ function RetrospectoJogador({c,p,onConfrontos}){
  </>;
 }
 
-/** Arquivo persistente de atletas. Layout inspirado na navegação em tela cheia do FM27. */
+const SETORES=[['','Todas'],['GOL','Goleiros'],['DEF','Defensores'],['MEI','Meio-campo'],['ATA','Atacantes']];
+const ORDENS=[['relevancia','Relevância'],['gols','Gols na carreira'],['jogos','Jogos'],['titulos','Títulos'],['jovens','Mais jovens'],['nome','Nome']];
+const POR_PAGINA=40;
+const iniciais=nome=>String(nome||'?').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+
+/** Pesquisa de jogadores do save, no estilo da busca do FM: filtros, ordenação e ficha ao lado. */
 export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
  const u=c.tecnico?.universo||c.universo||{};
  const [busca,B]=useState(''),[clube,C]=useState(''),[id,I]=useState(jogadorInicial),[aba,A]=useState(jogadorInicial?'carreira':'resumo');
- const [categoria,Q]=useState('todas');
+ const [categoria,Q]=useState('todas'),[setor,S]=useState(''),[situacao,SI]=useState(''),[nac,N]=useState(''),[ordem,O]=useState('relevancia'),[limite,LI]=useState(POR_PAGINA);
+ const [fichaAberta,F]=useState(!!jogadorInicial);
  const todos=useMemo(()=>{
   const mapa=new Map(Object.entries(u.atletas||{}).filter(([,p])=>p&&typeof p==='object').map(([chave,p])=>[String(p.id??chave),{...p,id:String(p.id??chave)}]));
   for(const p of c.mundo?.jogadores||[]){
    const atual=mapa.get(String(p.id));
    if(p.aposentado&&!atual)continue;
-   mapa.set(String(p.id),{...atual,id:String(p.id),nome:p.nome,posicao:p.posicao,nac:p.nac,
+   mapa.set(String(p.id),{...atual,id:String(p.id),nome:p.nome,posicao:p.posicao,nac:p.nac,idade:p.idade,ovr:p.ovr,
     clube:p.clubeNome,aposentado:!!p.aposentado,contrato:p.contrato,movimentos:p.movimentos?.length?p.movimentos:atual?.movimentos||[],
     historicoTemporadas:p.historicoTemporadas?.length?p.historicoTemporadas:atual?.historicoTemporadas||[],
     historico:atual?.historico||[]});
@@ -92,52 +101,71 @@ export default function ArquivoAtletasFM({c,onConfrontos,jogadorInicial=null}){
    const existente=mapa.get('voce')||{};
    mapa.set('voce',{
     ...existente,id:'voce',voce:true,nome:c.nome||existente.nome||'Seu jogador',
-    posicao:c.posicao||existente.posicao,nac:c.nac||existente.nac,
+    posicao:c.posicao||existente.posicao,nac:c.nac||existente.nac,idade:c.idade,
     clube:c.clubeNome||c.clube?.nome||existente.clube,aposentado:!!c.aposentado,
     movimentos:c.transferencias?.length?c.transferencias:existente.movimentos?.length?existente.movimentos:c.movimentos||c.jogador?.movimentos||[],
-    historico:existente.historico?.length?existente.historico:c.temporadas.map(t=>({ano:t.ano,clube:t.clube,jogos:t.jogos,gols:t.gols,assist:t.assist,defesas:t.defesas,cleanSheets:t.cleanSheets,titulos:(t.titulos||[]).map(x=>x.nome),porCompeticao:t.porCompeticao||[]}))
+    historico:existente.historico?.length?existente.historico:(c.temporadas||[]).map(t=>({ano:t.ano,clube:t.clube,jogos:t.jogos,gols:t.gols,assist:t.assist,defesas:t.defesas,cleanSheets:t.cleanSheets,titulos:(t.titulos||[]).map(x=>x.nome),porCompeticao:t.porCompeticao||[]}))
    });
   }
-  return [...mapa.values()];
- },[u,c.mundo,c.temporadas,c.nome,c.posicao,c.nac,c.clubeNome,c.aposentado]);
+  // Totais de carreira calculados uma vez para filtrar e ordenar.
+  return [...mapa.values()].map(p=>{const h=historicoAtleta(p);return {...p,setor:setorJogador(p),totJogos:total(h,'jogos'),totGols:total(h,'gols'),totTitulos:h.reduce((s,l)=>s+(l.titulos?.length||0),0)};});
+ },[u,c.mundo,c.temporadas,c.nome,c.posicao,c.nac,c.clubeNome,c.aposentado,c.idade]);
  const clubes=useMemo(()=>[...new Set(todos.flatMap(p=>[p.clube,...historicoAtleta(p).map(x=>x.clube)]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')),[todos]);
- const filtrados=useMemo(()=>todos.filter(p=>(!busca||texto(p.nome).includes(texto(busca)))&&(!clube||p.clube===clube||historicoAtleta(p).some(x=>x.clube===clube)))
-    .sort((a,b)=>Number(!!b.voce)-Number(!!a.voce)||a.nome.localeCompare(b.nome,'pt-BR')),[todos,busca,clube]);
- const selecionado=id&&!todos.some(p=>p.id===id)?null:filtrados.find(p=>p.id===id)||filtrados[0]||null;
+ const nacs=useMemo(()=>[...new Set(todos.map(p=>p.nac).filter(Boolean))].map(id=>({id,label:NACIONALIDADES.find(x=>x.id===id)?.label||id})).sort((a,b)=>a.label.localeCompare(b.label,'pt-BR')),[todos]);
+ const filtrados=useMemo(()=>{
+  const q=texto(busca).trim(),porClube=clube&&clubes.includes(clube)?clube:'';
+  const lista=todos.filter(p=>(!q||texto(p.nome).includes(q))&&(!setor||p.setor===setor)&&(!nac||p.nac===nac)
+   &&(!situacao||(situacao==='ativos'?!p.aposentado:p.aposentado))
+   &&(!porClube||p.clube===porClube||historicoAtleta(p).some(x=>x.clube===porClube)));
+  const cmp={
+   relevancia:(a,b)=>Number(!!b.voce)-Number(!!a.voce)||Number(!!a.aposentado)-Number(!!b.aposentado)||(b.ovr||0)-(a.ovr||0)||b.totGols-a.totGols,
+   gols:(a,b)=>b.totGols-a.totGols,jogos:(a,b)=>b.totJogos-a.totJogos,titulos:(a,b)=>b.totTitulos-a.totTitulos||b.totJogos-a.totJogos,
+   jovens:(a,b)=>(a.idade??99)-(b.idade??99)||(b.ovr||0)-(a.ovr||0),nome:()=>0,
+  }[ordem];
+  return lista.sort((a,b)=>cmp(a,b)||a.nome.localeCompare(b.nome,'pt-BR'));
+ },[todos,busca,clube,clubes,setor,nac,situacao,ordem]);
+ const selecionado=id?todos.find(p=>p.id===id)||null:filtrados[0]||null;
  const linhas=useMemo(()=>selecionado?historicoAtleta(selecionado):[],[selecionado]);
  const conquistas=useMemo(()=>selecionado?resumoConquistas(c,selecionado.id):{todas:[],titulos:[],premios:[]},[c,selecionado?.id]);
  const transferencias=useMemo(()=>selecionado?historicoTransferenciasAtleta(selecionado,linhas):[],[selecionado,linhas]);
- const selecionar=novo=>{I(novo);A('resumo');Q('todas');};
- return <section className="fm27-archive" aria-label="Arquivo de jogadores">
-  <header className="fm27-section-header">
-   <div><span className="fm27-eyebrow">A JOIA / CENTRO DE DADOS / JOGADORES</span><h2>Histórico de jogadores</h2>
-    <p>Carreiras, estatísticas, títulos e distinções preservados temporada após temporada.</p></div>
-   <span className="fm27-counter">{filtrados.length.toLocaleString('pt-BR')} atletas</span>
+ const selecionar=novo=>{I(novo);A('resumo');Q('todas');F(true);};
+ const filtrosAtivos=[busca,clube,setor,situacao,nac].filter(Boolean).length;
+ const limpar=()=>{B('');C('');S('');SI('');N('');LI(POR_PAGINA);};
+ return <section className={'fm27-archive pj-pesquisa'+(fichaAberta?' pj-com-ficha':'')} aria-label="Arquivo de jogadores">
+  <header className="pj-cabecalho">
+   <div><span className="fm27-eyebrow">A JOIA / CENTRO DE DADOS / JOGADORES</span><h2>Pesquisa de jogadores</h2></div>
+   <span className="fm27-counter">{filtrados.length.toLocaleString('pt-BR')} de {todos.length.toLocaleString('pt-BR')} atletas</span>
   </header>
-  <div className="fm27-browser">
-   <aside className="fm27-roster" aria-label="Selecionar jogador">
-    <div className="fm27-roster-filters">
-     <label>Buscar atleta<input aria-label="Buscar jogador" type="search" value={busca} onChange={e=>B(e.target.value)} placeholder="Nome do jogador…"/></label>
-     <label>Clube<select value={clube} onChange={e=>C(e.target.value)} aria-label="Filtrar pelo clube">
-       <option value="">Todos os clubes</option>{clubes.map(nome=><option key={nome} value={nome}>{nome}</option>)}
-      </select></label>
-    </div>
-    <div className="fm27-roster-list mv-atletas">
-     {filtrados.slice(0,120).map(p=><button key={p.id} className={'fm27-roster-item '+(selecionado?.id===p.id?'is-selected':'')} data-atleta={String(p.id)} type="button" onClick={()=>selecionar(p.id)}>
-      <span className="fm27-roster-avatar">{(p.nome||'?').slice(0,1).toUpperCase()}</span>
-      <span className="fm27-roster-copy"><strong>{p.nome||'Sem nome'}{p.voce?' · Você':''}</strong><small>{p.posicao||'Jogador'} · {p.clube||'Livre'}{p.aposentado?' · Aposentado':''}</small></span>
-     </button>)}
-     {filtrados.length>120&&<p className="fm27-list-hint">Refine a pesquisa para consultar mais jogadores.</p>}
-     {!filtrados.length&&<p className="fm27-list-hint">Nenhum jogador encontrado.</p>}
-    </div>
-   </aside>
-   <main className="fm27-player-main">
+  <div className="pj-filtros" aria-label="Filtros da pesquisa">
+   <label className="pj-busca"><span>Buscar</span><input aria-label="Buscar jogador" type="search" value={busca} onChange={e=>{B(e.target.value);LI(POR_PAGINA);}} placeholder="Nome do jogador…"/></label>
+   <div className="pj-chips" role="group" aria-label="Posição">{SETORES.map(([v,l])=><button key={v||'todas'} type="button" aria-pressed={setor===v} onClick={()=>{S(v);LI(POR_PAGINA);}}>{l}</button>)}</div>
+   <div className="pj-selects">
+    <label><span>Situação</span><select aria-label="Situação do jogador" value={situacao} onChange={e=>SI(e.target.value)}><option value="">Todos</option><option value="ativos">Em atividade</option><option value="aposentados">Aposentados</option></select></label>
+    <label><span>Nacionalidade</span><select aria-label="Nacionalidade" value={nac} onChange={e=>N(e.target.value)}><option value="">Todas</option>{nacs.map(x=><option key={x.id} value={x.id}>{x.label}</option>)}</select></label>
+    <label><span>Clube</span><input aria-label="Filtrar pelo clube" list="pj-clubes" value={clube} onChange={e=>C(e.target.value)} placeholder="Qualquer clube"/><datalist id="pj-clubes">{clubes.map(nome=><option key={nome} value={nome}/>)}</datalist></label>
+    <label><span>Ordenar por</span><select aria-label="Ordenar jogadores" value={ordem} onChange={e=>O(e.target.value)}>{ORDENS.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></label>
+   </div>
+   {filtrosAtivos>0&&<button type="button" className="pj-limpar" onClick={limpar}>Limpar filtros ({filtrosAtivos})</button>}
+  </div>
+  <div className="pj-corpo">
+   <div className="pj-resultados" aria-label="Resultados da pesquisa">
+    <div className="pj-linha pj-titulos" aria-hidden="true"><span>Jogador</span><span>Clube</span><span>Idade</span><span>J</span><span>G</span><span>Tít.</span></div>
+    <div className="mv-atletas">{filtrados.slice(0,limite).map(p=><button key={p.id} type="button" data-atleta={String(p.id)} className={'pj-linha'+(selecionado?.id===p.id?' is-selected':'')+(p.voce?' pj-voce':'')} onClick={()=>selecionar(p.id)}>
+     <span className="pj-jogador"><i aria-hidden="true">{iniciais(p.nome)}</i><span><strong>{p.nome||'Sem nome'}{p.voce?' · Você':''}</strong><small>{p.posicao||'—'} · {NACIONALIDADES.find(x=>x.id===p.nac)?.label||p.nac||'—'}{p.aposentado?' · Aposentado':Number.isFinite(p.ovr)?` · OVR ${p.ovr}`:''}</small></span></span>
+     <span className="pj-clube">{p.clube?<><img src={escudoDe(p.clube)} alt=""/>{p.clube}</>:'Livre'}</span>
+     <span data-rotulo="Idade">{p.aposentado?'—':p.idade??'—'}</span><span data-rotulo="Jogos">{n(p.totJogos)}</span><span data-rotulo="Gols">{n(p.totGols)}</span><span data-rotulo="Títulos">{n(p.totTitulos)}</span>
+    </button>)}</div>
+    {filtrados.length>limite&&<button type="button" className="pj-mais" onClick={()=>LI(x=>x+POR_PAGINA)}>Mostrar mais {Math.min(POR_PAGINA,filtrados.length-limite)} de {(filtrados.length-limite).toLocaleString('pt-BR')}</button>}
+    {!filtrados.length&&<p className="fm27-list-hint">Nenhum jogador encontrado com esses filtros.</p>}
+   </div>
+   <main className="fm27-player-main pj-ficha">
+    {fichaAberta&&<button type="button" className="pj-voltar" onClick={()=>F(false)}>← Voltar aos resultados</button>}
     {!selecionado?<div className="fm27-empty">Selecione um jogador para abrir a ficha.</div>:<article className="fm27-player-sheet" aria-label={`Ficha de ${selecionado.nome}`}>
      <div className="fm27-player-hero">
       <div className="fm27-identity-symbol"><img src={escudoDe(selecionado.clube)} alt="" /></div>
       <div className="fm27-player-identity">
        <span className="fm27-eyebrow">FICHA DE CARREIRA {selecionado.voce?' / SEU JOGADOR':''}</span>
-       <h3>{selecionado.nome}</h3><p>{selecionado.posicao||'Jogador'} · <LinkEntidade tipo="clube" nome={selecionado.clube||""}>{selecionado.clube||"Sem clube"}</LinkEntidade> · {selecionado.nac||'Nacionalidade não informada'}</p>
+       <h3>{selecionado.nome}</h3><p>{selecionado.posicao||'Jogador'} · <LinkEntidade tipo="clube" nome={selecionado.clube||""}>{selecionado.clube||"Sem clube"}</LinkEntidade> · {NACIONALIDADES.find(x=>x.id===selecionado.nac)?.label||selecionado.nac||'Nacionalidade não informada'}{!selecionado.aposentado&&Number.isFinite(selecionado.idade)?` · ${selecionado.idade} anos`:''}{Number.isFinite(selecionado.ovr)&&!selecionado.aposentado?` · OVR ${selecionado.ovr}`:''}</p>
       </div>
       <span className={'fm27-player-state '+(selecionado.aposentado?'is-retired':'')}>{selecionado.aposentado?'Aposentado':'Em atividade'}</span>
      </div>

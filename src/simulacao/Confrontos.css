@@ -1,0 +1,72 @@
+.cf-confrontos{display:flex;flex-direction:column;gap:14px}
+.cf-cabecalho{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.cf-cabecalho h2{margin:6px 0 0;font-size:clamp(22px,3vw,30px);font-weight:800;letter-spacing:-.03em}
+.cf-duelo{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:14px;align-items:center;padding:18px;border:1px solid #2c3d4d;border-radius:16px;background:radial-gradient(ellipse at 50% 0%,#1e3a5a55,transparent 70%),#111c29}
+.cf-lado{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.cf-lado img{width:60px;height:60px;object-fit:contain}
+.cf-avatar{display:grid;place-items:center;width:60px;height:60px;border-radius:50%;background:#20354a;font-size:24px;font-weight:800;color:#dce8f3}
+.cf-lado select,.cf-lado input,.cf-filtros select{width:100%;max-width:300px;min-height:40px;padding:8px 11px;border-radius:10px;border:1px solid #344d5c;background:#0b131d;color:#eef3f8;font-size:14px;font-weight:600;text-align:center}
+.cf-lado input{font-weight:400}
+.cf-vs{font-size:34px;font-weight:300;color:#5fd3b0}
+.cf-filtros{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.cf-filtros label{display:flex;flex-direction:column;gap:5px;min-width:150px;flex:1 1 150px}
+.cf-filtros label>span{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8fa3b8}
+.cf-filtros select{max-width:none;text-align:left;font-weight:400}
+.cf-filtros .fm27-reset{flex:none;min-height:40px}
+.cf-placar-geral{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 20px;padding:16px 18px;border:1px solid #2c3d4d;border-radius:16px;background:#0f1823}
+.cf-titulo h3{margin:0;font-size:20px}.cf-titulo p{margin:4px 0 8px;font-size:12px;color:#8fa3b8}
+.cf-numeros{display:flex;gap:18px;flex-wrap:wrap;justify-content:flex-end}
+.cf-numeros div{display:flex;flex-direction:column;align-items:flex-end}
+.cf-numeros strong{font-size:24px;font-variant-numeric:tabular-nums}
+.cf-numeros span{font-size:11px;color:#8fa3b8}
+.cf-barra{grid-column:1/-1}
+.cf-barra-trilho{display:flex;height:12px;border-radius:999px;overflow:hidden;background:#1d2b3a}
+.cf-barra-trilho i{display:block;min-width:0}
+.cf-v{background:#5fd3a0}.cf-e{background:#c9b16a}.cf-d{background:#e0838b}.cf-vazio{flex:1;background:#1d2b3a}
+.cf-barra-legenda{display:flex;justify-content:space-between;gap:10px;margin-top:6px;font-size:12px;color:#b8c6d4;flex-wrap:wrap}
+.cf-barra-legenda b{color:#fff}
+.cf-forma{display:flex;gap:5px}
+.cf-forma span{display:grid;place-items:center;width:24px;height:24px;border-radius:6px;font-size:11px;font-weight:800;color:#0b131d}
+.cf-forma-V{background:#5fd3a0}.cf-forma-E{background:#c9b16a}.cf-forma-D{background:#e0838b}
+.cf-destaques{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.cf-destaque{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:1px solid #2c3d4d;border-radius:12px;background:#111c29;min-width:0}
+.cf-destaque small{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5fd3b0}
+.cf-destaque strong{font-size:14px;line-height:1.3}
+.cf-destaque span{font-size:11px;color:#8fa3b8}
+.cf-colunas{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start}
+.cf-colunas>.cf-principal:only-child{grid-column:1/-1}
+.cf-abas{display:flex;gap:6px;margin-bottom:10px}
+.cf-abas button{min-height:36px;padding:6px 14px;border-radius:999px;border:1px solid #344d5c;background:transparent;color:#cfdbe7;font-size:12px;font-weight:600;cursor:pointer}
+.cf-abas button[aria-pressed=true]{background:#5fd3b0;color:#062018;border-color:#5fd3b0}
+.cf-partidas{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.cf-partidas li{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border:1px solid #1f2d3b;border-left:4px solid #556;border-radius:10px;background:#0f1823}
+.cf-partidas li.cf-r-V{border-left-color:#5fd3a0}.cf-partidas li.cf-r-E{border-left-color:#c9b16a}.cf-partidas li.cf-r-D{border-left-color:#e0838b}
+.cf-quando{display:flex;flex-direction:column;min-width:0}.cf-quando b{font-size:13px}.cf-quando small{font-size:11px;color:#8fa3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cf-jogo{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center}
+.cf-time{display:flex;align-items:center;justify-content:flex-end;gap:7px;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden}
+.cf-time.cf-fora{justify-content:flex-start}
+.cf-time img{width:20px;height:20px;flex:none}
+.cf-placar{font-size:16px;font-variant-numeric:tabular-nums;min-width:52px;text-align:center}
+.cf-individual{font-size:12px;color:#cfdbe7;white-space:nowrap}
+.cf-mais{margin-top:8px;width:100%;min-height:40px;border-radius:10px;border:1px solid #344d5c;background:#132131;color:#a5d9c8;font-size:12px;font-weight:600;cursor:pointer}
+.cf-rivais{padding:14px;border:1px solid #2c3d4d;border-radius:14px;background:#111c29}
+.cf-rivais h4{margin:0 0 10px;font-size:14px}
+.cf-rivais ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.cf-rivais button{display:grid;grid-template-columns:26px minmax(0,1fr);grid-template-rows:auto auto;gap:4px 10px;width:100%;padding:9px 10px;border-radius:10px;border:1px solid #1f2d3b;background:#0f1823;color:#e7eef6;text-align:left;cursor:pointer}
+.cf-rivais button:hover{border-color:#5fd3b0}
+.cf-rivais img{width:24px;height:24px;grid-row:1/3;align-self:center}
+.cf-rivais span{display:flex;flex-direction:column;min-width:0}
+.cf-rivais strong{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cf-rivais em{font-style:normal;font-size:10px;font-weight:700;color:#e6c06a}
+.cf-rivais small{font-size:11px;color:#8fa3b8}
+.cf-mini{grid-column:2;display:flex;height:5px;border-radius:999px;overflow:hidden;background:#1d2b3a}
+.cf-mini b{display:block;min-width:0}
+@media (max-width:900px){.cf-colunas{grid-template-columns:1fr}.cf-rivais{order:-1}.cf-destaques{grid-template-columns:1fr}}
+@media (max-width:600px){
+ .cf-duelo{padding:14px;gap:8px}.cf-lado img,.cf-avatar{width:44px;height:44px;font-size:18px}.cf-vs{font-size:24px}
+ .cf-lado select,.cf-lado input{font-size:13px;padding:7px 8px}
+ .cf-placar-geral{grid-template-columns:1fr}.cf-numeros{justify-content:space-between}.cf-numeros div{align-items:flex-start}
+ .cf-partidas li{grid-template-columns:1fr;gap:6px}
+ .cf-time{font-size:12px}
+ .cf-filtros label{min-width:calc(50% - 5px);flex:1 1 calc(50% - 5px)}
+}

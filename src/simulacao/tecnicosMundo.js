@@ -70,3 +70,18 @@ export function manchetesDoAno(a, {forcas = {}, transferencias = [], trocas = []
     ...de('titulo', m => m.peso < 4, 3), ...de('queda', undefined, 2)];
   return [...new Set(escolhidas)].slice(0, 18).map(({peso, ...m}) => ({ano: a.ano, ...m}));
 }
+
+/**
+ * Recordes de mercado por clube, preservados além da poda da central:
+ * maior venda e maior contratação de cada clube.
+ */
+export function registrarMercadoDoAno(anterior = {}, transferencias = [], ano) {
+  const mercado = {...(anterior || {})};
+  for (const t of transferencias) {
+    if (t.tipo !== 'transferencia' || !(t.valor > 0)) continue;
+    const registro = {nome: t.nome, id: t.id, valor: t.valor, ano: t.ano ?? ano};
+    if (t.de) { const m = mercado[t.de] = {...mercado[t.de]}; if (!(m.maiorVenda?.valor >= t.valor)) m.maiorVenda = {...registro, clube: t.para}; }
+    if (t.para) { const m = mercado[t.para] = {...mercado[t.para]}; if (!(m.maiorCompra?.valor >= t.valor)) m.maiorCompra = {...registro, clube: t.de}; }
+  }
+  return mercado;
+}

@@ -17,5 +17,11 @@ export const REFERENCIAS_RECORDES_FUTEBOL = Object.freeze([
  {tipo:'competicao',nome:'Champions League',id:'golsCarreira',valor:140,atleta:'Cristiano Ronaldo',fonte:'https://www.uefa.com/uefachampionsleague/news/02a7-2136b8f054ea-76a61b3f9d24-1000--cristiano-ronaldo-in-the-champions-league-records-stats-wh/',data:'2026-08'},
  {tipo:'competicao',nome:'Champions League',id:'jogosCarreira',valor:183,atleta:'Cristiano Ronaldo',fonte:'https://www.uefa.com/uefachampionsleague/news/025a-0e9f8a3d1e40-d534e8b4a897-1000--leaderboard-champions-league-appearances/',data:'2026-11-04'},
  {tipo:'competicao',nome:'Premier League',id:'golsCarreira',valor:260,atleta:'Alan Shearer',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
- {tipo:'competicao',nome:'Premier League',id:'golsTemporada',valor:36,atleta:'Erling Haaland',ano:'2022/23',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'}
+ {tipo:'competicao',nome:'Premier League',id:'golsTemporada',valor:36,atleta:'Erling Haaland',ano:'2022/23',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
+ // Técnicos: referências documentadas pela própria Premier League (era 1992/93+).
+ {tipo:'competicao',nome:'Premier League',id:'tecnicoJogos',valor:828,atleta:'Arsène Wenger',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
+ {tipo:'competicao',nome:'Premier League',id:'tecnicoVitorias',valor:528,atleta:'Sir Alex Ferguson',fonte:'https://www.premierleague.com/en/events/hall-of-fame/inductees/alex-ferguson',data:'2026-11'},
+ {tipo:'competicao',nome:'Premier League',id:'tecnicoPontos',valor:1752,atleta:'Sir Alex Ferguson',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
+ {tipo:'competicao',nome:'Premier League',id:'tecnicoTemporadas',valor:22,atleta:'Arsène Wenger',fonte:'https://www.premierleague.com/en/stats/records',data:'2026-11'},
+ {tipo:'competicao',nome:'Premier League',id:'tecnicoTitulos',valor:13,atleta:'Sir Alex Ferguson',fonte:'https://www.premierleague.com/en/news/4660971/every-premier-league-title-winning-manager-in-history',data:'2026-05'},
 ]);

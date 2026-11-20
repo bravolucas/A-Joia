@@ -1,7 +1,7 @@
 import {NACIONALIDADES} from '../dados/data.js';
 import {REFERENCIAS_RECORDES_FUTEBOL} from '../dados/recordesFutebolReais.js';
 import {recordesReaisTitulosCompeticao} from './recordesTitulosReais.js';
-import {recordesTreinador} from './recordesTreinador.js';
+import {recordesTreinador,METRICAS_TREINADOR} from './recordesTreinador.js';
 
 /** Recordes calculados dos fatos arquivados, sem novos sorteios nem alterar o save. */
 export const METRICAS_RECORDES = Object.freeze([
@@ -373,6 +373,16 @@ export function consultarRecordesFutebol(c={},tipo='clube',nome='',temporadas=c?
   return {id:m.id,rotulo:m.rotulo,categoria:m.categoria,real,simulado,
    status:real?.cobertura==='recorte'?'Referência de período documentado':ultrapassou?'Superado no save':igualou?'Igualado no save':real?'Recorde real preservado':'Recorde do save'};
  });
- return {tipo,nome,recordes:[...recordes,...recordesTreinador(c,tipo,nome)],desde:arquivo.desde??temporadas?.[0]?.ano??null,
+ const resultadosTecnico=new Map(recordesTreinador(c,tipo,nome).map(x=>[x.id,x.simulado]));
+ const recordesTecnico=METRICAS_TREINADOR.filter(m=>historicas.has(m.id)||resultadosTecnico.has(m.id)).map(m=>{
+  const real=historicas.get(m.id)||null,simulado=resultadosTecnico.get(m.id)||null;
+  const comparavel=real?.cobertura!=='recorte';
+  return {id:m.id,rotulo:m.rotulo,categoria:m.categoria,real,simulado,
+   status:real?.cobertura==='recorte'?'Referência de período documentado':
+    real&&comparavel&&simulado?.valor>real.valor?'Superado no save':
+    real&&comparavel&&simulado?.valor===real.valor?'Igualado no save':
+    real?'Recorde real preservado':'Recorde do treinador neste save'};
+ });
+ return {tipo,nome,recordes:[...recordes,...recordesTecnico],desde:arquivo.desde??temporadas?.[0]?.ano??null,
   cobertura:'Referências reais auditadas e partidas/temporadas armazenadas neste save. Lacunas não são preenchidas por estimativas.'};
 }

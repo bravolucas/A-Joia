@@ -1,5 +1,5 @@
 import {clonarEstado} from '../simulacao/clonarEstado.js';
-import {catalogoClubesEmpresario,analisarClubeEmpresario,respostaClubeEmpresario,viraPropostaSondagem} from './mercadoEmpresario.js';
+import {catalogoClubesEmpresario,analisarClubeEmpresario,respostaClubeEmpresario,viraPropostaSondagem,registrarCustoTransferencia} from './mercadoEmpresario.js';
 import {estatisticasDasPartidas} from '../simulacao/estatisticasMundo.js';
 import {gravarPersistente,lerPersistente,apagarPersistente} from '../simulacao/armazenamentoMundo.js';
 import {simularClassificacoesMundoTecnico,classificacaoDosJogos,atualizarLigasMundoTecnico} from '../treinador/classificacoesMundoTecnico.js';
@@ -21,7 +21,8 @@ import {simularCampanhaCopa,adversarioCopaPorFase} from '../treinador/copasEscol
 import {jogosDoGrupo,tabelaGrupoCopa,empateGrupo} from './gruposCopa.js';
 import {aplicarManchetesJogador} from './manchetesJogador.js';
 import {atualizarRecordesUniverso} from './recordesUniverso.js';
-import {detectarQuebrasRecordesFutebol,escoposRecordesDaTemporada,guardarQuebrasRecordesFutebol} from '../historia/noticiasRecordes.js';
+import {valorMercadoEuro} from '../simulacao/economia.js';
+import {detectarQuebrasRecordesFutebol,escoposRecordesDaTemporada,guardarQuebrasRecordesFutebol,pessoasDoRecorde} from '../historia/noticiasRecordes.js';
 import {registrarCampanhaContinental,registrarFinalContinental} from './torneioContinental.js';
 import {prepararElencoCopa,prepararElencoSelecao,forcaElencoCopa,registrarJogoElenco} from './elencoSelecao.js';
 import {iniciarJornada,memorizar,registrarEscolhaJornada,registrarTransferenciaJornada,prepararJornada,fecharJornada,pesoProjeto,projetoOferta,legadoNarrativo} from './jornadaJogador.js';
@@ -55,6 +56,11 @@ export const IDADES_TRACO = [19, 24, 29];
 
 /* prêmios individuais não contam como título de time */
 export const ehPremioIndividual = (tipo) => tipo === "bolaOuro" || tipo === "botaOuro";
+/* Copa do Mundo e torneio continental de seleções são conquistas da seleção:
+   nunca entram na conta do clube (bônus contratual, torcida, tabela do clube). */
+export const ehTituloSelecao = (tipo) => tipo === "copaMundo" || tipo === "continentalSelecao";
+export const titulosDoClube = (titulos = []) => titulos.filter((t) => !ehPremioIndividual(t.tipo) && !ehTituloSelecao(t.tipo));
+export const titulosDaSelecao = (titulos = []) => titulos.filter((t) => ehTituloSelecao(t.tipo));
 const ATTRS = ["velocidade", "finalizacao", "passe", "drible", "defesa", "fisico"];
 const DEFENSIVAS = ["GOL", "ZAG", "LD", "LE", "VOL", "ALE", "ALD"];
 const rnd = () => Math.random();
@@ -656,11 +662,36 @@ export function statusNoClube(c, clubeNome = c.clubeNome) {
   return statusPorDiff(ovrDe(c) - clubeDe(clubeNome).forca, c.idade);
 }
 
-/* ---------- valor de mercado ---------- */
-export function valorMercado(ovr, idade, fama = 0) {
-  const base = 1000 * Math.pow(1.173, ovr - 60); // em milhares de euro
-  const idadeF = idade <= 21 ? 1.5 : idade <= 24 ? 1.25 : idade <= 28 ? 1 : idade <= 31 ? 0.65 : 0.35;
-  return Math.max(50, Math.round(base * idadeF * (1 + fama / 400)));
+/* ---------- valor de mercado ----------
+   Mesma régua do mundo (economia.js, calibrada no mercado 2025/26): nível, idade,
+   liga onde joga, potencial e anos de contrato. Por cima, só o que é do seu
+   atleta: fama (até +20%) e a fase recente (de −12,5% a +20%). Assim um titular
+   do Brasileirão não vale como um craque da Premier League, e só a elite
+   mundial chega à casa dos € 100 mi. */
+export function valorMercado(ovr, idade, fama = 0, { liga = "inglaterra", potencial, contrato } = {}) {
+  const v = valorMercadoEuro({ ovr, idade, liga, potencial, contrato });
+  return Math.max(50, Math.round(v * (1 + clamp(fama || 0, 0, 100) / 500)));
+}
+/* Teto suave: acima de € 150 mi cada euro extra conta pela metade. Só a elite
+   absoluta passa do recorde real (Neymar, € 222 mi), e sem dobrar o número. */
+const TETO_SUAVE_VALOR = 150000;
+const suavizarTeto = (v) => (v <= TETO_SUAVE_VALOR ? v : TETO_SUAVE_VALOR + (v - TETO_SUAVE_VALOR) * 0.5);
+/* fase recente pesa metade no preço: 0,75–1,4 vira 0,875–1,2 */
+const efeitoForma = (f = 1) => 1 + ((f ?? 1) - 1) * 0.5;
+/* OVR que o atleta pode atingir (teto dos atributos) — jovem com teto alto vale mais */
+const ovrPotencialDe = (c) => (c.potencial ? Math.max(ovrDe(c), calcOVR({ ...c.attrs, ...c.potencial, fintas: 3, pernaRuim: 3 }, c.posicao)) : undefined);
+/** Valor (€ mil) do atleta no clube de origem; `ovr`/`idade` permitem projetar o fim da temporada. */
+export function valorDoAtleta(c, { ovr = ovrDe(c), idade = c.idade, liga = clubeDe(c.clubeNome).liga } = {}) {
+  const potencial = ovrPotencialDe(c);
+  const contrato = c.contrato ? Math.max(0, c.contrato.restantes ?? 0) : undefined;
+  let v = valorMercado(ovr, idade, c.fama, { liga, potencial, contrato });
+  // Promessa (até 22 anos): o mercado paga pelo jogador que ele deve virar aos 23,
+  // com desconto de risco de 18% por ano que falta (o caso Endrick/Estêvão).
+  if (idade <= 22 && potencial > ovr) {
+    const projecao = valorMercado(potencial, 23, c.fama, { liga, contrato }) * Math.pow(0.82, 23 - idade);
+    v = Math.max(v, projecao);
+  }
+  return Math.max(50, Math.round(suavizarTeto(v * efeitoForma(c.formaMercado))));
 }
 /* Forma recente: a última temporada mexe no preço (nota, participação em gols
    para a posição, títulos e Bola de Ouro). 1 = neutro; vai de 0,75 a 1,4. */
@@ -680,7 +711,7 @@ export function formaDaTemporada(card, posicao, anterior = 1) {
   return Math.round(clamp(0.3 * anterior + 0.7 * bruto, 0.75, 1.4) * 100) / 100;
 }
 /* Valor de mercado do atleta hoje: nível, idade, fama e forma recente */
-export const valorAtual = (c) => Math.max(50, Math.round(valorMercado(ovrDe(c), c.idade, c.fama) * (c.formaMercado ?? 1)));
+export const valorAtual = (c) => valorDoAtleta(c);
 
 export function formatarValor(k) {
   if(k>0&&(k<1||(k<10&&!Number.isInteger(k))))return `€ ${Math.round(k*1000).toLocaleString("pt-BR")}`;
@@ -877,7 +908,8 @@ export function comprarInvestimento(c0, id) {
 function fecharFinancas(c, card) {
   const k = c.contrato || contratoPadrao(c, c.clubeNome);
   const emp = empresarioDe(c);
-  const nTit = card.titulos.filter((t) => !ehPremioIndividual(t.tipo)).length;
+  // o clube paga bônus pelos títulos dele, não pelos da seleção
+  const nTit = titulosDoClube(card.titulos).length;
   const salario = k.salario;
   const bonus = k.bonusGol * card.gols + Math.round(salario * 0.1) * nTit + (card.bola?.pos === 1 ? Math.round(salario * 0.3) : 0);
   const comissao = Math.round((salario + bonus) * (emp.comissao || 0));
@@ -2010,7 +2042,7 @@ function fecharTemporadaBase(c0, card0) {
   const nTit = card.titulos.filter((t) => !ehPremioIndividual(t.tipo)).length;
   card.titulos.forEach((t) => {
     c.titulos[t.tipo] = (c.titulos[t.tipo] || 0) + 1;
-    const pelaSelecao = t.tipo === "copaMundo" || t.tipo === "continentalSelecao";
+    const pelaSelecao = ehTituloSelecao(t.tipo);
     c.lista.push({ ano: card.ano, nome: t.nome, tipo: t.tipo, clube: pelaSelecao ? nacDe(c.nac).label : ehPremioIndividual(t.tipo) ? "Individual" : card.clube });
   });
   c.campeaoContinental = card.titulos.some((t) => t.tipo === "continental" && !/Sul-Americana|Europa League|Conference/.test(t.nome)) && !card.emprestado ? card.clube : null;
@@ -2038,7 +2070,9 @@ function fecharTemporadaBase(c0, card0) {
   const luxos = efeitosInv(c).filter((i) => i.luxo).length;
   const ostentacao = luxos && clubeDe(tc).forca < 80 ? luxos * 3 : 0;
   if (ostentacao) card.destaques.push("Seu padrão de vida destoa do clube: a torcida estranha a ostentação");
-  const delta = ((card.nota ? (card.nota - 6.6) * 9 : -4) + nTit * 7 + (card.jogos >= 30 ? 3 : 0) + somaTraco(c, "torcidaAno") + somaInv(c, "torcidaAno") + (card.classico?.acertou ? somaInv(c, "torcidaClassico") : 0) - ostentacao - (c.foco === "vitrine" ? 3 : 0)) * (card.nota >= 6.6 ? multTraco(c, "torcidaMult") : 1);
+  // título do clube pesa na torcida dele; o da seleção só dá um orgulho pequeno (ídolo da casa)
+  const titClube = titulosDoClube(card.titulos).length, titSelecao = titulosDaSelecao(card.titulos).length;
+  const delta = ((card.nota ? (card.nota - 6.6) * 9 : -4) + titClube * 7 + titSelecao * 2 + (card.jogos >= 30 ? 3 : 0) + somaTraco(c, "torcidaAno") + somaInv(c, "torcidaAno") + (card.classico?.acertou ? somaInv(c, "torcidaClassico") : 0) - ostentacao - (c.foco === "vitrine" ? 3 : 0)) * (card.nota >= 6.6 ? multTraco(c, "torcidaMult") : 1);
   c.torcida[tc] = clampR(Math.round(tAntes + delta), 0, 100);
   // Fidelidade: a partir do 4º ano seguido no clube, a torcida reconhece quem ficou.
   const seguidos = anosSeguidosNoClube(c, tc) + (card.emprestado ? 0 : 1);
@@ -2191,7 +2225,7 @@ function fecharTemporadaBase(c0, card0) {
   card.valorAntes = valorAtual(c0);
   c.formaMercado = formaDaTemporada(card, c.posicao, c0.formaMercado ?? 1);
   card.forma = c.formaMercado;
-  card.valor = Math.max(50, Math.round(valorMercado(card.ovrDepois, c.idade + 1, c.fama) * c.formaMercado));
+  card.valor = valorDoAtleta(c, { ovr: card.ovrDepois, idade: c.idade + 1 });
 
   // promessa feita na coletiva: a imprensa confere
   resolverPromessa(c, card, tc);
@@ -2252,7 +2286,7 @@ function fecharTemporadaBase(c0, card0) {
     c.recordesEventos=guardarQuebrasRecordesFutebol(c,recordesNovos).recordesEventos;
     card.recordesEventos=recordesNovos;
     card.jornada={...(card.jornada||{}),noticias:[
-      ...recordesNovos.slice(0,2).map(e=>({tipo:'recorde',titulo:e.titulo,detalhe:e.detalhe})),
+      ...recordesNovos.slice(0,2).map(e=>({tipo:'recorde',titulo:e.titulo,detalhe:e.detalhe,pessoas:pessoasDoRecorde(e)})),
       ...(card.jornada?.noticias||[])
     ].slice(0,12)};
     card.destaques=[...(card.destaques||[]),...recordesNovos.slice(0,2).map(e=>'🏅 '+e.titulo)];
@@ -2263,11 +2297,13 @@ function fecharTemporadaBase(c0, card0) {
 
 /* Manchetes derivadas dos resultados efetivos, sem estado adicional no save.
    O mesmo card sempre gera as mesmas notícias, inclusive em saves antigos. */
+export { pessoasDoRecorde };
 export function noticiasDaTemporada(c, card) {
   if (!card) return [];
   const noticias = [...(card.jornada?.noticias||[])].slice(0,2);
-  const add = (tipo, titulo, detalhe) => {
-    if (noticias.length < 4) noticias.push({ tipo, titulo, detalhe });
+  // `pessoas` leva o ID de quem é citado: o nome vira link mesmo com homônimos no mundo.
+  const add = (tipo, titulo, detalhe, pessoas) => {
+    if (noticias.length < 4) noticias.push({ tipo, titulo, detalhe, ...(pessoas?.length ? { pessoas } : {}) });
   };
   const titulos = card.titulos || [];
   const grande = titulos.find(t => ["copaMundo", "continental", "mundial", "continentalSelecao"].includes(t.tipo));
@@ -2278,16 +2314,16 @@ export function noticiasDaTemporada(c, card) {
   // Noticiar apenas acontecimentos registrados no card, nunca inventar transferências.
   const rival = card.rival;
   if (rival && c.rival?.nome) {
-    const nome = c.rival.nome;
-    if (rival.mudou) add("mercado", `${nome} troca de clube`, `De ${rival.mudou} para ${rival.clube}.`);
-    if (rival.bola === 1) add("rival", `${nome} conquista a Bola de Ouro`, `Seu rival de geração brilhou pelo ${rival.clube}.`);
-    else if (rival.bola && rival.bola <= 3) add("rival", `${nome} termina entre os melhores do mundo`, `Top ${rival.bola} na Bola de Ouro.`);
-    if (rival.aposentou) add("rival", `${nome} anuncia aposentadoria`, `Fim de carreira após passagem pelo ${rival.clube}.`);
+    const nome = c.rival.nome, quem = c.rival.id != null ? [{ nome, id: c.rival.id }] : undefined;
+    if (rival.mudou) add("mercado", `${nome} troca de clube`, `De ${rival.mudou} para ${rival.clube}.`, quem);
+    if (rival.bola === 1) add("rival", `${nome} conquista a Bola de Ouro`, `Seu rival de geração brilhou pelo ${rival.clube}.`, quem);
+    else if (rival.bola && rival.bola <= 3) add("rival", `${nome} termina entre os melhores do mundo`, `Top ${rival.bola} na Bola de Ouro.`, quem);
+    if (rival.aposentou) add("rival", `${nome} anuncia aposentadoria`, `Fim de carreira após passagem pelo ${rival.clube}.`, quem);
   }
   // O ranking de Bola de Ouro também representa outros atletas do mundo.
   const vencedor = card.bola?.top?.[0];
   if (vencedor && !vencedor.voce && card.bola?.pos !== 1) {
-    add("mundo", `${vencedor.nome} lidera a Bola de Ouro`, `Destaque do ${vencedor.clube} na temporada.`);
+    add("mundo", `${vencedor.nome} lidera a Bola de Ouro`, `Destaque do ${vencedor.clube} na temporada.`, vencedor.id != null ? [{ nome: vencedor.nome, id: vencedor.id }] : undefined);
   }
   if (card.rebaixado) add("alerta", `${card.clube} sofre rebaixamento`, `A equipe encerrou a liga em ${card.posLiga}º lugar.`);
   else if (card.acesso) add("conquista", `${card.clube} garante o acesso`, `Campanha de ${card.posLiga}º lugar na ${card.ligaNome}.`);
@@ -2484,15 +2520,25 @@ export function gerarOfertas(c, n, opts = {}) {
   }));
 }
 
-/* Quanto o clube comprador paga ao atual: valor de mercado ajustado pelos anos de
-   contrato restantes, limitado pela cláusula. Sem contrato, sai de graça. */
+/* Quanto o clube comprador paga ao atual. Parte do valor no clube de origem (já
+   com idade, potencial e contrato restante); quem compra de uma liga mais rica paga
+   parte do preço do próprio mercado (o garoto do Brasileirão custa mais para a
+   Premier League do que para um vizinho), e clube grande paga um ágio de até 35%
+   (taxas reais costumam superar o valor de mercado). Limitado pela cláusula; sem contrato, sai de graça. */
 export function valorTransferencia(c, comprador) {
   const restantes = c.contrato?.restantes ?? 0;
   if (restantes <= 0) return 0;
-  const base = valorAtual(c) * (0.75 + 0.1 * Math.min(restantes, 4)) * (clubeDe(comprador).forca >= 85 ? 1.15 : 1);
+  const destino = clubeDe(comprador);
+  const origem = valorAtual(c);
+  const noDestino = valorDoAtleta(c, { liga: destino.liga }) * 0.85;
+  const agio = clamp(((destino.forca ?? 70) - 75) / 50, 0, 0.35);
+  const base = suavizarTeto(Math.max(origem, noDestino) * (1 + agio));
   const teto = Math.min(multaEfetiva(c), c.contrato?.multa || base);
   return Math.max(50, Math.round(Math.min(base, teto) / 50) * 50);
 }
+
+// a sondagem do empresário cobra exatamente o que a negociação real cobraria
+registrarCustoTransferencia((c, clube) => valorTransferencia(c, clube.nome));
 
 /* Clube que não quer vender: titular ou estrela com contrato longo vira peça
    que a diretoria segura. No máximo uma proposta por janela fica travada; o
@@ -4192,6 +4238,8 @@ export function carregarRapido() {
     s.c.picoAttrs = s.c.picoAttrs || { ...s.c.attrs };
     s.c.moral = s.c.moral ?? 65; s.c.transferencias = s.c.transferencias || []; s.c.ligaAlvo = s.c.ligaAlvo || null; s.c.ritmo = s.c.ritmo || "normal"; s.c.pe = s.c.pe || "destro";
     s.c.titulos = { liga: 0, copa: 0, continental: 0, mundial: 0, copaMundo: 0, continentalSelecao: 0, bolaOuro: 0, botaOuro: 0, estadual:0, segunda: 0, ...(s.c.titulos || {}) };
+    // save antigo: conquista da seleção gravada no nome do clube passa para a seleção
+    for (const t of s.c.lista || []) if (ehTituloSelecao(t.tipo)) t.clube = nacDe(s.c.nac).label;
     if (!s.c.mundo?.jogadores) s.c.mundo = mundoCompacto();
     const camisasLegadas=!s.c.camisas?.versao;
     iniciarCamisas(s.c);

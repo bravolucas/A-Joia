@@ -1,4 +1,5 @@
 import React from 'react';
+import TextoComLinks from '../historia/TextoComLinks.jsx';
 import { detalharOvr } from './detalheOvr.js';
 
 /* Gaveta do OVR (Modo Rápido): composição do número, peso de cada atributo
@@ -10,7 +11,7 @@ const COR_RELEVANCIA = { Essencial: '#EBC557', Importante: '#BCEAFF', Secundári
 function Linha({ rotulo, valor, cor = '#F2F5F3', detalhe }) {
   return (
     <li className="flex items-baseline justify-between gap-3 text-[15px]">
-      <span className="text-[#C9D9E8]">{rotulo}{detalhe && <small className="block text-[12px] text-[#9EB5C9]">{detalhe}</small>}</span>
+      <span className="text-[#C9D9E8]">{rotulo}{detalhe && <small className="block text-[12px] text-[#9EB5C9]"><TextoComLinks>{detalhe}</TextoComLinks></small>}</span>
       <span className="font-stat shrink-0" style={{ color: cor }}>{valor}</span>
     </li>
   );

@@ -4,6 +4,7 @@ import {RevelacaoTela} from '../comum/efeitos/Movimento.jsx';
 import {BotaoMuseuPessoal,MuseuFimCarreira} from '../museu/MuseuPessoal.jsx';
 import BotaoHistoria from '../historia/HistoriaFutebol.jsx';
 import PortalHistorico from '../historia/PortalHistorico.jsx';
+import TextoComLinks,{ProvedorLinks} from '../historia/TextoComLinks.jsx';
 import LinkEntidade from '../historia/LinkEntidade.jsx';
 import ApresentacaoOficial from '../comum/ApresentacaoOficial.jsx';
 import {ChegadaCarreira,PainelProgressaoCarreira,RetrospectivaCarreira} from './ProgressaoCarreiraUI.jsx';
@@ -66,10 +67,10 @@ import {
   escolherPretemporada,
   iniciarNegociacao, ajustarNegociacao, fecharNegociacao, CAMPOS_NEGOCIACAO, fama_negociador,
   comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
-  bonusPrecisaoLoja, chanceMomento, miniDaPosicao, ehPremioIndividual, vagasDaLiga, ehSegundaDivisao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
+  bonusPrecisaoLoja, chanceMomento, miniDaPosicao, ehPremioIndividual, titulosDoClube, titulosDaSelecao, vagasDaLiga, ehSegundaDivisao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
   eventoDaJanela, segundoEvento, anoDeDecisao, eventoImpasse, valorAtual, comparaSalario, textoEmoji, efeitosDaDecisao, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, resolverDesafio, desafioPendente, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
   noticiasDaTemporada, retrospectoRivalidade, caminhoSelecao, interesseMercado, sinalizarInteresse, receberRetornosEmpresario,
-  copaPendente, opcoesCopa, jogarCopa,
+  copaPendente, opcoesCopa, jogarCopa, pessoasDoRecorde,
 } from "./rapido.js";
 
 /* Estilo do seletor de modos e do Modo Rápido. Inclui as animações que as
@@ -459,15 +460,16 @@ function TabelaCarreira({ c, proxima = true, compacta = true }) {
           {visiveis.map((s) => {
             const i = ts.indexOf(s);
             const o = s.ovrDepois ?? s.ovr;
-            const tit = s.titulos.filter((t) => !ehPremioIndividual(t.tipo)).length;
+            const tit = titulosDoClube(s.titulos).length, titSel = titulosDaSelecao(s.titulos).length;
             const ultima = i === ts.length - 1;
             return (
               <div key={i} className={`${grid} rp-historico-linha rounded-xl py-1 ${ultima ? "rp-linha-nova rp-historico-atual bg-white/[.04]" : ""}`}>
                 <span className="w-[30px] h-[26px] rounded-lg bg-[#27272A] flex items-center justify-center text-[13px] font-bold text-[#E4E4E7]">{s.idade}</span>
                 <span className="flex items-center gap-1.5 min-w-0">
                   <ClubDot club={clubeDe(s.clube)} size={18} />
-                  <span className="truncate text-[14px] font-semibold text-[#F4F4F5]">{s.clube}</span>
-                  {tit > 0 && <span className="shrink-0 flex items-center gap-0.5 text-[11px] font-bold text-[#EBC557]"><TacaCompeticao tipo="liga" size={11} />{tit > 1 ? tit : ""}</span>}
+                  <span className="truncate text-[14px] font-semibold text-[#F4F4F5]"><LinkEntidade tipo="clube" nome={s.clube}/></span>
+                  {tit > 0 && <span className="shrink-0 flex items-center gap-0.5 text-[11px] font-bold text-[#EBC557]" title={`${tit} título(s) pelo clube`}><TacaCompeticao tipo="liga" size={11} />{tit > 1 ? tit : ""}</span>}
+                  {titSel > 0 && <span className="shrink-0 flex items-center gap-0.5 text-[11px] font-bold text-[#EBC557]" title={`${titSel} título(s) pela seleção`} aria-label={`${titSel} título(s) pela seleção`}><Bandeira nac={c.nac} size={11} /><TacaCompeticao tipo="copaMundo" size={11} />{titSel > 1 ? titSel : ""}</span>}
                   {s.acesso && <span className="shrink-0 text-[10px] font-bold px-1.5 rounded-full bg-[#16A34A] text-white">ACESSO</span>}
                   {s.rebaixado && <span className="shrink-0 text-[10px] font-bold px-1.5 rounded-full bg-[#DC2626] text-white">CAIU</span>}
                 </span>
@@ -612,7 +614,7 @@ function Estante({ c, onFechar }) {
               {[...c.marcos].reverse().map((m, i) => (
                 <li key={i} className="flex items-start gap-3 text-[15px]">
                   <span className="text-xl leading-none"><Icone e={m.icone} /></span>
-                  <span><span className="font-bold text-[#F2F5F3]">{m.titulo}</span> <span className="text-[#9EB5C9]">· {m.ano}</span><br /><span className="text-[#9EB5C9]">{m.texto}</span></span>
+                  <span><span className="font-bold text-[#F2F5F3]"><TextoComLinks>{m.titulo}</TextoComLinks></span> <span className="text-[#9EB5C9]">· {m.ano}</span><br /><span className="text-[#9EB5C9]"><TextoComLinks>{m.texto}</TextoComLinks></span></span>
                 </li>
               ))}
             </ul>
@@ -656,14 +658,14 @@ function Ficha({ c, semTopo = false }) {
             <ClubDot club={clube} size={18} />
             <span className="truncate"><LinkEntidade tipo="clube" nome={clube.nome}/>{c.emprestimo ? " (empréstimo)" : ""}</span>
           </div>
-          <div className="text-[13px] text-[#9EB5C9]">{ligaDe(clube.liga).nome} · {st.label}</div>
+          <div className="text-[13px] text-[#9EB5C9]"><TextoComLinks>{ligaDe(clube.liga).nome}</TextoComLinks> · {st.label}</div>
           <div className="text-[13px] text-[#9EB5C9]">Camisa <span className="font-stat text-[#E1E6E3]">{numeroDe(c)}</span> · {peDe(c.pe).nome}</div>
         </div>
       </div>}
       <div className={`px-4 pb-4 ${semTopo ? "pt-3" : ""}`}>
         <BotaoHistoria c={c} nome={clube.nome} className="hf-link">Galeria do clube e marcos da carreira →</BotaoHistoria>
         <BotaoMuseuPessoal c={c}/>
-        {semTopo && <div className="text-[13px] text-[#9EB5C9] mb-2">{ligaDe(clube.liga).nome} · {st.label} · {peDe(c.pe).nome}</div>}
+        {semTopo && <div className="text-[13px] text-[#9EB5C9] mb-2"><TextoComLinks>{ligaDe(clube.liga).nome}</TextoComLinks> · {st.label} · {peDe(c.pe).nome}</div>}
         <div className="grid grid-cols-6 gap-2 mt-1">
           {Object.keys(ATTR_LABEL).map((a) => (
             <div key={a} className="flex flex-col gap-1">
@@ -750,7 +752,7 @@ function PlacarMomento({ ok, texto, atraso = 0, c, momento }) {
   const espera=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:atraso;
   const [visivel,V]=useState(espera===0);
   useEffect(() => {const mostrar=()=>{V(true);if(ok){efeitoLance("rede");torcida(2.6,.22);tocar("sobe",.5);}else tocar("desce",.5);};if(!espera){mostrar();return;}const timer=setTimeout(mostrar,espera);return()=>clearTimeout(timer);}, [ok,espera]);
-  return <div className="relative" style={{visibility:visivel?'visible':'hidden'}}>{ok&&visivel&&(!c||["titulo","estreia","decisao"].includes(celebracaoMomento(c,{...momento,adversario:contextoMomento(c,momento).adversario}).tipo))&&<Lottie nome="gol" className="absolute left-1/2 -translate-x-1/2 -top-24 w-48 h-48 pointer-events-none"/>}<div className={`display text-3xl rp-sobe ${ok?'text-[#BCEAFF]':'text-[#E36B5B]'}`}>{texto}</div>{ok&&visivel&&c&&<CelebracaoLance c={c} momento={{...momento,adversario:contextoMomento(c,momento).adversario}}/>}</div>;
+  return <div className="relative" style={{visibility:visivel?'visible':'hidden'}}>{ok&&visivel&&(!c||["titulo","estreia","decisao"].includes(celebracaoMomento(c,{...momento,adversario:contextoMomento(c,momento).adversario}).tipo))&&<Lottie nome="gol" className="absolute left-1/2 -translate-x-1/2 -top-24 w-48 h-48 pointer-events-none"/>}<div className={`display text-3xl rp-sobe ${ok?'text-[#BCEAFF]':'text-[#E36B5B]'}`}><TextoComLinks>{texto}</TextoComLinks></div>{ok&&visivel&&c&&<CelebracaoLance c={c} momento={{...momento,adversario:contextoMomento(c,momento).adversario}}/>}</div>;
 }
 
 function TelaFalta({ c, momento, onReacao, onFim }) {
@@ -934,7 +936,7 @@ function PainelRival({ c, card }) {
         </div>
         <ClubDot club={clubeDe(l.clube)} size={30} />
       </div>
-      {noticia && <p className="text-[15px] text-[#C9D9E8] mt-2">{noticia}</p>}
+      {noticia && <p className="text-[15px] text-[#C9D9E8] mt-2"><TextoComLinks>{noticia}</TextoComLinks></p>}
       {retrospecto.anos.length > 0 && <div className="mt-3 rounded-xl bg-[#071321]/70 p-3" aria-label="Histórico da rivalidade">
         <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#9EB5C9]">Histórico da rivalidade</div>
         <div className="grid grid-cols-3 gap-2 mt-2 text-center">
@@ -942,7 +944,7 @@ function PainelRival({ c, card }) {
           <div><div className="font-stat text-[22px] text-[#F2F5F3]">{retrospecto.empates}</div><div className="text-[11px] text-[#9EB5C9]">Empates</div></div>
           <div><div className="font-stat text-[22px] text-[#F0A99E]">{retrospecto.rival}</div><div className="text-[11px] text-[#9EB5C9]">Rival</div></div>
         </div>
-        <div className="text-[11px] text-[#9EB5C9] mt-2">Comparação por desempenho anual (gols, assistências, títulos e Bola de Ouro). Não representa confrontos diretos.</div>
+        <div className="text-[11px] text-[#9EB5C9] mt-2">Comparação por desempenho anual (gols, assistências, títulos e <LinkEntidade tipo="premio" nome="Bola de Ouro"/>). Não representa confrontos diretos.</div>
         <div className="flex gap-1 mt-2" aria-label="Resultados por temporada">
           {retrospecto.anos.map((ano, i) => <span key={i} title={`${ano.ano}: ${ano.resultado === "voce" ? "Você" : ano.resultado === "rival" ? "Rival" : "Empate"}`}
             className={`h-2 flex-1 rounded-sm ${ano.resultado === "voce" ? "bg-[#BCEAFF]" : ano.resultado === "rival" ? "bg-[#E36B5B]" : "bg-[#9EB5C9]"}`} />)}
@@ -1044,8 +1046,8 @@ function TabelaAnoAno({ c }) {
         return (
           <div key={idx} className="grid grid-cols-[30px_1fr_auto_38px_30px_30px_30px] gap-x-2 items-center py-1.5 border-b border-white/5 text-[14px]">
             <span className="font-stat text-[#C9D9E8]">{s.idade}</span>
-            <span className="flex items-center gap-1.5 min-w-0">{troca && <span className="text-[#9EB5C9]" aria-label="clube novo">↳</span>}<ClubDot club={clubeDe(s.clube)} size={18} /><span className="truncate text-[#F2F5F3]">{s.clube}</span></span>
-            <span className="flex -space-x-1.5">{s.titulos.filter((t) => !ehPremioIndividual(t.tipo)).slice(0, 3).map((t, k) => <IconeTitulo key={k} tipo={t.tipo} nome={t.nome} size={16} />)}{s.titulos.some((t) => t.tipo === "bolaOuro") && <IconeTitulo tipo="bolaOuro" size={15} />}</span>
+            <span className="flex items-center gap-1.5 min-w-0">{troca && <span className="text-[#9EB5C9]" aria-label="clube novo">↳</span>}<ClubDot club={clubeDe(s.clube)} size={18} /><span className="truncate text-[#F2F5F3]"><LinkEntidade tipo="clube" nome={s.clube}/></span></span>
+            <span className="flex -space-x-1.5">{titulosDoClube(s.titulos).slice(0, 3).map((t, k) => <IconeTitulo key={k} tipo={t.tipo} nome={t.nome} size={16} />)}{titulosDaSelecao(s.titulos).map((t, k) => <span key={`sel${k}`} className="inline-flex items-center" title={`${t.nome} pela seleção`}><Bandeira nac={c.nac} size={10} /><IconeTitulo tipo={t.tipo} nome={t.nome} size={16} /></span>)}{s.titulos.some((t) => t.tipo === "bolaOuro") && <IconeTitulo tipo="bolaOuro" size={15} />}</span>
             <span className="font-stat text-center rounded-md text-[#071321] font-bold" style={{ background: corOvr(o) }}>{o}</span>
             <span className="font-stat text-right text-[#C9D9E8]">{s.jogos}</span>
             <span className="font-stat text-right text-[#F2F5F3]">{s.gols}</span>
@@ -1095,8 +1097,8 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
           <ClubDot club={clubeDe(card.clube)} size={36} />
           <div className="min-w-0 flex-1">
             <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9D9E8]">Temporada {card.ano} · {card.idade} anos</div>
-            <h2 className="display text-[15px] text-[#F2F5F3] truncate">{card.clube}{card.emprestado ? " (empréstimo)" : ""}</h2>
-            <div className="text-[13px] text-[#9EB5C9]">{card.status}{card.lesao ? ` · 🩹 ${card.lesao}` : ""}</div>
+            <h2 className="display text-[15px] text-[#F2F5F3] truncate"><LinkEntidade tipo="clube" nome={card.clube}/>{card.emprestado ? " (empréstimo)" : ""}</h2>
+            <div className="text-[13px] text-[#9EB5C9]"><TextoComLinks>{card.status}</TextoComLinks>{card.lesao ? ` · 🩹 ${card.lesao}` : ""}</div>
           </div>
           <AnelNota nota={card.nota} />
         </div>
@@ -1123,8 +1125,8 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
           <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#9EB5C9] mb-2">📰 Na imprensa</div>
           <div className="flex flex-col gap-1.5">
             {noticias.map((noticia, i) => <div key={i} className="rounded-xl border border-white/5 bg-[#071321]/70 px-3 py-2">
-              <div className="text-[13px] font-bold text-[#F2F5F3]">{noticia.titulo}</div>
-              <div className="text-[12px] text-[#9EB5C9]">{noticia.detalhe}</div>
+              <div className="text-[13px] font-bold text-[#F2F5F3]"><TextoComLinks pessoas={noticia.pessoas}>{noticia.titulo}</TextoComLinks></div>
+              <div className="text-[12px] text-[#9EB5C9]"><TextoComLinks pessoas={noticia.pessoas}>{noticia.detalhe}</TextoComLinks></div>
             </div>)}
           </div>
         </section>}
@@ -1173,7 +1175,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
 
       {card.marcos?.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
-          {card.marcos.map((m, i) => <span key={i} className="rp-chip rp-entra" style={{ color: "#C9DBFF", background: "rgba(46,111,224,.18)", animationDelay: `${i * 0.08}s` }}><Icone e={m.icone} /> {m.titulo}</span>)}
+          {card.marcos.map((m, i) => <span key={i} className="rp-chip rp-entra" style={{ color: "#C9DBFF", background: "rgba(46,111,224,.18)", animationDelay: `${i * 0.08}s` }}><Icone e={m.icone} /> <TextoComLinks>{m.titulo}</TextoComLinks></span>)}
         </div>
       )}
 
@@ -1210,7 +1212,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
 
       <div className="rp-painel p-4">
         <div className="flex items-center justify-between">
-          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9]">Bola de Ouro</div>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#9EB5C9]"><LinkEntidade tipo="premio" nome="Bola de Ouro"/></div>
           <div className="font-stat text-[15px] text-[#EBC557]">{bola.pos <= 50 ? `Você: ${bola.pos}º` : "Fora do top 50"}</div>
         </div>
         <ol className="mt-2 flex flex-col gap-1">
@@ -1246,7 +1248,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
           <span className="text-3xl">{card.acesso ? "🎉" : "⬇️"}</span>
           <div>
             <div className="display text-sm" style={{ color: card.acesso ? "#BCEAFF" : "#E36B5B" }}>{card.acesso ? "ACESSO!" : "REBAIXADO"}</div>
-            <div className="text-[15px] text-[#C9D9E8]">O {card.clube} {card.acesso ? "sobe" : "cai"} pra {(card.acesso || card.rebaixado).para} em {card.ano + 1}.</div>
+            <div className="text-[15px] text-[#C9D9E8]">O <LinkEntidade tipo="clube" nome={card.clube}/> {card.acesso ? "sobe" : "cai"} pra {(card.acesso || card.rebaixado).para} em {card.ano + 1}.</div>
           </div>
         </div>
       )}
@@ -1257,7 +1259,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
           <ul className="flex flex-col gap-1">
             {card.ovrMotivos.map((m, i) => (
               <li key={i} className="flex items-center justify-between text-[15px]">
-                <span className="text-[#C9D9E8]">{m.txt}</span>
+                <span className="text-[#C9D9E8]"><TextoComLinks>{m.txt}</TextoComLinks></span>
                 <span className="font-stat" style={{ color: m.d > 0 ? "#BCEAFF" : "#E36B5B" }}>{m.d > 0 ? `+${m.d}` : m.d}</span>
               </li>
             ))}
@@ -1267,7 +1269,7 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
 
       {card.destaques.length > 0 && (
         <ul className="flex flex-col gap-1.5">
-          {card.destaques.map((d, i) => <li key={i} className="text-[16px] text-[#C9D9E8]">✨ {d}</li>)}
+          {card.destaques.map((d, i) => <li key={i} className="text-[16px] text-[#C9D9E8]">✨ <TextoComLinks pessoas={(card.recordesEventos||[]).flatMap(pessoasDoRecorde)}>{d}</TextoComLinks></li>)}
         </ul>
       )}
       </div>
@@ -1280,27 +1282,28 @@ function TelaResumo({ c, card, onContinuar, onAposentar, onRever, voar, onPousou
 function ResumoCompacto({ c, card, onDetalhes }) {
   const delta = card.ovrDepois - (card.ovrAntes ?? card.ovr);
   const contRes = card.continental ? (card.titulos.some((t) => t.tipo === "continental") ? "Campeão" : card.continental.faseNome) : null;
+  // cada competição é um link (como no FM); o resto do card abre os detalhes
   const time = [
-    `${card.ligaNome.replace("Brasileirão Série B", "Série B")} ${card.posLiga}º${card.acesso ? " ⬆" : card.rebaixado ? " ⬇" : ""}`,
-    card.copaNac && `${card.copaNac.nome}: ${card.copaNac.fase.replace("Oitavas de final", "oitavas").replace("Quartas de final", "quartas").replace("Terceira fase", "3ª fase").toLowerCase()}`,
-    contRes && `${card.continental.nome}: ${contRes.toLowerCase()}`,
-    card.selecao?.convocado && `${card.selecao.nome}: ${(card.selecao.campeao ? "campeão" : card.selecao.resultado || "").toLowerCase()}`,
+    [card.ligaNome, card.ligaNome.replace("Brasileirão Série B", "Série B"), ` ${card.posLiga}º${card.acesso ? " ⬆" : card.rebaixado ? " ⬇" : ""}`],
+    card.copaNac && [card.copaNac.nome, card.copaNac.nome, `: ${card.copaNac.fase.replace("Oitavas de final", "oitavas").replace("Quartas de final", "quartas").replace("Terceira fase", "3ª fase").toLowerCase()}`],
+    contRes && [card.continental.nome, card.continental.nome, `: ${contRes.toLowerCase()}`],
+    card.selecao?.convocado && [null, card.selecao.nome, `: ${(card.selecao.campeao ? "campeão" : card.selecao.resultado || "").toLowerCase()}`],
   ].filter(Boolean);
   return (
-    <button onClick={onDetalhes} className="rp-painel w-full text-left px-3.5 py-2.5 rp-entra" aria-label={`Resumo da temporada ${card.ano}. Toque para ver os detalhes`}>
+    <div onClick={(e) => { if (!e.target.closest("button")) onDetalhes(); }} className="rp-painel w-full text-left px-3.5 py-2.5 rp-entra cursor-pointer" role="group" aria-label={`Resumo da temporada ${card.ano}`}>
       <div className="flex items-center gap-2">
         <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#9EB5C9]">{card.ano}</span>
         <span className="font-stat text-[17px] px-1.5 rounded-md text-[#071321]" style={{ background: card.nota >= 7.5 ? "#BCEAFF" : card.nota >= 6.6 ? "#EBC557" : "#E36B5B" }}>{card.nota ? card.nota.toFixed(1) : "—"}</span>
         <span className="font-stat text-[16px] text-[#F2F5F3]">{card.jogos}J · {card.gols}G · {card.assist}A</span>
         <span className={`ml-auto font-stat text-[16px] ${delta > 0 ? "text-[#BCEAFF]" : delta < 0 ? "text-[#E36B5B]" : "text-[#9EB5C9]"}`}>{delta > 0 ? `+${delta}` : delta < 0 ? delta : "="} OVR</span>
       </div>
-      <div className="text-[13px] text-[#C9D9E8] mt-1 truncate">{time.join(" · ")}</div>
+      <div className="text-[13px] text-[#C9D9E8] mt-1 truncate">{time.map(([comp, rotulo, resto], i) => <React.Fragment key={i}>{i > 0 && " · "}{comp ? <LinkEntidade tipo="competicao" nome={comp}>{rotulo}</LinkEntidade> : <TextoComLinks>{rotulo}</TextoComLinks>}{resto}</React.Fragment>)}</div>
       <div className="flex items-center gap-1.5 mt-1.5 min-h-[22px]">
         {card.titulos.map((t, i) => <IconeTitulo key={i} tipo={t.tipo} nome={t.nome} size={20} />)}
         {card.lesao && <span className="text-[12px] text-[#F0A99E]">🩹 {card.lesao}</span>}
-        <span className="ml-auto text-[12px] font-bold text-[#BCEAFF]">detalhes ›</span>
+        <button type="button" onClick={onDetalhes} className="ml-auto text-[12px] font-bold text-[#BCEAFF]" aria-label={`Resumo da temporada ${card.ano}. Toque para ver os detalhes`}>detalhes ›</button>
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -1395,8 +1398,8 @@ function CartaoEvento({ jogador, evento, resultado, efeitos, onEscolher, onPedir
         : evento.vida ? "linear-gradient(135deg, rgba(140,110,230,.18), transparent 70%)" : "linear-gradient(135deg, rgba(155,222,255,.14), transparent 70%)" }}>
         <span className="text-2xl w-11 h-11 rounded-xl bg-[#071321]/70 border border-white/10 flex items-center justify-center shrink-0"><Icone e={evento.icone} size={26} cor={evento.vida ? "#C7B8F5" : "#BCEAFF"} /></span>
         <div className="min-w-0">
-          <h2 className="display text-[14px] leading-snug text-[#F2F5F3]">{evento.titulo}{evento.vida && <span className="ml-1.5 align-middle rp-chip !text-[9px] !py-0.5" style={{ color: "#C7B8F5", background: "rgba(140,110,230,.18)" }}>vida</span>}</h2>
-          <p className="text-[15px] text-[#C9D9E8] mt-1 leading-snug line-clamp-3">{evento.texto}</p>
+          <h2 className="display text-[14px] leading-snug text-[#F2F5F3]"><TextoComLinks>{evento.titulo}</TextoComLinks>{evento.vida && <span className="ml-1.5 align-middle rp-chip !text-[9px] !py-0.5" style={{ color: "#C7B8F5", background: "rgba(140,110,230,.18)" }}>vida</span>}</h2>
+          <p className="text-[15px] text-[#C9D9E8] mt-1 leading-snug line-clamp-3"><TextoComLinks>{evento.texto}</TextoComLinks></p>
         </div>
       </div>
       {!resultado && evento.grade && evento.id!=='emprestimo' && (
@@ -1490,7 +1493,7 @@ function CartaoEvento({ jogador, evento, resultado, efeitos, onEscolher, onPedir
           <p className="text-[16px] font-semibold text-[#BCEAFF] leading-snug">→ {resultado}</p>
           {efeitos?.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-2" aria-label="Efeitos da decisão">
-              {efeitos.map((e) => <span key={e.txt} className="rp-chip" style={{ color: e.bom ? "#BCEAFF" : "#F0A99E", background: e.bom ? "rgba(155,222,255,.16)" : "rgba(227,107,91,.16)" }}>{e.txt}</span>)}
+              {efeitos.map((e) => <span key={e.txt} className="rp-chip" style={{ color: e.bom ? "#BCEAFF" : "#F0A99E", background: e.bom ? "rgba(155,222,255,.16)" : "rgba(227,107,91,.16)" }}><TextoComLinks>{e.txt}</TextoComLinks></span>)}
             </div>
           )}
           {espera > 0 && (
@@ -1546,7 +1549,7 @@ function DicasIniciais() {
         </div>
         <div className="flex gap-3 mt-1">
           <span className="text-3xl" aria-hidden="true"><Icone e={d.icone} /></span>
-          <div><div className="font-bold text-[17px] text-[#F2F5F3]">{d.titulo}</div><p className="text-[16px] text-[#C9D9E8] leading-snug mt-0.5">{d.texto}</p></div>
+          <div><div className="font-bold text-[17px] text-[#F2F5F3]"><TextoComLinks>{d.titulo}</TextoComLinks></div><p className="text-[16px] text-[#C9D9E8] leading-snug mt-0.5"><TextoComLinks>{d.texto}</TextoComLinks></p></div>
         </div>
         <button onClick={() => (passo + 1 < DICAS.length ? setPasso(passo + 1) : fechar())} className="rp-btn rp-sec text-[16px] w-full mt-3">{passo + 1 < DICAS.length ? "Próxima dica" : "Entendi, bora jogar"}</button>
       </div>
@@ -1884,7 +1887,7 @@ function PopupPosCarreira({ c, onFechar }) {
               <span className="w-8 flex justify-center shrink-0">{x.band ? <Bandeira nac={x.band} size={26} /> : <ClubDot club={clubeDe(x.clube)} size={28} />}</span>
               <span className="flex-1 min-w-0">
                 <span className="block text-[15px] font-semibold text-[#E4E4E7] truncate"><LinkEntidade tipo="clube" nome={x.clube}/></span>
-                <span className="block text-[12px] text-[#A1A1AA]">{x.de === x.ate ? x.de : `${x.de}–${x.ate}`} · {x.liga}</span>
+                <span className="block text-[12px] text-[#A1A1AA]">{x.de === x.ate ? x.de : `${x.de}–${x.ate}`} · <TextoComLinks>{x.liga}</TextoComLinks></span>
               </span>
               <span className="flex items-center gap-0.5 shrink-0">
                 {x.titulos.slice(0, 4).map((t, k) => <IconeTitulo key={k} tipo={t.tipo} nome={t.nome} size={20} />)}
@@ -1897,7 +1900,7 @@ function PopupPosCarreira({ c, onFechar }) {
       )}
       {pc.destaques?.length > 0 && (
         <ul className="flex flex-col gap-1.5 px-1">
-          {pc.destaques.map((d, i) => <li key={i} className="text-[15px] text-[#D4D4D8] leading-snug flex gap-2 cp-surge" style={{ animationDelay: `${0.4 + i * 0.08}s` }}><span style={{ color: pc.cor }}>●</span><span>{d}</span></li>)}
+          {pc.destaques.map((d, i) => <li key={i} className="text-[15px] text-[#D4D4D8] leading-snug flex gap-2 cp-surge" style={{ animationDelay: `${0.4 + i * 0.08}s` }}><span style={{ color: pc.cor }}>●</span><span><TextoComLinks>{d}</TextoComLinks></span></li>)}
         </ul>
       )}
     </TelaCheia>
@@ -2284,8 +2287,8 @@ function TelaFim({ c, onNova, onSair, onPosCarreira, onComecarTecnico }) {
             {c.marcos.map((m, i) => (
               <li key={i} className="relative">
                 <span className="absolute -left-[39px] top-0 w-7 h-7 rounded-full bg-[#121916] flex items-center justify-center"><MarcadorMomento c={c} m={m} /></span>
-                <div className="text-[15px] font-bold text-[#F2F5F3]">{m.titulo} <span className="font-stat font-normal text-[#7F918A]">{m.ano}</span></div>
-                <div className="text-[14px] text-[#9EB5C9]">{m.texto}</div>
+                <div className="text-[15px] font-bold text-[#F2F5F3]"><TextoComLinks>{m.titulo}</TextoComLinks> <span className="font-stat font-normal text-[#7F918A]">{m.ano}</span></div>
+                <div className="text-[14px] text-[#9EB5C9]"><TextoComLinks>{m.texto}</TextoComLinks></div>
               </li>
             ))}
           </ol>
@@ -2492,14 +2495,14 @@ export function PopupResultado({ info, onFechar }) {
       {temRoleta && <div className="mt-1"><ScannerChances chances={info.chances} alvo={info.alvo} idx={info.idx} estatico={revelado} onFim={revelar} dReal={info.chances[info.idx]?.d && info.ovrDepois != null ? info.ovrDepois - info.ovrAntes : null} /></div>}
       {revelado && (
         <div className="flex flex-col gap-3 cp-surge">
-          <p className="text-[18px] leading-snug text-[#F4F4F5] text-center font-medium px-1">{info.texto}</p>
+          <p className="text-[18px] leading-snug text-[#F4F4F5] text-center font-medium px-1"><TextoComLinks>{info.texto}</TextoComLinks></p>
           {dOvr !== 0 && <div className="cp-card p-4"><OvrAntesDepois de={info.ovrAntes} para={info.ovrDepois} grande /></div>}
           {outros.length > 0 && (
             <div className={`grid gap-2 ${outros.length > 2 ? "grid-cols-2" : "grid-cols-1"}`}>
               {outros.map((e, i) => (
                 <div key={e.txt} className="cp-card px-3 py-3 flex items-center gap-2 cp-surge" style={{ animationDelay: `${0.2 + i * 0.1}s`, borderColor: e.bom ? "rgba(74,222,128,.35)" : "rgba(248,113,113,.35)" }}>
                   <span className="text-[18px] font-black" style={{ color: e.bom ? "#4ADE80" : "#F87171" }}>{e.bom ? "▲" : "▼"}</span>
-                  <span className="text-[15px] font-semibold text-[#F4F4F5] leading-tight">{e.txt}</span>
+                  <span className="text-[15px] font-semibold text-[#F4F4F5] leading-tight"><TextoComLinks>{e.txt}</TextoComLinks></span>
                 </div>
               ))}
             </div>
@@ -2627,7 +2630,7 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
               <span className="flex flex-col items-center gap-1 min-w-0"><Bandeira nac={info.adversario.id} size={40} /><span className="text-[13px] font-bold text-white truncate max-w-[110px]">{info.adversario.label}</span><span className="text-[11px] text-[#A1A1AA]">força {info.adversario.forca}</span></span>
             </div>
           )}
-          <p className="text-[14px] text-[#D4D4D8] px-1 mt-1">{info.texto}</p>
+          <p className="text-[14px] text-[#D4D4D8] px-1 mt-1"><TextoComLinks>{info.texto}</TextoComLinks></p>
           <div className="flex flex-col gap-2 mt-2.5">
             {info.opcoes.map((o) => {
               if (o.p == null) return <button key={o.id} onClick={() => escolher(o)} className="rp-btn rp-ouro display text-[14px] tracking-wide flex items-center justify-center gap-2"><Icone e={o.icone} size={20} /> {o.nome}</button>;
@@ -2670,7 +2673,7 @@ function TelaCopa({ c, card, onAvancar, jogadaSalva, onRegistrar }) {
             <div className="cp-copa-resumo flex flex-col items-center gap-3 cp-surge" style={r.etapa === "grupos" ? { animationDelay: ".6s" } : undefined}>
               {r.placar && <div className="display text-[34px] leading-none" style={{ color: r.venceu ? "#4ADE80" : r.empate?"#FDE047":"#F87171" }}>{r.placar}</div>}
               <span className="cp-pop text-[14px] font-extrabold uppercase tracking-wide px-3 py-1 rounded-full" style={{ color: r.venceu ? "#1A1405" : "#fff", background: r.venceu ? "linear-gradient(90deg,#EAB308,#FDE047)" : r.empate?"#A16207":"#DC2626" }}>{jogada.card.copa.campeao ? "🏆 Campeão da competição" : r.marca}</span>
-              <p className="text-[18px] leading-snug text-[#F4F4F5] text-center font-medium px-1">{r.texto}</p>
+              <p className="text-[18px] leading-snug text-[#F4F4F5] text-center font-medium px-1"><TextoComLinks>{r.texto}</TextoComLinks></p>
               {r.outro&&<p className="text-[12px] text-[#A1A1AA]">Outro jogo: {r.outro.mandante.label} {r.outro.gp} x {r.outro.gc} {r.outro.visitante.label}</p>}
               {jogada.card.copa.craqueCopa && <div className="cp-card px-4 py-2.5 text-center text-[15px] font-bold text-[#FDE68A]">⭐ Eleito o craque da Copa</div>}
             </div>
@@ -2967,7 +2970,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const ultimo = estado.ultimo;
   const torneio = c && c.idade >= 18 ? (anoDeCopa(c.ano) ? "Copa do Mundo" : anoDeContinentalSelecao(c.ano) ? nomeCopaContinental(c.nac) : null) : null;
   return (
-    <div data-patamar={c&&!c.tecnico?patamarCarreira(c).id:undefined} className={etapa === "tecnico" ? "rp ct-root" : "rp rp-jogador"}>
+    <ProvedorLinks c={c}><div data-patamar={c&&!c.tecnico?patamarCarreira(c).id:undefined} className={etapa === "tecnico" ? "rp ct-root" : "rp rp-jogador"}>
       <style>{ESTILO_BASE}</style>{salvando&&<div className="mv-salvando" aria-live="polite"><span>Salvando progresso…</span></div>}{erroSave&&<div role="alert" className="mv-erro-save">{erroSave}</div>}
       {painel ? <CartaoCarreira c={c} etapa={etapa} onEstante={() => setEstanteAberta(true)} onFicha={() => setGaveta("ficha")} onOvr={() => setGaveta("ovr")} contadorPulsa={contadorPulsa} recorde={recorde} />
         : <Cabecalho etapa={etapa} treinador={etapa === "tecnico"} c={mostrarCabecalho ? c : null} onSair={onSair} onEstante={() => setEstanteAberta(true)} />}
@@ -3079,6 +3082,6 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
       {apresentacaoSelecao&&!apresentacao&&!chegadaPendente&&!["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa)&&!popup&&<PrimeiraSelecao c={apresentacaoSelecao.c} estreia={apresentacaoSelecao.estreia} onFim={()=>setApresentacaoSelecao(null)}/>}
       {popup && !["fechamento","bolaOuro","estadual","copasClubes","calendarioLiga"].includes(etapa) && <PopupResultado key={popup.k} info={popup} onFechar={() => setPopup(null)} />}
       <PortalHistorico c={c} />
-    </div>
+    </div></ProvedorLinks>
   );
 }

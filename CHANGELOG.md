@@ -2,6 +2,25 @@
 
 Tudo que mudou desde a primeira versão publicada, organizado por bloco de trabalho.
 
+## 21/11/2026 — Títulos da seleção separados dos títulos do clube (modo rápido)
+
+- Copa do Mundo e continental de seleções não aparecem mais como taça do clube na tabela ano a ano: ganham marcador próprio com a bandeira.
+- O clube deixa de pagar bônus de título e de dar +7 de torcida por conquistas da seleção (fica só um pequeno orgulho de +2).
+- Saves antigos com a Copa gravada no nome do clube são corrigidos ao carregar.
+
+## 21/11/2026 — Valores de mercado e transferências realistas no modo rápido
+
+- O jogador principal passa a usar a mesma régua do mundo (calibrada no mercado 2025/26): nível, idade, liga, potencial e contrato restante, com fama (até +20%) e fase (−12,5% a +20%) por cima.
+- Promessas valem pelo jogador que devem virar aos 23 anos, com desconto de risco; transferências para ligas mais ricas e gigantes pagam mais, como no mercado real.
+- Teto suave acima de € 150 mi: só a elite absoluta encosta no recorde real (€ 222 mi). Antes, um OVR 90 valia ~€ 190 mi e um titular do Brasileirão ~€ 37 mi.
+
+## 21/11/2026 — Links no padrão FM em todo o modo rápido
+
+- Nomes de clubes, jogadores, seleções, competições e prêmios no meio de frases (notícias, recordes, destaques, mensagens, fechamento da temporada) agora são links para o Arquivo Vivo.
+- Homônimos não viram link por adivinhação: notícias do rival/Bola de Ouro e recordes guardam o ID de quem citam.
+- Resumo compacto da temporada e lista de clubes do empresário seguem o FM: o nome abre a página; o restante do card (ou a seta) faz a ação.
+- Novo teste de navegador (`links-fm-rapido.spec.mjs`) falha se algum nome aparecer sem link nas telas principais, gavetas e fechamento do modo rápido.
+
 ## 21/11/2026 — Raio-X do OVR no modo rápido
 
 - O OVR do topo agora abre uma gaveta: valor exato e quanto falta para o próximo ponto, composição (nível + fase − adaptação de posição), peso de cada atributo na posição, distância até o teto, onde vale mais evoluir, momento da carreira e motivos da última temporada.

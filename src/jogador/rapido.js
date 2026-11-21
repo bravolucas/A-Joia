@@ -56,6 +56,11 @@ export const IDADES_TRACO = [19, 24, 29];
 
 /* prêmios individuais não contam como título de time */
 export const ehPremioIndividual = (tipo) => tipo === "bolaOuro" || tipo === "botaOuro";
+/* Copa do Mundo e torneio continental de seleções são conquistas da seleção:
+   nunca entram na conta do clube (bônus contratual, torcida, tabela do clube). */
+export const ehTituloSelecao = (tipo) => tipo === "copaMundo" || tipo === "continentalSelecao";
+export const titulosDoClube = (titulos = []) => titulos.filter((t) => !ehPremioIndividual(t.tipo) && !ehTituloSelecao(t.tipo));
+export const titulosDaSelecao = (titulos = []) => titulos.filter((t) => ehTituloSelecao(t.tipo));
 const ATTRS = ["velocidade", "finalizacao", "passe", "drible", "defesa", "fisico"];
 const DEFENSIVAS = ["GOL", "ZAG", "LD", "LE", "VOL", "ALE", "ALD"];
 const rnd = () => Math.random();
@@ -903,7 +908,8 @@ export function comprarInvestimento(c0, id) {
 function fecharFinancas(c, card) {
   const k = c.contrato || contratoPadrao(c, c.clubeNome);
   const emp = empresarioDe(c);
-  const nTit = card.titulos.filter((t) => !ehPremioIndividual(t.tipo)).length;
+  // o clube paga bônus pelos títulos dele, não pelos da seleção
+  const nTit = titulosDoClube(card.titulos).length;
   const salario = k.salario;
   const bonus = k.bonusGol * card.gols + Math.round(salario * 0.1) * nTit + (card.bola?.pos === 1 ? Math.round(salario * 0.3) : 0);
   const comissao = Math.round((salario + bonus) * (emp.comissao || 0));
@@ -2036,7 +2042,7 @@ function fecharTemporadaBase(c0, card0) {
   const nTit = card.titulos.filter((t) => !ehPremioIndividual(t.tipo)).length;
   card.titulos.forEach((t) => {
     c.titulos[t.tipo] = (c.titulos[t.tipo] || 0) + 1;
-    const pelaSelecao = t.tipo === "copaMundo" || t.tipo === "continentalSelecao";
+    const pelaSelecao = ehTituloSelecao(t.tipo);
     c.lista.push({ ano: card.ano, nome: t.nome, tipo: t.tipo, clube: pelaSelecao ? nacDe(c.nac).label : ehPremioIndividual(t.tipo) ? "Individual" : card.clube });
   });
   c.campeaoContinental = card.titulos.some((t) => t.tipo === "continental" && !/Sul-Americana|Europa League|Conference/.test(t.nome)) && !card.emprestado ? card.clube : null;
@@ -2064,7 +2070,9 @@ function fecharTemporadaBase(c0, card0) {
   const luxos = efeitosInv(c).filter((i) => i.luxo).length;
   const ostentacao = luxos && clubeDe(tc).forca < 80 ? luxos * 3 : 0;
   if (ostentacao) card.destaques.push("Seu padrão de vida destoa do clube: a torcida estranha a ostentação");
-  const delta = ((card.nota ? (card.nota - 6.6) * 9 : -4) + nTit * 7 + (card.jogos >= 30 ? 3 : 0) + somaTraco(c, "torcidaAno") + somaInv(c, "torcidaAno") + (card.classico?.acertou ? somaInv(c, "torcidaClassico") : 0) - ostentacao - (c.foco === "vitrine" ? 3 : 0)) * (card.nota >= 6.6 ? multTraco(c, "torcidaMult") : 1);
+  // título do clube pesa na torcida dele; o da seleção só dá um orgulho pequeno (ídolo da casa)
+  const titClube = titulosDoClube(card.titulos).length, titSelecao = titulosDaSelecao(card.titulos).length;
+  const delta = ((card.nota ? (card.nota - 6.6) * 9 : -4) + titClube * 7 + titSelecao * 2 + (card.jogos >= 30 ? 3 : 0) + somaTraco(c, "torcidaAno") + somaInv(c, "torcidaAno") + (card.classico?.acertou ? somaInv(c, "torcidaClassico") : 0) - ostentacao - (c.foco === "vitrine" ? 3 : 0)) * (card.nota >= 6.6 ? multTraco(c, "torcidaMult") : 1);
   c.torcida[tc] = clampR(Math.round(tAntes + delta), 0, 100);
   // Fidelidade: a partir do 4º ano seguido no clube, a torcida reconhece quem ficou.
   const seguidos = anosSeguidosNoClube(c, tc) + (card.emprestado ? 0 : 1);
@@ -4230,6 +4238,8 @@ export function carregarRapido() {
     s.c.picoAttrs = s.c.picoAttrs || { ...s.c.attrs };
     s.c.moral = s.c.moral ?? 65; s.c.transferencias = s.c.transferencias || []; s.c.ligaAlvo = s.c.ligaAlvo || null; s.c.ritmo = s.c.ritmo || "normal"; s.c.pe = s.c.pe || "destro";
     s.c.titulos = { liga: 0, copa: 0, continental: 0, mundial: 0, copaMundo: 0, continentalSelecao: 0, bolaOuro: 0, botaOuro: 0, estadual:0, segunda: 0, ...(s.c.titulos || {}) };
+    // save antigo: conquista da seleção gravada no nome do clube passa para a seleção
+    for (const t of s.c.lista || []) if (ehTituloSelecao(t.tipo)) t.clube = nacDe(s.c.nac).label;
     if (!s.c.mundo?.jogadores) s.c.mundo = mundoCompacto();
     const camisasLegadas=!s.c.camisas?.versao;
     iniciarCamisas(s.c);

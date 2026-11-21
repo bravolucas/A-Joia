@@ -67,7 +67,7 @@ import {
   escolherPretemporada,
   iniciarNegociacao, ajustarNegociacao, fecharNegociacao, CAMPOS_NEGOCIACAO, fama_negociador,
   comprarInvestimento, caminhosPosCarreira, escolherPosCarreira,
-  bonusPrecisaoLoja, chanceMomento, miniDaPosicao, ehPremioIndividual, vagasDaLiga, ehSegundaDivisao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
+  bonusPrecisaoLoja, chanceMomento, miniDaPosicao, ehPremioIndividual, titulosDoClube, titulosDaSelecao, vagasDaLiga, ehSegundaDivisao, PES, peDe, RITMOS, ritmoDe, numeroDe, NUMERO_PADRAO, opcoesClubeInicial, estadoMental,
   eventoDaJanela, segundoEvento, anoDeDecisao, eventoImpasse, valorAtual, comparaSalario, textoEmoji, efeitosDaDecisao, LIGAS_EMPRESARIO, pedirLiga, deveTerColetiva, gerarColetiva, responderColetiva, codigoDoDia, dadosDoDia, resolverDesafio, desafioPendente, dataDoCodigo, normalizarCodigo, lerHall, registrarNoHall, duelo,
   noticiasDaTemporada, retrospectoRivalidade, caminhoSelecao, interesseMercado, sinalizarInteresse, receberRetornosEmpresario,
   copaPendente, opcoesCopa, jogarCopa, pessoasDoRecorde,
@@ -460,7 +460,7 @@ function TabelaCarreira({ c, proxima = true, compacta = true }) {
           {visiveis.map((s) => {
             const i = ts.indexOf(s);
             const o = s.ovrDepois ?? s.ovr;
-            const tit = s.titulos.filter((t) => !ehPremioIndividual(t.tipo)).length;
+            const tit = titulosDoClube(s.titulos).length, titSel = titulosDaSelecao(s.titulos).length;
             const ultima = i === ts.length - 1;
             return (
               <div key={i} className={`${grid} rp-historico-linha rounded-xl py-1 ${ultima ? "rp-linha-nova rp-historico-atual bg-white/[.04]" : ""}`}>
@@ -468,7 +468,8 @@ function TabelaCarreira({ c, proxima = true, compacta = true }) {
                 <span className="flex items-center gap-1.5 min-w-0">
                   <ClubDot club={clubeDe(s.clube)} size={18} />
                   <span className="truncate text-[14px] font-semibold text-[#F4F4F5]"><LinkEntidade tipo="clube" nome={s.clube}/></span>
-                  {tit > 0 && <span className="shrink-0 flex items-center gap-0.5 text-[11px] font-bold text-[#EBC557]"><TacaCompeticao tipo="liga" size={11} />{tit > 1 ? tit : ""}</span>}
+                  {tit > 0 && <span className="shrink-0 flex items-center gap-0.5 text-[11px] font-bold text-[#EBC557]" title={`${tit} título(s) pelo clube`}><TacaCompeticao tipo="liga" size={11} />{tit > 1 ? tit : ""}</span>}
+                  {titSel > 0 && <span className="shrink-0 flex items-center gap-0.5 text-[11px] font-bold text-[#EBC557]" title={`${titSel} título(s) pela seleção`} aria-label={`${titSel} título(s) pela seleção`}><Bandeira nac={c.nac} size={11} /><TacaCompeticao tipo="copaMundo" size={11} />{titSel > 1 ? titSel : ""}</span>}
                   {s.acesso && <span className="shrink-0 text-[10px] font-bold px-1.5 rounded-full bg-[#16A34A] text-white">ACESSO</span>}
                   {s.rebaixado && <span className="shrink-0 text-[10px] font-bold px-1.5 rounded-full bg-[#DC2626] text-white">CAIU</span>}
                 </span>
@@ -1046,7 +1047,7 @@ function TabelaAnoAno({ c }) {
           <div key={idx} className="grid grid-cols-[30px_1fr_auto_38px_30px_30px_30px] gap-x-2 items-center py-1.5 border-b border-white/5 text-[14px]">
             <span className="font-stat text-[#C9D9E8]">{s.idade}</span>
             <span className="flex items-center gap-1.5 min-w-0">{troca && <span className="text-[#9EB5C9]" aria-label="clube novo">↳</span>}<ClubDot club={clubeDe(s.clube)} size={18} /><span className="truncate text-[#F2F5F3]"><LinkEntidade tipo="clube" nome={s.clube}/></span></span>
-            <span className="flex -space-x-1.5">{s.titulos.filter((t) => !ehPremioIndividual(t.tipo)).slice(0, 3).map((t, k) => <IconeTitulo key={k} tipo={t.tipo} nome={t.nome} size={16} />)}{s.titulos.some((t) => t.tipo === "bolaOuro") && <IconeTitulo tipo="bolaOuro" size={15} />}</span>
+            <span className="flex -space-x-1.5">{titulosDoClube(s.titulos).slice(0, 3).map((t, k) => <IconeTitulo key={k} tipo={t.tipo} nome={t.nome} size={16} />)}{titulosDaSelecao(s.titulos).map((t, k) => <span key={`sel${k}`} className="inline-flex items-center" title={`${t.nome} pela seleção`}><Bandeira nac={c.nac} size={10} /><IconeTitulo tipo={t.tipo} nome={t.nome} size={16} /></span>)}{s.titulos.some((t) => t.tipo === "bolaOuro") && <IconeTitulo tipo="bolaOuro" size={15} />}</span>
             <span className="font-stat text-center rounded-md text-[#071321] font-bold" style={{ background: corOvr(o) }}>{o}</span>
             <span className="font-stat text-right text-[#C9D9E8]">{s.jogos}</span>
             <span className="font-stat text-right text-[#F2F5F3]">{s.gols}</span>

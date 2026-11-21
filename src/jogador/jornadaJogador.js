@@ -17,6 +17,8 @@ const PAISES={brasileirao:'Brasil',serieB:'Brasil',argentina:'Argentina',inglate
 const clubeDe=n=>{const x=CLUBES.find(x=>x.nome===n)||{nome:n,liga:'',forca:60};return {...x,pais:x.pais||PAISES[x.liga.replace(/2$/,'')]||x.liga};};
 const clubeAtual=c=>c.emprestimo?.destino||c.clubeNome;
 const semPremio=t=>!['bolaOuro','botaOuro'].includes(t.tipo);
+// títulos do clube (sem prêmios individuais nem conquistas da seleção)
+const doClube=t=>semPremio(t)&&!['copaMundo','continentalSelecao'].includes(t.tipo);
 const NOMES=['Caio Nunes','Mateo Duarte','André Lemos','Davi Monteiro','Rafael Vidal','Gabriel Costa','Nicolas Reis','Bruno Azevedo'];
 export const ASSINATURAS=[
  {id:'cruzador',nome:'Cruzamento preciso',meta:3,descricao:'Três temporadas contribuindo pelo corredor ou decidindo cruzamentos.',efeito:'+3% em assistências · uma assinatura ativa.'},
@@ -155,8 +157,8 @@ function atualizarDuplas(c,card){
   if(d.aposentado)continue;
   if(card.ano-d.nascimento>=38){d.aposentado=true;const texto=`${d.nome} pendurou as chuteiras. ${d.temporadas} temporada(s) juntos ficam na memória.`;card.jornada.noticias.push({tipo:'dupla',titulo:'Um parceiro se despede',detalhe:texto});memorizar(c,'dupla','A despedida de uma dupla',texto,{id:`dupla:aposentadoria:${d.id}`,ano:card.ano,ficticio:true});continue;}
   if(d.clube===atual&&card.jogos>=10){d.conexao=Math.min(4,d.conexao+1);d.temporadas++;if(d.temporadas===2)card.jornada.noticias.push({tipo:'dupla',titulo:`Uma dupla com ${d.nome}`,detalhe:'A parceria recorrente rende entrosamento, com bônus limitado a +0,06 na nota.'});}
-  if(d.clube===atual&&d.temporadas>=2&&card.titulos?.some(semPremio)){
-   const titulo=card.titulos.find(semPremio),texto=`Você e ${d.nome} dividiram ${titulo.nome} em ${card.ano}, pelo ${atual}.`;
+  if(d.clube===atual&&d.temporadas>=2&&card.titulos?.some(doClube)){
+   const titulo=card.titulos.find(doClube),texto=`Você e ${d.nome} dividiram ${titulo.nome} em ${card.ano}, pelo ${atual}.`;
    memorizar(c,'dupla','Uma taça em parceria',texto,{id:`dupla:titulo:${d.id}:${card.ano}`,ano:card.ano,clube:atual,ficticio:true});
    card.jornada.noticias.push({tipo:'dupla',titulo:'Uma taça em parceria',detalhe:texto});
   }

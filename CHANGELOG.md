@@ -2,6 +2,12 @@
 
 Tudo que mudou desde a primeira versão publicada, organizado por bloco de trabalho.
 
+## 21/11/2026 — Títulos da seleção separados dos títulos do clube (modo rápido)
+
+- Copa do Mundo e continental de seleções não aparecem mais como taça do clube na tabela ano a ano: ganham marcador próprio com a bandeira.
+- O clube deixa de pagar bônus de título e de dar +7 de torcida por conquistas da seleção (fica só um pequeno orgulho de +2).
+- Saves antigos com a Copa gravada no nome do clube são corrigidos ao carregar.
+
 ## 21/11/2026 — Valores de mercado e transferências realistas no modo rápido
 
 - O jogador principal passa a usar a mesma régua do mundo (calibrada no mercado 2025/26): nível, idade, liga, potencial e contrato restante, com fama (até +20%) e fase (−12,5% a +20%) por cima.

@@ -1,5 +1,5 @@
 import {clonarEstado} from '../simulacao/clonarEstado.js';
-import {catalogoClubesEmpresario,analisarClubeEmpresario,respostaClubeEmpresario,viraPropostaSondagem} from './mercadoEmpresario.js';
+import {catalogoClubesEmpresario,analisarClubeEmpresario,respostaClubeEmpresario,viraPropostaSondagem,registrarCustoTransferencia} from './mercadoEmpresario.js';
 import {estatisticasDasPartidas} from '../simulacao/estatisticasMundo.js';
 import {gravarPersistente,lerPersistente,apagarPersistente} from '../simulacao/armazenamentoMundo.js';
 import {simularClassificacoesMundoTecnico,classificacaoDosJogos,atualizarLigasMundoTecnico} from '../treinador/classificacoesMundoTecnico.js';
@@ -2528,6 +2528,9 @@ export function valorTransferencia(c, comprador) {
   const teto = Math.min(multaEfetiva(c), c.contrato?.multa || base);
   return Math.max(50, Math.round(Math.min(base, teto) / 50) * 50);
 }
+
+// a sondagem do empresário cobra exatamente o que a negociação real cobraria
+registrarCustoTransferencia((c, clube) => valorTransferencia(c, clube.nome));
 
 /* Clube que não quer vender: titular ou estrela com contrato longo vira peça
    que a diretoria segura. No máximo uma proposta por janela fica travada; o

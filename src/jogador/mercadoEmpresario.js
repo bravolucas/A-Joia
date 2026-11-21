@@ -33,21 +33,19 @@ export function catalogoClubesEmpresario(c,clubes=CLUBES){
 
 /* A base mundial preserva jogadores reais, newgens, transferências e o caixa
    efetivo do save. Sem caixa disponível, a verba é estimada e identificada. */
+/* rapido.js registra aqui o preço real de transferência; importar direto criaria
+   um ciclo entre os módulos. Sem registro, usa a régua do mundo pelo contrato. */
+let custoTransferencia=(c,clube,ovr)=>(c.contrato?.restantes??0)>0?Math.max(50,Math.round(valorMercadoEuro({ovr,idade:c.idade,liga:clube.liga,contrato:c.contrato?.restantes})/50)*50):0;
+export function registrarCustoTransferencia(fn){custoTransferencia=fn;}
 export function analisarClubeEmpresario(c,clube,ovr){
  if(!clube?.nome||!LIGAS[clube.liga]||LIGAS[clube.liga].naoJogavel)throw new Error('Clube indisponível nesta carreira.');
  const mundo=c?.mundo||{},elenco=(mundo.jogadores||[]).filter(j=>!j.aposentado&&j.clubeNome===clube.nome);
  const concorrentes=elenco.filter(j=>j.posicao===c.posicao).sort((a,b)=>(b.ovr??b.qualidade??0)-(a.ovr??a.qualidade??0));
  const melhor=concorrentes[0]||null,qualidadeConcorrente=numero(melhor?.ovr??melhor?.qualidade,null);
  const posicaoOcupada=qualidadeConcorrente!==null&&qualidadeConcorrente>=ovr+3;
- // Mesmo custo que a negociação real do Modo Jogador usa.
- // Não comparar o caixa com uma avaliação calculada por outra economia.
- const restantes=c.contrato?.restantes??0;
- const valorBase=1000*Math.pow(1.173,ovr-60);
- const fatorIdade=c.idade<=21?1.5:c.idade<=24?1.25:c.idade<=28?1:c.idade<=31?0.65:0.35;
- const valorMercado=Math.max(50,Math.round(valorBase*fatorIdade*(1+numero(c.fama,0)/400)));
- const valorAtual=Math.max(50,Math.round(valorMercado*numero(c.formaMercado,1)));
- const pedido=valorAtual*(0.75+0.1*Math.min(restantes,4))*(clube.forca>=85?1.15:1);
- const custo=restantes>0?Math.max(50,Math.round(Math.min(pedido,c.contrato?.multa||pedido)/50)*50):0;
+ // Mesmo custo que a negociação real do Modo Jogador usa (valorTransferencia,
+ // registrada pelo rapido.js): a sondagem nunca mostra outro preço.
+ const custo=custoTransferencia(c,clube,ovr);
  const verbaDerivada=verbaTransferenciasEuro(elenco.map(j=>({
   valor:valorMercadoEuro({ovr:j.ovr??j.qualidade,idade:j.idade,liga:clube.liga,potencial:j.potencial,contrato:j.contrato}),
  })));

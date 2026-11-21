@@ -516,6 +516,22 @@ export function ganhosDaCarta(carta, posicao) {
   if (k.todos) ATTRS.forEach((a) => { g[a] = (g[a] || 0) + k.todos; });
   return g;
 }
+/* Quanto a carta muda de fato cada atributo deste atleta (sem alterar nada):
+   veterano (31+) ganha metade e o treino passa do teto em no máximo 2 pontos.
+   Usado pela temporada e pela prévia "+X OVR" das cartas, pra as duas baterem. */
+export function ganhosAplicadosCarta(c, carta0) {
+  const fator = c.idade >= 31 ? 0.5 : 1; // veterano já não ganha tanto no treino
+  const aplicados = {};
+  Object.entries(ganhosDaCarta(carta0, c.posicao)).forEach(([a, g]) => {
+    const atual = c.attrs[a];
+    const ganho = g > 0 ? Math.max(1, Math.round(g * fator)) : g;
+    // o treino pode passar do teto em até 2 pontos: sempre faz efeito, mesmo para quem já chegou ao auge
+    const teto = Math.max(atual, (c.potencial?.[a] ?? 99) + ((c.formaAttrs || {})[a] || 0) + 2);
+    const novo = clampR(g > 0 ? Math.min(atual + ganho, teto) : atual + ganho, 40, 99);
+    if (novo !== atual) aplicados[a] = novo - atual;
+  });
+  return aplicados;
+}
 /* efeitos da carta em texto curto, para mostrar na carta */
 export function efeitosDaCarta(carta, posicao) {
   const k = textoCarta(carta, posicao);
@@ -1500,18 +1516,12 @@ function jogarTemporadaBase(c0) {
   let preInfo = null;
   c.mod = c.mod || {};
   if (carta) {
-    const fator = c.idade >= 31 ? 0.5 : 1; // veterano já não ganha tanto no treino
-    const aplicados = {};
     const ganhos = ganhosDaCarta(carta0, c.posicao);
     // o atributo que mais cresce na carta ganha +1 permanente no teto
     const chave = Object.entries(ganhos).sort((a, b) => b[1] - a[1])[0]?.[0];
+    const aplicados = ganhosAplicadosCarta(c, carta0);
+    Object.entries(aplicados).forEach(([a, d]) => { c.attrs[a] += d; });
     Object.entries(ganhos).forEach(([a, g]) => {
-      const ganho = g > 0 ? Math.max(1, Math.round(g * fator)) : g;
-      // o treino pode passar do teto em até 2 pontos: sempre faz efeito, mesmo para quem já chegou ao auge
-      const teto = Math.max(c.attrs[a], (c.potencial?.[a] ?? 99) + ((c.formaAttrs || {})[a] || 0) + 2);
-      const novo = clampR(g > 0 ? Math.min(c.attrs[a] + ganho, teto) : c.attrs[a] + ganho, 40, 99);
-      if (novo !== c.attrs[a]) aplicados[a] = novo - c.attrs[a];
-      c.attrs[a] = novo;
       // carta épica deixa marca: o teto do atributo principal sobe
       if (a === chave && g > 0 && carta0.raridade === "epica") c.potencial[a] = clampR(c.potencial[a] + 1, 40, 99);
     });

@@ -25,6 +25,7 @@ import {mudarPosicao,reinventarVeterano} from './posicoesCarreira.js';
 import {ativarAssinatura,definirPreferenciaMercado,legadoNarrativo,projetoOferta,cenaDespedida,reagirReencontro,celebracaoMomento} from './jornadaJogador.js';
 import {GeometriaCampo,QuadroMini,BolaTrajeto} from '../comum/CenarioMini.jsx';
 import TreinosPretemporada from './TreinosPretemporada.jsx';
+import PainelOvr from './PainelOvr.jsx';
 import {trocarTreinos,papelDe} from './rapido.js';
 import Idolatria from './Idolatria.jsx';
 import Personalizacao from '../comum/Personalizacao.jsx';
@@ -362,7 +363,7 @@ function AvatarJogador({ clube, size = 72, numero = null }) {
 /* camisa de costas nas cores do clube, com o sobrenome e o número (cartão do topo) */
 function CamisaMini({ cor="#9BDEFF", clube, nome="", numero=9, size=44 }) {return <span style={{width:size,height:size,display:'inline-block',flexShrink:0}}><CamisaPremium nome={clube} cor={cor} numero={numero} sobrenome={nome.trim().split(/\s+/).at(-1).toUpperCase()}/></span>;}
 
-function CartaoCarreira({ c, onEstante, onFicha, contadorPulsa, recorde, etapa }) {
+function CartaoCarreira({ c, onEstante, onFicha, onOvr, contadorPulsa, recorde, etapa }) {
   const ovr = ovrDe(c);
   const [mostrado, delta] = useOvrAnimado(ovr);
   useEffect(() => { if (delta?.d > 0) vibrar(25); }, [delta?.k]);
@@ -372,9 +373,9 @@ function CartaoCarreira({ c, onEstante, onFicha, contadorPulsa, recorde, etapa }
   return (
     <header className="sticky top-0 z-30 bg-[#071321]/95 backdrop-blur border-b border-white/5">
       <div className="max-w-xl mx-auto px-3 py-2.5 flex items-stretch gap-2">
-        <div key={delta?.k || 0} className={`cp cp-ovr relative w-[70px] shrink-0 rounded-2xl flex flex-col items-center justify-center ${delta ? "rp-ovr-brilho" : ""}`}
+        <button type="button" onClick={onOvr} key={delta?.k || 0} className={`cp cp-ovr relative w-[70px] shrink-0 rounded-2xl flex flex-col items-center justify-center ${delta ? "rp-ovr-brilho" : ""}`}
           style={{ "--brilho": delta ? (delta.d > 0 ? "rgba(27,194,138,.55)" : "rgba(227,107,91,.55)") : "transparent" }}
-          aria-label={`Overall ${ovr}`}>
+          aria-label={`Overall ${ovr}. Ver o que compõe seu OVR`}>
           <span className="text-[10px] font-semibold tracking-[0.15em] text-white/80">OVR</span>
           <span className="text-[34px] font-black leading-none text-white">{mostrado}</span>
           {delta && (
@@ -383,7 +384,8 @@ function CartaoCarreira({ c, onEstante, onFicha, contadorPulsa, recorde, etapa }
             </span>
           )}
           {recorde ? <Fogos key={recorde} /> : null}
-        </div>
+          <span aria-hidden="true" className="absolute bottom-1 right-1.5 text-[10px] text-white/70">ⓘ</span>
+        </button>
         <div className="flex-1 min-w-0 rounded-2xl pl-1.5 pr-3 py-2 flex items-center gap-1.5" style={{ background: `linear-gradient(120deg, ${clube.cor || "#9BDEFF"}40, rgba(16,35,55,.9) 70%)`, border: "1px solid rgba(255,255,255,.07)" }}>
           {!semClube && <CamisaMini key={clube.nome} cor={clube.cor} clube={clube.nome} nome={c.nome} numero={numeroDe(c)} size={46} />}
           <div className="flex-1 min-w-0 flex flex-col justify-between gap-1 self-stretch">
@@ -2967,7 +2969,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   return (
     <div data-patamar={c&&!c.tecnico?patamarCarreira(c).id:undefined} className={etapa === "tecnico" ? "rp ct-root" : "rp rp-jogador"}>
       <style>{ESTILO_BASE}</style>{salvando&&<div className="mv-salvando" aria-live="polite"><span>Salvando progresso…</span></div>}{erroSave&&<div role="alert" className="mv-erro-save">{erroSave}</div>}
-      {painel ? <CartaoCarreira c={c} etapa={etapa} onEstante={() => setEstanteAberta(true)} onFicha={() => setGaveta("ficha")} contadorPulsa={contadorPulsa} recorde={recorde} />
+      {painel ? <CartaoCarreira c={c} etapa={etapa} onEstante={() => setEstanteAberta(true)} onFicha={() => setGaveta("ficha")} onOvr={() => setGaveta("ovr")} contadorPulsa={contadorPulsa} recorde={recorde} />
         : <Cabecalho etapa={etapa} treinador={etapa === "tecnico"} c={mostrarCabecalho ? c : null} onSair={onSair} onEstante={() => setEstanteAberta(true)} />}
       <RevelacaoTela as="main" identidade={etapa} className="pb-10">
         {etapa === "criacao" && <TelaCriacao onCriar={criar} ritmoInicial={ritmoInicial} />}
@@ -3054,6 +3056,11 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           </button>
           <BotaoSom />
           <button onClick={onSair} className="rp-btn rp-sec text-[15px]">Voltar ao menu (o jogo fica salvo)</button>
+        </Gaveta>
+      )}
+      {gaveta === "ovr" && c && (
+        <Gaveta titulo="Seu OVR" onFechar={() => setGaveta(null)}>
+          <PainelOvr c={c} motivos={ultimo?.ovrMotivos || []} />
         </Gaveta>
       )}
       {gaveta === "resumo" && ultimo && (

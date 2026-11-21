@@ -2,6 +2,11 @@
 
 Tudo que mudou desde a primeira versão publicada, organizado por bloco de trabalho.
 
+## 21/11/2026 — Raio-X do OVR no modo rápido
+
+- O OVR do topo agora abre uma gaveta: valor exato e quanto falta para o próximo ponto, composição (nível + fase − adaptação de posição), peso de cada atributo na posição, distância até o teto, onde vale mais evoluir, momento da carreira e motivos da última temporada.
+- Cartas de pré-temporada mostram o efeito no OVR (“+0,45 OVR · 55 → 56”) e destacam a que mais sobe o número, com as mesmas regras de idade e teto do treino real.
+
 ## 08/11/2026 — Treinador de clube ou seleção
 
 - Mercado com seleções de diferentes países, sem restringir os convites ao ano da Copa.

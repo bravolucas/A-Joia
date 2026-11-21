@@ -2,6 +2,12 @@
 
 Tudo que mudou desde a primeira versão publicada, organizado por bloco de trabalho.
 
+## 21/11/2026 — Valores de mercado e transferências realistas no modo rápido
+
+- O jogador principal passa a usar a mesma régua do mundo (calibrada no mercado 2025/26): nível, idade, liga, potencial e contrato restante, com fama (até +20%) e fase (−12,5% a +20%) por cima.
+- Promessas valem pelo jogador que devem virar aos 23 anos, com desconto de risco; transferências para ligas mais ricas e gigantes pagam mais, como no mercado real.
+- Teto suave acima de € 150 mi: só a elite absoluta encosta no recorde real (€ 222 mi). Antes, um OVR 90 valia ~€ 190 mi e um titular do Brasileirão ~€ 37 mi.
+
 ## 21/11/2026 — Links no padrão FM em todo o modo rápido
 
 - Nomes de clubes, jogadores, seleções, competições e prêmios no meio de frases (notícias, recordes, destaques, mensagens, fechamento da temporada) agora são links para o Arquivo Vivo.

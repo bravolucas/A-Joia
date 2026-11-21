@@ -21,6 +21,7 @@ import {simularCampanhaCopa,adversarioCopaPorFase} from '../treinador/copasEscol
 import {jogosDoGrupo,tabelaGrupoCopa,empateGrupo} from './gruposCopa.js';
 import {aplicarManchetesJogador} from './manchetesJogador.js';
 import {atualizarRecordesUniverso} from './recordesUniverso.js';
+import {valorMercadoEuro} from '../simulacao/economia.js';
 import {detectarQuebrasRecordesFutebol,escoposRecordesDaTemporada,guardarQuebrasRecordesFutebol,pessoasDoRecorde} from '../historia/noticiasRecordes.js';
 import {registrarCampanhaContinental,registrarFinalContinental} from './torneioContinental.js';
 import {prepararElencoCopa,prepararElencoSelecao,forcaElencoCopa,registrarJogoElenco} from './elencoSelecao.js';
@@ -656,11 +657,36 @@ export function statusNoClube(c, clubeNome = c.clubeNome) {
   return statusPorDiff(ovrDe(c) - clubeDe(clubeNome).forca, c.idade);
 }
 
-/* ---------- valor de mercado ---------- */
-export function valorMercado(ovr, idade, fama = 0) {
-  const base = 1000 * Math.pow(1.173, ovr - 60); // em milhares de euro
-  const idadeF = idade <= 21 ? 1.5 : idade <= 24 ? 1.25 : idade <= 28 ? 1 : idade <= 31 ? 0.65 : 0.35;
-  return Math.max(50, Math.round(base * idadeF * (1 + fama / 400)));
+/* ---------- valor de mercado ----------
+   Mesma régua do mundo (economia.js, calibrada no mercado 2025/26): nível, idade,
+   liga onde joga, potencial e anos de contrato. Por cima, só o que é do seu
+   atleta: fama (até +20%) e a fase recente (de −12,5% a +20%). Assim um titular
+   do Brasileirão não vale como um craque da Premier League, e só a elite
+   mundial chega à casa dos € 100 mi. */
+export function valorMercado(ovr, idade, fama = 0, { liga = "inglaterra", potencial, contrato } = {}) {
+  const v = valorMercadoEuro({ ovr, idade, liga, potencial, contrato });
+  return Math.max(50, Math.round(v * (1 + clamp(fama || 0, 0, 100) / 500)));
+}
+/* Teto suave: acima de € 150 mi cada euro extra conta pela metade. Só a elite
+   absoluta passa do recorde real (Neymar, € 222 mi), e sem dobrar o número. */
+const TETO_SUAVE_VALOR = 150000;
+const suavizarTeto = (v) => (v <= TETO_SUAVE_VALOR ? v : TETO_SUAVE_VALOR + (v - TETO_SUAVE_VALOR) * 0.5);
+/* fase recente pesa metade no preço: 0,75–1,4 vira 0,875–1,2 */
+const efeitoForma = (f = 1) => 1 + ((f ?? 1) - 1) * 0.5;
+/* OVR que o atleta pode atingir (teto dos atributos) — jovem com teto alto vale mais */
+const ovrPotencialDe = (c) => (c.potencial ? Math.max(ovrDe(c), calcOVR({ ...c.attrs, ...c.potencial, fintas: 3, pernaRuim: 3 }, c.posicao)) : undefined);
+/** Valor (€ mil) do atleta no clube de origem; `ovr`/`idade` permitem projetar o fim da temporada. */
+export function valorDoAtleta(c, { ovr = ovrDe(c), idade = c.idade, liga = clubeDe(c.clubeNome).liga } = {}) {
+  const potencial = ovrPotencialDe(c);
+  const contrato = c.contrato ? Math.max(0, c.contrato.restantes ?? 0) : undefined;
+  let v = valorMercado(ovr, idade, c.fama, { liga, potencial, contrato });
+  // Promessa (até 22 anos): o mercado paga pelo jogador que ele deve virar aos 23,
+  // com desconto de risco de 18% por ano que falta (o caso Endrick/Estêvão).
+  if (idade <= 22 && potencial > ovr) {
+    const projecao = valorMercado(potencial, 23, c.fama, { liga, contrato }) * Math.pow(0.82, 23 - idade);
+    v = Math.max(v, projecao);
+  }
+  return Math.max(50, Math.round(suavizarTeto(v * efeitoForma(c.formaMercado))));
 }
 /* Forma recente: a última temporada mexe no preço (nota, participação em gols
    para a posição, títulos e Bola de Ouro). 1 = neutro; vai de 0,75 a 1,4. */
@@ -680,7 +706,7 @@ export function formaDaTemporada(card, posicao, anterior = 1) {
   return Math.round(clamp(0.3 * anterior + 0.7 * bruto, 0.75, 1.4) * 100) / 100;
 }
 /* Valor de mercado do atleta hoje: nível, idade, fama e forma recente */
-export const valorAtual = (c) => Math.max(50, Math.round(valorMercado(ovrDe(c), c.idade, c.fama) * (c.formaMercado ?? 1)));
+export const valorAtual = (c) => valorDoAtleta(c);
 
 export function formatarValor(k) {
   if(k>0&&(k<1||(k<10&&!Number.isInteger(k))))return `€ ${Math.round(k*1000).toLocaleString("pt-BR")}`;
@@ -2191,7 +2217,7 @@ function fecharTemporadaBase(c0, card0) {
   card.valorAntes = valorAtual(c0);
   c.formaMercado = formaDaTemporada(card, c.posicao, c0.formaMercado ?? 1);
   card.forma = c.formaMercado;
-  card.valor = Math.max(50, Math.round(valorMercado(card.ovrDepois, c.idade + 1, c.fama) * c.formaMercado));
+  card.valor = valorDoAtleta(c, { ovr: card.ovrDepois, idade: c.idade + 1 });
 
   // promessa feita na coletiva: a imprensa confere
   resolverPromessa(c, card, tc);
@@ -2486,12 +2512,19 @@ export function gerarOfertas(c, n, opts = {}) {
   }));
 }
 
-/* Quanto o clube comprador paga ao atual: valor de mercado ajustado pelos anos de
-   contrato restantes, limitado pela cláusula. Sem contrato, sai de graça. */
+/* Quanto o clube comprador paga ao atual. Parte do valor no clube de origem (já
+   com idade, potencial e contrato restante); quem compra de uma liga mais rica paga
+   parte do preço do próprio mercado (o garoto do Brasileirão custa mais para a
+   Premier League do que para um vizinho), e clube grande paga um ágio de até 35%
+   (taxas reais costumam superar o valor de mercado). Limitado pela cláusula; sem contrato, sai de graça. */
 export function valorTransferencia(c, comprador) {
   const restantes = c.contrato?.restantes ?? 0;
   if (restantes <= 0) return 0;
-  const base = valorAtual(c) * (0.75 + 0.1 * Math.min(restantes, 4)) * (clubeDe(comprador).forca >= 85 ? 1.15 : 1);
+  const destino = clubeDe(comprador);
+  const origem = valorAtual(c);
+  const noDestino = valorDoAtleta(c, { liga: destino.liga }) * 0.85;
+  const agio = clamp(((destino.forca ?? 70) - 75) / 50, 0, 0.35);
+  const base = suavizarTeto(Math.max(origem, noDestino) * (1 + agio));
   const teto = Math.min(multaEfetiva(c), c.contrato?.multa || base);
   return Math.max(50, Math.round(Math.min(base, teto) / 50) * 50);
 }

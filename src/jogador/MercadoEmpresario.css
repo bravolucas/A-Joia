@@ -21,7 +21,7 @@
 .me-clube-texto strong{font-size:12px;line-height:1.3;overflow-wrap:anywhere}
 .me-clube-texto small,.me-alvo-nome small{font-size:10px;color:#9dbeb3}
 .me-forca{font-size:10px;color:#d9e2d9;white-space:nowrap;border:1px solid #79908449;border-radius:6px;padding:3px 6px}
-.me-seta{font-size:21px;line-height:1;color:#a0b9ab}
+.me-seta{font-size:21px;line-height:1;color:#a0b9ab;background:none;border:0;min-width:36px;min-height:36px;cursor:pointer;border-radius:8px}.me-seta:focus-visible{outline:2px solid #84d4ab}.me-clube .ajoia-entity-link{color:inherit;font-weight:inherit}
 .me-estado{display:inline-block;align-self:center;border-radius:6px;padding:4px 7px;font-size:10px;font-weight:750;white-space:normal}
 .me-aguardando{color:#e6d5a2;background:#5c482d55}.me-positivo{color:#b1efce;background:#2d644d80}.me-negativo{color:#f1b4a8;background:#72413677}
 .me-paginacao{display:flex;justify-content:center;align-items:center;gap:13px;font-size:11px}

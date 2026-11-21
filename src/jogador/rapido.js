@@ -21,7 +21,7 @@ import {simularCampanhaCopa,adversarioCopaPorFase} from '../treinador/copasEscol
 import {jogosDoGrupo,tabelaGrupoCopa,empateGrupo} from './gruposCopa.js';
 import {aplicarManchetesJogador} from './manchetesJogador.js';
 import {atualizarRecordesUniverso} from './recordesUniverso.js';
-import {detectarQuebrasRecordesFutebol,escoposRecordesDaTemporada,guardarQuebrasRecordesFutebol} from '../historia/noticiasRecordes.js';
+import {detectarQuebrasRecordesFutebol,escoposRecordesDaTemporada,guardarQuebrasRecordesFutebol,pessoasDoRecorde} from '../historia/noticiasRecordes.js';
 import {registrarCampanhaContinental,registrarFinalContinental} from './torneioContinental.js';
 import {prepararElencoCopa,prepararElencoSelecao,forcaElencoCopa,registrarJogoElenco} from './elencoSelecao.js';
 import {iniciarJornada,memorizar,registrarEscolhaJornada,registrarTransferenciaJornada,prepararJornada,fecharJornada,pesoProjeto,projetoOferta,legadoNarrativo} from './jornadaJogador.js';
@@ -2252,7 +2252,7 @@ function fecharTemporadaBase(c0, card0) {
     c.recordesEventos=guardarQuebrasRecordesFutebol(c,recordesNovos).recordesEventos;
     card.recordesEventos=recordesNovos;
     card.jornada={...(card.jornada||{}),noticias:[
-      ...recordesNovos.slice(0,2).map(e=>({tipo:'recorde',titulo:e.titulo,detalhe:e.detalhe})),
+      ...recordesNovos.slice(0,2).map(e=>({tipo:'recorde',titulo:e.titulo,detalhe:e.detalhe,pessoas:pessoasDoRecorde(e)})),
       ...(card.jornada?.noticias||[])
     ].slice(0,12)};
     card.destaques=[...(card.destaques||[]),...recordesNovos.slice(0,2).map(e=>'🏅 '+e.titulo)];
@@ -2263,11 +2263,13 @@ function fecharTemporadaBase(c0, card0) {
 
 /* Manchetes derivadas dos resultados efetivos, sem estado adicional no save.
    O mesmo card sempre gera as mesmas notícias, inclusive em saves antigos. */
+export { pessoasDoRecorde };
 export function noticiasDaTemporada(c, card) {
   if (!card) return [];
   const noticias = [...(card.jornada?.noticias||[])].slice(0,2);
-  const add = (tipo, titulo, detalhe) => {
-    if (noticias.length < 4) noticias.push({ tipo, titulo, detalhe });
+  // `pessoas` leva o ID de quem é citado: o nome vira link mesmo com homônimos no mundo.
+  const add = (tipo, titulo, detalhe, pessoas) => {
+    if (noticias.length < 4) noticias.push({ tipo, titulo, detalhe, ...(pessoas?.length ? { pessoas } : {}) });
   };
   const titulos = card.titulos || [];
   const grande = titulos.find(t => ["copaMundo", "continental", "mundial", "continentalSelecao"].includes(t.tipo));
@@ -2278,16 +2280,16 @@ export function noticiasDaTemporada(c, card) {
   // Noticiar apenas acontecimentos registrados no card, nunca inventar transferências.
   const rival = card.rival;
   if (rival && c.rival?.nome) {
-    const nome = c.rival.nome;
-    if (rival.mudou) add("mercado", `${nome} troca de clube`, `De ${rival.mudou} para ${rival.clube}.`);
-    if (rival.bola === 1) add("rival", `${nome} conquista a Bola de Ouro`, `Seu rival de geração brilhou pelo ${rival.clube}.`);
-    else if (rival.bola && rival.bola <= 3) add("rival", `${nome} termina entre os melhores do mundo`, `Top ${rival.bola} na Bola de Ouro.`);
-    if (rival.aposentou) add("rival", `${nome} anuncia aposentadoria`, `Fim de carreira após passagem pelo ${rival.clube}.`);
+    const nome = c.rival.nome, quem = c.rival.id != null ? [{ nome, id: c.rival.id }] : undefined;
+    if (rival.mudou) add("mercado", `${nome} troca de clube`, `De ${rival.mudou} para ${rival.clube}.`, quem);
+    if (rival.bola === 1) add("rival", `${nome} conquista a Bola de Ouro`, `Seu rival de geração brilhou pelo ${rival.clube}.`, quem);
+    else if (rival.bola && rival.bola <= 3) add("rival", `${nome} termina entre os melhores do mundo`, `Top ${rival.bola} na Bola de Ouro.`, quem);
+    if (rival.aposentou) add("rival", `${nome} anuncia aposentadoria`, `Fim de carreira após passagem pelo ${rival.clube}.`, quem);
   }
   // O ranking de Bola de Ouro também representa outros atletas do mundo.
   const vencedor = card.bola?.top?.[0];
   if (vencedor && !vencedor.voce && card.bola?.pos !== 1) {
-    add("mundo", `${vencedor.nome} lidera a Bola de Ouro`, `Destaque do ${vencedor.clube} na temporada.`);
+    add("mundo", `${vencedor.nome} lidera a Bola de Ouro`, `Destaque do ${vencedor.clube} na temporada.`, vencedor.id != null ? [{ nome: vencedor.nome, id: vencedor.id }] : undefined);
   }
   if (card.rebaixado) add("alerta", `${card.clube} sofre rebaixamento`, `A equipe encerrou a liga em ${card.posLiga}º lugar.`);
   else if (card.acesso) add("conquista", `${card.clube} garante o acesso`, `Campanha de ${card.posLiga}º lugar na ${card.ligaNome}.`);

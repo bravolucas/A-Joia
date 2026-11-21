@@ -1,4 +1,5 @@
 import React,{useMemo,useState} from 'react';
+import TextoComLinks from '../historia/TextoComLinks.jsx';
 import {catalogoMercadoJogador,diagnosticoMercadoJogador,ovrDe} from './rapido.js';
 import {formatarEuro} from '../simulacao/economia.js';
 import {escudoDe} from '../comum/arte.js';
@@ -44,18 +45,20 @@ export default function MercadoEmpresario({c,onAcao,interesses=[]}){
   <div className="me-lista">
    {visiveis.map(clube=>{
     const status=statusDe(clube.nome);
-    return <button type="button" key={clube.nome} className={'me-clube '+(selecionado===clube.nome?'me-selecionado':'')} onClick={()=>{S(clube.nome);V('');}} aria-pressed={selecionado===clube.nome}>
+    // Como no FM: o nome abre a página do clube; o resto da linha seleciona para análise.
+    const escolher=()=>{S(clube.nome);V('');};
+    return <div key={clube.nome} className={'me-clube '+(selecionado===clube.nome?'me-selecionado':'')} onClick={e=>{if(!e.target.closest('button'))escolher();}}>
       {escudoDe(clube.nome)?<img alt="" src={escudoDe(clube.nome)} loading="lazy"/>:<span className="me-escudo-fallback">{clube.nome.slice(0,2).toUpperCase()}</span>}
-      <span className="me-clube-texto"><strong>{clube.nome}</strong><small>{clube.ligaNome} · {clube.pais}</small></span><span className="me-forca">Força {clube.forca}</span>
+      <span className="me-clube-texto"><strong><LinkEntidade tipo="clube" nome={clube.nome}/></strong><small><TextoComLinks>{clube.ligaNome}</TextoComLinks> · {clube.pais}</small></span><span className="me-forca">Força {clube.forca}</span>
       {status&&<span className={'me-estado me-'+status}>{estadoRotulo[status]}</span>}
-      <span className="me-seta" aria-hidden="true">›</span>
-    </button>;
+      <button type="button" className="me-seta" onClick={escolher} aria-pressed={selecionado===clube.nome} aria-label={`Analisar ${clube.nome}`}>›</button>
+    </div>;
    })}
    {!visiveis.length&&<p className="me-vazio">Não encontramos clubes com esses filtros.</p>}
   </div>
   {totalPaginas>1&&<nav className="me-paginacao" aria-label="Páginas dos clubes"><button type="button" disabled={pagAtual<=1} onClick={()=>{G(pagAtual-1);S('');}}>Anterior</button><span>{pagAtual} de {totalPaginas}</span><button type="button" disabled={pagAtual>=totalPaginas} onClick={()=>{G(pagAtual+1);S('');}}>Próxima</button></nav>}
   {alvo&&analise&&<article className="me-detalhe">
-   <header><div className="me-alvo-nome">{escudoDe(alvo.nome)&&<img src={escudoDe(alvo.nome)} alt=""/>}<div><h4><LinkEntidade tipo="clube" nome={alvo.nome}/></h4><small>{alvo.pais} · {alvo.ligaNome}</small></div></div><span>Força {alvo.forca}</span></header>
+   <header><div className="me-alvo-nome">{escudoDe(alvo.nome)&&<img src={escudoDe(alvo.nome)} alt=""/>}<div><h4><LinkEntidade tipo="clube" nome={alvo.nome}/></h4><small>{alvo.pais} · <TextoComLinks>{alvo.ligaNome}</TextoComLinks></small></div></div><span>Força {alvo.forca}</span></header>
    <div className="me-dados">
     <div><small>Seu nível / clube</small><strong>{ovrDe(c)} / {alvo.forca}</strong><span>{analise.distancia>=0?'Nível competitivo':analise.distancia>=-5?'Desafio possível':'Salto exigente'}</span></div>
     <div><small>Disputa na posição</small><strong>{analise.concorrencia}</strong><span>{analise.melhor?analise.melhor.nome+' · OVR '+analise.qualidadeConcorrente:'Sem titular identificado no elenco'}</span></div>
@@ -68,9 +71,9 @@ export default function MercadoEmpresario({c,onAcao,interesses=[]}){
    {c.ultimaDevolutivaEmpresario?.ano===c.ano&&<p className="me-ultima-devolutiva" role="status">Seu empresário retornou com {c.ultimaDevolutivaEmpresario.total} resposta(s) após a temporada, sendo {c.ultimaDevolutivaEmpresario.positivas} positiva(s).</p>}
    <header><div><h4>Conversas do empresário</h4><small>Respostas desta temporada e histórico recente</small></div>{pendentes.length>0&&<button type="button" className="me-retornar" onClick={()=>avisar('retornos')}>Receber retorno ({pendentes.length})</button>}</header>
    {!sondagens.length&&<p className="me-vazio">Você ainda não procurou clubes. Escolha uma equipe acima e peça a primeira sondagem.</p>}
-   {sondagens.slice(-12).reverse().map((s,i)=><article key={s.ano+'-'+s.clube+'-'+i} className="me-conversa"><div><strong><LinkEntidade tipo="clube" nome={s.clube}/></strong><small>Temporada {s.ano} · {estadoRotulo[s.status]||'Sondagem'}</small></div><p>{s.texto}</p></article>)}
+   {sondagens.slice(-12).reverse().map((s,i)=><article key={s.ano+'-'+s.clube+'-'+i} className="me-conversa"><div><strong><LinkEntidade tipo="clube" nome={s.clube}/></strong><small>Temporada {s.ano} · {estadoRotulo[s.status]||'Sondagem'}</small></div><p><TextoComLinks>{s.texto}</TextoComLinks></p></article>)}
   </div>
-  {!!interesses.length&&<details className="me-observadores"><summary>Clubes que já acompanham você ({interesses.length})</summary>{interesses.map(s=><p key={s.clube}><LinkEntidade tipo="clube" nome={s.clube}/> · {s.liga} · {s.nivel}</p>)}</details>}
+  {!!interesses.length&&<details className="me-observadores"><summary>Clubes que já acompanham você ({interesses.length})</summary>{interesses.map(s=><p key={s.clube}><LinkEntidade tipo="clube" nome={s.clube}/> · <TextoComLinks>{s.liga}</TextoComLinks> · {s.nivel}</p>)}</details>}
   {aviso&&<p role="status" className="me-aviso">{aviso}</p>}
  </section>;
 }

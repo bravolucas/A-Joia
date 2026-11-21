@@ -2,6 +2,13 @@
 
 Tudo que mudou desde a primeira versão publicada, organizado por bloco de trabalho.
 
+## 21/11/2026 — Links no padrão FM em todo o modo rápido
+
+- Nomes de clubes, jogadores, seleções, competições e prêmios no meio de frases (notícias, recordes, destaques, mensagens, fechamento da temporada) agora são links para o Arquivo Vivo.
+- Homônimos não viram link por adivinhação: notícias do rival/Bola de Ouro e recordes guardam o ID de quem citam.
+- Resumo compacto da temporada e lista de clubes do empresário seguem o FM: o nome abre a página; o restante do card (ou a seta) faz a ação.
+- Novo teste de navegador (`links-fm-rapido.spec.mjs`) falha se algum nome aparecer sem link nas telas principais, gavetas e fechamento do modo rápido.
+
 ## 21/11/2026 — Raio-X do OVR no modo rápido
 
 - O OVR do topo agora abre uma gaveta: valor exato e quanto falta para o próximo ponto, composição (nível + fase − adaptação de posição), peso de cada atributo na posição, distância até o teto, onde vale mais evoluir, momento da carreira e motivos da última temporada.

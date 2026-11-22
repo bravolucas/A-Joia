@@ -7,19 +7,38 @@ const chaves={ajoia_rapido_v1:JSON.stringify({v:1,etapa:'evento',c:criarJogador(
 async function guardar(page){await page.evaluate(async itens=>{for(const [k,v]of Object.entries(itens))localStorage.setItem(k,v);await (await caches.open('ajoia-imagens')).put('/A-Joia/antigo',new Response('cache antigo'));await (await caches.open('cache-outro-aplicativo')).put('/outro',new Response('não apagar'));},chaves);}
 async function conferir(page){for(const [k,v]of Object.entries(chaves))expect(await page.evaluate(k=>localStorage.getItem(k),k)).toBe(v);const cachesAtuais=await page.evaluate(()=>caches.keys());expect(cachesAtuais).not.toContain('ajoia-imagens');expect(cachesAtuais).toContain('cache-outro-aplicativo');expect(await page.evaluate(async()=>{const rs=await navigator.serviceWorker.getRegistrations();return rs.filter(r=>new URL(r.scope).pathname==='/A-Joia/').length;})).toBe(0);}
 test('atualizar manualmente remove cache próprio e mantém saves e outros aplicativos',async({page})=>{
- await page.goto(base);await expect(page.getByText(/História viva/)).toBeVisible();await guardar(page);await page.getByRole('button',{name:'Atualizar jogo · manter saves'}).click();await expect(page).toHaveURL(/ajoia_atualizada=copas-v2/);await expect(page.getByText(/História viva/)).toBeVisible();await conferir(page);const url=page.url();await page.reload();await expect(page.getByText(/História viva/)).toBeVisible();expect(page.url()).toBe(url);
+ await page.goto(base);await expect(page.getByText(/História viva/)).toBeVisible();await guardar(page);await page.getByRole('button',{name:'Atualizar jogo · manter saves'}).click();await expect(page).toHaveURL(/ajoia_atualizada=manual-/);await expect(page.getByText(/História viva/)).toBeVisible();await conferir(page);const url=page.url();await page.reload();await expect(page.getByText(/História viva/)).toBeVisible();expect(page.url()).toBe(url);
 });
-test('HTML novo migra cache legado automaticamente uma só vez',async({page})=>{
- await page.goto(base);await guardar(page);await page.reload();await expect(page).toHaveURL(/ajoia_atualizada=copas-v2/);await expect(page.getByText(/História viva/)).toBeVisible();await conferir(page);const url=page.url();await page.reload();await expect(page.getByText(/História viva/)).toBeVisible();expect(page.url()).toBe(url);
+test('migração automática limpa cache sem recarregar página ou alterar URL',async({page})=>{
+ await page.goto(base);await guardar(page);
+ const url=page.url();
+ let navegacoes=0;page.on('framenavigated',frame=>{if(frame===page.mainFrame())navegacoes++;});
+ await page.reload();await expect(page.getByText(/História viva/)).toBeVisible();
+ await expect.poll(async()=>page.evaluate(async()=>!(await caches.keys()).includes('ajoia-imagens'))).toBe(true);
+ await conferir(page);
+ await page.waitForTimeout(1000);
+ expect(page.url()).toBe(url);
+ expect(navegacoes).toBe(1);
+ await page.reload();await expect(page.getByText(/História viva/)).toBeVisible();
+ expect(page.url()).toBe(url);
 });
 
-test('worker novo recupera uma página realmente presa no HTML antigo sem apagar saves',async({page})=>{
+test('worker novo remove cache legado sem interromper uma aba; usuário navega quando decidir',async({page})=>{
  const url='http://127.0.0.1:4174/A-Joia/';
  const servidor=spawn('python3',[fileURLToPath(new URL('./fixtures/servidor-migracao.py',import.meta.url))],{stdio:'ignore'});
  try {
  for(let i=0;i<50;i++){try{await page.request.get('http://127.0.0.1:4174/__estado',{timeout:500});break;}catch{await new Promise(r=>setTimeout(r,100));}}
 
  await page.goto('http://127.0.0.1:4174/__instalar');await page.evaluate(async()=>{const r=await navigator.serviceWorker.register('/A-Joia/sw.js',{scope:'/A-Joia/',updateViaCache:'none'});await new Promise(resolve=>{const w=r.installing||r.waiting||r.active;if(w.state==='activated')resolve();else w.addEventListener('statechange',()=>{if(w.state==='activated')resolve();});});});await page.goto(url);await expect(page.getByText('Versão antiga em cache')).toBeVisible();await guardar(page);
- await page.request.post('http://127.0.0.1:4174/__novo');await page.evaluate(async()=>{const r=await navigator.serviceWorker.getRegistration('/A-Joia/');await r.update();});await expect(page).toHaveURL(/ajoia_atualizada=copas-v2/);await expect(page.getByText(/História viva/)).toBeVisible({timeout:15000});await expect(page.locator('.cce-arena')).toHaveCount(0);await conferir(page);
+ await page.request.post('http://127.0.0.1:4174/__novo');
+ let navegacoes=0;page.on('framenavigated',frame=>{if(frame===page.mainFrame())navegacoes++;});
+ await page.evaluate(async()=>{const r=await navigator.serviceWorker.getRegistration('/A-Joia/');await r.update();});
+ await page.waitForFunction(async()=>!(await navigator.serviceWorker.getRegistrations()).some(r=>new URL(r.scope).pathname==='/A-Joia/'));
+ await page.waitForTimeout(1000);
+ expect(navegacoes).toBe(0);
+ await expect(page.getByText('Versão antiga em cache')).toBeVisible();
+ await page.reload();
+ await expect(page.getByText(/História viva/)).toBeVisible({timeout:15000});
+ await expect(page.locator('.cce-arena')).toHaveCount(0);await conferir(page);
  } finally {servidor.kill('SIGTERM');}
 });

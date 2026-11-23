@@ -50,6 +50,14 @@ export default function PalcoIdolos({c,tipo='clube',nome}){
    </article>)}</div>
    <small className="pi-acervo-nota">{tipo==='selecao'?'As marcas internacionais seguem os critérios de jogos da seleção principal nas fontes citadas.':'O critério de contabilização do clube pode incluir amistosos.'} Os números acima não são somados aos jogadores deste universo.</small>
   </section>}
+  {tipo==='clube'&&acervo?.marcos?.length>0&&<details className="pi-acervo" aria-label={'Marcos históricos documentados · '+nome}>
+   <summary>Marcos reais do clube · {acervo.marcos.length} registros</summary>
+   <ol className="pi-marcos-reais">{acervo.marcos.map((m,i)=><li key={(m.ano||'s-data')+'-'+i}>
+    <strong>{m.ano||'Data não especificada'} · {m.titulo}</strong>
+    <small>{m.descricao}</small>
+    <a href={m.fonte} target="_blank" rel="noopener noreferrer">Fonte histórica</a>
+   </li>)}</ol>
+  </details>}
   {tipo==='selecao'&&acervo?.titulos?.length>0&&<details className="pi-acervo" aria-label={'Títulos históricos da seleção '+nome}>
    <summary>Títulos históricos documentados · {acervo.titulos.length} conquistas</summary>
    <p className="pi-acervo-titulos">{acervo.titulos.map(t=>`${t.ano} · ${t.competicao}`).join('  |  ')}</p>

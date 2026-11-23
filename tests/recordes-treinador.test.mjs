@@ -90,8 +90,10 @@ test('metas, acesso, rebaixamento e demissao sao contabilizados apenas quando do
 test('campanha do treinador não vira partida de jogador por engano',()=>{
  const c=fixture();
  const perfil=consultarRecordesFutebol(c,'clube','Santos',c.tecnico.temporadas);
- assert.equal(perfil.recordes.find(r=>r.id==='jogosCarreira'),undefined);
- assert.equal(perfil.recordes.find(r=>r.id==='golsCarreira'),undefined);
+ // Referências do acervo real podem existir, mas a campanha do técnico
+ // jamais pode produzir estatísticas de partidas de atleta no save.
+ assert.equal(perfil.recordes.find(r=>r.id==='jogosCarreira')?.simulado??null,null);
+ assert.equal(perfil.recordes.find(r=>r.id==='golsCarreira')?.simulado??null,null);
  assert.equal(marca(perfil.recordes,'tecnicoJogos').valor,76);
 });
 test('ficha do treinador agrega passagens por clubes e seleções sem misturar atletas',()=>{

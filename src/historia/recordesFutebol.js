@@ -1,5 +1,6 @@
 import {NACIONALIDADES} from '../dados/data.js';
 import {REFERENCIAS_RECORDES_FUTEBOL} from '../dados/recordesFutebolReais.js';
+import {REFERENCIAS_RECORDES_CLUBES} from '../dados/acervoClubesHistoricos.js';
 import {recordesReaisTitulosCompeticao} from './recordesTitulosReais.js';
 import {recordesTreinador,METRICAS_TREINADOR} from './recordesTreinador.js';
 
@@ -382,23 +383,23 @@ export function consultarRecordesFutebol(c={},tipo='clube',nome='',temporadas=c?
  }
  medirCampanhasETitulos(mapa,arquivo,tipo,nome);
  medirAtuacoes(mapa,arquivo,tipo,nome,c?.nome||'Você');
- const referencias=REFERENCIAS_RECORDES_FUTEBOL.filter(r=>
+ const referencias=[...REFERENCIAS_RECORDES_FUTEBOL,...REFERENCIAS_RECORDES_CLUBES].filter(r=>
   r.tipo===tipo&&(tipo==='competicao'?competicaoIgual(r.nome,nome):eIgual(r.nome,nome)));
  const historicas=new Map([...referencias,...recordesReaisTitulosCompeticao(tipo,nome)].map(r=>[r.id,r]));
  const recordes=METRICAS_RECORDES.filter(m=>mapa.has(m.id)||historicas.has(m.id)).map(m=>{
   const real=historicas.get(m.id)||null,simulado=mapa.get(m.id)||null;
-  const comparavel=real?.cobertura!=='recorte';
+  const comparavel=real?.cobertura!=='recorte'&&real?.comparavel!==false;
   const ultrapassou=!!real&&comparavel&&!!simulado&&simulado.valor>real.valor;
   const igualou=!!real&&comparavel&&!!simulado&&simulado.valor===real.valor;
   return {id:m.id,rotulo:m.rotulo,categoria:m.categoria,real,simulado,
-   status:real?.cobertura==='recorte'?'Referência de período documentado':ultrapassou?'Superado no save':igualou?'Igualado no save':real?'Recorde real preservado':'Recorde do save'};
+   status:real?.cobertura==='recorte'?'Referência de período documentado':real?.comparavel===false?'Referência histórica · critério distinto':ultrapassou?'Superado no save':igualou?'Igualado no save':real?'Recorde real preservado':'Recorde do save'};
  });
  const resultadosTecnico=new Map(recordesTreinador(c,tipo,nome).map(x=>[x.id,x.simulado]));
  const recordesTecnico=METRICAS_TREINADOR.filter(m=>historicas.has(m.id)||resultadosTecnico.has(m.id)).map(m=>{
   const real=historicas.get(m.id)||null,simulado=resultadosTecnico.get(m.id)||null;
-  const comparavel=real?.cobertura!=='recorte';
+  const comparavel=real?.cobertura!=='recorte'&&real?.comparavel!==false;
   return {id:m.id,rotulo:m.rotulo,categoria:m.categoria,real,simulado,
-   status:real?.cobertura==='recorte'?'Referência de período documentado':
+   status:real?.cobertura==='recorte'?'Referência de período documentado':real?.comparavel===false?'Referência histórica · critério distinto':
     real&&comparavel&&simulado?.valor>real.valor?'Superado no save':
     real&&comparavel&&simulado?.valor===real.valor?'Igualado no save':
     real?'Recorde real preservado':'Recorde do treinador neste save'};

@@ -48,12 +48,13 @@ export default function PalcoIdolos({c,tipo='clube',nome}){
     <p>{x.jogos!=null?`${x.jogos.toLocaleString('pt-BR')} jogos`: 'Jogos não apurados'} · {x.gols!=null?`${x.gols.toLocaleString('pt-BR')} gols`:'Gols não apurados'}</p>
     <small>{x.descricao}</small><a href={x.fonte} target="_blank" rel="noopener noreferrer">Fonte histórica</a>
    </article>)}</div>
-   <small className="pi-acervo-nota">O critério de contabilização do clube pode incluir amistosos. Os números acima não são somados aos jogadores deste universo.</small>
+   <small className="pi-acervo-nota">{tipo==='selecao'?'As marcas internacionais seguem os critérios de jogos da seleção principal nas fontes citadas.':'O critério de contabilização do clube pode incluir amistosos.'} Os números acima não são somados aos jogadores deste universo.</small>
   </section>}
   {tipo==='selecao'&&acervo?.titulos?.length>0&&<details className="pi-acervo" aria-label={'Títulos históricos da seleção '+nome}>
    <summary>Títulos históricos documentados · {acervo.titulos.length} conquistas</summary>
    <p className="pi-acervo-titulos">{acervo.titulos.map(t=>`${t.ano} · ${t.competicao}`).join('  |  ')}</p>
   </details>}
+  {tipo==='clube'&&!acervo&&<p className="pi-acervo-nota">Esta equipe já consta do catálogo do jogo. As estatísticas históricas reais ainda estão em pesquisa e não serão substituídas por estimativas.</p>}
   {tipo==='selecao'&&acervo&&!acervo.atletas.length&&<p className="pi-acervo-nota">Recordes individuais reais desta seleção ainda não apurados. A carreira continua registrando seus próprios recordes normalmente.</p>}
   {lendas.length>0&&<div className="pi-hall" aria-label="Lendas antes deste save"><span>Hall da fama · antes deste save</span><p>{lendas.join(' · ')}</p></div>}
   <details className="pi-como"><summary>Como a afeição da torcida é calculada</summary>

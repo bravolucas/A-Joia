@@ -11,10 +11,10 @@ const atleta = (mundo, nome, clube) => mundo.jogadores.find(
   j => j.nome === nome && j.clubeNome === clube && !j.aposentado,
 );
 
-test('61 identidades verificadas correspondem a entradas reais e usam códigos de seleção válidos', () => {
-  assert.equal(totalMetadadosAtletasReais, 61);
+test('62 identidades verificadas correspondem a entradas reais e usam códigos de seleção válidos', () => {
+  assert.equal(totalMetadadosAtletasReais, 62);
   const conhecidos = [
-    ['Lionel Messi', 'Inter Miami'], ['Cristiano Ronaldo', 'Al-Nassr'],
+    ['Jhon Arias', 'Palmeiras'], ['Lionel Messi', 'Inter Miami'], ['Cristiano Ronaldo', 'Al-Nassr'],
     ['Neymar Jr', 'Santos'], ['Kylian Mbappé', 'Real Madrid'],
     ['Erling Haaland', 'Manchester City'], ['Mohamed Salah', 'Liverpool'],
     ['Harry Kane', 'Bayern de Munique'], ['Jude Bellingham', 'Real Madrid'],
@@ -69,10 +69,11 @@ test('idade é calculada pela data exata, respeitando aniversários depois de ju
   assert.equal(idadeAtletaReal(undefined, 2026), null);
 });
 
-test('61 jogadores reais preservam idade e seleção em duas seeds independentes', () => {
+test('62 jogadores reais preservam idade e seleção em duas seeds independentes', () => {
   const a = gerarMundoJogadores(geradorTecnico('metadados-reais-a'));
   const b = gerarMundoJogadores(geradorTecnico('metadados-reais-b'));
   for (const [nome, clube, idade, nac] of [
+    ['Jhon Arias', 'Palmeiras', 28, 'COL'],
     ['Cristiano Ronaldo', 'Al-Nassr', 41, 'POR'],
     ['Lionel Messi', 'Inter Miami', 39, 'ARG'],
     ['Lamine Yamal', 'Barcelona', 18, 'ESP'],

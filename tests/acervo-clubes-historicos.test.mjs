@@ -6,7 +6,7 @@ import {idolosDoClube} from '../src/historia/idolos.js';
 
 test('lote 1: fontes, escopos, valores válidos e sem métricas duplicadas por clube',()=>{
  const clubes=Object.values(ACERVO_CLUBES_HISTORICOS);
- assert.equal(clubes.length,94);
+ assert.equal(clubes.length,101);
  assert.ok(REFERENCIAS_RECORDES_CLUBES.length>=20);
  const chaves=new Set();
  for(const c of clubes){

@@ -16,9 +16,9 @@ O inventário único, deduplicado por nome, está em
 `src/dados/coberturaAcervoHistorico.js`.
 
 ## Fichas e recordes verificados
-- `src/dados/acervoClubesHistoricos.js` e `acervoClubesHistoricosLote2.js` `acervoClubesHistoricosLote3.js` `acervoClubesHistoricosLote4.js` `acervoClubesHistoricosLote5.js` e `acervoClubesHistoricosLote6.js`.
+- `src/dados/acervoClubesHistoricos.js` e `acervoClubesHistoricosLote2.js` `acervoClubesHistoricosLote3.js` `acervoClubesHistoricosLote4.js` `acervoClubesHistoricosLote5.js` `acervoClubesHistoricosLote6.js` e `acervoClubesHistoricosLote7.js`.
 - `src/dados/acervoSelecoesHistoricas.js`.
-- Clubes com fichas individuais verificadas neste ciclo: **94**.
+- Clubes com fichas individuais verificadas neste ciclo: **101**.
 - Seleções com fichas individuais verificadas neste ciclo: **21**.
 - O lote 6 registra também técnicos responsáveis por títulos documentados.
 - As demais entidades têm cobertura `pendente_apuracao`.

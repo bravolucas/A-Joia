@@ -8,6 +8,7 @@ const FONTES={
  city:'https://www.mancity.com/mancitylegends/aguero-sergio',
  arsenal:'https://www.arsenal.com/feature/the-wenger-years-a05Ex7F5N6vd',
  ajax:'https://english.ajax.nl/articles/125-years-of-ajax-white-red-white-history-from-start-to-finish',
+ ajaxSwart:'https://www.ajax.nl/artikelen/top-10-goals-mister-ajax',
  psv:'https://www.psv.nl/media/artikel/alles-over-feyenoord-psv-lijkt-garantie-voor-doelpunten',
  feyenoord:'https://www.feyenoord.com/en/our-club/organisation/history',
  dortmund:'https://www.bvb.de/de/en/teams/football/first-team/fifa-club-world-cup/former-players-usa.html',
@@ -16,6 +17,7 @@ const FONTES={
  sevilla:'https://sevillafc.es/en/actualidad/noticias/navas-diciembre-partidos-2024',
  psg:'https://www.psg.fr/en/content/digne-express-lucas-digne-paris-saint-germain-2026-2027',
  monaco:'https://www.asmonaco.com/fr/joueurs/delio-onnis',
+ monacoFalcao:'https://www.asmonaco.com/fr/news/quand-radamel-falcao-el-tigre-rugissait-a-l-as-monaco',
  lyon:'https://www.ol.fr/fr/actualites/depart-dalex-lacazette-la-fin-dune-tres-belle-histoire-31228',
  marseille:'https://billetterie.om.fr/fr/histoire',
 };
@@ -29,8 +31,11 @@ const DADOS={
   recordes:[],
  },
  'Ajax':{
-  atletas:[['Johan Cruijff','ATA','1964–1973; 1981–1983',null,null,'ajax','Ídolo formado em Amsterdã; estreou profissionalmente pelo Ajax em 1964.']],
-  recordes:[],
+  atletas:[
+   ['Johan Cruijff','ATA','1964–1973; 1981–1983',null,null,'ajax','Ídolo formado em Amsterdã; estreou profissionalmente pelo Ajax em 1964.'],
+   ['Sjaak Swart','PD','1956–1973',603,227,'ajaxSwart','Recordista de jogos oficiais pelo Ajax (603), com 227 gols de acordo com o clube.'],
+  ],
+  recordes:[['jogosCarreira','Sjaak Swart',603,'ajaxSwart','603 partidas oficiais pelo Ajax segundo o histórico institucional.']],
   marcos:[[1964,'Estreia de Johan Cruijff no Ajax','ajax','Marco da formação de um dos maiores ídolos da instituição.']],
  },
  'PSV':{
@@ -67,7 +72,10 @@ const DADOS={
   recordes:[],
  },
  'Monaco':{
-  atletas:[['Delio Onnis','ATA','1973–1980',null,null,'monaco','Referência dos artilheiros da liga francesa: 299 gols em toda a competição, sendo 157 pelo Monaco.']],
+  atletas:[
+   ['Delio Onnis','ATA','1973–1980',null,null,'monaco','Referência dos artilheiros da liga francesa: 299 gols em toda a competição, sendo 157 pelo Monaco.'],
+   ['Radamel Falcao','ATA','2013–2019',140,83,'monacoFalcao','83 gols e 14 assistências em 140 jogos, segundo perfil retrospectivo publicado pelo Monaco.'],
+  ],
   recordes:[],
  },
  'Lyon':{

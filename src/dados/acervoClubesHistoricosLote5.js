@@ -10,7 +10,7 @@ const FONTES={
  lazio:'https://www.sslazio.it/en/club/storia-del-club/storia',
  lazioArtilheiro:'https://www.sslazio.it/en/news/statistiche/immobile-domina-nella-top-5-dei-marcatori-laziali-degli-ultimi-10-anni',
  rangers:'https://www.rangers.co.uk/article/play-rangers-museum-lotto/2FjEPRWk02ea37JWHkbdaz',
- celtic:'https://www.uefa.com/uefachampionsleague/news/0200-0e7ec08e3805-72f16e6d7b2b-1000--celtic-close-in-on-group-stage-as-helsborg-visit/',
+ celtic:'https://www.uefa.com/uefachampionsleague/news/0200-0e7ec08e3805-72f16e6d7b2b-1000--celtic-close-in-on-group-stage-as-helsingborg-visit/',
  porto:'https://pt.uefa.com/news-media/news/027b-16aef484ace6-c7f7e024d25e-1000--futebol-portugues-de-luto-por-fernando-gomes/',
  valencia:'https://www.valenciacf.com/se-cumplen-50-anos-del-debut-de-la-leyenda-mario-alberto-kempes-con-el-valencia-cf',
  betis:'https://en.realbetisbalompie.es/club/consejo-de-administracion/joaquin-sanchez',

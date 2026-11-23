@@ -58,6 +58,14 @@ export default function PalcoIdolos({c,tipo='clube',nome}){
     <a href={m.fonte} target="_blank" rel="noopener noreferrer">Fonte histórica</a>
    </li>)}</ol>
   </details>}
+  {tipo==='clube'&&acervo?.tecnicos?.length>0&&<details className="pi-acervo" aria-label={'Técnicos históricos documentados · '+nome}>
+   <summary>Técnicos históricos · {acervo.tecnicos.length} registros</summary>
+   <ol className="pi-marcos-reais">{acervo.tecnicos.map((t,i)=><li key={t.nome+'-'+i}>
+    <strong>{t.nome} · {t.periodo||'Período não especificado'}</strong>
+    <small>{t.descricao}</small>
+    <a href={t.fonte} target="_blank" rel="noopener noreferrer">Fonte histórica</a>
+   </li>)}</ol>
+  </details>}
   {tipo==='selecao'&&acervo?.titulos?.length>0&&<details className="pi-acervo" aria-label={'Títulos históricos da seleção '+nome}>
    <summary>Títulos históricos documentados · {acervo.titulos.length} conquistas</summary>
    <p className="pi-acervo-titulos">{acervo.titulos.map(t=>`${t.ano} · ${t.competicao}`).join('  |  ')}</p>

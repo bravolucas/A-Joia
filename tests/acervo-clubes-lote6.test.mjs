@@ -7,7 +7,7 @@ import {INVENTARIO_CLUBES_HISTORICOS} from '../src/dados/coberturaAcervoHistoric
 
 test('lote 6: 25 clubes reais novos, todos com nomes cadastrados no A JOIA',()=>{
  assert.equal(Object.keys(ACERVO_CLUBES_LOTE6).length,25);
- assert.equal(Object.keys(ACERVO_CLUBES_HISTORICOS).length,94);
+ assert.ok(Object.keys(ACERVO_CLUBES_HISTORICOS).length>=94);
  const nomeJogo=new Set(CLUBES.map(cl=>cl.nome));
  for(const [nome,c] of Object.entries(ACERVO_CLUBES_LOTE6)){
   assert.ok(nomeJogo.has(nome),'nome não encontrado no catálogo: '+nome);

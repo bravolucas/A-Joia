@@ -4,9 +4,9 @@ import {ACERVO_CLUBES_LOTE5} from '../src/dados/acervoClubesHistoricosLote5.js';
 import {ACERVO_CLUBES_HISTORICOS,acervoClubeHistoricoDe} from '../src/dados/acervoClubesHistoricos.js';
 import {consultarRecordesFutebol} from '../src/historia/recordesFutebol.js';
 
-test('lote 5: onze clubes, fontes específicas e 69 clubes na base cumulativa',()=>{
+test('lote 5: onze clubes, fontes específicas e 69 clubes na base até o quinto lote',()=>{
  assert.equal(Object.keys(ACERVO_CLUBES_LOTE5).length,11);
- assert.equal(Object.keys(ACERVO_CLUBES_HISTORICOS).length,69);
+ assert.ok(Object.keys(ACERVO_CLUBES_HISTORICOS).length>=69);
  for(const c of Object.values(ACERVO_CLUBES_LOTE5)){
   assert.strictEqual(acervoClubeHistoricoDe(c.clube),c);
   assert.ok(c.atletas.length>0);

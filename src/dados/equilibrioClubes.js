@@ -1,4 +1,5 @@
 import {CLUBES,JOGADORES_REAIS_BASE} from './data.js';
+import {corrigirNacionalidadeHistoricaJhonArias} from './corrigirNacionalidadeAtletasReais.js';
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
 
 // Base antiga 76 -> 64. A primeira migração é preservada para saves antigos.
@@ -69,5 +70,5 @@ export function corrigirEquilibrioClubes(c) {
    if(Array.isArray(c.tecnico.propostas))out.tecnico.propostas=c.tecnico.propostas.map(p=>p.nome==='Fortaleza'?{...p,elenco:ajustar(p.elenco,10,99)}:p);
   }
  }
- return migrarElencoFortaleza(out);
+ return corrigirNacionalidadeHistoricaJhonArias(migrarElencoFortaleza(out));
 }

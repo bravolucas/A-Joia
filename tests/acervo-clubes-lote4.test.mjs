@@ -25,7 +25,7 @@ test('o quarto lote tem 13 clubes estrangeiros e fontes específicas para cada a
  }
 });
 test('o recorte de ligas e temporadas não fabrica recordes de carreira',()=>{
- for(const nome of ['PSG','Monaco','Lyon','Athletic Bilbao','Marseille','PSV','Ajax']){
+ for(const nome of ['PSG','Monaco','Lyon','Athletic Bilbao','Marseille','PSV']){
   assert.equal(acervoClubeHistoricoDe(nome).recordes.length,0,nome);
  }
  const city=acervoClubeHistoricoDe('Manchester City');

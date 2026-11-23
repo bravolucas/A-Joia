@@ -1,6 +1,7 @@
 import {NACIONALIDADES} from '../dados/data.js';
 import {REFERENCIAS_RECORDES_FUTEBOL} from '../dados/recordesFutebolReais.js';
 import {REFERENCIAS_RECORDES_CLUBES} from '../dados/acervoClubesHistoricos.js';
+import {REFERENCIAS_RECORDES_SELECOES} from '../dados/acervoSelecoesHistoricas.js';
 import {recordesReaisTitulosCompeticao} from './recordesTitulosReais.js';
 import {recordesTreinador,METRICAS_TREINADOR} from './recordesTreinador.js';
 
@@ -383,7 +384,7 @@ export function consultarRecordesFutebol(c={},tipo='clube',nome='',temporadas=c?
  }
  medirCampanhasETitulos(mapa,arquivo,tipo,nome);
  medirAtuacoes(mapa,arquivo,tipo,nome,c?.nome||'Você');
- const referencias=[...REFERENCIAS_RECORDES_FUTEBOL,...REFERENCIAS_RECORDES_CLUBES].filter(r=>
+ const referencias=[...REFERENCIAS_RECORDES_FUTEBOL,...REFERENCIAS_RECORDES_CLUBES,...REFERENCIAS_RECORDES_SELECOES].filter(r=>
   r.tipo===tipo&&(tipo==='competicao'?competicaoIgual(r.nome,nome):eIgual(r.nome,nome)));
  const historicas=new Map([...referencias,...recordesReaisTitulosCompeticao(tipo,nome)].map(r=>[r.id,r]));
  const recordes=METRICAS_RECORDES.filter(m=>mapa.has(m.id)||historicas.has(m.id)).map(m=>{

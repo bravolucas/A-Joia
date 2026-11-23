@@ -1,6 +1,7 @@
 import React,{useMemo,useState} from 'react';
 import {idolosDoClube,idolosDaSelecao,rankingIdolos,CRITERIOS_IDOLOS} from './idolos.js';
 import {lendasDe} from './lendasHistoricas.js';
+import {acervoClubeHistoricoDe} from '../dados/acervoClubesHistoricos.js';
 import LinkEntidade from './LinkEntidade.jsx';
 import './PalcoIdolos.css';
 
@@ -19,7 +20,7 @@ export default function PalcoIdolos({c,tipo='clube',nome}){
  const [id,setId]=useState('torcida');
  const criterio=criterios.find(x=>x.id===id)||criterios[0];
  const ranking=rankingIdolos(lista,criterio,10),podio=ranking.slice(0,3),resto=ranking.slice(3);
- const lendas=lendasDe(nome),contagem=['lenda','idolo','favorito'].map(s=>lista.filter(x=>x.status?.id===s).length);
+ const lendas=lendasDe(nome),acervo=tipo==='clube'?acervoClubeHistoricoDe(nome):null,contagem=['lenda','idolo','favorito'].map(s=>lista.filter(x=>x.status?.id===s).length);
  return <section className="pi-palco" aria-label={`Palco de ídolos · ${nome}`}>
   <header className="pi-topo"><div><span className="hf-eyebrow">PALCO DE ÍDOLOS</span><h3>Quem a torcida de {nome} nunca esquece</h3>
    <p>{contagem[0]} lenda{contagem[0]===1?'':'s'} · {contagem[1]} ídolo{contagem[1]===1?'':'s'} · {contagem[2]} favorito{contagem[2]===1?'':'s'} da torcida neste save</p></div></header>
@@ -39,6 +40,15 @@ export default function PalcoIdolos({c,tipo='clube',nome}){
     <Selo status={x.status}/><b>{n(x[criterio.campo])}</b>
    </li>)}</ol>}
   </>}
+  {acervo?.atletas?.length>0&&<section className="pi-acervo" aria-label={'Atletas históricos documentados · '+nome}>
+   <header><strong>Arquivo histórico real</strong><small>Ídolos anteriores à carreira · dados documentados, independentes do save</small></header>
+   <div className="pi-acervo-lista">{acervo.atletas.map(x=><article key={x.nome}>
+    <strong>{x.nome}</strong><small>{[x.posicao,x.periodo].filter(Boolean).join(' · ')}</small>
+    <p>{x.jogos!=null?`${x.jogos.toLocaleString('pt-BR')} jogos`: 'Jogos não apurados'} · {x.gols!=null?`${x.gols.toLocaleString('pt-BR')} gols`:'Gols não apurados'}</p>
+    <small>{x.descricao}</small><a href={x.fonte} target="_blank" rel="noopener noreferrer">Fonte histórica</a>
+   </article>)}</div>
+   <small className="pi-acervo-nota">O critério de contabilização do clube pode incluir amistosos. Os números acima não são somados aos jogadores deste universo.</small>
+  </section>}
   {lendas.length>0&&<div className="pi-hall" aria-label="Lendas antes deste save"><span>Hall da fama · antes deste save</span><p>{lendas.join(' · ')}</p></div>}
   <details className="pi-como"><summary>Como a afeição da torcida é calculada</summary>
    <p>{tipo==='selecao'?'Jogos, gols, assistências e títulos pela seleção nos torneios simulados.':'Tempo de casa, títulos, gols e assistências, gols em clássicos, jogos e despedida no clube. Para o seu jogador, o vínculo com a torcida também conta. Trocar o clube por um rival clássico derruba a afeição.'} Lenda: 75+ · Ídolo: 55+ · Favorito: 35+.</p>

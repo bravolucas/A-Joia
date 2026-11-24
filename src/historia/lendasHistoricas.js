@@ -827,6 +827,50 @@ export const LENDAS_HISTORICAS = {
   // https://www.fcnantes.com/articles/article2809.php?num=10252
   // https://www.lequipe.fr/Football/Actualites/Nantes-honore-ses-legendes-avant-le-match-face-a-l-om/1518065
   "Nantes": ["Maxime Bossis","Henri Michel","Mickaël Landreau","Didier Deschamps","Marcel Desailly","Christian Karembeu","Vahid Halilhodžić","Japhet N'Doram","Patrice Loko","Loïc Amisse","Jean-Paul Bertrand-Demanes","Reynald Pedros"],
+  // Portugal — primeira divisão do cadastro; seleção editorial parcial de ídolos e destaques, sem ranking. Consulta: 2026-11-24.
+  // Estrela e Académico: nesta etapa, referências das entidades pós-refundação.
+  // https://www.abola.pt/noticias/vem-ai-o-fc-porto-mas-o-misticismo-do-fontelo-pode-dar-noite-a-antiga-2026082821144651220
+  // https://academicodeviseu.pt/noticia.php?n=46
+  "Académico Viseu": ["Fernando Ferreira"],
+  // https://estrelamadora.pt/miguel-lopes-encerra-a-sua-historia-no-estrela-da-amadora/
+  "Estrela da Amadora": ["Miguel Lopes"],
+  // https://www.fcfamalicao.pt/noticias/empate-com-rio-ave-na-apresentacao-2018-2019/
+  "Famalicão": ["Vitor Lima"],
+  // https://www.record.pt/multimedia/fotogalerias/detalhe/o-onze-centenario-do-v-guimaraes-raphinha-e-rui-vitoria-numa-lista-com-o-historico-neno
+  "Vitória de Guimarães": ["Neno","Ricardo Pereira","Geromel","Edmond Tapsoba","Dimas","Pedro Mendes","N'Dinga","Pedro Barbosa","Vítor Paneira","Raphinha","Paulinho Cascavel"],
+  // https://www.transfermarkt.com.br/sc-braga/rekordspieler/verein/1075
+  "Braga": ["Alan","Barroso","Vandinho"],
+  // https://casapiaac.pt/palmares
+  "Casa Pia": ["Cândido de Oliveira","José Maria Gralha","António Pinho","António Lopes"],
+  // https://rioavefc.pt/noticias/futebol/tarantini-a-beira-dos-300/
+  "Rio Ave": ["Tarantini","Niquinha","Gama"],
+  // https://www.zerozero.pt/noticias/recordista-fabio-pacheco-e-o-novo-lider-em-presencas-na-liga-pelo-moreirense/347499
+  // https://moreirensefc.pt/maracas-chega-aos-100-jogos-pelo-moreirense/
+  "Moreirense": ["Fábio Pacheco","Jorge Duarte","Maracás"],
+  // https://www.abola.pt/noticias/ruben-fernandes-alcanca-300-jogos-na-liga-e-aproxima-se-de-marca-historica-pelo-gil-vicente-2024100715512099524
+  // https://www.record.pt/futebol/futebol-nacional/liga-betclic/gil-vicente/detalhe/carlitos-inesquecivel
+  "Gil Vicente": ["Paulo Jorge","Casquilha","Tuck","José Lemos","Rúben Fernandes","Carlitos"],
+  // https://www.zerozero.pt/noticias/se-o-capitao-esgaio-marca-o-arouca-e-feliz/1098834
+  // https://www.rtp.pt/noticias/futebol-nacional/david-simao-anuncia-saida-do-arouca_d1711452
+  "Arouca": ["David Simão","Nuno Coelho","André Bukia","Tiago Esgaio"],
+  // https://cdsantaclara.com/oficial-marco-pereira/
+  // https://cdsantaclara.com/anderson-carvalho-completa-100-jogos-pelo-santa-clara/
+  "Santa Clara": ["Figueiredo","Marco Pereira","Anderson Carvalho","Lincoln"],
+  // https://www.cdnacional.pt/cd-nacional-de-luto-por-maurilio-freitas/
+  // https://www.cdnacional.pt/obrigado-capitao-joao-aurelio/
+  // https://www.cdnacional.pt/o-adeus-de-ruben-micael/
+  "Nacional": ["Maurílio Freitas","João Aurélio","Rúben Micael"],
+  // https://www.cascais.pt/pessoa/marco-silva
+  // https://www.record.pt/futebol/futebol-nacional/liga-betclic/estoril/detalhe/estoril-despede-se-do-capitao-joaozinho
+  // https://www.estorilpraia.pt/blog/capitao-joao-carvalho-atinge-marca-dos-100-jogos-pelo-estoril-praia
+  "Estoril": ["Marco Silva","Joãozinho","João Carvalho"],
+  // https://www.record.pt/futebol/futebol-nacional/liga-betclic/maritimo/detalhe/maritimo-comercializa-video-com-historial
+  // https://www.record.pt/futebol/futebol-nacional/liga-betclic/maritimo/amp/alma-e-mistica-madeirenses-personificadas-no-maritimo
+  // https://en.wikipedia.org/wiki/C.S._Mar%C3%ADtimo_statistics_and_records
+  "Marítimo": ["Carlos Jorge","Arnaldo Carvalho","Eduardo Luís","Ewerton","João Luís","Briguel","Luís Olim","Eusébio Sousa"],
+  // https://fairplay.pt/futebol/futebolnacional/fc-alverca-elenco-sonho-19992000/
+  // https://www.record.pt/futebol/futebol-nacional/liga-betclic/benfica/detalhe/alverca-de-olhos-colocados-no-benfica-e-sporting
+  "Alverca": ["Cajú","Nélson Veríssimo","Abel Silva","Nélson Morais"],
   // Seleções
   'Brasil': ['Pelé', 'Garrincha', 'Ronaldo', 'Romário'],
   'Argentina': ['Diego Maradona', 'Lionel Messi', 'Mario Kempes', 'Gabriel Batistuta'],

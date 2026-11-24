@@ -6,13 +6,17 @@
 const FONTES={
  eyup:'https://www.tff.org/Resources/Tamsaha/234/88-89/',
  eyupT:'https://www.tff.org/Default.aspx?920pg=9&ftxtID=24074&pageID=182',
+ eyupElenco:'https://www.tff.org/Resources/TFF/Documents/LIGLER/2023-2024/T1L/EYUPSPOR.PDF',
  kayseri:'https://www.uefa.com/news-media/news/01cd-0f84d9f95409-c177da819714-1000--kayserispor-hold-nerve-in-cup-final/',
  kayseriInter:'https://www.uefa.com/news/01b7-0e6d938bdc33-c0a7a31f6ff9-1000--brave-ob-surprise-hibernian/',
  kayseriT:'https://www.uefa.com/news-media/news/0205-0f8859891ba8-b99c0d4683ed-1000--kafkas-returns-to-take-charge-of-trabzonspor/',
 };
 const DADOS={
  'Eyüpspor':{
-  atletas:[],
+  atletas:[
+   ['Ahmed Kutucu','ATA','2023–2025',null,null,'eyupElenco','Atacante do elenco histórico campeão da TFF 1. Lig 2023/24.'],
+   ['Gianni Bruno','ATA','2023–2024',null,null,'eyupElenco','Atacante do elenco que conquistou o primeiro acesso à Süper Lig.'],
+  ],
   marcos:[
    [2024,'Primeiro acesso à Süper Lig','eyup','Vitória por 4 a 1 sobre o Altay, em abril de 2024, confirmou a estreia na elite turca.'],
    [2024,'Campeão da segunda divisão turca','eyupT','Conquistou a TFF 1. Lig de 2023/24.'],

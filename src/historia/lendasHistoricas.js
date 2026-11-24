@@ -1109,9 +1109,48 @@ export const LENDAS_HISTORICAS = {
   // https://www.spl.com.sa/en/news/preview-roshn-saudi-league-matchweek-32
   "Al-Raed": ["Karim El Berkaoui","Raed Al Ghamdi","Julio Tavares"],
   // Seleções
-  'Brasil': ['Pelé', 'Garrincha', 'Ronaldo', 'Romário'],
-  'Argentina': ['Diego Maradona', 'Lionel Messi', 'Mario Kempes', 'Gabriel Batistuta'],
-  'Uruguai': ['Obdulio Varela', 'Enzo Francescoli', 'Luis Suárez'],
+  // Seleções sul-americanas — seleção editorial de destaques em diferentes gerações; sem ranking. Fontes consultadas nesta etapa.
+  // https://www.fifa.com/pt/tournaments/mens/worldcup/canadamexicousa2026/articles/copa-mundo-historia-brasileiros-campeoes-1958-1962-1970-1994-2002
+  // https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/articles/homage-to-boys-from-brazil-2026
+  // https://www.fifa.com/en/tournaments/mens/worldcup/articles/south-american-conmebol-qualifying-world-cup-2026-round-matchday-one-preview
+  "Brasil": ["Pelé","Garrincha","Ronaldo","Romário","Didi","Vavá","Mário Zagallo","Nilton Santos","Djalma Santos","Gilmar","Cafu","Bebeto","Ronaldinho Gaúcho","Rivaldo","Roberto Carlos","Tostão","Jairzinho","Carlos Alberto Torres","Rivelino","Neymar"],
+  // https://www.fifa.com/es/tournaments/mens/worldcup/canadamexicousa2026/articles/los-futbolistas-que-conquistaron-la-copa-mundial-con-argentina
+  // https://www.fifa.com/en/tournaments/olympicgames/paris2024/mens/articles/argentina-team-profile-olympics
+  // https://www.fifa.com/en/tournaments/mens/worldcup/articles/argentina-players-record-appearances-games
+  // https://www.fifa.com/pt/articles/copa-mundo-historia-argentina-maiores-artilheiros
+  "Argentina": ["Diego Maradona","Lionel Messi","Mario Kempes","Gabriel Batistuta","Daniel Passarella","Ubaldo Fillol","Jorge Burruchaga","Oscar Ruggeri","Javier Zanetti","Roberto Ayala","Ariel Ortega","Hernán Crespo","Javier Mascherano","Ángel Di María","Nicolás Otamendi"],
+  // https://www.fifa.com/es/articles/uruguay-en-las-copas-mundiales-planteles-entrenadores-y-resultados
+  // https://www.fifa.com/es/articles/las-copas-mundiales-que-gano-uruguay-plantel-entrenador-partidos-y-goleadores
+  // https://www.fifa.com/pt/articles/uruguai-copa-mundo-perfil-historia
+  "Uruguai": ["Obdulio Varela","Enzo Francescoli","Luis Suárez","Juan Alberto Schiaffino","Alcides Ghiggia","Roque Máspoli","Óscar Míguez","Víctor Rodríguez Andrade","Diego Forlán","Diego Godín","Diego Lugano","Edinson Cavani","Fernando Muslera","Sebastián Abreu"],
+  // https://www.fifa.com/es/tournaments/mens/worldcup/canadamexicousa2026/articles/seleccion-colombia-en-las-copas-mundiales-planteles-entrenadores
+  // https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/articles/colombia-team-profile-history
+  "Colômbia": ["Carlos Valderrama","René Higuita","Freddy Rincón","Radamel Falcao","James Rodríguez","Arnoldo Iguarán","Leonel Álvarez","Andrés Escobar","David Ospina","Mario Yepes","Juan Cuadrado","Faryd Mondragón","Bernardo Redín"],
+  // https://www.rsssf.org/miscellaneous/ecua-recintlp.html
+  // https://www.fifa.com/es/tournaments/mens/worldcup/canadamexicousa2026/articles/ecuador-en-la-copa-mundial-fifa-historia
+  // https://www.fifa.com/en/tournaments/mens/worldcup/articles/conmebol-qualifying-top-goalscorers-history
+  "Equador": ["Álex Aguinaga","Iván Hurtado","Agustín Delgado","Antonio Valencia","Enner Valencia","Carlos Tenorio","Giovanni Espinoza","Felipe Caicedo","Cristian Lara"],
+  // https://www.fifa.com/es/tournaments/mens/worldcup/canadamexicousa2026/articles/paraguay-perfil-historia-mundiales
+  // https://www.fifa.com/es/tournaments/mens/worldcup/canadamexicousa2026/articles/historial-capitanes-paraguay-copa-mundial-de-la-fifa
+  // https://www.rsssf.org/miscellaneous/pcdasilva-intl.html
+  // https://rsssf.org/miscellaneous/acuna-intl.html
+  // https://www.rsssf.org/miscellaneous/ayala-intl.html
+  "Paraguai": ["José Luis Chilavert","Carlos Gamarra","Roque Santa Cruz","Justo Villar","Paulo da Silva","Roberto Acuña","Celso Ayala"],
+  // https://inside.fifa.com/news/chile-football-federation-celebrates-125-years-3074625
+  // https://www.fifa.com/es/tournaments/mens/worldcup/articles/jugadores-chile-mas-partidos-alexis-sanchez-gary-medel
+  // https://inside.fifa.com/tournaments/mens/confederationscup/russia2017/news/goycochea-this-is-an-historic-opportunity-for-chile-2878191
+  "Chile": ["Elías Figueroa","Carlos Caszely","Iván Zamorano","Marcelo Salas","Alexis Sánchez","Arturo Vidal","Claudio Bravo","Gary Medel","Mauricio Isla","Patricio Yáñez","Ivo Basay"],
+  // https://elcomercio.pe/deporte-total/seleccion/seleccion-peruana-paolo-guerrero-y-la-vigencia-del-idolo-hasta-cuando-jugaron-cueto-cubillas-sotil-chumpitaz-y-como-saber-cuando-parar-noticia/
+  // https://www.rsssf.org/miscellaneous/peru-guerrero-intl.html
+  // https://www.rsssf.org/miscellaneous/rubendiaz-intl.html
+  // https://www.rsssf.org/miscellaneous/jorgesoto-intl.html
+  // https://the-peruvian.com/blogs/articulos/mejores-futbolistas-peruanos-historia
+  "Peru": ["Teófilo Cubillas","Héctor Chumpitaz","Hugo Sotil","César Cueto","Teodoro Fernández","Paolo Guerrero","Jefferson Farfán","Claudio Pizarro","Nolberto Solano","Pedro Gallese","Rubén Díaz","Jorge Soto"],
+  // https://www.rsssf.org/miscellaneous/bol-recintlp.html
+  // https://www.rsssf.org/miscellaneous/raldes-intl.html
+  // https://historiadelfutbolboliviano.com/2021/12/01/historia-del-futbol-boliviano-capitulo-9-1989-1999-la-decada-de-oro/
+  // https://elrincondelgol.com/los-mejores-futbolistas-de-bolivia-una-mirada-profunda/
+  "Bolívia": ["Marco Etcheverry","Erwin Sánchez","Marcelo Moreno","Julio César Baldivieso","Víctor Agustín Ugarte","Jaime Moreno","Carlos Trucco","Milton Melgar","Carlos Borja","Ronald Raldes","Juan Manuel Peña"],
   'França': ['Zinedine Zidane', 'Michel Platini', 'Thierry Henry', 'Kylian Mbappé'],
   'Alemanha': ['Franz Beckenbauer', 'Gerd Müller', 'Miroslav Klose', 'Lothar Matthäus'],
   'Itália': ['Paolo Maldini', 'Roberto Baggio', 'Gianluigi Buffon', 'Paolo Rossi'],

@@ -473,6 +473,70 @@ export const LENDAS_HISTORICAS = {
   // https://www.elchecf.es/noticias/reportaje-nino-sigue-haciendo-historia
   // https://fcmagazin.com/elx-cf/tots-els-jugadors-de-la-historia-de-lelx-abast/
   "Elche": ["Nino","César Rodríguez","Tomeu Llompart","Vicente Iborra (histórico)","Miguel Quirant","Cayetano Ré","Rubén Cano"],
+  // Espanha — segunda divisão do jogo; seleção editorial parcial de ídolos e destaques históricos, sem ranking. Consulta: 2026-11-24.
+  // https://www.realzaragoza.com/los-magnificos
+  "Real Zaragoza": ["Marcelino","Carlos Lapetra","Canario","Eleuterio Santos","Juan Manuel Villa","Severino Reija","Paco Santamaría"],
+  // https://www.lavozdeasturias.es/amp/noticia/sporting1905/2026/05/02/7-criterios-entrar-paseo-fama-sporting-48-placas-futbolistas-elegidos/00031777717547944973641.htm
+  // https://as.com/futbol/2016/11/24/primera/1480021307_978105.html
+  // https://www.lavozdeasturias.es/noticia/sporting1905/2018/07/22/30-jugadores-valiosos-historia-sporting/00031532252613331144517.htm
+  "Sporting Gijón": ["Quini","Joaquín Alonso","Enzo Ferrero","Cundi","Antonio Maceda","Juan Carlos Ablanedo","Churruca","David Villa"],
+  // https://www.transfermarkt.es/sd-eibar/rekordspieler/verein/1533
+  // https://www.laligaennumeros.es/2015/07/numeros-de-la-sd-eibar-en-primera.html
+  "Eibar": ["Mikel Arruabarrena","Ander Capa"],
+  // https://www.cadizcf.com/historia
+  // https://www.cadizcf.com/noticias/respeto-y-carino-en-el-homenaje-a-la-memoria-cadista
+  "Cádiz": ["Mágico González","Pepe Mejías","Juan José Jiménez","Chico Linares","Carmelo Navarro","Jesús Amarillo"],
+  // https://www.sdhuesca.es/noticias/camacho-se-marcha-una-leyenda
+  "Huesca": ["Juanjo Camacho"],
+  // https://www.granadacf.es/noticias/candi-el-presidente-de-la-etapa-deportiva-mas-gloriosa-del-granada-cf
+  // https://www.granadacf.es/noticias/los-historicos-granadinos-ya-tienen-su-puerta
+  "Granada": ["Enrique Porta","José Aguirre Suárez","Ladislao Mazurkiewicz","Julio Montero Castillo","Thomas Parits","Manuel Lucena"],
+  // https://www.udalmeriasad.com/noticias/corona-se-convierte-en-el-jugador-del-almeria-con-mas-partidos-en-primera-division
+  // https://www.udalmeriasad.com/noticias/luis-suarez-maximo-goleador-del-campeonato-con-27-goles
+  "Almería": ["Corona","José Ortiz Bernal","Fernando Soriano","Leonardo Ulloa","Luis Suárez"],
+  // https://www.clubdeportivotenerife.es/noticias/cifras-nombres-y-hechos-de-un-siglo-de-tinerfenismo
+  // https://www.clubdeportivotenerife.es/noticias/mellot-se-convierte-en-el-extranjero-con-mas-partidos-con-el-cd-tenerife
+  // https://www.clubdeportivotenerife.es/noticias/un-olimpo-distinto-al-de-laliga
+  "Tenerife": ["Juan Antonio Pizzi","Nino","Antonio Pedrero","Julito","Rommel Fernández","Fernando Redondo","Toño Hernández","Felipe Miñambres","Suso Santana"],
+  // https://www.albacetebalompie.es/noticias/el-club-quiso-reconocer-a-sus-leyendas
+  // https://www.albacetebalompie.es/noticias/antonio-y-stuani-en-la-delantera
+  "Albacete": ["José Luis Zalazar","Catali","Luis Gabelo Conejo","Antonio López Alfaro","Porro","Monroy","Cristhian Stuani"],
+  // https://www.burgoscf.es/noticias/gracias-eternas-aitor
+  // https://www.burgoscf.es/noticias/el-burgos-cf-y-unai-elgezabal-separan-sus-caminos
+  "Burgos": ["Aitor Córdoba","Unai Elgezabal"],
+  // https://www.cdcastellon.com/el-cd-castellon-homenajeara-a-los-unicos-tres-futbolistas-que-han-ascendido-en-dos-ocasiones-a-primera-division/
+  // https://castellonplaza.com/castellonplaza/las-leyendas-del-castellon-recuerdan-su-paso-por-el-club
+  "CD Castellón": ["Juan Bautista Planelles","José Ignacio Viña","Pepín Ferrer","Vicente del Bosque","Gaizka Mendieta","Manolo Clares"],
+  // https://www.cdeldense.es/historia
+  "Eldense": ["Andrés Sirvent (Mondonguito)"],
+  // https://www.cordobacf.com/historia
+  "Córdoba": ["Juanín","Miralles","Benegas","Simonet","Mingorance","Paz","Homar"],
+  // https://www.playerhistory.com/es/club/5147-fc-cartagena
+  // https://mexpedia.org/index.php?title=F._C._Cartagena
+  "Cartagena": ["Mariano Sánchez","Toché"],
+  // https://www.cdmirandes.com/noticias/gracias-pablo
+  "Mirandés": ["Pablo Infante"],
+  // https://www.racingclubferrol.net/noticias/o-noso-legado
+  "Racing Ferrol": ["Alberto","Pazolo","Pablo Rodríguez","Sueiro","Manu","Manel","David Pérez"],
+  // https://www.gironafc.cat/es/noticias/200-partits-de-stuani
+  // https://www.gironafc.cat/es/noticias/ya-tenemos-capitanes
+  "Girona": ["Cristhian Stuani","Àlex Granell","Eloi Amagat","Aday Benítez","Pedro Alcalá"],
+  // https://www.laliga.com/noticias/cinco-cosas-que-quiza-no-sabias-del-rcd-mallorca
+  // https://www.laliga.com/noticias/samuel-etoo-elegido-jugador-historico-del-rcd-mallorca
+  "Mallorca": ["Samuel Eto'o","Dani Güiza","Miquel Àngel Nadal","Javier Olaizola","Paco Soler","Ariel Ibagaza","Juan Arango","Carlos Roa"],
+  // https://www.realoviedo.es/club
+  // https://www.realoviedo.es/noticias/hace-85-anos-jugaba-por-ultima-vez-la-segunda-delantera-electrica
+  "Real Oviedo": ["Isidro Lángara","Herrerita","Emilín","Casuco","Gallart","Marianín","Robert Prosinečki","Peter Dubovský"],
+  // https://www.realvalladolid.es/noticias/leyendas-para-respetar-la-historia
+  // https://www.realvalladolid.es/noticias/doblete-historico-para-marcos
+  // https://www.realvalladolid.es/noticias/centenario-del-nacimiento-de-una-leyenda-blanquivioleta
+  "Real Valladolid": ["Alberto Marcos","Luis Mariano Minguela","Pepe Moré","Eusebio Sacristán","Onésimo Sánchez","Paco Lesmes","Juan Carlos Rodríguez"],
+  // https://www.udlaspalmas.es/historia
+  // https://www.udlaspalmas.es/noticias/jonathan-viera-36-anos-despues-un-jugador-de-la-ud-las-palmas-titular-con-espana
+  "Las Palmas": ["Germán Dévora","Tonono","Juan Guedes","Paco Castellano","Martín Marrero","Jonathan Viera"],
+  // https://www.cdleganes.com/historia
+  // https://fundacion.cdleganes.com/club/historia/leyendas/mantovani
+  "Leganés": ["Martín Mantovani","Benjamín Moreno","Catanha","Samuel Eto'o","Javier Eraso","Alberto Martín"],
   // Seleções
   'Brasil': ['Pelé', 'Garrincha', 'Ronaldo', 'Romário'],
   'Argentina': ['Diego Maradona', 'Lionel Messi', 'Mario Kempes', 'Gabriel Batistuta'],

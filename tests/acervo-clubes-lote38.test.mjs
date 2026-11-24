@@ -27,3 +27,21 @@ test('classificação da conferência e resultado da final da MLS mantêm seus r
   assert.ok(miami.some(m => m.ano === 2025 && m.titulo === 'Campeão da MLS Cup' && /3 a 1/.test(m.descricao)));
   assert.ok(ACERVO_CLUBES_LOTE38['Vancouver Whitecaps'].marcos.some(m => m.ano === 2025 && m.titulo === 'Finalista da MLS Cup'));
 });
+
+test('todos os 18 clubes da MLS têm perfis individuais com recortes documentados', () => {
+  const clubes = CLUBES.filter(clube => clube.liga === 'mls');
+  assert.equal(clubes.length, 18);
+  for (const {nome} of clubes) {
+    const ficha = ACERVO_CLUBES_LOTE38[nome];
+    assert.ok(ficha.atletas.length >= 1, nome);
+    assert.ok(ficha.marcos.length >= 1, nome);
+    for (const atleta of ficha.atletas) {
+      assert.match(atleta.fonte, /^https:\/\//);
+      assert.match(atleta.periodo, /20\d{2}/);
+      assert.equal(atleta.jogos, null);
+      assert.equal(atleta.gols, null);
+    }
+  }
+  const messi = ACERVO_CLUBES_LOTE38['Inter Miami'].atletas.find(a => a.nome === 'Lionel Messi');
+  assert.match(messi.descricao, /temporada regular de 2024.*final da MLS Cup de 2025/);
+});

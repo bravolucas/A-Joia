@@ -1,3 +1,5 @@
+import {ACERVO_ATLETAS_HISTORICOS_MLS} from './acervoAtletasHistoricosMLS.js';
+
 // País no arquivo RSSSF → clube no catálogo → linhas da tabela publicada.
 // Ano final, divisão, âncora, conferência, posição, J, V, E, D, GP, GC, Pts, desfecho.
 const CAMPANHAS = {
@@ -833,7 +835,7 @@ const fichas = Object.fromEntries(Object.entries(CAMPANHAS).flatMap(([pais, club
     const marcos = [...linhas.map(linha => marcoDeCampanha(pais, linha)), ...conquistas]
       .sort((a, b) => a.ano - b.ano);
     return [clube, Object.freeze({
-      clube, atualizadoEm: '2026-11-24', atletas: Object.freeze([]),
+      clube, atualizadoEm: '2026-11-24', atletas: ACERVO_ATLETAS_HISTORICOS_MLS[clube] || Object.freeze([]),
       marcos: Object.freeze(marcos), tecnicos: Object.freeze([]), recordes: Object.freeze([]),
     })];
   })));

@@ -771,6 +771,62 @@ export const LENDAS_HISTORICAS = {
   // https://www.lemansfc.fr/index.php?actu=3560&section=actualites-contenu
   // https://lemansfc.fr/index.php?actu=3004&section=actualites-contenu
   "Le Mans": ["Grégory Cerdan","Laurent Bonnart","Frédéric Thomas","Grafite","Gervinho","Romaric","Daisuke Matsui","Yohann Pelé"],
+  // França — segunda divisão do cadastro; seleção editorial parcial, sem ordem de mérito. Consulta: 2026-11-24.
+  // https://www.asse.fr/fr/actualites/toute-la-noblesse-d-une-vieille-dame-de-legende-ac34645
+  "Saint-Étienne": ["Robert Herbin","Hervé Revelli","Salif Keita","Rachid Mekhloufi","Ivan Ćurković","Dominique Rocheteau","Michel Platini","Jean-Michel Larqué","Loïc Perrin","Ľubomír Moravčík"],
+  // https://girondins.com/fr/club/legends
+  // https://www.girondins.com/fr/news/34421/un-joyeux-anniversaire-a-jean-tigana
+  // https://www.girondins.com/fr/news/22795/julien-bee-et-laurent-brun-parlent-de-lescure-et-les-girondins
+  // https://www.girondins.com/fr/news/32912/decouvrez-le-programme-des-matches-des-140-ans
+  "Bordeaux": ["Alain Giresse","Jean Tigana","Dominique Dropsy","Zinedine Zidane","Pedro Pauleta","Cédric Carrasso","Marouane Chamakh"],
+  // https://www.fcmetz.com/historique/histoire-du-club
+  // https://www.estrepublicain.fr/sport/2022/04/01/elisez-votre-onze-de-legende-du-fc-metz-de-1932-a-nos-jours
+  "Metz": ["Sylvain Kastendeuch","Robert Pirès","Philippe Hinschberger","Michel Ettorre","Philippe Gaillot","Jules Bocandé","Nico Braun","Bernard Zénier","Frédéric Meyrieu"],
+  // https://www.smcaen.fr/node/274
+  // https://www.ouest-france.fr/sport/football/sm-caen/
+  // https://www.smcaen.fr/2019-2020/actualites/retrospective/il-etait-une-fois-luc-borrelli
+  "Caen": ["Luc Borrelli","Nicolas Seube","Franck Dumas","Fabrice Divert","Xavier Gravelaine","Anthony Deroin","Yvan Lebourgeois","Stéphane Paille","N'Golo Kanté"],
+  // https://www.eaguingamp.com/le-club/
+  // https://cdt22.media.tourinsoft.eu/upload/guide-du-patrimoine-guingamp-2017-4.pdf
+  // https://www.guingamp.fr/
+  "Guingamp": ["Didier Drogba","Florent Malouda","Stéphane Guivarc'h","Coco Michel","Stéphane Carnot","Andrzej Szarmach","Vincent Candela"],
+  // https://ac-ajaccio.corsica/club/storia/i-ghjucadori
+  "Ajaccio": ["Albert Vannucci","Jean-Jean Marcialis","Dominique Baratelli","José Cau","Michel Albaladejo","David Terrier","Stéphane Trévisan","Alain Mistre"],
+  // https://www.clermontfoot.com/match-des-legendes-tous-les-joueurs-presents
+  // https://www.clermontfoot.com/johan-gastien-lame-du-club-tire-sa-reverence
+  // https://www.clermontfoot.com/yohann-magnin-quitte-le-club-apres-16-annees-en-rouge-bleu
+  "Clermont Foot": ["Eugène Ekobo","Cédric Bockhorni","Rémy Dugimont","Johan Gastien","Yohann Magnin","Jonathan Iglesias","Mohamed Bayo"],
+  // https://sc-bastia.corsica/pages/histoire-du-club
+  // https://www.football-the-story.com/blog/sc-bastia
+  "Bastia": ["Claude Papi","Dragan Džajić","Charles Orlanducci","Johnny Rep","Jacques Zimako","François Félix","Roger Milla"],
+  // https://rodezaveyronfootball.com/2022/08/ligue-2-bkt-apres-15-ans-au-raf-pierre-bardy-sen-va/
+  "Rodez": ["Pierre Bardy","Freddy Castanier"],
+  // https://www.football-the-story.com/blog/stade-lavallois
+  // https://www.unfp.org/2023/12/disparition-de-michel-le-milinaire/
+  // https://fr.wikipedia.org/wiki/Stade_lavallois_Mayenne_Football_Club
+  "Laval": ["Raymond Keruzoré","Patrick Delamontagne","François Omam-Biyik","Michel Le Milinaire","Jacques Ferrette","Maurice Gaumer"],
+  // https://www.paureinedessports.com/foot-pau-fc
+  // https://fr.wikipedia.org/wiki/Pau_Football_Club
+  "Pau FC": ["Paul Escudé","Joël Lopez"],
+  // https://www.football-the-story.com/amiens-sc
+  "Amiens": ["Paul Imiéla","Jean-Paul Abalo","Régis Gurtner","Georges Taisne","Urbain Wallet"],
+  // https://www.usldunkerque.com/lusl-dunkerque-et-jocelyn-blanchard-ont-dun-commun-accord-mis-fin-a-leur-collaboration/
+  // https://www.usldunkerque.com/dimitri-boudaud-prolonge-avec-lusld/
+  // https://www.usldunkerque.com/embleme-du-football-dunkerquois-alex-dupont-nest-plus/
+  // https://www.usldunkerque.com/alain-fairise-une-legende-dunkerquoise-nous-quitte/
+  // https://www.usldunkerque.com/demba-thiam-nest-plus-maritime/
+  // https://quatretroistrois.fr/dunkerque-les-10-meilleurs-joueurs-de-lhistoire-du-club/
+  "Dunkerque": ["Jocelyn Blanchard","Dimitri Boudaud","Alex Dupont","Alain Fairise","Demba Thiam","Jean-Claude Garnier"],
+  // https://fcmartigues.com/histoire-du-club/
+  "Martigues": ["Henri Canet","Patrick Dho","Ali Benarbia","Patrick Blondeau","Éric Cantona"],
+  // https://www.redstar.fr/les-grands-noms/
+  "Red Star": ["Lucien Gamblin","Marcel Dantheny","Marcel Domergue","Marcel Langiller","Maurice Meyer","Nestor Combin","Paul Nicolas","Philippe Bonnardel"],
+  // https://www.stade-de-reims.com/entrez-dans-la-legende/
+  // https://www.lemonde.fr/sport/article/2025/05/24/au-stade-de-reims-un-heritage-lourd-a-porter-qui-refait-timidement-surface-a-l-occasion-de-la-finale-de-la-coupe-de-france-contre-le-psg_6608218_3242.html
+  "Reims": ["Raymond Kopa","Just Fontaine","Roger Piantoni","Robert Jonquet","Armand Penverne"],
+  // https://www.fcnantes.com/articles/article2809.php?num=10252
+  // https://www.lequipe.fr/Football/Actualites/Nantes-honore-ses-legendes-avant-le-match-face-a-l-om/1518065
+  "Nantes": ["Maxime Bossis","Henri Michel","Mickaël Landreau","Didier Deschamps","Marcel Desailly","Christian Karembeu","Vahid Halilhodžić","Japhet N'Doram","Patrice Loko","Loïc Amisse","Jean-Paul Bertrand-Demanes","Reynald Pedros"],
   // Seleções
   'Brasil': ['Pelé', 'Garrincha', 'Ronaldo', 'Romário'],
   'Argentina': ['Diego Maradona', 'Lionel Messi', 'Mario Kempes', 'Gabriel Batistuta'],

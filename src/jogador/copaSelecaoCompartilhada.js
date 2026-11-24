@@ -19,7 +19,7 @@ const selecionar=(c,card)=>{
 };
 /** Não reabre ou redesenha uma Copa já iniciada, nem reinterpreta saves antigos. */
 export function iniciarCopaCompartilhada(c,card){
- if(!card?.copa?.convocado||card.copa.fim||card.copaCompartilhada)return card;
+ if(!card?.copa?.convocado||card.copa.fim||card.copaCompartilhada||card.copa.jogos?.length||card.copa.etapa!=='grupos')return card;
  const k=card.copa,usuario=k.label;
  const participantes=selecionar(c,card).map(n=>({nome:n.nome||n.label,nac:n.nac||n.id,forca:Number(n.elenco??n.forcaSelecao??n.forca??65)}));
  const jaTem=participantes.some(p=>p.nac===c.nac);

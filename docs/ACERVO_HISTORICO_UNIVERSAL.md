@@ -16,9 +16,9 @@ O inventário único, deduplicado por nome, está em
 `src/dados/coberturaAcervoHistorico.js`.
 
 ## Fichas e recordes verificados
-- `src/dados/acervoClubesHistoricos.js` e `acervoClubesHistoricosLote2.js` `acervoClubesHistoricosLote3.js` `acervoClubesHistoricosLote4.js` `acervoClubesHistoricosLote5.js` `acervoClubesHistoricosLote6.js` `acervoClubesHistoricosLote7.js` `acervoClubesHistoricosLote8.js` `acervoClubesHistoricosLote9.js` `acervoClubesHistoricosLote10.js` `acervoClubesHistoricosLote11.js` `acervoClubesHistoricosLote12.js` `acervoClubesHistoricosLote13.js` `acervoClubesHistoricosLote14.js` `acervoClubesHistoricosLote15.js` `acervoClubesHistoricosLote16.js` `acervoClubesHistoricosLote17.js` `acervoClubesHistoricosLote18.js` `acervoClubesHistoricosLote19.js` `acervoClubesHistoricosLote20.js` e `acervoClubesHistoricosLote21.js`.
+- `src/dados/acervoClubesHistoricos.js` e `acervoClubesHistoricosLote2.js` `acervoClubesHistoricosLote3.js` `acervoClubesHistoricosLote4.js` `acervoClubesHistoricosLote5.js` `acervoClubesHistoricosLote6.js` `acervoClubesHistoricosLote7.js` `acervoClubesHistoricosLote8.js` `acervoClubesHistoricosLote9.js` `acervoClubesHistoricosLote10.js` `acervoClubesHistoricosLote11.js` `acervoClubesHistoricosLote12.js` `acervoClubesHistoricosLote13.js` `acervoClubesHistoricosLote14.js` `acervoClubesHistoricosLote15.js` `acervoClubesHistoricosLote16.js` `acervoClubesHistoricosLote17.js` `acervoClubesHistoricosLote18.js` `acervoClubesHistoricosLote19.js` `acervoClubesHistoricosLote20.js` `acervoClubesHistoricosLote21.js` e `acervoClubesHistoricosLote22.js`.
 - `src/dados/acervoSelecoesHistoricas.js`.
-- Clubes com fichas individuais verificadas neste ciclo: **212**.
+- Clubes com fichas individuais verificadas neste ciclo: **215**.
 - Seleções com fichas individuais verificadas neste ciclo: **21**.
 - As 23 equipes da Série D, as 20 equipes da Série C e as 20 equipes da Série B do catálogo principal possuem ficha histórica inicial.
 - O lote 6 e o lote 8 incluem técnicos responsáveis por títulos documentados.
@@ -34,6 +34,7 @@ O inventário único, deduplicado por nome, está em
 - O lote 19 inclui Eyüpspor e Kayserispor, com fontes da TFF e UEFA, atletas documentados e marcos de acesso e títulos.
 - O lote 20 adiciona Al-Fateh (título saudita 2012/13) e Al-Taawoun (King’s Cup 2018/19), com documentação da AFC.
 - O lote 21 adiciona Al-Ettifaq (títulos sauditas de 1983 e 1987) e Gaziantep FK (origem como Sankospor e primeiro acesso à elite em 2019), preservando a distinção em relação ao Gaziantepspor.
+- O lote 22 adiciona Rizespor, Al-Qadsiah e Al-Khaleej com fundação, acessos, títulos e jogadores documentados; o Al-Khaleej ainda não possui atleta individual apurado.
 - As demais entidades têm cobertura `pendente_apuracao`.
 - Dados reais são independentes do Arquivo Vivo de cada save.
 - Os títulos históricos de seleções já existentes foram reutilizados, sem

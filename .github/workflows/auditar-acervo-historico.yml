@@ -19,6 +19,6 @@ jobs:
       - name: Verificar testes do acervo por lote e deduplicacao
         shell: bash
         run: |
-          node --test tests/acervo-clubes-historicos.test.mjs tests/acervo-clubes-lote*.test.mjs tests/acervo-deduplicacao-lotes.test.mjs tests/acervo-cobertura-ligas.test.mjs
+          node --test tests/acervo-clubes-historicos.test.mjs tests/acervo-clubes-lote*.test.mjs tests/acervo-deduplicacao-lotes.test.mjs tests/acervo-cobertura-ligas.test.mjs tests/acervo-selecoes-historicas.test.mjs tests/acervo-serie-d-cobertura.test.mjs
       - name: Gerar inventario pendente
         run: node scripts/auditar-acervo-historico.mjs --json

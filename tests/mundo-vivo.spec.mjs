@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {criarJogador,jogarTemporada,fecharTemporada,aplicarMomento,resolverCopaAuto} from '../src/jogador/rapido.js';
 import {LIGAS} from '../src/dados/data.js';
+import {jogosDaEdicao} from '../src/simulacao/mundoVivo.js';
 test.setTimeout(90000);
 const url='http://127.0.0.1:4173/A-Joia/';
 let pronto;
@@ -29,12 +30,22 @@ for(const width of [360,1366])test(`mundo vivo: IndexedDB, arquivo de clubes, jo
  await expect(d.locator('.mv-jogos li')).toHaveCount(0);
  await d.getByRole('button',{name:/TODOS OS JOGOS/}).click();
  await expect(d.locator('.mv-jogos li').first()).toBeVisible();
- await d.getByLabel('Filtrar pelo clube').selectOption('Corinthians');
+ const ligaArquivada=s.c.universo.edicoes.find(e=>e.nome===LIGAS.brasileirao.nome&&e.tipo==='liga');
+ const jogosArquivados=jogosDaEdicao(ligaArquivada);
+ const ultimaRodada=jogosArquivados.filter(j=>j.rodada===38);
+ expect(ultimaRodada.length).toBeGreaterThan(0);
+ // O clube do jogador pode estar em outra liga no cadastro inicial. Filtrar
+ // por uma equipe que realmente aparece nos jogos arquivados, sem inventar partidas.
+ const clubeFiltro=ultimaRodada[0].casa;
+ const jogosClube=jogosArquivados.filter(j=>j.casa===clubeFiltro||j.fora===clubeFiltro);
+ const rodadasClube=new Set(jogosClube.map(j=>j.rodada).filter(Number.isInteger));
  const rodada=d.getByRole('region',{name:'Partida por partida'}).getByLabel('Rodada',{exact:true});
  await expect(rodada.locator('option')).toHaveCount(38);
- await expect(d.locator('.mv-jogos li')).toHaveCount(1);
+ await d.getByLabel('Filtrar pelo clube').selectOption(clubeFiltro);
+ await expect(rodada.locator('option')).toHaveCount(rodadasClube.size);
+ await expect(d.locator('.mv-jogos li').first()).toBeVisible();
  await rodada.selectOption('rodada-38');
- await expect(d.locator('.mv-jogos li')).toHaveCount(1);
+ await expect(d.locator('.mv-jogos li')).toHaveCount(ultimaRodada.filter(j=>j.casa===clubeFiltro||j.fora===clubeFiltro).length);
  await expect(d.locator('.mv-partidas-contador')).toContainText('Rodada 38');
  const lider=d.locator('.mv-lideres article').filter({has:page.getByRole('heading',{name:'Artilheiros',exact:true})}).locator('li').first();
  await expect(lider).toBeVisible();await expect(lider).not.toContainText(LIGAS.brasileirao.nome);

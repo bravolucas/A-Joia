@@ -57,3 +57,16 @@ test('convocacao e saves legados nao ressorteiam partidas existentes',()=>{
  const sorteada=iniciarCopaCompartilhada(c,card);
  assert.equal(iniciarCopaCompartilhada(c,sorteada),sorteada);
 });
+
+test('Copas consecutivas de 2026, 2030 e 2034 preservam edição e sorteio distintos',()=>{
+ const {c,card}=origem(),assinaturas=new Set();
+ for(const ano of [2026,2030,2034]){
+  const atleta={...c,ano},temporada={...card,ano,copa:{...card.copa,ano}};
+  const campanha=iniciarCopaCompartilhada(atleta,temporada).copaCompartilhada;
+  assert.equal(campanha.ano,ano);
+  assert.equal(campanha.participantes,48);
+  assert.equal(campanha.gruposSorteados.length,12);
+  assinaturas.add(campanha.seed);
+ }
+ assert.equal(assinaturas.size,3);
+});

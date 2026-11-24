@@ -584,6 +584,51 @@ export const LENDAS_HISTORICAS = {
   "Lecce": ["Michele Lorusso","Pedro Pasculli","Antonio Conte","Mirko Vučinić","Guillermo Giacomazzi"],
   // https://ilmonzasiamonoi.it/storia/monza-hall-of-fame/
   "Monza": ["Sergio Magni","Marco Bolis","Francesco Copreni","Roberto Fontanini","Dany Mota"],
+  // Itália — segunda divisão do cadastro do jogo; seleção editorial parcial, sem ordem de mérito; consulta 2026-11-24.
+  // Brescia: galeria do Brescia Calcio histórico, não de eventual entidade sucessora.
+  // https://www.sampdoria.it/en/history-en/
+  // https://www.sampdoria.it/legends/
+  "Sampdoria": ["Roberto Mancini","Gianluca Vialli","Gianluca Pagliuca","Pietro Vierchowod","Attilio Lombardo","Toninho Cerezo","Moreno Mannini","Luca Pellegrini","Fausto Pari","Trevor Francis"],
+  // https://www.palermofc.com/it/news/hall-of-fame-ecco-gli-11-1-scelti-dai-tifosi-rosanero
+  "Palermo": ["Stefano Sorrentino","Federico Balzaretti","Andrea Barzagli","Fabio Grosso","Eugenio Corini","Josip Iličić","Javier Pastore","Lamberto Zauli","Paulo Dybala","Fabrizio Miccoli","Luca Toni"],
+  // https://www.legab.it/news/buon-compleanno-bari
+  // https://www.legab.it/seriebkt/ultime-news/i-giocatori-iconici-che-hanno-vestito-la-maglia-del-bari
+  "Bari": ["Jean-François Gillet","Giovanni Loseto","Igor Protti","Sandro Tovalieri","Antonio Cassano","Phil Masinga","Mirco Antenucci","Valerio Di Cesare"],
+  // https://sport.sky.it/calcio/cremonese-giocatori-famosi-storia
+  // https://uscremonese.it/abbonamenti-2024-25-chiusura-a-quota-6mila-313/
+  "Cremonese": ["Gianluca Vialli","Enrico Chiesa","Attilio Lombardo","Erminio Favalli"],
+  // https://www.speziacalcio.com/it/primati.12100.html
+  // https://www.spezia1906.com/2025/05/07/altri-tre-pezzi-di-storia-nella-hof-bonanni-un-premio-per-tutti-noi/
+  "Spezia": ["Osvaldo Motto","Giampaolo Bonanni","Gianni Zennaro"],
+  // https://www.calciocatanzaro.it/miti/massimo-palanca/
+  // https://www.catanzaroclub79.it/storia/
+  "Catanzaro": ["Massimo Palanca","Angelo Mammì","Renzo Rossi"],
+  // https://www.legab.it/news/gli-attaccanti-piu-iconici-del-brescia
+  // https://www.guerinsportivo.it/news/il-cuoio/2025/06/11-8194069/addio_brescia_ecco_un_undici_ideale
+  "Brescia": ["Roberto Baggio","Luca Toni","Dario Hübner","Andrea Pirlo","Gheorghe Hagi","Igli Tare"],
+  // https://www.legab.it/news/i-calciatori-iconici-che-hanno-vestito-la-maglia-del-modena
+  "Modena": ["Renato Braglia","Alfredo Mazzoni"],
+  // https://www.calcioweb.eu/squadre/salernitana/storia/
+  // https://sport.sky.it/calcio/serie-a/salernitana-giocatori-famosi-storia
+  "Salernitana": ["Marco Di Vaio","Agostino Di Bartolomei","Gennaro Gattuso","David Di Michele","Arturo Di Napoli","Salvatore Fresi"],
+  // https://reggianacalcio.it/2026/09/04/third-kit-26-27-ac-reggiana-e-la-storia-che-non-si-dimentica-con-il-professore-aldo-catalani/
+  // https://reggianacalcio.it/2025/06/27/paolo-rozzio-e-granata-per-la-decima-stagione/
+  "Reggiana": ["Aldo Catalani","Paolo Rozzio"],
+  // https://www.cesenafc.com/it/society/history
+  "Cesena": ["Walter Schachner","Massimo Agostini","Agatino Cuttone","Dario Hübner","Davor Jozić","Giuseppe Piraccini","Pierluigi Cera"],
+  // https://vocedimantova.it/sport/calcio-serie-c-guccione-verso-la-quarta-stagione-di-fila-nel-mantova-un-evento/
+  // https://vocedimantova.it/sport/calcio-serie-b-mantova-6-stagioni-di-fila-per-panizzi-solo-in-24-prima-di-lui/
+  "Mantova": ["Manuel Spinale","Gaetano Caridi","Gabriele Graziani","Pierangelo Avanzi"],
+  // https://www.ascittadella.it/notizie/capitan-iori-fa-200/
+  // https://www.ascittadella.it/notizie/coralli-nella-storia/
+  // https://www.mattinopadova.it/sport/iori-sono-303-presenze-in-maglia-granata-storia-di-questo-club-qqugul97
+  "Cittadella": ["Manuel Iori","Claudio Coralli","Joachim De Gasperi","Alberto Marchesan","Andrea Pierobon"],
+  // https://hellasverona.it/news/12-maggio-1985-hellas-verona-campione-ditalia-video
+  // https://hellasverona.it/news/veronacamp40ne-lhellas-verona-e-gli-eroi-dello-scudetto-ospiti-a-montecitorio
+  "Verona": ["Preben Elkjær","Hans-Peter Briegel","Roberto Tricella","Claudio Garella","Giuseppe Galderisi","Pietro Fanna","Domenico Volpati","Antonio Di Gennaro"],
+  // https://www.legab.it/news/i-calciatori-iconici-che-hanno-vestito-la-maglia-del-pisa
+  // https://news.bet365.it/it-it/article/pisa-i-giocatori-piu-famosi-della-storia-del-club-simeone-dunga-kieft-berggreen-vieri-allegri/2025050613524067553
+  "Pisa": ["Fabrizio Barontini","Piero Gionfantini","Klaus Berggreen"],
   // Seleções
   'Brasil': ['Pelé', 'Garrincha', 'Ronaldo', 'Romário'],
   'Argentina': ['Diego Maradona', 'Lionel Messi', 'Mario Kempes', 'Gabriel Batistuta'],

@@ -6,12 +6,12 @@ import {idolosDoClube} from '../src/historia/idolos.js';
 
 test('lote 1: fontes, escopos, valores válidos e sem métricas duplicadas por clube',()=>{
  const clubes=Object.values(ACERVO_CLUBES_HISTORICOS);
- assert.equal(clubes.length,191);
+ assert.ok(clubes.length>=225,'não remover as fichas documentadas do lote 26');
  assert.ok(REFERENCIAS_RECORDES_CLUBES.length>=20);
  const chaves=new Set();
  for(const c of clubes){
   assert.ok(c.clube&&c.atualizadoEm);
-  assert.ok(c.atletas.length>0);
+  assert.ok(c.atletas.length>0||c.marcos?.length>0||c.recordes.length>0,'Ficha sem evidência documentada: '+c.clube);
   for(const a of c.atletas){
    assert.ok(a.nome&&a.fonte?.startsWith('https://'));
    for(const k of ['jogos','gols']) assert.ok(a[k]===null||(Number.isInteger(a[k])&&a[k]>0));

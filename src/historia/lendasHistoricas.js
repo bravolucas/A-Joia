@@ -1171,6 +1171,25 @@ export const LENDAS_HISTORICAS = {
   "Holanda": ["Johan Cruyff","Marco van Basten","Ruud Gullit","Johan Neeskens","Ruud Krol","Frank Rijkaard","Ronald Koeman","Dennis Bergkamp","Edwin van der Sar","Wesley Sneijder","Arjen Robben","Robin van Persie","Memphis Depay","Ruud van Nistelrooy"],
   // https://www.rsssf.org/miscellaneous/port-recintlp.html
   "Portugal": ["Cristiano Ronaldo","Eusébio","Luís Figo","Rui Costa","Pepe","Pauleta","João Moutinho","Nani","Fernando Couto","Rui Patrício","Ricardo Carvalho","Nuno Gomes","Bernardo Silva","Bruno Fernandes"],
+  // UEFA — novas galerias editoriais, sem ordem de mérito. A seleção tcheca considera apenas atletas que a representaram após 1993.
+  // https://www.rsssf.org/miscellaneous/belg-recintlp.html
+  "Bélgica": ["Paul Van Himst","Jan Ceulemans","Enzo Scifo","Eric Gerets","Jean-Marie Pfaff","Michel Preud'homme","Marc Wilmots","Vincent Kompany","Eden Hazard","Kevin De Bruyne","Romelu Lukaku","Thibaut Courtois"],
+  // https://www.rsssf.org/miscellaneous/kroa-recintlp.html
+  "Croácia": ["Davor Šuker","Zvonimir Boban","Robert Prosinečki","Slaven Bilić","Luka Modrić","Ivan Rakitić","Mario Mandžukić","Ivan Perišić","Darijo Srna","Stipe Pletikosa","Mateo Kovačić"],
+  // https://www.rsssf.org/miscellaneous/zwit-recintlp.html
+  "Suíça": ["Heinz Hermann","Alain Geiger","Stéphane Chapuisat","Alexander Frei","Hakan Yakin","Gökhan Inler","Stephan Lichtsteiner","Granit Xhaka","Xherdan Shaqiri","Yann Sommer"],
+  // https://www.rsssf.org/miscellaneous/den-recintlp.html
+  "Dinamarca": ["Michael Laudrup","Brian Laudrup","Peter Schmeichel","Preben Elkjær","Allan Simonsen","Morten Olsen","Jon Dahl Tomasson","Dennis Rommedahl","Christian Eriksen","Simon Kjær","Kasper Schmeichel"],
+  // https://www.rsssf.org/miscellaneous/pol-recintlp.html
+  "Polônia": ["Kazimierz Deyna","Grzegorz Lato","Włodzimierz Lubański","Zbigniew Boniek","Jan Tomaszewski","Andrzej Szarmach","Robert Lewandowski","Jakub Błaszczykowski","Kamil Glik","Wojciech Szczęsny"],
+  // https://www.rsssf.org/miscellaneous/zwed-recintlp.html
+  "Suécia": ["Gunnar Nordahl","Gunnar Gren","Nils Liedholm","Kurt Hamrin","Tomas Brolin","Henrik Larsson","Zlatan Ibrahimović","Anders Svensson","Thomas Ravelli","Freddie Ljungberg","Olof Mellberg"],
+  // https://www.rsssf.org/miscellaneous/oost-recintlp.html
+  "Áustria": ["Matthias Sindelar","Ernst Happel","Gerhard Hanappi","Ernst Ocwirk","Toni Polster","Herbert Prohaska","Andreas Herzog","David Alaba","Marko Arnautović","Andreas Ivanschitz"],
+  // https://www.rsssf.org/miscellaneous/hong-recintlp.html
+  "Hungria": ["Ferenc Puskás","Sándor Kocsis","Nándor Hidegkuti","József Bozsik","Gyula Grosics","Flórián Albert","Lajos Tichy","László Fazekas","Zoltán Gera","Balázs Dzsudzsák","Dominik Szoboszlai"],
+  // https://www.rsssf.org/miscellaneous/tsje-recintlp.html
+  "República Tcheca": ["Pavel Nedvěd","Karel Poborský","Petr Čech","Jan Koller","Tomáš Rosický","Vladimír Šmicer","Milan Baroš","Tomáš Ujfaluši","Jaroslav Plašil","Patrik Schick"],
 };
 // Nomes alternativos existentes no cadastro das divisões alemãs: uma única galeria por identidade.
 const ALIASES_LENDAS = Object.freeze({ 'Hamburgo': 'Hamburger SV', 'Köln': 'FC Köln' });

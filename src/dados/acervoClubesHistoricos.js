@@ -160,7 +160,33 @@ const MAPA = Object.fromEntries(Object.entries(CLUBES).map(([nome,entrada])=>[no
    Object.freeze({tipo:'clube',nome,id,atleta,valor,ano,destaque,fonte:FONTES[f],data:'2026-11-23',
     comparavel:false,criterio:'Contagem do acervo histórico; metodologia não necessariamente equivalente às competições simuladas.'}))),
 })]));
-export const ACERVO_CLUBES_HISTORICOS = Object.freeze({...MAPA,...ACERVO_CLUBES_LOTE2,...ACERVO_CLUBES_LOTE3,...ACERVO_CLUBES_LOTE4,...ACERVO_CLUBES_LOTE5,...ACERVO_CLUBES_LOTE6,...ACERVO_CLUBES_LOTE7,...ACERVO_CLUBES_LOTE8,...ACERVO_CLUBES_LOTE9,...ACERVO_CLUBES_LOTE10,...ACERVO_CLUBES_LOTE11,...ACERVO_CLUBES_LOTE12,...ACERVO_CLUBES_LOTE13,...ACERVO_CLUBES_LOTE14,...ACERVO_CLUBES_LOTE15,...ACERVO_CLUBES_LOTE16,...ACERVO_CLUBES_LOTE17,...ACERVO_CLUBES_LOTE18,...ACERVO_CLUBES_LOTE19,...ACERVO_CLUBES_LOTE20,...ACERVO_CLUBES_LOTE21,...ACERVO_CLUBES_LOTE22,...ACERVO_CLUBES_LOTE23,...ACERVO_CLUBES_LOTE24,...ACERVO_CLUBES_LOTE25,...ACERVO_CLUBES_LOTE26});
+/** O lote 26 aprofunda dois clubes já documentados no lote 17.
+ * Unir atletas e técnicos evita que um novo levantamento apague registros antigos.
+ * Marcos da mesma competição e edição ficam com a descrição mais recente,
+ * mantendo referências complementares em 'fontesAdicionais'.
+ */
+const combinarAtualizacao = (anterior,novo) => {
+ if(!anterior)return novo;
+ const atletas=new Map((anterior.atletas||[]).map(a=>[a.nome,a]));
+ for(const atleta of novo.atletas||[])atletas.set(atleta.nome,{...atletas.get(atleta.nome),...atleta});
+ const tecnicos=new Map((anterior.tecnicos||[]).map(t=>[t.nome+'|'+t.periodo,t]));
+ for(const tecnico of novo.tecnicos||[])tecnicos.set(tecnico.nome+'|'+tecnico.periodo,tecnico);
+ const chaveMarco=m=>String(m.ano)+'|'+(/Copa da Turquia/i.test(m.titulo)?'copa-da-turquia':m.titulo.toLocaleLowerCase('tr'));
+ const marcos=new Map((anterior.marcos||[]).map(m=>[chaveMarco(m),m]));
+ for(const marco of novo.marcos||[]){
+  const chave=chaveMarco(marco),antigo=marcos.get(chave);
+  marcos.set(chave,antigo?{...marco,fontesAdicionais:[antigo.fonte,...(antigo.fontesAdicionais||[]),...(marco.fontesAdicionais||[])].filter((u,i,a)=>u&&u!==marco.fonte&&a.indexOf(u)===i)}:marco);
+ }
+ return Object.freeze({...anterior,...novo,
+  atletas:Object.freeze([...atletas.values()].map(Object.freeze)),
+  tecnicos:Object.freeze([...tecnicos.values()].map(Object.freeze)),
+  marcos:Object.freeze([...marcos.values()].map(Object.freeze)),
+  recordes:Object.freeze([...(anterior.recordes||[]),...(novo.recordes||[])]),
+ });
+};
+const LOTE26_CONSOLIDADO=Object.freeze(Object.fromEntries(Object.entries(ACERVO_CLUBES_LOTE26)
+ .map(([nome,ficha])=>[nome,combinarAtualizacao(ACERVO_CLUBES_LOTE17[nome],ficha)])));
+export const ACERVO_CLUBES_HISTORICOS = Object.freeze({...MAPA,...ACERVO_CLUBES_LOTE2,...ACERVO_CLUBES_LOTE3,...ACERVO_CLUBES_LOTE4,...ACERVO_CLUBES_LOTE5,...ACERVO_CLUBES_LOTE6,...ACERVO_CLUBES_LOTE7,...ACERVO_CLUBES_LOTE8,...ACERVO_CLUBES_LOTE9,...ACERVO_CLUBES_LOTE10,...ACERVO_CLUBES_LOTE11,...ACERVO_CLUBES_LOTE12,...ACERVO_CLUBES_LOTE13,...ACERVO_CLUBES_LOTE14,...ACERVO_CLUBES_LOTE15,...ACERVO_CLUBES_LOTE16,...ACERVO_CLUBES_LOTE17,...ACERVO_CLUBES_LOTE18,...ACERVO_CLUBES_LOTE19,...ACERVO_CLUBES_LOTE20,...ACERVO_CLUBES_LOTE21,...ACERVO_CLUBES_LOTE22,...ACERVO_CLUBES_LOTE23,...ACERVO_CLUBES_LOTE24,...ACERVO_CLUBES_LOTE25,...LOTE26_CONSOLIDADO});
 export const acervoClubeHistoricoDe = nome => ACERVO_CLUBES_HISTORICOS[nome] || null;
 /** Somente métricas explicitamente documentadas. Não contém projeções. */
 export const REFERENCIAS_RECORDES_CLUBES = Object.freeze(Object.values(ACERVO_CLUBES_HISTORICOS).flatMap(c=>c.recordes));

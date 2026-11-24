@@ -20,6 +20,13 @@ export const LENDAS_HISTORICAS = {
   'Bahia': ['Bobô', 'Charles', 'Beijoca'],
   'Sport Recife': ['Magrão', 'Leonardo', 'Durval'],
   'Athletico-PR': ['Sicupira', 'Kléberson', 'Alex Mineiro'],
+  // Galerias oficiais dos clubes (consulta 2026-11-24).
+  // https://fortaleza1918.com.br/lendas-tricolores-ribamar-assis-paraiba-everton-maranguape-e-leandro-lima-sao-homenageados/
+  'Fortaleza': ['Rinaldo', 'Clodoaldo', 'Dude', 'Salvino', 'Pedro Basílio', 'Marcelo Boeck', 'Erandir', 'Tangerina', 'Expedito', 'Caetano', 'Ribamar', 'Assis Paraíba', 'Éverton Maranguape', 'Leandro Lima'],
+  // https://midia.cearasc.com/idolos/
+  'Ceará': ['Gildo', 'Sérgio Alves', 'Mota', 'Magno Alves', 'Mitotônio', 'Da Costa', 'Carlito', 'Ivan Roriz', 'Adílson', 'Marco Aurélio'],
+  // https://oldsite.coritiba.com.br/NoticiaEMBED/26120
+  'Coritiba': ['Dirceu Krüger', 'Alex', 'Jairo', 'Capitão Hidalgo', 'Toby'],
   // Argentina e Uruguai
   'Boca Juniors': ['Diego Maradona', 'Juan Román Riquelme', 'Martín Palermo', 'Carlos Tevez'],
   'River Plate': ['Alfredo Di Stéfano', 'Enzo Francescoli', 'Ángel Labruna', 'Ariel Ortega'],

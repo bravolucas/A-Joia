@@ -220,6 +220,49 @@ export const LENDAS_HISTORICAS = {
   'Racing Club': ['Diego Milito', 'Roberto Perfumo', 'Lisandro López'],
   'Peñarol': ['Alberto Spencer', 'Fernando Morena', 'Pedro Rocha'],
   'Nacional de Montevidéu': ['Atilio García', 'Luis Suárez', 'Héctor Scarone'],
+  // Argentina — galeria parcial de ídolos e destaques, sem ranking; consulta 2026-11-24.
+  // https://contenidos2.sanlorenzo.com.ar/futbol-profesional/jugadores-historicos
+  "San Lorenzo": ["José Francisco Sanfilippo","Roberto Telch","Rodolfo Fischer"],
+  // https://estudiantesdelaplata.com/historia/
+  // https://www.tycsports.com/liga-profesional-de-futbol/los-idolos-de-estudiantes-que-seran-eternos-en-el-nuevo-estadio-20191121.html
+  "Estudiantes de La Plata": ["Alberto Zozaya","Juan Ramón Verón","Felipe Ribaudo","Marcos Conigliaro","Eduardo Flores","Juan Sebastián Verón","Carlos Bilardo","Alejandro Sabella"],
+  // https://www.clubtalleres.com.ar/el-curioso-caso-de-los-idolos-de-talleres-quienes-son-los-unicos-3-que-nacieron-en-cordoba/
+  "Talleres": ["Daniel Willington","José Daniel Valencia","Humberto Bravo","José Alfredo Zelaya","Julián Maidana","Luis Galván","Mario Bevilacqua","Héctor Baley","Miguel Antonio Romero","Diego Garay"],
+  // https://argentinosjuniors.com.ar/semillero-del-mundo/
+  "Argentinos Juniors": ["Diego Maradona","Claudio Borghi","Sergio Batista","Fernando Redondo","Juan Román Riquelme"],
+  // https://www.velez.ar/club/historia
+  // https://velez.com.ar/junta-historica/notas/2020/04/09/210431_la-estatua-del-idolo-eterno
+  "Vélez Sarsfield": ["Carlos Bianchi","José Luis Chilavert","Omar Asad","Christian Bassedas","José Flores","Roberto Trotta","Marcelo Gómez","Raúl Cardozo"],
+  // https://www.lanus.gob.ar/noticias/3636-se-inauguro-el-paseo-de-los-idolos-del-club-atletico-lanus
+  "Lanús": ["José Sand","Lautaro Acosta","Armando González","Hugo Morales","Diego Valeri","Gilmar Villagrán","Ángel Silva","Bernardo Acosta","José Nazionale","Gabriel Schurrer"],
+  // https://rosario.com.ar/estfut/rcentral.htm
+  "Rosario Central": ["Aldo Pedro Poy","Omar Palma","Mario Kempes"],
+  // https://diarioimagen.com.ar/chongui-saldana-elegido-por-los-hinchas-entre-los-mejores-22-jugadores-de-la-historia-de-newells/
+  // https://esporteemidia.com/2023/12/os-10-melhores-jogadores-da-historia-do-newells-old-boys.html
+  // https://radiografica.org.ar/2021/06/27/newells-1987-88-el-unico-equipo-campeon-con-todos-jugadores-surgidos-en-el-club/
+  "Newell's Old Boys": ["Gerardo Martino","Norberto Scoponi","Maxi Rodríguez","Ignacio Scocco","Américo Gallego","Santiago Santamaría","Mario Zanabria","Juan Manuel Llop","Víctor Ramos","Julio César Saldaña"],
+  // https://www.eldestapeweb.com/deportes/huracan/quienes-son-los-maximos-idolos-de-huracan-en-la-historia-2026128105553
+  // https://cahuracan.com/noticias/los-mejores-momentos-del-bautismo-de-la-pena-miguel-brindisi
+  "Huracán": ["René Houseman","Miguel Ángel Brindisi","Carlos Babington","Roque Avallay","Omar Larrosa","Herminio Masantonio"],
+  // https://belgrano.com.ar/historia/
+  "Belgrano": ["Luis Fabián Artime","Luis Ernesto Sosa"],
+  // https://www.vavel.com/ar/data/defensa-y-justicia/bio
+  "Defensa y Justicia": ["Néstor Omar Benítez","Jorge Galleguillo"],
+  // https://clubgodoycruz.com.ar/los-idolos-vuelven-a-casa-figuras-historicas-diran-presente-en-la-inauguracion-del-feliciano-gambarte/
+  "Godoy Cruz": ["Daniel Oldrá","Alejandro Abaurre","Diego Villar","David Ramírez","Nelson Ibáñez","Diego Pozo","Miguel Ángel Pasqualetto","Alberto Cepeda","Héctor Pedone"],
+  // https://deportv.gob.ar/futbol/editar-garrafa-sanchez-nid%3A513
+  // https://www.afa.com.ar/regla/posts/garrafa
+  "Banfield": ["José Luis Garrafa Sánchez","Eliseo Mouriño","Gustavo Albella","Félix Orte","Javier Sanguinetti"],
+  // https://www.gimnasia.org.ar/merecido-reconocimiento-a-griguol/
+  // https://www.gimnasia.org.ar/el-club/historia/
+  "Gimnasia La Plata": ["Guillermo Barros Schelotto","Gustavo Barros Schelotto","Mariano Messera","Sebastián Romero","Roberto Sosa","Andrés Yllana","Jorge San Esteban","Pedro Troglio"],
+  // https://catigre.com.ar/club/historia/
+  "Tigre": ["Bernabé Ferreyra","Daniel Islas","Martín Galmarini","Alexis Ferrero","Juan Carlos Blengio","Diego Castaño","Román Martínez","Martín Morel","Leandro Lázzaro"],
+  // https://cap.org.ar/2021/02/daniel-vega-dice-adios-y-nace-la-leyenda/
+  // https://cap.org.ar/2020/05/los-maximos-goleadores-calamares/
+  // https://cap.org.ar/2020/05/platense115-un-aniversario-distinto-pero-lleno-de-emociones-y-solidaridad/
+  // https://cap.org.ar/2017/07/el-pueblo-de-platense-agradecio-a-sus-idolos/
+  "Platense": ["Daniel Vega","Vicente Sayago","José Luis Petti","Marcelo Espina","Alejandro Alfaro Moreno","Felipe Bellini","Rolando Cristante","Oscar López Turitich"],
   // Europa
   'Real Madrid': ['Alfredo Di Stéfano', 'Cristiano Ronaldo', 'Raúl', 'Iker Casillas'],
   'Barcelona': ['Lionel Messi', 'Johan Cruyff', 'Xavi', 'Andrés Iniesta'],

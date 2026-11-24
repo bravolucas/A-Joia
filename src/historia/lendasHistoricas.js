@@ -537,6 +537,53 @@ export const LENDAS_HISTORICAS = {
   // https://www.cdleganes.com/historia
   // https://fundacion.cdleganes.com/club/historia/leyendas/mantovani
   "Leganés": ["Martín Mantovani","Benjamín Moreno","Catanha","Samuel Eto'o","Javier Eraso","Alberto Martín"],
+  // Itália — primeira divisão do jogo; seleção editorial parcial de ídolos e destaques, sem ranking. Consulta: 2026-11-24.
+  // https://www.sassuolocalcio.it/club/la-nostra-storia/serie-a/
+  "Sassuolo": ["Domenico Berardi","Francesco Magnanelli"],
+  // https://www.calciofrosinone.it/2024/02/14/frosinone-giocatori-record-presenze/
+  // https://www.transfermarkt.it/frosinone-calcio/rekordspieler/verein/8970
+  "Frosinone": ["Mirko Gori","Federico Dionisi","Francesco Bardi"],
+  // https://en.veneziafc.it/club/history
+  "Venezia": ["Valentino Mazzola","Ezio Loik","Filippo Maniero","Álvaro Recoba"],
+  // https://www.udinese.it/Apps/WebObjects/Udinese.woa/wa/viewSection?id=39251&lang=esp
+  // https://www.udinese.it/news/societa/ludinese-presente-pagnacco-per-lintitolazione-dello-stadio-a-pietro-zampa
+  "Udinese": ["Antonio Di Natale","Zico","Valerio Bertotto","Pietro Zampa","Oliver Bierhoff","Márcio Amoroso","Alexis Sánchez","Samir Handanović","Abel Balbo","Néstor Sensini"],
+  // https://www.torinofc.it/news/11/11/2013/i-100-di-sempre-sul-guerin-sportivo_3734
+  // https://en.wikipedia.org/wiki/Torino_FC_Hall_of_Fame
+  "Torino": ["Valentino Mazzola","Paolo Pulici","Giorgio Ferrini","Gigi Meroni","Virgilio Maroso","Adolfo Baloncieri","Claudio Sala","Valerio Bacigalupo"],
+  // https://www.bolognafc.it/en/history-2/
+  // https://www.bolognafc.it/presentata-la-maglia-away-con-i-nomi-dei-cento-giocatori-piu-presenti/
+  // https://www.bolognafc.it/il-bologna-in-libreria/
+  "Bologna": ["Angelo Schiavio","Giacomo Bulgarelli","Ezio Pascutti","Harald Nielsen","Helmut Haller","Giuseppe Savoldi","Giuseppe Signori","Marco Di Vaio","Roberto Baggio","Cesarino Cervellati"],
+  // https://alefiorentina.it/hall-of-fame-viola/
+  "Fiorentina": ["Giancarlo Antognoni","Kurt Hamrin","Gabriel Batistuta","Francesco Toldo","Giovanni Galli","Daniel Bertoni","Luca Toni","Mario Pizziolo"],
+  // https://en.legaseriea.it/serie-a/news/de-roon-a-true-atalanta-icon
+  // https://www.calcioatalanta.it/category/bacheca-del-tifoso/miti/
+  "Atalanta": ["Marten de Roon","Gianpaolo Bellini","Glenn Strömberg","Valter Bonacina","Cristiano Doni"],
+  // https://www.sslazio.it/en/club/leggende
+  // https://www.ansa.it/sito/notizie/sport/calcio/2021/06/18/libri-le-leggende-lazio-raccontate-da-patrizia-de-rossi_6af988da-2387-47c6-bc64-18e8d3247347.html
+  "Lazio": ["Silvio Piola","Giorgio Chinaglia","Alessandro Nesta","Ciro Immobile","Bruno Giordano","Giuseppe Signori","Paolo Di Canio","Miroslav Klose","Bob Lovati"],
+  // https://www.newtoncompton.com/index.php/libro/genoa-capitani-e-bandiere
+  // https://www.sportmemory.it/copertina/il-genoa-ritorna/
+  // https://www.theguardian.com/sport/the-gentleman-ultra/2024/nov/27/nostalgic-serie-a-five-a-side-teams-picking-a-lineup-for-genoa
+  "Genoa": ["Renzo De Vecchi","Giovanni De Prà","Roberto Pruzzo","Diego Milito","Tomáš Skuhravý","Gennaro Ruotolo","Fosco Becattini","Felice Levratto","Gianluca Signorini"],
+  // https://www.legab.it/news/i-giocatori-iconici-che-hanno-indossato-la-maglia-del-cagliari
+  // https://www.esquire.com/it/sport/calcio/a45260194/cagliari-squadra/
+  "Cagliari": ["Gigi Riva","Daniele Conti","Mario Brugnera","Nené (Claudio Olinto de Carvalho)","Luigi Piras","Diego López","David Suazo","Andrea Cossu"],
+  // https://comofootball.com/en/como-x-adidas-launch-exclusive-legends-collection/
+  // https://comofootball.com/como-legends-marco-cassetti/
+  "Como": ["Gigi Meroni","Stefano Borgonovo","Marco Cassetti"],
+  // https://www.parmacalcio1913.com/en/legends/
+  // https://www.legab.it/news/parma-la-top-11-degli-ultimi-30-anni
+  // https://sport.sky.it/calcio/parma-tanzi-campioni
+  "Parma": ["Gianluigi Buffon","Fabio Cannavaro","Lilian Thuram","Gianfranco Zola","Hernán Crespo","Enrico Chiesa","Tomas Brolin","Alessandro Melli","Alberto Gilardino"],
+  // https://oo.uslecce.it/storia
+  // https://nucleilecce.it/u-s-lecce
+  // https://sport.sky.it/calcio/lecce-giocatori-famosi-storia
+  // https://it.wikipedia.org/wiki/Statistiche_e_record_dell%27Unione_Sportiva_Lecce
+  "Lecce": ["Michele Lorusso","Pedro Pasculli","Antonio Conte","Mirko Vučinić","Guillermo Giacomazzi"],
+  // https://ilmonzasiamonoi.it/storia/monza-hall-of-fame/
+  "Monza": ["Sergio Magni","Marco Bolis","Francesco Copreni","Roberto Fontanini","Dany Mota"],
   // Seleções
   'Brasil': ['Pelé', 'Garrincha', 'Ronaldo', 'Romário'],
   'Argentina': ['Diego Maradona', 'Lionel Messi', 'Mario Kempes', 'Gabriel Batistuta'],

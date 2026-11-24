@@ -1049,6 +1049,65 @@ export const LENDAS_HISTORICAS = {
   // https://www.charlottefootballclub.com/news/charlotte-fc-transfers-forward-karol-swiderski-to-panathinaikos-fc
   // https://www.charlottefootballclub.com/news/charlotte-fc-captain-ashley-westwood-makes-100th-appearance
   "Charlotte FC": ["Karol Świderski","Ashley Westwood"],
+  // Arábia Saudita — seleção editorial inicial de ídolos e destaques, sem ranking. Consulta: 2026-11-24.
+  // Para clubes com acervo limitado, destaques documentados em temporadas específicas não implicam recordes absolutos.
+  // https://www.spl.com.sa/en/news/516978/mw16-in-focus-legends-past-and-present-shine-joy-at-al-fateh-firmino-the-liverpool-light
+  // https://www.spl.com.sa/en/news/ronaldo-toney-benzema-et-al-the-2024-25-rsl-master-marksman
+  "Al-Ittihad": ["Mohammed Noor","Ahmed Jamil","Saeed Ghurab","Ahmed Bakur","Karim Benzema","Abderrazak Hamdallah"],
+  // https://www.spl.com.sa/en/news/al-somah-rsl-legend-s-al-ahli-reunion-conjures-memories-of-record-setting-reign
+  // https://www.spl.com.sa/en/match/bf3e1ce5b7c5415cbc391b310df93798/al-ahli-vs-al-ittihad/lineups
+  // https://www.spl.com.sa/en/news/toney-mahrez-help-al-ahli-reclaim-top-spot-with-huge-sea-derby-win
+  "Al-Ahli": ["Omar Al Somah","Taisir Al Jassim","Riyad Mahrez","Ivan Toney"],
+  // https://saudipedia.com/en/al-nassr-club
+  // https://www.the-afc.com/en/more/news/asian_icons_majed_abdullah_saudi_arabia.html
+  // https://www.spl.com.sa/en/news/ronaldo-gunning-for-3rd-golden-boot-and-yet-more-rsl-history
+  "Al-Nassr": ["Majed Abdullah","Fahad Al-Harifi","Muhaisen Al-Jumaan","Mohammed Al-Khojali","Fuad Anwar","Cristiano Ronaldo"],
+  // https://www.spl.com.sa/en/news/ten-reasons-to-watch-the-roshn-saudi-league
+  // https://www.spl.com.sa/en/news/rsl-legends-wilhelmsson-the-wandering-winger-who-found-a-home-at-al-hilal
+  // https://www.spl.com.sa/en/news/club-history
+  // https://www.spl.com.sa/en/news/saudi-clasico-5-saudis-to-have-crossed-the-great-divide
+  "Al-Hilal": ["Sami Al Jaber","Mohammed Al Shalhoub","Yasser Al Qahtani","Mohammed Al Deayea","Osama Hawsawi","Christian Wilhelmsson","Thiago Neves","Mirel Rădoi","Salem Al Dawsari","Nasser Al Shamrani"],
+  // https://saudipedia.com/en/al-ettifaq-club
+  // https://www.spl.com.sa/en/news/516978/mw16-in-focus-legends-past-and-present-shine-joy-at-al-fateh-firmino-the-liverpool-light
+  "Al-Ettifaq": ["Saleh Al Khalifa","Abdullah Saleh","Jamal Mohammed"],
+  // https://www.proleaguefootballsaudi.com/saudi-pro-league-teams/al-taawoun-football-club-%D8%A7%D9%84%D8%AA%D8%B9%D8%A7%D9%88%D9%86/
+  // https://www.spl.com.sa/en/news/preview-roshn-saudi-league-matchweek-17
+  "Al-Taawoun": ["Léandre Tawamba","Mohammed Al Rashid","Rabie Sufiani","João Pedro"],
+  // https://www.spl.com.sa/en/news/rsl-legends-elton-arabia-the-historic-samba-star-with-saudi-in-his-heart
+  // https://www.arabnews.com/saudi-pro-league/inside-al-fateh-saudi-arabias-community-driven-club-2630171
+  "Al-Fateh": ["Élton José","Doris Salomo"],
+  // https://saudipedia.com/en/al-shabab-club
+  // https://portal.iffhs.com/posts/401
+  // https://www.spl.com.sa/en/news/ronaldo-gunning-for-3rd-golden-boot-and-yet-more-rsl-history
+  "Al-Shabab": ["Saeed Al Owairan","Fuad Anwar","Fahd Al Mehallel","Abdulrahman Al Roomi","Marzouk Al Otaibi","Nasser Al Shamrani","Éver Banega","Cristian Guanca","Abderrazak Hamdallah"],
+  // https://saudipedia.com/en/al-qadsiah-club
+  // https://www.the-afc.com/en/more/news/asian_icons_yasser_al_qahtani_saudi_arabia.html
+  // https://www.spl.com.sa/en/news/from-promotion-to-rsl-trophy-how-al-qadsiah-have-mounted-late-title-challenge
+  "Al-Qadsiah": ["Yasser Al Qahtani","Saud Jassim","Mohammed Al Farhan","Ghazi Asiri","Julián Quiñones","Pierre-Emerick Aubameyang"],
+  // https://www.spl.com.sa/en/news/rsl-legend-al-somah-joins-al-orobah
+  // https://fbref.com/en/squads/9efd3253/history/Al-Orobah-Stats-and-History
+  "Al-Orobah": ["Omar Al Somah","Mousa Al Shameri"],
+  // https://www.spl.com.sa/en/news/mahrez-mane-aouar-more-top-africans-of-2024-25-rsl
+  // https://www.spl.com.sa/en/news/toney-breaks-record-as-al-ahli-win-five-goal-thriller
+  "Al-Kholood": ["Myziane Maolida","Jackson Muleka"],
+  // https://www.transfermarkt.com/damac-fc/toptorschuetzen/verein/50532
+  // https://en.wikipedia.org/wiki/2023%E2%80%9324_Damac_FC_season
+  "Damac": ["Georges-Kévin Nkoudou","Assan Ceesay"],
+  // https://www.transfermarkt.us/al-khaleej/toptorschuetzensaison/verein/6070
+  // https://www.fotmob.com/leagues/536/stats/season/23876/players/goals/team/550433/al-khaleej
+  "Al-Khaleej": ["Fábio Martins","Khaled Narey"],
+  // https://www.spl.com.sa/en/news/remodelled-al-riyadh-look-to-relive-former-glories
+  // https://saudipedia.com/en/al-riyadh-club
+  "Al-Riyadh": ["Fahad Al Hamdan","Khaled Al Qarouni","Ahmed Zayed","Talal Al Jebreen"],
+  // https://www.the-afc.com/en/more/domestic_leagues/news/al_fayha_upset_al_hilal_to_win_historic_saudi_king%E2%80%99s_cup.html
+  // https://www.arabnews.com/sport/al-fayha-shock-al-hilal-in-kings-cup-final-to-claim-first-ever-major-trophy-2085851
+  "Al-Fayha": ["Vladimir Stojković","Ramon Lopes"],
+  // https://www.spl.com.sa/en/news/preview-roshn-saudi-league-matchweek-32
+  "Al-Wehda": ["Odion Ighalo"],
+  // https://www.transfermarkt.com/al-raed/rekordspieler/verein/22381
+  // https://www.transfermarkt.com/al-raed/toptorschuetzen/verein/22381
+  // https://www.spl.com.sa/en/news/preview-roshn-saudi-league-matchweek-32
+  "Al-Raed": ["Karim El Berkaoui","Raed Al Ghamdi","Julio Tavares"],
   // Seleções
   'Brasil': ['Pelé', 'Garrincha', 'Ronaldo', 'Romário'],
   'Argentina': ['Diego Maradona', 'Lionel Messi', 'Mario Kempes', 'Gabriel Batistuta'],

@@ -42,7 +42,7 @@ test('fontes, técnicos e marcos dos quatro ingleses não criam gols fictícios'
  assert.equal(acervoClubeHistoricoDe('Bournemouth').marcos[0].ano,2015);
 });
 
-test('sete grupos de primeira camada documental completos não ocultam outras pendências',()=>{
+test('oito grupos mantêm as fichas individuais de atletas',()=>{
  for(const [liga,total] of Object.entries({
   brasileirao:20,serieB:20,serieC:20,serieD:23,
   argentina:20,sulamericano:13,espanha:20,inglaterra:20,
@@ -51,5 +51,4 @@ test('sete grupos de primeira camada documental completos não ocultam outras pe
   assert.equal(clubes.length,total);
   assert.ok(clubes.every(x=>acervoClubeHistoricoDe(x.nome)?.atletas?.length>0),liga);
  }
- assert.ok(CLUBES.some(x=>!acervoClubeHistoricoDe(x.nome)),'as outras ligas ainda requerem apuração');
 });

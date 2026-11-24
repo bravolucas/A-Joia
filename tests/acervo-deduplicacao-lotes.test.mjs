@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import {ACERVO_CLUBES_HISTORICOS} from '../src/dados/acervoClubesHistoricos.js';
 
 // Executar sobre todos os lotes, não apenas sobre os arquivos recentes.
-const lotes=await Promise.all(Array.from({length:36},(_,i)=>i+2).map(async n=>{
+const lotes=await Promise.all(Array.from({length:37},(_,i)=>i+2).map(async n=>{
  const modulo=await import(`../src/dados/acervoClubesHistoricosLote${n}.js`);
  return {numero:n,clubes:modulo[`ACERVO_CLUBES_LOTE${n}`]};
 }));
 
-test('todos os 36 lotes são importáveis e as chaves conferem com o nome da ficha',()=>{
+test('todos os 37 lotes são importáveis e as chaves conferem com o nome da ficha',()=>{
  for(const {numero,clubes} of lotes){
   assert.ok(clubes&&typeof clubes==='object','lote não exportado: '+numero);
   for(const [nome,ficha] of Object.entries(clubes)){

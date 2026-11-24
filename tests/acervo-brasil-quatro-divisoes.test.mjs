@@ -27,7 +27,8 @@ test('auditoria oferece percentuais por liga para distinguir cobertura e pendên
  assert.equal(r.versao,'2026-11-24');
  assert.ok(r.catalogoPrincipal.total>=407);
  assert.equal(r.catalogoPrincipal.comFicha+r.catalogoPrincipal.pendentes,r.catalogoPrincipal.total);
- assert.ok(r.catalogoPrincipal.pendentes>0,'outras ligas internacionais ainda pendentes');
+ assert.equal(r.catalogoPrincipal.pendentes,0,'cada clube do catálogo principal tem ficha');
+ assert.ok(r.pendentes.clubes>0,'o inventário ampliado ainda inclui clubes extras em apuração');
  for(const [liga,esperado] of Object.entries({brasileirao:20,serieB:20,serieC:20,serieD:23})){
   const g=r.ligas.find(x=>x.id===liga);
   assert.equal(g.total,esperado,liga);

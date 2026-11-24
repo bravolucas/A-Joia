@@ -990,6 +990,65 @@ export const LENDAS_HISTORICAS = {
   "Fatih Karagümrük": ["Fabio Borini","Mbaye Diagne","Serdar Dursun","Erkan Zengin","Tarık Kutver","Aydın Yelken"],
   // https://genclerbirligi.org.tr/tarihimiz
   "Gençlerbirliği": ["Cemalettin Sakallıoğlu","Halim Çorbalı","Ergün Penbe","Tarık Daşgün","Ümit Özat","Geremi","Hasan Polat"],
+  // MLS — seleção editorial inicial de ídolos e destaques, sem ranking. Consulta: 2026-11-24.
+  // Prioridade à era MLS, sem mesclar recordes numéricos de eras ou competições distintas.
+  // https://www.soundersfc.com/news/sounders-fc-unveils-results-best-xi-campaign
+  // https://www.soundersfc.com/news/best-xi-who-are-best-forwards-seattle-sounders-fc-history
+  // https://www.soundersfc.com/news/cristian-roldan-named-to-2025-best-xi
+  "Seattle Sounders": ["Osvaldo Alonso","Nicolás Lodeiro","Raúl Ruidíaz","Jordan Morris","Cristian Roldan","Kasey Keller","Clint Dempsey","Fredy Montero","Chad Marshall","Brad Evans","Mauro Rosales","Román Torres"],
+  // https://www.atlutd.com/news/team-records-top-goal-scorers-final
+  // https://www.atlutd.com/news/team-records-player-appearances
+  "Atlanta United": ["Josef Martínez","Miguel Almirón","Thiago Almada","Brad Guzan","Julian Gressel","Miles Robinson","Jeff Larentowicz","Héctor Villalba"],
+  // https://www.lagalaxy.com/legend
+  // https://www.lagalaxy.com/news/six-la-galaxy-players-honored-mls-unveils-25-greatest-presented-att
+  "LA Galaxy": ["Landon Donovan","David Beckham","Cobi Jones","Mauricio Cienfuegos","Robbie Keane"],
+  // https://www.intermiamicf.com/news/road-to-glory-mls-cup-champions-historic-2025-season-in-review
+  // https://www.intermiamicf.com/news/leo-messi-reaches-100-goals-for-inter-miami-cf
+  "Inter Miami": ["Lionel Messi","Luis Suárez","Sergio Busquets","Jordi Alba"],
+  // https://www.lafc.com/club/records
+  // https://www.lafc.com/news/el-profe-returns
+  "LAFC": ["Carlos Vela","Diego Rossi","Eduard Atuesta","Latif Blessing","Walker Zimmerman"],
+  // https://www.newyorkcityfc.com/media/history
+  // https://www.newyorkcityfc.com/news/maxi-moralez-departs-new-york-city-football-club
+  "New York City FC": ["David Villa","Maxi Moralez","Frank Lampard","Andrea Pirlo"],
+  // https://www.columbuscrew.com/circle-of-honor
+  // https://www.columbuscrew.com/news/club-legend-frankie-hejduk-becomes-second-member-columbus-crew-circle-honor
+  // https://www.columbuscrew.com/news/circle-honor-spotlight-frankie-hejduk
+  "Columbus Crew": ["Brian McBride","Frankie Hejduk","Guillermo Barros Schelotto","Chad Marshall","Brian Maisonneuve","Mike Clark","Robert Warzycha"],
+  // https://www.philadelphiaunion.com/club/pressbox/almanac/individual-records
+  "Philadelphia Union": ["Sébastien Le Toux","Andre Blake","Jakob Glesnes","Jack Elliott","Haris Medunjanin"],
+  // https://www.fccincinnati.com/players/luciano-acosta/
+  // https://en.wikipedia.org/wiki/List_of_FC_Cincinnati_records_and_statistics
+  "FC Cincinnati": ["Luciano Acosta","Brandon Vázquez","Nick Hagglund","Álvaro Barreal"],
+  // https://www.rsl.com/news/real-salt-lake-unveils-its-all-time-best-xi
+  // https://www.rsl.com/news/all-time-best-xi-david-james-picks
+  // https://www.rsl.com/news/jeff-cassars-all-time-best-xi
+  "Real Salt Lake": ["Nick Rimando","Kyle Beckerman","Javier Morales","Andy Williams","Will Johnson","Ned Grabavoy"],
+  // https://www.mnufc.com/news/minnesota-united-reveals-team-of-the-decade-presented-by-allianz
+  // https://www.mnufc.com/news/michael-boxall-dayne-st-clair-voted-into-2025-mls-all-star-roster
+  "Minnesota United": ["Michael Boxall","Robin Lod","Darwin Quintero","Emanuel Reynoso","Christian Ramirez","Dayne St. Clair"],
+  // https://www.houstondynamofc.com/ringofhonor/inductees
+  // https://www.houstondynamofc.com/news/dynamo-legends-list-nominees-national-soccer-hall-fame
+  "Houston Dynamo": ["Brian Ching","Brad Davis","Stuart Holden"],
+  // https://www.whitecapsfc.com/club/history
+  // https://www.whitecapsfc.com/news/thank-you-rusty
+  // https://www.whitecapsfc.com/news/all-star-gauld
+  "Vancouver Whitecaps": ["Russell Teibert","Brian White","Camilo Sanvezzo","Ryan Gauld"],
+  // https://www.orlandocitysc.com/news/orlando-city-sc-captain-robin-jansson-announces-retirement-from-professional-soccer
+  // https://www.orlandocitysc.com/news/cyle-larin-breaks-all-time-city-scoring-record
+  "Orlando City": ["Robin Jansson","Cyle Larin","Kevin Molino"],
+  // https://www.coloradorapids.com/club/history/gallery-of-honor
+  "Colorado Rapids": ["Marcelo Balboa","Paul Bravo","Pablo Mastroeni"],
+  // https://www.timbers.com/news/timbers-reveal-fan-voted-all-time-xi-in-honor-of-50th-anniversary-season
+  // https://www.timbers.com/news/an-old-school-win-as-portland-celebrates-valeri-blanco-and-asprilla-lift-timbers
+  // https://www.mnufc.com/news/from-mls-icon-to-mnufc2-gaffer-fanendo-adi-brings-extensive-experience-to-new-role
+  "Portland Timbers": ["Diego Valeri","Diego Chara","Fanendo Adi","Sebastián Blanco","Dairon Asprilla"],
+  // https://www.nashvillesc.com/news/hany-mukhtar-named-to-third-straight-mls-all-star-team
+  // https://www.nashvillesc.com/news/nashville-soccer-club-falls-at-real-salt-lake
+  "Nashville SC": ["Hany Mukhtar","Walker Zimmerman","Dax McCarty"],
+  // https://www.charlottefootballclub.com/news/charlotte-fc-transfers-forward-karol-swiderski-to-panathinaikos-fc
+  // https://www.charlottefootballclub.com/news/charlotte-fc-captain-ashley-westwood-makes-100th-appearance
+  "Charlotte FC": ["Karol Świderski","Ashley Westwood"],
   // Seleções
   'Brasil': ['Pelé', 'Garrincha', 'Ronaldo', 'Romário'],
   'Argentina': ['Diego Maradona', 'Lionel Messi', 'Mario Kempes', 'Gabriel Batistuta'],

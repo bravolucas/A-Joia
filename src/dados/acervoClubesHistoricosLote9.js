@@ -11,6 +11,7 @@ const FONTES={
  abc:'https://www.abcfc.com.br/historia/titulos/campeao-brasileiro-serie-c-2010',
  abcTe:'https://ge.globo.com/rn/abc-100-anos/noticia/2015/06/em-2010-abc-coloca-o-rio-grande-do-norte-no-rol-dos-campeoes-nacionais.html',
  asa:'https://www.cbf.com.br/futebol-brasileiro/noticias/campeonato-brasileiro-serie-d/a/asa-encerra-serie-d-2026-com-orgulho-pelo-vice-campeonato',
+ asaJog:'https://ge.globo.com/al/futebol/times/asa/noticia/2026/09/30/asa-fecha-ciclo-de-renovacoes-e-zagueiros-titulares-na-serie-d-nao-ficam.ghtml',
  gama:'https://www.correiobraziliense.com.br/app/noticia/superesportes/2008/12/20/interna_superesportes%2C59301/amp.shtml',
  goia:'https://www.fgf.esp.br/pt/clubes/view.php?q=266',
  nac:'https://fafamazonas.com.br/site/noticia/e-campeao--nacional-vence-amazonas-por-2-a-1-e-conquista-o-barezao-sicredi-2026/',
@@ -40,11 +41,13 @@ const FONTES={
  treze:'https://ge.globo.com/pb/futebol/times/treze/noticia/flavio-araujo-lamenta-titulo-mas-exalta-campanha-historica-do-treze-na-serie-d.ghtml',
  trezeJ:'https://ge.globo.com/pb/futebol/times/treze/noticia/2026/05/28/treze-revive-roteiros-de-2018-e-2024-na-serie-d-e-pode-se-inspirar-em-campanhas-pelo-acesso.ghtml',
  camp:'https://ge.globo.com/pb/futebol/brasileirao-serie-d/noticia/campinense-e-o-3o-clube-paraibano-a-disputar-uma-decisao-da-serie-d-botafogo-pb-e-treze-ja-estiveram-la.ghtml',
- cian:'https://ge.globo.com/pr/futebol/times/cianorte/noticia/2025/01/09/como-chega-o-cianorte-para-o-paranaense-2025-time-base-reforcos-e-objetivo.ghtml',
+ campEsc:'https://www.fgf.esp.br/pt/noticias/view.php?q=23860',
+ cian:'https://ge.globo.com/pr/futebol/times/cianorte/noticia/2026/01/05/cianorte-no-paranaense-2026-time-base-reforcos-objetivo-e-agenda-de-jogos.ghtml',
  cianMarco:'https://ge.globo.com/pr/futebol/times/cianorte/noticia/2024/01/30/cianorte-reencontra-o-corinthians-19-anos-depois-de-vitoria-marcante-e-tem-dois-ex-timao-no-elenco.ghtml',
  sj:'https://fgf.com.br/noticia/fgf-sauda-acesso-do-sao-jose',
  sjIdolo:'https://gauchazh.clicrbs.com.br/esportes/noticia/2018/07/com-acesso-a-serie-c-sao-jose-apresenta-ao-pais-a-forca-que-o-rio-grande-do-sul-ja-conhecia-cjjexfrol0pm501qomywszspn.html',
  portRJ:'https://www.fferj.com.br/noticias/portuguesa-e-campea-da-copa-rio',
+ portRJ2023:'https://www.fferj.com.br/noticias/portuguesa-conquista-a-copa-rio',
  brasil:'https://ge.globo.com/pb/futebol/brasileirao-serie-d/noticia/2024/08/24/campeoes-nacionais-vice-da-copa-do-brasil-emergentes-veja-quem-esta-na-briga-pelo-acesso-na-serie-d.ghtml',
  brasilId:'https://blogs.correiobraziliense.com.br/dribledecorpo/20-anos-do-brasiliense-montamos-um-time-de-medalhoes-que-passaram-pelo-clube-do-distrito-federal/',
 };
@@ -55,7 +58,7 @@ const DADOS={
   tecnicos:[['Leandro Campos','2010','abcTe','Treinador do time campeão brasileiro da Série C.']],
  },
  'ASA':{
-  atletas:[['Rafael Mariano','GOL','2026',null,null,'asa','Goleiro do elenco do ASA de Arapiraca na campanha do vice da Série D de 2026.']],
+  atletas:[['Rafael Mariano','GOL','2026',null,null,'asaJog','Goleiro do elenco do ASA de Arapiraca na campanha do vice da Série D de 2026.']],
   marcos:[[2026,'Vice-campeonato brasileiro da Série D','asa','O ASA de Arapiraca chegou à final, perdendo o título para o Uberlândia.']],
  },
  'Gama':{
@@ -142,7 +145,7 @@ const DADOS={
   tecnicos:[['Flávio Araújo','2018','treze','Treinador da campanha do acesso à Série C.']],
  },
  'Campinense':{
-  atletas:[['Filipe Ramon','ZAG','2021',null,null,'camp','Jogador do elenco vice-campeão da Série D em 2021; métricas individuais por confirmar.']],
+  atletas:[['Filipe Ramon','ZAG','2021',null,null,'campEsc','Jogador do elenco vice-campeão da Série D em 2021; métricas individuais por confirmar.']],
   marcos:[[2021,'Vice-campeonato brasileiro da Série D','camp','Final contra a Aparecidense, após campanha que garantiu o acesso.']],
  },
  'Cianorte':{
@@ -161,7 +164,7 @@ const DADOS={
    ['Hugo Iglesias','ATA','2025',null,null,'portRJ','Marcou na vitória por 2 a 0 sobre o America na final da Copa Rio.'],
    ['Elicley','ATA','2025',null,null,'portRJ','Autor do gol do título nos acréscimos da final da Copa Rio 2025.'],
   ],
-  marcos:[[2023,'Campeonato da Copa Rio','portRJ','Título anterior da Portuguesa da Ilha; não confundir com a Portuguesa de São Paulo.'],
+  marcos:[[2023,'Campeonato da Copa Rio','portRJ2023','Título anterior da Portuguesa da Ilha; não confundir com a Portuguesa de São Paulo.'],
    [2025,'Campeã da Copa Rio','portRJ','Vitória por 2 a 0 sobre o America-RJ assegurou o título e vaga na Série D.']],
  },
  'Brasiliense':{

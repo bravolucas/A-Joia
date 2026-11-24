@@ -1151,13 +1151,26 @@ export const LENDAS_HISTORICAS = {
   // https://historiadelfutbolboliviano.com/2021/12/01/historia-del-futbol-boliviano-capitulo-9-1989-1999-la-decada-de-oro/
   // https://elrincondelgol.com/los-mejores-futbolistas-de-bolivia-una-mirada-profunda/
   "Bolívia": ["Marco Etcheverry","Erwin Sánchez","Marcelo Moreno","Julio César Baldivieso","Víctor Agustín Ugarte","Jaime Moreno","Carlos Trucco","Milton Melgar","Carlos Borja","Ronald Raldes","Juan Manuel Peña"],
-  'França': ['Zinedine Zidane', 'Michel Platini', 'Thierry Henry', 'Kylian Mbappé'],
-  'Alemanha': ['Franz Beckenbauer', 'Gerd Müller', 'Miroslav Klose', 'Lothar Matthäus'],
-  'Itália': ['Paolo Maldini', 'Roberto Baggio', 'Gianluigi Buffon', 'Paolo Rossi'],
-  'Espanha': ['Iker Casillas', 'Xavi', 'Andrés Iniesta', 'David Villa'],
-  'Inglaterra': ['Bobby Moore', 'Bobby Charlton', 'Harry Kane', 'Gary Lineker'],
-  'Holanda': ['Johan Cruyff', 'Marco van Basten', 'Ruud Gullit'],
-  'Portugal': ['Cristiano Ronaldo', 'Eusébio', 'Luís Figo'],
+  // Seleções europeias — galeria editorial de diferentes gerações, sem ranking ou recordes absolutos.
+  // https://www.fifa.com/en/articles/fifa.com/en/articles/france-world-cup-team-profile-history
+  // https://www.fifa.com/fr/articles/tous-les-titres-france-coupes-du-monde-histoire
+  // https://www.fifa.com/en/articles/france-squad-statistics-numbers-facts
+  "França": ["Zinedine Zidane","Michel Platini","Thierry Henry","Kylian Mbappé","Just Fontaine","Raymond Kopa","Didier Deschamps","Lilian Thuram","Laurent Blanc","Fabien Barthez","Patrick Vieira","David Trezeguet","Hugo Lloris","Olivier Giroud","Antoine Griezmann","Raphaël Varane"],
+  // https://datencenter.dfb.de/teams/deutschland/record_players
+  // https://datencenter.dfb.de/en/data-center/team/germany/record-scorers
+  "Alemanha": ["Franz Beckenbauer","Gerd Müller","Miroslav Klose","Lothar Matthäus","Uwe Seeler","Manuel Neuer","Thomas Müller","Bastian Schweinsteiger","Toni Kroos","Philipp Lahm","Jürgen Klinsmann","Jürgen Kohler","Lukas Podolski","Per Mertesacker"],
+  // https://www.figc.it/en/full-html?path=%2Fmuseum%2Fhall-of-fame%2Fcurrent-members
+  // https://www.figc.it/it/federazione/news/il-20-maggio-a-firenze-la-cerimonia-di-premiazione-della-hall-of-fame-del-calcio-italiano-tzfijhzk
+  "Itália": ["Paolo Maldini","Roberto Baggio","Gianluigi Buffon","Paolo Rossi","Giuseppe Meazza","Dino Zoff","Franco Baresi","Fabio Cannavaro","Gianluca Vialli","Giuseppe Bergomi","Alessandro Del Piero","Francesco Totti","Silvio Piola","Gaetano Scirea","Giacinto Facchetti","Valentino Mazzola"],
+  // https://www.rsssf.org/miscellaneous/span-recintlp.html?MobileOptOut=1
+  "Espanha": ["Iker Casillas","Xavi","Andrés Iniesta","David Villa","Sergio Ramos","Sergio Busquets","Andoni Zubizarreta","David Silva","Xabi Alonso","Cesc Fàbregas","Fernando Torres","Gerard Piqué","Raúl","Carles Puyol"],
+  // https://www.englandfootball.com/articles/2022/Aug/22/england-mens-senior-all-time-record-appearances-international-caps
+  // https://rsssf.org/miscellaneous/eng-recintlp.html
+  "Inglaterra": ["Bobby Moore","Bobby Charlton","Harry Kane","Gary Lineker","Peter Shilton","Wayne Rooney","David Beckham","Steven Gerrard","Frank Lampard","Ashley Cole","Michael Owen","Alan Shearer","Gordon Banks","Bryan Robson"],
+  // https://www.rsssf.org/miscellaneous/ned-recintlp.html
+  "Holanda": ["Johan Cruyff","Marco van Basten","Ruud Gullit","Johan Neeskens","Ruud Krol","Frank Rijkaard","Ronald Koeman","Dennis Bergkamp","Edwin van der Sar","Wesley Sneijder","Arjen Robben","Robin van Persie","Memphis Depay","Ruud van Nistelrooy"],
+  // https://www.rsssf.org/miscellaneous/port-recintlp.html
+  "Portugal": ["Cristiano Ronaldo","Eusébio","Luís Figo","Rui Costa","Pepe","Pauleta","João Moutinho","Nani","Fernando Couto","Rui Patrício","Ricardo Carvalho","Nuno Gomes","Bernardo Silva","Bruno Fernandes"],
 };
 // Nomes alternativos existentes no cadastro das divisões alemãs: uma única galeria por identidade.
 const ALIASES_LENDAS = Object.freeze({ 'Hamburgo': 'Hamburger SV', 'Köln': 'FC Köln' });

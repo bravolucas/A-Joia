@@ -1190,6 +1190,26 @@ export const LENDAS_HISTORICAS = {
   "Hungria": ["Ferenc Puskás","Sándor Kocsis","Nándor Hidegkuti","József Bozsik","Gyula Grosics","Flórián Albert","Lajos Tichy","László Fazekas","Zoltán Gera","Balázs Dzsudzsák","Dominik Szoboszlai"],
   // https://www.rsssf.org/miscellaneous/tsje-recintlp.html
   "República Tcheca": ["Pavel Nedvěd","Karel Poborský","Petr Čech","Jan Koller","Tomáš Rosický","Vladimír Šmicer","Milan Baroš","Tomáš Ujfaluši","Jaroslav Plašil","Patrik Schick"],
+  // UEFA — complemento das seleções jogáveis; seleção editorial, não ranking.
+  // Referência de pesquisa: https://www.rsssf.org/intlp-countrywise.html
+  // https://www.rsssf.org/miscellaneous/century.html
+  // Rússia e Sérvia: atletas que representaram a seleção moderna; não atribuir automaticamente atletas da URSS ou Iugoslávia.
+  "Sérvia": ["Branislav Ivanović","Aleksandar Kolarov","Nemanja Vidić","Dejan Stanković","Nikola Žigić","Dušan Tadić","Aleksandar Mitrović","Sergej Milinković-Savić","Vladimir Stojković","Dušan Vlahović"],
+  "Rússia": ["Aleksandr Mostovoi","Valeri Karpin","Viktor Onopko","Dmitri Alenichev","Andrey Arshavin","Igor Akinfeev","Roman Pavlyuchenko","Aleksandr Kerzhakov","Artem Dzyuba","Yuri Zhirkov"],
+  "Escócia": ["Kenny Dalglish","Denis Law","Billy Bremner","Jim Baxter","Graeme Souness","Alan Hansen","Gordon Strachan","Alex McLeish","Darren Fletcher","Andy Robertson"],
+  "País de Gales": ["John Charles","Ian Rush","Mark Hughes","Neville Southall","Ryan Giggs","Gary Speed","Gareth Bale","Aaron Ramsey","Chris Gunter","Joe Allen"],
+  "Irlanda do Norte": ["George Best","Pat Jennings","Danny Blanchflower","Billy Bingham","Norman Whiteside","David Healy","Steven Davis","Aaron Hughes","Jonny Evans","Gareth McAuley"],
+  "República da Irlanda": ["Liam Brady","Paul McGrath","Roy Keane","Robbie Keane","Shay Given","Niall Quinn","Damien Duff","John O'Shea","Richard Dunne","Steve Staunton"],
+  "Romênia": ["Gheorghe Hagi","Gheorghe Popescu","Dan Petrescu","Ilie Dumitrescu","Marius Lăcătuș","Dorinel Munteanu","Adrian Mutu","Cristian Chivu","Bogdan Stelea","Ciprian Tătărușanu"],
+  "Bulgária": ["Hristo Stoichkov","Dimitar Berbatov","Krasimir Balakov","Yordan Letchkov","Emil Kostadinov","Hristo Bonev","Georgi Asparuhov","Borislav Mihaylov","Stiliyan Petrov","Martin Petrov"],
+  "Grécia": ["Theodoros Zagorakis","Angelos Charisteas","Giorgos Karagounis","Kostas Katsouranis","Antonios Nikopolidis","Traianos Dellas","Vasilis Torosidis","Dimitris Salpingidis","Nikos Anastopoulos","Giorgos Samaras"],
+  "Turquia": ["Hakan Şükür","Rüştü Reçber","Bülent Korkmaz","Tugay Kerimoğlu","Hasan Şaş","Nihat Kahveci","Arda Turan","Emre Belözoğlu","Hamit Altıntop","Burak Yılmaz"],
+  "Eslováquia": ["Marek Hamšík","Martin Škrtel","Róbert Vittek","Miroslav Karhan","Peter Pekarík","Marek Mintál","Stanislav Lobotka","Juraj Kucka","Vladimír Weiss","Milan Škriniar"],
+  "Eslovênia": ["Zlatko Zahovič","Srečko Katanec","Milivoje Novaković","Boštjan Cesar","Samir Handanović","Valter Birsa","Josip Iličić","Jan Oblak","Robert Koren","Andraž Šporar"],
+  "Bósnia": ["Edin Džeko","Miralem Pjanić","Zvjezdan Misimović","Vedad Ibišević","Emir Spahić","Asmir Begović","Hasan Salihamidžić","Elvir Bolić","Sergej Barbarez","Sejad Salihović"],
+  "Islândia": ["Eiður Guðjohnsen","Gylfi Sigurðsson","Aron Gunnarsson","Birkir Bjarnason","Hannes Þór Halldórsson","Ragnar Sigurðsson","Kári Árnason","Kolbeinn Sigþórsson","Rúnar Kristinsson","Jóhann Berg Guðmundsson"],
+  "Noruega": ["Ole Gunnar Solskjær","John Arne Riise","Tore André Flo","Henning Berg","Ronny Johnsen","Steffen Iversen","Morten Gamst Pedersen","Erling Haaland","Martin Ødegaard","Jørgen Juve"],
+  "Israel": ["Mordechai Spiegler","Yossi Benayoun","Eyal Berkovic","Haim Revivo","Avi Nimni","Tal Ben Haim","Eran Zahavi","Dudu Aouate","Walid Badir","Eli Ohana"],
 };
 // Nomes alternativos existentes no cadastro das divisões alemãs: uma única galeria por identidade.
 const ALIASES_LENDAS = Object.freeze({ 'Hamburgo': 'Hamburger SV', 'Köln': 'FC Köln' });

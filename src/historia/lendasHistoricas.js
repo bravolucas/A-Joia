@@ -871,6 +871,32 @@ export const LENDAS_HISTORICAS = {
   // https://fairplay.pt/futebol/futebolnacional/fc-alverca-elenco-sonho-19992000/
   // https://www.record.pt/futebol/futebol-nacional/liga-betclic/benfica/detalhe/alverca-de-olhos-colocados-no-benfica-e-sporting
   "Alverca": ["Cajú","Nélson Veríssimo","Abel Silva","Nélson Morais"],
+  // Portugal — segunda divisão do cadastro; seleção editorial parcial de destaques, sem ranking. Consulta: 2026-11-24.
+  // AVS: somente atletas do clube criado em 2023, sem incorporar o histórico do Desportivo das Aves.
+  // https://gdchaves.pt/historia/
+  // https://www.canaln.tv/sempre-fomos-a-bola-com-eles-homenageia-18-jogadores-de-chaves/
+  "Chaves": ["Rui Riça","Quim Sanches","Diamantino Brás","Vítor Castanheira","João Alves","Pedro Gonçalves (Potinho)","Mário Mendonça"],
+  // https://rr.pt/bola-branca/noticia/futebol-nacional/2020/08/17/17-anos-da-estreia-de-cris-no-feirense-as-conquistas-tem-sido-incriveis/203792/
+  // https://www.record.pt/futebol/futebol-nacional/2--liga/feirense/detalhe/cris-coloca-ponto-final-na-carreira
+  "Feirense": ["Cris Santos"],
+  // https://futebol365.pt/artigo/112995-nuno-silva-14-anos-de-leixoes-e-mais-de-500-jogos-oficiais-nas-pernas/
+  // https://pt.wikipedia.org/wiki/Raul_Machado
+  // https://leixoessc.pt/identidade/
+  "Leixões": ["Nuno Silva","Raul Machado","Silva","Oliveirinha"],
+  // https://www.imediato.pt/os-10-jogadores-com-mais-jogos-pelo-fc-penafiel-na-ii-liga/
+  "Penafiel": ["Ferreira","Rafa Sousa","Luís Dias","Guedes","Romeu Ribeiro","Pedrinha","Pedro Coronas"],
+  // https://www.torreense.com/blog/notadepesarantoniodossantos
+  "Torreense": ["António Augusto dos Santos"],
+  // https://www.zerozero.pt/noticias/as-votacoes-acabaram-eis-o-melhor-xi-da-historia-do-boavista/283268
+  // https://www.record.pt/futebol/futebol-nacional/coluna-distrital/boavista/detalhe/dez-medios-em-votacao-para-o-melhor-onze
+  // https://rtiesporte.com.br/arquivo/boavista/amp/
+  "Boavista": ["Alfredo","João Vieira Pinto","Erwin Sánchez","Petit","Ricardo","Martelinho","João Alves","Phil Walker","Rui Bento","Ion Timofte"],
+  // https://afsfut.pt/obrigado-e-ate-ja/
+  // https://www.record.pt/futebol/futebol-nacional/2--liga/avs-sad/detalhe/nene-acerta-renovacao-com-o-avs-sad
+  "AVS": ["Nenê"],
+  // https://www.abola.pt/noticias/tondela-e-um-dos-historicos-e-quer-fazer-o-que-ja-ajudou-a-fazer-2026051922130957639
+  // https://www.jornaldocentro.pt/as-memorias-de-quem-ha-dez-anos-levou-o-tondela-a-primeira-2/
+  "Tondela": ["Bebeto","André Carvalhas","Nuno Santos","João Pica","Piojo"],
   // Seleções
   'Brasil': ['Pelé', 'Garrincha', 'Ronaldo', 'Romário'],
   'Argentina': ['Diego Maradona', 'Lionel Messi', 'Mario Kempes', 'Gabriel Batistuta'],

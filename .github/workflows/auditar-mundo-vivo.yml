@@ -28,6 +28,6 @@ jobs:
       - name: Testar arquivo Mundo Vivo em celular e desktop
         shell: bash
         run: |
-          npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/ajoia-preview.log 2>&1 &
+          GITHUB_PAGES=true npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/ajoia-preview.log 2>&1 &
           npx wait-on http://127.0.0.1:4173/A-Joia/
           npx playwright test tests/mundo-vivo.spec.mjs --reporter=line --workers=1

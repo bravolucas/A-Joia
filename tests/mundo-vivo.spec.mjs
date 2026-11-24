@@ -25,7 +25,17 @@ for(const width of [360,1366])test(`mundo vivo: IndexedDB, arquivo de clubes, jo
  await page.getByRole('button',{name:'Ver história do Corinthians',exact:true}).click();
  const d=page.getByRole('dialog',{name:'História do futebol'});await expect(d.getByRole('region',{name:'Evolução do Corinthians'})).toContainText(String(s.c.ano-1));
  await d.getByRole('button',{name:'Jogadores',exact:true}).click();await d.getByLabel('Buscar jogador',{exact:true}).fill('Mundo Persistente');await d.locator('.mv-atletas button').click();await expect(d.getByRole('article',{name:'Ficha de Mundo Persistente'})).toContainText(String(s.c.ano-1));
- await d.getByRole('button',{name:'Competições',exact:true}).click();await d.getByLabel('Competição do histórico').selectOption(LIGAS.brasileirao.nome);await expect(d.getByRole('region',{name:'Edições da competição'})).toBeVisible();await expect(d.locator('.mv-jogos li').first()).toBeVisible();await d.getByLabel('Filtrar partidas por clube').selectOption('Corinthians');await expect(d.locator('.mv-jogos li')).toHaveCount(38);
+ await d.getByRole('button',{name:'Competições',exact:true}).click();await d.getByLabel('Competição do histórico').selectOption(LIGAS.brasileirao.nome);await expect(d.getByRole('region',{name:'Edições da competição'})).toBeVisible();
+ await expect(d.locator('.mv-jogos li')).toHaveCount(0);
+ await d.getByRole('button',{name:/TODOS OS JOGOS/}).click();
+ await expect(d.locator('.mv-jogos li').first()).toBeVisible();
+ await d.getByLabel('Filtrar pelo clube').selectOption('Corinthians');
+ const rodada=d.getByRole('region',{name:'Partida por partida'}).getByLabel('Rodada',{exact:true});
+ await expect(rodada.locator('option')).toHaveCount(38);
+ await expect(d.locator('.mv-jogos li')).toHaveCount(1);
+ await rodada.selectOption('rodada-38');
+ await expect(d.locator('.mv-jogos li')).toHaveCount(1);
+ await expect(d.locator('.mv-partidas-contador')).toContainText('Rodada 38');
  const lider=d.locator('.mv-lideres article').filter({has:page.getByRole('heading',{name:'Artilheiros',exact:true})}).locator('li').first();
  await expect(lider).toBeVisible();await expect(lider).not.toContainText(LIGAS.brasileirao.nome);
  const nomes=new Set([s.c.nome,...s.c.mundo.jogadores.map(p=>p.nome)]);

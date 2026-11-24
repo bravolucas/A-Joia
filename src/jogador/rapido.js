@@ -1497,7 +1497,7 @@ function efeitoFoco(c) {
 
 /* Joga a temporada inteira. Se houver uma final com você em campo,
    devolve um "momento decisivo" (pênalti) para o jogador resolver na tela. */
-export function jogarTemporada(c0,opcoes={}) { sincronizarLigas(c0); const r=comSemente(c0.codigo, `jogar:${c0.ano}`, () => jogarTemporadaBase(c0));if(!opcoes.copasInterativas)return r;const card=prepararCopasJogador(r.c,r.card);return {...r,card,momento:card.pendente}; }
+export function jogarTemporada(c0,opcoes={}) { sincronizarLigas(c0); const r=comSemente(c0.codigo, `jogar:${c0.ano}`, () => jogarTemporadaBase(c0));if(!opcoes.copasInterativas)return r;const card=prepararCopasJogador(r.c,iniciarCopaCompartilhada(r.c,r.card));return {...r,card,momento:card.pendente}; }
 function jogarTemporadaBase(c0) {
   const c = clone(c0);
   c.lojaAnoEmCurso=c.ano;
@@ -1653,7 +1653,7 @@ function jogarTemporadaBase(c0) {
     : anoDeContinentalSelecao(c.ano) ? { nome: nomeCopaContinental(c.nac), tipo: "continentalSelecao" } : null;
   // Amistosos têm placares e participações próprios, separados dos torneios.
   card.amistososSelecao=simularAmistososSelecao(c,ovr,torneio?4:6);
-  if(torneio){const ini=iniciarCopa(c,ovr,torneio);if(ini){card.selecao=ini.selecao;card.copa=ini.copa;if(ini.copa.convocado)Object.assign(card,iniciarCopaCompartilhada(c,card));}}
+  if(torneio){const ini=iniciarCopa(c,ovr,torneio);if(ini){card.selecao=ini.selecao;card.copa=ini.copa;}}
 
   if(card.selecao?.convocado||card.copa?.convocado||card.amistososSelecao?.convocado){const elenco=card.copa?.elenco||card.selecao?.elenco||card.amistososSelecao?.elenco;prepararCamisaSelecao(c,elenco?.jogadores||[]);card.numeroSelecao=c.numeroSelecao;for(const e of [card.copa?.elenco,card.selecao?.elenco,card.amistososSelecao?.elenco])if(e)sincronizarCamisasSelecao(c,e);}
   momentos.forEach((m, i) => { if(m.tipo==='selecao'&&card.selecao?.finalAdversario)m.adversario=card.selecao.finalAdversario; m.mini = miniParaMomento(c,m,momentos.slice(0,i).map(x=>x.mini)); Object.assign(m,contextoMomento(c,m)); m.texto = textoDoMomento(m.mini, m, c); m.lance={minuto:84+hashTexto(c.codigo+':'+c.ano+':'+i)%7,gp:0,gc:0,simulado:true,disputa:['penalti','defesa'].includes(m.mini)}; m.ordem = i + 1; m.total = momentos.length; });

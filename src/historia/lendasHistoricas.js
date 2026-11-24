@@ -318,6 +318,50 @@ export const LENDAS_HISTORICAS = {
   'Porto': ['Fernando Gomes', 'Vítor Baía', 'Deco'],
   'Sporting': ['Cristiano Ronaldo', 'Luís Figo', 'Fernando Peyroteo'],
   'Ajax': ['Johan Cruyff', 'Marco van Basten', 'Frank Rijkaard'],
+  // Inglaterra — seleção editorial parcial de ídolos e destaques; consulta 2026-11-24.
+  // https://www.leedsunited.com/en/news/billy-bremner-25-years-since-a-legend-passed
+  // https://lufcarchive.com/history.html
+  // https://lufchistory.com/
+  "Leeds United": ["Billy Bremner","John Charles","Peter Lorimer","Jack Charlton","Norman Hunter","Eddie Gray","Allan Clarke","Johnny Giles"],
+  // https://www.coventrycity-mad.co.uk/news/tmnw/george_hudson_amongst_those_attending_legends_day_915019/index.shtml
+  "Coventry City": ["Steve Ogrizovic","George Hudson","Dave Bennett","Willie Carr","Micky Gynn"],
+  // https://www.sunderlandafc.news/club/legends/
+  "Sunderland": ["Charlie Hurley","Kevin Phillips","Bobby Gurney","Charlie Buchan"],
+  // https://therealefl.co.uk/english-football-teams/hull-city/
+  // https://tigerbase.hullcity.com/tigers-plyr-records.php
+  "Hull City": ["Chris Chilton","Ken Wagstaff","Dean Windass","Jock Davidson"],
+  // https://www.evertonresults.com/legends.htm
+  // https://efcheritagesociety.com/efcheritagesociety-com-page_idcat3/dixie-dean-memorial-awards/
+  // https://www.evertonfc.com/news/2025/february/11/goodison-s-most-memorable-merseyside-derbies/
+  "Everton": ["Dixie Dean","Neville Southall","Alan Ball","Brian Labone","Joe Mercer","Graeme Sharp","Kevin Ratcliffe","Colin Harvey","Alex Young","Howard Kendall"],
+  // https://www.cpfc.co.uk/hospitality/legendaryhosts/
+  // https://www.tottenhamhotspur.com/news/994542/legends-on-legends-crystal-palace
+  "Crystal Palace": ["Ian Wright","Mark Bright","Jim Cannon","Geoff Thomas","Nigel Martyn","Alan Pardew"],
+  // https://www.fulhamfc.com/club/history/history-of-fulham-football-club
+  // https://www.fulhamfc.com/club/history/honours
+  "Fulham": ["Johnny Haynes","George Cohen","Gordon Davies","Tony Macedo","Jim Langley","Alan Mullery","Graham Leggat","Rodney Marsh"],
+  // https://www.brightonandhovealbion.com/media-article/bhafc-125-year-anniversary-wall
+  "Brighton": ["Tommy Cook","Peter Ward","Bobby Zamora","Glenn Murray","Lewis Dunk","Pascal Groß"],
+  // https://www.avfc.co.uk/news/2025/march/17/Legacy-Numbers--Shaw--Fashanu--Hardy-and-Saward/
+  // https://shop.avfc.co.uk/en/aston-villa-1990-blackout-shirt/p-1292709049288156%2Bz-985-1274953860
+  // https://next.avfc.co.uk/news/2026/july/16/news-tradenation-provide-special-day-for-lions-clubs/
+  "Aston Villa": ["Paul McGrath","Peter Withe","Gordon Cowans","Gary Shaw","David Platt","Tony Daley"],
+  // https://www.newcastleunited.com/en/hall-of-fame
+  // https://www.newcastleunited.com/en/news/alan-shearer-names-his-greatest-xi
+  "Newcastle": ["Alan Shearer","Jackie Milburn","Malcolm Macdonald","Peter Beardsley","Shay Given","Bob Moncur","Kevin Keegan","Chris Waddle"],
+  // https://www.nottinghamforest.co.uk/club-information/history/club-information-history-of-nottingham-forest
+  // https://livepreview.nottinghamforest.co.uk/news/2025/july/30/legends-tours-with-ian-storey-moore-on-sale-now/
+  // https://livepreview.nottinghamforest.co.uk/news/2025/november/25/special-souvenir-edition-programme-for-malmo/
+  "Nottingham Forest": ["John Robertson","John McGovern","Stuart Pearce","Martin O'Neill","Frank Clark","Ian Storey-Moore","Viv Anderson","Garry Birtles"],
+  // https://www.afcb.co.uk/news/2025/november/03/junior-cherries-day-october-2025/
+  // https://www.afcb.co.uk/news/2025/march/17/Information-points-drops-united-home/
+  "Bournemouth": ["Steve Fletcher","Ted MacDougall"],
+  // https://www.brentfordfc.com/en/news/new-additions-to-brentford-fc-hall-of-fame_70938
+  // https://www.brentfordfc.com/en/news/article/wall-of-fame-created-at-griffin-park-_69961
+  "Brentford": ["Jim Towers","George Francis","Kevin O'Connor","Ken Coote","Jamie Bates","Marcus Gayle","Jackie Graham","Terry Evans"],
+  // https://prideofanglia.com/page.php?page=hallOfFameSummary
+  // https://www.prideofanglia.com/page.php?page=hallOfFame
+  "Ipswich Town": ["Mick Mills","John Wark","Ray Crawford","Ted Phillips","Kevin O'Callaghan","David Linighan","Doug Millward"],
   // Seleções
   'Brasil': ['Pelé', 'Garrincha', 'Ronaldo', 'Romário'],
   'Argentina': ['Diego Maradona', 'Lionel Messi', 'Mario Kempes', 'Gabriel Batistuta'],

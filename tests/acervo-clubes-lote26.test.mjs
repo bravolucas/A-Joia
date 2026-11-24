@@ -21,3 +21,17 @@ test('lote 26: documentos históricos de Kocaelispor e Gençlerbirliği, sem rec
  assert.ok(acervoClubeHistoricoDe('Kocaelispor').marcos.some(m=>m.ano===1997));
  assert.ok(acervoClubeHistoricoDe('Gençlerbirliği').marcos.some(m=>m.ano===1941));
 });
+
+test('novo lote aprofunda sem apagar os registros antigos do lote 17',()=>{
+ const k=acervoClubeHistoricoDe('Kocaelispor');
+ const g=acervoClubeHistoricoDe('Gençlerbirliği');
+ assert.ok(k.atletas.some(a=>a.nome==='Zdravko Lazarov'));
+ assert.ok(k.atletas.some(a=>a.nome==='Cihan Haspolatlı'));
+ assert.ok(k.atletas.some(a=>a.nome==='Faruk Yiğit'));
+ assert.ok(k.tecnicos.some(t=>t.nome==='Hikmet Karaman'));
+ assert.ok(k.tecnicos.some(t=>t.nome==='Güvenç Kurtar'));
+ assert.ok(g.atletas.some(a=>a.nome==='Filip Daems'));
+ assert.ok(g.atletas.some(a=>a.nome==='Hasan Polat'));
+ assert.equal(k.marcos.filter(m=>m.ano===1997&&/Copa da Turquia/.test(m.titulo)).length,1);
+ assert.equal(k.marcos.filter(m=>m.ano===2002&&/Copa da Turquia/.test(m.titulo)).length,1);
+});

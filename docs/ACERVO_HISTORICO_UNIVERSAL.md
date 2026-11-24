@@ -16,9 +16,9 @@ O inventário único, deduplicado por nome, está em
 `src/dados/coberturaAcervoHistorico.js`.
 
 ## Fichas e recordes verificados
-- `src/dados/acervoClubesHistoricos.js` e `acervoClubesHistoricosLote2.js` `acervoClubesHistoricosLote3.js` `acervoClubesHistoricosLote4.js` `acervoClubesHistoricosLote5.js` `acervoClubesHistoricosLote6.js` `acervoClubesHistoricosLote7.js` `acervoClubesHistoricosLote8.js` `acervoClubesHistoricosLote9.js` `acervoClubesHistoricosLote10.js` `acervoClubesHistoricosLote11.js` `acervoClubesHistoricosLote12.js` `acervoClubesHistoricosLote13.js` `acervoClubesHistoricosLote14.js` `acervoClubesHistoricosLote15.js` `acervoClubesHistoricosLote16.js` e `acervoClubesHistoricosLote17.js`.
+- `src/dados/acervoClubesHistoricos.js` e `acervoClubesHistoricosLote2.js` `acervoClubesHistoricosLote3.js` `acervoClubesHistoricosLote4.js` `acervoClubesHistoricosLote5.js` `acervoClubesHistoricosLote6.js` `acervoClubesHistoricosLote7.js` `acervoClubesHistoricosLote8.js` `acervoClubesHistoricosLote9.js` `acervoClubesHistoricosLote10.js` `acervoClubesHistoricosLote11.js` `acervoClubesHistoricosLote12.js` `acervoClubesHistoricosLote13.js` `acervoClubesHistoricosLote14.js` `acervoClubesHistoricosLote15.js` `acervoClubesHistoricosLote16.js` `acervoClubesHistoricosLote17.js` e `acervoClubesHistoricosLote18.js`.
 - `src/dados/acervoSelecoesHistoricas.js`.
-- Clubes com fichas individuais verificadas neste ciclo: **202**.
+- Clubes com fichas individuais verificadas neste ciclo: **206**.
 - Seleções com fichas individuais verificadas neste ciclo: **21**.
 - As 23 equipes da Série D, as 20 equipes da Série C e as 20 equipes da Série B do catálogo principal possuem ficha histórica inicial.
 - O lote 6 e o lote 8 incluem técnicos responsáveis por títulos documentados.
@@ -30,6 +30,7 @@ O inventário único, deduplicado por nome, está em
 - O lote 15 documenta Galatasaray, Fenerbahçe, Beşiktaş e Trabzonspor com atletas, marcos e técnicos associados a fontes da UEFA.
 - O lote 16 adiciona Başakşehir, Samsunspor e Göztepe com fontes UEFA e TFF; dados absolutos não apurados permanecem null.
 - O lote 17 adiciona Konyaspor, Kocaelispor, Gençlerbirliği e Al-Nassr com dados de UEFA, TFF e AFC; sem recordes absolutos não apurados.
+- O lote 18 acrescenta Alanyaspor, Kasımpaşa, Antalyaspor e Al-Shabab (fontes de TFF, clubes e AFC).
 - As demais entidades têm cobertura `pendente_apuracao`.
 - Dados reais são independentes do Arquivo Vivo de cada save.
 - Os títulos históricos de seleções já existentes foram reutilizados, sem

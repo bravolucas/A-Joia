@@ -79,7 +79,7 @@ export function EdicoesCompeticao({c,nome}){
      {grupoPartidas?<><nav className="mv-partidas-navegacao" aria-label={edicao.tipo==='liga'?'Navegar por rodada':'Navegar por fase'}>
        <button type="button" onClick={()=>mudarGrupo(gruposPartidas[Math.max(0,indicePartidas-1)].chave)} disabled={indicePartidas<=0} aria-label="Rodada ou fase anterior">‹ Anterior</button>
        <label>{edicao.tipo==='liga'?'Rodada':'Fase'}
-         <select value={grupoPartidas.chave} onChange={e=>mudarGrupo(e.target.value)}>
+         <select aria-label={edicao.tipo==='liga'?'Rodada':'Fase'} value={grupoPartidas.chave} onChange={e=>mudarGrupo(e.target.value)}>
            {gruposPartidas.map(g=><option key={g.chave} value={g.chave}>{g.rotulo} · {g.partidas.length} {g.partidas.length===1?'jogo':'jogos'}</option>)}
          </select>
        </label>

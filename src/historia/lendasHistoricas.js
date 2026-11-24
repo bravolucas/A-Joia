@@ -417,6 +417,62 @@ export const LENDAS_HISTORICAS = {
   "Queens Park Rangers": ["Stan Bowles","Rodney Marsh","Les Ferdinand"],
   // https://upthetown.uk/legends
   "Wrexham": ["Arfon Griffiths","Dixie McNeil","Tommy Bamford"],
+  // Espanha — primeira divisão do jogo; seleção editorial parcial, sem ordem de mérito; consulta 2026-11-24.
+  // https://www.realracingclub.es/noticias/la-leyenda-esta-de-nuevo-en-casa
+  // https://www.realracingclub.es/noticias/el-partido-solidario-de-leyendas-racinguistas-reune-en-las-instalaciones-a-mas-de-500-aficionados
+  "Racing Santander": ["Pedro Munitis","José Ceballos","Gonzalo Colsa","Quique Setién","Salva Ballesta","Nikola Žigić"],
+  // https://museo.levanteud.com/recuerdos/
+  // https://www.laliga.com/noticias/vota-por-tu-jugador-historico-del-levante-ud
+  "Levante": ["José Luis Morales","Sergio Ballesteros","Juanfran García","Félix Ettien","Vicente Iborra","Gustavo Munúa"],
+  // https://www.rcdeportivo.es/es/protagonistas-jugadores-legendarios
+  // https://dxtcampeon.elidealgallego.com/deportivo/depor/2026-05-22/una-charla-con-cinco-leyendas-del-deportivo-no-podemos-ser-miedosos-y-no-lo-vamos-a-ser-857226.html
+  "Deportivo La Coruña": ["Fran","Bebeto","Mauro Silva","Donato","Francisco Liaño","Jacques Songo'o","Juan Carlos Valerón","Manuel Pablo"],
+  // https://www.malagacf.com/noticias/gracias-duda
+  // https://www.malagacf.com/noticias/500-veces-como-mcf-en-la-rosaleda
+  // https://www.malagacf.com/noticias/convocatoria-del-malaga-cf-leyendas-y-de-afe
+  "Málaga": ["Duda","Darío Silva","Julio César Dely Valdés","Basti","Jesús Gámez","Vicente Valcarce","Catanha"],
+  // https://www.laliga.com/noticias/jugadores-historicos-valencia-cf
+  // https://www.laliga.com/noticias/vota-por-tu-jugador-historico-del-valencia-cf
+  // https://www.penyesvalenciacf.com/de-leyenda/
+  "Valencia": ["Mario Kempes","Mundo","Gaizka Mendieta","David Albelda","Rubén Baraja","Santiago Cañizares","Claudio López","Miguel Ángel Angulo","Vicente Rodríguez"],
+  // https://www.laliga.com/noticias/jugadores-historicos-real-betis
+  // https://en.realbetisbalompie.es/news/current_news/historia-la-foto-de-la-memoria-22970
+  "Real Betis": ["Joaquín Sánchez","Rafael Gordillo","José Ramón Esnaola","Julio Cardeñosa","Luis del Sol","Rogelio Sosa"],
+  // https://www.laliga.com/noticias/jugadores-historicos-sevilla-fc
+  "Sevilla": ["Jesús Navas","Juan Arza","Frédéric Kanouté","Luís Fabiano","Andrés Palop","Manolo Jiménez","Antonio Puerta","Biri Biri","Pablo Blanco"],
+  // https://www.laliga.com/es-US/noticias/jugadores-historicos-real-sociedad
+  // https://www.laliga.com/noticias/luis-miguel-arconada-elegido-jugador-historico-de-la-real-sociedad
+  "Real Sociedad": ["Luis Arconada","Jesús María Zamora","Alberto Górriz","Xabi Prieto","Jon Andoni Larrañaga","Roberto López Ufarte","Xabi Alonso","Darko Kovačević"],
+  // https://villarrealcf.es/centenario/el-partido-de-las-leyendas/
+  // https://villarrealcf.es/es/bruno-trigueros-y-mario-grandes-amigos-y-leyendas-del-villarreal/
+  "Villarreal": ["Bruno Soriano","Marcos Senna","Santi Cazorla","Juan Román Riquelme","Diego Forlán","Gerard Moreno","Joan Capdevila","Manu Trigueros","Mario Gaspar"],
+  // https://www.athletic-club.eus/noticias/2021/01/20/zarra-centenario-de-un-mito/
+  // https://www.athletic-club.eus/noticias/2023/01/14/iker-muniain-en-el-podio-de-partidos-disputados-con-el-athletic-club/
+  // https://www.laliga.com/noticias/jose-angel-iribar-elegido-jugador-historico-del-athletic-club
+  "Athletic Bilbao": ["Telmo Zarra","José Ángel Iribar","Pichichi","Agustín Gaínza","Txetxu Rojo","Julen Guerrero","Iker Muniain","Joseba Etxeberria","Aritz Aduriz"],
+  // https://www.laliga.com/noticias/iago-aspas-elegido-jugador-historico-del-rc-celta
+  // https://www.laliga.com/noticias/vota-por-tu-jugador-historico-del-rc-celta
+  // https://as.com/futbol/2016/12/16/album/1481882071_777933.html
+  "Celta Vigo": ["Iago Aspas","Aleksandr Mostovoi","Gustavo López","Vladimir Gudelj","Pahiño","Hugo Mallo"],
+  // https://www.osasuna.es/osasuna-y-lkn-homenajean-la-historia-del-club-con-un-mural-en-el-sadar
+  "Osasuna": ["Patxi Puñal","Jan Urban","Seve Goiburu","Sabino Andonegui","Pablo García","Javad Nekounam","Oier Sanjurjo","Roberto Torres"],
+  // https://www.laliga.com/noticias/miguel-angel-sanchez-michel-elegido-jugador-historico-del-rayo-vallecano
+  // https://www.laliga.com/noticias/vota-por-tu-jugador-historico-del-rayo-vallecano
+  "Rayo Vallecano": ["Míchel (Miguel Ángel Sánchez)","Jesús Diego Cota","Jon Pérez Bolo","Piti","José María De Quintana"],
+  // https://www.getafecf.com/jugadores-centenarios
+  // https://www.laliga.com/noticias/jugadores-historicos-getafe-cf
+  // https://www.laliga.com/noticias/vota-por-tu-jugador-historico-del-getafe-cf
+  "Getafe": ["Javi Casquero","Jaime Gavilán","Jaime Mata","Pedro León","Cata Díaz","Djené Dakonam","David Soria"],
+  // https://www.laliga.com/es-DE/noticias/jugadores-historicos-del-deportivo-alaves
+  // https://www.laliga.com/es-US/noticias/javier-moreno-elegido-jugador-historico-del-deportivo-alaves
+  "Alavés": ["Javi Moreno","Manu García","Fernando Pacheco","Jordi Cruyff","Cosmin Contra","Antonio Karmona","Martín Herrera"],
+  // https://www.rcdespanyol.com/es/noticia/una-nueva-fase-culminada/3415
+  // https://www.laliga.com/es-DE/noticias/jugadores-historicos-rcd-espanyol
+  "Espanyol": ["Raúl Tamudo","Rafa Marañón","Thomas N'Kono","Ricardo Zamora","Dani Jarque","Dani Solsona","Mauricio Pochettino"],
+  // https://www.elchecf.es/noticias/equipo-los-400-de-nino
+  // https://www.elchecf.es/noticias/reportaje-nino-sigue-haciendo-historia
+  // https://fcmagazin.com/elx-cf/tots-els-jugadors-de-la-historia-de-lelx-abast/
+  "Elche": ["Nino","César Rodríguez","Tomeu Llompart","Vicente Iborra (histórico)","Miguel Quirant","Cayetano Ré","Rubén Cano"],
   // Seleções
   'Brasil': ['Pelé', 'Garrincha', 'Ronaldo', 'Romário'],
   'Argentina': ['Diego Maradona', 'Lionel Messi', 'Mario Kempes', 'Gabriel Batistuta'],

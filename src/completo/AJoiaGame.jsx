@@ -2068,13 +2068,13 @@ function resolverTemporada(c, extraStats) {
         ...estatisticasReaisTemporada(card, jogosLista),
         nota: comNota.length ? +(comNota.reduce((a, j) => a + j.nota, 0) / comNota.length).toFixed(2) : card.nota,
       };
-      if (tabelaFinal) {
-        const classificacao = Object.values(tabelaFinal).sort((a, b) => b.pts - a.pts || b.sg - a.sg);
-        const minhaPos = classificacao.findIndex((r) => r.clube.nome === c.clube.nome);
-        card.classificacao=classificacao.map((r,i)=>({nome:r.clube.nome,posicao:i+1,jogos:r.j,pontos:r.pts,vitorias:r.v,empates:r.e,derrotas:r.d,golsPro:r.gp,golsContra:r.gc,saldoGols:r.sg}));
-        card.vencedorLiga=card.classificacao[0]?.nome;
-        if (minhaPos >= 0) { card.posLiga = minhaPos + 1; card.campeaoLiga = minhaPos === 0; }
-      }
+    }
+    if (tabelaFinal) {
+      const classificacao = Object.values(tabelaFinal).sort((a, b) => b.pts - a.pts || b.sg - a.sg);
+      const minhaPos = classificacao.findIndex((r) => r.clube.nome === c.clube.nome);
+      card.classificacao=classificacao.map((r,i)=>({nome:r.clube.nome,posicao:i+1,jogos:r.j,pontos:r.pts,vitorias:r.v,empates:r.e,derrotas:r.d,golsPro:r.gp,golsContra:r.gc,saldoGols:r.sg}));
+      card.vencedorLiga=card.classificacao[0]?.nome;
+      if (minhaPos >= 0) { card.posLiga = minhaPos + 1; card.campeaoLiga = minhaPos === 0; }
     }
     simularDefesas(c,card);
     c.codigoMundo ||= c.codigo || c.museuId || `${nome}|${nacionalidade}|${c.posicao}`;

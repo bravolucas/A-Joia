@@ -110,7 +110,8 @@ export function simularLigaMundo(clubes, rng = Math.random, liga = clubes[0]?.li
     for (let i = 0; i < base.length / 2; i++) {
       const a = base[i], b = base[base.length - 1 - i];
       if (!a || !b) continue;
-      const [casa, fora] = (rodada - 1 + i) % 2 === 0 ? [a, b] : [b, a];
+      // O clube fixo alterna por rodada. Os demais alternam conforme giram.
+      const [casa, fora] = (i === 0 ? rodada - 1 : i) % 2 === 0 ? [a, b] : [b, a];
       confrontos.push({casa, fora});
       if (sorteio) disputar(casa, fora, rodada, sorteio);
     }

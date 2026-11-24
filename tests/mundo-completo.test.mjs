@@ -152,3 +152,16 @@ test('ligas externas avançam com a carreira e preservam placares após salvar e
  assert.deepEqual(final.classificacoesMundo.inglaterra.jogos.slice(0,40).map(jogoSemMetadados),primeirosJogos.map(jogoSemMetadados));
  assert.equal(final.ligasEmDisputa,undefined);
 });
+
+test('calendário de 20 clubes evita sequências longas com o mesmo mando', () => {
+ const c=carreira(),card={};
+ avancarLigasExternas(c,card,null,38,38);
+ const edicao=card.ligasEmDisputa.ligas.inglaterra;
+ const jogos=jogosDaEdicao(edicao);
+ for(const {nome} of edicao.classificacao){
+  const mandos=jogos.filter(j=>j.casa===nome||j.fora===nome).map(j=>j.casa===nome?'C':'F').join('');
+  assert.equal(mandos.length,38);
+  assert.equal(mandos.replaceAll('F','').length,19);
+  assert.doesNotMatch(mandos,/C{4}|F{4}/);
+ }
+});

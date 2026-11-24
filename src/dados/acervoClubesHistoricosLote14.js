@@ -29,7 +29,7 @@ const D={
    ['Emiliano Marcondes','MEI','2017–2021',null,null,'brentford','Marcou o segundo gol da decisão de 2021, encerrada em 2 a 0 sobre o Swansea.'],
   ],
   marcos:[[2021,'Primeiro acesso do Brentford à Premier League','brentford','Vitória de 2 a 0 contra o Swansea City na final do playoff da Championship em 29 de maio de 2021.']],
-  tecnicos:[['Thomas Frank','2018–2024','brentfordT','Treinador do acesso histórico de 2021.']],
+  tecnicos:[['Thomas Frank','2018–2025','brentfordT','Treinador do acesso histórico de 2021.']],
  },
  'Ipswich Town':{
   atletas:[

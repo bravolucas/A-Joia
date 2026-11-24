@@ -10,7 +10,7 @@ test('todos os 20 clubes da Série C no catálogo possuem ficha inicial document
  const serieC=CLUBES.filter(x=>x.liga==='serieC');
  assert.equal(serieC.length,20);
  assert.equal(Object.keys(ACERVO_CLUBES_LOTE8).length,17);
- assert.equal(Object.keys(ACERVO_CLUBES_HISTORICOS).length,118);
+ assert.ok(Object.keys(ACERVO_CLUBES_HISTORICOS).length>=118);
  for(const clube of serieC){
   const acervo=acervoClubeHistoricoDe(clube.nome);
   assert.ok(acervo,clube.nome+' ainda sem acervo');

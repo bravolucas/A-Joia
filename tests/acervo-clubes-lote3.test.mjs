@@ -35,7 +35,8 @@ test('pesquisa preserva escopo e não apresenta números setoriais como recordes
  assert.ok(!acervoClubeHistoricoDe('Figueirense').recordes.length);
  assert.equal(acervoClubeHistoricoDe('Figueirense').atletas[0].gols,null);
  assert.equal(acervoClubeHistoricoDe('Mirassol').marcos.length,3);
- assert.ok(acervoClubeHistoricoDe('Coritiba').marcos[0].descricao.includes('minutos'));
+ assert.match(acervoClubeHistoricoDe('Coritiba').marcos[0].titulo,/933 minutos/);
+ assert.match(acervoClubeHistoricoDe('Coritiba').marcos[0].descricao,/invencibilidade/);
  assert.ok(!acervoClubeHistoricoDe('Sport Recife').recordes.length);
  const camp=consultarRecordesFutebol({},'clube','Avaí').recordes.find(x=>x.id==='golsCarreira');
  assert.equal(camp.real.valor,219);

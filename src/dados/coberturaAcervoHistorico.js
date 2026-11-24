@@ -23,8 +23,9 @@ for(const [lista,origem] of conjuntos)for(const item of lista){
  const acervo=acervoClubeHistoricoDe(nome);
  clubes.set(identidade,Object.freeze({
   tipo:'clube',nome,origem,
-  cobertura:acervo?.atletas?.length?'parcial_documentado':'pendente_apuracao',
+  cobertura:(acervo?.atletas?.length||acervo?.marcos?.length||acervo?.recordes?.length)?'parcial_documentado':'pendente_apuracao',
   atletasDocumentados:acervo?.atletas?.length||0,
+  marcosDocumentados:acervo?.marcos?.length||0,
   recordesDocumentados:acervo?.recordes?.length||0,
  }));
 }

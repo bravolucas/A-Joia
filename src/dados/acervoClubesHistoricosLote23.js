@@ -10,6 +10,7 @@ const F={
  wehdaHistoria:'https://saudipedia.com/en/al-wehda-club',
  wehdaRelatorio:'https://alwehdaclub.sa/new-website-in-progress/public/%D8%A7%D9%84%D8%AA%D9%82%D8%B1%D9%8A%D8%B1%20%D8%A7%D9%84%D8%B3%D9%86%D9%88%D9%8A%20%D9%84%D8%B9%D8%A7%D9%85%202023%20copy.pdf',
  wehdaFinal:'https://www.fifa.com/en/watch/eJGhhylJdEmLhhziIqy2hQ',
+ wehdaEscalacao:'https://www.ogol.com.br/jogo/2023-05-12-al-hilal-al-wehda/9356301',
 };
 const atleta=(nome,posicao,periodo,descricao,fonte)=>({nome,posicao,periodo,jogos:null,gols:null,descricao,fonte:F[fonte]});
 const marco=(ano,titulo,descricao,fonte)=>({ano,titulo,descricao,fonte:F[fonte]});
@@ -26,7 +27,10 @@ const D={
   ],
  },
  'Al-Wehda':{
-  atletas:[],
+  atletas:[
+   atleta('Karim Yoda','PE','2022–2023','Autor do gol do Al-Wehda na final da Copa do Rei Saudita em 12/05/2023.','wehdaEscalacao'),
+   atleta('Munir Mohamedi','GOL','2022–2024','Goleiro titular do Al-Wehda na final da Copa do Rei Saudita de 2023.','wehdaEscalacao'),
+  ],
   marcos:[
    marco(1947,'Fundação do Al-Wehda','Clube fundado em Meca em 1947.','wehdaHistoria'),
    marco(1957,'Campeão da Copa do Rei Saudita','Primeira conquista histórica da Copa do Rei, segundo relatório anual do próprio clube.','wehdaRelatorio'),

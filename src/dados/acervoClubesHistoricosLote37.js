@@ -22,7 +22,7 @@ export const ACERVO_CLUBES_LOTE37=Object.freeze({
   clube:'Ajaccio',atualizadoEm:'2026-11-24',
   atletas:Object.freeze([
    atleta('Aurélio Moyano','MC','1965–1967','Meio-campista argentino e integrante do título da segunda divisão francesa de 1967.','ajaccioMoyano'),
-   atleta('Cyril Granon','MC','década de 1990–2002','Capitão lembrado pelo clube como integrante importante do elenco campeão da D2 em 2002; sem total exato de partidas cadastrado.','ajaccioGranon'),
+   atleta('Cyril Granon','MC','1997–2004','Capitão lembrado pelo clube como integrante importante do elenco campeão da D2 em 2002; sem total exato de partidas cadastrado.','ajaccioGranon'),
   ]),
   marcos:Object.freeze([
    marco(1910,'Fundação do AC Ajaccio','A história institucional do clube começa em 1910, na Córsega.','ajaccioHistoria'),

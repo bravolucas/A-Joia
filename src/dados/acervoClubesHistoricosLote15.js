@@ -12,6 +12,7 @@ const FONTES={
  bes:'https://www.uefa.com/uefachampionsleague/news/0239-0e972a5a1938-a72d3dd3f48b-1000--besiktas-retain-turkish-league-title/',
  besU:'https://www.uefa.com/uefachampionsleague/news/023a-0e94e0c9fede-3a84530875c7-1000--club-facts-besiktas/',
  trab:'https://www.uefa.com/uefachampionsleague/news/0278-15e7be65ad83-1c6a4d4fdb7e-1000--trabzonspor-vs-copenhagen-facts/',
+ trabH:'https://www.uefa.com/news-media/mediaservices/informationkits/competitions/uefaeuropaleague/2023/match/2036021/',
 };
 const DADOS={
  'Galatasaray':{
@@ -41,7 +42,7 @@ const DADOS={
   tecnicos:[['Şenol Güneş','2015–2019','bes','Treinador das conquistas nacionais de 2015/16 e 2016/17.']],
  },
  'Trabzonspor':{
-  atletas:[],
+  atletas:[['Marek Hamšík','MEI','2021–2023',null,null,'trabH','Meio-campista do elenco campeão turco 2021/22; registrado pela UEFA nas competições europeias do clube.']],
   marcos:[[2022,'Campeão turco após 38 anos','trab','Conquistou a Süper Lig 2021/22, primeiro título nacional desde 1983/84; sétimo até aquela edição.']],
   tecnicos:[['Abdullah Avcı','2020–2023','trab','Treinador do título da Süper Lig 2021/22.']],
  },

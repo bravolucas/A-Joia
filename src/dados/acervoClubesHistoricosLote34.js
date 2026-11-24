@@ -18,8 +18,8 @@ const marcoAnual=(anos,titulo,fonte)=>anos.map(ano=>m(ano,titulo,'Título da edi
 const recorde=(id,atleta,valor,destaque)=>Object.freeze({
  tipo:'clube',nome:'Bordeaux',id,atleta,valor,
  ano:null,destaque,fonte:F.bordeauxDados,data:'2026-11-24',
- comparavel:false,
- criterio:'Balanço institucional do Bordeaux publicado com data-base em 01/07/2024. Escopo histórico de partidas do clube não uniformizado com os recortes do simulador.',
+ comparavel:false,cobertura:'recorte',
+ criterio:'Somente partidas e gols de Alain Giresse no campeonato francês pelo Bordeaux, conforme balanço oficial do clube. Não equivale a todas as competições nem ao conceito amplo de carreira do simulador.',
 });
 export const ACERVO_CLUBES_LOTE34=Object.freeze({
  'Saint-Étienne':Object.freeze({
@@ -40,7 +40,7 @@ export const ACERVO_CLUBES_LOTE34=Object.freeze({
  Bordeaux:Object.freeze({
   clube:'Bordeaux',atualizadoEm:'2026-11-24',
   atletas:Object.freeze([
-   j('Alain Giresse','MC','1970–1986','Maior goleador histórico dos Girondins segundo a própria instituição (158 gols); 519 jogos no recorte histórico do clube.','bordeauxDados'),
+   j('Alain Giresse','MC','1970–1986','Referência do Bordeaux: 158 gols e 519 jogos no campeonato francês pelo clube; não representam necessariamente todas as competições.','bordeauxDados'),
    j('Jean Tigana','MC','1981–1989','Meio-campista e ídolo dos títulos franceses de 1984, 1985 e 1987.','bordeauxGiresse'),
   ]),
   marcos:Object.freeze([
@@ -52,8 +52,8 @@ export const ACERVO_CLUBES_LOTE34=Object.freeze({
   ]),
   tecnicos:Object.freeze([]),
   recordes:Object.freeze([
-   recorde('golsCarreira','Alain Giresse',158,'Maior goleador no balanço histórico do clube; partidas e critérios podem diferir do universo simulado.'),
-   recorde('jogosCarreira','Alain Giresse',519,'Maior quantidade de jogos pelo Bordeaux conforme números publicados pelo próprio clube.'),
+   recorde('golsCarreira','Alain Giresse',158,'158 gols em partidas do campeonato francês pelo Bordeaux; não corresponde ao total em todas as competições.'),
+   recorde('jogosCarreira','Alain Giresse',519,'519 partidas no campeonato francês pelo Bordeaux; há outras participações em copas, excluídas deste recorte.'),
   ]),
  }),
 });

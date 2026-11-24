@@ -945,6 +945,51 @@ export const LENDAS_HISTORICAS = {
   // https://sctelstar.nl/de-club/over-telstar/historie
   // https://www.telstarfans.nl/statistieken/recordspelers/
   "Telstar": ["Frank Korpershoek","Fred Bischot"],
+  // Turquia — seleção editorial parcial de ídolos e destaques históricos, sem ranking. Consulta: 2026-11-24.
+  // Bases estatísticas de cobertura parcial não são prova de recordes absolutos.
+  // Gaziantep: refere-se ao Gaziantep FK, não ao Gaziantepspor.
+  // Kocaelispor: Kaan Dobra e Roman Dąbrowski são a mesma pessoa.
+  // https://www.galatasaray.org/haber/galatasaray-haberleri/camiadan-haberler/efsanemiz-metin-oktay-kabri-basinda-anildi/60948
+  // https://en.wikipedia.org/wiki/History_of_Galatasaray_S.K.
+  "Galatasaray": ["Metin Oktay","Gheorghe Hagi","Bülent Korkmaz","Hakan Şükür","Turgay Şeren","Tanju Çolak","Cláudio Taffarel","Fatih Terim"],
+  // https://www.gencgazete.net/foto-galeri/fenerbahcenin-tarihi-onlarsiz-yazilamazdi-iste-fenerbahcenin-efsane-isimleri
+  // https://en.wikipedia.org/wiki/List_of_Fenerbah%C3%A7e_S.K._footballers
+  "Fenerbahçe": ["Lefter Küçükandonyadis","Alex de Souza","Can Bartu","Volkan Demirel"],
+  // https://www.aa.com.tr/tr/futbol/besiktas-kulubu-123-yasini-kutluyor/3847702
+  "Beşiktaş": ["Hakkı Yeten","Metin Tekin","Ali Gültiken","Feyyaz Uçar","Sergen Yalçın"],
+  // https://www.trabzon.org/trabzonspor/efsaneler
+  "Trabzonspor": ["Şenol Güneş","Turgay Semercioğlu","Ali Kemal Denizci","Necati Özçağlayan","Hami Mandıralı","Ünal Karaman","Ogün Temizkanoğlu","Fatih Tekke"],
+  // https://en.wikipedia.org/wiki/%C4%B0stanbul_Ba%C5%9Fak%C5%9Fehir_F.K.
+  "Başakşehir": ["Mahmut Tekdemir","Edin Višća","Volkan Babacan","Alexandru Epureanu","Júnior Caiçara"],
+  // https://www.samsungazetesi.com/samsunsporda-iz-birakmis-yabanci-futbolcular
+  // https://www.samsungazetesi.com/foto-galeri/samsunsporun-yetistirdigi-efsane-futbolcular
+  "Samsunspor": ["Alioum Boukar","Theofanis Gekas","Simon Zenke","Cenk İşler"],
+  // https://www.aa.com.tr/tr/futbol/goztepe-super-ligde-1000inci-macina-cikacak/3671217
+  "Göztepe": ["Gürsel Aksel","Nevzat Güzelırmak","Fevzi Zemzem","Mehmet Işıkal","Çağlayan Derebaşı","Ali Artuner","Ertan Öznur","Mehmet Türken"],
+  // https://sporzip.com/eyupspor/en-cok-gol-atanlar
+  "Eyüpspor": ["Atakan Arslan","Mehmet Tosun","Eser Yayla","Ahmed Kutucu","Cem Ekinci"],
+  // https://ofsayt.com/futbol/takim/alanyaspor/e038e504-0e6f-4587-871a-b8698883516f/detay
+  "Alanyaspor": ["Efecan Karaca","Emre Akbaba","Papiss Cissé","Vágner Love","Junior Fernandes"],
+  // https://www.zerozero.pt/equipa/kasimpasa/8695/jogadores
+  // https://www.zerozero.pt/equipa/kasimpasa/8695/golos-por-idade
+  "Kasımpaşa": ["Adem Büyük","Bengali-Fodé Koita","Ezequiel Scarione"],
+  // https://sporzip.com/antalyaspor/en-cok-gol-atanlar
+  "Antalyaspor": ["Lamine Diarra","Samuel Eto'o","Melih Gökçek","Emrah Başsan","Necati Ateş"],
+  // https://en.wikipedia.org/wiki/Konyaspor
+  "Konyaspor": ["Ömer Ali Şahiner","Zafer Biryol","Riad Bajić"],
+  // https://sporzip.com/caykur-rizespor/en-cok-gol-atanlar
+  "Rizespor": ["Leonard Kweuke","Braian Samudio","Deniz Kadah","Vedat Muriqi"],
+  // https://sporzip.com/gaziantep-fk/en-cok-gol-atanlar
+  "Gaziantep": ["Alexandru Maxim","Serdar Deliktaş","Muhammet Demir","Ramazan Altıntepe"],
+  // https://www.hunattv.com/kayserispor-tarihinin-en-golcu-10-futbolcusu-zirvede-gokhan-unal/28300/
+  // https://www.kayserispor.org/public/index.php/genel/kayserispor-gokhan-unal-ile-2-yillik-sozlesme-imzaladi
+  "Kayserispor": ["Gökhan Ünal"],
+  // https://www.cagdaskocaeli.com.tr/foto/27895717/kocaelispor-efsane-oyunculari
+  "Kocaelispor": ["Saffet Sancaklı","Roman Dąbrowski","Taner Gülleri","Serdar Topraktepe"],
+  // https://www.transfermarkt.com/fatih-karagumruk/toptorschuetzen/verein/6646
+  "Fatih Karagümrük": ["Fabio Borini","Mbaye Diagne","Serdar Dursun","Erkan Zengin","Tarık Kutver","Aydın Yelken"],
+  // https://genclerbirligi.org.tr/tarihimiz
+  "Gençlerbirliği": ["Cemalettin Sakallıoğlu","Halim Çorbalı","Ergün Penbe","Tarık Daşgün","Ümit Özat","Geremi","Hasan Polat"],
   // Seleções
   'Brasil': ['Pelé', 'Garrincha', 'Ronaldo', 'Romário'],
   'Argentina': ['Diego Maradona', 'Lionel Messi', 'Mario Kempes', 'Gabriel Batistuta'],

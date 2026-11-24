@@ -7,6 +7,8 @@ const FONTES={
  alanya:'https://www.tff.org/default.aspx?2586pg=44&ftxtID=43307&pageID=471',
  alanyaT:'https://www.tff.org/Resources/Tamsaha/ZTK-Finali-2020/24-25/',
  kasim:'https://www.kasimpasa.com.tr/en/our-club?movetodesktop=1',
+ kasim2012:'https://www.tff.org/default.aspx?ftxtID=15262&pageID=287',
+ kasimBabel:'https://www.kasimpasa.com.tr/tr/haberler/a-takim-haberleri/ryan-babel-imzaladi_964.html',
  antalya:'https://www.tff.org/default.aspx?2586pg=16&ftxtID=43308&pageID=471',
  antalyaClub:'https://www.antalyaspor.com.tr/tr/futbol-haberleri/final-21-fraport-tav-antalyaspor-besiktas-jk.html',
  shabab:'https://www.the-afc.com/en/more/news/roll_of_honour.html',
@@ -22,10 +24,14 @@ const DADOS={
   tecnicos:[['Erol Bulut','2019–2020','alanyaT','Comandou o Alanyaspor na campanha da Copa da Turquia 2019/20.']],
  },
  'Kasımpaşa':{
-  atletas:[],
+  atletas:[
+   ['Adem Büyük','ATA','2012–2017',null,null,'kasim2012','Marcou na vitória por 3 a 2 sobre o Adanaspor na final do playoff de acesso de 2012.'],
+   ['Ryan Babel','PE','2013–2015',null,null,'kasimBabel','Contratado pelo Kasımpaşa em 2013, conforme anúncio oficial do clube.'],
+  ],
   marcos:[
    [1921,'Fundação do Kasımpaşa','kasim','Origem do clube em Istambul, conforme o histórico institucional.'],
    [1951,'Profissionalização do futebol turco','kasim','Kasımpaşa foi um dos primeiros dez clubes a adotar o profissionalismo na Turquia.'],
+   [2012,'Acesso à Süper Lig','kasim2012','Venceu o Adanaspor por 3 a 2 na final do playoff da segunda divisão turca.'],
   ],
  },
  'Antalyaspor':{

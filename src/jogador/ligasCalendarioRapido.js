@@ -4,6 +4,7 @@ import {geradorTecnico} from '../treinador/momentosTecnico.js';
 import {compactarJogos, jogosDaEdicao} from '../simulacao/mundoVivo.js';
 
 function placaresRegistrados(edicao) {
+  if (Array.isArray(edicao?.jogos)) return edicao.jogos;
   return jogosDaEdicao(edicao).map(({rodada, casa, fora, golsCasa, golsFora}) =>
     ({rodada, casa, fora, golsCasa, golsFora}));
 }
@@ -41,7 +42,8 @@ export function avancarCalendarioLigasRapido(estado, data) {
       [liga, placaresRegistrados(ligas[liga])]));
     const simuladas = simularLigas(estado, clubes, progresso, jogosAnteriores);
     for (const [liga, edicao] of Object.entries(simuladas)) {
-      ligas[liga] = {...edicao, progresso, jogos: compactarJogos(edicao.jogos)};
+      const jogos = edicao.origem === 'simulacao-global' ? compactarJogos(edicao.jogos) : edicao.jogos;
+      ligas[liga] = {...edicao, progresso, jogos};
     }
   }
   return {...estado, ligas};

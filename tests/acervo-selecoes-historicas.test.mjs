@@ -20,7 +20,7 @@ test('o inventario inclui todos os clubes jogáveis, extras e as 83 seleções',
  assert.equal(new Set(INVENTARIO_CLUBES_HISTORICOS.map(c=>c.nome)).size,INVENTARIO_CLUBES_HISTORICOS.length);
  assert.equal(INVENTARIO_SELECOES_HISTORICAS.length,83);
  assert.equal(Object.keys(ACERVO_SELECOES_HISTORICAS).length,83);
- assert.equal(Object.keys(ACERVO_CLUBES_HISTORICOS).length,187);
+ assert.equal(Object.keys(ACERVO_CLUBES_HISTORICOS).length,191);
  assert.ok(TOTAL_SELECOES_COM_FICHA>=20);
  assert.equal(coberturaHistoricaDe('clube','Clube inventado'),null);
 });

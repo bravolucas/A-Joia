@@ -719,6 +719,58 @@ export const LENDAS_HISTORICAS = {
   // https://www.ndr.de/sport/fussball/FC-St-Pauli-Club-Legende-Trulsen-muss-gehen%2Ctrulsen106.html
   // https://www.sportbuzzer.de/fussball/zweite-bundesliga/25-ehemalige-spieler-des-fc-st-pauli-und-was-aus-ihnen-wurde-53E366B3652BB4C72BD25E244A.html
   "St. Pauli": ["André Trulsen","Klaus Thomforde","Dirk Dammann","Werner Pokropp","Walter Frosch","Ivan Klasnić","Holger Stanislawski"],
+  // França — primeira divisão do cadastro; seleção editorial parcial de ídolos e destaques históricos, sem ranking. Consulta: 2026-11-24.
+  // https://www.fclorient.bzh/lhistoire-du-club/
+  // https://www.fclorient.bzh/jeremy-morel-dans-le-coeur-des-supporters-lorientais/
+  // https://www.lequipe.fr/Football/Actualites/Gameiro-keita-darcheville-koscielny-notre-onze-de-l-histoire-du-fc-lorient-pour-ses-cent-ans/1664636
+  "Lorient": ["Fabien Audard","Jérémy Morel","Vincent Le Goff","Jean-Claude Darcheville","Ulrich Le Pen","Bakari Koné","Kevin Gameiro","Laurent Koscielny"],
+  // https://www.estac.fr/paroles-danciens-avec-benjamin-nivet/
+  "Troyes": ["Benjamin Nivet"],
+  // https://www.toulousefc.com/equipes/equipe-professionnelle
+  // https://www.toulousefc.com/play/blog/2024/05/daniel-congre-met-un-terme-a-sa-carriere
+  "Toulouse": ["Alberto Márcico","Christophe Revault","Daniel Congré"],
+  // https://en.wikipedia.org/wiki/RC_Strasbourg_Alsace
+  // https://fr.wikipedia.org/wiki/Liste_des_joueurs_du_Racing_Club_de_Strasbourg
+  "Strasbourg": ["Jacky Duguépéroux","Roger Jouve","Ivan Hašek","Aleksandr Mostovoi","José Luis Chilavert","Alexander Vencel"],
+  // https://www.staderennais.com/actualites/125-ans/votre-onze-de-legende
+  // https://www.staderennais.com/actualites/cest-pour-eux-un-club-a-part
+  // https://histoire.staderennais.com/
+  "Rennes": ["Petr Čech","Romain Danzé","Kader Mangane","Benjamin André","Benjamin Bourigeaud","Sylvain Wiltord","Olivier Monterrubio","Alexander Frei"],
+  // https://www.rclens.fr/fr/news/match-des-heros-rclens-unicef-bollaert-delelis-20230422
+  "Lens": ["Éric Sikora","Guillaume Warmuz","Tony Vairelles","Frédéric Déhu","Vladimír Šmicer","Jean-Guy Wallemme","Daniel Moreira","Vitorino Hilton"],
+  // https://www.ogcnice.org/grandsjoueurs
+  "Nice": ["Joaquín Valle","Jean Luciano","Antoine Bonifaci","Pancho González","Joseph Ujlaki","Vic Nurenberg","Georges Lamia","Charly Loubet"],
+  // https://www.losc.fr/joueurs-les-plus-capes-de-lhistoire-du-losc
+  // https://lepetitlillois.com/encyclopedie-losc-tout-savoir/
+  "Lille": ["Marceau Somerlinck","Rio Mavuba","André Strappe","Jean Baratte","Florent Balmont","Franck Béria","Mathieu Debuchy","Grégory Tafforeau","Jonathan David"],
+  // https://www.lyonfoot.com/article/14818/qui-sont-les-legendes-de-l-ol-l-after-foot-tranche-et-laisse-du-beau-monde-dehors
+  // https://gone-stats.fr/onze-de-legende/
+  "Lyon": ["Juninho Pernambucano","Fleury Di Nallo","Bernard Lacombe","Serge Chiesa","Grégory Coupet","Sidney Govou","Sonny Anderson","Karim Benzema","Alexandre Lacazette","Cris"],
+  // https://billetterie.om.fr/fr/histoire
+  "Marseille": ["Jean-Pierre Papin","Éric Di Meco","Franck Sauzée","Jean Boyer","Édouard Crut"],
+  // https://www.asmonaco.com/fr/news/onnis-cossou-falcao-quels-sont-les-meilleurs-buteurs-de-l-histoire-de-l-as-monaco
+  // https://www.asmonaco.com/fr/club/histoire/ettori-petit-amoros-quels-sont-les-joueurs-les-plus-capes-de-l-histoire-de-l-as-monaco
+  // https://www.asmonaco.com/fr/news/deux-legendes-de-las-monaco-au-coup-denvoi
+  // https://www.asmonaco.com/fr/news/rafael-marquez-une-legende-mexicaine-sur-le-rocher
+  // https://www.asmonaco.com/fr/joueurs/michel-hidalgo
+  // https://www.asmonaco.com/fr/news/willy-sagnol-la-legende-munichoise-revelee-en-principaute
+  "Monaco": ["Delio Onnis","Jean-Luc Ettori","Manuel Amoros","Radamel Falcao","Rui Barros","John Collins","Rafael Márquez","Michel Hidalgo","Marcelo Gallardo"],
+  // https://www.aja.fr/histoire/
+  // https://www.aja.fr/bruno-martini-est-decede/
+  // https://www.aja.fr/djibril-cisse-annonce-son-jubile-le-27-mai-2025-a-auxerre/
+  "Auxerre": ["Djibril Cissé","Bruno Martini","Andrzej Szarmach","Christophe Cocard","Cédric Hengbart"],
+  // https://angers-sco.fr/club/histoire/
+  "Angers": ["Raymond Kopa","Jonathan Kodjia"],
+  // https://ligue1.com/en/articles/l1_article_2966-
+  "Le Havre": ["Jean-Michel Lesage"],
+  // https://www.lequipe.fr/Football/Article/Quels-joueurs-du-brest-2024-dans-l-equipe-type-de-l-histoire-du-stade-brestois/1469048
+  // https://footballski.fr/drago-vabec-le-mythe-du-stade-brestois
+  "Brest": ["Drago Vabec","Yvon Le Roux","David Ginola","Pierre Lees-Melou","Roberto Cabañas","Paul Le Guen"],
+  // https://parisfc.fr/equipe-pro/julien-lopez-parisien-jusquen-2026/
+  "Paris FC": ["Vincent Demarconnay","Lamri Laachi","Julien Lopez"],
+  // https://www.lemansfc.fr/index.php?actu=3560&section=actualites-contenu
+  // https://lemansfc.fr/index.php?actu=3004&section=actualites-contenu
+  "Le Mans": ["Grégory Cerdan","Laurent Bonnart","Frédéric Thomas","Grafite","Gervinho","Romaric","Daisuke Matsui","Yohann Pelé"],
   // Seleções
   'Brasil': ['Pelé', 'Garrincha', 'Ronaldo', 'Romário'],
   'Argentina': ['Diego Maradona', 'Lionel Messi', 'Mario Kempes', 'Gabriel Batistuta'],

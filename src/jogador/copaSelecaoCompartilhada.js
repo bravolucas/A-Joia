@@ -7,6 +7,7 @@ import {NACIONALIDADES} from '../dados/data.js';
 import {classificadosCopaDoMundo,participantesContinentalSelecoes} from '../competicoes/copaDoMundo.js';
 import {CONFEDERACAO_POR_NACAO} from '../dados/data.js';
 import {criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa,resumoCampanhaCopa} from '../treinador/copasEscolha.js';
+import {lancesJogadorCopa} from './copasJogador.js';
 
 const selecionar=(c,card)=>{
  const ehMundo=card.copa.tipo==='copaMundo',nac=c.nac;
@@ -39,9 +40,18 @@ export function escolherCopaCompartilhada(card,chave,opcao){
  const d=decisaoCopa(antiga);
  const esperada=d?.chave||`${antiga.seed}|resultado|${antiga.etapa}`;
  if(chave!==esperada)return card;
- const nova=opcao==='continuar'?continuarCopa(antiga):escolherCopa(antiga,chave,opcao);
+ let nova=opcao==='continuar'?continuarCopa(antiga):escolherCopa(antiga,chave,opcao);
  if(nova===antiga)return card;
  let atualizado={...card,copaCompartilhada:nova};
+ // A partida do jogador também precisa ficar no histórico: o resultado não é
+ // contabilizado de novo ao clicar em Continuar ou ao recarregar o save.
+ if(opcao!=='continuar'&&nova.resultado&&!nova.resultado.penaltisPendentes&&!antiga.resultado){
+  const lances=lancesJogadorCopa(card,nova,chave);
+  if(lances){nova={...nova,resultado:{...nova.resultado,lancesJogador:lances}};
+   const anterior=card.copaEstatisticas||{jogos:0,gols:0,assist:0};
+   atualizado={...atualizado,copaCompartilhada:nova,copaEstatisticas:{jogos:anterior.jogos+(lances.jogou?1:0),gols:anterior.gols+(lances.gols||0),assist:anterior.assist+(lances.assist||0)}};
+  }
+ }
  if(nova.fase!=='fim'||nova.resultado)return atualizado;
  const ganhou=nova.campeao===nova.usuario;
  const jogos=nova.jogosUsuario||[];
@@ -49,11 +59,12 @@ export function escolherCopaCompartilhada(card,chave,opcao){
  const k={...card.copa,fim:true,etapa:'fim',campeao:ganhou,convocado:true,
   jogos:jogos.map(j=>({fase:j.fase,adv:{label:j.casa===nova.usuario?j.fora:j.casa},gp:j.casa===nova.usuario?j.golsCasa:j.golsFora,gc:j.casa===nova.usuario?j.golsFora:j.golsCasa})),
  };
- const resumo=resumoCampanhaCopa(nova);
+ const resumo=resumoCampanhaCopa(nova),est=card.copaEstatisticas||{jogos:0,gols:0,assist:0};
+ k.gols=est.gols;k.assist=est.assist;
  atualizado={...atualizado,copa:k,
   selecao:{...selecionado,convocado:true,campeao:ganhou,resultado:nova.faseUsuario,
    jogos:jogos.length,partidas:jogos,elenco:k.elenco||selecionado.elenco,
-   gols:selecionado.gols||0,assist:selecionado.assist||0},
+   gols:est.gols,assist:est.assist},
   torneios:[...(card.torneios||[]).filter(x=>x.nome!==nova.nome),resumo],
   titulos:ganhou&&!card.titulos.some(t=>t.tipo===k.tipo&&t.nome===k.nome)?
    [...card.titulos,{tipo:k.tipo,nome:k.nome}]:card.titulos,

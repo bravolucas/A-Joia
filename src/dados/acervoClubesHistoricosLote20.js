@@ -3,13 +3,15 @@
  */
 const FONTES={
  fateh:'https://assets.the-afc.com/migration/a/f/afc-champions-league-2017-technical-report',
+ fatehElton:'https://www.the-afc.com/en/club/afc_champions_league/news/honours_even_in_six-goal_thriller.html',
  taawoun:'https://www.the-afc.com/en/club/afc_champions_league/news/al_taawoun_stun_al_ittihad_to_win_saudi_king%E2%80%99s_cup.html',
  taawounElenco:'https://assets.the-afc.com/migration/a/f/afc-champions-league-2020-technical-report-statistics',
 };
 const DADOS={
  'Al-Fateh':{
-  atletas:[],
+  atletas:[['Elton José Xavier','MEI','2011–2016',null,null,'fatehElton','Marcou o gol do empate por 3 a 3 contra o Al-Ahli na campanha do título saudita 2012/13.']],
   marcos:[[2013,'Campeão saudita pela primeira vez','fateh','Conquista da Saudi Pro League de 2012/13, reconhecida pela AFC como título surpreendente.']],
+  tecnicos:[['Fathi Al-Jabal','2008–2014','fateh','Treinador do primeiro título saudita em 2012/13.']],
  },
  'Al-Taawoun':{
   atletas:[

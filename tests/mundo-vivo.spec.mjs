@@ -39,7 +39,7 @@ for(const width of [360,1366])test(`mundo vivo: IndexedDB, arquivo de clubes, jo
  const clubeFiltro=ultimaRodada[0].casa;
  const jogosClube=jogosArquivados.filter(j=>j.casa===clubeFiltro||j.fora===clubeFiltro);
  const rodadasClube=new Set(jogosClube.map(j=>j.rodada).filter(Number.isInteger));
- const rodada=d.getByRole('region',{name:'Partida por partida'}).getByLabel('Rodada',{exact:true});
+ const rodada=d.getByRole('navigation',{name:'Navegar por rodada'}).getByRole('combobox',{name:'Rodada',exact:true});
  await expect(rodada.locator('option')).toHaveCount(38);
  await d.getByLabel('Filtrar pelo clube').selectOption(clubeFiltro);
  await expect(rodada.locator('option')).toHaveCount(rodadasClube.size);

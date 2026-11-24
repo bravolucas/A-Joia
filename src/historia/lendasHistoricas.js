@@ -897,6 +897,54 @@ export const LENDAS_HISTORICAS = {
   // https://www.abola.pt/noticias/tondela-e-um-dos-historicos-e-quer-fazer-o-que-ja-ajudou-a-fazer-2026051922130957639
   // https://www.jornaldocentro.pt/as-memorias-de-quem-ha-dez-anos-levou-o-tondela-a-primeira-2/
   "Tondela": ["Bebeto","André Carvalhas","Nuno Santos","João Pica","Piojo"],
+  // Holanda — seleção editorial parcial de ídolos e destaques históricos, sem ranking. Consulta: 2026-11-24.
+  // https://www.psv.nl/en/media/article/unveiling-these-tiles-form-the-start-of-the-psv-walk-of-fame
+  // https://www.psv.nl/en/media/article/news-romario-guest-of-honor-at-psv-az
+  // https://www.psv.nl/en/media/article/news-gerets-and-van-kraaij-received-tile-in-walk-of-fame
+  "PSV": ["Willy van der Kuijlen","Ronaldo","Romário","Luc Nilis","Hans van Breukelen","Ruud van Nistelrooij","Phillip Cocu","Berry van Aerle","Mark van Bommel","Heurelho Gomes","Arjen Robben","Mateja Kežman","Eric Gerets"],
+  // https://www.feyenoord.com/nl/de-club/organisatie/historie
+  // https://www.feyenoordgeschiedenis.nl/p/historisch-overzicht.html?m=0
+  "Feyenoord": ["Coen Moulijn","Willem van Hanegem","Rinus Israël","Wim Jansen","Ove Kindvall","Cor van der Gijp","Eddy Pieters Graafland"],
+  // https://www.az.nl/inside-az/nieuws/2026/maart/van-buskermolen-tot-dembele-iconen-op-het-stadion
+  "AZ": ["Michael Buskermolen","Kees Kist","Kristen Nygaard","Hugo Hovenkamp","Barry Opdam","Mousa Dembélé","Ron Vlaar","Barry van Galen"],
+  // https://fctwente.nl/nieuws/fc-twente-en-barry-pirovano-brengen-fc-twente-legends-samen
+  // https://fctwente.nl/nieuws/boekpresentatie-rare-jongens-die-tukkers
+  "Twente": ["Epi Drost","Sander Boschker","Wout Brama","Blaise Nkufo","Bryan Ruiz","Theo Janssen","Theo Pahlplatz","Jeroen Heubach","Eddy Achterberg","Theo Snelders"],
+  // https://fcutrecht.nl/nieuws/2022/oktober/eerbetoon-aan-clubicoon-vanaf-nu-jean-paul-de-jong-zaal-in-stadion-galgenwaard/
+  "Utrecht": ["Jean-Paul de Jong"],
+  // https://www.nec-nijmegen.nl/nieuws/nieuws/doneer-nu-voor-borstbeelden-frans-janssen-sije-visser.htm
+  "NEC": ["Sije Visser","Frans Janssen"],
+  // https://www.ga-eagles.nl/eeuwige-uittrap-leo-halle-straalt-kracht-en-historie/
+  // https://www.ga-eagles.nl/gerrit-dick-en-gerard-drie-echte-deventer-jongens/
+  // https://nos.nl/artikel/2018008-mooie-tijden-in-de-kweekvijver-van-go-ahead-eagles
+  "Go Ahead Eagles": ["Leo Halle","Dick Schneider","Gerrit Niehaus","Gerard Somer","Wietse Veenstra","John Oude Wesselink"],
+  // https://www.sc-heerenveen.nl/club/historie/abe-lenstra
+  // https://www.sc-heerenveen.nl/nieuws/nieuwe-helden-bekend-lasse-nilsson-arek-radomski-gianni-zuiverloon-en-boy-waterman
+  "Heerenveen": ["Abe Lenstra","Lasse Nilsson","Arek Radomski","Gianni Zuiverloon","Boy Waterman"],
+  // https://www.sparta-rotterdam.nl/english/about-sparta
+  // https://www.kickuitgevers.nl/onze-boeken/sport/125-jaar-sparta/
+  "Sparta Rotterdam": ["Bok de Korver","Tonny van Ede","Cas Ruffelse","Nol Heijerman","Rinus Terlouw","Kevin Strootman"],
+  // https://www.svfcgroningen.nl/2015/08/17/word-onderdeel-van-de-spelerstunnel/
+  // https://www.50jaarfcgroningen.nl/
+  "Groningen": ["Piet Fransen","Martin Koeman","Arjen Robben","Ronald Koeman","Erwin Koeman","Jan van Dijk","Henk Veldmate"],
+  // https://fortunasittard.nl/footballmemories
+  // https://fortunasittard.nl/nieuws/fortuna-eert-fernando-ricksen-met-speciaal-tenue
+  "Fortuna Sittard": ["Fernando Ricksen","Mark van Bommel","Kevin Hofland"],
+  // https://www.voetbalprimeur.nl/nieuws/1200441/bram-van-polen-heeft-laatste-wedstrijd-gespeeld-voor-pec-zwolle.html
+  "PEC Zwolle": ["Bram van Polen"],
+  // https://excelsiorrotterdam.nl/2025/04/excelsiors-topscorer-aller-tijden-piet-slui-89-overleden/
+  "Excelsior": ["Piet Slui"],
+  // https://www.willem-ii.nl/artikel/jan-van-roessel-clublegende-speler-van-de-eeuw-en-echte-tilburger
+  // https://www.willem-ii.nl/artikel/uit-de-oude-doos-trios-met-tien-meer-competitiedoelpunten
+  "Willem II": ["Jan van Roessel","Jo Mommers","Toon Becx","Sjel de Bruyckere"],
+  // https://cambuur.nl/nieuws/clubicoon-dirk-roelfsema-op-84-jarige-leeftijd-overleden/
+  "Cambuur": ["Dirk Roelfsema"],
+  // https://adodenhaag.nl/nl/nieuws/laatste-nieuws/1e-elftal/19439-lex-schoenmaker-vereeuwigd-met-standbeeld-op-haagse-heldenplein?tmpl=print%3Ftmpl%3Dprint
+  // https://www.waarderingvoetbaliconenadodenhaag.nl/nieuws
+  "ADO Den Haag": ["Lex Schoenmaker","Aad Mansveld"],
+  // https://sctelstar.nl/de-club/over-telstar/historie
+  // https://www.telstarfans.nl/statistieken/recordspelers/
+  "Telstar": ["Frank Korpershoek","Fred Bischot"],
   // Seleções
   'Brasil': ['Pelé', 'Garrincha', 'Ronaldo', 'Romário'],
   'Argentina': ['Diego Maradona', 'Lionel Messi', 'Mario Kempes', 'Gabriel Batistuta'],

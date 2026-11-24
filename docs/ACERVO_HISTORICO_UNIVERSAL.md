@@ -19,6 +19,8 @@ O inventário único, deduplicado por nome, está em
 - `src/dados/acervoClubesHistoricos.js` e `acervoClubesHistoricosLote2.js` `acervoClubesHistoricosLote3.js` `acervoClubesHistoricosLote4.js` `acervoClubesHistoricosLote5.js` `acervoClubesHistoricosLote6.js` `acervoClubesHistoricosLote7.js` `acervoClubesHistoricosLote8.js` `acervoClubesHistoricosLote9.js` `acervoClubesHistoricosLote10.js` `acervoClubesHistoricosLote11.js` `acervoClubesHistoricosLote12.js` `acervoClubesHistoricosLote13.js` `acervoClubesHistoricosLote14.js` `acervoClubesHistoricosLote15.js` `acervoClubesHistoricosLote16.js` `acervoClubesHistoricosLote17.js` `acervoClubesHistoricosLote18.js` `acervoClubesHistoricosLote19.js` `acervoClubesHistoricosLote20.js` `acervoClubesHistoricosLote21.js` `acervoClubesHistoricosLote22.js` `acervoClubesHistoricosLote23.js` `acervoClubesHistoricosLote24.js` `acervoClubesHistoricosLote25.js` e `acervoClubesHistoricosLote26.js`.
 - `src/dados/acervoSelecoesHistoricas.js`.
 - Clubes com fichas individuais verificadas neste ciclo: **225**.
+- **Turquia e Arábia Saudita:** 18 + 17 clubes do catálogo principal com ficha documental inicial. Fichas com apenas marcos históricos recebem `parcial_documentado`, não `pendente_apuracao`. Os 35 clubes ainda podem ter jogadores, recordes ou temporadas por apurar; não equivalem a cobertura completa.
+- A auditoria é incremental: o teste de integridade não impõe a contagem fixa de 191 nem inventa um atleta para cada clube.
 - Seleções com fichas individuais verificadas neste ciclo: **21**.
 - As 23 equipes da Série D, as 20 equipes da Série C e as 20 equipes da Série B do catálogo principal possuem ficha histórica inicial.
 - O lote 6 e o lote 8 incluem técnicos responsáveis por títulos documentados.

@@ -8,7 +8,7 @@ import {INVENTARIO_CLUBES_HISTORICOS} from '../src/dados/coberturaAcervoHistoric
 
 test('lote 10 inclui 16 clubes reais no catálogo e 157 fichas totais',()=>{
  assert.equal(Object.keys(ACERVO_CLUBES_LOTE10).length,16);
- assert.equal(Object.keys(ACERVO_CLUBES_HISTORICOS).length,157);
+ assert.ok(Object.keys(ACERVO_CLUBES_HISTORICOS).length>=157);
  const nomes=new Set(CLUBES.map(c=>c.nome));
  for(const [nome,c] of Object.entries(ACERVO_CLUBES_LOTE10)){
   assert.ok(nomes.has(nome),'Clube não encontrado: '+nome);

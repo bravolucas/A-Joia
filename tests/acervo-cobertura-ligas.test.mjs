@@ -26,7 +26,7 @@ test('fichas com marcos e sem jogadores são documentadas, não completas',()=>{
 });
 test('inventário de cobertura corresponde ao acervo e não a uma contagem congelada',()=>{
  const fichas=Object.values(ACERVO_CLUBES_HISTORICOS);
- assert.ok(fichas.length>=230);
+ assert.ok(fichas.length>=232);
  const nomes=new Set(fichas.map(f=>f.clube));
  assert.equal(nomes.size,fichas.length,'não duplicar registros de clubes');
  for(const reg of INVENTARIO_CLUBES_HISTORICOS){

@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {LIGAS} from '../dados/data.js';
-import {jogosDaEdicao} from '../simulacao/mundoVivo.js';
+import {jogosDaEdicao} from './mundoVivo.js';
 
 export default function LigasEmDisputa({estado}) {
   const [ligaEscolhida, escolherLiga] = useState('');

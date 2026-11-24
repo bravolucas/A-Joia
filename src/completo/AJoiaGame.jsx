@@ -1,5 +1,5 @@
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
-import LigasEmDisputa from './LigasEmDisputa.jsx';
+import LigasEmDisputa from '../simulacao/LigasEmDisputa.jsx';
 import {registrarFormaDaLiga,simularPlacarDeLiga} from '../treinador/classificacoesMundoTecnico.js';
 import {COPAS_NACIONAIS} from '../competicoes/regrasCopasRapidas.js';
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';

@@ -1,3 +1,4 @@
+import LigasEmDisputa from '../simulacao/LigasEmDisputa.jsx';
 import {prepararElencoTecnico} from '../treinador/tecnico.js';
 import {negociarElencoTecnico} from '../treinador/mercadoTecnico.js';
 import {RevelacaoTela} from '../comum/efeitos/Movimento.jsx';
@@ -3009,7 +3010,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           </section>
         )}
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}
-        {(['estadual','copasClubes','calendarioLiga'].includes(etapa))&&<section className="max-w-xl mx-auto rp-painel p-5"><h2 className="text-xl font-bold">{card.estadualEmJogo?.nome||'Calendário da temporada'}</h2><p className="my-3 text-sm">Acompanhe os jogos na ordem do calendário. Seu progresso está salvo.</p><button className="rp-btn rp-ouro" onClick={()=>setEstadualAberto(true)}>{etapa==='estadual'?'Retomar estadual →':'Retomar temporada →'}</button></section>}
+        {(['estadual','copasClubes','calendarioLiga'].includes(etapa))&&<section className="max-w-xl mx-auto rp-painel p-5"><h2 className="text-xl font-bold">{card.estadualEmJogo?.nome||'Calendário da temporada'}</h2><p className="my-3 text-sm">Acompanhe os jogos na ordem do calendário. Seu progresso está salvo.</p><LigasEmDisputa estado={card.calendarioLigasExternas}/><button className="rp-btn rp-ouro" onClick={()=>setEstadualAberto(true)}>{etapa==='estadual'?'Retomar estadual →':'Retomar temporada →'}</button></section>}
         {etapa === "copa" && card?.copa && <TelaCopa key={`${card.copa.etapa}:${card.copa.fase}:${card.copa.jogos.length}`} c={c} card={card} jogadaSalva={estado.copaJogada} onRegistrar={jogada=>setEstado(st=>({...st,copaJogada:jogada,auto:false}))} onAvancar={avancarCopa} />}
         {etapa === "momento" && <TelaMomento key={`${card.ano}:${(card.momentos || []).length}`} c={c} momento={card.pendente} onReacao={tipo=>setEstado(st=>({...st,c:reagirReencontro(st.c,{...st.card.pendente,adversario:contextoMomento(st.c,st.card.pendente).adversario},tipo)}))} onRegistrar={r=>setEstado(st=>({...st,auto:false,card:{...st.card,pendente:{...st.card.pendente,mini:r.mini,decisaoJogo:r,lance:{...(st.card.pendente.lance||{}),disputa:false,minuto:st.card.pendente.lance?.minuto||89,gp:st.card.pendente.lance?.gp||0,gc:st.card.pendente.lance?.gc||0}}}}))} onFim={fimMomento} />}
 
@@ -3068,7 +3069,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           <TelaResumo c={c} card={ultimo} gaveta onRever={() => { setGaveta(null); setEstado((st) => ({ etapa: "fechamento", c: st.c, card: ultimo, retorno: st,auto:false })); }} />
         </Gaveta>
       )}
-      {etapa==='calendarioLiga'&&card?.calendarioCopas?.pausa&&estadualAberto&&<MarcoLiga agenda={card.calendarioCopas} temporada={card} onContinuar={()=>responderCopaJogador(chaveCopaJogador(card),'continuar')} onMinimizar={()=>setEstadualAberto(false)}/>}
+      {etapa==='calendarioLiga'&&card?.calendarioCopas?.pausa&&estadualAberto&&<MarcoLiga agenda={card.calendarioCopas} temporada={card} ligasExternas={<LigasEmDisputa estado={card.calendarioLigasExternas}/>} onContinuar={()=>responderCopaJogador(chaveCopaJogador(card),'continuar')} onMinimizar={()=>setEstadualAberto(false)}/>}
       {etapa==='copasClubes'&&card?.calendarioCopas&&estadualAberto&&<CopaEscolha modoJogador calendario={contextoAgenda(card.calendarioCopas)} campanha={card.calendarioCopas.campeonatos[card.calendarioCopas.indice]} chave={chaveCopaJogador(card)} onEscolher={responderCopaJogador} ocupado={false} onMinimizar={()=>setEstadualAberto(false)}/>}
       {etapa==='estadual'&&card?.estadualEmJogo&&estadualAberto&&<CopaEscolha modoJogador calendario={contextoAgenda(card.calendarioCopas)} campanha={card.estadualEmJogo} chave={card.calendarioCopas?chaveCopaJogador(card):chaveEstadualJogador(card)} onEscolher={responderEstadual} ocupado={false} onMinimizar={()=>setEstadualAberto(false)}/>}
       {chegadaPendente&&!popup&&<ChegadaCarreira key={clubePendente?'clube':'selecao'} c={clubePendente?c:cDaSelecao} alvo={clubePendente?'clube':'selecao'} precisaNumero={clubePendente?!infoChegada.escolhido:true} onNumero={receberNumero} onPlano={receberPlano}/>}

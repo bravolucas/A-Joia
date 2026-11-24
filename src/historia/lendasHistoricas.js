@@ -1210,6 +1210,34 @@ export const LENDAS_HISTORICAS = {
   "Islândia": ["Eiður Guðjohnsen","Gylfi Sigurðsson","Aron Gunnarsson","Birkir Bjarnason","Hannes Þór Halldórsson","Ragnar Sigurðsson","Kári Árnason","Kolbeinn Sigþórsson","Rúnar Kristinsson","Jóhann Berg Guðmundsson"],
   "Noruega": ["Ole Gunnar Solskjær","John Arne Riise","Tore André Flo","Henning Berg","Ronny Johnsen","Steffen Iversen","Morten Gamst Pedersen","Erling Haaland","Martin Ødegaard","Jørgen Juve"],
   "Israel": ["Mordechai Spiegler","Yossi Benayoun","Eyal Berkovic","Haim Revivo","Avi Nimni","Tal Ben Haim","Eran Zahavi","Dudu Aouate","Walid Badir","Eli Ohana"],
+  // CAF — seleção editorial de atletas internacionais de diferentes gerações, não ranking.
+  // Referências gerais de pesquisa: https://www.rsssf.org/intlp-countrywise.html
+  // https://www.rsssf.org/miscellaneous/century.html
+  "Marrocos": ["Ahmed Faras","Badou Zaki","Aziz Bouderbala","Mustapha Hadji","Noureddine Naybet","Youssef Chippo","Marouane Chamakh","Medhi Benatia","Hakim Ziyech","Achraf Hakimi","Yassine Bounou","Youssef En-Nesyri"],
+  "Senegal": ["El Hadji Diouf","Khalilou Fadiga","Henri Camara","Papa Bouba Diop","Tony Sylva","Sadio Mané","Idrissa Gueye","Kalidou Koulibaly","Édouard Mendy","Ismaïla Sarr"],
+  "Nigéria": ["Rashidi Yekini","Jay-Jay Okocha","Nwankwo Kanu","Stephen Keshi","Sunday Oliseh","Daniel Amokachi","Finidi George","Peter Rufai","Vincent Enyeama","John Obi Mikel","Ahmed Musa","Victor Osimhen"],
+  "Camarões": ["Roger Milla","Samuel Eto'o","Thomas N'Kono","Joseph-Antoine Bell","François Omam-Biyik","Patrick Mboma","Rigobert Song","Geremi","Lauren","Vincent Aboubakar"],
+  "Argélia": ["Rabah Madjer","Lakhdar Belloumi","Salah Assad","Djamel Menad","Moussa Saïb","Rafik Saïfi","Madjid Bougherra","Riyad Mahrez","Islam Slimani","Sofiane Feghouli","Raïs M'Bolhi"],
+  "Costa do Marfim": ["Didier Drogba","Yaya Touré","Kolo Touré","Gervinho","Salomon Kalou","Didier Zokora","Boubacar Barry","Laurent Pokou","Abdoulaye Traoré","Serge Aurier","Franck Kessié"],
+  "Egito": ["Hossam Hassan","Ahmed Hassan","Mohamed Aboutrika","Essam El-Hadary","Mahmoud El Khatib","Hassan Shehata","Hazem Emam","Ahmed Fathy","Mohamed Salah","Ahmed Elmohamady","Wael Gomaa"],
+  "Tunísia": ["Tarak Dhiab","Hatem Trabelsi","Radhi Jaïdi","Sami Trabelsi","Zoubeir Baya","Francileudo Santos","Youssef Msakni","Wahbi Khazri","Aymen Mathlouthi","Ali Maâloul"],
+  "Gana": ["Abedi Pelé","Tony Yeboah","Asamoah Gyan","Michael Essien","Stephen Appiah","Sulley Muntari","André Ayew","Jordan Ayew","Samuel Kuffour","Osei Kofi","Karim Abdul Razak"],
+  "África do Sul": ["Lucas Radebe","Benni McCarthy","Doctor Khumalo","Shaun Bartlett","Mark Fish","Neil Tovey","Aaron Mokoena","Steven Pienaar","Siphiwe Tshabalala","Itumeleng Khune"],
+  "Angola": ["Akwá","Flávio Amado","Mantorras","Fabrice Maieco","Kali","Loco","João Ricardo","Gilberto","Manucho","Love Cabungula"],
+  "Togo": ["Emmanuel Adebayor","Kossi Agassa","Mohamed Kader","Thomas Dossevi","Alaixys Romao","Serge Akakpo","Floyd Ayité","Jonathan Ayité","Razak Boukari","Djené Dakonam"],
+  "RD Congo": ["Pierre Ndaye Mulamba","Kazadi Mwamba","Bwanga Tshimen","Mwepu Ilunga","Shabani Nonda","Lomana LuaLua","Dieumerci Mbokani","Youssouf Mulumbu","Cédric Bakambu","Chancel Mbemba"],
+  // AFC (inclui Austrália) — seleção editorial, não ranking. Mesmas referências gerais.
+  "Japão": ["Kazuyoshi Miura","Hidetoshi Nakata","Shunsuke Nakamura","Yasuhito Endō","Makoto Hasebe","Keisuke Honda","Shinji Kagawa","Shinji Okazaki","Yoshikatsu Kawaguchi","Maya Yoshida","Yūto Nagatomo","Kunishige Kamamoto"],
+  "Coreia do Sul": ["Cha Bum-kun","Hong Myung-bo","Hwang Sun-hong","Park Ji-sung","Lee Young-pyo","Ahn Jung-hwan","Kim Nam-il","Lee Dong-gook","Ki Sung-yueng","Son Heung-min","Kim Min-jae"],
+  "Arábia Saudita": ["Majed Abdullah","Sami Al Jaber","Mohammed Al Deayea","Saeed Al Owairan","Yousuf Al Thunayan","Fuad Anwar","Nawaf Al Temyat","Yasser Al Qahtani","Mohammed Al Shalhoub","Salem Al Dawsari"],
+  "Irã": ["Ali Daei","Ali Karimi","Mehdi Mahdavikia","Karim Bagheri","Javad Nekounam","Andranik Teymourian","Jalal Hosseini","Khodadad Azizi","Sardar Azmoun","Mehdi Taremi","Ahmad Reza Abedzadeh"],
+  "Austrália": ["Tim Cahill","Harry Kewell","Mark Viduka","Mark Schwarzer","Brett Emerton","Lucas Neill","Mile Jedinak","Mark Bresciano","John Aloisi","Mathew Leckie"],
+  "Catar": ["Mansour Muftah","Mubarak Mustafa","Sebastián Soria","Khalfan Ibrahim","Hassan Al-Haydos","Akram Afif","Almoez Ali","Abdelkarim Hassan","Saad Al Sheeb","Boualem Khoukhi"],
+  "China": ["Hao Haidong","Fan Zhiyi","Sun Jihai","Li Tie","Zheng Zhi","Gao Lin","Wu Lei","Li Weifeng","Ma Mingyu","Yang Chen"],
+  "Iraque": ["Ahmed Radhi","Hussein Saeed","Younis Mahmoud","Nashat Akram","Hawar Mulla Mohammed","Noor Sabri","Ali Rehema","Mahdi Karim","Alaa Abdul-Zahra","Ali Adnan"],
+  "Coreia do Norte": ["Pak Doo-ik","Pak Seung-zin","Ri Chan-myong","Hong Yong-jo","Jong Tae-se","Ri Myong-guk","An Yong-hak","Ji Yun-nam","Pak Nam-chol"],
+  "Kuwait": ["Jassem Yaqoub","Faisal Al-Dakhil","Saad Al-Houti","Fathi Kameel","Bashar Abdullah","Bader Al-Mutawa","Nawaf Al-Khaldi","Waleed Ali","Fahad Al-Enezi","Hamad Al-Enezi"],
+  "Emirados Árabes": ["Adnan Al Talyani","Fahad Khamees","Ismail Matar","Omar Abdulrahman","Ahmed Khalil","Ali Mabkhout","Amer Abdulrahman","Majed Naser","Walid Abbas","Mohamed Abdulrahman"],
 };
 // Nomes alternativos existentes no cadastro das divisões alemãs: uma única galeria por identidade.
 const ALIASES_LENDAS = Object.freeze({ 'Hamburgo': 'Hamburger SV', 'Köln': 'FC Köln' });

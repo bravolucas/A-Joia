@@ -34,7 +34,7 @@ const FONTES={
  ittihad:'https://www.the-afc.com/en/club/afc_champions_league/news/al_ittihad_2004-2005_the_last_team_to_win_back-to-back_acl_titles.html',
  ittihadGols:'https://www.the-afc.com/en/club/afc_champions_league/news/five_memorable_afc_champions_league_finals.html',
  ahli:'https://www.the-afc.com/en/club/afc_champions_league_elite.html/news/al-ahli-saudi-fc-end-title-wait-in-style',
- ahliTre:'https://www.the-afc.com/en/club/afc_champions_league_elite.html/news/aclelite-facts-figure',
+ ahliTre:'https://www.the-afc.com/en/club/afc_champions_league_elite.html/news/jaissle-mahrez-confident-of-al-ahlis-chances',
 };
 const DADOS={
  'Everton':{
@@ -112,8 +112,9 @@ const DADOS={
   marcos:[[1987,'Primeira FA Cup do Coventry City','coventry','Vitória por 3 a 2 na prorrogação contra o Tottenham em Wembley.']],
  },
  'Al-Hilal':{
-  atletas:[['Salem Al-Dawsari','PE','2011–2026',null,null,'hilalMvp','Eleito melhor jogador da AFC Champions League de 2021 e autor do gol mais rápido da história de uma final, 16 segundos após o início.']],
-  marcos:[[2021,'Quarto título continental do Al-Hilal','hilal','O clube derrotou o Pohang Steelers por 2 a 0 na final da Champions asiática; Salem Al-Dawsari marcou aos 16 segundos.']],
+  atletas:[['Salem Al-Dawsari','PE','2011–2026',null,null,'hilalMvp','Eleito melhor jogador da AFC Champions League de 2021.'],
+   ['Nasser Al-Dawsari','VOL','2021',null,null,'hilal','Marcou aos 16 segundos de jogo na final asiática de 2021 contra o Pohang Steelers.']],
+  marcos:[[2021,'Quarto título continental do Al-Hilal','hilal','O clube derrotou o Pohang Steelers por 2 a 0 na final da Champions asiática; Nasser Al-Dawsari marcou aos 16 segundos.']],
  },
  'Al-Ittihad':{
   atletas:[['Mohammed Noor','MEI','1993–2013; 2014–2016',null,null,'ittihad','Meia central da equipe bicampeã continental em 2004 e 2005; não confundir este recorte com estatísticas gerais.']],

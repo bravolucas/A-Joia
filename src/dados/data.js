@@ -1542,6 +1542,7 @@ export const JOGADORES_REAIS_BASE = [
   { nome: "Riquelme Filipi", time: "Palmeiras", posicao: "PE", ovr: 66 },
   { nome: "Felipe Anderson", time: "Palmeiras", posicao: "PD", ovr: 83 },
   { nome: "Allan", time: "Palmeiras", posicao: "PD", ovr: 84 },
+  // Jhon Arias: colombiano (COL), 21/09/1997; metadados em metadadosAtletasReais.js.
   { nome: "Jhon Arias", time: "Palmeiras", posicao: "PD", ovr: 93 },
   { nome: "Vitor Roque", time: "Palmeiras", posicao: "ATA", ovr: 93 },
   { nome: "Luighi", time: "Palmeiras", posicao: "ATA", ovr: 70 },

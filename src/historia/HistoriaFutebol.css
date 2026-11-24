@@ -21,3 +21,23 @@
 .mv-noticias-compacto li{padding:8px 10px}
 .mv-noticias li[data-tipo=voce]{border-color:#a7e9ad66;background:#a7e9ad0d}
 .mv-reacao-boa{color:#a6f0cf;font-size:11px}.mv-reacao-ruim{color:#f3b4b9;font-size:11px}
+
+/* Arquivo Vivo: partidas ocultas por padrão; nunca forçar scroll por todas as edições. */
+.mv-arquivo-jogos{margin:20px 0 4px}
+.mv-jogos-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:66px;padding:14px 16px;border:1px solid #7dd3fc55;border-radius:12px;background:#12283b;color:#e0f2fe;text-align:left;cursor:pointer}
+.mv-jogos-toggle>span:first-child{display:grid;gap:5px}.mv-jogos-toggle strong{font-size:12px;letter-spacing:.08em}
+.mv-jogos-toggle small{font-size:11px;color:#a6b9cb}.mv-jogos-toggle>span:last-child{font-size:22px;font-weight:600;color:#7dd3fc}
+.mv-jogos-toggle:hover,.mv-jogos-toggle:focus-visible{border-color:#7dd3fc;background:#163449}
+.mv-partidas-aba{padding:16px;margin-top:10px;background:#0b1c2b;border:1px solid #7dd3fc30;border-radius:12px}
+.mv-partidas-aba header h4{font-size:15px;color:#e0f2fe;margin:0 0 5px}.mv-partidas-aba header p{font-size:11px;color:#abc0d0;margin:0 0 12px}
+.mv-partidas-filtros{max-width:340px;margin-bottom:12px}.mv-partidas-filtros label,.mv-partidas-navegacao label{display:grid;gap:5px;color:#b9cddb;font-size:11px}
+.mv-partidas-aba select{width:100%;min-width:0;min-height:40px;border:1px solid #7dd3fc55;border-radius:8px;background:#10273a;color:#e0f2fe;padding:7px 10px;font-size:12px}
+.mv-partidas-navegacao{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:end;max-width:740px}
+.mv-partidas-navegacao button,.mv-partidas-paginacao button{min-height:40px;border:1px solid #7dd3fc50;border-radius:8px;background:#142f43;color:#d8f0ff;padding:8px 12px;font-size:11px;font-weight:600;cursor:pointer}
+.mv-partidas-navegacao button:disabled,.mv-partidas-paginacao button:disabled{opacity:.35;cursor:not-allowed}
+.mv-partidas-navegacao button:not(:disabled):hover,.mv-partidas-paginacao button:not(:disabled):hover{background:#214b67}
+.mv-partidas-contador{font-size:12px;color:#9ecbe6;font-weight:600;margin:16px 0 8px}
+.mv-partidas-aba .mv-jogos{max-height:none;overflow:visible;margin:0}
+.mv-partidas-paginacao{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:16px}
+.mv-partidas-paginacao span{color:#b9cddb;font-size:11px}
+@media(max-width:560px){.mv-partidas-aba{padding:12px}.mv-partidas-navegacao{grid-template-columns:1fr 1fr}.mv-partidas-navegacao label{grid-column:1/-1;grid-row:1}.mv-partidas-navegacao button{grid-row:2}.mv-jogos-toggle{min-height:58px}.mv-partidas-aba .mv-jogos li{grid-template-columns:minmax(0,1fr) 62px minmax(0,1fr);gap:5px;font-size:11px}}

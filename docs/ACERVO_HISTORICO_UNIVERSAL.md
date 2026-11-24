@@ -1,0 +1,104 @@
+# A JOIA · Acervo histórico universal — clubes e seleções
+
+Atualizado: 23/11/2026. Esta etapa cria uma **lista de trabalho de todas as
+entidades do catálogo**; a existência de cadastro **não significa que todos os
+recordes já foram apurados**.
+
+## Fontes de identidade
+- Clubes jogáveis: `src/dados/data.js` (`CLUBES`).
+- Participantes regionais: `src/competicoes/estaduaisRapidos.js`.
+- Adversários europeus: `src/competicoes/clubesEuropeusExtras.js`.
+- Adversários sul-americanos: `src/competicoes/clubesInternacionais.js`.
+- Seleções: `NACIONALIDADES` de `src/dados/data.js` (83 países).
+- Campeões históricos de seleções: `src/dados/selecoesHistoricas.js`.
+
+O inventário único, deduplicado por nome, está em
+`src/dados/coberturaAcervoHistorico.js`.
+
+## Fichas e recordes verificados
+- `src/dados/acervoClubesHistoricos.js` e `acervoClubesHistoricosLote2.js` `acervoClubesHistoricosLote3.js` `acervoClubesHistoricosLote4.js` `acervoClubesHistoricosLote5.js` `acervoClubesHistoricosLote6.js` `acervoClubesHistoricosLote7.js` `acervoClubesHistoricosLote8.js` `acervoClubesHistoricosLote9.js` `acervoClubesHistoricosLote10.js` `acervoClubesHistoricosLote11.js` `acervoClubesHistoricosLote12.js` `acervoClubesHistoricosLote13.js` `acervoClubesHistoricosLote14.js` `acervoClubesHistoricosLote15.js` `acervoClubesHistoricosLote16.js` `acervoClubesHistoricosLote17.js` `acervoClubesHistoricosLote18.js` `acervoClubesHistoricosLote19.js` `acervoClubesHistoricosLote20.js` `acervoClubesHistoricosLote21.js` `acervoClubesHistoricosLote22.js` `acervoClubesHistoricosLote23.js` `acervoClubesHistoricosLote24.js` `acervoClubesHistoricosLote25.js` `acervoClubesHistoricosLote26.js` `acervoClubesHistoricosLote27.js` `acervoClubesHistoricosLote28.js` `acervoClubesHistoricosLote29.js` `acervoClubesHistoricosLote30.js` `acervoClubesHistoricosLote31.js` `acervoClubesHistoricosLote32.js` `acervoClubesHistoricosLote33.js` e `acervoClubesHistoricosLote34.js`.
+- `src/dados/acervoSelecoesHistoricas.js`.
+- Clubes com fichas individuais verificadas neste ciclo: **247**.
+- **Turquia e Arábia Saudita:** 18 + 17 clubes do catálogo principal com ficha documental inicial. Fichas com apenas marcos históricos recebem `parcial_documentado`, não `pendente_apuracao`. Os 35 clubes ainda podem ter jogadores, recordes ou temporadas por apurar; não equivalem a cobertura completa.
+- A auditoria é incremental: o teste de integridade não impõe a contagem fixa de 191 nem inventa um atleta para cada clube.
+- Seleções com fichas individuais verificadas neste ciclo: **21**.
+- As 23 equipes da Série D, as 20 equipes da Série C e as 20 equipes da Série B do catálogo principal possuem ficha histórica inicial.
+- O lote 6 e o lote 8 incluem técnicos responsáveis por títulos documentados.
+- O lote 10 amplia clubes ingleses e sauditas com fontes de clubes e da AFC.
+- O lote 11 inclui clubes alemães, italianos e espanhóis com referências da UEFA e Bundesliga.
+- O lote 12 completa as fichas históricas iniciais dos 20 clubes argentinos e 13 clubes do grupo continental sul-americano.
+- O lote 13 fecha a lacuna de Defensa y Justicia e documenta as oito equipes pendentes do grupo Espanha.
+- O lote 14 completa o grupo inglês de 20 clubes com quatro novas fichas documentadas.
+- O lote 15 documenta Galatasaray, Fenerbahçe, Beşiktaş e Trabzonspor com atletas, marcos e técnicos associados a fontes da UEFA.
+- O lote 16 adiciona Başakşehir, Samsunspor e Göztepe com fontes UEFA e TFF; dados absolutos não apurados permanecem null.
+- O lote 17 adiciona Konyaspor, Kocaelispor, Gençlerbirliği e Al-Nassr com dados de UEFA, TFF e AFC; sem recordes absolutos não apurados.
+- O lote 18 acrescenta Alanyaspor, Kasımpaşa, Antalyaspor e Al-Shabab (fontes de TFF, clubes e AFC).
+- O lote 19 inclui Eyüpspor e Kayserispor, com fontes da TFF e UEFA, atletas documentados e marcos de acesso e títulos.
+- O lote 20 adiciona Al-Fateh (título saudita 2012/13) e Al-Taawoun (King’s Cup 2018/19), com documentação da AFC.
+- O lote 21 adiciona Al-Ettifaq (títulos sauditas de 1983 e 1987) e Gaziantep FK (origem como Sankospor e primeiro acesso à elite em 2019), preservando a distinção em relação ao Gaziantepspor.
+- O lote 22 adiciona Rizespor, Al-Qadsiah e Al-Khaleej com fundação, acessos, títulos e jogadores documentados; o Al-Khaleej ainda não possui atleta individual apurado.
+- O lote 23 adiciona Al-Fayha (Copa do Rei 2022, primeira vitória asiática 2023) e Al-Wehda (Copas do Rei 1957 e 1966, final de 2023), com atletas reais e fontes AFC, FIFA e clube.
+- As demais entidades têm cobertura `pendente_apuracao`.
+- Dados reais são independentes do Arquivo Vivo de cada save.
+- Os títulos históricos de seleções já existentes foram reutilizados, sem
+  copiar a lista para um segundo lugar nem inventar edições ausentes.
+
+## Como ampliar sem introduzir números incorretos
+1. Localizar a identidade EXATA no catálogo, preservando clube/seleção e
+   diferenciando homônimos. Registrar nome, posição, período e fonte pública.
+2. Para jogos, gols e assistências, indicar **recorte**: oficiais, apenas liga,
+   todas as competições, amistosos e/ou A-matches. Quando não houver número
+   verificável, usar `null`, nunca zero.
+3. Separar `atletas[]` (dados individuais) de `recordes[]` (marcas comprovadas).
+   Um valor conhecido não é, necessariamente, o recorde absoluto do clube.
+4. Usar `comparavel:false` para metodologias diferentes. O jogador do save
+   não deve receber anúncio falso de recorde quebrado.
+5. Conferir recordistas ativos (novembro de 2026) com fontes datadas e
+   não repetir números de Copa do Mundo como se fossem de todas as partidas.
+6. Rodar os testes e revisar a interface antes de integrar à `main`.
+
+## Auditoria
+```bash
+node scripts/auditar-acervo-historico.mjs
+node scripts/auditar-acervo-historico.mjs --pendentes
+node scripts/auditar-acervo-historico.mjs --pendentes --json
+node --test tests/acervo-clubes-historicos.test.mjs tests/acervo-selecoes-historicas.test.mjs
+```
+
+## Expansão futura
+Preencher, entidade por entidade, os jogos e gols históricos; recordistas
+de partidas por temporada e por competição; títulos de atletas; técnicos
+históricos; fatos notáveis; transferências recordistas; marcos do estádio;
+e estatísticas por adversário. Todas as afirmações precisam de fontes
+específicas e uma regra de comparação compatível com a simulação.
+
+- O lote 24 adiciona Al-Riyadh, Al-Raed, Damac e Al-Kholood (fundação, títulos e promoções documentadas na Saudipedia). Os registros de atletas sem períodos comprovados são mantidos com `periodo: null`; não há preenchimento fictício de recordes.
+
+- O lote 25 adiciona Fatih Karagümrük (fundação, retomada em 1946, acessos em 2020 e 2025, fontes oficiais do clube e TFF) e Al-Orobah (fundação, título e primeiro acesso em 2013, retorno à elite em 2024, atletas Zouma, Guðmundsson e Young, fontes SPL e clube). Sem totais inventados.
+
+- O lote 26 aprofunda fichas preexistentes de Kocaelispor (Copas da Turquia de 1997 e 2002, acesso de 2025, atletas da temporada 1992/93) e Gençlerbirliği (Campeonatos Turcos pré-Süper Lig de 1941 e 1946, Copas de 1987 e 2001, campanha europeia de 2003/04). Fontes de TFF e clubes. Os títulos de 1941/1946 são descritos explicitamente como competições anteriores à liga nacional.
+
+- Auditoria de duplicatas: Kocaelispor e Gençlerbirliği já existiam no lote 17; lote 26 foi consolidado com o original, preservando ídolos, treinadores, marcos e fontes. Contagem de **223 clubes únicos** após deduplicação (não 225). O total deve sempre ser calculado por nome único de clube, e não somando tamanhos de lotes.
+
+- O lote 27 registra duas fichas novas na Ligue 1: Lens (título francês de 1998, Copa da Liga 1999, elenco campeão e Daniel Leclercq) e Rennes (Copas da França de 1965, 1971 e 2019, Jean Prouff). Fontes oficiais dos dois clubes, números individuais ainda não apurados. Passa a **225 clubes únicos**.
+
+- O lote 28 adiciona Nantes (8 títulos de liga e 4 Copas da França), Nice (4 títulos de liga e 3 Copas da França) e Strasbourg (liga de 1979, 3 Copas da França e 3 Copas da Liga), com fontes do FC Nantes, OGC Nice e FFF. Total: **228 clubes únicos**; falta aprofundar atletas, técnicos e recordes individuais.
+
+- O lote 29 acrescenta Lille (4 ligas, 6 Copas da França, Jean Baratte) e Toulouse (Copa da França de 2023 e Ligue 2 de 2022), com fontes oficiais. O título de 1957 do Toulouse homônimo anterior não foi atribuído automaticamente ao clube moderno. Total: **230 clubes únicos**.
+
+- Lote 30 acrescenta Auxerre (campeonato francês de 1996, Copas da França de 1994, 1996, 2003 e 2005, Guy Roux) e Le Havre (Copa da França e segunda divisão em 1959), com fontes AJA, UEFA e FFF. Total **232 clubes únicos**, sendo apenas fichas históricas iniciais.
+
+- Lote 31 adiciona Angers (finais de Copa da França em 1957 e 2017, não títulos; Raymond Kopa), Brest (título da D2 1980/81) e Paris FC (fundação em 1969, separação do PSG em 1972, acesso à Ligue 2 em 2015 e à Ligue 1 em 2025). Total: **235 clubes únicos**, com fichas iniciais e fontes FFF, clubes, Ligue 1 e Cidade de Paris.
+
+- Lote 32 acrescenta Lorient (fundação em 1926, Copa da França 2002, Ligue 2 2025), Troyes (Copa Intertoto 2001 e Ligue 2 de 2015 e 2021) e Reims (6 ligas, 2 Copas da França e vices europeus de 1956 e 1959). Fontes oficiais dos clubes e da Ligue 1. Total: **238 clubes únicos** com ficha inicial.
+
+- O lote 33 acrescenta Le Mans FC, completando a **cobertura histórica inicial dos 18 clubes da Ligue 1** do catálogo principal (18/18). Documenta a fundação do MUC 72 em 1985, mudança de nome em 2010, crise de 2013, acesso à Ligue 2 em 2019 e retorno à elite em 2026. Fontes: Le Mans FC. Total: **239 clubes únicos**, ainda com recordes e atletas por aprofundar.
+
+- O lote 34 inaugura o levantamento da Ligue 2: Saint-Étienne (10 ligas francesas, 6 Copas da França, 3 Ligue 2, Robert Herbin) e Bordeaux (6 ligas, 4 Copas da França, 3 Copas da Liga e Alain Giresse). Registros oficiais dos clubes e **dois recordes de Giresse** (158 gols, 519 jogos) preservados como históricos, com `comparavel:false` para não equiparar o save a metodologias divergentes. Total: **241 clubes únicos** com fichas iniciais; Ligue 1: 18/18, Ligue 2: pelo menos 2/17.
+
+- Lote 35: Metz (4 conquistas da D2, Copas da França de 1984/1988, Copas da Liga de 1986/1996, vice nacional de 1998) e Guingamp (Copas da França de 2009/2014, vice da Copa da Liga de 2019), com fontes oficiais de Metz, Guingamp e FFF. **243 clubes únicos** em 35 lotes; fichas iniciais, não acervo completo.
+- Correção de escopo no Bordeaux: 158 gols e 519 jogos de Alain Giresse correspondem ao recorte de liga do próprio clube, não necessariamente à soma de todas as competições. Indicados como `cobertura:'recorte'` e `comparavel:false` para não sugerir recorde universal de carreira.
+
+- **Lote 36:** primeiras fichas verificadas do Caen e Bastia (clubes da Ligue 2 no catálogo principal). Caen: títulos da D2 de 1996 e 2010, final da Copa da Liga de 2005 e trajetória de Xavier Gravelaine. Bastia: D2 em 1968 e 2012, Copa da França de 1981, Intertoto 1997 e vice europeu de 1978, além da retomada institucional após 2017. Fontes: sites oficiais dos clubes e FFF. São **245 clubes únicos** documentados inicialmente em 36 lotes; o acervo integral de recordes e atletas permanece pendente.
+
+- **Lote 37:** AC Ajaccio (campeão da D2 em 1967/2002, campeão do National em 1998; Aurélio Moyano e Cyril Granon) e Clermont Foot 63 (formação do clube atual em 1990, primeiro acesso à Ligue 1 em 2021, 8º lugar em 2023, Mohamed Bayo, Pascal Gastien e Corinne Diacre). As fontes são páginas históricas oficiais dos dois clubes. Não se atribui o título de Ligue 2 ao Clermont em 2021: subiu como vice. Total: **247 clubes únicos** com ficha histórica inicial.

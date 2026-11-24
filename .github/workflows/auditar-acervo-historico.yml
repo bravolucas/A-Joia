@@ -1,0 +1,24 @@
+name: Auditar integridade do acervo historico
+on:
+  pull_request:
+    paths:
+      - 'src/dados/acervoClubesHistoricos*.js'
+      - 'src/dados/coberturaAcervoHistorico.js'
+      - 'tests/acervo-*.test.mjs'
+      - '.github/workflows/auditar-acervo-historico.yml'
+  workflow_dispatch:
+jobs:
+  fichas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificar testes do acervo por lote e deduplicacao
+        shell: bash
+        run: |
+          node --test tests/acervo-clubes-historicos.test.mjs tests/acervo-clubes-lote*.test.mjs tests/acervo-deduplicacao-lotes.test.mjs tests/acervo-cobertura-ligas.test.mjs tests/acervo-selecoes-historicas.test.mjs tests/acervo-serie-d-cobertura.test.mjs
+      - name: Gerar inventario pendente
+        run: node scripts/auditar-acervo-historico.mjs --json

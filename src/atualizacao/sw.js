@@ -6,9 +6,10 @@ self.addEventListener('install', event => event.waitUntil(self.skipWaiting()));
 self.addEventListener('activate', event => event.waitUntil((async () => {
   const base = new URL(self.registration.scope).pathname;
   const nomes = await caches.keys();
+  const identificador = base.replace(/^\/+|\/+$/g, '');
   await Promise.all(
     nomes.filter(nome => nome.startsWith('ajoia-') ||
-      (nome.startsWith('workbox-') && nome.includes(base)))
+      (nome.startsWith('workbox-') && identificador && nome.includes(identificador)))
       .map(nome => caches.delete(nome))
   );
   // Deixar de controlar novas navegações, sem chamar clients.navigate().

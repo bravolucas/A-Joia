@@ -4,7 +4,8 @@
  * homônimo jamais herda acidentalmente a nacionalidade ou idade de outro.
  *
  * Referência da idade: início da temporada do jogo, 01/07/2026.
- * O catálogo só afeta novas carreiras; não migra/sobrescreve saves antigos.
+ * Os metadados corrigem novos elencos. Uma migração separada e restrita
+ * corrige erros conhecidos de nacionalidade em saves antigos, sem mexer em partidas.
  * Para atletas ainda não verificados, mantém-se o comportamento legado.
  *
  * Referências primárias consultadas:
@@ -18,6 +19,10 @@
  */
 
 const REGISTROS = [
+  // Palmeiras (2026): nascido em Quibdó, Colômbia. Fontes: Palmeiras / Federação Colombiana.
+  // https://www.palmeiras.com.br/noticias/palmeiras-contrata-colombiano-jhon-arias-do-wolverhampton-ing/
+  // https://fcf.com.co/wp-content/uploads/2025/09/Guia-de-medios-Clasificados-a-la-Copa-Mundial-de-la-FIFA-2026.pdf
+  ['Jhon Arias', 'Palmeiras', 'COL', '1997-09-21'],
   ['Lionel Messi', 'Inter Miami', 'ARG', '1987-06-24'],
   ['Cristiano Ronaldo', 'Al-Nassr', 'POR', '1985-02-05'],
   ['Neymar Jr', 'Santos', 'BRA', '1992-02-05'],

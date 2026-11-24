@@ -216,12 +216,18 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
 export function compactarJogos(jogos=[]) {
   const nomes=[...new Set(jogos.flatMap(j=>[j.casa,j.fora]).filter(Boolean))];
   const indices=new Map(nomes.map((n,i)=>[n,i]));
-  return {nomes,partidas:jogos.filter(j=>j.casa&&j.fora&&Number.isFinite(j.golsCasa)&&Number.isFinite(j.golsFora)).map(j=>[indices.get(j.casa),indices.get(j.fora),j.golsCasa,j.golsFora,j.rodada||j.fase||'',j.vencedor?indices.get(j.vencedor):null,j.penaltis?1:0])};
+  return {nomes,partidas:jogos.filter(j=>j.casa&&j.fora&&Number.isFinite(j.golsCasa)&&Number.isFinite(j.golsFora)).map(j=>{
+    const linha=[indices.get(j.casa),indices.get(j.fora),j.golsCasa,j.golsFora,j.rodada||j.fase||'',j.vencedor?indices.get(j.vencedor):null,j.penaltis?1:0];
+    // Oitava posição opcional: mantém fase de copa e playoffs da Série C/B.
+    // Partidas antigas com sete colunas continuam legíveis sem migração.
+    if(typeof j.fase==='string'&&j.fase.trim())linha.push(j.fase);
+    return linha;
+  })};
 }
 export function jogosDaEdicao(edicao) {
   if(Array.isArray(edicao?.jogos))return edicao.jogos;
   const {nomes=[],partidas=[]}=edicao?.jogos||{};
-  return partidas.map(([a,b,golsCasa,golsFora,rodada,v,penaltis])=>({casa:nomes[a],fora:nomes[b],golsCasa,golsFora,rodada,vencedor:v==null?null:nomes[v],penaltis:!!penaltis}));
+  return partidas.map(([a,b,golsCasa,golsFora,rodada,v,penaltis,fase])=>({casa:nomes[a],fora:nomes[b],golsCasa,golsFora,rodada,vencedor:v==null?null:nomes[v],penaltis:!!penaltis,...(fase?{fase}:{})}));
 }
 export function resumirTabelas(classificacoes) {
   return Object.fromEntries(Object.entries(classificacoes||{}).map(([liga,t])=>{const {jogos,...resumo}=t;return [liga,resumo];}));

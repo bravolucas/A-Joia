@@ -1,0 +1,33 @@
+name: Auditar navegador do Mundo Vivo
+on:
+  pull_request:
+    paths:
+      - 'src/simulacao/MundoVivo.jsx'
+      - 'src/simulacao/mundoVivo.js'
+      - 'src/simulacao/partidasCompeticao.js'
+      - 'tests/mundo-vivo.spec.mjs'
+      - '.github/workflows/auditar-mundo-vivo.yml'
+  workflow_dispatch:
+jobs:
+  navegador-mundo-vivo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar dependencias do jogo
+        run: npm install --no-package-lock --no-audit --no-fund
+      - name: Instalar Playwright
+        run: npm install --no-save @playwright/test wait-on
+      - name: Instalar Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Compilar versao GitHub Pages
+        run: GITHUB_PAGES=true npm run build
+      - name: Testar arquivo Mundo Vivo em celular e desktop
+        shell: bash
+        run: |
+          GITHUB_PAGES=true npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/ajoia-preview.log 2>&1 &
+          npx wait-on http://127.0.0.1:4173/A-Joia/
+          npx playwright test tests/mundo-vivo.spec.mjs --reporter=line --workers=1

@@ -671,6 +671,54 @@ export const LENDAS_HISTORICAS = {
   // https://sv07elversberg.de/sve-verabschiedet-sich-zum-saisonende-von-acht-spielern/
   // https://sv07elversberg.de/u21-startet-in-die-neue-saarlandliga-saison-samstag-gegen-den-fc-rastpfuhl/
   "Elversberg": ["Kevin Koffi","Lukas Kohler"],
+  // Alemanha — segunda divisão do cadastro; seleção editorial parcial, sem ranking. Consulta: 2026-11-24.
+  // https://www.aktehertha.com/en/key-figures/
+  "Hertha Berlim": ["Michael Preetz","Erich Beer"],
+  // https://www.f95.de/aktuell/news/u23/109/3523-ralf-beckers-gab-fortunas-wall-of-fame-in-auftrag/
+  // https://www.f95.de/news/33576-gemeinsamer-heimspielbesuch-gegen-preu-en-munster
+  // https://www.f95.de/news/34427
+  "Fortuna Düsseldorf": ["Klaus Allofs","Thomas Allofs","Toni Turek","Gerd Zewe","Andreas Lambertz","Egon Köhnen","Dieter Brei","Wilfried Woyke","Benno Beiroth"],
+  // https://fck.de/blog/in-gedenken-an-die-legendaeren-walter-brueder/
+  "Kaiserslautern": ["Fritz Walter","Ottmar Walter"],
+  // https://www.fcn.de/news/artikel/legenden-die-besten-club-spieler-aller-zeiten/
+  // https://www.fcn.de/news/artikel/neue-bloecke-im-easycredit-stadion/
+  // https://www.fcn.de/news/artikel/24-legenden-in-einem-buch/
+  // https://www.fcn.de/news/artikel/die-legende-lebt-3/
+  "Nürnberg": ["Max Morlock","Heiner Stuhlfauth","Andreas Köpke","Hans Sutor","Heinz Strehl","Marek Mintal","Raphael Schäfer","Andreas Wolf","Dieter Eckstein"],
+  // https://www.sv98.de/was-macht-eigentlich/
+  // https://www.transfermarkt.de/sv-darmstadt-98/rekordspieler/verein/105
+  "Darmstadt 98": ["Aytaç Sulu","Peter Cestonaro"],
+  // https://www.ksc.de/profis/saison/news/show/article/waehlt-bis-donnerstag-eure-ksc-legenden/
+  "Karlsruher SC": ["Oliver Kahn","Artur Beier","Michael Harforth","Edgar Schmitt"],
+  // https://www.hannover96.de/newscenter/news/details/28876-ihr-habt-gewaehlt-das-ist-unsere-125-jahre-mannschaft.html
+  // https://www.hannover96.de/newscenter/news/details/32795-ron-robert-zieler-hans-siemensmeyer-und-die-329-das-grosse-doppel-interview-zum-rekordspiel.html
+  "Hannover 96": ["Robert Enke","Hans Siemensmeyer","Ron-Robert Zieler"],
+  // https://1.fc-magdeburg.de/news/verein/fcm-legende-feiert-geburtstag
+  // https://1.fc-magdeburg.de/news/verein/fcm-trauert-um-joachim-streich
+  "Magdeburg": ["Joachim Streich","Jürgen Sparwasser"],
+  // https://www.kleeblatt-chronik.de/v3/chronik/legenden.php
+  // https://www.kleeblatt-chronik.de/v3/chronik/rekordspieler.php
+  "Greuther Fürth": ["Max Appis","Karl Schmidt","Karl Mai","Hans Nöth","Karl Höger"],
+  // https://www.eintracht.com/eintracht/chronik/uebersicht
+  // https://www.eintracht.com/eintracht/chronik/geschichte-von-frueher
+  // https://www.eintracht.com/news/artikel/ruhe-in-frieden-peter-kaack
+  "Eintracht Braunschweig": ["Lothar Ulsaß","Horst Wolter","Jürgen Moll","Joachim Bäse","Klaus Gerwien","Walter Schmidt","Danilo Popivoda","Peter Kaack"],
+  // https://scpreussen-muenster.de/news/preussen-legende-fiffi-gerritzen-in-die-westfaelische-ehrengalerie-aufgenommen/
+  // https://scpreussen-muenster.de/news/289-spiele-mehmet-kara-neuer-rekordspieler-des-sc-preussen/
+  "Preußen Münster": ["Felix Gerritzen","Mehmet Kara","Karl Heinz Krekeler"],
+  // https://www.ssvulm1846-fussball.de/verein/trauer-um-walter-kubanczyk/
+  "SSV Ulm": ["Walter Kubanczyk"],
+  // https://www.vfl-wolfsburg.de/newsdetails/news-detail/detail/news/edeltechniker-und-halbes-duo
+  // https://www.vfl-wolfsburg.de/newsdetails/news-detail/detail/news/treff-der-legenden
+  // https://www.bild.de/sport/fussball/bundesliga-erkennen-sie-diese-legende-er-war-lange-nicht-zu-sehen-68c5755d2c41ed57328f8458
+  "Wolfsburg": ["Grafite","Edin Džeko","Naldo","Andrea Barzagli","Josué","Diego Benaglio","Roy Präger"],
+  // https://www.fc-heidenheim.de/fch-traditionsmannschaft
+  // https://www.fc-heidenheim.de/news/detail/die-fch-traditionsmannschaft-holt-den-ersten-sieg?cHash=de9d9dfff95d1c1e1cedcdabfc5c4d7e
+  "Heidenheim": ["Marc Schnatterer","Robert Strauß","Tim Göhlert","Ingo Feistle","Alper Bagceci","Bastian Heidecker"],
+  // https://www.tuttostpauli.com/associazionismo/due-ita-traditionsmannschaft-fc-st-pauli-die-seele-des-vereins-la-squadra-delle-leggende-1554
+  // https://www.ndr.de/sport/fussball/FC-St-Pauli-Club-Legende-Trulsen-muss-gehen%2Ctrulsen106.html
+  // https://www.sportbuzzer.de/fussball/zweite-bundesliga/25-ehemalige-spieler-des-fc-st-pauli-und-was-aus-ihnen-wurde-53E366B3652BB4C72BD25E244A.html
+  "St. Pauli": ["André Trulsen","Klaus Thomforde","Dirk Dammann","Werner Pokropp","Walter Frosch","Ivan Klasnić","Holger Stanislawski"],
   // Seleções
   'Brasil': ['Pelé', 'Garrincha', 'Ronaldo', 'Romário'],
   'Argentina': ['Diego Maradona', 'Lionel Messi', 'Mario Kempes', 'Gabriel Batistuta'],

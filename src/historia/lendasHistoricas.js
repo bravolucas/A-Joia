@@ -1223,7 +1223,7 @@ export const LENDAS_HISTORICAS = {
   "Tunísia": ["Tarak Dhiab","Hatem Trabelsi","Radhi Jaïdi","Sami Trabelsi","Zoubeir Baya","Francileudo Santos","Youssef Msakni","Wahbi Khazri","Aymen Mathlouthi","Ali Maâloul"],
   "Gana": ["Abedi Pelé","Tony Yeboah","Asamoah Gyan","Michael Essien","Stephen Appiah","Sulley Muntari","André Ayew","Jordan Ayew","Samuel Kuffour","Osei Kofi","Karim Abdul Razak"],
   "África do Sul": ["Lucas Radebe","Benni McCarthy","Doctor Khumalo","Shaun Bartlett","Mark Fish","Neil Tovey","Aaron Mokoena","Steven Pienaar","Siphiwe Tshabalala","Itumeleng Khune"],
-  "Angola": ["Akwá","Flávio Amado","Mantorras","Fabrice Maieco","Kali","Loco","João Ricardo","Gilberto","Manucho","Love Cabungula"],
+  "Angola": ["Akwá","Flávio Amado","Mantorras","Kali","Loco","João Ricardo","Gilberto","Manucho","Love Cabungula","Mateus Galiano"],
   "Togo": ["Emmanuel Adebayor","Kossi Agassa","Mohamed Kader","Thomas Dossevi","Alaixys Romao","Serge Akakpo","Floyd Ayité","Jonathan Ayité","Razak Boukari","Djené Dakonam"],
   "RD Congo": ["Pierre Ndaye Mulamba","Kazadi Mwamba","Bwanga Tshimen","Mwepu Ilunga","Shabani Nonda","Lomana LuaLua","Dieumerci Mbokani","Youssouf Mulumbu","Cédric Bakambu","Chancel Mbemba"],
   // AFC (inclui Austrália) — seleção editorial, não ranking. Mesmas referências gerais.

@@ -19,6 +19,7 @@ import {ACERVO_CLUBES_LOTE19} from './acervoClubesHistoricosLote19.js';
 import {ACERVO_CLUBES_LOTE20} from './acervoClubesHistoricosLote20.js';
 import {ACERVO_CLUBES_LOTE21} from './acervoClubesHistoricosLote21.js';
 import {ACERVO_CLUBES_LOTE22} from './acervoClubesHistoricosLote22.js';
+import {ACERVO_CLUBES_LOTE23} from './acervoClubesHistoricosLote23.js';
 /**
  * Acervo de referências históricas de clubes — lote 1 (auditoria em 23/11/2026).
  * Fontes por linha e valores explícitos. NUNCA se tornam estatísticas do save.
@@ -156,7 +157,7 @@ const MAPA = Object.fromEntries(Object.entries(CLUBES).map(([nome,entrada])=>[no
    Object.freeze({tipo:'clube',nome,id,atleta,valor,ano,destaque,fonte:FONTES[f],data:'2026-11-23',
     comparavel:false,criterio:'Contagem do acervo histórico; metodologia não necessariamente equivalente às competições simuladas.'}))),
 })]));
-export const ACERVO_CLUBES_HISTORICOS = Object.freeze({...MAPA,...ACERVO_CLUBES_LOTE2,...ACERVO_CLUBES_LOTE3,...ACERVO_CLUBES_LOTE4,...ACERVO_CLUBES_LOTE5,...ACERVO_CLUBES_LOTE6,...ACERVO_CLUBES_LOTE7,...ACERVO_CLUBES_LOTE8,...ACERVO_CLUBES_LOTE9,...ACERVO_CLUBES_LOTE10,...ACERVO_CLUBES_LOTE11,...ACERVO_CLUBES_LOTE12,...ACERVO_CLUBES_LOTE13,...ACERVO_CLUBES_LOTE14,...ACERVO_CLUBES_LOTE15,...ACERVO_CLUBES_LOTE16,...ACERVO_CLUBES_LOTE17,...ACERVO_CLUBES_LOTE18,...ACERVO_CLUBES_LOTE19,...ACERVO_CLUBES_LOTE20,...ACERVO_CLUBES_LOTE21,...ACERVO_CLUBES_LOTE22});
+export const ACERVO_CLUBES_HISTORICOS = Object.freeze({...MAPA,...ACERVO_CLUBES_LOTE2,...ACERVO_CLUBES_LOTE3,...ACERVO_CLUBES_LOTE4,...ACERVO_CLUBES_LOTE5,...ACERVO_CLUBES_LOTE6,...ACERVO_CLUBES_LOTE7,...ACERVO_CLUBES_LOTE8,...ACERVO_CLUBES_LOTE9,...ACERVO_CLUBES_LOTE10,...ACERVO_CLUBES_LOTE11,...ACERVO_CLUBES_LOTE12,...ACERVO_CLUBES_LOTE13,...ACERVO_CLUBES_LOTE14,...ACERVO_CLUBES_LOTE15,...ACERVO_CLUBES_LOTE16,...ACERVO_CLUBES_LOTE17,...ACERVO_CLUBES_LOTE18,...ACERVO_CLUBES_LOTE19,...ACERVO_CLUBES_LOTE20,...ACERVO_CLUBES_LOTE21,...ACERVO_CLUBES_LOTE22,...ACERVO_CLUBES_LOTE23});
 export const acervoClubeHistoricoDe = nome => ACERVO_CLUBES_HISTORICOS[nome] || null;
 /** Somente métricas explicitamente documentadas. Não contém projeções. */
 export const REFERENCIAS_RECORDES_CLUBES = Object.freeze(Object.values(ACERVO_CLUBES_HISTORICOS).flatMap(c=>c.recordes));

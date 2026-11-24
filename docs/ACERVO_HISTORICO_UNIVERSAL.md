@@ -16,9 +16,9 @@ O inventário único, deduplicado por nome, está em
 `src/dados/coberturaAcervoHistorico.js`.
 
 ## Fichas e recordes verificados
-- `src/dados/acervoClubesHistoricos.js` e `acervoClubesHistoricosLote2.js` `acervoClubesHistoricosLote3.js` `acervoClubesHistoricosLote4.js` `acervoClubesHistoricosLote5.js` `acervoClubesHistoricosLote6.js` `acervoClubesHistoricosLote7.js` `acervoClubesHistoricosLote8.js` `acervoClubesHistoricosLote9.js` `acervoClubesHistoricosLote10.js` `acervoClubesHistoricosLote11.js` `acervoClubesHistoricosLote12.js` `acervoClubesHistoricosLote13.js` `acervoClubesHistoricosLote14.js` `acervoClubesHistoricosLote15.js` `acervoClubesHistoricosLote16.js` `acervoClubesHistoricosLote17.js` `acervoClubesHistoricosLote18.js` `acervoClubesHistoricosLote19.js` `acervoClubesHistoricosLote20.js` `acervoClubesHistoricosLote21.js` `acervoClubesHistoricosLote22.js` `acervoClubesHistoricosLote23.js` e `acervoClubesHistoricosLote24.js`.
+- `src/dados/acervoClubesHistoricos.js` e `acervoClubesHistoricosLote2.js` `acervoClubesHistoricosLote3.js` `acervoClubesHistoricosLote4.js` `acervoClubesHistoricosLote5.js` `acervoClubesHistoricosLote6.js` `acervoClubesHistoricosLote7.js` `acervoClubesHistoricosLote8.js` `acervoClubesHistoricosLote9.js` `acervoClubesHistoricosLote10.js` `acervoClubesHistoricosLote11.js` `acervoClubesHistoricosLote12.js` `acervoClubesHistoricosLote13.js` `acervoClubesHistoricosLote14.js` `acervoClubesHistoricosLote15.js` `acervoClubesHistoricosLote16.js` `acervoClubesHistoricosLote17.js` `acervoClubesHistoricosLote18.js` `acervoClubesHistoricosLote19.js` `acervoClubesHistoricosLote20.js` `acervoClubesHistoricosLote21.js` `acervoClubesHistoricosLote22.js` `acervoClubesHistoricosLote23.js` `acervoClubesHistoricosLote24.js` e `acervoClubesHistoricosLote25.js`.
 - `src/dados/acervoSelecoesHistoricas.js`.
-- Clubes com fichas individuais verificadas neste ciclo: **221**.
+- Clubes com fichas individuais verificadas neste ciclo: **223**.
 - Seleções com fichas individuais verificadas neste ciclo: **21**.
 - As 23 equipes da Série D, as 20 equipes da Série C e as 20 equipes da Série B do catálogo principal possuem ficha histórica inicial.
 - O lote 6 e o lote 8 incluem técnicos responsáveis por títulos documentados.
@@ -71,3 +71,5 @@ e estatísticas por adversário. Todas as afirmações precisam de fontes
 específicas e uma regra de comparação compatível com a simulação.
 
 - O lote 24 adiciona Al-Riyadh, Al-Raed, Damac e Al-Kholood (fundação, títulos e promoções documentadas na Saudipedia). Os registros de atletas sem períodos comprovados são mantidos com `periodo: null`; não há preenchimento fictício de recordes.
+
+- O lote 25 adiciona Fatih Karagümrük (fundação, retomada em 1946, acessos em 2020 e 2025, fontes oficiais do clube e TFF) e Al-Orobah (fundação, título e primeiro acesso em 2013, retorno à elite em 2024, atletas Zouma, Guðmundsson e Young, fontes SPL e clube). Sem totais inventados.

@@ -46,7 +46,7 @@ export function escolherCopaCompartilhada(card,chave,opcao){
  let atualizado={...card,copaCompartilhada:nova};
  // A partida do jogador também precisa ficar no histórico: o resultado não é
  // contabilizado de novo ao clicar em Continuar ou ao recarregar o save.
- if(opcao!=='continuar'&&nova.resultado&&!nova.resultado.penaltisPendentes&&!antiga.resultado){
+ if(opcao!=='continuar'&&nova.resultado&&!nova.resultado.penaltisPendentes&&(!antiga.resultado||antiga.resultado.penaltisPendentes)){
   const lances=lancesJogadorCopa(card,nova,chave);
   if(lances){nova={...nova,resultado:{...nova.resultado,lancesJogador:lances}};
    const anterior=card.copaEstatisticas||{jogos:0,gols:0,assist:0};

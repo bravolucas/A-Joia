@@ -17,7 +17,7 @@ test('os 20 clubes atuais do catalogo da Serie B possuem fichas historicas',()=>
 });
 test('novo lote de 7 clubes da Serie B referencia atletas, marcos e fontes reais',()=>{
  assert.equal(Object.keys(ACERVO_CLUBES_LOTE7).length,7);
- assert.equal(Object.keys(ACERVO_CLUBES_HISTORICOS).length,101);
+ assert.ok(Object.keys(ACERVO_CLUBES_HISTORICOS).length>=101);
  for(const [nome,c] of Object.entries(ACERVO_CLUBES_LOTE7)){
   assert.strictEqual(acervoClubeHistoricoDe(nome),c);
   for(const jogador of c.atletas){

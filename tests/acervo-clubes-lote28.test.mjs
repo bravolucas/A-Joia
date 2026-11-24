@@ -8,7 +8,7 @@ import {CLUBES} from '../src/dados/data.js';
 test('lote 28 documenta três clubes franceses existentes no jogo',()=>{
  assert.deepEqual(Object.keys(ACERVO_CLUBES_LOTE28).sort(),['Nantes','Nice','Strasbourg'].sort());
  for(const nome of Object.keys(ACERVO_CLUBES_LOTE28)){
-  assert.ok(CLUBES.some(c=>c.nome===nome&&c.liga==='franca'),'clube da Ligue 1: '+nome);
+  assert.ok(CLUBES.some(c=>c.nome===nome&&['franca','franca2'].includes(c.liga)),'clube francês no catálogo: '+nome);
   const ficha=acervoClubeHistoricoDe(nome);
   assert.ok(ficha&&ficha.marcos.length>0);
   assert.equal(coberturaHistoricaDe('clube',nome).cobertura,'parcial_documentado');

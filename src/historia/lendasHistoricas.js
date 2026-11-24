@@ -629,6 +629,48 @@ export const LENDAS_HISTORICAS = {
   // https://www.legab.it/news/i-calciatori-iconici-che-hanno-vestito-la-maglia-del-pisa
   // https://news.bet365.it/it-it/article/pisa-i-giocatori-piu-famosi-della-storia-del-club-simeone-dunga-kieft-berggreen-vieri-allegri/2025050613524067553
   "Pisa": ["Fabrizio Barontini","Piero Gionfantini","Klaus Berggreen"],
+  // Alemanha — seleção editorial parcial de ídolos e destaques, sem ranking. Consulta: 2026-11-24.
+  // https://schalke04.de/verein/tradition/schalke-legenden/jahrhundertelf/
+  // https://schalke04.de/inside/legenden-elf-des-ruhrgebiets/
+  "Schalke 04": ["Ernst Kuzorra","Fritz Szepan","Klaus Fischer","Olaf Thon","Klaus Fichtel","Stan Libuda"],
+  // https://www.scp07.de/Teams/Profis/News-Profis/200.-Pflichtspiel.html
+  "Paderborn": ["Markus Krösche","Jörg Bräuer","Markus Mrugalla","Christian Strohdiek","Lukas Kruse","Daniel Brückner","Sven Michel"],
+  // https://www.scfreiburg.com/verein/historie/sc-geschichte/2025-heute/
+  "Freiburg": ["Christian Günter","Andreas Zeyer","Nils Petersen","Vincenzo Grifo"],
+  // https://www.worldfootball.net/teams/te24/tsg-hoffenheim/records-all-time-appearances/
+  "Hoffenheim": ["Oliver Baumann","Andrej Kramarić","Sebastian Rudy","Sejad Salihović"],
+  // https://www.fc-union-berlin.de/de-e/alle-neuigkeiten/budenzeit-fuer-die-traditionself-Nuzuvz
+  "Union Berlin": ["Torsten Mattuschka","Karim Benyamina","Daniel Göhlert","Christian Stuff","Christopher Quiring"],
+  // https://www.vfb.de/de/vfb/aktuell/neues/club/2025/kader-der-vfb-legenden-beim-beckenbauer-cup/
+  // https://www.vfb.de/de/vfb/verein/traditionself/legende/
+  // https://www.vfb.de/en/vfb/latest/news/club/2023/markenbotschafter-/
+  // https://www.merkur.de/sport/fussball/legendaere-spieler-vfb-stuttgart-allgoewer-bobic-balakov-buchwald-elber-schlienz-sigurvinsson-zr-92693448.html
+  "Stuttgart": ["Karl Allgöwer","Guido Buchwald","Krassimir Balakov","Fredi Bobic","Giovane Élber","Cacau","Hansi Müller","Timo Hildebrand"],
+  // https://profis.eintracht.de/news/adlerticker-die-eintracht-news-des-tages-freitag-2-oktober-2026-179580/
+  "Eintracht Frankfurt": ["Jürgen Grabowski","Bernd Hölzenbein","Jay-Jay Okocha","Tony Yeboah","Alexander Meier","Makoto Hasebe","Karl-Heinz Körbel","Sebastian Rode"],
+  // https://rbleipzig.com/de/news/orban-poulsen-gulacsi-kampl-forsberg-champions-league-rekord-rbl-manchester-city
+  // https://rbleipzig.com/en/match-news/match-preview-champions-league-rb-leipzig-rc-lens-24-november-2026
+  "RB Leipzig": ["Yussuf Poulsen","Willi Orbán","Emil Forsberg","Péter Gulácsi","Kevin Kampl","Christopher Nkunku"],
+  // https://www.bayer04.de/en-us/page/history/honorary-captains
+  // https://www.bayer04.de/de-de/page/historie/bundesliga-allstars
+  "Leverkusen": ["Ulf Kirsten","Rüdiger Vollborn","Bernd Schneider","Carsten Ramelow","Simon Rolfes","Stefan Kießling","Lars Bender","Jens Nowotny","Lúcio","Zé Roberto","Michael Ballack"],
+  // https://www.bundesliga.com/en/bundesliga/news/borussia-monchengladbach-bundesliga-club-by-club-historical-guide-heynckes-netzer-24134
+  "Borussia Mönchengladbach": ["Günter Netzer","Jupp Heynckes","Berti Vogts","Rainer Bonhof","Allan Simonsen","Wolfgang Kleff"],
+  // https://www.werder.de/news/maenner/2022-2023/pizarro-abschiedsspiel-kader-230922/
+  // https://www.werder.de/news/maenner/2024-2025/spielbericht-legenden-21062025
+  "Werder Bremen": ["Claudio Pizarro","Aílton","Johan Micoud","Marco Bode","Dieter Eilts","Torsten Frings","Naldo","Per Mertesacker","Dieter Burdenski"],
+  // https://www.fsv05.de/datrek/rekges.html
+  "Mainz 05": ["Nikolče Noveski","Stephan Kuhnert","Niko Bungert","Elkin Soto"],
+  // https://www.augsburger-allgemeine.de/sport/fc-augsburg/dieser-spieler-absolvierte-die-meisten-spiele-fuer-den-fc-augsburg-110165842
+  "Augsburg": ["Helmut Haller","Daniel Baier"],
+  // https://fc.de/club/ueber-den-fc/historie-und-erfolge/clubgeschichte
+  "FC Köln": ["Hans Schäfer","Wolfgang Overath","Wolfgang Weber","Heinz Flohe","Hannes Löhr","Dieter Müller","Pierre Littbarski","Toni Schumacher","Lukas Podolski","Jonas Hector"],
+  // https://www.bundesliga.com/en/bundesliga/news/hamburger-sv-bundesliga-club-by-club-historical-guide-keegan-seeler-24135
+  // https://www.hsv.de/unser-hsv/historie/hsv-rekordspieler
+  "Hamburger SV": ["Uwe Seeler","Manfred Kaltz","Horst Hrubesch","Felix Magath","Rudi Kargus","Peter Nogly","Jimmy Hartwig","Horst Schnoor"],
+  // https://sv07elversberg.de/sve-verabschiedet-sich-zum-saisonende-von-acht-spielern/
+  // https://sv07elversberg.de/u21-startet-in-die-neue-saarlandliga-saison-samstag-gegen-den-fc-rastpfuhl/
+  "Elversberg": ["Kevin Koffi","Lukas Kohler"],
   // Seleções
   'Brasil': ['Pelé', 'Garrincha', 'Ronaldo', 'Romário'],
   'Argentina': ['Diego Maradona', 'Lionel Messi', 'Mario Kempes', 'Gabriel Batistuta'],
@@ -641,4 +683,6 @@ export const LENDAS_HISTORICAS = {
   'Holanda': ['Johan Cruyff', 'Marco van Basten', 'Ruud Gullit'],
   'Portugal': ['Cristiano Ronaldo', 'Eusébio', 'Luís Figo'],
 };
-export const lendasDe = nome => LENDAS_HISTORICAS[nome] || [];
+// Nomes alternativos existentes no cadastro das divisões alemãs: uma única galeria por identidade.
+const ALIASES_LENDAS = Object.freeze({ 'Hamburgo': 'Hamburger SV', 'Köln': 'FC Köln' });
+export const lendasDe = nome => LENDAS_HISTORICAS[Object.hasOwn(ALIASES_LENDAS, nome) ? ALIASES_LENDAS[nome] : nome] || [];

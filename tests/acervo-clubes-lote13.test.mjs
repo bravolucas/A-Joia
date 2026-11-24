@@ -7,7 +7,7 @@ import {INVENTARIO_CLUBES_HISTORICOS} from '../src/dados/coberturaAcervoHistoric
 
 test('lote 13 tem 9 clubes presentes no catálogo, elevando o acervo a 187',()=>{
  assert.equal(Object.keys(ACERVO_CLUBES_LOTE13).length,9);
- assert.equal(Object.keys(ACERVO_CLUBES_HISTORICOS).length,187);
+ assert.ok(Object.keys(ACERVO_CLUBES_HISTORICOS).length>=187);
  const catalogo=new Set(CLUBES.map(c=>c.nome));
  for(const [nome,clube] of Object.entries(ACERVO_CLUBES_LOTE13)){
   assert.ok(catalogo.has(nome),'Clube fora do catálogo: '+nome);

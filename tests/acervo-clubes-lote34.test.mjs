@@ -37,7 +37,9 @@ test('Bordeaux: títulos documentados e dois recordes Giresse sem comparação i
   const rec=registros.find(x=>x.id===id);
   assert.equal(rec?.real?.valor,valor);
   assert.equal(rec.real?.comparavel,false);
-  assert.match(rec.status,/critério distinto/);
+  assert.match(rec.status,/Referência de período documentado/);
+  assert.equal(rec.real?.cobertura,'recorte');
+  assert.match(rec.real?.criterio,/Somente partidas e gols/);
  }
  const gols=registros.find(x=>x.id==='golsCarreira');
  assert.ok(gols.simulado?.valor>=200);

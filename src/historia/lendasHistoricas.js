@@ -263,6 +263,39 @@ export const LENDAS_HISTORICAS = {
   // https://cap.org.ar/2020/05/platense115-un-aniversario-distinto-pero-lleno-de-emociones-y-solidaridad/
   // https://cap.org.ar/2017/07/el-pueblo-de-platense-agradecio-a-sus-idolos/
   "Platense": ["Daniel Vega","Vicente Sayago","José Luis Petti","Marcelo Espina","Alejandro Alfaro Moreno","Felipe Bellini","Rolando Cristante","Oscar López Turitich"],
+  // Demais clubes sul-americanos — seleção editorial parcial, sem ranking; consulta 2026-11-24.
+  // https://futbolete.com/ohnacional-com/mayores-idolos-de-atletico-nacional-en-su-historia/775538/
+  // https://balonlatino.net/mejores-jugadores-historia-atletico-nacional/
+  "Atlético Nacional": ["René Higuita","Andrés Escobar","Víctor Aristizábal","Humberto Álvarez","Alexis Henríquez","Franco Armani"],
+  // https://www.winsports.co/futbol-colombiano/noticias/junior-vs-millonarios-un-partido-con-idolos-que-marcaron-historia-343327
+  "Millonarios": ["Alfredo Di Stéfano","Willington Ortiz","Arnoldo Iguarán","David Mackalister Silva"],
+  // https://www.elespectador.com/deportes/futbol-colombiano/junior-fc/el-11-historico-del-junior-de-barranquilla-los-100-anos-del-cuadro-tiburon/?outputType=amp
+  // https://www.winsports.co/futbol-colombiano/noticias/junior-vs-millonarios-un-partido-con-idolos-que-marcaron-historia-343327
+  "Junior de Barranquilla": ["Carlos Valderrama","Sebastián Viera","Giovanni Hernández","Teófilo Gutiérrez","Carlos Bacca"],
+  // https://chile.as.com/chile/2016/01/07/album/1452202339_640187.html
+  // https://www.colo-colo.com/los-fichajes-que-se-convirtieron-en-leyenda-en-colo-colo/
+  // https://www.24horas.cl/deportes/futbol-nacional/la-formacion-ideal-con-jugadores-que-defendieron-a-la-uc-y-colo-colo-2315154
+  "Colo-Colo": ["David Arellano","Guillermo Subiabre","Alfonso Domínguez","Arturo Torres","Marcelo Barticciotto","Esteban Paredes","Elson Beyruth","Marcelo Espina"],
+  // https://www.udechile.cl/noticias/especial-aniversario-los-jugadores-que-rompieron-records-y-dejaron-su-marca-en-el-romantico-viajero
+  "Universidad de Chile": ["Leonel Sánchez","Carlos Campos","Marcelo Salas"],
+  // https://cruzados.cl/cruzados-historicos/nestor-gorosito/
+  // https://www.alairelibre.cl/futbol/cruzalbos-siete-futbolistas-que-jugaron-en-colo-colo-y-universidad-catolica/
+  "Universidad Católica": ["Néstor Gorosito","Alberto Acosta","José Pedro Fuenzalida"],
+  // https://www.clubolimpia.com.py/historia
+  // https://www.abc.com.py/deportes/futbol/olimpia/2026/07/25/olimpia-celebra-124-anos-de-historia-con-homenaje-a-ever-almeida-y-la-mira-puesta-en-el-clausura/
+  "Olimpia": ["Éver Almeida","Raúl Vicente Amarilla","Gabriel González","Adriano Samaniego","Mauro Caballero","Miguel Ángel Benítez","Roque Santa Cruz","Alicio Solalinde","Carlos Kiese","Virginio Cáceres"],
+  // https://www.ultimahora.com/los-idolos-cerristas-invitados-la-inauguracion-la-nueva-olla-n1102613
+  // https://www.lanacion.com.py/futboledicion-impresa/2019/02/17/aquel-triunfo-con-campeonato-del-72/
+  // https://www.rdn.com.py/2017/08/18/borran-a-olimpistas-del-festejo-de-la-nueva-olla/
+  "Cerro Porteño": ["Saturnino Arrúa","Julio Dos Santos","Roberto Fernández","Francisco Arce","Juan Manuel Battaglia","Juvencio Osorio","Santiago Salcedo","Justo Jacquet"],
+  // https://www.primicias.ec/noticias/jugada/eldeportequequeremos/liga-quito-fundacion-historia-jugadores-aniversario/
+  // https://www.primicias.ec/noticias/jugada/eldeportequequeremos/jugadores-titulos-liga-quito-historia//
+  "LDU de Quito": ["Patricio Urrutia","Néicer Reasco","Franklin Salas","Damián Manso","Alexander Domínguez","Paúl Ambrosi","Epifanio Brizuela","Héctor Morales","César Mantilla"],
+  // https://www.expreso.ec/deportes/independiente-del-valle-jugadores-historicos-de-la-gloria-rayada-267025.html
+  // https://www.teleamazonas.com/junior-sornoza-referente-independiente-valle/
+  "Independiente del Valle": ["Junior Sornoza","Richard Schunke","Librado Azcona","Jorge Pinos","Arturo Mina","Alán Franco","Luis Segovia","Jefferson Orejuela","Luis Fernando León","Jonny Uchuari"],
+  // https://especiales.eluniverso.com/barcelona-sporting-club/idolos-idolo/
+  "Barcelona de Guayaquil": ["Washington Muñoz","Alberto Spencer","Galo Vásquez","Jimmy Montanero","Carlos Luis Morales","Clímaco Cañarte"],
   // Europa
   'Real Madrid': ['Alfredo Di Stéfano', 'Cristiano Ronaldo', 'Raúl', 'Iker Casillas'],
   'Barcelona': ['Lionel Messi', 'Johan Cruyff', 'Xavi', 'Andrés Iniesta'],

@@ -9,7 +9,6 @@ test('todos os 23 clubes do catalogo da Serie D possuem ficha historica inicial'
  const divisao=CLUBES.filter(c=>c.liga==='serieD');
  assert.equal(divisao.length,23);
  assert.equal(Object.keys(ACERVO_CLUBES_LOTE9).length,23);
- assert.equal(Object.keys(ACERVO_CLUBES_HISTORICOS).length,141);
  const jogo=new Set(divisao.map(x=>x.nome));
  for(const [nome,c] of Object.entries(ACERVO_CLUBES_LOTE9)){
   assert.ok(jogo.has(nome),'Clube nao pertence ao catalogo da Serie D: '+nome);

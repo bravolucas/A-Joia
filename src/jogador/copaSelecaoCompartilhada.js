@@ -25,7 +25,8 @@ export function iniciarCopaCompartilhada(c,card){
  const jaTem=participantes.some(p=>p.nac===c.nac);
  if(!jaTem)participantes[participantes.length-1]={nome:usuario,nac:c.nac,forca:k.fs};
  const campanha=criarCampanhaCopa({
-  nome:k.nome,tipo:k.tipo,usuario,forcaUsuario:k.fs,
+  nome:k.nome,tipo:k.tipo,usuario,
+  forcaUsuario:Math.max(35,Math.min(100,k.fs+(k.titular?Math.max(-2,Math.min(3,(k.ovr-k.fs)*.25)):0))),
   clubes:participantes,ano:card.ano,
   formato:k.tipo==='copaMundo'?(card.ano>=2026?'copa48':'selecao32'):'selecaoGrupos',
   seed:`${c.codigo||c.nome}|${card.ano}|${k.tipo}|jogador`,

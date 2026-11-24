@@ -362,6 +362,61 @@ export const LENDAS_HISTORICAS = {
   // https://prideofanglia.com/page.php?page=hallOfFameSummary
   // https://www.prideofanglia.com/page.php?page=hallOfFame
   "Ipswich Town": ["Mick Mills","John Wark","Ray Crawford","Ted Phillips","Kevin O'Callaghan","David Linighan","Doug Millward"],
+  // Inglaterra — segunda divisão do jogo; seleção editorial parcial, consulta 2026-11-24.
+  // https://www.southamptonfc.com/en/news/article/saints-launch-legacy-numbers
+  "Southampton": ["Matt Le Tissier","Mick Channon","Terry Paine"],
+  // https://en.wikipedia.org/wiki/Norwich_City_F.C._Hall_of_Fame
+  "Norwich City": ["Kevin Keelan","Darren Huckerby","Iwan Roberts"],
+  // https://www.sheffieldunited.news/club/legends/
+  "Sheffield United": ["Tony Currie","Jimmy Hagan","Joe Shaw"],
+  // https://www.boro.news/club/legends/
+  "Middlesbrough": ["Juninho Paulista","Wilf Mannion","Brian Clough"],
+  // https://www.westbromnews.co.uk/2025/09/09/tony-brown-and-bob-taylor-top-10-west-brom-legends-every-fan-should-know
+  "West Bromwich Albion": ["Jeff Astle","Tony Brown","Bryan Robson","John Wile"],
+  // https://toby393.substack.com/p/millwalls-prodigal-sons-of-the-last
+  "Millwall": ["Neil Harris","Tim Cahill","Steve Morison","Tony Craig"],
+  // https://brfpa.co.uk/
+  "Blackburn Rovers": ["Alan Shearer","Brad Friedel","Bryan Douglas","Derek Fazackerley","Simon Garner"],
+  // https://www.bristolcitysupporters.org/heritage/
+  "Bristol City": ["John Atyeo","Gerry Gow","Bob Taylor","Scott Murray","Louis Carey"],
+  // https://therealefl.co.uk/category/championship/watford-football-club/
+  "Watford": ["Luther Blissett","John Barnes","Tony Coton"],
+  // https://www.swanseacity.com/history/players-past
+  "Swansea City": ["Ivor Allchurch","Cliff Jones","Alan Curtis"],
+  // https://therealefl.co.uk/category/clubs/championship/stoke-city/
+  "Stoke City": ["Stanley Matthews","Gordon Banks","George Eastham"],
+  // https://www.bbc.co.uk/sport/football/26194543
+  "Preston North End": ["Tom Finney"],
+  // https://vitalfootball.co.uk/wednesday-legends/
+  "Sheffield Wednesday": ["David Hirst","Chris Waddle","Roland Nilsson","John Sheridan"],
+  // https://www.derbycounty.news/club/legends/
+  "Derby County": ["Steve Bloomer","Kevin Hector","Craig Bryson"],
+  // https://www.portsmouthfc.news/club/legends/
+  "Portsmouth": ["Jimmy Dickinson","David James","Duggie Reid"],
+  // https://vitalfootball.co.uk/luton-town-your-5-best-ever-forwards-revealed/
+  "Luton Town": ["Mick Harford","Brian Stein"],
+  // https://www.molineux.news/club/legends/
+  "Wolves": ["Billy Wright","Steve Bull","Derek Parkin","Derek Dougan","Bert Williams"],
+  // https://www.whufc.com/en/the-club/history/honours-and-records/awards
+  "West Ham": ["Bobby Moore","Geoff Hurst","Martin Peters","Billy Bonds","Trevor Brooking","Mark Noble"],
+  // https://www.leicestercity.news/club/legends/
+  "Leicester City": ["Jamie Vardy","Gary Lineker","Graham Cross"],
+  // https://www.tottenhamhotspur.com/news/995329/legends-on-legends-burnley
+  "Burnley": ["Jimmy McIlroy","Jimmy Adamson"],
+  // https://informationbirmingham.com/birmingham-city-fc
+  "Birmingham City": ["Trevor Francis","Joe Bradford","Gil Merrick"],
+  // https://www.bwfc.co.uk/news/2020/september/one-town-nat-lofthouse---a-northern-powerhouse
+  "Bolton Wanderers": ["Nat Lofthouse"],
+  // https://www.cardiffcityfc.co.uk/club/club-history
+  "Cardiff City": ["Fred Keenor","Phil Dwyer"],
+  // https://cafcmuseum.net/history/
+  "Charlton Athletic": ["Sam Bartram","Derek Hales","Mike Flanagan","Keith Peacock","Colin Powell","Clive Mendonca"],
+  // https://the72.co.uk/guide/lincoln-city-fc-club-records/
+  "Lincoln City": ["Grant Brown","Andy Graver","Gordon Hobson","Allan Hall"],
+  // https://www.qpr.co.uk/news/2024/february/24/stan-bowles-rip/
+  "Queens Park Rangers": ["Stan Bowles","Rodney Marsh","Les Ferdinand"],
+  // https://upthetown.uk/legends
+  "Wrexham": ["Arfon Griffiths","Dixie McNeil","Tommy Bamford"],
   // Seleções
   'Brasil': ['Pelé', 'Garrincha', 'Ronaldo', 'Romário'],
   'Argentina': ['Diego Maradona', 'Lionel Messi', 'Mario Kempes', 'Gabriel Batistuta'],

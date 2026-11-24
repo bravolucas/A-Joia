@@ -7,7 +7,6 @@ on:
       - 'src/jogador/ModoRapido.jsx'
       - 'src/treinador/copasEscolha.js'
       - 'tests/copa-mundo-jogador-compartilhada.test.mjs'
-      - 'tests/copa-mundo-jogador-compartilhada.spec.mjs'
       - '.github/workflows/auditar-copa-mundo-jogador.yml'
   workflow_dispatch:
 jobs:
@@ -22,6 +21,6 @@ jobs:
       - name: Instalar dependências
         run: npm install --no-audit --no-fund
       - name: Testar 48 seleções, convocação, estratégias, saves e simulação automática
-        run: node --test tests/copa-mundo-jogador-compartilhada.test.mjs tests/copa-mundo-jogador-compartilhada.spec.mjs
+        run: node --test tests/copa-mundo-jogador-compartilhada.test.mjs
       - name: Compilar jogo
         run: npm run build

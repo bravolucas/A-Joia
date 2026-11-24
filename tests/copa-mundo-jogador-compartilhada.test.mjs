@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {criarJogador} from '../src/jogador/rapido.js';
+import {criarJogador,jogarTemporada} from '../src/jogador/rapido.js';
 import {iniciarCopaCompartilhada,escolherCopaCompartilhada,chaveCopaCompartilhada} from '../src/jogador/copaSelecaoCompartilhada.js';
 import {decisaoCopa} from '../src/treinador/copasEscolha.js';
 
@@ -41,4 +41,19 @@ test('estratégias, pênaltis, salvamento e resumo não duplicam títulos',()=>{
  const repetido=escolherCopaCompartilhada(estado,chaveCopaCompartilhada(estado),'continuar');
  assert.equal(repetido,estado,'campanha concluída não deve ser atualizada novamente');
  assert.ok(estado.titulos.filter(t=>t.nome==='Copa do Mundo').length<=1);
+});
+
+test('carreira automatica nao cria uma segunda Copa interativa',()=>{
+ const {c}=origem();const r=jogarTemporada(c);
+ assert.equal(r.card.copaCompartilhada,undefined,'modo automatico deve conservar o fluxo anterior');
+ assert.ok(r.card.copa,'a Copa legacy continua gerada');
+});
+test('convocacao e saves legados nao ressorteiam partidas existentes',()=>{
+ const {c,card}=origem();
+ const pendente={...card,copa:{...card.copa,convocado:false,etapa:'convocacao'}};
+ assert.equal(iniciarCopaCompartilhada(c,pendente),pendente);
+ const legado={...card,copa:{...card.copa,jogos:[{fase:0,adv:{label:'Alemanha'},gp:1,gc:0}]}};
+ assert.equal(iniciarCopaCompartilhada(c,legado),legado);
+ const sorteada=iniciarCopaCompartilhada(c,card);
+ assert.equal(iniciarCopaCompartilhada(c,sorteada),sorteada);
 });

@@ -1238,6 +1238,38 @@ export const LENDAS_HISTORICAS = {
   "Coreia do Norte": ["Pak Doo-ik","Pak Seung-zin","Ri Chan-myong","Hong Yong-jo","Jong Tae-se","Ri Myong-guk","An Yong-hak","Ji Yun-nam","Pak Nam-chol"],
   "Kuwait": ["Jassem Yaqoub","Faisal Al-Dakhil","Saad Al-Houti","Fathi Kameel","Bashar Abdullah","Bader Al-Mutawa","Nawaf Al-Khaldi","Waleed Ali","Fahad Al-Enezi","Hamad Al-Enezi"],
   "Emirados Árabes": ["Adnan Al Talyani","Fahad Khamees","Ismail Matar","Omar Abdulrahman","Ahmed Khalil","Ali Mabkhout","Amer Abdulrahman","Majed Naser","Walid Abbas","Mohamed Abdulrahman"],
+  // CONCACAF — seleção editorial de internacionais, não ranking. Referência geral: https://www.rsssf.org/intlp-countrywise.html
+  "Estados Unidos": ["Landon Donovan","Clint Dempsey","Tim Howard","Brad Friedel","Claudio Reyna","Brian McBride","Cobi Jones","Eric Wynalda","DaMarcus Beasley","Christian Pulisic","Michael Bradley","Alexi Lalas"],
+  "México": ["Hugo Sánchez","Rafael Márquez","Jorge Campos","Cuauhtémoc Blanco","Javier Hernández","Jared Borgetti","Claudio Suárez","Andrés Guardado","Guillermo Ochoa","Luis Hernández","Antonio Carbajal","Raúl Jiménez"],
+  "Costa Rica": ["Keylor Navas","Paulo Wanchope","Bryan Ruiz","Rolando Fonseca","Walter Centeno","Luis Gabelo Conejo","Celso Borges","Joel Campbell","Óscar Duarte","Mauricio Solís"],
+  "Canadá": ["Dwayne De Rosario","Julian de Guzman","Paul Stalteri","Atiba Hutchinson","Craig Forrest","Alex Bunbury","Tomasz Radzinski","Alphonso Davies","Jonathan David","Cyle Larin"],
+  "Jamaica": ["Theodore Whitmore","Ricardo Gardner","Warren Barrett","Ian Goodison","Luton Shelton","Walter Boyd","Andy Williams","Donovan Ricketts","Leon Bailey","Michail Antonio"],
+  "Honduras": ["Carlos Pavón","David Suazo","Amado Guevara","Carlos Costly","Wilson Palacios","Maynor Figueroa","Noel Valladares","Milton Núñez","Ramón Maradiaga","Gilberto Yearwood"],
+  "Panamá": ["Román Torres","Blas Pérez","Luis Tejada","Jaime Penedo","Gabriel Gómez","Felipe Baloy","Julio Dely Valdés","Jorge Dely Valdés","Alberto Quintero","Aníbal Godoy"],
+  "Trinidad e Tobago": ["Dwight Yorke","Russell Latapy","Stern John","Shaka Hislop","Kenwyne Jones","Dennis Lawrence","Carlos Edwards","Angus Eve","Marvin Andrews","Cornell Glen"],
+  "Haiti": ["Emmanuel Sanon","Henri Françillon","Philippe Vorbe","Joe Gaetjens","Jean-Eudes Maurice","Duckens Nazon","Frantzdy Pierrot","Johnny Placide","Wilde-Donald Guerrier","Ernst Jean-Joseph"],
+  "El Salvador": ["Jorge González","Luis Ramírez Zapata","Raúl Díaz Arce","Mauricio Cienfuegos","Jaime Rodríguez","José María Rivas","Alfredo Pacheco","Rodolfo Zelaya","Eliseo Quintanilla","Darwin Cerén"],
+  // OFC — seleção editorial inicial; nas seleções com fontes limitadas, inclui destaques documentados de campanhas, sem atribuir recordes absolutos.
+  // https://www.oceaniafootball.com/fifa-world-cup-2026-new-zealand-players-to-watch/
+  // https://rsssf.org/miscellaneous/fiji-krishna-intlg.html
+  // https://www.rsssf.org/miscellaneous/menapi-intlg.html
+  // https://www.rsssf.org/miscellaneous/iwai-intlg.html
+  // https://www.rsssf.org/tables/2012oc-scor.html
+  // https://www.rsssf.org/tables/2016oc-scor.html
+  // https://www.oceaniafootball.com/archives-9379/
+  // https://www.oceaniafootball.com/archives-12505/
+  // https://www.oceaniafootball.com/archives-7273/
+  // https://www.oceaniafootball.com/archives-13339/
+  // https://www.oceaniafootball.com/blood-is-thicker-family-and-the-oceania-qualifiers/
+  // https://www.oceaniafootball.com/preview-2012-winners-tahiti-looking-to-make-more-history/
+  "Nova Zelândia": ["Wynton Rufer","Chris Wood","Ivan Vicelich","Ryan Nelsen","Steve Sumner","Vaughan Coveny","Shane Smeltz","Rory Fallon","Simon Elliott","Winston Reid"],
+  "Fiji": ["Roy Krishna","Esala Masi","Maciu Dunadamu"],
+  "Ilhas Salomão": ["Commins Menapi","Benjamin Totori","Gideon Omokirio","Himson Teleda"],
+  "Taiti": ["Steevy Chong Hue","Alvin Tehau","Teaonui Tehau","Raimana Li Fung Kuee","Roihau Degage"],
+  "Vanuatu": ["Richard Iwai","Brian Kaltak","Moise Poida","Dominique Fred"],
+  "Papua-Nova Guiné": ["John Panu","Kema Jack","Niel Hans","Nigel Dabingyaba","Michael Foster"],
+  "Nova Caledônia": ["Marius Bako","Kalaje Gnipate","Roy Kayara"],
+  "Samoa": ["Desmond Fa'aiuaso","Silao Malo","Masi Toetu","Jared Curtis","Shaun Easthope","Andrew Mobberley","Faitalia Hamilton-Pama"],
 };
 // Nomes alternativos existentes no cadastro das divisões alemãs: uma única galeria por identidade.
 const ALIASES_LENDAS = Object.freeze({ 'Hamburgo': 'Hamburger SV', 'Köln': 'FC Köln' });

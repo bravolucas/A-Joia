@@ -14,6 +14,7 @@ import {prepararDecisaoJogo} from './decisaoDeJogo.js';
 import {contextoAgenda} from '../competicoes/calendarioCopas.js';
 import {atualizarFluxoCopasJogador,etapaAgendaJogador,registrarLanceLegadoJogador,chaveCopaJogador,escolherCopaJogador,concluirEventoJogador} from './copasJogador.js';
 import CopaEscolha,{MarcoLiga} from '../treinador/CopaEscolha.jsx';
+import {iniciarCopaCompartilhada,escolherCopaCompartilhada,chaveCopaCompartilhada} from './copaSelecaoCompartilhada.js';
 import {chaveEstadualJogador,escolherEstadualJogador} from './estadualJogador.js';
 import {resolverCopaEscolhaTecnico} from '../treinador/tecnico.js';
 import {jogosDoGrupo,tabelaGrupoCopa,empateGrupo} from './gruposCopa.js';
@@ -2827,11 +2828,16 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     else aposFechar(c, fecharTemporada(c, k));
   };
   // Copa do Mundo: cada etapa volta pra cá; a final (titular) vira momento decisivo
-  const avancarCopa = (k) => {
+  const avancarCopa = (original) => {
+    const k=original.copa?.convocado&&!original.copa?.fim?iniciarCopaCompartilhada(c,original):original;
     if(card.calendarioCopas){if(!k.pendente&&!copaPendente(k))seguirAgendaJogador(c,concluirEventoJogador(k));else setEstado({etapa:k.pendente?'momento':'copa',c,card:k,ultimo:estado.ultimo,auto:false});return;}
     if (k.pendente) setEstado({ etapa: "momento", c, card: k, ultimo: estado.ultimo });
     else if (copaPendente(k)) setEstado({ etapa: "copa", c, card: k, ultimo: estado.ultimo });
     else aposFechar(c, fecharTemporada(c, k));
+  };
+  const responderCopaSelecao=(chave,opcao)=>{
+    const k=escolherCopaCompartilhada(card,chave,opcao);
+    if(k!==card)avancarCopa(k);
   };
   // compatibilidade com saves parados na tela de resumo antiga
   const continuar = () => posTemporada(c, card);
@@ -3010,7 +3016,8 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         )}
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}
         {(['estadual','copasClubes','calendarioLiga'].includes(etapa))&&<section className="max-w-xl mx-auto rp-painel p-5"><h2 className="text-xl font-bold">{card.estadualEmJogo?.nome||'Calendário da temporada'}</h2><p className="my-3 text-sm">Acompanhe os jogos na ordem do calendário. Seu progresso está salvo.</p><button className="rp-btn rp-ouro" onClick={()=>setEstadualAberto(true)}>{etapa==='estadual'?'Retomar estadual →':'Retomar temporada →'}</button></section>}
-        {etapa === "copa" && card?.copa && <TelaCopa key={`${card.copa.etapa}:${card.copa.fase}:${card.copa.jogos.length}`} c={c} card={card} jogadaSalva={estado.copaJogada} onRegistrar={jogada=>setEstado(st=>({...st,copaJogada:jogada,auto:false}))} onAvancar={avancarCopa} />}
+        {etapa === "copa" && card?.copaCompartilhada && !card.copa.fim && <CopaEscolha modoJogador campanha={card.copaCompartilhada} chave={chaveCopaCompartilhada(card)} onEscolher={responderCopaSelecao} ocupado={false} onMinimizar={()=>setEstadualAberto(false)}/>}
+        {etapa === "copa" && (!card?.copaCompartilhada||card.copa.fim) && card?.copa && <TelaCopa key={`${card.copa.etapa}:${card.copa.fase}:${card.copa.jogos.length}`} c={c} card={card} jogadaSalva={estado.copaJogada} onRegistrar={jogada=>setEstado(st=>({...st,copaJogada:jogada,auto:false}))} onAvancar={avancarCopa} />}
         {etapa === "momento" && <TelaMomento key={`${card.ano}:${(card.momentos || []).length}`} c={c} momento={card.pendente} onReacao={tipo=>setEstado(st=>({...st,c:reagirReencontro(st.c,{...st.card.pendente,adversario:contextoMomento(st.c,st.card.pendente).adversario},tipo)}))} onRegistrar={r=>setEstado(st=>({...st,auto:false,card:{...st.card,pendente:{...st.card.pendente,mini:r.mini,decisaoJogo:r,lance:{...(st.card.pendente.lance||{}),disputa:false,minuto:st.card.pendente.lance?.minuto||89,gp:st.card.pendente.lance?.gp||0,gc:st.card.pendente.lance?.gc||0}}}}))} onFim={fimMomento} />}
 
         {etapa === "festa" && <TelaFesta c={c} card={card} onFim={() => { if (estado.retorno) setEstado({ ...estado.retorno, voar: false }); else setEstado({etapa:"fechamento",c,card,ultimo:card,auto:false}); }} />}

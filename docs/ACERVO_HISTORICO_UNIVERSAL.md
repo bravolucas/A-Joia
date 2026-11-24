@@ -16,12 +16,13 @@ O inventário único, deduplicado por nome, está em
 `src/dados/coberturaAcervoHistorico.js`.
 
 ## Fichas e recordes verificados
-- `src/dados/acervoClubesHistoricos.js` e `acervoClubesHistoricosLote2.js` `acervoClubesHistoricosLote3.js` `acervoClubesHistoricosLote4.js` `acervoClubesHistoricosLote5.js` `acervoClubesHistoricosLote6.js` `acervoClubesHistoricosLote7.js` `acervoClubesHistoricosLote8.js` e `acervoClubesHistoricosLote9.js`.
+- `src/dados/acervoClubesHistoricos.js` e `acervoClubesHistoricosLote2.js` `acervoClubesHistoricosLote3.js` `acervoClubesHistoricosLote4.js` `acervoClubesHistoricosLote5.js` `acervoClubesHistoricosLote6.js` `acervoClubesHistoricosLote7.js` `acervoClubesHistoricosLote8.js` `acervoClubesHistoricosLote9.js` e `acervoClubesHistoricosLote10.js`.
 - `src/dados/acervoSelecoesHistoricas.js`.
-- Clubes com fichas individuais verificadas neste ciclo: **141**.
+- Clubes com fichas individuais verificadas neste ciclo: **157**.
 - Seleções com fichas individuais verificadas neste ciclo: **21**.
 - As 23 equipes da Série D, as 20 equipes da Série C e as 20 equipes da Série B do catálogo principal possuem ficha histórica inicial.
 - O lote 6 e o lote 8 incluem técnicos responsáveis por títulos documentados.
+- O lote 10 amplia clubes ingleses e sauditas com fontes de clubes e da AFC.
 - As demais entidades têm cobertura `pendente_apuracao`.
 - Dados reais são independentes do Arquivo Vivo de cada save.
 - Os títulos históricos de seleções já existentes foram reutilizados, sem

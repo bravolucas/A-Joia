@@ -13,6 +13,7 @@ import {ITENS_PESSOAIS} from './itensPessoais.js';
 import {iniciarCamisas,aposentarDonoCamisa,prepararCamisaSelecao,sincronizarCamisasSelecao} from './camisasCarreira.js';
 import {estatisticasDecisao} from './decisaoDeJogo.js';
 import {prepararCopasJogador} from './copasJogador.js';
+import {iniciarCopaCompartilhada} from './copaSelecaoCompartilhada.js';
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
 import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternacionais.js';
 import {vagaJogador,nomeVaga,calcularVagasRapidas,clubesParaCopas,regiaoDaLiga,idContinental} from '../competicoes/regrasCopasRapidas.js';
@@ -1652,7 +1653,7 @@ function jogarTemporadaBase(c0) {
     : anoDeContinentalSelecao(c.ano) ? { nome: nomeCopaContinental(c.nac), tipo: "continentalSelecao" } : null;
   // Amistosos têm placares e participações próprios, separados dos torneios.
   card.amistososSelecao=simularAmistososSelecao(c,ovr,torneio?4:6);
-  if(torneio){const ini=iniciarCopa(c,ovr,torneio);if(ini){card.selecao=ini.selecao;card.copa=ini.copa;}}
+  if(torneio){const ini=iniciarCopa(c,ovr,torneio);if(ini){card.selecao=ini.selecao;card.copa=ini.copa;if(ini.copa.convocado)Object.assign(card,iniciarCopaCompartilhada(c,card));}}
 
   if(card.selecao?.convocado||card.copa?.convocado||card.amistososSelecao?.convocado){const elenco=card.copa?.elenco||card.selecao?.elenco||card.amistososSelecao?.elenco;prepararCamisaSelecao(c,elenco?.jogadores||[]);card.numeroSelecao=c.numeroSelecao;for(const e of [card.copa?.elenco,card.selecao?.elenco,card.amistososSelecao?.elenco])if(e)sincronizarCamisasSelecao(c,e);}
   momentos.forEach((m, i) => { if(m.tipo==='selecao'&&card.selecao?.finalAdversario)m.adversario=card.selecao.finalAdversario; m.mini = miniParaMomento(c,m,momentos.slice(0,i).map(x=>x.mini)); Object.assign(m,contextoMomento(c,m)); m.texto = textoDoMomento(m.mini, m, c); m.lance={minuto:84+hashTexto(c.codigo+':'+c.ano+':'+i)%7,gp:0,gc:0,simulado:true,disputa:['penalti','defesa'].includes(m.mini)}; m.ordem = i + 1; m.total = momentos.length; });

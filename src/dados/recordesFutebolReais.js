@@ -39,4 +39,23 @@ export const REFERENCIAS_RECORDES_FUTEBOL = Object.freeze([
  {tipo:'competicao',nome:'Champions League',id:'tecnicoJogos',valor:218,atleta:'Carlo Ancelotti',fonte:'https://www.uefa.com/uefachampionsleague/news/0281-18096ab833ba-60100b78b635-1000--most-champions-league-games-and-/',data:'2026-11-04'},
  {tipo:'competicao',nome:'Champions League',id:'tecnicoVitorias',valor:124,atleta:'Carlo Ancelotti',fonte:'https://www.uefa.com/uefachampionsleague/news/0281-18096ab833ba-60100b78b635-1000--most-champions-league-games-and-/',data:'2026-11-04'},
  {tipo:'competicao',nome:'Champions League',id:'tecnicoTitulos',valor:5,atleta:'Carlo Ancelotti',fonte:'https://www.uefa.com/news/0275-15407684c988-5b733e851bf5-1000--champions-league-coach-records/',data:'2026-05-30'},
+ // CONMEBOL — seleções masculinas principais, internacionais A. RSSSF (Roberto Mamrud e colaboradores).
+ // Valores de referência segundo o recorte indicado em data, não contadores ao vivo; atletas ativos podem ampliar as marcas.
+ {"tipo":"selecao","nome":"Brasil","id":"jogosCarreira","valor":142,"atleta":"Cafu","fonte":"https://www.rsssf.org/miscellaneous/braz-recintlp.html","data":"2026-07-05"},
+ {"tipo":"selecao","nome":"Argentina","id":"golsCarreira","valor":125,"atleta":"Lionel Messi","fonte":"https://www.rsssf.org/miscellaneous/arg-recintlp.html","data":"2026-07-19"},
+ {"tipo":"selecao","nome":"Argentina","id":"jogosCarreira","valor":207,"atleta":"Lionel Messi","fonte":"https://www.rsssf.org/miscellaneous/arg-recintlp.html","data":"2026-07-19"},
+ {"tipo":"selecao","nome":"Uruguai","id":"golsCarreira","valor":69,"atleta":"Luis Suárez","fonte":"https://www.rsssf.org/miscellaneous/bijtertje-intlg.html","data":"2024-09"},
+ {"tipo":"selecao","nome":"Uruguai","id":"jogosCarreira","valor":161,"atleta":"Diego Godín","fonte":"https://www.rsssf.org/miscellaneous/dgodin-intl.html","data":"2022-11"},
+ {"tipo":"selecao","nome":"Colômbia","id":"golsCarreira","valor":36,"atleta":"Radamel Falcao","fonte":"https://www.rsssf.org/miscellaneous/col-recintlp.html","data":"2025-11-18"},
+ {"tipo":"selecao","nome":"Colômbia","id":"jogosCarreira","valor":129,"atleta":"David Ospina","fonte":"https://www.rsssf.org/miscellaneous/col-recintlp.html","data":"2025-11-18"},
+ {"tipo":"selecao","nome":"Equador","id":"golsCarreira","valor":49,"atleta":"Enner Valencia","fonte":"https://www.rsssf.org/miscellaneous/ecua-recintlp.html","data":"2026-06-30"},
+ {"tipo":"selecao","nome":"Equador","id":"jogosCarreira","valor":168,"atleta":"Iván Hurtado","fonte":"https://www.rsssf.org/miscellaneous/ecua-recintlp.html","data":"2026-06-30"},
+ {"tipo":"selecao","nome":"Paraguai","id":"golsCarreira","valor":32,"atleta":"Roque Santa Cruz","fonte":"https://www.rsssf.org/miscellaneous/para-recintlp.html","data":"2026-10-02"},
+ {"tipo":"selecao","nome":"Paraguai","id":"jogosCarreira","valor":148,"atleta":"Paulo da Silva","fonte":"https://www.rsssf.org/miscellaneous/para-recintlp.html","data":"2026-10-02"},
+ {"tipo":"selecao","nome":"Chile","id":"golsCarreira","valor":52,"atleta":"Alexis Sánchez","fonte":"https://www.rsssf.org/miscellaneous/chil-recintlp.html","data":"2026-06-09"},
+ {"tipo":"selecao","nome":"Chile","id":"jogosCarreira","valor":168,"atleta":"Alexis Sánchez","fonte":"https://www.rsssf.org/miscellaneous/chil-recintlp.html","data":"2026-06-09"},
+ {"tipo":"selecao","nome":"Peru","id":"golsCarreira","valor":41,"atleta":"Paolo Guerrero","fonte":"https://www.rsssf.org/miscellaneous/peru-guerrero-intl.html","data":"2025"},
+ {"tipo":"selecao","nome":"Peru","id":"jogosCarreira","valor":130,"atleta":"Yoshimar Yotún","fonte":"https://www.rsssf.org/miscellaneous/peru-yotun-intl.html","data":"2025"},
+ {"tipo":"selecao","nome":"Bolívia","id":"golsCarreira","valor":31,"atleta":"Marcelo Moreno","fonte":"https://www.rsssf.org/miscellaneous/bol-recintlp.html","data":"2025-12-21"},
+ {"tipo":"selecao","nome":"Bolívia","id":"jogosCarreira","valor":107,"atleta":"Marcelo Moreno","fonte":"https://www.rsssf.org/miscellaneous/bol-recintlp.html","data":"2025-12-21"},
 ]);

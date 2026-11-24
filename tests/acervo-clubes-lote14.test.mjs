@@ -7,7 +7,7 @@ import {INVENTARIO_CLUBES_HISTORICOS} from '../src/dados/coberturaAcervoHistoric
 
 test('lote 14 fecha a liga Inglaterra, com 20 de 20 fichas documentadas',()=>{
  assert.equal(Object.keys(ACERVO_CLUBES_LOTE14).length,4);
- assert.equal(Object.keys(ACERVO_CLUBES_HISTORICOS).length,191);
+ assert.ok(Object.keys(ACERVO_CLUBES_HISTORICOS).length>=223,'preservar a cobertura consolidada dos 26 lotes');
  const clubes=CLUBES.filter(c=>c.liga==='inglaterra');
  assert.equal(clubes.length,20);
  for(const c of clubes){

@@ -31,7 +31,7 @@ const FONTES={
  porto:'https://ffer.com.br/Publicacao.aspx?id=394374',
  portoJ:'https://ge.globo.com/ro/futebol/noticia/2025/03/07/luan-viana-destaque-do-porto-velho-em-2024-retorna-ao-clube.ghtml',
  manaus:'https://fcf.com.br/brusque-e-campeao-brasileiro-da-serie-d/',
- manausM:'https://ge.globo.com/am/futebol/times/nacional-am/noticia/2026/07/26/nacional-am-coloca-o-futebol-amazonense-na-disputa-do-acesso-na-serie-d-apos-quatro-anos.ghtml',
+ manausM:'https://ge.globo.com/am/futebol/times/manaus/noticia/rossini-e-eleito-por-torcedores-como-destaque-do-manaus-em-2019.ghtml',
  sampaio:'https://www.sampaiocorreafc.com.br/historico/',
  aguia:'https://aguiademaraba.com.br/',
  aguiaJ:'https://ge.globo.com/pa/futebol/times/aguia-de-maraba/noticia/2023/05/27/aguia-de-maraba-conquista-titulo-inedito-e-coloca-tecnico-e-atletas-na-vitrine-do-futebol-paraense.ghtml',
@@ -55,7 +55,7 @@ const DADOS={
   tecnicos:[['Leandro Campos','2010','abcTe','Treinador do time campeão brasileiro da Série C.']],
  },
  'ASA':{
-  atletas:[['Rafael Mariano','ZAG','2026',null,null,'asa','Integrante do elenco do ASA de Arapiraca na campanha do vice da Série D de 2026.']],
+  atletas:[['Rafael Mariano','GOL','2026',null,null,'asa','Goleiro do elenco do ASA de Arapiraca na campanha do vice da Série D de 2026.']],
   marcos:[[2026,'Vice-campeonato brasileiro da Série D','asa','O ASA de Arapiraca chegou à final, perdendo o título para o Uberlândia.']],
  },
  'Gama':{
@@ -116,7 +116,7 @@ const DADOS={
    [2025,'Quinto título rondoniense','porto','Título estadual confirmado no histórico da Federação de Rondônia.']],
  },
  'Manaus':{
-  atletas:[['Rossini','MEI','2019',null,null,'manaus','Integrante da geração do Manaus vice-campeão da Série D de 2019; ficha individual de números pendente.']],
+  atletas:[['Rossini','ATA','2019',null,null,'manausM','Atacante eleito destaque de 2019, autor de quatro gols em partidas decisivas na Série D; ficha com totais da carreira pendente.']],
   marcos:[[2019,'Vice-campeonato da Série D e primeiro acesso nacional','manaus','Final contra o Brusque terminada na disputa por pênaltis, com recorde de público na Arena da Amazônia.']],
  },
  'Sampaio Corrêa':{
@@ -142,11 +142,11 @@ const DADOS={
   tecnicos:[['Flávio Araújo','2018','treze','Treinador da campanha do acesso à Série C.']],
  },
  'Campinense':{
-  atletas:[['Felipe Ramon','ZAG','2021',null,null,'camp','Jogador do elenco vice-campeão da Série D em 2021; métricas individuais por confirmar.']],
+  atletas:[['Filipe Ramon','ZAG','2021',null,null,'camp','Jogador do elenco vice-campeão da Série D em 2021; métricas individuais por confirmar.']],
   marcos:[[2021,'Vice-campeonato brasileiro da Série D','camp','Final contra a Aparecidense, após campanha que garantiu o acesso.']],
  },
  'Cianorte':{
-  atletas:[['Marcos Goiano','ATA','2005',null,null,'cianMarco','Jogador citado na geração que surpreendeu o Corinthians por 3 a 0 na Copa do Brasil 2005.']],
+  atletas:[['Márcio Machado','ATA','2005',null,null,'cianMarco','Atacante autor de dois dos três gols da vitória histórica sobre o Corinthians pela Copa do Brasil de 2005.']],
   marcos:[[2005,'Vitória de 3 a 0 sobre o Corinthians','cianMarco','Triunfo histórico na Copa do Brasil, em sua primeira participação nacional.'],
    [2025,'Título da Taça FPF','cian','Conquista registrada pelo clube na temporada de 2025.']],
   tecnicos:[['Rafael Ferro','2025','cian','Treinador do time vencedor da Taça FPF 2025.']],

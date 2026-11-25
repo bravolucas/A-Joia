@@ -61,3 +61,17 @@ test('todos os 18 clubes neerlandeses têm perfil individual e os recortes de go
   assert.equal(immers.jogos, 259);
   assert.equal(immers.gols, 49);
 });
+
+test('as duas divisões portuguesas têm perfis e distinguem as passagens do mesmo atleta', () => {
+  const clubes = CLUBES.filter(clube => ['portugal', 'portugal2'].includes(clube.liga));
+  assert.equal(clubes.length, 26);
+  for (const {nome} of clubes) assert.ok(coberturaHistoricaDe('clube', nome).atletasDocumentados > 0, nome);
+  const casaPia = ACERVO_CLUBES_LOTE38['Casa Pia'].atletas[0];
+  const rioAve = ACERVO_CLUBES_LOTE38['Rio Ave'].atletas[0];
+  assert.equal(casaPia.nome, rioAve.nome);
+  assert.notEqual(casaPia.periodo, rioAve.periodo);
+  assert.notEqual(casaPia.fonte, rioAve.fonte);
+  const horta = ACERVO_CLUBES_LOTE38.Braga.atletas[0];
+  assert.match(horta.descricao, /fevereiro de 2025.*410 jogos e 134 gols/);
+  assert.equal(horta.gols, null);
+});

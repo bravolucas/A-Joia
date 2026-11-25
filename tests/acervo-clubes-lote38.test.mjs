@@ -143,3 +143,14 @@ test('os 15 clubes da Serie B italiana têm atletas e as passagens de Vialli fic
   assert.equal(sampdoria.gols, null);
   assert.match(cremonese.descricao, /10 de maio de 1981/);
 });
+
+test('os 22 clubes da segunda divisão espanhola têm perfis com feitos ligados à competição certa', () => {
+  const clubes = CLUBES.filter(clube => clube.liga === 'espanha2');
+  assert.equal(clubes.length, 22);
+  for (const {nome} of clubes) assert.ok(coberturaHistoricaDe('clube', nome).atletasDocumentados > 0, nome);
+  const nayim = acervoClubeHistoricoDe('Real Zaragoza').atletas[0];
+  assert.match(nayim.descricao, /final contra o Arsenal.*Recopa Europeia/);
+  const dovbyk = acervoClubeHistoricoDe('Girona').atletas[0];
+  assert.match(dovbyk.descricao, /primeira divisão espanhola com 24 gols/);
+  assert.equal(dovbyk.gols, null);
+});

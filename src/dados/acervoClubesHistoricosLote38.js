@@ -1,3 +1,4 @@
+import {ACERVO_ATLETAS_HISTORICOS_ESPANHA} from './acervoAtletasHistoricosEspanha.js';
 import {ACERVO_ATLETAS_HISTORICOS_ITALIA} from './acervoAtletasHistoricosItalia.js';
 import {ACERVO_ATLETAS_HISTORICOS_ALEMANHA} from './acervoAtletasHistoricosAlemanha.js';
 import {ACERVO_ATLETAS_HISTORICOS_MLS} from './acervoAtletasHistoricosMLS.js';
@@ -837,6 +838,7 @@ const atletasPorPais = {
   port: ACERVO_ATLETAS_HISTORICOS_PORTUGAL,
   duit: ACERVO_ATLETAS_HISTORICOS_ALEMANHA,
   ital: ACERVO_ATLETAS_HISTORICOS_ITALIA,
+  span: ACERVO_ATLETAS_HISTORICOS_ESPANHA,
 };
 
 const fichas = Object.fromEntries(Object.entries(CAMPANHAS).flatMap(([pais, clubes]) =>

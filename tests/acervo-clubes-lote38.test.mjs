@@ -88,3 +88,17 @@ test('os 35 clubes das divisões francesas têm perfis e preservam o escopo das 
   assert.match(redStar.find(a => a.nome === 'Merwan Ifnaoui').descricao, /melhor jogador do Championnat National/);
   assert.match(redStar.find(a => a.nome === 'Quentin Beunardeau').descricao, /melhor goleiro do Championnat National/);
 });
+
+test('a primeira divisão alemã tem perfis e os aliases compartilham os mesmos atletas', () => {
+  const clubes = CLUBES.filter(clube => clube.liga === 'alemanha');
+  assert.equal(clubes.length, 18);
+  for (const {nome} of clubes) assert.ok(coberturaHistoricaDe('clube', nome).atletasDocumentados > 0, nome);
+
+  const hamburgo = acervoClubeHistoricoDe('Hamburgo');
+  const hsv = acervoClubeHistoricoDe('Hamburger SV');
+  assert.equal(hamburgo.atletas, hsv.atletas);
+  assert.equal(acervoClubeHistoricoDe('Köln').atletas, acervoClubeHistoricoDe('FC Köln').atletas);
+  assert.match(hsv.atletas[0].descricao, /30 gols em 30 partidas.*edição inaugural/);
+  assert.equal(hsv.atletas[0].gols, null);
+  assert.match(acervoClubeHistoricoDe('Elversberg').atletas[0].descricao, /18 gols na segunda divisão/);
+});

@@ -130,3 +130,16 @@ test('os 20 clubes da Serie A italiana têm atletas com marcas de carreira e edi
   const pohjanpalo = acervoClubeHistoricoDe('Venezia').atletas[0];
   assert.match(pohjanpalo.descricao, /artilheiro da Serie B com 22 gols/);
 });
+
+test('os 15 clubes da Serie B italiana têm atletas e as passagens de Vialli ficam vinculadas ao clube', () => {
+  const clubes = CLUBES.filter(clube => clube.liga === 'italia2');
+  assert.equal(clubes.length, 15);
+  for (const {nome} of clubes) assert.ok(coberturaHistoricaDe('clube', nome).atletasDocumentados > 0, nome);
+  const sampdoria = acervoClubeHistoricoDe('Sampdoria').atletas[0];
+  const cremonese = acervoClubeHistoricoDe('Cremonese').atletas[0];
+  assert.equal(sampdoria.nome, cremonese.nome);
+  assert.notEqual(sampdoria.fonte, cremonese.fonte);
+  assert.match(sampdoria.descricao, /artilheiro da Serie A com 19 gols/);
+  assert.equal(sampdoria.gols, null);
+  assert.match(cremonese.descricao, /10 de maio de 1981/);
+});

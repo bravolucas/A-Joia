@@ -33,6 +33,51 @@ const perfis = {
   Monza: [
     ['Dany Mota', 'ATA', '2021/22', 'Abriu o placar no 2 a 1 sobre o Pisa na ida da final dos playoffs da Serie B. O Monza conquistou o primeiro acesso à Serie A na volta.', 'https://www.acmonza.com/it/news/3678/', null, null, 'https://www.acmonza.com/news/3689/'],
   ],
+  Sampdoria: [
+    ['Gianluca Vialli', 'ATA', '1989/90 e 1990/91', 'Marcou os dois gols da vitória sobre o Anderlecht na prorrogação da final da Recopa Europeia de 1990. Na temporada seguinte, foi artilheiro da Serie A com 19 gols e campeão italiano pela Sampdoria.', 'https://www.sampdoria.it/storia/'],
+  ],
+  Palermo: [
+    ['Fabrizio Miccoli', 'ATA', 'homenagem de 2020', 'O Palermo incluiu Miccoli no time histórico escolhido por votação dos torcedores para o Hall da Fama do clube.', 'https://www.palermofc.com/it/news/hall-of-fame-ecco-gli-11-1-scelti-dai-tifosi-rosanero'],
+  ],
+  Bari: [
+    ['Igor Protti', 'ATA', '1995/96', 'Marcou 24 gols pelo Bari e dividiu a artilharia da Serie A com Giuseppe Signori, da Lazio.', 'https://sport.sky.it/calcio/2026/06/19/igor-protti-morto'],
+  ],
+  Cremonese: [
+    ['Gianluca Vialli', 'ATA', '1980/81', 'Estreou no time principal da Cremonese em 10 de maio de 1981, antes da passagem que o consagrou na Sampdoria.', 'https://uscremonese.it/storia/'],
+  ],
+  Spezia: [
+    ['Emmanuel Gyasi', 'ATA', '2019/20', 'Marcou o gol do 1 a 0 sobre o Frosinone na ida da final dos playoffs da Serie B. O Spezia conquistou na volta o primeiro acesso à Serie A de sua história.', 'https://www.speziacalcio.com/en/20192020-landing-in-paradise.22267.html'],
+  ],
+  Catanzaro: [
+    ['Pietro Iemmello', 'ATA', '2022/23', 'Marcou 28 gols pelo Catanzaro e recebeu da Associação Italiana de Jogadores o prêmio de artilheiro do Grupo C da Serie C.', 'https://www.calciocatanzaro.it/2023/09/18/catanzaro-iemmello-premiato-dallaic-come-miglior-cannoniere-della-serie-c-22-23/'],
+  ],
+  Brescia: [
+    ['Roberto Baggio', 'SA', '2000–2004', 'O Giornale di Brescia registra 95 partidas e 45 gols pelo Brescia durante as quatro temporadas em que defendeu o clube.', 'https://www.giornaledibrescia.it/sport/la-prima-di-baggio-col-brescia-unemozione-lunga-67-minuti-apgavppc'],
+  ],
+  Modena: [
+    ['Marco Ballotta', 'GOL', '2001/02', 'O arquivo do Modena o lista entre os jogadores mais utilizados na campanha que levou o clube de volta à Serie A depois de 38 anos.', 'https://modenacalcio.com/storia/'],
+  ],
+  Salernitana: [
+    ['Marco Di Vaio', 'ATA', '1997/98', 'Foi o artilheiro da Serie B com 21 gols na campanha em que a Salernitana conquistou o acesso à primeira divisão.', 'https://www.calciosalernitana.it/miti/marco-di-vaio/'],
+  ],
+  Reggiana: [
+    ['Luca Cigarini', 'MC', '2021–2024', 'Em julho de 2024, a Reggiana registrou 71 partidas e três gols em três edições do campeonato, período que incluiu o acesso à Serie B.', 'https://reggianacalcio.it/2024/07/02/luca-cigarini-sara-granata-fino-al-2025/'],
+  ],
+  Cesena: [
+    ['Cristian Shpendi', 'ATA', '2023/24', 'Marcou 20 gols no campeonato da Serie C, incluindo três contra o Pontedera.', 'https://www.ilrestodelcarlino.it/cesena/cronaca/cesena-shpendi-qui-mi-sento-a-casa-89c8e145'],
+  ],
+  Mantova: [
+    ['Davis Mensah', 'ATA', '2023/24', 'Jogou 37 partidas do campeonato na campanha do acesso do Mantova à Serie B, segundo o balanço do Tifo Mantova.', 'https://www.tifomantova.it/2024/05/31/mantova-dopo-cristiano-bani-rinnova-anche-davis-mensah/'],
+  ],
+  Cittadella: [
+    ['Davide Diaw', 'ATA', '2018/19', 'Marcou os dois gols do Cittadella no 2 a 0 sobre o Verona na ida da final dos playoffs de acesso à Serie A.', 'https://www.acmonza.com/it/news/2316/'],
+  ],
+  Verona: [
+    ['Preben Elkjær Larsen', 'ATA', '1984/85', 'Marcou o gol de empate contra a Atalanta no jogo em que o Hellas Verona confirmou o título da Serie A.', 'https://hellasverona.it/en/news/veronacamp40ne-the-special-kit-for-the-40th-anniversary-of-the-scudetto-video'],
+  ],
+  Pisa: [
+    ['Mattéo Tramoni', 'MEI', '2024/25', 'Eleito pela Lega B o melhor jogador de dezembro de 2024. Marcou 13 gols na edição em que o Pisa voltou à Serie A após 34 anos.', 'https://www.legab.it/seriebkt/ultime-news/il-pisa-in-a-dopo-24-anni', null, null, 'https://www.legab.it/news/tramoni-e-lmvp-di-dicembre-della-serie-bkt'],
+  ],
 };
 
 export const ACERVO_ATLETAS_HISTORICOS_ITALIA = Object.freeze(Object.fromEntries(

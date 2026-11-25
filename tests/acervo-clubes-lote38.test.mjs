@@ -102,3 +102,17 @@ test('a primeira divisão alemã tem perfis e os aliases compartilham os mesmos 
   assert.equal(hsv.atletas[0].gols, null);
   assert.match(acervoClubeHistoricoDe('Elversberg').atletas[0].descricao, /18 gols na segunda divisão/);
 });
+
+test('os 17 clubes da segunda divisão alemã têm atletas com marcas no recorte documentado', () => {
+  const clubes = CLUBES.filter(clube => clube.liga === 'alemanha2');
+  assert.equal(clubes.length, 17);
+  for (const {nome} of clubes) assert.ok(coberturaHistoricaDe('clube', nome).atletasDocumentados > 0, nome);
+
+  const grafite = acervoClubeHistoricoDe('Wolfsburg').atletas.find(a => a.nome === 'Grafite');
+  assert.equal(grafite.periodo, '2008/09');
+  assert.match(grafite.descricao, /artilheiro da Bundesliga com 28 gols/);
+  assert.equal(grafite.gols, null);
+  const scienza = acervoClubeHistoricoDe('SSV Ulm').atletas[0];
+  assert.match(scienza.descricao, /12 gols e 15 assistências em 34 jogos oficiais da temporada/);
+  assert.equal(scienza.jogos, null);
+});

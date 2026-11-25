@@ -45,3 +45,19 @@ test('todos os 18 clubes da MLS têm perfis individuais com recortes documentado
   const messi = ACERVO_CLUBES_LOTE38['Inter Miami'].atletas.find(a => a.nome === 'Lionel Messi');
   assert.match(messi.descricao, /temporada regular de 2024.*final da MLS Cup de 2025/);
 });
+
+test('todos os 18 clubes neerlandeses têm perfil individual e os recortes de gols são preservados', () => {
+  const clubes = CLUBES.filter(clube => clube.liga === 'holanda');
+  assert.equal(clubes.length, 18);
+  for (const {nome} of clubes) assert.ok(coberturaHistoricaDe('clube', nome).atletasDocumentados > 0, nome);
+  const pavlidisAZ = ACERVO_CLUBES_LOTE38.AZ.atletas[0];
+  const pavlidisWillem = ACERVO_CLUBES_LOTE38['Willem II'].atletas[0];
+  assert.equal(pavlidisAZ.nome, pavlidisWillem.nome);
+  assert.notEqual(pavlidisAZ.fonte, pavlidisWillem.fonte);
+  assert.match(pavlidisAZ.descricao, /29 gols na edição/);
+  assert.equal(pavlidisAZ.gols, null);
+  assert.match(pavlidisWillem.descricao, /33 gols em 82 jogos pelo clube/);
+  const immers = ACERVO_CLUBES_LOTE38['ADO Den Haag'].atletas[0];
+  assert.equal(immers.jogos, 259);
+  assert.equal(immers.gols, 49);
+});

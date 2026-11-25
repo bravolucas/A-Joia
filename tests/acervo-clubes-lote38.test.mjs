@@ -116,3 +116,17 @@ test('os 17 clubes da segunda divisão alemã têm atletas com marcas no recorte
   assert.match(scienza.descricao, /12 gols e 15 assistências em 34 jogos oficiais da temporada/);
   assert.equal(scienza.jogos, null);
 });
+
+test('os 20 clubes da Serie A italiana têm atletas com marcas de carreira e edição distintas', () => {
+  const clubes = CLUBES.filter(clube => clube.liga === 'italia');
+  assert.equal(clubes.length, 20);
+  for (const {nome} of clubes) assert.ok(coberturaHistoricaDe('clube', nome).atletasDocumentados > 0, nome);
+  const diNatale = acervoClubeHistoricoDe('Udinese').atletas[0];
+  assert.equal(diNatale.jogos, 445);
+  assert.equal(diNatale.gols, 227);
+  const milito = acervoClubeHistoricoDe('Genoa').atletas[0];
+  assert.match(milito.descricao, /24 gols em 31 partidas da Serie A/);
+  assert.equal(milito.gols, null);
+  const pohjanpalo = acervoClubeHistoricoDe('Venezia').atletas[0];
+  assert.match(pohjanpalo.descricao, /artilheiro da Serie B com 22 gols/);
+});

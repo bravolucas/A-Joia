@@ -1,3 +1,4 @@
+import {acervoClubeHistoricoDe} from '../src/dados/acervoClubesHistoricos.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {CLUBES} from '../src/dados/data.js';
@@ -74,4 +75,16 @@ test('as duas divisões portuguesas têm perfis e distinguem as passagens do mes
   const horta = ACERVO_CLUBES_LOTE38.Braga.atletas[0];
   assert.match(horta.descricao, /fevereiro de 2025.*410 jogos e 134 gols/);
   assert.equal(horta.gols, null);
+});
+
+test('os 35 clubes das divisões francesas têm perfis e preservam o escopo das fontes', () => {
+  const clubes = CLUBES.filter(clube => ['franca', 'franca2'].includes(clube.liga));
+  assert.equal(clubes.length, 35);
+  for (const {nome} of clubes) assert.ok(coberturaHistoricaDe('clube', nome).atletasDocumentados > 0, nome);
+  const corredor = acervoClubeHistoricoDe('Rodez').atletas[0];
+  assert.match(corredor.descricao, /19 gols e oito assistências somando todas as competições da temporada/);
+  assert.equal(corredor.gols, null);
+  const redStar = acervoClubeHistoricoDe('Red Star').atletas;
+  assert.match(redStar.find(a => a.nome === 'Merwan Ifnaoui').descricao, /melhor jogador do Championnat National/);
+  assert.match(redStar.find(a => a.nome === 'Quentin Beunardeau').descricao, /melhor goleiro do Championnat National/);
 });

@@ -14,7 +14,7 @@ test('lote 24 acrescenta quatro clubes sauditas com fontes e sem recordes invent
   assert.ok(ficha.marcos.length>=3);
   assert.equal(ficha.recordes.length,0);
   for(const m of ficha.marcos){assert.ok(Number.isInteger(m.ano));assert.match(m.fonte,/^https:\/\//);}
-  for(const a of ficha.atletas){assert.equal(a.jogos,null);assert.equal(a.gols,null);assert.equal(a.periodo,null);assert.match(a.fonte,/^https:\/\//);}
+  for(const a of ACERVO_CLUBES_LOTE24[nome].atletas){assert.equal(a.jogos,null);assert.equal(a.gols,null);assert.equal(a.periodo,null);assert.match(a.fonte,/^https:\/\//);}
  }
  assert.ok(acervoClubeHistoricoDe('Al-Riyadh').marcos.some(m=>m.ano===1994));
  assert.ok(acervoClubeHistoricoDe('Al-Kholood').marcos.some(m=>m.ano===2024));

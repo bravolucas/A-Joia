@@ -1,3 +1,10 @@
+import {ACERVO_ATLETAS_HISTORICOS_ESPANHA} from './acervoAtletasHistoricosEspanha.js';
+import {ACERVO_ATLETAS_HISTORICOS_ITALIA} from './acervoAtletasHistoricosItalia.js';
+import {ACERVO_ATLETAS_HISTORICOS_ALEMANHA} from './acervoAtletasHistoricosAlemanha.js';
+import {ACERVO_ATLETAS_HISTORICOS_MLS} from './acervoAtletasHistoricosMLS.js';
+import {ACERVO_ATLETAS_HISTORICOS_EREDIVISIE} from './acervoAtletasHistoricosEredivisie.js';
+import {ACERVO_ATLETAS_HISTORICOS_PORTUGAL} from './acervoAtletasHistoricosPortugal.js';
+
 // País no arquivo RSSSF → clube no catálogo → linhas da tabela publicada.
 // Ano final, divisão, âncora, conferência, posição, J, V, E, D, GP, GC, Pts, desfecho.
 const CAMPANHAS = {
@@ -826,14 +833,24 @@ function marcoDeCampanha(pais, linha) {
   });
 }
 
+const atletasPorPais = {
+  ned: ACERVO_ATLETAS_HISTORICOS_EREDIVISIE,
+  port: ACERVO_ATLETAS_HISTORICOS_PORTUGAL,
+  duit: ACERVO_ATLETAS_HISTORICOS_ALEMANHA,
+  ital: ACERVO_ATLETAS_HISTORICOS_ITALIA,
+  span: ACERVO_ATLETAS_HISTORICOS_ESPANHA,
+};
+
 const fichas = Object.fromEntries(Object.entries(CAMPANHAS).flatMap(([pais, clubes]) =>
   Object.entries(clubes).map(([clube, linhas]) => {
     const conquistas = (CONQUISTAS[clube] || []).map(([ano, titulo, descricao, chave]) =>
       Object.freeze({ano, titulo, descricao, fonte: fontes[chave]}));
     const marcos = [...linhas.map(linha => marcoDeCampanha(pais, linha)), ...conquistas]
       .sort((a, b) => a.ano - b.ano);
+    const atletasRecentes = atletasPorPais[pais]?.[clube];
     return [clube, Object.freeze({
-      clube, atualizadoEm: '2026-11-24', atletas: Object.freeze([]),
+      clube, atualizadoEm: atletasRecentes ? '2026-11-25' : '2026-11-24',
+      atletas: atletasRecentes || ACERVO_ATLETAS_HISTORICOS_MLS[clube] || Object.freeze([]),
       marcos: Object.freeze(marcos), tecnicos: Object.freeze([]), recordes: Object.freeze([]),
     })];
   })));

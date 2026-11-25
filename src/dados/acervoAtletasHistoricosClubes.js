@@ -1,0 +1,37 @@
+const perfis = {
+  Southampton: ['Matt Le Tissier', 'MEI', '1992–2002', 'Marcou 100 gols em 270 jogos pelo Southampton na Premier League.', 'https://www.southamptonfc.com/en/news/article/le-tissier-among-pl-hall-of-fame-nominees'],
+  'Norwich City': ['Teemu Pukki', 'ATA', '2018/19', 'Marcou 29 gols no Championship na campanha do título e do acesso do Norwich à Premier League.', 'https://www.canaries.co.uk/content/teemu-pukki-called-up-for-finlands-uefa-european-qualifiers'],
+  'Sheffield United': ['Billy Sharp', 'ATA', '2016–2023', 'Participou de três acessos pelo Sheffield United, saindo da League One em 2017 e do Championship em 2019 e 2023.', 'https://www.efl.com/news/2026/october/11/billy-sharp--goals--promotions-and-legacy-of-an-efl-icon/'],
+  Middlesbrough: ['Massimo Maccarone', 'ATA', '2005/06', 'Marcou de cabeça aos 89 minutos contra o Steaua Bucareste, garantindo a vaga na primeira final europeia do Middlesbrough.', 'https://www.uefa.com/uefaeuropaleague/news/01b4-0ea85ab6bf17-47c4281fb8ba-1000--fairytale-finish-for-middlesbrough/'],
+  'West Bromwich Albion': ['Jeff Astle', 'ATA', '1967/68', 'Marcou na prorrogação o gol do título da Copa da Inglaterra de 1968 contra o Everton.', 'https://www.wba.co.uk/news/2020/may/on-this-day-in-1968'],
+  Millwall: ['Neil Harris', 'ATA', '1998–2011', 'Somou 138 gols em 432 jogos em duas passagens pelo Millwall.', 'https://www.bbc.co.uk/sport/football/49923743'],
+  'Blackburn Rovers': ['Alan Shearer', 'ATA', '1994/95', 'Marcou 34 gols na campanha do título do Blackburn na Premier League.', 'https://www.premierleague.com/en/news/693434'],
+  'Bristol City': ['Scott Murray', 'PD', '2002/03', 'Foi o maior goleador do Bristol City na liga em 2002/03.', 'https://fbref.com/en/squads/93493607/2002-2003/Bristol-City-Stats'],
+  'Swansea City': ['Michu', 'MEI', '2012/13', 'Marcou 18 gols na Premier League na primeira temporada pelo Swansea City.', 'https://www.swanseacity.com/news/swansea-city-part-company-michu'],
+  'Derby County': ['Kevin Hector', 'ATA', '1966–1982', 'Disputou 589 jogos pelo Derby County somando as duas passagens e fez parte das equipes campeãs inglesas em 1972 e 1975.', 'https://www.dcfc.co.uk/news/2020/04/snapshot-in-time-record-appearance-holder-hector-goes-close-against-chelsea'],
+  'Luton Town': ['Carlton Morris', 'ATA', '2022/23', 'Marcou 20 gols no Championship na campanha do acesso do Luton Town à Premier League pelos playoffs.', 'https://www.lutontown.co.uk/news/2023/august/15/carlton-morris-nominated-by-the-pfa/'],
+  Burnley: ['Nathan Tella', 'PD', '2022/23', 'Marcou 17 gols na campanha do título do Burnley no Championship.', 'https://www.bundesliga.com/en/bundesliga/news/nathan-tella-who-is-bayer-leverkusen-s-england-winger-24546'],
+  'Birmingham City': ['Obafemi Martins', 'ATA', '2010/11', 'Marcou o gol da vitória por 2 a 1 sobre o Arsenal na final da Copa da Liga Inglesa de 2011.', 'https://www.uefa.com/news/01ee-0e7751ed5623-5477d62828dd-1000--birmingham-stun-arsenal-to-lift-league-cup/'],
+  'Bolton Wanderers': ['Nat Lofthouse', 'ATA', '1957/58', 'Marcou os dois gols do Bolton na vitória sobre o Manchester United na final da Copa da Inglaterra.', 'https://www.bwfc.co.uk/news/2020/september/one-town-nat-lofthouse---a-northern-powerhouse'],
+  'Cardiff City': ['Joe Ledley', 'MC', '2007/08', 'Marcou o único gol da semifinal da Copa da Inglaterra contra o Barnsley, levando o Cardiff à final de 2008.', 'https://www.cardiffcityfc.co.uk/news/day-2008-fa-cup-semi-final'],
+  'Lincoln City': ['Sean Raggett', 'ZAG', '2016/17', 'Marcou de cabeça no fim da vitória sobre o Burnley, que levou o Lincoln City às quartas de final da Copa da Inglaterra.', 'https://www.thefa.com/news/2017/feb/18/burnley-lincoln-city-report-180217'],
+  'Queens Park Rangers': ['Bobby Zamora', 'ATA', '2013/14', 'Marcou o gol da vitória sobre o Derby County em Wembley na final dos playoffs do Championship, garantindo o acesso à Premier League.', 'https://www.wembleystadium.com/news/2014/may/24/qpr-1-derby-0'],
+  Watford: ['Troy Deeney', 'ATA', '2012/13', 'Marcou nos acréscimos contra o Leicester na semifinal dos playoffs do Championship e classificou o Watford para a final.', 'https://www.bbc.co.uk/sport/football/22417772'],
+  'Sheffield Wednesday': ['Josh Windass', 'MEI', '2022/23', 'Marcou de cabeça no fim da prorrogação contra o Barnsley na final dos playoffs da League One e garantiu o acesso ao Championship.', 'https://www.efl.com/news/2023/may/sheffield-wednesday-win-dass-the-league-one-play-off-final-and-return-to-the-sky-bet-championship/'],
+  Portsmouth: ['Nwankwo Kanu', 'ATA', '2007/08', 'Marcou o único gol da final da Copa da Inglaterra contra o Cardiff City em 2008.', 'https://www.uefa.com/news-media/news/01cd-0f84db7dca5a-f604520a6112-1000--kanu-captures-cup-for-portsmouth/'],
+  'Charlton Athletic': ['Clive Mendonca', 'ATA', '1997/98', 'Marcou três gols no empate por 4 a 4 com o Sunderland na final dos playoffs de acesso de 1998. O Charlton subiu após vencer nos pênaltis.', 'https://www.bbc.co.uk/sport/football/48356991'],
+  Wrexham: ['Paul Mullin', 'ATA', '2022/23', 'Marcou 38 gols na National League na campanha que levou o Wrexham de volta à Football League.', 'https://wrexhamafcarchive.co.uk/player.php?id=2820'],
+  'Al-Kholood': ['Myziane Maolida', 'ATA', '2024/25', 'Foi um dos atacantes africanos destacados pela Saudi Pro League no balanço da temporada de estreia do Al-Kholood na elite.', 'https://www.spl.com.sa/en/news/mahrez-mane-aouar-more-top-africans-of-2024-25-rsl'],
+  Damac: ['Georges-Kévin N’Koudou', 'PE', '2023/24', 'Marcou 15 gols e deu cinco assistências em 31 partidas pelo Damac na Saudi Pro League.', 'https://www.spl.com.sa/en/news/preview-2024-25-rsl-matchweek-1-day-2'],
+  'Stoke City': ['Peter Crouch', 'ATA', '2016/17', 'Chegou a 100 gols na carreira na Premier League ao marcar pelo Stoke no empate por 1 a 1 com o Everton.', 'https://www.premierleague.com/en/news/322567/age-is-no-barrier-as-crouch-hits-pl-century'],
+  'Preston North End': ['Tom Finney', 'PE', '1946–1960', 'Marcou 187 gols em 433 partidas de liga pelo Preston North End.', 'https://www.bbc.co.uk/sport/football/26194543'],
+  'Al-Khaleej': ['Kostas Fortounis', 'MEI', '2024/25', 'Converteu o pênalti que empatou provisoriamente a partida contra o Al-Nassr pela Saudi Pro League em janeiro de 2025.', 'https://www.spl.com.sa/en/match/024900d58fef4735b1e447a074f9a13d/al-khaleej-vs-al-nassr/commentary'],
+  'Al-Raed': ['Karim El Berkaoui', 'ATA', '2023/24', 'Marcou dois gols na vitória por 3 a 1 sobre o Al-Ittihad pela Saudi Pro League em dezembro de 2023.', 'https://www.spl.com.sa/en/news/al-raed-stun-al-ittihad-wins-for-al-fateh-and-al-wehda'],
+  'Fatih Karagümrük': ['Erik Sabo', 'MC', '2019/20', 'Converteu sua cobrança na disputa de pênaltis contra o Adana Demirspor na final do playoff que levou o Fatih Karagümrük à Süper Lig.', 'https://www.aa.com.tr/tr/futbol/fatih-karagumruk-super-ligde/1927906'],
+};
+
+export const ACERVO_ATLETAS_HISTORICOS_CLUBES = Object.freeze(Object.fromEntries(
+  Object.entries(perfis).map(([clube, [nome, posicao, periodo, descricao, fonte]]) => [
+    clube, Object.freeze([Object.freeze({nome, posicao, periodo, descricao, fonte, jogos: null, gols: null})]),
+  ]),
+));

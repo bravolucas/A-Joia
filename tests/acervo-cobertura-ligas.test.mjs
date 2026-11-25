@@ -16,12 +16,12 @@ test('as ligas turca e saudita têm fichas iniciais documentadas em todos os clu
   }
  }
 });
-test('fichas com marcos e sem jogadores são documentadas, não completas',()=>{
+test('fichas iniciais registram atletas e marcos como cobertura parcial',()=>{
  const nome='Al-Khaleej',ficha=acervoClubeHistoricoDe(nome),status=coberturaHistoricaDe('clube',nome);
  assert.ok(ficha.marcos.length);
- assert.equal(ficha.atletas.length,0);
+ assert.ok(ficha.atletas.length);
  assert.equal(status.cobertura,'parcial_documentado');
- assert.equal(status.atletasDocumentados,0);
+ assert.equal(status.atletasDocumentados,ficha.atletas.length);
  assert.ok(status.marcosDocumentados>0);
 });
 test('inventário de cobertura corresponde ao acervo e não a uma contagem congelada',()=>{
@@ -31,5 +31,13 @@ test('inventário de cobertura corresponde ao acervo e não a uma contagem conge
  assert.equal(nomes.size,fichas.length,'não duplicar registros de clubes');
  for(const reg of INVENTARIO_CLUBES_HISTORICOS){
   if(reg.cobertura==='parcial_documentado')assert.ok(reg.atletasDocumentados||reg.marcosDocumentados||reg.recordesDocumentados);
+ }
+});
+
+test('todos os clubes jogáveis têm ao menos um atleta com fonte histórica',()=>{
+ assert.ok(CLUBES.length>=407);
+ for(const {nome} of CLUBES){
+  const ficha=acervoClubeHistoricoDe(nome);
+  assert.ok(ficha?.atletas.some(atleta=>atleta.nome&&atleta.fonte?.startsWith('https://')),nome);
  }
 });

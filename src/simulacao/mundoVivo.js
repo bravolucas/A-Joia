@@ -196,7 +196,7 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
       }} : {})});
   }
   if(!a.classificacoesMundo?.[a.ligaId||a.liga]&&(a.classificacao?.length||a.tabelaLiga?.length))u.edicoes.push({ano:a.ano,nome:a.ligaNome||LIGAS[a.ligaId||a.liga]?.nome||a.liga,tipo:'liga',classificacao:a.classificacao||a.tabelaLiga.map((nome,i)=>({nome,posicao:i+1})),jogos:compactarJogos(a.jogosLiga||[]),campeao:a.vencedorLiga||a.classificacao?.[0]?.nome||a.tabelaLiga?.[0]});
-  for(const t of [...(a.torneiosMundo||[]),...(a.torneios||[])])if(t.campeao&&!t.finalPendente)u.edicoes.push({ano:a.ano,nome:t.nome,tipo:t.tipo,campeao:t.campeao,vice:t.vice,classificacao:t.classificacao||[],grupos:(t.grupos||[]).map(g=>({grupo:g.grupo,classificacao:g.classificacao||[]})),jogos:compactarJogos(jogosTorneio(t))});
+  for(const t of [...(a.torneiosMundo||[]),...(a.torneios||[])])if(t.campeao&&!t.finalPendente)u.edicoes.push({ano:a.ano,nome:t.nome,tipo:t.tipo,campeao:t.campeao,vice:t.vice,classificacao:t.classificacao||[],grupos:(t.grupos||[]).map(g=>({grupo:g.grupo,classificacao:g.classificacao||[]})),jogos:compactarJogos(jogosTorneio(t),{arquivarSumulas:true})});
   u.edicoes=[...new Map(u.edicoes.map(e=>[`${e.ano}|${e.nome}`,e])).values()];
   // Registrar depois de arquivar os placares: assim o Modo Rápido usa somente
   // partidas finalizadas, com distribuição fixa e identificada por competição.

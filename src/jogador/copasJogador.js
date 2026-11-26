@@ -1,4 +1,4 @@
-import {avancarCalendarioLigasRapido,finalizarCalendarioLigasRapido} from './ligasCalendarioRapido.js';
+import {avancarCalendarioLigasRapido,finalizarCalendarioLigasRapido,prepararPartidasDeCopa} from './ligasCalendarioRapido.js';
 import {clubesDoMundo} from '../simulacao/mundoVivo.js';
 import {criarAgenda,dataCopa,selecionarAgenda,avancarPausa,chaveAgenda} from '../competicoes/calendarioCopas.js';
 import {clubesParaCopas,COPAS_NACIONAIS,vagaJogador,nomeVaga,regiaoDaLiga,calcularVagasRapidas} from '../competicoes/regrasCopasRapidas.js';
@@ -71,7 +71,11 @@ export function concluirEventoJogador(card){const p=card.calendarioCopas;if(!p?.
 export function escolherCopaJogador(card,chave,opcao){
  const p=card.calendarioCopas;if(!p||chave!==chaveCopaJogador(card))return card;
  if(p.pausa)return opcao==='continuar'?concluirEventoJogador(card):card;
- const cp=p.campeonatos[p.indice],nova=opcao==='continuar'?continuarCopa(cp):escolherCopa(cp,chave,opcao);if(nova===cp)return card;
+ const cp=p.campeonatos[p.indice],calendario=card.calendarioLigasExternas;
+ const rodada=opcao!=='continuar'&&calendario?.partilharCopas&&['copa','estadual','continental','mundial'].includes(cp.tipo)
+  ? prepararPartidasDeCopa(calendario,p.dataAtual,cp.nome) : null;
+ const nova=opcao==='continuar'?continuarCopa(cp):escolherCopa(cp,chave,opcao,rodada?.partida);if(nova===cp)return card;
+ if(rodada)card={...card,calendarioLigasExternas:{...calendario,memoria:rodada.memoria}};
  // Partida decidida agora: registra os lances do atleta uma única vez.
  if(nova.resultado&&!nova.resultado.penaltisPendentes&&!nova.resultado.lancesJogador&&!cp.resultado?.lancesJogador&&nova.resultado!==cp.resultado){
   const lances=lancesJogadorCopa(card,nova,chave);

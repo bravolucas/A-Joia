@@ -15,7 +15,7 @@ export function elencosParaLigasRapidas(jogadores = []) {
 }
 
 // Cada ficha guarda os titulares e reservas que entraram em pares [id, minutos].
-function escalar(clube, elenco, memoria, rodada, rng, tecnico) {
+function escalar(clube, elenco, memoria, rodada, rng, tecnico, disciplina) {
   const formacao = formacaoTecnico(tecnico);
   const estilo = ESTILOS[formacao];
   const referencia = clube.elenco ?? clube.forca ?? 50;
@@ -30,9 +30,10 @@ function escalar(clube, elenco, memoria, rodada, rng, tecnico) {
       const carga = Math.max(0, (atual.carga ?? 0) - 24 * (rodada - (atual.rodada ?? rodada)));
       atual.carga = carga;
       atual.rodada = rodada;
-      if (atual.lesionadoAte >= rodada || atual.suspenso) {
+      const cartoes = disciplina ? (atual.disciplina ??= {})[disciplina] ??= {} : atual;
+      if (atual.lesionadoAte >= rodada || cartoes.suspenso) {
         ficha.ausencias.push(p.id, atual.lesionadoAte >= rodada ? 'lesão' : 'suspensão');
-        if (!(atual.lesionadoAte >= rodada)) atual.suspenso = false;
+        if (!(atual.lesionadoAte >= rodada)) cartoes.suspenso = false;
         continue;
       }
       candidatos.push({p, atual, peso: p.ovr + (atual.forma ?? 0) - carga / 10 * estilo.rodagem + rng() * 2});
@@ -69,7 +70,7 @@ function escalar(clube, elenco, memoria, rodada, rng, tecnico) {
   };
 }
 
-function registrar(ficha, memoria, saldo, rodada, rng) {
+function registrar(ficha, memoria, saldo, rodada, rng, disciplina) {
   for (let i = 0; i < ficha.minutos.length; i += 2) {
     const id = ficha.minutos[i], minutos = ficha.minutos[i + 1];
     const atleta = memoria[id];
@@ -80,11 +81,12 @@ function registrar(ficha, memoria, saldo, rodada, rng) {
     if (rng() < minutos / 90 * (.008 + atleta.carga / 2500)) {
       atleta.lesionadoAte = rodada + 1 + Math.floor(rng() * 3);
     }
+    const cartoes = disciplina ? atleta.disciplina[disciplina] : atleta;
     if (rng() < minutos / 90 * .16) {
-      atleta.amarelos = (atleta.amarelos ?? 0) + 1;
-      if (atleta.amarelos === 5) {
-        atleta.suspenso = true;
-        atleta.amarelos = 0;
+      cartoes.amarelos = (cartoes.amarelos ?? 0) + 1;
+      if (cartoes.amarelos === 5) {
+        cartoes.suspenso = true;
+        cartoes.amarelos = 0;
       }
     }
   }
@@ -92,15 +94,17 @@ function registrar(ficha, memoria, saldo, rodada, rng) {
 
 export function prepararPartidasLigasRapidas(elencos, seed, anteriores = {}, tecnicos = {}, memoriaExistente = null) {
   const memoria = memoriaExistente ?? Object.fromEntries(Object.entries(anteriores).map(([id, estado]) => [id, {...estado}]));
-  const disputar = (casa, fora, rodada, formaCasa, formaFora, sorteio) => {
-    const rng = geradorTecnico(`${seed}|${casa.nome}|${fora.nome}|${rodada}|escalacao`);
-    const a = elencos[casa.nome]?.length ? escalar(casa, elencos[casa.nome], memoria, rodada, rng, tecnicos[casa.nome]) : null;
-    const b = elencos[fora.nome]?.length ? escalar(fora, elencos[fora.nome], memoria, rodada, rng, tecnicos[fora.nome]) : null;
-    const placar = simularPlacarDeLiga(a?.equipe ?? casa, b?.equipe ?? fora, formaCasa, formaFora, sorteio);
+  const jogar = (casa, fora, rodadaCasa, rodadaFora, simular, disciplina = null) => {
+    const rng = geradorTecnico(`${seed}|${casa.nome}|${fora.nome}|${rodadaCasa}${disciplina ? '|'+disciplina : ''}|escalacao`);
+    const a = elencos[casa.nome]?.length ? escalar(casa, elencos[casa.nome], memoria, rodadaCasa, rng, tecnicos[casa.nome], disciplina) : null;
+    const b = elencos[fora.nome]?.length ? escalar(fora, elencos[fora.nome], memoria, rodadaFora, rng, tecnicos[fora.nome], disciplina) : null;
+    const placar = simular(a?.equipe ?? casa, b?.equipe ?? fora);
     const saldo = placar.golsCasa - placar.golsFora;
-    if (a) registrar(a.ficha, memoria, saldo, rodada, rng);
-    if (b) registrar(b.ficha, memoria, -saldo, rodada, rng);
+    if (a) registrar(a.ficha, memoria, saldo, rodadaCasa, rng, disciplina);
+    if (b) registrar(b.ficha, memoria, -saldo, rodadaFora, rng, disciplina);
     return a || b ? {...placar, sumula: [a?.ficha ?? null, b?.ficha ?? null]} : placar;
   };
-  return {disputar, memoria};
+  const disputar = (casa, fora, rodada, formaCasa, formaFora, sorteio) =>
+    jogar(casa, fora, rodada, rodada, (a,b) => simularPlacarDeLiga(a,b,formaCasa,formaFora,sorteio));
+  return {disputar, jogar, memoria};
 }

@@ -1,3 +1,4 @@
+import {prepararPartidasDeCopa} from '../src/jogador/ligasCalendarioRapido.js';
 import {formacaoTecnico, prepararDecisoesLigas} from '../src/jogador/decisoesLigasRapidas.js';
 import {jogosDaEdicao} from '../src/simulacao/mundoVivo.js';
 import test from 'node:test';
@@ -54,7 +55,7 @@ test('save anterior sem chave mantém o adversário visível e continua com outr
  let cp=criarCampanhaCopa({nome:'Copa do Brasil',tipo:'copa',usuario:'Flamengo',forcaUsuario:99,clubes:brasil,ano:2030,formato:'mata',seed:'MIGRAR-CHAVE'});const adversario=cp.adversario.nome;delete cp.quadroMata;delete cp.sobreviventes;delete cp.reservados;const d=decisaoCopa(cp),novo=escolherCopa(cp,d.chave,'pressionar');assert.deepEqual([novo.resultado.jogo.casa,novo.resultado.jogo.fora].sort(),[cp.usuario,adversario].sort(),'o rival da ida permanece o mesmo independentemente do mando');assert.equal(novo.resultado.jogoIda,true);assert.ok(novo.quadroMata.length>1);let c=novo;for(let i=0;c.fase!=='fim'&&i<40;i++)c=proximo(c);assert.ok(c.campeao);assert.notEqual(c.faseUsuario,'Sem adversário elegível');
 });
 
-test('Modo Rápido disputa ligas externas pela data e termina com os mesmos placares do lote', () => {
+test('Modo Rápido preserva calendário, súmulas e estatísticas após retomar a temporada', () => {
  const c=criarJogador({nome:'Calendário',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:9,codigo:'LIGAS-EXTERNAS'});
  c.clubeNome='Flamengo';
  c.flags.baseEscolhida=true;
@@ -109,7 +110,8 @@ test('Modo Rápido disputa ligas externas pela data e termina com os mesmos plac
   assert.equal(jogos,jogosPorAtleta.get(atleta.id)||0);
  }
  for(const liga of Object.keys(lote).filter(liga=>liga!=='brasileirao')){
-  assert.deepEqual(card.classificacoesMundo[liga],lote[liga]);
+  assert.deepEqual(card.classificacoesMundo[liga].jogos.map(({casa,fora,rodada})=>[casa,fora,rodada]),
+   lote[liga].jogos.map(({casa,fora,rodada})=>[casa,fora,rodada]));
  }
 });
 
@@ -137,4 +139,20 @@ test('janela cobre desfalque com empréstimo e técnico ameaçado muda o esquema
  salvo.iniciarRodada('teste',clubes,18,30,tabela);
  assert.equal(salvo.decisoes.teste.filter(e=>e.tipo==='emprestimo').length,1);
  assert.equal(salvo.elencos[favorito].filter(p=>p.id===10).length,1);
+});
+
+
+test('copa usa lesão da liga, acumula minutos e separa os cartões por competição',()=>{
+ const equipe={nome:'Clube A',liga:'teste',elenco:70,ataque:70,defesa:70};
+ const estado={seed:'copa-e-liga',equipes:[equipe,{...equipe,nome:'Clube B'}],periodos:{teste:{inicio:1,fim:11}},
+  elencos:{'Clube A':[{id:1,setor:'ATA',ovr:90},{id:2,setor:'ATA',ovr:80},{id:3,setor:'ATA',ovr:70}]},
+  memoria:{1:{lesionadoAte:3},2:{suspenso:true,minutos:90,carga:30,rodada:1}}};
+ const preparo=prepararPartidasDeCopa(estado,8,'Copa');
+ const placar=preparo.partida({nome:'Clube A',forca:70},{nome:'Clube B',forca:70},()=>({golsCasa:1,golsFora:0}));
+ assert.deepEqual(placar.sumula[0].ausencias,[1,'lesão']);
+ assert.ok(placar.sumula[0].minutos.filter((_,i)=>i%2===0).includes(2));
+ assert.equal(preparo.memoria[2].suspenso,true);
+ assert.ok(preparo.memoria[2].minutos>estado.memoria[2].minutos);
+ assert.ok(preparo.memoria[2].carga>estado.memoria[2].carga);
+ assert.equal(estado.memoria[2].disciplina,undefined);
 });

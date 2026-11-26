@@ -92,8 +92,8 @@ export function criarCampanhaCopa({nome,tipo='continental',usuario,forcaUsuario,
  if(entrada==='pre'&&['grupos','liga'].includes(formato)){c.entradaPendente=true;c.faseAposPre=c.fase;c.fase='mata';c.tamanho=2;c.preContinental=true;}
  return preparar(c);
 }
-function avancarLiga(c,jogoUsuario){
- const rodada=c.calendario[c.rodada],rng=geradorTecnico(`${c.seed}|liga|${c.rodada}`),jogos=rodada.map(j=>{if(jogoUsuario&&[j.casa,j.fora].includes(c.usuario))return jogoUsuario;return partida({nome:j.casa,forca:c.forcas[j.casa]},{nome:j.fora,forca:c.forcas[j.fora]},rng,null,false,null,campoNeutro(c)?0:1);});
+function avancarLiga(c,jogoUsuario,partidaIA){
+ const rodada=c.calendario[c.rodada],rng=geradorTecnico(`${c.seed}|liga|${c.rodada}`),jogos=rodada.map(j=>{if(jogoUsuario&&[j.casa,j.fora].includes(c.usuario))return jogoUsuario;const a={nome:j.casa,forca:c.forcas[j.casa]},b={nome:j.fora,forca:c.forcas[j.fora]},simular=(x,y)=>partida(x,y,rng,null,false,null,campoNeutro(c)?0:1);return partidaIA?partidaIA(a,b,simular):simular(a,b);});
  c.jogosLiga.push(...jogos);for(const j of jogos)if([j.casa,j.fora].includes(c.usuario))c.jogosUsuario.push({...j,fase:c.fase==='liga'?'Fase de liga':'Fase de grupos',rodada:c.rodada+1});c.rodada++;c.classificacao=tabela(c.times,c.jogosLiga,c.usuario);
 }
 /** Classificação geral do mata-mata: define quem decide em casa (melhor campanha manda o jogo de volta). */
@@ -283,7 +283,7 @@ function prepararChave(c){
  const nome=meu?.find(n=>n&&n!==c.usuario);c.adversario=c.pool.find(x=>x.nome===nome)||(nome?{nome,forca:c.forcas[nome]}:null);
  if(!c.adversario){c.fase='fim';c.faseUsuario='Sem adversário elegível';}
 }
-function registrarMata(c,jogo){
+function registrarMata(c,jogo,partidaIA){
  if(c.roteiroMundial){const final=c.roteiroMundial.length===1,fase=final?'Final':c.roteiroMundial.length===3?'Derby das Américas':'Copa Challenger';c.fases.push({fase,jogos:[{...jogo,fase}]});c.jogosUsuario.push({...jogo,fase});if(jogo.vencedor!==c.usuario||final){c.fase='fim';c.campeao=final?jogo.vencedor:c.roteiroMundial.at(-1);c.vice=final?(jogo.vencedor===c.usuario?c.adversario.nome:c.usuario):null;c.faseUsuario=final?(c.campeao===c.usuario?'Campeão':'Vice-campeão'):`Eliminado: ${fase}`;}else{c.roteiroMundial.shift();c.tamanho=2**c.roteiroMundial.length;c.adversario=null;}return;}
  const fase=c.preContinental?'Pré-classificação continental':c.playoff&&c.tamanho===32?'Playoff de acesso às oitavas':nomeFase(c,c.tamanho);
  const rng=geradorTecnico(`${c.seed}|chave-resultados|${c.etapa}|${c.tamanho}`),jogos=[],vencedores=[];
@@ -291,7 +291,8 @@ function registrarMata(c,jogo){
   if(par.includes(c.usuario)){jogos.push({...jogo,fase});vencedores.push(jogo.vencedor);continue;}
   let [a,b]=par;if(!a||!b){vencedores.push(a||b);continue;}
   if(c.ranqueGeral&&posicaoGeral(c,a)<posicaoGeral(c,b))[a,b]=[b,a];
-  const j=jogoDaChave(c,{nome:a,forca:c.forcas[a]},{nome:b,forca:c.forcas[b]},rng);jogos.push({...j,fase});vencedores.push(j.vencedor);c.eliminados.push(j.vencedor===a?b:a);
+  const casa={nome:a,forca:c.forcas[a]},fora={nome:b,forca:c.forcas[b]},simular=(x,y)=>jogoDaChave(c,x,y,rng);
+  const j=partidaIA&&!idaVoltaNaFase(c)?partidaIA(casa,fora,simular):simular(casa,fora);jogos.push({...j,fase});vencedores.push(j.vencedor);c.eliminados.push(j.vencedor===a?b:a);
  }
  if(!jogos.some(j=>j===jogo||[j.casa,j.fora].includes(c.usuario))){jogos.unshift({...jogo,fase});vencedores.unshift(jogo.vencedor);}
  c.fases.push({fase,jogos});c.jogosUsuario.push({...jogo,fase});
@@ -307,7 +308,7 @@ function registrarMata(c,jogo){
   continuarChave(c,proximos,rng);
  }
 }
-export function escolherCopa(c,chave,opcao){
+export function escolherCopa(c,chave,opcao,partidaIA){
  const d=decisaoCopa(c);if(!d||d.chave!==chave)return c;
  const planos=[...(d.penaltis?PLANOS_PENALTIS:PLANOS_COPA),...escolhasCopa(c,d).opcoes];if(!planos.some(x=>x.id===opcao))throw new Error('Escolha inválida.');
  const plano=planos.find(x=>x.id===opcao),revelacao={nome:plano.nome,probabilidades:d.penaltis?{classificacao:chancePenaltis(d.forcaUsuario,d.forcaAdv,opcao,d.final)}:chancesCopa(d.forcaUsuario,d.forcaAdv,opcao,d.final,d.perfilAdversario,d.mando)};
@@ -318,7 +319,7 @@ export function escolherCopa(c,chave,opcao){
  if(d.penaltis){
   const j={...novo.resultado.jogo,penaltis:true,vencedor:rng()<chancePenaltis(d.forcaUsuario,d.forcaAdv,opcao,d.final)?novo.usuario:d.adversario};
   novo.resultado={...novo.resultado,jogo:j,escolha:opcao,revelacao,penaltisPendentes:false,venceu:j.vencedor===novo.usuario,empate:false,fase:d.fase,final:d.final};
-  delete novo.pernaIda;registrarMata(novo,j);novo.etapa++;return novo;
+  delete novo.pernaIda;registrarMata(novo,j,partidaIA);novo.etapa++;return novo;
  }
  const eu={nome:novo.usuario,forca:d.forcaUsuario},rival={nome:d.adversario,forca:d.forcaAdv};
  let j=partida(eu,rival,rng,opcao,d.final,d.perfilAdversario,d.mando);
@@ -344,7 +345,7 @@ export function escolherCopa(c,chave,opcao){
  if(!d.grupo&&!j.vencedor&&temProrrogacao({nome:novo.nome,tipo:novo.tipo,final:d.final,idaVolta:false}))j=decidir(prorrogar(j,eu,rival,rng,d.mando));
  novo.resultado={jogo:j,escolha:opcao,revelacao,penaltisPendentes:!d.grupo&&!j.vencedor,venceu:j.vencedor===novo.usuario,empate:!j.vencedor,fase:d.fase,final:d.final};
  if(novo.resultado.penaltisPendentes)return novo;
- if(d.grupo)avancarLiga(novo,j);else registrarMata(novo,j);novo.etapa++;return novo;
+ if(d.grupo)avancarLiga(novo,j,partidaIA);else registrarMata(novo,j,partidaIA);novo.etapa++;return novo;
 }
 /** Insere o resultado do motor ao vivo na mesma chave dos demais clubes. */
 export function registrarPlacarCopa(c,chave,jogo) {

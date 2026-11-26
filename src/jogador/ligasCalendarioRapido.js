@@ -12,7 +12,7 @@ function placaresRegistrados(edicao) {
 
 export function criarCalendarioLigasRapido(equipes, codigo, ano, elencos = {}, tecnicos = {}) {
   return {
-    ano, codigo,
+    ano, codigo, partilharCopas: true,
     seed: `${codigo}|${ano}|ligas-rapido`,
     equipes: equipes.map(({nome, liga, elenco, ataque, defesa}) => ({nome, liga, elenco, ataque, defesa})),
     ligas: {},
@@ -82,4 +82,28 @@ export function finalizarCalendarioLigasRapido(estado) {
   const {ligas, decisoes} = avancarCalendarioLigasRapido(estado, Infinity);
   return Object.fromEntries(Object.entries(ligas).map(([liga, {progresso, ...edicao}]) =>
     [liga, {...edicao, jogos: placaresRegistrados(edicao), ...(decisoes[liga]?.length ? {decisoes:decisoes[liga]} : {})}]));
+}
+
+
+export function prepararPartidasDeCopa(estado, data, competicao) {
+  const memoria = structuredClone(estado.memoria ?? {});
+  const equipes = new Map(estado.equipes.map(p => [p.nome, p]));
+  const contagens = new Map();
+  for (const {liga} of estado.equipes) contagens.set(liga, (contagens.get(liga) ?? 0) + 1);
+  const rodadaDe = equipe => {
+    const periodo = estado.periodos?.[equipe.liga];
+    if (!periodo) return 0;
+    const n = contagens.get(equipe.liga);
+    const total = 2 * (n + n % 2 - 1);
+    return (data - periodo.inicio) / (periodo.fim - periodo.inicio) * total;
+  };
+  const {jogar} = prepararPartidasLigasRapidas(estado.elencos, estado.seed, {}, estado.tecnicos, memoria);
+  const partida = (a, b, simular) => {
+    const casa = equipes.get(a.nome) ?? a, fora = equipes.get(b.nome) ?? b;
+    const ajustar = (original, base, time) => ({...original, forca: original.forca +
+      ((time.ataque ?? 0) + (time.defesa ?? 0) - (base.ataque ?? 0) - (base.defesa ?? 0)) / 2});
+    return jogar(casa, fora, rodadaDe(casa), rodadaDe(fora),
+      (x,y) => simular(ajustar(a,casa,x), ajustar(b,fora,y)), competicao);
+  };
+  return {memoria, partida};
 }

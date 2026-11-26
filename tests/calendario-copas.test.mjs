@@ -4,7 +4,7 @@ import {jogosDaEdicao} from '../src/simulacao/mundoVivo.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {CLUBES,LIGAS} from '../src/dados/data.js';
-import {criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa,simularCampanhaCopa} from '../src/treinador/copasEscolha.js';
+import {avancarCopaAutomatica,criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa,simularCampanhaCopa} from '../src/treinador/copasEscolha.js';
 import {criarMundialAnual,criarMundial32,eCampeaoPrincipal} from '../src/competicoes/mundialRapido.js';
 import {dataCopa,criarAgenda,rotuloData} from '../src/competicoes/calendarioCopas.js';
 import {temaCopa} from '../src/competicoes/temasCopas.js';
@@ -155,4 +155,31 @@ test('copa usa lesão da liga, acumula minutos e separa os cartões por competi�
  assert.ok(preparo.memoria[2].minutos>estado.memoria[2].minutos);
  assert.ok(preparo.memoria[2].carga>estado.memoria[2].carga);
  assert.equal(estado.memoria[2].disciplina,undefined);
+});
+
+test('os outros grupos jogam na mesma rodada e o mata-mata automático guarda cada perna separadamente',()=>{
+ const clubes=Array.from({length:8},(_,i)=>({nome:`Equipe ${i}`,forca:70+i}));
+ const copa=criarCampanhaCopa({nome:'Libertadores',tipo:'continental',usuario:'Equipe 0',forcaUsuario:70,
+  clubes,ano:2030,formato:'grupos',seed:'calendario-grupos',agendaIA:true});
+ let chamadas=[];
+ const partidaIA=(a,b,jogar)=>{chamadas.push([a.nome,b.nome]);return jogar(a,b);};
+ const primeira=escolherCopa(copa,decisaoCopa(copa).chave,'controlar',partidaIA);
+ assert.equal(Object.values(primeira.jogosOutrosGrupos).flat().length,2);
+ assert.equal(chamadas.length,3);
+ assert.ok(Object.values(primeira.jogosOutrosGrupos).flat().every(j=>j.rodada===1));
+
+ const fase={...copa,fase:'mata',tamanho:4,
+  pendenteIA:{ordem:['Equipe 1','Equipe 2','Equipe 3','Equipe 4'],playoff:false,entradaUsuario:false}};
+ chamadas=[];
+ const ida=avancarCopaAutomatica(fase,partidaIA);
+ assert.equal(ida.fases.length,0);
+ assert.equal(ida.idaIA.length,2);
+ const mandosIda=chamadas;
+ chamadas=[];
+ const volta=avancarCopaAutomatica(JSON.parse(JSON.stringify(ida)),partidaIA);
+ assert.ok(dataCopa(ida)>dataCopa(fase));
+ assert.deepEqual(chamadas,mandosIda.map(([a,b])=>[b,a]));
+ assert.equal(volta.fases[0].jogos.length,2);
+ assert.ok(volta.fases[0].jogos.every(j=>j.partidas.length===2&&j.vencedor));
+ assert.equal(volta.pendenteIA.ordem.length,2);
 });

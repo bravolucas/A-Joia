@@ -29,3 +29,8 @@
 .pi-como summary{cursor:pointer;font-size:12px;color:#a7e9ad;min-height:32px}
 .pi-como p{font-size:12px;color:#a9b6c6;line-height:1.5;margin:4px 0 0}
 @media (max-width:560px){.pi-palco{padding:14px}.pi-podio{grid-template-columns:1fr}.pi-podio li{order:0!important;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;text-align:left;padding:12px}.pi-podio .pi-posicao-1{padding-top:12px}.pi-valor{margin-left:auto;text-align:right}.pi-lista li{grid-template-columns:30px 1fr 44px}.pi-lista .pi-selo{display:none}}
+
+.pi-acervo{padding:14px;border:1px solid #e6c06a40;border-radius:12px;background:#ffffff05;display:flex;flex-direction:column;gap:10px}
+.pi-acervo>header{display:flex;flex-direction:column;gap:3px}.pi-acervo>header>strong{font-size:14px;color:#e6c06a}.pi-acervo>header>small,.pi-acervo-nota{font-size:11px;color:#a9b6c6}
+.pi-acervo-lista{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:9px}.pi-acervo-lista article{display:flex;flex-direction:column;gap:5px;padding:12px;border:1px solid #ffffff16;border-radius:10px;background:#0f1824}
+.pi-acervo-lista strong{font-size:14px;color:#fff}.pi-acervo-lista small{font-size:11px;color:#a9b6c6}.pi-acervo-lista p{font-size:13px;color:#e3e9f1;margin:2px 0}.pi-acervo-lista a{font-size:11px;color:#e6c06a;text-decoration:underline;text-underline-offset:2px;align-self:flex-start}

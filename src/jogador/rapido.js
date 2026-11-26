@@ -15,6 +15,7 @@ import {ITENS_PESSOAIS} from './itensPessoais.js';
 import {iniciarCamisas,aposentarDonoCamisa,prepararCamisaSelecao,sincronizarCamisasSelecao} from './camisasCarreira.js';
 import {estatisticasDecisao} from './decisaoDeJogo.js';
 import {prepararCopasJogador} from './copasJogador.js';
+import {iniciarCopaCompartilhada} from './copaSelecaoCompartilhada.js';
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
 import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternacionais.js';
 import {vagaJogador,nomeVaga,calcularVagasRapidas,clubesParaCopas,regiaoDaLiga,idContinental} from '../competicoes/regrasCopasRapidas.js';
@@ -1509,7 +1510,7 @@ function efeitoFoco(c) {
 
 /* Joga a temporada inteira. Se houver uma final com você em campo,
    devolve um "momento decisivo" (pênalti) para o jogador resolver na tela. */
-export function jogarTemporada(c0,opcoes={}) { sincronizarLigas(c0); const r=comSemente(c0.codigo, `jogar:${c0.ano}`, () => jogarTemporadaBase(c0,opcoes.copasInterativas));if(!opcoes.copasInterativas)return r;const card=prepararCopasJogador(r.c,r.card);return {...r,card,momento:card.pendente}; }
+export function jogarTemporada(c0,opcoes={}) { sincronizarLigas(c0); const r=comSemente(c0.codigo, `jogar:${c0.ano}`, () => jogarTemporadaBase(c0,opcoes.copasInterativas));if(!opcoes.copasInterativas)return r;const card=prepararCopasJogador(r.c,iniciarCopaCompartilhada(r.c,r.card));return {...r,card,momento:card.pendente}; }
 function jogarTemporadaBase(c0, interativo) {
   const c = clone(c0);
   c.lojaAnoEmCurso=c.ano;

@@ -1,6 +1,7 @@
 import SumulaLiga from './SumulaLiga.jsx';
-import React,{useMemo,useState} from 'react';
+import React,{useId,useMemo,useState} from 'react';
 import {jogosDaEdicao,historicoAtleta} from './mundoVivo.js';
+import {agruparPartidasCompeticao} from './partidasCompeticao.js';
 import {avaliarClubeNoMundo} from './forcaEquipe.js';
 import {EIXOS_REPUTACAO_CLUBE,NOMES_REPUTACAO_CLUBE} from './reputacoesClube.js';
 import {CLUBES} from '../dados/data.js';
@@ -36,11 +37,21 @@ export function ArquivoAtletas({c}){
 export function EdicoesCompeticao({c,nome}){
  const u=universo(c),edicoes=useMemo(()=>(u?.edicoes||[]).filter(e=>e.nome===nome).sort((a,b)=>b.ano-a.ano),[u,nome]);
  const [ano,A]=useState(null),[equipe,E]=useState(''),[grupo,G]=useState('');
+ const [jogosAbertos,JA]=useState(false),[etapa,ET]=useState(''),[pagina,PA]=useState(0);
+ const idPainelJogos=useId();
  const edicao=edicoes.find(e=>e.ano===Number(ano))||edicoes[0];
  const grupoAtual=edicao?.grupos?.find(g=>g.grupo===grupo)||edicao?.grupos?.[0];
  const classificacao=grupoAtual?.classificacao||edicao?.classificacao;
- const jogos=useMemo(()=>jogosDaEdicao(edicao,{incluirSumulas:!!equipe}),[edicao,equipe]);
+ const jogos=useMemo(()=>jogosDaEdicao(edicao,{incluirSumulas:jogosAbertos}),[edicao,jogosAbertos]);
  const atletas=useMemo(()=>new Map(Object.values(u?.atletas||{}).map(p=>[String(p.id),p.nome])),[u]);
+ const partidasFiltradas=useMemo(()=>jogos.filter(j=>!equipe||[j.casa,j.fora].includes(equipe)),[jogos,equipe]);
+ const gruposPartidas=useMemo(()=>agruparPartidasCompeticao(edicao,partidasFiltradas),[edicao,partidasFiltradas]);
+ const grupoPartidas=gruposPartidas.find(g=>g.chave===etapa)||gruposPartidas[0];
+ const indicePartidas=gruposPartidas.findIndex(g=>g.chave===grupoPartidas?.chave);
+ const porPagina=20,totalPaginas=Math.max(1,Math.ceil((grupoPartidas?.partidas.length||0)/porPagina));
+ const paginaAtual=Math.min(pagina,totalPaginas-1);
+ const mudarGrupo=chave=>{ET(chave);PA(0)};
+ const partidasVisiveis=grupoPartidas?.partidas.slice(paginaAtual*porPagina,(paginaAtual+1)*porPagina)||[];
  const destaques=useMemo(()=>Object.values(u?.atletas||{}).flatMap(p=>{
   const linha=p.historico.find(a=>(Array.isArray(a)?a[0]:a.ano)===edicao?.ano);
   if(!linha)return [];
@@ -48,12 +59,47 @@ export function EdicoesCompeticao({c,nome}){
   return t?[{...t,id:p.id,nome:p.nome,clube:a.clube}]:[];
  }),[u,edicao,nome]);
  if(!edicao)return null;
- return <section className="mv-painel" aria-label="Edições da competição"><h3>Por dentro da temporada</h3><div className="hf-filtros"><label>Edição<select value={edicao.ano} onChange={e=>{A(e.target.value);E('');G('');}}>{edicoes.map(e=><option key={e.ano}>{e.ano}</option>)}</select></label><label>Filtrar partidas por clube<select value={equipe} onChange={e=>E(e.target.value)}><option value="">Todos</option>{[...new Set(jogos.flatMap(j=>[j.casa,j.fora]))].sort().map(n=><option key={n}>{n}</option>)}</select></label></div>
+ return <section className="mv-painel" aria-label="Edições da competição"><h3>Por dentro da temporada</h3><div className="hf-filtros"><label>Edição<select value={edicao.ano} onChange={e=>{A(e.target.value);E('');G('');JA(false);ET('');PA(0);}}>{edicoes.map(e=><option key={e.ano}>{e.ano}</option>)}</select></label></div>
  {edicao.grupos?.length>1&&<label className="hf-filtros">Classificação do grupo<select value={grupoAtual.grupo} onChange={e=>G(e.target.value)}>{edicao.grupos.map(g=><option key={g.grupo}>{g.grupo}</option>)}</select></label>}
  {classificacao?.length>0&&<div className="hf-tabela-scroll"><table className="hf-tabela"><thead><tr><th>Pos.</th><th>Clube</th><th>J</th><th>Pts</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th></tr></thead><tbody>{classificacao.map((t,i)=><tr key={t.nome}><td>{t.posicao||i+1}º</td><th><LinkEntidade tipo="clube" nome={t.nome}/></th>{['jogos','pontos','vitorias','empates','derrotas','golsPro','golsContra'].map(k=><td key={k}>{t[k]??'—'}</td>)}</tr>)}</tbody></table></div>}
  <PremiosTemporada premios={u?.premiosLigas?.[edicao.ano]?.[nome]} ano={edicao.ano}/>
  {destaques.length>0&&<div className="mv-lideres">{[['gols','Artilheiros'],['assist','Assistências'],['defesas','Defesas']].map(([campo,titulo])=>{const lista=destaques.filter(p=>p[campo]>0).sort((a,b)=>b[campo]-a[campo]||a.nome.localeCompare(b.nome)).slice(0,5);return lista.length>0&&<article key={campo}><h4>{titulo}</h4><ol>{lista.map(p=><li key={p.id}><span><LinkEntidade tipo="jogador" id={p.id} nome={p.nome}/><small><LinkEntidade tipo="clube" nome={p.clube}/></small></span><b>{p[campo]}</b></li>)}</ol></article>;})}</div>}
- {jogos.length>0?<><p className="hf-nota">{jogos.length} partidas registradas nesta edição.</p><ol className="mv-jogos">{jogos.filter(j=>!equipe||[j.casa,j.fora].includes(equipe)).map((j,i)=><li key={i}><small>{typeof j.rodada==='number'?`Rodada ${j.rodada}`:j.rodada}</small><span><LinkEntidade tipo="clube" nome={j.casa}/></span><b>{j.golsCasa} × {j.golsFora}</b><span><LinkEntidade tipo="clube" nome={j.fora}/></span>{j.penaltis&&<small>Pênaltis · {j.vencedor}</small>}{equipe&&<SumulaLiga jogo={j} atletas={atletas}/>}</li>)}</ol></>:<p className="hf-nota">Esta edição preserva a classificação registrada; os placares individuais não estavam disponíveis.</p>}</section>;
+ {jogos.length>0?<section className="mv-arquivo-jogos" aria-label="Arquivo de partidas desta edição">
+   <button type="button" className="mv-jogos-toggle" aria-expanded={jogosAbertos} aria-controls={idPainelJogos}
+     onClick={()=>{JA(aberto=>!aberto);ET('');PA(0);}}>
+     <span><strong>TODOS OS JOGOS</strong><small>{jogos.length} partidas registradas · {edicao.tipo==='liga'?'organizadas por rodada':'organizadas por fase'}</small></span>
+     <span aria-hidden="true">{jogosAbertos?'−':'+'}</span>
+   </button>
+   {jogosAbertos&&<div id={idPainelJogos} className="mv-partidas-aba" role="region" aria-label="Partida por partida">
+     <header><h4>Partida por partida</h4><p>Selecione {edicao.tipo==='liga'?'a rodada':'a fase'} para consultar os placares desta edição.</p></header>
+     <div className="mv-partidas-filtros"><label>Filtrar pelo clube
+       <select value={equipe} onChange={e=>{E(e.target.value);ET('');PA(0);}}>
+         <option value="">Todos os clubes</option>
+         {[...new Set(jogos.flatMap(j=>[j.casa,j.fora]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(n=><option key={n}>{n}</option>)}
+       </select>
+     </label></div>
+     {grupoPartidas?<><nav className="mv-partidas-navegacao" aria-label={edicao.tipo==='liga'?'Navegar por rodada':'Navegar por fase'}>
+       <button type="button" onClick={()=>mudarGrupo(gruposPartidas[Math.max(0,indicePartidas-1)].chave)} disabled={indicePartidas<=0} aria-label="Rodada ou fase anterior">‹ Anterior</button>
+       <label>{edicao.tipo==='liga'?'Rodada':'Fase'}
+         <select aria-label={edicao.tipo==='liga'?'Rodada':'Fase'} value={grupoPartidas.chave} onChange={e=>mudarGrupo(e.target.value)}>
+           {gruposPartidas.map(g=><option key={g.chave} value={g.chave}>{g.rotulo} · {g.partidas.length} {g.partidas.length===1?'jogo':'jogos'}</option>)}
+         </select>
+       </label>
+       <button type="button" onClick={()=>mudarGrupo(gruposPartidas[Math.min(gruposPartidas.length-1,indicePartidas+1)].chave)} disabled={indicePartidas>=gruposPartidas.length-1} aria-label="Próxima rodada ou fase">Próxima ›</button>
+     </nav>
+     <p className="mv-partidas-contador" aria-live="polite">{grupoPartidas.rotulo} · {grupoPartidas.partidas.length} {grupoPartidas.partidas.length===1?'partida':'partidas'}</p>
+     <ol className="mv-jogos">{partidasVisiveis.map((j,i)=><li key={[grupoPartidas.chave,paginaAtual,i,j.casa,j.fora].join('|')}>
+       <small>{j.fase|| (typeof j.rodada==='number'?'Rodada '+j.rodada:typeof j.rodada==='string'?j.rodada:grupoPartidas.rotulo)}</small>
+       <span><LinkEntidade tipo="clube" nome={j.casa}/></span><b>{j.golsCasa} × {j.golsFora}</b><span><LinkEntidade tipo="clube" nome={j.fora}/></span>
+       {j.penaltis&&<small>Pênaltis · {j.vencedor}</small>}<SumulaLiga jogo={j} atletas={atletas}/>
+     </li>)}</ol>
+     {totalPaginas>1&&<div className="mv-partidas-paginacao">
+       <button type="button" disabled={!paginaAtual} onClick={()=>PA(n=>n-1)}>Partidas anteriores</button>
+       <span>Página {paginaAtual+1} de {totalPaginas}</span>
+       <button type="button" disabled={paginaAtual+1>=totalPaginas} onClick={()=>PA(n=>n+1)}>Próximas partidas</button>
+     </div>}</>:<p className="hf-vazio">Nenhuma partida registrada para o clube selecionado nesta edição.</p>}
+   </div>}
+ </section>:<p className="hf-nota">Esta edição preserva a classificação registrada; os placares individuais não estavam disponíveis.</p>}</section>;
 }
 
 const ICONES_NOTICIA={voce:'⭐',titulo:'🏆',zebra:'⚡',liga:'🥇',mercado:'💶',tecnico:'🔁',queda:'⬇️'};

@@ -220,7 +220,7 @@ export function compactarJogos(jogos=[], {arquivarSumulas=false}={}) {
   const validos=jogos.filter(j=>j.casa&&j.fora&&Number.isFinite(j.golsCasa)&&Number.isFinite(j.golsFora));
   const partidas=validos.map(j=>[indices.get(j.casa),indices.get(j.fora),j.golsCasa,j.golsFora,
     j.rodada||j.fase||'',j.vencedor?indices.get(j.vencedor):null,j.penaltis?1:0,
-    ...(!arquivarSumulas&&j.sumula?[j.sumula]:[])]);
+    ...(!arquivarSumulas&&j.sumula?[j.fase||null,j.sumula]:j.fase?[j.fase]:[])]);
   const sumulas=arquivarSumulas&&validos.some(j=>j.sumula)
     ? LZString.compressToUTF16(JSON.stringify(validos.map(j=>j.sumula??null)))
     : null;
@@ -230,10 +230,10 @@ export function jogosDaEdicao(edicao, {incluirSumulas=true}={}) {
   if(Array.isArray(edicao?.jogos))return edicao.jogos;
   const {nomes=[],partidas=[],sumulas}=edicao?.jogos||{};
   const arquivadas=incluirSumulas&&sumulas ? JSON.parse(LZString.decompressFromUTF16(sumulas)) : null;
-  return partidas.map(([a,b,golsCasa,golsFora,rodada,v,penaltis,sumula],i)=>{
+  return partidas.map(([a,b,golsCasa,golsFora,rodada,v,penaltis,fase,sumula],i)=>{
     const ficha=incluirSumulas&&(sumula??arquivadas?.[i]);
     return {casa:nomes[a],fora:nomes[b],golsCasa,golsFora,rodada,vencedor:v==null?null:nomes[v],
-      penaltis:!!penaltis,...(ficha?{sumula:ficha}:{})};
+      penaltis:!!penaltis,...(fase?{fase}:{}),...(ficha?{sumula:ficha}:{})};
   });
 }
 export function resumirTabelas(classificacoes) {

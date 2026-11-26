@@ -12,8 +12,11 @@
       return u.origin === location.origin && u.pathname === base + 'sw.js';
     } catch { return false; }
   };
+  // Workbox usa o nome da pasta sem a barra inicial; limitar ao escopo
+  // impede apagar caches de aplicações vizinhas hospedadas na mesma origem.
+  const identificador = base.replace(/^\/+|\/+$/g, '');
   const cacheProprio = nome => nome.startsWith('ajoia-') ||
-    (nome.startsWith('workbox-') && nome.includes(base));
+    (nome.startsWith('workbox-') && identificador && nome.includes(identificador));
 
   async function limparLegado() {
     if ('serviceWorker' in navigator) {

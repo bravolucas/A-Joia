@@ -40,4 +40,4 @@
 .mv-partidas-aba .mv-jogos{max-height:none;overflow:visible;margin:0}
 .mv-partidas-paginacao{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:16px}
 .mv-partidas-paginacao span{color:#b9cddb;font-size:11px}
-@media(max-width:560px){.mv-partidas-aba{padding:12px}.mv-partidas-navegacao{grid-template-columns:1fr 1fr}.mv-partidas-navegacao label{grid-column:1/-1;grid-row:1}.mv-partidas-navegacao button{grid-row:2}.mv-jogos-toggle{min-height:58px}.mv-partidas-aba .mv-jogos li{grid-template-columns:minmax(0,1fr) 62px minmax(0,1fr);gap:5px;font-size:11px}}
+@media(max-width:560px){.mv-partidas-aba{padding:12px}.mv-partidas-navegacao{grid-template-columns:1fr 1fr}.mv-partidas-navegacao label{grid-column:1/-1;grid-row:1}.mv-partidas-navegacao button{grid-row:2}.mv-jogos-toggle{min-height:58px}.mv-partidas-aba .mv-jogos > li{grid-template-columns:minmax(0,1fr) 62px minmax(0,1fr);gap:5px;font-size:11px}}

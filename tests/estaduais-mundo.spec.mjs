@@ -21,9 +21,9 @@ for(const width of [390,1366])test(`estaduais com histórico real e calendário 
  const atual=edicoes.find(e=>e.nome===ESTADUAIS.SP);await expect(d.locator('.hf-campeao-atual')).toContainText(atual.campeao);await expect(d.locator('.hf-campeao-atual')).toContainText(String(atual.ano));
  const partidas=d.getByRole('region',{name:'Edições da competição'});await expect(partidas).toBeVisible();
  await expect(partidas.getByRole('button',{name:/TODOS OS JOGOS/})).toHaveAttribute('aria-expanded','false');
- await expect(partidas.locator('.mv-jogos li')).toHaveCount(0);
+ await expect(partidas.locator('.mv-jogos > li')).toHaveCount(0);
  await partidas.getByRole('button',{name:/TODOS OS JOGOS/}).click();
- await expect(partidas.getByRole('region',{name:'Partida por partida'}).locator('.mv-jogos li').first()).toBeVisible();
+ await expect(partidas.getByRole('region',{name:'Partida por partida'}).locator('.mv-jogos > li').first()).toBeVisible();
  const historico=d.locator('.hf-historico-competicao');await historico.locator('summary').click();await expect(historico.getByRole('list',{name:'Campeões estaduais anteriores à carreira'})).toContainText('1902');await expect(historico).toContainText('2024');await expect(historico).toContainText('Palmeiras');
  const corinthians=d.locator('.hf-ranking-campeoes li').filter({has:page.getByRole('button',{name:'Corinthians',exact:true})});await expect(corinthians).toContainText('30 na base');
  await d.locator('.hf-ranking-campeoes').getByRole('button',{name:'Santos',exact:true}).click();
@@ -35,7 +35,7 @@ for(const width of [390,1366])test(`estaduais com histórico real e calendário 
  const roraima=edicoes.find(e=>e.nome===ESTADUAIS.RR);await expect(d.locator('.hf-campeao-atual')).toContainText(roraima.campeao);await expect(d.getByRole('region',{name:'Edições da competição'})).toContainText(String(roraima.ano));
  await expect(partidas.getByRole('button',{name:/TODOS OS JOGOS/})).toHaveAttribute('aria-expanded','false');
  await partidas.getByRole('button',{name:/TODOS OS JOGOS/}).click();
- await expect(partidas.locator('.mv-jogos li').first()).toBeVisible();
+ await expect(partidas.locator('.mv-jogos > li').first()).toBeVisible();
  await page.screenshot({path:`test-results/estadual-mundo-${width}.png`,animations:'disabled'});expect(await d.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
  await d.getByRole('button',{name:'Voltar ao jogo',exact:true}).click();const depois=await lerSave(page);expect(depois.c.universo).toEqual(antes.c.universo);
  await page.reload();await page.getByRole('button',{name:/Continuar · Estaduais Vivos/}).click();await page.getByRole('button',{name:'Ver história do Arsenal',exact:true}).click();await d.getByRole('button',{name:'Competições',exact:true}).click();await d.getByLabel('Competição do histórico').selectOption(ESTADUAIS.RR);await expect(d.locator('.hf-campeao-atual')).toContainText(roraima.campeao);expect(erros).toEqual([]);

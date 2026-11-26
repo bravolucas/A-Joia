@@ -1,3 +1,4 @@
+import {participacaoNasSumulas} from '../simulacao/planejamentoLigasRapidas.js';
 import {podarCentral, registroCentral} from '../simulacao/transferenciasMundo.js';
 import {novoTecnico} from '../simulacao/tecnicosMundo.js';
 import {elencosParaLigasRapidas, prepararPartidasLigasRapidas} from './escalacoesLigasRapido.js';
@@ -1972,7 +1973,7 @@ function fecharTemporadaBase(c0, card0) {
   // registramos o único vencedor oficial (inclusive quando é o usuário).
   c.mundo = estatisticasDasPartidas(simularTemporadaMundo(c.mundo,Math.random,{
     clubes:clubesDoMundo(antes),perfis:antes.universo?.clubes,ano:card.ano,
-    registrarPremio:false,
+    registrarPremio:false,participacaoRapida:{...participacaoNasSumulas(card.classificacoesMundo,card.torneios),clubeDoAtleta:card.clube},
   }),antes.mundo,{...card,campeoesCalendarioMundo},c.codigo);
   const emprestimosRapidos = Object.values(card.classificacoesMundo || {}).flatMap(t =>
     (t.decisoes || []).filter(e => e.tipo === 'emprestimo'));

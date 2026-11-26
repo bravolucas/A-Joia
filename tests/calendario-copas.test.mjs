@@ -1,3 +1,4 @@
+import {ajustarEvolucaoObservada, prepararProjetosClubes} from '../src/simulacao/planejamentoLigasRapidas.js';
 import {prepararPartidasDeCopa} from '../src/jogador/ligasCalendarioRapido.js';
 import {formacaoTecnico, prepararDecisoesLigas} from '../src/jogador/decisoesLigasRapidas.js';
 import {jogosDaEdicao} from '../src/simulacao/mundoVivo.js';
@@ -96,6 +97,9 @@ test('Modo Rápido preserva calendário, súmulas e estatísticas após retomar 
  assert.ok(jogosLocais.some(j=>j.casa!=='Flamengo'&&j.fora!=='Flamengo'&&j.sumula));
  assert.ok(jogosLocais.every(j=>(j.casa!=='Flamengo'&&j.fora!=='Flamengo')||!j.sumula));
  const {c:fim}=fecharTemporada(c,card);
+ const projeto=fim.mundo.projetosClubes['River Plate'];
+ assert.ok(projeto.historico[0].folha>0&&projeto.historico[0].teto>0);
+ assert.equal(projeto.historico[0].ano,card.ano);
  const edicao=fim.universo.edicoes.find(e=>e.nome===LIGAS.argentina.nome);
  assert.deepEqual(jogosDaEdicao(edicao).map(j=>j.sumula),jogosDaLiga.map(j=>j.sumula));
  const jogosPorAtleta=new Map();
@@ -139,6 +143,14 @@ test('janela cobre desfalque com empréstimo e técnico ameaçado muda o esquema
  salvo.iniciarRodada('teste',clubes,18,30,tabela);
  assert.equal(salvo.decisoes.teste.filter(e=>e.tipo==='emprestimo').length,1);
  assert.equal(salvo.elencos[favorito].filter(p=>p.id===10).length,1);
+ memoria[10]={minutos:90};
+ salvo.iniciarRodada('teste',clubes,19,30,tabela);
+ memoria[10].minutos=310;
+ salvo.iniciarRodada('teste',clubes,21,30,tabela);
+ salvo.iniciarRodada('teste',clubes,22,30,tabela);
+ const historia=salvo.decisoes.teste.filter(e=>e.historia&&e.clube===favorito);
+ assert.deepEqual(historia.map(e=>e.etapa),['contratacao','estreia','sequencia']);
+ assert.equal(new Set(historia.map(e=>e.historia)).size,1);
 });
 
 
@@ -182,4 +194,23 @@ test('os outros grupos jogam na mesma rodada e o mata-mata automático guarda ca
  assert.equal(volta.fases[0].jogos.length,2);
  assert.ok(volta.fases[0].jogos.every(j=>j.partidas.length===2&&j.vencedor));
  assert.equal(volta.pendenteIA.ordem.length,2);
+});
+
+
+test('minutos observados aceleram o jovem e acesso abre projeto que dura três temporadas',()=>{
+ const jovem={idade:20,ovr:65,potencial:78,picoIdade:28,posicao:'ATA'};
+ const veterano={...jovem,idade:35};
+ assert.ok(ajustarEvolucaoObservada(jovem,4,{minutos:1800,saldo:1200},20)>
+  ajustarEvolucaoObservada(jovem,4,{minutos:90,saldo:0},20));
+ assert.equal(ajustarEvolucaoObservada(veterano,-2,{minutos:0,saldo:0},20),-3);
+ assert.equal(ajustarEvolucaoObservada(jovem,4,undefined,undefined),4);
+ const clubes=[{nome:'Promovido'}],jogadores=[{...jovem,clubeNome:'Promovido',salario:10}];
+ const perfis={Promovido:{historico:[{ano:2029,movimento:'acesso'}]}};
+ const primeiro=prepararProjetosClubes({jogadores},clubes,perfis,2030,{Promovido:240});
+ assert.equal(primeiro.Promovido.objetivo,'permanência');
+ assert.equal(primeiro.Promovido.ate,2032);
+ assert.ok(primeiro.Promovido.teto>primeiro.Promovido.folha);
+ const segundo=prepararProjetosClubes({jogadores,projetosClubes:primeiro},clubes,{},2031,{Promovido:100});
+ assert.equal(segundo.Promovido.desde,2030);
+ assert.equal(segundo.Promovido.objetivo,'permanência');
 });

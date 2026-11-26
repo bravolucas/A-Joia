@@ -33,9 +33,22 @@ export function prepararDecisoesLigas(estado, memoria) {
     const data = inicio + (fim - inicio) * rodada / totalRodadas;
     const janela = inicio < 0 ? data >= 1 && data < 2 : data >= 7 && data < 8;
 
+    const eventos = [...(decisoes[liga] || [])];
+    for (const e of eventos.filter(x=>x.tipo==='emprestimo'&&Number.isFinite(x.minutosInicio))) {
+      const minutos = (memoria[e.atleta]?.minutos ?? 0) - e.minutosInicio;
+      const estreou = eventos.some(x=>x.historia===e.historia&&x.etapa==='estreia');
+      const impacto = estreou && minutos >= 270 && rodada >= e.rodada+4;
+      const etapa = impacto ? 'sequencia' : 'estreia';
+      if (minutos <= 0 || eventos.some(x=>x.historia===e.historia&&x.etapa===etapa)) continue;
+      eventos.push({tipo:'consequencia', clube:e.clube, historia:e.historia, etapa, rodada,
+        texto:impacto
+          ? `${e.nome} chegou a ${minutos} minutos por ${e.clube} desde o empréstimo.`
+          : `${e.nome} estreou por ${e.clube} e já soma ${minutos} minutos pelo novo clube.`});
+    }
+    decisoes[liga] = eventos;
+
     const avaliarCargo = rodada >= 9 && rodada % 4 === 1;
     if (!janela && !avaliarCargo) return;
-    const eventos = [...(decisoes[liga] || [])];
     const ordemPorForca = [...clubes].sort((a,b) => b.elenco - a.elenco);
     const ordemAtual = [...tabela.values()].sort((a,b) => b.pontos - a.pontos || b.saldoGols - a.saldoGols);
 
@@ -87,8 +100,8 @@ export function prepararDecisoesLigas(estado, memoria) {
       if (!candidato) continue;
       elencos[origem] = elencos[origem].filter(p => p.id !== candidato.id);
       elencos[nome] = [...elencos[nome], {...candidato, emprestado:true}];
-      eventos.push({tipo:'emprestimo', rodada, clube:nome, origem, atleta:candidato.id, nome:candidato.nome,
-        texto:`${nome} recebeu ${candidato.nome} por empréstimo de ${origem} até o fim da liga para cobrir a lesão de ${lesionado.nome}.`});
+      eventos.push({tipo:'emprestimo', rodada, clube:nome, origem, atleta:candidato.id, nome:candidato.nome, historia:`${nome}|${candidato.id}|${rodada}`, etapa:'contratacao',
+        minutosInicio:memoria[candidato.id]?.minutos??0, texto:`${nome} recebeu ${candidato.nome} por empréstimo de ${origem} até o fim da liga para cobrir a lesão de ${lesionado.nome}.`});
     }
     decisoes[liga] = eventos;
   };

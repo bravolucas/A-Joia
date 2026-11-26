@@ -55,7 +55,7 @@ export function avancarCalendarioLigasRapido(estado, data) {
       const novos = edicao.jogos.slice(jogosAnteriores[liga].length);
       if (novos.length) {
         const eventos = (decisoes[liga] || []).filter(e => e.rodada >= novos[0].rodada);
-        noticias.push(...eventos.map(e => ({liga, texto:e.texto, prioridade:3})));
+        noticias.push(...eventos.map(e => ({liga, texto:e.texto, prioridade:e.tipo==='consequencia'?4:3})));
         const lider = edicao.classificacao[0];
         if (lider && anterior?.classificacao[0]?.jogos > 0 && lider.nome !== anterior.classificacao[0].nome) {
           noticias.push({liga, texto:`${lider.nome} assumiu a liderança com ${lider.pontos} pontos.`, prioridade:2});
@@ -71,7 +71,7 @@ export function avancarCalendarioLigasRapido(estado, data) {
         }
       }
       const jogos = edicao.origem === 'simulacao-global' ? compactarJogos(edicao.jogos) : edicao.jogos;
-      ligas[liga] = {...edicao, progresso, jogos};
+      ligas[liga] = {...edicao, progresso, jogos, ...(decisoes[liga]?.length?{decisoes:decisoes[liga]}:{})};
     }
   }
   return {...estado, ligas, memoria, elencos, tecnicos, decisoes,
@@ -79,9 +79,9 @@ export function avancarCalendarioLigasRapido(estado, data) {
 }
 
 export function finalizarCalendarioLigasRapido(estado) {
-  const {ligas, decisoes} = avancarCalendarioLigasRapido(estado, Infinity);
+  const {ligas} = avancarCalendarioLigasRapido(estado, Infinity);
   return Object.fromEntries(Object.entries(ligas).map(([liga, {progresso, ...edicao}]) =>
-    [liga, {...edicao, jogos: placaresRegistrados(edicao), ...(decisoes[liga]?.length ? {decisoes:decisoes[liga]} : {})}]));
+    [liga, {...edicao, jogos: placaresRegistrados(edicao)}]));
 }
 
 

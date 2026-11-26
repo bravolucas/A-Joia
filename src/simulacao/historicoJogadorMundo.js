@@ -100,7 +100,7 @@ export function lerMovimentacoesJogador(jogador) {
  */
 export const LIMITE_TITULOS_JOGADOR = 120;
 
-export function creditarTitulosAtleta(jogador, campeoes = [], temporada) {
+export function creditarTitulosAtleta(jogador, campeoes = [], temporada, clubesDisputados) {
   if (!Number.isSafeInteger(temporada) || temporada < 1 ||
       !Array.isArray(campeoes) || !campeoes.length) return jogador;
   const historico = jogador?.historicoTemporadas?.find(
@@ -119,8 +119,8 @@ export function creditarTitulosAtleta(jogador, campeoes = [], temporada) {
     .map(r => [r[0], r[2], r[3], r[4]].join('|')));
   const novos = [];
   for (const titulo of campeoes) {
-    if (!titulo || titulo.clube !== clubeTemporada || !titulo.nome ||
-        !disputadas.has(titulo.nome)) continue;
+    if (!titulo?.nome || !disputadas.has(titulo.nome)) continue;
+    if (clubesDisputados ? !clubesDisputados.has(`${titulo.nome}|${titulo.clube}`) : titulo.clube !== clubeTemporada) continue;
     const chave = [temporada, titulo.tipo, titulo.nome, titulo.clube].join('|');
     if (chaves.has(chave)) continue;
     chaves.add(chave);

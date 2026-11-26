@@ -18,6 +18,7 @@ export default function SumulaLiga({jogo, atletas}) {
         }
         return <div key={lado}>
           <strong>{lado === 0 ? jogo.casa : jogo.fora}</strong>
+          {ficha.formacao && <p>{ficha.formacao}{ficha.tecnico ? ` · ${ficha.tecnico}` : ''}</p>}
           <ul>{participantes}</ul>
           {ausencias.length > 0 && <><strong>Desfalques e rotação</strong><ul>{ausencias}</ul></>}
         </div>;

@@ -1,5 +1,5 @@
 import SumulaLiga from './SumulaLiga.jsx';
-import {useState} from 'react';
+import {Fragment,useState} from 'react';
 import {LIGAS} from '../dados/data.js';
 import {jogosDaEdicao} from './mundoVivo.js';
 
@@ -20,6 +20,11 @@ export default function LigasEmDisputa({estado}) {
   const atletas = new Map(edicao.classificacao.flatMap(({nome}) => (estado.elencos?.[nome] || [])
     .map(p => [String(p.id), p.nome])));
   return (
+    <Fragment>
+    {estado.noticias?.length > 0 && <section className="glass my-2 rounded-md border border-white/10 p-3 text-xs" aria-label="Resumo do avanço">
+      <h3 className="font-bold">Resumo do avanço</h3>
+      <ul>{estado.noticias.map(({liga: id, texto}) => <li key={texto}><strong>{LIGAS[id]?.nome || id}</strong> · {texto}</li>)}</ul>
+    </section>}
     <details className="glass rounded-md border border-white/10 p-3 text-xs">
       <summary className="cursor-pointer font-bold">Outras ligas em andamento</summary>
       <label className="mt-3 flex items-center gap-2">
@@ -58,5 +63,6 @@ export default function LigasEmDisputa({estado}) {
         </div>
       </div>
     </details>
+    </Fragment>
   );
 }

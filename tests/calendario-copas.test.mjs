@@ -1,3 +1,4 @@
+import {formacaoTecnico, prepararDecisoesLigas} from '../src/jogador/decisoesLigasRapidas.js';
 import {jogosDaEdicao} from '../src/simulacao/mundoVivo.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -110,4 +111,30 @@ test('Modo Rápido disputa ligas externas pela data e termina com os mesmos plac
  for(const liga of Object.keys(lote).filter(liga=>liga!=='brasileirao')){
   assert.deepEqual(card.classificacoesMundo[liga],lote[liga]);
  }
+});
+
+
+test('janela cobre desfalque com empréstimo e técnico ameaçado muda o esquema da equipe',()=>{
+ const clubes=Array.from({length:8},(_,i)=>({nome:`Clube ${i}`,liga:'teste',elenco:80-i*2}));
+ const [favorito,cedente]=clubes.map(c=>c.nome);
+ const elencos={
+  [favorito]:[{id:1,nome:'Titular',setor:'ATA',ovr:75},{id:2,nome:'Reserva',setor:'ATA',ovr:64}],
+  [cedente]:Array.from({length:6},(_,i)=>({id:i+10,nome:`Atacante ${i}`,setor:'ATA',ovr:75-i})),
+ };
+ const tecnico={id:'tecnico-anterior',nome:'Treinador anterior',formacao:'4-3-3'};
+ const estado={ano:2030,seed:'janela',elencos,tecnicos:{[favorito]:tecnico},
+  periodos:{teste:{inicio:1.5,fim:12.05}}};
+ const memoria={1:{lesionadoAte:19,minutos:1400}};
+ const tabela=new Map(clubes.map((c,i)=>[c.nome,{nome:c.nome,jogos:16,pontos:i*3,saldoGols:0}]));
+ const r=prepararDecisoesLigas(estado,memoria);
+ r.iniciarRodada('teste',clubes,17,30,tabela);
+ assert.notEqual(formacaoTecnico(r.tecnicos[favorito]),'4-3-3');
+ assert.equal(r.decisoes.teste.filter(e=>e.tipo==='tecnico'&&e.clube===favorito).length,1);
+ assert.ok(r.elencos[favorito].some(p=>p.id===10&&p.emprestado));
+ assert.ok(r.elencos[cedente].every(p=>p.id!==10));
+ assert.equal(estado.elencos[cedente].length,6);
+ const salvo=prepararDecisoesLigas(JSON.parse(JSON.stringify({...estado,...r})),memoria);
+ salvo.iniciarRodada('teste',clubes,18,30,tabela);
+ assert.equal(salvo.decisoes.teste.filter(e=>e.tipo==='emprestimo').length,1);
+ assert.equal(salvo.elencos[favorito].filter(p=>p.id===10).length,1);
 });

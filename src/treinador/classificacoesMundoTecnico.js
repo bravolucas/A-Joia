@@ -81,7 +81,7 @@ export function registrarFormaDaLiga(forma, {casa, fora, golsCasa, golsFora}) {
 }
 
 export function simularLigaMundo(clubes, rng = Math.random, liga = clubes[0]?.liga, {
-  progresso = 1, jogosAnteriores = [], rngRodada, disputarPartida,
+  progresso = 1, jogosAnteriores = [], rngRodada, disputarPartida, iniciarRodada,
 } = {}) {
   const tabela = criarTabela(clubes), jogos = [...jogosAnteriores], forma = new Map();
   const base = [...clubes], primeiroTurno = [];
@@ -111,6 +111,7 @@ export function simularLigaMundo(clubes, rng = Math.random, liga = clubes[0]?.li
   for (let rodada = 1; rodada <= rodadas && rodada <= ateRodada; rodada++) {
     const confrontos = [];
     const sorteio = rodada > ultimaRodada ? rngRodada?.(rodada) ?? rng : null;
+    if (sorteio) iniciarRodada?.(liga, clubes, rodada, 2 * rodadas, tabela);
     for (let i = 0; i < base.length / 2; i++) {
       const a = base[i], b = base[base.length - 1 - i];
       if (!a || !b) continue;
@@ -124,6 +125,7 @@ export function simularLigaMundo(clubes, rng = Math.random, liga = clubes[0]?.li
   }
   for (let rodada = Math.max(rodadas, ultimaRodada) + 1; rodada <= ateRodada; rodada++) {
     const sorteio = rngRodada?.(rodada) ?? rng;
+    iniciarRodada?.(liga, clubes, rodada, 2 * rodadas, tabela);
     for (const {casa, fora} of primeiroTurno[rodada - rodadas - 1]) disputar(fora, casa, rodada, sorteio);
   }
   return {classificacao: ordenarTabela([...tabela.values()], jogos, liga), jogos};
@@ -148,6 +150,7 @@ export function simularClassificacoesMundoTecnico({
   jogosAnteriores = {},
   rngLigaRodada,
   disputarPartida,
+  iniciarRodada,
 }) {
   const clubesUnicos = [...new Map(clubes.filter(clube => clube?.nome).map(clube => [clube.nome, clube])).values()];
   const porLiga = new Map();
@@ -236,7 +239,7 @@ export function simularClassificacoesMundoTecnico({
       continue;
     }
     resultado[liga] = { liga, origem: 'simulacao-global', ...simularLigaMundo(ordenados, rng, liga, {
-      progresso, jogosAnteriores: jogosAnteriores[liga], disputarPartida,
+      progresso, jogosAnteriores: jogosAnteriores[liga], disputarPartida, iniciarRodada,
       rngRodada: rngLigaRodada && (rodada => rngLigaRodada(liga, rodada)),
     }) };
   }

@@ -1,7 +1,7 @@
 import {COPAS_NACIONAIS,calcularVagasRapidas,nomeVaga} from '../competicoes/regrasCopasRapidas.js';
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
 import {anoTemporadaCarreira,CLUBES,LIGAS,ESTADUAIS,nomeDosTitulos} from '../dados/data.js';
-import {clubesDoMundo} from '../simulacao/mundoVivo.js';
+import {clubesDoMundo,compactarJogos,jogosDaEdicao} from '../simulacao/mundoVivo.js';
 import {simularClassificacoesMundoTecnico} from '../treinador/classificacoesMundoTecnico.js';
 import {simularMundo,nomeCanonico} from '../historia/historiaFutebol.js';
 import {geradorTecnico} from '../treinador/momentosTecnico.js';
@@ -15,16 +15,44 @@ export function clubesDoCompleto(c,mundo){
  const ligas=ligasDoCompleto(c);
  return clubesDoMundo({...c,mundo,ligas},CLUBES.map(cl=>({...cl,liga:ligas[cl.nome]||cl.liga})));
 }
-/** Calendários externos são simulados uma vez; os placares do usuário prevalecem. */
+function simularLigasExternas(c,card,mundo,progresso){
+ const ano=card.ano??anoTemporadaCarreira(c),ligaId=card.ligaId||c.clube.liga;
+ const ligas=ligasDoCompleto(c),clubes=clubesDoCompleto(c,mundo);
+ const seed=`${c.codigoMundo||c.codigo||c.museuId||c.nome}|${ano}|ligas-completo`;
+ const jogosAnteriores=card.ligasEmDisputa?.ano===ano&&card.ligasEmDisputa.ligaId===ligaId
+  ?Object.fromEntries(Object.entries(card.ligasEmDisputa.ligas).map(([liga,edicao])=>[liga,jogosDaEdicao(edicao).map(({rodada,casa,fora,golsCasa,golsFora})=>({rodada,casa,fora,golsCasa,golsFora}))]))
+  :{};
+ return simularClassificacoesMundoTecnico({
+  clubes:clubes.filter(cl=>cl.liga!==ligaId&&(cl.liga==='serieC'||!LIGAS[cl.liga]?.naoJogavel)),
+  ligasMundo:ligas,ano,progresso,jogosAnteriores,rng:geradorTecnico(seed),
+  rngLigaRodada:(liga,rodada)=>geradorTecnico(`${seed}|${liga}|${rodada}`),
+ });
+}
+
+/** O relógio das ligas externas acompanha a fração disputada da liga local. */
+export function avancarLigasExternas(c,card,mundo,rodada,totalRodadas){
+ if(!totalRodadas)return;
+ const ano=card.ano??anoTemporadaCarreira(c),ligaId=card.ligaId||c.clube.liga;
+ const progresso=Math.min(1,rodada/totalRodadas);
+ const anterior=card.ligasEmDisputa;
+ if(anterior?.ano===ano&&anterior.ligaId===ligaId&&anterior.progresso>=progresso)return;
+ const simuladas=simularLigasExternas(c,card,mundo,progresso);
+ const ligas=Object.fromEntries(Object.entries(simuladas).filter(([,t])=>t.origem==='simulacao-global')
+  .map(([liga,{jogos,classificacao}])=>[liga,{jogos:compactarJogos(jogos),classificacao}]));
+ card.ligasEmDisputa={ano,ligaId,progresso,ligas};
+}
+
+/** Fecha o calendário usando os resultados já registrados durante a temporada. */
 export function prepararMundoTemporada(c,card,mundo){
  if(card.calendarioMundoVersao===1)return card;
  const ano=card.ano??anoTemporadaCarreira(c),ligaId=card.ligaId||c.clube.liga,clube=c.clube.nome;
- const ligas=ligasDoCompleto(c),clubes=clubesDoCompleto(c,mundo);
- const classificacoesMundo=simularClassificacoesMundoTecnico({clubes:clubes.filter(cl=>cl.liga!==ligaId&&(cl.liga==='serieC'||!LIGAS[cl.liga]?.naoJogavel)),ligasMundo:ligas,ano,rng:geradorTecnico(`${c.codigo||c.nome}|${ano}|ligas-completo`)});
+ const ligas=ligasDoCompleto(c);
+ const classificacoesMundo=simularLigasExternas(c,card,mundo,1);
  if(card.classificacao?.length)classificacoesMundo[ligaId]={liga:ligaId,origem:'partidas-jogador',classificacao:card.classificacao.map(t=>({...t})),jogos:(card.jogosLiga||[]).map(j=>({...j}))};
  const nomes=nomeDosTitulos(ligaId);
  const competicoesPreservadas=[COPAS_NACIONAIS[primeiraLiga(ligaId)],nomes.copa,card.copaNacional?.nome,card.continental?.nome,card.continentalPendente?.nome].filter(Boolean);
  const novo={...card,ano,ligaId,clube,ligaNome:LIGAS[ligaId]?.nome||card.ligaNome,ligaMult:LIGAS[ligaId]?.mult??card.ligaMult,calendarioMundoVersao:1,classificacoesMundo,torneiosMundo:[],competicoesPreservadas};
+ delete novo.ligasEmDisputa;
  simularMundo({...c,mundo,ligas},novo,{preservarTorneios:true});
  const campeoes=new Map();
  const inserir=t=>{if(t.clube&&t.nome)campeoes.set(nomeCanonico(t.nome),{...t,ano,nome:nomeCanonico(t.nome)});};
@@ -59,7 +87,7 @@ export function registrarPremioCalendario(mundo,vencedor){
 }
 
 export function vagasProximaTemporada(c,card){
- return calcularVagasRapidas({ano:card.ano,classificacoesMundo:card.classificacoesMundo,torneios:[...(card.torneiosMundo||[]),...(card.torneios||[])],ligasMundo:ligasDoCompleto(c),seed:c.codigoMundo||c.codigo||c.nome});
+ return calcularVagasRapidas({ano:card.ano,classificacoesMundo:card.classificacoesMundo,torneios:[...(card.torneiosMundo||[]),...(card.torneios||[])],ligasMundo:ligasDoCompleto(c),seed:c.codigoMundo||c.codigo||c.museuId||c.nome});
 }
 export function aplicarVagaTemporada(c,card){
  const ano=anoTemporadaCarreira(c);
@@ -72,7 +100,7 @@ export function aplicarVagaTemporada(c,card){
 export function ajustarCardNovoClube(c,card){
  if(!card)return card;
  const liga=LIGAS[c.clube.liga],novo={...card,ligaId:c.clube.liga,ligaNome:liga?.nome,ligaMult:liga?.mult};
- delete novo.campanhasCompletas;delete novo.pernasCopas;delete novo.torneios;
+ delete novo.ligasEmDisputa;delete novo.campanhasCompletas;delete novo.pernasCopas;delete novo.torneios;
  if(card.continentalPendente||card.continental){
   novo.continental=null;
   novo.continentalPendente=liga?.continental?{nome:liga.continental,formato:['Champions League','Europa League','Conference League'].includes(liga.continental)?'liga':'grupo'}:null;

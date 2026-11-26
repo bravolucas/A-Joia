@@ -2,9 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {CLUBES,LIGAS,ANO_INICIO} from '../src/dados/data.js';
 import {estadoInicialClubes,girarLigas} from '../src/comum/lib.js';
-import {prepararMundoTemporada,clubesDoCompleto,ligasDoCompleto,creditarCampeoesCalendario,registrarPremioCalendario} from '../src/completo/mundoTemporada.js';
+import {avancarLigasExternas,prepararMundoTemporada,clubesDoCompleto,ligasDoCompleto,creditarCampeoesCalendario,registrarPremioCalendario} from '../src/completo/mundoTemporada.js';
 import {estatisticasDasPartidas} from '../src/simulacao/estatisticasMundo.js';
 import {jogosDaCampanha} from '../src/competicoes/jogosCampanha.js';
+import {jogosDaEdicao} from '../src/simulacao/mundoVivo.js';
 import {registrarAnoHistoria} from '../src/historia/historiaFutebol.js';
 const carreira=()=>({codigo:'MUNDO-COMPLETO',idade:24,clube:CLUBES.find(c=>c.nome==='Santos'),estadoClubes:estadoInicialClubes()});
 let pronto;
@@ -129,5 +130,38 @@ test('sorteio continental funciona sem ano explícito em clubes de continentes d
  for(const nome of ['Santos','Arsenal']){
   const c={idade:24,clube:CLUBES.find(x=>x.nome===nome)};
   const adversario=sortearAdversario(c,'continental');assert.equal(typeof adversario,'string');assert.ok(adversario.length);assert.notEqual(adversario,nome);
+ }
+});
+
+test('ligas externas avançam com a carreira e preservam placares após salvar e fechar o ano', () => {
+ const c=carreira(),card={};
+ avancarLigasExternas(c,card,null,4,38);
+ const parcial=card.ligasEmDisputa.ligas.inglaterra;
+ assert.ok(parcial.classificacao.every(clube=>clube.jogos===4));
+ const primeirosJogos=jogosDaEdicao(parcial);
+ assert.equal(primeirosJogos.length,40);
+ const retomado=JSON.parse(JSON.stringify(card));
+ avancarLigasExternas(c,retomado,null,4,38);
+ assert.deepEqual(retomado,card);
+ avancarLigasExternas(c,retomado,null,19,38);
+ assert.ok(retomado.ligasEmDisputa.ligas.inglaterra.classificacao.every(clube=>clube.jogos===19));
+ const final=prepararMundoTemporada(c,retomado,null);
+ const emLote=prepararMundoTemporada(c,{},null);
+ assert.deepEqual(final.classificacoesMundo,emLote.classificacoesMundo);
+ const jogoSemMetadados=({rodada,casa,fora,golsCasa,golsFora})=>({rodada,casa,fora,golsCasa,golsFora});
+ assert.deepEqual(final.classificacoesMundo.inglaterra.jogos.slice(0,40).map(jogoSemMetadados),primeirosJogos.map(jogoSemMetadados));
+ assert.equal(final.ligasEmDisputa,undefined);
+});
+
+test('calendário de 20 clubes evita sequências longas com o mesmo mando', () => {
+ const c=carreira(),card={};
+ avancarLigasExternas(c,card,null,38,38);
+ const edicao=card.ligasEmDisputa.ligas.inglaterra;
+ const jogos=jogosDaEdicao(edicao);
+ for(const {nome} of edicao.classificacao){
+  const mandos=jogos.filter(j=>j.casa===nome||j.fora===nome).map(j=>j.casa===nome?'C':'F').join('');
+  assert.equal(mandos.length,38);
+  assert.equal(mandos.replaceAll('F','').length,19);
+  assert.doesNotMatch(mandos,/C{4}|F{4}/);
  }
 });

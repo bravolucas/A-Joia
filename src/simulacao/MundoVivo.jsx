@@ -1,3 +1,4 @@
+import SumulaLiga from './SumulaLiga.jsx';
 import React,{useId,useMemo,useState} from 'react';
 import {jogosDaEdicao,historicoAtleta} from './mundoVivo.js';
 import {agruparPartidasCompeticao} from './partidasCompeticao.js';
@@ -41,7 +42,8 @@ export function EdicoesCompeticao({c,nome}){
  const edicao=edicoes.find(e=>e.ano===Number(ano))||edicoes[0];
  const grupoAtual=edicao?.grupos?.find(g=>g.grupo===grupo)||edicao?.grupos?.[0];
  const classificacao=grupoAtual?.classificacao||edicao?.classificacao;
- const jogos=useMemo(()=>jogosDaEdicao(edicao),[edicao]);
+ const jogos=useMemo(()=>jogosDaEdicao(edicao,{incluirSumulas:jogosAbertos}),[edicao,jogosAbertos]);
+ const atletas=useMemo(()=>new Map(Object.values(u?.atletas||{}).map(p=>[String(p.id),p.nome])),[u]);
  const partidasFiltradas=useMemo(()=>jogos.filter(j=>!equipe||[j.casa,j.fora].includes(equipe)),[jogos,equipe]);
  const gruposPartidas=useMemo(()=>agruparPartidasCompeticao(edicao,partidasFiltradas),[edicao,partidasFiltradas]);
  const grupoPartidas=gruposPartidas.find(g=>g.chave===etapa)||gruposPartidas[0];
@@ -89,7 +91,7 @@ export function EdicoesCompeticao({c,nome}){
      <ol className="mv-jogos">{partidasVisiveis.map((j,i)=><li key={[grupoPartidas.chave,paginaAtual,i,j.casa,j.fora].join('|')}>
        <small>{j.fase|| (typeof j.rodada==='number'?'Rodada '+j.rodada:typeof j.rodada==='string'?j.rodada:grupoPartidas.rotulo)}</small>
        <span><LinkEntidade tipo="clube" nome={j.casa}/></span><b>{j.golsCasa} × {j.golsFora}</b><span><LinkEntidade tipo="clube" nome={j.fora}/></span>
-       {j.penaltis&&<small>Pênaltis · {j.vencedor}</small>}
+       {j.penaltis&&<small>Pênaltis · {j.vencedor}</small>}<SumulaLiga jogo={j} atletas={atletas}/>
      </li>)}</ol>
      {totalPaginas>1&&<div className="mv-partidas-paginacao">
        <button type="button" disabled={!paginaAtual} onClick={()=>PA(n=>n-1)}>Partidas anteriores</button>

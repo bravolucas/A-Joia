@@ -1,6 +1,7 @@
+import {jogosDaEdicao} from '../src/simulacao/mundoVivo.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {CLUBES} from '../src/dados/data.js';
+import {CLUBES,LIGAS} from '../src/dados/data.js';
 import {criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa,simularCampanhaCopa} from '../src/treinador/copasEscolha.js';
 import {criarMundialAnual,criarMundial32,eCampeaoPrincipal} from '../src/competicoes/mundialRapido.js';
 import {dataCopa,criarAgenda,rotuloData} from '../src/competicoes/calendarioCopas.js';
@@ -50,4 +51,63 @@ test('treinador campeão continental recebe campanha mundial no mesmo ano e não
 });
 test('save anterior sem chave mantém o adversário visível e continua com outros sobreviventes',()=>{
  let cp=criarCampanhaCopa({nome:'Copa do Brasil',tipo:'copa',usuario:'Flamengo',forcaUsuario:99,clubes:brasil,ano:2030,formato:'mata',seed:'MIGRAR-CHAVE'});const adversario=cp.adversario.nome;delete cp.quadroMata;delete cp.sobreviventes;delete cp.reservados;const d=decisaoCopa(cp),novo=escolherCopa(cp,d.chave,'pressionar');assert.deepEqual([novo.resultado.jogo.casa,novo.resultado.jogo.fora].sort(),[cp.usuario,adversario].sort(),'o rival da ida permanece o mesmo independentemente do mando');assert.equal(novo.resultado.jogoIda,true);assert.ok(novo.quadroMata.length>1);let c=novo;for(let i=0;c.fase!=='fim'&&i<40;i++)c=proximo(c);assert.ok(c.campeao);assert.notEqual(c.faseUsuario,'Sem adversário elegível');
+});
+
+test('Modo Rápido disputa ligas externas pela data e termina com os mesmos placares do lote', () => {
+ const c=criarJogador({nome:'Calendário',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:9,codigo:'LIGAS-EXTERNAS'});
+ c.clubeNome='Flamengo';
+ c.flags.baseEscolhida=true;
+ const lote=jogarTemporada(c).card.classificacoesMundo;
+ let {card}=jogarTemporada(c,{copasInterativas:true});
+ assert.equal(card.classificacoesMundo.inglaterra,undefined);
+ assert.equal(card.calendarioLigasExternas.ligas.inglaterra.progresso<1,true);
+ assert.equal(card.calendarioLigasExternas.ligas.argentina,undefined);
+ let parcial;
+ for(let passos=0;card.calendarioCopas&&passos<250;passos++){
+  const p=card.calendarioCopas;
+  if(p.pausa?.id==='metade'){
+   parcial=card.calendarioLigasExternas.ligas.argentina;
+   assert.ok(parcial.classificacao.every(t=>t.jogos>0&&t.jogos<lote.argentina.classificacao[0].jogos));
+   card=JSON.parse(JSON.stringify(card));
+  }
+  if(p.pausa?.tipo==='momento')card=concluirEventoJogador(aplicarMomento(card,true));
+  else if(p.pausa?.tipo==='selecao')card=concluirEventoJogador({...card,copa:{...card.copa,fim:true}});
+  else{
+   const decisao=decisaoCopa(p.campeonatos[p.indice]);
+   card=escolherCopaJogador(card,chaveCopaJogador(card),decisao?decisao.penaltis?'canto':'controlar':'continuar');
+  }
+ }
+ assert.ok(parcial);
+ assert.equal(card.calendarioCopas,null);
+ assert.equal(card.calendarioLigasExternas,undefined);
+ const jogosDaLiga=card.classificacoesMundo.argentina.jogos;
+ assert.ok(jogosDaLiga.length>0&&jogosDaLiga.every(j=>j.sumula?.every(Boolean)));
+ assert.ok(jogosDaLiga.some(j=>j.sumula.some(f=>f.ausencias.includes('lesão'))));
+ assert.ok(jogosDaLiga.some(j=>j.sumula.some(f=>f.ausencias.includes('suspensão'))));
+ for(const {sumula} of jogosDaLiga)for(const ficha of sumula){
+  const ids=ficha.minutos.filter((_,i)=>i%2===0);
+  assert.equal(new Set(ids).size,ids.length);
+  assert.equal(ficha.minutos.filter((_,i)=>i%2===1).reduce((total,m)=>total+m,0),ficha.titulares*90);
+  assert.ok(ficha.ausencias.every((valor,i)=>i%2===0||valor==='poupado no início'||!ids.includes(ficha.ausencias[i-1])));
+ }
+ const {jogos: jogosLocais}=card.classificacoesMundo.brasileirao;
+ assert.ok(jogosLocais.some(j=>j.casa!=='Flamengo'&&j.fora!=='Flamengo'&&j.sumula));
+ assert.ok(jogosLocais.every(j=>(j.casa!=='Flamengo'&&j.fora!=='Flamengo')||!j.sumula));
+ const {c:fim}=fecharTemporada(c,card);
+ const edicao=fim.universo.edicoes.find(e=>e.nome===LIGAS.argentina.nome);
+ assert.deepEqual(jogosDaEdicao(edicao).map(j=>j.sumula),jogosDaLiga.map(j=>j.sumula));
+ const jogosPorAtleta=new Map();
+ for(const {sumula} of jogosDaLiga)for(const ficha of sumula){
+  for(let i=0;i<ficha.minutos.length;i+=2){
+   const id=ficha.minutos[i];
+   jogosPorAtleta.set(id,(jogosPorAtleta.get(id)||0)+1);
+  }
+ }
+ for(const atleta of fim.mundo.jogadores){
+  const jogos=atleta.porCompeticao?.find(t=>t.nome===LIGAS.argentina.nome)?.jogos||0;
+  assert.equal(jogos,jogosPorAtleta.get(atleta.id)||0);
+ }
+ for(const liga of Object.keys(lote).filter(liga=>liga!=='brasileirao')){
+  assert.deepEqual(card.classificacoesMundo[liga],lote[liga]);
+ }
 });

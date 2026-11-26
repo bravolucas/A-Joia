@@ -3,18 +3,9 @@ import {ordenarTabelaBrasileira} from '../simulacao/desempateBrasileiro.js';
 import {simularSerieC, regulamentoSerieC} from '../simulacao/serieC.js';
 import {progredirBrasilInferior} from '../simulacao/progressaoBrasilInferior.js';
 
-const limitar = (valor, minimo, maximo) => Math.max(minimo, Math.min(maximo, valor));
+import {sortearPlacar} from '../competicoes/motorPartida.js';
 
-function sortearPoisson(media, rng) {
-  const limite = Math.exp(-limitar(media, 0.05, 5));
-  let produto = 1;
-  let gols = 0;
-  do {
-    gols++;
-    produto *= rng();
-  } while (produto > limite && gols < 12);
-  return gols - 1;
-}
+const limitar = (valor, minimo, maximo) => Math.max(minimo, Math.min(maximo, valor));
 
 function criarTabela(clubes) {
   return new Map(clubes.map(clube => [clube.nome, {
@@ -68,32 +59,74 @@ function ordenarTabela(linhas, jogos = [], liga = null) {
   return ordenadas.map((linha, indice) => ({ ...linha, posicao: jaClassificada ? linha.posicao : indice + 1 }));
 }
 
-function simularPartida(casa, fora, tabela, rng, jogos, rodada) {
-  const ataqueCasa=casa.ataque??Number(casa.elenco??casa.forca??50),defesaCasa=casa.defesa??Number(casa.elenco??casa.forca??50);
-  const ataqueFora=fora.ataque??Number(fora.elenco??fora.forca??50),defesaFora=fora.defesa??Number(fora.elenco??fora.forca??50);
-  const golsCasa = sortearPoisson(limitar(1.35 + (ataqueCasa-defesaFora) * 0.035, 0.25, 3.5), rng);
-  const golsFora = sortearPoisson(limitar(1.12 + (ataqueFora-defesaCasa) * 0.03, 0.2, 3.2), rng);
-  registrarPartida(tabela, casa, fora, golsCasa, golsFora);
-  jogos?.push({rodada,casa:casa.nome,fora:fora.nome,golsCasa,golsFora});
+export function simularPlacarDeLiga(casa, fora, formaCasa = 0, formaFora = 0, rng = Math.random) {
+  const forcaCasa = Number(casa.elenco ?? casa.forca ?? 50);
+  const forcaFora = Number(fora.elenco ?? fora.forca ?? 50);
+  const ataqueCasa = casa.ataque ?? forcaCasa;
+  const defesaCasa = casa.defesa ?? forcaCasa;
+  const ataqueFora = fora.ataque ?? forcaFora;
+  const defesaFora = fora.defesa ?? forcaFora;
+  const momento = (formaCasa - formaFora) * 0.16;
+  const {golsA, golsB} = sortearPlacar({
+    a: limitar(1.35 + (ataqueCasa - defesaFora) * 0.035 + momento, 0.25, 3.5),
+    b: limitar(1.12 + (ataqueFora - defesaCasa) * 0.03 - momento, 0.2, 3.2),
+  }, rng);
+  return {golsCasa: golsA, golsFora: golsB};
 }
 
-export function simularLigaMundo(clubes, rng = Math.random, liga = clubes[0]?.liga) {
-  const tabela = criarTabela(clubes), jogos = [], primeiroTurno = [];
-  const base = [...clubes];
-  if(base.length<2)return {classificacao:ordenarTabela([...tabela.values()], jogos, liga),jogos};
-  if(base.length%2)base.push(null);
-  const rodadas=base.length-1;
-  for(let rodada=0;rodada<rodadas;rodada++){
-    for(let i=0;i<base.length/2;i++){
-      const a=base[i],b=base[base.length-1-i];if(!a||!b)continue;
-      const casa=(rodada+i)%2===0?a:b,fora=casa===a?b:a;
-      primeiroTurno.push({casa,fora,rodada:rodada+1});
-      simularPartida(casa,fora,tabela,rng,jogos,rodada+1);
-    }
-    base.splice(1,0,base.pop());
+export function registrarFormaDaLiga(forma, {casa, fora, golsCasa, golsFora}) {
+  const saldo = limitar((golsCasa - golsFora) / 2, -1, 1);
+  forma.set(casa, (forma.get(casa) ?? 0) * 0.75 + saldo * 0.25);
+  forma.set(fora, (forma.get(fora) ?? 0) * 0.75 - saldo * 0.25);
+}
+
+export function simularLigaMundo(clubes, rng = Math.random, liga = clubes[0]?.liga, {
+  progresso = 1, jogosAnteriores = [], rngRodada, disputarPartida,
+} = {}) {
+  const tabela = criarTabela(clubes), jogos = [...jogosAnteriores], forma = new Map();
+  const base = [...clubes], primeiroTurno = [];
+  if (base.length % 2) base.push(null);
+  const rodadas = Math.max(0, base.length - 1);
+  const ateRodada = Math.floor(2 * rodadas * progresso + 1e-9);
+  const ultimaRodada = jogos.at(-1)?.rodada ?? 0;
+
+  for (const jogo of jogos) {
+    const {casa, fora, golsCasa, golsFora} = jogo;
+    registrarPartida(tabela, {nome: casa}, {nome: fora}, golsCasa, golsFora);
+    registrarFormaDaLiga(forma, jogo);
   }
-  for(const j of primeiroTurno)simularPartida(j.fora,j.casa,tabela,rng,jogos,j.rodada+rodadas);
-  return {classificacao:ordenarTabela([...tabela.values()], jogos, liga),jogos};
+
+  const disputar = (casa, fora, rodada, sorteio) => {
+    const formaCasa = forma.get(casa.nome), formaFora = forma.get(fora.nome);
+    const placar = disputarPartida
+      ? disputarPartida(casa, fora, rodada, formaCasa, formaFora, sorteio)
+      : simularPlacarDeLiga(casa, fora, formaCasa, formaFora, sorteio);
+    const {golsCasa, golsFora} = placar;
+    registrarPartida(tabela, casa, fora, golsCasa, golsFora);
+    const jogo = {rodada, casa: casa.nome, fora: fora.nome, ...placar};
+    jogos.push(jogo);
+    registrarFormaDaLiga(forma, jogo);
+  };
+
+  for (let rodada = 1; rodada <= rodadas && rodada <= ateRodada; rodada++) {
+    const confrontos = [];
+    const sorteio = rodada > ultimaRodada ? rngRodada?.(rodada) ?? rng : null;
+    for (let i = 0; i < base.length / 2; i++) {
+      const a = base[i], b = base[base.length - 1 - i];
+      if (!a || !b) continue;
+      // O clube fixo alterna por rodada. Os demais alternam conforme giram.
+      const [casa, fora] = (i === 0 ? rodada - 1 : i) % 2 === 0 ? [a, b] : [b, a];
+      confrontos.push({casa, fora});
+      if (sorteio) disputar(casa, fora, rodada, sorteio);
+    }
+    primeiroTurno.push(confrontos);
+    base.splice(1, 0, base.pop());
+  }
+  for (let rodada = Math.max(rodadas, ultimaRodada) + 1; rodada <= ateRodada; rodada++) {
+    const sorteio = rngRodada?.(rodada) ?? rng;
+    for (const {casa, fora} of primeiroTurno[rodada - rodadas - 1]) disputar(fora, casa, rodada, sorteio);
+  }
+  return {classificacao: ordenarTabela([...tabela.values()], jogos, liga), jogos};
 }
 
 /**
@@ -111,6 +144,10 @@ export function simularClassificacoesMundoTecnico({
   jogosTreinador = [],
   ano = 2026,
   rng = Math.random,
+  progresso = 1,
+  jogosAnteriores = {},
+  rngLigaRodada,
+  disputarPartida,
 }) {
   const clubesUnicos = [...new Map(clubes.filter(clube => clube?.nome).map(clube => [clube.nome, clube])).values()];
   const porLiga = new Map();
@@ -177,6 +214,7 @@ export function simularClassificacoesMundoTecnico({
     }
     const ordenados = [...participantes].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
     if (liga === 'serieC') {
+      if (progresso < 1) continue;
       const esperados = regulamentoSerieC(ano).participantes;
       if (ordenados.length !== esperados) {
         // Saves legados podem ainda não ter recebido todos os acessos da D.
@@ -197,7 +235,10 @@ export function simularClassificacoesMundoTecnico({
       };
       continue;
     }
-    resultado[liga] = { liga, origem: 'simulacao-global', ...simularLigaMundo(ordenados, rng, liga) };
+    resultado[liga] = { liga, origem: 'simulacao-global', ...simularLigaMundo(ordenados, rng, liga, {
+      progresso, jogosAnteriores: jogosAnteriores[liga], disputarPartida,
+      rngRodada: rngLigaRodada && (rodada => rngLigaRodada(liga, rodada)),
+    }) };
   }
   return resultado;
 }

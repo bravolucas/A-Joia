@@ -1,3 +1,4 @@
+import {avancarCalendarioLigasRapido,finalizarCalendarioLigasRapido} from './ligasCalendarioRapido.js';
 import {clubesDoMundo} from '../simulacao/mundoVivo.js';
 import {criarAgenda,dataCopa,selecionarAgenda,avancarPausa,chaveAgenda} from '../competicoes/calendarioCopas.js';
 import {clubesParaCopas,COPAS_NACIONAIS,vagaJogador,nomeVaga,regiaoDaLiga,calcularVagasRapidas} from '../competicoes/regrasCopasRapidas.js';
@@ -53,7 +54,18 @@ export function prepararCopasJogador(c,card){
  const p=criarAgenda(campeonatos,{ano:card.ano,clube:clube.nome,liga:{nome:card.ligaNome,europa:regiao==='europa',brasil:clube.pais==='Brasil'},externos});
  return sincronizarCard({...card,titulos:(card.titulos||[]).filter(t=>!['estadual','copa','continental','mundial'].includes(t.tipo)),destaques:(card.destaques||[]).filter(x=>!/^Vice-campeão da |Perdeu a final do Mundial/.test(x)),continental:null,copaNac:null,mundialRes:null,pendente:null,filaMomentos:[],calendarioCopas:p,torneios:[],estadual:regional?{nome:regional.nome,estado:regional.estado,fase:'Em disputa'}:null});
 }
-function sincronizarCard(card){const p=card.calendarioCopas,cp=p?.campeonatos[p.indice];return {...card,estadualEmJogo:cp?.tipo==='estadual'?cp:null,...(p?.pausa?.tipo==='momento'?{pendente:p.pausa.momento,filaMomentos:[]}: {})};}
+function sincronizarCard(card){
+ const p=card.calendarioCopas,cp=p?.campeonatos[p.indice];
+ const novo={...card,estadualEmJogo:cp?.tipo==='estadual'?cp:null,...(p?.pausa?.tipo==='momento'?{pendente:p.pausa.momento,filaMomentos:[]}: {})};
+ if(card.calendarioLigasExternas){
+  if(p)novo.calendarioLigasExternas=avancarCalendarioLigasRapido(card.calendarioLigasExternas,p.dataAtual);
+  else{
+   novo.classificacoesMundo={...card.classificacoesMundo,...finalizarCalendarioLigasRapido(card.calendarioLigasExternas)};
+   delete novo.calendarioLigasExternas;
+  }
+ }
+ return novo;
+}
 export function chaveCopaJogador(card){const p=card.calendarioCopas;if(!p)return null;if(p.pausa)return chaveAgenda(p);const cp=p.campeonatos[p.indice];return decisaoCopa(cp)?.chave||`${cp.seed}|resultado|${cp.etapa}`;}
 export function concluirEventoJogador(card){const p=card.calendarioCopas;if(!p?.pausa)return card;const pronto=card.copa?.fim?{...p,vistos:[...p.vistos,...p.eventos.filter(x=>x.tipo==='selecao').map(x=>x.id)]}:p;return sincronizarCard({...card,calendarioCopas:avancarPausa(pronto),pendente:null,...(p.pausa.tipo==='liga'&&p.pausa.id==='fim'?{ligaCelebrada:true}:{})});}
 export function escolherCopaJogador(card,chave,opcao){

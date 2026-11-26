@@ -1,6 +1,9 @@
+import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
+import LigasEmDisputa from '../simulacao/LigasEmDisputa.jsx';
+import {registrarFormaDaLiga,simularPlacarDeLiga} from '../treinador/classificacoesMundoTecnico.js';
 import {COPAS_NACIONAIS} from '../competicoes/regrasCopasRapidas.js';
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
-import {prepararMundoTemporada,creditarCampeoesCalendario,registrarPremioCalendario,clubesDoCompleto,vagasProximaTemporada,aplicarVagaTemporada,ajustarCardNovoClube} from './mundoTemporada.js';
+import {avancarLigasExternas,prepararMundoTemporada,creditarCampeoesCalendario,registrarPremioCalendario,clubesDoCompleto,vagasProximaTemporada,aplicarVagaTemporada,ajustarCardNovoClube} from './mundoTemporada.js';
 import {estatisticasDasPartidas} from '../simulacao/estatisticasMundo.js';
 import {geradorTecnico} from '../treinador/momentosTecnico.js';
 import {prepararCopaPersistente,registrarJogoPersistente} from './copasPersistentes.js';
@@ -938,6 +941,19 @@ function gerarCalendarioLiga(clube, todosClubes, ligaAtual) {
   const returno = calendario.map((rodada) => rodada.map((p) => ({ casa: p.fora, fora: p.casa })));
   return [...calendario, ...returno];
 }
+function formaDaTemporada(card, rodadasConcluidas) {
+  const forma = new Map();
+  for (const jogo of card.jogosLiga || []) {
+    if (jogo.rodada <= rodadasConcluidas) registrarFormaDaLiga(forma, jogo);
+  }
+  return forma;
+}
+function simularJogoEntreClubes(c, {casa, fora}, forma, rodada) {
+  const estado = {...c, mundo};
+  const escala = clube => avaliarClubeNoMundo(estado, clube, {bonus: c.investimentosClube?.[clube.nome] || 0});
+  const rng = geradorTecnico(`${c.codigoMundo||c.codigo||c.museuId||c.nome}|${anoTemporadaCarreira(c)}|${rodada}|${casa.nome}|${fora.nome}`);
+  return simularPlacarDeLiga(escala(casa), escala(fora), forma.get(casa.nome), forma.get(fora.nome), rng);
+}
 /* Confronto: força de cada time (+ um empurrão se o jogador reforça aquele lado) + mando de campo, com Poisson pra variância real */
 function simularPartidaLiga(casa, fora, clubeJogadorNome, forcaClubeJogador, ovrJogador) {
   let forcaCasa = casa.nome === clubeJogadorNome ? forcaClubeJogador : casa.forca;
@@ -1035,6 +1051,7 @@ function simularRodadaAtual(c, ta, bonusGol = 0, bonusAssist = 0, forcarNaoEscal
   const rodada = ta.calendario[ta.rodadaAtual];
   let tabela = ta.tabela;
   const historico = [];
+  const forma = formaDaTemporada(ta.cardOriginal, ta.rodadaAtual);
   let meuResultadoRodada = null;
   let golsRestantes = ta.golsRestantes, assistRestantes = ta.assistRestantes;
   const forcaJogador = calcOVR(c.attrs, c.posicao);
@@ -1044,7 +1061,9 @@ function simularRodadaAtual(c, ta, bonusGol = 0, bonusAssist = 0, forcarNaoEscal
   const forcaClube = forcaEfetivaClube(c, c.clube,{participacao:ausente?0:1});
   rodada.forEach((partida) => {
     const ehJogoDoJogador = partida.casa.nome === c.clube.nome || partida.fora.nome === c.clube.nome;
-    let { golsCasa, golsFora } = simularPartidaLiga({...partida.casa,forca:forcaEfetivaClube(c,partida.casa)}, {...partida.fora,forca:forcaEfetivaClube(c,partida.fora)}, c.clube.nome, forcaClube, forcaJogador);
+    let { golsCasa, golsFora } = ehJogoDoJogador
+      ? simularPartidaLiga({...partida.casa,forca:forcaEfetivaClube(c,partida.casa)}, {...partida.fora,forca:forcaEfetivaClube(c,partida.fora)}, c.clube.nome, forcaClube, forcaJogador)
+      : simularJogoEntreClubes(c, partida, forma, ta.rodadaAtual + 1);
     if (ehJogoDoJogador && bonusGol) { if (partida.casa.nome === c.clube.nome) golsCasa += bonusGol; else golsFora += bonusGol; }
     tabela = atualizarTabelaPartida(tabela, partida.casa.nome, partida.fora.nome, golsCasa, golsFora);
     historico.push({casa:partida.casa.nome,fora:partida.fora.nome,golsCasa,golsFora,rodada:ta.rodadaAtual+1, texto: `${emojiClube(partida.casa.nome)} ${partida.casa.nome} ${golsCasa} x ${golsFora} ${partida.fora.nome} ${emojiClube(partida.fora.nome)}`, destaque: ehJogoDoJogador });
@@ -1136,6 +1155,7 @@ function simularRodadaAtual(c, ta, bonusGol = 0, bonusAssist = 0, forcarNaoEscal
     }
   });
   registrarRodadaTemporada(ta.cardOriginal, historico);
+  avancarLigasExternas(c, ta.cardOriginal, mundo, ta.rodadaAtual + 1, ta.calendario.length);
   return { tabela, historico, meuResultadoRodada, golsRestantes, assistRestantes };
 }
 /* Resolve todas as partidas da rodada MENOS a do jogador — usada pelo motor
@@ -1144,10 +1164,11 @@ function simularOutrasPartidasDaRodada(c, ta) {
   const rodada = ta.calendario[ta.rodadaAtual];
   let tabela = ta.tabela;
   const historico = [];
+  const forma = formaDaTemporada(ta.cardOriginal, ta.rodadaAtual);
   rodada.forEach((partida) => {
     const ehJogoDoJogador = partida.casa.nome === c.clube.nome || partida.fora.nome === c.clube.nome;
     if (ehJogoDoJogador) return;
-    const { golsCasa, golsFora } = simularPartidaLiga({...partida.casa,forca:forcaEfetivaClube(c,partida.casa)}, {...partida.fora,forca:forcaEfetivaClube(c,partida.fora)}, c.clube.nome, 0, 0);
+    const { golsCasa, golsFora } = simularJogoEntreClubes(c, partida, forma, ta.rodadaAtual + 1);
     tabela = atualizarTabelaPartida(tabela, partida.casa.nome, partida.fora.nome, golsCasa, golsFora);
     historico.push({casa:partida.casa.nome,fora:partida.fora.nome,golsCasa,golsFora,rodada:ta.rodadaAtual+1, texto: `${emojiClube(partida.casa.nome)} ${partida.casa.nome} ${golsCasa} x ${golsFora} ${partida.fora.nome} ${emojiClube(partida.fora.nome)}`, destaque: false });
   });
@@ -1157,6 +1178,7 @@ function simularOutrasPartidasDaRodada(c, ta) {
    partir do estado real resolvido pelo motor de lances, e conclui a rodada. */
 function concluirRodada(c, ta, { tabela, historico, meuResultadoRodada, golsRestantes, assistRestantes }) {
   registrarRodadaTemporada(ta.cardOriginal, historico);
+  avancarLigasExternas(c, ta.cardOriginal, mundo, ta.rodadaAtual + 1, ta.calendario.length);
   const proxRodada = ta.rodadaAtual + 1;
   const logJogos = meuResultadoRodada ? [...ta.logJogos, meuResultadoRodada] : ta.logJogos;
   const resultadosRodadas = [...ta.resultadosRodadas, meuResultadoRodada ? meuResultadoRodada.resultado : "E"];
@@ -2046,13 +2068,13 @@ function resolverTemporada(c, extraStats) {
         ...estatisticasReaisTemporada(card, jogosLista),
         nota: comNota.length ? +(comNota.reduce((a, j) => a + j.nota, 0) / comNota.length).toFixed(2) : card.nota,
       };
-      if (tabelaFinal) {
-        const classificacao = Object.values(tabelaFinal).sort((a, b) => b.pts - a.pts || b.sg - a.sg);
-        const minhaPos = classificacao.findIndex((r) => r.clube.nome === c.clube.nome);
-        card.classificacao=classificacao.map((r,i)=>({nome:r.clube.nome,posicao:i+1,jogos:r.j,pontos:r.pts,vitorias:r.v,empates:r.e,derrotas:r.d,golsPro:r.gp,golsContra:r.gc,saldoGols:r.sg}));
-        card.vencedorLiga=card.classificacao[0]?.nome;
-        if (minhaPos >= 0) { card.posLiga = minhaPos + 1; card.campeaoLiga = minhaPos === 0; }
-      }
+    }
+    if (tabelaFinal) {
+      const classificacao = Object.values(tabelaFinal).sort((a, b) => b.pts - a.pts || b.sg - a.sg);
+      const minhaPos = classificacao.findIndex((r) => r.clube.nome === c.clube.nome);
+      card.classificacao=classificacao.map((r,i)=>({nome:r.clube.nome,posicao:i+1,jogos:r.j,pontos:r.pts,vitorias:r.v,empates:r.e,derrotas:r.d,golsPro:r.gp,golsContra:r.gc,saldoGols:r.sg}));
+      card.vencedorLiga=card.classificacao[0]?.nome;
+      if (minhaPos >= 0) { card.posLiga = minhaPos + 1; card.campeaoLiga = minhaPos === 0; }
     }
     simularDefesas(c,card);
     c.codigoMundo ||= c.codigo || c.museuId || `${nome}|${nacionalidade}|${c.posicao}`;
@@ -5086,6 +5108,8 @@ function resolverTemporada(c, extraStats) {
                   <AttrBarDelta label="FIS" value={carreira.attrs.fisico} anterior={carreira.attrsAnteriores?.fisico} />
                   </div>
                 </Card>
+
+                <LigasEmDisputa estado={carreira.temporadaAndamento?.cardOriginal?.ligasEmDisputa} />
 
                 {carreira.temporadaAndamento?.historicoRodada?.length > 0 && (
                 <div className="grid gap-3">

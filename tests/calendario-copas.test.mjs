@@ -1,8 +1,10 @@
+import {prepararPartidasDeCopa} from '../src/jogador/ligasCalendarioRapido.js';
+import {formacaoTecnico, prepararDecisoesLigas} from '../src/jogador/decisoesLigasRapidas.js';
 import {jogosDaEdicao} from '../src/simulacao/mundoVivo.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {CLUBES,LIGAS} from '../src/dados/data.js';
-import {criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa,simularCampanhaCopa} from '../src/treinador/copasEscolha.js';
+import {avancarCopaAutomatica,criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa,simularCampanhaCopa} from '../src/treinador/copasEscolha.js';
 import {criarMundialAnual,criarMundial32,eCampeaoPrincipal} from '../src/competicoes/mundialRapido.js';
 import {dataCopa,criarAgenda,rotuloData} from '../src/competicoes/calendarioCopas.js';
 import {temaCopa} from '../src/competicoes/temasCopas.js';
@@ -53,7 +55,7 @@ test('save anterior sem chave mantém o adversário visível e continua com outr
  let cp=criarCampanhaCopa({nome:'Copa do Brasil',tipo:'copa',usuario:'Flamengo',forcaUsuario:99,clubes:brasil,ano:2030,formato:'mata',seed:'MIGRAR-CHAVE'});const adversario=cp.adversario.nome;delete cp.quadroMata;delete cp.sobreviventes;delete cp.reservados;const d=decisaoCopa(cp),novo=escolherCopa(cp,d.chave,'pressionar');assert.deepEqual([novo.resultado.jogo.casa,novo.resultado.jogo.fora].sort(),[cp.usuario,adversario].sort(),'o rival da ida permanece o mesmo independentemente do mando');assert.equal(novo.resultado.jogoIda,true);assert.ok(novo.quadroMata.length>1);let c=novo;for(let i=0;c.fase!=='fim'&&i<40;i++)c=proximo(c);assert.ok(c.campeao);assert.notEqual(c.faseUsuario,'Sem adversário elegível');
 });
 
-test('Modo Rápido disputa ligas externas pela data e termina com os mesmos placares do lote', () => {
+test('Modo Rápido preserva calendário, súmulas e estatísticas após retomar a temporada', () => {
  const c=criarJogador({nome:'Calendário',nac:'BRA',posicao:'ATA',origem:'base',personalidade:'ascensao',pe:'destro',numero:9,codigo:'LIGAS-EXTERNAS'});
  c.clubeNome='Flamengo';
  c.flags.baseEscolhida=true;
@@ -108,6 +110,76 @@ test('Modo Rápido disputa ligas externas pela data e termina com os mesmos plac
   assert.equal(jogos,jogosPorAtleta.get(atleta.id)||0);
  }
  for(const liga of Object.keys(lote).filter(liga=>liga!=='brasileirao')){
-  assert.deepEqual(card.classificacoesMundo[liga],lote[liga]);
+  assert.deepEqual(card.classificacoesMundo[liga].jogos.map(({casa,fora,rodada})=>[casa,fora,rodada]),
+   lote[liga].jogos.map(({casa,fora,rodada})=>[casa,fora,rodada]));
  }
+});
+
+
+test('janela cobre desfalque com empréstimo e técnico ameaçado muda o esquema da equipe',()=>{
+ const clubes=Array.from({length:8},(_,i)=>({nome:`Clube ${i}`,liga:'teste',elenco:80-i*2}));
+ const [favorito,cedente]=clubes.map(c=>c.nome);
+ const elencos={
+  [favorito]:[{id:1,nome:'Titular',setor:'ATA',ovr:75},{id:2,nome:'Reserva',setor:'ATA',ovr:64}],
+  [cedente]:Array.from({length:6},(_,i)=>({id:i+10,nome:`Atacante ${i}`,setor:'ATA',ovr:75-i})),
+ };
+ const tecnico={id:'tecnico-anterior',nome:'Treinador anterior',formacao:'4-3-3'};
+ const estado={ano:2030,seed:'janela',elencos,tecnicos:{[favorito]:tecnico},
+  periodos:{teste:{inicio:1.5,fim:12.05}}};
+ const memoria={1:{lesionadoAte:19,minutos:1400}};
+ const tabela=new Map(clubes.map((c,i)=>[c.nome,{nome:c.nome,jogos:16,pontos:i*3,saldoGols:0}]));
+ const r=prepararDecisoesLigas(estado,memoria);
+ r.iniciarRodada('teste',clubes,17,30,tabela);
+ assert.notEqual(formacaoTecnico(r.tecnicos[favorito]),'4-3-3');
+ assert.equal(r.decisoes.teste.filter(e=>e.tipo==='tecnico'&&e.clube===favorito).length,1);
+ assert.ok(r.elencos[favorito].some(p=>p.id===10&&p.emprestado));
+ assert.ok(r.elencos[cedente].every(p=>p.id!==10));
+ assert.equal(estado.elencos[cedente].length,6);
+ const salvo=prepararDecisoesLigas(JSON.parse(JSON.stringify({...estado,...r})),memoria);
+ salvo.iniciarRodada('teste',clubes,18,30,tabela);
+ assert.equal(salvo.decisoes.teste.filter(e=>e.tipo==='emprestimo').length,1);
+ assert.equal(salvo.elencos[favorito].filter(p=>p.id===10).length,1);
+});
+
+
+test('copa usa lesão da liga, acumula minutos e separa os cartões por competição',()=>{
+ const equipe={nome:'Clube A',liga:'teste',elenco:70,ataque:70,defesa:70};
+ const estado={seed:'copa-e-liga',equipes:[equipe,{...equipe,nome:'Clube B'}],periodos:{teste:{inicio:1,fim:11}},
+  elencos:{'Clube A':[{id:1,setor:'ATA',ovr:90},{id:2,setor:'ATA',ovr:80},{id:3,setor:'ATA',ovr:70}]},
+  memoria:{1:{lesionadoAte:3},2:{suspenso:true,minutos:90,carga:30,rodada:1}}};
+ const preparo=prepararPartidasDeCopa(estado,8,'Copa');
+ const placar=preparo.partida({nome:'Clube A',forca:70},{nome:'Clube B',forca:70},()=>({golsCasa:1,golsFora:0}));
+ assert.deepEqual(placar.sumula[0].ausencias,[1,'lesão']);
+ assert.ok(placar.sumula[0].minutos.filter((_,i)=>i%2===0).includes(2));
+ assert.equal(preparo.memoria[2].suspenso,true);
+ assert.ok(preparo.memoria[2].minutos>estado.memoria[2].minutos);
+ assert.ok(preparo.memoria[2].carga>estado.memoria[2].carga);
+ assert.equal(estado.memoria[2].disciplina,undefined);
+});
+
+test('os outros grupos jogam na mesma rodada e o mata-mata automático guarda cada perna separadamente',()=>{
+ const clubes=Array.from({length:8},(_,i)=>({nome:`Equipe ${i}`,forca:70+i}));
+ const copa=criarCampanhaCopa({nome:'Libertadores',tipo:'continental',usuario:'Equipe 0',forcaUsuario:70,
+  clubes,ano:2030,formato:'grupos',seed:'calendario-grupos',agendaIA:true});
+ let chamadas=[];
+ const partidaIA=(a,b,jogar)=>{chamadas.push([a.nome,b.nome]);return jogar(a,b);};
+ const primeira=escolherCopa(copa,decisaoCopa(copa).chave,'controlar',partidaIA);
+ assert.equal(Object.values(primeira.jogosOutrosGrupos).flat().length,2);
+ assert.equal(chamadas.length,3);
+ assert.ok(Object.values(primeira.jogosOutrosGrupos).flat().every(j=>j.rodada===1));
+
+ const fase={...copa,fase:'mata',tamanho:4,
+  pendenteIA:{ordem:['Equipe 1','Equipe 2','Equipe 3','Equipe 4'],playoff:false,entradaUsuario:false}};
+ chamadas=[];
+ const ida=avancarCopaAutomatica(fase,partidaIA);
+ assert.equal(ida.fases.length,0);
+ assert.equal(ida.idaIA.length,2);
+ const mandosIda=chamadas;
+ chamadas=[];
+ const volta=avancarCopaAutomatica(JSON.parse(JSON.stringify(ida)),partidaIA);
+ assert.ok(dataCopa(ida)>dataCopa(fase));
+ assert.deepEqual(chamadas,mandosIda.map(([a,b])=>[b,a]));
+ assert.equal(volta.fases[0].jogos.length,2);
+ assert.ok(volta.fases[0].jogos.every(j=>j.partidas.length===2&&j.vencedor));
+ assert.equal(volta.pendenteIA.ordem.length,2);
 });

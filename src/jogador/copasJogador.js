@@ -1,4 +1,4 @@
-import {avancarCalendarioLigasRapido,finalizarCalendarioLigasRapido} from './ligasCalendarioRapido.js';
+import {avancarCalendarioLigasRapido,finalizarCalendarioLigasRapido,prepararPartidasDeCopa} from './ligasCalendarioRapido.js';
 import {clubesDoMundo} from '../simulacao/mundoVivo.js';
 import {criarAgenda,dataCopa,selecionarAgenda,avancarPausa,chaveAgenda} from '../competicoes/calendarioCopas.js';
 import {clubesParaCopas,COPAS_NACIONAIS,vagaJogador,nomeVaga,regiaoDaLiga,calcularVagasRapidas} from '../competicoes/regrasCopasRapidas.js';
@@ -6,7 +6,7 @@ import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
 import {participantesEstadual} from '../competicoes/estaduaisRapidos.js';
 import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternacionais.js';
 import {eCampeaoPrincipal,criarMundialAnual,criarMundial32} from '../competicoes/mundialRapido.js';
-import {criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa,resumoCampanhaCopa} from '../treinador/copasEscolha.js';
+import {avancarCopaAutomatica,rodadaAutomaticaCopa,criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa,resumoCampanhaCopa} from '../treinador/copasEscolha.js';
 import {geradorTecnico} from '../treinador/momentosTecnico.js';
 import {torneiosDoHistorico} from '../competicoes/sorteio.js';
 
@@ -41,12 +41,12 @@ export function lancesJogadorCopa(card,campanha,chave){
 export function prepararCopasJogador(c,card){
  if(card.calendarioCopas||(c.temporadas||[]).some(a=>a.ano===card.ano))return card;
  const clubes=clubesDoMundo(c,clubesParaCopas(c.ligas)),clube=clubes.find(x=>x.nome===card.clube);if(!clube)return card;
- const campeonatos=[],regiao=regiaoDaLiga(clube.liga),regional=participantesEstadual(clube),forca=Math.round(card.forcaClube??card.estadual?.forcaUsuario??clube.forca),historico=torneiosDoHistorico(c.temporadas),criar=o=>criarCampanhaCopa({usuario:clube.nome,forcaUsuario:forca,ano:card.ano,seed:`${c.codigo}|${card.ano}|${o.nome}|jogador`,historico,...o});
+ const campeonatos=[],regiao=regiaoDaLiga(clube.liga),regional=participantesEstadual(clube),forca=Math.round(card.forcaClube??card.estadual?.forcaUsuario??clube.forca),historico=torneiosDoHistorico(c.temporadas),criar=o=>criarCampanhaCopa({usuario:clube.nome,forcaUsuario:forca,ano:card.ano,seed:`${c.codigo}|${card.ano}|${o.nome}|jogador`,historico,agendaIA:!!card.calendarioLigasExternas?.partilharCopas,...o});
  if(regional)campeonatos.push(criar({nome:regional.nome,tipo:'estadual',clubes:clubesDoMundo(c,regional.clubes),formato:'estadual',estado:regional.estado,interativoEstadual:true}));
  const nacional=COPAS_NACIONAIS[primeiraLiga(clube.liga)];if(nacional)campeonatos.push(criar({nome:nacional,tipo:'copa',clubes:clubes.filter(x=>x.pais===clube.pais),formato:'mata',entrada:nacional==='Copa do Brasil'?(clube.forca>=80?'principal':clube.forca>=65?'pre':'preliminar'):'principal'}));
  const vaga=vagaJogador(c,clube)||card.continental?.vaga||(card.continental?{competicao:regiao==='europa'?'champions':regiao==='sul'?'libertadores':regiao==='arabia'?'asia':'concacaf',entrada:'principal'}:null);
  if(vaga){const vagas=c.vagasInternacionaisAno===card.ano?c.vagasInternacionaisClubes:calcularVagasRapidas({ano:card.ano-1,ligasMundo:c.ligas}),pool=clubes.filter(x=>x.nome===clube.nome||vagas[x.nome]?.competicao===vaga.competicao);pool.splice(0,pool.length,...ampliarParticipantesInternacionais(pool,vaga.competicao,card.ano,clubesParaCopas(c.ligas)));const repescagem=vaga.competicao==='sulamericana'?ampliarParticipantesInternacionais(clubes.filter(x=>vagas[x.nome]?.competicao==='libertadores'),'libertadores',card.ano,clubesParaCopas(c.ligas)):[];campeonatos.push(criar({nome:nomeVaga(vaga.competicao),tipo:'continental',clubes:pool,formato:regiao==='europa'?'liga':'grupos',entrada:vaga.entrada,repescagem}));}
- const mundial=criarMundial32({usuario:clube.nome,forcaUsuario:forca,ano:card.ano,historico:c.lista||[],seed:c.codigo});if(mundial)campeonatos.push(mundial);
+ const mundial=criarMundial32({usuario:clube.nome,forcaUsuario:forca,ano:card.ano,historico:c.lista||[],seed:c.codigo,agendaIA:!!card.calendarioLigasExternas?.partilharCopas});if(mundial)campeonatos.push(mundial);
  campeonatos.forEach(cp=>{cp.regiao=regiao;});
  const momentos=[card.pendente,...(card.filaMomentos||[])].filter(m=>m&&!['continental','copa','mundial'].includes(m.tipo));
  const externos=momentos.map(m=>({tipo:'momento',momento:m,data:m.tipo==='selecao'?6.6:m.tipo==='classico'?(regiao==='europa'?1.5:7.7):(regiao==='europa'?5.7:12)})).sort((a,b)=>a.data-b.data).map((x,i)=>({...x,id:`momento-${i}`,momento:{...x.momento,ordem:i+1,total:momentos.length}}));
@@ -55,6 +55,18 @@ export function prepararCopasJogador(c,card){
  return sincronizarCard({...card,titulos:(card.titulos||[]).filter(t=>!['estadual','copa','continental','mundial'].includes(t.tipo)),destaques:(card.destaques||[]).filter(x=>!/^Vice-campeão da |Perdeu a final do Mundial/.test(x)),continental:null,copaNac:null,mundialRes:null,pendente:null,filaMomentos:[],calendarioCopas:p,torneios:[],estadual:regional?{nome:regional.nome,estado:regional.estado,fase:'Em disputa'}:null});
 }
 function sincronizarCard(card){
+ for(;;){
+  card=sincronizarData(card);
+  const p=card.calendarioCopas, cp=p?.campeonatos[p.indice];
+  if(!rodadaAutomaticaCopa(cp))return card;
+  const calendario=card.calendarioLigasExternas;
+  const rodada=calendario&&prepararPartidasDeCopa(calendario,p.dataAtual,cp.nome);
+  const nova=avancarCopaAutomatica(cp,rodada?.partida);
+  if(rodada)card={...card,calendarioLigasExternas:{...calendario,memoria:rodada.memoria}};
+  card=registrarProgressoCopa(card,nova,true);
+ }
+}
+function sincronizarData(card){
  const p=card.calendarioCopas,cp=p?.campeonatos[p.indice];
  const novo={...card,estadualEmJogo:cp?.tipo==='estadual'?cp:null,...(p?.pausa?.tipo==='momento'?{pendente:p.pausa.momento,filaMomentos:[]}: {})};
  if(card.calendarioLigasExternas){
@@ -71,7 +83,11 @@ export function concluirEventoJogador(card){const p=card.calendarioCopas;if(!p?.
 export function escolherCopaJogador(card,chave,opcao){
  const p=card.calendarioCopas;if(!p||chave!==chaveCopaJogador(card))return card;
  if(p.pausa)return opcao==='continuar'?concluirEventoJogador(card):card;
- const cp=p.campeonatos[p.indice],nova=opcao==='continuar'?continuarCopa(cp):escolherCopa(cp,chave,opcao);if(nova===cp)return card;
+ const cp=p.campeonatos[p.indice],calendario=card.calendarioLigasExternas;
+ const rodada=opcao!=='continuar'&&calendario?.partilharCopas&&['copa','estadual','continental','mundial'].includes(cp.tipo)
+  ? prepararPartidasDeCopa(calendario,p.dataAtual,cp.nome) : null;
+ const nova=opcao==='continuar'?continuarCopa(cp):escolherCopa(cp,chave,opcao,rodada?.partida);if(nova===cp)return card;
+ if(rodada)card={...card,calendarioLigasExternas:{...calendario,memoria:rodada.memoria}};
  // Partida decidida agora: registra os lances do atleta uma única vez.
  if(nova.resultado&&!nova.resultado.penaltisPendentes&&!nova.resultado.lancesJogador&&!cp.resultado?.lancesJogador&&nova.resultado!==cp.resultado){
   const lances=lancesJogadorCopa(card,nova,chave);
@@ -79,7 +95,21 @@ export function escolherCopaJogador(card,chave,opcao){
    const atual=card.copaLances?.[nova.nome]||{jogos:0,gols:0,assist:0};
    card={...card,copaLances:{...card.copaLances,[nova.nome]:{jogos:atual.jogos+(lances.jogou?1:0),gols:atual.gols+(lances.gols||0),assist:atual.assist+(lances.assist||0)}}};}
  }
- const novo=structuredClone(p);novo.campeonatos[p.indice]=nova;let k={...card,calendarioCopas:novo};
+ return sincronizarCard(registrarProgressoCopa(card,nova,opcao==='continuar'));
+}
+
+function registrarProgressoCopa(card,nova,selecionar){
+ const p=card.calendarioCopas;
+ const novo={...p,campeonatos:[...p.campeonatos],concluidas:[...p.concluidas]};
+ const anterior=p.campeonatos[p.indice];
+ if(nova.agendaIA&&(nova.pernaIda||nova.idaIA)){
+  nova={...nova,dataMinimaVoltaIA:anterior.dataMinimaVoltaIA??p.dataAtual+.24};
+ }else if(nova.dataMinimaVoltaIA!==undefined){
+  nova={...nova};
+  delete nova.dataMinimaVoltaIA;
+ }
+ novo.campeonatos[p.indice]=nova;
+ const k={...card,calendarioCopas:novo};
  if(nova.fase==='fim'&&!nova.resultado){
   const ganhou=nova.campeao===card.clube;k.torneios=[...(card.torneios||[]).filter(x=>x.nome!==nova.nome), {...resumoCampanhaCopa(nova),celebrado:ganhou}];
   if(ganhou&&!k.titulos.some(x=>x.nome===nova.nome))k.titulos=[...k.titulos,{tipo:nova.tipo,nome:nova.nome}];
@@ -88,10 +118,10 @@ export function escolherCopaJogador(card,chave,opcao){
   if(nova.tipo==='continental')k.continental={nome:nova.nome,faseNome:nova.faseUsuario,final:!!nova.vice,campeao:nova.campeao,vice:nova.vice};
   if(nova.tipo==='mundial')k.mundialRes=nova.faseUsuario;
   if(eCampeaoPrincipal(nova)&&!novo.campeonatos.some(x=>x.nome==='Copa Intercontinental FIFA'))novo.campeonatos.push(criarMundialAnual(nova));
-  if(nova.repescagemSulamericana){const base=clubesParaCopas(),clubes=ampliarParticipantesInternacionais(base.filter(x=>regiaoDaLiga(x.liga)==='sul'),'sulamericana',card.ano,base);novo.campeonatos.push(criarCampanhaCopa({nome:'Copa Sul-Americana',tipo:'continental',usuario:card.clube,forcaUsuario:nova.forcaUsuario,clubes,ano:card.ano,formato:'mata',entrada:'pre',seed:`${nova.seed}|repescagem`}));}
+  if(nova.repescagemSulamericana){const base=clubesParaCopas(),clubes=ampliarParticipantesInternacionais(base.filter(x=>regiaoDaLiga(x.liga)==='sul'),'sulamericana',card.ano,base);novo.campeonatos.push(criarCampanhaCopa({nome:'Copa Sul-Americana',tipo:'continental',usuario:card.clube,forcaUsuario:nova.forcaUsuario,clubes,ano:card.ano,formato:'mata',entrada:'pre',agendaIA:!!nova.agendaIA,seed:`${nova.seed}|repescagem`}));}
   novo.concluidas.push(p.indice);k.calendarioCopas=selecionarAgenda(novo);
- }else if(opcao==='continuar')k.calendarioCopas=selecionarAgenda(novo);
- return sincronizarCard(k);
+ }else if(selecionar)k.calendarioCopas=selecionarAgenda(novo);
+ return k;
 }
 
 /** Resume older player saves without rerolling played matches or the current minigame. */

@@ -77,7 +77,9 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
   }
   const subiram=new Set(a.subiram||[]),cairam=new Set(a.cairam||[]);
   // Técnicos da IA: o clube do usuário (jogador ou treinador) não troca de comando por aqui.
-  const tecnicos={...(anterior.tecnicos||{})},trocas=[],vagas=[],demitidos=[],desempenhos=new Map(),semente=c.codigo||c.nome||'carreira';
+  const decisoesRapidas=Object.values(a.classificacoesMundo||{}).flatMap(t=>t.decisoes||[]);
+  const trocasRapidas=decisoesRapidas.filter(e=>e.tipo==='tecnico');
+  const tecnicos={...(anterior.tecnicos||{}),...Object.fromEntries(trocasRapidas.map(e=>[e.clube,e.troca]))},trocas=[],vagas=[],demitidos=trocasRapidas.map(e=>({...e.tecnico,ate:a.ano,passagens:[...(e.tecnico.passagens||[]),{clube:e.clube,desde:e.tecnico.desde,ate:a.ano}]})),desempenhos=new Map(),semente=c.codigo||c.nome||'carreira';
   // Artilheiro de cada clube na temporada (linha do tempo do clube).
   const artilheiros=new Map(),antesPorId=new Map((antesMundo?.jogadores||[]).map(p=>[String(p.id),p]));
   for(const p of c.mundo?.jogadores||[]){
@@ -194,7 +196,7 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
       }} : {})});
   }
   if(!a.classificacoesMundo?.[a.ligaId||a.liga]&&(a.classificacao?.length||a.tabelaLiga?.length))u.edicoes.push({ano:a.ano,nome:a.ligaNome||LIGAS[a.ligaId||a.liga]?.nome||a.liga,tipo:'liga',classificacao:a.classificacao||a.tabelaLiga.map((nome,i)=>({nome,posicao:i+1})),jogos:compactarJogos(a.jogosLiga||[]),campeao:a.vencedorLiga||a.classificacao?.[0]?.nome||a.tabelaLiga?.[0]});
-  for(const t of [...(a.torneiosMundo||[]),...(a.torneios||[])])if(t.campeao&&!t.finalPendente)u.edicoes.push({ano:a.ano,nome:t.nome,tipo:t.tipo,campeao:t.campeao,vice:t.vice,classificacao:t.classificacao||[],grupos:(t.grupos||[]).map(g=>({grupo:g.grupo,classificacao:g.classificacao||[]})),jogos:compactarJogos(jogosTorneio(t))});
+  for(const t of [...(a.torneiosMundo||[]),...(a.torneios||[])])if(t.campeao&&!t.finalPendente)u.edicoes.push({ano:a.ano,nome:t.nome,tipo:t.tipo,campeao:t.campeao,vice:t.vice,classificacao:t.classificacao||[],grupos:(t.grupos||[]).map(g=>({grupo:g.grupo,classificacao:g.classificacao||[]})),jogos:compactarJogos(jogosTorneio(t),{arquivarSumulas:true})});
   u.edicoes=[...new Map(u.edicoes.map(e=>[`${e.ano}|${e.nome}`,e])).values()];
   // Registrar depois de arquivar os placares: assim o Modo Rápido usa somente
   // partidas finalizadas, com distribuição fixa e identificada por competição.
@@ -210,7 +212,7 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
   const forcasManchetes=Object.fromEntries(Object.entries(forcasAntes).map(([n,v])=>[n,typeof v==='number'?v:v?.forca]).filter(([,v])=>Number.isFinite(v)));
   const manchetes=manchetesDoAno(a,{forcas:forcasManchetes,transferencias:(c.mundo?.transferencias||[]).filter(t=>t.temporada===c.mundo?.temporada),trocas,cairam:[...cairam]});
   const sobreVoce=(a.manchetes||[]).map(m=>({ano:a.ano,tipo:'voce',texto:m.texto,clube:typeof a.clube==='string'?a.clube:a.clube?.nome,...(m.torcida?{torcida:m.torcida}:{})}));
-  u.noticias=[...sobreVoce,...manchetes,...(anterior.noticias||[]).filter(n=>n.ano!==a.ano)].slice(0,70);
+  u.noticias=[...sobreVoce,...decisoesRapidas.slice(-12).map(e=>({ano:a.ano,tipo:e.tipo==='tecnico'?'tecnico':'mercado',texto:e.texto,clube:e.clube})),...manchetes,...(anterior.noticias||[]).filter(n=>n.ano!==a.ano)].slice(0,70);
   if(c.tecnico){delete c.universo;c.tecnico={...c.tecnico,universo:u,forcasMundo:forcasDoMundo({...c,universo:u})};}else c.universo=u;
 }
 

@@ -21,8 +21,10 @@ function escolher(lista,rng,peso){const total=lista.reduce((s,p)=>s+peso(p),0);l
 export function estatisticasDasPartidas(mundo,antes,card,seed='mundo',{zerarSemPartidas=false,clubesLegados=[]}={}){
  if(!mundo?.jogadores||!antes?.jogadores)return mundo;
  const originais=new Map(antes.jogadores.map(p=>[p.id,p]));
- const times=new Map(),linhas=new Map(),posicoes={GOL:1,DEF:4,MEI:3,ATA:3};
+ const times=new Map(),linhas=new Map(),clubesPorAtleta=new Map(),posicoes={GOL:1,DEF:4,MEI:3,ATA:3};
  for(const p of antes.jogadores){if(p.aposentado)continue;if(!times.has(p.clubeNome))times.set(p.clubeNome,[]);times.get(p.clubeNome).push(p);}
+ const emprestados=new Set(Object.values(card.classificacoesMundo||{}).flatMap(t=>
+  (t.decisoes||[]).filter(e=>e.tipo==='emprestimo').map(e=>String(e.atleta))));
  const competicoes=Object.entries(card.classificacoesMundo||{}).map(([liga,t])=>({nome:LIGAS[liga]?.nome||liga,jogos:t.jogos||[]}));
  for(const t of [...(card.torneiosMundo||[]),...(card.torneios||[])])competicoes.push({nome:t.nome,tipo:t.tipo,jogos:jogosDaCampanha(t)});
  const cobertos=new Set(competicoes.flatMap(t=>t.jogos.flatMap(j=>[j.casa,j.fora])));
@@ -41,11 +43,11 @@ export function estatisticasDasPartidas(mundo,antes,card,seed='mundo',{zerarSemP
     if(ficha){
      for(let i=0;i<ficha.minutos.length;i+=2){
       const atleta=originais.get(ficha.minutos[i]);
-      if(atleta?.clubeNome===clube)participantes.push(atleta);
+      if(atleta)participantes.push(atleta);
      }
     }else for(const [setor,vagas]of Object.entries(posicoes))participantes.push(...elenco.filter(p=>setorJogador(p)===setor).map(p=>({p,peso:p.ovr+rng()*10})).sort((a,b)=>b.peso-a.peso).slice(0,Math.max(0,vagas-(clube===card.clube&&participacao?.presente&&setorJogador({posicao:card.posicao})===setor?1:0))).map(x=>x.p));
     const stats=new Map(),classico=ehClassico(jogo.casa,jogo.fora);
-    for(const p of participantes){const k=String(p.id);if(!linhas.has(k))linhas.set(k,new Map());const comps=linhas.get(k);if(!comps.has(comp.nome))comps.set(comp.nome,{nome:comp.nome,...vazio()});const s=comps.get(comp.nome);s.jogos++;if(classico)s.jogosClassicos=(s.jogosClassicos||0)+1;stats.set(k,s);}
+    for(const p of participantes){const k=String(p.id);if(emprestados.has(k)){if(!clubesPorAtleta.has(k))clubesPorAtleta.set(k,new Set());clubesPorAtleta.get(k).add(`${comp.nome}|${clube}`);}if(!linhas.has(k))linhas.set(k,new Map());const comps=linhas.get(k);if(!comps.has(comp.nome))comps.set(comp.nome,{nome:comp.nome,...vazio()});const s=comps.get(comp.nome);s.jogos++;if(classico)s.jogosClassicos=(s.jogosClassicos||0)+1;stats.set(k,s);}
     if(!participantes.length)continue;
     const goleiro=participantes.find(p=>p.posicao==='GOL');
     if(goleiro){const s=stats.get(String(goleiro.id));s.golsSofridos+=sofridos;s.defesas+=Math.floor(1+rng()*6);s.cleanSheets+=sofridos===0?1:0;}
@@ -65,7 +67,7 @@ export function estatisticasDasPartidas(mundo,antes,card,seed='mundo',{zerarSemP
   }
  }
  const campeoes=card.campeoesCalendarioMundo||[];
- const premiar=j=>creditarTitulosAtleta(j,campeoes,mundo.temporada);
+ const premiar=j=>creditarTitulosAtleta(j,campeoes,mundo.temporada,clubesPorAtleta.get(String(j.id)));
  return {...mundo,jogadores:mundo.jogadores.map(p=>{
   const original=originais.get(p.id);
   if(original?.aposentado)return p;

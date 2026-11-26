@@ -1,3 +1,5 @@
+import {podarCentral, registroCentral} from '../simulacao/transferenciasMundo.js';
+import {novoTecnico} from '../simulacao/tecnicosMundo.js';
 import {elencosParaLigasRapidas, prepararPartidasLigasRapidas} from './escalacoesLigasRapido.js';
 import {criarCalendarioLigasRapido,finalizarCalendarioLigasRapido} from './ligasCalendarioRapido.js';
 import {clonarEstado} from '../simulacao/clonarEstado.js';
@@ -1137,7 +1139,9 @@ function simularLiga(c, clube, ovr, share, extra, interativo) {
   const local = equipes.filter(x => x.liga === clube.liga).map(x =>
     x.nome === clube.nome ? {...x, elenco: proprio.forca, ataque: proprio.ataque, defesa: proprio.defesa} : x);
   const elencos = elencosParaLigasRapidas(c.mundo?.jogadores);
-  const rivais = prepararPartidasLigasRapidas(elencos, `${c.codigo}|${c.ano}|liga-local`);
+  const tecnicosLocais = Object.fromEntries(local.filter(x => x.nome !== clube.nome && elencos[x.nome])
+    .map(x => [x.nome, c.universo?.tecnicos?.[x.nome] ?? novoTecnico(x, c.ano - 1, c.codigo)]));
+  const rivais = prepararPartidasLigasRapidas(elencos, `${c.codigo}|${c.ano}|liga-local`, {}, tecnicosLocais);
   const mundo = simularClassificacoesMundoTecnico({
     clubes: local, ano: c.ano, rng: rnd,
     disputarPartida: (casa, fora, rodada, formaCasa, formaFora, sorteio) =>
@@ -1147,7 +1151,7 @@ function simularLiga(c, clube, ovr, share, extra, interativo) {
   });
   const externas = equipes.filter(x => x.liga !== clube.liga);
   const calendario = criarCalendarioLigasRapido(externas, c.codigo, c.ano,
-    Object.fromEntries(externas.filter(x => elencos[x.nome]).map(x => [x.nome, elencos[x.nome]])));
+    Object.fromEntries(externas.filter(x => elencos[x.nome]).map(x => [x.nome, elencos[x.nome]])), c.universo?.tecnicos);
   const classificacoes = interativo ? mundo : {...mundo, ...finalizarCalendarioLigasRapido(calendario)};
   const tabela=mundo[clube.liga]?.classificacao||[];
   const pos=tabela.findIndex(x=>x.nome===clube.nome)+1;
@@ -1970,6 +1974,20 @@ function fecharTemporadaBase(c0, card0) {
     clubes:clubesDoMundo(antes),perfis:antes.universo?.clubes,ano:card.ano,
     registrarPremio:false,
   }),antes.mundo,{...card,campeoesCalendarioMundo},c.codigo);
+  const emprestimosRapidos = Object.values(card.classificacoesMundo || {}).flatMap(t =>
+    (t.decisoes || []).filter(e => e.tipo === 'emprestimo'));
+  if (emprestimosRapidos.length) {
+    const jogadores = new Map((antes.mundo?.jogadores || []).map(p => [p.id, p]));
+    const movimentos = emprestimosRapidos.flatMap(e => {
+      const p = jogadores.get(e.atleta);
+      return p ? [registroCentral({ano:card.ano, temporada:c.mundo.temporada, p,
+        de:e.origem, para:e.clube, valor:0, tipo:'emprestimo'})] : [];
+    });
+    const central = c.mundo.transferencias || [];
+    const antigas = central.filter(t => t.temporada !== c.mundo.temporada);
+    const virada = central.filter(t => t.temporada === c.mundo.temporada);
+    c.mundo.transferencias = podarCentral([...antigas, ...movimentos, ...virada], c.mundo.temporada);
+  }
   atualizarRecordesUniverso(c,card,antes.mundo);
   const pesoTit = pesoTitulosBolaDeOuro(card.titulos);
   const jogosDoClube=(card.classificacoesMundo?.[card.ligaId]?.jogos||[])

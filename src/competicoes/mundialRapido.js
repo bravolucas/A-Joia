@@ -20,7 +20,7 @@ export function criarMundialAnual(c){
  const camp=criarCampanhaCopa({nome:NOME_MUNDIAL_ANUAL,tipo:'mundial',usuario:c.usuario,forcaUsuario:c.forcaUsuario,clubes:pool,ano:c.ano,formato:'mata',seed});
  camp.roteiroMundial=roteiro;camp.participantes=6;camp.tamanho=2**roteiro.length;camp.adversario=pool.find(x=>x.nome===roteiro[0]);camp.quadroMata=[[c.usuario,roteiro[0]]];camp.sobreviventes=null;return camp;
 }
-export function criarMundial32({usuario,forcaUsuario,ano,historico=[],seed}){
+export function criarMundial32({usuario,forcaUsuario,ano,historico=[],seed,agendaIA=false}){
  if((ano-2025)%4!==0)return null;
  const vaga=historico.some(x=>x.clube===usuario&&x.ano>=ano-4&&x.ano<ano&&(/Libertadores|Champions League|Champions Asiática|Concacaf/i.test(x.nome||'')||x.titulosConquistados?.some(n=>/Libertadores|Champions League|Champions Asiática|Concacaf/i.test(n))));
  if(!vaga)return null;
@@ -29,6 +29,6 @@ export function criarMundial32({usuario,forcaUsuario,ano,historico=[],seed}){
  const pool=[...new Map([...europa,...sul,...asia,...norte,...extras].filter(x=>x.nome!==usuario).map(x=>[x.nome,x])).values()].slice(0,31);
  for(const x of CLUBES.filter(x=>!pool.some(p=>p.nome===x.nome)&&x.nome!==usuario).sort((a,b)=>b.forca-a.forca)){if(pool.length>=31)break;pool.push(x);}
  pool.unshift({nome:usuario,forca:forcaUsuario});
- const camp=criarCampanhaCopa({nome:'Mundial de Clubes FIFA',tipo:'mundial',usuario,forcaUsuario,clubes:pool,ano,formato:'grupos',seed:`${seed}|mundial32|${ano}`});
+ const camp=criarCampanhaCopa({nome:'Mundial de Clubes FIFA',tipo:'mundial',usuario,forcaUsuario,clubes:pool,ano,formato:'grupos',agendaIA,seed:`${seed}|mundial32|${ano}`});
  camp.formato='mundial32';camp.totalRodadas=3;camp.calendario=camp.calendario.slice(0,3);camp.manual=[0,1,2];return camp;
 }

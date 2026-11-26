@@ -1,3 +1,4 @@
+import {formatarEuro} from './economia.js';
 import SumulaLiga from './SumulaLiga.jsx';
 import React,{useId,useMemo,useState} from 'react';
 import {jogosDaEdicao,historicoAtleta} from './mundoVivo.js';
@@ -12,9 +13,19 @@ const universo=c=>c.tecnico?.universo||c.universo;
 const sinal=n=>n>0?`+${n}`:String(n);
 export function EvolucaoClube({c,nome}){
  const u=universo(c),p=u?.clubes?.[nome];
+ const projeto=c.mundo?.projetosClubes?.[nome];
  const cl=CLUBES.find(x=>x.nome===nome)||{nome,forca:60},atual=avaliarClubeNoMundo(c,cl);
  return <section className="mv-painel" aria-label={`Evolução do ${nome}`}><span className="hf-eyebrow">UM CLUBE EM MOVIMENTO</span><h3>O momento do <LinkEntidade tipo="clube" nome={nome}/></h3><div className="hf-numeros"><article><strong>{atual.forca}</strong><span>força do elenco</span></article><article><strong>{p?.reputacao??cl.forca}</strong><span>reputação</span></article><article><strong>{p?.financas??50}/100</strong><span>saúde financeira</span></article></div><p className="hf-nota">A força acompanha a qualidade dos jogadores, o equilíbrio dos setores e a fase. Reputação e estrutura mudam mais devagar.</p>{u?.tecnicos?.[nome]&&<p className="hf-nota">Técnico: <strong>{u.tecnicos[nome].nome}</strong> · no cargo desde {u.tecnicos[nome].desde}</p>}
  {p?.reputacoes&&<section aria-label="Oito dimensões de reputação do clube"><h4>Reputação em oito dimensões</h4><dl style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(120px,1fr))',gap:'0.6rem'}}>{EIXOS_REPUTACAO_CLUBE.map(eixo=><div key={eixo}><dt>{NOMES_REPUTACAO_CLUBE[eixo]}</dt><dd><strong>{Number.isFinite(p.reputacoes[eixo])?p.reputacoes[eixo]:'—'}</strong><small>/99</small></dd></div>)}</dl><p className="hf-nota">Indicadores calculados a partir das temporadas registradas. Não alteram, por enquanto, a força do elenco nem o dinheiro do clube.</p></section>}
+ {projeto&&<details className="my-3">
+  <summary className="cursor-pointer font-bold">Projeto do clube · {projeto.objetivo} até {projeto.ate}</summary>
+  <div className="hf-tabela-scroll"><table className="hf-tabela">
+   <thead><tr><th>Temporada</th><th>Objetivo</th><th>Folha mensal</th><th>Teto mensal</th><th>Caixa</th><th>Renovações</th><th>Compras</th><th>Vendas</th></tr></thead>
+   <tbody>{[...projeto.historico].reverse().map(h=><tr key={h.ano}><th>{h.ano}</th><td>{h.objetivo}</td>
+    <td>{formatarEuro(h.folha)}</td><td>{formatarEuro(h.teto)}</td><td>{formatarEuro(h.caixa)}</td>
+    <td>{h.renovacoes}</td><td>{h.compras}</td><td>{h.vendas}</td></tr>)}</tbody>
+  </table></div>
+ </details>}
  <h4 className="lt-titulo-secao">Linha do tempo</h4><LinhaDoTempoClube historico={historicoAtleta(p||{})}/></section>;
 }
 export function ImpactoJogador({avaliacao}){

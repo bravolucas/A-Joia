@@ -1,3 +1,5 @@
+import {ajustarEvolucaoObservada, prepararProjetosClubes, finalizarProjetosClubes} from '../simulacao/planejamentoLigasRapidas.js';
+import {SETORES_FORCA, setorJogador} from '../simulacao/forcaEquipe.js';
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
 import {resolverOuReusarPlayoffsSerieB} from '../simulacao/playoffsSerieB.js';
 import {progredirBrasilInferior} from '../simulacao/progressaoBrasilInferior.js';
@@ -1936,7 +1938,7 @@ export function gerarMundoJogadores(rng = Math.random) {
   return { jogadores: completarCarenciasMundo(jogadores, CLUBES, rng), elencosCompletos:true, temporada: 0, historicoBolaDeOuro: [], calibracaoFortalezaElenco:'2026-v2' };
 }
 
-export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES, perfis = {}, clubeControlado = null, treinoClube = 0, ano = mundo.anoCalendario, registrarPremio = true} = {}) {
+export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES, perfis = {}, clubeControlado = null, treinoClube = 0, ano = mundo.anoCalendario, registrarPremio = true, participacaoRapida = null} = {}) {
 
   const rand=(a,b)=>Math.floor(rng()*(b-a+1))+a;
   const pick=lista=>lista[Math.min(lista.length-1,Math.floor(rng()*lista.length))];
@@ -1947,6 +1949,19 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
   // entra na central de transferências e no histórico do atleta.
   const temporadaNova=(mundo.temporada||0)+1;
   const caixa=renovarCaixaClubes(mundo.caixaClubes,verbasPorClube(mundo.jogadores));
+  const projetos=participacaoRapida?prepararProjetosClubes(mundo,clubes,perfis,ano,caixa,participacaoRapida.clubeDoAtleta):null;
+  const salarioDestino=(p,d)=>salarioMensalEuro({...p,liga:d.liga});
+  const cabeNaFolha=(p,d)=>!projetos?.[d.nome]||projetos[d.nome].folha+salarioDestino(p,d)<=projetos[d.nome].teto;
+  const atendeProjeto=(p,d)=>{
+    const projeto=projetos?.[d.nome];
+    if(!projeto)return true;
+    const setor=setorJogador(p);
+    if(projeto.setores[setor]<SETORES_FORCA[setor]*2)return true;
+    if(projeto.objetivo==='formação')return p.idade<=22;
+    if(projeto.objetivo==='permanência')return p.idade>=23&&p.ovr>=d.forca;
+    if(projeto.objetivo==='recuperação')return p.ovr>=d.forca&&salarioDestino(p,d)<projeto.teto*.08;
+    return p.ovr>=d.forca-2;
+  };
   const central=Array.isArray(mundo.transferencias)?[...mundo.transferencias]:[];
   // Um clube não compromete mais de 60% do caixa num único atleta.
   // Clube sem elenco registrado no mundo recebe a verba estimada pela força e liga.
@@ -1964,6 +1979,12 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
     }].slice(-30);
     if(valor>0){caixa[d.nome]=caixaDe(d)-valor;if(anterior)caixa[anterior]=(caixa[anterior]??0)+valor;}
     central.push(registroCentral({ano,temporada:temporadaNova,p,de:anterior,para:d.nome,valor,tipo}));
+    if(projetos&&tipo!=='emprestimo'){
+      const setor=setorJogador(p), origem=projetos[anterior], destino=projetos[d.nome];
+      if(origem){origem.folha=Math.max(0,origem.folha-(p.salario??salarioMensalEuro(p)));origem.setores[setor]--;if(valor>0)origem.vendas++;}
+      p.salario=tipo==='retornoEmprestimo'?(p.salario??salarioMensalEuro(p)):salarioDestino(p,d);
+      if(destino){destino.folha+=p.salario;destino.setores[setor]++;if(valor>0)destino.compras++;}
+    }
     p.clubeNome=d.nome;p.liga=d.liga;
     if(!manterContrato&&Number.isInteger(p.contrato))p.contrato=duracaoContratoIA(p.idade,p.posicao);
   };
@@ -1981,7 +2002,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
     if(!p.clubeNome){
       p.idade++;p.jogos=0;p.gols=0;p.assist=0;p.defesas=0;p.cleanSheets=0;p.clubeTemporada=null;p.porCompeticao=[];p.nota=0;p.temporadaEstatisticas=(mundo.temporada||0)+1;
       if(p.idade>=41)p.aposentado=true;
-      else if(rng()<.35){const destinos=destinosTransferenciaIA(p,clubes,ocupacao,perfis,{clubeControlado,limiteElenco:24,toleranciaOvr:10});if(destinos.length){mover(p,pick(destinos),{tipo:'livre',valor:0});p.contrato=duracaoContratoIA(p.idade,p.posicao);}}
+      else if(rng()<.35){const destinos=destinosTransferenciaIA(p,clubes,ocupacao,perfis,{clubeControlado,limiteElenco:24,toleranciaOvr:10});const viaveis=destinos.filter(d=>cabeNaFolha(p,d)&&atendeProjeto(p,d));if(viaveis.length){mover(p,pick(viaveis),{tipo:'livre',valor:0});p.contrato=duracaoContratoIA(p.idade,p.posicao);}}
       return p;
     }
     // A longevidade traz gestão de minutos: veteranos de linha disputam
@@ -2008,8 +2029,12 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
     p.carreira = { ...p.carreira, gols: p.carreira.gols + gols, assist: p.carreira.assist + assist, jogos: p.carreira.jogos + jogos, temporadas: p.carreira.temporadas + 1 };
     // evolução / declínio
     p.idade += 1;
-    if (p.idade <= p.picoIdade) p.ovr = clampR(p.ovr + Math.max(0, Math.round((p.potencial - p.ovr) * 0.28)) + rand(0, 1), 40, 99);
-    else p.ovr = clampR(p.ovr - rand(0, 2) - Math.max(0, Math.round((p.idade - p.picoIdade - 2) * 0.6)), 40, 99);
+    const variacao = p.idade <= p.picoIdade
+      ? Math.max(0, Math.round((p.potencial - p.ovr) * 0.28)) + rand(0, 1)
+      : -rand(0, 2) - Math.max(0, Math.round((p.idade - p.picoIdade - 2) * 0.6));
+    const jogosObservados=participacaoRapida?.jogosPorClube.get(p.clubeNome);
+    const minutosObservados=participacaoRapida?.atletas.get(p.id);
+    p.ovr=clampR(p.ovr+ajustarEvolucaoObservada(p,variacao,minutosObservados,jogosObservados),40,99);
     if(p.clubeNome===clubeControlado&&treinoClube&&p.idade<30)p.ovr=Math.min(99,Math.max(p.ovr,Math.min(p.potencial??99,p.ovr+Math.max(0,Math.min(1,treinoClube)))));
     // O retrato sazonal é registrado antes de eventuais transferências ou
     // aposentadoria, preservando o clube no qual os números foram obtidos.
@@ -2018,7 +2043,16 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
       clube: clubeTemporada, liga: ligaTemporada, idadeInicial, ovrInicial,
     });
     // aposentadoria
-    if (p.idade >= 34 && (p.idade >= 41 || rng() < Math.min(0.8, 0.04 + (p.idade - 34) ** 2 * 0.018))) { p.aposentado = true; return p; }
+    if (p.idade >= 34 && (p.idade >= 41 || rng() < Math.min(0.8, 0.04 + (p.idade - 34) ** 2 * 0.018))) {
+      p.aposentado = true;
+      const projeto=projetos?.[p.clubeNome];
+      if(projeto){
+        projeto.folha=Math.max(0,projeto.folha-(p.salario??salarioMensalEuro(p)));
+        projeto.setores[setorJogador(p)]--;
+        ocupacao.set(p.clubeNome,Math.max(0,(ocupacao.get(p.clubeNome)||0)-1));
+      }
+      return p;
+    }
     // Fim do empréstimo: o atleta volta ao clube dono depois da temporada cedida.
     if(p.emprestimo){
       if((p.emprestimo.ateTemporada??0)<=temporadaNova){
@@ -2031,13 +2065,32 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
       p.contrato=Math.max(0,p.contrato-1);
       if(!p.contrato){
         if(p.clubeNome===clubeControlado){p.movimentos=[...(p.movimentos||[]),{ano,tipo:'fim-contrato',de:p.clubeNome,para:null,valor:0}];p.clubeNome=null;return p;}
-        // Parte dos atletas em fim de contrato assina com outro clube sem custos.
-        if(p.idade<33&&sorteioTransferencia(ano,p.id,'fim-contrato')<0.15){
-          const destinos=destinosTransferenciaIA(p,clubes,ocupacao,perfis,{clubeControlado,toleranciaOvr:6,limiteElenco:28});
-          const d=escolherEstavel(destinos,ano,p.id,'livre');
-          if(d){mover(p,d,{tipo:'livre',valor:0});return p;}
+        const projeto=projetos?.[p.clubeNome];
+        if(projeto){
+          const atual=p.salario??salarioMensalEuro(p);
+          const proposta=Math.max(atual,salarioMensalEuro(p));
+          const titular=!!jogosObservados&&(minutosObservados?.minutos??0)>=36*jogosObservados;
+          if((titular||p.idade<=23||p.ovr>=clube.forca)&&projeto.folha-atual+proposta<=projeto.teto){
+            projeto.folha+=proposta-atual;projeto.renovacoes++;
+            p.salario=proposta;p.contrato=duracaoContratoIA(p.idade,p.posicao);
+            p.movimentos=[...(p.movimentos||[]),{ano,temporada:temporadaNova,tipo:'renovacao',de:p.clubeNome,para:p.clubeNome}].slice(-30);
+          }else{
+            const origem=p.clubeNome;
+            projeto.folha=Math.max(0,projeto.folha-atual);projeto.setores[setorJogador(p)]--;
+            ocupacao.set(origem,Math.max(0,(ocupacao.get(origem)||0)-1));
+            p.movimentos=[...(p.movimentos||[]),{ano,temporada:temporadaNova,tipo:'fim-contrato',de:origem,para:null,valor:0}].slice(-30);
+            p.clubeNome=null;p.salario=0;
+            return p;
+          }
+        }else{
+          // Parte dos atletas em fim de contrato assina com outro clube sem custos.
+          if(p.idade<33&&sorteioTransferencia(ano,p.id,'fim-contrato')<0.15){
+            const destinos=destinosTransferenciaIA(p,clubes,ocupacao,perfis,{clubeControlado,toleranciaOvr:6,limiteElenco:28});
+            const d=escolherEstavel(destinos,ano,p.id,'livre');
+            if(d){mover(p,d,{tipo:'livre',valor:0});return p;}
+          }
+          p.contrato=duracaoContratoIA(p.idade,p.posicao);
         }
-        p.contrato=duracaoContratoIA(p.idade,p.posicao);
       }
     }
     if(p.clubeNome===clubeControlado)return p;
@@ -2050,11 +2103,11 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
       const origem = clubes.find((x) => x.nome === p.clubeOrigem);
       if (origem && origem.nome !== clubeControlado) {
         const valor=valorTransferenciaMundo(p,origem,ano);
-        if(podePagar(origem,valor)){ mover(p,origem,{valor}); return p; }
+        if(podePagar(origem,valor)&&cabeNaFolha(p,origem)&&atendeProjeto(p,origem)){ mover(p,origem,{valor}); return p; }
       }
     }
     // Compras exigem caixa: o valor parte do valor de mercado no clube de origem.
-    const comValor=lista=>lista.map(d=>({d,valor:valorTransferenciaMundo(p,d,ano)})).filter(x=>podePagar(x.d,x.valor));
+    const comValor=lista=>lista.map(d=>({d,valor:valorTransferenciaMundo(p,d,ano)})).filter(x=>podePagar(x.d,x.valor)&&cabeNaFolha(p,x.d)&&atendeProjeto(p,x.d));
     if (gap > 5 && rng() < 0.35 * multTransf) {
       // Antes dos 29, o atleta valorizado não troca uma liga forte por outra bem mais fraca.
       let destinos = comValor(destinosTransferenciaIA(p,clubes,ocupacao,perfis,{clubeControlado,toleranciaOvr:6,forcaMinima:clube.forca+1,apenasPrimeiraDivisao:true}).filter(d=>p.idade>=29||fatorLiga(d.liga)>=fatorLiga(clube.liga)*0.8));
@@ -2129,7 +2182,7 @@ export function simularTemporadaMundo(mundo, rng = Math.random, {clubes = CLUBES
       clube: vencedor.clubeTemporada ?? vencedor.clubeNome,
     });
   }
-  return { ...mundo,...(Number.isFinite(ano)?{anoCalendario:ano+1}:{}), jogadores: jogadoresLimpos, temporada: temporadaNova, historicoBolaDeOuro, transferencias: podarCentral(central,temporadaNova), caixaClubes: caixa };
+  return { ...mundo,...(Number.isFinite(ano)?{anoCalendario:ano+1}:{}), jogadores: jogadoresLimpos, temporada: temporadaNova, historicoBolaDeOuro, transferencias: podarCentral(central,temporadaNova), caixaClubes: caixa, ...(projetos?{projetosClubes:finalizarProjetosClubes(projetos,caixa,ano,jogadoresLimpos)}:{}) };
 }
 
 /** Peso da conquista esportiva (não soma todos os títulos como iguais). */

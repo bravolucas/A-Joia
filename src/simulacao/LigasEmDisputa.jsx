@@ -33,6 +33,11 @@ export default function LigasEmDisputa({estado}) {
           {ligas.map(id => <option key={id} value={id}>{LIGAS[id]?.nome || id}</option>)}
         </select>
       </label>
+      {edicao.decisoes?.some(e=>e.historia) && <details className="mt-3">
+        <summary className="cursor-pointer font-bold">Histórias da temporada</summary>
+        <ul>{edicao.decisoes.filter(e=>e.historia&&(!clube||e.clube===clube)).map(e=>
+          <li key={`${e.historia}|${e.etapa}`}>Rodada {e.rodada} · {e.texto}</li>)}</ul>
+      </details>}
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <table className="w-full text-left">
           <caption className="text-left font-bold">Classificação</caption>

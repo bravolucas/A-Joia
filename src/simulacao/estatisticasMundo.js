@@ -35,16 +35,21 @@ export function estatisticasDasPartidas(mundo,antes,card,seed='mundo',{zerarSemP
   for(const jogo of comp.jogos){
    if(!Number.isFinite(jogo.golsCasa)||!Number.isFinite(jogo.golsFora))continue;
    const participacao=usuario.mapa.get(chaveJogo(comp.nome,jogo))?.shift();
-   for(const [clube,gols,sofridos]of [[jogo.casa,jogo.golsCasa,jogo.golsFora],[jogo.fora,jogo.golsFora,jogo.golsCasa]]){
+   for(const [clube,gols,sofridos,ficha]of [[jogo.casa,jogo.golsCasa,jogo.golsFora,jogo.sumula?.[0]],[jogo.fora,jogo.golsFora,jogo.golsCasa,jogo.sumula?.[1]]]){
     const elenco=(times.get(clube)||[]).filter(p=>comp.tipo!=='copinha'||p.idade<=20);if(!elenco.length)continue;
-    const titulares=[];
-    for(const [setor,vagas]of Object.entries(posicoes))titulares.push(...elenco.filter(p=>setorJogador(p)===setor).map(p=>({p,peso:p.ovr+rng()*10})).sort((a,b)=>b.peso-a.peso).slice(0,Math.max(0,vagas-(clube===card.clube&&participacao?.presente&&setorJogador({posicao:card.posicao})===setor?1:0))).map(x=>x.p));
+    const participantes=[];
+    if(ficha){
+     for(let i=0;i<ficha.minutos.length;i+=2){
+      const atleta=originais.get(ficha.minutos[i]);
+      if(atleta?.clubeNome===clube)participantes.push(atleta);
+     }
+    }else for(const [setor,vagas]of Object.entries(posicoes))participantes.push(...elenco.filter(p=>setorJogador(p)===setor).map(p=>({p,peso:p.ovr+rng()*10})).sort((a,b)=>b.peso-a.peso).slice(0,Math.max(0,vagas-(clube===card.clube&&participacao?.presente&&setorJogador({posicao:card.posicao})===setor?1:0))).map(x=>x.p));
     const stats=new Map(),classico=ehClassico(jogo.casa,jogo.fora);
-    for(const p of titulares){const k=String(p.id);if(!linhas.has(k))linhas.set(k,new Map());const comps=linhas.get(k);if(!comps.has(comp.nome))comps.set(comp.nome,{nome:comp.nome,...vazio()});const s=comps.get(comp.nome);s.jogos++;if(classico)s.jogosClassicos=(s.jogosClassicos||0)+1;stats.set(k,s);}
-    if(!titulares.length)continue;
-    const goleiro=titulares.find(p=>p.posicao==='GOL');
+    for(const p of participantes){const k=String(p.id);if(!linhas.has(k))linhas.set(k,new Map());const comps=linhas.get(k);if(!comps.has(comp.nome))comps.set(comp.nome,{nome:comp.nome,...vazio()});const s=comps.get(comp.nome);s.jogos++;if(classico)s.jogosClassicos=(s.jogosClassicos||0)+1;stats.set(k,s);}
+    if(!participantes.length)continue;
+    const goleiro=participantes.find(p=>p.posicao==='GOL');
     if(goleiro){const s=stats.get(String(goleiro.id));s.golsSofridos+=sofridos;s.defesas+=Math.floor(1+rng()*6);s.cleanSheets+=sofridos===0?1:0;}
-    const campo=titulares.filter(p=>p.posicao!=='GOL');if(!campo.length)continue;
+    const campo=participantes.filter(p=>p.posicao!=='GOL');if(!campo.length)continue;
     const detalhada=usuario.competicoes.has(comp.nome);
     const seusGols=clube===card.clube?Math.min(gols,(detalhada?participacao?.gols:reserva.gols)||0):0;
     const suasAssist=clube===card.clube?Math.min(Math.max(0,gols-seusGols),(detalhada?participacao?.assist:reserva.assist)||0):0;

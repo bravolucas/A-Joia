@@ -1,3 +1,4 @@
+import SumulaLiga from './SumulaLiga.jsx';
 import React,{useMemo,useState} from 'react';
 import {jogosDaEdicao,historicoAtleta} from './mundoVivo.js';
 import {avaliarClubeNoMundo} from './forcaEquipe.js';
@@ -38,7 +39,8 @@ export function EdicoesCompeticao({c,nome}){
  const edicao=edicoes.find(e=>e.ano===Number(ano))||edicoes[0];
  const grupoAtual=edicao?.grupos?.find(g=>g.grupo===grupo)||edicao?.grupos?.[0];
  const classificacao=grupoAtual?.classificacao||edicao?.classificacao;
- const jogos=useMemo(()=>jogosDaEdicao(edicao),[edicao]);
+ const jogos=useMemo(()=>jogosDaEdicao(edicao,{incluirSumulas:!!equipe}),[edicao,equipe]);
+ const atletas=useMemo(()=>new Map(Object.values(u?.atletas||{}).map(p=>[String(p.id),p.nome])),[u]);
  const destaques=useMemo(()=>Object.values(u?.atletas||{}).flatMap(p=>{
   const linha=p.historico.find(a=>(Array.isArray(a)?a[0]:a.ano)===edicao?.ano);
   if(!linha)return [];
@@ -51,7 +53,7 @@ export function EdicoesCompeticao({c,nome}){
  {classificacao?.length>0&&<div className="hf-tabela-scroll"><table className="hf-tabela"><thead><tr><th>Pos.</th><th>Clube</th><th>J</th><th>Pts</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th></tr></thead><tbody>{classificacao.map((t,i)=><tr key={t.nome}><td>{t.posicao||i+1}º</td><th><LinkEntidade tipo="clube" nome={t.nome}/></th>{['jogos','pontos','vitorias','empates','derrotas','golsPro','golsContra'].map(k=><td key={k}>{t[k]??'—'}</td>)}</tr>)}</tbody></table></div>}
  <PremiosTemporada premios={u?.premiosLigas?.[edicao.ano]?.[nome]} ano={edicao.ano}/>
  {destaques.length>0&&<div className="mv-lideres">{[['gols','Artilheiros'],['assist','Assistências'],['defesas','Defesas']].map(([campo,titulo])=>{const lista=destaques.filter(p=>p[campo]>0).sort((a,b)=>b[campo]-a[campo]||a.nome.localeCompare(b.nome)).slice(0,5);return lista.length>0&&<article key={campo}><h4>{titulo}</h4><ol>{lista.map(p=><li key={p.id}><span><LinkEntidade tipo="jogador" id={p.id} nome={p.nome}/><small><LinkEntidade tipo="clube" nome={p.clube}/></small></span><b>{p[campo]}</b></li>)}</ol></article>;})}</div>}
- {jogos.length>0?<><p className="hf-nota">{jogos.length} partidas registradas nesta edição.</p><ol className="mv-jogos">{jogos.filter(j=>!equipe||[j.casa,j.fora].includes(equipe)).map((j,i)=><li key={i}><small>{typeof j.rodada==='number'?`Rodada ${j.rodada}`:j.rodada}</small><span><LinkEntidade tipo="clube" nome={j.casa}/></span><b>{j.golsCasa} × {j.golsFora}</b><span><LinkEntidade tipo="clube" nome={j.fora}/></span>{j.penaltis&&<small>Pênaltis · {j.vencedor}</small>}</li>)}</ol></>:<p className="hf-nota">Esta edição preserva a classificação registrada; os placares individuais não estavam disponíveis.</p>}</section>;
+ {jogos.length>0?<><p className="hf-nota">{jogos.length} partidas registradas nesta edição.</p><ol className="mv-jogos">{jogos.filter(j=>!equipe||[j.casa,j.fora].includes(equipe)).map((j,i)=><li key={i}><small>{typeof j.rodada==='number'?`Rodada ${j.rodada}`:j.rodada}</small><span><LinkEntidade tipo="clube" nome={j.casa}/></span><b>{j.golsCasa} × {j.golsFora}</b><span><LinkEntidade tipo="clube" nome={j.fora}/></span>{j.penaltis&&<small>Pênaltis · {j.vencedor}</small>}{equipe&&<SumulaLiga jogo={j} atletas={atletas}/>}</li>)}</ol></>:<p className="hf-nota">Esta edição preserva a classificação registrada; os placares individuais não estavam disponíveis.</p>}</section>;
 }
 
 const ICONES_NOTICIA={voce:'⭐',titulo:'🏆',zebra:'⚡',liga:'🥇',mercado:'💶',tecnico:'🔁',queda:'⬇️'};

@@ -1,6 +1,7 @@
+import {jogosDaEdicao} from '../src/simulacao/mundoVivo.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {CLUBES} from '../src/dados/data.js';
+import {CLUBES,LIGAS} from '../src/dados/data.js';
 import {criarCampanhaCopa,decisaoCopa,escolherCopa,continuarCopa,simularCampanhaCopa} from '../src/treinador/copasEscolha.js';
 import {criarMundialAnual,criarMundial32,eCampeaoPrincipal} from '../src/competicoes/mundialRapido.js';
 import {dataCopa,criarAgenda,rotuloData} from '../src/competicoes/calendarioCopas.js';
@@ -79,6 +80,33 @@ test('Modo Rápido disputa ligas externas pela data e termina com os mesmos plac
  assert.ok(parcial);
  assert.equal(card.calendarioCopas,null);
  assert.equal(card.calendarioLigasExternas,undefined);
+ const jogosDaLiga=card.classificacoesMundo.argentina.jogos;
+ assert.ok(jogosDaLiga.length>0&&jogosDaLiga.every(j=>j.sumula?.every(Boolean)));
+ assert.ok(jogosDaLiga.some(j=>j.sumula.some(f=>f.ausencias.includes('lesão'))));
+ assert.ok(jogosDaLiga.some(j=>j.sumula.some(f=>f.ausencias.includes('suspensão'))));
+ for(const {sumula} of jogosDaLiga)for(const ficha of sumula){
+  const ids=ficha.minutos.filter((_,i)=>i%2===0);
+  assert.equal(new Set(ids).size,ids.length);
+  assert.equal(ficha.minutos.filter((_,i)=>i%2===1).reduce((total,m)=>total+m,0),ficha.titulares*90);
+  assert.ok(ficha.ausencias.every((valor,i)=>i%2===0||valor==='poupado no início'||!ids.includes(ficha.ausencias[i-1])));
+ }
+ const {jogos: jogosLocais}=card.classificacoesMundo.brasileirao;
+ assert.ok(jogosLocais.some(j=>j.casa!=='Flamengo'&&j.fora!=='Flamengo'&&j.sumula));
+ assert.ok(jogosLocais.every(j=>(j.casa!=='Flamengo'&&j.fora!=='Flamengo')||!j.sumula));
+ const {c:fim}=fecharTemporada(c,card);
+ const edicao=fim.universo.edicoes.find(e=>e.nome===LIGAS.argentina.nome);
+ assert.deepEqual(jogosDaEdicao(edicao).map(j=>j.sumula),jogosDaLiga.map(j=>j.sumula));
+ const jogosPorAtleta=new Map();
+ for(const {sumula} of jogosDaLiga)for(const ficha of sumula){
+  for(let i=0;i<ficha.minutos.length;i+=2){
+   const id=ficha.minutos[i];
+   jogosPorAtleta.set(id,(jogosPorAtleta.get(id)||0)+1);
+  }
+ }
+ for(const atleta of fim.mundo.jogadores){
+  const jogos=atleta.porCompeticao?.find(t=>t.nome===LIGAS.argentina.nome)?.jogos||0;
+  assert.equal(jogos,jogosPorAtleta.get(atleta.id)||0);
+ }
  for(const liga of Object.keys(lote).filter(liga=>liga!=='brasileirao')){
   assert.deepEqual(card.classificacoesMundo[liga],lote[liga]);
  }

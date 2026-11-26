@@ -1,9 +1,10 @@
+import {elencosParaLigasRapidas, prepararPartidasLigasRapidas} from './escalacoesLigasRapido.js';
 import {criarCalendarioLigasRapido,finalizarCalendarioLigasRapido} from './ligasCalendarioRapido.js';
 import {clonarEstado} from '../simulacao/clonarEstado.js';
 import {catalogoClubesEmpresario,analisarClubeEmpresario,respostaClubeEmpresario,viraPropostaSondagem} from './mercadoEmpresario.js';
 import {estatisticasDasPartidas} from '../simulacao/estatisticasMundo.js';
 import {gravarPersistente,lerPersistente,apagarPersistente} from '../simulacao/armazenamentoMundo.js';
-import {simularClassificacoesMundoTecnico,classificacaoDosJogos,atualizarLigasMundoTecnico} from '../treinador/classificacoesMundoTecnico.js';
+import {simularClassificacoesMundoTecnico,simularPlacarDeLiga,classificacaoDosJogos,atualizarLigasMundoTecnico} from '../treinador/classificacoesMundoTecnico.js';
 import {resolverOuReusarPlayoffsSerieB} from '../simulacao/playoffsSerieB.js';
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
 import {forcasDoMundo,clubesDoMundo,registrarMundoVivo,resumirTabelas} from '../simulacao/mundoVivo.js';
@@ -1134,8 +1135,18 @@ function simularLiga(c, clube, ovr, share, extra, interativo) {
   }
   const local = equipes.filter(x => x.liga === clube.liga).map(x =>
     x.nome === clube.nome ? {...x, elenco: proprio.forca, ataque: proprio.ataque, defesa: proprio.defesa} : x);
-  const mundo = simularClassificacoesMundoTecnico({clubes: local, ano: c.ano, rng: rnd});
-  const calendario = criarCalendarioLigasRapido(equipes.filter(x => x.liga !== clube.liga), c.codigo, c.ano);
+  const elencos = elencosParaLigasRapidas(c.mundo?.jogadores);
+  const rivais = prepararPartidasLigasRapidas(elencos, `${c.codigo}|${c.ano}|liga-local`);
+  const mundo = simularClassificacoesMundoTecnico({
+    clubes: local, ano: c.ano, rng: rnd,
+    disputarPartida: (casa, fora, rodada, formaCasa, formaFora, sorteio) =>
+      casa.nome === clube.nome || fora.nome === clube.nome
+        ? simularPlacarDeLiga(casa, fora, formaCasa, formaFora, sorteio)
+        : rivais.disputar(casa, fora, rodada, formaCasa, formaFora, sorteio),
+  });
+  const externas = equipes.filter(x => x.liga !== clube.liga);
+  const calendario = criarCalendarioLigasRapido(externas, c.codigo, c.ano,
+    Object.fromEntries(externas.filter(x => elencos[x.nome]).map(x => [x.nome, elencos[x.nome]])));
   const classificacoes = interativo ? mundo : {...mundo, ...finalizarCalendarioLigasRapido(calendario)};
   const tabela=mundo[clube.liga]?.classificacao||[];
   const pos=tabela.findIndex(x=>x.nome===clube.nome)+1;

@@ -1,3 +1,4 @@
+import LZString from 'lz-string';
 import {CLUBES_REGIONAIS_EXTRAS} from '../competicoes/estaduaisRapidos.js';
 import {jogosDaCampanha} from '../competicoes/jogosCampanha.js';
 import {registrarPartidasDetalhadasUsuario} from './historicoConfrontos.js';
@@ -177,7 +178,7 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
       if(!jogosUnicos.has(chave))jogosUnicos.set(chave,jogo);
     }
     u.edicoes.push({ano:a.ano,nome:LIGAS[liga]?.nome||liga,tipo:'liga',
-      classificacao:t.classificacao,jogos:compactarJogos([...jogosUnicos.values()]),
+      classificacao:t.classificacao,jogos:compactarJogos([...jogosUnicos.values()], {arquivarSumulas:true}),
       // Uma edição pendente (ex.: Série C ainda sem tabela) não tem campeão:
       // omitir a propriedade evita gerar `campeao: undefined` no save, que é
       // descartado na serialização JSON e quebra a idempotência da carreira.
@@ -213,15 +214,27 @@ export function registrarMundoVivo(c,a,{antesMundo}={}){
   if(c.tecnico){delete c.universo;c.tecnico={...c.tecnico,universo:u,forcasMundo:forcasDoMundo({...c,universo:u})};}else c.universo=u;
 }
 
-export function compactarJogos(jogos=[]) {
+export function compactarJogos(jogos=[], {arquivarSumulas=false}={}) {
   const nomes=[...new Set(jogos.flatMap(j=>[j.casa,j.fora]).filter(Boolean))];
   const indices=new Map(nomes.map((n,i)=>[n,i]));
-  return {nomes,partidas:jogos.filter(j=>j.casa&&j.fora&&Number.isFinite(j.golsCasa)&&Number.isFinite(j.golsFora)).map(j=>[indices.get(j.casa),indices.get(j.fora),j.golsCasa,j.golsFora,j.rodada||j.fase||'',j.vencedor?indices.get(j.vencedor):null,j.penaltis?1:0])};
+  const validos=jogos.filter(j=>j.casa&&j.fora&&Number.isFinite(j.golsCasa)&&Number.isFinite(j.golsFora));
+  const partidas=validos.map(j=>[indices.get(j.casa),indices.get(j.fora),j.golsCasa,j.golsFora,
+    j.rodada||j.fase||'',j.vencedor?indices.get(j.vencedor):null,j.penaltis?1:0,
+    ...(!arquivarSumulas&&j.sumula?[j.sumula]:[])]);
+  const sumulas=arquivarSumulas&&validos.some(j=>j.sumula)
+    ? LZString.compressToUTF16(JSON.stringify(validos.map(j=>j.sumula??null)))
+    : null;
+  return {nomes,partidas,...(sumulas?{sumulas}:{})};
 }
-export function jogosDaEdicao(edicao) {
+export function jogosDaEdicao(edicao, {incluirSumulas=true}={}) {
   if(Array.isArray(edicao?.jogos))return edicao.jogos;
-  const {nomes=[],partidas=[]}=edicao?.jogos||{};
-  return partidas.map(([a,b,golsCasa,golsFora,rodada,v,penaltis])=>({casa:nomes[a],fora:nomes[b],golsCasa,golsFora,rodada,vencedor:v==null?null:nomes[v],penaltis:!!penaltis}));
+  const {nomes=[],partidas=[],sumulas}=edicao?.jogos||{};
+  const arquivadas=incluirSumulas&&sumulas ? JSON.parse(LZString.decompressFromUTF16(sumulas)) : null;
+  return partidas.map(([a,b,golsCasa,golsFora,rodada,v,penaltis,sumula],i)=>{
+    const ficha=incluirSumulas&&(sumula??arquivadas?.[i]);
+    return {casa:nomes[a],fora:nomes[b],golsCasa,golsFora,rodada,vencedor:v==null?null:nomes[v],
+      penaltis:!!penaltis,...(ficha?{sumula:ficha}:{})};
+  });
 }
 export function resumirTabelas(classificacoes) {
   return Object.fromEntries(Object.entries(classificacoes||{}).map(([liga,t])=>{const {jogos,...resumo}=t;return [liga,resumo];}));

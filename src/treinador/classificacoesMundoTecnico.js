@@ -81,7 +81,7 @@ export function registrarFormaDaLiga(forma, {casa, fora, golsCasa, golsFora}) {
 }
 
 export function simularLigaMundo(clubes, rng = Math.random, liga = clubes[0]?.liga, {
-  progresso = 1, jogosAnteriores = [], rngRodada,
+  progresso = 1, jogosAnteriores = [], rngRodada, disputarPartida,
 } = {}) {
   const tabela = criarTabela(clubes), jogos = [...jogosAnteriores], forma = new Map();
   const base = [...clubes], primeiroTurno = [];
@@ -97,9 +97,13 @@ export function simularLigaMundo(clubes, rng = Math.random, liga = clubes[0]?.li
   }
 
   const disputar = (casa, fora, rodada, sorteio) => {
-    const {golsCasa, golsFora} = simularPlacarDeLiga(casa, fora, forma.get(casa.nome), forma.get(fora.nome), sorteio);
+    const formaCasa = forma.get(casa.nome), formaFora = forma.get(fora.nome);
+    const placar = disputarPartida
+      ? disputarPartida(casa, fora, rodada, formaCasa, formaFora, sorteio)
+      : simularPlacarDeLiga(casa, fora, formaCasa, formaFora, sorteio);
+    const {golsCasa, golsFora} = placar;
     registrarPartida(tabela, casa, fora, golsCasa, golsFora);
-    const jogo = {rodada, casa: casa.nome, fora: fora.nome, golsCasa, golsFora};
+    const jogo = {rodada, casa: casa.nome, fora: fora.nome, ...placar};
     jogos.push(jogo);
     registrarFormaDaLiga(forma, jogo);
   };
@@ -143,6 +147,7 @@ export function simularClassificacoesMundoTecnico({
   progresso = 1,
   jogosAnteriores = {},
   rngLigaRodada,
+  disputarPartida,
 }) {
   const clubesUnicos = [...new Map(clubes.filter(clube => clube?.nome).map(clube => [clube.nome, clube])).values()];
   const porLiga = new Map();
@@ -231,7 +236,7 @@ export function simularClassificacoesMundoTecnico({
       continue;
     }
     resultado[liga] = { liga, origem: 'simulacao-global', ...simularLigaMundo(ordenados, rng, liga, {
-      progresso, jogosAnteriores: jogosAnteriores[liga],
+      progresso, jogosAnteriores: jogosAnteriores[liga], disputarPartida,
       rngRodada: rngLigaRodada && (rodada => rngLigaRodada(liga, rodada)),
     }) };
   }

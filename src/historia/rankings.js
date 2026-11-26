@@ -28,7 +28,7 @@ function pontosPorEquipe(edicoes, teste, anoFinal, janela) {
   };
   for (const e of edicoes) {
     if (!teste(e.nome || '') || e.ano > anoFinal || e.ano <= anoFinal - janela) continue;
-    for (const j of jogosDaEdicao(e)) {
+    for (const j of jogosDaEdicao(e,{incluirSumulas:false})) {
       if (!Number.isFinite(j.golsCasa) || !Number.isFinite(j.golsFora)) continue;
       const [pc, pf] = j.golsCasa > j.golsFora ? [2, 0] : j.golsCasa < j.golsFora ? [0, 2] : [1, 1];
       somar(j.casa, e.ano, pc); somar(j.fora, e.ano, pf);

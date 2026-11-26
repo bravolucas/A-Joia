@@ -2,8 +2,7 @@ import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {bandeiraDe} from '../comum/arte.js';
 import {grupoSelecao} from './elencoSelecao.js';
 import {roteiroConvocacao} from './convocacaoCinema.js';
-import arteCenas from '../../arte/jornada/convocacao-sequencia.jpg';
-import arteReacao from '../../arte/jornada/convocacao-frustracao.jpg';
+import personagem from '../../arte/jornada/convocacao-personagem.webp';
 import './ConvocacaoSelecaoCinema.css';
 
 const PALETAS={
@@ -16,8 +15,7 @@ const PALETAS={
 const GRUPOS={GOL:'Goleiros',DEF:'Defensores',MEI:'Meio-campistas',ATA:'Atacantes'};
 const TITULOS=['A transmissão começou','O técnico abre o envelope','A lista avança por posições','Falta a última vaga','O resultado está definido','Uma noite inesquecível'];
 const TEMPOS=[1000,2300,3500,4800,5950];
-const POSTER=['0% 10%','50% 10%','100% 10%','0% 91%','50% 91%','100% 91%'];
-const NEGATIVO=['0% 0%','100% 0%','0% 50%','100% 50%','0% 100%','100% 100%'];
+
 
 export default function ConvocacaoSelecaoCinema({jogador,copa,resultado,revelado=false,onRevelar}){
  const [fase,S]=useState(revelado?5:0);
@@ -55,10 +53,9 @@ export default function ConvocacaoSelecaoCinema({jogador,copa,resultado,revelado
    <div className="cs-selecao">{bandeira&&<img src={bandeira} alt="" draggable="false"/>}<span><small>SELEÇÃO NACIONAL</small><b>{nomePais}</b></span></div>
    <span className="cs-edicao">{copa?.nome||'Copa do Mundo'} <b>{copa?.ano}</b></span>
   </header>
-  <div className={'cs-visor '+(venceu?'cs-cena-sim':'cs-cena-nao')}>
-   <div className="cs-fotograma" style={{backgroundImage:'url('+ (venceu?arteCenas:arteReacao)+')',
-    backgroundSize:venceu?'300% 200%':'200% 300%',
-    backgroundPosition:(venceu?POSTER:NEGATIVO)[passo]}} aria-hidden="true"/>
+  <div className="cs-visor" data-cena={passo<5?'espera':venceu?'estadio':'tunel'}>
+   <div className="cs-cenario" aria-hidden="true"/>
+   <div className="cs-personagem" aria-hidden="true" style={{backgroundImage:`url(${personagem})`}}/>
    {passo<=3&&<div className="cs-tv" data-canal="selecao">
     <div className="cs-tv-federacao">{bandeira&&<img src={bandeira} alt=""/>}<div><small>AO VIVO · FEDERAÇÃO NACIONAL</small><b>{nomePais}</b></div></div>
     {passo<=1?

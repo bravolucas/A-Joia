@@ -17,3 +17,7 @@ Originais preservados no workspace: `generated_images/exec-5b81ca70-47b6-4899-88
 ## Posturas do cobrador
 
 `cobrador.webp`: atlas 3 × 1 original, gerado com a ferramenta de imagens nesta sessão. Mesmo atleta fictício em três preparações de chute, com transparência; sem imagem de atleta real, número ou marca. Original preservado em `generated_images/exec-0f3548a1-14a7-4824-9b73-079c0fad267f.png`. Conversão de formato para WebP, qualidade 88, sem edição de conteúdo por script. O jogo recorta cada pose via SVG e usa uma pista imperfeita, sem alterar o alvo real para coincidir com ela.
+
+## Convocação da seleção
+
+`convocacao-personagem.webp` contém três poses isoladas do atleta fictício da cena, em células de 512 px, na ordem espera, comemoração e decepção. A ferramenta de imagens gerou os recortes com transparência a partir do storyboard existente. O jogo compõe as poses sobre cenários reutilizados e desenha a transmissão separadamente. O original foi convertido para WebP com alpha.

@@ -18,6 +18,7 @@ import {ITENS_PESSOAIS} from './itensPessoais.js';
 import {iniciarCamisas,aposentarDonoCamisa,prepararCamisaSelecao,sincronizarCamisasSelecao} from './camisasCarreira.js';
 import {estatisticasDecisao} from './decisaoDeJogo.js';
 import {prepararCopasJogador} from './copasJogador.js';
+import {completarHistoricoCopasMundo} from '../simulacao/copasExternasMundo.js';
 import {iniciarCopaCompartilhada} from './copaSelecaoCompartilhada.js';
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
 import {ampliarParticipantesInternacionais} from '../competicoes/clubesInternacionais.js';
@@ -4287,6 +4288,10 @@ export function carregarRapido() {
     s.c.ligas = s.c.ligas || {};
     sincronizarLigas(s.c);
     s.c=corrigirCampeoesLiga(s.c);
+    // Reparo de histórico é opcional: um save antigo nunca pode deixar de abrir
+    // só porque a reconstrução de uma edição da Copa encontrou dados incompletos.
+    try { s.c=completarHistoricoCopasMundo(s.c); }
+    catch (erro) { console.warn('Não foi possível completar o histórico de Copas; carreira preservada.',erro); }
     if(s.card)s.card=normalizarCampeaoLiga(s.card);
     return s;
   } catch { return null; }

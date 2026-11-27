@@ -177,8 +177,9 @@ próprios. Os totais não são somados entre categorias:
 
 - **Copa Intercontinental clássica (1960–2004):** 43 edições disputadas
   entre campeões europeus e sul-americanos. Não houve edições em 1975 e
-  1978; a final da edição de 1974 ocorreu em março e abril de 1975. O ano
-  cadastrado identifica a edição oficial, não o calendário das partidas.
+  1978; a decisão da edição de 1974 ocorreu em março/abril de 1975 e a de
+  1977 em março/julho de 1978. O ano cadastrado identifica a edição oficial,
+  não o calendário das partidas.
 - **Mundial de Clubes FIFA:** edição inaugural de 2000, retorno em 2005 e
   edições anuais até 2023; depois, o torneio expandido para 32 equipes em
   2025. São 21 edições no histórico aqui cadastrado.

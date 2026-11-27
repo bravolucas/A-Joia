@@ -19,7 +19,7 @@ export const museuVazio = () => ({ versao: 1, tacas: {}, camisas: {}, feitos: {}
 
 export function competenciaMuseu(valor) {
   const nome = texto(valor).replace(/^Campe[ãa]o(?:\s+d[oa]s?|\s+de)?\s+/i, '').replace(/^(Copa do Mundo)\s*\([^)]*\)$/i, '$1').trim();
-  const aliases = { 'copa-libertadores': 'Libertadores', 'conmebol-libertadores': 'Libertadores', 'uefa-champions-league': 'Champions League', 'campeonato-brasileiro-serie-a': 'Brasileirão', 'brasileirao-serie-a': 'Brasileirão', 'campeonato-brasileiro-serie-b': 'Brasileirão Série B', 'serie-b-italia': 'Serie B (Itália)', 'copa-do-rei': 'Copa del Rey', 'copa-da-franca': 'Coupe de France', 'saudi-pro-league': 'Liga Saudita', concacaf: 'Concacaf Champions', 'sul-americana': 'Copa Sul-Americana' };
+  const aliases = { 'copa-libertadores': 'Libertadores', 'conmebol-libertadores': 'Libertadores', 'uefa-champions-league': 'Champions League', 'campeonato-brasileiro-serie-a': 'Brasileirão', 'brasileirao-serie-a': 'Brasileirão', 'campeonato-brasileiro-serie-b': 'Brasileirão Série B', 'serie-b-italia': 'Serie B (Itália)', 'copa-do-rei': 'Copa del Rey', 'copa-da-franca': 'Coupe de France', 'saudi-pro-league': 'Liga Saudita', concacaf: 'Concacaf Champions', 'sul-americana': 'Copa Sul-Americana', 'mundial-de-clubes': 'Mundial de Clubes FIFA' };
   const canonico = aliases[slugCompeticao(nome)] || nome;
   return { id: `taca-${slugCompeticao(canonico)}`, nome: canonico, tipo: competicaoDoTitulo(canonico).tipo };
 }
@@ -47,7 +47,7 @@ export const FEITOS_MUSEU = [
   ...metasCarreiraTecnico().map(m => ({ id: `tecnico-${m.id}`, nome: `${m.nome} · técnico`, descricao: `Como treinador: ${m.descricao}`, icone: '📋' })),
 ];
 
-const nomesCatalogo = [...Object.values(LIGAS).filter(x => !x.naoJogavel).map(x => x.nome), ...Object.values(COMPS_PAIS).flatMap(Object.values), ...Object.values(ESTADUAIS).map(x => x.nome), 'Copa do Brasil', 'Copa do Mundo', 'Mundial de Clubes', 'Mundial de Clubes FIFA', 'Copa Intercontinental FIFA', 'Libertadores', 'Copa Sul-Americana', 'Copa América', 'Eurocopa', 'Copa Ouro', 'Copa Africana de Nações', 'Copa da Ásia', 'Copa das Nações da OFC'];
+const nomesCatalogo = [...Object.values(LIGAS).filter(x => !x.naoJogavel).map(x => x.nome), ...Object.values(COMPS_PAIS).flatMap(Object.values), ...Object.values(ESTADUAIS).map(x => x.nome), 'Copa do Brasil', 'Copa do Mundo', 'Mundial de Clubes', 'Mundial de Clubes FIFA', 'Copa Intercontinental', 'Copa Intercontinental FIFA', 'Libertadores', 'Copa Sul-Americana', 'Copa América', 'Eurocopa', 'Copa Ouro', 'Copa Africana de Nações', 'Copa da Ásia', 'Copa das Nações da OFC'];
 export const TACAS_MUSEU = [...new Map(nomesCatalogo.filter(x => typeof x === 'string').map(nome => { const c = competenciaMuseu(nome); return [c.id, { ...c, descricao: `Conquiste a competição ${c.nome} como jogador ou treinador.` }]; })).values()];
 export const CAMISAS_MUSEU = CLUBES.map(c => ({ id: `camisa-${slugCompeticao(c.nome)}`, nome: c.nome, cor: c.cor || '#12A876', descricao: `Dispute ao menos uma temporada pelo ${c.nome}. Com 75 de aprovação da torcida, ela vira camisa de ídolo.` }));
 

@@ -230,6 +230,8 @@ test('carreira técnica permite avançar uma rodada por vez sem duplicar jogos o
    const salvo=JSON.parse(JSON.stringify(c));
    assert.equal(salvo.tecnico.andamento.rodadas,rodada);
    assert.equal(new Set(salvo.tecnico.andamento.confrontos.map((j,i)=>j.folga?'folga-'+i:j.rodada+'|'+j.nome)).size,rodada);
+   assert.equal(salvo.tecnico.andamento.classificacao.find(x=>x.meuClube).jogos,rodada);
+   c=salvo; // A próxima rodada deve continuar corretamente após serializar e recarregar o save.
   }
  }
  assert.equal(c.tecnico.fase,'resultado');

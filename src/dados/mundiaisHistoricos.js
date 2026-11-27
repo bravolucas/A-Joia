@@ -22,7 +22,8 @@ const criarTotais = edicoes => {
   totais.set(clube,(totais.get(clube)||0)+quantidade);
  return Object.freeze(Object.fromEntries(totais));
 };
-// Copa Intercontinental clássica. 1975 e 1978 não tiveram partidas.
+// Copa Intercontinental clássica. Não houve edições em 1975 e 1978;
+// a final da edição de 1974 foi disputada em março e abril de 1975.
 const INTERCONTINENTAL_CLASSICA_POR_ANO=Object.freeze({
  1960:'Real Madrid',1961:'Peñarol',1962:'Santos',1963:'Santos',
  1964:'Inter de Milão',1965:'Inter de Milão',1966:'Peñarol',

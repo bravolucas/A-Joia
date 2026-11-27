@@ -3,7 +3,9 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'src/dados/ligasHistoricas.js'\n      - 'src/dados/estaduaisHistoricos.js'\n      - 'tests/estaduais-historicos.test.mjs'
+      - 'src/dados/ligasHistoricas.js'
+      - 'src/dados/estaduaisHistoricos.js'
+      - 'tests/estaduais-historicos.test.mjs'
       - 'src/dados/data.js'
       - 'src/historia/competicoesHistoricas.js'
       - 'src/historia/historiaFutebol.js'

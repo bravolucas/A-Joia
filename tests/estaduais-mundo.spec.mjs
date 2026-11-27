@@ -25,7 +25,7 @@ for(const width of [390,1366])test(`estaduais com histórico real e calendário 
  await partidas.getByRole('button',{name:/TODOS OS JOGOS/}).click();
  await expect(partidas.getByRole('region',{name:'Partida por partida'}).locator('.mv-jogos > li').first()).toBeVisible();
  const historico=d.locator('.hf-historico-competicao');await historico.locator('summary').click();await expect(historico.getByRole('list',{name:'Campeões estaduais anteriores à carreira'})).toContainText('1902');await expect(historico).toContainText('2024');await expect(historico).toContainText('Palmeiras');
- const corinthians=d.locator('.hf-ranking-campeoes li').filter({has:page.getByRole('button',{name:'Corinthians',exact:true})});await expect(corinthians).toContainText('30 na base');
+ const corinthians=d.locator('.hf-ranking-campeoes li').filter({has:page.getByRole('button',{name:'Corinthians',exact:true})});await expect(corinthians).toContainText('31 na base');
  await d.locator('.hf-ranking-campeoes').getByRole('button',{name:'Santos',exact:true}).click();
  const galeria=d.getByRole('region',{name:'Galeria do Santos'}),taca=galeria.locator('.hf-taca').filter({has:page.getByRole('button',{name:ESTADUAIS.SP,exact:true})});
  await expect(taca).toContainText('22 no acervo inicial');await expect(taca.locator('strong').first()).toHaveText(`${22+(atual.campeao==='Santos'?1:0)}×`);

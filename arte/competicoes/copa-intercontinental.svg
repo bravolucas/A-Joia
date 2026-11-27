@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="600" viewBox="0 0 500 600" role="img" aria-labelledby="title desc">
+<title id="title">Taça original da Copa Intercontinental clássica</title>
+<desc id="desc">Ilustração original de uma taça dourada com globo e órbitas, criada para identificar o torneio clássico disputado entre 1960 e 2004. Não reproduz o troféu oficial.</desc>
+<defs>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2=".15">
+    <stop stop-color="#70451b"/><stop offset=".18" stop-color="#d69a3e"/><stop offset=".38" stop-color="#fff0ae"/><stop offset=".57" stop-color="#bd7928"/><stop offset=".78" stop-color="#f5c76d"/><stop offset="1" stop-color="#5a3519"/>
+  </linearGradient>
+  <linearGradient id="goldDark" x1="0" y1="0" x2="0" y2="1">
+    <stop stop-color="#f3c76a"/><stop offset=".5" stop-color="#9b5b21"/><stop offset="1" stop-color="#432915"/>
+  </linearGradient>
+  <linearGradient id="globe" x1="0" y1="0" x2="1" y2=".8">
+    <stop stop-color="#fff1b1"/><stop offset=".26" stop-color="#d59a42"/><stop offset=".55" stop-color="#875020"/><stop offset=".78" stop-color="#e7b75d"/><stop offset="1" stop-color="#633b1c"/>
+  </linearGradient>
+  <linearGradient id="silver" x1="0" y1="0" x2="1" y2="0">
+    <stop stop-color="#4f5d69"/><stop offset=".25" stop-color="#e9eef0"/><stop offset=".5" stop-color="#8998a2"/><stop offset=".78" stop-color="#f8fbfc"/><stop offset="1" stop-color="#45525c"/>
+  </linearGradient>
+  <filter id="shadow" x="-30%" y="-20%" width="160%" height="160%">
+    <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#07111b" flood-opacity=".48"/>
+  </filter>
+  <radialGradient id="halo"><stop stop-color="#f1c879" stop-opacity=".18"/><stop offset="1" stop-color="#f1c879" stop-opacity="0"/></radialGradient>
+</defs>
+<ellipse cx="250" cy="292" rx="205" ry="255" fill="url(#halo)"/>
+<g filter="url(#shadow)">
+  <!-- Globe and orbital band: a symbolic, original world-football motif. -->
+  <circle cx="250" cy="150" r="82" fill="url(#globe)" stroke="#f6d98d" stroke-width="5"/>
+  <path d="M178 126 C210 102 289 102 322 126 M173 154 C213 139 287 139 327 154 M182 184 C218 199 282 199 318 184" fill="none" stroke="#553719" stroke-opacity=".55" stroke-width="3"/>
+  <path d="M250 69 C219 105 219 194 250 231 M250 69 C281 105 281 194 250 231" fill="none" stroke="#fff0b2" stroke-opacity=".62" stroke-width="3"/>
+  <ellipse cx="250" cy="150" rx="34" ry="82" fill="none" stroke="#6c421e" stroke-opacity=".6" stroke-width="2.5"/>
+  <ellipse cx="250" cy="150" rx="112" ry="34" transform="rotate(-24 250 150)" fill="none" stroke="url(#silver)" stroke-width="10"/>
+  <ellipse cx="250" cy="150" rx="112" ry="34" transform="rotate(-24 250 150)" fill="none" stroke="#fff4c6" stroke-opacity=".55" stroke-width="2"/>
+  <!-- Cup bowl with curved handles. -->
+  <path d="M164 230 C145 257 119 275 108 304 C94 341 124 363 168 348" fill="none" stroke="url(#gold)" stroke-width="18" stroke-linecap="round"/>
+  <path d="M336 230 C355 257 381 275 392 304 C406 341 376 363 332 348" fill="none" stroke="url(#gold)" stroke-width="18" stroke-linecap="round"/>
+  <path d="M177 222 C185 291 200 337 224 368 L276 368 C300 337 315 291 323 222Z" fill="url(#gold)" stroke="#ffdf91" stroke-width="4"/>
+  <path d="M183 241 C200 271 300 271 317 241" fill="none" stroke="#fff0b6" stroke-opacity=".65" stroke-width="5"/>
+  <path d="M198 281 C213 299 287 299 302 281" fill="none" stroke="#78481f" stroke-opacity=".45" stroke-width="3"/>
+  <path d="M224 366 L276 366 L291 440 L209 440Z" fill="url(#goldDark)" stroke="#f2ce81" stroke-width="4"/>
+  <path d="M210 392 H290 M214 414 H286" stroke="#ffe7a5" stroke-opacity=".68" stroke-width="4"/>
+  <!-- Pedestal. -->
+  <path d="M192 438 H308 L323 463 H177Z" fill="url(#silver)" stroke="#f2d18a" stroke-width="3"/>
+  <path d="M177 465 H323 L337 493 H163Z" fill="url(#goldDark)" stroke="#f4d18b" stroke-width="4"/>
+  <path d="M158 496 Q250 514 342 496 L350 524 Q250 548 150 524Z" fill="url(#gold)" stroke="#ffdf91" stroke-width="4"/>
+  <path d="M167 508 Q250 529 333 508" fill="none" stroke="#fff0bf" stroke-opacity=".75" stroke-width="3"/>
+  <path d="M184 533 H316 L306 550 H194Z" fill="#51331f"/>
+  <text x="250" y="515" text-anchor="middle" font-family="Georgia,serif" font-size="12" font-weight="700" letter-spacing="2.4" fill="#302015">1960 · 2004</text>
+</g>
+<text x="250" y="579" text-anchor="middle" font-family="system-ui,Arial,sans-serif" font-size="12" font-weight="800" letter-spacing="3.4" fill="#c8a265">INTERCONTINENTAL CLÁSSICA</text>
+</svg>

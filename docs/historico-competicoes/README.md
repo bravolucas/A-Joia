@@ -170,6 +170,40 @@ Testes: `node --test tests/conference-historica.test.mjs
 tests/europa-league-historica.test.mjs tests/champions-historica.test.mjs`
 e build Pages. Mudança somente documental e de consulta: sem mutação de saves.
 
+## Mundiais de clubes — três palmares separados (27/11/2026)
+
+O arquivo mundial distingue três torneios com formatos e históricos
+próprios. Os totais não são somados entre categorias:
+
+- **Copa Intercontinental clássica (1960–2004):** 43 edições disputadas
+  entre campeões europeus e sul-americanos. Não houve edições em 1975 e
+  1978; a decisão da edição de 1974 ocorreu em março/abril de 1975 e a de
+  1977 em março/agosto de 1978. O ano cadastrado identifica a edição oficial,
+  não o calendário das partidas.
+- **Mundial de Clubes FIFA:** edição inaugural de 2000, retorno em 2005 e
+  edições anuais até 2023; depois, o torneio expandido para 32 equipes em
+  2025. São 21 edições no histórico aqui cadastrado.
+- **Copa Intercontinental FIFA:** torneio anual reintroduzido em 2024,
+  com Real Madrid (2024) e PSG (2025) como campeões das duas edições
+  concluídas. A final de 2026 está marcada para 16/12/2026; por isso,
+  2026 ainda não entra como título.
+
+A distinção de 2025 é essencial: Chelsea venceu o Mundial de Clubes
+expandido, enquanto o PSG venceu a Copa Intercontinental FIFA. Ambos
+recebem registros separados. O acervo antigo de PALMARES_HISTORICO guardava
+uma contagem genérica de títulos mundiais; a galeria agora exibe as três
+bases comprovadas por torneio. Conquistas simuladas e títulos legados de
+saves continuam separados dos palmares reais.
+
+### Fontes e critérios
+
+- [RSSSF — Copa Intercontinental clássica, resultados e edições não disputadas](https://www.rsssf.org/tablest/toyota.html)
+- [RSSSF — histórico da Copa do Mundo de Clubes FIFA e da Copa Intercontinental FIFA](https://rsssf.org/tablesf/fifawcc.html)
+- [FIFA — calendário e final da Copa Intercontinental 2026 (16/12/2026)](https://www.fifa.com/en/tournaments/mens/intercontinentalcup/2026/articles/teams-dates-venues-history)
+
+**Teste:** node --test tests/mundiais-historicos.test.mjs tests/competicoes-historicas.test.mjs
+e GITHUB_PAGES=true npm run build.
+
 ## Copa do Brasil — histórico real 1989–2025
 
 A edição inaugural foi vencida pelo Grêmio em **1989** e a última

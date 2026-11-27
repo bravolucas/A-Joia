@@ -38,7 +38,8 @@ O alias `concacaf` aponta para `concacaf-champions`, evitando armazenar duas có
 
 Brasileirão, Copa do Brasil e Libertadores receberam novas renderizações produzidas com a ferramenta de edição de imagens, usando as ilustrações anteriores como referência estrutural. São recriações visuais para o jogo, não fotografias oficiais. As referências foram preservadas em `arte/originais/referencias/`, e as matrizes de produção em `arte/originais/tacas/`. A reexportação respeita essas matrizes; os PNGs gerados também permanecem em `/workspace/generated_images`.
 
-- `copa-intercontinental-fifa.svg`: ilustração vetorial original criada para A JOIA (2026). Representação artística de uma taça mundial, sem reprodução do logotipo oficial.
+- `copa-intercontinental-fifa.png`: imagem criada com Adobe Firefly e Photoshop para representar a taça da Copa Intercontinental FIFA; referência documental em `acervo.json`.
+- `copa-intercontinental.svg`: ilustração vetorial original criada para A JOIA (2026), com simbologia própria para a competição clássica de 1960–2004. Não é fotografia nem reprodução da taça oficial.
 
 ## Estaduais — pesquisa de 08/11/2026
 

@@ -13,7 +13,7 @@ const ALIASES = Object.freeze({
   'botaouro':'bota-de-ouro',
   'bota-ouro':'bota-de-ouro',
   'copa-intercontinental-da-fifa':'copa-intercontinental-fifa',
-  'copa-intercontinental':'copa-intercontinental-fifa',
+  'toyota-cup':'copa-intercontinental',
   'copa-das-nacoes-da-oceania':'copa-das-nacoes-da-ofc',
   'concacaf': 'concacaf-champions',
   'copa-libertadores': 'libertadores',

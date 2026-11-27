@@ -232,7 +232,7 @@ export function PodiumBolaDeOuro({ finalistas, aoConcluir }) {
       {finalistas.some((f,i)=>f.voce&&f.pos===1&&fase[i]==="revelado") && (
         <div className="relative isolate overflow-hidden rounded-sm border border-amber-400/50 min-h-[190px] bg-[radial-gradient(ellipse_at_72%_30%,rgba(216,180,74,.35),transparent_55%),linear-gradient(135deg,#211a0b,#080808_70%)]">
           <div className="absolute inset-0 opacity-40" style={{backgroundImage:`url(${ARTE.confete})`,backgroundSize:'cover',backgroundPosition:'center'}}/>
-          <PersonagemCinematico pose="comemoracao" style={{position:'absolute',right:'3%',bottom:0,height:'100%',width:'48%',backgroundSize:'300% 100%',backgroundPosition:'50% 50%'}}/>
+          <PersonagemCinematico pose="comemoracao" style={{position:'absolute',right:'3%',bottom:0,height:'100%',width:'auto',aspectRatio:'1 / 1',backgroundSize:'300% 100%',backgroundPosition:'50% 50%'}}/>
           <div className="relative z-10 p-4 pr-[43%] min-h-[190px] flex flex-col justify-center">
             <div className="text-[9px] tracking-[.2em] text-amber-300 uppercase">O melhor do mundo</div>
             <div className="text-xl font-black text-amber-300 leading-tight">BOLA DE OURO</div>
@@ -511,7 +511,7 @@ export function CenaLevantarTaca({ titulos, clube, onConcluir }) {
       <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `radial-gradient(circle at 50% 20%, ${corClube}33 0%, #050505 75%), url(${ARTE.confete}) center/cover` }}>
         <div className="relative h-[400px] flex flex-col items-center justify-center px-4 overflow-hidden">
           {fase >= 1 && <Confetti />}
-          <PersonagemCinematico pose="comemoracao" style={{position:'absolute',right:'2%',bottom:0,height:'92%',width:'48%',backgroundSize:'300% 100%',backgroundPosition:'50% 50%',opacity:.96}}/>
+          <PersonagemCinematico pose="comemoracao" style={{position:'absolute',right:'2%',bottom:0,height:'92%',width:'auto',aspectRatio:'1 / 1',backgroundSize:'300% 100%',backgroundPosition:'50% 50%',opacity:.96}}/>
           <div className="relative z-10 mr-[28%]" style={{ animation: fase === 0 ? "jerseyRise 0.8s ease-out" : "floatY 2.4s ease-in-out infinite", filter:"drop-shadow(0 4px 16px #000)" }}>
             <TrofeuIcone tier={titulos[0]?.tier || "ouro"} size={100} />
           </div>

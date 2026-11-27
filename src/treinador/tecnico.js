@@ -967,7 +967,7 @@ export function reuniaoEmergenciaTecnico(c, escolha, rng = sorteio) {
     reuniaoPendente: false, reunioes: [...(t.reunioes || []), { ano: t.ano, rodada: t.andamento.rodadas ?? t.andamento.jogos, escolha }] };
   return { ...c, tecnico: nova };
 }
-export function simularEtapaTecnico(c, rng = sorteio) {
+export function simularEtapaTecnico(c, rng = sorteio, opcoes = {}) {
   const t = c?.tecnico;
   // Projeção local; jamais adicionada a c.tecnico, andamento ou save.
   const elencoRapido=t?.modoTreinadorRapido?elencoTaticoRapidoDoMundo(c.mundo,t.clube):null;
@@ -980,7 +980,10 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   const calendario = anterior.calendario || calendarioAdversariosTecnico(t);
   const totalRodadas = calendario?.length || 38;
   const rodadasAnteriores = anterior.rodadas ?? anterior.jogos;
-  const limite = etapasCalendarioTecnico(t, calendario).find(n => n > rodadasAnteriores);
+  const etapas = etapasCalendarioTecnico(t, calendario);
+  const limite = opcoes.umaRodada
+    ? Math.min(rodadasAnteriores + 1, totalRodadas)
+    : etapas.find(n => n > rodadasAnteriores);
   if (!limite) throw new Error('Temporada já concluída.');
   // Copia cada partida para não alterar saves anteriores por referência.
   const confrontos = (anterior.confrontos || []).map(jogo => ({ ...jogo }));
@@ -1002,20 +1005,21 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   const pontos = v * 3 + e;
   const jogosDisputados = confrontos.filter(j => !j.folga).length;
   const aproveitamento = jogosDisputados ? pontos / (jogosDisputados * 3) : 0;
+  const avaliarEtapa = !opcoes.umaRodada || etapas.includes(limite) || limite === totalRodadas;
   const expectativa = objetivoTecnico(t).posicao;
   const ruim = aproveitamento < (expectativa <= 4 ? 0.44 : expectativa <= 8 ? 0.35 : 0.25);
   const otimo = aproveitamento > (expectativa <= 4 ? 0.72 : 0.62);
   const ajuste = otimo ? 6 : ruim ? -9 : 1;
-  const diretoria = limitar((t.diretoria ?? 60) + ajuste, 0, 100);
-  const torcida = limitar((t.torcida ?? 55) + (otimo ? 7 : ruim ? -8 : 1), 0, 100);
+  const diretoria = avaliarEtapa ? limitar((t.diretoria ?? 60) + ajuste, 0, 100) : (t.diretoria ?? 60);
+  const torcida = avaliarEtapa ? limitar((t.torcida ?? 55) + (otimo ? 7 : ruim ? -8 : 1), 0, 100) : (t.torcida ?? 55);
   const pressao = riscoDemissaoTecnico({ ...t, diretoria, torcida }).pressao;
-  const demitido = (diretoria < 18 || pressao >= 85) && limite < totalRodadas;
-  const reuniaoPendente = !demitido && limite < totalRodadas && (pressao >= 55 || diretoria <= 45);
+  const demitido = avaliarEtapa && (diretoria < 18 || pressao >= 85) && limite < totalRodadas;
+  const reuniaoPendente = avaliarEtapa && !demitido && limite < totalRodadas && (pressao >= 55 || diretoria <= 45);
   const avaliacao = { rodada: limite, pontos, aproveitamento: Math.round(aproveitamento * 100),
     situacao: demitido ? 'Demitido durante a temporada' : ruim ? 'Diretoria insatisfeita' : otimo ? 'Diretoria satisfeita' : 'Diretoria acompanha os resultados',
     diretoria, torcida, pressao };
   const andamento = { jogos: jogosDisputados, rodadas: limite, calendario, confrontos, partidasLiga, vitorias: v, empates: e, derrotas: d, pontos,
-    avaliacoes: [...anterior.avaliacoes, avaliacao] };
+    avaliacoes: avaliarEtapa ? [...(anterior.avaliacoes || []), avaliacao] : [...(anterior.avaliacoes || [])] };
   // Saves anteriores à introdução dos placares preservam resultados e recebem gols coerentes.
   for (const jogo of confrontos) {
     if (!Number.isFinite(jogo.golsPro) || !Number.isFinite(jogo.golsContra)) {
@@ -1049,6 +1053,10 @@ export function simularEtapaTecnico(c, rng = sorteio) {
   if (limite < totalRodadas) return { ...c, tecnico: { ...t, diretoria, torcida, andamento, reuniaoPendente } };
   // Finalizar usando os resultados já disputados, sem sortear partidas novamente.
   return finalizarTemporadaTecnico(c, { ...andamento, diretoria, torcida }, rng);
+}
+/** Avança exatamente uma rodada da liga, preservando as avaliações nos marcos da temporada. */
+export function jogarProximaRodadaTecnico(c, rng = sorteio) {
+  return simularEtapaTecnico(c, rng, { umaRodada: true });
 }
 export const INTERVENCOES_TECNICO=[
  {id:'manter',nome:'Manter o plano',descricao:'Confie no estilo preparado para a temporada.'},

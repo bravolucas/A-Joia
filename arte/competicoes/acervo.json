@@ -54,7 +54,8 @@
     "Campeones Cup",
     "Johan Cruijff Schaal",
     "Copa da Turquia",
-    "Supercopa da Turquia"
+    "Supercopa da Turquia",
+    "Copa Intercontinental clássica"
   ],
   "recriacoesIluminadas": [
     "brasileirao",
@@ -69,6 +70,11 @@
       "requestId": "071d586b-bacc-4196-ad52-f40fe07036c6",
       "recorteRequestId": "202f340a-0d3a-4b9a-ba62-9b77099557d1",
       "referencia": "https://inside.fifa.com/official-documents/annual-report/2024/2024-at-a-glance/fifa-intercontinental-cup-2024"
+    },
+    "copa-intercontinental": {
+      "arquivo": "copa-intercontinental.svg",
+      "gerador": "Ilustração vetorial original criada para A JOIA (2026)",
+      "finalidade": "Representação visual própria da competição clássica, distinta da Copa Intercontinental FIFA"
     }
   }
 }

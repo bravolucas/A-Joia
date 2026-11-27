@@ -5,7 +5,7 @@ import {competicoesDisponiveis,galeriaCompeticao} from '../src/historia/competic
 import {acervoInicial,galeriaClube} from '../src/historia/historiaFutebol.js';
 import {chaveCompeticao} from '../src/comum/arteCompeticoes.js';
 import {nomeCanonico} from '../src/historia/historiaFutebol.js';
-import {TACAS_MUSEU,competicaoMuseu} from '../src/museu/museu.js';
+import {TACAS_MUSEU,competenciaMuseu} from '../src/museu/museu.js';
 
 test('Copa Intercontinental clássica tem 43 edições e preserva os anos sem final',()=>{
  assert.equal(HISTORICO_COPA_INTERCONTINENTAL.length,43);
@@ -79,7 +79,7 @@ test('catálogo e aliases de imagem preservam o nome de cada torneio',()=>{
  assert.equal(chaveCompeticao('Copa Intercontinental FIFA'),'copa-intercontinental-fifa');
  assert.equal(chaveCompeticao('Mundial de Clubes FIFA'),'mundial-de-clubes');
  assert.equal(nomeCanonico('Mundial de Clubes'),'Mundial de Clubes FIFA');
- assert.equal(competicaoMuseu('Mundial de Clubes').nome,'Mundial de Clubes FIFA');
+ assert.equal(competenciaMuseu('Mundial de Clubes').nome,'Mundial de Clubes FIFA');
  assert.equal(TACAS_MUSEU.filter(t=>t.nome==='Mundial de Clubes FIFA').length,1);
 });
 

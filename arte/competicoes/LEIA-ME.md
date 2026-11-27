@@ -30,6 +30,14 @@ Oito estaduais possuem **imagem local** específica: Paulista, Carioca, Mineiro,
 **Sergipano e Paraense** permanecem com fallback original: os arquivos encontrados com bandeiras estaduais não comprovam reproduzir o troféu do campeonato. Não confundimos esse material com imagem oficial. A afirmação de cobertura do catálogo acima não incluía estaduais: há um erro anterior na construção desse catálogo (`ESTADUAIS` contém strings). Essa cobertura não significa que todos os troféus sejam fotografias reais.
 
 
+## Intercontinental clássica e torneio FIFA
+
+O acervo mantém duas artes diferentes: `copa-intercontinental.svg` representa
+de forma original a competição histórica de 1960 a 2004; `copa-intercontinental-fifa.png`
+identifica a Copa Intercontinental FIFA, retomada em 2024. A separação visual
+acompanha os históricos e rankings independentes do jogo.
+
+
 ## Conference League
 
 `conference-league.svg` é uma **ilustração vetorial original local**

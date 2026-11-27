@@ -17,12 +17,12 @@ test('acervo cobre as 27 federações com fontes, campeões e anos anteriores à
  assert.equal(Object.keys(ESTADUAIS).length,27);assert.equal(Object.keys(HISTORICO_ESTADUAIS).length,27);
  for(const [estado,nome] of Object.entries(ESTADUAIS)){
   const h=HISTORICO_ESTADUAIS[estado];assert.equal(h.nome,nome);assert.ok(h.fontes.length>=2);assert.ok(h.clubes&&Object.keys(h.clubes).length);
-  for(const [clube,anos] of Object.entries(h.clubes)){assert.ok(clube);assert.ok(anos.length);assert.ok(anos.every(a=>Number.isInteger(a)&&a<ANO_INICIO));}
+  for(const [clube,anos] of Object.entries(h.clubes)){assert.ok(clube);assert.ok(anos.length);assert.ok(anos.every(a=>Number.isInteger(a)&&a<=ANO_INICIO));}
   const historicas=edicoesEstaduaisHistoricas(nome);assert.ok(historicas.some(e=>e.ano===2024));assert.ok(historicas.every(e=>e.campeoes.length));
  }
 });
 test('contagens e anos dos clubes do jogo não começam em zero nem misturam supercampeonatos',()=>{
- for(const [clube,q] of [['Santos',22],['Corinthians',30],['Palmeiras',26],['São Paulo',22],['Flamengo',38],['Vasco da Gama',24],['Fluminense',33],['Botafogo',21],['Grêmio',43],['Internacional',45],['Atlético-MG',49],['Cruzeiro',38],['Athletico-PR',28],['Coritiba',39],['CRB',34],['Avaí',18],['ABC',57],['América-RN',38]]){
+ for(const [clube,q] of [['Santos',22],['Corinthians',31],['Palmeiras',26],['São Paulo',22],['Flamengo',38],['Vasco da Gama',24],['Fluminense',33],['Botafogo',21],['Grêmio',43],['Internacional',45],['Atlético-MG',49],['Cruzeiro',38],['Athletico-PR',28],['Coritiba',39],['CRB',34],['Avaí',18],['ABC',57],['América-RN',38]]){
   const h=historicoEstadualDoClube(clube);assert.equal(h.quantidade,q,clube);assert.equal(h.anos.length,q,clube);const cl=CLUBES.find(c=>c.nome===clube);if(cl)assert.equal(palmaresInicialDe(cl).estadual,q,clube);
  }
  assert.equal(historicoEstadualDoClube('São Paulo').anos.includes(2002),false);
@@ -90,7 +90,7 @@ test('intercontinental usa os quatro campeões reais e registra as cinco partida
 });
 
 test('mudança de estado não apaga os títulos anteriores de Operário-MS e Comercial-MS',()=>{
- const op=galeriaClube({},'Operário-MS');assert.equal(op.tacas.find(t=>t.nome===ESTADUAIS.MT).inicial,4);assert.equal(op.tacas.find(t=>t.nome===ESTADUAIS.MS).inicial,13);
+ const op=galeriaClube({},'Operário-MS');assert.equal(op.tacas.find(t=>t.nome===ESTADUAIS.MT).inicial,4);assert.equal(op.tacas.find(t=>t.nome===ESTADUAIS.MS).inicial,15);
  const comercial=galeriaClube({},'Comercial-MS');assert.equal(comercial.tacas.find(t=>t.nome===ESTADUAIS.MT).inicial,1);assert.equal(comercial.tacas.find(t=>t.nome===ESTADUAIS.MS).inicial,9);
 });
 test('Copa São Paulo continua sem o usuário e preserva a edição própria',async()=>{

@@ -1,8 +1,8 @@
 # Histórico e calendário dos estaduais
 
-As novas carreiras começam em 2026 (`ANO_INICIO`), nos modos rápido e completo. O modo completo salva `anoInicio`; saves antigos sem esse campo mantêm a referência anterior de 2025. O acervo estadual documentado permanece com corte em 2024, indicado na interface; mudar o início da carreira não cria resultados históricos. As conquistas efetivamente salvas mantêm seus anos. O calendário quadrienal dos mundiais mantém sua referência real de 2025.
+As novas carreiras começam em 2026 (`ANO_INICIO`), nos modos rápido e completo. O modo completo salva `anoInicio`; saves antigos sem esse campo mantêm a referência anterior de 2025. O acervo estadual documentado agora tem corte em 2026, indicado na interface; mudar o início da carreira não cria resultados históricos. As conquistas efetivamente salvas mantêm seus anos. O calendário quadrienal dos mundiais mantém sua referência real de 2025.
 
-`src/dados/estaduaisHistoricos.js` contém os dados compilados de listas históricas da RSSSF Brasil e das tabelas de campeões da Wikipédia em português, consultadas em 14/11/2026. Os URLs específicos dos 27 campeonatos estão em cada registro. A RSSSF credita as listas aos seus respectivos autores (entre eles Julio Bovi Diogo e colaboradores). O arquivo do jogo contém fatos — clubes e anos — e mantém a atribuição por links; não reproduz os textos das páginas.
+`src/dados/estaduaisHistoricos.js` contém os dados compilados de listas históricas da RSSSF Brasil e das tabelas de campeões da Wikipédia em português, consultadas em 14/11/2026, com atualização dos campeões de 2025 e 2026 a partir das listas nacionais publicadas pelo ge. Os URLs específicos dos 27 campeonatos estão em cada registro. A RSSSF credita as listas aos seus respectivos autores (entre eles Julio Bovi Diogo e colaboradores). O arquivo do jogo contém fatos — clubes e anos — e mantém a atribuição por links; não reproduz os textos das páginas.
 
 ## Critérios da base
 
@@ -39,3 +39,19 @@ Falsas placas antigas de “primeiro estadual”, causadas pela base vazia, deix
 ## Escudos dos representantes adicionados
 
 Os 52 clubes dos novos estaduais possuem arquivos reais locais. O manifesto `arte/escudos/acervo-estaduais-2026-11-15.json` registra clube, estado, país, arquivo, URL da imagem original, referência e SHA-256. Os arquivos foram preservados sem edição; as fontes são a coleção football-logos, Escudos FC, Logo de Times e Escudos Futebol API. As verificações de integridade e o carregamento no navegador incluem os 694 nomes do catálogo ampliado.
+
+
+## Atualização do acervo real — temporadas 2025 e 2026
+
+O corte documental foi ampliado de 2024 para 2026 nos **27 estaduais (26 estados e Distrito Federal)**. Foram acrescentados 54 registros de campeões, um por competição em cada temporada, sem inserir vices, placares ou estatísticas que não façam parte do acervo.
+
+A conferência de 2025 usa a lista final do ge publicada em 17/05/2025 e sua retrospectiva de 31/12/2025. O caso do Tocantins merece atenção: a lista inicial apontava o União, mas a decisão administrativa posterior do STJD alterou a classificação; o Araguaína é o campeão oficial ao fim de 2025. A atualização segue a lista retrospectiva final, não o resultado provisório.
+
+A temporada 2026 foi conferida pela lista completa do ge publicada em 06/04/2026. Entre os campeões inéditos adicionados estão Santa Cruz-AC, Guaporé-RO, IAPE, Porto Vitória e Barra-SC. Os nomes foram alinhados ao catálogo histórico local, preservando clubes homônimos por estado.
+
+**Fontes de conferência:**
+- [ge — todos os campeões estaduais de 2025 (17/05/2025)](https://ge.globo.com/pi/futebol/noticia/2025/05/17/veja-todos-os-campeoes-estaduais-do-brasil-em-2025.ghtml)
+- [ge — retrospectiva dos campeões de 2025 (31/12/2025), incluindo a definição posterior do Tocantins](https://ge.globo.com/pi/futebol/noticia/2025/12/31/dos-estaduais-ao-mundial-veja-todos-os-campeoes-de-2025.ghtml)
+- [ge — todos os campeões estaduais de 2026 (06/04/2026)](https://ge.globo.com/pi/futebol/noticia/2026/04/06/quebras-de-jejuns-titulos-ineditos-e-hegemonias-mantidas-veja-todos-os-campeoes-estaduais-de-2026.ghtml)
+
+O teste `tests/estaduais-historicos.test.mjs` verifica a presença dos 27 campeões de cada temporada, o corte documental por estado e a preservação dos registros anteriores. A atualização não altera o calendário simulado nem reescreve saves.

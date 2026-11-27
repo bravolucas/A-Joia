@@ -49,7 +49,7 @@ test('vitrines dos clubes e aliases usam o mesmo torneio, sem confundir com Libe
  assert.equal(taca('Chapecoense')?.inicial,1);
  assert.equal(acervoInicial('Independiente Santa Fe').conhecido,true);
  assert.equal(galeriaCompeticao({},'Copa Sudamericana').nome,'Copa Sul-Americana');
- assert.equal(galeriaCompeticao({},'Sul-Americana').historicas.length,24);
+ assert.equal(galeriaCompeticao({},'Sul-Americana').historicas.length,25);
  assert.equal(galeriaCompeticao({},'Libertadores').historicas.length,66);
  assert.equal(galeriaCompeticao({},'Libertadores').ranking.find(t=>t.clube==='Athletico-PR'),undefined);
 });
@@ -64,7 +64,7 @@ test('carreira simulada adiciona uma conquista apenas e jamais altera save ou hi
  assert.equal(g.ranking.find(t=>t.clube==='Lanús').total,3);
  assert.equal(g.ranking.find(t=>t.clube==='Lanús').simulacao,1);
  assert.equal(g.ranking.reduce((s,t)=>s+t.simulacao,0),1);
- assert.equal(g.historicas.length,24);
+ assert.equal(g.historicas.length,25);
  assert.equal(g.ultima.ano,2030);
  assert.deepEqual(c,antes);
  assert.equal(galeriaClube(c,'Lanús').tacas.find(t=>t.nome==='Copa Sul-Americana').total,3);

@@ -1,4 +1,4 @@
-// Acervo de edições documentadas até 2024. Fontes e critérios: docs/ESTADUAIS.md.
+// Acervo de edições documentadas até 2026. Fontes e critérios: docs/ESTADUAIS.md.
 export const HISTORICO_ESTADUAIS = {
  "AC": {
   "nome": "Campeonato Acreano",
@@ -19,9 +19,8 @@ export const HISTORICO_ESTADUAIS = {
    "Rio Branco-AC": [1919,1921,1928,1929,1935,1936,1937,1938,1939,1940,1941,1943,1944,1945,1946,1947,1950,1951,1955,1956,1957,1960,1961,1962,1964,1971,1973,1977,1979,1983,1986,1992,1994,1997,2000,2002,2003,2004,2005,2007,2008,2010,2011,2012,2014,2015,2018,2021,2023],
    "Vasco-AC": [1965,1999,2001],
    "Ypiranga-AC": [1920],
-  
-    "Santa Cruz-AC": [2026],
-   ,
+   "Santa Cruz-AC": [2026],
+  },
  },
  "AP": {
   "nome": "Campeonato Amapaense",
@@ -99,9 +98,8 @@ export const HISTORICO_ESTADUAIS = {
    "Serra-ES": [1999,2003,2004,2005,2008,2018],
    "São Mateus-ES": [2009,2011],
    "Vitória-ES": [1920,1932,1933,1943,1950,1952,1956,1976,2006,2019],
-  
-    "Porto Vitória": [2026],
-   ,
+   "Porto Vitória": [2026],
+  },
  },
  "MA": {
   "nome": "Campeonato Maranhense",
@@ -122,9 +120,8 @@ export const HISTORICO_ESTADUAIS = {
    "Tupan-MA": [1932,1935,1938],
    "Vasco da Gama-MA": [1928],
    "Vitória do Mar-MA": [1952],
-  
-    "IAPE": [2026],
-   ,
+   "IAPE": [2026],
+  },
  },
  "MT": {
   "nome": "Campeonato Mato-Grossense",
@@ -150,9 +147,8 @@ export const HISTORICO_ESTADUAIS = {
    "União Rondonópolis": [2010],
    "Vila Aurora-MT": [2005],
    "Várzea Grande-MT": [2006],
-  
-    "Primavera-MT": [2025],
-   ,
+   "Primavera-MT": [2025],
+  },
  },
  "MS": {
   "nome": "Campeonato Sul-Mato-Grossense",
@@ -280,9 +276,8 @@ export const HISTORICO_ESTADUAIS = {
    "Vilhena": [2005,2009,2010,2013,2014],
    "Vilhenense-RO": [2019],
    "Ypiranga-RO": [1945,1953,1959,1964,1982,1984,1984],
-  
-    "Guaporé-RO": [2026],
-   ,
+   "Guaporé-RO": [2026],
+  },
  },
  "RR": {
   "nome": "Campeonato Roraimense",
@@ -534,9 +529,8 @@ export const HISTORICO_ESTADUAIS = {
    "SER Perdigão-SC": [1966],
    "Tubarão FC-SC": [1970],
    "Ypiranga-SC": [1940],
-  
-    "Barra-SC": [2026],
-   ,
+   "Barra-SC": [2026],
+  },
  },
  "GO": {
   "nome": "Campeonato Goiano",

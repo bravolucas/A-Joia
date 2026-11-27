@@ -1,16 +1,18 @@
 /**
- * Copa Sul-Americana: campeões reais por edição (2002–2025).
+ * Copa Sul-Americana: campeões reais por edição (2002–2026).
  * Dados de referência; não são resultados de carreiras simuladas.
  * O título de 2016 foi concedido à Chapecoense, sem disputa da final.
  * Clubes não jogáveis permanecem no histórico (ex.: Pachuca, Cienciano).
  *
- * Fontes consultadas em 18/11/2026:
+ * Fontes consultadas em 27/11/2026:
  * https://ge.globo.com/mg/futebol/copa-sul-americana/noticia/2025/11/22/todos-os-campeoes-da-copa-sul-americana-veja-lista.ghtml
  * https://www.fff.fr/626-palmares-copa-sudamericana.html
  * https://www1.folha.uol.com.br/esporte/2025/11/confira-a-lista-com-todos-os-campeoes-da-copa-sul-americana.shtml
+ * AFA (final 2026): https://www.afa.com.ar/es/posts/boca-se-corono-campeon-de-la-conmebol-sudamericana
+ * UOL (final 2026): https://www.uol.com.br/esporte/futebol/ultimas-noticias/2026/11/21/atletico-mg-x-boca-juniors-final-sul-americana.ghtm
  *
- * A edição de 2026 não tem campeão registrado neste acervo: nunca
- * inferir seu vencedor a partir de partidas ou saves do jogo.
+ * A edição de 2026 foi concluída em 21/11: Boca Juniors venceu o
+ * Atlético Mineiro por 2–0 em Barranquilla. A edição de 2027 segue aberta.
  */
 const POR_ANO=Object.freeze({
   2002:'San Lorenzo',2003:'Cienciano',2004:'Boca Juniors',
@@ -21,10 +23,10 @@ const POR_ANO=Object.freeze({
   2017:'Independiente',2018:'Athletico-PR',2019:'Independiente del Valle',
   2020:'Defensa y Justicia',2021:'Athletico-PR',
   2022:'Independiente del Valle',2023:'LDU de Quito',
-  2024:'Racing Club',2025:'Lanús',
+  2024:'Racing Club',2025:'Lanús',2026:'Boca Juniors',
 });
 
-export const ULTIMO_ANO_SULAMERICANA_HISTORICO=2025;
+export const ULTIMO_ANO_SULAMERICANA_HISTORICO=2026;
 export const HISTORICO_SULAMERICANA=Object.freeze(
   Object.entries(POR_ANO)
     .map(([ano,clube])=>Object.freeze({

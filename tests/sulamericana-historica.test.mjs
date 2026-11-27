@@ -9,30 +9,31 @@ import {acervoInicial,galeriaClube} from '../src/historia/historiaFutebol.js';
 
 const taca=clube=>galeriaClube({},clube).tacas.find(t=>t.nome==='Copa Sul-Americana');
 
-test('24 edições reais consecutivas, 2002–2025, sem antecipar 2026',()=>{
- assert.equal(ULTIMO_ANO_SULAMERICANA_HISTORICO,2025);
- assert.equal(HISTORICO_SULAMERICANA.length,24);
- assert.deepEqual(HISTORICO_SULAMERICANA.map(e=>e.ano),Array.from({length:24},(_,i)=>2025-i));
+test('25 edições reais consecutivas, 2002–2026, sem antecipar 2027',()=>{
+ assert.equal(ULTIMO_ANO_SULAMERICANA_HISTORICO,2026);
+ assert.equal(HISTORICO_SULAMERICANA.length,25);
+ assert.deepEqual(HISTORICO_SULAMERICANA.map(e=>e.ano),Array.from({length:25},(_,i)=>2026-i));
  assert.ok(HISTORICO_SULAMERICANA.every(e=>e.campeoes.length===1&&e.campeoes[0].quantidade===1));
- assert.equal(HISTORICO_SULAMERICANA[0].campeoes[0].clube,'Lanús');
+ assert.equal(HISTORICO_SULAMERICANA[0].campeoes[0].clube,'Boca Juniors');
  assert.equal(HISTORICO_SULAMERICANA.at(-1).campeoes[0].clube,'San Lorenzo');
  assert.equal(HISTORICO_SULAMERICANA.find(e=>e.ano===2016).campeoes[0].clube,'Chapecoense');
  assert.equal(HISTORICO_SULAMERICANA.find(e=>e.ano===2006).campeoes[0].clube,'Pachuca');
- assert.ok(!HISTORICO_SULAMERICANA.some(e=>e.ano>=2026));
+ assert.ok(!HISTORICO_SULAMERICANA.some(e=>e.ano>=2027));
 });
 
-test('ranking mundial conta 24 taças de 18 clubes, inclusive os não jogáveis',()=>{
+test('ranking mundial conta 25 taças de 18 clubes, inclusive os não jogáveis',()=>{
  const g=galeriaCompeticao({},'Copa Sul-Americana');
- assert.equal(g.historicas.length,24);
+ assert.equal(g.historicas.length,25);
  assert.equal(g.edicoes.length,0);
- assert.equal(g.ultima.clube,'Lanús');
- assert.equal(g.ultima.ano,2025);
+ assert.equal(g.ultima.clube,'Boca Juniors');
+ assert.equal(g.ultima.ano,2026);
  assert.equal(g.ultima.historica,true);
  assert.equal(g.ranking.length,18);
- assert.equal(g.ranking.reduce((s,t)=>s+t.inicial,0),24);
- assert.equal(Object.values(TOTAIS_SULAMERICANA_HISTORICOS).filter(x=>x===2).length,6);
- for(const nome of ['Boca Juniors','Independiente','Athletico-PR','Independiente del Valle','LDU de Quito','Lanús'])
+ assert.equal(g.ranking.reduce((s,t)=>s+t.inicial,0),25);
+ assert.equal(Object.values(TOTAIS_SULAMERICANA_HISTORICOS).filter(x=>x===2).length,5);
+ for(const nome of ['Independiente','Athletico-PR','Independiente del Valle','LDU de Quito','Lanús'])
   assert.equal(g.ranking.find(t=>t.clube===nome)?.inicial,2,nome);
+ assert.equal(g.ranking.find(t=>t.clube==='Boca Juniors')?.inicial,3,'Boca Juniors');
  for(const nome of ['Pachuca','Cienciano','Arsenal de Sarandí','Independiente Santa Fe'])
   assert.equal(g.ranking.find(t=>t.clube===nome)?.inicial,1,nome);
  assert.ok(!g.ranking.some(t=>t.clube==='Atlético-MG'),'vice não recebe título');
@@ -41,6 +42,7 @@ test('ranking mundial conta 24 taças de 18 clubes, inclusive os não jogáveis'
 
 test('vitrines dos clubes e aliases usam o mesmo torneio, sem confundir com Libertadores',()=>{
  assert.ok(competicoesDisponiveis({}).includes('Copa Sul-Americana'));
+ assert.equal(taca('Boca Juniors')?.inicial,3);
  assert.equal(taca('Lanús')?.inicial,2);
  assert.equal(taca('Athletico-PR')?.inicial,2);
  assert.equal(taca('Pachuca')?.inicial,1);

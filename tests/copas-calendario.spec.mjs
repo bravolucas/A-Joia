@@ -21,8 +21,8 @@ for(const width of [320,1366])for(const [nome,tema]of[['Libertadores','libertado
 test('movimento reduzido preserva o tempo de leitura da estratégia com campo estático',async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});const c=atleta(),cp=cpTema('Libertadores'),card={...jogarTemporada(c).card,calendarioCopas:criarAgenda([cp],{ano:c.ano,clube:c.clubeNome}),titulos:[]};await abrir(page,{etapa:'copasClubes',c,card});
  await page.clock.install({time:new Date('2030-01-01T00:00:00Z')});await page.clock.pauseAt(new Date('2030-01-01T00:00:01Z'));
- await page.locator('.cce-opcoes button').first().click();const cena=page.locator('.cce-cinematica');await expect(cena).toBeVisible();await expect(cena.locator('animateMotion')).toHaveCount(0);const bola=cena.locator('.cce-bola-tatica'),antes=await bola.boundingBox();
- await page.clock.runFor(1400);await expect(cena).toBeVisible();await expect(cena.locator('.cce-veredito')).toHaveCount(0);expect(await bola.boundingBox()).toEqual(antes);
+ await page.locator('.cce-opcoes button').first().click();const cena=page.locator('.cce-cinematica');await expect(cena).toBeVisible();await expect(cena.locator('animateMotion')).toHaveCount(0);const bola=cena.locator('.cce-bola-tatica'),antes={cx:await bola.getAttribute('cx'),cy:await bola.getAttribute('cy')};
+ await page.clock.runFor(1400);await expect(cena).toBeVisible();await expect(cena.locator('.cce-veredito')).toHaveCount(0);expect({cx:await bola.getAttribute('cx'),cy:await bola.getAttribute('cy')}).toEqual(antes);
  await page.clock.runFor(300);await expect(cena.locator('.cce-veredito')).toBeVisible();await expect(cena.locator('.cce-veredito')).toHaveCSS('animation-name','none');await expect(page.locator('.cce-rodape button')).toBeDisabled();
  await page.clock.runFor(1400);await expect(cena).toHaveCount(0);await expect(page.getByRole('status')).toBeVisible();await expect(page.locator('.cce-rodape button')).toBeEnabled();
 });

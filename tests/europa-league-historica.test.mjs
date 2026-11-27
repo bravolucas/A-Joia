@@ -56,7 +56,7 @@ test('identidades de clube, aliases e outras copas ficam separados',()=>{
   assert.equal(galeriaCompeticao({},alias).historicas.length,55,alias);
  assert.equal(galeriaCompeticao({},'Champions League').historicas.length,71);
  assert.equal(galeriaCompeticao({},'Libertadores').historicas.length,66);
- assert.equal(galeriaCompeticao({},'Copa Sul-Americana').historicas.length,24);
+ assert.equal(galeriaCompeticao({},'Copa Sul-Americana').historicas.length,25);
 });
 test('carreira preservada: final simulada é contada uma vez, sem mexer na história real',()=>{
  const c={lista:[{ano:2031,nome:'Copa da UEFA',clube:'Sevilla',tipo:'continental'}],

@@ -51,7 +51,7 @@ test('clube jogável e dois campeões não jogáveis, sem confundir ligas e torn
  assert.equal(nomeCanonico('Copa do Brasil'),'Copa do Brasil');
  assert.equal(galeriaCompeticao({},'Copa Brasil').historicas.length,37);
  assert.equal(galeriaCompeticao({},'Libertadores').historicas.length,66);
- assert.equal(galeriaCompeticao({},'Copa Sul-Americana').historicas.length,24);
+ assert.equal(galeriaCompeticao({},'Copa Sul-Americana').historicas.length,25);
  assert.equal(galeriaCompeticao({},'Champions League').historicas.length,71);
  assert.equal(galeriaCompeticao({},'Europa League').historicas.length,55);
  assert.equal(galeriaCompeticao({},'Conference League').historicas.length,5);

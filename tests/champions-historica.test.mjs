@@ -76,7 +76,7 @@ test('carreira adiciona só uma edição, nunca altera saves ou palmarés real',
  assert.equal(galeriaClube(c,'Real Madrid').tacas.find(t=>t.nome==='Champions League').total,16);
  assert.deepEqual(c,antes);
  assert.equal(galeriaCompeticao({},'Libertadores').historicas.length,66);
- assert.equal(galeriaCompeticao({},'Copa Sul-Americana').historicas.length,24);
+ assert.equal(galeriaCompeticao({},'Copa Sul-Americana').historicas.length,25);
 });
 
 test('save legado do PSG com uma Champions antiga não cria título adicional falso',()=>{

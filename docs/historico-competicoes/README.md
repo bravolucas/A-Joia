@@ -52,20 +52,24 @@ Todos os saves existentes permanecem intactos: somente a consulta do
 acervo real foi ampliada; históricos simulados, vitórias e títulos salvos
 não são reescritos.
 
-## Copa Sul-Americana — acervo real corrigido (18/11/2026)
+## Copa Sul-Americana — acervo real atualizado até 2026 (27/11/2026)
 
-A **Copa Sul-Americana** tem agora **24 campeões por edição (2002–2025)**,
+A **Copa Sul-Americana** tem agora **25 campeões por edição (2002–2026)**,
 distribuídos entre **18 clubes**, incluindo representantes do México, Peru,
 Colômbia, Argentina, Brasil, Equador e Chile. O acervo fica em
 `src/dados/sulamericanaHistorica.js`. Pachuca, Cienciano, Arsenal de
 Sarandí e Independiente Santa Fe também aparecem, mesmo não sendo equipes
 jogáveis do A JOIA.
 
-No ranking, seis equipes têm duas taças cada: Boca Juniors, Independiente,
-Athletico-PR, Independiente del Valle, LDU de Quito e Lanús.
-A conquista de 2016 foi **atribuída à Chapecoense**, sem disputa da decisão.
-O Lanús é o último vencedor cadastrado (2025). **Não registrar o campeão
-de 2026 antes da final e da confirmação do resultado.**
+O **Boca Juniors lidera isolado com três títulos** (2004, 2005 e 2026).
+Outros cinco clubes têm duas conquistas: Independiente, Athletico-PR,
+Independiente del Valle, LDU de Quito e Lanús. A conquista de 2016 foi
+**atribuída à Chapecoense**, sem disputa da decisão.
+
+Em **21/11/2026**, o Boca Juniors venceu o Atlético Mineiro por **2 a 0**
+na final única em Barranquilla, com gols de Santiago Ascacíbar e Miguel
+Merentiel. A edição de 2026 está concluída e incluída; **2027 permanece
+fora do acervo até sua decisão oficial**.
 
 As edições reais, vencedores da carreira e totais legados são mostrados
 separadamente: só os títulos da carreira alteram o save. Aliases
@@ -77,15 +81,15 @@ consultam a mesma competição, sem fundir com a Libertadores.
 - [ge — lista completa por temporada (22/11/2025)](https://ge.globo.com/mg/futebol/copa-sul-americana/noticia/2025/11/22/todos-os-campeoes-da-copa-sul-americana-veja-lista.ghtml)
 - [Folha — histórico 2002–2025 (22/11/2025)](https://www1.folha.uol.com.br/esporte/2025/11/confira-a-lista-com-todos-os-campeoes-da-copa-sul-americana.shtml)
 - [Federação Francesa de Futebol — palmarés até 2024](https://www.fff.fr/626-palmares-copa-sudamericana.html)
+- [AFA — Boca campeão da Sul-Americana 2026](https://www.afa.com.ar/es/posts/boca-se-corono-campeon-de-la-conmebol-sudamericana)
+- [UOL — resultado da final Atlético-MG 0–2 Boca Juniors (21/11/2026)](https://www.uol.com.br/esporte/futebol/ultimas-noticias/2026/11/21/atletico-mg-x-boca-juniors-final-sul-americana.ghtm)
 
 **Testes:** `node --test tests/sulamericana-historica.test.mjs
 tests/libertadores-historica.test.mjs tests/competicoes-historicas.test.mjs`
 e `GITHUB_PAGES=true npm run build`.
 
 As mudanças não migram saves, nem inventam placares, vices ou resultados
-históricos simulados. A edição de 2026 deve ser adicionada somente quando
-oficialmente concluída.
-
+históricos simulados.
 ## Champions League / Copa dos Campeões — histórico real (18/11/2026)
 
 A história das duas fases da principal competição europeia foi reunida

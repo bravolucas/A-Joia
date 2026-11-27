@@ -200,7 +200,8 @@ export function PodiumBolaDeOuro({ finalistas, aoConcluir }) {
     // suspense: revela do lugar mais baixo pro mais alto
     const ordem = finalistas.map((_, i) => i).sort((a, b) => finalistas[b].pos - finalistas[a].pos);
     ordem.forEach((indice, k) => setTimeout(() => revelarUm(indice), k * 950));
-    setTimeout(() => aoConcluir && aoConcluir(), ordem.length * 950 + 560);
+    const usuarioVenceu = finalistas.some(f => f.voce && f.pos === 1);
+    setTimeout(() => aoConcluir && aoConcluir(), ordem.length * 950 + (usuarioVenceu ? 2200 : 560));
   }
 
   return (

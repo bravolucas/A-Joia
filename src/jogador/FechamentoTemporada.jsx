@@ -1,4 +1,6 @@
 import {ImpactoJogador} from '../simulacao/MundoVivo.jsx';
+import TextoComLinks from '../historia/TextoComLinks.jsx';
+import {pessoasDoRecorde} from '../historia/noticiasRecordes.js';
 import {porCompeticaoTemporada} from './FechamentoTemporadaDados.js';
 import CerimoniaBola from '../comum/CerimoniaBola.jsx';
 import {nomeVaga} from '../competicoes/regrasCopasRapidas.js';
@@ -29,6 +31,7 @@ export default function FechamentoTemporada({c,card,onContinuar,celebracaoIndice
  const ganhouTipo=(tipo,nome)=>(card.titulos||[]).some(t=>t.tipo===tipo&&(!nome||t.nome===nome));
  const campanha=campanhaDaTemporada(card,ganhouTipo);
  const destaques=(card.destaques||[]);
+ const pessoasRecordes=[...(card.recordesEventos||[]).flatMap(pessoasDoRecorde),...(card.jornada?.noticias||[]).flatMap(n=>n.pessoas||[])];
  const extras=[...(card.jornada?.mensagens||[]).map(m=>`${m.de}: ${m.texto}`),...(card.jornada?.noticias||[]).slice(0,3).map(m=>`${m.titulo}: ${m.detalhe}`),...destaques.slice(3)];
  const fatos=[
   card.bola?.pos<=10&&{icone:'⚽',texto:`Bola de Ouro: ${card.bola.pos}º`},
@@ -44,9 +47,9 @@ export default function FechamentoTemporada({c,card,onContinuar,celebracaoIndice
    <section className={`ft-palco ${selecionado?'':'ft-palco-curto'}`} aria-label="Conquistas da temporada">
     <div className="ft-clube">{emblema&&<img src={emblema} alt={nacional?`Bandeira de ${nomeEquipe}`:''}/>}<span><LinkEntidade tipo={nacional?'selecao':'clube'} nome={nomeEquipe}/></span></div>
     {selecionado?<><h1>{premio?'É SEU!':'CAMPEÃO!'}</h1><div className="ft-taca" key={selecionado.id}><div className="ft-halo"/>{Array.from({length:12},(_,i)=><i key={i} className="ft-papel" style={{'--i':i}}/>)}<TacaCompeticao nome={selecionado.nome} tipo={selecionado.tipo} size={112}/><b aria-label={`${n} conquistas na carreira`}>×{n}</b></div><h2><LinkEntidade tipo={premio?'premio':'competicao'} nome={selecionado.nome}/></h2><p className="ft-anos">{carreira?.conquistas?.map(x=>x.ano).filter(Boolean).filter((a,i,v)=>v.indexOf(a)===i).sort((a,b)=>a-b).join(' · ')||card.ano}</p>{grupos.length>1&&<div className="ft-titulos" aria-label="Todas as conquistas desta temporada">{grupos.map((g,i)=><button key={g.id} aria-pressed={indice===i} onClick={()=>I(i)}>{g.nome}<small>×{historico.find(h=>h.id===g.id)?.quantidade||g.quantidade}</small></button>)}</div>}</>
-     :<div className="ft-sem-taca"><strong>{card.acesso?'ACESSO!':card.rebaixado?'REBAIXADO':'SEM TÍTULOS NESTE ANO'}</strong><p>{card.acesso?`O ${card.clube} sobe para ${card.acesso.para}.`:card.rebaixado?`O ${card.clube} vai jogar ${card.rebaixado.para}.`:'Veja abaixo como foi cada competição.'}</p></div>}
+     :<div className="ft-sem-taca"><strong>{card.acesso?'ACESSO!':card.rebaixado?'REBAIXADO':'SEM TÍTULOS NESTE ANO'}</strong><p><TextoComLinks>{card.acesso?`O ${card.clube} sobe para ${card.acesso.para}.`:card.rebaixado?`O ${card.clube} vai jogar ${card.rebaixado.para}.`:'Veja abaixo como foi cada competição.'}</TextoComLinks></p></div>}
     <div className="ft-campanha-lista" aria-label="Campanha nas competições">{campanha.map(x=><div key={x.nome} className={`ft-comp ft-${x.tom}`}>
-     <TacaCompeticao nome={x.nome} tipo={x.tipo} size={24}/><span><strong><LinkEntidade tipo="competicao" nome={x.nome}/></strong>{x.detalhe&&<small>{x.detalhe}</small>}</span><b>{x.res}</b></div>)}</div>
+     <TacaCompeticao nome={x.nome} tipo={x.tipo} size={24}/><span><strong><TextoComLinks c={c}>{x.nome}</TextoComLinks></strong>{x.detalhe&&<small><TextoComLinks>{x.detalhe}</TextoComLinks></small>}</span><b><TextoComLinks c={c}>{x.res}</TextoComLinks></b></div>)}</div>
     {card.tabelaLiga?.length>0&&<MiniTabela card={card}/>}
     {card.amistososSelecao?.convocado&&<details className="ft-amistosos"><summary>Amistosos da seleção · {card.amistososSelecao.jogos} jogos · {card.amistososSelecao.gols} gols</summary>{card.amistososSelecao.partidas.map((j,i)=><p key={i}>{NACIONALIDADES.find(n=>n.id===c.nac)?.label} {j.gp} × {j.gc} {j.adv.label}<small>{j.gols} gols · {j.assist} assistências suas</small></p>)}</details>}
    </section>
@@ -54,13 +57,13 @@ export default function FechamentoTemporada({c,card,onContinuar,celebracaoIndice
     <h2>Seus números</h2>
     <div className="ft-numeros">{[['Jogos',card.jogos],['Gols',card.gols],['Assistências',card.assist]].map(([rotulo,valor])=><div key={rotulo}><strong>{valor??0}</strong><span>{rotulo}</span></div>)}</div>
     <div className="ft-evolucao"><div><span>OVR</span><strong>{antes}<i>→</i>{depois}</strong><small>{delta>0?'+':''}{delta} na temporada</small></div><div><span>Nota</span><strong>{Number.isFinite(card.nota)?card.nota.toFixed(1):'—'}</strong><small>{card.status||'Temporada registrada'}</small></div></div>
-    {fatos.length>0&&<div className="ft-fatos">{fatos.map(f=><span key={f.texto}><i aria-hidden="true">{f.icone}</i>{f.texto}</span>)}</div>}
-    {porCompeticaoTemporada(card).length>1&&<div className="ft-por-competicao" aria-label="Seus números por competição">{porCompeticaoTemporada(card).map(x=><p key={x.nome}><strong>{x.nome}</strong><span>{x.jogos} jogos · {x.gols} gols · {x.assist} assist.</span></p>)}</div>}
+    {fatos.length>0&&<div className="ft-fatos">{fatos.map(f=><span key={f.texto}><i aria-hidden="true">{f.icone}</i><TextoComLinks>{f.texto}</TextoComLinks></span>)}</div>}
+    {porCompeticaoTemporada(card).length>1&&<div className="ft-por-competicao" aria-label="Seus números por competição">{porCompeticaoTemporada(card).map(x=><p key={x.nome}><strong><LinkEntidade tipo="competicao" nome={x.nome}/></strong><span>{x.jogos} jogos · {x.gols} gols · {x.assist} assist.</span></p>)}</div>}
     {card.selecao?.convocado&&<p className="ft-internacional">Seleção · {card.selecao.jogos||0} jogos · {card.selecao.gols||0} gols · {card.selecao.assist||0} assistências</p>}
-    {card.manchetes?.length>0&&<><h2 className="ft-sub">Na imprensa</h2><ul className="ft-manchetes" aria-label="Manchetes sobre você">{card.manchetes.map((m,i)=><li key={i}><span>{m.texto}</span>{(m.torcida||m.moral)?<small>{m.torcida?`Torcida ${m.torcida>0?'+':''}${m.torcida}`:''}{m.torcida&&m.moral?' · ':''}{m.moral?`Moral ${m.moral>0?'+':''}${m.moral}`:''}</small>:null}</li>)}</ul></>}
-    {destaques.length>0&&<><h2 className="ft-sub">O que marcou o ano</h2><ul className="ft-destaques">{destaques.slice(0,3).map((t,i)=><li key={i}>{t}</li>)}</ul></>}
-    {card.jornada?.mensagens?.[0]&&<aside className="ft-mensagem"><small>{card.jornada.mensagens[0].de}{card.jornada.mensagens[0].ficticio?' · personagem fictício':''}</small><p>{card.jornada.mensagens[0].texto}</p></aside>}
-    {extras.length>0&&<details className="ft-campanha"><summary>Mais acontecimentos ({extras.length})</summary>{extras.map((t,i)=><p key={i}>{t}</p>)}</details>}
+    {card.manchetes?.length>0&&<><h2 className="ft-sub">Na imprensa</h2><ul className="ft-manchetes" aria-label="Manchetes sobre você">{card.manchetes.map((m,i)=><li key={i}><span><TextoComLinks>{m.texto}</TextoComLinks></span>{(m.torcida||m.moral)?<small>{m.torcida?`Torcida ${m.torcida>0?'+':''}${m.torcida}`:''}{m.torcida&&m.moral?' · ':''}{m.moral?`Moral ${m.moral>0?'+':''}${m.moral}`:''}</small>:null}</li>)}</ul></>}
+    {destaques.length>0&&<><h2 className="ft-sub">O que marcou o ano</h2><ul className="ft-destaques">{destaques.slice(0,3).map((t,i)=><li key={i}><TextoComLinks pessoas={pessoasRecordes}>{t}</TextoComLinks></li>)}</ul></>}
+    {card.jornada?.mensagens?.[0]&&<aside className="ft-mensagem"><small>{card.jornada.mensagens[0].de}{card.jornada.mensagens[0].ficticio?' · personagem fictício':''}</small><p><TextoComLinks>{card.jornada.mensagens[0].texto}</TextoComLinks></p></aside>}
+    {extras.length>0&&<details className="ft-campanha"><summary>Mais acontecimentos ({extras.length})</summary>{extras.map((t,i)=><p key={i}><TextoComLinks pessoas={pessoasRecordes}>{t}</TextoComLinks></p>)}</details>}
    </section>
   </div>
   <footer><button onClick={continuar}>Continuar carreira <span>→</span></button><small>Temporada registrada. Vamos ao próximo capítulo.</small></footer>

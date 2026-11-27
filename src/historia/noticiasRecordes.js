@@ -87,7 +87,7 @@ export function detectarQuebrasRecordesFutebol(antes={},depois={},{
     id:[ano,tipo,nome,r.id,novo.atletaId||novo.atleta||'registro'].join('|'),
     ano,tipo,entidade:nome,metrica:r.id,rotulo:r.rotulo,
     atleta:novo.atleta||protagonista,atletaId:novo.atletaId||null,
-    valor:novo.valor,anterior:anteriorValor,anteriorAtleta:(historico?real.atleta:velho.atleta)??null,
+    valor:novo.valor,anterior:anteriorValor,anteriorAtleta:(historico?real.atleta:velho.atleta)??null,anteriorAtletaId:historico?null:(velho?.atletaId??null),
     ...(marco&&!historico?{marco}:{}),
     historico,igualou:igualouReal,fonte:historico?(real.fonte??null):null,
     titulo,detalhe,prioridade:prioridade({historico,atletaId:novo.atletaId,metrica:r.id})
@@ -109,3 +109,7 @@ export function guardarQuebrasRecordesFutebol(depois,novos=[]){
  }
  return {...depois,recordesEventos:[...anteriores,...adicionados].slice(-80)};
 }
+
+/** Quem o recorde cita, com ID (recordista e dono da marca anterior): vira link mesmo com homônimos. */
+export const pessoasDoRecorde=e=>[[e?.atleta,e?.atletaId],[e?.anteriorAtleta,e?.anteriorAtletaId]]
+ .filter(([nome,id])=>nome&&id!=null).map(([nome,id])=>({nome,id}));

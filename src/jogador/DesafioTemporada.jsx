@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import TextoComLinks from '../historia/TextoComLinks.jsx';
 import { desafiosDaTemporada, ovrDe } from './rapido.js';
 import './DesafioTemporada.css';
 import CenaFotografica from '../comum/CenaFotografica.jsx';
@@ -70,7 +71,7 @@ export default function DesafioTemporada({ c, resultado, onEscolher, onContinuar
         <div className={`dt-evolucao ${!animando ? 'dt-evolucao-final' : ''}`}><div><span>Antes</span><strong>{resultado.ovrAntes}</strong></div><span className="dt-transicao" aria-hidden="true"><i/><i/><i/></span><div><span>{animando ? 'Evolução' : 'Agora'}</span><strong data-testid="desafio-ovr-atual" aria-live="off">{nivel}</strong></div><b className={resultado.d < 0 ? 'dt-perda' : ''}>{animando ? '…' : `${pontos(resultado.d)} OVR`}</b></div>
         <div className="dt-detalhes" style={{ visibility: animando ? 'hidden' : 'visible' }} aria-hidden={animando}>
           <p>{resultado.txt}</p>
-          {resultado.efeitos?.length > 0 && <ul className="dt-efeitos">{resultado.efeitos.filter(e => !/OVR$/.test(e.txt)).map(e => <li key={e.txt}>{e.txt}</li>)}</ul>}
+          {resultado.efeitos?.length > 0 && <ul className="dt-efeitos">{resultado.efeitos.filter(e => !/OVR$/.test(e.txt)).map(e => <li key={e.txt}><TextoComLinks>{e.txt}</TextoComLinks></li>)}</ul>}
         </div>
       </div>
       <footer className="dt-footer"><button onClick={animando ? revelar : onContinuar}>{animando ? 'Pular animação' : 'Continuar para o treino'} <span aria-hidden="true">→</span></button><p>{animando ? 'Você pode acompanhar a animação ou revelar agora.' : 'O resultado já foi salvo. Agora prepare a temporada.'}</p></footer>

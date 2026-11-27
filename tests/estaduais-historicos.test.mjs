@@ -54,7 +54,7 @@ test('campeões de 2025 e 2026 correspondem às listas publicadas pelo ge', () =
 });
 
 test('anos históricos anteriores são preservados ao atualizar o corte documental', () => {
-  assert.ok(HISTORICO_ESTADUAIS.AC.clubes['Rio Branco-AC'].includes(2024));
+  assert.ok(HISTORICO_ESTADUAIS.AC.clubes['Independência'].includes(2024));
   assert.ok(HISTORICO_ESTADUAIS.SP.clubes['Palmeiras'].includes(2024));
   assert.ok(HISTORICO_ESTADUAIS.RN.clubes['América-RN'].includes(2024));
 });

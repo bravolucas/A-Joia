@@ -214,3 +214,26 @@ test('minutos observados aceleram o jovem e acesso abre projeto que dura três t
  assert.equal(segundo.Promovido.desde,2030);
  assert.equal(segundo.Promovido.objetivo,'permanência');
 });
+
+
+test('carreira técnica permite avançar uma rodada por vez sem duplicar jogos ou antecipar avaliações',()=>{
+ let c=T.iniciarCarreiraTecnico({nome:'Calendário contínuo',ano:2030,idade:40,aposentado:true,legado:{pontos:500},temporadas:[]});
+ c.tecnico={...c.tecnico,clube:'Flamengo',pais:'Brasil',liga:'brasileirao',clubeInicialEscolhido:true,decisoes:Array(4).fill({}),elenco:90,diretoria:100,torcida:80};
+ const total=T.calendarioLigaTecnico(c.tecnico).length;
+ for(let rodada=1;rodada<=total;rodada++){
+  c=T.jogarProximaRodadaTecnico(c,()=>.4);
+  if(rodada<total){
+   assert.equal(c.tecnico.fase,'pretemporada');
+   assert.equal(c.tecnico.andamento.rodadas,rodada);
+   assert.equal(c.tecnico.andamento.confrontos.length,rodada);
+   assert.equal(c.tecnico.andamento.avaliacoes.length,[10,19,29].filter(x=>x<=rodada).length);
+   const salvo=JSON.parse(JSON.stringify(c));
+   assert.equal(salvo.tecnico.andamento.rodadas,rodada);
+   assert.equal(new Set(salvo.tecnico.andamento.confrontos.map((j,i)=>j.folga?'folga-'+i:j.rodada+'|'+j.nome)).size,rodada);
+  }
+ }
+ assert.equal(c.tecnico.fase,'resultado');
+ assert.equal(c.tecnico.temporadas.length,1);
+ assert.equal(c.tecnico.temporadas[0].jogos,c.tecnico.temporadas[0].confrontos.filter(j=>!j.folga).length);
+ assert.equal(c.tecnico.temporadas[0].avaliacoes.length,4);
+});

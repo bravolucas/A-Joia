@@ -57,6 +57,7 @@ test('as três galerias e os rankings não misturam campeões nem contagens',()=
  assert.equal(fifa.ultima.clube,'PSG');
  assert.match(classic.notaHistorica,/sem edições em 1975 e 1978/);
  assert.match(classic.notaHistorica,/1974.*1975/);
+ assert.match(classic.notaHistorica,/1977.*1978/);
  assert.match(mundial.notaHistorica,/formato expandido em 2025/);
  assert.match(fifa.notaHistorica,/16\/12\/2026/);
 });

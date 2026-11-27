@@ -19,8 +19,10 @@ for(const nac of ['BRA','ARG','ENG','FRA'])for(const venceu of [true,false])for(
   await expect(c).toBeVisible();await expect(c).toHaveAttribute('data-fase','5');
   await expect(c).toHaveAttribute('data-resultado',venceu?'convocado':'fora');
   await expect(c).toContainText(venceu?'CONVOCADO!':'FORA DA LISTA');
-  const imagem=c.locator('.cs-fotograma');
-  await expect(imagem).toHaveCSS('background-image',/convocacao-(sequencia|frustracao)/);
+  const personagem=c.locator('.cs-personagem');
+  await expect(personagem).toHaveCSS('background-image',/convocacao-personagem/);
+  await expect(personagem).toHaveCSS('background-position',venceu?'50% 50%':'100% 50%');
+  await expect(c.locator('.cs-cenario')).toHaveCSS('background-image',venceu?/estadio-premium/:/tunel/);
   await expect(c.locator('.cs-selecao img')).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   expect(erros).toEqual([]);

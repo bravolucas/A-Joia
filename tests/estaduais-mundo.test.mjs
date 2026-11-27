@@ -22,7 +22,7 @@ test('acervo cobre as 27 federações com fontes, campeões e anos anteriores à
  }
 });
 test('contagens e anos dos clubes do jogo não começam em zero nem misturam supercampeonatos',()=>{
- for(const [clube,q] of [['Santos',22],['Corinthians',31],['Palmeiras',27],['São Paulo',22],['Flamengo',40],['Vasco da Gama',24],['Fluminense',33],['Botafogo',21],['Grêmio',44],['Internacional',45],['Atlético-MG',49],['Cruzeiro',38],['Athletico-PR',28],['Coritiba',39],['CRB',34],['Avaí',18],['ABC',57],['América-RN',38]]){
+ for(const [clube,q] of [['Santos',22],['Corinthians',31],['Palmeiras',27],['São Paulo',22],['Flamengo',40],['Vasco da Gama',24],['Fluminense',33],['Botafogo',21],['Grêmio',44],['Internacional',46],['Atlético-MG',49],['Cruzeiro',38],['Athletico-PR',28],['Coritiba',39],['CRB',34],['Avaí',18],['ABC',57],['América-RN',38]]){
   const h=historicoEstadualDoClube(clube);assert.equal(h.quantidade,q,clube);assert.equal(h.anos.length,q,clube);const cl=CLUBES.find(c=>c.nome===clube);if(cl)assert.equal(palmaresInicialDe(cl).estadual,q,clube);
  }
  assert.equal(historicoEstadualDoClube('São Paulo').anos.includes(2002),false);

@@ -28,6 +28,9 @@ test('ranking mundial conta 25 taças de 18 clubes, inclusive os não jogáveis'
  assert.equal(g.ultima.clube,'Boca Juniors');
  assert.equal(g.ultima.ano,2026);
  assert.equal(g.ultima.historica,true);
+ assert.match(g.notaHistorica,/2002–2026/);
+ assert.match(g.notaHistorica,/Boca Juniors venceu em 2026/);
+ assert.match(g.notaHistorica,/2027 ainda não foi concluída/);
  assert.equal(g.ranking.length,18);
  assert.equal(g.ranking.reduce((s,t)=>s+t.inicial,0),25);
  assert.equal(Object.values(TOTAIS_SULAMERICANA_HISTORICOS).filter(x=>x===2).length,5);

@@ -55,7 +55,7 @@ test('as três galerias e os rankings não misturam campeões nem contagens',()=
  assert.equal(mundial.ultima.ano,2025);
  assert.equal(mundial.ultima.clube,'Chelsea');
  assert.equal(fifa.ultima.clube,'PSG');
- assert.match(classic.notaHistorica,/sem edições em 1975 e 1978/);
+ assert.match(classic.notaHistorica,/Não houve edições em 1975 e 1978/);
  assert.match(classic.notaHistorica,/1974.*1975/);
  assert.match(classic.notaHistorica,/1977.*março\/agosto de 1978/);
  assert.match(mundial.notaHistorica,/formato expandido em 2025/);

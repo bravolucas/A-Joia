@@ -82,3 +82,10 @@ test('catálogo e aliases de imagem preservam o nome de cada torneio',()=>{
  assert.equal(competicaoMuseu('Mundial de Clubes').nome,'Mundial de Clubes FIFA');
  assert.equal(TACAS_MUSEU.filter(t=>t.nome==='Mundial de Clubes FIFA').length,1);
 });
+
+test('totais documentais fecham com as edições de cada um dos três acervos',()=>{
+ const soma=ranking=>ranking.reduce((s,t)=>s+t.inicial,0);
+ assert.equal(soma(galeriaCompeticao({},'Copa Intercontinental').ranking),43);
+ assert.equal(soma(galeriaCompeticao({},'Mundial de Clubes FIFA').ranking),21);
+ assert.equal(soma(galeriaCompeticao({},'Copa Intercontinental FIFA').ranking),2);
+});

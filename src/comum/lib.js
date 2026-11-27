@@ -1028,9 +1028,21 @@ export function gerarElenco(clube, mundo, posicaoJogador) {
     elenco.push({ ...j, idade: rand(17, 20), ovr: clampR(j.ovr - rand(6, 14), 40, 80), daBase: true });
   }
 
-  // 4) completa até um plantel realista (24 a 26 jogadores)
+  // 4) completa até um plantel realista (24 a 26 jogadores).
+  // Não adiciona duplicatas artificiais nas posições já cobertas por aptidão
+  // secundária explícita de atletas persistidos do mundo.
   const alvo = rand(24, 26);
-  while (elenco.length < alvo) elenco.push(gerarJogadorElenco(clube, pick(FORMACAO_433), idBase++));
+  const secundariasCobertas = new Set(doMundo.flatMap(j =>
+    (j.posicoesSecundarias || [])
+      .filter(p => p && typeof p === "object" && p.apto === true && p.posicao)
+      .map(p => p.posicao)
+  ));
+  const posicoesComplementares = [...new Set(FORMACAO_433)]
+    .filter(pos => !secundariasCobertas.has(pos));
+  const posicoesExtras = posicoesComplementares.length ? posicoesComplementares : [...new Set(FORMACAO_433)];
+  while (elenco.length < alvo) {
+    elenco.push(gerarJogadorElenco(clube, pick(posicoesExtras), idBase++));
+  }
 
   return elenco;
 }

@@ -7,11 +7,12 @@ import {chaveCompeticao} from '../src/comum/arteCompeticoes.js';
 import {nomeCanonico} from '../src/historia/historiaFutebol.js';
 import {TACAS_MUSEU,competenciaMuseu} from '../src/museu/museu.js';
 
-test('Copa Intercontinental clássica tem 43 edições e preserva os anos sem final',()=>{
+test('Copa Intercontinental clássica tem 43 edições e distingue ano oficial de disputa',()=>{
  assert.equal(HISTORICO_COPA_INTERCONTINENTAL.length,43);
  assert.equal(HISTORICO_COPA_INTERCONTINENTAL[0].ano,2004);
  assert.equal(HISTORICO_COPA_INTERCONTINENTAL.at(-1).ano,1960);
  assert.ok(!HISTORICO_COPA_INTERCONTINENTAL.some(e=>[1975,1978].includes(e.ano)));
+ assert.ok(HISTORICO_COPA_INTERCONTINENTAL.some(e=>e.ano===1974));
  assert.equal(totalCopaIntercontinentalHistoricas('Boca Juniors'),3);
  assert.equal(totalCopaIntercontinentalHistoricas('Milan'),3);
  assert.equal(totalCopaIntercontinentalHistoricas('Nacional'),3);
@@ -54,7 +55,8 @@ test('as três galerias e os rankings não misturam campeões nem contagens',()=
  assert.equal(mundial.ultima.ano,2025);
  assert.equal(mundial.ultima.clube,'Chelsea');
  assert.equal(fifa.ultima.clube,'PSG');
- assert.match(classic.notaHistorica,/1975 e 1978/);
+ assert.match(classic.notaHistorica,/sem edições em 1975 e 1978/);
+ assert.match(classic.notaHistorica,/1974.*1975/);
  assert.match(mundial.notaHistorica,/formato expandido em 2025/);
  assert.match(fifa.notaHistorica,/16\/12\/2026/);
 });

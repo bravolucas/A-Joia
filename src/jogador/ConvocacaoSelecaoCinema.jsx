@@ -31,7 +31,7 @@ export default function ConvocacaoSelecaoCinema({jogador,copa,resultado,revelado
  const passo=revelado?5:fase;
  // Mantém o modelo da espera; os novos recortes só são usados no resultado.
  const recorte=passo===5?imagemPose(venceu?'comemoracao':'decepcao',jogador?.nome):null;
- const visual=useRetratoCinematico(recorte,undefined,jogador?.aparencia);
+ const visual=useRetratoCinematico(recorte,undefined,jogador?.aparencia,false,jogador?.idade);
  const nomes=passo===0?[]:passo>=5?lista.anunciados:passo===4?lista.iniciais:lista.iniciais.slice(0,passo);
  const revelacao=passo>=4;
  const status=passo===5?(venceu?'convocado':'fora'):'aguardando';

@@ -1,6 +1,6 @@
 import React from 'react';
 import PersonagemCinematico from './PersonagemCinematico.jsx';
-import {TONS_PELE,normalizarAparencia} from './aparenciaCinematica.js';
+import {TONS_PELE,CORES_CABELO,normalizarAparencia} from './aparenciaCinematica.js';
 export default function SeletorAparencia({valor,onChange}){
  const visual=normalizarAparencia(valor);
  return <details className="mt-3 rounded-lg border border-blue-400/30 bg-slate-900 p-3">
@@ -8,7 +8,8 @@ export default function SeletorAparencia({valor,onChange}){
   <div className="grid grid-cols-[minmax(72px,1fr)_minmax(0,2fr)] gap-2 items-center mt-2">
    <PersonagemCinematico pose="neutro" aparencia={visual} className="retrato-aparencia-completo" style={{width:'100%',height:148}}/>
    <fieldset className="min-w-0"><legend className="text-xs mb-2 text-slate-300">Tom de pele</legend>
-    <div className="grid grid-cols-2 gap-1">{TONS_PELE.map(t=><button type="button" key={t.id} aria-pressed={visual.tom===t.id} onClick={()=>onChange(normalizarAparencia({tom:t.id}))} className={'rounded-md border p-1 text-[10px] flex flex-col items-center gap-1 '+(visual.tom===t.id?'border-blue-300 bg-blue-950':'border-slate-700 bg-slate-950')}><i aria-hidden="true" style={{background:t.cor,width:20,height:20,borderRadius:'50%'}}/>{t.nome}</button>)}</div>
+    <div className="grid grid-cols-2 gap-1">{TONS_PELE.map(t=><button type="button" key={t.id} aria-pressed={visual.tom===t.id} onClick={()=>onChange(normalizarAparencia({...visual,tom:t.id}))} className={'rounded-md border p-1 text-[10px] flex flex-col items-center gap-1 '+(visual.tom===t.id?'border-blue-300 bg-blue-950':'border-slate-700 bg-slate-950')}><i aria-hidden="true" style={{background:t.cor,width:20,height:20,borderRadius:'50%'}}/>{t.nome}</button>)}</div>
+    <label className="block text-xs mt-3 text-slate-300">Cor do cabelo<select aria-label="Cor do cabelo" className="block w-full rounded border border-slate-600 bg-slate-950 p-1 mt-1 text-xs" value={visual.cabelo||'original'} onChange={e=>onChange(normalizarAparencia({...visual,cabelo:e.target.value}))}>{CORES_CABELO.map(t=><option key={t.id} value={t.id}>{t.nome}</option>)}</select></label>
     <p className="text-[10px] text-slate-400 mt-2">Variação do modelo atual, sem efeito nos atributos.</p>
    </fieldset>
   </div>

@@ -22,13 +22,13 @@ const CONFETES=Array.from({length:22},(_,i)=>({
  cor:['#f4d77b','#ffffff','#ddaf47','#e7a34f'][i%4]
 }));
 
-export default function CerimoniaBola({nome,posicao,finalistas=[],ano,children,aparencia}){
+export default function CerimoniaBola({nome,posicao,finalistas=[],ano,children,aparencia,idade}){
  const [repeticao,repetir]=useState(0);
  const colocado=Number(posicao),venceu=colocado===1,podio=[1,2,3].includes(colocado);
  const cena=CENAS_BOLA_DE_OURO[colocado];
  const recorte=imagemPose(posePremiacao(colocado),nome);
  const foto=recorte||cena?.imagem;
- const visual=useRetratoCinematico(recorte,undefined,aparencia);
+ const visual=useRetratoCinematico(recorte,undefined,aparencia,false,idade);
  const linhas=Array.isArray(finalistas)?finalistas.slice(0,3):[];
  const vencedor=linhas[0]?.nome,clubeJogador=linhas.find(p=>p.voce)?.clube;
  const emocao=venceu?'Seu nome no topo. A taça é sua, e esta noite entra para a história.'

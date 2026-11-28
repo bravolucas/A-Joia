@@ -5,9 +5,16 @@ export const TONS_PELE=Object.freeze([
  {id:'bronze',nome:'Mais bronzeado',cor:'#a57450',fator:.82},
  {id:'escuro',nome:'Mais escuro',cor:'#785039',fator:.62}
 ]);
+export const CORES_CABELO=Object.freeze([
+ {id:'original',nome:'Original',cor:'#312a24'},
+ {id:'preto',nome:'Preto',cor:'#191b20'},
+ {id:'castanho',nome:'Castanho',cor:'#67472c'},
+ {id:'loiro',nome:'Loiro escuro',cor:'#a98b52'}
+]);
 export function normalizarAparencia(valor){
  const tom=TONS_PELE.some(t=>t.id===valor?.tom)?valor.tom:'original';
- return {versao:1,modelo:'a',tom};
+ const cabelo=CORES_CABELO.some(t=>t.id===valor?.cabelo)?valor.cabelo:'original';
+ return {versao:1,modelo:'a',tom,...(cabelo==='original'?{}:{cabelo})};
 }
 // Exclui azuis, neutros, pele muito escura em sombra profunda e reflexos brancos.
 // A separação é aproximada, não é uma segmentação anatômica.

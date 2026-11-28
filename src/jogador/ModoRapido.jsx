@@ -850,7 +850,7 @@ function SlideTitulo({ c, card, titulo }) {
 
 function SlideBolaDeOuro({ c, card }) {
   // O ranking vem da temporada; a cena apenas apresenta a colocação já apurada.
-  return <CerimoniaBola aparencia={c.aparencia} nome={c.nome} posicao={card.bola?.pos} finalistas={card.bola?.top||[]} ano={card.ano}/>;
+  return <CerimoniaBola idade={c.idade} aparencia={c.aparencia} nome={c.nome} posicao={card.bola?.pos} finalistas={card.bola?.top||[]} ano={card.ano}/>;
 }
 
 /* Cerimônia da Bola de Ouro: quando você fica entre os três, o pódio é revelado do 3º ao 1º. */

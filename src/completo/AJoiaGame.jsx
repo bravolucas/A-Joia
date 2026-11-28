@@ -5935,15 +5935,15 @@ function resolverTemporada(c, extraStats) {
                 )}
 
                 {pendingDespedidaClube && (
-                  <CenaDespedidaClube numero={carreira?.camisaPorClube?.[pendingDespedidaClube.clube?.nome]?.at(-1)} aparencia={carreira?.aparencia||aparencia} nome={nome} clube={pendingDespedidaClube.clube} anos={pendingDespedidaClube.anos} onConcluir={concluirDespedidaClube} />
+                  <CenaDespedidaClube idade={carreira?.idade} numero={carreira?.camisaPorClube?.[pendingDespedidaClube.clube?.nome]?.at(-1)} aparencia={carreira?.aparencia||aparencia} nome={nome} clube={pendingDespedidaClube.clube} anos={pendingDespedidaClube.anos} onConcluir={concluirDespedidaClube} />
                 )}
 
                 {pendingAposentadoria && (
-                  <CenaAposentadoria aparencia={carreira?.aparencia||aparencia} nome={nome} clube={carreira.clube} onConcluir={() => { setFim(pendingAposentadoria); setPendingAposentadoria(null); setStage("fim"); }} />
+                  <CenaAposentadoria idade={carreira?.idade} aparencia={carreira?.aparencia||aparencia} nome={nome} clube={carreira.clube} onConcluir={() => { setFim(pendingAposentadoria); setPendingAposentadoria(null); setStage("fim"); }} />
                 )}
 
                 {pendingLesaoGrave && (
-                  <CenaLesaoGrave aparencia={carreira?.aparencia||aparencia} nome={nome} nomeLesao={pendingLesaoGrave.nomeLesao} jogosFora={pendingLesaoGrave.jogosFora} onConcluir={concluirLesaoGrave} />
+                  <CenaLesaoGrave idade={carreira?.idade} aparencia={carreira?.aparencia||aparencia} nome={nome} nomeLesao={pendingLesaoGrave.nomeLesao} jogosFora={pendingLesaoGrave.jogosFora} onConcluir={concluirLesaoGrave} />
                 )}
 
                 {pendingEstreia && (
@@ -5955,7 +5955,7 @@ function resolverTemporada(c, extraStats) {
                 )}
 
                 {pendingCelebracaoTitulo && (
-                  <CenaLevantarTaca numero={carreira?.camisaPorClube?.[pendingCelebracaoTitulo.clube?.nome]?.at(-1)} aparencia={carreira?.aparencia||aparencia} nome={nome} titulos={pendingCelebracaoTitulo.titulos} clube={pendingCelebracaoTitulo.clube} onConcluir={concluirCelebracaoTitulo} />
+                  <CenaLevantarTaca idade={carreira?.idade} numero={carreira?.camisaPorClube?.[pendingCelebracaoTitulo.clube?.nome]?.at(-1)} aparencia={carreira?.aparencia||aparencia} nome={nome} titulos={pendingCelebracaoTitulo.titulos} clube={pendingCelebracaoTitulo.clube} onConcluir={concluirCelebracaoTitulo} />
                 )}
 
                 {pendingApresentacaoClube && (
@@ -6273,7 +6273,7 @@ function resolverTemporada(c, extraStats) {
                           <>
                             <div className="text-center mb-3 flex flex-col items-center gap-1"><TrophyIcon tipo="ouro" size={30} /><div className="text-[10px] text-amber-400 uppercase tracking-widest">Premiações & finanças</div></div>
                             {awardsPopup.registro.premios.some((p) => p.nome === "BOLA DE OURO") && (
-                              <CerimoniaBola aparencia={carreira?.aparencia||aparencia} nome={nome} posicao={awardsPopup.registro.postoBO} finalistas={awardsPopup.registro.rankingBO||[]} ano={awardsPopup.registro.ano||awardsPopup.registro.temporadaLabel}/>
+                              <CerimoniaBola idade={carreira?.idade} aparencia={carreira?.aparencia||aparencia} nome={nome} posicao={awardsPopup.registro.postoBO} finalistas={awardsPopup.registro.rankingBO||[]} ano={awardsPopup.registro.ano||awardsPopup.registro.temporadaLabel}/>
 
                             )}
                             <div className="text-xs text-zinc-300 space-y-2 mb-3">

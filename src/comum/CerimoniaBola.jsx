@@ -1,5 +1,5 @@
 import React,{useState} from 'react';
-import {imagemPose} from './PersonagemCinematico.jsx';
+import {imagemPose,useRetratoCinematico} from './PersonagemCinematico.jsx';
 import {posePremiacao} from './posesCinematicas.js';
 import {TacaCompeticao} from './trofeus.jsx';
 import LinkEntidade from '../historia/LinkEntidade.jsx';
@@ -22,12 +22,13 @@ const CONFETES=Array.from({length:22},(_,i)=>({
  cor:['#f4d77b','#ffffff','#ddaf47','#e7a34f'][i%4]
 }));
 
-export default function CerimoniaBola({nome,posicao,finalistas=[],ano,children}){
+export default function CerimoniaBola({nome,posicao,finalistas=[],ano,children,aparencia}){
  const [repeticao,repetir]=useState(0);
  const colocado=Number(posicao),venceu=colocado===1,podio=[1,2,3].includes(colocado);
  const cena=CENAS_BOLA_DE_OURO[colocado];
  const recorte=imagemPose(posePremiacao(colocado),nome);
  const foto=recorte||cena?.imagem;
+ const visual=useRetratoCinematico(recorte,undefined,aparencia);
  const linhas=Array.isArray(finalistas)?finalistas.slice(0,3):[];
  const vencedor=linhas[0]?.nome,clubeJogador=linhas.find(p=>p.voce)?.clube;
  const emocao=venceu?'Seu nome no topo. A taça é sua, e esta noite entra para a história.'
@@ -38,9 +39,10 @@ export default function CerimoniaBola({nome,posicao,finalistas=[],ano,children})
   data-resultado-bola={venceu?'vencedor':'finalista'}
   data-animacao-bola={cena?'cinematografica':'classica'}>
   <span className="cb-eyebrow"><LinkEntidade tipo="premio" nome="Bola de Ouro"/> · {ano}</span>
-  <div className={'cb-cinema'+(recorte?' cb-cinema-modular':'')} data-arte={recorte?'recorte':'legado'} key={colocado+'-'+repeticao}>
+  <div className={'cb-cinema'+(recorte?' cb-cinema-modular':'')} data-arte={recorte?'recorte':'legado'} data-tom-pele={visual.tom} data-aparencia-status={visual.statusAparencia} key={colocado+'-'+repeticao}>
    {foto?<img className="cb-cinema-foto" src={foto} alt={'Cena cinematográfica da Bola de Ouro: '+colocado+'º lugar'} loading="eager" decoding="async"/>:
     <div className="cb-cinema-alternativa"><TacaCompeticao nome="Bola de Ouro" tipo="bolaOuro" size={118}/></div>}
+   {visual.url&&<img className="cb-cinema-camada" aria-hidden="true" alt="" src={visual.url}/>}
    <div className="cb-cinema-cortina" aria-hidden="true"><small>A JOIA APRESENTA</small><span>BOLA DE OURO</span></div>
    <div className="cb-cinema-holofote" aria-hidden="true"/>
    <div className="cb-cinema-flash" aria-hidden="true"/>

@@ -1,4 +1,6 @@
 import ApresentacaoOficial from './ApresentacaoOficial.jsx';
+import PersonagemCinematico from './PersonagemCinematico.jsx';
+import {posePremiacao} from './posesCinematicas.js';
 import CenaPenaltis from '../treinador/CenaPenaltis.jsx';
 import {desfechoCobranca,ladoGoleiroCobranca} from './desfechoCobranca.js';
 import {createPortal} from 'react-dom';
@@ -199,7 +201,8 @@ export function PodiumBolaDeOuro({ finalistas, aoConcluir }) {
     // suspense: revela do lugar mais baixo pro mais alto
     const ordem = finalistas.map((_, i) => i).sort((a, b) => finalistas[b].pos - finalistas[a].pos);
     ordem.forEach((indice, k) => setTimeout(() => revelarUm(indice), k * 950));
-    setTimeout(() => aoConcluir && aoConcluir(), ordem.length * 950 + 560);
+    const usuarioVenceu = finalistas.some(f => f.voce && posePremiacao(f.pos));
+    setTimeout(() => aoConcluir && aoConcluir(), ordem.length * 950 + (usuarioVenceu ? 2200 : 560));
   }
 
   return (
@@ -228,6 +231,19 @@ export function PodiumBolaDeOuro({ finalistas, aoConcluir }) {
           );
         })}
       </div>
+      {finalistas.filter((f,i)=>f.voce&&posePremiacao(f.pos)&&fase[i]==="revelado").map(f=>(
+        <div key={f.pos} className="relative isolate overflow-hidden rounded-sm border border-blue-400/40 min-h-[190px]" style={{background:'radial-gradient(ellipse at 72% 30%,#264c8055,transparent 65%),linear-gradient(135deg,#122747,#071321)'}}>
+          {f.pos===1&&<div className="absolute inset-0 opacity-40" style={{backgroundImage:`url(${ARTE.confete})`,backgroundSize:'cover',backgroundPosition:'center'}}/>}
+          <PersonagemCinematico pose={posePremiacao(f.pos)} semente={f.nome} permitirLegado={false} style={{position:'absolute',right:'3%',bottom:0,height:'100%',width:'auto',aspectRatio:'1 / 1'}}/>
+          <div className="relative z-10 p-4 pr-[43%] min-h-[190px] flex flex-col justify-center">
+            <div className="text-[9px] tracking-[.2em] text-blue-200 uppercase">{f.pos===1?'O melhor do mundo':f.pos+'º lugar'}</div>
+            <div className="text-xl font-black text-amber-300 leading-tight">BOLA DE OURO</div>
+            <div className="text-sm font-bold text-white mt-1">{f.nome}</div>
+            <div className="text-[10px] text-zinc-300 mt-1">{f.clube}</div>
+          </div>
+          <div className="absolute top-3 right-3 z-10"><TrophyIcon tipo={f.pos===1?'ouro':'prata'} size={30}/></div>
+        </div>
+      ))}
       {!iniciado && <Button variant="gold" onClick={iniciarCerimonia}>🏆 Revelar a Bola de Ouro</Button>}
     </div>
   );
@@ -488,7 +504,7 @@ export function TrofeuIcone({ tier = "ouro", size = 80 }) {
 }
 
 // Levantar a taça — a conquista de um título vira cena, não só uma linha de log.
-export function CenaLevantarTaca({ titulos, clube, onConcluir }) {
+export function CenaLevantarTaca({ titulos, clube, onConcluir, nome, aparencia, numero, idade }) {
   const [fase, setFase] = useState(0);
   useEffect(() => { if (fase === 0) { const t = setTimeout(() => setFase(1), 1000); return () => clearTimeout(t); } }, [fase]);
   const corClube = clube?.cor || "#D8B44A";
@@ -497,7 +513,8 @@ export function CenaLevantarTaca({ titulos, clube, onConcluir }) {
       <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `radial-gradient(circle at 50% 20%, ${corClube}33 0%, #050505 75%), url(${ARTE.confete}) center/cover` }}>
         <div className="relative h-[400px] flex flex-col items-center justify-center px-4 overflow-hidden">
           {fase >= 1 && <Confetti />}
-          <div className="relative z-10" style={{ animation: fase === 0 ? "jerseyRise 0.8s ease-out" : "floatY 2.4s ease-in-out infinite" }}>
+          <PersonagemCinematico pose="comemoracao" semente={nome||clube?.nome} clube={clube} numero={numero} aparencia={aparencia} idade={idade} style={{position:'absolute',right:'2%',bottom:0,height:'92%',width:'auto',aspectRatio:'1 / 1',opacity:.96}}/>
+          <div className="relative z-10 mr-[28%]" style={{ animation: fase === 0 ? "jerseyRise 0.8s ease-out" : "floatY 2.4s ease-in-out infinite", filter:"drop-shadow(0 4px 16px #000)" }}>
             <TrofeuIcone tier={titulos[0]?.tier || "ouro"} size={100} />
           </div>
           {fase >= 1 && (
@@ -544,12 +561,12 @@ export function CenaEstreia({ tipo, nomeEquipe, corDestaque, onConcluir }) {
 }
 
 // Lesão grave — câmera lenta, tom mais sério, sem confete nenhum.
-export function CenaLesaoGrave({ nomeLesao, jogosFora, onConcluir }) {
+export function CenaLesaoGrave({ nomeLesao, jogosFora, onConcluir, nome, aparencia, idade }) {
   return (
     <PopupOverlay>
       <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `linear-gradient(180deg, rgba(5,5,5,.2) 0%, rgba(40,6,6,.65) 50%, #050505 100%), url(${ARTE.lesao}) center 40%/cover` }}>
         <div className="h-[320px] flex flex-col items-center justify-end pb-8 px-5">
-          <div className="text-4xl mb-3 animate-[fadeIn_0.8s_ease-out]">🩹</div>
+          <PersonagemCinematico pose="recuperacao" semente={nome} aparencia={aparencia} idade={idade} permitirLegado={false} style={{width:"100%",height:205,flexShrink:1}}/>
           <div className="animate-[popIn_0.5s_ease-out]">
             <div className="font-black text-lg text-red-400 mb-1">{nomeLesao}</div>
             <p className="text-xs text-zinc-400 mb-1">A comissão médica já está em campo — o jogo segue sem você.</p>
@@ -583,11 +600,12 @@ export function CenaRivalidade({ meuNome, rivalNome, onConcluir }) {
 }
 
 // Aposentadoria — a última volta, sem confete de festa, mais nostalgia que celebração.
-export function CenaAposentadoria({ nome, clube, onConcluir }) {
+export function CenaAposentadoria({ nome, clube, onConcluir, aparencia, idade }) {
   return (
     <PopupOverlay>
       <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `linear-gradient(180deg, rgba(5,5,5,.15) 0%, rgba(5,5,5,.55) 55%, #050505 100%), url(${ARTE.porDoSol}) center 70%/cover` }}>
         <div className="h-[360px] flex flex-col items-center justify-end pb-8 px-5">
+          <PersonagemCinematico pose="aposentadoria" semente={nome} aparencia={aparencia} idade={idade} permitirLegado={false} style={{width:"100%",height:240,flexShrink:1}}/>
           <div className="animate-[popIn_0.6s_ease-out]">
             <div className="font-black text-lg text-amber-400 mb-1">A última volta</div>
             <p className="text-sm text-zinc-300 mb-1">{nome}</p>
@@ -601,12 +619,13 @@ export function CenaAposentadoria({ nome, clube, onConcluir }) {
 }
 
 // Despedida de um clube marcante — o inverso da chegada: guarda de honra na saída.
-export function CenaDespedidaClube({ clube, anos, onConcluir }) {
+export function CenaDespedidaClube({ clube, anos, onConcluir, nome, aparencia, numero, idade }) {
   const cor = clube?.cor || "#D8B44A";
   return (
     <PopupOverlay>
       <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `linear-gradient(180deg, rgba(5,5,5,.3) 0%, rgba(5,5,5,.7) 55%, #050505 100%), radial-gradient(circle at 50% 25%, ${cor}33 0%, transparent 70%), url(${ARTE.estadioNoite}) center 40%/cover` }}>
         <div className="h-[340px] flex flex-col items-center justify-center px-5">
+          <PersonagemCinematico pose="gratidao" semente={nome} clube={clube} numero={numero} aparencia={aparencia} idade={idade} permitirLegado={false} style={{width:"100%",height:210,flexShrink:1}}/>
           <div className="animate-[popIn_0.5s_ease-out] flex flex-col items-center">
             <ClubDot club={clube} size={56} />
             <div className="font-black text-lg mt-3" style={{ color: cor }}>Obrigado, {clube?.nome}!</div>

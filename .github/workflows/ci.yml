@@ -28,6 +28,8 @@ jobs:
           node-version: '22'
       - name: Instalar dependências
         run: npm install --no-audit --no-fund
+      - name: Exigir os 31 recortes cinematográficos
+        run: npm run validar:personagens
       - name: Regressões rápidas de mercado e veteranos IA
         run: node --test tests/mercado-ia.test.mjs tests/fase4-disponibilidade-veteranos.test.mjs tests/fase4-mercado-veteranos.test.mjs
       - name: Testes de lógica (exceto carreiras massivas)

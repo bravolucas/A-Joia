@@ -2,9 +2,10 @@ import React,{useEffect,useId,useRef} from 'react';
 import {createPortal} from 'react-dom';
 import atlas from '../../arte/colecoes/apresentacoes-oficiais.webp';
 import {escudoDe} from './arte.js';
-import {PadraoCamisa} from './VisualFutebol.jsx';
+import {CamisaPremium,PadraoCamisa} from './VisualFutebol.jsx';
 import {uniformeDe,tintaUniforme} from '../dados/uniformes.js';
 import {bloquearRolagem} from './bloqueioRolagem.js';
+import PersonagemCinematico,{imagemPose} from './PersonagemCinematico.jsx';
 import './ApresentacaoOficial.css';
 const TEMAS=[{id:'imprensa',nome:'A primeira foto oficial',texto:'Os flashes registram o começo deste capítulo.'},{id:'estadio',nome:'O estádio recebe você',texto:'Uma nova camisa diante de milhares de sonhos.'},{id:'noite',nome:'Uma noite para guardar',texto:'A torcida faz da chegada uma celebração.'},{id:'ct',nome:'O primeiro dia em casa',texto:'Da porta do CT ao seu novo vestiário.'}];
 const hash=s=>[...String(s)].reduce((n,l)=>(Math.imul(n,31)+l.charCodeAt(0))>>>0,7);
@@ -19,8 +20,22 @@ export function CenaApresentacao({clube,nome,numero,indice=0}){
  <g className="ao-estampa" fill={tinta} stroke={tinta==='#19232b'?'#fff9':'#18201b99'} paintOrder="stroke" textAnchor="middle"><text x="509" y="272" fontFamily="Inter, sans-serif" fontWeight="800" fontSize="23" textLength={Math.min(178,sob.length*17)} lengthAdjust="spacingAndGlyphs" strokeWidth="1">{sob}</text><text x="509" y="411" fontFamily="Oswald, sans-serif" fontWeight="700" fontSize="125" strokeWidth="2">{numero}</text></g>
  </svg>;
 }
+/** Camisa e escudo do clube são recursos independentes do retrato fixo. */
+function CenaApresentacaoModular({clube,nome,numero,tema,aparencia,idade}){
+ const sob=String(nome||'').trim().split(/\s+/).at(-1).toUpperCase();
+ return <div className="ao-cena-modular" data-cenario={tema} data-arte="recorte">
+  <div className="ao-cenario-modular" aria-hidden="true"/>
+  <div className="ao-identidade-clube">
+   {escudoDe(clube?.nome)&&<img className="ao-escudo-palco" src={escudoDe(clube.nome)} alt=""/>}
+   <div className="ao-camisa-personalizada" role="img" aria-label={`Camisa ${numero} de ${nome} no ${clube?.nome||'clube'}`}>
+    <CamisaPremium nome={clube?.nome} cor={clube?.cor} numero={numero} sobrenome={sob}/>
+   </div>
+  </div>
+  <PersonagemCinematico pose="apresentacao" semente={nome} clube={clube} numero={numero} aparencia={aparencia} idade={idade} className="ao-personagem-isolado" permitirLegado={false}/>
+ </div>;
+}
 export default function ApresentacaoOficial(props){
  const {clube,nome,numero,idade,posicao,contrato,valor,deOnde,onConcluir}=props,indice=temaApresentacao(props),tema=TEMAS[indice],ref=useRef(null),fim=useRef(onConcluir);fim.current=onConcluir;
  useEffect(()=>{const anterior=document.activeElement,liberar=bloquearRolagem(document.body);ref.current?.querySelector('button')?.focus();const teclado=e=>{if(e.key==='Escape')fim.current?.();if(e.key==='Tab'){const bs=[...ref.current.querySelectorAll('button')],primeiro=bs[0],ultimo=bs.at(-1);if(e.shiftKey&&document.activeElement===primeiro){e.preventDefault();ultimo.focus();}else if(!e.shiftKey&&document.activeElement===ultimo){e.preventDefault();primeiro.focus();}}};document.addEventListener('keydown',teclado);return()=>{liberar();document.removeEventListener('keydown',teclado);anterior?.focus({preventScroll:true});};},[]);
- return createPortal(<div className="ao-overlay apresentacao-grande" role="dialog" aria-modal="true" aria-label={`Apresentação no ${clube?.nome}`} ref={ref}><section className={`ao ao-${tema.id}`}><header><span>UMA NOVA HISTÓRIA</span><button onClick={onConcluir} aria-label="Pular apresentação">Pular →</button></header><div className="ao-palco"><CenaApresentacao clube={clube} nome={nome} numero={numero} indice={indice}/><span className="ao-ao-vivo">● APRESENTAÇÃO OFICIAL</span>{[0,1,2].map(i=><i key={i} className="ao-flash" style={{animationDelay:`${.8+i*.6}s`}}/>)}</div><div className="ao-legenda"><small>{tema.nome}</small><h2>{escudoDe(clube?.nome)&&<img src={escudoDe(clube.nome)} alt=""/>}{clube?.nome}</h2><h3>{nome} <span>#{numero}</span></h3><p>{posicao} · {idade} anos{deOnde?.nome?` · chega do ${deOnde.nome}`:''}</p><div className="ao-termos"><span>Transferência<b>{dinheiro(valor)}</b></span><span>Contrato<b>{contrato?.anos||1} temporada(s)</b></span><span>Salário/ano<b>{dinheiro(contrato?.salario)}</b></span></div><p className="ao-frase">{tema.texto}</p><button className="ao-continuar" onClick={onConcluir}>Vestir a camisa →</button></div></section></div>,document.body);
+ return createPortal(<div className="ao-overlay apresentacao-grande" role="dialog" aria-modal="true" aria-label={`Apresentação no ${clube?.nome}`} ref={ref}><section className={`ao ao-${tema.id}`}><header><span>UMA NOVA HISTÓRIA</span><button onClick={onConcluir} aria-label="Pular apresentação">Pular →</button></header><div className="ao-palco">{imagemPose('apresentacao',nome)?<CenaApresentacaoModular idade={idade} aparencia={props.aparencia} clube={clube} nome={nome} numero={numero} tema={tema.id}/>:<CenaApresentacao clube={clube} nome={nome} numero={numero} indice={indice}/>}<span className="ao-ao-vivo">● APRESENTAÇÃO OFICIAL</span>{[0,1,2].map(i=><i key={i} className="ao-flash" style={{animationDelay:`${.8+i*.6}s`}}/>)}</div><div className="ao-legenda"><small>{tema.nome}</small><h2>{escudoDe(clube?.nome)&&<img src={escudoDe(clube.nome)} alt=""/>}{clube?.nome}</h2><h3>{nome} <span>#{numero}</span></h3><p>{posicao} · {idade} anos{deOnde?.nome?` · chega do ${deOnde.nome}`:''}</p><div className="ao-termos"><span>Transferência<b>{dinheiro(valor)}</b></span><span>Contrato<b>{contrato?.anos||1} temporada(s)</b></span><span>Salário/ano<b>{dinheiro(contrato?.salario)}</b></span></div><p className="ao-frase">{tema.texto}</p><button className="ao-continuar" onClick={onConcluir}>Vestir a camisa →</button></div></section></div>,document.body);
 }

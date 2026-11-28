@@ -12,3 +12,11 @@ test('seleção determinística e tolerante a arquivos ausentes',()=>{
  assert.equal(escolherPose('comemoracao',{vitoria:'a.webp'}),'a.webp');
  assert.equal(escolherPose('desconhecida',files),null);
 });
+
+import {IDS_BIBLIOTECA,POSES_MODELO_B} from '../src/comum/posesCinematicas.js';
+test('todos os 31 recursos são catalogados, sem misturar os modelos de gala',()=>{
+ assert.equal(IDS_BIBLIOTECA.length,31);
+ const ids=[...Object.values(POSES_CINEMATICAS),...Object.values(POSES_MODELO_B)].flat();
+ assert.deepEqual([...new Set(ids)].sort(),[...IDS_BIBLIOTECA].sort());
+ assert.ok(!POSES_CINEMATICAS['premio-1'].some(id=>POSES_MODELO_B['premio-1'].includes(id)));
+});

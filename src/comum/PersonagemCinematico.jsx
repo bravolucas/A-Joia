@@ -3,7 +3,7 @@ import personagem from '../../arte/jornada/convocacao-personagem.webp';
 import {escolherPose} from './posesCinematicas.js';
 
 // Vite inclui apenas imagens presentes no repositório e respeita o base do GitHub Pages.
-const ARQUIVOS=Object.fromEntries(Object.entries(import.meta.glob('../../arte/personagens-cinematicos/*.webp',{eager:true,query:'?url',import:'default'})).map(([path,url])=>[path.split('/').at(-1).replace(/\.webp$/,''),url]));
+const ARQUIVOS=Object.fromEntries(Object.entries(import.meta.glob('../../arte/jornada/personagens/*.webp',{eager:true,query:'?url',import:'default'})).map(([path,url])=>[path.split('/').at(-1).replace(/\.webp$/,''),url]));
 const POSICOES={apresentacao:'0% 50%',comemoracao:'50% 50%',decepcao:'100% 50%'};
 export const imagemPose=(pose,semente)=>escolherPose(pose,ARQUIVOS,semente);
 

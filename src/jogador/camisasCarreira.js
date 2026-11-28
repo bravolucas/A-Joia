@@ -1,7 +1,10 @@
 import {CLUBES} from '../dados/data.js';
 import {gerarNomeRegionalUnico} from '../simulacao/nomesRegionais.js';
 import {nacionalidadeLocalLiga} from '../simulacao/nacionalidadesLiga.js';
-const copiar=x=>structuredClone(x);
+import {clonarEstado} from '../simulacao/clonarEstado.js';
+// Cópia JSON que compartilha o arquivo histórico (universo, imutável) em vez de
+// duplicar dezenas de MB a cada ação numa carreira longa.
+const copiar=x=>clonarEstado(x);
 const hash=s=>[...String(s)].reduce((n,v)=>Math.imul(n^v.charCodeAt(0),16777619)>>>0,2166136261);
 const valido=(n,max=99)=>Number.isInteger(Number(n))&&Number(n)>=1&&Number(n)<=max;
 const atual=c=>c.emprestimo?.destino||c.clubeNome;

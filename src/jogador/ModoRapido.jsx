@@ -52,7 +52,9 @@ import CarreiraTecnico from "../treinador/CarreiraTecnico.jsx";
 import { carreiraTecnicoEncerrada, pedirDemissaoTecnico, aposentarTecnico, responderParadaTecnico, resolverFinalTecnico, responderConviteSelecaoTecnico, comprarMelhoriaTecnico, iniciarCarreiraTecnico, iniciarNoClubeIdolo, atualizarPropostasCoerentesTecnico, escolherPretemporadaRapidaTecnico, responderIntervencaoTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico } from "../treinador/tecnico.js";
 import Lottie from "../comum/Lottie.jsx";
 import { tocar, apito, torcida, somLigado, alternarSom } from "../comum/som.js";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { clonarEstado } from "../simulacao/clonarEstado.js";
+const SEM_ELENCO = Object.freeze([]);
 import { createPortal } from "react-dom";
 import confetti from "canvas-confetti";
 import { ARTE, ARTE_EVENTO, logoCompeticao, bandeiraDe, escudoDe } from "../comum/arte.js";
@@ -2945,8 +2947,15 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
   const faltaPlano=!!(infoChegada&&infoChegada.chegada>0&&!c.jornada?.espacoClubes?.[c.emprestimo?.destino||c.clubeNome]?.plano&&c.lojaAnoEmCurso!==c.ano);
   const clubePendente=!!(infoChegada&&(!infoChegada.escolhido||faltaPlano));
   const chegadaSelecaoAtiva=!!(c&&!c.tecnico&&!c.aposentado&&(apresentacaoSelecao||(etapa==='copa'&&card?.copa?.convocado)||(etapa==='momento'&&card?.pendente?.tipo==='selecao')));
-  const cDaSelecao=chegadaSelecaoAtiva&&(!c.camisas?.selecao||c.camisas.selecao.nac!==c.nac)?structuredClone(c):c;
-  if(chegadaSelecaoAtiva&&(!cDaSelecao.camisas?.selecao||cDaSelecao.camisas.selecao.nac!==c.nac))prepararCamisaSelecao(cDaSelecao,card?.copa?.elenco?.jogadores||card?.selecao?.elenco?.jogadores||c.jornada?.elencoSelecao?.jogadores||[]);
+  // Cópia só quando a camisa da seleção ainda precisa ser preparada, e uma vez por
+  // estado: antes era um structuredClone da carreira inteira (arquivo histórico
+  // incluído) a cada renderização, o que pesava muito em carreiras longas.
+  const precisaKitSelecao=chegadaSelecaoAtiva&&(!c.camisas?.selecao||c.camisas.selecao.nac!==c.nac);
+  const elencoSelecaoChegada=card?.copa?.elenco?.jogadores||card?.selecao?.elenco?.jogadores||c?.jornada?.elencoSelecao?.jogadores||SEM_ELENCO;
+  const cDaSelecao=useMemo(()=>{
+    if(!precisaKitSelecao)return c;
+    const copia=clonarEstado(c);prepararCamisaSelecao(copia,elencoSelecaoChegada);return copia;
+  },[c,precisaKitSelecao,elencoSelecaoChegada]);
   const temChegadaSelecao=!!(chegadaSelecaoAtiva&&cDaSelecao.camisas?.selecao&&!cDaSelecao.camisas.selecao.escolhido);
   const chegadaPendente=clubePendente||temChegadaSelecao;
   const receberNumero=(numero,alvo='clube')=>{

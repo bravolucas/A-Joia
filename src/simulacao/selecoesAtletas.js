@@ -37,6 +37,20 @@ export function registrarSelecoesDoAno(anterior = {}, a, jogadores = [], semente
     elencos.set(nome, lista);
     return lista;
   };
+  // Copia-na-escrita: os registros de anos anteriores pertencem ao arquivo da
+  // temporada passada (compartilhado entre cópias da carreira). Alterar o objeto
+  // antigo contaria jogos/gols em dobro se o fechamento fosse refeito.
+  const copiados = new Set();
+  const registroDe = (reg, p) => {
+    const atual = reg.atletas[p.id];
+    if (!atual) return (reg.atletas[p.id] = {id: p.id, nome: p.nome, posicao: p.posicao, jogos: 0, gols: 0, assist: 0, titulos: [], anos: []});
+    if (!copiados.has(atual)) {
+      const novo = {...atual, titulos: [...(atual.titulos || [])], anos: [...(atual.anos || [])]};
+      reg.atletas[p.id] = novo; copiados.add(novo);
+      return novo;
+    }
+    return atual;
+  };
   const vistos = new Set();
   for (const t of torneios) {
     if (vistos.has(`${t.nome}|${a.ano}`)) continue;
@@ -49,24 +63,24 @@ export function registrarSelecoesDoAno(anterior = {}, a, jogadores = [], semente
         const reg = selecoes[lado] ??= {atletas: {}};
         const titulares = elenco.map(p => ({p, peso: (p.ovr || 60) + rng() * 10})).sort((x, y) => y.peso - x.peso).slice(0, 11).map(x => x.p);
         for (const p of titulares) {
-          const r = reg.atletas[p.id] ??= {id: p.id, nome: p.nome, posicao: p.posicao, jogos: 0, gols: 0, assist: 0, titulos: [], anos: []};
+          const r = registroDe(reg, p);
           r.jogos++;
           if (!r.anos.includes(a.ano)) r.anos.push(a.ano);
         }
         const campo = titulares.filter(p => p.posicao !== 'GOL');
         for (let g = 0; g < gols && campo.length; g++) {
           const autor = escolher(campo, rng, p => ({ATA: 7, MEI: 3, DEF: 1}[setorJogador(p)] || 1) * Math.max(1, (p.ovr || 60) - 30));
-          reg.atletas[autor.id].gols++;
+          registroDe(reg, autor).gols++;
           const outros = campo.filter(p => p.id !== autor.id);
-          if (outros.length && rng() < 0.72) reg.atletas[escolher(outros, rng, p => ({ATA: 3, MEI: 6, DEF: 2}[setorJogador(p)] || 1)).id].assist++;
+          if (outros.length && rng() < 0.72) registroDe(reg, escolher(outros, rng, p => ({ATA: 3, MEI: 6, DEF: 2}[setorJogador(p)] || 1))).assist++;
         }
       }
     }
     // Título da seleção para todos os convocados que entraram em campo no torneio.
     if (t.campeao && !t.finalPendente && selecoes[t.campeao]) {
       for (const p of elencoDe(t.campeao)) {
-        const r = selecoes[t.campeao].atletas[p.id];
-        if (r?.anos.includes(a.ano) && !r.titulos.some(x => x.nome === t.nome && x.ano === a.ano)) r.titulos.push({nome: t.nome, ano: a.ano});
+        const existente = selecoes[t.campeao].atletas[p.id];
+        if (existente?.anos.includes(a.ano) && !existente.titulos.some(x => x.nome === t.nome && x.ano === a.ano)) registroDe(selecoes[t.campeao], p).titulos.push({nome: t.nome, ano: a.ano});
       }
     }
   }

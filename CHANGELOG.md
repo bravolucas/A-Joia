@@ -2,6 +2,12 @@
 
 Tudo que mudou desde a primeira versão publicada, organizado por bloco de trabalho.
 
+## 28/11/2026 — Carreiras longas sem recarregar a página
+
+- Em carreiras longas (24 temporadas, save de ~95 MB) a aba estourava a memória no celular e o navegador recarregava a página em loop. O arquivo histórico (universo) agora é compartilhado entre as cópias em memória em vez de duplicado a cada leitura e gravação: memória estável de 572 MB para ~296 MB e abertura de 11,8 s para 6,4 s.
+- Correção de bug: estatísticas de seleção do arquivo histórico eram alteradas no lugar ao registrar um ano novo (refazer um fechamento podia contar jogos/gols em dobro).
+- Telas da camisa da seleção e da escolha do plano de chegada deixaram de copiar a carreira inteira.
+
 ## 21/11/2026 — Títulos da seleção separados dos títulos do clube (modo rápido)
 
 - Copa do Mundo e continental de seleções não aparecem mais como taça do clube na tabela ano a ano: ganham marcador próprio com a bandeira.

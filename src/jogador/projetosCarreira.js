@@ -1,6 +1,7 @@
 import {CLUBES} from '../dados/data.js';
 import {calcOVR} from '../comum/lib.js';
 import {penalidadePosicao} from './posicoesCarreira.js';
+import {clonarEstado} from '../simulacao/clonarEstado.js';
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const hash=s=>[...String(s)].reduce((n,v)=>Math.imul(n^v.charCodeAt(0),16777619)>>>0,2166136261);
 const atual=c=>c.emprestimo?.destino||c.clubeNome;
@@ -36,7 +37,7 @@ export function iniciarProjetoChegada(c,{renovar=false,nome=atual(c)}={}){
 }
 export function definirPlanoEspaco(c0,id){
  const plano=PLANOS_ESPACO.find(p=>p.id===id);if(!plano)throw Error('Escolha uma postura válida para disputar espaço.');
- const c=structuredClone(c0),e=iniciarProjetoChegada(c);if(e.plano)throw Error('A postura desta chegada já foi escolhida.');
+ const c=clonarEstado(c0),e=iniciarProjetoChegada(c);if(e.plano)throw Error('A postura desta chegada já foi escolhida.');
  if(c.lojaAnoEmCurso===c.ano)throw Error('Escolha sua postura antes de iniciar a temporada.');
  e.plano=id;e.escolhidoEm=c.ano;e.confianca=clamp(e.confianca??50,25,80);
  const j=c.jornada;j.ecos=j.ecos||[];const eco={id:`espaco:${c.ano}:${atual(c)}`,origem:c.ano,ano:c.ano+1,clube:atual(c),titulo:plano.nome,escolha:plano.nome,eixo:'vinculo'};

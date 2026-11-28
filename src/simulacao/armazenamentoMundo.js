@@ -29,7 +29,10 @@ function resolverPersistente(chave,storage){
 }
 export function lerPersistente(chave,storage=globalThis.localStorage){
  const {valor,arquivo}=resolverPersistente(chave,storage);
- return arquivo?structuredClone(valor):valor;
+ // O arquivo histórico (universo) é imutável — cada fechamento cria objetos novos —
+ // e fica compartilhado; o resto é copiado. Numa carreira longa ele passa de 50 MB:
+ // duplicá-lo a cada leitura derrubava a aba no celular (recarga em loop).
+ return arquivo?clonarEstado(valor):valor;
 }
 /** Consulta SOMENTE LEITURA do snapshot do IndexedDB.
  * Evita clonar milhares de atletas para extrair as conquistas do museu.
@@ -47,9 +50,10 @@ function comunicar(chave,erro){if(typeof window!=='undefined')window.dispatchEve
 export function gravarPersistente(chave,valor,storage=globalThis.localStorage){
  const temArquivo=[valor?.ativo?.c,valor?.c,valor?.carreira,valor].some(c=>c?.universo||c?.tecnico?.universo||c?.mundo?.jogadores);
  if(!banco||storage!==globalThis.localStorage||!temArquivo){storage.setItem(chave,serializarCarreira(valor));return {ok:true};}
- // O banco clona ao gravar. Uma única cópia JSON isolada captura também o arquivo
- // imutável, sem comprimir o mundo nem duplicar o snapshot na interface.
- const snapshot=clonarEstado(valor,{compartilharUniverso:false});
+ // O banco clona ao gravar. A cópia isola o estado mutável; o arquivo histórico
+ // (universo) é imutável e fica compartilhado, em vez de mais uma cópia de dezenas
+ // de MB a cada clique (ver selecoesAtletas: o arquivo nunca é alterado no lugar).
+ const snapshot=clonarEstado(valor);
  cache.set(chave,snapshot);
  const tarefa=()=>new Promise((resolve,reject)=>{
   let tx;

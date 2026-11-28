@@ -2,7 +2,7 @@ import {participacaoNasSumulas} from '../simulacao/planejamentoLigasRapidas.js';
 import {podarCentral, registroCentral} from '../simulacao/transferenciasMundo.js';
 import {novoTecnico} from '../simulacao/tecnicosMundo.js';
 import {elencosParaLigasRapidas, prepararPartidasLigasRapidas} from './escalacoesLigasRapido.js';
-import {criarCalendarioLigasRapido,finalizarCalendarioLigasRapido} from './ligasCalendarioRapido.js';
+import {criarCalendarioLigasRapido,finalizarCalendarioLigasRapido,rodadasDoClube} from './ligasCalendarioRapido.js';
 import {clonarEstado} from '../simulacao/clonarEstado.js';
 import {catalogoClubesEmpresario,analisarClubeEmpresario,respostaClubeEmpresario,viraPropostaSondagem,registrarCustoTransferencia} from './mercadoEmpresario.js';
 import {estatisticasDasPartidas} from '../simulacao/estatisticasMundo.js';
@@ -17,7 +17,7 @@ import {normalizarCampeaoLiga,corrigirCampeoesLiga,registrarAnoHistoria,registra
 import {ITENS_PESSOAIS} from './itensPessoais.js';
 import {iniciarCamisas,aposentarDonoCamisa,prepararCamisaSelecao,sincronizarCamisasSelecao} from './camisasCarreira.js';
 import {estatisticasDecisao} from './decisaoDeJogo.js';
-import {prepararCopasJogador} from './copasJogador.js';
+import {prepararCopasJogador,avancarCalendarioJogador} from './copasJogador.js';
 import {completarHistoricoCopasMundo} from '../simulacao/copasExternasMundo.js';
 import {iniciarCopaCompartilhada} from './copaSelecaoCompartilhada.js';
 import {primeiraLiga} from '../competicoes/vagasInternacionais.js';
@@ -1183,13 +1183,22 @@ function simularLiga(c, clube, ovr, share, extra, interativo) {
         ? simularPlacarDeLiga(casa, fora, formaCasa, formaFora, sorteio)
         : rivais.disputar(casa, fora, rodada, formaCasa, formaFora, sorteio),
   });
-  const externas = equipes.filter(x => x.liga !== clube.liga);
+  // Calendário contínuo: a liga do atleta também anda rodada a rodada, junto com o mundo,
+  // e os jogos do clube dele são disputados (ou pulados) no calendário da temporada.
+  const ligaNoCalendario = interativo && clube.liga !== 'serieC' && local.length >= 4;
+  const externas = ligaNoCalendario ? [...equipes.filter(x => x.liga !== clube.liga), ...local] : equipes.filter(x => x.liga !== clube.liga);
   const calendario = criarCalendarioLigasRapido(externas, c.codigo, c.ano,
-    Object.fromEntries(externas.filter(x => elencos[x.nome]).map(x => [x.nome, elencos[x.nome]])), c.universo?.tecnicos);
-  const classificacoes = interativo ? mundo : {...mundo, ...finalizarCalendarioLigasRapido(calendario)};
+    Object.fromEntries(externas.filter(x => elencos[x.nome] && x.nome !== clube.nome).map(x => [x.nome, elencos[x.nome]])),
+    ligaNoCalendario ? {...(c.universo?.tecnicos || {}), ...tecnicosLocais} : c.universo?.tecnicos);
+  let ligaPropria = null;
+  if (ligaNoCalendario) {
+    calendario.usuario = clube.nome; calendario.estrategias = {};
+    ligaPropria = {liga: clube.liga, indice: 0, rodadas: rodadasDoClube(calendario, clube.nome, clube.liga)};
+  }
+  const classificacoes = interativo ? (ligaNoCalendario ? {} : mundo) : {...mundo, ...finalizarCalendarioLigasRapido(calendario)};
   const tabela=mundo[clube.liga]?.classificacao||[];
   const pos=tabela.findIndex(x=>x.nome===clube.nome)+1;
-  return {pos:pos||1,total:tabela.length,campeao:tabela[0]?.nome,ordem:tabela.map(x=>x.nome),pontos:tabela.map(x=>x.pontos),classificacoes,calendario:interativo?calendario:null};
+  return {pos:pos||1,total:tabela.length,campeao:tabela[0]?.nome,ordem:tabela.map(x=>x.nome),pontos:tabela.map(x=>x.pontos),classificacoes,calendario:interativo?calendario:null,ligaPropria};
 }
 
 /* Classificação final de uma liga: a sua vem da temporada jogada; as outras são
@@ -1651,15 +1660,17 @@ function jogarTemporadaBase(c0, interativo) {
   card.posLiga = tab.pos; card.totalLiga = tab.total; card.campeaoLiga = tab.pos===1; card.vencedorLiga = tab.campeao;
   card.classificacoesMundo=tab.classificacoes;
   if(tab.calendario)card.calendarioLigasExternas=tab.calendario;
+  if(tab.ligaPropria)card.ligaPropria={...tab.ligaPropria,nome:liga.nome,tituloTipo:ehSegundaDivisao(clube.liga)?'segunda':'liga',total:tab.total};
   card.tabelaLiga = tab.ordem; // a virada de divisões no fim da temporada usa a classificação inteira
   // só a briga pelo título vira desafio, e nem sempre; acesso e permanência saem da tabela
-  const decisaoBruta = emCampo ? decisaoNaTabela(clube, tab) : null;
+  // No calendário contínuo a última rodada é jogada de verdade: sem desafio sorteado.
+  const decisaoBruta = emCampo && !card.ligaPropria ? decisaoNaTabela(clube, tab) : null;
   const decisaoLiga = decisaoBruta?.tipo === "liga" && chance(0.5) ? decisaoBruta : null;
   if (decisaoLiga) momentos.push(decisaoLiga);
   // Clássico: nem todo ano o lance decisivo cai no seu pé contra o maior rival. Vale mais para a torcida.
   const rivalClassico = emCampo && !c.emprestimo ? CLASSICOS.find((p) => p.includes(clube.nome))?.find((x) => x !== clube.nome) : null;
   if (rivalClassico && (somaInv(c, "classicoGarantido") > 0 || chance(0.4))) momentos.push({ tipo: "classico", titulo: `Clássico contra o ${rivalClassico}`, adversario: { tipo: "clube", nome: rivalClassico } });
-  if (tab.pos === 1 && decisaoLiga?.tipo !== "liga") {
+  if (tab.pos === 1 && decisaoLiga?.tipo !== "liga" && !card.ligaPropria) {
     card.titulos.push({ tipo: ehSegundaDivisao(clube.liga) ? "segunda" : "liga", nome: liga.nome });
     card.destaques.push(`Título do ${liga.nome} com ${tab.pontos && tab.pontos[1] != null && tab.pontos[0] - tab.pontos[1] < 3.2 ? "emoção até o fim" : "folga na tabela"}`);
   }
@@ -1980,7 +1991,7 @@ function detectarMarcos(antes, c, card) {
 }
 
 /* Fecha a temporada: títulos, Bola de Ouro, torcida, evolução, idade e mundo. */
-export function fecharTemporada(c0, card0) { const concluida=(c0.temporadas||[]).find(t=>t.ano===card0.ano);if(concluida)return {c:c0,card:concluida};if(card0.calendarioCopas)throw new Error('Conclua o calendário antes de fechar a temporada.');if(card0.estadualEmJogo)throw new Error('Conclua o estadual antes de fechar a temporada.');sincronizarLigas(c0); if (copaPendente(card0)) card0 = resolverCopaAuto(c0, card0); return comSemente(c0.codigo, `fechar:${c0.ano}`, () => fecharTemporadaBase(c0, card0)); }
+export function fecharTemporada(c0, card0) { const concluida=(c0.temporadas||[]).find(t=>t.ano===card0.ano);if(concluida)return {c:c0,card:concluida};if(card0.ligaPropria&&!card0.ligaPropria.concluida&&!card0.calendarioCopas)card0=avancarCalendarioJogador(card0,{modo:'ate',data:Infinity});if(card0.calendarioCopas)throw new Error('Conclua o calendário antes de fechar a temporada.');if(card0.estadualEmJogo)throw new Error('Conclua o estadual antes de fechar a temporada.');sincronizarLigas(c0); if (copaPendente(card0)) card0 = resolverCopaAuto(c0, card0); return comSemente(c0.codigo, `fechar:${c0.ano}`, () => fecharTemporadaBase(c0, card0)); }
 function fecharTemporadaBase(c0, card0) {
   const antes = c0;
   const c = clone(c0);

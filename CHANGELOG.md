@@ -2,6 +2,15 @@
 
 Tudo que mudou desde a primeira versão publicada, organizado por bloco de trabalho.
 
+## 28/11/2026 — Calendário contínuo da temporada (Modo Rápido: jogador e treinador)
+
+- Liga e copas agora dividem o mesmo calendário, com datas: cada rodada do campeonato nacional é um compromisso, entre os jogos do estadual, da copa nacional, do continental e do Mundial.
+- Em cada partida da liga dá para **jogar** escolhendo a estratégia (manter o plano, buscar a vitória ou proteger a equipe), **pular a próxima partida** (estratégia padrão) ou **ir para um dia** do calendário: tudo até lá é simulado sem paradas, com a estratégia padrão, e o jogo volta a você naquele dia. Também há "simular até o fim da temporada".
+- As copas seguem com as telas de estratégia de sempre; pelo calendário também dá para pulá-las com a estratégia padrão ("Controlar o jogo").
+- O mundo anda junto: as outras ligas (Europa, América do Sul, Ásia, MLS…) avançam a cada data, com classificação parcial, líderes e notícias em "Pelo mundo".
+- No modo jogador, a liga do seu clube passa a ser disputada rodada a rodada (antes o resultado do ano saía pronto no início); a posição final e o título vêm da tabela jogada. Seus lances aparecem nos últimos resultados. Desafios decisivos e jogos da seleção continuam abrindo a tela própria.
+- No modo treinador, pedir demissão no meio do calendário registra a temporada interrompida com os jogos já disputados.
+
 ## 28/11/2026 — Arquivo histórico gravado uma vez por temporada
 
 - O arquivo histórico (universo, 55 MB numa carreira de 24 anos) passa a ficar em registro próprio do IndexedDB e só é regravado quando muda — no fechamento da temporada. Cada clique grava apenas o resto da carreira: escolher a camisa caiu de ~4,9 s para ~1,9 s até salvar.

@@ -1,3 +1,5 @@
+import SeletorAparencia from '../comum/SeletorAparencia.jsx';
+import {normalizarAparencia} from '../comum/aparenciaCinematica.js';
 import {avaliarClubeNoMundo} from '../simulacao/forcaEquipe.js';
 import LigasEmDisputa from '../simulacao/LigasEmDisputa.jsx';
 import {registrarFormaDaLiga,simularPlacarDeLiga} from '../treinador/classificacoesMundoTecnico.js';
@@ -46,6 +48,7 @@ export default function AJoiaGame() {
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [stage, introFase]);
   const [nome, setNome] = useState("");
+  const [aparencia,setAparencia]=useState(()=>normalizarAparencia());
   const [formEtapa, setFormEtapa] = useState(0);
   const [posicao, setPosicao] = useState(null);
   const [nacionalidade, setNacionalidade] = useState("BRA");
@@ -331,7 +334,7 @@ function gerarBloqueadosNumero() { const s = new Set(); while (s.size < 18) s.ad
     draftSlots.forEach((s) => { if (s.valor) attrsIni[s.attr] = clampR(attrsIni[s.attr] + s.valor, 40, 99); });
     const persona = PERSONALIDADES.find((p) => p.id === personalidade) || PERSONALIDADES[3];
     const c = {
-      museuId: criarIdMuseu(), ajustesCadastro: {[AJUSTE_FORTALEZA]:true},
+      aparencia:normalizarAparencia(aparencia), museuId: criarIdMuseu(), ajustesCadastro: {[AJUSTE_FORTALEZA]:true},
       attrs: attrsIni, attrsAnteriores: { ...attrsIni }, potencial: potencialFinal, posicao, personalidade, nacionalidade, clubeCoracao, pernaDominante, origem: origem?.id,
       anoInicio: ANO_INICIO, idade: 16, clube: clubeEscolhido, forma: 0, anoNoClube: 0,
       gols: 0, assist: 0, melhorEmCampo: 0, titulos: 0, bolasDeOuro: 0, premiosIndividuais: 0, copasDoMundo: 0,
@@ -4065,6 +4068,7 @@ function resolverTemporada(c, extraStats) {
     if (!saveBruto) return;
     const save = normalizarSave(saveBruto); // completa campos que faltarem
     setNome(save.nome || "");
+    setAparencia(normalizarAparencia(save.carreira?.aparencia||save.fim?.c?.aparencia||save.aparencia));
     setPosicao(save.posicao || null);
     setNacionalidade(save.nacionalidade || "BRA");
     setPersonalidade(save.personalidade || null);
@@ -4386,7 +4390,7 @@ function resolverTemporada(c, extraStats) {
 
         {stage === "intro" && introFase === "titulo" && (() => {
           const resumoAuto = temSave ? resumoDoSave(carregarLocal("auto")) : null;
-          const irParaFormulario = () => { setFormEtapa(0); setIntroFase("form"); };
+          const irParaFormulario = () => { setAparencia(normalizarAparencia()); setFormEtapa(0); setIntroFase("form"); };
           return (
             <div className="tela-titulo fixed inset-0 z-50 overflow-y-auto">
               <div aria-hidden="true" className="tela-titulo-brilho" />
@@ -4449,6 +4453,7 @@ function resolverTemporada(c, extraStats) {
                   <div className="animate-[fadeIn_0.3s_ease-out]">
                     <div className="text-sm text-zinc-300 mb-3">Qual o nome do seu jogador?</div>
                     <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome do jogador" autoFocus className="w-full bg-zinc-800 border border-zinc-700 rounded-sm px-4 py-3 text-sm outline-none focus:border-emerald-500" />
+                    <SeletorAparencia valor={aparencia} onChange={setAparencia}/>
                   </div>
                 )}
                 {formEtapa === 1 && (
@@ -5930,15 +5935,15 @@ function resolverTemporada(c, extraStats) {
                 )}
 
                 {pendingDespedidaClube && (
-                  <CenaDespedidaClube clube={pendingDespedidaClube.clube} anos={pendingDespedidaClube.anos} onConcluir={concluirDespedidaClube} />
+                  <CenaDespedidaClube aparencia={carreira?.aparencia||aparencia} nome={nome} clube={pendingDespedidaClube.clube} anos={pendingDespedidaClube.anos} onConcluir={concluirDespedidaClube} />
                 )}
 
                 {pendingAposentadoria && (
-                  <CenaAposentadoria nome={nome} clube={carreira.clube} onConcluir={() => { setFim(pendingAposentadoria); setPendingAposentadoria(null); setStage("fim"); }} />
+                  <CenaAposentadoria aparencia={carreira?.aparencia||aparencia} nome={nome} clube={carreira.clube} onConcluir={() => { setFim(pendingAposentadoria); setPendingAposentadoria(null); setStage("fim"); }} />
                 )}
 
                 {pendingLesaoGrave && (
-                  <CenaLesaoGrave nomeLesao={pendingLesaoGrave.nomeLesao} jogosFora={pendingLesaoGrave.jogosFora} onConcluir={concluirLesaoGrave} />
+                  <CenaLesaoGrave aparencia={carreira?.aparencia||aparencia} nome={nome} nomeLesao={pendingLesaoGrave.nomeLesao} jogosFora={pendingLesaoGrave.jogosFora} onConcluir={concluirLesaoGrave} />
                 )}
 
                 {pendingEstreia && (
@@ -5950,12 +5955,12 @@ function resolverTemporada(c, extraStats) {
                 )}
 
                 {pendingCelebracaoTitulo && (
-                  <CenaLevantarTaca titulos={pendingCelebracaoTitulo.titulos} clube={pendingCelebracaoTitulo.clube} onConcluir={concluirCelebracaoTitulo} />
+                  <CenaLevantarTaca aparencia={carreira?.aparencia||aparencia} nome={nome} titulos={pendingCelebracaoTitulo.titulos} clube={pendingCelebracaoTitulo.clube} onConcluir={concluirCelebracaoTitulo} />
                 )}
 
                 {pendingApresentacaoClube && (
                   <ApresentacaoNovoClube
-                    clube={pendingApresentacaoClube.clube} numero={pendingApresentacaoClube.numero}
+                    aparencia={carreira?.aparencia||aparencia} clube={pendingApresentacaoClube.clube} numero={pendingApresentacaoClube.numero}
                     nome={nome} posicao={pendingApresentacaoClube.posicao} idade={pendingApresentacaoClube.idade}
                     grandeChegada={pendingApresentacaoClube.grandeChegada}
                     onConcluir={() => { const chegada = pendingApresentacaoClube.chegadaDepois; setPendingApresentacaoClube(null); setPendingChegadaClube(chegada); }}
@@ -6268,7 +6273,7 @@ function resolverTemporada(c, extraStats) {
                           <>
                             <div className="text-center mb-3 flex flex-col items-center gap-1"><TrophyIcon tipo="ouro" size={30} /><div className="text-[10px] text-amber-400 uppercase tracking-widest">Premiações & finanças</div></div>
                             {awardsPopup.registro.premios.some((p) => p.nome === "BOLA DE OURO") && (
-                              <CerimoniaBola nome={nome} posicao={awardsPopup.registro.postoBO} finalistas={awardsPopup.registro.rankingBO||[]} ano={awardsPopup.registro.ano||awardsPopup.registro.temporadaLabel}/>
+                              <CerimoniaBola aparencia={carreira?.aparencia||aparencia} nome={nome} posicao={awardsPopup.registro.postoBO} finalistas={awardsPopup.registro.rankingBO||[]} ano={awardsPopup.registro.ano||awardsPopup.registro.temporadaLabel}/>
 
                             )}
                             <div className="text-xs text-zinc-300 space-y-2 mb-3">

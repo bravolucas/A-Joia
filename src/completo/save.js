@@ -1,3 +1,4 @@
+import {normalizarAparencia} from '../comum/aparenciaCinematica.js';
 import {gravarPersistente,lerPersistente,apagarPersistente} from '../simulacao/armazenamentoMundo.js';
 import {corrigirEquilibrioClubes} from '../dados/equilibrioClubes.js';
 import {CLUBES,anoRegistroTemporada} from '../dados/data.js';
@@ -159,6 +160,7 @@ const PADRAO_CARREIRA = {
 export function normalizarCarreira(c) {
   if (!c) return null;
   const out = { ...PADRAO_CARREIRA, ...corrigirEquilibrioClubes(c), anoInicio: Number.isInteger(c.anoInicio) ? c.anoInicio : 2025 };
+  out.aparencia=normalizarAparencia(out.aparencia);
   // garante que campos de coleção sejam do tipo certo, mesmo se vierem nulos
   Object.entries(PADRAO_CARREIRA).forEach(([k, v]) => {
     if (Array.isArray(v) && !Array.isArray(out[k])) out[k] = [];
@@ -205,6 +207,7 @@ export function normalizarSave(save) {
     ...save,
     ...(combinado?{mundo:mundoAjustado}:{}),
     carreira:final,
+    fim:save.fim?.c?{...save.fim,c:{...save.fim.c,aparencia:normalizarAparencia(save.fim.c.aparencia)}}:save.fim,
     temporadas: (Array.isArray(save.temporadas) ? save.temporadas : []).map(normalizarTemporada).filter(Boolean).map(t => ({...t, ano: anoRegistroTemporada(final,t)})),
   };
 }

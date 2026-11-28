@@ -25,7 +25,9 @@ export function aplicarCopaTecnico(c,chave,opcao){
  const copas=structuredClone(p);copas.campeonatos[p.indice]=nova;
  let tecnico={...t,copasEmJogo:copas};
  if(nova.fase==='fim'&&!nova.resultado){
-  const temporadas=[...t.temporadas],idx=temporadas.findIndex(a=>a.ano===p.ano&&a.clube===p.clube),temporada={...temporadas[idx]};
+  // Calendário contínuo: a copa pode terminar antes da liga, quando a temporada ainda não
+  // tem registro. O resumo entra no fechamento da liga (torneios da agenda).
+  const temporadas=[...t.temporadas],idx=temporadas.findIndex(a=>a.ano===p.ano&&a.clube===p.clube),emCurso=idx<0,temporada=emCurso?{torneios:[],titulosConquistados:[]}:{...temporadas[idx]};
   temporada.torneios=(temporada.torneios||[]).filter(x=>x.nome!==nova.nome).concat({...resumoCampanhaCopa(nova),celebrado:nova.campeao===p.clube});
   const ganhou=nova.campeao===p.clube,ja=(temporada.titulosConquistados||[]).includes(nova.nome);
   if(ganhou&&!ja){temporada.titulosConquistados=[...(temporada.titulosConquistados||[]),nova.nome];tecnico={...tecnico,titulos:(t.titulos||0)+1,reputacao:Math.min(99,t.reputacao+(nova.tipo==='estadual'?1:nova.tipo==='continental'?8:4)),diretoria:Math.min(100,(t.diretoria||0)+4),torcida:Math.min(100,(t.torcida||0)+5)};}
@@ -35,7 +37,8 @@ export function aplicarCopaTecnico(c,chave,opcao){
    temporada.jogos=jogos.length;temporada.vitorias=v;temporada.empates=e;temporada.derrotas=d;temporada.pontos=v*3+e;
    if(ganhou||nova.tipo==='copaMundo'&&nova.posicaoInicial<=2)temporada.cumpriuObjetivo=true;
   }
-  temporadas[idx]=temporada;tecnico.temporadas=temporadas;
+  if(emCurso){tecnico={...tecnico,titulos:t.titulos,reputacao:t.reputacao,diretoria:t.diretoria,torcida:t.torcida};}
+  else{temporadas[idx]=temporada;tecnico.temporadas=temporadas;}
   if(nova.repescagemSulamericana){const base=clubesParaCopas(t.ligasMundo),clubes=ampliarParticipantesInternacionais(base.filter(x=>regiaoDaLiga(x.liga)==='sul'),'sulamericana',t.ano,base);copas.campeonatos.push(criarCampanhaCopa({nome:'Copa Sul-Americana',tipo:'continental',usuario:p.clube,forcaUsuario:nova.forcaUsuario,clubes,ano:p.ano,formato:'mata',entrada:'pre',seed:`${nova.seed}|repescagem` }));}
   if(temporada.tipoEquipe!=='selecao'&&eCampeaoPrincipal(nova)&&!copas.campeonatos.some(x=>x.tipo==='mundial'&&x.nome==='Copa Intercontinental FIFA'))copas.campeonatos.push(criarMundialAnual(nova));
   if(copas.calendarioVersao){copas.concluidas.push(p.indice);tecnico.copasEmJogo=selecionarAgenda(copas);}else copas.indice++;

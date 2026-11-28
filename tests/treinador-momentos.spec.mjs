@@ -30,20 +30,23 @@ const salvo = page => lerSave(page,"ajoia_rapido_v1").then(salvo=>(salvo.c));
 const semRolagemLateral = page => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth);
 
 for (const width of [390, 1366]) {
-  test(`calendário intercala estadual e liga, mostra campanha parcial e continua em ${width}px`, async ({ page }) => {
+  test(`calendário intercala estadual e liga por data e mantém o progresso ao recarregar em ${width}px`, async ({ page }) => {
     test.setTimeout(90000);await page.setViewportSize({width,height:900});await page.emulateMedia({reducedMotion:'reduce'});
     const erros=[];page.on('pageerror',e=>erros.push(e.message));await abrir(page,carreira('normal'));
     await page.getByRole('button',{name:'Preparar equipe (opcional)',exact:true}).click();await page.getByRole('dialog',{name:'Decisão de pré-temporada'}).locator('.ct-decisions button:enabled').first().click();
-    await expect(page.getByRole('dialog',{name:/Copa em jogo · Campeonato Sergipano/})).toBeVisible();let data=-99,achou=false;
-    for(let i=0;i<70;i++){
-      const c=await salvo(page),p=c.tecnico.copasEmJogo;expect(p).toBeTruthy();expect(p.dataAtual).toBeGreaterThanOrEqual(data);data=p.dataAtual;
-      if(p.pausa?.id==='metade'){achou=true;break;}
-      const d=page.getByRole('dialog'),continuar=d.getByRole('button',{name:/Ir para jogo de volta|Continuar campanha|Concluir campanha|Continuar temporada/});if(await continuar.count())await continuar.click();else await d.locator('.cce-opcoes button').first().click();
+    const hub=page.getByRole('region',{name:'Calendário da temporada'});await expect(hub).toBeVisible();
+    let data=-99;const vistos=new Set();
+    for(let i=0;i<16;i++){
+      await page.locator('.ct-simulating').waitFor({state:'detached',timeout:15000});
+      const c=await salvo(page),t=c.tecnico,p=t.temporadaPausada,agenda=t.copasEmJogo;
+      const liga=p.datas[p.indice],copa=agenda?.dataAtual??Infinity,proxima=Math.min(liga,copa);
+      expect(proxima).toBeGreaterThanOrEqual(data);data=proxima;vistos.add(liga<=copa?'liga':agenda.campeonatos[agenda.indice]?.tipo||'marco');
+      await hub.getByRole('button',{name:/Pular próxima partida|Avançar a rodada/}).click();
     }
-    expect(achou).toBe(true);await expect(page.getByLabel('Campanha parcial')).toContainText('Confiança');
-    const antes=await salvo(page),partidas=antes.tecnico.temporadas[0].confrontos.filter(j=>!j.folga),metade=partidas.slice(0,Math.floor(partidas.length/2)),pontos=metade.reduce((n,j)=>n+(j.resultado==='V'?3:j.resultado==='E'?1:0),0);
-    await expect(page.getByLabel('Campanha parcial')).toContainText(`${metade.length} jogos · ${pontos} pontos`);expect(await semRolagemLateral(page)).toBe(true);await page.screenshot({path:`test-results/treinador-parada-${width}.png`,fullPage:false});
-    await page.getByRole('button',{name:/Continuar temporada/}).click();const depois=await salvo(page);expect(depois.ano).toBe(antes.ano);expect(depois.idade).toBe(antes.idade);expect(depois.tecnico.temporadas[0].confrontos).toEqual(antes.tecnico.temporadas[0].confrontos);expect(erros).toEqual([]);
+    expect(vistos.has('liga')).toBe(true);expect(vistos.has('estadual')).toBe(true);
+    const antes=await salvo(page);await page.reload();await page.getByRole('button',{name:/Continuar · Treinador momentos/}).click();await expect(hub).toBeVisible();
+    const depois=await salvo(page);expect(depois.tecnico.temporadaPausada.confrontos).toEqual(antes.tecnico.temporadaPausada.confrontos);expect(depois.tecnico.calendarioRecentes).toEqual(antes.tecnico.calendarioRecentes);
+    expect(await semRolagemLateral(page)).toBe(true);expect(erros).toEqual([]);
   });
 
   test(`final decidida pela escolha do treinador em ${width}px`, async ({ page }) => {

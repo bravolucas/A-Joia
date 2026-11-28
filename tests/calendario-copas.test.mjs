@@ -10,7 +10,7 @@ import {criarMundialAnual,criarMundial32,eCampeaoPrincipal} from '../src/competi
 import {dataCopa,criarAgenda,rotuloData} from '../src/competicoes/calendarioCopas.js';
 import {temaCopa} from '../src/competicoes/temasCopas.js';
 import {criarJogador,jogarTemporada,aplicarMomento,fecharTemporada} from '../src/jogador/rapido.js';
-import {prepararCopasJogador,chaveCopaJogador,escolherCopaJogador,concluirEventoJogador} from '../src/jogador/copasJogador.js';
+import {prepararCopasJogador,chaveCopaJogador,escolherCopaJogador,concluirEventoJogador,proximoCompromissoJogador,avancarCalendarioJogador} from '../src/jogador/copasJogador.js';
 import * as T from '../src/treinador/tecnico.js';
 import {chaveCopaTecnico} from '../src/treinador/copasCarreiraTecnico.js';
 const brasil=CLUBES.filter(x=>['brasileirao','serieB'].includes(x.liga));
@@ -66,8 +66,18 @@ test('Modo Rápido preserva calendário, súmulas e estatísticas após retomar 
  assert.equal(card.calendarioLigasExternas.ligas.inglaterra.progresso<1,true);
  assert.equal(card.calendarioLigasExternas.ligas.argentina,undefined);
  let parcial;
- for(let passos=0;card.calendarioCopas&&passos<250;passos++){
+ for(let passos=0;card.calendarioCopas&&passos<400;passos++){
   const p=card.calendarioCopas;
+  // Calendário contínuo: as rodadas do Flamengo entram nas mesmas datas das copas.
+  if(proximoCompromissoJogador(card)?.tipo==='liga'){
+   const l=card.ligaPropria;
+   if(l.indice===Math.floor(l.rodadas.length/2)&&!parcial){
+    parcial=card.calendarioLigasExternas.ligas.argentina;
+    assert.ok(parcial.classificacao.every(t=>t.jogos>0&&t.jogos<lote.argentina.classificacao[0].jogos));
+    card=JSON.parse(JSON.stringify(card));
+   }
+   card=avancarCalendarioJogador(card,{modo:'pular'});continue;
+  }
   if(p.pausa?.id==='metade'){
    parcial=card.calendarioLigasExternas.ligas.argentina;
    assert.ok(parcial.classificacao.every(t=>t.jogos>0&&t.jogos<lote.argentina.classificacao[0].jogos));

@@ -12,9 +12,12 @@ function jogador(clube='Flamengo',ritmo='normal'){const c=criarJogador({nome:'Jo
 async function abrir(page,s){await page.goto('http://127.0.0.1:4173/A-Joia/');await instalarSave(page,((s)=>({v:1,auto:false,...s}))(s),"ajoia_rapido_v1");await page.reload();await page.getByRole('button',{name:/Continuar · Jogador em campo/}).click();}
 for(const ritmo of ['normal','expresso','intenso'])for(const width of [320,1366])test(`jogador ${ritmo}: treino, estadual, Brasileiro e Libertadores com tema e escolhas em ${width}px`,async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});await page.setViewportSize({width,height:width===320?568:768});const erros=[];page.on('pageerror',e=>erros.push(e.message));const c=jogador('Flamengo',ritmo);await abrir(page,{etapa:'evento',c});await page.locator('.tp-carta').first().click();await expect(page.getByRole('dialog',{name:'Copa em jogo · Campeonato Carioca'})).toBeVisible();let liga=false,lib=false;
- for(let i=0;i<45;i++){
+ for(let i=0;i<90;i++){
   await aguardarSave(page);
   const d=page.getByRole('dialog');if(await page.getByRole('dialog',{name:'Calendário · Brasileirão'}).count())liga=true;
+  // Calendário contínuo: rodadas do Brasileirão entre os jogos de copa.
+  const hub=page.getByRole('region',{name:'Calendário da temporada'});
+  if(!(await d.count())&&await hub.count()){liga=true;await hub.getByRole('button',{name:/Pular próxima partida|Avançar a rodada/}).click();continue;}
   if(await page.getByRole('dialog',{name:'Copa em jogo · Libertadores'}).count()){lib=true;await expect(d.locator('.cce-corpo')).toHaveAttribute('data-tema','libertadores');await expect(d.locator('.cce-topo small')).toContainText('MODO RÁPIDO · JOGADOR');await expect(d.locator('.cce-opcoes button').nth(1)).toBeVisible();await expect(d.locator('.cce-opcoes button')).toHaveCount(3);await page.screenshot({path:`test-results/jogador-libertadores-${ritmo}-${width}.png`});break;}
   const next=d.getByRole('button',{name:/Ir para jogo de volta|Continuar campanha|Concluir campanha|Continuar temporada/});if(await next.count())await next.click();else await d.locator('.cce-opcoes button').first().click();
  }

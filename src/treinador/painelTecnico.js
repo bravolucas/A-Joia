@@ -23,6 +23,9 @@ export function jogosPainelTecnico(t={}){
  return jogos;
 }
 export function proximoJogoPainel(t={}){
+ // Calendário contínuo: a próxima rodada da liga vem antes quando a data dela é anterior.
+ const pl=t.fase==='calendario'&&t.temporadaPausada?.tipo==='calendario'?t.temporadaPausada:null,adv=pl?.calendario?.[pl.indice];
+ if(adv&&!adv.folga&&(!t.copasEmJogo||pl.datas[pl.indice]<=t.copasEmJogo.dataAtual||t.copasEmJogo.pausa))return {clube:t.clube,adversario:adv.nome,competicao:nomeLigaPainel(t),fase:`Rodada ${pl.indice+1}`,ano:t.ano};
  const cp=t.copasEmJogo?.campeonatos?.[t.copasEmJogo.indice];
  if(!cp||t.copasEmJogo.pausa)return null;
  const d=decisaoCopa(cp);return d?{clube:cp.usuario,adversario:d.adversario,competicao:cp.nome,fase:d.fase,ano:cp.ano}:null;

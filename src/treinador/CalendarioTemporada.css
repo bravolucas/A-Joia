@@ -1,0 +1,41 @@
+.cal-temporada{display:flex;flex-direction:column;gap:14px;text-align:left}
+.cal-topo{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.cal-topo small,.cal-proximo>small{font-size:10px;letter-spacing:.6px;color:#a1a1aa;font-weight:650}
+.cal-topo h2{margin:4px 0 0!important;font-size:20px!important}
+.cal-situacao{display:flex;flex-direction:column;align-items:flex-end;gap:2px}.cal-situacao strong{font-size:22px;color:#facc15;line-height:1}.cal-situacao span{font-size:11px;color:#a1a1aa}
+.cal-proximo{background:#1d1e23;border:1px solid #2e2f36;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.cal-proximo .ct-season-preview{margin:0;background:#25262c}
+.cal-instrucao,.cal-folga,.cal-nota{font-size:12px;color:#b1b1be;margin:0;line-height:1.5}
+.cal-nota{font-size:11px;color:#8b8b96;margin-top:8px}
+.cal-estrategias{margin-top:0}.cal-estrategias button{padding:12px 14px}
+.cal-pulos{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cal-pulos button{display:flex;flex-direction:column;gap:3px;align-items:flex-start;text-align:left;background:transparent;border:1px solid #3a3a44;border-radius:12px;padding:10px 12px;color:#f4f4f5;font-size:12px!important;font-weight:700!important;cursor:pointer;min-height:44px}
+.cal-pulos button:hover{border-color:#85858f;background:#26262d}.cal-pulos small{font-size:10px!important;color:#a1a1aa;font-weight:500}
+.cal-temporada button:disabled{opacity:.55;cursor:wait}
+.cal-lista{background:#18181c;border:1px solid #2a2a31;border-radius:14px;padding:12px 14px}
+.cal-lista summary{cursor:pointer;font-size:13px!important;font-weight:750;min-height:28px}
+.cal-mes h3{font-size:10px;letter-spacing:.8px;color:#facc15;margin:12px 0 4px}
+.cal-mes ol,.cal-recentes,.cal-noticias,.cal-lideres{list-style:none;margin:0;padding:0}
+.cal-item{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #24242a;font-size:12px}
+.cal-item time{font-weight:800;color:#e4e4e7;text-align:center}
+.cal-item-jogo{min-width:0;overflow-wrap:anywhere;color:#d4d4d8}.cal-item-jogo em{color:#8b8b96}
+.cal-item-copa .cal-item-jogo{color:#fde68a}
+.cal-item button,.cal-mais{background:#26262d;border:1px solid #3a3a44;border-radius:999px;color:#f4f4f5;font-size:11px!important;padding:6px 10px;cursor:pointer;min-height:32px;white-space:nowrap}
+.cal-item button:hover,.cal-mais:hover{border-color:#85858f}
+.cal-hoje{font-size:10px;font-weight:800;color:#121215;background:#facc15;border-radius:999px;padding:4px 8px}
+.cal-mais{margin-top:10px;width:100%}
+.cal-bloco h3{font-size:12px;font-weight:800;margin:0 0 8px;color:#e4e4e7}
+.cal-recente{display:grid;grid-template-columns:minmax(0,1fr) 24px;gap:2px 8px;align-items:center;padding:7px 0;border-bottom:1px solid #24242a;font-size:12px}
+.cal-recente small{grid-column:1/-1;font-size:10px;color:#8b8b96}
+.cal-recente span{min-width:0;overflow-wrap:anywhere}.cal-recente strong{color:#fff;white-space:nowrap}
+.cal-recente i{font-style:normal;font-weight:800;font-size:11px;text-align:center;border-radius:6px;padding:2px 0;background:#3f3f46}
+.cal-V i{background:#166534}.cal-D i{background:#7f1d1d}
+.cal-eu{color:#facc15}
+.cal-tabela{width:100%;border-collapse:collapse;font-size:12px}.cal-tabela th{font-size:10px;color:#8b8b96;text-align:left;font-weight:600;padding:4px}.cal-tabela td{padding:5px 4px;border-top:1px solid #24242a}
+.cal-tabela td:nth-child(n+3),.cal-tabela th:nth-child(n+3){text-align:right}
+.cal-tabela tr.cal-eu td{background:#facc1512}
+.cal-noticias li,.cal-lideres li{display:flex;flex-direction:column;gap:2px;padding:6px 0;border-bottom:1px solid #24242a;font-size:12px;color:#d4d4d8;line-height:1.45}
+.cal-noticias small,.cal-lideres small{font-size:10px;color:#8b8b96}
+.cal-lideres{display:grid;grid-template-columns:1fr 1fr;column-gap:12px;margin-top:6px}
+@media (max-width:420px){.cal-pulos{grid-template-columns:1fr}.cal-lideres{grid-template-columns:1fr}}
+.ct-pulos-copas{margin-top:10px}

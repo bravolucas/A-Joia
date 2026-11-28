@@ -13,7 +13,11 @@ import {forcasDoMundo,clubesDoMundo,registrarMundoVivo,resumirTabelas} from '../
 import {registrarAnoHistoria} from '../historia/historiaFutebol.js';
 import {detectarQuebrasRecordesFutebol,escoposRecordesDaTemporada,guardarQuebrasRecordesFutebol} from '../historia/noticiasRecordes.js';
 import {resumoCampanhaCopa} from './copasEscolha.js';
-import {prepararCopasTecnico,aplicarCopaTecnico,estadualAutomaticoTecnico} from './copasCarreiraTecnico.js';
+import {prepararCopasTecnico,aplicarCopaTecnico,estadualAutomaticoTecnico,chaveCopaTecnico} from './copasCarreiraTecnico.js';
+import {decisaoCopa} from './copasEscolha.js';
+import {selecionarAgenda} from '../competicoes/calendarioCopas.js';
+import {criarCalendarioLigasRapido,avancarCalendarioLigasRapido,finalizarCalendarioLigasRapido} from '../jogador/ligasCalendarioRapido.js';
+import {elencosParaLigasRapidas} from '../jogador/escalacoesLigasRapido.js';
 import {vagaTecnico,nomeVaga,calcularVagasRapidas,idContinental,classificacoesHistoricas} from '../competicoes/regrasCopasRapidas.js';
 import { SELECOES_TECNICO, propostasSelecoesTecnico, simularAnoSelecaoTecnico, equipeTituloTecnico } from './selecoesTecnico.js';
 import {legadoNarrativo} from '../jogador/jornadaJogador.js';
@@ -101,7 +105,7 @@ export function pedirDemissaoTecnico(c,rng){
  const andamento=t.andamento||t.temporadaPausada,confrontos=andamento?.confrontos||[];
  const quantidade=(campo,resultado)=>Number.isFinite(andamento?.[campo])?andamento[campo]:confrontos.filter(j=>j.resultado===resultado).length;
  const vitorias=quantidade('vitorias','V'),empates=quantidade('empates','E'),derrotas=quantidade('derrotas','D'),jogos=vitorias+empates+derrotas;
- const parcial=jogos>0&&['pretemporada','parada'].includes(t.fase);
+ const parcial=jogos>0&&['pretemporada','parada','calendario'].includes(t.fase);
  // Cláusula de rebaixamento: depois de uma queda, sair é previsto em contrato e rende indenização.
  const ultima=(t.temporadas||[]).at(-1);
  const clausula=t.fase==='resultado'&&t.clausulaRebaixamento?.clube===clube&&ultima?.clube===clube&&!!ultima?.rebaixado;
@@ -659,10 +663,10 @@ function participantesDaLigaLegadaTecnico(t, liga) {
     nomesCalendario,
   });
 }
-function classificacoesMundoDaTemporada(t, liga, classificacao, rng, jogosTreinador = []) {
+function classificacoesMundoDaTemporada(t, liga, classificacao, rng, jogosTreinador = [], soLigaDoTreinador = false) {
   const { clubes, ligasMundo } = participantesDaLigaLegadaTecnico(t, liga);
   return simularClassificacoesMundoTecnico({
-    clubes,
+    clubes: soLigaDoTreinador ? clubes.filter(x => (ligasMundo[x.nome] || x.liga) === liga) : clubes,
     ligasMundo,
     ligaTreinador: liga,
     clubeTreinador: t.clube,
@@ -1069,11 +1073,14 @@ export function responderIntervencaoTecnico(c,chave,escolha,rng=sorteio){
 }
 export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   if (!c?.tecnico) throw new Error('Carreira técnica não iniciada.');
-  if (c.tecnico.fase !== 'pretemporada') throw new Error('Conclua a temporada anterior antes de simular.');
+  if (c.tecnico.fase !== 'pretemporada' && c.tecnico.fase !== 'calendario') throw new Error('Conclua a temporada anterior antes de simular.');
   if(c.tecnico.aposentado||(idadeAtualTecnico(c))>=IDADE_MAXIMA_TECNICO)throw new Error('Carreira de treinador encerrada aos 85 anos ou por aposentadoria.');
   const pausa=c.tecnico.temporadaPausada;
-  if(pausa&&!pausa.escolha)throw new Error('Escolha uma intervenção para continuar.');
-  const t = {...c.tecnico,forcasMundo:forcasDoMundo(c),copasEscolhaHabilitadas:c.tecnico.copasEscolhaHabilitadas||!!opcoes.copasInterativas,temporadaPausada:null,intervencaoPendente:null};
+  if(pausa&&!pausa.escolha&&pausa.tipo!=='calendario')throw new Error('Escolha uma intervenção para continuar.');
+  // Calendário contínuo (Modo Rápido): liga e copas dividem as mesmas datas e a temporada
+  // avança jogo a jogo. O estado da liga fica em temporadaPausada {tipo:'calendario'}.
+  const modoCalendario = pausa?.tipo === 'calendario' || (!!opcoes.calendario && c.tecnico.tipoEquipe !== 'selecao');
+  const t = {...c.tecnico,fase:'pretemporada',forcasMundo:forcasDoMundo(c),copasEscolhaHabilitadas:c.tecnico.copasEscolhaHabilitadas||!!opcoes.copasInterativas||modoCalendario,temporadaPausada:null,intervencaoPendente:null};
   const elencoRapido=t.modoTreinadorRapido?elencoTaticoRapidoDoMundo(c.mundo,t.clube):null;
   const folhaJogo=escalacaoHistoricaTecnico(c,t);
   if ((t.decisoes?.length || 0) < QUANTIDADE_DECISOES_TECNICO) throw new Error('Tome as decisões da temporada antes de simular.');
@@ -1102,7 +1109,15 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
     ? calendario.map((j, i) => (!j.folga && j.nome === rivalInicial.clube ? i : -1)).filter(i => i >= 0).at(-1) ?? -1 : -1;
   let classico = pausa?.classico || null;
   const pausaComum = { ...(classico ? { classico } : {}), ...(pausa?.classicoFeito ? { classicoFeito: true } : {}) };
+  let copasCalendario = modoCalendario ? (pausa ? t.copasEmJogo || null : iniciarAgendaCalendarioTecnico(t)) : null;
+  const datasCalendario = modoCalendario ? (pausa?.datas || datasRodadasTecnico(copasCalendario, ligaAtual, calendario.length)) : null;
+  const mundoCalendario = modoCalendario ? (pausa ? pausa.mundo || null : criarMundoCalendarioTecnico(c, t, ligaAtual)) : null;
   for (let rodada = pausa?.indice ?? 0; rodada < calendario.length; rodada++) {
+    if (modoCalendario && rodada >= (opcoes.pararNaRodada ?? 0)) {
+      return { ...c, tecnico: { ...t, fase: 'calendario', copasEmJogo: copasCalendario,
+        temporadaPausada: { tipo: 'calendario', ano: t.ano, clube: t.clube, indice: rodada, calendario: pausa ? calendario : structuredClone(calendario), datas: datasCalendario,
+          confrontos, partidasLiga, classificacao, vitorias, empates, derrotas, golsPro, golsContra, mundo: mundoCalendario, ...(classico ? { classico } : {}) } } };
+    }
     const adversario = calendario[rodada];
     if (adversario.folga) {
       confrontos.push({ ...adversario });
@@ -1167,7 +1182,9 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
   const idoloEmCasa = !!vinculoAtual?.idolatria;
   const cumpriuObjetivo = posicao <= objetivo.posicao;
   const promessaDescumprida = !!(t.promessaContrato && t.promessaContrato.clube === t.clube && posicao > t.promessaContrato.posicaoMaxima);
-  const classificacoesMundo = classificacoesMundoDaTemporada({ ...t, liga: ligaAtual }, ligaAtual, classificacao, rng, partidasLiga);
+  const classificacoesMundo = mundoCalendario
+    ? { ...finalizarCalendarioLigasRapido(mundoCalendario), ...classificacoesMundoDaTemporada({ ...t, liga: ligaAtual }, ligaAtual, classificacao, rng, partidasLiga, true) }
+    : classificacoesMundoDaTemporada({ ...t, liga: ligaAtual }, ligaAtual, classificacao, rng, partidasLiga);
   if (ligaAtual === 'serieC' && classificacoesMundo.serieC?.edicaoSerieC) {
     campeao = classificacoesMundo.serieC.edicaoSerieC.campeao === t.clube;
   }
@@ -1244,7 +1261,7 @@ export function simularTemporadaTecnico(c, rng = sorteio, opcoes = {}) {
     });
     if (continental) torneios.push(continental);
   }
-  const copasEmJogo=t.copasEscolhaHabilitadas?prepararCopasTecnico(t,forcaClubeTecnico(t)):null;
+  const copasEmJogo=modoCalendario?copasCalendario:t.copasEscolhaHabilitadas?prepararCopasTecnico(t,forcaClubeTecnico(t)):null;
   if(copasEmJogo)torneios.splice(0,torneios.length,...copasEmJogo.campeonatos.map(resumoCampanhaCopa));
   else {const estadual=estadualAutomaticoTecnico(t,forcaClubeTecnico(t));if(estadual)torneios.push(estadual);}
   temporada.torneios = torneios;
@@ -1476,6 +1493,120 @@ export function jogarTemporadaExpressaTecnico(c, opcaoId, rng = sorteio, opcoes 
     return atual;
   }
   return simularTemporadaTecnico(atual, rng, opcoes);
+}
+
+/* ---------- Calendário contínuo da temporada (Modo Rápido) ----------
+   Liga e copas no mesmo calendário, como no Football Manager: cada compromisso tem
+   data; o técnico joga a próxima partida escolhendo a estratégia, pula a próxima
+   (estratégia padrão) ou simula até uma data sem paradas. As demais ligas do mundo
+   andam junto com as datas. */
+const DATAS_LIGA_PADRAO={europa:{inicio:-4,fim:5.8},outras:{inicio:1.5,fim:12.05}};
+function iniciarAgendaCalendarioTecnico(t){
+ const agenda=prepararCopasTecnico(t,forcaClubeTecnico(t));if(!agenda)return null;
+ // O próprio calendário mostra o andamento da liga; só o fim do campeonato vira marco.
+ const vistos=agenda.eventos.filter(e=>e.tipo==='liga'&&e.id!=='fim').map(e=>e.id);
+ return selecionarAgenda({...agenda,vistos:[...agenda.vistos,...vistos],pausa:null});
+}
+function periodoLigaTecnico(agenda,liga){
+ const marcos=agenda?.eventos?.filter(e=>e.tipo==='liga')||[];
+ const inicio=marcos.find(e=>e.id==='inicio')?.data,fim=marcos.find(e=>e.id==='fim')?.data;
+ if(Number.isFinite(inicio)&&Number.isFinite(fim))return {inicio,fim};
+ const europa=['inglaterra','inglaterra2','espanha','espanha2','italia','italia2','alemanha','alemanha2','franca','franca2','portugal','portugal2','holanda','turquia'].includes(liga);
+ return europa?DATAS_LIGA_PADRAO.europa:DATAS_LIGA_PADRAO.outras;
+}
+function datasRodadasTecnico(agenda,liga,total){
+ const {inicio,fim}=periodoLigaTecnico(agenda,liga);
+ return Array.from({length:total},(_,i)=>Math.round((inicio+(i+.5)/total*(fim-inicio-.05))*1000)/1000);
+}
+function criarMundoCalendarioTecnico(c,t,liga){
+ const {clubes,ligasMundo}=participantesDaLigaLegadaTecnico(t,liga);
+ const equipes=clubes.filter(x=>x.nome!==t.clube).map(x=>({...x,liga:ligasMundo[x.nome]||x.liga})).filter(x=>x.liga&&x.liga!==liga&&x.liga!=='serieD');
+ if(!equipes.length)return null;
+ const elencos=elencosParaLigasRapidas(c.mundo?.jogadores||[]);
+ return criarCalendarioLigasRapido(equipes,`${c.codigo||c.nome||'tecnico'}|tecnico`,t.ano,
+  Object.fromEntries(equipes.filter(x=>elencos[x.nome]).map(x=>[x.nome,elencos[x.nome]])),t.universo?.tecnicos||c.universo?.tecnicos||{});
+}
+const temCalendarioTecnico=t=>t?.fase==='calendario'&&t.temporadaPausada?.tipo==='calendario';
+/** Próximo compromisso do clube: rodada da liga, partida de copa ou marco do calendário. */
+export function proximoCompromissoTecnico(t){
+ const p=temCalendarioTecnico(t)?t.temporadaPausada:null,agenda=t?.copasEmJogo;
+ const liga=p&&p.indice<p.calendario.length?{tipo:'liga',indice:p.indice,rodada:p.indice+1,total:p.calendario.length,data:p.datas[p.indice],adversario:p.calendario[p.indice]}:null;
+ let copa=null;
+ if(agenda){
+  if(agenda.pausa)copa={tipo:'marco',data:agenda.dataAtual,marco:agenda.pausa,chave:chaveCopaTecnico(t)};
+  else{const campanha=agenda.campeonatos[agenda.indice];if(campanha)copa={tipo:'copa',data:agenda.dataAtual,campanha,decisao:decisaoCopa(campanha),chave:chaveCopaTecnico(t)};}
+ }
+ if(liga&&(!copa||liga.data<=copa.data))return liga;
+ return copa;
+}
+/** Próximas rodadas da liga com data (as datas das copas dependem dos sorteios e aparecem quando definidas). */
+export function agendaCalendarioTecnico(t,limite=60){
+ const p=temCalendarioTecnico(t)?t.temporadaPausada:null;if(!p)return [];
+ return p.calendario.slice(p.indice,p.indice+limite).map((adv,i)=>({tipo:'liga',indice:p.indice+i,rodada:p.indice+i+1,data:p.datas[p.indice+i],adversario:adv}));
+}
+/** Tabela da liga em andamento, com a linha do clube do técnico atualizada. */
+export function tabelaCalendarioTecnico(t){
+ const p=temCalendarioTecnico(t)?t.temporadaPausada:null;if(!p)return [];
+ const jogos=p.confrontos.filter(j=>!j.folga).length,{vitorias=0,empates=0,derrotas=0,golsPro=0,golsContra=0}=p;
+ return ordenarClassificacaoTecnico(p.classificacao.map(x=>x.meuClube?{...x,jogos,pontos:vitorias*3+empates,vitorias,empates,derrotas,golsPro,golsContra,saldoGols:golsPro-golsContra}:x));
+}
+function avancarMundoTecnico(c,data){
+ const t=c.tecnico,p=t.temporadaPausada;
+ if(!temCalendarioTecnico(t)||!p.mundo||!Number.isFinite(data))return c;
+ return {...c,tecnico:{...t,temporadaPausada:{...p,mundo:avancarCalendarioLigasRapido(p.mundo,data)}}};
+}
+const ESTRATEGIA_PADRAO_COPA=d=>d?.penaltis?'canto':'controlar';
+const ESTRATEGIAS_LIGA=new Set(INTERVENCOES_TECNICO.map(x=>x.id));
+function registrarRecenteTecnico(c,jogo){
+ if(!jogo)return c;const t=c.tecnico;
+ return {...c,tecnico:{...t,calendarioRecentes:[jogo,...(t.calendarioRecentes||[]).filter(x=>x.ano===t.ano)].slice(0,8)}};
+}
+/** Um passo do calendário. Devolve {c, jogou, data, tipo} ou null. */
+function passoCalendarioTecnico(c,estrategia,rng){
+ const t=c.tecnico,prox=proximoCompromissoTecnico(t);if(!prox)return null;
+ if(prox.tipo==='liga'){
+  const p=t.temporadaPausada,escolha=!prox.adversario.folga&&ESTRATEGIAS_LIGA.has(estrategia)&&estrategia!=='manter'?estrategia:undefined;
+  let novo=simularTemporadaTecnico({...c,tecnico:{...t,temporadaPausada:{...p,escolha}}},rng,{calendario:true,pararNaRodada:p.indice+1});
+  const j=novo.tecnico.temporadaPausada?.confrontos?.at(-1)||novo.tecnico.temporadas?.at(-1)?.confrontos?.at(-1);
+  if(!prox.adversario.folga&&j)novo=registrarRecenteTecnico(novo,{ano:t.ano,data:prox.data,competicao:'liga',rodada:prox.rodada,casa:j.casa?t.clube:j.nome,fora:j.casa?j.nome:t.clube,golsCasa:j.casa?j.golsPro:j.golsContra,golsFora:j.casa?j.golsContra:j.golsPro,resultado:j.resultado,...(escolha?{estrategia:escolha}:{})});
+  return {c:novo,jogou:!prox.adversario.folga,data:prox.data,tipo:'liga'};
+ }
+ if(prox.tipo==='marco')return {c:resolverCopaEscolhaTecnico(c,prox.chave,'continuar'),jogou:false,data:prox.data,tipo:'marco'};
+ const d=prox.decisao,opcao=!d?'continuar':d.penaltis?ESTRATEGIA_PADRAO_COPA(d):(estrategia&&!ESTRATEGIAS_LIGA.has(estrategia)?estrategia:ESTRATEGIA_PADRAO_COPA(d));
+ let novo=resolverCopaEscolhaTecnico(c,prox.chave,opcao);
+ if(novo===c)return null;
+ if(d&&!d.penaltis){
+  const agenda=novo.tecnico.copasEmJogo,cp=agenda?.campeonatos.find(x=>x.seed===prox.campanha.seed),r=cp?.resultado,j=r?.jogoExibido||r?.jogo;
+  if(j)novo=registrarRecenteTecnico(novo,{ano:t.ano,data:prox.data,competicao:prox.campanha.nome,tipoCompeticao:prox.campanha.tipo,fase:d.fase,casa:j.casa,fora:j.fora,golsCasa:j.golsCasa,golsFora:j.golsFora,
+   resultado:r.penaltisPendentes?'E':r.venceu?'V':r.empate?'E':'D',...(estrategia&&!ESTRATEGIAS_LIGA.has(estrategia)?{estrategia}:{})});
+ }
+ return {c:novo,jogou:!!d&&!d.penaltis,data:prox.data,tipo:'copa'};
+}
+/**
+ * Avança o calendário da temporada.
+ *  - {modo:'jogar', estrategia}: joga a próxima partida com a estratégia escolhida.
+ *  - {modo:'pular'}: joga a próxima partida com a estratégia padrão.
+ *  - {modo:'ate', data}: simula, sem paradas, tudo o que acontece antes da data (Infinity = fim da temporada).
+ * Partidas sem escolha seguem o padrão: plano habitual na liga e "Controlar o jogo" nas copas.
+ */
+export function avancarCalendarioTecnico(c,acao={},rng=sorteio){
+ let atual=c,ultimaData=null,jogou=false;const modo=acao.modo||'pular';
+ for(let guarda=0;guarda<4000;guarda++){
+  const prox=proximoCompromissoTecnico(atual.tecnico);
+  if(!prox)break;
+  if(modo==='ate'&&prox.data>=acao.data)break;
+  // Depois de um jogo, só conclui o que pertence a ele (pênaltis, tela de resultado da copa).
+  if(modo!=='ate'&&jogou&&!(prox.tipo==='copa'&&(!prox.decisao||prox.decisao.penaltis)))break;
+  const passo=passoCalendarioTecnico(atual,modo==='jogar'&&!jogou?acao.estrategia:null,rng);
+  if(!passo)break;
+  atual=passo.c;ultimaData=passo.data;if(passo.jogou)jogou=true;
+ }
+ if(ultimaData!=null)atual=avancarMundoTecnico(atual,ultimaData);
+ return atual;
+}
+/** Começa a temporada no calendário contínuo (sem simular nenhum jogo ainda). */
+export function iniciarCalendarioTecnico(c,opcaoId,rng=sorteio){
+ return jogarTemporadaExpressaTecnico(c,opcaoId,rng,{interativo:true,copasInterativas:true,calendario:true});
 }
 
 export function comprarMelhoriaTecnico(c,id){

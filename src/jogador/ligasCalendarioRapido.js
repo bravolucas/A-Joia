@@ -1,7 +1,7 @@
 import {prepararDecisoesLigas} from './decisoesLigasRapidas.js';
 import {prepararPartidasLigasRapidas} from './escalacoesLigasRapido.js';
 import {regiaoDaLiga} from '../competicoes/regrasCopasRapidas.js';
-import {simularClassificacoesMundoTecnico} from '../treinador/classificacoesMundoTecnico.js';
+import {simularClassificacoesMundoTecnico,simularLigaMundo,simularPlacarDeLiga} from '../treinador/classificacoesMundoTecnico.js';
 import {geradorTecnico} from '../treinador/momentosTecnico.js';
 import {compactarJogos, jogosDaEdicao} from '../simulacao/mundoVivo.js';
 
@@ -31,11 +31,39 @@ function simularLigas(estado, clubes, progresso, jogosAnteriores, disputarPartid
   });
 }
 
+const AJUSTES_ESTRATEGIA = {atacar: {ataque: 4, defesa: -3}, proteger: {ataque: -3, defesa: 4}};
+function comEstrategia(time, estrategia) {
+  const ajuste = AJUSTES_ESTRATEGIA[estrategia];
+  if (!ajuste) return time;
+  const forca = Number(time.elenco ?? time.forca ?? 50);
+  return {...time, ataque: (time.ataque ?? forca) + ajuste.ataque, defesa: (time.defesa ?? forca) + ajuste.defesa};
+}
+
+/** Rodadas do clube na liga, na mesma ordem de confrontos do motor das ligas (sem simular placares). */
+export function rodadasDoClube(estado, clube, liga) {
+  const participantes = estado.equipes.filter(x => x.liga === liga).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  const {jogos} = simularLigaMundo(participantes, () => .5, liga, {disputarPartida: () => ({golsCasa: 0, golsFora: 0})});
+  const total = Math.max(0, 2 * (participantes.length + participantes.length % 2 - 1));
+  const periodo = estado.periodos?.[liga] ?? {inicio: 1.5, fim: 12.05};
+  // A rodada r entra no avanço quando o progresso da liga alcança r/total.
+  const data = r => periodo.inicio + (r / total) * (periodo.fim - periodo.inicio);
+  return jogos.filter(j => j.casa === clube || j.fora === clube)
+    .map(j => ({rodada: j.rodada, data: data(j.rodada), casa: j.casa === clube, adversario: j.casa === clube ? j.fora : j.casa}));
+}
+
 export function avancarCalendarioLigasRapido(estado, data) {
   const ligas = {...estado.ligas};
   const memoria = Object.fromEntries(Object.entries(estado.memoria ?? {}).map(([id, dados]) => [id, {...dados}]));
   const {tecnicos, elencos, decisoes, iniciarRodada} = prepararDecisoesLigas(estado, memoria);
-  const {disputar} = prepararPartidasLigasRapidas(elencos, estado.seed, {}, tecnicos, memoria);
+  const partidas = prepararPartidasLigasRapidas(elencos, estado.seed, {}, tecnicos, memoria);
+  // Jogos do clube do atleta: a estratégia escolhida no calendário pesa no placar.
+  const disputar = estado.usuario
+    ? (casa, fora, rodada, formaCasa, formaFora, sorteio) => {
+        if (casa.nome !== estado.usuario && fora.nome !== estado.usuario) return partidas.disputar(casa, fora, rodada, formaCasa, formaFora, sorteio);
+        const ajustar = time => time.nome === estado.usuario ? comEstrategia(time, estado.estrategias?.[rodada]) : time;
+        return simularPlacarDeLiga(ajustar(casa), ajustar(fora), formaCasa, formaFora, sorteio);
+      }
+    : partidas.disputar;
   const noticias = [];
   for (const europa of [true, false]) {
     const inicio = europa ? -4 : 1.5;

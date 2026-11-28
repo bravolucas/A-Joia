@@ -14,7 +14,8 @@ import {definirPlanoEspaco,patamarCarreira} from './projetosCarreira.js';
 import DecisaoDeJogo from './DecisaoDeJogo.jsx';
 import {prepararDecisaoJogo} from './decisaoDeJogo.js';
 import {contextoAgenda} from '../competicoes/calendarioCopas.js';
-import {atualizarFluxoCopasJogador,etapaAgendaJogador,registrarLanceLegadoJogador,chaveCopaJogador,escolherCopaJogador,concluirEventoJogador} from './copasJogador.js';
+import {atualizarFluxoCopasJogador,etapaAgendaJogador,registrarLanceLegadoJogador,chaveCopaJogador,escolherCopaJogador,concluirEventoJogador,avancarCalendarioJogador,dadosCalendarioJogador} from './copasJogador.js';
+import CalendarioTemporada from '../treinador/CalendarioTemporada.jsx';
 import CopaEscolha,{MarcoLiga} from '../treinador/CopaEscolha.jsx';
 import {iniciarCopaCompartilhada,escolherCopaCompartilhada,chaveCopaCompartilhada} from './copaSelecaoCompartilhada.js';
 import {chaveEstadualJogador,escolherEstadualJogador} from './estadualJogador.js';
@@ -49,7 +50,7 @@ import { JogadorCampo, RetratoApresentacao, CamisaPremium, SuperficieMini, useCe
 import { criarIdMuseu } from '../museu/museu.js';
 import Icone from "../comum/Icone.jsx";
 import CarreiraTecnico from "../treinador/CarreiraTecnico.jsx";
-import { carreiraTecnicoEncerrada, pedirDemissaoTecnico, aposentarTecnico, responderParadaTecnico, resolverFinalTecnico, responderConviteSelecaoTecnico, comprarMelhoriaTecnico, iniciarCarreiraTecnico, iniciarNoClubeIdolo, atualizarPropostasCoerentesTecnico, escolherPretemporadaRapidaTecnico, responderIntervencaoTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico } from "../treinador/tecnico.js";
+import { carreiraTecnicoEncerrada, pedirDemissaoTecnico, aposentarTecnico, responderParadaTecnico, resolverFinalTecnico, responderConviteSelecaoTecnico, comprarMelhoriaTecnico, iniciarCarreiraTecnico, iniciarNoClubeIdolo, atualizarPropostasCoerentesTecnico, escolherPretemporadaRapidaTecnico, responderIntervencaoTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico, iniciarCalendarioTecnico, avancarCalendarioTecnico } from "../treinador/tecnico.js";
 import Lottie from "../comum/Lottie.jsx";
 import { tocar, apito, torcida, somLigado, alternarSom } from "../comum/som.js";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -2815,6 +2816,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
     const etapa=etapaAgendaJogador(k);
     setEstadualAberto(true);setEstado({etapa,c:atleta,card:k,ultimo:estado.ultimo,auto:false});
   };
+  const acaoCalendarioJogador=acao=>{const k=avancarCalendarioJogador(card,acao);if(k!==card)seguirAgendaJogador(c,k);};
   const responderCopaJogador=(chave,opcao)=>{const k=escolherCopaJogador(card,chave,opcao);if(k!==card)seguirAgendaJogador(c,k);};
   const responderEstadual=(chave,opcao)=>{
     if(card.calendarioCopas){responderCopaJogador(chave,opcao);return;}
@@ -3029,7 +3031,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           </section>
         )}
         {etapa === "negociacao" && estado.neg && <TelaNegociacao c={c} n={estado.neg} onAjustar={ajustarNeg} onAssinar={assinar} onSair={sairNeg} />}
-        {(['estadual','copasClubes','calendarioLiga'].includes(etapa))&&<section className="max-w-xl mx-auto rp-painel p-5"><h2 className="text-xl font-bold">{card.estadualEmJogo?.nome||'Calendário da temporada'}</h2><p className="my-3 text-sm">Acompanhe os jogos na ordem do calendário. Seu progresso está salvo.</p><LigasEmDisputa estado={card.calendarioLigasExternas}/><button className="rp-btn rp-ouro" onClick={()=>setEstadualAberto(true)}>{etapa==='estadual'?'Retomar estadual →':'Retomar temporada →'}</button></section>}
+        {(['estadual','copasClubes','calendarioLiga','calendario'].includes(etapa))&&(card?.ligaPropria&&card.calendarioLigasExternas?<section className="max-w-xl mx-auto rp-painel p-4"><CalendarioTemporada modoJogador dados={dadosCalendarioJogador(card)} ocupado={false} onAcao={acaoCalendarioJogador} onAbrirCopa={()=>{setEstadualAberto(true);setEstado(st=>({...st,etapa:etapaAgendaJogador(st.card)||st.etapa}));}}/></section>:<section className="max-w-xl mx-auto rp-painel p-5"><h2 className="text-xl font-bold">{card.estadualEmJogo?.nome||'Calendário da temporada'}</h2><p className="my-3 text-sm">Acompanhe os jogos na ordem do calendário. Seu progresso está salvo.</p><LigasEmDisputa estado={card.calendarioLigasExternas}/><button className="rp-btn rp-ouro" onClick={()=>setEstadualAberto(true)}>{etapa==='estadual'?'Retomar estadual →':'Retomar temporada →'}</button></section>)}
         {etapa === "copa" && card?.copaCompartilhada && !card.copa.fim && estadualAberto && <CopaEscolha modoJogador campanha={card.copaCompartilhada} chave={chaveCopaCompartilhada(card)} onEscolher={responderCopaSelecao} ocupado={false} onMinimizar={()=>setEstadualAberto(false)}/>}
         {etapa === "copa" && card?.copaCompartilhada && !card.copa.fim && !estadualAberto && <section className="max-w-xl mx-auto rp-painel p-5"><h2 className="text-xl font-bold">Copa de seleções</h2><p className="my-3 text-sm">O sorteio, o chaveamento e suas estratégias estão salvos.</p><button className="rp-btn rp-ouro" onClick={()=>setEstadualAberto(true)}>Retomar Copa do Mundo →</button></section>}
         {etapa === "copa" && (!card?.copaCompartilhada||card.copa.fim) && card?.copa && <TelaCopa key={`${card.copa.etapa}:${card.copa.fase}:${card.copa.jogos.length}`} c={c} card={card} jogadaSalva={estado.copaJogada} onRegistrar={jogada=>setEstado(st=>({...st,copaJogada:jogada,auto:false}))} onAvancar={avancarCopa} />}
@@ -3043,20 +3045,21 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
         {etapa === "fim" && <FimDeCarreira c={c} onAbrirMuseu={()=>setSolicitacaoMuseuFinal(n=>n+1)} onNova={nova} onSair={onSair} onComecarTecnico={comecarTecnico} onPosCarreira={(id) => setEstado((st) => ({ ...st, c: escolherPosCarreira(st.c, id) }))} />}
         {etapa === "tecnico" && <CarreiraTecnico c={c} onAbrirElenco={()=>setEstado(st=>({...st,c:prepararElencoTecnico(st.c)}))} onNegociarElenco={negociarElenco} onCopaEscolha={(chave,op)=>setEstado(st=>({...st,c:resolverCopaEscolhaTecnico(st.c,chave,op)}))}
           onComprarMelhoria={id=>{const novo=comprarMelhoriaTecnico(c,id);setEstado(st=>st.c===c?{...st,c:novo}:st);}}
-          onEscolhaRapida={(chave,op) => setEstado(st => ({...st,c:escolherPretemporadaRapidaTecnico(st.c,chave,op,undefined,{interativo:true,copasInterativas:true})}))}
+          onEscolhaRapida={(chave,op) => setEstado(st => ({...st,c:escolherPretemporadaRapidaTecnico(st.c,chave,op,undefined,{interativo:true,copasInterativas:true,calendario:true})}))}
           onParada={(chave, op) => setEstado(st => ({ ...st, c: responderParadaTecnico(st.c, chave, op) }))}
           onFinal={(nome, op) => setEstado(st => ({ ...st, c: resolverFinalTecnico(st.c, nome, op) }))}
           onConviteSelecao={aceitar => setEstado(st => ({ ...st, c: responderConviteSelecaoTecnico(st.c, aceitar, { interativo: true, copasInterativas: true }) }))}
           onIntervir={(chave, escolha) => setEstado(st => ({ ...st, c: responderIntervencaoTecnico(st.c, chave, escolha) }))}
           onDecisao={(id) => setEstado((st) => ({ ...st, c: id ? tomarDecisaoTecnico(st.c, id) : st.c }))}
-          onSimularTemporada={(id) => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(st.c, id ?? null, undefined, { interativo: true, copasInterativas: true }) }))}
+          onSimularTemporada={(id) => setEstado((st) => ({ ...st, c: iniciarCalendarioTecnico(st.c, id ?? null) }))}
+          onCalendario={(acao) => setEstado((st) => ({ ...st, c: avancarCalendarioTecnico(st.c, acao) }))}
           onReuniao={(id) => setEstado((st) => ({ ...st, c: reuniaoEmergenciaTecnico(st.c, id) }))}
           onJogar={() => setEstado((st) => ({ ...st, c: simularEtapaTecnico(st.c) }))}
           onEscolherClubeInicial={(nome) => setEstado((st) => ({ ...st, c: iniciarNoClubeIdolo(st.c, nome) }))}
           onEsperar={(escolha) => setEstado((st) => ({ ...st, c: passarAnoDesempregado(st.c, undefined, escolha) }))}
           onAceitarProposta={(nome, estrategia, opcoes) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia, undefined, opcoes); if (!negociado.tecnico.ultimaNegociacao?.aceita) return { ...st, c: negociado }; return { ...st, c: proximaTemporadaTecnico(negociado) }; })}
           onAvancar={() => setEstado((st) => ({ ...st, c: proximaTemporadaTecnico(st.c) }))}
-          onAvancarESimular={() => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(proximaTemporadaTecnico(st.c), null, undefined, { interativo: true, copasInterativas: true }) }))}
+          onAvancarESimular={() => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(proximaTemporadaTecnico(st.c), null, undefined, { interativo: true, copasInterativas: true, calendario: true }) }))}
           onPedirDemissao={()=>setEstado(st=>({...st,c:pedirDemissaoTecnico(st.c)}))}
           onAposentar={()=>setEstado(st=>({...st,c:aposentarTecnico(st.c)}))}
           onLegado={() => setEstado((st) => ({ ...st, etapa: "fim" }))}

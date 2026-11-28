@@ -37,6 +37,8 @@ async function concluirMomentos(page) {
   for (let i = 0; i < 80; i++) {
     await page.locator('.ct-simulating').waitFor({state:'detached',timeout:10000});
     await page.waitForTimeout(80);
+    const calendario=page.getByRole('region',{name:'Calendário da temporada'});
+    if(await calendario.count()){await calendario.getByRole('button',{name:/Simular até o fim da temporada/}).click();continue;}
     const copa=page.getByRole('dialog',{name:/Copa em jogo ·/});
     if(await copa.count()){const seguir=copa.getByRole('button',{name:/Continuar campanha|Concluir campanha/});if(await seguir.count())await seguir.click();else await copa.locator('.cce-opcoes button').first().click();continue;}
     const final = page.getByRole('dialog', { name: /^Final · / });

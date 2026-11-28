@@ -513,7 +513,7 @@ export function CenaLevantarTaca({ titulos, clube, onConcluir }) {
       <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `radial-gradient(circle at 50% 20%, ${corClube}33 0%, #050505 75%), url(${ARTE.confete}) center/cover` }}>
         <div className="relative h-[400px] flex flex-col items-center justify-center px-4 overflow-hidden">
           {fase >= 1 && <Confetti />}
-          <PersonagemCinematico pose="comemoracao" semente={clube?.nome} style={{position:'absolute',right:'2%',bottom:0,height:'92%',width:'auto',aspectRatio:'1 / 1',opacity:.96}}/>
+          <PersonagemCinematico pose="comemoracao" semente={clube?.nome} clube={clube} style={{position:'absolute',right:'2%',bottom:0,height:'92%',width:'auto',aspectRatio:'1 / 1',opacity:.96}}/>
           <div className="relative z-10 mr-[28%]" style={{ animation: fase === 0 ? "jerseyRise 0.8s ease-out" : "floatY 2.4s ease-in-out infinite", filter:"drop-shadow(0 4px 16px #000)" }}>
             <TrofeuIcone tier={titulos[0]?.tier || "ouro"} size={100} />
           </div>

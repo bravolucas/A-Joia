@@ -6,3 +6,18 @@
 
 /* Identidade azul e cenário separado do recorte individual. */
 .ao-overlay{background:#071321ef}.ao{background:#102039;border-color:#5575a333}.ao-palco{background:#102747}.ao-fotografia{opacity:1}.ao-cenario-modular{position:absolute;inset:0;background:radial-gradient(ellipse at 65% 25%,#315a9d88,transparent 65%),linear-gradient(135deg,#142b51,#071321);display:flex;align-items:center;justify-content:flex-start;padding-left:12%}.ao-cenario-modular img{width:30%;height:65%;object-fit:contain;opacity:.45}.ao-legenda>p,.ao-termos>span,.ao-legenda p.ao-frase{color:#b1c5df}.ao-termos>span{background:#07132166}.ao-legenda h3{color:#edf4ff}
+
+/* Cada contexto usa um cenário independente e uma camisa renderizada com dados reais. */
+.ao-cena-modular{position:absolute;inset:0;isolation:isolate}
+.ao-cena-modular .ao-cenario-modular{padding:0;background-size:cover;background-position:center;animation:aoEntrada 1.4s cubic-bezier(.2,.8,.2,1) both}
+.ao-cena-modular[data-cenario=imprensa] .ao-cenario-modular{background-image:linear-gradient(100deg,#071321c9,#10203970),url('../../arte/cenarios/imprensa-premium.webp')}
+.ao-cena-modular[data-cenario=estadio] .ao-cenario-modular{background-image:linear-gradient(100deg,#071321bd,#10203955),url('../../arte/cenarios/estadio-premium.webp')}
+.ao-cena-modular[data-cenario=noite] .ao-cenario-modular{background-image:radial-gradient(ellipse at 75% 10%,#497dc355,transparent 60%),linear-gradient(100deg,#071321de,#07132177),url('../../arte/cenarios/estadio-premium.webp')}
+.ao-cena-modular[data-cenario=ct] .ao-cenario-modular{background-image:linear-gradient(100deg,#071321c7,#10203966),url('../../arte/cenarios/treino-premium.webp')}
+.ao-identidade-clube{position:absolute;z-index:2;left:4%;width:42%;height:82%;bottom:5%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2%;pointer-events:none}
+.ao-escudo-palco{height:28%;width:32%;object-fit:contain;filter:drop-shadow(0 4px 10px #000a)}
+.ao-camisa-personalizada{height:69%;width:100%;display:grid;place-items:center}
+.ao-camisa-personalizada .vf-camisa{display:block;height:100%;width:auto;max-width:100%;filter:drop-shadow(0 6px 8px #000a)}
+.ao-cena-modular .ao-personagem-isolado{right:0;height:96%;max-width:54%}
+@media(max-width:600px){.ao-cena-modular .ao-personagem-isolado{right:0;height:91%}.ao-identidade-clube{height:77%;bottom:5%}}
+@media(prefers-reduced-motion:reduce){.ao-cena-modular .ao-cenario-modular{animation:none!important}}

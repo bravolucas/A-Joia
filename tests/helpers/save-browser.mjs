@@ -31,7 +31,9 @@ export async function lerSave(page,chave='ajoia_rapido_v1'){
   };
   const r=JSON.parse(localStorage.getItem(chave)||'null');if(!r?.arquivoMundo)return resumir(r);
   const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('ajoia-carreiras',1);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
-  const save=await new Promise((resolve,reject)=>{const tx=db.transaction('saves','readonly'),r=tx.objectStore('saves').get(chave);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
+  // O arquivo histórico pode estar em registro próprio (chave::c.universo).
+  const hidratar=async(db,s)=>{for(const r of [s?.c,s?.carreira,s?.ativo?.c,s])for(const d of [r,r?.tecnico])if(d?.universo?.arquivoSeparado)d.universo=await new Promise(ok=>{const q=db.transaction('saves').objectStore('saves').get(d.universo.arquivoSeparado);q.onsuccess=()=>ok(q.result);});return s;};
+  const save=await hidratar(db,await new Promise((resolve,reject)=>{const tx=db.transaction('saves','readonly'),r=tx.objectStore('saves').get(chave);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);}));
   db.close();return resumir(save);
  },chave);
 }

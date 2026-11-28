@@ -2,6 +2,12 @@
 
 Tudo que mudou desde a primeira versão publicada, organizado por bloco de trabalho.
 
+## 28/11/2026 — Arquivo histórico gravado uma vez por temporada
+
+- O arquivo histórico (universo, 55 MB numa carreira de 24 anos) passa a ficar em registro próprio do IndexedDB e só é regravado quando muda — no fechamento da temporada. Cada clique grava apenas o resto da carreira: escolher a camisa caiu de ~4,9 s para ~1,9 s até salvar.
+- Telas de camisa, posição, jornada e elenco da seleção deixaram de duplicar a carreira inteira (com o arquivo) a cada ação.
+- Saves antigos, com o arquivo embutido, continuam abrindo; a separação acontece na próxima gravação.
+
 ## 28/11/2026 — Carreiras longas sem recarregar a página
 
 - Em carreiras longas (24 temporadas, save de ~95 MB) a aba estourava a memória no celular e o navegador recarregava a página em loop. O arquivo histórico (universo) agora é compartilhado entre as cópias em memória em vez de duplicado a cada leitura e gravação: memória estável de 572 MB para ~296 MB e abertura de 11,8 s para 6,4 s.

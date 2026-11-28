@@ -8,8 +8,11 @@ import {CLUBES,LIGAS} from '../dados/data.js';
 import {calcOVR} from '../comum/lib.js';
 import {progressoAssinatura,registrarAssinaturasLoja} from './lojaJogador.js';
 import {IDENTIDADES_POSICAO,fecharAdaptacaoPosicao,penalidadePosicao} from './posicoesCarreira.js';
+import {clonarEstado} from '../simulacao/clonarEstado.js';
 
-const copiar=x=>JSON.parse(JSON.stringify(x));
+// Cópia JSON que compartilha o arquivo histórico (universo, imutável) em vez de
+// duplicar dezenas de MB a cada ação numa carreira longa.
+const copiar=x=>clonarEstado(x);
 const clamp=(x,a=0,b=100)=>Math.max(a,Math.min(b,x));
 const hash=s=>[...String(s)].reduce((n,v)=>Math.imul(n^v.charCodeAt(0),16777619)>>>0,2166136261);
 const numero=n=>Number.isFinite(n)?n:0;

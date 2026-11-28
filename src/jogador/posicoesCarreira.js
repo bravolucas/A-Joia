@@ -1,8 +1,11 @@
 import {POSICOES} from '../dados/data.js';
 import {calcOVR} from '../comum/lib.js';
+import {clonarEstado} from '../simulacao/clonarEstado.js';
 
 const limitar=(n,a=40,b=99)=>Math.max(a,Math.min(b,Math.round(n)));
-const copiar=x=>JSON.parse(JSON.stringify(x));
+// Cópia JSON que compartilha o arquivo histórico (universo, imutável) em vez de
+// duplicar dezenas de MB a cada ação numa carreira longa.
+const copiar=x=>clonarEstado(x);
 export const IDENTIDADES_POSICAO={
  GOL:{nome:'Guardião',descricao:'Leitura do cobrador, defesas e reposição iniciam a jogada.',assinatura:'paredao',feito:'primeira-defesa'},
  ZAG:{nome:'Última linha',descricao:'Antecipe o passe, ganhe a disputa e construa a saída.',assinatura:'antecipador',feito:'primeira-recuperacao'},

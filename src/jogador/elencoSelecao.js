@@ -3,7 +3,10 @@ import {NACIONALIDADES} from '../dados/data.js';
 import {calcOVR} from '../comum/lib.js';
 import {penalidadePosicao} from './posicoesCarreira.js';
 import {gerarNomeRegionalUnico} from '../simulacao/nomesRegionais.js';
-const clone=x=>JSON.parse(JSON.stringify(x));
+import {clonarEstado} from '../simulacao/clonarEstado.js';
+// Cópia JSON que compartilha o arquivo histórico (universo, imutável) em vez de
+// duplicar dezenas de MB a cada ação numa carreira longa.
+const clone=x=>clonarEstado(x);
 const limitar=(n,a,b)=>Math.max(a,Math.min(b,n));
 const hash=s=>[...String(s)].reduce((a,v)=>Math.imul(a^v.charCodeAt(0),16777619)>>>0,2166136261);
 const POSICOES=['GOL','GOL','GOL','LD','LD','LE','LE','ZAG','ZAG','ZAG','ZAG','VOL','VOL','MC','MC','MC','MEI','MEI','MD','ME','PD','PD','PE','PE','ATA','ATA'];

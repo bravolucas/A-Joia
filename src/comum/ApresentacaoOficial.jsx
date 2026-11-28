@@ -31,7 +31,7 @@ function CenaApresentacaoModular({clube,nome,numero,tema,aparencia}){
     <CamisaPremium nome={clube?.nome} cor={clube?.cor} numero={numero} sobrenome={sob}/>
    </div>
   </div>
-  <PersonagemCinematico pose="apresentacao" semente={nome} clube={clube} aparencia={aparencia} className="ao-personagem-isolado" permitirLegado={false}/>
+  <PersonagemCinematico pose="apresentacao" semente={nome} clube={clube} numero={numero} aparencia={aparencia} className="ao-personagem-isolado" permitirLegado={false}/>
  </div>;
 }
 export default function ApresentacaoOficial(props){

@@ -5935,7 +5935,7 @@ function resolverTemporada(c, extraStats) {
                 )}
 
                 {pendingDespedidaClube && (
-                  <CenaDespedidaClube aparencia={carreira?.aparencia||aparencia} nome={nome} clube={pendingDespedidaClube.clube} anos={pendingDespedidaClube.anos} onConcluir={concluirDespedidaClube} />
+                  <CenaDespedidaClube numero={carreira?.camisaPorClube?.[pendingDespedidaClube.clube?.nome]?.at(-1)} aparencia={carreira?.aparencia||aparencia} nome={nome} clube={pendingDespedidaClube.clube} anos={pendingDespedidaClube.anos} onConcluir={concluirDespedidaClube} />
                 )}
 
                 {pendingAposentadoria && (
@@ -5955,7 +5955,7 @@ function resolverTemporada(c, extraStats) {
                 )}
 
                 {pendingCelebracaoTitulo && (
-                  <CenaLevantarTaca aparencia={carreira?.aparencia||aparencia} nome={nome} titulos={pendingCelebracaoTitulo.titulos} clube={pendingCelebracaoTitulo.clube} onConcluir={concluirCelebracaoTitulo} />
+                  <CenaLevantarTaca numero={carreira?.camisaPorClube?.[pendingCelebracaoTitulo.clube?.nome]?.at(-1)} aparencia={carreira?.aparencia||aparencia} nome={nome} titulos={pendingCelebracaoTitulo.titulos} clube={pendingCelebracaoTitulo.clube} onConcluir={concluirCelebracaoTitulo} />
                 )}
 
                 {pendingApresentacaoClube && (

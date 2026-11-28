@@ -504,7 +504,7 @@ export function TrofeuIcone({ tier = "ouro", size = 80 }) {
 }
 
 // Levantar a taça — a conquista de um título vira cena, não só uma linha de log.
-export function CenaLevantarTaca({ titulos, clube, onConcluir, nome, aparencia }) {
+export function CenaLevantarTaca({ titulos, clube, onConcluir, nome, aparencia, numero }) {
   const [fase, setFase] = useState(0);
   useEffect(() => { if (fase === 0) { const t = setTimeout(() => setFase(1), 1000); return () => clearTimeout(t); } }, [fase]);
   const corClube = clube?.cor || "#D8B44A";
@@ -513,7 +513,7 @@ export function CenaLevantarTaca({ titulos, clube, onConcluir, nome, aparencia }
       <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `radial-gradient(circle at 50% 20%, ${corClube}33 0%, #050505 75%), url(${ARTE.confete}) center/cover` }}>
         <div className="relative h-[400px] flex flex-col items-center justify-center px-4 overflow-hidden">
           {fase >= 1 && <Confetti />}
-          <PersonagemCinematico pose="comemoracao" semente={nome||clube?.nome} clube={clube} aparencia={aparencia} style={{position:'absolute',right:'2%',bottom:0,height:'92%',width:'auto',aspectRatio:'1 / 1',opacity:.96}}/>
+          <PersonagemCinematico pose="comemoracao" semente={nome||clube?.nome} clube={clube} numero={numero} aparencia={aparencia} style={{position:'absolute',right:'2%',bottom:0,height:'92%',width:'auto',aspectRatio:'1 / 1',opacity:.96}}/>
           <div className="relative z-10 mr-[28%]" style={{ animation: fase === 0 ? "jerseyRise 0.8s ease-out" : "floatY 2.4s ease-in-out infinite", filter:"drop-shadow(0 4px 16px #000)" }}>
             <TrofeuIcone tier={titulos[0]?.tier || "ouro"} size={100} />
           </div>
@@ -619,13 +619,13 @@ export function CenaAposentadoria({ nome, clube, onConcluir, aparencia }) {
 }
 
 // Despedida de um clube marcante — o inverso da chegada: guarda de honra na saída.
-export function CenaDespedidaClube({ clube, anos, onConcluir, nome, aparencia }) {
+export function CenaDespedidaClube({ clube, anos, onConcluir, nome, aparencia, numero }) {
   const cor = clube?.cor || "#D8B44A";
   return (
     <PopupOverlay>
       <Card padded={false} className="overflow-hidden border-none text-center" style={{ background: `linear-gradient(180deg, rgba(5,5,5,.3) 0%, rgba(5,5,5,.7) 55%, #050505 100%), radial-gradient(circle at 50% 25%, ${cor}33 0%, transparent 70%), url(${ARTE.estadioNoite}) center 40%/cover` }}>
         <div className="h-[340px] flex flex-col items-center justify-center px-5">
-          <PersonagemCinematico pose="gratidao" semente={nome} clube={clube} aparencia={aparencia} permitirLegado={false} style={{width:"100%",height:210,flexShrink:1}}/>
+          <PersonagemCinematico pose="gratidao" semente={nome} clube={clube} numero={numero} aparencia={aparencia} permitirLegado={false} style={{width:"100%",height:210,flexShrink:1}}/>
           <div className="animate-[popIn_0.5s_ease-out] flex flex-col items-center">
             <ClubDot club={clube} size={56} />
             <div className="font-black text-lg mt-3" style={{ color: cor }}>Obrigado, {clube?.nome}!</div>

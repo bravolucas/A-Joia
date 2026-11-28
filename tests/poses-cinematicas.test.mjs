@@ -20,3 +20,11 @@ test('todos os 31 recursos são catalogados, sem misturar os modelos de gala',()
  assert.deepEqual([...new Set(ids)].sort(),[...IDS_BIBLIOTECA].sort());
  assert.ok(!POSES_CINEMATICAS['premio-1'].some(id=>POSES_MODELO_B['premio-1'].includes(id)));
 });
+
+import {poseTransicaoCarreira} from '../src/comum/posesCinematicas.js';
+test('transições usam recortes específicos sem substituir os gestos antigos',()=>{
+ assert.equal(poseTransicaoCarreira({primeiroDia:true,tipo:'estadio'}),'saudacao');
+ assert.equal(poseTransicaoCarreira({tipo:'aposentadoria'}),'aposentadoria');
+ for(const tipo of ['base','estadio','homenagem','ruptura','vestiario']) assert.equal(poseTransicaoCarreira({tipo}),null);
+ assert.deepEqual(POSES_CINEMATICAS.aposentadoria,['despedida-chuteiras']);
+});

@@ -12,6 +12,7 @@ export const POSES_CINEMATICAS = Object.freeze({
   comemoracao: ['vitoria','vitoria-ajoelhado','corrida-comemoracao'],
   decepcao: ['derrota','frustracao-maos-cabeca'],
   despedida: ['despedida-chuteiras','aplausos'],
+  aposentadoria: ['despedida-chuteiras'],
   gol: ['gol-deslizando','corrida-comemoracao'],
   treino: ['treino-concentracao'],
   recuperacao: ['reabilitacao'],
@@ -32,3 +33,10 @@ export const posePremiacao=pos=>[1,2,3].includes(pos)?'premio-'+pos:null;
 // Variantes B pertencem a outro modelo visual; não misturar rostos pelo resultado.
 export const POSES_MODELO_B = Object.freeze({gala:['gala-celebracao-b'],'premio-1':['bola-ouro-b','bola-ouro-euforia-b']});
 export const IDS_BIBLIOTECA = Object.freeze(["aplausos","apresentacao-camisa","bola-ouro-a","bola-ouro-b","bola-ouro-euforia-b","conducao-bola","conducao-capitao","corrida-comemoracao","derrota","despedida-chuteiras","determinacao","drible-lateral","frustracao-maos-cabeca","gala-aceno","gala-aplausos","gala-celebracao-b","gala-confianca","gala-decepcao","gala-gratidao","gala-neutro","gala-segundo-lugar","gol-deslizando","jogador-neutro","mao-no-peito","reabilitacao","saudacao-agasalho","silencio","treinador-prancheta","treino-concentracao","vitoria-ajoelhado","vitoria"]);
+
+/** Não substitui as despedidas com animações de gestos já existentes. */
+export function poseTransicaoCarreira({primeiroDia=false,tipo}={}){
+ if(primeiroDia)return 'saudacao';
+ if(tipo==='aposentadoria')return 'aposentadoria';
+ return null;
+}

@@ -1,4 +1,5 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
+import {imagemPose} from '../comum/PersonagemCinematico.jsx';
 import {bandeiraDe} from '../comum/arte.js';
 import {grupoSelecao} from './elencoSelecao.js';
 import {roteiroConvocacao} from './convocacaoCinema.js';
@@ -28,6 +29,8 @@ export default function ConvocacaoSelecaoCinema({jogador,copa,resultado,revelado
  const [corA,corB]=PALETAS[nacionalidade]||['#d6b968','#587aa0'];
  const lista=useMemo(()=>roteiroConvocacao(copa?.elenco,jogador,venceu),[copa?.elenco,jogador?.nome,jogador?.posicao,venceu]);
  const passo=revelado?5:fase;
+ // Mantém o modelo da espera; os novos recortes só são usados no resultado.
+ const recorte=passo===5?imagemPose(venceu?'comemoracao':'decepcao',jogador?.nome):null;
  const nomes=passo===0?[]:passo>=5?lista.anunciados:passo===4?lista.iniciais:lista.iniciais.slice(0,passo);
  const revelacao=passo>=4;
  const status=passo===5?(venceu?'convocado':'fora'):'aguardando';
@@ -55,7 +58,7 @@ export default function ConvocacaoSelecaoCinema({jogador,copa,resultado,revelado
   </header>
   <div className="cs-visor" data-cena={passo<5?'espera':venceu?'estadio':'tunel'}>
    <div className="cs-cenario" aria-hidden="true"/>
-   <div className="cs-personagem" aria-hidden="true" style={{backgroundImage:`url(${personagem})`}}/>
+   <div className="cs-personagem" data-arte={recorte?'recorte':'legado'} aria-hidden="true" style={{backgroundImage:`url(${recorte||personagem})`,...(recorte?{backgroundSize:'contain',backgroundPosition:'center bottom'}:{})}}/>
    {passo<=3&&<div className="cs-tv" data-canal="selecao">
     <div className="cs-tv-federacao">{bandeira&&<img src={bandeira} alt=""/>}<div><small>AO VIVO · FEDERAÇÃO NACIONAL</small><b>{nomePais}</b></div></div>
     {passo<=1?

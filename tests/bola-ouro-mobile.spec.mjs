@@ -15,6 +15,10 @@ for(const modo of ['rapido','completo'])for(const [width,height] of [[320,568],[
  await expect(cena.locator('.cb-cinema-informacao strong')).toHaveText(pos+'º LUGAR');
  await expect(cena.locator('.cb-cinema-confetes i')).toHaveCount(pos===1?22:0);
  const src=await foto.getAttribute('src');
+ const arte=await cena.locator('.cb-cinema').getAttribute('data-arte');
+ expect(['recorte','legado']).toContain(arte);
+ if(arte==='recorte') expect(src).toMatch(pos===1?/bola-ouro-a/:/gala-/);
+ else expect(src).toMatch(/bola-de-ouro-/);
  await cena.getByRole('button',{name:'Repetir animação da cerimônia'}).click();
  await expect(cena.locator('img.cb-cinema-foto')).toHaveAttribute('src',src);
  const corpo=d.locator(modo==='rapido'?'.cb-bola':'.premiacao-corpo');const botao=d.getByRole('button',{name:modo==='rapido'?/Ver resumo da temporada/:'Continuar',exact:modo!=='rapido'});

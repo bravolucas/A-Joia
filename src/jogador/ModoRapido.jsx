@@ -49,7 +49,7 @@ import { JogadorCampo, RetratoApresentacao, CamisaPremium, SuperficieMini, useCe
 import { criarIdMuseu } from '../museu/museu.js';
 import Icone from "../comum/Icone.jsx";
 import CarreiraTecnico from "../treinador/CarreiraTecnico.jsx";
-import { carreiraTecnicoEncerrada, pedirDemissaoTecnico, aposentarTecnico, responderParadaTecnico, resolverFinalTecnico, responderConviteSelecaoTecnico, comprarMelhoriaTecnico, iniciarCarreiraTecnico, iniciarNoClubeIdolo, atualizarPropostasCoerentesTecnico, escolherPretemporadaRapidaTecnico, responderIntervencaoTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico } from "../treinador/tecnico.js";
+import { carreiraTecnicoEncerrada, pedirDemissaoTecnico, aposentarTecnico, responderParadaTecnico, resolverFinalTecnico, responderConviteSelecaoTecnico, comprarMelhoriaTecnico, iniciarCarreiraTecnico, iniciarNoClubeIdolo, atualizarPropostasCoerentesTecnico, escolherPretemporadaRapidaTecnico, responderIntervencaoTecnico, tomarDecisaoTecnico, negociarContratoTecnico, passarAnoDesempregado, simularEtapaTecnico, jogarProximaRodadaTecnico, reuniaoEmergenciaTecnico, proximaTemporadaTecnico, jogarTemporadaExpressaTecnico } from "../treinador/tecnico.js";
 import Lottie from "../comum/Lottie.jsx";
 import { tocar, apito, torcida, somLigado, alternarSom } from "../comum/som.js";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -3052,6 +3052,7 @@ export default function ModoRapido({ onSair, ritmoInicial = "normal", nova: come
           onSimularTemporada={(id) => setEstado((st) => ({ ...st, c: jogarTemporadaExpressaTecnico(st.c, id ?? null, undefined, { interativo: true, copasInterativas: true }) }))}
           onReuniao={(id) => setEstado((st) => ({ ...st, c: reuniaoEmergenciaTecnico(st.c, id) }))}
           onJogar={() => setEstado((st) => ({ ...st, c: simularEtapaTecnico(st.c) }))}
+          onJogarRodada={() => setEstado((st) => ({ ...st, c: jogarProximaRodadaTecnico(st.c) }))}
           onEscolherClubeInicial={(nome) => setEstado((st) => ({ ...st, c: iniciarNoClubeIdolo(st.c, nome) }))}
           onEsperar={(escolha) => setEstado((st) => ({ ...st, c: passarAnoDesempregado(st.c, undefined, escolha) }))}
           onAceitarProposta={(nome, estrategia, opcoes) => setEstado((st) => { const negociado = negociarContratoTecnico(st.c, nome, estrategia, undefined, opcoes); if (!negociado.tecnico.ultimaNegociacao?.aceita) return { ...st, c: negociado }; return { ...st, c: proximaTemporadaTecnico(negociado) }; })}

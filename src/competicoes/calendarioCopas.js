@@ -31,3 +31,5 @@ export function selecionarAgenda(p){
 export function chaveAgenda(p){return p?.pausa?`${p.ano}|${p.clube}|calendario|${p.pausa.id}`:null;}
 export function avancarPausa(p){return selecionarAgenda({...p,vistos:[...p.vistos,p.pausa.id],pausa:null});}
 export function contextoAgenda(p){if(!p?.calendarioVersao)return null;return {data:rotuloData(p.dataAtual,p.ano),liga:p.eventos.find(x=>x.tipo==='liga')?.nome,etapa:p.pausa?.titulo};}
+/** Data com dia: "14 MAR 2030". As datas do calendário são meses decimais. */
+export function rotuloDia(valor,ano){if(!Number.isFinite(valor))return '';const mes=Math.floor(valor),dia=Math.min(28,1+Math.floor((valor-mes)*28));return `${dia} ${rotuloData(valor,ano)}`;}

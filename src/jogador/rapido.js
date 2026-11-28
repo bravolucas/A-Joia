@@ -1,3 +1,4 @@
+import {normalizarAparencia} from '../comum/aparenciaCinematica.js';
 import {participacaoNasSumulas} from '../simulacao/planejamentoLigasRapidas.js';
 import {podarCentral, registroCentral} from '../simulacao/transferenciasMundo.js';
 import {novoTecnico} from '../simulacao/tecnicosMundo.js';
@@ -262,6 +263,7 @@ export function criarJogador(dados) {
   const codigo = normalizarCodigo(dados.codigo) || gerarCodigo();
   sincronizarLigas(null); // carreira nova: todo mundo na liga de origem
   const c = comSemente(codigo, "criar", () => criarJogadorBase(dados));
+  c.aparencia=normalizarAparencia(dados.aparencia);
   c.ajustesCadastro = {[AJUSTE_FORTALEZA]:true};
   c.codigo = codigo;
   c.diario = ehCodigoDiario(codigo);
@@ -4266,6 +4268,7 @@ export function carregarRapido() {
     const s = lerPersistente(CHAVE_SAVE_RAPIDO);
     if (!s || s.v !== VERSAO_RAPIDO || !s.c?.attrs || !Array.isArray(s.c.temporadas)) return null;
     s.c=corrigirEquilibrioClubes(s.c);
+    s.c.aparencia=normalizarAparencia(s.c.aparencia);
     if(s.c.tecnico&&!Number.isFinite(s.c.tecnico.idade))s.c.tecnico.idade=s.c.idade;
     s.c.flags = { historicoEventos: [], traidor: [], ...(s.c.flags || {}) };
     s.c.mod = s.c.mod || {};
